@@ -27,6 +27,7 @@ MODULE module_sf_ruclsm
       real (kind_phys), parameter :: r_v     = 461.50_kind_dbl_prec
       real (kind_phys), parameter :: zero    = 0._kind_dbl_prec
       real (kind_phys), parameter :: one     = 1._kind_dbl_prec
+      real (kind_phys), parameter :: tfrz    = 273.15_kind_dbl_prec
 
       !-- options for snow conductivity: 1 - constant, 2 - Sturm et al.,1997
       integer, parameter :: isncond_opt = 1
@@ -190,12 +191,12 @@ CONTAINS
    LOGICAL,    INTENT(IN   )    ::     myj,frpcpn,init,lsm_cold_start,exticeden
    INTEGER,    INTENT(IN   )    ::     NLCAT, NSCAT 
    INTEGER,    INTENT(IN   )    ::     ktau, iter, nsl, isice, iswater, &
-                                       ims,ime, jms,jme, kms,kme, &
+                                       ims,ime, jms,jme, kms,kme,       &
                                        its,ite, jts,jte, kts,kte
 
 !   LOGICAL,    DIMENSION( ims:ime, jms:jme ), INTENT(IN   )    ::     flag_iter, flag
 
-   real (kind_phys),    DIMENSION( ims:ime, kms:kme, jms:jme ) , &
+   real (kind_phys),   DIMENSION( ims:ime, kms:kme, jms:jme ) , &
             INTENT(IN   )    ::                           QV3D, &
                                                           QC3D, &
                                                            p8w, &
@@ -203,7 +204,7 @@ CONTAINS
                                                            T3D, &
                                                            z3D
 
-   real (kind_phys),       DIMENSION( ims:ime , jms:jme ),  &
+   real (kind_phys),   DIMENSION( ims:ime , jms:jme ),           &
                INTENT(IN   )    ::                       RAINBL, &
                                                             GLW, &
                                                           GSWdn, &
@@ -258,10 +259,10 @@ CONTAINS
    real (kind_phys),     DIMENSION( ims:ime , 1:nlcat, jms:jme ), INTENT(IN):: LANDUSEF
    real (kind_phys),     DIMENSION( ims:ime , 1:nscat, jms:jme ), INTENT(IN):: SOILCTOP
 
-   real (kind_phys), INTENT(IN   )  ::   CP,G0,LV,STBOLT,RV,RD,PI, &
+   real (kind_phys), INTENT(IN   ) ::  CP,G0,LV,STBOLT,RV,RD,PI, &
                                          XICE_threshold
  
-   real (kind_phys),       DIMENSION( ims:ime , 1:nsl, jms:jme ) , &
+   real (kind_phys),     DIMENSION( ims:ime , 1:nsl, jms:jme ) , &
                INTENT(INOUT)    ::                 SOILMOIS,SH2O,TSO
 
    real (kind_phys),       DIMENSION( ims:ime, jms:jme )       , &
@@ -326,7 +327,7 @@ CONTAINS
                                              ::    KEEPFR3DFLAG, &
                                                          SMFR3D
 
-   real (kind_phys), DIMENSION( ims:ime, jms:jme ), INTENT(OUT) :: &
+   real (kind_phys),DIMENSION( ims:ime, jms:jme ),INTENT(OUT) :: &
                                                          RHOSNF, & ! RHO of snowfall
                                                        PRECIPFR, & ! time-step frozen precip
                                                      SNOWFALLAC
@@ -358,13 +359,13 @@ CONTAINS
                                                             KWT
 
 
-   real (kind_phys),     DIMENSION(1:NSL)                :: ZSMAIN, &
-                                                            ZSHALF, &
-                                                            DTDZS2
+   real (kind_phys),     DIMENSION(1:NSL)             :: ZSMAIN, &
+                                                         ZSHALF, &
+                                                         DTDZS2
 
-   real (kind_phys),     DIMENSION(1:2*(nsl-2))          :: DTDZS
+   real (kind_phys),     DIMENSION(1:2*(nsl-2))       :: DTDZS
 
-   real (kind_phys),     DIMENSION(1:5001)               :: TBQ
+   real (kind_phys),     DIMENSION(1:5001)            :: TBQ
 
 
    real (kind_phys),     DIMENSION( 1:nsl )          :: SOILM1D, & 
@@ -373,10 +374,10 @@ CONTAINS
                                                         SOILIQW, &
                                                        SMFRKEEP
 
-   real (kind_phys),     DIMENSION( 1:nsl )              :: KEEPFR
+   real (kind_phys),     DIMENSION( 1:nsl )           :: KEEPFR
                                                 
-   real (kind_phys),     DIMENSION( 1:nlcat )            :: lufrac
-   real (kind_phys),     DIMENSION( 1:nscat )            :: soilfrac
+   real (kind_phys),     DIMENSION( 1:nlcat )         :: lufrac
+   real (kind_phys),     DIMENSION( 1:nscat )         :: soilfrac
 
    real (kind_phys)                           ::            RSM, &
                                                       SNWEPRINT, &
@@ -441,22 +442,21 @@ CONTAINS
 
 !> - Table TBQ is for resolution of balance equation in vilka()
         CQ=173.15_kind_dbl_prec-.05_kind_dbl_prec
-        R273=1._kind_dbl_prec/273.15_kind_dbl_prec
+        R273=1._kind_dbl_prec/tfrz
         R61=6.1153_kind_dbl_prec*0.62198_kind_dbl_prec
         ARP=77455._kind_dbl_prec*41.9_kind_dbl_prec/461.525_kind_dbl_prec
         BRP=64._kind_dbl_prec*41.9_kind_dbl_prec/461.525_kind_dbl_prec
 
         DO K=1,5001
           CQ=CQ+.05_kind_dbl_prec
-        EVS=EXP(17.67_kind_dbl_prec*(CQ-273.15_kind_dbl_prec)/(CQ-29.65_kind_dbl_prec))
-        EIS=EXP(22.514_kind_phys-6.15E3_kind_dbl_prec/CQ)
-        if(CQ.ge.273.15_kind_dbl_prec) then
-! tbq is in mb
-        tbq(k) = R61*evs
-        else
-        tbq(k) = R61*eis
-        endif
-
+          EVS=EXP(17.67_kind_dbl_prec*(CQ-tfrz)/(CQ-29.65_kind_dbl_prec))
+          EIS=EXP(22.514_kind_dbl_prec-6.15E3_kind_dbl_prec/CQ)
+          if(CQ.ge.tfrz) then
+          ! tbq is in mb
+            tbq(k) = R61*evs
+          else
+            tbq(k) = R61*eis
+          endif
         END DO
 
 !> - Initialize soil/vegetation parameters
@@ -472,7 +472,7 @@ CONTAINS
 !>  - Initializing inside-snow temp if it is not defined
            IF((soilt1(i,j) .LT. 170._kind_phys) .or. (soilt1(i,j) .GT.400._kind_phys)) THEN
              IF(snowc(i,j).gt.zero) THEN
-               soilt1(i,j)=min(273.15_kind_phys,0.5_kind_phys*(soilt(i,j)+tso(i,1,j)) )
+               soilt1(i,j)=min(tfrz,0.5_kind_phys*(soilt(i,j)+tso(i,1,j)) )
                IF (debug_print ) THEN
                    print *, &
                   'Temperature inside snow is initialized in RUCLSM ', soilt1(i,j),i,xlat,xlon
@@ -481,7 +481,7 @@ CONTAINS
                soilt1(i,j) = tso(i,1,j)
              ENDIF
            ENDIF
-           tsnav(i,j) =min(zero,0.5_kind_phys*(soilt(i,j)+tso(i,1,j))-273.15_kind_phys)
+           tsnav(i,j) =min(zero,0.5_kind_phys*(soilt(i,j)+tso(i,1,j))-tfrz)
            !- 10feb22 - limit snow albedo at high elevations
            !- based on Roesch et al., Climate Dynamics (2001),17:933-946
            if(hgt(i,j) > 2500._kind_phys) then
@@ -582,7 +582,6 @@ CONTAINS
       endif
     ENDIF
 
-
          ILAND     = IVGTYP(i,j)
          ISOIL     = ISLTYP(I,J)
          TABS      = T3D(i,kms,j)
@@ -605,11 +604,11 @@ CONTAINS
 !> - Apply the same frozen precipitation fraction to convective precip
 !tgs - 31 mar17 - add temperature check in case Thompson MP produces
 !                 frozen precip at T > 273.
-       if(frzfrac(i,j) > zero .and. tabs < 273._kind_phys) then
+       if(frzfrac(i,j) > zero .and. tabs < tfrz) then
          prcpculiq = max(zero,raincv(i,j)*(one-frzfrac(i,j)))
          prcpcufr = max(zero,raincv(i,j)*frzfrac(i,j))
        else
-          if(tabs < 273._kind_phys) then
+          if(tabs < tfrz) then
             prcpcufr = max(zero,raincv(i,j))
             prcpculiq = zero
           else
@@ -631,7 +630,7 @@ CONTAINS
          endif
 
        ELSE  ! .not. FRPCPN
-          if (tabs.le.273.15_kind_phys) then
+          if (tabs.le.tfrz) then
          PRCPMS    = zero 
          NEWSNMS   = RAINBL(i,j)/DT*1.e-3_kind_phys
          !> - If here no info about constituents of frozen precipitation,
@@ -765,7 +764,7 @@ CONTAINS
     ENDIF
 
         CN=CFACTR_DATA   ! exponent
-        SAT = 5.e-4  ! units [m]
+        SAT = 5.e-4_kind_phys  ! units [m]
 
 !-- definition of number of soil levels in the rooting zone
      IF(iforest.gt.2) THEN
@@ -774,10 +773,10 @@ CONTAINS
 ! for open areas factor is 2, and for forests - factor is 0.85
 ! This will make limit on snow melting smaller and let snow stay 
 ! longer in the forests.
-         meltfactor = 2.0
+         meltfactor = 2.0_kind_phys
 
          do k=2,nzs
-         if(zsmain(k).ge.0.4) then
+         if(zsmain(k).ge.0.4_kind_phys) then
             NROOT=K
             goto  111
          endif
@@ -789,10 +788,10 @@ CONTAINS
 ! 28 March 11 - Previously used value of metfactor= 1.5 needs to be further reduced 
 ! to compensate for low snow albedos in the forested areas. 
 ! Melting rate in forests will reduce.
-         meltfactor = 0.85
+         meltfactor = 0.85_kind_phys
 
          do k=2,nzs
-         if(zsmain(k).ge.1.1) then
+         if(zsmain(k).ge.1.1_kind_phys) then
             NROOT=K
             goto  111
          endif
@@ -808,29 +807,29 @@ CONTAINS
          print *,'NROOT, meltfactor, iforest, ivgtyp, i,j ', nroot,meltfactor,iforest,ivgtyp(I,J),I,J
     ENDIF
 
-        IF((XLAND(I,J)-1.5).GE.0.)THEN
+        IF((XLAND(I,J)-1.5).GE.0._kind_phys)THEN
 !-- Water 
-           SMAVAIL(I,J)=1.0
-             SMMAX(I,J)=1.0
-             SNOW(I,J)=0.0
-             SNOWH(I,J)=0.0
-             SNOWC(I,J)=0.0
-           LMAVAIL(I,J)=1.0
+           SMAVAIL(I,J)= one
+             SMMAX(I,J)= one
+             SNOW(I,J) = zero
+             SNOWH(I,J)= zero
+             SNOWC(I,J)= zero
+           LMAVAIL(I,J)= one
 ! accumulated water equivalent of frozen precipitation over water [mm]
            acsnow(i,j)=acsnow(i,j)+precipfr(i,j)
 
            ILAND=iswater
            ISOIL=14
 
-           patmb=P8w(i,1,j)*1.e-2
+           patmb=P8w(i,1,j)*1.e-2_kind_phys
            qvg  (i,j) = QSN(SOILT(i,j),TBQ)/PATMB
            qsfc(i,j) = qvg(i,j)/(1.+qvg(i,j))
-           CHKLOWQ(I,J)=1.
+           CHKLOWQ(I,J)= one
            Q2SAT=QSN(TABS,TBQ)/PATMB
 
             DO K=1,NZS
-              SOILMOIS(I,K,J)=1.0
-              SH2O    (I,K,J)=1.0 
+              SOILMOIS(I,K,J)=one
+              SH2O    (I,K,J)=one 
               TSO(I,K,J)= SOILT(I,J)
             ENDDO
 
@@ -843,12 +842,12 @@ CONTAINS
 
 ! LAND POINT OR SEA ICE
        if(xice(i,j).ge.xice_threshold) then
-           SEAICE(i,j)=1.
+           SEAICE(i,j)=one
        else
-           SEAICE(i,j)=0.
+           SEAICE(i,j)=zero
        endif
 
-         IF(SEAICE(I,J).GT.0.5)THEN
+         IF(SEAICE(I,J).GT.0.5_kind_phys)THEN
 !-- Sea-ice case
     IF (debug_print ) THEN
               PRINT*,' sea-ice at water point, I=',I,            &
@@ -860,25 +859,25 @@ CONTAINS
         else
             ISOIL = 16 ! STATSGO
         endif
-            ZNT(I,J) = 0.011
+            ZNT(I,J) = 0.011_kind_phys
             ! in FV3 albedo and emiss are defined for ice
             emissl(i,j) = emisbck(i,j) ! no snow impact, old 0.98 used in WRF 
-            dqm = 1.
-            ref = 1.
-            qmin = 0.
-            wilt = 0.
+            dqm = one
+            ref = one
+            qmin = zero
+            wilt = zero
 
-           patmb=P8w(i,1,j)*1.e-2
+           patmb=P8w(i,1,j)*1.e-2_kind_phys
            qvg  (i,j) = QSN(SOILT(i,j),TBQ)/PATMB
            qsg  (i,j) = qvg(i,j)
            qsfc(i,j) = qvg(i,j)/(1.+qvg(i,j))
 
             DO K=1,NZS
-               soilmois(i,k,j) = 1.
-               smfr3d(i,k,j)   = 1.
-               sh2o(i,k,j)     = 0.
-               keepfr3dflag(i,k,j) = 0.
-               tso(i,k,j) = min(271.4,tso(i,k,j))
+               soilmois(i,k,j) = one
+               smfr3d(i,k,j)   = one
+               sh2o(i,k,j)     = zero
+               keepfr3dflag(i,k,j) = zero
+               tso(i,k,j) = min(271.4_kind_phys,tso(i,k,j))
             ENDDO
           ENDIF
 
@@ -887,10 +886,10 @@ CONTAINS
 
            DO k=1,nzs
            ! soilm1d - soil moisture content minus residual [m**3/m**3]
-              soilm1d (k) = min(max(0.,soilmois(i,k,j)-qmin),dqm)
+              soilm1d (k) = min(max(zero,soilmois(i,k,j)-qmin),dqm)
               tso1d   (k) = tso(i,k,j)
-              soiliqw (k) = min(max(0.,sh2o(i,k,j)-qmin),soilm1d(k))
-              soilice (k) =(soilm1d (k) - soiliqw (k))/0.9 
+              soiliqw (k) = min(max(zero,sh2o(i,k,j)-qmin),soilm1d(k))
+              soilice (k) =(soilm1d (k) - soiliqw (k))/0.9_kind_phys 
            ENDDO 
 
            do k=1,nzs
@@ -898,7 +897,7 @@ CONTAINS
               keepfr  (k) = keepfr3dflag(i,k,j)
            enddo
 
-              LMAVAIL(I,J)=max(0.00001,min(1.,soilm1d(1)/(ref-qmin)))
+              LMAVAIL(I,J)=max(0.00001_kind_phys,min(one,soilm1d(1)/(ref-qmin)))
 
     IF (debug_print ) THEN
       if (abs(xlat-testptlat).lt.0.2 .and.                           &
@@ -971,10 +970,10 @@ CONTAINS
 !tgs - turn off "irrigation" while there is no fractional landuse and LAI
 !climatology.
     if(1==2) then
-    IF (lufrac(crop) > 0 .and. lai(i,j) > 1.1) THEN
+    IF (lufrac(crop) > zero .and. lai(i,j) > 1.1_kind_phys) THEN
     ! cropland
         do k=1,nroot
-             cropsm=1.1*wilt - qmin
+             cropsm=1.1_kind_phys*wilt - qmin
           if(soilm1d(k) < cropsm*lufrac(crop)) then
     IF (debug_print ) THEN
 print * ,'Soil moisture is below wilting in cropland category at time step',ktau  &
@@ -991,14 +990,14 @@ print * ,'Soil moisture is below wilting in cropland category at time step',ktau
     ELSEIF (ivgtyp(i,j) == natural .and. lai(i,j) > 0.7) THEN
     ! grassland: assume that 40% of grassland is irrigated cropland
         do k=1,nroot
-             cropsm=1.2*wilt - qmin
+             cropsm=1.2_kind_phys*wilt - qmin
           if(soilm1d(k) < cropsm*lufrac(natural)*0.4) then
     IF (debug_print ) THEN
 print * ,'Soil moisture is below wilting in mixed grassland/cropland category at time step',ktau &
               ,'i,j,lufrac(natural),k,soilm1d(k),wilt',                       &
                 i,j,lufrac(natural),k,soilm1d(k),wilt
     ENDIF
-             soilm1d(k) = cropsm * lufrac(natural)*0.4
+             soilm1d(k) = cropsm * lufrac(natural)*0.4_kind_phys
     IF (debug_print ) THEN
       print * ,'Added soil water to grassland category, i,j,k,soilm1d(k)',i,j,k,soilm1d(k)
     ENDIF
@@ -1011,8 +1010,8 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !--- available and maximum soil moisture content in the soil
 !--- domain
 
-        smavail(i,j) = 0.
-        smmax (i,j)  = 0.  
+        smavail(i,j) = zero
+        smmax (i,j)  = zero
 
       !do k=1,nzs-1
       !-- root-zone soil moisture
@@ -1033,10 +1032,10 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !--- Convert the water unit into mm
         !-- three lines below are commented because accumulation
         !   happens in sfc_drv_ruc
-        ACRUNOFF(I,J)  = (RUNOFF1(I,J)+RUNOFF2(I,J))*DT*1000.0
-        SMAVAIL  (I,J) = SMAVAIL(I,J) * 1000. ! mm
-        SMMAX    (I,J) = SMMAX(I,J) * 1000.
-        smtotold (I,J) = smtotold(I,J) * 1000. ! mm
+        ACRUNOFF(I,J)  = (RUNOFF1(I,J)+RUNOFF2(I,J))*DT*rhowater
+        SMAVAIL  (I,J) = SMAVAIL(I,J) * rhowater ! mm
+        SMMAX    (I,J) = SMMAX(I,J) * rhowater
+        smtotold (I,J) = smtotold(I,J) * rhowater ! mm
 
         do k=1,nzs
 
@@ -1058,24 +1057,24 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 
         Z0       (I,J) = ZNT (I,J)
         SFCEXC   (I,J) = TKMS
-        patmb=P8w(i,1,j)*1.e-2
+        patmb=P8w(i,1,j)*1.e-2_kind_phys
         Q2SAT=QSN(TABS,TBQ)/PATMB
-        QSFC(I,J) = QVG(I,J)/(1.+QVG(I,J))
+        QSFC(I,J) = QVG(I,J)/(one+QVG(I,J))
         ! for MYJ surface and PBL scheme
         !      if (myj) then
         ! MYJSFC expects QSFC as actual specific humidity at the surface
-        IF((QVATM.GE.Q2SAT*0.95).AND.QVATM.LT.qvg(I,J))THEN
-          CHKLOWQ(I,J)=0.
+        IF((QVATM.GE.Q2SAT*0.95_kind_phys).AND.QVATM.LT.qvg(I,J))THEN
+          CHKLOWQ(I,J)=zero
         ELSE
-          CHKLOWQ(I,J)=1.
+          CHKLOWQ(I,J)=one
         ENDIF
 
-        if(snow(i,j)==0.) EMISSL(i,j) = EMISBCK(i,j)
+        if(snow(i,j)==zero) EMISSL(i,j) = EMISBCK(i,j)
         EMISS (I,J) = EMISSL(I,J)
         ! SNOW is in [mm], SNWE is in [m]; CANWAT is in mm, CANWATR is in m
-        SNOW   (i,j) = SNWE*1000.
+        SNOW   (i,j) = SNWE*1000._kind_phys
         SNOWH  (I,J) = SNHEI 
-        CANWAT (I,J) = CANWATR*1000.
+        CANWAT (I,J) = CANWATR*1000._kind_phys
 
      if (debug_print) then
        if (abs(xlat-testptlat).lt.0.2 .and. abs(xlon-testptlon).lt.0.2)then
@@ -1091,7 +1090,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
       endif
     ENDIF
         SFCEVP (I,J) = SFCEVP (I,J) + QFX (I,J) * DT
-        GRDFLX (I,J) = -1. * sflx(I,J)
+        GRDFLX (I,J) = -one * sflx(I,J)
 
 !tgs - SMF.NE.0. when there is phase change in the top soil layer
 ! The heat of soil water freezing/thawing is not computed explicitly
@@ -1117,16 +1116,16 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
      if (abs(xlat-testptlat).lt.0.2 .and.   &
          abs(xlon-testptlon).lt.0.2)then
      !-- compute budget for a test point
-       ac=0.
-       as=0.
-       wb=0.
+       ac=zero
+       as=zero
+       wb=zero
 
-       ac=canwat(i,j)-canwatold(i,j)*1.e3 ! canopy water change
+       ac=canwat(i,j)-canwatold(i,j)*rhowater ! canopy water change
        as=snwe-snowold(i,j) ! SWE change
        wb = smavail(i,j)-smtotold(i,j)
-       waterbudget(i,j)=rainbl(i,j)+smelt(i,j)*dt*1.e3_kind_phys & ! source
+       waterbudget(i,j)=rainbl(i,j)+smelt(i,j)*dt*rhowater & ! source
                       -qfx(i,j)*dt &
-                      -runoff1(i,j)*dt*1.e3_kind_phys-runoff2(i,j)*dt*1.e3_kind_phys &
+                      -runoff1(i,j)*dt*rhowater-runoff2(i,j)*dt*rhowater &
                       -ac-as ! - (smavail(i,j)-smtotold(i,j))
 
        print *,'soilm1d ',i,soilm1d
@@ -1139,9 +1138,9 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
        !--
        print *,'Smf=',smf(i,j),i,j
        print *,'SNOW,SNOWold',i,j,snwe,snowold(i,j)
-       print *,'SNOW-SNOWold',i,j,max(0._kind_phys,snwe-snowold(i,j))
+       print *,'SNOW-SNOWold',i,j,max(zero,snwe-snowold(i,j))
        print *,'CANWATold, canwat ',i,j,canwatold(i,j),canwat(i,j)
-       print *,'canwat(i,j)-canwatold(i,j)',max(0._kind_phys,canwat(i,j)-canwatold(i,j))
+       print *,'canwat(i,j)-canwatold(i,j)',max(zero,canwat(i,j)-canwatold(i,j))
      endif
     endif
 
@@ -1215,12 +1214,12 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
    real (kind_phys),     INTENT(IN   )   ::  C1SN,C2SN,RHONEWSN_ex
    LOGICAL,  INTENT(IN   )   ::  myj, debug_print, exticeden
 !--- 3-D Atmospheric variables
-   real (kind_phys)                                                        , &
+   real (kind_phys)                                            , &
             INTENT(IN   )    ::                            PATM, &
                                                            TABS, &
                                                           QVATM, &
                                                           QCATM
-   real (kind_phys)                                                        , &
+   real (kind_phys)                                            , &
             INTENT(IN   )    ::                             GLW, &
                                                             GSW, &
                                                           GSWdn, &
@@ -1237,7 +1236,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                                                              
    INTEGER,   INTENT(IN   )  ::                          IVGTYP, ISLTYP
 !--- 2-D variables
-   real (kind_phys)                                                        , &
+   real (kind_phys)                                            , &
             INTENT(INOUT)    ::                           EMISS, &
                                                         EMISBCK, &
                                                          MAVAIL, &
@@ -1247,7 +1246,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                                                             CST
 
 !--- soil properties
-   real (kind_phys)                      ::                                  &
+   real (kind_phys)                      ::                      &
                                                           RHOCS, &
                                                            BCLH, &
                                                             DQM, &
@@ -1259,7 +1258,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                                                             SAT, &
                                                            WILT
 
-   real (kind_phys),     INTENT(IN   )   ::                              CN, &
+   real (kind_phys),     INTENT(IN   )   ::                  CN, &
                                                              CW, &
                                                              CP, &
                                                           ROVCP, &
@@ -1270,34 +1269,34 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                                                            KICE, &
                                                             KWT
 
-   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN)  ::            ZSMAIN, &
+   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN) :: ZSMAIN, &
                                                          ZSHALF, &
                                                          DTDZS2 
 
 
-   real (kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
+   real (kind_phys),     DIMENSION(1:NDDZS), INTENT(IN) :: DTDZS
 
-   real (kind_phys),     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
+   real (kind_phys),     DIMENSION(1:5001), INTENT(IN) :: TBQ
 
 
 !--- input/output variables
 !-------- 3-d soil moisture and temperature
-   real (kind_phys),     DIMENSION( 1:nzs )                                , &
+   real (kind_phys),     DIMENSION( 1:nzs )                    , &
              INTENT(INOUT)   ::                            TS1D, & 
                                                         SOILM1D, &
                                                        SMFRKEEP
-   real (kind_phys),  DIMENSION( 1:nzs )                                   , &
+   real (kind_phys),  DIMENSION( 1:nzs )                       , &
              INTENT(INOUT)   ::                          KEEPFR
 
-   real (kind_phys),  DIMENSION(1:NZS), INTENT(INOUT)  ::          SOILICE, &
-                                                       SOILIQW
+   real (kind_phys),  DIMENSION(1:NZS),INTENT(INOUT) :: SOILICE, &
+                                                        SOILIQW
           
 
    INTEGER, INTENT(INOUT)    ::                     ILAND,ISOIL
    INTEGER                   ::                     ILANDs
 
 !-------- 2-d variables
-   real (kind_phys)                                                        , &
+   real (kind_phys)                                            , &
              INTENT(INOUT)   ::                             DEW, &
                                                           EDIR1, &
                                                             EC1, &
@@ -1337,7 +1336,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                                                           TSNAV, &
                                                             ZNT
 
-   real (kind_phys),     DIMENSION(1:NZS)              ::                    &
+   real (kind_phys),     DIMENSION(1:NZS)              ::        &
                                                            tice, &
                                                         rhosice, &
                                                          capice, &
@@ -1374,14 +1373,14 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
             
                      
 
-   real (kind_phys),  INTENT(INOUT)                     ::              RSM, &  
+   real (kind_phys),  INTENT(INOUT)                     ::  RSM, &  
                                                       SNWEPRINT, &
                                                      SNHEIPRINT
 !--- Local variables
 
    INTEGER ::  K,ILNB
 
-   real (kind_phys)    ::  BSN, XSN                                        , &
+   real (kind_phys)    ::  BSN, XSN                            , &
                RAINF, SNTH, NEWSN, PRCPMS, NEWSNMS             , &
                T3, UPFLUX, XINET, snowfrac2, m
    real (kind_phys)    ::  snhei_crit, snhei_crit_newsn, keep_snow_albedo, SNOWFRACnewsn
@@ -1410,23 +1409,23 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
      !             with vegetation dependent parameters from Noah MP (personal
      !             communication with Mike Barlage)
      !-- SNHEI_CRIT is a threshold for fractional snow in isncovr_opt=1
-         snhei_crit=0.01601_kind_phys*1.e3_kind_phys/rhosn
-         snhei_crit_newsn=0.0005*1.e3_kind_phys/rhosn
+         snhei_crit=0.01601_kind_phys*rhowater/rhosn
+         snhei_crit_newsn=0.0005_kind_phys*rhowater/rhosn
      !--
         zntsn = z0tbl(isice)
-        snow_mosaic=0._kind_phys
-        snfr = 1._kind_phys
-        NEWSN=0._kind_phys
-        newsnowratio = 0._kind_phys
-        snowfracnewsn=0._kind_phys
-        snowfrac2=0._kind_phys
+        snow_mosaic = zero
+        snfr = one
+        NEWSN= zero
+        newsnowratio = zero
+        snowfracnewsn= zero
+        snowfrac2= zero
         rhonewsn = 100._kind_phys
-        if(snhei == 0._kind_phys) snowfrac=0._kind_phys
-        smelt = 0._kind_phys
-        RAINF = 0._kind_phys
-        RSM=0._kind_phys
-        DD1=0._kind_phys
-        INFILTR=0._kind_phys
+        if(snhei == zero) snowfrac=zero
+        smelt = zero
+        RAINF = zero
+        RSM = zero
+        DD1 = zero
+        INFILTR = zero
 ! Jul 2016 -  Avissar and Pielke (1989)
 ! This formulation depending on LAI defines relative contribution of the vegetation to
 ! the total heat fluxes between surface and atmosphere.
@@ -1435,21 +1434,21 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !        VGFR=0.01*VEGFRA ! % --> fraction
 !        VEGFRAC=2.*lai*vgfr/(1.+2.*lai*vgfr)
         VEGFRAC=0.01_kind_phys*VEGFRA
-        drip = 0._kind_phys
-        dripsn = 0._kind_phys
-        dripliq = 0._kind_phys
-        smf = 0._kind_phys
-        interw=0._kind_phys
-        intersn=0._kind_phys
-        infwater=0._kind_phys
+        drip = zero
+        dripsn = zero
+        dripliq = zero
+        smf = zero
+        interw = zero
+        intersn = zero
+        infwater = zero
 
 !---initialize local arrays for sea ice
           do k=1,nzs
-            tice(k) = 0._kind_phys
-            rhosice(k) = 0._kind_phys
-            cice = 0._kind_phys
-            capice(k) = 0._kind_phys
-            thdifice(k) = 0._kind_phys
+            tice(k) = zero
+            rhosice(k) = zero
+            cice = zero
+            capice(k) = zero
+            thdifice(k) = zero
           enddo
 
         GSWnew=GSW
@@ -1463,20 +1462,20 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !--- N.N Zubov "Arctic Ice"
 !--- no salinity dependence because we consider the ice pack
 !--- to be old and to have low salinity (0.0002)
-       if(SEAICE.ge.0.5) then
+       if(SEAICE.ge.0.5_kind_phys) then
           do k=1,nzs
-            tice(k) = ts1d(k) - 273.15
-            rhosice(k) = 917.6/(1-0.000165*tice(k))
-            cice = 2115.85 +7.7948*tice(k)
+            tice(k) = ts1d(k) - tfrz
+            rhosice(k) = 917.6_kind_phys/(one-0.000165_kind_phys*tice(k))
+            cice = 2115.85_kind_phys +7.7948_kind_phys*tice(k)
             capice(k) = cice*rhosice(k)
-            thdifice(k) = 2.260872/capice(k)
+            thdifice(k) = 2.260872_kind_phys/capice(k)
            enddo
 !-- SEA ICE ALB dependence on ice temperature. When ice temperature is
 !-- below critical value of -10C - no change to albedo.
 !-- If temperature is higher that -10C then albedo is decreasing.
 !-- The minimum albedo at t=0C for ice is 0.1 less.
-       ALBice = MIN(ALB_SNOW_FREE,MAX(ALB_SNOW_FREE - 0.05,   &
-               ALB_SNOW_FREE - 0.1*(tice(1)+10.)/10. ))
+       ALBice = MIN(ALB_SNOW_FREE,MAX(ALB_SNOW_FREE - 0.05_kind_phys,   &
+               ALB_SNOW_FREE - 0.1_kind_phys*(tice(1)+10._kind_phys)/10._kind_phys ))
        endif
 
     IF (debug_print ) THEN
@@ -1485,29 +1484,29 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                  GSW,GSWnew,GLW,SOILT,EMISS,ALB,ALBice,SNWE
     ENDIF
 
-	if(snhei.gt.0.0081*1.e3/rhosn) then
+	if(snhei.gt.0.0081_kind_phys*rhowater/rhosn) then
 !*** Update snow density for current temperature (Koren et al. 1999)
-        BSN=delt/3600.*c1sn*exp(0.08*min(0.,tsnav)-c2sn*rhosn*1.e-3)
-       if(bsn*snwe*100..lt.1.e-4) goto 777
-        XSN=rhosn*(exp(bsn*snwe*100.)-1.)/(bsn*snwe*100.)
-        rhosn=MIN(MAX(58.8,XSN),500.)
+        BSN=delt/3600._kind_phys*c1sn*exp(0.08_kind_phys*min(zero,tsnav)-c2sn*rhosn*1.e-3_kind_phys)
+       if(bsn*snwe*100._kind_phys.lt.1.e-4_kind_phys) goto 777
+        XSN=rhosn*(exp(bsn*snwe*100._kind_phys)-one)/(bsn*snwe*100._kind_phys)
+        rhosn=MIN(MAX(58.8_kind_phys,XSN),500._kind_phys)
  777   continue
       endif
 
       !-- snow_mosaic from the previous time step 
-      if(snowfrac < 0.75) snow_mosaic = 1.
+      if(snowfrac < 0.75_kind_phys) snow_mosaic = one
 
            newsn=newsnms*delt
 !---- ACSNOW - run-total snowfall water [mm]
-           acsnow=acsnow+newsn*1.e3
+           acsnow=acsnow+newsn*rhowater
 
-       IF(NEWSN.GT.0.) THEN
+       IF(NEWSN.GT.zero) THEN
 
     IF (debug_print ) THEN
       print *, 'THERE IS NEW SNOW, newsn', newsn
     ENDIF
 
-        newsnowratio = min(1.,newsn/(snwe+newsn))
+        newsnowratio = min(one,newsn/(snwe+newsn))
 
         !if(isncovr_opt == 2) then
         !-- update snow fraction for fresh snowfall (Swenson&Lawrence,JGR,2012)
@@ -1522,14 +1521,14 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
       if (exticeden) then
         rhonewsn = rhonewsn_ex
       else
-        rhonewsn=min(125.,1000.0/max(8.,(17.*tanh((276.65-Tabs)*0.15))))
-        rhonewgr=min(500.,rhowater/max(2.,(3.5*tanh((274.15-Tabs)*0.3333))))
+        rhonewsn=min(125._kind_phys,rhowater/max(8._kind_phys,(17._kind_phys*tanh((276.65_kind_phys-Tabs)*0.15_kind_phys))))
+        rhonewgr=min(500._kind_phys,rhowater/max(2._kind_phys,(3.5_kind_phys*tanh((274.15_kind_phys-Tabs)*0.3333_kind_phys))))
         rhonewice=rhonewsn
 
 !--- compute density of "snowfall" from weighted contribution
 !                 of snow, graupel and ice fractions
 
-         rhosnfall = min(500.,max(58.8,(rhonewsn*snowrat +  &
+         rhosnfall = min(500._kind_phys,max(58.8_kind_phys,(rhonewsn*snowrat +  &
                      rhonewgr*grauprat + rhonewice*icerat + rhonewgr*curat)))
 
     if (debug_print) then
@@ -1548,10 +1547,10 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !*** without snow melt )
          xsn=(rhosn*snwe+rhonewsn*newsn)/                         &
              (snwe+newsn)
-         rhosn=MIN(MAX(58.8,XSN),500.)
+         rhosn=MIN(MAX(58.8_kind_phys,XSN),500._kind_phys)
        ENDIF ! end NEWSN > 0.
 
-       IF(PRCPMS.NE.0.) THEN
+       IF(PRCPMS > zero) THEN
 
 ! PRCPMS is liquid precipitation rate
 ! RAINF is a flag used for calculation of rain water
@@ -1559,18 +1558,18 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 ! is set equal to air temperature at the first atmospheric
 ! level.  
 
-           RAINF=1.
+           RAINF=one
        ENDIF
 
-        drip = 0.
-        intwratio=0.
-     if(vegfrac > 0.01) then
+        drip = zero
+        intwratio= zero
+     if(vegfrac > 0.01_kind_phys) then
 ! compute intercepted precipitation - Eq. 1 Lawrence et al.,
 ! J. of Hydrometeorology, 2006, CLM.
-         interw=0.25*DELT*PRCPMS*(1.-exp(-0.5*lai))*vegfrac
-         intersn=0.25*NEWSN*(1.-exp(-0.5*lai))*vegfrac
+         interw=0.25_kind_phys*DELT*PRCPMS*(one-exp(-0.5_kind_phys*lai))*vegfrac
+         intersn=0.25_kind_phys*NEWSN*(one-exp(-0.5_kind_phys*lai))*vegfrac
          infwater=PRCPMS - interw/delt
-    if((interw+intersn) > 0.) then
+    if((interw+intersn) > zero) then
        intwratio=interw/(interw+intersn)
     endif
 
@@ -1582,26 +1581,26 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
           DRIP=DD1-SAT
         ENDIF
      else
-         CST=0.
-         DRIP=0.
-         interw=0.
-         intersn=0.
+         CST=zero
+         DRIP=zero
+         interw=zero
+         intersn=zero
          infwater=PRCPMS
      endif ! vegfrac > 0.01
 
 
-       IF(NEWSN.GT.0.) THEN
+       IF(NEWSN.GT.zero) THEN
 !Update snow on the ground
-         snwe=max(0.,snwe+newsn-intersn)
+         snwe=max(zero,snwe+newsn-intersn)
 ! Add drip to snow on the ground
-      if(drip > 0.) then
-       if (snow_mosaic==1.) then
+      if(drip > zero) then
+       if (snow_mosaic==one) then
          dripliq=drip*intwratio
          dripsn = drip - dripliq
          snwe=snwe+dripsn
          infwater=infwater+dripliq
-         dripliq=0.
-         dripsn = 0.
+         dripliq=zero
+         dripsn = zero
        else
          snwe=snwe+drip
        endif
@@ -1610,7 +1609,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
          NEWSN=NEWSN*rhowater/rhonewsn
        ENDIF
 
-   IF(SNHEI.GT.0.0) THEN
+   IF(SNHEI.GT.zero) THEN
 !-- SNOW on the ground
 !--- Land-use category should be changed to snow/ice for grid points with snow>0
         ILAND=ISICE
@@ -1626,48 +1625,48 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !    endif
 
       !-- update snow cover with accounting for fresh snow
-        m = 1.0_kind_phys ! m=1.6 in Niu&Yang, m=1 in CLM
+        m = one ! m=1.6 in Niu&Yang, m=1 in CLM
       if(isncovr_opt == 1) then
-        snowfrac=min(1._kind_phys,snhei/(2.*snhei_crit))
+        snowfrac=min(one,snhei/(2._kind_phys*snhei_crit))
       elseif(isncovr_opt == 2) then
-        snowfrac=min(1.,snhei/(2._kind_phys*snhei_crit))
+        snowfrac=min(one,snhei/(2._kind_phys*snhei_crit))
         if(ivgtyp == glacier .or. ivgtyp == bare) then
         !-- sparsely vegetated or land ice
-          snowfrac2 = tanh( snhei/(2.5 * 0.2 *(rhosn/rhonewsn)**m))
+          snowfrac2 = tanh( snhei/(2.5_kind_phys * 0.2_kind_phys *(rhosn/rhonewsn)**m))
         else
           !-- Niu&Yang: znt=0.01 m for 1 degree (100km) resolution tests
           !  on 3-km scale use actual roughness, but not higher than 0.2 m.
           !  The factor is 20 for forests (~100/dx = 33.)
-          snowfrac2 = tanh( snhei/(2.5 *min(0.2,znt) *(rhosn/rhonewsn)**m))
+          snowfrac2 = tanh( snhei/(2.5_kind_phys *min(0.2_kind_phys,znt) *(rhosn/rhonewsn)**m))
         endif
         !-- snow fraction is average between method 1 and 2
-        snowfrac = 0.5*(snowfrac+snowfrac2)
+        snowfrac = 0.5_kind_phys*(snowfrac+snowfrac2)
       else
       !-- isncovr_opt=3
         !m = msnf ! vegetation dependent facsnf/msnf from Noah MP
         !-- for RRFS a factor 10. was added to 'facsnf' to get reasonal values of
         !   snow cover fractions on the 3-km scale.
         !   This factor is scale dependent.
-        snowfrac = tanh( snhei/(10. * facsnf *(rhosn/rhonewsn)**m))
+        snowfrac = tanh( snhei/(10._kind_phys * facsnf *(rhosn/rhonewsn)**m))
       endif
 
-       if(newsn > 0. ) then
-         SNOWFRACnewsn=MIN(1.,SNHEI/SNHEI_CRIT_newsn)
+       if(newsn > zero ) then
+         SNOWFRACnewsn=MIN(one,SNHEI/SNHEI_CRIT_newsn)
        endif
 
        !-- due to steep slopes and blown snow, limit snow fraction in the
        !-- mountains to 0.85 (based on Swiss weather model over the Alps)
-       if(hgt > 2500. .and. ivgtyp == glacier) snowfrac=min(0.85,snowfrac)
+       if(hgt > 2500._kind_phys .and. ivgtyp == glacier) snowfrac=min(0.85_kind_phys,snowfrac)
 
        !24nov15 - SNOWFRAC for urban category < 0.75 
-       if(ivgtyp == urban) snowfrac=min(0.75,snowfrac)
+       if(ivgtyp == urban) snowfrac=min(0.75_kind_phys,snowfrac)
 
-       if(snowfrac < 0.75) snow_mosaic = 1.
+       if(snowfrac < 0.75_kind_phys) snow_mosaic = one
 
-       KEEP_SNOW_ALBEDO = 0.
-       IF (NEWSN > 0. .and. snowfracnewsn > 0.99 .and. rhosnfall < 450.) THEN
+       KEEP_SNOW_ALBEDO = zero
+       IF (NEWSN > zero .and. snowfracnewsn > 0.99_kind_phys .and. rhosnfall < 450._kind_phys) THEN
        ! new snow
-             KEEP_SNOW_ALBEDO = 1.
+             KEEP_SNOW_ALBEDO = one
              !snow_mosaic=0.  ! ???
       ENDIF
 
@@ -1678,33 +1677,33 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 
 !-- Set znt for snow from VEGPARM table (snow/ice landuse), except for
 !-- land-use types with higher roughness (forests, urban).
-      IF(newsn.eq.0. .and. znt.le.0.2 .and. IVGTYP.ne.isice) then
-         if( snhei .le. 2.*ZNT)then
+      IF(newsn.eq.zero .and. znt.le.0.2_kind_phys .and. IVGTYP.ne.isice) then
+         if( snhei .le. 2._kind_phys*ZNT)then
          ! shallow snow
-           znt=0.55*znt+0.45*z0tbl(iland)
-         elseif( snhei .gt. 2.*ZNT .and. snhei .le. 4.*ZNT)then
-           znt=0.2*znt+0.8*z0tbl(iland)
-         elseif(snhei > 4.*ZNT) then
+           znt=0.55_kind_phys*znt+0.45_kind_phys*z0tbl(iland)
+         elseif( snhei .gt. 2._kind_phys*ZNT .and. snhei .le. 4._kind_phys*ZNT)then
+           znt=0.2_kind_phys*znt+0.8_kind_phys*z0tbl(iland)
+         elseif(snhei > 4._kind_phys*ZNT) then
          ! deep snow
            znt=z0tbl(iland)
          endif
        ENDIF
 
 
-    IF(SEAICE .LT. 0.5) THEN
+    IF(SEAICE .LT. 0.5_kind_phys) THEN
 !----- SNOW on soil
 !-- ALB dependence on snow depth
 ! ALB_SNOW across Canada's forested areas is very low - 0.27-0.35, this
 ! causes significant warm biases. Limiting ALB in these areas to be higher than 0.4
 ! hwlps with these biases.. 
-     if( snow_mosaic == 1.) then
+     if( snow_mosaic == one) then
          ALBsn=alb_snow
-         if(newsn > 0. .and. KEEP_SNOW_ALBEDO > 0.9 .and. albsn < 0.4) then
+         if(newsn > zero .and. KEEP_SNOW_ALBEDO > 0.9_kind_phys .and. albsn < 0.4_kind_phys) then
          !-- Albedo correction with fresh snow and deep snow pack
          !-- will reduce warm bias in western Canada
          !-- and US West coast, where max snow albedo is low (0.3-0.5).
            !print *,'ALB increase to 0.7',alb_snow,snhei,snhei_crit,albsn,i,j
-           !ALBsn = 0.7
+           !ALBsn = 0.7_kind_phys
          endif
 
          Emiss= emissn
@@ -1712,12 +1711,12 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
          ALBsn   = MAX(keep_snow_albedo*alb_snow,               &
                    MIN((alb_snow_free +                         &
            (alb_snow - alb_snow_free) * snowfrac), alb_snow))
-         if(newsn > 0. .and. KEEP_SNOW_ALBEDO > 0.9 .and. albsn < 0.4) then
+         if(newsn > zero .and. KEEP_SNOW_ALBEDO > 0.9_kind_phys .and. albsn < 0.4_kind_phys) then
          !-- Albedo correction with fresh snow and deep snow pack
          !-- will reduce warm bias in western Canada
          !-- and US West coast, where max snow albedo is low (0.3-0.5).
            !print *,'ALB increase to 0.7',alb_snow,snhei,snhei_crit,albsn,i,j
-           !ALBsn = 0.7
+           !ALBsn = 0.7_kind_phys
            !print *,'NO mosaic ALB increase to 0.7',alb_snow,snhei,snhei_crit,alb,i,j
          endif
 
@@ -1739,16 +1738,16 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !-- If temperature is higher that -10C then albedo is decreasing.
 !-- The minimum albedo at t=0C for snow on land is 15% less than
 !-- albedo of temperatures below -10C.
-     if(albsn.lt.0.4 .or. keep_snow_albedo==1) then
+     if(albsn.lt.0.4_kind_phys .or. keep_snow_albedo==1) then
         ALB=ALBsn
       else
 !-- change albedo when no fresh snow and snow albedo is higher than 0.5
-        ALB = MIN(ALBSN,MAX(ALBSN - 0.1*(soilt - 263.15)/       &
-                (273.15-263.15)*ALBSN, ALBSN - 0.05))
+        ALB = MIN(ALBSN,MAX(ALBSN - 0.1_kind_phys*(soilt - 263.15_kind_phys)/       &
+                (tfrz-263.15_kind_phys)*ALBSN, ALBSN - 0.05_kind_phys))
       endif
     ELSE
 !----- SNOW on ice
-     if( snow_mosaic == 1.) then
+     if( snow_mosaic == one) then
          ALBsn=alb_snow
          Emiss= emissn
      else
@@ -1766,25 +1765,25 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !-- ALB dependence on snow temperature. When snow temperature is
 !-- below critical value of -10C - no change to albedo.
 !-- If temperature is higher that -10C then albedo is decreasing.
-      if(albsn.lt.alb_snow .or. keep_snow_albedo .eq.1.)then
+      if(albsn.lt.alb_snow .or. keep_snow_albedo .eq.one)then
        ALB=ALBsn
       else
 !-- change albedo when no fresh snow
-       ALB = MIN(ALBSN,MAX(ALBSN - 0.15*ALBSN*(soilt - 263.15)/  &
-                (273.15-263.15), ALBSN - 0.1))
+       ALB = MIN(ALBSN,MAX(ALBSN - 0.15_kind_phys*ALBSN*(soilt - 263.15_kind_phys)/  &
+                (tfrz-263.15_kind_phys), ALBSN - 0.1_kind_phys))
       endif
 
     ENDIF
 
-    if (snow_mosaic==1.) then 
+    if (snow_mosaic==one) then 
 !may 2014 - treat separately snow-free and snow-covered areas
 
-       if(SEAICE .LT. 0.5) then
+       if(SEAICE .LT. 0.5_kind_phys) then
 !  LAND
 ! portion not covered with snow
 ! compute absorbed GSW for snow-free portion
 
-         gswnew=GSWin*(1.-alb_snow_free)
+         gswnew=GSWin*(one-alb_snow_free)
 !--------------
          T3      = STBOLT*SOILT*SOILT*SOILT
          UPFLUX  = T3 *SOILT
@@ -1808,9 +1807,9 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
           qcgs = qcg
           csts = cst
           mavails = mavail
-          smelt=0.
-          runoff1s=0.
-          runoff2s=0.
+          smelt=zero
+          runoff1s=zero
+          runoff2s=zero
        
           ilands = ivgtyp
 
@@ -1838,7 +1837,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 ! portion not covered with snow
 ! compute absorbed GSW for snow-free portion
 
-         gswnew=GSWin*(1.-albice)
+         gswnew=GSWin*(one-albice)
 !--------------
          T3      = STBOLT*SOILT*SOILT*SOILT
          UPFLUX  = T3 *SOILT
@@ -1855,15 +1854,15 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
           qvgs = qvg
           qsgs = qsg
           qcgs = qcg
-          smelt=0.
-          runoff1s=0.
-          runoff2s=0.
+          smelt=zero
+          runoff1s=zero
+          runoff2s=zero
  
           CALL SICE(debug_print,xlat,xlon,                      &
 !--- input variables
             i,j,iland,isoil,delt,ktau,conflx,nzs,nddzs,nroot,   &
             PRCPMS,RAINF,PATM,QVATM,QCATM,GLW,GSWnew,           &
-            0.98,RNET,QKMS,TKMS,rho,myj,                        &
+            0.98_kind_phys,RNET,QKMS,TKMS,rho,myj,              &
 !--- sea ice parameters
             tice,rhosice,capice,thdifice,                       &
             zsmain,zshalf,DTDZS,DTDZS2,tbq,                     &
@@ -1873,20 +1872,20 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
             ts1ds,dews,soilts,qvgs,qsgs,qcgs,                   &
             eetas,qfxs,hfxs,ss,evapls,prcpls,fltots             &
                                                                 )
-           edir1 = eeta*1.e-3
-           ec1 = 0.
-           ett1 = 0.
+           edir1 = eeta*1.e-3_kind_phys
+           ec1 = zero
+           ett1 = zero
            runoff1 = prcpms
-           runoff2 = 0.
-           mavail = 1.
-           infiltr=0.
-           cst=0.
+           runoff2 = zero
+           mavail = one
+           infiltr= zero
+           cst= zero
             do k=1,nzs
-               soilm1d(k)=1.
-               soiliqw(k)=0.
-               soilice(k)=1.
-               smfrkeep(k)=1.
-               keepfr(k)=0.
+               soilm1d(k)=one
+               soiliqw(k)=zero
+               soilice(k)=one
+               smfrkeep(k)=one
+               keepfr(k)=zero
             enddo
         endif ! seaice < 0.5
 
@@ -1894,7 +1893,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                            
 !--- recompute absorbed solar radiation and net radiation
 !--- for updated value of snow albedo - ALB
-         gswnew=GSWin*(1.-alb)
+         gswnew=GSWin*(one-alb)
 !--------------
          T3      = STBOLT*SOILT*SOILT*SOILT
          UPFLUX  = T3 *SOILT
@@ -1908,10 +1907,10 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
         print *,'GSWnew',gswnew,'alb=',alb
     ENDIF
 
-      if (SEAICE .LT. 0.5) then
+      if (SEAICE .LT. 0.5_kind_phys) then
 ! LAND
-           if(snow_mosaic==1.)then
-              snfr=1.
+           if(snow_mosaic==one)then
+              snfr=one
            else
               snfr=snowfrac
            endif
@@ -1939,8 +1938,8 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
             mavail,soilice,soiliqw,infiltr                      )
        else
 ! SEA ICE
-           if(snow_mosaic==1.)then
-              snfr=1.
+           if(snow_mosaic==one)then
+              snfr=one
            else
               snfr=snowfrac
            endif
@@ -1964,28 +1963,28 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
             SMELT,SNOH,SNFLX,SNOM,eeta,                         &    
             qfx,hfx,s,sublim,prcpl,fltot                        &    
                                                                 )    
-           edir1 = eeta*1.e-3
-           ec1 = 0.
-           ett1 = 0.
+           edir1 = eeta*1.e-3_kind_phys
+           ec1 = zero
+           ett1 = zero
            runoff1 = smelt
-           runoff2 = 0.
-           mavail = 1.
-           infiltr=0.
-           cst=0.
+           runoff2 = zero
+           mavail = one
+           infiltr = zero
+           cst = zero
             do k=1,nzs
-               soilm1d(k)=1.
-               soiliqw(k)=0.
-               soilice(k)=1.
-               smfrkeep(k)=1.
-               keepfr(k)=0.
+               soilm1d(k)=one
+               soiliqw(k)=zero
+               soilice(k)=one
+               smfrkeep(k)=one
+               keepfr(k)=zero
             enddo
        endif
 
 
-     if (snow_mosaic==1.) then
+     if (snow_mosaic==one) then
 ! May 2014 - now combine snow covered and snow-free land fluxes, soil temp, moist,
 ! etc.
-        if(SEAICE .LT. 0.5) then
+        if(SEAICE .LT. 0.5_kind_phys) then
 ! LAND
    IF (debug_print ) THEN
     !if (abs(xlat-33.35).lt.0.2 .and. abs(xlon-272.55).lt.0.2)then
@@ -2004,7 +2003,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
           soilm1d(k) = soilm1ds(k)*(1.-snowfrac) + soilm1d(k)*snowfrac
           ts1d(k) = ts1ds(k)*(1.-snowfrac) + ts1d(k)*snowfrac
           smfrkeep(k) = smfrkeeps(k)*(1.-snowfrac) + smfrkeep(k)*snowfrac
-       if(snowfrac > 0.5) then
+       if(snowfrac > 0.5_kind_phys) then
           keepfr(k) = keepfr(k)
        else
           keepfr(k) = keepfrs(k)
@@ -2012,23 +2011,23 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
           soilice(k) = soilices(k)*(1.-snowfrac) + soilice(k)*snowfrac
           soiliqw(k) = soiliqws(k)*(1.-snowfrac) + soiliqw(k)*snowfrac
             enddo
-          dew = dews*(1.-snowfrac) + dew*snowfrac
-          soilt = soilts*(1.-snowfrac) + soilt*snowfrac
-          qvg = qvgs*(1.-snowfrac) + qvg*snowfrac
-          qsg = qsgs*(1.-snowfrac) + qsg*snowfrac
-          qcg = qcgs*(1.-snowfrac) + qcg*snowfrac
-          edir1 = edir1s*(1.-snowfrac) + edir1*snowfrac
-          ec1 = ec1s*(1.-snowfrac) + ec1*snowfrac
-          cst = csts*(1.-snowfrac) + cst*snowfrac
-          ett1 = ett1s*(1.-snowfrac) + ett1*snowfrac
-          eeta = eetas*(1.-snowfrac) + eeta*snowfrac
-          qfx = qfxs*(1.-snowfrac) + qfx*snowfrac
-          hfx = hfxs*(1.-snowfrac) + hfx*snowfrac
-          s = ss*(1.-snowfrac) + s*snowfrac
-          evapl = evapls*(1.-snowfrac)
+          dew = dews*(one-snowfrac) + dew*snowfrac
+          soilt = soilts*(one-snowfrac) + soilt*snowfrac
+          qvg = qvgs*(one-snowfrac) + qvg*snowfrac
+          qsg = qsgs*(one-snowfrac) + qsg*snowfrac
+          qcg = qcgs*(one-snowfrac) + qcg*snowfrac
+          edir1 = edir1s*(one-snowfrac) + edir1*snowfrac
+          ec1 = ec1s*(one-snowfrac) + ec1*snowfrac
+          cst = csts*(one-snowfrac) + cst*snowfrac
+          ett1 = ett1s*(one-snowfrac) + ett1*snowfrac
+          eeta = eetas*(one-snowfrac) + eeta*snowfrac
+          qfx = qfxs*(one-snowfrac) + qfx*snowfrac
+          hfx = hfxs*(one-snowfrac) + hfx*snowfrac
+          s = ss*(one-snowfrac) + s*snowfrac
+          evapl = evapls*(one-snowfrac)
           sublim = sublim*snowfrac
-          prcpl = prcpls*(1.-snowfrac) + prcpl*snowfrac
-          fltot = fltots*(1.-snowfrac) + fltot*snowfrac
+          prcpl = prcpls*(one-snowfrac) + prcpl*snowfrac
+          fltot = fltots*(one-snowfrac) + fltot*snowfrac
           ALB   = MAX(keep_snow_albedo*alb,              &
                   MIN((alb_snow_free + (alb - alb_snow_free) * snowfrac), alb))
 
@@ -2036,14 +2035,14 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                   MIN((emiss_snowfree +                  &
               (emissn - emiss_snowfree) * snowfrac), emissn))
 
-          runoff1 = runoff1s*(1.-snowfrac) + runoff1*snowfrac
-          runoff2 = runoff2s*(1.-snowfrac) + runoff2*snowfrac
+          runoff1 = runoff1s*(one-snowfrac) + runoff1*snowfrac
+          runoff2 = runoff2s*(one-snowfrac) + runoff2*snowfrac
           smelt = smelt * snowfrac
           snoh = snoh * snowfrac
           snflx = snflx * snowfrac
           snom = snom * snowfrac
-          mavail = mavails*(1.-snowfrac) + 1.*snowfrac
-          infiltr = infiltrs*(1.-snowfrac) + infiltr*snowfrac
+          mavail = mavails*(one-snowfrac) + one*snowfrac
+          infiltr = infiltrs*(one-snowfrac) + infiltr*snowfrac
 
     IF (debug_print ) THEN
     !if (abs(xlat-33.35).lt.0.2 .and. & abs(xlon-272.55).lt.0.2)then
@@ -2058,27 +2057,27 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
       print *,'SOILT snow on ice', soilt
     ENDIF
             do k=1,nzs
-          ts1d(k) = ts1ds(k)*(1.-snowfrac) + ts1d(k)*snowfrac
+          ts1d(k) = ts1ds(k)*(one-snowfrac) + ts1d(k)*snowfrac
             enddo
-          dew = dews*(1.-snowfrac) + dew*snowfrac
-          soilt = soilts*(1.-snowfrac) + soilt*snowfrac
-          qvg = qvgs*(1.-snowfrac) + qvg*snowfrac
-          qsg = qsgs*(1.-snowfrac) + qsg*snowfrac
-          qcg = qcgs*(1.-snowfrac) + qcg*snowfrac
+          dew = dews*(one-snowfrac) + dew*snowfrac
+          soilt = soilts*(one-snowfrac) + soilt*snowfrac
+          qvg = qvgs*(one-snowfrac) + qvg*snowfrac
+          qsg = qsgs*(one-snowfrac) + qsg*snowfrac
+          qcg = qcgs*(one-snowfrac) + qcg*snowfrac
           sublim = eeta*snowfrac
-          eeta = eetas*(1.-snowfrac) + eeta*snowfrac
-          qfx = qfxs*(1.-snowfrac) + qfx*snowfrac
-          hfx = hfxs*(1.-snowfrac) + hfx*snowfrac
-          s = ss*(1.-snowfrac) + s*snowfrac
-          prcpl = prcpls*(1.-snowfrac) + prcpl*snowfrac
-          fltot = fltots*(1.-snowfrac) + fltot*snowfrac
+          eeta = eetas*(one-snowfrac) + eeta*snowfrac
+          qfx = qfxs*(one-snowfrac) + qfx*snowfrac
+          hfx = hfxs*(one-snowfrac) + hfx*snowfrac
+          s = ss*(one-snowfrac) + s*snowfrac
+          prcpl = prcpls*(one-snowfrac) + prcpl*snowfrac
+          fltot = fltots*(one-snowfrac) + fltot*snowfrac
           ALB   = MAX(keep_snow_albedo*alb,              &
                   MIN((albice + (alb - alb_snow_free) * snowfrac), alb))
           Emiss = MAX(keep_snow_albedo*emissn,           &
                   MIN((emiss_snowfree +                  &
               (emissn - emiss_snowfree) * snowfrac), emissn))
-          runoff1 = runoff1s*(1.-snowfrac) + runoff1*snowfrac
-          runoff2 = runoff2s*(1.-snowfrac) + runoff2*snowfrac
+          runoff1 = runoff1s*(one-snowfrac) + runoff1*snowfrac
+          runoff2 = runoff2s*(one-snowfrac) + runoff2*snowfrac
           smelt = smelt * snowfrac
           snoh = snoh * snowfrac
           snflx = snflx * snowfrac
@@ -2120,23 +2119,23 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
       !   Limit on znt (<0.25) is needed to avoid very small snow fractions in the
       !   forested areas with large roughness
 
-    IF(snhei == 0.) then
+    IF(snhei == zero) then
       !--- all snow is melted
       iland=ivgtyp
-      snowfrac = 0.
+      snowfrac = zero
       alb = alb_snow_free
       emiss = emiss_snowfree
     ELSE
     !-- update snow cover after possible melting
-        m = 1.0  ! m=1.6 in Niu&Yang, m=1 in CLM
+        m = one  ! m=1.6_kind_phys in Niu&Yang, m=1 in CLM
       if(isncovr_opt == 1) then
-        snowfrac=min(1.,snhei/(2.*snhei_crit))
+        snowfrac=min(one,snhei/(2._kind_phys*snhei_crit))
       elseif(isncovr_opt == 2) then
       !-- isncovr_opt=2
-        snowfrac=min(1.,snhei/(2.*snhei_crit))
+        snowfrac=min(one,snhei/(2._kind_phys*snhei_crit))
         if(ivgtyp == glacier .or. ivgtyp == bare) then
         !-- sparsely vegetated or land ice
-          snowfrac2 = tanh( snhei/(2.5 * 0.2 *(rhosn/rhonewsn)**m))
+          snowfrac2 = tanh( snhei/(2.5_kind_phys * 0.2_kind_phys *(rhosn/rhonewsn)**m))
         else
           !-- Niu&Yang: znt=0.01 m for 1 degree (100km) resolution tests
           !  on 3-km scale use actual roughness, but not higher than 0.2 m.
@@ -2144,21 +2143,21 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
           snowfrac2 = tanh( snhei/(2.5 *min(0.2,znt) *(rhosn/rhonewsn)**m))
         endif
         !-- snow fraction is average between method 1 and 2
-        snowfrac = 0.5*(snowfrac+snowfrac2)
+        snowfrac = 0.5_kind_phys*(snowfrac+snowfrac2)
       else
       !-- isncovr_opt=3
         !m = msnf ! vegetation dependent facsnf/msnf from Noah MP
         !-- for RRFS a factor 10. was added to 'facsnf' to get reasonal values of
         !   snow cover fractions on the 3-km scale.
         !   This factor is scale dependent.
-        snowfrac = tanh( snhei/(10. * facsnf *(rhosn/rhonewsn)**m)) 
+        snowfrac = tanh( snhei/(10._kind_phys * facsnf *(rhosn/rhonewsn)**m)) 
       endif
 
       !-- due to steep slopes and blown snow, limit snow fraction in the
       !-- mountains ( Swiss weather model)
-      if(hgt > 2500. .and. ivgtyp == glacier) snowfrac=min(0.85,snowfrac)
+      if(hgt > 2500._kind_phys .and. ivgtyp == glacier) snowfrac=min(0.85_kind_phys,snowfrac)
 
-      if(ivgtyp == urban) snowfrac=min(0.75,snowfrac)
+      if(ivgtyp == urban) snowfrac=min(0.75_kind_phys,snowfrac)
 
 !  run-total accumulated snow based on snowfall and snowmelt in [mm]
 
@@ -2171,9 +2170,9 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
          print *,'Time-step sublim: swe,[kg m-2]',sublim*delt
        endif
 
-      snowfallac = snowfallac + max(0.,(newsn*rhonewsn -                       & ! source of snow (swe) [m]
-                                       (smelt+sublim*1.e-3)*delt*newsnowratio) & ! sink: melting and sublimation, (swe) [m]
-                                       /rhonewsn)*1.e3 ! snow accumulation in snow depth [mm]
+      snowfallac = snowfallac + max(zero,(newsn*rhonewsn -                               & ! source of snow (swe) [m]
+                                       (smelt+sublim*1.e-3_kind_phys)*delt*newsnowratio) & ! sink: melting and sublimation, (swe) [m]
+                                       /rhonewsn)*rhowater ! snow accumulation in snow depth [mm]
 
        IF (debug_print ) THEN
        !if (abs(xlat-testptlat).lt.0.2 .and. abs(xlon-testptlon).lt.0.2)then
@@ -2183,9 +2182,9 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 
    ELSE
 !--- no snow
-           snheiprint=0.
-           snweprint=0.
-           smelt=0.
+           snheiprint=zero
+           snweprint=zero
+           smelt=zero
 
 !--------------
          T3      = STBOLT*SOILT*SOILT*SOILT
@@ -2196,7 +2195,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
      print *,'NO snow on the ground GSWnew -',GSWnew,'RNET=',rnet
     ENDIF
 
-       if(SEAICE .LT. 0.5) then
+       if(SEAICE .LT. 0.5_kind_phys) then
 !  LAND
          CALL SOIL(debug_print,xlat,xlon,                       &
 !--- input variables
@@ -2221,7 +2220,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 ! SEA ICE
 ! If current ice albedo is not the same as from the previous time step, then
 ! update GSW, ALB and RNET for surface energy budget
-         if(ALB.ne.ALBice) GSWnew=GSW/(1.-ALB)*(1.-ALBice)
+         if(ALB.ne.ALBice) GSWnew=GSW/(one-ALB)*(one-ALBice)
          alb=albice
          RNET    = GSWnew + XINET
 
@@ -2237,22 +2236,22 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
             lv,CP,rovcp,cw,stbolt,tabs,                         &
 !--- output variables
             ts1d,dew,soilt,qvg,qsg,qcg,                         &
-            eeta,qfx,hfx,s,evapl,prcpl,fltot                          &
+            eeta,qfx,hfx,s,evapl,prcpl,fltot                    &
                                                                 )
-           edir1 = eeta*1.e-3
-           ec1 = 0.
-           ett1 = 0.
+           edir1 = eeta*1.e-3_kind_phys
+           ec1 = zero
+           ett1 = zero
            runoff1 = prcpms
-           runoff2 = 0.
-           mavail = 1.
-           infiltr=0.
-           cst=0.
+           runoff2 = zero
+           mavail = one
+           infiltr = zero
+           cst = zero
             do k=1,nzs
-               soilm1d(k)=1.
-               soiliqw(k)=0.
-               soilice(k)=1.
-               smfrkeep(k)=1.
-               keepfr(k)=0.
+               soilm1d(k)= one
+               soiliqw(k)= zero
+               soilice(k)= one
+               smfrkeep(k)= one
+               keepfr(k)= zero
             enddo
         endif
 
@@ -2273,14 +2272,14 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
       real (kind_phys)    QSN, R,R1,R2
       INTEGER I
 
-       R=(TN-173.15)/.05+1.
+       R=(TN-173.15_kind_dbl_prec)/.05_kind_dbl_prec+one
        I=INT(R)
        IF(I.GE.1) goto 10
        I=1
        R=1.
   10   IF(I.LE.5000) GOTO 20
        I=5000
-       R=5001.
+       R=5001._kind_dbl_prec
   20   R1=T(I)
        R2=R-I
        QSN=(T(I+1)-R1)*R2 + R1
@@ -2376,12 +2375,12 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
    real (kind_phys),     INTENT(IN   )   ::  DELT,CONFLX,xlat,xlon
    LOGICAL,  INTENT(IN   )   ::  myj
 !--- 3-D Atmospheric variables
-   real (kind_phys),                                        &
+   real (kind_phys),                                             &
             INTENT(IN   )    ::                            PATM, &
                                                           QVATM, &
                                                           QCATM
 !--- 2-D variables
-   real (kind_phys),                                        &
+   real (kind_phys),                                             &
             INTENT(IN   )    ::                             GLW, &
                                                             GSW, &
                                                           GSWin, &
@@ -2395,7 +2394,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                                                            TKMS
 
 !--- soil properties
-   real (kind_phys),                                        &
+   real (kind_phys),                                             &
             INTENT(IN   )    ::                           RHOCS, &
                                                            BCLH, &
                                                             DQM, &
@@ -2406,7 +2405,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                                                             REF, &
                                                            WILT
 
-   real (kind_phys),     INTENT(IN   )   ::             CN, &
+   real (kind_phys),     INTENT(IN   )   ::                  CN, &
                                                              CW, &
                                                          KQWRTZ, &
                                                            KICE, &
@@ -2415,7 +2414,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                                                             g0_p
 
 
-   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN)  :: ZSMAIN, &
+   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN) :: ZSMAIN, &
                                                          ZSHALF, &
                                                          DTDZS2
 
@@ -2426,16 +2425,16 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 
 !--- input/output variables
 !-------- 3-d soil moisture and temperature
-   real (kind_phys),     DIMENSION( 1:nzs )               , &
+   real (kind_phys),     DIMENSION( 1:nzs )                    , &
              INTENT(INOUT)   ::                             TSO, &
                                                        SOILMOIS, &
                                                        SMFRKEEP
 
-   real (kind_phys),     DIMENSION( 1:nzs )               , &
+   real (kind_phys),     DIMENSION( 1:nzs )                    , &
              INTENT(INOUT)   ::                          KEEPFR
 
 !-------- 2-d variables
-   real (kind_phys),                                        &
+   real (kind_phys),                                             &
              INTENT(INOUT)   ::                             DEW, &
                                                             CST, &
                                                            DRIP, &
@@ -2459,12 +2458,12 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                                                           SOILT
 
 !-------- 1-d variables
-   real (kind_phys),     DIMENSION(1:NZS), INTENT(OUT)  :: SOILICE, &
+   real (kind_phys),  DIMENSION(1:NZS), INTENT(OUT)  :: SOILICE, &
                                                         SOILIQW
 
 !--- Local variables
 
-   real (kind_phys)    ::  INFILTRP, transum              , &
+   real (kind_phys)    ::  INFILTRP, transum                   , &
                RAINF,  PRCPMS                                  , &
                TABS, T3, UPFLUX, XINET
    real (kind_phys)    ::  CP,rovcp,G0,LV,STBOLT,xlmelt,dzstop , &
@@ -2473,7 +2472,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                trans,zn,ci,cvw,tln,tavln,pi                    , &
                DD1,CMC2MS,DRYCAN,WETCAN                        , &
                INFMAX,RIW, X
-   real (kind_phys),     DIMENSION(1:NZS)  ::  transp,cap,diffu,hydro, &
+   real (kind_phys), DIMENSION(1:NZS) :: transp,cap,diffu,hydro, &
                                    thdif,tranf,tav,soilmoism   , &
                                    soilicem,soiliqwm,detal     , &
                                    fwsat,lwsat,told,smold
@@ -2486,67 +2485,67 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !-----------------------------------------------------------------
 
 !-- define constants
-        RHOICE=900.
-        CI=RHOICE*2100.
-        XLMELT=3.35E+5
+        RHOICE=900._kind_phys
+        CI=RHOICE*2100._kind_phys
+        XLMELT=3.35E+5_kind_phys
         cvw=cw
 
         prcpl=prcpms
 
-        smf=0.
+        smf = zero
         soiltold = soilt
 
-        wetcan=0.
-        drycan=1.
+        wetcan= zero
+        drycan= one
 
 !--- Initializing local arrays
         DO K=1,NZS
-          TRANSP   (K)=0.
-          soilmoism(k)=0.
-          soilice  (k)=0.
-          soiliqw  (k)=0.
-          soilicem (k)=0.
-          soiliqwm (k)=0.
-          lwsat    (k)=0.
-          fwsat    (k)=0.
-          tav      (k)=0.
-          cap      (k)=0.
-          thdif    (k)=0.
-          diffu    (k)=0.
-          hydro    (k)=0.   
-          tranf    (k)=0.
-          detal    (k)=0.
-          told     (k)=0.
-          smold    (k)=0.
+          TRANSP   (K)=zero
+          soilmoism(k)=zero
+          soilice  (k)=zero
+          soiliqw  (k)=zero
+          soilicem (k)=zero
+          soiliqwm (k)=zero
+          lwsat    (k)=zero
+          fwsat    (k)=zero
+          tav      (k)=zero
+          cap      (k)=zero
+          thdif    (k)=zero
+          diffu    (k)=zero
+          hydro    (k)=zero
+          tranf    (k)=zero
+          detal    (k)=zero
+          told     (k)=zero
+          smold    (k)=zero
         ENDDO
 
           NZS1=NZS-1
           NZS2=NZS-2
-        dzstop=1./(zsmain(2)-zsmain(1))
-        RAS=RHO*1.E-3
-        RIW=rhoice*1.e-3
+        dzstop=one/(zsmain(2)-zsmain(1))
+        RAS=RHO*1.E-3_kind_phys
+        RIW=rhoice*1.e-3_kind_phys
 
 !--- Computation of volumetric content of ice in soil 
 
          DO K=1,NZS
 !- main levels
-         tln=log(tso(k)/273.15)
-         if(tln.lt.0.) then
+         tln=log(tso(k)/tfrz)
+         if(tln.lt.zero) then
            soiliqw(k)=(dqm+qmin)*(XLMELT*                        &
-         (tso(k)-273.15)/tso(k)/9.81/psis)                       &
-          **(-1./bclh)-qmin
-           soiliqw(k)=max(0.,soiliqw(k))
+         (tso(k)-tfrz)/tso(k)/9.81_kind_phys/psis)               &
+          **(-one/bclh)-qmin
+           soiliqw(k)=max(zero,soiliqw(k))
            soiliqw(k)=min(soiliqw(k),soilmois(k))
            soilice(k)=(soilmois(k)-soiliqw(k))/RIW
 
 !---- melting and freezing is balanced, soil ice cannot increase
-       if(keepfr(k).eq.1._kind_phys) then
+       if(keepfr(k).eq.one) then
            soilice(k)=min(soilice(k),smfrkeep(k))
-           soiliqw(k)=max(0._kind_phys,soilmois(k)-soilice(k)*riw)
+           soiliqw(k)=max(zero,soilmois(k)-soilice(k)*riw)
        endif
 
          else
-           soilice(k)=0._kind_phys
+           soilice(k)=zero
            soiliqw(k)=soilmois(k)
          endif
 
@@ -2554,39 +2553,39 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 
           DO K=1,NZS1
 !- middle of soil layers
-         tav(k)=0.5*(tso(k)+tso(k+1))
-         soilmoism(k)=0.5*(soilmois(k)+soilmois(k+1))
-         tavln=log(tav(k)/273.15)
+         tav(k)=0.5_kind_phys*(tso(k)+tso(k+1))
+         soilmoism(k)=0.5_kind_phys*(soilmois(k)+soilmois(k+1))
+         tavln=log(tav(k)/tfrz)
 
-         if(tavln.lt.0._kind_phys) then
+         if(tavln.lt.zero) then
            soiliqwm(k)=(dqm+qmin)*(XLMELT*                       &
-         (tav(k)-273.15)/tav(k)/9.81/psis)                       &
-          **(-1./bclh)-qmin
+         (tav(k)-tfrz)/tav(k)/9.81_kind_phys/psis)               &
+          **(-one/bclh)-qmin
            fwsat(k)=dqm-soiliqwm(k)
            lwsat(k)=soiliqwm(k)+qmin
-           soiliqwm(k)=max(0._kind_phys,soiliqwm(k))
+           soiliqwm(k)=max(zero,soiliqwm(k))
            soiliqwm(k)=min(soiliqwm(k), soilmoism(k))
            soilicem(k)=(soilmoism(k)-soiliqwm(k))/riw
 !---- melting and freezing is balanced, soil ice cannot increase
-       if(keepfr(k).eq.1._kind_phys) then
+       if(keepfr(k).eq.one) then
            soilicem(k)=min(soilicem(k),                          &
-                   0.5*(smfrkeep(k)+smfrkeep(k+1)))
-           soiliqwm(k)=max(0.,soilmoism(k)-soilicem(k)*riw)
+                   0.5_kind_phys*(smfrkeep(k)+smfrkeep(k+1)))
+           soiliqwm(k)=max(zero,soilmoism(k)-soilicem(k)*riw)
            fwsat(k)=dqm-soiliqwm(k)
            lwsat(k)=soiliqwm(k)+qmin
        endif
 
          else
-           soilicem(k)=0._kind_phys
+           soilicem(k)=zero
            soiliqwm(k)=soilmoism(k)
            lwsat(k)=dqm+qmin
-           fwsat(k)=0._kind_phys
+           fwsat(k)=zero
          endif
 
           ENDDO
 
           do k=1,nzs
-           if(soilice(k).gt.0._kind_phys) then
+           if(soilice(k).gt.zero) then
              smfrkeep(k)=soilice(k)
            else
              smfrkeep(k)=soilmois(k)/riw
@@ -2617,7 +2616,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 
         Q1=-QKMS*RAS*(QVATM - QSG)
 
-        DEW=0.
+        DEW=zero
         IF(QVATM.GE.QSG)THEN
           DEW=FQ*(QVATM-QSG)
         ENDIF
@@ -2626,8 +2625,8 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !--- water, and DRYCAN is the fraction of vegetated area where
 !--- transpiration may take place.
 
-          WETCAN=min(0.25,max(0.,(CST/SAT))**CN)
-          DRYCAN=1.-WETCAN
+          WETCAN=min(0.25_kind_phys,max(zero,(CST/SAT))**CN)
+          DRYCAN=one-WETCAN
 
 !**************************************************************
 !  TRANSF computes transpiration function
@@ -2648,16 +2647,16 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 
 ! Sakaguchi and Zeng (2009) - dry soil resistance to evaporation
 !      if (vgtype==11) then   ! MODIS wetland
-        alfa=1.
+        alfa=one
 !      else
-        fex=min(1.,soilmois(1)/dqm)
-        fex=max(fex,0.01)
+        fex=min(one,soilmois(1)/dqm)
+        fex=max(fex,0.01_kind_phys)
         psit=psis*fex ** (-bclh)
-        psit = max(-1.e5, psit)
-        alfa=min(1.,exp(G0_P*psit/r_v/SOILT))
+        psit = max(-1.e5_kind_phys, psit)
+        alfa=min(one,exp(G0_P*psit/r_v/SOILT))
      ! print *,'alfa=',alfa, exp(G0_P*psit/r_v/SOILT)
 !      endif
-        alfa=1.
+        alfa=one
 ! field capacity
 ! 20jun18 - beta in Eq. (5) is called soilres in the code - it limits soil evaporation
 ! when soil moisture is below field capacity.  [Lee and Pielke, 1992]
@@ -2672,13 +2671,13 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 ! 3feb21 - in RRFS testing (fv3-based), ref*0.5 gives too much direct
 !          evaporation. Therefore , it is replaced with ref*0.7.
         fc=ref
-        fex_fc=1.
-      if((soilmois(1)+qmin) > fc .or. (qvatm-qvg) > 0.) then
-        soilres = 1.
+        fex_fc=one
+      if((soilmois(1)+qmin) > fc .or. (qvatm-qvg) > zero) then
+        soilres = one
       else
-        fex_fc=min(1.,(soilmois(1)+qmin)/fc)
-        fex_fc=max(fex_fc,0.01)
-        soilres=0.25*(1.-cos(piconst*fex_fc))**2.
+        fex_fc=min(one,(soilmois(1)+qmin)/fc)
+        fex_fc=max(fex_fc,0.01_kind_phys)
+        soilres=0.25_kind_phys*(one-cos(piconst*fex_fc))**2._kind_phys
       endif
     IF ( debug_print ) THEN
      print *,'piconst=',piconst
@@ -2709,14 +2708,14 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !************************************************************************
 
 !--- CALCULATION OF DEW USING NEW VALUE OF QSG OR TRANSP IF NO DEW
-        ETT1=0.
-        DEW=0.
+        ETT1=zero
+        DEW=zero
 
         IF(QVATM.GE.QSG)THEN
           DEW=QKMS*(QVATM-QSG)
-          ETT1=0.
+          ETT1=zero
           DO K=1,NZS
-            TRANSP(K)=0.
+            TRANSP(K)=zero
           ENDDO
         ELSE
 
@@ -2724,33 +2723,33 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
             TRANSP(K)=VEGFRAC*RAS*QKMS*                       &
                     (QVATM-QSG)*                              &
                     TRANF(K)*DRYCAN/ZSHALF(NROOT+1)
-               IF(TRANSP(K).GT.0.) TRANSP(K)=0.
+               IF(TRANSP(K).GT.zero) TRANSP(K)=zero
             ETT1=ETT1-TRANSP(K)
           ENDDO
           DO k=nroot+1,nzs
-            transp(k)=0.
+            transp(k)=zero
           enddo
         ENDIF
 
 !-- Recalculate volumetric content of frozen water in soil
          DO K=1,NZS
 !- main levels
-           tln=log(tso(k)/273.15)
-         if(tln.lt.0.) then
+           tln=log(tso(k)/tfrz)
+         if(tln.lt.zero) then
            soiliqw(k)=(dqm+qmin)*(XLMELT*                     &
-          (tso(k)-273.15)/tso(k)/9.81/psis)                   & 
-           **(-1./bclh)-qmin
-           soiliqw(k)=max(0.,soiliqw(k))
+          (tso(k)-tfrz)/tso(k)/9.81_kind_phys/psis)           & 
+           **(-one/bclh)-qmin
+           soiliqw(k)=max(zero,soiliqw(k))
            soiliqw(k)=min(soiliqw(k),soilmois(k))
            soilice(k)=(soilmois(k)-soiliqw(k))/riw
 !---- melting and freezing is balanced, soil ice cannot increase
-       if(keepfr(k).eq.1.) then
+       if(keepfr(k).eq.one) then
            soilice(k)=min(soilice(k),smfrkeep(k))
-           soiliqw(k)=max(0.,soilmois(k)-soilice(k)*riw)
+           soiliqw(k)=max(zero,soilmois(k)-soilice(k)*riw)
        endif
 
          else
-           soilice(k)=0.
+           soilice(k)=zero
            soiliqw(k)=soilmois(k)
          endif
          ENDDO
@@ -2764,8 +2763,8 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                delt,nzs,nddzs,DTDZS,DTDZS2,RIW,                &
                zsmain,zshalf,diffu,hydro,                      &
                QSG,QVG,QCG,QCATM,QVATM,-infwater,              &
-               QKMS,TRANSP,DRIP,DEW,0.,SOILICE,VEGFRAC,        &
-               0.,soilres,                                     &
+               QKMS,TRANSP,DRIP,DEW,zero,SOILICE,VEGFRAC,      &
+               zero,soilres,                                   &
 !-- soil properties
                DQM,QMIN,REF,KSAT,RAS,INFMAX,                   &
 !-- output
@@ -2782,11 +2781,11 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !--- frozen soil.
  
         do k=1,nzs
-       if (soilice(k).gt.0.) then
+       if (soilice(k).gt.zero) then
           if(tso(k).gt.told(k).and.soilmois(k).gt.smold(k)) then
-              keepfr(k)=1.
+              keepfr(k)=one
           else
-              keepfr(k)=0.
+              keepfr(k)=zero
           endif
        endif
         enddo
@@ -2794,22 +2793,22 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !--- THE DIAGNOSTICS OF SURFACE FLUXES 
 
           T3      = STBOLT*SOILTold*SOILTold*SOILTold
-          UPFLUX  = T3 * 0.5*(SOILTold+SOILT)
+          UPFLUX  = T3 * 0.5_kind_phys*(SOILTold+SOILT)
           XINET   = EMISS*(GLW-UPFLUX)
           HFT=-TKMS*CP*RHO*(TABS-SOILT)
           HFX=-TKMS*CP*RHO*(TABS-SOILT)                        &
-               *(P1000mb*0.00001/Patm)**ROVCP
+               *(P1000mb*0.00001_kind_phys/Patm)**ROVCP
           Q1=-QKMS*RAS*(QVATM - QSG)
 
-          CMC2MS = 0.
-        IF (Q1.LE.0.) THEN
+          CMC2MS = zero
+        IF (Q1.LE.zero) THEN
 ! ---  condensation
-          EC1=0.
-          EDIR1=0.
-          ETT1=0.
+          EC1= zero
+          EDIR1= zero
+          ETT1= zero
      if(myj) then
 !-- moisture flux for coupling with MYJ PBL
-          EETA=-QKMS*RAS*(QVATM/(1.+QVATM) - QSG/(1.+QSG))*1.E3
+          EETA=-QKMS*RAS*(QVATM/(one+QVATM) - QSG/(one+QSG))*rhowater
           CST= CST-EETA*DELT*vegfrac
     IF (debug_print ) THEN
 !!!    IF(i.eq.374.and.j.eq.310.or. EETA.gt.0.0004) then
@@ -2828,7 +2827,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
           EETA= - RHO*DEW
         ELSE
 ! ---  evaporation
-          EDIR1 =-soilres*(1.-vegfrac)*QKMS*RAS*                      &
+          EDIR1 =-soilres*(one-vegfrac)*QKMS*RAS*                      &
                   (QVATM-QVG)
           CMC2MS=CST/DELT*RAS
           EC1 = Q1 * WETCAN * vegfrac
@@ -2839,11 +2838,11 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
      ENDIF
     ENDIF
 
-          CST=max(0.,CST-EC1 * DELT)
+          CST=max(zero,CST-EC1 * DELT)
 
      if (myj) then
 !-- moisture flux for coupling with MYJ PBL
-          EETA=-soilres*QKMS*RAS*(QVATM/(1.+QVATM) - QVG/(1.+QVG))*1.E3
+          EETA=-soilres*QKMS*RAS*(QVATM/(one+QVATM) - QVG/(one+QVG))*rhowater
      else ! myj
     IF (debug_print ) THEN
 !    IF(i.eq.440.and.j.eq.180.or. QFX.gt.1000..or.i.eq.417.and.j.eq.540) then
@@ -2854,14 +2853,14 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
        print *,'EC1=',EC1,'ETT1=',ETT1,'CMC2MS=',CMC2MS,'CMC2MS*ras=',CMC2MS*ras
     ENDIF
 !-- actual moisture flux from RUC LSM
-          EETA = (EDIR1 + EC1 + ETT1)*1.E3
+          EETA = (EDIR1 + EC1 + ETT1)*rhowater
     IF (debug_print ) THEN
 !    IF(i.eq.374.and.j.eq.310.or. EETA.gt.0.0004) then
         print *,'RUC LSM EETA',EETA,eeta*xlv
     ENDIF
      endif ! myj
           QFX= XLV * EETA
-          EETA = (EDIR1 + EC1 + ETT1)*1.E3
+          EETA = (EDIR1 + EC1 + ETT1)*rhowater
         ENDIF
     IF (debug_print ) THEN
      print *,'potential temp HFT ',HFT
@@ -2878,7 +2877,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
        print *,'edir1,ec1,ett1,mavail,qkms,qvatm,qvg,qsg,vegfrac',&
                 edir1,ec1,ett1,mavail,qkms,qvatm,qvg,qsg,vegfrac
     ENDIF
-    if(detal(1) .ne. 0.) then
+    if(detal(1) .ne. zero) then
 ! SMF - energy of phase change in the first soil layer
          smf=fltot
     IF (debug_print ) THEN
@@ -3058,7 +3057,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
         AA=XLS*(FKQ+R210)/TDENOM
         BB=(D10*TABS+R21*TN+XLS*(QVATM*FKQ                            &
         +R210*QVG)+D11+D9*(D2+R22*TN)                                 &
-        +RAINF*CVW*PRCPMS*max(273.15,TABS)                            &
+        +RAINF*CVW*PRCPMS*max(tfrz,TABS)                              &
          )/TDENOM
         AA1=AA
         PP=PATM*1.E3
@@ -3146,7 +3145,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
             XLS*rho*r211*(QSG-QGOLD)
          X=X &
 ! "heat" from rain
-        -RAINF*CVW*PRCPMS*(max(273.15,TABS)-SOILT)
+        -RAINF*CVW*PRCPMS*(max(tfrz,TABS)-SOILT)
 
 !-- excess energy spent on sea ice melt
         icemelt=RNET-XLS*EETA -HFT -S -X
@@ -3486,10 +3485,10 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !tgs - water in soil if there is any
          DO K=1,NZS
 
-         tln=log(tso(k)/273.15)
+         tln=log(tso(k)/tfrz)
          if(tln.lt.0.) then
            soiliqw(k)=(dqm+qmin)*(XLMELT*                          &
-         (tso(k)-273.15)/tso(k)/9.81/psis)                         &
+           (tso(k)-tfrz)/tso(k)/9.81/psis)                         &
           **(-1./bclh)-qmin
            soiliqw(k)=max(0.,soiliqw(k))
            soiliqw(k)=min(soiliqw(k),soilmois(k))
@@ -3512,11 +3511,11 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 
          tav(k)=0.5*(tso(k)+tso(k+1))
          soilmoism(k)=0.5*(soilmois(k)+soilmois(k+1))
-         tavln=log(tav(k)/273.15)
+         tavln=log(tav(k)/tfrz)
 
          if(tavln.lt.0.) then
            soiliqwm(k)=(dqm+qmin)*(XLMELT*                         &
-         (tav(k)-273.15)/tav(k)/9.81/psis)                         &
+         (tav(k)-tfrz)/tav(k)/9.81/psis)                         &
           **(-1./bclh)-qmin
            fwsat(k)=dqm-soiliqwm(k)
            lwsat(k)=soiliqwm(k)+qmin
@@ -3674,10 +3673,10 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 
 !-- recalculating of frozen water in soil
          DO K=1,NZS
-         tln=log(tso(k)/273.15)
+         tln=log(tso(k)/tfrz)
          if(tln.lt.0.) then
            soiliqw(k)=(dqm+qmin)*(XLMELT*                    &
-         (tso(k)-273.15)/tso(k)/9.81/psis)                   &
+           (tso(k)-tfrz)/tso(k)/9.81/psis)                   &
           **(-1./bclh)-qmin
            soiliqw(k)=max(0.,soiliqw(k))
            soiliqw(k)=min(soiliqw(k),soilmois(k))
@@ -3716,7 +3715,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 
 !-- Restore land-use parameters if all snow is melted
          IF(SNHEI.EQ.0.)  then
-          tsnav=soilt-273.15
+          tsnav=soilt-tfrz
          ENDIF
 
 ! 21apr2009
@@ -4141,7 +4140,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          rhtsn=rhtso(NZS)
 !*** Average temperature of snow pack (C)
          tsnav=0.5*(soilt+tso(1))                                     &
-                     -273.15
+                     -tfrz
 
         else
 !-- 2 layers in snow, SOILT1 is temperasture at DELTSN depth
@@ -4168,7 +4167,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 !*** Average temperature of snow pack (C)
          tsnav=0.5/snhei*((soilt+soilt1)*deltsn                       &
                      +(soilt1+tso(1))*(SNHEI-DELTSN))                 &
-                     -273.15
+                     -tfrz
         endif
        ENDIF
 
@@ -4190,7 +4189,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          cotso(nzs1) = x1sn/denom
          rhtso(nzs1)=(FT+X2*rhtso(NZS-2))/denom
          tsnav=0.5*(soilt+tso(1))                                    &
-                     -273.15
+                     -tfrz
          cotso(nzs)=cotso(NZS1)
          rhtso(nzs)=rhtso(nzs1)
          cotsn=cotso(NZS)
@@ -4263,8 +4262,8 @@ print *, 'TSO before calling SNOWTEMP: ', tso
         BB=(D10*TABS+R21*TN+XLVM*(QVATM*                             &
         (BETA*FKQ)                                                   &
         +R210*QVG)+D11+D9SN*(D2SN+R22SN*TN)                          &
-        +RAINF*CVW*PRCPMS*max(273.15,TABS)                           &
-        + RHOnewCSN*NEWSNOW/DELT*min(273.15,TABS)                    &
+        +RAINF*CVW*PRCPMS*max(tfrz,TABS)                           &
+        + RHOnewCSN*NEWSNOW/DELT*min(tfrz,TABS)                    &
          )/TDENOM
         AA1=AA
         PP=PATM*1.E3
@@ -4288,7 +4287,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 !--- SOILT - skin temperature of snow on ice
         SOILT=TS1
      if(nmelt==1 .and. snowfrac==1) then
-       soilt = min(273.15,soilt)
+       soilt = min(tfrz,soilt)
      endif
 
     IF (debug_print ) THEN
@@ -4299,7 +4298,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
        IF(SNHEI.GE.SNTH) THEN
         if(snhei.gt.DELTSN+SNTH) then
 !-- 2-layer snow model
-          SOILT1=min(273.15,rhtsn+cotsn*SOILT)
+          SOILT1=min(tfrz,rhtsn+cotsn*SOILT)
           TSO(1)=min(271.4,(rhtso(NZS)+cotso(NZS)*SOILT1))
           tsob=soilt1
         else
@@ -4344,18 +4343,17 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 
       if(nmelt.eq.1) go to 220
 
-!--- IF SOILT > 273.15 F then melting of snow can happen
+!--- IF SOILT > tfrz F then melting of snow can happen
 !    if all snow can evaporate, then there is nothing to melt
-   IF(SOILT.GT.273.15.AND.BETA.EQ.1._kind_phys.AND.SNHEI.GT.0._kind_phys) THEN
+   IF(SOILT>tfrz .AND. BETA==one .AND. SNHEI>zero) THEN
 !
         nmelt = 1
-        soiltfrac=snowfrac*273.15+(1.-snowfrac)*min(271.4,SOILT)
+        soiltfrac=snowfrac*tfrz+(1.-snowfrac)*min(271.4,SOILT)
 
         QSG= QSN(soiltfrac,TBQ)/PP
         T3      = STBOLT*TNold*TNold*TNold
         UPFLUX  = T3 * 0.5*(TNold+SOILTfrac)
         XINET   = EMISS*(GLW-UPFLUX)
-!        RNET = GSW + XINET
          EPOT = -QKMS*(QVATM-QSG)
          Q1=EPOT*RAS
 
@@ -4386,16 +4384,16 @@ print *, 'TSO before calling SNOWTEMP: ', tso
             XLVM*R210*(QSG-QGOLD)
 !-- SNOH is energy flux of snow phase change
         SNOH=RNET+QFX +HFX                                              &
-                  +RHOnewCSN*NEWSNOW/DELT*(min(273.15,TABS)-soiltfrac)  &
+                  +RHOnewCSN*NEWSNOW/DELT*(min(tfrz,TABS)-soiltfrac)  &
                   -SOH-X+RAINF*CVW*PRCPMS*                              &
-                  (max(273.15,TABS)-soiltfrac)
+                  (max(tfrz,TABS)-soiltfrac)
 
     IF (debug_print ) THEN
      print *,'SNOWSEAICE melt I,J,SNOH,RNET,QFX,HFX,SOH,X',i,j,SNOH,RNET,QFX,HFX,SOH,X
-     print *,'RHOnewCSN*NEWSNOW/DELT*(min(273.15,TABS)-soiltfrac)',     &
-              RHOnewCSN*NEWSNOW/DELT*(min(273.15,TABS)-soiltfrac)
-     print *,'RAINF*CVW*PRCPMS*(max(273.15,TABS)-soiltfrac)',           &
-              RAINF*CVW*PRCPMS*(max(273.15,TABS)-soiltfrac)
+     print *,'RHOnewCSN*NEWSNOW/DELT*(min(tfrz,TABS)-soiltfrac)',     &
+              RHOnewCSN*NEWSNOW/DELT*(min(tfrz,TABS)-soiltfrac)
+     print *,'RAINF*CVW*PRCPMS*(max(tfrz,TABS)-soiltfrac)',           &
+              RAINF*CVW*PRCPMS*(max(tfrz,TABS)-soiltfrac)
     ENDIF
         SNOH=AMAX1(0._kind_phys,SNOH)
 !-- SMELT is speed of melting in M/S
@@ -4407,7 +4405,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
        print *,'1-SMELT i,j',smelt,i,j
     ENDIF
 !18apr08 - Egglston limit
-       SMELT= amin1 (smelt,delt/60.* 5.6E-8*meltfactor*max(1.,(soilt-273.15))) ! SnowMIP
+       SMELT= amin1 (smelt,delt/60.* 5.6E-8*meltfactor*max(1.,(soilt-tfrz))) ! SnowMIP
     IF (debug_print ) THEN
        print *,'2-SMELT i,j',smelt,i,j
     ENDIF
@@ -4538,9 +4536,9 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
         if(ilnb.gt.1) then
           tsnav=0.5/snhei*((soilt+soilt1)*deltsn                     &
                     +(soilt1+tso(1))*(SNHEI-DELTSN))                 &
-                       -273.15
+                       -tfrz
         else
-          tsnav=0.5*(soilt+tso(1)) - 273.15
+          tsnav=0.5*(soilt+tso(1)) - tfrz
         endif
       ENDIF
 !--- RECALCULATION OF DEW USING NEW VALUE OF QSG
@@ -4624,8 +4622,8 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
               R21,D9sn,r22sn,soiltfrac,tnold,qsg,qgold,snprim
     ENDIF
          X=X &
-        -RHOnewCSN*NEWSNOW/DELT*(min(273.15,TABS)-SOILT)        &
-        -RAINF*CVW*PRCPMS*(max(273.15,TABS)-SOILT)
+        -RHOnewCSN*NEWSNOW/DELT*(min(tfrz,TABS)-SOILT)        &
+        -RAINF*CVW*PRCPMS*(max(tfrz,TABS)-SOILT)
 
 ! -- excess energy is spent on ice melt
         icemelt = RNET-HFT-XLVm*EETA-S-SNOH-X
@@ -4642,7 +4640,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
     ENDIF
 !-- Restore sea-ice parameters if snow is less than threshold
          IF(SNHEI.EQ.0.)  then
-          tsnav=soilt-273.15
+          tsnav=soilt-tfrz
           emiss=0.98
           znt=0.011
           alb=0.55
@@ -4870,7 +4868,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
         BB=(D10*TABS+R21*TN+XLV*(QVATM*                               &
         (FKQ*UMVEG+C)                                                 & 
         +R210*QVG)+D11+D9*(D2+R22*TN)                                 &
-        +RAINF*CVW*PRCPMS*max(273.15,TABS)                            &
+        +RAINF*CVW*PRCPMS*max(tfrz,TABS)                            &
          )/TDENOM
         AA1=AA+CC
         PP=PATM*1.E3
@@ -4944,7 +4942,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
     ENDIF
          X=X &
 ! "heat" from rain
-        -RAINF*CVW*PRCPMS*(max(273.15,TABS)-SOILT)
+        -RAINF*CVW*PRCPMS*(max(tfrz,TABS)-SOILT)
 
     IF (debug_print ) THEN
         print *,'x=',x
@@ -5276,7 +5274,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
          rhtsn=rhtso(NZS)
 !*** Average temperature of snow pack (C)
          tsnav=min(0.,0.5*(soilt+tso(1))                              &
-                     -273.15)
+                     -tfrz)
 
         else
 !-- 2 layers in snow, SOILT1 is temperasture at DELTSN depth
@@ -5306,7 +5304,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
 !*** Average temperature of snow pack (C)
          tsnav=min(0.,0.5/snhei*((soilt+soilt1)*deltsn                &
                      +(soilt1+tso(1))*(SNHEI-DELTSN))                 &
-                     -273.15)
+                     -tfrz)
         endif
        ENDIF
        IF(SNHEI.LT.SNTH.AND.SNHEI.GT.0.) then
@@ -5327,7 +5325,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
          cotso(nzs1) = x1sn/denom
          rhtso(nzs1)=(FT+X2*rhtso(NZS-2))/denom
          tsnav=min(0.,0.5*(soilt+tso(1))                             &
-                     -273.15)
+                     -tfrz)
          cotso(NZS)=cotso(nzs1)
          rhtso(NZS)=rhtso(nzs1)
          cotsn=cotso(NZS)
@@ -5425,8 +5423,8 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
         BB=(D10*TABS+R21*TN+XLVM*(QVATM*                             &
         (BETA*FKQ*UMVEG+C)                                           &
         +R210*QGOLD)+D11+D9SN*(D2SN+R22SN*TN)                        &
-        +RAINF*CVW*PRCPMS*max(273.15,TABS)                           &
-        + RHOnewCSN*NEWSNOW/DELT*min(273.15,TABS)                    &
+        +RAINF*CVW*PRCPMS*max(tfrz,TABS)                           &
+        + RHOnewCSN*NEWSNOW/DELT*min(tfrz,TABS)                    &
          )/TDENOM
         AA1=AA+CC
         PP=PATM*1.E3
@@ -5494,15 +5492,15 @@ endif ! 1==2
 
 !--- SOILT - skin temperature
         SOILT=TS1
-     if(nmelt==1 .and. snowfrac==1 .and. snwe > 0. .and. SOILT > 273.15) then
+     if(nmelt==1 .and. snowfrac==1 .and. snwe > 0. .and. SOILT > tfrz) then
      !--7feb22 on the second iteration when SNOH is known and snwe > 0. after melting,
-     !-- check if the snow skin temperature is =<273.15K
+     !-- check if the snow skin temperature is =<tfrzK
      !-- when a grid cell is fully covered with snow (snowfrac=1) 
      !-- or with partial snow cover and snow_mosaic=1 (snowfrac=1).
        if (debug_print ) then
        !if (abs(xlat-33.35).lt.0.2 .and. abs(xlon-272.55).lt.0.2)then
          print *,'soilt is too high =',soilt,xlat,xlon
-         soilt = min(273.15,soilt)
+         soilt = min(tfrz,soilt)
        endif
      endif
 
@@ -5538,9 +5536,9 @@ endif ! 1==2
        ENDIF
        if(nmelt==1.and.snowfrac==1) then
        !-- second iteration with full snow cover
-         SOILT1= min(273.15,SOILT1)
-         TSO(1)= min(273.15,TSO(1))
-         tsob  = min(273.15,tsob)
+         SOILT1= min(tfrz,SOILT1)
+         TSO(1)= min(tfrz,TSO(1))
+         tsob  = min(tfrz,tsob)
        endif
 
 !---- Final solution for TSO
@@ -5575,12 +5573,12 @@ endif ! 1==2
 
      if(nmelt.eq.1) go to 220
 
-!--- IF SOILT > 273.15 F then melting of snow can happen
+!--- IF SOILT > tfrz F then melting of snow can happen
 ! if all snow can evaporate (beta<1), then there is nothing to melt
-   IF(SOILT.GT.273.15.AND.BETA.EQ.1.AND.SNHEI.GT.0.) THEN
+   IF(SOILT.GT.tfrz.AND.BETA.EQ.1.AND.SNHEI.GT.0.) THEN
      !-- snow sublimation and melting
         nmelt = 1
-        soiltfrac=snowfrac*273.15+(1.-snowfrac)*SOILT
+        soiltfrac=snowfrac*tfrz+(1.-snowfrac)*SOILT
         QSG=min(QSG, QSN(soiltfrac,TBQ)/PP)
         qvg=qsg
         T3      = STBOLT*TN*TN*TN
@@ -5640,8 +5638,8 @@ endif ! 1==2
 
 !-- SNOH is energy flux of snow phase change
         SNOH=RNET-QFX -HFX - SOH - X                                    & 
-                  +RHOnewCSN*NEWSNOW/DELT*(min(273.15,TABS)-soiltfrac)  &
-                  +RAINF*CVW*PRCPMS*(max(273.15,TABS)-soiltfrac) 
+                  +RHOnewCSN*NEWSNOW/DELT*(min(tfrz,TABS)-soiltfrac)  &
+                  +RAINF*CVW*PRCPMS*(max(tfrz,TABS)-soiltfrac) 
         SNOH=AMAX1(0.,SNOH)
 !-- SMELT is speed of melting in M/S
         SMELT= SNOH /XLMELT*1.E-3
@@ -5666,7 +5664,7 @@ endif ! 1==2
       !-- 22apr22 Do not limit snow melting for hail (rhonewsn > 450), or dense snow
       !-- (rhosn > 350.) with very warm surface temperatures (>10C)
       if( (rhosn < 350. .or. (newsnow > 0. .and. rhonewsn < 450.)) .and. soilt < 283. ) then
-        SMELT= amin1 (smelt, delt/60.*5.6E-8*meltfactor*max(1.,(soilt-273.15))) 
+        SMELT= amin1 (smelt, delt/60.*5.6E-8*meltfactor*max(1.,(soilt-tfrz))) 
         IF (debug_print ) THEN
         !if (abs(xlat-33.35).lt.0.2 .and. abs(xlon-272.55).lt.0.2)then
           print *,'3- SMELT',xlat,xlon,smelt,rhosn,rhonewsn,xlat,xlon
@@ -5848,7 +5846,7 @@ endif ! 1==2
       print *,'snhei,snwe,rhosn,snowfr',snhei,snwe,rhosn,snowfrac,xlat,xlon
     endif
 
-        IF(TSO(1).GT.273.15 .and. snhei > 0.) THEN
+        IF(TSO(1).GT.tfrz .and. snhei > 0.) THEN
 !-- melting at the soil/snow interface
           if (snhei.GT.deltsn+snth) then
               hsn = snhei - deltsn
@@ -5862,7 +5860,7 @@ endif ! 1==2
               hsn = snhei
           endif
 
-         soiltfrac=snowfrac*273.15+(1.-snowfrac)*TSO(1)
+         soiltfrac=snowfrac*tfrz+(1.-snowfrac)*TSO(1)
 
          SNOHG=(TSO(1)-soiltfrac)*(cap(1)*zshalf(2)+                       &
                RHOCSN*0.5*hsn) / DELT
@@ -5926,8 +5924,8 @@ endif ! 1==2
 
          X=X &
 ! "heat" from snow and rain
-        -RHOnewCSN*NEWSNOW/DELT*(min(273.15,TABS)-SOILT)         &
-        -RAINF*CVW*PRCPMS*(max(273.15,TABS)-SOILT)
+        -RHOnewCSN*NEWSNOW/DELT*(min(tfrz,TABS)-SOILT)         &
+        -RAINF*CVW*PRCPMS*(max(tfrz,TABS)-SOILT)
     IF (debug_print ) THEN
      print *,'x=',x
      print *,'SNHEI=',snhei
@@ -5938,12 +5936,12 @@ endif ! 1==2
         if(ilnb.gt.1) then
           tsnav=min(0.,0.5/snhei*((soilt+soilt1)*deltsn          &
                     +(soilt1+tso(1))*(SNHEI-DELTSN))             &
-                       -273.15)
+                       -tfrz)
         else
-          tsnav=min(0.,0.5*(soilt+tso(1)) - 273.15)
+          tsnav=min(0.,0.5*(soilt+tso(1)) - tfrz)
         endif
       ELSE
-          tsnav= min(0.,soilt - 273.15)
+          tsnav= min(0.,soilt - tfrz)
       ENDIF
 
 !------------------------------------------------------------------------
@@ -6400,7 +6398,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
            endif
 
          DO K=1,NZS1
-           tn=tav(k) - 273.15
+           tn=tav(k) - tfrz
            wd=ws - riw*soilicem(k)
            psif=psis*100.*(wd/(soiliqwm(k)+qmin))**bclh            &
                 * (ws/wd)**3.
@@ -6418,7 +6416,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !--- DETAL is taking care of energy spent on freezing or released from 
 !          melting of soil water
 
-              DETAL(K)=273.15*X2/(TAV(K)*TAV(K))*                  &
+              DETAL(K)=tfrz*X2/(TAV(K)*TAV(K))*                  &
                      (TAV(K)/(X1*TN))**X4
 
               if(keepfr(k).eq.1.) then
@@ -7279,11 +7277,11 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
          DO L=1,NZS
            !-- for land points initialize soil ice
-           tln=log(TSLB(i,l,j)/273.15)
+           tln=log(TSLB(i,l,j)/tfrz)
           
            if(tln.lt.0.) then
              soiliqw(l)=(dqm+qmin)*(XLMELT*                        &
-            (tslb(i,l,j)-273.15)/tslb(i,l,j)/9.81/psis)             &
+            (tslb(i,l,j)-tfrz)/tslb(i,l,j)/9.81/psis)             &
             **(-1./bclh)
             soiliqw(l)=max(0.,soiliqw(l))
             soiliqw(l)=min(soiliqw(l),smois(i,l,j))
