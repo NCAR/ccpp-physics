@@ -1077,6 +1077,22 @@
   type = real
   kind = kind_phys
   intent = in
+[stbolt]
+  standard_name = stefan_boltzmann_constant
+  long_name = Stefan-Boltzmann constant
+  units = W m-2 K-4
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[rhoh2o]
+  standard_name = density_of_fresh_water
+  long_name = density of fresh water
+  units = kg m-3
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [semisbase]
   standard_name = baseline_surface_longwave_emissivity
   long_name = baseline surface lw emissivity in fraction

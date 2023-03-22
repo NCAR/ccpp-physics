@@ -336,7 +336,7 @@ module lsm_ruc
      &       min_lakeice, min_seaice, oceanfrac, rhonewsn1,             &
      ! --- constants
      &       con_cp, con_rd, con_rv, con_g, con_pi, con_hvap,           &
-     &       con_hfus, con_fvirt,                                       &
+     &       con_hfus, con_fvirt, stbolt, rhoh2o,                       &
      ! --- in/outs for ice and land
      &       semisbase, semis_lnd, semis_ice, sfalb_lnd, sfalb_ice,     &
      &       sncovr1_lnd, weasd_lnd, snwdph_lnd, tskin_lnd,             &
@@ -366,10 +366,6 @@ module lsm_ruc
 
       implicit none
 
-!  ---  constant parameters:
-      real(kind_phys), parameter :: rhoh2o  = 1000.0
-      real(kind_phys), parameter :: stbolt  = 5.670400e-8
-
 !  ---  input:
       integer, intent(in) :: me, master
       integer, intent(in) :: im, nlev, iter, lsoil_ruc, lsoil, kdt, isot, ivegsrc
@@ -392,9 +388,10 @@ module lsm_ruc
      &       cm_ice, ch_ice
 
       real (kind_phys),  intent(in) :: delt, min_seaice, min_lakeice
-      real (kind_phys),  intent(in) :: con_cp, con_rv, con_g,       &
-                                            con_pi, con_rd,              &
-                                            con_hvap, con_hfus, con_fvirt
+      real (kind_phys),  intent(in) :: con_cp, con_rv, con_g,      &
+                                       con_pi, con_rd,             &
+                                       con_hvap, con_hfus,         &
+                                       con_fvirt, stbolt, rhoh2o
 
       logical, dimension(:),  intent(in) :: flag_iter, flag_guess
       logical, dimension(:),  intent(in) :: land, icy, use_lake
