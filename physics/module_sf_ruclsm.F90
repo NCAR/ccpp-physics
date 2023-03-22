@@ -3875,12 +3875,12 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 
    LOGICAL,  INTENT(IN   )   ::  myj
 !--- 3-D Atmospheric variables
-   real (kind_phys),                                        &
+   real (kind_phys),                                             &
             INTENT(IN   )    ::                            PATM, &
                                                           QVATM, &
                                                           QCATM
 !--- 2-D variables
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
             INTENT(IN   )    ::                             GLW, &
                                                             GSW, &
                                                             RHO, &
@@ -3888,35 +3888,35 @@ print *, 'TSO before calling SNOWTEMP: ', tso
                                                            TKMS
 
 !--- sea ice properties
-   real (kind_phys),     DIMENSION(1:NZS)                 , &
+   real (kind_phys),     DIMENSION(1:NZS)                      , &
             INTENT(IN   )    ::                                  &
                                                            tice, &
                                                         rhosice, &
                                                          capice, &
                                                        thdifice
 
-   real (kind_phys),     INTENT(IN   )   ::                 &
+   real (kind_phys),     INTENT(IN   )   ::                      &
                                                              CW, &
                                                             XLV
 
-   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN)  :: ZSMAIN, &
-                                                               ZSHALF, &
-                                                               DTDZS2
+   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN) :: ZSMAIN, &
+                                                         ZSHALF, &
+                                                         DTDZS2
 
-   real (kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
+   real (kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  :: DTDZS
 
-   real (kind_phys),     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
+   real (kind_phys),     DIMENSION(1:5001), INTENT(IN)  ::  TBQ
 
 !--- input/output variables
 !-------- 3-d soil moisture and temperature
-   real (kind_phys),     DIMENSION(  1:nzs )           , &
+   real (kind_phys),     DIMENSION(  1:nzs )                   , &
              INTENT(INOUT)   ::                             TSO
 
    INTEGER,  INTENT(INOUT)    ::                           ILAND
 
 
 !-------- 2-d variables
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
              INTENT(INOUT)   ::                             DEW, &
                                                            EETA, &
                                                           RHOSN, &
@@ -3944,27 +3944,27 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 
    INTEGER, INTENT(INOUT)    ::                            ILNB
 
-   real (kind_phys),     INTENT(OUT)                    :: RSM, &
-                                                          SNWEPRINT, &
-                                                          SNHEIPRINT
+   real (kind_phys),     INTENT(OUT)                     :: RSM, &
+                                                      SNWEPRINT, &
+                                                     SNHEIPRINT
 !--- Local variables
 
 
    INTEGER ::  nzs1,nzs2,k,k1,kn,kk
    real (kind_phys)    ::  x,x1,x2,dzstop,ft,tn,denom
 
-   real (kind_phys)    ::  SNTH, NEWSN                    , &
+   real (kind_phys)    ::  SNTH, NEWSN                         , &
                TABS, T3, UPFLUX, XINET                         , &
                BETA, SNWEPR,EPDT,PP
-   real (kind_phys)    ::  CP,rovcp,G0,LV,xlvm,STBOLT,xlmelt , &
+   real (kind_phys)    ::  CP,rovcp,G0,LV,xlvm,STBOLT,xlmelt   , &
                epot,fltot,fq,hft,q1,ras,rhoice,ci,cvw          , &
                RIW,DELTSN,H
 
-   real (kind_phys)    ::  rhocsn,thdifsn,                  &
+   real (kind_phys)    ::  rhocsn,thdifsn,                       &
                xsn,ddzsn,x1sn,d1sn,d2sn,d9sn,r22sn
 
    real (kind_phys)    ::  cotsn,rhtsn,xsn1,ddzsn1,x1sn1,ftsnow,denomsn
-   real (kind_phys)    ::  fso,fsn,                         &
+   real (kind_phys)    ::  fso,fsn,                              &
                FKT,D1,D2,D9,D10,DID,R211,R21,R22,R6,R7,D11,      &
                FKQ,R210,AA,BB,QS1,TS1,TQ2,TX2,                   &
                TDENOM,AA1,RHCS,H1,TSOB, SNPRIM,                  &
@@ -3977,14 +3977,14 @@ print *, 'TSO before calling SNOWTEMP: ', tso
    real (kind_phys)                   :: keff, fact
 
 !-----------------------------------------------------------------
-        XLMELT=3.35E+5
+        XLMELT=3.35E+5_kind_dbl_prec
 !-- heat of sublimation of water vapor
         XLVm=XLV+XLMELT
 
         !-- options for snow conductivity:
         !-- 1 - constant
         !-- opt 2 -  Sturm et al., 1997
-        keff = 0.265
+        keff = 0.265_kind_phys
 
 !--- SNOW flag -- ISICE
 !--- DELTSN - is the threshold for splitting the snow layer into 2 layers.
@@ -3995,78 +3995,78 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 !--- the top sea ice layer. SNTH is computed using snwe=0.016 m, and
 !--- equals 4 cm for snow density 400 kg/m^3.
 
-           DELTSN=0.05*1.e3/rhosn
-           snth=0.01*1.e3/rhosn
+           DELTSN=0.05_kind_phys*rhowater/rhosn
+           snth=0.01_kind_phys*rhowater/rhosn
 
 ! For 2-layer snow model when the snow depth is marginlly higher than DELTSN,
 ! reset DELTSN to half of snow depth.
         IF(SNHEI.GE.DELTSN+SNTH) THEN
-          if(snhei-deltsn-snth.lt.snth) deltsn=0.5*(snhei-snth)
+          if(snhei-deltsn-snth.lt.snth) deltsn=0.5_kind_phys*(snhei-snth)
     IF (debug_print ) THEN
         print *,'DELTSN ICE is changed,deltsn,snhei,snth', &
                                   i,j, deltsn,snhei,snth
     ENDIF
         ENDIF
 
-        RHOICE=900.
-        CI=RHOICE*2100.
-        RAS=RHO*1.E-3
-        RIW=rhoice*1.e-3
-        RSM=0.
+        RHOICE=900._kind_dbl_prec
+        CI=RHOICE*2100._kind_dbl_prec
+        RAS=RHO*1.E-3_kind_dbl_prec
+        RIW=rhoice*1.e-3_kind_dbl_prec
+        RSM=zero
 
-        XLMELT=3.35E+5
-        RHOCSN=2090.* RHOSN
+        XLMELT=3.35E+5_kind_dbl_prec
+        RHOCSN=2090._kind_dbl_prec * RHOSN
 !18apr08 - add rhonewcsn
-        RHOnewCSN=2090.* RHOnewSN
+        RHOnewCSN=2090._kind_dbl_prec * RHOnewSN
 
       if(isncond_opt == 1) then
-         if(newsnow <= 0. .and. snhei > 3.0*SNHEI_crit .and. rhosn > 250.) then
+         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
         !-- some areas with large snow depth have unrealistically 
         !-- low snow density (in the Rockie's with snow depth > 1 m). 
         !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
         !-- In future a better compaction scheme is needed for these areas.
-          thdifsn = 2.5e-6
+          thdifsn = 2.5e-6_kind_phys
         else
           !-- old version thdifsn = 0.265/RHOCSN
-          THDIFSN = 0.265/RHOCSN
+          THDIFSN = 0.265_kind_phys/RHOCSN
         endif
       else
       !-- 07Jun19 - thermal conductivity (K_eff) from Sturm et al.(1997)
       !-- keff = 10. ** (2.650 * RHOSN*1.e-3 - 1.652)
-         fact = 1.
-         if(rhosn < 156. .or. (newsnow > 0. .and. rhonewsn < 156.)) then
-           keff = 0.023 + 0.234 * rhosn * 1.e-3
+         fact = one
+         if(rhosn < 156._kind_phys .or. (newsnow > zero .and. rhonewsn < 156._kind_phys)) then
+           keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
            !-- fact is added by tgs based on 4 Jan 2017 testing 
-           fact = 5.
+           fact = 5._kind_phys
          else
-           keff = 0.138 - 1.01 * rhosn*1.e-3 + 3.233 * rhosn**2 * 1.e-6
-           fact = 2.
+           keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
+           fact = 2._kind_phys
          endif
 
-         if(newsnow <= 0. .and. snhei > 3.0*SNHEI_crit .and. rhosn > 250.) then
+         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
          !-- some areas with large snow depth have unrealistically 
          !-- low snow density (in the Rockie's with snow depth > 1 m). 
          !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
          !-- In future a better compaction scheme is needed for these areas.
-           thdifsn = 2.5e-6
+           thdifsn = 2.5e-6_kind_phys
          else
            thdifsn = keff/rhocsn * fact
          endif
       endif
 
-        RAS=RHO*1.E-3
+        RAS=RHO*1.E-3_kind_phys
 
         SOILTFRAC=SOILT
 
-        SMELT=0.
-        SOH=0.
-        SNODIF=0.
-        SNOH=0.
-        SNOHGNEW=0.
-        RSM = 0.
-        RSMFRAC = 0.
-        fsn=1.
-        fso=0.
+        SMELT=zero
+        SOH=zero
+        SNODIF=zero
+        SNOH=zero
+        SNOHGNEW=zero
+        RSM=zero
+        RSMFRAC=zero
+        fsn=one
+        fso=zero
         cvw=cw
 
           NZS1=NZS-1
@@ -4074,10 +4074,10 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 
         QGOLD=QSG
         TNOLD=SOILT
-        DZSTOP=1./(ZSMAIN(2)-ZSMAIN(1))
+        DZSTOP=one/(ZSMAIN(2)-ZSMAIN(1))
 
-        snweprint=0.
-        snheiprint=0.
+        snweprint=zero
+        snheiprint=zero
         prcpl=prcpms
 
 !*** DELTSN is the depth of the top layer of snow where
@@ -4085,27 +4085,27 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 !*** is considered to have constant temperature
 
 
-        H=1.
-        SMELT=0.
+        H=one
+        SMELT=zero
 
         FQ=QKMS
-        SNHEI=SNWE*1.e3/RHOSN
-          SNWEPR=SNWE
+        SNHEI=SNWE*rhowater/RHOSN
+        SNWEPR=SNWE
 
 !  check if all snow can evaporate during DT
-         BETA=1.
+         BETA=one
          EPOT = -FQ*(QVATM-QSG)
          EPDT = EPOT * RAS *DELT
-         IF(EPDT.GT.0. .and. SNWEPR.LE.EPDT) THEN
-            BETA=SNWEPR/max(1.e-8,EPDT)
-            SNWE=0.
+         IF(EPDT.GT.zero .and. SNWEPR.LE.EPDT) THEN
+            BETA=SNWEPR/max(1.e-8_kind_phys,EPDT)
+            SNWE=zero
          ENDIF
 
 !******************************************************************************
 !       COEFFICIENTS FOR THOMAS ALGORITHM FOR TSO
 !******************************************************************************
 
-        cotso(1)=0.
+        cotso(1)=zero
         rhtso(1)=TSO(NZS)
         DO 33 K=1,NZS2
           KN=NZS-K
@@ -4127,19 +4127,19 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          snprim=max(snth,snhei)
          soilt1=tso(1)
          tsob=tso(1)
-         XSN = DELT/2./(zshalf(2)+0.5*SNPRIM)
+         XSN = DELT/2._kind_phys/(zshalf(2)+0.5_kind_phys*SNPRIM)
          DDZSN = XSN / SNPRIM
          X1SN = DDZSN * thdifsn
          X2 = DTDZS(1)*THDIFICE(1)
          FT = TSO(1)+X1SN*(SOILT-TSO(1))                              &
               -X2*(TSO(1)-TSO(2))
-         DENOM = 1. + X1SN + X2 -X2*cotso(NZS1)
+         DENOM = one + X1SN + X2 -X2*cotso(NZS1)
          cotso(NZS)=X1SN/DENOM
          rhtso(NZS)=(FT+X2*rhtso(NZS1))/DENOM
          cotsn=cotso(NZS)
          rhtsn=rhtso(NZS)
 !*** Average temperature of snow pack (C)
-         tsnav=0.5*(soilt+tso(1))                                     &
+         tsnav=0.5_kind_phys*(soilt+tso(1))                            &
                      -tfrz
 
         else
@@ -4147,8 +4147,8 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          ilnb=2
          snprim=deltsn
          tsob=soilt1
-         XSN = DELT/2./(0.5*SNHEI)
-         XSN1= DELT/2./(zshalf(2)+0.5*(SNHEI-DELTSN))
+         XSN = DELT/2._kind_phys/(0.5_kind_phys*SNHEI)
+         XSN1= DELT/2._kind_phys/(zshalf(2)+0.5_kind_phys*(SNHEI-DELTSN))
          DDZSN = XSN / DELTSN
          DDZSN1 = XSN1 / (SNHEI-DELTSN)
          X1SN = DDZSN * thdifsn
@@ -4156,7 +4156,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          X2 = DTDZS(1)*THDIFICE(1)
          FT = TSO(1)+X1SN1*(SOILT1-TSO(1))                            &
               -X2*(TSO(1)-TSO(2))
-         DENOM = 1. + X1SN1 + X2 - X2*cotso(NZS1)
+         DENOM = one + X1SN1 + X2 - X2*cotso(NZS1)
          cotso(nzs)=x1sn1/denom
          rhtso(nzs)=(ft+x2*rhtso(nzs1))/denom
          ftsnow = soilt1+x1sn*(soilt-soilt1)                          &
@@ -4165,30 +4165,30 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          cotsn=x1sn/denomsn
          rhtsn=(ftsnow+X1SN1*rhtso(NZS))/denomsn
 !*** Average temperature of snow pack (C)
-         tsnav=0.5/snhei*((soilt+soilt1)*deltsn                       &
+         tsnav=0.5_kind_phys/snhei*((soilt+soilt1)*deltsn             &
                      +(soilt1+tso(1))*(SNHEI-DELTSN))                 &
                      -tfrz
         endif
        ENDIF
 
-       IF(SNHEI.LT.SNTH.AND.SNHEI.GT.0.) then
+       IF(SNHEI.LT.SNTH.AND.SNHEI.GT.zero) then
 !--- snow is too thin to be treated separately, therefore it
 !--- is combined with the first sea ice layer.
          snprim=SNHEI+zsmain(2)
          fsn=SNHEI/snprim
-         fso=1.-fsn
+         fso=one-fsn
          soilt1=tso(1)
          tsob=tso(2)
-         XSN = DELT/2./((zshalf(3)-zsmain(2))+0.5*snprim)
+         XSN = DELT/2._kind_phys/((zshalf(3)-zsmain(2))+0.5_kind_phys*snprim)
          DDZSN = XSN /snprim
          X1SN = DDZSN * (fsn*thdifsn+fso*thdifice(1))
          X2=DTDZS(2)*THDIFICE(2)
          FT=TSO(2)+X1SN*(SOILT-TSO(2))-                              &
                        X2*(TSO(2)-TSO(3))
-         denom = 1. + x1sn + x2 - x2*cotso(nzs-2)
+         denom = one + x1sn + x2 - x2*cotso(nzs-2)
          cotso(nzs1) = x1sn/denom
          rhtso(nzs1)=(FT+X2*rhtso(NZS-2))/denom
-         tsnav=0.5*(soilt+tso(1))                                    &
+         tsnav=0.5_kind_phys*(soilt+tso(1))                          &
                      -tfrz
          cotso(nzs)=cotso(NZS1)
          rhtso(nzs)=rhtso(nzs1)
@@ -4200,21 +4200,21 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 !--- THE HEAT BALANCE EQUATION 
 !18apr08 nmelt is the flag for melting, and SNOH is heat of snow phase changes
        nmelt=0
-       SNOH=0.
+       SNOH=zero
 
         EPOT=-QKMS*(QVATM-QSG)
         RHCS=CAPICE(1)
-        H=1.
+        H=one
         FKT=TKMS
         D1=cotso(NZS1)
         D2=rhtso(NZS1)
         TN=SOILT
         D9=THDIFICE(1)*RHCS*dzstop
         D10=TKMS*CP*RHO
-        R211=.5*CONFLX/DELT
+        R211=.5_kind_phys*CONFLX/DELT
         R21=R211*CP*RHO
-        R22=.5/(THDIFICE(1)*DELT*dzstop**2)
-        R6=EMISS *STBOLT*.5*TN**4
+        R22=.5_kind_phys/(THDIFICE(1)*DELT*dzstop**2)
+        R6=EMISS *STBOLT*.5_kind_phys*TN**4
         R7=R6/TN
         D11=RNET+R6
 
@@ -4229,20 +4229,20 @@ print *, 'TSO before calling SNOWTEMP: ', tso
           D2SN = rhtsn
         endif
         D9SN= THDIFSN*RHOCSN / SNPRIM
-        R22SN = SNPRIM*SNPRIM*0.5/(THDIFSN*DELT)
+        R22SN = SNPRIM*SNPRIM*0.5_kind_phys/(THDIFSN*DELT)
       ENDIF
 
-       IF(SNHEI.LT.SNTH.AND.SNHEI.GT.0.) then
+       IF(SNHEI.LT.SNTH.AND.SNHEI.GT.zero) then
 !--- thin snow is combined with sea ice
          D1SN = D1
          D2SN = D2
          D9SN = (fsn*THDIFSN*RHOCSN+fso*THDIFICE(1)*RHCS)/           &
                  snprim
-         R22SN = snprim*snprim*0.5                                   &
+         R22SN = snprim*snprim*0.5_kind_phys                         &
                  /((fsn*THDIFSN+fso*THDIFICE(1))*delt)
       ENDIF
 
-      IF(SNHEI.eq.0.)then
+      IF(SNHEI.eq.zero)then
 !--- all snow is sublimated
         D9SN = D9
         R22SN = R22
@@ -4252,7 +4252,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 
 
 !---- TDENOM for snow
-        TDENOM = D9SN*(1.-D1SN +R22SN)+D10+R21+R7                    &
+        TDENOM = D9SN*(one-D1SN +R22SN)+D10+R21+R7                   &
               +RAINF*CVW*PRCPMS                                      &
               +RHOnewCSN*NEWSNOW/DELT
 
@@ -4262,11 +4262,11 @@ print *, 'TSO before calling SNOWTEMP: ', tso
         BB=(D10*TABS+R21*TN+XLVM*(QVATM*                             &
         (BETA*FKQ)                                                   &
         +R210*QVG)+D11+D9SN*(D2SN+R22SN*TN)                          &
-        +RAINF*CVW*PRCPMS*max(tfrz,TABS)                           &
-        + RHOnewCSN*NEWSNOW/DELT*min(tfrz,TABS)                    &
+        +RAINF*CVW*PRCPMS*max(tfrz,TABS)                             &
+        + RHOnewCSN*NEWSNOW/DELT*min(tfrz,TABS)                      &
          )/TDENOM
         AA1=AA
-        PP=PATM*1.E3
+        PP=PATM*1.E3_kind_phys
         AA1=AA1/PP
 !18apr08  - the iteration start point
  212    continue
@@ -4282,11 +4282,11 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 !--- it is saturation over snow
         QVG=QS1
         QSG=QS1
-        QCG=0.
+        QCG=zero
 
 !--- SOILT - skin temperature of snow on ice
         SOILT=TS1
-     if(nmelt==1 .and. snowfrac==1) then
+     if(nmelt==1 .and. snowfrac==one) then
        soilt = min(tfrz,soilt)
      endif
 
@@ -4299,37 +4299,37 @@ print *, 'TSO before calling SNOWTEMP: ', tso
         if(snhei.gt.DELTSN+SNTH) then
 !-- 2-layer snow model
           SOILT1=min(tfrz,rhtsn+cotsn*SOILT)
-          TSO(1)=min(271.4,(rhtso(NZS)+cotso(NZS)*SOILT1))
+          TSO(1)=min(271.4_kind_phys,(rhtso(NZS)+cotso(NZS)*SOILT1))
           tsob=soilt1
         else
 !-- 1 layer in snow
-          TSO(1)=min(271.4,(rhtso(NZS)+cotso(NZS)*SOILT))
+          TSO(1)=min(271.4_kind_phys,(rhtso(NZS)+cotso(NZS)*SOILT))
           SOILT1=TSO(1)
           tsob=tso(1)
         endif
-       ELSEIF  (SNHEI > 0. .and. SNHEI < SNTH) THEN
+       ELSEIF  (SNHEI > zero .and. SNHEI < SNTH) THEN
 ! blended
-         TSO(2)=min(271.4,(rhtso(NZS1)+cotso(NZS1)*SOILT))
-         tso(1)=min(271.4,(tso(2)+(soilt-tso(2))*fso))
+         TSO(2)=min(271.4_kind_phys,(rhtso(NZS1)+cotso(NZS1)*SOILT))
+         tso(1)=min(271.4_kind_phys,(tso(2)+(soilt-tso(2))*fso))
          SOILT1=TSO(1)
          tsob=TSO(2)
        ELSE
 ! snow is melted
-         TSO(1)=min(271.4,SOILT)
-         SOILT1=min(271.4,SOILT)
+         TSO(1)=min(271.4_kind_phys,SOILT)
+         SOILT1=min(271.4_kind_phys,SOILT)
          tsob=tso(1)
        ENDIF
 !---- Final solution for TSO in sea ice
-       IF (SNHEI > 0. .and. SNHEI < SNTH) THEN
+       IF (SNHEI > zero .and. SNHEI < SNTH) THEN
 ! blended or snow is melted
           DO K=3,NZS
             KK=NZS-K+1
-            TSO(K)=min(271.4,rhtso(KK)+cotso(KK)*TSO(K-1))
+            TSO(K)=min(271.4_kind_phys,rhtso(KK)+cotso(KK)*TSO(K-1))
           END DO
        ELSE
           DO K=2,NZS
             KK=NZS-K+1
-            TSO(K)=min(271.4,rhtso(KK)+cotso(KK)*TSO(K-1))
+            TSO(K)=min(271.4_kind_phys,rhtso(KK)+cotso(KK)*TSO(K-1))
           END DO
        ENDIF
 !--- For thin snow layer combined with the top soil layer
@@ -4348,16 +4348,16 @@ print *, 'TSO before calling SNOWTEMP: ', tso
    IF(SOILT>tfrz .AND. BETA==one .AND. SNHEI>zero) THEN
 !
         nmelt = 1
-        soiltfrac=snowfrac*tfrz+(1.-snowfrac)*min(271.4,SOILT)
+        soiltfrac=snowfrac*tfrz+(1.-snowfrac)*min(271.4_kind_phys,SOILT)
 
         QSG= QSN(soiltfrac,TBQ)/PP
         T3      = STBOLT*TNold*TNold*TNold
-        UPFLUX  = T3 * 0.5*(TNold+SOILTfrac)
+        UPFLUX  = T3 * 0.5_kind_phys*(TNold+SOILTfrac)
         XINET   = EMISS*(GLW-UPFLUX)
          EPOT = -QKMS*(QVATM-QSG)
          Q1=EPOT*RAS
 
-        IF (Q1.LE.0.) THEN
+        IF (Q1.LE.zero) THEN
 ! ---  condensation
           DEW=-EPOT
 
@@ -4365,7 +4365,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
         EETA=QFX/XLVM
        ELSE
 ! ---  evaporation
-        EETA = Q1 * BETA *1.E3
+        EETA = Q1 * BETA * rhowater
 ! to convert from kg m-2 s-1 to m s-1: 1/rho water=1.e-3************
         QFX= - XLVM * EETA
        ENDIF
@@ -4395,17 +4395,17 @@ print *, 'TSO before calling SNOWTEMP: ', tso
      print *,'RAINF*CVW*PRCPMS*(max(tfrz,TABS)-soiltfrac)',           &
               RAINF*CVW*PRCPMS*(max(tfrz,TABS)-soiltfrac)
     ENDIF
-        SNOH=AMAX1(0._kind_phys,SNOH)
+        SNOH=AMAX1(zero,SNOH)
 !-- SMELT is speed of melting in M/S
-        SMELT= SNOH /XLMELT*1.E-3
+        SMELT= SNOH /XLMELT*1.E-3_kind_phys
         SMELT=AMIN1(SMELT,SNWEPR/DELT-BETA*EPOT*RAS)
-        SMELT=AMAX1(0._kind_phys,SMELT)
+        SMELT=AMAX1(zero,SMELT)
 
     IF (debug_print ) THEN
        print *,'1-SMELT i,j',smelt,i,j
     ENDIF
 !18apr08 - Egglston limit
-       SMELT= amin1 (smelt,delt/60.* 5.6E-8*meltfactor*max(1.,(soilt-tfrz))) ! SnowMIP
+       SMELT= amin1 (smelt,delt/60._kind_phys* 5.6E-8_kind_phys*meltfactor*max(one,(soilt-tfrz))) ! SnowMIP
     IF (debug_print ) THEN
        print *,'2-SMELT i,j',smelt,i,j
     ENDIF
@@ -4417,7 +4417,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
       print *,'3- SMELT i,j,smelt,rr',i,j,smelt,rr
     ENDIF
         SNOHGNEW=SMELT*XLMELT*1.E3
-        SNODIF=AMAX1(0.,(SNOH-SNOHGNEW))
+        SNODIF=AMAX1(zero,(SNOH-SNOHGNEW))
 
         SNOH=SNOHGNEW
 
@@ -4428,15 +4428,15 @@ print *, 'TSO before calling SNOWTEMP: ', tso
     ENDIF
 
 !*** From Koren et al. (1999) 13% of snow melt stays in the snow pack
-        rsmfrac=min(0.18,(max(0.08,snwepr/0.10*0.13)))
-       if(snhei > 0.01) then
+        rsmfrac=min(0.18_kind_phys,(max(0.08_kind_phys,snwepr/0.10_kind_phys*0.13_kind_phys)))
+       if(snhei > 0.01_kind_phys) then
         rsm=rsmfrac*smelt*delt
        else
 ! do not keep melted water if snow depth is less that 1 cm
-        rsm=0.
+        rsm=zero
        endif
 !18apr08 rsm is part of melted water that stays in snow as liquid
-        SMELT=AMAX1(0.,SMELT-rsm/delt)
+        SMELT=AMAX1(zero,SMELT-rsm/delt)
     IF (debug_print ) THEN
        print *,'4-SMELT i,j,smelt,rsm,snwepr,rsmfrac', &
                     i,j,smelt,rsm,snwepr,rsmfrac
@@ -4444,19 +4444,19 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 
 !-- update liquid equivalent of snow depth
 !-- for evaporation and snow melt
-        SNWE = AMAX1(0.,(SNWEPR-                                      &
+        SNWE = AMAX1(zero,(SNWEPR-                                    &
                     (SMELT+BETA*EPOT*RAS)*DELT                        &
                                          ) )
         soilt=soiltfrac
 !--- If there is no snow melting then just evaporation
 !--- or condensation changes SNWE
       ELSE
-       if(snhei.ne.0..and. beta == 1.) then
+       if(snhei > zero.and. beta == one) then
                EPOT=-QKMS*(QVATM-QSG)
-               SNWE = AMAX1(0.,(SNWEPR-                               &
+               SNWE = AMAX1(zero,(SNWEPR-                             &
                     BETA*EPOT*RAS*DELT))
        else
-         snwe = 0.
+         snwe = zero
        endif
 
       ENDIF
@@ -4466,7 +4466,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 !      if(nmelt.eq.1) goto 212  ! second iteration
  220  continue
 
-       if(smelt > 0..and.  rsm > 0.) then
+       if(smelt > zero .and. rsm > zero) then
         if(snwe.le.rsm) then
     IF (debug_print ) THEN
      print *,'SEAICE SNWE<RSM snwe,rsm,smelt*delt,epot*ras*delt,beta', &
@@ -4478,41 +4478,41 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 !*** remains in the pack and changes its density.
 !*** Eq. 9 (with my correction) in Koren et al. (1999)
 
-         xsn=(rhosn*(snwe-rsm)+1.e3*rsm)/                            &
+         xsn=(rhosn*(snwe-rsm)+rhowater*rsm)/                            &
              snwe
-         rhosn=MIN(MAX(58.8,XSN),500.)
+         rhosn=MIN(MAX(58.8_kind_phys,XSN),500._kind_phys)
 
-        RHOCSN=2090.* RHOSN
+        RHOCSN=2090._kind_phys* RHOSN
         if(isncond_opt == 1) then
-         if(newsnow <= 0. .and. snhei > 3.0*SNHEI_crit .and. rhosn > 250.) then
+         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
           !-- some areas with large snow depth have unrealistically 
           !-- low snow density (in the Rockie's with snow depth > 1 m). 
           !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
           !-- In future a better compaction scheme is needed for these areas.
-            thdifsn = 2.5e-6
+            thdifsn = 2.5e-6_kind_phys
           else
           !-- old version thdifsn = 0.265/RHOCSN
-            THDIFSN = 0.265/RHOCSN
+            THDIFSN = 0.265_kind_phys/RHOCSN
           endif
         else
       !-- 07Jun19 - thermal conductivity (K_eff) from Sturm et al.(1997)
       !-- keff = 10. ** (2.650 * RHOSN*1.e-3 - 1.652)
-         fact = 1.
-         if(rhosn < 156. .or. (newsn > 0. .and. rhonewsn < 156.)) then
-           keff = 0.023 + 0.234 * rhosn * 1.e-3
+         fact = one
+         if(rhosn < 156._kind_phys .or. (newsn > zero .and. rhonewsn < 156._kind_phys)) then
+           keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
            !-- fact is added by tgs based on 4 Jan 2017 testing 
-           fact = 5.
+           fact = 5._kind_phys
          else
-           keff = 0.138 - 1.01 * rhosn*1.e-3 + 3.233 * rhosn**2 * 1.e-6
-           fact = 2.
+           keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
+           fact = 2._kind_phys
          endif
         
-         if(newsnow <= 0. .and. snhei > 3.0*SNHEI_crit .and. rhosn > 250.) then
+         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
          !-- some areas with large snow depth have unrealistically 
          !-- low snow density (in the Rockie's with snow depth > 1 m). 
          !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
          !-- In future a better compaction scheme is needed for these areas.
-           thdifsn = 2.5e-6
+           thdifsn = 2.5e-6_kind_phys
          else
            thdifsn = keff/rhocsn * fact
          endif
@@ -4522,51 +4522,50 @@ print *, 'TSO before calling SNOWTEMP: ', tso
       endif
 
         snweprint=snwe
-!                                              &
 !--- if VEGFRAC.ne.0. then some snow stays on the canopy
 !--- and should be added to SNWE for water conservation
-! 4 Nov 07                    +VEGFRAC*cst
-        snheiprint=snweprint*1.E3 / RHOSN
+!                +VEGFRAC*cst
+        snheiprint=snweprint*rhowater / RHOSN
 
     IF (debug_print ) THEN
 print *, 'snweprint : ',snweprint
 print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
     ENDIF
-      IF(SNHEI.GT.0.) THEN
+      IF(SNHEI.GT.zero) THEN
         if(ilnb.gt.1) then
-          tsnav=0.5/snhei*((soilt+soilt1)*deltsn                     &
+          tsnav=0.5_kind_phys/snhei*((soilt+soilt1)*deltsn           &
                     +(soilt1+tso(1))*(SNHEI-DELTSN))                 &
                        -tfrz
         else
-          tsnav=0.5*(soilt+tso(1)) - tfrz
+          tsnav=0.5_kind_phys*(soilt+tso(1)) - tfrz
         endif
       ENDIF
 !--- RECALCULATION OF DEW USING NEW VALUE OF QSG
-         DEW=0.
-         PP=PATM*1.E3
+         DEW=zero
+         PP=PATM*1.E3_kind_phys
          QSG= QSN(SOILT,TBQ)/PP
          EPOT = -FQ*(QVATM-QSG)
-       IF(EPOT.LT.0.) THEN
+       IF(EPOT.LT.zero) THEN
 ! Sublimation
           DEW=-EPOT
         ENDIF
 
-        SNOM=SNOM+SMELT*DELT*1.e3
+        SNOM=SNOM+SMELT*DELT*rhowater
 
 !--- THE DIAGNOSTICS OF SURFACE FLUXES
 
         T3      = STBOLT*TNold*TNold*TNold
-        UPFLUX  = T3 *0.5*(SOILT+TNold)
+        UPFLUX  = T3 *0.5_kind_phys*(SOILT+TNold)
         XINET   = EMISS*(GLW-UPFLUX)
         HFT=-TKMS*CP*RHO*(TABS-SOILT)
         HFX=-TKMS*CP*RHO*(TABS-SOILT)                        &
-               *(P1000mb*0.00001/Patm)**ROVCP
+               *(P1000mb*0.00001_kind_phys/Patm)**ROVCP
         Q1 = - FQ*RAS* (QVATM - QSG)
-        IF (Q1.LT.0.) THEN
+        IF (Q1.LT.zero) THEN
 ! ---  condensation
       if(myj) then
 !-- moisture flux for coupling with MYJ PBL
-          EETA=-QKMS*RAS*(QVATM/(1.+QVATM) - QSG/(1.+QSG))*1.E3
+          EETA=-QKMS*RAS*(QVATM/(1.+QVATM) - QSG/(1.+QSG))*rhowater
       else ! myj
 !-- actual moisture flux from RUC LSM
           DEW=QKMS*(QVATM-QSG)
@@ -4579,22 +4578,22 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 ! ---  evaporation
       if(myj) then
 !-- moisture flux for coupling with MYJ PBL
-          EETA=-QKMS*RAS*BETA*(QVATM/(1.+QVATM) - QVG/(1.+QVG))*1.E3
+          EETA=-QKMS*RAS*BETA*(QVATM/(1.+QVATM) - QVG/(1.+QVG))*rhowater
       else ! myj
 ! to convert from m s-1 to kg m-2 s-1: *rho water=1.e3************
 !-- actual moisture flux from RUC LSM
-          EETA = Q1*BETA*1.E3
+          EETA = Q1*BETA*rhowater
       endif ! myj
           QFX= XLVm * EETA
-          EETA = Q1*BETA*1.E3
+          EETA = Q1*BETA*rhowater
           sublim = EETA
         ENDIF
 
-        icemelt=0.
+        icemelt=zero
       IF(SNHEI.GE.SNTH)then
          S=thdifsn*RHOCSN*(soilt-TSOB)/SNPRIM
          SNFLX=S
-       ELSEIF(SNHEI.lt.SNTH.and.SNHEI.GT.0.) then
+       ELSEIF(SNHEI.lt.SNTH.and.SNHEI.GT.zero) then
          S=(fsn*thdifsn*rhocsn+fso*thdifice(1)*rhcs)*                &
               (soilt-TSOB)/snprim
          SNFLX=S
@@ -4608,7 +4607,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
     ENDIF
        ENDIF
 
-        SNHEI=SNWE *1.E3 / RHOSN
+        SNHEI=SNWE *rhowater / RHOSN
 
     IF (debug_print ) THEN
        print *,'SNHEI,SNOH',i,j,SNHEI,SNOH
@@ -4639,11 +4638,11 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                       ,FLTOT,RNET,HFT,XLVm*EETA,s,SNOH,icemelt,snodif,X,SOILT
     ENDIF
 !-- Restore sea-ice parameters if snow is less than threshold
-         IF(SNHEI.EQ.0.)  then
+         IF(SNHEI.EQ.zero)  then
           tsnav=soilt-tfrz
-          emiss=0.98
-          znt=0.011
-          alb=0.55
+          emiss=0.98_kind_phys
+          znt=0.011_kind_phys
+          alb=0.55_kind_phys
          ENDIF
 
 !------------------------------------------------------------------------
