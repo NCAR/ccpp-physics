@@ -4,17 +4,23 @@
 
  module rrfs_smoke_wrapper
 
-   use machine ,        only : kind_phys
-   use rrfs_smoke_config
-   use dust_data_mod
-   use seas_mod,        only : gocart_seasalt_driver
-   use dust_fengsha_mod,only : gocart_dust_fengsha_driver
-   use plume_data_mod
-   use module_plumerise1 !plume_rise_mod
-   use module_add_emiss_burn
-   use coarsepm_settling_mod
-   use dep_dry_mod
-   use module_wetdep_ls
+   use machine ,              only : kind_phys
+   use rrfs_smoke_config,     only : kemit, dust_opt, seas_opt, do_plumerise,           &
+                                     addsmoke_flag, plumerisefire_frq, wetdep_ls_opt,   &
+                                     drydep_opt, coarsepm_settling, aero_ind_fdb,       &
+                                     dbg_opt, smoke_forecast, wetdep_ls_alpha,          &
+                                     num_moist, num_chem, num_emis_seas, num_emis_dust, &
+                                     DUST_OPT_FENGSHA, p_qv, p_atm_shum, p_atm_cldq,    &
+                                     p_smoke, p_dust_1, p_coarse_pm, epsilc
+   use dust_data_mod,         only : dust_alpha, dust_gamma
+   use plume_data_mod,        only : p_frp_std, p_frp_hr, num_frp_plume
+   use seas_mod,              only : gocart_seasalt_driver
+   use dust_fengsha_mod,      only : gocart_dust_fengsha_driver
+   use dep_dry_mod,           only : dry_dep_driver
+   use module_wetdep_ls,      only : wetdep_ls
+   use module_plumerise1,     only : ebu_driver
+   use module_add_emiss_burn, only : add_emis_burn
+   use coarsepm_settling_mod, only : coarsepm_settling_driver
 
    implicit none
 

@@ -5,7 +5,6 @@
  module rrfs_smoke_postpbl
 
    use machine ,        only : kind_phys
-   use rrfs_smoke_config
 
    implicit none
 

@@ -448,20 +448,7 @@ INTEGER, parameter :: use_last = 1    ! RAR 10/31/2022: I set to one, checking w
 !real(kind=kind_phys), parameter :: beta = 5.0   !ref.: Wooster et al., 2005
 REAL(kind=kind_phys), parameter :: beta = 0.88  !ref.: Paugam et al., 2015
 
-!data heat_flux/  &  RAR: not used
-!---------------------------------------------------------------------
-!  heat flux      !IGBP Land Cover	    !
-! min  ! max      !Legend and		    ! reference
-!    kW/m^2       !description  	    !
-!--------------------------------------------------------------------
-!30.0, 80.0,   &! Tropical Forest         ! igbp 2 & 4
-!30.0, 80.0,   &! Boreal(kind=kind_phys) forest           ! igbp 1 & 3
-!4.4,  23.0,   &! cerrado/woody savanna   | igbp  5 thru 9
-!3.3,  3.3     /! Grassland/cropland      ! igbp 10 thru 17
-!--------------------------------------------------------------------
-!-- fire at surface
 !
-!coms%area = 20.e+4   ! area of burn, m^2
 coms%area = burnt_area! area of burn, m^2
 
 !IF ( PLUMERISE_flag == 1) THEN
@@ -567,9 +554,6 @@ COMS%FMOIST   = MOIST / 100.       !- fuel moisture fraction
        COMS%HEATING (3) = 2. * HINC  
        COMS%HEATING (4) = 3. * HINC 
     ELSE 
-    ! RAR: I've commented out so we don't use the look-up table for heat flux
-    !   HINC = (COMS%HEATING (1) - heat_flux(imm-1,iveg_ag) * 1000. *0.55)/ 4.
-    !   COMS%HEATING (1) = heat_flux(imm-1,iveg_ag) * 1000. *0.55 + 0.1
        COMS%HEATING (2) = COMS%HEATING (1)+ HINC  
        COMS%HEATING (3) = COMS%HEATING (2)+ HINC  
        COMS%HEATING (4) = COMS%HEATING (3)+ HINC 
