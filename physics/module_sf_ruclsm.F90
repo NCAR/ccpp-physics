@@ -10,6 +10,8 @@ MODULE module_sf_ruclsm
 
    use machine ,   only : kind_phys, kind_dbl_prec
    use namelist_soilveg_ruc
+   use physcons,   only : rhowater, con_t0c, con_hfus, con_hvap, &
+                          con_pi, con_rv, con_g, con_csol, con_tice
 
    implicit none
 
@@ -20,14 +22,19 @@ MODULE module_sf_ruclsm
 
 !> CONSTANT PARAMETERS
 !! @{
-      real (kind_phys), parameter :: P1000mb = 100000._kind_dbl_prec
-      real (kind_phys), parameter :: xls     = 2.85E6_kind_dbl_prec
-      real (kind_phys), parameter :: rhowater= 1000._kind_dbl_prec
-      real (kind_phys), parameter :: piconst = 3.1415926535897931_kind_dbl_prec
-      real (kind_phys), parameter :: r_v     = 461.50_kind_dbl_prec
-      real (kind_phys), parameter :: zero    = 0._kind_dbl_prec
-      real (kind_phys), parameter :: one     = 1._kind_dbl_prec
-      real (kind_phys), parameter :: tfrz    = 273.15_kind_dbl_prec
+      real (kind_phys), parameter :: tfrz     = con_t0c
+      real (kind_phys), parameter :: xls      = con_hvap + con_hfus 
+      real (kind_phys), parameter :: piconst  = con_pi
+      real (kind_phys), parameter :: r_v      = con_rv
+      real (kind_phys), parameter :: grav     = con_g
+      real (kind_phys), parameter :: sheatice = con_csol
+
+      real (kind_phys), parameter :: rhoice   = 917._kind_phys ! ice density
+      real (kind_phys), parameter :: sheatsn  = 2090._kind_phys ! snow heat capacity
+      real (kind_phys), parameter :: P1000mb  = 100000._kind_phys
+
+      real (kind_phys), parameter :: zero     = 0._kind_dbl_prec
+      real (kind_phys), parameter :: one      = 1._kind_dbl_prec
 
       !-- options for snow conductivity: 1 - constant, 2 - Sturm et al.,1997
       integer, parameter :: isncond_opt = 1
@@ -877,7 +884,7 @@ CONTAINS
                smfr3d(i,k,j)   = one
                sh2o(i,k,j)     = zero
                keepfr3dflag(i,k,j) = zero
-               tso(i,k,j) = min(271.4_kind_phys,tso(i,k,j))
+               tso(i,k,j) = min(con_tice,tso(i,k,j))
             ENDDO
           ENDIF
 
@@ -2468,7 +2475,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                TABS, T3, UPFLUX, XINET
    real (kind_phys)    ::  CP,rovcp,G0,LV,STBOLT,xlmelt,dzstop , &
                can,epot,fac,fltot,ft,fq,hft                    , &
-               q1,ras,rhoice,sph                               , &
+               q1,ras,sph                                      , &
                trans,zn,ci,cvw,tln,tavln,pi                    , &
                DD1,CMC2MS,DRYCAN,WETCAN                        , &
                INFMAX,RIW, X
@@ -2485,9 +2492,8 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !-----------------------------------------------------------------
 
 !-- define constants
-        RHOICE=900._kind_phys
-        CI=RHOICE*2100._kind_phys
-        XLMELT=3.35E+5_kind_phys
+        CI=RHOICE*sheatice
+        XLMELT=con_hfus
         cvw=cw
 
         prcpl=prcpms
@@ -2522,8 +2528,8 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
           NZS1=NZS-1
           NZS2=NZS-2
         dzstop=one/(zsmain(2)-zsmain(1))
-        RAS=RHO*1.E-3_kind_phys
-        RIW=rhoice*1.e-3_kind_phys
+        RAS=RHO*1.E-3_kind_phys ! rho/rhowater
+        RIW=rhoice*1.e-3_kind_phys ! rhoice/rhowater
 
 !--- Computation of volumetric content of ice in soil 
 
@@ -2532,7 +2538,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
          tln=log(tso(k)/tfrz)
          if(tln.lt.zero) then
            soiliqw(k)=(dqm+qmin)*(XLMELT*                        &
-         (tso(k)-tfrz)/tso(k)/9.81_kind_phys/psis)               &
+         (tso(k)-tfrz)/tso(k)/grav/psis)                         &
           **(-one/bclh)-qmin
            soiliqw(k)=max(zero,soiliqw(k))
            soiliqw(k)=min(soiliqw(k),soilmois(k))
@@ -2559,7 +2565,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 
          if(tavln.lt.zero) then
            soiliqwm(k)=(dqm+qmin)*(XLMELT*                       &
-         (tav(k)-tfrz)/tav(k)/9.81_kind_phys/psis)               &
+         (tav(k)-tfrz)/tav(k)/grav/psis)                         &
           **(-one/bclh)-qmin
            fwsat(k)=dqm-soiliqwm(k)
            lwsat(k)=soiliqwm(k)+qmin
@@ -2737,7 +2743,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
            tln=log(tso(k)/tfrz)
          if(tln.lt.zero) then
            soiliqw(k)=(dqm+qmin)*(XLMELT*                     &
-          (tso(k)-tfrz)/tso(k)/9.81_kind_phys/psis)           & 
+          (tso(k)-tfrz)/tso(k)/grav/psis)                     & 
            **(-one/bclh)-qmin
            soiliqw(k)=max(zero,soiliqw(k))
            soiliqw(k)=min(soiliqw(k),soilmois(k))
@@ -3004,7 +3010,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !-----------------------------------------------------------------
 
 !-- define constants
-        XLMELT=3.35E+5_kind_dbl_prec
+        XLMELT=con_hfus
         cvw=cw
 
         prcpl=prcpms
@@ -3077,7 +3083,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !--- it is saturation over sea ice
         QVG=QS1
         QSG=QS1
-        TSO(1)=min(271.4_kind_phys,TS1)
+        TSO(1)=min(con_tice,TS1)
         QCG=zero
 !--- sea ice melting is not included in this simple approach
 !--- SOILT - skin temperature
@@ -3085,7 +3091,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !---- Final solution for soil temperature - TSO
           DO K=2,NZS
             KK=NZS-K+1
-            TSO(K)=min(271.4_kind_phys,rhtso(KK)+cotso(KK)*TSO(K-1))
+            TSO(K)=min(con_tice,rhtso(KK)+cotso(KK)*TSO(K-1))
           END DO
 !--- CALCULATION OF DEW USING NEW VALUE OF QSG OR TRANSP IF NO DEW
         DEW=zero
@@ -3393,7 +3399,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
                BETA, SNWEPR,EPDT,PP
    real (kind_phys)    ::  CP,rovcp,G0,LV,xlvm,STBOLT,xlmelt,dzstop, &
                can,epot,fac,fltot,ft,fq,hft                    , &
-               q1,ras,rhoice,sph                               , &
+               q1,ras,sph                                      , &
                trans,zn,ci,cvw,tln,tavln,pi                    , &
                DD1,CMC2MS,DRYCAN,WETCAN                        , &
                INFMAX,RIW,DELTSN,H,UMVEG
@@ -3409,7 +3415,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !-----------------------------------------------------------------
 
         cvw=cw
-        XLMELT=3.35E+5_kind_dbl_prec
+        XLMELT=con_hfus
 !-- heat of water vapor sublimation
         XLVm=XLV+XLMELT
 
@@ -3441,10 +3447,9 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
     ENDIF
         ENDIF 
 
-        RHOICE=900._kind_dbl_prec
-        CI=RHOICE*2100._kind_dbl_prec
-        RAS=RHO*1.E-3_kind_dbl_prec
-        RIW=rhoice*1.e-3_kind_dbl_prec
+        CI=RHOICE*sheatice
+        RAS=RHO*1.E-3_kind_dbl_prec ! rho/rhowater
+        RIW=rhoice*1.e-3_kind_dbl_prec ! rhoice/rhowater
         RSM=zero
 
         DO K=1,NZS
@@ -3488,7 +3493,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
          tln=log(tso(k)/tfrz)
          if(tln.lt.zero) then
            soiliqw(k)=(dqm+qmin)*(XLMELT*                          &
-           (tso(k)-tfrz)/tso(k)/9.81_kind_phys/psis)               &
+           (tso(k)-tfrz)/tso(k)/grav/psis)                         &
           **(-one/bclh)-qmin
            soiliqw(k)=max(zero,soiliqw(k))
            soiliqw(k)=min(soiliqw(k),soilmois(k))
@@ -3497,7 +3502,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !---- melting and freezing is balanced, soil ice cannot increase
        if(keepfr(k).eq.1.) then
            soilice(k)=min(soilice(k),smfrkeep(k))
-           soiliqw(k)=max(zero,soilmois(k)-soilice(k)*rhoice*1.e-3_kind_phys)
+           soiliqw(k)=max(zero,soilmois(k)-soilice(k)*riw)
        endif
 
          else
@@ -3515,7 +3520,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 
          if(tavln.lt.zero) then
            soiliqwm(k)=(dqm+qmin)*(XLMELT*                         &
-         (tav(k)-tfrz)/tav(k)/9.81_kind_phys/psis)                 &
+         (tav(k)-tfrz)/tav(k)/grav/psis)                           &
           **(-one/bclh)-qmin
            fwsat(k)=dqm-soiliqwm(k)
            lwsat(k)=soiliqwm(k)+qmin
@@ -3676,7 +3681,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          tln=log(tso(k)/tfrz)
          if(tln.lt.zero) then
            soiliqw(k)=(dqm+qmin)*(XLMELT*                    &
-           (tso(k)-tfrz)/tso(k)/9.81_kind_phys/psis)         &
+           (tso(k)-tfrz)/tso(k)/grav/psis)                   &
           **(-one/bclh)-qmin
            soiliqw(k)=max(zero,soiliqw(k))
            soiliqw(k)=min(soiliqw(k),soilmois(k))
@@ -3957,7 +3962,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
                TABS, T3, UPFLUX, XINET                         , &
                BETA, SNWEPR,EPDT,PP
    real (kind_phys)    ::  CP,rovcp,G0,LV,xlvm,STBOLT,xlmelt   , &
-               epot,fltot,fq,hft,q1,ras,rhoice,ci,cvw          , &
+               epot,fltot,fq,hft,q1,ras,ci,cvw                 , &
                RIW,DELTSN,H
 
    real (kind_phys)    ::  rhocsn,thdifsn,                       &
@@ -3977,7 +3982,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
    real (kind_phys)                   :: keff, fact
 
 !-----------------------------------------------------------------
-        XLMELT=3.35E+5_kind_dbl_prec
+        XLMELT=con_hfus
 !-- heat of sublimation of water vapor
         XLVm=XLV+XLMELT
 
@@ -4008,16 +4013,15 @@ print *, 'TSO before calling SNOWTEMP: ', tso
     ENDIF
         ENDIF
 
-        RHOICE=900._kind_dbl_prec
-        CI=RHOICE*2100._kind_dbl_prec
-        RAS=RHO*1.E-3_kind_dbl_prec
-        RIW=rhoice*1.e-3_kind_dbl_prec
+        CI=RHOICE*sheatice
+        RAS=RHO*1.E-3_kind_dbl_prec ! rho/rhowater
+        RIW=rhoice*1.e-3_kind_dbl_prec ! rhoice/rhowater
         RSM=zero
 
-        XLMELT=3.35E+5_kind_dbl_prec
-        RHOCSN=2090._kind_dbl_prec * RHOSN
+        XLMELT=con_hfus
+        RHOCSN=sheatsn * RHOSN
 !18apr08 - add rhonewcsn
-        RHOnewCSN=2090._kind_dbl_prec * RHOnewSN
+        RHOnewCSN=sheatsn * RHOnewSN
 
       if(isncond_opt == 1) then
          if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
@@ -4299,24 +4303,24 @@ print *, 'TSO before calling SNOWTEMP: ', tso
         if(snhei.gt.DELTSN+SNTH) then
 !-- 2-layer snow model
           SOILT1=min(tfrz,rhtsn+cotsn*SOILT)
-          TSO(1)=min(271.4_kind_phys,(rhtso(NZS)+cotso(NZS)*SOILT1))
+          TSO(1)=min(con_tice,(rhtso(NZS)+cotso(NZS)*SOILT1))
           tsob=soilt1
         else
 !-- 1 layer in snow
-          TSO(1)=min(271.4_kind_phys,(rhtso(NZS)+cotso(NZS)*SOILT))
+          TSO(1)=min(con_tice,(rhtso(NZS)+cotso(NZS)*SOILT))
           SOILT1=TSO(1)
           tsob=tso(1)
         endif
        ELSEIF  (SNHEI > zero .and. SNHEI < SNTH) THEN
 ! blended
-         TSO(2)=min(271.4_kind_phys,(rhtso(NZS1)+cotso(NZS1)*SOILT))
-         tso(1)=min(271.4_kind_phys,(tso(2)+(soilt-tso(2))*fso))
+         TSO(2)=min(con_tice,(rhtso(NZS1)+cotso(NZS1)*SOILT))
+         tso(1)=min(con_tice,(tso(2)+(soilt-tso(2))*fso))
          SOILT1=TSO(1)
          tsob=TSO(2)
        ELSE
 ! snow is melted
-         TSO(1)=min(271.4_kind_phys,SOILT)
-         SOILT1=min(271.4_kind_phys,SOILT)
+         TSO(1)=min(con_tice,SOILT)
+         SOILT1=min(con_tice,SOILT)
          tsob=tso(1)
        ENDIF
 !---- Final solution for TSO in sea ice
@@ -4324,12 +4328,12 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 ! blended or snow is melted
           DO K=3,NZS
             KK=NZS-K+1
-            TSO(K)=min(271.4_kind_phys,rhtso(KK)+cotso(KK)*TSO(K-1))
+            TSO(K)=min(con_tice,rhtso(KK)+cotso(KK)*TSO(K-1))
           END DO
        ELSE
           DO K=2,NZS
             KK=NZS-K+1
-            TSO(K)=min(271.4_kind_phys,rhtso(KK)+cotso(KK)*TSO(K-1))
+            TSO(K)=min(con_tice,rhtso(KK)+cotso(KK)*TSO(K-1))
           END DO
        ENDIF
 !--- For thin snow layer combined with the top soil layer
@@ -4348,7 +4352,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
    IF(SOILT>tfrz .AND. BETA==one .AND. SNHEI>zero) THEN
 !
         nmelt = 1
-        soiltfrac=snowfrac*tfrz+(1.-snowfrac)*min(271.4_kind_phys,SOILT)
+        soiltfrac=snowfrac*tfrz+(1.-snowfrac)*min(con_tice,SOILT)
 
         QSG= QSN(soiltfrac,TBQ)/PP
         T3      = STBOLT*TNold*TNold*TNold
@@ -4482,7 +4486,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
              snwe
          rhosn=MIN(MAX(58.8_kind_phys,XSN),500._kind_phys)
 
-        RHOCSN=2090._kind_phys* RHOSN
+        RHOCSN=sheatsn* RHOSN
         if(isncond_opt == 1) then
          if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
           !-- some areas with large snow depth have unrealistically 
@@ -4726,12 +4730,12 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
    real (kind_phys),     INTENT(IN   )   ::  DELT,CONFLX,PRCPMS, RAINF,xlat,xlon
    real (kind_phys),     INTENT(INOUT)   ::  DRYCAN,WETCAN,TRANSUM
 !--- 3-D Atmospheric variables
-   real (kind_phys),                                        &
+   real (kind_phys),                                             &
             INTENT(IN   )    ::                            PATM, &
                                                           QVATM, &
                                                           QCATM
 !--- 2-D variables
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
             INTENT(IN   )    ::                                  &
                                                           EMISS, &
                                                             RHO, &
@@ -4744,17 +4748,17 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                                                            TKMS
 
 !--- soil properties
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
             INTENT(IN   )    ::                                  &
                                                            BCLH, &
                                                             DQM, &
                                                            QMIN
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
             INTENT(IN   )    ::                                  &
                                                    soilres,alfa
 
 
-   real (kind_phys),     INTENT(IN   )   ::             CP, &
+   real (kind_phys),     INTENT(IN   )   ::                  CP, &
                                                             CVW, &
                                                             XLV, &
                                                          STBOLT, &
@@ -4762,23 +4766,23 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                                                            G0_P
 
 
-   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN)  :: ZSMAIN, &
+   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN) :: ZSMAIN, &
                                                          ZSHALF, &
                                                           THDIF, &
                                                             CAP
 
-   real (kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  ::           DTDZS
+   real (kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  :: DTDZS
 
-   real (kind_phys),     DIMENSION(1:5001), INTENT(IN)  ::              TBQ
+   real (kind_phys),     DIMENSION(1:5001), INTENT(IN)  ::  TBQ
 
 
 !--- input/output variables
 !-------- 3-d soil moisture and temperature
-   real (kind_phys),     DIMENSION( 1:nzs )               , &
+   real (kind_phys),     DIMENSION( 1:nzs )                    , &
              INTENT(INOUT)   ::                             TSO
 
 !-------- 2-d variables
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
              INTENT(INOUT)   ::                                  &
                                                          MAVAIL, &
                                                             QVG, &
@@ -4789,12 +4793,12 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 
 !--- Local variables
 
-   real (kind_phys)    ::  x,x1,x2,x4,dzstop,can,ft,sph   , &
+   real (kind_phys)    ::  x,x1,x2,x4,dzstop,can,ft,sph        , &
                tn,trans,umveg,denom,fex
 
    real (kind_phys)    ::  FKT,D1,D2,D9,D10,DID,R211,R21,R22,R6,R7,D11, &
-               PI,H,FKQ,R210,AA,BB,PP,Q1,QS1,TS1,TQ2,TX2       , &
-               TDENOM
+                      PI,H,FKQ,R210,AA,BB,PP,Q1,QS1,TS1,TQ2,TX2       , &
+                      TDENOM
 
    real (kind_phys)    ::  C,CC,AA1,RHCS,H1, QGOLD
 
@@ -4814,13 +4818,13 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
         qgold=qvg
 
         do k=1,nzs
-           cotso(k)=0.
-           rhtso(k)=0.
+           cotso(k)=zero
+           rhtso(k)=zero
         enddo
 !******************************************************************************
 !       COEFFICIENTS FOR THOMAS ALGORITHM FOR TSO
 !******************************************************************************
-        cotso(1)=0.
+        cotso(1)=zero
         rhtso(1)=TSO(NZS)
         DO 33 K=1,NZS2
           KN=NZS-K
@@ -4851,13 +4855,13 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
         TN=SOILT
         D9=THDIF(1)*RHCS*dzstop
         D10=TKMS*CP*RHO
-        R211=.5*CONFLX/DELT
+        R211=.5_kind_phys*CONFLX/DELT
         R21=R211*CP*RHO
-        R22=.5/(THDIF(1)*DELT*dzstop**2)
-        R6=EMISS *STBOLT*.5*TN**4
+        R22=.5_kind_phys/(THDIF(1)*DELT*dzstop**2)
+        R6=EMISS *STBOLT*.5_kind_phys*TN**4
         R7=R6/TN
         D11=RNET+R6
-        TDENOM=D9*(1.-D1+R22)+D10+R21+R7                              &
+        TDENOM=D9*(one-D1+R22)+D10+R21+R7                             &
               +RAINF*CVW*PRCPMS
         FKQ=QKMS*RHO
         R210=R211*RHO
@@ -4867,14 +4871,14 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
         BB=(D10*TABS+R21*TN+XLV*(QVATM*                               &
         (FKQ*UMVEG+C)                                                 & 
         +R210*QVG)+D11+D9*(D2+R22*TN)                                 &
-        +RAINF*CVW*PRCPMS*max(tfrz,TABS)                            &
+        +RAINF*CVW*PRCPMS*max(tfrz,TABS)                              &
          )/TDENOM
         AA1=AA+CC
-        PP=PATM*1.E3
+        PP=PATM*1.E3_kind_phys
         AA1=AA1/PP
         CALL VILKA(TN,AA1,BB,PP,QS1,TS1,TBQ,KTAU,i,j,iland,isoil,xlat,xlon)
         TQ2=QVATM
-        TX2=TQ2*(1.-H)
+        TX2=TQ2*(one-H)
         Q1=TX2+H*QS1
     IF (debug_print ) THEN
         print *,'VILKA1 - TS1,QS1,TQ2,H,TX2,Q1',TS1,QS1,TQ2,H,TX2,Q1
@@ -4885,7 +4889,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
    90   QVG=QS1
         QSG=QS1
         TSO(1)=TS1
-        QCG=max(0.,Q1-QS1)
+        QCG=max(zero,Q1-QS1)
     IF (debug_print ) THEN
         print *,'90 QVG,QSG,QCG,TSO(1)',QVG,QSG,QCG,TSO(1)
     ENDIF
@@ -4909,7 +4913,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
     ! QVG = QVATM
 !   endif
         TSO(1)=TS1
-        QCG=0.
+        QCG=zero
   200   CONTINUE
     IF (debug_print ) THEN
         print *,'200 QVG,QSG,QCG,TSO(1)',QVG,QSG,QCG,TSO(1)
@@ -4929,14 +4933,14 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
             TSO(K)=rhtso(KK)+cotso(KK)*TSO(K-1)
           END DO
 
-         X= (cp*rho*r211+rhcs*zsmain(2)*0.5/delt)*(SOILT-TN) + &
+         X= (cp*rho*r211+rhcs*zsmain(2)*0.5_kind_phys/delt)*(SOILT-TN) + &
             XLV*rho*r211*(QVG-QGOLD) 
 
     IF (debug_print ) THEN
         print*,'SOILTEMP storage, i,j,x,soilt,tn,qvg,qvgold', &
                                   i,j,x,soilt,tn,qvg,qgold
         print *,'TEMP term (cp*rho*r211+rhcs*zsmain(2)*0.5/delt)*(SOILT-TN)',&
-                 (cp*rho*r211+rhcs*zsmain(2)*0.5/delt)*(SOILT-TN)
+                 (cp*rho*r211+rhcs*zsmain(2)*0.5_kind_phys/delt)*(SOILT-TN)
         print *,'QV term XLV*rho*r211*(QVG-QGOLD)',XLV*rho*r211*(QVG-QGOLD)
     ENDIF
          X=X &
@@ -5029,7 +5033,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                                  nddzs                             !nddzs=2*(nzs-2)
 
    INTEGER,  INTENT(IN   )   ::  i,j,iland,isoil
-   real (kind_phys),     INTENT(IN   )   ::  DELT,CONFLX,PRCPMS , &
+   real (kind_phys),     INTENT(IN   )  ::  DELT,CONFLX,PRCPMS , &
                                  RAINF,NEWSNOW,DELTSN,SNTH     , &
                                  TABS,TRANSUM,SNWEPR           , &
                                  testptlat,testptlon           , & 
@@ -5037,12 +5041,12 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
    real                      ::  rhonewcsn
 
 !--- 3-D Atmospheric variables
-   real (kind_phys),                                        &
+   real (kind_phys),                                             &
             INTENT(IN   )    ::                            PATM, &
                                                           QVATM, &
                                                           QCATM
 !--- 2-D variables
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
             INTENT(IN   )    ::                             GLW, &
                                                             GSW, &
                                                             RHO, &
@@ -5052,14 +5056,14 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                                                            TKMS
 
 !--- soil properties
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
             INTENT(IN   )    ::                                  &
                                                            BCLH, &
                                                             DQM, &
                                                            PSIS, &
                                                            QMIN
 
-   real (kind_phys),     INTENT(IN   )   ::             CP, &
+   real (kind_phys),     INTENT(IN   )   ::                  CP, &
                                                           ROVCP, &
                                                             CVW, &
                                                          STBOLT, &
@@ -5067,7 +5071,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                                                             G0_P
 
 
-   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN)  :: ZSMAIN, &
+   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN) :: ZSMAIN, &
                                                          ZSHALF, &
                                                           THDIF, &
                                                             CAP, &
@@ -5080,12 +5084,12 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 
 !--- input/output variables
 !-------- 3-d soil moisture and temperature
-   real (kind_phys),     DIMENSION(  1:nzs )              , &
+   real (kind_phys),     DIMENSION(  1:nzs )                   , &
              INTENT(INOUT)   ::                             TSO
 
 
 !-------- 2-d variables
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
              INTENT(INOUT)   ::                             DEW, &
                                                             CST, &
                                                           RHOSN, &
@@ -5107,7 +5111,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 
    real (kind_phys),     INTENT(INOUT)                  ::   DRYCAN, WETCAN           
 
-   real (kind_phys),     INTENT(OUT)                    :: RSM, &
+   real (kind_phys),     INTENT(OUT)                    ::  RSM, &
                                                       SNWEPRINT, &
                                                      SNHEIPRINT
    INTEGER,  INTENT(OUT)                    ::             ilnb
@@ -5116,16 +5120,16 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 
    INTEGER ::  nzs1,nzs2,k,k1,kn,kk
 
-   real (kind_phys)    ::  x,x1,x2,x4,dzstop,can,ft,sph,    &
+   real (kind_phys)    ::  x,x1,x2,x4,dzstop,can,ft,sph,         &
                tn,trans,umveg,denom
 
    real (kind_phys)    ::  cotsn,rhtsn,xsn1,ddzsn1,x1sn1,ftsnow,denomsn
 
-   real (kind_phys)    ::  t3,upflux,xinet,ras,             &
+   real (kind_phys)    ::  t3,upflux,xinet,ras,                  & 
                xlmelt,rhocsn,thdifsn,                            &
                beta,epot,xsn,ddzsn,x1sn,d1sn,d2sn,d9sn,r22sn
 
-   real (kind_phys)    ::  fso,fsn,                         &
+   real (kind_phys)    ::  fso,fsn,                              &
                FKT,D1,D2,D9,D10,DID,R211,R21,R22,R6,R7,D11,      &
                PI,H,FKQ,R210,AA,BB,PP,Q1,QS1,TS1,TQ2,TX2,        &
                TDENOM,C,CC,AA1,RHCS,H1,                          &
@@ -5134,7 +5138,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
                CMC2MS,TNOLD,QGOLD,SNOHGNEW                            
 
    real (kind_phys),     DIMENSION(1:NZS)  ::  transp,cotso,rhtso
-   real (kind_phys)                        ::        edir1, &
+   real (kind_phys)                        ::             edir1, &
                                                             ec1, &
                                                            ett1, &
                                                            eeta, &
@@ -5151,91 +5155,91 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
        !-- options for snow conductivity:
        !-- 1 - constant
        !-- opt 2 -  Sturm et al., 1997
-       keff = 0.265
+       keff = 0.265_kind_phys
 
        do k=1,nzs
-          transp   (k)=0.
-          cotso    (k)=0.
-          rhtso    (k)=0.
+          transp   (k)=zero
+          cotso    (k)=zero
+          rhtso    (k)=zero
        enddo
 
     IF (debug_print ) THEN
 print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt 
     ENDIF
-        XLMELT=3.35E+5
-        RHOCSN=2090.* RHOSN
-        RHOnewCSN=2090.* RHOnewSN
+        XLMELT=con_hfus
+        RHOCSN=sheatsn* RHOSN
+        RHOnewCSN=sheatsn* RHOnewSN
         if(isncond_opt == 1) then
-         if(newsnow <= 0. .and. snhei > 3.0*SNHEI_crit .and. rhosn > 250.) then
+         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
           !-- some areas with large snow depth have unrealistically 
           !-- low snow density (in the Rockie's with snow depth > 1 m). 
           !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
           !-- In future a better compaction scheme is needed for these areas.
-            thdifsn = 2.5e-6
+            thdifsn = 2.5e-6_kind_phys
           else
           !-- old version thdifsn = 0.265/RHOCSN
-            THDIFSN = 0.265/RHOCSN
+            THDIFSN = 0.265_kind_phys/RHOCSN
           endif
         else
         !-- 07Jun19 - thermal conductivity (K_eff) from Sturm et al.(1997)
         !-- keff = 10. ** (2.650 * RHOSN*1.e-3 - 1.652)
-           fact = 1.
-           if(rhosn < 156. .or. (newsnow > 0. .and. rhonewsn < 156.)) then
-             keff = 0.023 + 0.234 * rhosn * 1.e-3
+           fact = one
+           if(rhosn < 156._kind_phys .or. (newsnow > zero .and. rhonewsn < 156._kind_phys)) then
+             keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
              !-- fact is added by tgs based on 4 Jan 2017 testing 
-             fact = 5.
+             fact = 5._kind_phys
            else
-             keff = 0.138 - 1.01 * rhosn*1.e-3 + 3.233 * rhosn**2 * 1.e-6
-             fact = 2.
+             keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
+             fact = 2._kind_phys
              if(debug_print) then
                print *,'SnowTemp xlat,xlon,rhosn,keff', xlat,xlon,rhosn,keff,keff/rhocsn*fact
-               print *,'SNOWTEMP - 0.265/rhocsn',0.265/rhocsn
+               print *,'SNOWTEMP - 0.265/rhocsn',0.265_kind_phys/rhocsn
              endif
            endif
        if ( debug_print .and. abs(xlat-testptlat).lt.0.2  .and. abs(xlon-testptlon).lt.0.2) then
            print *,'SNOWTEMP - xlat,xlon,newsnow,rhonewsn,rhosn,fact,keff',xlat,xlon,newsnow, rhonewsn,rhosn,fact,keff
        endif
 
-         if(newsnow <= 0. .and. snhei > 3.0*SNHEI_crit .and. rhosn > 250.) then
+         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
            !-- some areas with large snow depth have unrealistically 
            !-- low snow density (in the Rockie's with snow depth > 1 m). 
            !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
            !-- In future a better compaction scheme is needed for these areas.
-             thdifsn = 2.5e-6
+             thdifsn = 2.5e-6_kind_phys
            else
              thdifsn = keff/rhocsn * fact
            endif
        if (debug_print .and. abs(xlat-testptlat).lt.0.2  .and. abs(xlon-testptlon).lt.0.2) then
            print *,'SNOWTEMP - thdifsn',xlat,xlon,thdifsn
-           print *,'SNOWTEMP - 0.265/rhocsn',0.265/rhocsn
+           print *,'SNOWTEMP - 0.265/rhocsn',0.265_kind_phys/rhocsn
        endif
 
         endif
 
-        RAS=RHO*1.E-3
+        RAS=RHO*1.E-3_kind_phys
 
         SOILTFRAC=SOILT
 
-        SMELT=0.
-        SOH=0.
-        SMELTG=0.
-        SNOHG=0.
-        SNODIF=0.
-        RSM = 0.
-        RSMFRAC = 0.
-        fsn=1.
-        fso=0.
+        SMELT=zero
+        SOH=zero
+        SMELTG=zero
+        SNOHG=zero
+        SNODIF=zero
+        RSM = zero
+        RSMFRAC = zero
+        fsn=one
+        fso=zero
 
           NZS1=NZS-1
           NZS2=NZS-2
 
         QGOLD=QVG
-        DZSTOP=1./(ZSMAIN(2)-ZSMAIN(1))
+        DZSTOP=one/(ZSMAIN(2)-ZSMAIN(1))
 
 !******************************************************************************
 !       COEFFICIENTS FOR THOMAS ALGORITHM FOR TSO
 !******************************************************************************
-        cotso(1)=0.
+        cotso(1)=zero
         rhtso(1)=TSO(NZS)
         DO 33 K=1,NZS2
           KN=NZS-K
@@ -5260,20 +5264,19 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
          snprim=max(snth,snhei)
          tsob=tso(1)
          soilt1=tso(1)
-         XSN = DELT/2./(zshalf(2)+0.5*SNPRIM)
+         XSN = DELT/2._kind_phys/(zshalf(2)+0.5_kind_phys*SNPRIM)
          DDZSN = XSN / SNPRIM
          X1SN = DDZSN * thdifsn
          X2 = DTDZS(1)*THDIF(1)
          FT = TSO(1)+X1SN*(SOILT-TSO(1))                              &
               -X2*(TSO(1)-TSO(2))
-         DENOM = 1. + X1SN + X2 -X2*cotso(NZS1)
+         DENOM = one + X1SN + X2 -X2*cotso(NZS1)
          cotso(NZS)=X1SN/DENOM
          rhtso(NZS)=(FT+X2*rhtso(NZS1))/DENOM
          cotsn=cotso(NZS)
          rhtsn=rhtso(NZS)
 !*** Average temperature of snow pack (C)
-         tsnav=min(0.,0.5*(soilt+tso(1))                              &
-                     -tfrz)
+         tsnav=min(zero,0.5_kind_phys*(soilt+tso(1))-tfrz)
 
         else
 !-- 2 layers in snow, SOILT1 is temperasture at DELTSN depth
@@ -5283,8 +5286,8 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
          ilnb=2
          snprim=deltsn
          tsob=soilt1
-         XSN = DELT/2./(0.5*deltsn)
-         XSN1= DELT/2./(zshalf(2)+0.5*(SNHEI-DELTSN))
+         XSN = DELT/2._kind_phys/(0.5_kind_phys*deltsn)
+         XSN1= DELT/2._kind_phys/(zshalf(2)+0.5_kind_phys*(SNHEI-DELTSN))
          DDZSN = XSN / DELTSN
          DDZSN1 = XSN1 / (SNHEI-DELTSN)
          X1SN = DDZSN * thdifsn
@@ -5297,33 +5300,33 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
          rhtso(nzs)=(ft+x2*rhtso(nzs1))/denom
          ftsnow = soilt1+x1sn*(soilt-soilt1)                          &
                -x1sn1*(soilt1-tso(1))
-         denomsn = 1. + X1SN + X1SN1 - X1SN1*cotso(NZS)
+         denomsn = one + X1SN + X1SN1 - X1SN1*cotso(NZS)
          cotsn=x1sn/denomsn
          rhtsn=(ftsnow+X1SN1*rhtso(NZS))/denomsn
 !*** Average temperature of snow pack (C)
-         tsnav=min(0.,0.5/snhei*((soilt+soilt1)*deltsn                &
+         tsnav=min(zero,0.5_kind_phys/snhei*((soilt+soilt1)*deltsn    &
                      +(soilt1+tso(1))*(SNHEI-DELTSN))                 &
                      -tfrz)
         endif
        ENDIF
-       IF(SNHEI.LT.SNTH.AND.SNHEI.GT.0.) then
+       IF(SNHEI.LT.SNTH.AND.SNHEI.GT.zero) then
 !--- snow is too thin to be treated separately, therefore it
 !--- is combined with the first soil layer.
          snprim=SNHEI+zsmain(2)
          fsn=SNHEI/snprim
-         fso=1.-fsn
+         fso=one-fsn
          soilt1=tso(1)
          tsob=tso(2)
-         XSN = DELT/2./((zshalf(3)-zsmain(2))+0.5*snprim)
+         XSN = DELT/2._kind_phys/((zshalf(3)-zsmain(2))+0.5_kind_phys*snprim)
          DDZSN = XSN /snprim
          X1SN = DDZSN * (fsn*thdifsn+fso*thdif(1))
          X2=DTDZS(2)*THDIF(2)
          FT=TSO(2)+X1SN*(SOILT-TSO(2))-                              &
                        X2*(TSO(2)-TSO(3))
-         denom = 1. + x1sn + x2 - x2*cotso(nzs-2)
+         denom = one + x1sn + x2 - x2*cotso(nzs-2)
          cotso(nzs1) = x1sn/denom
          rhtso(nzs1)=(FT+X2*rhtso(NZS-2))/denom
-         tsnav=min(0.,0.5*(soilt+tso(1))                             &
+         tsnav=min(zero,0.5_kind_phys*(soilt+tso(1))                 &
                      -tfrz)
          cotso(NZS)=cotso(nzs1)
          rhtso(NZS)=rhtso(nzs1)
@@ -5336,25 +5339,25 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
 !--- THE HEAT BALANCE EQUATION (Smirnova et al. 1996, EQ. 21,26)
 !18apr08 nmelt is the flag for melting, and SNOH is heat of snow phase changes
        nmelt=0
-       SNOH=0.
+       SNOH=zero
 
-        ETT1=0.
+        ETT1=zero
         EPOT=-QKMS*(QVATM-QGOLD)
         RHCS=CAP(1)
         H=MAVAIL !1.
         TRANS=TRANSUM*DRYCAN/ZSHALF(NROOT+1)
         CAN=WETCAN+TRANS
-        UMVEG=1.-VEGFRAC
+        UMVEG=one-VEGFRAC
         FKT=TKMS
         D1=cotso(NZS1)
         D2=rhtso(NZS1)
         TN=SOILT
         D9=THDIF(1)*RHCS*dzstop
         D10=TKMS*CP*RHO
-        R211=.5*CONFLX/DELT
+        R211=.5_kind_phys*CONFLX/DELT
         R21=R211*CP*RHO
-        R22=.5/(THDIF(1)*DELT*dzstop**2)
-        R6=EMISS *STBOLT*.5*TN**4
+        R22=.5_kind_phys/(THDIF(1)*DELT*dzstop**2)
+        R6=EMISS *STBOLT*.5_kind_phys*TN**4
         R7=R6/TN
         D11=RNET+R6
 
@@ -5375,25 +5378,25 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
     ENDIF
         endif
         D9SN= THDIFSN*RHOCSN / SNPRIM
-        R22SN = SNPRIM*SNPRIM*0.5/(THDIFSN*DELT)
+        R22SN = SNPRIM*SNPRIM*0.5_kind_phys/(THDIFSN*DELT)
     IF (debug_print ) THEN
       print *,'1 or 2 layers D9sn,R22sn',d9sn,r22sn
     ENDIF
       ENDIF
 
-       IF(SNHEI.LT.SNTH.AND.SNHEI.GT.0.) then
+       IF(SNHEI.LT.SNTH.AND.SNHEI.GT.zero) then
 !--- thin snow is combined with soil
          D1SN = D1
          D2SN = D2
          D9SN = (fsn*THDIFSN*RHOCSN+fso*THDIF(1)*RHCS)/              &
                  snprim
-         R22SN = snprim*snprim*0.5                                   &
+         R22SN = snprim*snprim*0.5_kind_phys                         &
                  /((fsn*THDIFSN+fso*THDIF(1))*delt)
     IF (debug_print ) THEN
        print *,' Combined  D9SN,R22SN,D1SN,D2SN: ',D9SN,R22SN,D1SN,D2SN
     ENDIF
       ENDIF
-      IF(SNHEI.eq.0.)then
+      IF(SNHEI.eq.zero)then
 !--- all snow is sublimated
         D9SN = D9
         R22SN = R22
@@ -5410,7 +5413,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
  212    continue
 
 !---- TDENOM for snow
-        TDENOM = D9SN*(1.-D1SN +R22SN)+D10+R21+R7                    &
+        TDENOM = D9SN*(one-D1SN +R22SN)+D10+R21+R7                   &
               +RAINF*CVW*PRCPMS                                      &
               +RHOnewCSN*NEWSNOW/DELT
 
@@ -5422,11 +5425,11 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
         BB=(D10*TABS+R21*TN+XLVM*(QVATM*                             &
         (BETA*FKQ*UMVEG+C)                                           &
         +R210*QGOLD)+D11+D9SN*(D2SN+R22SN*TN)                        &
-        +RAINF*CVW*PRCPMS*max(tfrz,TABS)                           &
-        + RHOnewCSN*NEWSNOW/DELT*min(tfrz,TABS)                    &
+        +RAINF*CVW*PRCPMS*max(tfrz,TABS)                             &
+        + RHOnewCSN*NEWSNOW/DELT*min(tfrz,TABS)                      &
          )/TDENOM
         AA1=AA+CC
-        PP=PATM*1.E3
+        PP=PATM*1.E3_kind_phys
         AA1=AA1/PP
         BB=BB-SNOH/TDENOM
 
@@ -5438,7 +5441,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
       ENDIF
         CALL VILKA(TN,AA1,BB,PP,QS1,TS1,TBQ,KTAU,i,j,iland,isoil,xlat,xlon)
         TQ2=QVATM
-        TX2=TQ2*(1.-H)
+        TX2=TQ2*(one-H)
         Q1=TX2+H*QS1
     IF (debug_print ) THEN
     !if (abs(xlat-33.35).lt.0.2 .and. abs(xlon-272.55).lt.0.2)then
@@ -5449,7 +5452,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
 !--- if saturation - goto 90
    90   QVG=QS1
         QSG=QS1
-        QCG=max(0.,Q1-QS1)
+        QCG=max(zero,Q1-QS1)
     IF (debug_print ) THEN
      print *,'90 QVG,QSG,QCG,TSO(1)',QVG,QSG,QCG,TSO(1)
     ENDIF
@@ -5465,33 +5468,15 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
         IF(Q1.GT.QS1) GOTO 90
         QSG=QS1
         QVG=Q1
-        QCG=0.
+        QCG=zero
     IF (debug_print ) THEN
      print *,'No Saturation QVG,QSG,QCG,TSO(1)',QVG,QSG,QCG,TSO(1)
     ENDIF
   200   CONTINUE
 
-if(1==2) then
-  if(qvatm > QSG .and. iter==0) then
-!condensation regime
-    IF (debug_print ) THEN
-     print *,'SNOW turn off canopy evaporation and transpiration'
-     print *,' QVATM,QVG,QSG,TS1',QVATM,QVG,QSG,TS1
-     print *,'before can, umveg ',can, umveg
-    ENDIF
-      iter=1
-  endif
-
-    IF (debug_print ) THEN
-     if(iter==1) then
-       print *,'SNOW - QVATM,QVG,QSG,QCG,TS1',QVATM,QVG,QSG,QCG,TS1
-     endif
-    ENDIF
-endif ! 1==2
-
 !--- SOILT - skin temperature
         SOILT=TS1
-     if(nmelt==1 .and. snowfrac==1 .and. snwe > 0. .and. SOILT > tfrz) then
+     if(nmelt==1 .and. snowfrac==one .and. snwe > zero .and. SOILT > tfrz) then
      !--7feb22 on the second iteration when SNOH is known and snwe > 0. after melting,
      !-- check if the snow skin temperature is =<tfrzK
      !-- when a grid cell is fully covered with snow (snowfrac=1) 
@@ -5520,7 +5505,7 @@ endif ! 1==2
           SOILT1=TSO(1)
           tsob=tso(1)
         endif
-       ELSEIF (SNHEI > 0. .and. SNHEI < SNTH) THEN
+       ELSEIF (SNHEI > zero .and. SNHEI < SNTH) THEN
 ! blended 
          TSO(2)=rhtso(NZS1)+cotso(NZS1)*SOILT
          tso(1)=(tso(2)+(soilt-tso(2))*fso)
@@ -5533,7 +5518,7 @@ endif ! 1==2
          SOILT1=SOILT
          tsob=TSO(1)
        ENDIF
-       if(nmelt==1.and.snowfrac==1) then
+       if(nmelt==1.and.snowfrac==one) then
        !-- second iteration with full snow cover
          SOILT1= min(tfrz,SOILT1)
          TSO(1)= min(tfrz,TSO(1))
@@ -5541,7 +5526,7 @@ endif ! 1==2
        endif
 
 !---- Final solution for TSO
-       IF (SNHEI > 0. .and. SNHEI < SNTH) THEN
+       IF (SNHEI > zero .and. SNHEI < SNTH) THEN
 ! blended or snow is melted
           DO K=3,NZS
             KK=NZS-K+1
@@ -5574,7 +5559,7 @@ endif ! 1==2
 
 !--- IF SOILT > tfrz F then melting of snow can happen
 ! if all snow can evaporate (beta<1), then there is nothing to melt
-   IF(SOILT.GT.tfrz.AND.BETA.EQ.1.AND.SNHEI.GT.0.) THEN
+   IF(SOILT > tfrz.AND.BETA==one.AND.SNHEI>zero) THEN
      !-- snow sublimation and melting
         nmelt = 1
         soiltfrac=snowfrac*tfrz+(one-snowfrac)*SOILT
@@ -5610,7 +5595,7 @@ endif ! 1==2
         EDIR1 = Q1*UMVEG * BETA
         EC1 = Q1 * WETCAN * vegfrac
         CMC2MS=CST/DELT*RAS
-        EETA = (EDIR1 + EC1 + ETT1)*1.E3
+        EETA = (EDIR1 + EC1 + ETT1)*rhowater
 ! to convert from kg m-2 s-1 to m s-1: 1/rho water=1.e-3************ 
         QFX=  XLVM * EETA
        ENDIF
@@ -5641,17 +5626,17 @@ endif ! 1==2
                   +RAINF*CVW*PRCPMS*(max(tfrz,TABS)-soiltfrac) 
         SNOH=AMAX1(0.,SNOH)
 !-- SMELT is speed of melting in M/S
-        SMELT= SNOH /XLMELT*1.E-3
+        SMELT= SNOH /XLMELT*1.E-3_kind_phys
     IF (debug_print ) THEN
     !if (abs(xlat-33.35).lt.0.2 .and. abs(xlon-272.55).lt.0.2)then
       print *,'1- SMELT',smelt,snoh,xlat,xlon
     ENDIF
 
-      IF(EPOT.gt.0. .and. SNWEPR.LE.EPOT*RAS*DELT) THEN
+      IF(EPOT.gt.zero .and. SNWEPR.LE.EPOT*RAS*DELT) THEN
 !-- all snow can evaporate
         BETA=SNWEPR/(EPOT*RAS*DELT)
-        SMELT=AMAX1(0.,AMIN1(SMELT,SNWEPR/DELT-BETA*EPOT*RAS))
-        SNWE=0.
+        SMELT=AMAX1(zero,AMIN1(SMELT,SNWEPR/DELT-BETA*EPOT*RAS))
+        SNWE=zero
        IF (debug_print ) THEN
        !if (abs(xlat-33.35).lt.0.2 .and. abs(xlon-272.55).lt.0.2)then
          print *,'2- SMELT',xlat,xlon,snwe,smelt,rhonewsn,xlat,xlon
@@ -5662,8 +5647,8 @@ endif ! 1==2
 !18apr08 - Egglston limit
       !-- 22apr22 Do not limit snow melting for hail (rhonewsn > 450), or dense snow
       !-- (rhosn > 350.) with very warm surface temperatures (>10C)
-      if( (rhosn < 350. .or. (newsnow > 0. .and. rhonewsn < 450.)) .and. soilt < 283. ) then
-        SMELT= amin1 (smelt, delt/60.*5.6E-8*meltfactor*max(1.,(soilt-tfrz))) 
+      if( (rhosn < 350._kind_phys .or. (newsnow > zero .and. rhonewsn < 450._kind_phys)) .and. soilt < 283._kind_phys ) then
+        SMELT= amin1 (smelt, delt/60._kind_phys*5.6E-8_kind_phys*meltfactor*max(one,(soilt-tfrz))) 
         IF (debug_print ) THEN
         !if (abs(xlat-33.35).lt.0.2 .and. abs(xlon-272.55).lt.0.2)then
           print *,'3- SMELT',xlat,xlon,smelt,rhosn,rhonewsn,xlat,xlon
@@ -5671,18 +5656,18 @@ endif ! 1==2
       endif
 
 ! rr - potential melting
-        rr=max(0.,SNWEPR/delt-BETA*EPOT*RAS)
+        rr=max(zero,SNWEPR/delt-BETA*EPOT*RAS)
         if(smelt > rr) then
           SMELT = min(SMELT,rr)
-          SNWE = 0.
+          SNWE = zero
          IF (debug_print ) THEN
          !if (abs(xlat-33.35).lt.0.2 .and. abs(xlon-272.55).lt.0.2)then
            print *,'4- SMELT i,j,smelt,rr',xlat,xlon,smelt,rr
          ENDIF
         endif
  88   continue
-        SNOHGNEW=SMELT*XLMELT*1.E3
-        SNODIF=AMAX1(0.,(SNOH-SNOHGNEW))
+        SNOHGNEW=SMELT*XLMELT*rhowater
+        SNODIF=AMAX1(zero,(SNOH-SNOHGNEW))
 
         SNOH=SNOHGNEW
         IF (debug_print ) THEN
@@ -5691,19 +5676,19 @@ endif ! 1==2
           print *,' xlat, xlon', xlat, xlon
         ENDIF
 
-      IF( smelt > 0.) then
+      IF( smelt > zero) then
 !*** From Koren et al. (1999) 13% of snow melt stays in the snow pack
-        rsmfrac=min(0.18,(max(0.08,snwepr/0.10*0.13)))
-       if(snhei > 0.01 .and. rhosn < 350.) then
+        rsmfrac=min(0.18_kind_phys,(max(0.08_kind_phys,snwepr/0.10_kind_phys*0.13_kind_phys)))
+       if(snhei > 0.01_kind_phys .and. rhosn < 350._kind_phys) then
         rsm=min(snwe,rsmfrac*smelt*delt)
        else
        ! do not keep melted water if snow depth is less that 1 cm
        ! or if snow is dense
-        rsm=0.
+        rsm=zero
        endif
 !18apr08 rsm is part of melted water that stays in snow as liquid
-       if(rsm > 0.) then
-         SMELT=max(0.,SMELT-rsm/delt)
+       if(rsm > zero) then
+         SMELT=max(zero,SMELT-rsm/delt)
          IF (debug_print ) THEN
          !if (abs(xlat-33.35).lt.0.2 .and. abs(xlon-272.55).lt.0.2)then
            print *,'5- SMELT i,j,smelt,rsm,snwepr,rsmfrac', &
@@ -5716,8 +5701,8 @@ endif ! 1==2
 
 !-- update of liquid equivalent of snow depth
 !-- due to evaporation and snow melt
-      if(snwe > 0.) then
-        SNWE = AMAX1(0.,(SNWEPR-                          &
+      if(snwe > zero) then
+        SNWE = AMAX1(zero,(SNWEPR-                        &
                (SMELT+BETA*EPOT*RAS)*DELT                 &
                                          ) )
         IF (debug_print ) THEN
@@ -5735,13 +5720,13 @@ endif ! 1==2
       !-- NO MELTING, only sublimation
       !--- If there is no snow melting then just evaporation
       !--- or condensation changes SNWE
-       if(snhei.ne.0..and. beta == 1.) then
+       if(snhei.ne.zero .and. beta == one) then
                EPOT=-QKMS*(QVATM-QSG)
-               SNWE = AMAX1(0.,(SNWEPR-                               &
+               SNWE = AMAX1(zero,(SNWEPR-                  &
                     BETA*EPOT*RAS*DELT))
        else
        !-- all snow is sublibated
-         snwe = 0.
+         snwe = zero
        endif
 
       ENDIF
@@ -5751,7 +5736,7 @@ endif ! 1==2
      if(nmelt.eq.1) goto 212  ! second interation
  220  continue
 
-      if(smelt.gt.0..and.rsm.gt.0.) then
+      if(smelt > zero .and. rsm > zero) then
        if(snwe.le.rsm) then
     IF ( debug_print ) THEN
        print *,'SNWE<RSM snwe,rsm,smelt*delt,epot*ras*delt,beta', &
@@ -5762,33 +5747,33 @@ endif ! 1==2
 !*** from the top of the snow. 13% of melted water
 !*** remains in the pack and changes its density.
 !*** Eq. 9 (with my correction) in Koren et al. (1999)
-          xsn=(rhosn*(snwe-rsm)+1.e3*rsm)/                            &
+          xsn=(rhosn*(snwe-rsm)+rhowater*rsm)/                    &
               snwe
-          rhosn=MIN(MAX(58.8,XSN),500.)
+          rhosn=MIN(MAX(58.8_kind_phys,XSN),500._kind_phys)
 
-          RHOCSN=2090.* RHOSN
+          RHOCSN=sheatsn* RHOSN
           if(isncond_opt == 1) then
-            if(newsnow <= 0. .and. snhei > 3.0*SNHEI_crit .and. rhosn > 250.) then
+            if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
             !-- some areas with large snow depth have unrealistically 
             !-- low snow density (in the Rockie's with snow depth > 1 m). 
             !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
             !-- In future a better compaction scheme is needed for these areas.
-              thdifsn = 2.5e-6
+              thdifsn = 2.5e-6_kind_phys
             else
             !-- old version thdifsn = 0.265/RHOCSN
-              THDIFSN = 0.265/RHOCSN
+              THDIFSN = 0.265_kind_phys/RHOCSN
             endif
           else
           !-- 07Jun19 - thermal conductivity (K_eff) from Sturm et al.(1997)
           !-- keff = 10. ** (2.650 * RHOSN*1.e-3 - 1.652)
-            fact = 1.
-            if(rhosn < 156. .or. (newsnow > 0. .and. rhonewsn < 156.)) then
-              keff = 0.023 + 0.234 * rhosn * 1.e-3
+            fact = one
+            if(rhosn < 156._kind_phys .or. (newsnow > zero .and. rhonewsn < 156._kind_phys)) then
+              keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
               !-- fact is added by tgs based on 4 Jan 2017 testing 
-              fact = 5.
+              fact = 5._kind_phys
             else
-              keff = 0.138 - 1.01 * rhosn*1.e-3 + 3.233 * rhosn**2 * 1.e-6
-              fact = 2.
+              keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
+              fact = 2._kind_phys
               if(debug_print) then
                 print *,'End SNOWTEMP - xlat,xlon,rhosn,keff',xlat,xlon,rhosn,keff
                 print *,'End SNOWTEMP - 0.265/rhocsn',0.265/rhocsn
@@ -5799,12 +5784,12 @@ endif ! 1==2
                     xlat,xlon,newsnow, rhonewsn,rhosn,fact,keff,keff/rhocsn*fact
        endif
 
-         if(newsnow <= 0. .and. snhei > 3.0*SNHEI_crit .and. rhosn > 250.) then
+         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
             !-- some areas with large snow depth have unrealistically 
             !-- low snow density (in the Rockie's with snow depth > 1 m). 
             !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
             !-- In future a better compaction scheme is needed for these areas.
-              thdifsn = 2.5e-6
+              thdifsn = 2.5e-6_kind_phys
             else
               thdifsn = keff/rhocsn * fact
             endif
@@ -5822,7 +5807,7 @@ endif ! 1==2
          S=thdifsn*RHOCSN*(soilt-TSOB)/SNPRIM
          SNFLX=S
          S=D9*(tso(1)-tso(2))
-       ELSEIF(SNHEI.lt.SNTH.and.SNHEI.GT.0.) then
+       ELSEIF(SNHEI.lt.SNTH.and.SNHEI.GT.zero) then
          S=(fsn*thdifsn*rhocsn+fso*thdif(1)*rhcs)*                   &
               (soilt-TSOB)/snprim
          SNFLX=S
@@ -5834,7 +5819,7 @@ endif ! 1==2
        ENDIF
 
         !-- Update snow depth after melting at the interface with the atmosphere
-        SNHEI=SNWE *1.E3 / RHOSN
+        SNHEI=SNWE * rhowater / RHOSN
 
 !--  If ground surface temperature
 !--  is above freezing snow can melt from the bottom at the interface with soild. The following
@@ -5845,7 +5830,7 @@ endif ! 1==2
       print *,'snhei,snwe,rhosn,snowfr',snhei,snwe,rhosn,snowfrac,xlat,xlon
     endif
 
-        IF(TSO(1).GT.tfrz .and. snhei > 0.) THEN
+        IF(TSO(1).GT.tfrz .and. snhei > zero) THEN
 !-- melting at the soil/snow interface
           if (snhei.GT.deltsn+snth) then
               hsn = snhei - deltsn
@@ -5859,41 +5844,41 @@ endif ! 1==2
               hsn = snhei
           endif
 
-         soiltfrac=snowfrac*tfrz+(1.-snowfrac)*TSO(1)
+         soiltfrac=snowfrac*tfrz+(one-snowfrac)*TSO(1)
 
          SNOHG=(TSO(1)-soiltfrac)*(cap(1)*zshalf(2)+                       &
-               RHOCSN*0.5*hsn) / DELT
-         SNOHG=AMAX1(0.,SNOHG)
-         SNODIF=0.
-         SMELTG=SNOHG/XLMELT*1.E-3
+               RHOCSN*0.5_kind_phys*hsn) / DELT
+         SNOHG=AMAX1(zero,SNOHG)
+         SNODIF=zero
+         SMELTG=SNOHG/XLMELT*1.E-3_kind_phys
          IF (debug_print ) THEN
          !if (abs(xlat-33.35).lt.0.2 .and. abs(xlon-272.55).lt.0.2)then
            print *,' SMELTG =',smeltg,xlat,xlon
          endif
 ! Egglston - empirical limit on snow melt from the bottom of snow pack
       !9jun22-- the next line excludeis cases of summer hail from snowmelt limiting
-      if( (rhosn < 350. .or. (newsnow > 0. .and. rhonewsn < 450.)) .and. soilt < 283. ) then
-        SMELT=AMIN1(SMELTG, 5.8e-9)
+      if( (rhosn < 350._kind_phys .or. (newsnow > zero .and. rhonewsn < 450._kind_phys)) .and. soilt < 283._kind_phys ) then
+        SMELT=AMIN1(SMELTG, 5.8e-9_kind_phys)
       endif
 
 ! rr - potential melting
         rr=SNWE/delt
         SMELTG=AMIN1(SMELTG, rr)
 
-        SNOHGNEW=SMELTG*XLMELT*1.e3
-        SNODIF=AMAX1(0.,(SNOHG-SNOHGNEW))
+        SNOHGNEW=SMELTG*XLMELT*rhowater
+        SNODIF=AMAX1(zero,(SNOHG-SNOHGNEW))
     IF (debug_print ) THEN
     !if (abs(xlat-33.35).lt.0.2 .and. abs(xlon-272.55).lt.0.2)then
        print *,'TSO(1),soiltfrac,snowfrac,smeltg,SNODIF',TSO(1),soiltfrac,snowfrac,smeltg,SNODIF
        print *,' xlat, xlon', xlat, xlon
     ENDIF
 
-        snwe=max(0.,snwe-smeltg*delt)
-        SNHEI=SNWE *1.E3 / RHOSN
+        snwe=max(zero,snwe-smeltg*delt)
+        SNHEI=SNWE * rhowater / RHOSN
         !-- add up all snow melt
         SMELT = SMELT + SMELTG
       
-        if(snhei > 0.) TSO(1) = soiltfrac
+        if(snhei > zero) TSO(1) = soiltfrac
 
     IF (debug_print ) THEN
     !if (abs(xlat-33.35).lt.0.2 .and. abs(xlon-272.55).lt.0.2)then
@@ -5902,14 +5887,14 @@ endif ! 1==2
        print *,'TSO(1),soiltfrac,snowfrac,smeltg,SNODIF',TSO(1),soiltfrac,snowfrac,smeltg,SNODIF
        print *,'Melt from the bottom snwe,snhei,snoh',snwe,snhei,snoh
        print *,' Final TSO ',tso
-       if (snhei==0.) &
+       if (snhei==zero) &
        print *,'Snow is all melted on the warm ground'
     ENDIF
 
         ENDIF ! melt on snow/soil interface
 
         snweprint=snwe
-        snheiprint=snweprint*1.E3 / RHOSN
+        snheiprint=snweprint*rhowater / RHOSN
 
         X= (R21+D9SN*R22SN)*(soilt-TN) +                            &
             XLVM*R210*(QSG-QGOLD)
@@ -5923,7 +5908,7 @@ endif ! 1==2
 
          X=X &
 ! "heat" from snow and rain
-        -RHOnewCSN*NEWSNOW/DELT*(min(tfrz,TABS)-SOILT)         &
+        -RHOnewCSN*NEWSNOW/DELT*(min(tfrz,TABS)-SOILT)              &
         -RAINF*CVW*PRCPMS*(max(tfrz,TABS)-SOILT)
     IF (debug_print ) THEN
      print *,'x=',x
@@ -5931,16 +5916,16 @@ endif ! 1==2
      print *,'SNFLX=',snflx
     ENDIF
 
-      IF(SNHEI.GT.0.) THEN
+      IF(SNHEI.GT.zero) THEN
         if(ilnb.gt.1) then
-          tsnav=min(0.,0.5/snhei*((soilt+soilt1)*deltsn          &
-                    +(soilt1+tso(1))*(SNHEI-DELTSN))             &
+          tsnav=min(zero,0.5_kind_phys/snhei*((soilt+soilt1)*deltsn &
+                    +(soilt1+tso(1))*(SNHEI-DELTSN))                &
                        -tfrz)
         else
-          tsnav=min(0.,0.5*(soilt+tso(1)) - tfrz)
+          tsnav=min(zero,0.5_kind_phys*(soilt+tso(1)) - tfrz)
         endif
       ELSE
-          tsnav= min(0.,soilt - tfrz)
+          tsnav= min(zero,soilt - tfrz)
       ENDIF
 
 !------------------------------------------------------------------------
@@ -6008,7 +5993,7 @@ endif ! 1==2
 
 ! input variables
 
-   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN   )  :: ZSMAIN, &
+   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN) :: ZSMAIN, &
                                                          ZSHALF, &
                                                           DIFFU, &
                                                           HYDRO, &
@@ -6018,18 +6003,17 @@ endif ! 1==2
 
    real (kind_phys),     DIMENSION(1:NDDZS), INTENT(IN)  ::  DTDZS
 
-   real (kind_phys),     INTENT(IN   )   ::    QSG,QVG,QCG,QCATM,QVATM, &
+   real (kind_phys),     INTENT(IN ) :: QSG,QVG,QCG,QCATM,QVATM, &
                                    QKMS,VEGFRAC,DRIP,PRCP      , &
                                    DEW,SMELT,SNOWFRAC          , &
                                    DQM,QMIN,REF,KSAT,RAS,RIW,SOILRES
                          
 ! output
 
-   real (kind_phys),     DIMENSION(  1:nzs )                               , &
-
-             INTENT(INOUT)   ::                SOILMOIS,SOILIQW
-                                                  
-   real (kind_phys),     INTENT(INOUT)   ::  MAVAIL,RUNOFF,RUNOFF2,INFILTRP, &
+   real (kind_phys),     DIMENSION(  1:nzs )                   , &
+                         INTENT(INOUT) :: SOILMOIS,SOILIQW
+                                                
+   real (kind_phys),     INTENT(INOUT) :: MAVAIL,RUNOFF,RUNOFF2,INFILTRP, &
                                                         INFMAX
 
 ! local variables
@@ -6055,16 +6039,16 @@ endif ! 1==2
  118      format(6(10Pf23.19))
 
            do k=1,nzs
-            cosmc(k)=0.
-            rhsmc(k)=0.
+            cosmc(k)=zero
+            rhsmc(k)=zero
            enddo
  
         DID=(ZSMAIN(NZS)-ZSHALF(NZS))
         X1=ZSMAIN(NZS)-ZSMAIN(NZS1)
 
-        DENOM=(1.+DIFFU(nzs1)/X1/DID*DELT+HYDRO(NZS)/(2.*DID)*DELT)
-        COSMC(1)=DELT*(DIFFU(nzs1)/DID/X1                                &
-                    +HYDRO(NZS1)/2./DID)/DENOM
+        DENOM=(one+DIFFU(nzs1)/X1/DID*DELT+HYDRO(NZS)/(2._kind_phys*DID)*DELT)
+        COSMC(1)=DELT*(DIFFU(nzs1)/DID/X1                                 &
+                    +HYDRO(NZS1)/2._kind_phys/DID)/DENOM
         RHSMC(1)=(SOILMOIS(NZS)+TRANSP(NZS)*DELT/                         &
                DID)/DENOM
 
@@ -6073,13 +6057,13 @@ endif ! 1==2
 ! So far - no interaction with the water table.
 
         DENOM=1.+DIFFU(nzs1)/X1/DID*DELT
-        COSMC(1)=DELT*(DIFFU(nzs1)/DID/X1                                &  
+        COSMC(1)=DELT*(DIFFU(nzs1)/DID/X1                                 &
                     +HYDRO(NZS1)/DID)/DENOM
 
-        RHSMC(1)=(SOILMOIS(NZS)-HYDRO(NZS)*DELT/DID*soilmois(nzs) & 
+        RHSMC(1)=(SOILMOIS(NZS)-HYDRO(NZS)*DELT/DID*soilmois(nzs)         &
                  +TRANSP(NZS)*DELT/DID)/DENOM
 
-        COSMC(1)=0.
+        COSMC(1)=zero
         RHSMC(1)=SOILMOIS(NZS)
 !
         DO K=1,NZS2
@@ -6089,7 +6073,7 @@ endif ! 1==2
           X2=2.*DTDZS(K1+1)*DIFFU(KN)
           Q4=X4+HYDRO(KN-1)*DTDZS2(KN-1)
           Q2=X2-HYDRO(KN+1)*DTDZS2(KN-1)
-          DENOM=1.+X2+X4-Q2*COSMC(K)
+          DENOM=one+X2+X4-Q2*COSMC(K)
           COSMC(K+1)=Q4/DENOM
     IF (debug_print ) THEN
           print *,'q2,soilmois(kn),DIFFU(KN),x2,HYDRO(KN+1),DTDZS2(KN-1),kn,k' &
@@ -6104,16 +6088,16 @@ endif ! 1==2
 ! --- MOISTURE BALANCE BEGINS HERE
 
           TRANS=TRANSP(1)
-          UMVEG=(1.-VEGFRAC)*soilres
+          UMVEG=(one-VEGFRAC)*soilres
 
-          RUNOFF=0.
-          RUNOFF2=0.
+          RUNOFF=zero
+          RUNOFF2=zero
           DZS=ZSMAIN(2)
           R1=COSMC(NZS1)
           R2= RHSMC(NZS1)
           R3=DIFFU(1)/DZS
-          R4=R3+HYDRO(1)*.5          
-          R5=R3-HYDRO(2)*.5
+          R4=R3+HYDRO(1)*.5_kind_phys          
+          R5=R3-HYDRO(2)*.5_kind_phys
           R6=QKMS*RAS
 !-- Total liquid water available on the top of soil domain
 !-- Without snow - 3 sources of water: precipitation,
@@ -6122,7 +6106,7 @@ endif ! 1==2
 
   191   format (f23.19)
 
-        TOTLIQ=PRCP-DRIP/DELT-(1.-VEGFRAC)*DEW*RAS-SMELT
+        TOTLIQ=PRCP-DRIP/DELT-(one-VEGFRAC)*DEW*RAS-SMELT
     IF (debug_print ) THEN
 print *,'UMVEG*PRCP,DRIP/DELT,UMVEG*DEW*RAS,SMELT', &
          UMVEG*PRCP,DRIP/DELT,UMVEG*DEW*RAS,SMELT
@@ -6140,32 +6124,32 @@ print *,'UMVEG*PRCP,DRIP/DELT,UMVEG*DEW*RAS,SMELT', &
 !   THAT IS WHY PARAMETER CVFRZ = 3 (INT{1/0.6*0.6})
 !
 !   Current logic doesn't allow CVFRZ be bigger than 3
-         CVFRZ = 3.
+         CVFRZ = 3._kind_phys
 
 !-- SCHAAKE/KOREN EXPRESSION for calculation of max infiltration
-         REFKDT=3.
-         REFDK=3.4341E-6
-         DELT1=DELT/86400.
+         REFKDT=3._kind_phys
+         REFDK=3.4341E-6_kind_phys
+         DELT1=DELT/86400._kind_phys
          F1MAX=DQM*ZSHALF(2)
          F2MAX=DQM*(ZSHALF(3)-ZSHALF(2))
-         F1=F1MAX*(1.-SOILMOIS(1)/DQM)
+         F1=F1MAX*(one-SOILMOIS(1)/DQM)
          DICE=SOILICE(1)*ZSHALF(2)
          FD=F1
         do k=2,nzs1
          DICE=DICE+(ZSHALF(k+1)-ZSHALF(k))*SOILICE(K)
          FKMAX=DQM*(ZSHALF(k+1)-ZSHALF(k))
-         FK=FKMAX*(1.-SOILMOIS(k)/DQM)
+         FK=FKMAX*(one-SOILMOIS(k)/DQM)
          FD=FD+FK
         enddo
          KDT=REFKDT*KSAT/REFDK
          VAL=(1.-EXP(-KDT*DELT1))
          DDT = FD*VAL
          PX= - TOTLIQ * DELT
-         IF(PX.LT.0.0) PX = 0.0
-         IF(PX.gt.0.0) THEN
+         IF(PX < zero) PX = zero
+         IF(PX > zero) THEN
            INFMAX1 = (PX*(DDT/(PX+DDT)))/DELT
          ELSE
-           INFMAX1 = 0.
+           INFMAX1 = zero
          ENDIF
     IF (debug_print ) THEN
   print *,'INFMAX1 before frozen part',INFMAX1
@@ -6176,11 +6160,12 @@ print *,'UMVEG*PRCP,DRIP/DELT,UMVEG*DEW*RAS,SMELT', &
 !
 ! ------------------------------------------------------------------
 
-         FRZX= 0.15*((dqm+qmin)/ref) * (0.412 / 0.468)
-         FCR = 1.
-         IF ( DICE .GT. 1.E-2) THEN
+         FRZX= 0.15_kind_phys*((dqm+qmin)/ref) * (0.412_kind_phys / 0.468_kind_phys)
+
+         FCR = one
+         IF ( DICE .GT. 1.E-2_kind_phys) THEN
            ACRT = CVFRZ * FRZX / DICE
-           SUM = 1.
+           SUM = one
            IALP1 = CVFRZ - 1
            DO JK = 1,IALP1
               K = 1
@@ -6189,7 +6174,7 @@ print *,'UMVEG*PRCP,DRIP/DELT,UMVEG*DEW*RAS,SMELT', &
               END DO
               SUM = SUM + (ACRT ** ( CVFRZ-JK)) / FLOAT (K)
            END DO
-           FCR = 1. - EXP(-ACRT) * SUM
+           FCR = one - EXP(-ACRT) * SUM
          END IF
     IF (debug_print ) THEN
           print *,'FCR--------',fcr
@@ -6215,18 +6200,18 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 ! INFILTRP is total infiltration flux in M/S
           INFILTRP=FLX
 ! Solution of moisture budget
-          R7=.5*DZS/DELT
+          R7=.5_kind_phys*DZS/DELT
           R4=R4+R7
           FLX=FLX-SOILMOIS(1)*R7
 ! R8 is for direct evaporation from soil, which occurs
 ! only from snow-free areas
-          R8=UMVEG*R6*(1.-snowfrac)
+          R8=UMVEG*R6*(one-snowfrac)
           QTOT=QVATM+QCATM
           R9=TRANS
           R10=QTOT-QSG
 
 !-- evaporation regime
-          IF(R10.LE.0.) THEN
+          IF(R10.LE.zero) THEN
             QQ=(R5*R2-FLX+R9)/(R4-R5*R1-R10*R8/(REF-QMIN))
             FLXSAT=-DQM*(R4-R5*R1-R10*R8/(REF-QMIN))                &
                    +R5*R2+R9
@@ -6238,7 +6223,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
           IF(QQ.LT.0.) THEN
 !  print *,'negative QQ=',qq
-            SOILMOIS(1)=1.e-8
+            SOILMOIS(1)=1.e-8_kind_phys
 
           ELSE IF(QQ.GT.DQM) THEN
 !-- saturation
@@ -6248,7 +6233,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
     ENDIF
             RUNOFF=RUNOFF+(FLXSAT-FLX)
           ELSE
-            SOILMOIS(1)=min(dqm,max(1.e-8,QQ))
+            SOILMOIS(1)=min(dqm,max(1.e-8_kind_phys,QQ))
           END IF
 
     IF (debug_print ) THEN
@@ -6261,7 +6246,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
             KK=NZS-K+1
             QQ=COSMC(KK)*SOILMOIS(K-1)+RHSMC(KK)
 
-           IF (QQ.LT.0.) THEN
+           IF (QQ.LT.zero) THEN
 
            ELSE IF(QQ.GT.DQM) THEN
 !-- saturation
@@ -6275,14 +6260,14 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
                RUNOFF2=RUNOFF2+((QQ-DQM)*(ZSHALF(K+1)-ZSHALF(K)))/DELT
              ENDIF
            ELSE
-            SOILMOIS(K)=min(dqm,max(1.e-8,QQ))
+            SOILMOIS(K)=min(dqm,max(1.e-8_kind_phys,QQ))
            END IF
           END DO
     IF (debug_print ) THEN
    print *,'END soilmois,soiliqw,soilice',soilmois,SOILIQW,soilice*riw
     ENDIF
 
-           MAVAIL=max(.00001,min(1.,(SOILMOIS(1)/(REF-QMIN)*(1.-snowfrac)+1.*snowfrac)))
+           MAVAIL=max(.00001_kind_phys,min(one,(SOILMOIS(1)/(REF-QMIN)*(one-snowfrac)+one*snowfrac)))
 !-------------------------------------------------------------------
     END SUBROUTINE SOILMOIST
 !-------------------------------------------------------------------
@@ -6324,7 +6309,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !--- soil properties
    LOGICAL,  INTENT(IN   )   ::  debug_print
    INTEGER, INTENT(IN   )    ::                            NZS
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
             INTENT(IN   )    ::                           RHOCS, &
                                                            BCLH, &
                                                             DQM, &
@@ -6333,12 +6318,12 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
                                                           QWRTZ, &  
                                                            QMIN
 
-   real (kind_phys),    DIMENSION(  1:nzs )               , &
+   real (kind_phys),    DIMENSION(  1:nzs )                    , &
             INTENT(IN   )    ::                        SOILMOIS, &
                                                          keepfr
 
 
-   real (kind_phys),     INTENT(IN   )   ::             CP, &
+   real (kind_phys),     INTENT(IN   )   ::                  CP, &
                                                             CVW, &
                                                             RIW, &  
                                                          kqwrtz, &
@@ -6350,7 +6335,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
 
 !--- output variables
-   real (kind_phys),     DIMENSION(1:NZS)                 , &
+   real (kind_phys),     DIMENSION(1:NZS)                      , &
             INTENT(INOUT)  ::      cap,diffu,hydro             , &
                                    thdif,tav                   , &
                                    soilmoism                   , &
@@ -6372,66 +6357,66 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
          nzs1=nzs-1
 
 !-- Constants for Johansen (1975) thermal conductivity
-         kzero =2.       ! if qwrtz > 0.2
+         kzero =2._kind_phys       ! if qwrtz > 0.2
 
 
          do k=1,nzs
-            detal (k)=0.
-            kasat (k)=0.
-            kjpl  (k)=0.
-            hk    (k)=0.
+            detal (k)=zero
+            kasat (k)=zero
+            kjpl  (k)=zero
+            hk    (k)=zero
          enddo
 
            ws=dqm+qmin
            x1=xlmelt/(g0_p*psis)
            x2=x1/bclh*ws
-           x4=(bclh+1.)/bclh
+           x4=(bclh+one)/bclh
 !--- Next 3 lines are for Johansen thermal conduct.
-           gamd=(1.-ws)*2700.
-           kdry=(0.135*gamd+64.7)/(2700.-0.947*gamd)
+           gamd=(one-ws)*2700._kind_phys
+           kdry=(0.135_kind_phys*gamd+64.7_kind_phys)/(2700._kind_phys-0.947_kind_phys*gamd)
            !-- one more option from Christa's paper
-           if(qwrtz > 0.2) then
+           if(qwrtz > 0.2_kind_phys) then
              kas=kqwrtz**qwrtz*kzero**(1.-qwrtz)
            else
-             kas=kqwrtz**qwrtz*3.**(1.-qwrtz)
+             kas=kqwrtz**qwrtz*3._kind_phys**(one-qwrtz)
            endif
 
          DO K=1,NZS1
            tn=tav(k) - tfrz
            wd=ws - riw*soilicem(k)
-           psif=psis*100.*(wd/(soiliqwm(k)+qmin))**bclh            &
-                * (ws/wd)**3.
+           psif=psis*100._kind_phys*(wd/(soiliqwm(k)+qmin))**bclh            &
+                * (ws/wd)**3._kind_phys
 !--- PSIF should be in [CM] to compute PF
            pf=log10(abs(psif))
-           fact=1.+riw*soilicem(k)
+           fact=one+riw*soilicem(k)
 !--- HK is for McCumber thermal conductivity
-         IF(PF.LE.5.2) THEN
-           HK(K)=420.*EXP(-(PF+2.7))*fact
+         IF(PF.LE.5.2_kind_phys) THEN
+           HK(K)=420._kind_phys*EXP(-(PF+2.7_kind_phys))*fact
          ELSE
-           HK(K)=.1744*fact
+           HK(K)=.1744_kind_phys*fact
          END IF
 
-           IF(soilicem(k).NE.0.AND.TN.LT.0.) then
+           IF(soilicem(k).NE.zero.AND.TN.LT.zero) then
 !--- DETAL is taking care of energy spent on freezing or released from 
 !          melting of soil water
 
               DETAL(K)=tfrz*X2/(TAV(K)*TAV(K))*                  &
                      (TAV(K)/(X1*TN))**X4
 
-              if(keepfr(k).eq.1.) then
-                 detal(k)=0.
+              if(keepfr(k).eq.one) then
+                 detal(k)=zero
               endif
 
            ENDIF
 
 !--- Next 10 lines calculate Johansen thermal conductivity KJPL
-           kasat(k)=kas**(1.-ws)*kice**fwsat(k)                    &
+           kasat(k)=kas**(one-ws)*kice**fwsat(k)                  &
                     *kwt**lwsat(k)
 
            X5=(soilmoism(k)+qmin)/ws
-         if(soilicem(k).eq.0.) then
-           sr=max(0.101,x5)
-           ke=log10(sr)+1.
+         if(soilicem(k).eq.zero) then
+           sr=max(0.101_kind_phys,x5)
+           ke=log10(sr)+one
          else
            ke=x5
          endif
@@ -6439,25 +6424,25 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
            kjpl(k)=ke*(kasat(k)-kdry)+kdry
 
 !--- CAP -volumetric heat capacity
-            CAP(K)=(1.-WS)*RHOCS                                    &
+            CAP(K)=(one-WS)*RHOCS                                   &
                   + (soiliqwm(K)+qmin)*CVW                          &
                   + soilicem(K)*CI                                  &
-                  + (dqm-soilmoism(k))*CP*1.2                       &
-            - DETAL(K)*1.e3*xlmelt
+                  + (dqm-soilmoism(k))*CP*1.2_kind_phys             &
+            - DETAL(K)*rhowater*xlmelt
 
            a=RIW*soilicem(K)
 
-        if((ws-a).lt.0.12)then
-           diffu(K)=0.
+        if((ws-a).lt.0.12_kind_phys)then
+           diffu(K)=zero
         else
-           H=max(0.,(soilmoism(K)+qmin-a)/(max(1.e-8,(ws-a)))) 
-           facd=1.
-        if(a.ne.0.)facd=1.-a/max(1.e-8,soilmoism(K))
-          ame=max(1.e-8,ws-riw*soilicem(K))
+           H=max(zero,(soilmoism(K)+qmin-a)/(max(1.e-8_kind_phys,(ws-a)))) 
+           facd=one
+        if(a.ne.zero)facd=one-a/max(1.e-8_kind_phys,soilmoism(K))
+          ame=max(1.e-8_kind_phys,ws-riw*soilicem(K))
 !--- DIFFU is diffusional conductivity of soil water
           diffu(K)=-BCLH*KSAT*PSIS/ame*                            &
-                  (ws/ame)**3.                                     &
-                  *H**(BCLH+2.)*facd
+                  (ws/ame)**3._kind_phys                           &
+                  *H**(BCLH+2._kind_phys)*facd
          endif
 
 !--- thdif - thermal diffusivity
@@ -6472,19 +6457,19 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
     ENDIF
          DO K=1,NZS
 
-         if((ws-riw*soilice(k)).lt.0.12)then
-            hydro(k)=0.
+         if((ws-riw*soilice(k)).lt.0.12_kind_phys)then
+            hydro(k)=zero
          else
-            fach=1.
-          if(soilice(k).ne.0.)                                     &
-             fach=1.-riw*soilice(k)/max(1.e-8,soilmois(k))
-         am=max(1.e-8,ws-riw*soilice(k))
+            fach=one
+          if(soilice(k).ne.zero)                                   &
+             fach=one-riw*soilice(k)/max(1.e-8_kind_phys,soilmois(k))
+         am=max(1.e-8_kind_phys,ws-riw*soilice(k))
 !--- HYDRO is hydraulic conductivity of soil water
           hydro(K)=min(KSAT,KSAT/am*                               & 
                   (soiliqw(K)/am)                                  &
-                  **(2.*BCLH+2.)                                   &
+                  **(2._kind_phys*BCLH+2._kind_phys)               &
                   * fach)
-          if(hydro(k)<1.e-10)hydro(k)=0.
+          if(hydro(k)<1.e-10_kind_phys)hydro(k)=zero
          endif
 
        ENDDO
@@ -6521,22 +6506,22 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    LOGICAL,  INTENT(IN   )   ::  debug_print
    INTEGER,  INTENT(IN   )   ::  nroot,nzs,iland
 
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
             INTENT(IN   )    ::                GSWin, TABS, lai
 !--- soil properties
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
             INTENT(IN   )    ::                             DQM, &
                                                            QMIN, &
                                                             REF, &
                                                              PC, &
                                                            WILT
 
-   real (kind_phys),     DIMENSION(1:NZS), INTENT(IN)  :: soiliqw,  &
-                                                         ZSHALF
+   real (kind_phys),  DIMENSION(1:NZS), INTENT(IN)  :: soiliqw,  &
+                                                        ZSHALF
 
 !-- output 
-   real (kind_phys),     DIMENSION(1:NZS), INTENT(OUT)  ::            TRANF
-   real (kind_phys),     INTENT(OUT)  ::                            TRANSUM  
+   real (kind_phys),     DIMENSION(1:NZS), INTENT(OUT)  :: TRANF
+   real (kind_phys),     INTENT(OUT)  ::                 TRANSUM  
 
 !-- local variables
    real (kind_phys)    ::  totliq, did
@@ -6549,32 +6534,32 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !--------------------------------------------------------------------
 
         do k=1,nzs
-           part(k)=0.
-           tranf(k)=0.
+           part(k)=zero
+           tranf(k)=zero
         enddo
 
-        transum=0.
+        transum=zero
         totliq=soiliqw(1)+qmin
            sm1=totliq
            sm2=sm1*sm1
            sm3=sm2*sm1
            sm4=sm3*sm1
-           ap0=0.299
-           ap1=-8.152
-           ap2=61.653
-           ap3=-115.876
-           ap4=59.656
+           ap0=0.299_kind_phys
+           ap1=-8.152_kind_phys
+           ap2=61.653_kind_phys
+           ap3=-115.876_kind_phys
+           ap4=59.656_kind_phys
            gx=ap0+ap1*sm1+ap2*sm2+ap3*sm3+ap4*sm4
-          if(totliq.ge.ref) gx=1.
-          if(totliq.le.0.) gx=0.
-          if(gx.gt.1.) gx=1.
-          if(gx.lt.0.) gx=0.
+          if(totliq.ge.ref) gx=one
+          if(totliq.le.zero) gx=zero
+          if(gx.gt.one) gx=one
+          if(gx.lt.zero) gx=zero
         DID=zshalf(2)
           part(1)=DID*gx
         IF(TOTLIQ.GT.REF) THEN
           TRANF(1)=DID
         ELSE IF(TOTLIQ.LE.WILT) THEN
-          TRANF(1)=0.
+          TRANF(1)=zero
         ELSE
           TRANF(1)=(TOTLIQ-WILT)/(REF-WILT)*DID
         ENDIF 
@@ -6588,16 +6573,16 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
            sm3=sm2*sm1
            sm4=sm3*sm1
            gx=ap0+ap1*sm1+ap2*sm2+ap3*sm3+ap4*sm4
-          if(totliq.ge.ref) gx=1.
-          if(totliq.le.0.) gx=0.
-          if(gx.gt.1.) gx=1.
-          if(gx.lt.0.) gx=0.
+          if(totliq.ge.ref) gx=one
+          if(totliq.le.zero) gx=zero
+          if(gx.gt.one) gx=one
+          if(gx.lt.zero) gx=zero
           DID=zshalf(K+1)-zshalf(K)
           part(k)=did*gx
         IF(totliq.GE.REF) THEN
           TRANF(K)=DID
         ELSE IF(totliq.LE.WILT) THEN
-          TRANF(K)=0.
+          TRANF(K)=zero
         ELSE
           TRANF(K)=(totliq-WILT)                                &
                 /(REF-WILT)*DID
@@ -6607,8 +6592,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
         END DO
 
 ! For LAI> 3 =>  transpiration at potential rate (F.Tardieu, 2013)
-      if(lai > 4.) then
-        pctot=0.8
+      if(lai > 4._kind_phys) then
+        pctot=0.8_kind_phys
       else
         pctot=pc
 !- 26aug16-  next 2 lines could lead to LH increase and higher 2-m Q during the day
@@ -6621,22 +6606,22 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !---
 !--- air temperature function
 !     Avissar (1985) and AX 7/95
-        IF (TABS .LE. 302.15) THEN
-          FTEM = 1.0 / (1.0 + EXP(-0.41 * (TABS - 282.05)))
+        IF (TABS .LE. 302.15_kind_phys) THEN
+          FTEM = one / (one + EXP(-0.41_kind_phys * (TABS - 282.05_kind_phys)))
         ELSE
-          FTEM = 1.0 / (1.0 + EXP(0.5 * (TABS - 314.0)))
+          FTEM = one / (one + EXP(0.5_kind_phys * (TABS - 314.0_kind_phys)))
         ENDIF
     IF ( debug_print ) THEN
      print *,'tabs,ftem',tabs,ftem
     ENDIF
 !--- incoming solar function
-     cmin = 1./rsmax_data
-     cmax = 1./rstbl(iland)
-    if(lai > 1.) then
+     cmin = one/rsmax_data
+     cmax = one/rstbl(iland)
+    if(lai > one) then
      cmax = lai/rstbl(iland) ! max conductance
     endif
 ! Noihlan & Planton (1988)
-       f1=0.
+       f1=zero
 !    if(lai > 0.01) then
 !       f1 = 1.1/lai*gswin/rgltbl(iland)! f1=0. when GSWin=0.
 !       fsol = (f1+cmin/cmax)/(1.+f1)
@@ -6647,9 +6632,9 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !     totcnd = max(lai/rstbl(iland), pctot * ftem * f1) 
 ! Mahrer & Avissar (1982), Avissar et al. (1985)
      if (GSWin < rgltbl(iland)) then
-      fsol = 1. / (1. + exp(-0.034 * (GSWin - 3.5)))
+      fsol = one / (one + exp(-0.034_kind_phys * (GSWin - 3.5_kind_phys)))
      else
-      fsol = 1.
+      fsol = one
      endif
     IF ( debug_print ) THEN
      print *,'GSWin,lai,f1,fsol',gswin,lai,f1,fsol
@@ -6663,7 +6648,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
     ENDIF
 
 !-- TRANSUM - total for the rooting zone
-          transum=0.
+          transum=zero
         DO K=1,NROOT
 ! linear root distribution
          TRANF(k)=max(cmin,TRANF(k)*totcnd)
@@ -6695,20 +6680,20 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    real (kind_phys)    ::  F1,T1,T2,RN
    INTEGER ::  I,I1
 
-       I=(TN-1.7315E2)/.05+1
-       T1=173.1+FLOAT(I)*.05
+       I=(TN-1.7315E2_kind_dbl_prec)/.05_kind_dbl_prec+1
+       T1=173.1_kind_dbl_prec+FLOAT(I)*.05_kind_dbl_prec
        F1=T1+D1*TT(I)-D2
-       I1=I-F1/(.05+D1*(TT(I+1)-TT(I)))
+       I1=I-F1/(.05_kind_dbl_prec+D1*(TT(I+1)-TT(I)))
        I=I1
        IF(I.GT.5000.OR.I.LT.1) GOTO 1
   10   I1=I
-       T1=173.1+FLOAT(I)*.05
+       T1=173.1_kind_dbl_prec+FLOAT(I)*.05_kind_dbl_prec
        F1=T1+D1*TT(I)-D2
-       RN=F1/(.05+D1*(TT(I+1)-TT(I)))
+       RN=F1/(.05_kind_dbl_prec+D1*(TT(I+1)-TT(I)))
        I=I-INT(RN)
        IF(I.GT.5000.OR.I.LT.1) GOTO 1
        IF(I1.NE.I) GOTO 10
-       TS=T1-.05*RN
+       TS=T1-.05_kind_dbl_prec*RN
        QS=(TT(I)+(TT(I)-TT(I+1))*RN)/PP
        GOTO 20
    1   PRINT *,'     AVOST IN VILKA     Table index= ',I
@@ -6784,7 +6769,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !            19          White Sand
 !
 !----------------------------------------------------------------------
-         real (kind_phys)  LQMA(nsoilclas),LRHC(nsoilclas),      &
+         real (kind_phys)  LQMA(nsoilclas),LRHC(nsoilclas),           &
                LPSI(nsoilclas),LQMI(nsoilclas),                       &
                LBCL(nsoilclas),LKAS(nsoilclas),                       &
                LWIL(nsoilclas),LREF(nsoilclas),                       &
@@ -6921,8 +6906,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
 
 !----  Below are the arrays for the vegetation parameters
-         real (kind_phys) LALB(nvegclas),LMOI(nvegclas),LEMI(nvegclas),            &
-              LROU(nvegclas),LTHI(nvegclas),LSIG(nvegclas),            &
+         real (kind_phys) LALB(nvegclas),LMOI(nvegclas),LEMI(nvegclas), &
+              LROU(nvegclas),LTHI(nvegclas),LSIG(nvegclas),             &
               LPC(nvegclas)
 
 !************************************************************************
@@ -6962,18 +6947,18 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    real (kind_phys),     DIMENSION( 1:NLCAT ),  INTENT(IN)::         LUFRAC
    real (kind_phys),     DIMENSION( 1:NSCAT ),  INTENT(IN)::         SOILFRAC
 
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
             INTENT (  OUT)            ::                     pc, &
                                                            msnf, &
                                                          facsnf
 
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
             INTENT (INOUT   )         ::                  emiss, &
                                                             lai, &
                                                             znt
   LOGICAL, intent(in) :: rdlai2d
 !--- soil properties
-   real (kind_phys)                                       , &
+   real (kind_phys)                                            , &
             INTENT(  OUT)    ::                           RHOCS, &
                                                            BCLH, &
                                                             DQM, &
@@ -7007,25 +6992,25 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
             ifortbl(ivgtyp),ivgtyp,laitbl(ivgtyp),z0tbl(ivgtyp)
     ENDIF
 
-        deltalai(:) = 0.
+        deltalai(:) = zero
 
 ! 11oct2012 - seasonal correction on ZNT for crops and LAI for all veg. types
 ! factor = 1 with minimum greenness -->  vegfrac = shdmin (cold season)
 ! factor = 0 with maximum greenness -->  vegfrac = shdmax
 ! SHDMAX, SHDMIN and VEGFRAC are in % here.
-      if((shdmax - shdmin) .lt. 1) then
-        factor = 1. ! min greenness
+      if((shdmax - shdmin) .lt. one) then
+        factor = one ! min greenness
       else
-        factor = 1. - max(0.,min(1.,(vegfrac - shdmin)/max(1.,(shdmax-shdmin))))
+        factor = one - max(zero,min(one,(vegfrac - shdmin)/max(one,(shdmax-shdmin))))
       endif
 
 ! 18sept18 - LAITBL and Z0TBL are the max values
       do k = 1,nlcat
-       if(IFORTBL(k) == 1) deltalai(k)=min(0.2,0.8*LAITBL(K))
-       if(IFORTBL(k) == 2 .or. IFORTBL(k) == 7) deltalai(k)=min(0.5,0.8*LAITBL(K))
-       if(IFORTBL(k) == 3) deltalai(k)=min(0.45,0.8*LAITBL(K))
-       if(IFORTBL(k) == 4) deltalai(k)=min(0.75,0.8*LAITBL(K))
-       if(IFORTBL(k) == 5) deltalai(k)=min(0.86,0.8*LAITBL(K))
+       if(IFORTBL(k) == 1) deltalai(k)=min(0.2_kind_phys,0.8_kind_phys*LAITBL(K))
+       if(IFORTBL(k) == 2 .or. IFORTBL(k) == 7) deltalai(k)=min(0.5_kind_phys,0.8_kind_phys*LAITBL(K))
+       if(IFORTBL(k) == 3) deltalai(k)=min(0.45_kind_phys,0.8_kind_phys*LAITBL(K))
+       if(IFORTBL(k) == 4) deltalai(k)=min(0.75_kind_phys,0.8_kind_phys*LAITBL(K))
+       if(IFORTBL(k) == 5) deltalai(k)=min(0.86_kind_phys,0.8_kind_phys*LAITBL(K))
 
        if(k.ne.iswater) then
 !-- 20aug18 - change in LAItoday based on the greenness fraction for the current day
@@ -7033,7 +7018,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
          if(IFORTBL(k) == 7) then
 !-- seasonal change of roughness length for crops 
-           ZNTtoday(k) = Z0TBL(K) - 0.125 * factor
+           ZNTtoday(k) = Z0TBL(K) - 0.125_kind_phys * factor
          else
            ZNTtoday(k) = Z0TBL(K)
          endif
@@ -7048,24 +7033,24 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
          i,j,ivgtyp,factor,vegfrac,shdmin,shdmax,deltalai(ivgtyp),laitoday(ivgtyp),znttoday(ivgtyp)
     ENDIF
 
-        EMISS = 0.
-        ZNT   = 0.
-        ZNT1  = 0.
-        PC    = 0.
-        MSNF  = 0.
-        FACSNF= 0.
-        if(.not.rdlai2d) LAI = 0.
-        AREA  = 0.
+        EMISS = zero
+        ZNT   = zero
+        ZNT1  = zero
+        PC    = zero
+        MSNF  = zero
+        FACSNF= zero
+        if(.not.rdlai2d) LAI = zero
+        AREA  = zero
 !-- mosaic approach to landuse in the grid box
 ! Use  Mason (1988) Eq.(15) to compute effective ZNT;
 !  Lb - blending height =  L/200., where L is the length scale
 ! of regions with varying Z0 (Lb = 5 if L=1000 m)
-        LB = 5.
+        LB = 5._kind_phys
       if(mosaic_lu == 1) then
       do k = 1,nlcat
         AREA  = AREA + lufrac(k)
         EMISS = EMISS+ LEMITBL(K)*lufrac(k)
-        ZNT   = ZNT  + lufrac(k)/ALOG(LB/ZNTtoday(K))**2.
+        ZNT   = ZNT  + lufrac(k)/ALOG(LB/ZNTtoday(K))**2._kind_phys
 ! ZNT1 - weighted average in the grid box, not used, computed for comparison
         ZNT1  = ZNT1 + lufrac(k)*ZNTtoday(K)
         if(.not.rdlai2d) LAI = LAI  + LAItoday(K)*lufrac(k)
@@ -7074,8 +7059,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
         FACSNF= FACSNF + SNCOVFAC(K)*lufrac(k)
       enddo
 
-       if (area.gt.1.) area=1.
-       if (area <= 0.) then
+       if (area.gt.one) area=one
+       if (area <= zero) then
           print *,'Bad area of grid box', area
           errflg = 1
           errmsg = 'ERROR(SOILVEGIN): Bad area of grid box'
@@ -7088,7 +7073,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
         EMISS = EMISS/AREA
         ZNT1   = ZNT1/AREA
-        ZNT = LB/EXP(SQRT(1./ZNT))
+        ZNT = LB/EXP(SQRT(one/ZNT))
         if(.not.rdlai2d) LAI = LAI/AREA
         PC    = PC /AREA
         MSNF  = MSNF /AREA
@@ -7109,23 +7094,23 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
      endif
 
 ! parameters from SOILPARM.TBL
-          RHOCS  = 0.
-          BCLH   = 0.
-          DQM    = 0.
-          KSAT   = 0.
-          PSIS   = 0.
-          QMIN   = 0.
-          REF    = 0.
-          WILT   = 0.
-          QWRTZ  = 0.
-          AREA   = 0.
+          RHOCS  = zero
+          BCLH   = zero
+          DQM    = zero
+          KSAT   = zero
+          PSIS   = zero
+          QMIN   = zero
+          REF    = zero
+          WILT   = zero
+          QWRTZ  = zero
+          AREA   = zero
 ! mosaic approach
        if(mosaic_soil == 1 ) then
             do k = 1, nscat
         if(k.ne.14) then  ! STATSGO value for water
         !exclude water points from this loop
           AREA   = AREA + soilfrac(k)
-          RHOCS  = RHOCS + HC(k)*1.E6*soilfrac(k)
+          RHOCS  = RHOCS + HC(k)*1.E6_kind_phys*soilfrac(k)
           BCLH   = BCLH + BB(K)*soilfrac(k)
           DQM    = DQM + (MAXSMC(K)-                               &
                    DRYSMC(K))*soilfrac(k)
@@ -7137,11 +7122,11 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
           QWRTZ  = QWRTZ + QTZ(K)*soilfrac(k)
         endif
             enddo
-       if (area.gt.1.) area=1.
-       if (area <= 0.) then
+       if (area.gt.one) area=one
+       if (area <= zero) then
 ! area = 0. for water points
 !          print *,'Area of a grid box', area, 'iswater = ',iswater
-          RHOCS  = HC(ISLTYP)*1.E6
+          RHOCS  = HC(ISLTYP)*1.E6_kind_phys
           BCLH   = BB(ISLTYP)
           DQM    = MAXSMC(ISLTYP)-                               &
                    DRYSMC(ISLTYP)
@@ -7166,7 +7151,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 ! dominant category approach
         else
       if(isltyp.ne.14) then
-          RHOCS  = HC(ISLTYP)*1.E6
+          RHOCS  = HC(ISLTYP)*1.E6_kind_phys
           BCLH   = BB(ISLTYP)
           DQM    = MAXSMC(ISLTYP)-                               &
                    DRYSMC(ISLTYP)
@@ -7208,18 +7193,18 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
                                     its,ite, jts,jte, kts,kte,  &
                                     nzs
 
-   real (kind_phys), DIMENSION( ims:ime, 1:nzs, jms:jme ), &
+   real (kind_phys), DIMENSION( ims:ime, 1:nzs, jms:jme )     , &
             INTENT(IN)    ::                              TSLB, &
                                                          SMOIS
 
    INTEGER, DIMENSION( ims:ime, jms:jme )                      , &
             INTENT(INOUT)    ::                   ISLTYP,IVGTYP
 
-   real (kind_phys), DIMENSION( ims:ime, 1:nzs, jms:jme ) , &
+   real (kind_phys), DIMENSION( ims:ime, 1:nzs, jms:jme )      , &
             INTENT(OUT)    ::                            SMFR3D, &
                                                          SH2O
 
-   real (kind_phys), DIMENSION( ims:ime, jms:jme )        , &
+   real (kind_phys), DIMENSION( ims:ime, jms:jme )             , &
             INTENT(OUT)    ::                            MAVAIL
 
    !-- local
@@ -7230,8 +7215,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
    INTEGER                   :: errflag
 
-        RIW=900.*1.e-3
-        XLMELT=3.35E+5
+        RIW=rhoice*1.e-3_kind_phys
+        XLMELT=con_hfus
 
 ! for FIM
    itf=ite  !  min0(ite,ide-1)
@@ -7261,7 +7246,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
        ! has isltyp=14 for water
        if (isltyp(i,j) == 0) isltyp(i,j)=14
      
-       if(landfrac(i) > 0. ) then
+       if(landfrac(i) > zero ) then
        !-- land
        !-- Computate volumetric content of ice in soil
        !-- and initialize MAVAIL
@@ -7272,41 +7257,41 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
          QMIN   = DRYSMC   (ISLTYP(I,J))
          BCLH   = BB       (ISLTYP(I,J))
 
-         mavail(i,j) = max(0.00001,min(1.,(smois(i,1,j)-qmin)/(ref-qmin)))
+         mavail(i,j) = max(0.00001_kind_phys,min(one,(smois(i,1,j)-qmin)/(ref-qmin)))
 
          DO L=1,NZS
            !-- for land points initialize soil ice
            tln=log(TSLB(i,l,j)/tfrz)
           
-           if(tln.lt.0.) then
+           if(tln.lt.zero) then
              soiliqw(l)=(dqm+qmin)*(XLMELT*                        &
-            (tslb(i,l,j)-tfrz)/tslb(i,l,j)/9.81/psis)             &
-            **(-1./bclh)
-            soiliqw(l)=max(0.,soiliqw(l))
+            (tslb(i,l,j)-tfrz)/tslb(i,l,j)/grav/psis)              &
+            **(-one/bclh)
+            soiliqw(l)=max(zero,soiliqw(l))
             soiliqw(l)=min(soiliqw(l),smois(i,l,j))
             sh2o(i,l,j)=soiliqw(l)
             smfr3d(i,l,j)=(smois(i,l,j)-soiliqw(l))/RIW
          
            else
-             smfr3d(i,l,j)=0.
+             smfr3d(i,l,j)=zero
              sh2o(i,l,j)=smois(i,l,j)
            endif
          ENDDO
 
        elseif( fice(i) > min_seaice) then
        !-- ice
-         mavail(i,j) = 1.
+         mavail(i,j) = one
          DO L=1,NZS
-           smfr3d(i,l,j)=1.
-           sh2o(i,l,j)=0.
+           smfr3d(i,l,j)=one
+           sh2o(i,l,j)=zero
          ENDDO
     
        else
        !-- water  ISLTYP=14
-         mavail(i,j) = 1.
+         mavail(i,j) = one
          DO L=1,NZS
-           smfr3d(i,l,j)=0.
-           sh2o(i,l,j)=1.
+           smfr3d(i,l,j)=zero
+           sh2o(i,l,j)=one
          ENDDO
 
        endif ! land
@@ -7684,11 +7669,11 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
       real (kind_phys), PARAMETER:: C7= .379534310E-11
       real (kind_phys), PARAMETER:: C8=-.321582393E-13
 
-      X=MAX(-80.,T-273.16)
+      X=MAX(-80._kind_dbl_prec,T-273.16_kind_dbl_prec)
 
       ESL=C0+X*(C1+X*(C2+X*(C3+X*(C4+X*(C5+X*(C6+X*(C7+X*C8)))))))
-      ESL=MIN(ESL, P*0.15)        ! Even with P=1050mb and T=55C, the sat. vap.  pres only contributes to ~15% of total pres.
-      RSLF=.622*ESL/max(1.e-4,(P-ESL))
+      ESL=MIN(ESL, P*0.15_kind_dbl_prec)        ! Even with P=1050mb and T=55C, the sat. vap.  pres only contributes to ~15% of total pres.
+      RSLF=.622_kind_dbl_prec*ESL/max(1.e-4_kind_dbl_prec,(P-ESL))
 
       END FUNCTION RSLF
 
