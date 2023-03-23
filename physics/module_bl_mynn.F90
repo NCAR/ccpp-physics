@@ -250,7 +250,6 @@ MODULE module_bl_mynn
         onethird  , twothirds , tkmin      , t0c       , &
         tice
 
-
   IMPLICIT NONE
 
 !get rid
@@ -578,14 +577,39 @@ CONTAINS
     REAL,DIMENSION(KTS:KTE+1) :: sd_aw1,sd_awthl1,sd_awqt1, &
                   sd_awqv1,sd_awqc1,sd_awu1,sd_awv1,sd_awqke1
 
-    REAL, DIMENSION(KTS:KTE+1) :: zw
-    REAL :: cpm,sqcg,flt,fltv,flq,flqv,flqc,pmz,phh,exnerg,zet,phi_m,&
-          & afk,abk,ts_decay, qc_bl2, qi_bl2,                        &
-          & th_sfc,ztop_plume,sqc9,sqi9
+    REAL, DIMENSION(KTS:KTE+1,ITS:ITE) :: zw,rthratenKI
+    !REAL :: cpm,sqcg,flt,fltv,flq,flqv,flqc,pmz,phh,exnerg,zet,phi_m,&
+    REAL :: cpm,pmz,phh,exnerg,zet,phi_m,                   & !JFM removed sqcg for GPU
+          & afk,abk,ts_decay, qc_bl2, qi_bl2,               &
+          & sqc9,sqi9
+    REAL, DIMENSION(ITS:ITE) :: th_sfc,ztop_plume,flq,flqv, & !JFM Promoted for GPU
+          & flqc,flt,fltv                                     !JFM Promoted for GPU
+    REAL :: qcn,thvn    
 
     !top-down diffusion
     REAL, DIMENSION(ITS:ITE) :: maxKHtopdown
     REAL,DIMENSION(KTS:KTE) :: KHtopdown,TKEprodTD
+
+    !JFM Variabls for replacing automatic arrays for GPU performance
+    REAL, DIMENSION(kts:kte,its:ite) :: realKTEa,realKTEb,realKTEc,realKTEd, &
+          & realKTEe,realKTEf,realKTEg,realKTEh,realKTEi,realKTEj,    &
+          & realKTEk,realKTEl,realKTEm,realKTEn,realKTEo,realKTEp 
+    REAL, DIMENSION(kts:kte+1,its:ite) :: realKTEP1a,realKTEP1b,realKTEP1c
+    !JFM End Variabls for replacing automatic arrays for GPU performance
+
+    !JFM variable for GET_PBLH to prevent automatic array
+    INTEGER, DIMENSION(kts:kte,its:ite) :: kzia
+    !JFM End variable for GET_PBLH
+    !JFM variables for DMP_mf to prevent automatic arrays
+    INTEGER, PARAMETER :: NUPdmp_mf = 10 !This must match NUP in DMP_mf
+    REAL, DIMENSION(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE) :: UPW,UPTHL,UPQT,UPQC,UPQV,      &
+          &                                           UPA,UPU,UPV,UPTHV,UPQKE,UPQNC, &
+          &                                           UPQNI,UPQNWFA,UPQNIFA
+    REAL   ,DIMENSION(KTS:KTE,1:NUPdmp_mf,ITS:ITE) :: ENT
+    REAL,DIMENSION(nchem)                        :: chemn
+    REAL,DIMENSION(KTS:KTE+1,1:NUPdmp_mf, nchem) :: UPCHEM
+    REAL,DIMENSION(KTS:KTE+1,             nchem) :: edmf_chem
+    !JFM End variables for DMP_mf
 
     LOGICAL :: INITIALIZE_QKE
 
@@ -649,7 +673,23 @@ CONTAINS
     maxmf(its:ite)=0.
     maxKHtopdown(its:ite)=0.
 
-    ! DH* CHECK HOW MUCH OF THIS INIT IF-BLOCK IS ACTUALLY NEEDED FOR RESTARTS
+!JFM zw can be set here for all subsequent uses
+    DO i=ITS,ITF
+       zw(kts,i)=0.
+       DO k=KTS+1,KTE
+          zw(k,i)=zw(k-1,i)+dz(i,k-1)
+       ENDDO
+       zw(kte+1,i)=zw(kte,i)+dz(i,kte)
+    ENDDO      
+
+!JFM reverse indecies for rthraten
+    DO i=ITS,ITF
+       DO k=KTS,KTE
+          rthratenKI(k,i) = rthraten(i,k)
+       ENDDO
+    ENDDO
+    
+! DH* CHECK HOW MUCH OF THIS INIT IF-BLOCK IS ACTUALLY NEEDED FOR RESTARTS
 !> - Within the MYNN-EDMF, there is a dependecy check for the first time step,
 !! If true, a three-dimensional initialization loop is entered. Within this loop,
 !! several arrays are initialized and k-oriented (vertical) subroutines are called 
@@ -782,16 +822,11 @@ CONTAINS
                 ENDIF
                 thvl(k)=thlsg(k)*(1.+0.61*sqv(k))
 
-                IF (k==kts) THEN
-                   zw(k)=0.
-                ELSE
-                   zw(k)=zw(k-1)+dz(i,k-1)
-                ENDIF
                 IF (INITIALIZE_QKE) THEN
                    !Initialize tke for initial PBLH calc only - using 
                    !simple PBLH form of Koracin and Berkowicz (1988, BLM)
                    !to linearly taper off tke towards top of PBL.
-                   qke1(k)=5.*ust(i) * MAX((ust(i)*700. - zw(k))/(MAX(ust(i),0.01)*700.), 0.01)
+                   qke1(k)=5.*ust(i) * MAX((ust(i)*700. - zw(k,i))/(MAX(ust(i),0.01)*700.), 0.01)
                 ELSE
                    qke1(k)=qke(i,k)
                 ENDIF
@@ -809,12 +844,10 @@ CONTAINS
 
              ENDDO
 
-             zw(kte+1)=zw(kte)+dz(i,kte)
-
 !>  - Call get_pblh() to calculate hybrid (\f$\theta_{vli}-TKE\f$) PBL height.
 !             CALL GET_PBLH(KTS,KTE,PBLH(i),thetav,&
              CALL GET_PBLH(KTS,KTE,PBLH(i),thvl,  &
-               &  Qke1,zw,dz1,xland(i),KPBL(i))
+               &  Qke1,zw(1,i),dz1,xland(i),KPBL(i),kzia(kts,i) )
              
 !>  - Call scale_aware() to calculate similarity functions for scale-adaptive control
 !! (\f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$).
@@ -832,7 +865,7 @@ CONTAINS
 !! within mym_initialize(): mym_level2() and mym_length().
              CALL mym_initialize (                & 
                   &kts,kte,                       &
-                  &dz1, dx(i), zw,                &
+                  &dz1, dx(i), zw(1,i),           &
                   &u1, v1, thl, sqv,              &
                   &thlsg, sqwsg,                  &
                   &PBLH(i), th1, thetav, sh, sm,  &
@@ -842,7 +875,9 @@ CONTAINS
                   &bl_mynn_mixlength,             &
                   &edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf,&
                   &INITIALIZE_QKE,                &
-                  &spp_pbl,rstoch_col )
+                  &spp_pbl,rstoch_col,            &
+                  &realKTEa(KTS,i),realKTEb(KTS,i),&   !JFM for mym_length
+                  &realKTEc(KTS,i),realKTEd(KTS,i) )   !JFM for mym_length
 
              IF (.not.restart) THEN
                 !UPDATE 3D VARIABLES
@@ -884,6 +919,130 @@ CONTAINS
        qke=qke_adv
     ENDIF
 
+!$acc update device(                                          &
+!$acc        cp        , cpv       , cliq       , cice      , &
+!$acc        p608      , ep_2      , ep_3       , gtr       , &
+!$acc        grav      , g_inv     , karman                 , &
+!$acc        rcp       , r_d       , r_v        , rk        , &
+!$acc        rvovrd                                         , &
+!$acc        xlf       , xlv       , xls        , xlscp     , &
+!$acc        xlvcp     , tv0       , tv1                    , &
+!$acc        t0c )
+
+!$acc enter data copyin( bl_mynn_cloudpdf,bl_mynn_edmf_tke,bl_mynn_mixscalars,bl_mynn_tkebudget,kts,qni(:,:),pattern_spp_pbl(its:ite,kts:kte),sqc3d(:,:),delt,ts(its:ite),u(its:ite,kts:kte),w(its:ite,kts:kte),v(its:ite,kts:kte),t3d(its:ite,kts:kte),sqv3d(its:ite,kts:kte),ozone(:,:),dz(its:ite,kts:kte),qnwfa(:,:),sqi3d(:,:),spp_pbl,qnc(:,:),qnifa(:,:),p(its:ite,kts:kte),th(its:ite,kts:kte),kte,flag_qnwfa,rho(its:ite,kts:kte),flag_qni,flag_qnifa,flag_qnc,flag_qi,flag_qc,exner(its:ite,kts:kte),bl_mynn_mixlength,bl_mynn_edmf_mom,bl_mynn_edmf,closure )
+    
+!$acc enter data copyin( det_sqv3d(:,:) )
+!$acc enter data copyin(edmf_chem(KTS:KTE+1,nchem),fltv(ITS:ITE),chemn(:),frp(:),nchem,   &
+!$acc      emis_ant_no(:),bl_mynn_mixqt,th_sfc(ITS:ITE),flqv(ITS:ITE),flt(ITS:ITE),fire_turb,               &
+!$acc      flqc(ITS:ITE),sm3d(its:ite,kts:kte),mix_chem,maxkhtopdown(its:ite),ztop_plume(its:ite), &
+!$acc      vdep(:,:),kdvel,upchem(:,:,:),   &
+!$acc      ndvel,flq(ITS:ITE),chem3d(:,:,:),bl_mynn_cloudmix )
+!$acc enter data copyin(cov(its:ite,kts:kte))
+!$acc enter data copyin(sub_sqv3d(:,:),edmf_ent1(:),edmf_a(:,:),edmf_qt1(:),edmf_qc(:,:),edmf_thl1(:),edmf_ent(:,:) )
+!$acc enter data copyin(rqniblten(its:ite,kts:kte),rqncblten(its:ite,kts:kte),rmol(:), &
+!$acc      rqnwfablten(its:ite,kts:kte),rqvblten(its:ite,kts:kte),               &
+!$acc      rublten(its:ite,kts:kte),rthblten(its:ite,kts:kte),                   &
+!$acc      el_pbl(its:ite,kts:kte),exch_h(its:ite,kts:kte),                      &
+!$acc      rqcblten(its:ite,kts:kte),rqiblten(its:ite,kts:kte),                  &
+!$acc      rqnifablten(its:ite,kts:kte),det_thl3d(:,:))
+!$acc enter data copyin(vdfg(:),ENT(:,:,:))
+!$acc enter data copyin(qc_bl(its:ite,kts:kte))
+!$acc enter data copyin(pblh(:))
+!$acc enter data copyin(cldfra_bl(its:ite,kts:kte))
+!$acc enter data copyin(qshear(its:ite,kts:kte))
+!$acc enter data copyin(rvblten(its:ite,kts:kte),edmf_w(:,:),nupdraft(:))
+!$acc enter data copyin(qke(its:ite,kts:kte))
+!$acc enter data copyin(qbuoy(its:ite,kts:kte))
+!$acc enter data copyin(dozone(its:ite,kts:kte),qi_bl(its:ite,kts:kte),dx(:),tsq(its:ite,kts:kte),ust(:))
+!$acc enter data copyin(sub_thl3d(:,:))
+!$acc enter data copyin(exch_m(its:ite,kts:kte),qwt(its:ite,kts:kte))
+!$acc enter data copyin(hfx(:),zw(:,:),xland(:))
+!$acc enter data copyin(psig_bl(:))
+!$acc enter data copyin(dqke(its:ite,kts:kte),qdiss(its:ite,kts:kte))
+!$acc enter data copyin(ktop_plume(:),kpbl(:),sh3d(its:ite,kts:kte))
+!$acc enter data copyin(edmf_qt(:,:),edmf_thl(:,:),maxmf(:))
+!$acc enter data copyin(qsq(its:ite,kts:kte),psig_shcu(:))
+!$acc enter data copyin( ps(IMS:IME),qfx(IMS:IME),wspd(IMS:IME),uoce(IMS:IME),voce(IMS:IME) )
+!$acc enter data copyin(UPW(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPTHL(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPQT(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPQC(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPQV(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPA(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPU(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPV(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPTHV(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPQKE(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPQNC(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPQNI(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPQNWFA(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE),UPQNIFA(KTS:KTE+1,1:NUPdmp_mf,ITS:ITE) )
+
+!$acc enter data copyin( realKTEa  (kts:kte  ,its:ite),realKTEb  (kts:kte  ,its:ite) )
+!$acc enter data copyin( realKTEk  (kts:kte  ,its:ite),realKTEP1a(kts:kte+1,its:ite) )
+!$acc enter data copyin( realKTEP1b(kts:kte+1,its:ite),realKTEP1c(kts:kte+1,its:ite) )
+!$acc enter data copyin( realKTEl  (kts:kte  ,its:ite),realKTEm  (kts:kte  ,its:ite) )
+!$acc enter data copyin( realKTEn  (kts:kte  ,its:ite),realKTEo  (kts:kte  ,its:ite) )
+!$acc enter data copyin( realKTEp  (kts:kte  ,its:ite),realKTEc  (kts:kte  ,its:ite) )
+!$acc enter data copyin( realKTEd  (kts:kte  ,its:ite),realKTEe  (kts:kte  ,its:ite) )
+!$acc enter data copyin( realKTEf  (kts:kte  ,its:ite),realKTEg  (kts:kte  ,its:ite) )
+!$acc enter data copyin( realKTEh  (kts:kte  ,its:ite),realKTEi  (kts:kte  ,its:ite) )
+!$acc enter data copyin( realKTEj  (kts:kte  ,its:ite),kzia      (kts:kte  ,its:ite) )
+
+!$acc kernels loop gang private( qcn,thvn,qsq1,qnwfa1,qv1,sh,el,det_thl,qc1,qi1, &
+!$acc      cldfra_bl1d,qc_bl1d,qi_bl1d,dqnwfa1,tsq1,u1,w1,v1,sub_thl,thvl,sm,Dfm,&
+!$acc      ozone1,p1,sqi,dozone1,dqc1,dqnc1,dqi1,dqnifa1,dqni1,diss_heat,Dfh,Dfq,&
+!$acc      qc_bl1d_old,sqc,sqv,thetav,thl,sqw,th1,thlsg,qnc1,qke1,qnifa1,        &
+!$acc      qni1,ex1,edmf_w1,qi_bl1d_old,rstoch_col,tk1,cldfra_bl1d_old,          &
+!$acc      rho1,dz1,edmf_qc1,edmf_a1,sub_sqv,sub_u,sub_v,sqwsg,det_sqv,cov1,     &
+!$acc      edmf_a_dd1,edmf_w_dd1,edmf_qc_dd1,det_sqc,det_u,det_v,Tcd,Qcd,        &
+!$acc      s_awchem1,chem1,vd1,                                                  &
+!$acc      s_aw1,s_awthl1,s_awqt1,s_awqv1,s_awqc1,s_awu1,s_awv1,s_awqke1,        &
+!$acc      s_awqnc1,s_awqni1,s_awqnwfa1,s_awqnifa1,Pdk,Pdt,Pdq,Pdc,K_m1,K_h1,    &
+!$acc      sd_aw1,sd_awthl1,sd_awqt1,sd_awqv1,sd_awqc1,sd_awu1,sd_awv1,sd_awqke1,&
+!$acc      TKEprodTD,Vt,Vq,sgm,qWT1,qSHEAR1,qBUOY1,qDISS1,Du1,Dv1,Dth1,Dqv1 )    &
+!$acc      present( realKTEa  (kts:kte  ,its:ite),realKTEb  (kts:kte  ,its:ite), &
+!$acc               realKTEk  (kts:kte  ,its:ite),realKTEP1a(kts:kte+1,its:ite), &
+!$acc               realKTEP1b(kts:kte+1,its:ite),realKTEP1c(kts:kte+1,its:ite), &
+!$acc               realKTEl  (kts:kte  ,its:ite),realKTEm  (kts:kte  ,its:ite), &
+!$acc               realKTEn  (kts:kte  ,its:ite),realKTEo  (kts:kte  ,its:ite), &
+!$acc               realKTEp  (kts:kte  ,its:ite),realKTEc  (kts:kte  ,its:ite), &
+!$acc               realKTEd  (kts:kte  ,its:ite),realKTEe  (kts:kte  ,its:ite), &
+!$acc               realKTEf  (kts:kte  ,its:ite),realKTEg  (kts:kte  ,its:ite), &
+!$acc               realKTEh  (kts:kte  ,its:ite),realKTEi  (kts:kte  ,its:ite), &
+!$acc               realKTEj  (kts:kte  ,its:ite),kzia      (kts:kte  ,its:ite)) &
+!$acc      present( UPW,UPTHL,UPQT,UPQC,UPQV,UPA,UPU,UPV,UPTHV,UPQKE,UPQNC,UPQNI,UPQNWFA,UPQNIFA ) &
+!$acc      present(det_sqv3d(:,:),ndvel)                                         &
+!$acc      present(cov(its:ite,kts:kte))                                         &
+!$acc      present(sub_sqv3d(:,:),edmf_ent1(:),edmf_a(:,:),edmf_qt1(:),edmf_qc(:,:),edmf_thl1(:))  &
+!$acc      present(rqniblten(its:ite,kts:kte),rqncblten(its:ite,kts:kte),rmol(:),&
+!$acc      rqnwfablten(its:ite,kts:kte),rqvblten(its:ite,kts:kte),               &
+!$acc      rublten(its:ite,kts:kte),rthblten(its:ite,kts:kte),                   &
+!$acc      el_pbl(its:ite,kts:kte),exch_h(its:ite,kts:kte),                      &
+!$acc      rqcblten(its:ite,kts:kte),rqiblten(its:ite,kts:kte),                  &
+!$acc      rqnifablten(its:ite,kts:kte),det_thl3d(:,:))                          &
+!$acc      present(vdfg(:),ENT(:,:,:))                                           &
+!$acc      present(qc_bl(its:ite,kts:kte))                                       &
+!$acc      present(pblh(:))                                                      &
+!$acc      present(cldfra_bl(its:ite,kts:kte))                                   &
+!$acc      present(qshear(its:ite,kts:kte))                                      &
+!$acc      present(rvblten(its:ite,kts:kte),edmf_w(:,:),nupdraft(:))             &
+!$acc      present(qke(its:ite,kts:kte))                                         &
+!$acc      present(qbuoy(its:ite,kts:kte))                                       &
+!$acc      present(dozone(its:ite,kts:kte),qi_bl(its:ite,kts:kte),dx(:),         &
+!$acc              tsq(its:ite,kts:kte),ust(:))                                  &
+!$acc      present(sub_thl3d(:,:))                                               &
+!$acc      present(exch_m(its:ite,kts:kte),qwt(its:ite,kts:kte))                 &
+!$acc      present(hfx(:),zw(:,:),xland(:))                                      &
+!$acc      present(psig_bl(:))                                                   &
+!$acc      present(dqke(its:ite,kts:kte),qdiss(its:ite,kts:kte))                 &
+!$acc      present(ktop_plume(:),kpbl(:),sh3d(its:ite,kts:kte))                  &
+!$acc      present(edmf_qt(:,:),edmf_thl(:,:),edmf_ent(:,:),maxmf(:))            &
+!$acc      present(qsq(its:ite,kts:kte),psig_shcu(:))                            &
+!$acc      present(ps(IMS:IME),qfx(IMS:IME),wspd(IMS:IME),                       &
+!$acc              uoce(IMS:IME),voce(IMS:IME))                                  &
+!$acc      present( bl_mynn_cloudpdf,bl_mynn_edmf_tke,bl_mynn_mixscalars,        &
+!$acc      bl_mynn_tkebudget,kts,qni(:,:),pattern_spp_pbl(its:ite,kts:kte),      &
+!$acc      sqc3d(:,:),delt,ts(its:ite),u(its:ite,kts:kte),w(its:ite,kts:kte),    &
+!$acc      v(its:ite,kts:kte),t3d(its:ite,kts:kte),sqv3d(its:ite,kts:kte),       &
+!$acc      ozone(:,:),dz(its:ite,kts:kte),qnwfa(:,:),sqi3d(:,:),spp_pbl,qnc(:,:),&
+!$acc      qnifa(:,:),p(its:ite,kts:kte),th(its:ite,kts:kte),kte,flag_qnwfa,     &
+!$acc      rho(its:ite,kts:kte),flag_qni,flag_qnifa,flag_qnc,flag_qi,flag_qc,    &
+!$acc      exner(its:ite,kts:kte),bl_mynn_mixlength,bl_mynn_edmf_mom,            &
+!$acc      bl_mynn_edmf,closure )                                                &
+!$acc      present(edmf_chem(KTS:KTE+1,nchem),fltv(ITS:ITE),chemn(:),frp(:),nchem,        &
+!$acc      emis_ant_no(:),bl_mynn_mixqt,th_sfc(its:ite),flqv(its:ite),flt(ITS:ITE),fire_turb,               &
+!$acc      flqc(its:ite),sm3d(its:ite,kts:kte),mix_chem,maxkhtopdown(its:ite),ztop_plume(its:ite), &
+!$acc      vdep(:,:),kdvel,upchem(:,:,:),   &
+!$acc      flq(its:ite),chem3d(:,:,:),bl_mynn_cloudmix )
+    
     DO i=ITS,ITF
        DO k=KTS,KTE !KTF
             !JOE-TKE BUDGET
@@ -1044,11 +1203,6 @@ CONTAINS
              det_u(k)=0.
              det_v(k)=0.
 
-             IF (k==kts) THEN
-                zw(k)=0.
-             ELSE
-                zw(k)=zw(k-1)+dz(i,k-1)
-             ENDIF
           ENDDO ! end k
 
           !initialize smoke/chem arrays (if used):
@@ -1078,7 +1232,6 @@ CONTAINS
                 enddo
              ENDIF
 
-          zw(kte+1)=zw(kte)+dz(i,kte)
           !EDMF
           s_aw1(kte+1)=0.
           s_awthl1(kte+1)=0.
@@ -1110,7 +1263,7 @@ CONTAINS
 !! PBL height diagnostic.
 !          CALL GET_PBLH(KTS,KTE,PBLH(i),thetav,&
           CALL GET_PBLH(KTS,KTE,PBLH(i),thvl,&
-          & Qke1,zw,dz1,xland(i),KPBL(i))
+          & Qke1,zw(1,i),dz1,xland(i),KPBL(i),kzia(kts,i) )
 
 !>  - Call scale_aware() to calculate the similarity functions,
 !! \f$P_{\sigma-PBL}\f$ and \f$P_{\sigma-shcu}\f$, to control 
@@ -1123,7 +1276,7 @@ CONTAINS
              Psig_shcu(i)=1.0
           ENDIF
 
-          sqcg= 0.0   !ill-defined variable; qcg has been removed
+          !sqcg= 0.0   !ill-defined variable; qcg has been removed
           cpm=cp*(1.+0.84*qv1(kts))
           exnerg=(ps(i)/p1000mb)**rcp
 
@@ -1141,17 +1294,18 @@ CONTAINS
           !flq = qfx(i)/  rho(i,kts)       &
           !  & -vdfg(i)*(sqc(kts) - sqcg )
           !-----------------------------------------------------
-          flqv = qfx(i)/rho1(kts)
-          flqc = -vdfg(i)*(sqc(kts) - sqcg )
-          th_sfc = ts(i)/ex1(kts)
+          flqv(i) = qfx(i)/rho1(kts)
+          !flqc = -vdfg(i)*(sqc(kts) - sqcg )
+          flqc(i) = -vdfg(i)*(sqc(kts) ) !JFM removed sqcg for GPU
+          th_sfc(i) = ts(i)/ex1(kts)
 
           ! TURBULENT FLUX FOR TKE BOUNDARY CONDITIONS
-          flq =flqv+flqc !! LATENT
-          flt =hfx(i)/(rho1(kts)*cpm )-xlvcp*flqc/ex1(kts)  !! Temperature flux
-          fltv=flt + flqv*p608*th_sfc                       !! Virtual temperature flux
+          flq (i) = flqv(i)+flqc(i) !! LATENT
+          flt (i) = hfx(i)/(rho1(kts)*cpm )-xlvcp*flqc(i)/ex1(kts)  !! Temperature flux
+          fltv(i) = flt(i) + flqv(i)*p608*th_sfc(i)                    !! Virtual temperature flux
 
           ! Update 1/L using updated sfc heat flux and friction velocity
-          rmol(i) = -karman*gtr*fltv/max(ust(i)**3,1.0e-6)
+          rmol(i) = -karman*gtr*fltv(i)/max(ust(i)**3,1.0e-6)
           zet = 0.5*dz(i,kts)*rmol(i)
           zet = MAX(zet, -20.)
           zet = MIN(zet,  20.)
@@ -1177,24 +1331,28 @@ CONTAINS
 !! used to calculate the buoyancy flux. Different cloud PDFs can be
 !! selected by use of the namelist parameter \p bl_mynn_cloudpdf.
 
-          CALL  mym_condensation ( kts,kte,      &
-               &dx(i),dz1,zw,thl,sqw,sqv,sqc,sqi,&
-               &p1,ex1,tsq1,qsq1,cov1,           &
-               &Sh,el,bl_mynn_cloudpdf,          &
-               &qc_bl1D,qi_bl1D,cldfra_bl1D,     &
-               &PBLH(i),HFX(i),                  &
-               &Vt, Vq, th1, sgm, rmol(i),       &
-               &spp_pbl, rstoch_col              )
+          CALL  mym_condensation ( kts,kte,           &
+               &dx(i),dz1,zw(1,i),thl,sqw,sqv,sqc,sqi,&
+               &p1,ex1,tsq1,qsq1,cov1,                &
+               &Sh,el,bl_mynn_cloudpdf,               &
+               &qc_bl1D,qi_bl1D,cldfra_bl1D,          &
+               &PBLH(i),HFX(i),                       &
+               &Vt, Vq, th1, sgm, rmol(i),            &
+               &spp_pbl, rstoch_col,                  &
+               &realKTEl(KTS,i),realKTEm(KTS,i),      & !JFM removbe automatic arrays for GPU
+               &realKTEa(KTS,i),realKTEb(KTS,i),      & !JFM removbe automatic arrays for GPU
+               &realKTEc(KTS,i) )                       !JFM removbe automatic arrays for GPU
 
 !>  - Add TKE source driven by cloud top cooling
 !!  Calculate the buoyancy production of TKE from cloud-top cooling when
 !! \p bl_mynn_topdown =1.
           IF (bl_mynn_topdown.eq.1)then
-             CALL topdown_cloudrad(kts,kte,dz1,zw,          &
+             CALL topdown_cloudrad(kts,kte,dz1,zw(1,i),     &
                 &xland(i),kpbl(i),PBLH(i),                  &
                 &sqc,sqi,sqw,thl,th1,ex1,p1,rho1,thetav,    &
-                &cldfra_bl1D,rthraten,                      &
-                &maxKHtopdown(i),KHtopdown,TKEprodTD        )
+                &cldfra_bl1D,rthratenKI(1,I),               &
+                &maxKHtopdown(i),realKTEd(KTS,i),TKEprodTD, &
+                &realKTEa(KTS,i),realKTEb(KTS,i),realKTEc(KTS,i) )
           ELSE
              maxKHtopdown(i)  = 0.0
              KHtopdown(kts:kte) = 0.0
@@ -1204,7 +1362,7 @@ CONTAINS
           IF (bl_mynn_edmf > 0) THEN
             !PRINT*,"Calling DMP Mass-Flux: i= ",i
             CALL DMP_mf(                          &
-               &kts,kte,delt,zw,dz1,p1,rho1,      &
+               &kts,kte,delt,zw(1,i),dz1,p1,rho1, &
                &bl_mynn_edmf_mom,                 &
                &bl_mynn_edmf_tke,                 &
                &bl_mynn_mixscalars,               &
@@ -1212,9 +1370,9 @@ CONTAINS
                &sqw,sqv,sqc,qke1,                 &
                &qnc1,qni1,qnwfa1,qnifa1,          &
                &ex1,Vt,Vq,sgm,                    &
-               &ust(i),flt,fltv,flq,flqv,         &
+               &ust(i),flt(i),fltv(i),flq(i),flqv(i),   &
                &PBLH(i),KPBL(i),DX(i),            &
-               &xland(i),th_sfc,                  &
+               &xland(i),th_sfc(i),               &
             ! now outputs - tendencies
             ! &,dth1mf,dqv1mf,dqc1mf,du1mf,dv1mf  &
             ! outputs - updraft properties
@@ -1233,6 +1391,7 @@ CONTAINS
             ! chem/smoke mixing
                & nchem,chem1,s_awchem1,           &
                & mix_chem,                        &
+               & UPCHEM,edmf_chem,chemn,          & !JFM Eliminate automatic arrays for GPU
                & qc_bl1D,cldfra_bl1D,             &
                & qc_bl1D_old,cldfra_bl1D_old,     &
                & FLAG_QC,FLAG_QI,                 &
@@ -1240,24 +1399,30 @@ CONTAINS
                & FLAG_QNWFA,FLAG_QNIFA,           &
                & Psig_shcu(i),                    &
                & nupdraft(i),ktop_plume(i),       &
-               & maxmf(i),ztop_plume,             &
-               & spp_pbl,rstoch_col               )
+               & maxmf(i),ztop_plume(i),          &
+               & spp_pbl,rstoch_col,qcn,thvn,     &
+               & realKTEa(KTS,i),UPW(KTS,1,i),UPTHL(KTS,1,i),UPQT(KTS,1,i),UPQC(KTS,1,i),           & !JFM Eliminate automatic arrays for GPU
+               & UPQV(KTS,1,i),UPA(KTS,1,i),UPU(KTS,1,i),UPV(KTS,1,i),UPTHV(KTS,1,i),UPQKE(KTS,1,i),& !JFM Eliminate automatic arrays for GPU
+               & UPQNC(KTS,1,i),UPQNI(KTS,1,i),UPQNWFA(KTS,1,i),UPQNIFA(KTS,1,i),ENT(KTS,1,i),      & !JFM Eliminate automatic arrays for GPU
+               & realKTEb(KTS,i),realKTEc(KTS,i),realKTEd(KTS,i),                                   & !JFM Eliminate automatic arrays for GPU
+               & realKTEe(KTS,i),realKTEf(KTS,i),realKTEg(KTS,i),                                   & !JFM Eliminate automatic arrays for GPU
+               & realKTEP1a(KTS,i),realKTEP1b(KTS,i) )                                                !JFM Eliminate automatic arrays for GPU
           ENDIF
 
           IF (bl_mynn_edmf_dd == 1) THEN
-            CALL DDMF_JPL(kts,kte,delt,zw,dz1,p1, &
-              &u1,v1,th1,thl,thetav,tk1,          &
-              sqw,sqv,sqc,rho1,ex1,               &
-              &ust(i),flt,flq,                    &
-              &PBLH(i),KPBL(i),                   &
-              &edmf_a_dd1,edmf_w_dd1,edmf_qt_dd1, &
-              &edmf_thl_dd1,edmf_ent_dd1,         &
-              &edmf_qc_dd1,                       &
-              &sd_aw1,sd_awthl1,sd_awqt1,         &
-              &sd_awqv1,sd_awqc1,sd_awu1,sd_awv1, &
-              &sd_awqke1,                         &
-              &qc_bl1d,cldfra_bl1d,               &
-              &rthraten(i,:)                      )
+            CALL DDMF_JPL(kts,kte,delt,zw(1,i),dz1,p1, &
+              &u1,v1,th1,thl,thetav,tk1,               &
+              sqw,sqv,sqc,rho1,ex1,                    &
+              &ust(i),flt(i),flq(i),                   &
+              &PBLH(i),KPBL(i),                        &
+              &edmf_a_dd1,edmf_w_dd1,edmf_qt_dd1,      &
+              &edmf_thl_dd1,edmf_ent_dd1,              &
+              &edmf_qc_dd1,                            &
+              &sd_aw1,sd_awthl1,sd_awqt1,              &
+              &sd_awqv1,sd_awqc1,sd_awu1,sd_awv1,      &
+              &sd_awqke1,                              &
+              &qc_bl1d,cldfra_bl1d,                    &
+              &rthratenKI(1,i),qcn,thvn )
           ENDIF
 
           !Capability to substep the eddy-diffusivity portion
@@ -1266,12 +1431,12 @@ CONTAINS
 
           CALL mym_turbulence (                  & 
                &kts,kte,closure,                 &
-               &dz1, DX(i), zw,                  &
+               &dz1, DX(i), zw(1,i),             &
                &u1, v1, thl, thetav, sqc, sqw,   &
                &thlsg, sqwsg,                    &
                &qke1, tsq1, qsq1, cov1,          &
                &vt, vq,                          &
-               &rmol(i), flt, flq,               &
+               &rmol(i), flt(i), flq(i),         &
                &PBLH(i),th1,                     &
                &Sh,Sm,el,                        &
                &Dfm,Dfh,Dfq,                     &
@@ -1281,20 +1446,29 @@ CONTAINS
                &bl_mynn_tkebudget,               &
                &Psig_bl(i),Psig_shcu(i),         &
                &cldfra_bl1D,bl_mynn_mixlength,   &
-               &edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf,   &
-               &TKEprodTD,                       &
-               &spp_pbl,rstoch_col)
+               &edmf_w1,edmf_a1,edmf_qc1,        &
+               &bl_mynn_edmf,TKEprodTD,spp_pbl,  &
+               &rstoch_col,realKTEe(KTS,i),realKTEf(KTS,i),     & !JFM Eliminate automatic arrays for GPU
+               &realKTEg(KTS,i),realKTEh(KTS,i),realKTEi(KTS,i),& !JFM Eliminate automatic arrays for GPU
+               &realKTEj(KTS,i),realKTEa(KTS,i),realKTEb(KTS,i),& !JFM for mym_length
+               &realKTEc(KTS,i),realKTEd(KTS,i) )                 !JFM for mym_length
 
 !>  - Call mym_predict() to solve TKE and 
 !! \f$\theta^{'2}, q^{'2}, and \theta^{'}q^{'}\f$
 !! for the following time step.
-          CALL mym_predict (kts,kte,closure,     &
-               &delt2, dz1,                      &
-               &ust(i), flt, flq, pmz, phh,      &
+          CALL mym_predict (kts,kte,closure,      &
+               &delt2, dz1,                       &
+               &ust(i), flt(i), flq(i), pmz, phh, &
                &el, dfq, rho1, pdk, pdt, pdq, pdc,&
-               &Qke1, Tsq1, Qsq1, Cov1,          &
+               &Qke1, Tsq1, Qsq1, Cov1,           &
                &s_aw1, s_awqke1, bl_mynn_edmf_tke,&
-               &qWT1, qDISS1,bl_mynn_tkebudget) !! TKE budget  (Puhales, 2020)
+               &qWT1, qDISS1,bl_mynn_tkebudget,                     & !! TKE budget  (Puhales, 2020)
+               &realKTEb(KTS,i),realKTEc(KTS,i),realKTEe(KTS,i),    & !! JFM Eliminate automatic arrays for GPU
+               &realKTEf(KTS,i),realKTEg(KTS,i),realKTEh(KTS,i),    & !! JFM Eliminate automatic arrays for GPU
+               &realKTEa(KTS,i),realKTEl(KTS,i),realKTEm(KTS,i),    & !! JFM Eliminate automatic arrays for GPU
+               &realKTEn(KTS,i),realKTEo(KTS,i),realKTEp(KTS,i),    & !! JFM Eliminate automatic arrays for GPU
+               &realKTEk(KTS,i),realKTEP1a(KTS,i),realKTEP1b(KTS,i),& !! JFM Eliminate automatic arrays for GPU
+               &realKTEP1c(KTS,i),realKTEi(KTS,i),realKTEj(KTS,i) )   !! JFM For tridiag2
 
           if (dheat_opt > 0) then
              DO k=kts,kte-1
@@ -1311,14 +1485,14 @@ CONTAINS
 !>  - Call mynn_tendencies() to solve for tendencies of 
 !! \f$U, V, \theta, q_{v}, q_{c}, and q_{i}\f$.
           CALL mynn_tendencies(kts,kte,i,        &
-               &closure,                         &
+!JFM not used  &closure,                         &
                &delt, dz1, rho1,                 &
                &u1, v1, th1, tk1, qv1,           &
                &qc1, qi1, qnc1, qni1,            &
                &ps(i), p1, ex1, thl,             &
                &sqv, sqc, sqi, sqw,              &
                &qnwfa1, qnifa1, ozone1,          &
-               &ust(i),flt,flq,flqv,flqc,        &
+               &ust(i),flt(i),flq(i),flqv(i),flqc(I),&
                &wspd(i),uoce(i),voce(i),         &
                &tsq1, qsq1, cov1,                &
                &tcd, qcd,                        &
@@ -1346,7 +1520,14 @@ CONTAINS
                &bl_mynn_mixqt,                   &
                &bl_mynn_edmf,                    &
                &bl_mynn_edmf_mom,                &
-               &bl_mynn_mixscalars               )
+               &bl_mynn_mixscalars,              &
+               &realKTEa(KTS,i),realKTEb(KTS,i),realKTEk(KTS,i),       &  !JFM Eliminate automatic arrays for GPU
+               &realKTEP1a(KTS,i),realKTEP1b(KTS,i),realKTEP1c(KTS,i), &  !JFM Eliminate automatic arrays for GPU
+               &realKTEl  (KTS,i),realKTEm  (KTS,i),realKTEn  (KTS,i), &  !JFM Eliminate automatic arrays for GPU
+               &realKTEo  (KTS,i),realKTEp  (KTS,i),realKTEc  (KTS,i), &  !JFM Eliminate automatic arrays for GPU
+               &realKTEd  (KTS,i),realKTEe  (KTS,i),realKTEf  (KTS,i), &  !JFM Eliminate automatic arrays for GPU
+               &realKTEg  (KTS,i),realKTEh  (KTS,i),realKTEi  (KTS,i), &  !JFM Eliminate automatic arrays for GPU
+               &realKTEj  (KTS,i) )                                       !JFM Eliminate automatic arrays for GPU
 
 
           IF ( rrfs_smoke .and. mix_chem ) THEN
@@ -1354,7 +1535,7 @@ CONTAINS
                   &delt, dz1, pblh(i),           &
                   &nchem, kdvel, ndvel,          &
                   &chem1, vd1,                   &
-                  &rho1,flt,                     &
+                  &rho1,flt(i),                  &
                   &tcd, qcd,                     &
                   &dfh,                          &
                   &s_aw1,s_awchem1,              &
@@ -1533,7 +1714,36 @@ CONTAINS
           !ENDDO
 
     ENDDO !end i-loop
+!$acc end kernels
 
+!$acc update self (det_sqv3d(:,:))
+!$acc update self(cov(its:ite,kts:kte))
+!$acc update self(sub_sqv3d(:,:),edmf_ent1(:),edmf_a(:,:),edmf_qt1(:),edmf_qc(:,:),edmf_thl1(:))
+!$acc update self(rqniblten(its:ite,kts:kte),rqncblten(its:ite,kts:kte),rmol(:), &
+!$acc      rqnwfablten(its:ite,kts:kte),rqvblten(its:ite,kts:kte),               &
+!$acc      rublten(its:ite,kts:kte),rthblten(its:ite,kts:kte),                   &
+!$acc      el_pbl(its:ite,kts:kte),exch_h(its:ite,kts:kte),                      &
+!$acc      rqcblten(its:ite,kts:kte),rqiblten(its:ite,kts:kte),                  &
+!$acc      rqnifablten(its:ite,kts:kte),det_thl3d(:,:))
+!$acc update self(vdfg(:))
+!$acc update self(qc_bl(its:ite,kts:kte))
+!$acc update self(pblh(:))
+!$acc update self(cldfra_bl(its:ite,kts:kte))
+!$acc update self(qshear(its:ite,kts:kte))
+!$acc update self(rvblten(its:ite,kts:kte),edmf_w(:,:),nupdraft(:))
+!$acc update self(qke(its:ite,kts:kte))
+!$acc update self(qbuoy(its:ite,kts:kte))
+!$acc update self(dozone(its:ite,kts:kte),qi_bl(its:ite,kts:kte),dx(:),tsq(its:ite,kts:kte),ust(:))
+!$acc update self(sub_thl3d(:,:))
+!$acc update self(exch_m(its:ite,kts:kte),qwt(its:ite,kts:kte))
+!$acc update self(hfx(:),zw(:,:),xland(:))
+!$acc update self(psig_bl(:))
+!$acc update self(dqke(its:ite,kts:kte),qdiss(its:ite,kts:kte))
+!$acc update self(ktop_plume(:),kpbl(:),sh3d(its:ite,kts:kte))
+!$acc update self(edmf_qt(:,:),edmf_thl(:,:),edmf_ent(:,:),maxmf(:))
+!$acc update self(qsq(its:ite,kts:kte),psig_shcu(:))
+!$acc update self(sm3d(its:ite,kts:kte),chem3d(:,:,:) )
+    
 !ACF copy qke into qke_adv if using advection
     IF (bl_mynn_tkeadvect) THEN
        qke_adv=qke
@@ -1624,7 +1834,9 @@ CONTAINS
        &            bl_mynn_mixlength,                        &
        &            edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf,    &
        &            INITIALIZE_QKE,                           &
-       &            spp_pbl,rstoch_col)
+       &            spp_pbl,rstoch_col,                       &
+       &            qtke,elBLmin,elBLavg,thetaw ) !JFM for mym_length
+!$acc routine vector
 !
 !-------------------------------------------------------------------
     
@@ -1643,6 +1855,7 @@ CONTAINS
     REAL, DIMENSION(kts:kte) :: &
          &ql,pdk,pdt,pdq,pdc,dtl,dqw,dtv,&
          &gm,gh,sm,sh,qkw,vt,vq
+    REAL, DIMENSION(kts:kte), INTENT(OUT) :: qtke,elBLmin,elBLavg,thetaw !JFM for mym_length
     INTEGER :: k,l,lmax
     REAL :: phm,vkz,elq,elv,b1l,b2l,pmz=1.,phh=1.,flt=0.,flq=0.,tmpq
     REAL :: zi
@@ -1663,7 +1876,8 @@ CONTAINS
          &            dz,                           &
          &            u, v, thl, thetav, qw,        &
          &            thlsg, qwsg,                  &
-         &            ql, vt, vq,                   &
+!        &            ql, vt, vq,                   &     ql is not used
+         &            vt, vq,                       &
          &            dtl, dqw, dtv, gm, gh, sm, sh )
 !
 !   **  Preliminary setting  **
@@ -1711,7 +1925,8 @@ CONTAINS
             &            el,                 &
             &            zi,theta,           &
             &            qkw,Psig_bl,cldfra_bl1D,bl_mynn_mixlength,&
-            &            edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf)
+            &            edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf,&
+            &            qtke,elBLmin,elBLavg,thetaw ) !JFM Eliminate automatic arrays for GPU
 !
        DO k = kts+1,kte
           elq = el(k)*qkw(k)
@@ -1822,8 +2037,10 @@ CONTAINS
        &            dz,                           &
        &            u, v, thl, thetav, qw,        &
        &            thlsg, qwsg,                  &
-       &            ql, vt, vq,                   &
+!      &            ql, vt, vq,                   &    ql is not used
+       &            vt, vq,                       &
        &            dtl, dqw, dtv, gm, gh, sm, sh )
+!$acc routine vector
 !
 !-------------------------------------------------------------------
 
@@ -1835,7 +2052,8 @@ CONTAINS
 #endif
 
     REAL, DIMENSION(kts:kte), INTENT(in) :: dz
-    REAL, DIMENSION(kts:kte), INTENT(in) :: u,v,thl,qw,ql,vt,vq,&
+!   REAL, DIMENSION(kts:kte), INTENT(in) :: u,v,thl,qw,ql,vt,vq,& !JFM ql is not used
+    REAL, DIMENSION(kts:kte), INTENT(in) :: u,v,thl,qw,vt,vq,&
                                             thetav,thlsg,qwsg
     REAL, DIMENSION(kts:kte), INTENT(out) :: &
          &dtl,dqw,dtv,gm,gh,sm,sh
@@ -1963,7 +2181,9 @@ CONTAINS
     &            el,                           &
     &            zi,theta,                     &
     &            qkw,Psig_bl,cldfra_bl1D,bl_mynn_mixlength,&
-    &            edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf)
+    &            edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf,&
+    &            qtke,elBLmin,elBLavg,thetaw )  !JFM Eliminate automatic arrays for GPU
+!$acc routine vector
 !-------------------------------------------------------------------
 
     INTEGER, INTENT(IN)   :: kts,kte
@@ -1976,7 +2196,7 @@ CONTAINS
     INTEGER, INTENT(IN)   :: bl_mynn_mixlength,bl_mynn_edmf
     REAL, DIMENSION(kts:kte), INTENT(in)   :: dz
     REAL, DIMENSION(kts:kte+1), INTENT(in) :: zw
-    REAL, INTENT(in) :: rmo,flt,flq,Psig_bl,dx
+    REAL, VALUE,INTENT(in) :: rmo,flt,flq,Psig_bl,dx
     REAL, DIMENSION(kts:kte), INTENT(IN)   :: u1,v1,qke,vt,vq,cldfra_bl1D,&
                                           edmf_w1,edmf_a1,edmf_qc1
     REAL, DIMENSION(kts:kte), INTENT(out)  :: qkw, el
@@ -1985,8 +2205,9 @@ CONTAINS
     REAL :: elt,vsc
 
     REAL, DIMENSION(kts:kte), INTENT(IN) :: theta
-    REAL, DIMENSION(kts:kte) :: qtke,elBLmin,elBLavg,thetaw
-    REAL :: wt,wt2,zi,zi2,h1,h2,hs,elBLmin0,elBLavg0,cldavg
+    REAL, DIMENSION(kts:kte), INTENT(OUT) :: qtke,elBLmin,elBLavg,thetaw !JFM Eliminate automatic arrays for GPU
+!   REAL :: wt,wt2,zi,zi2,h1,h2,hs,elBLmin0,elBLavg0,cldavg   elBLmin0,elBLavg0 not used
+    REAL :: wt,wt2,zi,zi2,h1,h2,hs,cldavg
 
     ! THE FOLLOWING CONSTANTS ARE IMPORTANT FOR REGULATING THE
     ! MIXING LENGTHS:
@@ -2159,7 +2380,7 @@ CONTAINS
         zwk1    = zw(kts+1)              !full-sigma levels
 
         ! COMPUTE BouLac mixing length
-        CALL boulac_length(kts,kte,zw,dz,qtke,thetaw,elBLmin,elBLavg)
+        CALL boulac_length(kts,kte,zw,dz,qtke,thetaw,elBLmin,elBLavg) !JFM elBLmin,elBLavg promoted to eliminate automatic arrays for GPU
 
         DO k = kts+1,kte
            zwk = zw(k)              !full-sigma levels
@@ -2375,7 +2596,12 @@ CONTAINS
 !  finite amount of TKE.
 !\param lb1  the minimum of the length up and length down
 !\param lb2  the average of the length up and length down
+!
+! JFM boulac_length0 is not called
+#ifdef NODEF
+  
   SUBROUTINE boulac_length0(k,kts,kte,zw,dz,qtke,theta,lb1,lb2)
+!$acc routine seq
 !
 !    NOTE: This subroutine was taken from the BouLac scheme in WRF-ARW
 !          and modified for integration into the MYNN PBL scheme.
@@ -2524,6 +2750,8 @@ CONTAINS
      !print*,"IN MYNN-BouLac",k,dld,dlu
 
   END SUBROUTINE boulac_length0
+! JFM boulac_length0 is not called
+#endif
 
 ! ==================================================================
 !>\ingroup gp_mynnedmf
@@ -2535,6 +2763,7 @@ CONTAINS
 !! length scales, and also considers the distance to the
 !! surface.
   SUBROUTINE boulac_length(kts,kte,zw,dz,qtke,theta,lb1,lb2)
+!$acc routine vector
 !      dlu = the distance a parcel can be lifted upwards give a finite 
 !            amount of TKE.
 !      dld = the distance a parcel can be displaced downwards given a
@@ -2545,12 +2774,13 @@ CONTAINS
 
      INTEGER, INTENT(IN) :: kts,kte
      REAL, DIMENSION(kts:kte), INTENT(IN) :: qtke,dz,theta
-     REAL, DIMENSION(kts:kte), INTENT(OUT) :: lb1,lb2
+     REAL, DIMENSION(kts:kte), INTENT(OUT) :: lb1,lb2 !JFM elBLmin,elBLavg promoted to eliminate automatic arrays for GPU
      REAL, DIMENSION(kts:kte+1), INTENT(IN) :: zw
 
      !LOCAL VARS
      INTEGER :: iz, izz, found
-     REAL, DIMENSION(kts:kte) :: dlu,dld
+!    REAL, DIMENSION(kts:kte) :: dlu,dld
+     REAL :: dlu,dld !JFM dlu,dld do not need to be arrays
      REAL, PARAMETER :: Lmax=2000.  !soft limit
      REAL :: dzt, zup, beta, zup_inf, bbb, tl, zdo, zdo_sup, zzz
 
@@ -2562,7 +2792,7 @@ CONTAINS
         ! FIND DISTANCE UPWARD
         !----------------------------------
         zup=0.
-        dlu(iz)=zw(kte+1)-zw(iz)-dz(iz)*0.5
+        dlu=zw(kte+1)-zw(iz)-dz(iz)*0.5
         zzz=0.
         zup_inf=0.
         beta=gtr           !Buoyancy coefficient (g/tref)
@@ -2596,8 +2826,8 @@ CONTAINS
                        tl=0.
                     endif
                  endif            
-                 dlu(iz)=zzz-dzt+tl
-                 !print*,"  FOUND Dup:",dlu(iz)," z=",zw(izz)," tl=",tl
+                 dlu=zzz-dzt+tl
+                 !print*,"  FOUND Dup:",dlu," z=",zw(izz)," tl=",tl
                  found =1
               endif
               zup_inf=zup
@@ -2615,7 +2845,7 @@ CONTAINS
         !----------------------------------
         zdo=0.
         zdo_sup=0.
-        dld(iz)=zw(iz)
+        dld=zw(iz)
         zzz=0.
 
         !print*,"FINDING Ddown, k=",iz," zwk=",zw(iz)
@@ -2645,8 +2875,8 @@ CONTAINS
                        tl=0.
                     endif
                  endif            
-                 dld(iz)=zzz-dzt+tl
-                 !print*,"  FOUND Ddown:",dld(iz)," z=",zw(izz)," tl=",tl
+                 dld=zzz-dzt+tl
+                 !print*,"  FOUND Ddown:",dld," z=",zw(izz)," tl=",tl
                  found = 1
               endif
               zdo_sup=zdo
@@ -2663,13 +2893,13 @@ CONTAINS
         !----------------------------------
         !The surface layer length scale can exceed z for large z/L,
         !so keep maximum distance down > z.
-        dld(iz) = min(dld(iz),zw(iz+1))!not used in PBL anyway, only free atmos
-        lb1(iz) = min(dlu(iz),dld(iz))     !minimum
+        dld = min(dld,zw(iz+1))!not used in PBL anyway, only free atmos
+        lb1(iz) = min(dlu,dld)     !minimum
         !JOE-fight floating point errors
-        dlu(iz)=MAX(0.1,MIN(dlu(iz),1000.))
-        dld(iz)=MAX(0.1,MIN(dld(iz),1000.))
-        lb2(iz) = sqrt(dlu(iz)*dld(iz))    !average - biased towards smallest
-        !lb2(iz) = 0.5*(dlu(iz)+dld(iz))   !average
+        dlu=MAX(0.1,MIN(dlu,1000.))
+        dld=MAX(0.1,MIN(dld,1000.))
+        lb2(iz) = sqrt(dlu*dld)    !average - biased towards smallest
+        !lb2(iz) = 0.5*(dlu+dld)   !average
 
         !Apply soft limit (only impacts very large lb; lb=100 by 5%, lb=500 by 20%).
         lb1(iz) = lb1(iz)/(1. + (lb1(iz)/Lmax))
@@ -2680,7 +2910,7 @@ CONTAINS
            lb2(kte) = lb2(kte-1)
         endif
         !print*,"IN MYNN-BouLac",kts, kte,lb1(iz)
-        !print*,"IN MYNN-BouLac",iz,dld(iz),dlu(iz)
+        !print*,"IN MYNN-BouLac",iz,dld,dlu
 
      ENDDO
                    
@@ -2753,7 +2983,11 @@ CONTAINS
     &            Psig_bl,Psig_shcu,cldfra_bl1D,bl_mynn_mixlength,&
     &            edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf,       &
     &            TKEprodTD,                                   &
-    &            spp_pbl,rstoch_col)
+    &            spp_pbl,rstoch_col,                          & !JFM Eliminate automatic array rstoch_col for GPU
+    &            qkw,dtl,dqw,dtv,gm,gh,                       & !JFM Eliminate automatic arrays for GPU
+    &            qtke,elBLmin,elBLavg,thetaw                  ) !JFM for mym_length
+!$acc routine vector
+    
 !-------------------------------------------------------------------
 !
     INTEGER, INTENT(IN)   :: kts,kte
@@ -2767,7 +3001,8 @@ CONTAINS
     REAL, INTENT(IN)      :: closure
     REAL, DIMENSION(kts:kte), INTENT(in) :: dz
     REAL, DIMENSION(kts:kte+1), INTENT(in) :: zw
-    REAL, INTENT(in) :: rmo,flt,flq,Psig_bl,Psig_shcu,dx
+    REAL, INTENT(IN) :: rmo,Psig_bl,Psig_shcu,dx
+    REAL, VALUE, INTENT(IN) :: flt,flq !JFM for GPU
     REAL, DIMENSION(kts:kte), INTENT(in) :: u,v,thl,thetav,qw,& 
          &ql,vt,vq,qke,tsq,qsq,cov,cldfra_bl1D,edmf_w1,edmf_a1,edmf_qc1,&
          &TKEprodTD,thlsg,qwsg
@@ -2782,7 +3017,9 @@ CONTAINS
             upwp,vpwp,Tpwp
     LOGICAL, INTENT(in) :: bl_mynn_tkebudget
 
-    REAL, DIMENSION(kts:kte) :: qkw,dtl,dqw,dtv,gm,gh,sm,sh
+    REAL, DIMENSION(kts:kte), INTENT(OUT) :: sm,sh
+    REAL, DIMENSION(kts:kte), INTENT(OUT) :: qkw,dtl,dqw,dtv,gm,gh        !JFM Eliminate automatic arrays for GPU
+    REAL, DIMENSION(kts:kte), INTENT(OUT) :: qtke,elBLmin,elBLavg,thetaw  !JFM Eliminate automatic arrays for GPU
 
     INTEGER :: k
 !    REAL :: cc2,cc3,e1c,e2c,e3c,e4c,e5c
@@ -2804,7 +3041,7 @@ CONTAINS
 
 !   Stochastic
     INTEGER,  INTENT(IN)                          ::    spp_pbl
-    REAL, DIMENSION(KTS:KTE)                      ::    rstoch_col
+    REAL, DIMENSION(KTS:KTE), INTENT(IN)          ::    rstoch_col !JFM Eliminate automatic array for GPU
     REAL :: Prnum, Prlim
     REAL, PARAMETER :: Prlimit = 5.0
 
@@ -2826,7 +3063,8 @@ CONTAINS
     &            dz,                            &
     &            u, v, thl, thetav, qw,         &
     &            thlsg, qwsg,                   &
-    &            ql, vt, vq,                    &
+!   &            ql, vt, vq,                    &     ql is not used
+    &            vt, vq,                        &
     &            dtl, dqw, dtv, gm, gh, sm, sh  )
 !
     CALL mym_length (                           &
@@ -2839,7 +3077,8 @@ CONTAINS
     &            el,                            &
     &            zi,theta,                      &
     &            qkw,Psig_bl,cldfra_bl1D,bl_mynn_mixlength, &
-    &            edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf )
+    &            edmf_w1,edmf_a1,edmf_qc1,bl_mynn_edmf, &
+    &            qtke,elBLmin,elBLavg,thetaw    )  !JFM Eliminate automatic arrays for GPU
 !
 
     DO k = kts+1,kte
@@ -2973,7 +3212,7 @@ CONTAINS
        END IF !end Helfand & Labraga check
 
        !Impose broad limits on Sh and Sm:
-       gmelq    = MAX(gmel/q3sq, 1e-8)
+       gmelq    = REAL(MAX(gmel/q3sq, 1d-8))
        sm25max  = 4.  !MIN(sm20*3.0, SQRT(.1936/gmelq))
        sh25max  = 4.  !MIN(sh20*3.0, 0.76*b2)
        sm25min  = 0.0 !MAX(sm20*0.1, 1e-6)
@@ -3324,7 +3563,10 @@ CONTAINS
        &            pdk, pdt, pdq, pdc,                                 &
        &            qke, tsq, qsq, cov,                                 &
        &            s_aw,s_awqke,bl_mynn_edmf_tke,                      &
-       &            qWT1D, qDISS1D,bl_mynn_tkebudget)  !! TKE budget  (Puhales, 2020)
+       &            qWT1D, qDISS1D,bl_mynn_tkebudget,                   &  !! TKE budget  (Puhales, 2020)
+       &            tke_up,dzinv,qkw, bp, rp, df3q,dtz,a,b,c,d,x,rhoinv,&  !! JFM Eliminate automatic arrays for GPU
+       &            rhoz,kqdz,kmdz,cptd2,dptd2 )                           !! JFM Eliminate automatic arrays for GPU
+!$acc routine vector
 !-------------------------------------------------------------------
     INTEGER, INTENT(IN) :: kts,kte    
 
@@ -3335,10 +3577,10 @@ CONTAINS
 
     REAL, INTENT(IN)    :: closure
     INTEGER, INTENT(IN) :: bl_mynn_edmf_tke
-    REAL, INTENT(IN)    :: delt
+    REAL, VALUE, INTENT(IN)    :: delt
     REAL, DIMENSION(kts:kte), INTENT(IN) :: dz, dfq, el, rho
     REAL, DIMENSION(kts:kte), INTENT(INOUT) :: pdk, pdt, pdq, pdc
-    REAL, INTENT(IN)    ::  flt, flq, ust, pmz, phh
+    REAL, VALUE, INTENT(IN)    ::  flt, flq, ust, pmz, phh
     REAL, DIMENSION(kts:kte), INTENT(INOUT) :: qke,tsq, qsq, cov
 ! WA 8/3/15
     REAL, DIMENSION(kts:kte+1), INTENT(INOUT) :: s_awqke,s_aw
@@ -3346,17 +3588,17 @@ CONTAINS
     !!  TKE budget  (Puhales, 2020, WRF 4.2.1)  << EOB 
     REAL, DIMENSION(kts:kte), INTENT(OUT) :: qWT1D, qDISS1D  
     LOGICAL, INTENT(IN) :: bl_mynn_tkebudget  
-    REAL, DIMENSION(kts:kte) :: tke_up,dzinv  
+    REAL, DIMENSION(kts:kte), INTENT(OUT) :: tke_up,dzinv     !JFM Eliminate automatic arrays for GPU
     !! >> EOB
     
     INTEGER :: k
-    REAL, DIMENSION(kts:kte) :: qkw, bp, rp, df3q
+    REAL, DIMENSION(kts:kte),INTENT(OUT) :: qkw, bp, rp, df3q !JFM Eliminate automatic arrays for GPU
     REAL :: vkz,pdk1,phm,pdt1,pdq1,pdc1,b1l,b2l,onoff
-    REAL, DIMENSION(kts:kte) :: dtz
-    REAL, DIMENSION(kts:kte) :: a,b,c,d,x
-
-    REAL, DIMENSION(kts:kte) :: rhoinv
-    REAL, DIMENSION(kts:kte+1) :: rhoz,kqdz,kmdz
+    REAL, DIMENSION(kts:kte),INTENT(OUT) :: dtz               !JFM Eliminate automatic arrays for GPU
+    REAL, DIMENSION(kts:kte),INTENT(OUT) :: a,b,c,d,x         !JFM Eliminate automatic arrays for GPU
+    REAL, DIMENSION(kts:kte),INTENT(OUT) :: rhoinv            !JFM Eliminate automatic arrays for GPU
+    REAL, DIMENSION(kts:kte+1),INTENT(OUT) :: rhoz,kqdz,kmdz  !JFM Eliminate automatic arrays for GPU
+    REAL ,DIMENSION(kte),INTENT(OUT) :: cptd2,dptd2           !JFM for tridiag2
 
     ! REGULATE THE MOMENTUM MIXING FROM THE MASS-FLUX SCHEME (on or off)
     IF (bl_mynn_edmf_tke == 0) THEN
@@ -3476,7 +3718,7 @@ CONTAINS
     d(kte)=qke(kte)
 
 !    CALL tridiag(kte,a,b,c,d)
-    CALL tridiag2(kte,a,b,c,d,x)
+    CALL tridiag2(kte,a,b,c,d,x,cptd2,dptd2)
 
     DO k=kts,kte
 !       qke(k)=max(d(k-kts+1), 1.e-4)
@@ -3508,6 +3750,7 @@ CONTAINS
         qWT1D(k)=dzinv(k)*(-kqdz(k)*(tke_up(k)-tke_up(k-1)) &
             &  + 0.5*rhoinv(k)*(-s_aw(k)*tke_up(k)-s_aw(k)*tke_up(k-1)+s_awqke(k))*onoff) !unstaggared
         !!  >> EOBvt
+        bp(k) = 0.0       !! JFM bp(kte) is not set
         qDISS1D=bp*tke_up !! TKE dissipation rate !unstaggered
     END IF
 !! >> EOB 
@@ -3541,7 +3784,7 @@ CONTAINS
        d(kte)=0.
 
 !       CALL tridiag(kte,a,b,c,d)
-    CALL tridiag2(kte,a,b,c,d,x)
+    CALL tridiag2(kte,a,b,c,d,x,cptd2,dptd2)
        
        DO k=kts,kte
           !qsq(k)=d(k-kts+1)
@@ -3606,8 +3849,8 @@ CONTAINS
        d(kte)=0.
        
 !       CALL tridiag(kte,a,b,c,d)
-       CALL tridiag2(kte,a,b,c,d,x)
-
+       CALL tridiag2(kte,a,b,c,d,x,cptd2,dptd2)
+   
        DO k=kts,kte
 !          tsq(k)=d(k-kts+1)
            tsq(k)=x(k)
@@ -3654,7 +3897,7 @@ CONTAINS
        d(kte)=0.
 
 !       CALL tridiag(kte,a,b,c,d)
-    CALL tridiag2(kte,a,b,c,d,x)
+    CALL tridiag2(kte,a,b,c,d,x,cptd2,dptd2)
        
        DO k=kts,kte
 !          cov(k)=d(k-kts+1)
@@ -3731,7 +3974,9 @@ CONTAINS
     &            cldfra_bl1D,             &
     &            PBLH1,HFX1,              &
     &            Vt, Vq, th, sgm, rmo,    &
-    &            spp_pbl,rstoch_col       )
+    &            spp_pbl,rstoch_col,      &
+    &            a,b,ql,q1,RH )               !JFM removbe automatic arrays for GPU
+!$acc routine vector
 
 !-------------------------------------------------------------------
 
@@ -3750,7 +3995,7 @@ CONTAINS
 
     REAL, DIMENSION(kts:kte), INTENT(INOUT) :: vt,vq,sgm
 
-    REAL, DIMENSION(kts:kte) :: alp,a,bet,b,ql,q1,RH
+    REAL, DIMENSION(kts:kte), INTENT(OUT) :: a,b,ql,q1,RH
     REAL, DIMENSION(kts:kte), INTENT(OUT) :: qc_bl1D,qi_bl1D, &
                                              cldfra_bl1D
     DOUBLE PRECISION :: t3sq, r3sq, c3sq
@@ -3758,7 +4003,7 @@ CONTAINS
     REAL :: qsl,esat,qsat,dqsl,cld0,q1k,qlk,eq1,qll,&
          &q2p,pt,rac,qt,t,xl,rsl,cpm,Fng,qww,alpha,beta,bb,&
          &ls,wt,cld_factor,fac_damp,liq_frac,ql_ice,ql_water,&
-         &qmq,qsat_tk
+         &qmq,qsat_tk,alp,bet
     INTEGER :: i,j,k
 
     REAL :: erf
@@ -3777,7 +4022,7 @@ CONTAINS
 
 !   Stochastic
     INTEGER,  INTENT(IN)                          ::    spp_pbl
-    REAL, DIMENSION(KTS:KTE)                      ::    rstoch_col
+    REAL, DIMENSION(KTS:KTE), INTENT(IN)          ::    rstoch_col
     REAL :: qw_pert
 
 ! First, obtain an estimate for the tropopause height (k), using the method employed in the
@@ -3825,8 +4070,8 @@ CONTAINS
            !dqw/dT: Clausius-Clapeyron
            dqsl = qsl*ep_2*xlv/( r_d*t**2 )
 
-           alp(k) = 1.0/( 1.0+dqsl*xlvcp )
-           bet(k) = dqsl*exner(k)
+           alp = 1.0/( 1.0+dqsl*xlvcp )
+           bet = dqsl*exner(k)
 
            !Sommeria and Deardorff (1977) scheme, as implemented
            !in Nakanishi and Niino (2009), Appendix B
@@ -3834,7 +4079,7 @@ CONTAINS
            r3sq = MAX( qsq(k), 0.0 )
            c3sq =      cov(k)
            c3sq = SIGN( MIN( ABS(c3sq), SQRT(t3sq*r3sq) ), c3sq )
-           r3sq = r3sq +bet(k)**2*t3sq -2.0*bet(k)*c3sq
+           r3sq = r3sq +bet**2*t3sq -2.0*bet*c3sq
            !DEFICIT/EXCESS WATER CONTENT
            qmq  = qw(k) -qsl
            !ORIGINAL STANDARD DEVIATION
@@ -3848,7 +4093,7 @@ CONTAINS
            eq1  = rrp*EXP( -0.5*q1k*q1k )
            qll  = MAX( cldfra_bl1D(k)*q1k + eq1, 0.0 )
            !ESTIMATED LIQUID WATER CONTENT (UNNORMALIZED)
-           ql(k) = alp(k)*sgm(k)*qll
+           ql(k) = alp*sgm(k)*qll
            !LIMIT SPECIES TO TEMPERATURE RANGES
            liq_frac = min(1.0, max(0.0,(t-240.0)/29.0))
            qc_bl1D(k) = liq_frac*ql(k)
@@ -3863,12 +4108,12 @@ CONTAINS
 
            !qt is a THETA-V CONVERSION FOR TOTAL WATER (i.e., THETA-V = qt*THETA)
            qt   = 1.0 +p608*qw(k) -(1.+p608)*(qc_bl1D(k)+qi_bl1D(k))*cldfra_bl1D(k)
-           rac  = alp(k)*( cldfra_bl1D(K)-qll*eq1 )*( q2p*qt-(1.+p608)*pt )
+           rac  = alp*( cldfra_bl1D(K)-qll*eq1 )*( q2p*qt-(1.+p608)*pt )
 
            !BUOYANCY FACTORS: wherever vt and vq are used, there is a
            !"+1" and "+tv0", respectively, so these are subtracted out here.
            !vt is unitless and vq has units of K.
-           vt(k) =      qt-1.0 -rac*bet(k)
+           vt(k) =      qt-1.0 -rac*bet
            vq(k) = p608*pt-tv0 +rac
 
         END DO
@@ -3885,8 +4130,8 @@ CONTAINS
            !dqw/dT: Clausius-Clapeyron
            dqsl = qsl*ep_2*xlv/( r_d*t**2 )
 
-           alp(k) = 1.0/( 1.0+dqsl*xlvcp )
-           bet(k) = dqsl*exner(k)
+           alp = 1.0/( 1.0+dqsl*xlvcp )
+           bet = dqsl*exner(k)
 
            if (k .eq. kts) then 
              dzk = 0.5*dz(k)
@@ -3895,9 +4140,9 @@ CONTAINS
            end if
            dth = 0.5*(thl(k+1)+thl(k)) - 0.5*(thl(k)+thl(MAX(k-1,kts)))
            dqw = 0.5*(qw(k+1) + qw(k)) - 0.5*(qw(k) + qw(MAX(k-1,kts)))
-           sgm(k) = SQRT( MAX( (alp(k)**2 * MAX(el(k)**2,0.1) * &
+           sgm(k) = SQRT( MAX( (alp**2 * MAX(el(k)**2,0.1) * &
                              b2 * MAX(Sh(k),0.03))/4. * &
-                      (dqw/dzk - bet(k)*(dth/dzk ))**2 , 1.0e-10) )
+                      (dqw/dzk - bet*(dth/dzk ))**2 , 1.0e-10) )
            qmq   = qw(k) -qsl
            q1(k) = qmq / sgm(k)
            cldfra_bl1D(K) = 0.5*( 1.0+erf( q1(k)*rr2 ) )
@@ -3909,7 +4154,7 @@ CONTAINS
            eq1  = rrp*EXP( -0.5*q1k*q1k )
            qll  = MAX( cldfra_bl1D(K)*q1k + eq1, 0.0 )
            !ESTIMATED LIQUID WATER CONTENT (UNNORMALIZED)
-           ql (k) = alp(k)*sgm(k)*qll
+           ql (k) = alp*sgm(k)*qll
            liq_frac = min(1.0, max(0.0,(t-240.0)/29.0))
            qc_bl1D(k) = liq_frac*ql(k)
            qi_bl1D(k) = (1.0 - liq_frac)*ql(k)
@@ -3923,12 +4168,12 @@ CONTAINS
 
            !qt is a THETA-V CONVERSION FOR TOTAL WATER (i.e., THETA-V = qt*THETA)
            qt   = 1.0 +p608*qw(k) -(1.+p608)*(qc_bl1D(k)+qi_bl1D(k))*cldfra_bl1D(k)
-           rac  = alp(k)*( cldfra_bl1D(K)-qll*eq1 )*( q2p*qt-(1.+p608)*pt )
+           rac  = alp*( cldfra_bl1D(K)-qll*eq1 )*( q2p*qt-(1.+p608)*pt )
 
            !BUOYANCY FACTORS: wherever vt and vq are used, there is a
            !"+1" and "+tv0", respectively, so these are subtracted out here.
            !vt is unitless and vq has units of K.
-           vt(k) =      qt-1.0 -rac*bet(k)
+           vt(k) =      qt-1.0 -rac*bet
            vq(k) = p608*pt-tv0 +rac
 
         END DO
@@ -3949,8 +4194,8 @@ CONTAINS
 
            !dqw/dT: Clausius-Clapeyron
            dqsl = qsat_tk*ep_2*xlv/( r_d*t**2 )
-           alp(k) = 1.0/( 1.0+dqsl*xlvcp )
-           bet(k) = dqsl*exner(k)
+           ! alp = 1.0/( 1.0+dqsl*xlvcp )   JFM not used
+           ! bet(k) = dqsl*exner(k) JFM not used
  
            rsl = xl*qsat_tk / (r_v*t**2)     ! slope of C-C curve at t (=abs temperature)
                                              ! CB02, Eqn. 4
@@ -4147,7 +4392,7 @@ CONTAINS
 !! This subroutine solves for tendencies of U, V, \f$\theta\f$, qv,
 !! qc, and qi
   SUBROUTINE mynn_tendencies(kts,kte,i,    &
-       &closure,                           &
+!      &closure,                           & JFM not used
        &delt,dz,rho,                       &
        &u,v,th,tk,qv,qc,qi,qnc,qni,        &
        &psfc,p,exner,                      &
@@ -4178,7 +4423,11 @@ CONTAINS
        &bl_mynn_mixqt,                     &
        &bl_mynn_edmf,                      &
        &bl_mynn_edmf_mom,                  &
-       &bl_mynn_mixscalars                )
+       &bl_mynn_mixscalars,                &
+       &dtz,delp,rhoinv,rhoz,khdz,kmdz,a,b,&  !JFM Eliminate automatic arrays for GPU
+       &c,d,x,sqv2,sqc2,sqi2,sqw2,qni2,    &  !JFM Eliminate automatic arrays for GPU
+       &qnc2,qnwfa2,qnifa2 )                  !JFM Eliminate automatic arrays for GPU
+!$acc routine vector
 
 !-------------------------------------------------------------------
     INTEGER, INTENT(in) :: kts,kte,i
@@ -4188,7 +4437,7 @@ CONTAINS
 # define kte HARDCODE_VERTICAL
 #endif
 
-    REAL,    INTENT(in) :: closure
+!   REAL,    INTENT(in) :: closure    JFM Not used
     INTEGER, INTENT(in) :: bl_mynn_cloudmix,bl_mynn_mixqt,&
                            bl_mynn_edmf,bl_mynn_edmf_mom, &
                            bl_mynn_mixscalars
@@ -4224,15 +4473,21 @@ CONTAINS
 
 !    REAL, INTENT(IN) :: gradu_top,gradv_top,gradth_top,gradqv_top
 
+!JFM Eliminate automatic arrays for GPU 
+!   REAL, DIMENSION(kts:kte) :: dtz,dfhc,dfmc,delp !JFM dfhc,dfmc not used
+    REAL, DIMENSION(kts:kte),INTENT(out) :: dtz,delp
+    REAL, DIMENSION(kts:kte),INTENT(out) :: sqv2,sqc2,sqi2,sqw2,qni2,qnc2, & !AFTER MIXING
+!                                           qnwfa2,qnifa2,ozone2   JFM ozone2 not used
+                                            qnwfa2,qnifa2
+!   REAL, DIMENSION(kts:kte) :: zfac,plumeKh,rhoinv     JFM zfac,plumeKh not used 
+    REAL, DIMENSION(kts:kte),INTENT(out) :: rhoinv
+    REAL, DIMENSION(kts:kte),INTENT(out) :: a,b,c,d,x
+    REAL, DIMENSION(kts:kte+1),INTENT(out) :: rhoz, & !rho on model interface
+          &         khdz, kmdz
+!JFM End Eliminate automatic arrays for GPU 
+
 !local vars
 
-    REAL, DIMENSION(kts:kte) :: dtz,dfhc,dfmc,delp
-    REAL, DIMENSION(kts:kte) :: sqv2,sqc2,sqi2,sqw2,qni2,qnc2, & !AFTER MIXING
-                                qnwfa2,qnifa2,ozone2
-    REAL, DIMENSION(kts:kte) :: zfac,plumeKh,rhoinv
-    REAL, DIMENSION(kts:kte) :: a,b,c,d,x
-    REAL, DIMENSION(kts:kte+1) :: rhoz, & !rho on model interface
-          &         khdz, kmdz
     REAL :: rhs,gfluxm,gfluxp,dztop,maxdfh,mindfh,maxcf,maxKh,zw
     REAL :: vdfg1    !Katata-fogdes
     REAL :: t,esat,qsl,onoff,kh,km,dzk,rhosfc
@@ -5167,6 +5422,8 @@ ENDIF
   SUBROUTINE moisture_check(kte, delt, dp, exner, &
                             qv, qc, qi, th,       &
                             dqv, dqc, dqi, dth )
+!$acc routine vector
+
 
   ! This subroutine was adopted from the CAM-UW ShCu scheme and 
   ! adapted for use here.
@@ -5263,6 +5520,7 @@ ENDIF
        s_aw, s_awchem,                    &
        emis_ant_no,frp,                   &
        fire_turb                          )
+!$acc routine vector
 
 !-------------------------------------------------------------------
     INTEGER, INTENT(in) :: kts,kte,i
@@ -5386,6 +5644,7 @@ ENDIF
 !>\ingroup gp_mynnedmf
   SUBROUTINE retrieve_exchange_coeffs(kts,kte,&
        &dfm,dfh,dz,K_m,K_h)
+!$acc routine vector
 
 !-------------------------------------------------------------------
 
@@ -5448,7 +5707,7 @@ ENDIF
 
 ! ==================================================================
 !>\ingroup gp_mynnedmf
-      subroutine tridiag2(n,a,b,c,d,x)
+      subroutine tridiag2(n,a,b,c,d,x,cp,dp)
       implicit none
 !      a - sub-diagonal (means it is the diagonal below the main diagonal)
 !      b - the main diagonal
@@ -5460,7 +5719,7 @@ ENDIF
         integer,intent(in) :: n
         real, dimension(n),intent(in) :: a,b,c,d
         real ,dimension(n),intent(out) :: x
-        real ,dimension(n) :: cp,dp
+        real ,dimension(n),intent(out) :: cp,dp !Put in calling sequence for GPU
         real :: m
         integer :: i
 
@@ -5484,6 +5743,7 @@ ENDIF
 ! ==================================================================
 !>\ingroup gp_mynnedmf
        subroutine tridiag3(kte,a,b,c,d,x)
+!$acc routine vector
 
 !ccccccccccccccccccccccccccccccc                                                                   
 ! Aim: Inversion and resolution of a tridiagonal matrix                                            
@@ -5498,24 +5758,29 @@ ENDIF
 !ccccccccccccccccccccccccccccccc                                                                   
 
        implicit none
-        integer,intent(in)   :: kte
-        integer, parameter   :: kts=1
-        real, dimension(kte) :: a,b,c,d
-        real ,dimension(kte),intent(out) :: x
+        integer, parameter                 :: kts=1
+        integer             ,intent(in)    :: kte
+        real, dimension(kte),intent(in)    :: a,c
+        real ,dimension(kte),intent(inout) :: b,d
+        real ,dimension(kte),intent(out)   :: x
+
         integer :: in
 
 !       integer kms,kme,kts,kte,in
 !       real a(kms:kme,3),c(kms:kme),x(kms:kme)
 
+!$acc loop seq
         do in=kte-1,kts,-1
          d(in)=d(in)-c(in)*d(in+1)/b(in+1)
          b(in)=b(in)-c(in)*a(in+1)/b(in+1)
         enddo
 
+!$acc loop seq
         do in=kts+1,kte
          d(in)=d(in)-a(in)*d(in-1)/b(in-1)
         enddo
 
+!$acc loop vector
         do in=kts,kte
          x(in)=d(in)/b(in)
         enddo
@@ -5601,7 +5866,8 @@ ENDIF
 !!value could be found to work best in all conditions.
 !>\section gen_get_pblh  GSD get_pblh General Algorithm
 !> @{
-  SUBROUTINE GET_PBLH(KTS,KTE,zi,thetav1D,qke1D,zw1D,dz1D,landsea,kzi)
+  SUBROUTINE GET_PBLH(KTS,KTE,zi,thetav1D,qke1D,zw1D,dz1D,landsea,kzi,kzia)
+!$acc routine vector
 
     !---------------------------------------------------------------
     !             NOTES ON THE PBLH FORMULATION
@@ -5620,7 +5886,7 @@ ENDIF
     !value could be found to work best in all conditions.
     !---------------------------------------------------------------
 
-    INTEGER,INTENT(IN) :: KTS,KTE
+    INTEGER,VALUE,INTENT(IN) :: KTS,KTE
 
 #ifdef HARDCODE_VERTICAL
 # define kts 1
@@ -5628,15 +5894,16 @@ ENDIF
 #endif
 
     REAL, INTENT(OUT) :: zi
-    REAL, INTENT(IN) :: landsea
+    REAL, VALUE, INTENT(IN) :: landsea
     REAL, DIMENSION(KTS:KTE), INTENT(IN) :: thetav1D, qke1D, dz1D
     REAL, DIMENSION(KTS:KTE+1), INTENT(IN) :: zw1D
+    INTEGER,INTENT(OUT) :: kzi,kzia(KTS:KTE)
     !LOCAL VARS
     REAL ::  PBLH_TKE,qtke,qtkem1,wt,maxqke,TKEeps,minthv
     REAL :: delt_thv   !delta theta-v; dependent on land/sea point
     REAL, PARAMETER :: sbl_lim  = 200. !upper limit of stable BL height (m).
     REAL, PARAMETER :: sbl_damp = 400. !transition length for blending (m).
-    INTEGER :: I,J,K,kthv,ktke,kzi
+    INTEGER :: I,J,K,kthv,ktke
 
     !Initialize KPBL (kzi)
     kzi = 2
@@ -5729,12 +5996,14 @@ ENDIF
     ENDIF
 
     !Compute KPBL (kzi)
+    !JFM restructure for GPU to eliminate loop carried dependence.
+    kzia = kte
     DO k=kts+1,kte-1
        IF ( zw1D(k) >= zi) THEN
-          kzi = k-1
-          exit
+          kzia(k) = k-1
        ENDIF
     ENDDO
+    kzi = minval(kzia)
 
 #ifdef HARDCODE_VERTICAL
 # undef kts
@@ -5790,6 +6059,7 @@ ENDIF
             ! chem/smoke
                  & nchem,chem1,s_awchem,    &
                  & mix_chem,                &
+                 & UPCHEM,edmf_chem,chemn,  & !JFM Eliminate automatic arrays for GPU
             ! in/outputs - subgrid scale clouds
                  & qc_bl1d,cldfra_bl1d,         &
                  & qc_bl1D_old,cldfra_bl1D_old, &
@@ -5801,7 +6071,13 @@ ENDIF
             ! output info
                  &nup2,ktop,maxmf,ztop,     &
             ! unputs for stochastic perturbations
-                 &spp_pbl,rstoch_col) 
+                 &spp_pbl,rstoch_col,QCn,THVn,      & !JFM necessary to make qcn and thvn private
+                 &edmf_th,UPW,UPTHL,UPQT,UPQC,UPQV, & !JFM Eliminate automatic arrays for GPU
+                 &UPA,UPU,UPV,UPTHV,UPQKE,UPQNC,    & !JFM Eliminate automatic arrays for GPU
+                 &UPQNI,UPQNWFA,UPQNIFA,ENT,dzi,    & !JFM Eliminate automatic arrays for GPU
+                 &envm_thl,envm_sqv,envm_sqc,envm_u,& !JFM Eliminate automatic arrays for GPU
+                 &envm_v,envi_a,envi_w              ) !JFM Eliminate automatic arrays for GPU
+!$acc routine vector
 
   ! inputs:
      INTEGER, INTENT(IN) :: KTS,KTE,KPBL,momentum_opt,tke_opt,scalar_opt
@@ -5813,7 +6089,7 @@ ENDIF
 
 ! Stochastic 
      INTEGER,  INTENT(IN)          :: spp_pbl
-     REAL, DIMENSION(KTS:KTE)      :: rstoch_col
+     REAL, DIMENSION(KTS:KTE), INTENT(IN)  :: rstoch_col
 
      REAL,DIMENSION(KTS:KTE), INTENT(IN) :: U,V,W,TH,THL,TK,QT,QV,QC,&
                       exner,dz,THV,P,rho,qke,qnc,qni,qnwfa,qnifa
@@ -5826,23 +6102,23 @@ ENDIF
      REAL,DIMENSION(KTS:KTE), INTENT(OUT) :: edmf_a,edmf_w,        &
                       & edmf_qt,edmf_thl, edmf_ent,edmf_qc
      !add one local edmf variable:
-     REAL,DIMENSION(KTS:KTE) :: edmf_th
+     REAL,DIMENSION(KTS:KTE), INTENT(OUT) :: edmf_th
   ! output
      INTEGER, INTENT(OUT) :: nup2,ktop
      REAL, INTENT(OUT) :: maxmf,ztop
   ! outputs - variables needed for solver
-     REAL,DIMENSION(KTS:KTE+1) :: s_aw,      & !sum ai*rho*wis_awphi
-                               s_awthl,      & !sum ai*rho*wi*phii
-                                s_awqt,      &
-                                s_awqv,      &
-                                s_awqc,      &
-                               s_awqnc,      &
-                               s_awqni,      &
-                             s_awqnwfa,      &
-                             s_awqnifa,      &
-                                 s_awu,      &
-                                 s_awv,      &
-                               s_awqke, s_aw2
+     REAL,DIMENSION(KTS:KTE+1), INTENT(OUT) :: s_aw,      & !sum ai*rho*wis_awphi
+                                            s_awthl,      & !sum ai*rho*wi*phii
+                                             s_awqt,      &
+                                             s_awqv,      &
+                                             s_awqc,      &
+                                            s_awqnc,      &
+                                            s_awqni,      &
+                                          s_awqnwfa,      &
+                                          s_awqnifa,      &
+                                              s_awu,      &
+                                              s_awv,      &
+                                            s_awqke
 
      REAL,DIMENSION(KTS:KTE), INTENT(INOUT) :: qc_bl1d,cldfra_bl1d,    &
                                        qc_bl1d_old,cldfra_bl1d_old
@@ -5852,18 +6128,18 @@ ENDIF
   !------------- local variables -------------------
   ! updraft properties defined on interfaces (k=1 is the top of the
   ! first model layer
-     REAL,DIMENSION(KTS:KTE+1,1:NUP) :: UPW,UPTHL,UPQT,UPQC,UPQV,      &
+     REAL,DIMENSION(KTS:KTE+1,1:NUP),INTENT(OUT) :: UPW,UPTHL,UPQT,UPQC,UPQV, &
                                         UPA,UPU,UPV,UPTHV,UPQKE,UPQNC, &
                                         UPQNI,UPQNWFA,UPQNIFA
   ! entrainment variables
-     REAL,DIMENSION(KTS:KTE,1:NUP) :: ENT,ENTf
-     INTEGER,DIMENSION(KTS:KTE,1:NUP) :: ENTi
+     REAL,DIMENSION(KTS:KTE,1:NUP), INTENT(OUT) :: ENT  !JFM Eliminate automatic arrays for GPU
   ! internal variables
      INTEGER :: K,I,k50
      REAL :: fltv2,wstar,qstar,thstar,sigmaW,sigmaQT,sigmaTH,z0,       &
              pwmin,pwmax,wmin,wmax,wlv,Psig_w,maxw,maxqc,wpbl
-     REAL :: B,QTn,THLn,THVn,QCn,Un,Vn,QKEn,QNCn,QNIn,QNWFAn,QNIFAn,   &
+     REAL :: B,QTn,THLn,Un,Vn,QKEn,QNCn,QNIn,QNWFAn,QNIFAn,   &
              Wn2,Wn,EntEXP,EntEXM,EntW,BCOEFF,THVkm1,THVk,Pk,rho_int
+     REAL, INTENT(OUT) :: QCn,THVn   !JFM necessary to make qcn and thvn private
 
   ! w parameters
      REAL,PARAMETER :: &
@@ -5889,12 +6165,12 @@ ENDIF
 
   ! chem/smoke
      INTEGER, INTENT(IN) :: nchem
-     REAL,DIMENSION(:, :) :: chem1
-     REAL,DIMENSION(kts:kte+1, nchem) :: s_awchem
-     REAL,DIMENSION(nchem) :: chemn
-     REAL,DIMENSION(KTS:KTE+1,1:NUP, nchem) :: UPCHEM
+     REAL,DIMENSION(:, :), INTENT(IN) :: chem1
+     REAL,DIMENSION(kts:kte+1, nchem), INTENT(OUT)  :: s_awchem
+     REAL,DIMENSION(nchem),INTENT(OUT) :: chemn
+     REAL,DIMENSION(KTS:KTE+1,1:NUP, nchem), INTENT(OUT) :: UPCHEM
      INTEGER :: ic
-     REAL,DIMENSION(KTS:KTE+1, nchem) :: edmf_chem
+     REAL,DIMENSION(KTS:KTE+1, nchem), INTENT(OUT) :: edmf_chem
      LOGICAL, INTENT(IN) :: mix_chem
 
   !JOE: add declaration of ERF
@@ -5909,8 +6185,8 @@ ENDIF
            Ac_mf,Ac_strat,qc_mf
 
   ! Variables for plume interpolation/saturation check
-   REAL,DIMENSION(KTS:KTE) :: exneri,dzi
-   REAL ::  THp, QTp, QCp, QCs, esat, qsl
+   REAL,DIMENSION(KTS:KTE), INTENT(OUT) :: dzi !Moved to input for GPU
+   REAL ::  THp, QTp, QCp, QCs, esat, qsl, exneri
    REAL :: csigma,acfac,ac_wsp,ac_cld
 
    !plume overshoot
@@ -5924,11 +6200,11 @@ ENDIF
                                        ! over land (decrease maxMF by 10-20%), but no impact over water.
 
    !Subsidence
-   REAL,DIMENSION(KTS:KTE) :: sub_thl,sub_sqv,sub_u,sub_v,    &  !tendencies due to subsidence
+   REAL,DIMENSION(KTS:KTE), INTENT(OUT) :: sub_thl,sub_sqv,sub_u,sub_v,    &  !tendencies due to subsidence
                       det_thl,det_sqv,det_sqc,det_u,det_v,    &  !tendencied due to detrainment
-                 envm_a,envm_w,envm_thl,envm_sqv,envm_sqc,    &
+                               envm_thl,envm_sqv,envm_sqc,    &
                                        envm_u,envm_v  !environmental variables defined at middle of layer
-   REAL,DIMENSION(KTS:KTE+1) ::  envi_a,envi_w        !environmental variables defined at model interface
+   REAL,DIMENSION(KTS:KTE+1), INTENT(OUT) ::  envi_a,envi_w        !environmental variables defined at model interface
    REAL :: temp,sublim,qc_ent,qv_ent,qt_ent,thl_ent,detrate,  &
            detrateUV,oow,exc_fac,aratio,detturb,qc_grid,qc_sgs,&
            qc_plume
@@ -6453,7 +6729,7 @@ ENDIF
              print *,'ENT:',ENT(:,I)
           ENDIF
        ENDIF
-    ENDDO
+    ENDDO !NUP
   ELSE
     !At least one of the conditions was not met for activating the MF scheme.
     NUP2=0.
@@ -6688,8 +6964,8 @@ ENDIF
     !Here, k=1 is the top of the first model layer. These values do not 
     !need to be defined at k=kte (unused level).
     DO K=KTS,KTE-1
-       exneri(k) = (exner(k)*DZ(k+1)+exner(k+1)*DZ(k))/(DZ(k+1)+DZ(k))
-       edmf_th(k)= edmf_thl(k) + xlvcp/exneri(k)*edmf_qc(K)
+       exneri    = (exner(k)*DZ(k+1)+exner(k+1)*DZ(k))/(DZ(k+1)+DZ(k))
+       edmf_th(k)= edmf_thl(k) + xlvcp/exneri*edmf_qc(K)
        dzi(k)    = 0.5*(DZ(k)+DZ(k+1))
     ENDDO
 
@@ -6868,11 +7144,12 @@ IF (edmf_w(1) > 4.0) THEN
 ! ENDDO
  
 ! mean updrafts
+#ifndef _OPENACC
    print *,' edmf_a',edmf_a(1:14)
    print *,' edmf_w',edmf_w(1:14)
    print *,' edmf_qt:',edmf_qt(1:14)
    print *,' edmf_thl:',edmf_thl(1:14)
- 
+#endif
 ENDIF !END Debugging
 
 
@@ -6886,8 +7163,9 @@ END SUBROUTINE DMP_MF
 !>\ingroup gp_mynnedmf
 !! zero or one condensation for edmf: calculates THV and QC
 subroutine condensation_edmf(QT,THL,P,zagl,THV,QC)
+!$acc routine seq
 !
-real,intent(in)   :: QT,THL,P,zagl
+real,value,intent(in)   :: QT,THL,P,zagl
 real,intent(out)  :: THV
 real,intent(inout):: QC
 
@@ -6993,7 +7271,7 @@ SUBROUTINE DDMF_JPL(kts,kte,dt,zw,dz,p,              &
               &sd_awqv,sd_awqc,sd_awu,sd_awv,        &
               &sd_awqke,                             &
               &qc_bl1d,cldfra_bl1d,                  &
-              &rthraten                              )
+              &rthraten,qcn,thvn                     )
 
         INTEGER, INTENT(IN) :: KTS,KTE,KPBL
         REAL,DIMENSION(KTS:KTE), INTENT(IN) :: U,V,TH,THL,TK,QT,QV,QC,&
@@ -7027,9 +7305,10 @@ SUBROUTINE DDMF_JPL(kts,kte,dt,zw,dz,p,              &
   ! internal variables
         INTEGER :: K,I,ki, kminrad, qlTop, p700_ind, qlBase
         REAL :: wthv,wstar,qstar,thstar,sigmaW,sigmaQT,sigmaTH,z0, &
-            pwmin,pwmax,wmin,wmax,wlv,wtv,went,mindownw
-        REAL :: B,QTn,THLn,THVn,QCn,Un,Vn,QKEn,Wn2,Wn,THVk,Pk, &
+            pwmin,pwmax,wmin,wmax,wlv,wtv,went,mindownw,p700_val
+        REAL :: B,QTn,THLn,Un,Vn,QKEn,Wn2,Wn,THVk,Pk, &
                 EntEXP,EntW, Beta_dm, EntExp_M, rho_int
+        REAL, INTENT(OUT) :: QCn,THVn   !JFM necessary to make qcn and thvn private
         REAL :: jump_thetav, jump_qt, jump_thetal, &
                 refTHL, refTHV, refQT
   ! DD specific internal variables
@@ -7143,7 +7422,14 @@ SUBROUTINE DDMF_JPL(kts,kte,dt,zw,dz,p,              &
       enddo
 
       !!![EW: INVJUMP] find 700mb height then subtract trpospheric lapse rate!!!
-      p700_ind = MINLOC(ABS(p-70000),1)!p1D is 70000
+ !    p700_ind = MINLOC(ABS(p-70000),1)!p1D is 70000   JFM MINLOC is not supported on GPU by nvhpc/22.2
+      p700_val = huge(p)
+      do k=kts,kte
+         if(ABS(p(k)-70000) < p700_val) then
+            p700_val = ABS(p(k)-70000)
+            p700_ind = k
+         endif
+      enddo
       jump_thetav = thv(p700_ind) - thv(1) - (thv(p700_ind)-thv(qlTop+3))/(ZW(p700_ind)-ZW(qlTop+3))*(ZW(p700_ind)-ZW(qlTop))
       jump_qt = qc(p700_ind) + qv(p700_ind) - qc(1) - qv(1)
       jump_thetal = thl(p700_ind) - thl(1) - (thl(p700_ind)-thl(qlTop+3))/(ZW(p700_ind)-ZW(qlTop+3))*(ZW(p700_ind)-ZW(qlTop))
@@ -7345,6 +7631,7 @@ END SUBROUTINE DDMF_JPL
 !> Add scale-aware factor (Psig) here, taken from Honnert et al. (2011) \cite Honnert_2011
 !! and/or from Shin and Hong (2013) \cite Shin_2013.
 SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
+!$acc routine seq
 
     !---------------------------------------------------------------
     !             NOTES ON SCALE-AWARE FORMULATION
@@ -7423,10 +7710,11 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 !! value is "phase-aware", this formulation may be preferred for use throughout
 !! the module (replacing "svp").
   FUNCTION esat_blend(t) 
+!$acc routine seq
 
       IMPLICIT NONE
       
-      REAL, INTENT(IN):: t
+      REAL, VALUE, INTENT(IN):: t
       REAL :: esat_blend,XC,ESL,ESI,chi
 
       XC=MAX(-80.,t - t0c) !note t0c = 273.15, tice is set in module mynn_common
@@ -7454,10 +7742,11 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 !! saturation mixing ratio.
 !!\author JAYMES
   FUNCTION qsat_blend(t, P, waterice)
+!$acc routine seq
 
       IMPLICIT NONE
 
-      REAL, INTENT(IN):: t, P
+      REAL, VALUE, INTENT(IN):: t, P
       CHARACTER(LEN=1), OPTIONAL, INTENT(IN) :: waterice
       CHARACTER(LEN=1) :: wrt
       REAL :: qsat_blend,XC,ESL,ESI,RSLF,RSIF,chi
@@ -7497,10 +7786,11 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 !! Chaboureau and Bechtold (2002) \cite Chaboureau_2002, Appendix.
 !!\author JAYMES
   FUNCTION xl_blend(t)
+!$acc routine seq
 
       IMPLICIT NONE
 
-      REAL, INTENT(IN):: t
+      REAL, VALUE, INTENT(IN):: t
       REAL :: xl_blend,xlvt,xlst,chi
       !note: t0c = 273.15, tice is set in mynn_common
 
@@ -7526,9 +7816,10 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 !! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
 !! stable conditions [z/L ~ O(10)].
   FUNCTION phim(zet)
+!$acc routine seq
       IMPLICIT NONE
 
-      REAL, INTENT(IN):: zet
+      REAL, VALUE, INTENT(IN):: zet
       REAL :: dummy_0,dummy_1,dummy_11,dummy_2,dummy_22,dummy_3,dummy_33,dummy_4,dummy_44,dummy_psi
       REAL, PARAMETER :: am_st=6.1, bm_st=2.5, rbm_st=1./bm_st
       REAL, PARAMETER :: ah_st=5.3, bh_st=1.1, rbh_st=1./bh_st
@@ -7577,9 +7868,10 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 !! updated form taken from Cheng and Brutsaert (2005), which extends the validity into very
 !! stable conditions [z/L ~ O(10)].
   FUNCTION phih(zet)
+!$acc routine seq
       IMPLICIT NONE
 
-      REAL, INTENT(IN):: zet
+      REAL, VALUE, INTENT(IN):: zet
       REAL :: dummy_0,dummy_1,dummy_11,dummy_2,dummy_22,dummy_3,dummy_33,dummy_4,dummy_44,dummy_psi
       REAL, PARAMETER :: am_st=6.1, bm_st=2.5, rbm_st=1./bm_st
       REAL, PARAMETER :: ah_st=5.3, bh_st=1.1, rbh_st=1./bh_st
@@ -7623,7 +7915,9 @@ END FUNCTION phih
  SUBROUTINE topdown_cloudrad(kts,kte,dz1,zw,xland,kpbl,PBLH,  &
                &sqc,sqi,sqw,thl,th1,ex1,p1,rho1,thetav,       &
                &cldfra_bl1D,rthraten,                         &
-               &maxKHtopdown,KHtopdown,TKEprodTD              )
+               &maxKHtopdown,KHtopdown,TKEprodTD,             &
+               &zfac,wscalek2,zfacent )                           !JFM Eliminate automatic arrays for GPU
+!$acc routine vector
 
     !input
     integer, intent(in) :: kte,kts
@@ -7636,7 +7930,7 @@ END FUNCTION phih
     real, intent(out) :: maxKHtopdown
     real, dimension(kts:kte), intent(out) :: KHtopdown,TKEprodTD
     !local
-    real, dimension(kts:kte) :: zfac,wscalek2,zfacent
+    real, dimension(kts:kte), intent(out) :: zfac,wscalek2,zfacent  !JFM Eliminate automatic arrays for GPU
     real :: bfx0,sflux,wm2,wm3,h1,h2,bfxpbl,dthvx,tmp1
     real :: temps,templ,zl1,wstar3_2
     real :: ent_eff,radsum,radflux,we,rcldb,rvls,minrad,zminrad

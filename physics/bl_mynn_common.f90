@@ -67,4 +67,14 @@
  real(kind=kind_phys):: xlvcp        !<= xlv/cp
  real(kind=kind_phys):: g_inv        !<= 1./grav
 
+!$acc declare create (                                        &
+!$acc        cp        , cpv       , cliq       , cice      , &
+!$acc        p608      , ep_2      , ep_3       , gtr       , &
+!$acc        grav      , g_inv     , karman                 , &
+!$acc        rcp       , r_d       , r_v        , rk        , &
+!$acc        rvovrd                                         , &
+!$acc        xlf       , xlv       , xls        , xlscp     , &
+!$acc        xlvcp     , tv0       , tv1                    , &
+!$acc        t0c )
+
  end module bl_mynn_common
