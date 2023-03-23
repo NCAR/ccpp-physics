@@ -8119,8 +8119,7 @@ END SUBROUTINE nssl_2mom_driver
 !          write(0,*) 'dtmps,dtmph = ',dtmps,dtmph
 !         ENDIF
 
-! 1.2 GB of messages is a bit too much.
-        IF ( .false. ) then ! .not. dtmp(ix,kz) .lt. 1.e30 .or. dbz(ix,jy,kz) > 190.0
+        IF ( ndebug>1 .and. .not. dtmp(ix,kz) .lt. 1.e30 .or. dbz(ix,jy,kz) > 190.0 ) THEN
 !        IF ( ix == 31 .and. kz == 20 .and. jy == 23 ) THEN
 !          write(0,*) 'my_rank = ',my_rank
           write(0,*) 'ix,jy,kz = ',ix,jy,kz
