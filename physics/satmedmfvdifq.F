@@ -267,10 +267,10 @@
       real(kind=kind_phys) bfac, mffac
 
 !PCC_CANOPY------------------------------------
-      integer COUNTCAN
+      integer COUNTCAN,KCAN
       real(kind=kind_phys) FCH,       MOL,   HOL, TLCAN,
      &                     SIGMACAN,  RRCAN, BBCAN,
-     &                     AACAN,     ZCAN,  ZFL,
+     &                     AACAN,     ZCAN,  ZFL, BOTCAN,
      &                     EDDYVEST1, EDDYVEST_INT
 
       ! in canopy eddy diffusivity [ m**2/s ]
@@ -1315,13 +1315,22 @@
         enddo
       enddo
       !PCC_CANOPY------------------------------------
-      if (do_canopy) then  
+      if (do_canopy) then 
         do k = 1, km1
           do i = 1, im
                       FCH = hvt_table(vegtype(i)) !top of canopy
-                                               
                       IF (k .EQ. 1) THEN !first model layer
-!                       Check for Contiguous Canopy Grid Cells
+                        KCAN = 1
+                      ELSE 
+                        IF (FCH .GT. zl(i,k-1)  
+     &                  .AND. FCH .LE. zl(i,k) ) THEN
+                            KCAN = 1
+                        ELSE
+                            KCAN = 0
+                        END IF
+                      END IF
+                      IF (KCAN .EQ. 1) THEN !canopy could be inside model layer
+!                       Check for other Contiguous Canopy Grid Cell Conditions
                         IF ( lai(i) .LT. 0.1  !from LSM
      &                   .OR. FCH .LT. 0.5 ) THEN
 !     &                   .OR. MAX(0.0, 1.0 - FRT) .GT. 0.5
@@ -1340,10 +1349,17 @@
 ! (1989), 115, pp 609-632
               MOL  = zol(i)/zl(i,k)  !Monin-Obukhov Length
               HOL = FCH/MOL  !local canopy stability parameter (hc/MOL)
-              ZCAN = zl(i,k) ! Initialize canopy top (m) = First model layer height above canopy
+              ZCAN = zl(i,k) ! Initialize canopy top (m) = Each model layer that contains canopy
               ZFL = ZCAN     ! Set ZFL = ZCAN
               COUNTCAN = 0   ! Initialize canopy layers
-              DO WHILE (ZCAN.GE.0.5)  !canopy threshold >= 0.5 m
+
+              IF (k .EQ. 1) THEN  !Find bottom in each model layer
+                  BOTCAN = 0.5
+              ELSE
+                  BOTCAN = zl(i,k-1)
+              END IF
+
+              DO WHILE (ZCAN.GE.BOTCAN)
                  ! TLCAN = Lagrangian timescale
                  TLCAN = (FCH/ustar(i)) * (
      &                   (0.256 * (ZCAN-(0.75*FCH))/FCH ) +
@@ -1396,7 +1412,7 @@
                  IF ( HOL .GE.  0.9 ) THEN  !VERY STABLE
                     SIGMACAN = 0.25*ustar(i)
                  END IF
-                 IF ( ZCAN .EQ. ZFL )  THEN ! First model layer above canopy
+                 IF ( ZCAN .EQ. ZFL )  THEN ! Each model layer that includes canopy
                   EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN
                  ELSE IF ( ZCAN .LE. FCH )  THEN !in-canopy layers and set arrays
                   COUNTCAN = COUNTCAN + 1
@@ -1411,7 +1427,8 @@
               dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
               dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
                         END IF !contigous canopy conditions
-                      END IF  ! first model layer scaled canopy
+!                      END IF  ! first model layer scaled canopy
+                      END IF   ! model layers containing canopy
           enddo !i
         enddo !k
       endif !do_canopy
