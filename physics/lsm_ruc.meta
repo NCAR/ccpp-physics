@@ -1442,7 +1442,7 @@
   kind = kind_phys
   intent = inout
 [snowfallac_lnd]
-  standard_name = surface_snow_amount_vardens_over_land
+  standard_name = surface_snow_amount_assuming_variable_snow_density_over_land
   long_name = run-total snow accumulation on the ground with variable snow density over land
   units = kg m-2
   dimensions = (horizontal_loop_extent)
@@ -1602,7 +1602,7 @@
   kind = kind_phys
   intent = in
 [snowfallac_ice]
-  standard_name = surface_snow_amount_vardens_over_ice
+  standard_name = surface_snow_amount_assuming_variable_snow_density_over_ice
   long_name = run-total snow accumulation on the ground with variable snow density over ice
   units = kg m-2
   dimensions = (horizontal_loop_extent)
