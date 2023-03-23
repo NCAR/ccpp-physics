@@ -2241,7 +2241,7 @@ contains
             po_cup,pr_ens,maxens3,                                       &
             sig,closure_n,xland1,xmbm_in,xmbs_in,                        &
             ichoice,imid,ipr,itf,ktf,                                    &
-            its,ite, kts,kte,                                            &
+            its,ite, kts,kte,dx,sigmab,                                  &
             dicycle,xf_dicycle,xf_progsigma)
 
 !> - Call rain_evap_below_cloudbase() to calculate evaporation below cloud base
@@ -4110,7 +4110,7 @@ endif
               maxens3,                                                      &
               sig,closure_n,xland1,xmbm_in,xmbs_in,                         &
               ichoice,imid,ipr,itf,ktf,                                     &
-              its,ite, kts,kte,                                             &
+              its,ite, kts,kte, dx,sigmab,                                  &
               dicycle,xf_dicycle,xf_progsigma)
 
    implicit none
@@ -4151,7 +4151,7 @@ endif
         zu,pwd,p_cup
      real(kind=kind_phys),   dimension (its:ite)                                       &
          ,intent (in  )                   ::                           &
-        sig,xmbm_in,xmbs_in,edt
+        sig,xmbm_in,xmbs_in,edt,sigmab,dx
      real(kind=kind_phys),   dimension (its:ite,2)                                     &
          ,intent (in  )                   ::                           &
         xff_mid

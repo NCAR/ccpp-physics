@@ -66,7 +66,7 @@ contains
                          hfx,qfx,xland,ichoice,tcrit,dtime,         &
                          zuo,xmb_out,kbcon,ktop,k22,ierr,ierrc,     &
                          flag_init, flag_restart,fv,r_d,delp,tmf,qmicro, & 
-                         forceqv_spechum,sigmain,sigmaout,progsigma,    &
+                         forceqv_spechum,sigmain,sigmaout,progsigma,dx,  &
                          outt,outq,outqc,outu,outv,cnvwt,pre,cupclw,     & ! output tendencies
                          itf,ktf,its,ite, kts,kte,ipr,tropics)  ! dimesnional variables
 !
@@ -125,7 +125,7 @@ contains
          q,qo
      real(kind=kind_phys), dimension (its:ite)                                         &
         ,intent (in   )                   ::                           &
-        xland,z1,psur,hfx,qfx
+        xland,z1,psur,hfx,qfx,dx
        
      real(kind=kind_phys)                                                              &
         ,intent (in   )                   ::                           &

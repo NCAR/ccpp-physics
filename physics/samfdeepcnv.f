@@ -209,7 +209,7 @@ cj
      &                     bb1,     bb2,     wucb
 !
 !  parameters for prognostic sigma closure                                                                                                                                                      
-      real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km)
+      real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im),qadv(im,km)
       real(kind=kind_phys) gravinv,invdelt
       logical flag_shallow

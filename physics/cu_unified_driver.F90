@@ -646,8 +646,8 @@ contains
 ! turning off shallow convection for grid points
                          zus,xmbs,kbcons,ktops,k22s,ierrs,ierrcs,                &
 !Prog closure
-                         flag_init, flag_restart,fv,r_d,delp,tmfq,qmicro,         &
-                         forceqv_spechum,sigmain,sigmaout,progsigma,            &
+                         flag_init, flag_restart,fv,r_d,delp,tmfq,qmicro,        &
+                         forceqv_spechum,sigmain,sigmaout,progsigma,dx,          &
 ! output tendencies
                          outts,outqs,outqcs,outus,outvs,cnvwt,prets,cupclws,     &
 ! dimesnional variables
