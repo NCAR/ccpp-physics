@@ -37,11 +37,10 @@ MODULE module_sf_ruclsm
       real (kind_phys), parameter :: one      = 1._kind_dbl_prec
 
       !-- options for snow conductivity: 1 - constant, 2 - Sturm et al.,1997
-      integer, parameter :: isncond_opt = 1
-
+      !integer, parameter :: isncond_opt = 1
       !-- Snow fraction options
       !-- option 1: original formulation using threshold snow depth to compute snow fraction
-      integer, parameter :: isncovr_opt = 1
+      !integer, parameter :: isncovr_opt = 1
       !-- option 2: the tanh formulation from Niu,G.-Y.,and Yang,Z.-L., 2007,JGR,DOI:10.1029/2007JD008674.
       !integer, parameter :: isncovr_opt = 2
       !-- option 3: the tanh formulation from Niu,G.-Y.,and Yang,Z with
@@ -93,7 +92,9 @@ CONTAINS
                    rhosnf,precipfr,exticeden, hgt,stdev,         &
                    Z3D,P8W,T3D,QV3D,QC3D,RHO3D,EMISBCK,          &
                    GLW,GSWdn,GSW,EMISS,CHKLOWQ, CHS,             &
-                   FLQC,FLHC,rhonewsn_ex,MAVAIL,CANWAT,VEGFRA,   &
+                   FLQC,FLHC,rhonewsn_ex,mosaic_lu,              &
+                   mosaic_soil,isncond_opt,isncovr_opt,          &
+                   MAVAIL,CANWAT,VEGFRA,                         &
                    ALB,ZNT,Z0,SNOALB,ALBBCK,LAI,                 & 
                    landusef, nlcat, soilctop, nscat,             &
                    QSFC,QSG,QVG,QCG,DEW,SOILT1,TSNAV,            &
@@ -197,6 +198,8 @@ CONTAINS
    real (kind_phys),       INTENT(IN   )    ::     DT
    LOGICAL,    INTENT(IN   )    ::     myj,frpcpn,init,lsm_cold_start,exticeden
    INTEGER,    INTENT(IN   )    ::     NLCAT, NSCAT 
+   INTEGER,    INTENT(IN   )    ::     mosaic_lu,mosaic_soil
+   INTEGER,    INTENT(IN   )    ::     isncond_opt,isncovr_opt
    INTEGER,    INTENT(IN   )    ::     ktau, iter, nsl, isice, iswater, &
                                        ims,ime, jms,jme, kms,kme,       &
                                        its,ite, jts,jte, kts,kte
@@ -692,10 +695,7 @@ CONTAINS
         NZS1=NZS-1
 !-----
     IF (debug_print ) THEN
-      if (abs(xlat-testptlat).lt.0.2 .and.                           &
-          abs(xlon-testptlon).lt.0.2)then
           print *,' DT,NZS1, ZSMAIN, ZSHALF --->', dt,nzs1,zsmain,zshalf
-      endif
     ENDIF
 
         DO  K=2,NZS1
@@ -739,6 +739,7 @@ CONTAINS
       if(init) then
         if (abs(xlat-testptlat).lt.0.2 .and.                           &
             abs(xlon-testptlon).lt.0.2)then
+           print*,'  lat,lon=',xlat,xlon
            print *,'before SOILVEGIN - z0,znt',i,z0(i,j),znt(i,j)
            print *,'ILAND, ISOIL =',i,iland,isoil
         endif
@@ -747,7 +748,7 @@ CONTAINS
  
 !> - Call soilvegin() to initialize soil and surface properties
      !-- land or ice
-       CALL SOILVEGIN  ( debug_print, &
+       CALL SOILVEGIN  ( debug_print, mosaic_lu, mosaic_soil,                        &
                        soilfrac,nscat,shdmin(i,j),shdmax(i,j),                       &
                        NLCAT,ILAND,ISOIL,iswater,MYJ,IFOREST,lufrac,VEGFRA(I,J),     &
                        EMISSL(I,J),PC(I,J),MSNF(I,J),FACSNF(I,J),                    &
@@ -761,6 +762,7 @@ CONTAINS
       if(init)then
         if (abs(xlat-testptlat).lt.0.2 .and.                           &
             abs(xlon-testptlon).lt.0.2)then
+         print*,'  lat,lon=',xlat,xlon
          print *,'after SOILVEGIN - z0,znt,lai',i,z0(i,j),znt(i,j),lai(i,j)
          print *,'NLCAT,iland,EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J)', &
                   NLCAT,iland,EMISSL(I,J),PC(I,J),ZNT(I,J),LAI(I,J),i,j
@@ -808,10 +810,14 @@ CONTAINS
 
 !-----
     IF (debug_print ) THEN
+      if (abs(xlat-testptlat).lt.0.2 .and.                               &
+          abs(xlon-testptlon).lt.0.2)then
+         print*,'  lat,lon=',xlat,xlon
          print *,' ZNT, LAI, VEGFRA, SAT, EMIS, PC --->',                &
                    ZNT(I,J),LAI(I,J),VEGFRA(I,J),SAT,EMISSL(I,J),PC(I,J)
          print *,' ZS, ZSMAIN, ZSHALF, CONFLX, CN, SAT, --->', zs,zsmain,zshalf,conflx,cn,sat
          print *,'NROOT, meltfactor, iforest, ivgtyp, i,j ', nroot,meltfactor,iforest,ivgtyp(I,J),I,J
+      endif
     ENDIF
 
         IF((XLAND(I,J)-1.5).GE.0._kind_phys)THEN
@@ -841,8 +847,11 @@ CONTAINS
             ENDDO
 
     IF (debug_print ) THEN
-              PRINT*,'  water point, I=',I,                      &
-              'J=',J, 'SOILT=', SOILT(i,j)
+      if (abs(xlat-testptlat).lt.0.2 .and.                    &
+            abs(xlon-testptlon).lt.0.2)then
+           PRINT*,'  water point'  
+           print*,'  lat,lon=',xlat,xlon,'SOILT=', SOILT(i,j)
+      endif
     ENDIF
 
            ELSE
@@ -857,8 +866,11 @@ CONTAINS
          IF(SEAICE(I,J).GT.0.5_kind_phys)THEN
 !-- Sea-ice case
     IF (debug_print ) THEN
-              PRINT*,' sea-ice at water point, I=',I,            &
-              'J=',J
+        if (abs(xlat-testptlat).lt.0.2 .and.                    &      
+            abs(xlon-testptlon).lt.0.2)then
+           PRINT*,' sea-ice at water point'
+           print*,'  lat,lon=',xlat,xlon
+        endif
     ENDIF
             ILAND = isice
         if(nscat == 9) then
@@ -909,6 +921,7 @@ CONTAINS
     IF (debug_print ) THEN
       if (abs(xlat-testptlat).lt.0.2 .and.                           &
           abs(xlon-testptlon).lt.0.2)then
+        print*,'  lat,lon=',xlat,xlon
         print *,'LAND, i,j,tso1d,soilm1d,PATM,TABS,QVATM,QCATM,RHO',  &
                        i,j,tso1d,soilm1d,PATM,TABS,QVATM,QCATM,RHO
         print *,'CONFLX =',CONFLX 
@@ -934,6 +947,7 @@ CONTAINS
                 xlat, xlon, testptlat, testptlon,                &
 !--- input variables
                 nzs,nddzs,nroot,meltfactor,                      &   !added meltfactor
+                isncond_opt,isncovr_opt,                         &
                 iland,isoil,ivgtyp(i,j),isltyp(i,j),             &
                 PRCPMS, NEWSNMS,SNWE,SNHEI,SNOWFRAC,             &
                 exticeden,RHOSN,RHONEWSN_ex(I),RHONEWSN,         &
@@ -973,23 +987,29 @@ CONTAINS
 ! croplands.
 ! This change violates LSM moisture budget, but
 ! can be considered as a compensation for irrigation not included into LSM. 
-
-!tgs - turn off "irrigation" while there is no fractional landuse and LAI
-!climatology.
-    if(1==2) then
+!tgs - "irrigation" uses fractional landuse, therefore mosaic_lu=1.
+    if(mosaic_lu == 1) then
     IF (lufrac(crop) > zero .and. lai(i,j) > 1.1_kind_phys) THEN
     ! cropland
         do k=1,nroot
-             cropsm=1.1_kind_phys*wilt - qmin
+          cropsm=1.1_kind_phys*wilt - qmin
           if(soilm1d(k) < cropsm*lufrac(crop)) then
     IF (debug_print ) THEN
-print * ,'Soil moisture is below wilting in cropland category at time step',ktau  &
-              ,'i,j,lufrac(crop),k,soilm1d(k),wilt,cropsm',                       &
-                i,j,lufrac(crop),k,soilm1d(k),wilt,cropsm
+      if (abs(xlat-testptlat).lt.0.2 .and. &
+          abs(xlon-testptlon).lt.0.2)then
+print * ,'Soil moisture is below wilting in cropland category at time step',ktau 
+          print*,'  lat,lon=',xlat,xlon  &
+                ,'lufrac(crop),k,soilm1d(k),wilt,cropsm', &
+                  lufrac(crop),k,soilm1d(k),wilt,cropsm
+      endif
     ENDIF
-             soilm1d(k) = cropsm*lufrac(crop)
+           soilm1d(k) = cropsm*lufrac(crop)
     IF (debug_print ) THEN
-      print * ,'Added soil water to cropland category, i,j,k,soilm1d(k)',i,j,k,soilm1d(k)
+      if (abs(xlat-testptlat).lt.0.2 .and. &                  
+            abs(xlon-testptlon).lt.0.2)then
+        print*,'  lat,lon=',xlat,xlon
+        print * ,'Added soil water to cropland category, i,j,k,soilm1d(k)',i,j,k,soilm1d(k)
+      endif
     ENDIF
           endif
         enddo
@@ -997,21 +1017,30 @@ print * ,'Soil moisture is below wilting in cropland category at time step',ktau
     ELSEIF (ivgtyp(i,j) == natural .and. lai(i,j) > 0.7) THEN
     ! grassland: assume that 40% of grassland is irrigated cropland
         do k=1,nroot
-             cropsm=1.2_kind_phys*wilt - qmin
+          cropsm=1.2_kind_phys*wilt - qmin
           if(soilm1d(k) < cropsm*lufrac(natural)*0.4) then
     IF (debug_print ) THEN
-print * ,'Soil moisture is below wilting in mixed grassland/cropland category at time step',ktau &
-              ,'i,j,lufrac(natural),k,soilm1d(k),wilt',                       &
-                i,j,lufrac(natural),k,soilm1d(k),wilt
+      if (abs(xlat-testptlat).lt.0.2 .and. &
+          abs(xlon-testptlon).lt.0.2)then
+print * ,'Soil moisture is below wilting in mixed grassland/cropland category at time step',ktau 
+          print*,'  lat,lon=',xlat,xlon, &
+                 'lufrac(natural),k,soilm1d(k),wilt', &
+                  lufrac(natural),k,soilm1d(k),wilt
+      endif
     ENDIF
-             soilm1d(k) = cropsm * lufrac(natural)*0.4_kind_phys
+           soilm1d(k) = cropsm * lufrac(natural)*0.4_kind_phys
+
     IF (debug_print ) THEN
-      print * ,'Added soil water to grassland category, i,j,k,soilm1d(k)',i,j,k,soilm1d(k)
+      if (abs(xlat-testptlat).lt.0.2 .and. &  
+            abs(xlon-testptlon).lt.0.2)then
+        print*,'  lat,lon=',xlat,xlon
+        print * ,'Added soil water to grassland category, i,j,k,soilm1d(k)',i,j,k,soilm1d(k)
+      endif
     ENDIF
           endif
         enddo
     ENDIF
-    endif ! 1==2
+    endif ! mosaic_lu
 
 !***  DIAGNOSTICS
 !--- available and maximum soil moisture content in the soil
@@ -1046,7 +1075,6 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 
         do k=1,nzs
 
-!             soilmois(i,k,j) = soilm1d(k)
              soilmois(i,k,j) = soilm1d(k) + qmin
              sh2o    (i,k,j) = min(soiliqw(k) + qmin,soilmois(i,k,j))
                   tso(i,k,j) = tso1d(k)
@@ -1102,7 +1130,6 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 !tgs - SMF.NE.0. when there is phase change in the top soil layer
 ! The heat of soil water freezing/thawing is not computed explicitly
 ! and is responsible for the residual in the energy budget.
-!       endif
 
 !--- SNOWC snow cover flag
        SNOWC(I,J)=SNOWFRAC
@@ -1157,9 +1184,9 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
     IF (debug_print ) THEN
      if (abs(xlat-testptlat).lt.0.2 .and.   &
          abs(xlon-testptlon).lt.0.2)then
-       print *,'LAND, i,j,tso1d,soilm1d,soilt - end of time step',         &
-                  i,j,tso1d,soilm1d,soilt(i,j)
-       print *,'LAND, QFX, HFX after SFCTMP', i,j,lh(i,j),hfx(i,j)
+       print *,'LAND, i,tso1d,soilm1d,soilt - end of time step',         &
+                  i,tso1d,soilm1d,soilt(i,j)
+       print *,'LAND, QFX, HFX after SFCTMP', i,lh(i,j),hfx(i,j)
      endif
     ENDIF
 
@@ -1187,6 +1214,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
    SUBROUTINE SFCTMP (debug_print, delt,ktau,conflx,i,j,         & !--- input variables
                 xlat,xlon,testptlat,testptlon,                   &
                 nzs,nddzs,nroot,meltfactor,                      &
+                isncond_opt,isncovr_opt,                         &
                 ILAND,ISOIL,IVGTYP,ISLTYP,PRCPMS,                &
                 NEWSNMS,SNWE,SNHEI,SNOWFRAC,                     &
                 exticeden,RHOSN,RHONEWSN_ex,RHONEWSN,RHOSNFALL,  &
@@ -1215,6 +1243,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
 
    INTEGER,  INTENT(IN   )   ::  isice,i,j,nroot,ktau,nzs ,      &
                                  nddzs                             !nddzs=2*(nzs-2)
+   integer,  intent(in   )   ::  isncond_opt,isncovr_opt
 
    real (kind_phys),     INTENT(IN   )   ::  DELT,CONFLX,meltfactor,xlat,xlon
    real (kind_phys),     INTENT(IN   )   ::  testptlat,testptlon
@@ -1923,6 +1952,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
            endif
          CALL SNOWSOIL (debug_print,xlat,xlon,testptlat,testptlon, & !--- input variables
             i,j,isoil,delt,ktau,conflx,nzs,nddzs,nroot,         &
+            isncond_opt,isncovr_opt,                            &
             meltfactor,rhonewsn,SNHEI_CRIT,                     &  ! new
             ILAND,PRCPMS,RAINF,NEWSN,snhei,SNWE,snfr,           &
             RHOSN,PATM,QVATM,QCATM,                             &
@@ -1951,8 +1981,9 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
               snfr=snowfrac
            endif
 
-         CALL SNOWSEAICE (debug_print,xlat,xlon,                 &
+         CALL SNOWSEAICE (debug_print,xlat,xlon,                &
             i,j,isoil,delt,ktau,conflx,nzs,nddzs,               &    
+            isncond_opt,isncovr_opt,                            &
             meltfactor,rhonewsn,SNHEI_CRIT,                     &  ! new
             ILAND,PRCPMS,RAINF,NEWSN,snhei,SNWE,snfr,           &    
             RHOSN,PATM,QVATM,QCATM,                             &    
@@ -3177,6 +3208,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
         SUBROUTINE SNOWSOIL ( debug_print,xlat,xlon,           &
              testptlat,testptlon,                              &
              i,j,isoil,delt,ktau,conflx,nzs,nddzs,nroot,       & !--- input variables
+             isncond_opt,isncovr_opt,                          &
              meltfactor,rhonewsn,SNHEI_CRIT,                   & ! new
              ILAND,PRCPMS,RAINF,NEWSNOW,snhei,SNWE,SNOWFRAC,   &
              RHOSN,                                            &
@@ -3271,7 +3303,7 @@ print * ,'Soil moisture is below wilting in mixed grassland/cropland category at
    LOGICAL,  INTENT(IN   )   ::  debug_print
    INTEGER,  INTENT(IN   )   ::  nroot,ktau,nzs     ,            &
                                  nddzs                         !nddzs=2*(nzs-2)
-   INTEGER,  INTENT(IN   )   ::  i,j,isoil
+   INTEGER,  INTENT(IN   )   ::  i,j,isoil,isncond_opt,isncovr_opt
 
    real (kind_phys),     INTENT(IN   )   ::  DELT,CONFLX,PRCPMS, &
                                  RAINF,NEWSNOW,RHONEWSN,         &
@@ -3632,6 +3664,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 !--- input variables
              i,j,iland,isoil,                                 &
              delt,ktau,conflx,nzs,nddzs,nroot,                &
+             isncond_opt,isncovr_opt,                         &
              snwe,snwepr,snhei,newsnow,snowfrac,snhei_crit,   &
              beta,deltsn,snth,rhosn,rhonewsn,meltfactor,      &  ! add meltfactor
              PRCPMS,RAINF,                                    &
@@ -3844,6 +3877,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 !! temperature, snow and ice temperatures, snow depth and snow melt.
            SUBROUTINE SNOWSEAICE( debug_print,xlat,xlon,        &
             i,j,isoil,delt,ktau,conflx,nzs,nddzs,               &
+            isncond_opt,isncovr_opt,                            &
             meltfactor,rhonewsn,SNHEI_CRIT,                     &  ! new
             ILAND,PRCPMS,RAINF,NEWSNOW,snhei,SNWE,snowfrac,     &
             RHOSN,PATM,QVATM,QCATM,                             &
@@ -3871,7 +3905,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
    LOGICAL,  INTENT(IN   )   ::  debug_print
    INTEGER,  INTENT(IN   )   ::  ktau,nzs     ,                  &
                                  nddzs                         !nddzs=2*(nzs-2)
-   INTEGER,  INTENT(IN   )   ::  i,j,isoil
+   INTEGER,  INTENT(IN   )   ::  i,j,isoil,isncond_opt,isncovr_opt
 
    real (kind_phys),     INTENT(IN   )   ::  DELT,CONFLX,PRCPMS, &
                                  RAINF,NEWSNOW,RHONEWSN,         &
@@ -4961,6 +4995,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
            SUBROUTINE SNOWTEMP( debug_print,xlat,xlon,             &
            testptlat,testptlon,i,j,iland,isoil,                    & !--- input variables
            delt,ktau,conflx,nzs,nddzs,nroot,                       &
+           isncond_opt,isncovr_opt,                                &
            snwe,snwepr,snhei,newsnow,snowfrac,snhei_crit,          &
            beta,deltsn,snth,rhosn,rhonewsn,meltfactor,             &  ! add meltfactor
            PRCPMS,RAINF,                                           &
@@ -5032,7 +5067,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
    INTEGER,  INTENT(IN   )   ::  nroot,ktau,nzs                , &
                                  nddzs                             !nddzs=2*(nzs-2)
 
-   INTEGER,  INTENT(IN   )   ::  i,j,iland,isoil
+   INTEGER,  INTENT(IN   )   ::  i,j,iland,isoil,isncond_opt,isncovr_opt
    real (kind_phys),     INTENT(IN   )  ::  DELT,CONFLX,PRCPMS , &
                                  RAINF,NEWSNOW,DELTSN,SNTH     , &
                                  TABS,TRANSUM,SNWEPR           , &
@@ -6708,7 +6743,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !! This subroutine computes effective land and soil parameters in the
 !! grid cell from the weighted contribution of soil and land categories
 !! represented in the grid cell.
-     SUBROUTINE SOILVEGIN  ( debug_print,                              &
+     SUBROUTINE SOILVEGIN  ( debug_print,mosaic_lu,mosaic_soil,        &
                              soilfrac,nscat,shdmin, shdmax,            &
                      NLCAT,IVGTYP,ISLTYP,iswater,MYJ,                  &
                      IFOREST,lufrac,vegfrac,EMISS,PC,                  &
@@ -6743,6 +6778,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
       integer,   parameter      ::      ilsnow=99
 
    LOGICAL,    INTENT(IN   )    ::      debug_print
+   INTEGER,    INTENT(IN   )    ::      mosaic_lu, mosaic_soil
    INTEGER,    INTENT(IN   )    ::      nlcat, nscat, iswater, i, j
 
 !---    soiltyp classification according to STATSGO(nclasses=16)

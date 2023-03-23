@@ -326,7 +326,8 @@ module lsm_ruc
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
      &       imp_physics_nssl, do_mynnsfclay,                           &
-     &       exticeden, lsoil_ruc, lsoil, nlcat, nscat,                 &
+     &       exticeden, lsoil_ruc, lsoil, mosaic_lu, mosaic_soil,       &
+     &       isncond_opt, isncovr_opt, nlcat, nscat,                    &
      &       rdlai, xlat_d, xlon_d,                                     &
      &       oro, sigma, zs, t1, q1, qc, stype, vtype, vegtype_frac,    &
      &       soiltype_frac, sigmaf, laixy,                              &
@@ -371,6 +372,7 @@ module lsm_ruc
 !  ---  input:
       integer, intent(in) :: me, master
       integer, intent(in) :: im, nlev, iter, lsoil_ruc, lsoil, kdt, isot, ivegsrc
+      integer, intent(in) :: mosaic_lu, mosaic_soil, isncond_opt, isncovr_opt
       integer, intent(in) :: nlcat, nscat
       integer, intent(in) :: lsm_ruc, lsm
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, &
@@ -1154,6 +1156,8 @@ module lsm_ruc
      &          qcatm(i,1,j), rho2(i,1,j), semis_bck(i,j), lwdn(i,j),        &
      &          swdn(i,j), solnet_lnd(i,j), sfcems_lnd(i,j), chklowq(i,j),   &
      &          chs_lnd(i,j), flqc_lnd(i,j), flhc_lnd(i,j), rhonewsn_ex(i),  &
+!  ---  snow model options
+     &          mosaic_lu, mosaic_soil, isncond_opt, isncovr_opt,            &
 !  ---  input/outputs:
      &          wet(i,j), cmc(i,j), shdfac(i,j), alb_lnd(i,j), znt_lnd(i,j), &
      &          z0_lnd(i,j), snoalb1d_lnd(i,j), albbck_lnd(i,j),             &
@@ -1438,6 +1442,8 @@ module lsm_ruc
      &          qcatm(i,1,j), rho2(i,1,j), semis_bck(i,j), lwdn(i,j),        &
      &          swdn(i,j), solnet_ice(i,j), sfcems_ice(i,j), chklowq(i,j),   &
      &          chs_ice(i,j), flqc_ice(i,j), flhc_ice(i,j), rhonewsn_ex(i),  &
+!  ---  snow model options
+     &          mosaic_lu, mosaic_soil, isncond_opt, isncovr_opt,            &
 !  ---  input/outputs:
      &          wet_ice(i,j), cmc(i,j), shdfac(i,j), alb_ice(i,j),           &
      &          znt_ice(i,j), z0_ice(i,j), snoalb1d_ice(i,j),                &
