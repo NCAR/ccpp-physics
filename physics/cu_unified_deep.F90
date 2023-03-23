@@ -45,9 +45,9 @@ module cu_unified_deep
 
 contains
 
-!>\defgroup cu_unified_deep_group Grell-Freitas Deep Convection Module
+!>\defgroup cu_unified_deep_group Unified Deep Convection Module
 !>\ingroup cu_unified_group
-!! This is Grell-Freitas deep convection scheme module
+!! This is Unified deep convection scheme module
 !> @{
    integer function my_maxloc1d(A,N)
 !$acc routine vector
@@ -70,8 +70,8 @@ contains
       return
    end function my_maxloc1d
 
-!>Driver for the deep or congestus GF routine.
-!! \section general_unified_deep Grell-Freitas Deep Convection General Algorithm
+!>Driver for the deep or congestus routine.
+!! \section general_unified_deep Unified Deep Convection General Algorithm
    subroutine cu_unified_deep_run(        &          
                itf,ktf,its,ite, kts,kte  &
               ,flag_init     &
@@ -4183,7 +4183,7 @@ endif
      real(kind=kind_phys)                                 ::                           &
         clos_wei,dtt,dp,dtq,dtqc,dtpw,dtpwd
      real(kind=kind_phys),    dimension (its:ite)         ::                           &
-       pre2,xmb_ave,pwtot
+       pre2,xmb_ave,pwtot,scaldfunc
 !$acc declare create(pre2,xmb_ave,pwtot)
 !
       character *(*), intent (in)         ::                           &
@@ -4201,6 +4201,7 @@ endif
       do i=its,itf
         pre(i)=0.
         xmb(i)=0.
+        scaldfunc(i)=0.
       enddo
       do i=its,itf
         if(ierr(i).eq.0)then
@@ -4218,10 +4219,16 @@ endif
 
 !LB: Prognostic closure:
   if(progsigma)then
-
+     
       do i=its,itf
         if(ierr(i).eq.0)then
-           xmb(i)=xf_progsigma(i)
+           if (dx(i) < 10.E3) then
+              scaldfunc(i)=(1.-sigmab(i))*(1.-sigmab(i))
+              scaldfunc(i) = max(min(scaldfunc(i), 1.0), 0.)
+           else
+              scaldfunc(i) = 1.0
+           endif
+           xmb(i)=scaldfunc(i)*xf_progsigma(i)
         endif
       enddo
 
@@ -6030,7 +6037,7 @@ endif
             do i = 1, itf
                if (ierr(i)==0) then
                   if(k > kbcon(i) .and. k < ktcon(i)) then
-                     zdqca(i,k)=clw_all(i,k)*zu(i,k)
+                     zdqca(i,k)=clw_all(i,k)
                   endif
                endif
             enddo

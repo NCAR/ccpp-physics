@@ -105,12 +105,13 @@ contains
         index_of_process_scnv, index_of_process_dcnv, ntqv, ntcw, ntiw
 !$acc declare copyin(dtidx)
    real(kind=kind_phys),  dimension( : , : ), intent(in    ) :: forcet,forceqv_spechum,w,phil,delp
-   real(kind=kind_phys), dimension ( : , : ), intent(in    ) :: sigmain,qmicro,tmf
+   real(kind=kind_phys), dimension ( : , : ), intent(in    ) :: sigmain,qmicro
    real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: t,us,vs
    real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: qci_conv
    real(kind=kind_phys),  dimension( : , : ), intent(out   ) :: cnvw_moist,cnvc
    real(kind=kind_phys), dimension ( : , : ), intent(out   ) :: sigmaout
    real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: cliw, clcw
+   real(kind=kind_phys), dimension ( : , : , :), intent(in    ) :: tmf
 !$acc declare copyin(forcet,forceqv_spechum,w,phil)
 !$acc declare copy(t,us,vs,qci_conv,cliw, clcw)
 !$acc declare copyout(cnvw_moist,cnvc)
@@ -172,7 +173,7 @@ contains
    real(kind=kind_phys), dimension (im,km) :: outts,outqs,outqcs,outu,outv,outus,outvs
    real(kind=kind_phys), dimension (im,km) :: outtm,outqm,outqcm,submm,cupclwm
    real(kind=kind_phys), dimension (im,km) :: cnvwt,cnvwts,cnvwtm
-   real(kind=kind_phys), dimension (im,km) :: hco,hcdo,zdo,zdd,hcom,hcdom,zdom
+   real(kind=kind_phys), dimension (im,km) :: hco,hcdo,zdo,zdd,hcom,hcdom,zdom,tmfq
    real(kind=kind_phys), dimension    (km) :: zh
    real(kind=kind_phys), dimension (im)    :: tau_ecmwf,edt,edtm,edtd,ter11,aa0,xlandi
    real(kind=kind_phys), dimension (im)    :: pret,prets,pretm,hexec
@@ -465,6 +466,13 @@ contains
        gdc2(i,k,1)=0.
       enddo
      enddo
+
+      do k=kts,kte
+         do i=its,ite
+            tmfq(i,k)=tmf(i,k,1)
+         enddo
+      enddo
+
      ierr(:)=0
      ierrm(:)=0
      ierrs(:)=0
@@ -638,7 +646,7 @@ contains
 ! turning off shallow convection for grid points
                          zus,xmbs,kbcons,ktops,k22s,ierrs,ierrcs,                &
 !Prog closure
-                         flag_init, flag_restart,fv,r_d,delp,tmf,qmicro,         &
+                         flag_init, flag_restart,fv,r_d,delp,tmfq,qmicro,         &
                          forceqv_spechum,sigmain,sigmaout,progsigma,            &
 ! output tendencies
                          outts,outqs,outqcs,outus,outvs,cnvwt,prets,cupclws,     &
@@ -679,7 +687,7 @@ contains
               ,forcing2      &
               ,t2d           &
               ,q2d           &
-              ,tmf           &
+              ,tmfq          &
               ,qmicro        &
               ,forceqv_spechum &
               ,sigmain       &
@@ -770,7 +778,7 @@ contains
               ,forcing       &
               ,t2d           &
               ,q2d           &
-              ,tmf           &
+              ,tmfq          &
               ,qmicro        &
               ,forceqv_spechum &
               ,sigmain       &

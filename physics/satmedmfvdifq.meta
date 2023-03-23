@@ -208,14 +208,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[tmf]
-  standard_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
-  long_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
-  units = kg kg-1 s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [u1]
   standard_name = x_wind
   long_name = x component of layer wind

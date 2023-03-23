@@ -70,7 +70,7 @@
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
      &   prslp(:,:), garea(:), hpbl(:), dot(:,:), phil(:,:),            &
-     &   qmicro(:,:),tmf(:,:),prevsq(:,:),q(:,:)
+     &   qmicro(:,:),tmf(:,:,:),prevsq(:,:),q(:,:)
 
       real(kind=kind_phys), intent(in) :: sigmain(:,:)
 !
@@ -156,7 +156,7 @@ c
 cc
 
 !  parameters for prognostic sigma closure
-      real(kind=kind_phys) omega_u(im,km),zdqca(im,km),
+      real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
      &                     sigmab(im),qadv(im,km)
       real(kind=kind_phys) gravinv,dxcrtas,invdelt
@@ -1938,9 +1938,16 @@ c
                enddo
             enddo
          endif
+
+         do k = 1,km
+            do i = 1,im
+               tmfq(i,k)=tmf(i,k,1)
+            enddo
+         enddo
+
          flag_shallow = .true.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
-     &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
+     &        del,tmfq,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
      &        qadv,kbcon1,ktcon,cnvflg,
      &        sigmain,sigmaout,sigmab)
       endif

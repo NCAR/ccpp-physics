@@ -102,7 +102,7 @@
       real(kind=kind_phys), intent(in) :: nthresh
       real(kind=kind_phys), intent(in) :: ca_deep(:)
       real(kind=kind_phys), intent(in) :: sigmain(:,:),qmicro(:,:),     &
-     &     tmf(:,:),q(:,:), prevsq(:,:)
+     &     tmf(:,:,:),q(:,:), prevsq(:,:)
       real(kind=kind_phys), intent(out) :: rainevap(:)
       real(kind=kind_phys), intent(out) :: sigmaout(:,:)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
@@ -209,7 +209,7 @@ cj
      &                     bb1,     bb2,     wucb
 !
 !  parameters for prognostic sigma closure                                                                                                                                                      
-      real(kind=kind_phys) omega_u(im,km),zdqca(im,km),
+      real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km)
      &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im),qadv(im,km)
       real(kind=kind_phys) gravinv,invdelt
       logical flag_shallow
@@ -2886,9 +2886,15 @@ c
             enddo
          endif
          
+         do k = 1,km
+            do i = 1,im
+               tmfq(i,k)=tmf(i,k,1)
+            enddo
+         enddo
+
          flag_shallow = .false.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
-     &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
+     &        del,tmfq,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
      &        qadv,kbcon1,ktcon,cnvflg,
      &        sigmain,sigmaout,sigmab)
       endif

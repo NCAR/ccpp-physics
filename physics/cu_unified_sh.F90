@@ -220,7 +220,8 @@ contains
        flux_tun,hkbo,xhkb,                                             &
        rand_vmas,xmbmax,xmb,                                           &
        cap_max,entr_rate,                                              &
-       cap_max_increment,lambau,wc,omegac,sigmab
+       cap_max_increment,lambau,wc,omegac,sigmab,                      &
+       scaldfunc
      integer,    dimension (its:ite)      ::                           &
        kstabi,xland1,kbmax,ktopx
 !$acc declare create( &
@@ -260,6 +261,7 @@ contains
      flux_tun(:)=fluxtune
      lambau(:)=2.
      c1d(:,:)=0.
+     scaldfunc(:)=0.
 !$acc end kernels
 
      el2orc=xlv*xlv/(r_v*cp)
@@ -995,6 +997,13 @@ contains
          gravinv = 1./g
          if(ierr(i)==0)then
             xmb(i) = sigmab(i)*((-1.0*omegac(i))*gravinv)
+            if (dx(i) < 10.E3) then
+               scaldfunc(i)=(1.-sigmab(i))*(1.-sigmab(i))
+               scaldfunc(i) = max(min(scaldfunc(i), 1.0), 0.)
+            else
+               scaldfunc(i) = 1.0
+            endif
+            xmb(i)=scaldfunc(i)*xmb(i)
          endif
 
       else
