@@ -30,9 +30,14 @@
      &                    f10m,u10m,v10m,t2m,q2m,dpt2m,errmsg,errflg    &
      &                   )
 !
-      use machine , only : kind_phys
+      use machine , only : kind_phys, kind_dbl_prec
       use funcphys, only : fpvs
+      use physcons, only : con_t0c
       implicit none
+
+      real (kind_phys), parameter :: zero     = 0._kind_dbl_prec
+      real (kind_phys), parameter :: one      = 1._kind_dbl_prec
+      real (kind_phys), parameter :: qmin     = 1.0e-8_kind_dbl_prec
 !
       integer, intent(in) :: im, lsm, lsm_ruc
       logical, intent(in) :: thsfc_loc  ! Flag for reference pot. temp.
@@ -52,7 +57,6 @@
 !     locals
 !
       logical :: debug_print
-      real(kind=kind_phys), parameter :: qmin=1.0e-8
       real(kind=kind_phys) :: q1c, qv, tem, qv1, th2m, x2m, rho
       real(kind=kind_phys) :: dT, dQ, qsfcmr, qsfcprox, ff, fac, dz1
       real(kind=kind_phys) :: t2_alt, q2_alt
@@ -70,8 +74,8 @@
       errflg = 0
 
       !--
-      testptlat = 35.3 !41.02 !42.05 !39.0 !74.12 !29.5 
-      testptlon = 273.0 !284.50 !286.75 !280.6 !164.0 !283.0 
+      testptlat = 35.3_kind_phys 
+      testptlon = 273.0_kind_phys
       !--
       debug_print = .false.
 !
@@ -87,23 +91,19 @@
 
       do i = 1, im
         f10m(i) = fm10(i) / fm(i)
-!       f10m(i) = min(f10m(i),1.)
         u10m(i) = f10m(i) * u1(i)
         v10m(i) = f10m(i) * v1(i)
         fhi     = fh2(i) / fh(i)
-!       t2m(i)  = tskin(i)*(1. - fhi) + t1(i) * prslki(i) * fhi
-!       sig2k   = 1. - (grav+grav) / (cp * t2m(i))
-!       t2m(i)  = t2m(i) * sig2k
-        wrk     = 1.0 - fhi
+        wrk     = one - fhi
 
-        thcon    = (1.e5/ps(i))**con_rocp    
+        thcon    = (1.e5_kind_dbl_prec/ps(i))**con_rocp
        !-- make sure 1st level q is not higher than saturated value
         qss    = fpvs(t1(i))
         qss    = eps * qss / (ps(i) + epsm1 * qss)
         q1c    = min(q1(i),qss) ! lev 1 spec. humidity
 
-        qv1    = q1c / (1. - q1c) ! lev 1 mixing ratio
-        qsfcmr   = qsurf(i)/(1. - qsurf(i)) ! surface mixing ratio
+        qv1    = q1c / (one - q1c) ! lev 1 mixing ratio
+        qsfcmr   = qsurf(i)/(one - qsurf(i)) ! surface mixing ratio
         chs = cdq(i) * wind(i)
         cqs = chs
         chs2 = ust(i)*con_karman/fh2(i)
@@ -118,7 +118,7 @@
             else ! Use potential temperature referenced to 1000 hPa
               t2m(i) = tskin(i)*wrk + t1(i)*fhi - (grav+grav)/cp
             endif
-            if(evap(i) >= 0.) then !  for evaporation>0, use inferred qsurf to deduce q2m
+            if(evap(i) >= zero) then !  for evaporation>0, use inferred qsurf to deduce q2m
               q2m(i) = qsurf(i)*wrk + max(qmin,q1c)*fhi
             else                   !  for dew formation, use saturated q at tskin
               qss    = fpvs(tskin(i))
@@ -136,7 +136,7 @@
             t2m(i) = th2m/thcon
 
             x2m = max(qmin,qsfcprox - evap(i)/cqs2) ! mix. ratio
-            q2m(i) = x2m/(1. + x2m) ! spec. humidity
+            q2m(i) = x2m/(one + x2m) ! spec. humidity
         endif ! flux method
 
         if(diag_log) then
@@ -144,24 +144,24 @@
           dT = t1(i) - tskin(i)
           dQ = qv1 - qsfcmr
           dz1= zf(i) ! level of atm. forcing
-          IF (dT > 0.) THEN
-            ff  = MIN(MAX(1.-dT/10.,0.01), 1.0)
+          IF (dT > zero) THEN
+            ff  = MIN(MAX(one-dT/10._kind_phys,0.01_kind_phys), one)
             !for now, set zt = 0.05
-            fac = LOG((2.  + .05)/(0.05 + ff))/                         &
-     &          LOG((dz1 + .05)/(0.05 + ff))
+            fac = LOG((2._kind_phys  + .05_kind_phys)/(0.05_kind_phys + &
+     &          ff))/LOG((dz1 + .05_kind_phys)/(0.05_kind_phys + ff))
             T2_alt = tskin(i) + fac * dT
           ELSE
           !no alternatives (yet) for unstable conditions
             T2_alt = t2m(i)
           ENDIF
 
-          IF (dQ > 0.) THEN
-            ff  = MIN(MAX(1.-dQ/0.003,0.01), 1.0)
+          IF (dQ > zero) THEN
+            ff  = MIN(MAX(one-dQ/0.003_kind_phys,0.01_kind_phys), one)
             !-- for now, set zt = 0.05
-            fac = LOG((2.  + .05)/(0.05 + ff))/                         &
-     &            LOG((dz1 + .05)/(0.05 + ff))
+            fac = LOG((2._kind_phys  + .05_kind_phys)/(0.05_kind_phys + &
+     &            ff))/LOG((dz1 + .05_kind_phys)/(0.05_kind_phys + ff))
             Q2_alt = qsfcmr + fac * dQ ! mix. ratio
-            Q2_alt = Q2_alt/(1. + Q2_alt) ! spec. humidity
+            Q2_alt = Q2_alt/(one + Q2_alt) ! spec. humidity
           ELSE
             !no alternatives (yet) for unstable conditions
             Q2_alt = q2m(i)
@@ -190,14 +190,15 @@
         !   This prevents unrealistic values when QFX is not mostly surface
         !   flux because calculation is based on surface flux only.
         !   Problems occurred in transition periods and weak winds and vegetation source
-          q2m(i) = min(q2m(i),1.05*q1c) ! works if qsurf > q1c, evaporation
+          q2m(i) = min(q2m(i),1.05_kind_dbl_prec*q1c) ! works if qsurf > q1c, evaporation
         endif
 
 
         !-- Compute dew point, using vapor pressure
         qv  = max(qmin,(q2m(i)/(1.-q2m(i))))
-        tem = max(ps(i) * qv/( eps - epsm1 *qv), 1.e-8)
-        dpt2m(i) = 243.5/( ( 17.67 / log(tem/611.2) ) - 1.) + 273.14
+        tem = max(ps(i) * qv/( eps - epsm1 *qv), qmin)
+        dpt2m(i) = 243.5_kind_dbl_prec/( ( 17.67_kind_dbl_prec /        &
+     &             log(tem/611.2_kind_dbl_prec) ) - one) + con_t0c
         dpt2m(i) = min(dpt2m(i),t2m(i))
        
 
