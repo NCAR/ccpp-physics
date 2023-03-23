@@ -76,7 +76,7 @@
   type = real
   kind = kind_phys
   intent = in
-[rocp]
+[con_rocp]
   standard_name = ratio_of_gas_constant_dry_air_to_specific_heat_of_dry_air_at_constant_pressure
   long_name = (rd/cp)
   units = none
@@ -90,14 +90,6 @@
   units = none
   dimensions = ()
   type = real
-  intent = in
-[wet]
-  standard_name = normalized_soil_wetness_for_land_surface_model
-  long_name = normalized soil wetness
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
   intent = in
 [zf]
   standard_name = height_above_ground_at_lowest_model_layer

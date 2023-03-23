@@ -22,8 +22,9 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
       subroutine sfc_diag_run (im,xlat_d,xlon_d,                        &
-     &                    lsm,lsm_ruc,grav,cp,eps,epsm1,rocp,con_karman,&
-     &                    wet,shflx,cdq,wind,                           &
+     &                    lsm,lsm_ruc,grav,cp,eps,epsm1,con_rocp,       &
+     &                    con_karman,                                   &
+     &                    shflx,cdq,wind,                               &
      &                    zf,ps,u1,v1,t1,q1,prslki,evap,fm,fh,fm10,fh2, &
      &                    ust,tskin,qsurf,thsfc_loc,diag_flux,diag_log, &
      &                    f10m,u10m,v10m,t2m,q2m,dpt2m,errmsg,errflg    &
@@ -37,10 +38,10 @@
       logical, intent(in) :: thsfc_loc  ! Flag for reference pot. temp.
       logical, intent(in) :: diag_flux  ! Flag for flux method in 2-m diagnostics
       logical, intent(in) :: diag_log   ! Flag for 2-m log diagnostics under stable conditions
-      real(kind=kind_phys), intent(in) :: grav,cp,eps,epsm1,rocp
+      real(kind=kind_phys), intent(in) :: grav,cp,eps,epsm1,con_rocp
       real(kind=kind_phys), intent(in) :: con_karman
       real(kind=kind_phys), dimension(:), intent( in) ::                &
-     &                      zf, ps, u1, v1, t1, q1, ust, tskin, wet,    &
+     &                      zf, ps, u1, v1, t1, q1, ust, tskin,         &
      &                      qsurf, prslki, evap, fm, fh, fm10, fh2,     &
      &                      shflx, cdq, wind, xlat_d, xlon_d
       real(kind=kind_phys), dimension(:), intent(out) ::                &
@@ -95,7 +96,7 @@
 !       t2m(i)  = t2m(i) * sig2k
         wrk     = 1.0 - fhi
 
-        thcon    = (1.e5/ps(i))**rocp    
+        thcon    = (1.e5/ps(i))**con_rocp    
        !-- make sure 1st level q is not higher than saturated value
         qss    = fpvs(t1(i))
         qss    = eps * qss / (ps(i) + epsm1 * qss)
