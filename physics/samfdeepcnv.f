@@ -1515,7 +1515,7 @@ c
                 pwavo(i) = pwavo(i) + pwo(i,k)
 !               cnvwt(i,k) = (etah*qlk + pwo(i,k)) * grav / dp
                 cnvwt(i,k) = etah * qlk * grav / dp
-                zdqca(i,k)=dq
+                zdqca(i,k)=dq/eta(i,k)
               endif
 !
 !  compute buoyancy and drag for updraft velocity
@@ -1690,7 +1690,7 @@ c
                 pwavo(i) = pwavo(i) + pwo(i,k)
 !               cnvwt(i,k) = (etah*qlk + pwo(i,k)) * grav / dp
                 cnvwt(i,k) = etah * qlk * grav / dp
-                zdqca(i,k)=dq
+                zdqca(i,k)=dq/eta(i,k)
               endif
             endif
           endif

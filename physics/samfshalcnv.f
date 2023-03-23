@@ -1270,7 +1270,7 @@ c
                 qcko(i,k)= qlk + qrch
                 pwo(i,k) = etah * c0t(i,k) * dz * qlk
                 cnvwt(i,k) = etah * qlk * grav / dp
-                zdqca(i,k)=dq
+                zdqca(i,k)=dq/eta(i,k)
               endif
 !
 !  compute buoyancy and drag for updraft velocity
@@ -1435,7 +1435,7 @@ c
                 qcko(i,k) = qlk + qrch
                 pwo(i,k) = etah * c0t(i,k) * dz * qlk
                 cnvwt(i,k) = etah * qlk * grav / dp
-                zdqca(i,k)=dq
+                zdqca(i,k)=dq/eta(i,k)
               endif
             endif
           endif
