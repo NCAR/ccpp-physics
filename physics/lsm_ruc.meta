@@ -1665,7 +1665,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  active = (control_for_land_surface_scheme == identifier_for_ruc_land_surface_scheme)
 [sbsno]
   standard_name = snow_deposition_sublimation_upward_latent_heat_flux
   long_name = latent heat flux from snow depo/subl
