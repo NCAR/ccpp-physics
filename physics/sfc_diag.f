@@ -86,7 +86,7 @@
         u10m(i) = f10m(i) * u1(i)
         v10m(i) = f10m(i) * v1(i)
         fhi     = fh2(i) / fh(i)
-        wrk     = 1. - fhi
+        wrk     = 1.0 - fhi
 
         if(lsm /= lsm_ruc) then
         !-- original method
@@ -95,7 +95,7 @@
           else ! Use potential temperature referenced to 1000 hPa
             t2m(i) = tskin(i)*wrk + t1(i)*fhi - (grav+grav)/cp
           endif
-          if(evap(i) >= zero) then !  for evaporation>0, use inferred qsurf to deduce q2m
+          if(evap(i) >= 0.) then !  for evaporation>0, use inferred qsurf to deduce q2m
             q2m(i) = qsurf(i)*wrk + max(qmin,q1(i))*fhi
           else                   !  for dew formation, use saturated q at tskin
             qss    = fpvs(tskin(i))
