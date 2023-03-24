@@ -96,11 +96,11 @@
             t2m(i) = tskin(i)*wrk + t1(i)*fhi - (grav+grav)/cp
           endif
           if(evap(i) >= zero) then !  for evaporation>0, use inferred qsurf to deduce q2m
-            q2m(i) = qsurf(i)*wrk + max(qmin,q1c)*fhi
+            q2m(i) = qsurf(i)*wrk + max(qmin,q1(i))*fhi
           else                   !  for dew formation, use saturated q at tskin
             qss    = fpvs(tskin(i))
             qss    = eps * qss/(ps(i) + epsm1 * qss)
-            q2m(i) = qss*wrk + max(qmin,q1c)*fhi
+            q2m(i) = qss*wrk + max(qmin,q1(i))*fhi
           endif
           qss    = fpvs(t2m(i))
           qss    = eps * qss / (ps(i) + epsm1 * qss)
