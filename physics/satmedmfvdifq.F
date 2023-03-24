@@ -1316,20 +1316,20 @@
       enddo
       !PCC_CANOPY------------------------------------
       if (do_canopy) then 
-        do k = 1, km1
+        do k = 1, km1-1
           do i = 1, im
                       FCH = hvt_table(vegtype(i)) !top of canopy
-                      IF (k .EQ. 1) THEN !first model layer
+                      IF (k .EQ. 1) THEN !use model layer interfaces
                         KCAN = 1
                       ELSE 
-                        IF (FCH .GT. zl(i,k-1)  
-     &                  .AND. FCH .LE. zl(i,k) ) THEN
+                        IF (FCH .GT. zi(i,k)  
+     &                  .AND. FCH .LE. zi(i,k+1) ) THEN
                             KCAN = 1
                         ELSE
                             KCAN = 0
                         END IF
                       END IF
-                      IF (KCAN .EQ. 1) THEN !canopy could be inside model layer
+                      IF (KCAN .EQ. 1) THEN !canopy inside model layer
 !                       Check for other Contiguous Canopy Grid Cell Conditions
                         IF ( lai(i) .LT. 0.1  !from LSM
      &                   .OR. FCH .LT. 0.5 ) THEN
@@ -1347,16 +1347,17 @@
 !concentrations to
 ! source distributions in vegetation canopies. Q. J. R. Meteor. Soc.
 ! (1989), 115, pp 609-632
-              MOL  = zol(i)/zl(i,k)  !Monin-Obukhov Length
+              MOL  = zol(i)/zl(i,k)  !Monin-Obukhov Length in layer
               HOL = FCH/MOL  !local canopy stability parameter (hc/MOL)
-              ZCAN = zl(i,k) ! Initialize canopy top (m) = Each model layer that contains canopy
+              ZCAN = zi(i,k+1) ! Initialize each model layer top that contains canopy (m)
+                             ! Integrate across total model interface
               ZFL = ZCAN     ! Set ZFL = ZCAN
               COUNTCAN = 0   ! Initialize canopy layers
 
               IF (k .EQ. 1) THEN  !Find bottom in each model layer
                   BOTCAN = 0.5
               ELSE
-                  BOTCAN = zl(i,k-1)
+                  BOTCAN = zi(i,k)
               END IF
 
               DO WHILE (ZCAN.GE.BOTCAN)
