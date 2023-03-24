@@ -44,7 +44,7 @@
         gasvmr_ccl4,  gasvmr_cfc113, aerodp,ext550, clouds6, clouds7, clouds8, &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
-        aero_dir_fdb, spp_wts_rad, spp_rad, ico2, errmsg, errflg)
+        aero_dir_fdb, fdb_coef, spp_wts_rad, spp_rad, ico2, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -155,6 +155,7 @@
                                                              clouds2, clouds3, &
                                                              clouds4, clouds5
       real(kind=kind_phys), dimension(:,:), intent(in)  :: qci_conv
+      real(kind=kind_phys), dimension(:),   intent(in)  :: fdb_coef
       real(kind=kind_phys), dimension(:),   intent(out) :: lwp_ex,iwp_ex, &
                                                            lwp_fc,iwp_fc
 
@@ -640,12 +641,13 @@
        if (aero_dir_fdb) then
          do k=1,lmk
            do i=1,im
-             aer_nm(i,k,1 )=aer_nm(i,k,1 )+qgrs(i,k,ntdust)*0.33*1.e-9  ! dust bin1
-             aer_nm(i,k,2 )=aer_nm(i,k,2 )+(qgrs(i,k,ntdust)*0.67+qgrs(i,k,ntcoarsepm)*0.02)*1.e-9
-             aer_nm(i,k,3 )=aer_nm(i,k,3 )+qgrs(i,k,ntcoarsepm)*0.13*1.e-9 ! dust bin3
-             aer_nm(i,k,4 )=aer_nm(i,k,4 )+qgrs(i,k,ntcoarsepm)*0.85*1.e-9 ! dust bin4
-             aer_nm(i,k,12)=aer_nm(i,k,12)+qgrs(i,k,ntsmoke)*1.e-9*0.05 !Smoke BC
-             aer_nm(i,k,14)=aer_nm(i,k,14)+qgrs(i,k,ntsmoke)*1.e-9*0.95 !Smoke OA, we may need to revise later for OA vs. OC
+             aer_nm(i,k,1 )=aer_nm(i,k,1 )+ qgrs(i,k,ntdust)*fdb_coef(1)*1.e-9    ! dust bin1
+             aer_nm(i,k,2 )=aer_nm(i,k,2 )+(qgrs(i,k,ntdust)*fdb_coef(2)          &
+                           +qgrs(i,k,ntcoarsepm)*fdb_coef(3))*1.e-9               ! dust bin2
+             aer_nm(i,k,3 )=aer_nm(i,k,3 )+qgrs(i,k,ntcoarsepm)*fdb_coef(4)*1.e-9 ! dust bin3
+             aer_nm(i,k,4 )=aer_nm(i,k,4 )+qgrs(i,k,ntcoarsepm)*fdb_coef(5)*1.e-9 ! dust bin4
+             aer_nm(i,k,12)=aer_nm(i,k,12)+qgrs(i,k,ntsmoke)*fdb_coef(6)*1.e-9    ! Smoke BC
+             aer_nm(i,k,14)=aer_nm(i,k,14)+qgrs(i,k,ntsmoke)*fdb_coef(7)*1.e-9    ! Smoke OA
             enddo
           enddo
        endif

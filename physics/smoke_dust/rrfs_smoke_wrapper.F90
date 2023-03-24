@@ -41,8 +41,8 @@ contains
     subroutine rrfs_smoke_wrapper_run(im, kte, kme, ktau, dt, garea, land, jdate,          &
                    u10m, v10m, ustar, rlat, rlon, tskin, pb2d, t2m, dpt2m,                 &
                    pr3d, ph3d,phl3d, prl3d, tk3d, us3d, vs3d, spechum, w,                  &
-                   nsoil, smc, vegtype, soiltyp, sigmaf, dswsfc, zorl,snow,                &
-                   julian, idat, rain_cpl, rainc_cpl, exch, hf2d, g, pi, con_cp, con_rd,   &
+                   nsoil, smc, vegtype, soiltyp, sigmaf, dswsfc, zorl, snow, julian,       &
+                   idat, rain_cpl, rainc_cpl, exch, hf2d, g, pi, con_cp, con_rd, con_fv,   &
                    dust12m_in, emi_in, smoke_RRFS, ntrac, qgrs, gq0, chem3d, tile_num,     &
                    ntsmoke, ntdust, ntcoarsepm, imp_physics, imp_physics_thompson,         &
                    nwfa, nifa, emanoc, emdust, emseas,                                     &
@@ -60,7 +60,7 @@ contains
 
     integer,        intent(in) :: im,kte,kme,ktau,nsoil,tile_num,jdate(8),idat(8)
     integer,        intent(in) :: ntrac, ntsmoke, ntdust, ntcoarsepm, ndvel
-    real(kind_phys),intent(in) :: dt, julian, g, pi, con_cp, con_rd
+    real(kind_phys),intent(in) :: dt, julian, g, pi, con_cp, con_rd, con_fv
     logical,        intent(in) :: aero_ind_fdb_in,dbg_opt_in
     integer,        intent(in) :: smoke_forecast_in
 
@@ -228,7 +228,7 @@ contains
     
 !>- get ready for chemistry run
     call rrfs_smoke_prep(                                               &
-        current_month, current_hour, gmt,                               &
+        current_month, current_hour, gmt, con_rd, con_fv,               &
         u10m,v10m,ustar,land,garea,rlat,rlon,tskin,                     &
         pr3d,ph3d,phl3d,tk3d,prl3d,us3d,vs3d,spechum,exch,w,            &
         nsoil,smc,vegtype,soiltyp,sigmaf,dswsfc,zorl,                   &
@@ -418,8 +418,8 @@ contains
     do k=kts,kte
      do i=its,ite
        gq0(i,k,ntsmoke )  = min(5000.,max(epsilc,chem(i,k,1,p_smoke ))) 
-       gq0(i,k,ntdust  )  = min(100.,max(epsilc,chem(i,k,1,p_dust_1)))
-       gq0(i,k,ntcoarsepm)= min(1000.,max(epsilc,chem(i,k,1,p_coarse_pm)))
+       gq0(i,k,ntdust  )  = min(200.,max(epsilc,chem(i,k,1,p_dust_1)))
+       gq0(i,k,ntcoarsepm)= min(5000.,max(epsilc,chem(i,k,1,p_coarse_pm)))
      enddo
     enddo
 
@@ -482,7 +482,7 @@ contains
  end subroutine rrfs_smoke_wrapper_run
 
  subroutine rrfs_smoke_prep(                                            &
-        current_month,current_hour,gmt,                                 &
+        current_month,current_hour,gmt,con_rd,con_fv,                   &
         u10m,v10m,ustar,land,garea,rlat,rlon,ts2d,                      &
         pr3d,ph3d,phl3d,tk3d,prl3d,us3d,vs3d,spechum,exch,w,            &
         nsoil,smc,vegtype,soiltyp,sigmaf,dswsfc,zorl,                   &
@@ -510,7 +510,7 @@ contains
     integer, intent(in) :: nsoil
     integer, dimension(ims:ime), intent(in) :: land, vegtype, soiltyp
     integer, intent(in) :: ntrac
-    real(kind=kind_phys), intent(in) :: g, pi, gmt
+    real(kind=kind_phys), intent(in) :: g, pi, gmt, con_rd, con_fv
     real(kind=kind_phys), dimension(ims:ime), intent(in) ::                & 
          u10m, v10m, ustar, garea, rlat, rlon, ts2d, sigmaf, dswsfc,       &
          zorl, snow_cpl, pb2d, hf2d
@@ -671,7 +671,7 @@ contains
           p_phy(i,k,j)=prl3d(i,kkp)
           u_phy(i,k,j)=us3d(i,kkp)
           v_phy(i,k,j)=vs3d(i,kkp)
-          rho_phy(i,k,j)=p_phy(i,k,j)/(287.04*t_phy(i,k,j)*(1.+.608*spechum(i,kkp)))
+          rho_phy(i,k,j)=p_phy(i,k,j)/(con_rd*t_phy(i,k,j)*(1.+con_fv*spechum(i,kkp)))
           rri(i,k,j)=1./rho_phy(i,k,j)
           vvel(i,k,j)=-w(i,kkp)*rri(i,k,j)/g 
           moist(i,k,j,:)=0.
