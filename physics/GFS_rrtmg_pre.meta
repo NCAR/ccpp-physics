@@ -234,8 +234,8 @@
   type = integer
   intent = in
 [ntcoarsepm]
-  standard_name = index_for_coarse_pm_in_tracer_concentration_array
-  long_name = tracer index for coarse pm
+  standard_name = index_for_coarse_particulate_matter_in_tracer_concentration_array
+  long_name = tracer index for coarse particulate matter
   units = index
   dimensions = ()
   type = integer
@@ -1465,6 +1465,14 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[fdb_coef]
+  standard_name = smoke_dust_direct_fdb_coef
+  long_name = smoke dust direct feedback coefficents
+  units = none
+  dimensions = (7)
+  type = real
+  kind = kind_phys
   intent = in
 [spp_wts_rad]
   standard_name = spp_weights_for_radiation_scheme

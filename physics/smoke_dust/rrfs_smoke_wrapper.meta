@@ -349,6 +349,14 @@
   type = real
   kind = kind_phys
   intent = in
+[con_fv]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [dust12m_in]
   standard_name = fengsha_dust12m_input
   long_name = fengsha dust input
@@ -426,8 +434,8 @@
   type = integer
   intent = in
 [ntcoarsepm]
-  standard_name = index_for_coarse_pm_in_tracer_concentration_array
-  long_name = tracer index for coarse pm
+  standard_name = index_for_coarse_particulate_matter_in_tracer_concentration_array
+  long_name = tracer index for coarse particulate matter
   units = index
   dimensions = ()
   type = integer
@@ -463,8 +471,8 @@
   kind = kind_phys
   intent = inout
 [emanoc]
-  standard_name = emission_of_anoc_for_thompson_mp
-  long_name = emission of anoc for thompson mp
+  standard_name = emission_of_anothropogenic_for_mp_indir_fdb
+  long_name = emission of anothropogenic for mp indirect feedabck
   units = ug m-2 s-1
   dimensions = (horizontal_loop_extent)
   type = real
@@ -479,8 +487,8 @@
   kind = kind_phys
   intent = inout
 [emseas]
-  standard_name = emission_of_seas_for_smoke
-  long_name = emission of seas for smoke
+  standard_name = emission_of_sea_salt_for_mp_indir_fdb
+  long_name = emission of sea salt for mp indirect feedabck
   units = ug m-2 s-1
   dimensions = (horizontal_loop_extent)
   type = real

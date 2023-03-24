@@ -36,8 +36,8 @@
   type = integer
   intent = in
 [ntcoarsepm]
-  standard_name = index_for_coarse_pm_in_tracer_concentration_array
-  long_name = tracer index for coarse pm
+  standard_name = index_for_coarse_particulate_matter_in_tracer_concentration_array
+  long_name = tracer index for coarse particulate matter
   units = index
   dimensions = ()
   type = integer
