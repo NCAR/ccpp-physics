@@ -1,11 +1,11 @@
 [ccpp-table-properties]
-  name = rrfs_smoke_wrapper
+  name = rrfs_smoke_postpbl
   type = scheme
-  dependencies = dep_dry_gocart_mod.F90,dep_dry_mod.F90,dep_simple_mod.F90,dep_vertmx_mod.F90,dep_wet_ls_mod.F90,dust_data_mod.F90,dust_fengsha_mod.F90,module_add_emiss_burn.F90,module_plumerise1.F90,module_smoke_plumerise.F90,module_zero_plumegen_coms.F90,plume_data_mod.F90,rrfs_smoke_config.F90,rrfs_smoke_data.F90,seas_data_mod.F90,seas_mod.F90,seas_ngac_mod.F90
+  dependencies = dep_dry_mod.F90,module_wetdep_ls.F90,dust_data_mod.F90,dust_fengsha_mod.F90,module_add_emiss_burn.F90,module_plumerise1.F90,module_smoke_plumerise.F90,module_zero_plumegen_coms.F90,plume_data_mod.F90,rrfs_smoke_config.F90,seas_data_mod.F90,seas_mod.F90,seas_ngac_mod.F90
 
 ########################################################################
 [ccpp-arg-table]
-  name = rrfs_smoke_wrapper_run
+  name = rrfs_smoke_postpbl_run
   type = scheme
 [ite]
   standard_name = horizontal_loop_extent
@@ -35,6 +35,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ntcoarsepm]
+  standard_name = index_for_coarse_particulate_matter_in_tracer_concentration_array
+  long_name = tracer index for coarse particulate matter
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [ntrac]
   standard_name = number_of_tracers
   long_name = number of tracers
@@ -54,10 +61,17 @@
   standard_name = chem3d_mynn_pbl_transport
   long_name = mynn pbl transport of smoke and dust
   units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,2)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_chemical_species_vertically_mixed)
   type = real
   kind = kind_phys
   intent = inout
+[rrfs_sd]
+  standard_name = do_smoke_coupling
+  long_name = flag controlling rrfs_sd collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
