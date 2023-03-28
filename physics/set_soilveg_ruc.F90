@@ -36,8 +36,7 @@
      &  RSMAX_DATA, BARE, GLACIER, NATURAL, CROP, URBAN,                &
      &  DEFINED_VEG, DEFINED_SOIL, DEFINED_SLOPE,                       &
      &  BB, DRYSMC, HC, MAXSMC, REFSMC, SATPSI, SATDK, SATDW,           &
-     &  WLTSMC, QTZ, mosaic_soil, mosaic_lu,                            &
-     &  REFSMCnoah, WLTSMCnoah, MAXSMCnoah
+     &  WLTSMC, QTZ, REFSMCnoah, WLTSMCnoah, MAXSMCnoah
 
       ! Initialize error-handling
       errflg = 0
@@ -234,9 +233,6 @@
       bare = 16
       endif
 !  end if veg table
-
-! - set mosaic_lu=1 when info for fractional landuse is available
-      mosaic_lu = 0
 
       topt_data =298.0
       cmcmax_data =0.2e-3
@@ -439,9 +435,6 @@
            WLTSMCnoah(I) = WLTSMC1 - 0.5 * WLTSMC1
            endif
          END DO
-
-! - set mosaic_soil=1 when info for fractional landuse is available
-      mosaic_soil = 0
 
 ! PT 5/18/2015 - changed to FALSE to match atm_namelist setting
 ! PT LPARAM is not used anywhere

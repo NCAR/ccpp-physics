@@ -45,7 +45,6 @@
       INTEGER DEFINED_VEG
       INTEGER DEFINED_SOIL
       INTEGER DEFINED_SLOPE
-      INTEGER MOSAIC_LU
 !> -- soils
       real(kind_phys) BB(MAX_SOILTYP)
       real(kind_phys) DRYSMC(MAX_SOILTYP)
@@ -63,5 +62,4 @@
       real(kind_phys) SATDKnoah(MAX_SOILTYP)
       real(kind_phys) SATPSInoah(MAX_SOILTYP)
       real(kind_phys) MAXSMCnoah(MAX_SOILTYP)
-      INTEGER MOSAIC_SOIL
       end module namelist_soilveg_ruc
