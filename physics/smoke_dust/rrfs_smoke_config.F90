@@ -16,58 +16,29 @@ module rrfs_smoke_config
   !-- constant paramters
   real(kind=kind_phys), parameter :: epsilc     = 1.e-12
 
-  !-- chemistyr module configurations
+  !-- aerosol module configurations
   integer :: chem_opt = 1
   integer :: kemit = 1
   integer :: dust_opt = 5
-  integer :: dmsemis_opt = 1
   integer :: seas_opt = 2
-  integer :: biomass_burn_opt=1
   logical :: do_plumerise  = .true.
   integer :: addsmoke_flag = 1
-  integer :: plumerisefire_frq=60  ! Let's add to the namelist
-  integer :: chem_conv_tr  = 0
-  integer :: aer_ra_feedback=1 !0
-  integer :: aer_ra_frq  = 60
+  integer :: plumerisefire_frq=60
   integer :: wetdep_ls_opt = 1
   integer :: drydep_opt  = 1
+  integer :: coarsepm_settling = 1
   logical :: bb_dcycle   = .false.
-  logical :: smoke_forecast = .false.
   logical :: aero_ind_fdb = .false.
   logical :: dbg_opt     = .true.
-
-  real(kind=kind_phys), parameter :: depo_fact=0.
-  integer, parameter :: CHEM_OPT_GOCART= 1
-  INTEGER, PARAMETER :: gocartracm_kpp = 301
-  integer, parameter :: chem_tune_tracers = 20
-  integer, parameter :: DUST_OPT_NONE = 0
-  integer, parameter :: SEAS_OPT_NONE = 0
-  ! -- DMS emissions
-  integer, parameter :: DMSE_OPT_NONE   = 0
-  integer, parameter :: DMSE_OPT_ENABLE = 1
-  ! -- subgrid convective transport
-  integer, parameter :: CTRA_OPT_NONE  = 0
-  integer, parameter :: CTRA_OPT_GRELL = 2
-  ! -- large scale wet deposition
-  integer, parameter :: WDLS_OPT_NONE  = 0
-  integer, parameter :: WDLS_OPT_GSD   = 1
-  integer, parameter :: WDLS_OPT_NGAC  = 2
+  integer :: smoke_forecast = 0 ! 0 read in ebb_smoke(i,24)
+  real(kind_phys) :: wetdep_ls_alpha = .5 ! scavenging factor
 
   ! --
+  integer, parameter :: CHEM_OPT_GOCART= 1
   integer, parameter :: call_chemistry     = 1
   integer, parameter :: num_moist=3, num_chem=20, num_emis_seas=5, num_emis_dust=5
-  integer, parameter :: num_emis_ant = 7
 
-  integer, parameter :: SEAS_OPT_DEFAULT = 1
-
-  integer, parameter :: DUST_OPT_GOCART  = 1
-  integer, parameter :: DUST_OPT_AFWA    = 3
   integer, parameter :: DUST_OPT_FENGSHA = 5
-
-  ! -- biomass burning emissions
-  integer, parameter :: BURN_OPT_ENABLE = 1
-  integer, parameter :: FIRE_OPT_MODIS  = 1
-  integer, parameter :: FIRE_OPT_GBBEPx = 2
 
   ! -- hydrometeors
   integer, parameter :: p_qv=1
@@ -77,11 +48,8 @@ module rrfs_smoke_config
   ! -- FV3 GFDL microphysics
   integer, parameter :: p_atm_shum = 1
   integer, parameter :: p_atm_cldq = 2
-  integer, parameter :: p_atm_o3mr = 7
 
   integer :: numgas = 0
-
-  real(kind=kind_phys) :: wetdep_ls_alpha(chem_tune_tracers)=-999.
 
   !-- tracers
   integer, parameter :: p_so2=1
@@ -97,7 +65,7 @@ module rrfs_smoke_config
   integer, parameter :: p_dust_2=11
   integer, parameter :: p_dust_3=12
   integer, parameter :: p_dust_4=13
-  integer, parameter :: p_dust_5=14
+  integer, parameter :: p_dust_5=14, p_coarse_pm=14
   integer, parameter :: p_seas_1=15
   integer, parameter :: p_seas_2=16
   integer, parameter :: p_seas_3=17

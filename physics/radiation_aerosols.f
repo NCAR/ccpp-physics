@@ -2179,7 +2179,7 @@
      &     ( prsi,prsl,prslk,tvly,rhlay,slmsk,tracer,aerfld,xlon,xlat,  &   !  ---  inputs
      &       IMAX,NLAY,NLP1, lsswr,lslwr,iaermdl,iaerflg,top_at_1,      &
      &       con_pi,con_rd,con_g,aerosw,aerolw,                         &   !  ---  outputs
-     &       aerodp, errflg, errmsg                                     &
+     &       aerodp, ext550, errflg, errmsg                             &
      &     )
 
 !  ==================================================================  !
@@ -2259,6 +2259,7 @@
      &       aerosw, aerolw
 
       real (kind=kind_phys), dimension(:,:)    , intent(out) :: aerodp
+      real (kind=kind_phys), dimension(:,:)    , intent(out) :: ext550
       integer,          intent(out) :: errflg
       character(len=*), intent(out) :: errmsg
 
@@ -2314,6 +2315,7 @@
          aerodp(i,k) = f_zero
        enddo
       enddo
+      ext550(:,:) = f_zero
 
       if ( .not. (lsswr .or. lslwr) ) then
         return
@@ -2411,7 +2413,7 @@
      &         alon,alat,slmsk,laersw,laerlw,con_rd,                      &
      &         IMAX,NLAY,NLP1,                                            &
 !  ---  outputs:
-     &         aerosw,aerolw,aerodp,errflg,errmsg                         &
+     &         aerosw,aerolw,aerodp,ext550,errflg,errmsg                  &
      &       )
         endif     ! end if_iaerflg_block
 
@@ -4334,7 +4336,7 @@
      &       alon,alat,slmsk, laersw,laerlw,con_rd,                     &
      &       imax,nlay,nlp1,                                            &
 !  ---  outputs:
-     &       aerosw,aerolw,aerodp,errflg,errmsg                         &
+     &       aerosw,aerolw,aerodp,ext550,errflg,errmsg                  &
      &     )
 
 !  ==================================================================  !
@@ -4401,6 +4403,7 @@
       real (kind=kind_phys), dimension(:,:,:,:), intent(out) ::         &
      &       aerosw, aerolw
       real (kind=kind_phys), dimension(:,:)    , intent(out) :: aerodp
+      real (kind=kind_phys), dimension(:,:)    , intent(out) :: ext550
       integer,          intent(out) :: errflg
       character(len=*), intent(out) :: errmsg
 
@@ -4485,6 +4488,7 @@
 ! --- update diagnostic aod arrays
           do k = 1, NLAY
             aerodp(i,1) = aerodp(i,1) + tauae_550(k,1)
+            ext550(i,k) = tauae_550(k,1)
             do m = 1, NSPC
               aerodp(i,m+1) = aerodp(i,m+1)+spcodp(k,m)
             enddo
