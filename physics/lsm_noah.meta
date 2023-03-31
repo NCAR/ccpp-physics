@@ -486,6 +486,21 @@
   type = real
   kind = kind_phys
   intent = in
+[rhonewsn1]
+  standard_name = surface_frozen_precipitation_density
+  long_name = density of precipitation ice
+  units = kg m-3
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[exticeden]
+  standard_name = do_external_surface_frozen_precipitation_density
+  long_name = flag for calculating frozen precip ice density outside of the LSM
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [weasd]
   standard_name = water_equivalent_accumulated_snow_depth_over_land
   long_name = water equiv of acc snow depth over land

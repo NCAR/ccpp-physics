@@ -6,12 +6,7 @@
 !> @{
 module GFS_rrtmg_setup
 
-   use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg, &
-   &             iaermdl,                            icldflg,         &
-   &             iovrRad=>iovr, lcrick , lcnorm , lnoprec,            &
-   &             isubcsw, isubclw, ivflip , ipsd0,                    &
-   &             iswcliq,                                             &
-   &             kind_phys
+   use machine, only:  kind_phys
 
    implicit none
 
@@ -27,14 +22,14 @@ module GFS_rrtmg_setup
    !    &   VTAGRAD='NCEP-Radiation_driver    v5.1  Nov 2012 '
    !    &   VTAGRAD='NCEP-Radiation_driver    v5.0  Aug 2012 '
 
-   !> new data input control variables (set/reset in subroutines radinit/radupdate):
+   !> new data input control variables (set/reset in subroutine radupdate):
    integer :: month0 = 0
    integer :: iyear0 = 0
    integer :: monthd = 0
 
    !> control flag for the first time of reading climatological ozone data
    !! (set/reset in subroutines radinit/radupdate, it is used only if the
-   !! control parameter ioznflg=0)
+   !! control parameter ntoz=0)
    logical :: loz1st = .true.
 
    contains
@@ -42,13 +37,14 @@ module GFS_rrtmg_setup
 !> \section arg_table_GFS_rrtmg_setup_init Argument Table
 !! \htmlinclude GFS_rrtmg_setup_init.html
 !!
-   subroutine GFS_rrtmg_setup_init (                          &
-          si, levr, ictm, isol, ico2, iaer, ntcw,             &
-          num_p3d, npdf3d, ntoz, iovr, isubc_sw, isubc_lw,    &
-          icliq_sw, crick_proof, ccnorm,                      &
-          imp_physics,                                        &
-          norad_precip, idate, iflip,                         &
-          do_RRTMGP, me, ltp, lextop, errmsg, errflg)
+   subroutine GFS_rrtmg_setup_init ( si, levr, ictm, isol, solar_file, ico2, &
+        iaer, ntcw, num_p3d, npdf3d, ntoz, iovr, iovr_rand, iovr_maxrand,    &
+        iovr_max, iovr_dcorr, iovr_exp, iovr_exprand, icliq_sw, lcrick,      &
+        lcnorm, imp_physics, lnoprec, idate, iflip, do_RRTMGP, me, lalw1bd,  &
+        iaermdl, iaerflg, aeros_file, con_pi, con_t0c, con_c, con_boltz,     &
+        con_plnk, con_solr_2008, con_solr_2002, con_g, con_rd, co2usr_file,  &
+        co2cyc_file, rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, isubclw,&
+        iswmode, ipsd0, ltp, lextop, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:   GFS_rrtmg_setup_init - a subprogram to initialize radiation !
@@ -125,14 +121,14 @@ module GFS_rrtmg_setup
 !                     =1: max/ran overlapping clouds                    !
 !                     =2: maximum overlap clouds       (mcica only)     !
 !                     =3: decorrelation-length overlap (mcica only)     !
-!                     =4: exponential overlap clouds
-!   isubc_sw/isubc_lw: sub-column cloud approx control flag (sw/lw rad) !
+!                     =4: exponential overlap clouds                    !
+!   isubcsw/isubclw: sub-column cloud approx control flag (sw/lw rad)   !
 !                     =0: with out sub-column cloud approximation       !
 !                     =1: mcica sub-col approx. prescribed random seed  !
 !                     =2: mcica sub-col approx. provided random seed    !
-!   crick_proof      : control flag for eliminating CRICK               !
-!   ccnorm           : control flag for in-cloud condensate mixing ratio!
-!   norad_precip     : control flag for not using precip in radiation   !
+!   lcrick           : control flag for eliminating CRICK               !
+!   lcnorm           : control flag for in-cloud condensate mixing ratio!
+!   lnoprec          : control flag for not using precip in radiation   !
 !   idate(4)         : ncep absolute date and time of initial condition !
 !                      (hour, month, day, year)                         !
 !   iflip            : control flag for direction of vertical index     !
@@ -146,35 +142,31 @@ module GFS_rrtmg_setup
 !                                                                       !
 !  ===================================================================  !
 !
+      use module_radiation_astronomy, only : sol_init
+      use module_radiation_aerosols,  only : aer_init
+      use module_radiation_gases,     only : gas_init
+      use module_radiation_clouds,    only : cld_init
+      use rrtmg_lw,                   only : rlwinit
+      use rrtmg_sw,                   only : rswinit
       implicit none
 
       ! interface variables
       real (kind=kind_phys), intent(in) :: si(:)
-      integer, intent(in) :: levr
-      integer, intent(in) :: ictm
-      integer, intent(in) :: isol
-      integer, intent(in) :: ico2
-      integer, intent(in) :: iaer
-      integer, intent(in) :: ntcw
-      integer, intent(in) :: num_p3d
-      integer, intent(in) :: npdf3d
-      integer, intent(in) :: ntoz
-      integer, intent(in) :: iovr
-      integer, intent(in) :: isubc_sw
-      integer, intent(in) :: isubc_lw
-      integer, intent(in) :: icliq_sw
-      logical, intent(in) :: crick_proof
-      logical, intent(in) :: ccnorm
-      integer, intent(in) :: imp_physics
-      logical, intent(in) :: norad_precip
+      integer, intent(in) :: levr, ictm, isol, ico2, iaer, ntcw, num_p3d, &
+           ltp, npdf3d, ntoz, iovr, iovr_rand, iovr_maxrand, iovr_max,    &
+           iovr_dcorr, iovr_exp, iovr_exprand, icliq_sw, imp_physics,     &
+           iflip, me, rad_hr_units, icliq_lw, isubcsw, isubclw, iswmode
       integer, intent(in) :: idate(:)
-      integer, intent(in) :: iflip
-      logical, intent(in) :: do_RRTMGP
-      integer, intent(in) :: me
-      integer, intent(in) :: ltp
-      logical, intent(in) :: lextop
+      logical, intent(in) :: lcrick, lcnorm, lnoprec, do_RRTMGP, lalw1bd, &
+           inc_minor_gas, lextop
+      character(len=26),intent(in)  :: aeros_file, solar_file, co2usr_file,&
+           co2cyc_file
+      real(kind_phys),  intent(in)  :: con_pi, con_t0c, con_c, con_boltz,  &
+           con_plnk, con_solr_2008, con_solr_2002, con_g, con_rd
+      integer,          intent(inout) :: ipsd0
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
+      integer,          intent(out) :: iaermdl, iaerflg
 
       ! Initialize the CCPP error handling variables
       errmsg = ''
@@ -188,11 +180,6 @@ module GFS_rrtmg_setup
         return
       end if
 
-      isolar = isol                     ! solar constant control flag
-      ictmflg= ictm                     ! data ic time/date control flag
-      ico2flg= ico2                     ! co2 data source control flag
-      ioznflg= ntoz                     ! ozone data source control flag
-
       if ( ictm==0 .or. ictm==-2 ) then
         iaerflg = mod(iaer, 100)        ! no volcanic aerosols for clim hindcast
       else
@@ -201,58 +188,50 @@ module GFS_rrtmg_setup
       iaermdl = iaer/1000               ! control flag for aerosol scheme selection
       if ( iaermdl < 0 .or.  (iaermdl>2 .and. iaermdl/=5) ) then
          print *, ' Error -- IAER flag is incorrect, Abort'
-         stop 7777
+         errflg = 1
+         errmsg = 'ERROR(GFS_rrtmg_setup): IAER flag is incorrect'
+         return
       endif
 
-!     if ( ntcw > 0 ) then
-        icldflg = 1                     ! prognostic cloud optical prop scheme
-!     else
-!       icldflg = 0                     ! no support for diag cloud opt prop scheme
-!     endif
-
-      iswcliq = icliq_sw                ! optical property for liquid clouds for sw
-
-      ! iovr comes from the model. In the RRTMG implementation this is stored in phyrparam.f,
-      ! it comes in from the host-model and is set here. 
-      ! In GP, iovr is passed directly into the routines.
-      iovrRAD = iovr
-      lcrick  = crick_proof             ! control flag for eliminating CRICK 
-      lcnorm  = ccnorm                  ! control flag for in-cld condensate 
-      lnoprec = norad_precip            ! precip effect on radiation flag (ferrier microphysics)
-      isubcsw = isubc_sw                ! sub-column cloud approx flag in sw radiation
-      isubclw = isubc_lw                ! sub-column cloud approx flag in lw radiation
-
-      ivflip = iflip                    ! vertical index direction control flag
-
 !  ---  assign initial permutation seed for mcica cloud-radiation
-      if ( isubc_sw>0 .or. isubc_lw>0 ) then
+      if ( isubcsw>0 .or. isubclw>0 ) then
 !       ipsd0 = 17*idate(1)+43*idate(2)+37*idate(3)+23*idate(4) + ipsd0
         ipsd0 = 17*idate(1)+43*idate(2)+37*idate(3)+23*idate(4)
       endif
 
       if ( me == 0 ) then
-        print *,'  In rad_initialize (GFS_rrtmg_setup_init), before calling radinit'
-        print *,' si =',si
-        print *,' levr=',levr,' ictm=',ictm,' isol=',isol,' ico2=',ico2,&
-     &          ' iaermdl=',iaermdl,' iaerflg=',iaerflg
-        print *,' np3d=',num_p3d,' ntoz=',ntoz,                         &
-     &          ' iovr=',iovr,' isubc_sw=',isubc_sw,                    &
-     &          ' isubc_lw=',isubc_lw,' icliq_sw=',icliq_sw,            &
-     &          ' iflip=',iflip,'  me=',me
-        print *,' crick_proof=',crick_proof,                            &
-     &          ' ccnorm=',ccnorm,' norad_precip=',norad_precip
+         print *,' In rad_initialize (GFS_rrtmg_setup_init), before calling RRTMG initialization'
+         print *,' si =',si
+         print *,' levr=',levr,' ictm=',ictm,' isol=',isol,' ico2=',ico2,&
+                 ' iaermdl=',iaermdl,' iaerflg=',iaerflg
+         print *,' np3d=',num_p3d,' ntoz=',ntoz,                         &
+                 ' iovr=',iovr,' isubcsw=',isubcsw,                      &
+                 ' isubclw=',isubclw,' icliq_sw=',icliq_sw,              &
+                 ' iflip=',iflip,'  me=',me
+         print *,' lcrick=',lcrick,                                      &
+                 ' lcnorm=',lcnorm,' lnoprec=',lnoprec
+         print *, 'lextop=',lextop, ' ltp=',ltp
       endif
 
-      call radinit                                                      &
-!  ---  inputs:
-     &     ( si, levr, imp_physics, me, ltp, lextop )
-!  ---  outputs:
-!          ( none )
+      ! Call initialization routines
+      call sol_init ( me, isol, solar_file, con_solr_2008,con_solr_2002,&
+           con_pi )
+      call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file,  &
+           con_pi, con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)
+      call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz,   &
+           con_pi, errflg, errmsg)
+      call cld_init ( si, levr, imp_physics, me, con_g, con_rd, errflg, errmsg)
+      call rlwinit ( me, rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, &
+           iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
+           iovr_exp, iovr_exprand, errflg, errmsg )
+      call rswinit ( me, rad_hr_units, inc_minor_gas, icliq_sw, isubclw, &
+           iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
+           iovr_exp, iovr_exprand,iswmode, errflg, errmsg )
 
       if ( me == 0 ) then
         print *,'  Radiation sub-cloud initial seed =',ipsd0,           &
      &          ' IC-idate =',idate
-        print *,' return from rad_initialize (GFS_rrtmg_setup_init) - after calling radinit'
+        print *,' return from rad_initialize (GFS_rrtmg_setup_init) - after calling RRTMG initialization'
       endif
 !
       is_initialized = .true.
@@ -264,9 +243,9 @@ module GFS_rrtmg_setup
 !> \section arg_table_GFS_rrtmg_setup_timestep_init Argument Table
 !! \htmlinclude GFS_rrtmg_setup_timestep_init.html
 !!
-   subroutine GFS_rrtmg_setup_timestep_init (      &
-          idate, jdate, deltsw, deltim, lsswr, me, &
-          slag, sdec, cdec, solcon, errmsg, errflg)
+   subroutine GFS_rrtmg_setup_timestep_init (idate, jdate, deltsw, deltim, &
+        lsswr, me, iaermdl, iaerflg, isol, aeros_file, slag, sdec, cdec,   &
+        solcon, con_pi, co2dat_file, co2gbl_file, ictm, ico2, ntoz, errmsg, errflg)
 
       implicit none
 
@@ -275,8 +254,11 @@ module GFS_rrtmg_setup
       integer,              intent(in)  :: jdate(:)
       real(kind=kind_phys), intent(in)  :: deltsw
       real(kind=kind_phys), intent(in)  :: deltim
+      real(kind=kind_phys), intent(in)  :: con_pi
       logical,              intent(in)  :: lsswr
       integer,              intent(in)  :: me
+      integer,              intent(in)  :: iaermdl, iaerflg, isol, ictm, ico2, ntoz
+      character(len=26),    intent(in)  :: aeros_file, co2dat_file, co2gbl_file
       real(kind=kind_phys), intent(out) :: slag
       real(kind=kind_phys), intent(out) :: sdec
       real(kind=kind_phys), intent(out) :: cdec
@@ -295,8 +277,8 @@ module GFS_rrtmg_setup
       errmsg = ''
       errflg = 0
 
-      call radupdate(idate,jdate,deltsw,deltim,lsswr,me, &
-                     slag,sdec,cdec,solcon)
+      call radupdate(idate,jdate,deltsw,deltim,lsswr,me,iaermdl, iaerflg,isol,aeros_file,&
+           slag,sdec,cdec,solcon,con_pi,co2dat_file,co2gbl_file,ictm,ico2,ntoz,errflg,errmsg)
 
    end subroutine GFS_rrtmg_setup_timestep_init
 
@@ -322,229 +304,6 @@ module GFS_rrtmg_setup
 
    end subroutine GFS_rrtmg_setup_finalize
 
-
-! Private functions
-
-!>Initialization of radiation calculations.
-   subroutine radinit( si, NLAY, imp_physics, me, ltp, lextop )
-!...................................
-
-!  ---  inputs:
-!     &     ( si, NLAY, imp_physics, me )
-!  ---  outputs:
-!          ( none )
-
-! =================   subprogram documentation block   ================ !
-!                                                                       !
-! subprogram:   radinit     initialization of radiation calculations    !
-!                                                                       !
-! usage:        call radinit                                            !
-!                                                                       !
-! attributes:                                                           !
-!   language:  fortran 90                                               !
-!   machine:   wcoss                                                    !
-!                                                                       !
-!  ====================  definition of variables  ====================  !
-!                                                                       !
-! input parameters:                                                     !
-!   si               : model vertical sigma interface                   !
-!   NLAY             : number of model vertical layers                  !
-!   imp_physics      : MP identifier                                    !
-!   me               : print control flag                               !
-!                                                                       !
-!  outputs: (none)                                                      !
-!                                                                       !
-!  external module variables:  (in module physparam)                     !
-!   isolar   : solar constant cntrol flag                               !
-!              = 0: use the old fixed solar constant in "physcon"       !
-!              =10: use the new fixed solar constant in "physcon"       !
-!              = 1: use noaa ann-mean tsi tbl abs-scale with cycle apprx!
-!              = 2: use noaa ann-mean tsi tbl tim-scale with cycle apprx!
-!              = 3: use cmip5 ann-mean tsi tbl tim-scale with cycl apprx!
-!              = 4: use cmip5 mon-mean tsi tbl tim-scale with cycl apprx!
-!   iaerflg  : 3-digit aerosol flag (abc for volc, lw, sw)              !
-!              a:=0 use background stratospheric aerosol                !
-!                =1 include stratospheric vocanic aeros                 !
-!              b:=0 no topospheric aerosol in lw radiation              !
-!                =1 compute tropspheric aero in 1 broad band for lw     !
-!                =2 compute tropspheric aero in multi bands for lw      !
-!              c:=0 no topospheric aerosol in sw radiation              !
-!                =1 include tropspheric aerosols for sw                 !
-!   ico2flg  : co2 data source control flag                             !
-!              =0: use prescribed global mean co2 (old  oper)           !
-!              =1: use observed co2 annual mean value only              !
-!              =2: use obs co2 monthly data with 2-d variation          !
-!   ictmflg  : =yyyy#, external data ic time/date control flag          !
-!              =   -2: same as 0, but superimpose seasonal cycle        !
-!                      from climatology data set.                       !
-!              =   -1: use user provided external data for the          !
-!                      forecast time, no extrapolation.                 !
-!              =    0: use data at initial cond time, if not            !
-!                      available, use latest, no extrapolation.         !
-!              =    1: use data at the forecast time, if not            !
-!                      available, use latest and extrapolation.         !
-!              =yyyy0: use yyyy data for the forecast time,             !
-!                      no further data extrapolation.                   !
-!              =yyyy1: use yyyy data for the fcst. if needed, do        !
-!                      extrapolation to match the fcst time.            !
-!   ioznflg  : ozone data source control flag                           !
-!              =0: use climatological ozone profile                     !
-!              =1: use interactive ozone profile                        !
-!   icldflg  : cloud optical property scheme control flag               !
-!              =0: use diagnostic cloud scheme                          !
-!              =1: use prognostic cloud scheme (default)                !
-!   imp_physics  : cloud microphysics scheme control flag               !
-!              =99 zhao/carr/sundqvist microphysics scheme              !
-!              =98 zhao/carr/sundqvist microphysics+pdf cloud&cnvc,cnvw !
-!              =11 GFDL cloud microphysics                              !
-!              =8 Thompson microphysics scheme                          !
-!              =6 WSM6 microphysics scheme                              !
-!              =10 MG microphysics scheme                               !
-!   iovr     : control flag for cloud overlap in radiation              !
-!              =0: random overlapping clouds                            !
-!              =1: max/ran overlapping clouds                           !
-!   isubcsw  : sub-column cloud approx control flag in sw radiation     !
-!   isubclw  : sub-column cloud approx control flag in lw radiation     !
-!              =0: with out sub-column cloud approximation              !
-!              =1: mcica sub-col approx. prescribed random seed         !
-!              =2: mcica sub-col approx. provided random seed           !
-!   lcrick   : control flag for eliminating CRICK                       !
-!              =t: apply layer smoothing to eliminate CRICK             !
-!              =f: do not apply layer smoothing                         !
-!   lcnorm   : control flag for in-cld condensate                       !
-!              =t: normalize cloud condensate                           !
-!              =f: not normalize cloud condensate                       !
-!   lnoprec  : precip effect in radiation flag (ferrier microphysics)   !
-!              =t: snow/rain has no impact on radiation                 !
-!              =f: snow/rain has impact on radiation                    !
-!   ivflip   : vertical index direction control flag                    !
-!              =0: index from toa to surface                            !
-!              =1: index from surface to toa                            !
-!                                                                       !
-!  subroutines called: sol_init, aer_init, gas_init, cld_init,          !
-!                      rlwinit, rswinit                                 !
-!                                                                       !
-!  usage:       call radinit                                            !
-!                                                                       !
-!  ===================================================================  !
-!
-
-      use module_radiation_astronomy, only : sol_init
-      use module_radiation_aerosols,  only : aer_init
-      use module_radiation_gases,     only : gas_init
-      use module_radiation_clouds,    only : cld_init
-      use rrtmg_lw,                   only : rlwinit
-      use rrtmg_sw,                   only : rswinit
-
-      implicit none
-
-!  ---  inputs:
-      integer, intent(in) :: NLAY, me, imp_physics, ltp
-      logical, intent(in) :: lextop 
-
-      real (kind=kind_phys), intent(in) :: si(:)
-
-!  ---  outputs: (none, to module variables)
-
-!  ---  locals:
-
-!
-!===> ...  begin here
-!
-!> -# Set up control variables and external module variables in
-!!    module physparam
-      loz1st = (ioznflg == 0)           ! first-time clim ozone data read flag
-      month0 = 0
-      iyear0 = 0
-      monthd = 0
-
-      if (me == 0) then
-!       print *,' NEW RADIATION PROGRAM STRUCTURES -- SEP 01 2004'
-        print *,' NEW RADIATION PROGRAM STRUCTURES BECAME OPER. ',      &
-     &          '  May 01 2007'
-        print *, VTAGRAD                !print out version tag
-        print *,' - Selected Control Flag settings: ICTMflg=',ictmflg,  &
-     &    ' ISOLar =',isolar, ' ICO2flg=',ico2flg,' IAERflg=',iaerflg,  &
-     &    ' ICLDflg=',icldflg,                                          &
-     &    ' IMP_PHYSICS=',imp_physics,' IOZNflg=',ioznflg
-        print *,' IVFLIP=',ivflip,' IOVR=',iovrRad,                     &
-     &    ' ISUBCSW=',isubcsw,' ISUBCLW=',isubclw
-        print *,' LCRICK=',lcrick,' LCNORM=',lcnorm,' LNOPREC=',lnoprec
-        print *,' LTP =',ltp,', add extra top layer =',lextop
-
-        if ( ictmflg==0 .or. ictmflg==-2 ) then
-          print *,'   Data usage is limited by initial condition!'
-          print *,'   No volcanic aerosols'
-        endif
-
-        if ( isubclw == 0 ) then
-          print *,' - ISUBCLW=',isubclw,' No McICA, use grid ',         &
-     &            'averaged cloud in LW radiation'
-        elseif ( isubclw == 1 ) then
-          print *,' - ISUBCLW=',isubclw,' Use McICA with fixed ',       &
-     &            'permutation seeds for LW random number generator'
-        elseif ( isubclw == 2 ) then
-          print *,' - ISUBCLW=',isubclw,' Use McICA with random ',      &
-     &            'permutation seeds for LW random number generator'
-        else
-          print *,' - ERROR!!! ISUBCLW=',isubclw,' is not a ',          &
-     &            'valid option '
-          stop
-        endif
-
-        if ( isubcsw == 0 ) then
-          print *,' - ISUBCSW=',isubcsw,' No McICA, use grid ',         &
-     &            'averaged cloud in SW radiation'
-        elseif ( isubcsw == 1 ) then
-          print *,' - ISUBCSW=',isubcsw,' Use McICA with fixed ',       &
-     &            'permutation seeds for SW random number generator'
-        elseif ( isubcsw == 2 ) then
-          print *,' - ISUBCSW=',isubcsw,' Use McICA with random ',      &
-     &            'permutation seeds for SW random number generator'
-        else
-          print *,' - ERROR!!! ISUBCSW=',isubcsw,' is not a ',          &
-     &            'valid option '
-          stop
-        endif
-
-        if ( isubcsw /= isubclw ) then
-          print *,' - *** Notice *** ISUBCSW /= ISUBCLW !!!',           &
-     &            isubcsw, isubclw
-        endif
-      endif
-
-!> -# Initialization
-!! - astronomy initialization routine:
-!! call module_radiation_astronomy::sol_init()
-!! - aerosols initialization routine:
-!! call module_radiation_aerosols::aer_init()
-!! - CO2 and other gases intialization routine:
-!! call module_radiation_gases::gas_init()
-!! - cloud initialization routine:
-!! call module_radiation_clouds::cld_init()
-!! - LW radiation initialization routine:
-!! call module_radlw_main::rlwinit()
-!! - SW radiation initialization routine:
-!! call module_radsw_main::rswinit()
-!     Initialization
-
-      call sol_init ( me )          !  --- ...  astronomy initialization routine
-
-      call aer_init ( NLAY, me )    !  --- ...  aerosols initialization routine
-
-      call gas_init ( me )          !  --- ...  co2 and other gases initialization routine
-
-      call cld_init ( si, NLAY, imp_physics, me) !  --- ...  cloud initialization routine
-
-      call rlwinit ( me )           !  --- ...  lw radiation initialization routine
-
-      call rswinit ( me )           !  --- ...  sw radiation initialization routine
-!
-      return
-!
-      end subroutine radinit
-      !-----------------------------------
-
 !> This subroutine checks and updates time sensitive data used by
 !! radiation computations. This subroutine needs to be placed inside
 !! the time advancement loop but outside of the horizontal grid loop.
@@ -565,8 +324,9 @@ module GFS_rrtmg_setup
 !! \param solcon         solar constant adjusted by sun-earth distance \f$(W/m^2)\f$
 !> \section gen_radupdate General Algorithm
 !-----------------------------------
-      subroutine radupdate( idate,jdate,deltsw,deltim,lsswr, me,        &
-     &                      slag,sdec,cdec,solcon)
+      subroutine radupdate( idate,jdate,deltsw,deltim,lsswr,me, iaermdl,&
+           iaerflg, isol, aeros_file, slag,sdec,cdec,solcon, con_pi,    &
+           co2dat_file,co2gbl_file, ictm, ico2, ntoz, errflg, errmsg)
 !...................................
 
 ! =================   subprogram documentation block   ================ !
@@ -598,31 +358,6 @@ module GFS_rrtmg_setup
 !   sdec, cdec     : sin and cos of the solar declination angle         !
 !   solcon         : sun-earth distance adjusted solar constant (w/m2)  !
 !                                                                       !
-!  external module variables:                                           !
-!   isolar   : solar constant cntrl  (in module physparam)              !
-!              = 0: use the old fixed solar constant in "physcon"       !
-!              =10: use the new fixed solar constant in "physcon"       !
-!              = 1: use noaa ann-mean tsi tbl abs-scale with cycle apprx!
-!              = 2: use noaa ann-mean tsi tbl tim-scale with cycle apprx!
-!              = 3: use cmip5 ann-mean tsi tbl tim-scale with cycl apprx!
-!              = 4: use cmip5 mon-mean tsi tbl tim-scale with cycl apprx!
-!   ictmflg  : =yyyy#, external data ic time/date control flag          !
-!              =   -2: same as 0, but superimpose seasonal cycle        !
-!                      from climatology data set.                       !
-!              =   -1: use user provided external data for the          !
-!                      forecast time, no extrapolation.                 !
-!              =    0: use data at initial cond time, if not            !
-!                      available, use latest, no extrapolation.         !
-!              =    1: use data at the forecast time, if not            !
-!                      available, use latest and extrapolation.         !
-!              =yyyy0: use yyyy data for the forecast time,             !
-!                      no further data extrapolation.                   !
-!              =yyyy1: use yyyy data for the fcst. if needed, do        !
-!                      extrapolation to match the fcst time.            !
-!                                                                       !
-!  module variables:                                                    !
-!   loz1st   : first-time clim ozone data read flag                     !
-!                                                                       !
 !  subroutines called: sol_update, aer_update, gas_update               !
 !                                                                       !
 !  ===================================================================  !
@@ -634,13 +369,16 @@ module GFS_rrtmg_setup
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: idate(:), jdate(:), me
+      integer, intent(in) :: idate(:), jdate(:), me, iaermdl, iaerflg, isol, ictm, ntoz, ico2
       logical, intent(in) :: lsswr
+      character(len=26),intent(in) :: aeros_file,co2dat_file,co2gbl_file
 
-      real (kind=kind_phys), intent(in) :: deltsw, deltim
+      real (kind=kind_phys), intent(in) :: deltsw, deltim, con_pi
 
 !  ---  outputs:
       real (kind=kind_phys), intent(out) :: slag, sdec, cdec, solcon
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 
 !  ---  locals:
       integer :: iyear, imon, iday, ihour
@@ -652,6 +390,11 @@ module GFS_rrtmg_setup
 !
 !===> ...  begin here
 !
+
+      ! Initialize the CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
 !> -# Set up time stamp at fcst time and that for green house gases
 !! (currently co2 only)
 !  --- ...  time stamp at fcst time
@@ -663,7 +406,7 @@ module GFS_rrtmg_setup
 
 !  --- ...  set up time stamp used for green house gases (** currently co2 only)
 
-      if ( ictmflg==0 .or. ictmflg==-2 ) then  ! get external data at initial condition time
+      if ( ictm==0 .or. ictm==-2 ) then  ! get external data at initial condition time
         kyear = idate(1)
         kmon  = idate(2)
         kday  = idate(3)
@@ -673,7 +416,7 @@ module GFS_rrtmg_setup
         kmon  = imon
         kday  = iday
         khour = ihour
-      endif   ! end if_ictmflg_block
+      endif   ! end if_ictm_block
 
       if ( month0 /= imon ) then
         lmon_chg = .true.
@@ -686,12 +429,12 @@ module GFS_rrtmg_setup
 !! time interpolation.
       if (lsswr) then
 
-        if ( isolar == 0 .or. isolar == 10 ) then
+        if ( isol == 0 .or. isol == 10 ) then
           lsol_chg = .false.
         elseif ( iyear0 /= iyear ) then
           lsol_chg = .true.
         else
-          lsol_chg = ( isolar==4 .and. lmon_chg )
+          lsol_chg = ( isol==4 .and. lmon_chg )
         endif
         iyear0 = iyear
 
@@ -699,7 +442,7 @@ module GFS_rrtmg_setup
 !  ---  inputs:
      &     ( jdate,kyear,deltsw,deltim,lsol_chg, me,                    &
 !  ---  outputs:
-     &       slag,sdec,cdec,solcon                                      &
+     &       slag,sdec,cdec,solcon,con_pi,errmsg,errflg                 &
      &     )
 
       endif  ! end_if_lsswr_block
@@ -707,7 +450,7 @@ module GFS_rrtmg_setup
 !> -# Call module_radiation_aerosols::aer_update(), monthly update, no
 !! time interpolation
       if ( lmon_chg ) then
-        call aer_update ( iyear, imon, me )
+        call aer_update ( iyear, imon, me, iaermdl, aeros_file, errflg, errmsg )
       endif
 
 !> -# Call co2 and other gases update routine:
@@ -719,7 +462,8 @@ module GFS_rrtmg_setup
         lco2_chg = .false.
       endif
 
-      call gas_update ( kyear,kmon,kday,khour,loz1st,lco2_chg, me )
+      call gas_update ( kyear,kmon,kday,khour,loz1st,lco2_chg, me, co2dat_file, &
+           co2gbl_file, ictm, ico2, ntoz, errflg, errmsg )
 
       if ( loz1st ) loz1st = .false.
 
