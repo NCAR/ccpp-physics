@@ -21,10 +21,10 @@
 !> \section arg_table_GFS_surface_generic_post_init Argument Table
 !! \htmlinclude GFS_surface_generic_post_init.html
 !!
-      subroutine GFS_surface_generic_post_init (vtype, stype, slope, vtype_save, stype_save, slope_save, errmsg, errflg)
+      subroutine GFS_surface_generic_post_init (vtype, stype,scolor, slope, vtype_save, stype_save,scolor_save, slope_save, errmsg, errflg)
 
-        integer, dimension(:), intent(in)  :: vtype_save, stype_save, slope_save
-        integer, dimension(:), intent(out) :: vtype, stype, slope
+        integer, dimension(:), intent(in)  :: vtype_save, stype_save,scolor_save, slope_save
+        integer, dimension(:), intent(out) :: vtype, stype, scolor,slope
 
         ! CCPP error handling
         character(len=*), intent(out) :: errmsg
@@ -37,6 +37,7 @@
         ! Restore vegetation, soil and slope type
         vtype(:) = vtype_save(:)
         stype(:) = stype_save(:)
+        scolor(:) = scolor_save(:)
         slope(:) = slope_save(:)
 
       end subroutine GFS_surface_generic_post_init
@@ -53,7 +54,7 @@
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
         nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, paha, ep, ecan, etran, edir, waxy, &
         runoff, srunoff, runof, drain, tecan, tetran, tedir, twa, lheatstrg, h0facu, h0facs, zvfun, hflx, evap, hflxq, hffac,       &
-        isot, ivegsrc, islmsk, vtype, stype, slope, vtype_save, stype_save, slope_save, errmsg, errflg)
+        isot, ivegsrc, islmsk, vtype, stype,scolor, slope, vtype_save, stype_save,scolor_save, slope_save, errmsg, errflg)
 
         implicit none
 
@@ -85,8 +86,8 @@
         real(kind=kind_phys), dimension(:), intent(out) :: hflxq
         real(kind=kind_phys), dimension(:), intent(out) :: hffac
 
-        integer, intent(in) :: isot, ivegsrc, islmsk(:), vtype_save(:), stype_save(:), slope_save(:)
-        integer, intent(out) :: vtype(:), stype(:), slope(:)
+        integer, intent(in) :: isot, ivegsrc, islmsk(:), vtype_save(:), stype_save(:),scolor_save(:), slope_save(:)
+        integer, intent(out) :: vtype(:), stype(:),scolor(:), slope(:)
 
         ! CCPP error handling variables
         character(len=*), intent(out) :: errmsg
@@ -274,6 +275,7 @@
         ! Restore vegetation, soil and slope type
         vtype(:) = vtype_save(:)
         stype(:) = stype_save(:)
+        scolor(:) = scolor_save(:)
         slope(:) = slope_save(:)
 
       end subroutine GFS_surface_generic_post_run
