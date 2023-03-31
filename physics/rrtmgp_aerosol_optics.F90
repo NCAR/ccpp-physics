@@ -27,7 +27,7 @@ contains
   subroutine rrtmgp_aerosol_optics_run(doSWrad, doLWrad, nCol, nLev, nDay, idxday, p_lev,   &
        p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, iaermdl, iaerflg,     &
        top_at_1, con_pi, con_rd, con_g, aerodp, aerlw_tau, aerlw_ssa, aerlw_g, aersw_tau,   &
-       aersw_ssa, aersw_g, errmsg, errflg  )
+       aersw_ssa, aersw_g, ext550, errmsg, errflg  )
 
     ! Inputs
     logical, intent(in) :: &
@@ -61,6 +61,8 @@ contains
          aerfld                   ! aerosol input concentrations
     real(kind_phys), dimension(:,:),intent(in) :: &
          p_lev                    ! Pressure @ layer-interfaces (Pa)
+    real (kind=kind_phys), dimension(:,:), intent(out) :: &
+         ext550                   ! 3d optical extinction for total aerosol species
 
     ! Outputs
     real(kind_phys), dimension(:,:), intent(out) :: &
@@ -92,7 +94,8 @@ contains
 
     ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
     call setaer(p_lev*0.01, p_lay*0.01, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, nCol, nLev, &
-         nLev+1, .true., .true., iaermdl, iaerflg, top_at_1, con_pi, con_rd, con_g, aerosolssw2, aerosolslw, aerodp, errflg, errmsg)
+         nLev+1, .true., .true., iaermdl, iaerflg, top_at_1, con_pi, con_rd, con_g, aerosolssw2, aerosolslw, &
+         aerodp, ext550, errflg, errmsg)
 
     ! Shortwave
     if (doSWrad .and. (nDay .gt. 0)) then

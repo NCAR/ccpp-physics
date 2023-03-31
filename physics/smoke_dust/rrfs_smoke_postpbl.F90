@@ -5,7 +5,6 @@
  module rrfs_smoke_postpbl
 
    use machine ,        only : kind_phys
-   use rrfs_smoke_config
 
    implicit none
 
@@ -15,26 +14,22 @@
 
 contains
 
-!>\defgroup rrfs_smoke_postpbl GSD Chem emission driver Module  
-!> \ingroup gsd_chem_group
-!! This is the GSD Chem emission driver Module
-!! \section arg_table_rrfs_smoke_postpbl_run Argument Table
+!> \section arg_table_rrfs_smoke_postpbl_run Argument Table
 !! \htmlinclude rrfs_smoke_postpbl_run.html
 !!
-!>\section rrfs_smoke_postpbl GSD Chemistry Scheme General Algorithm
-!> @{
-    subroutine rrfs_smoke_postpbl_run(ite, kte, ntsmoke, ntdust, ntrac,      &
-                   qgrs, chem3d, errmsg, errflg)
+    subroutine rrfs_smoke_postpbl_run(ite, kte, ntsmoke, ntdust, ntcoarsepm, ntrac,      &
+                   qgrs, chem3d, rrfs_sd, errmsg, errflg)
 
     implicit none
 
 
-    integer,        intent(in) :: ite,kte,ntsmoke,ntdust,ntrac
+    integer,        intent(in) :: ite,kte,ntsmoke,ntdust,ntcoarsepm,ntrac
 
     integer, parameter :: its=1,kts=1
 
     real(kind_phys), dimension(:,:,:), intent(inout) :: qgrs
     real(kind_phys), dimension(:,:,:), intent(inout) :: chem3d
+    logical, intent(in) :: rrfs_sd
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
 
@@ -44,16 +39,20 @@ contains
     errmsg = ''
     errflg = 0
 
+    if (.not. rrfs_sd) return
+
     !--- put smoke stuff back into tracer array
 
     do k=kts,kte
      do i=its,ite
        qgrs(i,k,ntsmoke)= chem3d(i,k,1)
        qgrs(i,k,ntdust )= chem3d(i,k,2)
+       qgrs(i,k,ntcoarsepm)= chem3d(i,k,3)
      enddo
     enddo
 
- end subroutine rrfs_smoke_postpbl_run
+    return
 
-!> @}
+   end subroutine rrfs_smoke_postpbl_run
+
   end module rrfs_smoke_postpbl

@@ -125,13 +125,6 @@
   dimensions = ()
   type = logical
   intent = in
-[lheatstrg]
-  standard_name = flag_for_canopy_heat_storage_in_land_surface_scheme
-  long_name = flag for canopy heat storage parameterization
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -303,9 +296,17 @@
   type = real
   kind = kind_phys
   intent = inout
-[qgrs_ice_cloud]
+[qgrs_ice]
   standard_name = cloud_ice_mixing_ratio
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[qgrs_snow]
+  standard_name = snow_mixing_ratio
+  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -364,6 +365,14 @@
   long_name = mean layer pressure
   units = Pa
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[prsi]
+  standard_name = air_pressure_at_interface
+  long_name = air pressure at model layer interfaces
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -1017,9 +1026,17 @@
   type = real
   kind = kind_phys
   intent = inout
-[dqdt_ice_cloud]
+[dqdt_ice]
   standard_name = process_split_cumulative_tendency_of_cloud_ice_mixing_ratio
   long_name = cloud condensed water mixing ratio tendency due to model physics
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dqdt_snow]
+  standard_name = process_split_cumulative_tendency_of_snow_mixing_ratio
+  long_name = ratio of mass of snow water tendency to mass of dry air plus vapor (without condensates) due to model physics
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -1151,6 +1168,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ntsw]
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for snow water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [ntlnc]
   standard_name = index_of_mass_number_concentration_of_cloud_droplets_in_tracer_concentration_array
   long_name = tracer index for liquid number concentration
@@ -1210,12 +1234,12 @@
   type = real
   kind = kind_phys
   intent = in
-[bl_mynn_tkebudget]
+[tke_budget]
   standard_name = control_for_tke_budget_output
   long_name = flag for activating TKE budget
   units = flag
   dimensions = ()
-  type = logical
+  type = integer
   intent = in
 [bl_mynn_tkeadvect]
   standard_name = flag_for_tke_advection
@@ -1329,6 +1353,13 @@
   dimensions = ()
   type = integer
   intent = in
+[imp_physics_fa]
+  standard_name = identifier_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [imp_physics_nssl]
   standard_name = identifier_for_nssl_microphysics_scheme
   long_name = choice of NSSL 2-moment microphysics scheme
@@ -1347,7 +1378,7 @@
   standard_name = chem3d_mynn_pbl_transport
   long_name = mynn pbl transport of smoke and dust
   units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,2)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_chemical_species_vertically_mixed)
   type = real
   kind = kind_phys
   intent = inout
@@ -1359,9 +1390,9 @@
   type = real
   kind = kind_phys
   intent = inout
-[rrfs_smoke]
+[rrfs_sd]
   standard_name = do_smoke_coupling
-  long_name = flag controlling rrfs_smoke collection (default off)
+  long_name = flag controlling rrfs_sd collection (default off)
   units = flag
   dimensions = ()
   type = logical
@@ -1373,7 +1404,7 @@
   dimensions = ()
   type = logical
   intent = in
-[fire_turb]
+[enh_mix]
   standard_name = do_planetary_boundary_layer_fire_enhancement
   long_name = flag for rrfs smoke mynn enh vermix
   units = flag
@@ -1393,6 +1424,21 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+[vdep]
+  standard_name = dry_deposition_velocity_mynn_pbl_transport
+  long_name = dry deposition velocity by mynn pbl transport
+  units = m s-1
+  dimensions = (horizontal_loop_extent,number_of_chemical_species_deposited)
+  type = real
+  kind = kind_phys
+  intent = in
+[smoke_dbg]
+  standard_name = do_smoke_debug
+  long_name = flag for rrfs smoke plumerise debug
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
