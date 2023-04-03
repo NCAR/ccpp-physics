@@ -68,7 +68,7 @@
       integer,               intent(in) :: im, nf_albd, ialb
       logical,               intent(in) :: frac_grid, lslwr, lsswr, use_cice_alb, cplice
       integer,               intent(in) :: lsm, lsm_noahmp, lsm_ruc, lndp_type, n_var_lndp
-      real(kind=kind_phys),  intent(in) :: min_seaice, min_lakeice, con_tpp
+      real(kind=kind_phys),  intent(in) :: min_seaice, min_lakeice, con_ttp
       integer, dimension(:), intent(in) :: use_lake_model
 
       real(kind=kind_phys), dimension(:),   intent(in)  :: xlat, xlon, slmsk,           &
