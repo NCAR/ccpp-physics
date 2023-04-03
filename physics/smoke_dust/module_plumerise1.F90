@@ -3,7 +3,6 @@
 
  module module_plumerise1
 
-  use rrfs_smoke_data
   use machine , only : kind_phys
   real(kind=kind_phys),parameter :: p1000mb = 100000.  ! p at 1000mb (pascals)
 !- Implementing the fire radiative power (FRP) methodology for biomass burning
@@ -35,10 +34,10 @@
 !                              'aggr'   /) ! grassland
 
 CONTAINS
-subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
+subroutine ebu_driver (      flam_frac,ebb_smoke,ebu,           &
                              t_phy,q_vap,                            &   ! RAR: moist is replaced with q_vap
                              rho_phy,vvel,u_phy,v_phy,p_phy,         &
-                             z_at_w,z,ktau,g,con_cp,con_rd,          &   ! scale_fire_emiss is part of config_flags
+                             z_at_w,z,g,con_cp,con_rd,               &   ! scale_fire_emiss is part of config_flags
                              plume_frp, k_min, k_max,                &   ! RAR:
                              ids,ide, jds,jde, kds,kde,              &
                              ims,ime, jms,jme, kms,kme,              &
@@ -49,7 +48,6 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
   USE module_zero_plumegen_coms
   USE module_smoke_plumerise
   IMPLICIT NONE
-  type(smoke_data), intent(inout) :: data
 
    REAL(kind_phys), PARAMETER :: frp_threshold= 1.e+7   ! Minimum FRP (Watts) to have plume rise 
     
@@ -58,8 +56,7 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
 !   TYPE(grid_config_rec_type),  INTENT(IN )    :: config_flags
    character(*), intent(inout) :: errmsg
    integer, intent(inout) :: errflg
-   INTEGER,      INTENT(IN   ) :: ktau,                                    &
-                                  ids,ide, jds,jde, kds,kde,               &
+   INTEGER,      INTENT(IN   ) :: ids,ide, jds,jde, kds,kde,               &
                                   ims,ime, jms,jme, kms,kme,               &
                                   its,ite, jts,jte, kts,kte
 !   real(kind=kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme, num_moist ),                &
@@ -98,7 +95,6 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
 !     write(0,*)'plumerise'
 
 ! RAR:
-!      if (config_flags%biomass_burn_opt == BIOMASSB_SMOKE) then
 !          do j=jts,jte:
 !             do i=its,ite
 !                 ebu(i,kts,j,p_ebu_smoke)= ebb_smoke(i,j)
@@ -115,12 +111,12 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
         cpor    =con_cp/con_rd
         con_rocp=con_rd/con_cp
 
-        IF ( dbg_opt .and. ktau<2000) then
+        IF ( dbg_opt ) then
            WRITE(*,*) 'module_plumerise1: its,ite,jts,jte ', its,ite,jts,jte
            WRITE(*,*) 'module_plumerise1: ims,ime,jms,jme ', ims,ime,jms,jme
           !WRITE(*,*) 'module_plumerise1: p_ebu_smoke,num_ebu: ', p_ebu_smoke,num_ebu
            WRITE(*,*) 'module_plumerise1: maxval(ebu(:,kts,:)) ', maxval(ebu(:,kts,:))
-         END IF
+        END IF
       !endif
 
 ! RAR: setting to zero the ebu emissions at the levels k>1, this is necessary when the plumerise is called, so the emissions at k>1 are updated
@@ -136,7 +132,6 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
 
 ! For now the flammable fraction is constant, based on the namelist. The next
 ! step to use LU index and meteorology to parameterize it
-!    IF (ktau==2) THEN
        do j=jts,jte
         do i=its,ite
            flam_frac(i,j)= 0.
@@ -145,13 +140,12 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
            end if
         enddo
        enddo
- !   ENDIF
 
 
 ! RAR: new FRP based approach
 !check_pl:  IF (config_flags%plumerise_flag == 2 ) THEN    ! if the namelist option is set for plumerise 
 ! Haiqin: plumerise_flag is added to the namelist options
-!check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumerise 
+check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumerise
        do j=jts,jte
           do i=its,ite
               ! k_min(i,j)=0
@@ -175,7 +169,7 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
                  !theta_in(k)= t_phy(i,k,j)/pi_in(k)*cp
                enddo
 
-             IF (dbg_opt .and. ktau<2000) then
+             IF (dbg_opt) then
                WRITE(*,*) 'module_plumerise1: i,j ',i,j
                WRITE(*,*) 'module_plumerise1: plume_frp(i,j,:) ',plume_frp(i,j,:)
                WRITE(*,*) 'module_plumerise1: ebu(i,kts,j) ',ebu(i,kts,j)
@@ -185,15 +179,15 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
              END IF
 
 ! RAR: the plume rise calculation step:
-               CALL plumerise(data,kte,1,1,1,1,1,1,         &
+               CALL plumerise(kte,1,1,1,1,1,1,         &
                               !firesize,mean_fct,                    & 
                               !num_ebu, eburn_in, eburn_out,         &
                               u_in, v_in, w_in, theta_in ,pi_in,    &
                               rho_phyin, qv_in, zmid, z_lev,        &
                               plume_frp(i,j,1), k_min(i,j),         & 
-                              k_max(i,j), ktau, dbg_opt, g, con_cp, &
+                              k_max(i,j), dbg_opt, g, con_cp,       &
                               con_rd, cpor, errmsg, errflg )
-                             !k_max(i,j), ktau, config_flags%debug_chem )
+                             !k_max(i,j), config_flags%debug_chem )
                if(errflg/=0) return
 
                kp1= k_min(i,j)
@@ -205,7 +199,7 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
                   enddo
                   ebu(i,kts,j)=   (1.-flam_frac(i,j))* ebb_smoke(i,j)
 
-               IF ( dbg_opt .and. ktau<2000) then
+               IF ( dbg_opt ) then
                    WRITE(*,*) 'module_plumerise1: i,j ',i,j
                    WRITE(*,*) 'module_plumerise1: k_min(i,j), k_max(i,j) ',k_min(i,j), k_max(i,j)  
                END IF
@@ -213,7 +207,7 @@ subroutine ebu_driver (      data,flam_frac,ebb_smoke,ebu,           &
             enddo
           enddo
 
-!        ENDIF check_pl
+        ENDIF check_pl
 
 end subroutine ebu_driver
 
