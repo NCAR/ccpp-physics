@@ -6,7 +6,7 @@ project(ccpp_physics
 
 #------------------------------------------------------------------------------
 set(PACKAGE "ccpp-physics")
-set(AUTHORS "Grant Firl" "Dom Heinzeller" "Man Zhang" "Mike Kavulich" "Chunxi Zhang")
+set(AUTHORS "Grant Firl" "Dustin Swales" "Man Zhang" "Mike Kavulich" )
 
 #------------------------------------------------------------------------------
 # Set OpenMP flags for C/C++/Fortran
