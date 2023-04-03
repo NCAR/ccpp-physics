@@ -9,6 +9,8 @@ module module_zero_plumegen_coms
   integer, parameter :: nkp = 200, ntime = 200
 
   type plumegen_coms
+    logical :: initialized = .false.
+
     real(kind=kind_phys),dimension(nkp) ::  w,t,qv,qc,qh,qi,sc,  &  ! blob
          vth,vti,rho,txs,  &
          est,qsat! never used: ,qpas,qtotal
@@ -55,37 +57,27 @@ module module_zero_plumegen_coms
     procedure :: set_to_zero => plumegen_coms_zero
   end type plumegen_coms
 
-  interface plumegen_coms
-    procedure :: plumegen_coms_constructor
-  end interface plumegen_coms
-
-  type(plumegen_coms), private, target :: private_thread_coms
-  logical, private :: mzpc_initialized = .false.
+  type(plumegen_coms), private, pointer :: private_thread_coms
 
 !$OMP THREADPRIVATE(private_thread_coms)
-!$OMP THREADPRIVATE(mzpc_initialized)
 
 contains
 
   function get_thread_coms() result(coms)
     implicit none
     class(plumegen_coms), pointer :: coms
-    if(.not.mzpc_initialized) then
-      private_thread_coms = plumegen_coms()
-      mzpc_initialized = .true.
+    if(.not.associated(private_thread_coms)) then
+      allocate(private_thread_coms)
+      call plumegen_coms_zero(private_thread_coms)
     endif
     coms => private_thread_coms
   end function get_thread_coms
 
-  type(plumegen_coms) function plumegen_coms_constructor() result(this)
-    implicit none
-    call plumegen_coms_zero(this)
-    this%testval=3314
-  end function plumegen_coms_constructor
-
   subroutine plumegen_coms_zero(this)
     implicit none
     class(plumegen_coms) :: this
+
+    this%initialized = .false.
 
     this%w=0.0
     this%t=0.0

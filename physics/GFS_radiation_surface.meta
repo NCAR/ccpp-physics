@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_radiation_surface
   type = scheme
-  dependencies = iounitdef.f,machine.F,physparam.f,radiation_surface.f,set_soilveg_ruc.F90,namelist_soilveg_ruc.F90
+  dependencies = iounitdef.f,machine.F,radiation_surface.f,set_soilveg_ruc.F90,namelist_soilveg_ruc.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -28,6 +28,22 @@
   dimensions = ()
   type = integer
   intent = in
+[semis_file]
+  standard_name = surface_emissivity_data_file
+  long_name = surface emissivity data file for radiation
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -52,6 +68,13 @@
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
   units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ialb]
+  standard_name = control_for_surface_albedo
+  long_name = flag for using climatology alb, based on sfc type
+  units = flag
   dimensions = ()
   type = integer
   intent = in
@@ -386,6 +409,14 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[con_ttp]
+  standard_name = triple_point_temperature_of_water
+  long_name = triple point temperature of water
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [albdvis_lnd]
   standard_name = surface_albedo_direct_visible_over_land

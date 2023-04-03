@@ -210,8 +210,8 @@
   kind = kind_phys
   intent = in
 [top_at_1]
-  standard_name = flag_for_vertical_ordering_in_RRTMGP
-  long_name = flag for vertical ordering in RRTMGP
+  standard_name = flag_for_vertical_ordering_in_radiation
+  long_name = flag for vertical ordering in radiation
   units = flag
   dimensions = ()
   type = logical

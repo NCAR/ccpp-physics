@@ -3,7 +3,6 @@
 
 module dust_data_mod
 
-  use rrfs_smoke_data
   use machine ,        only : kind_phys
   use rrfs_smoke_config, only : p_dust_1, p_dust_2, p_dust_3, p_dust_4, p_dust_5, &
                               p_edust1, p_edust2, p_edust3, p_edust4, p_edust5
@@ -80,8 +79,8 @@ module dust_data_mod
   ! -- FENGSHA uses precalculated drag partition from ASCAT. See: Prigent et al. (2012,2015)
   integer, parameter :: dust_calcdrag = 1
 
-  real(kind_phys), parameter :: dust_alpha = 2.2
-  real(kind_phys), parameter :: dust_gamma = 1.0
+  real(kind_phys) :: dust_alpha = 2.2
+  real(kind_phys) :: dust_gamma = 1.0
 
 
   ! -- sea salt parameters

@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_surface_composites_pre
   type = scheme
-  dependencies = machine.F,physparam.f
+  dependencies = machine.F
   
 ########################################################################
 [ccpp-arg-table]

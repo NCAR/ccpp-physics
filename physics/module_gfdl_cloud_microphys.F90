@@ -3563,7 +3563,8 @@ end subroutine setupm
 !>\ingroup mod_gfdl_cloud_mp
 !! The subroutine 'gfdl_cloud_microphys_init' initializes the GFDL
 !! cloud microphysics.
-subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, logunit, fn_nml)
+subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, logunit, &
+     fn_nml, errmsg, errflg)
 
     implicit none
 
@@ -3574,6 +3575,8 @@ subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, lo
 
     character (len = 64), intent (in) :: fn_nml
     character (len = *),  intent (in) :: input_nml_file(:)
+    character(len=*),     intent(out) :: errmsg
+    integer,              intent(out) :: errflg
 
     integer :: ios
     logical :: exists
@@ -3588,13 +3591,19 @@ subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, lo
 
     ! master = (mpp_pe () .eq.mpp_root_pe ())
 
+    ! Initialize CCPP error-handling
+    errflg = 0
+    errmsg = ''
+
 #ifdef INTERNAL_FILE_NML
     read (input_nml_file, nml = gfdl_cloud_microphysics_nml)
 #else
     inquire (file = trim (fn_nml), exist = exists)
     if (.not. exists) then
         write (6, *) 'gfdl - mp :: namelist file: ', trim (fn_nml), ' does not exist'
-        stop
+        errflg = 1
+        errmsg = 'ERROR(gfdl_cloud_microphys_mod_init): namelist file '//trim (fn_nml)//' does not exist'
+        return
     else
         open (unit = nlunit, file = fn_nml, action = 'read' , status = 'old', iostat = ios)
     endif

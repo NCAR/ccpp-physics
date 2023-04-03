@@ -14,6 +14,36 @@
   dimensions = ()
   type = integer
   intent = in
+[xlat_d]
+  standard_name = latitude_in_degree
+  long_name = latitude in degree north
+  units = degree_north
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[xlon_d]
+  standard_name = longitude_in_degree
+  long_name = longitude in degree east
+  units = degree_east
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[lsm]
+  standard_name = control_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[lsm_ruc]
+  standard_name = identifier_for_ruc_land_surface_scheme
+  long_name = flag for RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [grav]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -46,6 +76,29 @@
   type = real
   kind = kind_phys
   intent = in
+[con_rocp]
+  standard_name = ratio_of_gas_constant_dry_air_to_specific_heat_of_dry_air_at_constant_pressure
+  long_name = (rd/cp)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_karman]
+  standard_name = von_karman_constant
+  long_name = von karman constant
+  units = none
+  dimensions = ()
+  type = real
+  intent = in
+[zf]
+  standard_name = height_above_ground_at_lowest_model_layer
+  long_name = layer 1 height above ground (not MSL)
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [ps]
   standard_name = surface_air_pressure
   long_name = surface pressure
@@ -71,7 +124,7 @@
   kind = kind_phys
   intent = in
 [t1]
-  standard_name = air_temperature_of_new_state_at_surface_adjacent_layer
+  standard_name = air_temperature_at_surface_adjacent_layer
   long_name = 1st model layer air temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -79,7 +132,7 @@
   kind = kind_phys
   intent = in
 [q1]
-  standard_name = specific_humidity_of_new_state_at_surface_adjacent_layer
+  standard_name = specific_humidity_at_surface_adjacent_layer
   long_name = 1st model layer specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -134,6 +187,14 @@
   type = real
   kind = kind_phys
   intent = in
+[ust]
+  standard_name = surface_friction_velocity
+  long_name = boundary layer parameter
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [tskin]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -186,10 +247,40 @@
   type = real
   kind = kind_phys
   intent = in
+[diag_flux]
+  standard_name = flag_for_flux_method_in_2m_diagnostics
+  long_name = flag for flux method in 2-m diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[diag_log]
+  standard_name = flag_for_log_method_in_2m_diagnostics
+  long_name = flag for log method in 2-m diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[shflx]
+  standard_name = surface_upward_temperature_flux
+  long_name = kinematic surface upward sensible heat flux
+  units = K m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [lake_q2m]
   standard_name =  specific_humidity_at_2m_from_clm_lake
   long_name = specific humidity at 2m from clm lake
   units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[cdq]
+  standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
+  long_name = surface exchange coeff heat & moisture
+  units = none
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -200,6 +291,14 @@
   units = flag
   dimensions = ()
   type = integer
+  intent = in
+[wind]
+  standard_name = wind_speed_at_lowest_model_layer
+  long_name = wind speed at lowest model level
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = in
 [f10m]
   standard_name = ratio_of_wind_at_surface_adjacent_layer_to_wind_at_10m
@@ -237,6 +336,14 @@
   standard_name = specific_humidity_at_2m
   long_name = specific humidity at 2 m
   units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[dpt2m]
+  standard_name = dewpoint_temperature_at_2m
+  long_name = 2 meter dewpoint temperature
+  units = K
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

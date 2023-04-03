@@ -25,8 +25,8 @@ module cu_gf_deep
      real(kind=kind_phys), parameter :: pgcd = 0.1
 !
 !> aerosol awareness, do not use yet!
-     integer, parameter :: autoconv=2
-     integer, parameter :: aeroevap=3
+     integer, parameter :: autoconv=1 !2
+     integer, parameter :: aeroevap=1 !3
      real(kind=kind_phys), parameter :: scav_factor = 0.5
 !> still 16 ensembles for clousres
      integer, parameter:: maxens3=16
