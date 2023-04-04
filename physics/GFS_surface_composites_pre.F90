@@ -73,7 +73,7 @@ contains
       errflg = 0
 
        do i=1,im
-         if(use_lake_model(i) > 0.0) then
+         if(use_lake_model(i) > 0) then
              wet(i) = .true.
          endif
        enddo
