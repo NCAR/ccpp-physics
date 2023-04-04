@@ -92,7 +92,7 @@
         u10m(i) = f10m(i) * u1(i)
         v10m(i) = f10m(i) * v1(i)
         have_2m = use_lake_model(i)>0 .and. use_lake2m .and.            &
-     &                iopt_lake==iopt_lake_clm) then
+     &                iopt_lake==iopt_lake_clm
         if(have_2m) then
            t2m(i) = lake_t2m(i)
            q2m(i) = lake_q2m(i)
