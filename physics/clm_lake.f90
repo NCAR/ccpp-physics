@@ -472,7 +472,7 @@ MODULE clm_lake
       errmsg = ' '
       errflg = 0
 
-      if(iopt_lake/=iopt_lake_clm .or. lkm==0 .or. all(.not.use_lake_model)) then
+      if(iopt_lake/=iopt_lake_clm .or. lkm==0 .or. all(use_lake_model==0)) then
         return ! nothing to do
       endif
 
