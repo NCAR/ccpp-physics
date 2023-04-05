@@ -1,8 +1,8 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_setup
   type = scheme
-  dependencies = iounitdef.f,machine.F,module_bfmicrophysics.f,physparam.f,radiation_aerosols.f,radiation_astronomy.f
-  dependencies = module_mp_thompson.F90,radiation_clouds.f,radiation_gases.f
+  dependencies = iounitdef.f,machine.F,module_bfmicrophysics.f,radiation_aerosols.f,radiation_astronomy.f
+  dependencies = module_mp_thompson.F90,radiation_gases.f
 
 ########################################################################
 [ccpp-arg-table]
@@ -101,6 +101,30 @@
   dimensions = ()
   type = integer
   intent = in
+[solar_file]
+  standard_name = solar_constant_file
+  long_name = external solar constant data table file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[con_solr_2008]
+  standard_name = solar_constant_2008
+  long_name = solar constant Tim 2008
+  units = W m-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_solr_2002]
+  standard_name = solar_constant_2002
+  long_name= solar constant Liu 2002
+  units = W m-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [ico2]
   standard_name = control_for_co2
   long_name = prescribed global mean value (old opernl)
@@ -119,13 +143,6 @@
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[num_p3d]
-  standard_name = number_of_microphysics_variables_in_xyz_dimensioned_restart_array
-  long_name = number of 3D arrays needed for microphysics
-  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -157,31 +174,10 @@
   dimensions = ()
   type = integer
   intent = in
-[icliq_sw]
-  standard_name = control_for_shortwave_radiation_liquid_clouds
-  long_name = sw optical property for liquid clouds
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[crick_proof]
-  standard_name = flag_for_CRICK_proof_cloud_water
-  long_name = flag for CRICK-Proof cloud water
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[ccnorm]
-  standard_name = flag_for_in_cloud_condensate
-  long_name = flag for cloud condensate normalized by cloud cover
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[norad_precip]
-  standard_name = flag_for_turning_off_precipitation_radiative_effect
-  long_name = radiation precip flag for Ferrier/Moorthi
-  units = flag
+[lalw1bd]
+  standard_name = do_longwave_aerosol_band_properties
+  long_name = control of band or multiband longwave aerosol properties
+  units = 1
   dimensions = ()
   type = logical
   intent = in
@@ -192,13 +188,6 @@
   dimensions = (4)
   type = integer
   intent = in
-[iflip]
-  standard_name = control_for_vertical_index_direction
-  long_name = flag for vertical index direction control
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -206,6 +195,91 @@
   dimensions = ()
   type = integer
   intent = in
+[aeros_file]
+  standard_name = aerosol_data_file
+  long_name = aerosol data file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_c]
+  standard_name = speed_of_light_in_vacuum
+  long_name = speed of light in vacuum
+  units = m s-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_plnk]
+  standard_name = planck_constant
+  long_name = Planck constant
+  units = J s-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_boltz]
+  standard_name = boltzmann_constant
+  long_name = Boltzmann constant
+  units = J K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degree Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[co2usr_file]
+  standard_name = co2_user_data_table_file
+  long_name =  co2 user defined data table file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[co2cyc_file]
+  standard_name = co2_clim_monthly_cycle_data_table_file
+  long_name = co2 climotological monthly cycle data table file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[ipsd0]
+  standard_name = initial_seed_for_mcica
+  long_name = initial permutaion seed for mcica radiation
+  units = 1
+  dimensions =  ()
+  type = integer
+  intent = inout
+[iaermdl]
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+[iaerflg]
+  standard_name = control_for_aerosol_effects_in_radiation
+  long_name = control of aerosol effects in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -256,7 +330,7 @@
   type = real
   kind = kind_phys
   intent = in
-[lsswr]
+[doSWrad]
   standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
   units = flag
@@ -269,6 +343,73 @@
   units = index
   dimensions = ()
   type = integer
+  intent = in
+[aeros_file]
+  standard_name = aerosol_data_file
+  long_name = aerosol data file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[co2dat_file]
+  standard_name = co2_monthly_obs_data_table_file
+  long_name = co2 monthly observation data table
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[co2gbl_file]
+  standard_name = co2_global_annual_mean_data_table_file
+  long_name = co2 global annual mean data file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[ictm]
+  standard_name = flag_for_initial_time_date_control
+  long_name = flag for initial conditions and forcing
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[ico2]
+  standard_name = control_for_co2
+  long_name = prescribed global mean value (old opernl)
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[ntoz]
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for ozone mixing ratio
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[iaermdl]
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[isol]
+  standard_name = control_for_solar_constant
+  long_name = use prescribed solar constant
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [slag]
   standard_name = equation_of_time

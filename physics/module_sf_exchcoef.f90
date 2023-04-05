@@ -636,7 +636,7 @@ CONTAINS
 
   END SUBROUTINE znot_t_v8
 
-   SUBROUTINE znot_wind10m(w10m,znott,znotm,icoef_sf)
+   SUBROUTINE znot_wind10m(w10m,znott,znotm,icoef_sf,errmsg,errflg)
    IMPLICIT NONE
 
 ! w10m(m/s)   :   10-m wind speed
@@ -647,8 +647,15 @@ CONTAINS
      REAL, INTENT(IN) :: w10m
      INTEGER, INTENT(IN) :: icoef_sf
      REAL, INTENT(OUT):: znott, znotm
+     character(len=*),intent(out) :: errmsg
+     integer,         intent(out) :: errflg
 
      real :: zm,zt,windmks, zlev,z10, tmp, zlevt, aaa, zm1,zt1
+
+     ! Initialize error-handling
+     errflg = 0
+     errmsg = ''
+
         zlev=20.0
         zlevt=10.0
         z10=10.0
@@ -722,7 +729,9 @@ CONTAINS
               call  znot_t_v8(windmks,zt1)
            else
              write(0,*)'stop, icoef_sf must be one of 0,1,2,3,4,5,6,7,8'
-             stop
+             errflg = 1
+             errmsg = 'ERROR(znot_wind10m): icoef_sf must be one of 0,1,2,3,4,5,6,7,8'
+             return
           endif
           znott=zt1
           znotm=zm1

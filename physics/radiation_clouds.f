@@ -16,7 +16,7 @@
 !          inputs:                                                     !
 !           ( si, NLAY, imp_physics,  me )                             !
 !          outputs:                                                    !
-!           ( none )                                                   !
+!           ( errflg, errmsg )                                         !
 !                                                                      !
 !       'radiation_clouds_prop'         --- radiation cloud properties !
 !            obtained from various cloud schemes                       !
@@ -29,8 +29,8 @@
 !            imp_physics, imp_physics_nssl, imp_physics_fer_hires,     !
 !            imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, !
 !            imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,         !
-!            imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,        !
-!            iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,            !
+!            imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,  !
+!            iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,     !
 !            idcor_hogan, idcor_oreopoulos,                            !
 !            imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,       !
 !            uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,              !
@@ -68,11 +68,7 @@
 !   ** fu's scheme need to be normalized by snow density (g/m**3/1.0e6)!
 !                                                                      !
 !    external modules referenced:                                      !
-!                                                                      !
-!       'module physparam'           in 'physparam.f'                  !
-!       'module physcons'            in 'physcons.f'                   !
 !       'module module_microphysics' in 'module_bfmicrophysics.f'      !
-!                                                                      !
 !                                                                      !
 ! program history log:                                                 !
 !      nov 1992,   y.h., k.a.c, a.k. - cloud parameterization          !
@@ -169,13 +165,6 @@
 !> This module computes cloud related quantities for radiation computations.
       module module_radiation_clouds
 !
-      use physparam,           only : icldflg, iovr, idcor,             &
-     &                                lcrick, lcnorm, lnoprec,          &
-     &                                ivflip
-      use physcons,            only : con_fvirt, con_ttp, con_rocp,     &
-     &                                con_t0c, con_pi, con_g, con_rd,   &
-     &                                con_thgni, decorr_con
-      use module_microphysics, only : rsipath2
       use module_iounitdef,    only : NICLTUN
       use module_radiation_cloud_overlap, only: cmp_dcorr_lgth,         &
      &                                          get_alpha_exper
@@ -191,9 +180,7 @@
 !    &   VTAGCLD='NCEP-Radiation_clouds    v5.0  Aug 2012 '
 
 !  ---  set constant parameters
-      real (kind=kind_phys), parameter :: gfac=1.0e5/con_g              &
-     &,                                   gord=con_g/con_rd
-
+      real (kind=kind_phys) :: gfac,gord
 
       integer, parameter, public :: NF_CLDS = 9          !< number of fields in cloud array
       integer, parameter, public :: NK_CLDS = 3          !< number of cloud vertical domains
@@ -265,10 +252,7 @@
 !!\param me              print control flag
 !>\section cld_init General Algorithm
       subroutine cld_init                                               &
-     &     ( si, NLAY, imp_physics, me ) !  ---  inputs
-!  ---  outputs:
-!          ( none )
-
+     &     ( si, NLAY, imp_physics, me, con_g, con_rd, errflg, errmsg )
 !  ===================================================================  !
 !                                                                       !
 ! abstract: cld_init is an initialization program for cloud-radiation   !
@@ -280,31 +264,12 @@
 !   NLAY            : vertical layer number                             !
 !   imp_physics     : MP identifier                                     !
 !   me              : print control flag                                !
-!                                                                       !
-!  outputs: (none)                                                      !
-!           to module variables                                         !
-!                                                                       !
-!  external module variables: (in physparam)                            !
-!   icldflg         : cloud optical property scheme control flag        !
-!                     =0: abort! diagnostic cloud method discontinued   !
-!                     =1: model use prognostic cloud method             !
 !   imp_physics         : cloud microphysics scheme control flag        !
-!                     =99: zhao/carr/sundqvist microphysics cloud       !
-!                     =98: zhao/carr/sundqvist microphysics cloud+pdfcld!
-!                     =11: GFDL microphysics cloud                      !
-!                     =8: Thompson microphysics                         !
-!                     =6: WSM6 microphysics                             !
-!                     =10: MG microphysics                              !
-!   iovr            : control flag for cloud overlapping scheme         !
-!                     =0: random overlapping clouds                     !
-!                     =1: max/ran overlapping clouds                    !
-!                     =2: maximum overlap clouds       (mcica only)     !
-!                     =3: decorrelation-length overlap (mcica only)     !
-!                     =4: exponential cloud overlap  (AER; mcica only)  !
-!                     =5: exponential-random overlap (AER; mcica only)  !
-!   ivflip          : control flag for direction of vertical index      !
-!                     =0: index from toa to surface                     !
-!                     =1: index from surface to toa                     !
+!                                                                       !
+!  outputs:                                                             !
+!   errflg          : CCPP error flag                                   !
+!   errmsg          : CCPP error message                                !
+!                                                                       !
 !  usage:       call cld_init                                           !
 !                                                                       !
 !  subroutines called:    rhtable                                       !
@@ -316,71 +281,51 @@
 !  ---  inputs:
       integer, intent(in) :: NLAY, me, imp_physics
 
-      real (kind=kind_phys), intent(in) :: si(:)
+      real (kind=kind_phys), intent(in) :: si(:), con_g, con_rd
 
-!  ---  outputs: (none)
-
-!  ---  locals:
-      integer :: k, kl, ier
+!  ---  outputs:
+      integer,          intent(out) :: errflg
+      character(len=*), intent(out) :: errmsg
 
 !
 !===> ...  begin here
 !
-!  ---  set up module variables
+! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 
-      if (me == 0) print *, VTAGCLD      !print out version tag
+      ! Initialze module parameters
+      gfac = 1.0e5/con_g
+      gord = con_g/con_rd
 
-      if ( icldflg == 0 ) then
-        print *,' - Diagnostic Cloud Method has been discontinued'
-        stop
-
-      else
-        if (me == 0) then
-          print *,' - Using Prognostic Cloud Method'
-          if (imp_physics == 99) then
+      if (me == 0) then
+         print *, VTAGCLD       !print out version tag
+         print *,' - Using Prognostic Cloud Method'
+         if (imp_physics == 99) then
             print *,'   --- Zhao/Carr/Sundqvist microphysics'
-          elseif (imp_physics == 98) then
+         elseif (imp_physics == 98) then
             print *,'   --- zhao/carr/sundqvist + pdf cloud'
-          elseif (imp_physics == 11) then
+         elseif (imp_physics == 11) then
             print *,'   --- GFDL Lin cloud microphysics'
-          elseif (imp_physics == 8) then
+         elseif (imp_physics == 8) then
             print *,'   --- Thompson cloud microphysics'
-          elseif (imp_physics == 6) then
+         elseif (imp_physics == 6) then
             print *,'   --- WSM6 cloud microphysics'
-          elseif (imp_physics == 10) then
+         elseif (imp_physics == 10) then
             print *,'   --- MG cloud microphysics'
-          elseif (imp_physics == 15) then
+         elseif (imp_physics == 15) then
             print *,'   --- Ferrier-Aligo cloud microphysics'
-          elseif (imp_physics == 17) then
+         elseif (imp_physics == 17) then
             print *,'   --- NSSL cloud microphysics'
-          else
+         else
             print *,'  !!! ERROR in cloud microphysc specification!!!', &
      &              '  imp_physics (NP3D) =',imp_physics
-            stop
-          endif
-        endif
+            errflg = 1
+            errmsg = 'ERROR(cld_init): cloud mp specification is not'// &
+     &       ' valid'
+            return
+         endif
       endif
-
-!> - Compute the top of BL cld (llyr), which is the topmost non
-!!    cld(low) layer for stratiform (at or above lowest 0.1 of the
-!!     atmosphere).
-
-      if ( ivflip == 0 ) then    ! data from toa to sfc
-        lab_do_k0 : do k = NLAY, 2, -1
-          kl = k
-          if (si(k) < 0.9e0) exit lab_do_k0
-        enddo  lab_do_k0
-
-        llyr = kl
-      else                      ! data from sfc to top
-        lab_do_k1 : do k = 2, NLAY
-          kl = k
-          if (si(k) < 0.9e0) exit lab_do_k1
-        enddo  lab_do_k1
-
-        llyr = kl - 1
-      endif                     ! end_if_ivflip
-
 !
       return
 !...................................
@@ -394,20 +339,21 @@
      &     ( plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,                  &    !  ---  inputs:
      &       ccnd, ncndl, cnvw, cnvc, tracer1,                          &
      &       xlat, xlon, slmsk, dz, delp, IX, LM, NLAY, NLP1,           &
-     &       deltaq, sup, me, icloud, kdt,                              &
+     &       deltaq, sup, dcorr_con, me, icloud, kdt,                   &
      &       ntrac, ntcw, ntiw, ntrw, ntsw, ntgl, ntclamt,              &
      &       imp_physics, imp_physics_nssl, imp_physics_fer_hires,      &
      &       imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,  &
      &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
-     &       imp_physics_mg, iovr_rand, iovr_maxrand, iovr_max,         &
-     &       iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,             &
-     &       idcor_hogan, idcor_oreopoulos,                             &
+     &       imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,   &
+     &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
+     &       idcor_hogan, idcor_oreopoulos, lcrick, lcnorm,             &
      &       imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,        &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &
      &       effrl_inout, effri_inout, effrs_inout,                     &
      &       lwp_ex, iwp_ex, lwp_fc, iwp_fc,                            &
-     &       dzlay, latdeg, julian, yearlen, gridkm,                    &
+     &       dzlay, latdeg, julian, yearlen, gridkm, top_at_1, si,      &
+     &       con_ttp, con_pi, con_g, con_rd, con_thgni,                 &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice,          &    !  ---  outputs:
      &       cld_rwp, cld_rerain, cld_swp, cld_resnow,                  &    
      &       clds, mtop, mbot, de_lgth, alpha                           &    
@@ -490,15 +436,17 @@
 !   imp_physics_zhao_carr     : Zhao-Carr microphysics scheme           !
 !   imp_physics_zhao_carr_pdf : Zhao-Carr microphysics scheme with PDF clouds
 !   imp_physics_mg  :  Morrison-Gettelman microphysics scheme           !
-!   iovr_rand       :  choice of cloud-overlap: random (=0)
-!   iovr_maxrand    :  choice of cloud-overlap: maximum random (=1)
-!   iovr_max        :  choice of cloud-overlap: maximum (=2)
-!   iovr_dcorr      :  choice of cloud-overlap: decorrelation length (=3)
-!   iovr_exp        :  choice of cloud-overlap: exponential (=4)
-!   iovr_exprand    :  choice of cloud-overlap: exponential random (=5)
-!   idcor_con       :  choice for decorrelation-length: Use constant value (=0)
-!   idcor_hogan     :  choice for decorrelation-length: (=1)
-!   idcor_oreopoulos:  choice for decorrelation-length: (=2)
+!   iovr            : choice of cloud-overlap                           !
+!   iovr_rand       : flag of cloud-overlap: random (=0)                !
+!   iovr_maxrand    : flag of cloud-overlap: maximum random (=1)        !
+!   iovr_max        : flag of cloud-overlap: maximum (=2)               !
+!   iovr_dcorr      : flag of cloud-overlap: decorrelation length(=3)   !
+!   iovr_exp        : flag of cloud-overlap: exponential (=4)           !
+!   iovr_exprand    : flag of cloud-overlap: exponential random (=5)    !
+!   idcor           : choice for decorrelation-length                   !
+!   idcor_con       : flag for decorrelation-length: Use constant value (=0)
+!   idcor_hogan     : flag for decorrelation-length: (=1)               !
+!   idcor_oreopoulos: flag for decorrelation-length: (=2)               !
 !   imfdeepcnv      :  flag for mass-flux deep convection scheme        !
 !   imfdeepcnv_gf   :  flag for scale- & aerosol-aware Grell-Freitas scheme (GSD)
 !   do_mynnedmf     :  flag for MYNN-EDMF                               !
@@ -506,6 +454,7 @@
 !   uni_cld         : logical - true for cloud fraction from shoc       !
 !   lmfshal         : logical - true for mass flux shallow convection   !
 !   lmfdeep2        : logical - true for mass flux deep convection      !
+!   top_at_1        : logical - true if ordered from toa-2-sfc          !
 !   cldcov          : layer cloud fraction (used when uni_cld=.true.    !
 !   clouds1         : layer total cloud fraction
 !   effrl,          : effective radius for liquid water
@@ -524,7 +473,15 @@
 !   latdeg(ix)      : latitude (in degrees 90 -> -90)                   !
 !   julian          : day of the year (fractional julian day)           !
 !   yearlen         : current length of the year (365/366 days)         !
-!   gridkm          : grid length in km
+!   gridkm          : grid length in km                                 !
+!   lmfshal         : mass-flux shallow conv scheme flag                !
+!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !
+!   lcrick          : control flag for eliminating CRICK                !
+!                     =t: apply layer smoothing to eliminate CRICK      !
+!                     =f: do not apply layer smoothing                  !
+!   lcnorm          : control flag for in-cld condensate                !
+!                     =t: normalize cloud condensate                    !
+!                     =f: not normalize cloud condensate                !
 !                                                                       !
 ! output variables:                                                     !
 !   cloud profiles:                                                     !
@@ -542,20 +499,7 @@
 !   mtop  (IX,3)    : vertical indices for low, mid, hi cloud tops      !
 !   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !
 !   de_lgth(ix)     : clouds decorrelation length (km)                  !
-!   alpha(ix,nlay)  : alpha decorrelation parameter
-!                                                                       !
-! module variables:                                                     !
-!   ivflip          : control flag of vertical index direction          !
-!                     =0: index from toa to surface                     !
-!                     =1: index from surface to toa                     !
-!   lmfshal         : mass-flux shallow conv scheme flag                !
-!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !
-!   lcrick          : control flag for eliminating CRICK                !
-!                     =t: apply layer smoothing to eliminate CRICK      !
-!                     =f: do not apply layer smoothing                  !
-!   lcnorm          : control flag for in-cld condensate                !
-!                     =t: normalize cloud condensate                    !
-!                     =f: not normalize cloud condensate                !
+!   alpha(ix,nlay)  : alpha decorrelation parameter                     !
 !                                                                       !
 !  ====================    end of description    =====================  !
       implicit none
@@ -577,19 +521,21 @@
      &     imp_physics_mg               ! Flag for MG scheme
 
       integer,              intent(in)  ::                               &
+     &     iovr,                         !
      &     iovr_rand,                    ! Flag for random cloud overlap method
      &     iovr_maxrand,                 ! Flag for maximum-random cloud overlap method
      &     iovr_max,                     ! Flag for maximum cloud overlap method
      &     iovr_dcorr,                   ! Flag for decorrelation-length cloud overlap method
      &     iovr_exp,                     ! Flag for exponential cloud overlap method
      &     iovr_exprand,                 ! Flag for exponential-random cloud overlap method
+     &     idcor,
      &     idcor_con,                   
      &     idcor_hogan,                 
      &     idcor_oreopoulos
 
 
-      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, effr_in
-      logical, intent(in)  :: do_mynnedmf, lgfdlmprad
+      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, effr_in,      &
+     &     do_mynnedmf, lgfdlmprad, top_at_1, lcrick, lcnorm
 
       real (kind=kind_phys), dimension(:,:,:), intent(in) :: ccnd,      &
      &                                                       tracer1
@@ -597,9 +543,10 @@
      &       tlyr,  tvly,  qlyr,  qstl, rhly, cnvw, cnvc, cldcov,       &
      &       delp, dz, effrl, effri, effrr, effrs, dzlay, clouds1
 
-      real (kind=kind_phys), intent(in) :: sup
+      real (kind=kind_phys), intent(in) :: sup, dcorr_con, con_ttp,     &
+     &     con_pi, con_g, con_rd, con_thgni 
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
-     &       slmsk
+     &       slmsk, si
 
       real(kind=kind_phys), dimension(:), intent(in) :: latdeg, gridkm
       real(kind=kind_phys), intent(in) :: julian
@@ -677,7 +624,7 @@
      &                     IX, NLAY, NLP1, cldcov,                      &
      &                     effrl, effri, effrr, effrs, effr_in,         &
      &                     dzlay,                                       & 
-     &                     cldtot, cldcnv,                              & ! inout
+     &                     cldtot, cldcnv, lcrick, lcnorm, con_ttp,     & ! inout
      &                     cld_frac, cld_lwp, cld_reliq, cld_iwp,       & !  ---  outputs
      &                     cld_reice,cld_rwp, cld_rerain,cld_swp,       &  
      &                     cld_resnow)
@@ -688,7 +635,7 @@
      &                    lmfshal, lmfdeep2,                            &
      &                    cldcov, effrl, effri, effrr, effrs, effr_in,  &
      &                    dzlay,                                        &
-     &                    cldtot, cldcnv,                               & ! inout
+     &                    cldtot, cldcnv, lcrick, lcnorm, con_ttp,      & ! inout
      &                    cld_frac, cld_lwp, cld_reliq, cld_iwp,        & !  ---  outputs
      &                    cld_reice,cld_rwp, cld_rerain,cld_swp,        & 
      &                    cld_resnow)
@@ -700,8 +647,8 @@
      &                 qstl, rhly, ccnd(1:IX,1:NLAY,1), cnvw, cnvc,     &
      &                 xlat, xlon, slmsk, dz, delp, IX, NLAY, NLP1,     &
      &                 deltaq, sup, kdt, me, dzlay,                     & 
-     &                 cldtot, cldcnv,                                  &  ! inout
-     &                 cld_frac, cld_lwp, cld_reliq, cld_iwp,           &  !  ---  outputs
+     &                 cldtot, cldcnv, lcrick, lcnorm, con_thgni,       &  ! inout
+     &                 con_ttp, cld_frac, cld_lwp, cld_reliq, cld_iwp,  &  !  ---  outputs
      &                 cld_reice,cld_rwp, cld_rerain,cld_swp,           & 
      &                 cld_resnow)
 
@@ -712,7 +659,7 @@
      &                    qstl, rhly, ccnd(1:IX,1:NLAY,1), cnvw, cnvc,  &
      &                    xlat, xlon, slmsk, cldcov, dz, delp,          &
      &                    IX, NLAY, NLP1, dzlay,                        &
-     &                    cldtot, cldcnv,                               &  ! inout
+     &                    cldtot, cldcnv, lcrick, lcnorm, con_ttp,      &  ! inout
      &                    cld_frac, cld_lwp, cld_reliq, cld_iwp,        &  !  ---  outputs
      &                    cld_reice,cld_rwp, cld_rerain,cld_swp,        &
      &                    cld_resnow)
@@ -722,7 +669,7 @@
      &                   xlon, slmsk, dz,delp, IX, NLAY, NLP1, cldcov,  &
      &                   effrl, effri, effrr, effrs, effr_in,           &
      &                   dzlay,                                         &
-     &                   cldtot, cldcnv,                                &  ! inout
+     &                   cldtot, cldcnv, lcrick, lcnorm, con_ttp,       &  ! inout
      &                   cld_frac, cld_lwp, cld_reliq, cld_iwp,         & !  ---  outputs
      &                   cld_reice,cld_rwp, cld_rerain,cld_swp,         & 
      &                   cld_resnow)
@@ -744,7 +691,7 @@
      &                    cldcov(:,1:NLAY),effrl_inout(:,:),            &
      &                    effri_inout(:,:), effrs_inout(:,:),           &
      &                    dzlay,                                        &
-     &                    cldtot, cldcnv,                               &  ! inout
+     &                    cldtot, cldcnv, lcnorm,                       &  ! inout
      &                    cld_frac, cld_lwp, cld_reliq, cld_iwp,        & !  ---  outputs
      &                    cld_reice,cld_rwp, cld_rerain,cld_swp,        & 
      &                    cld_resnow)
@@ -767,7 +714,7 @@
      &                   cld_frac,                                      &
      &                   effrl, effri, effrr, effrs, effr_in ,          &
      &                   dzlay,                                         &
-     &                   cldtot, cldcnv,                                &  ! inout
+     &                   cldtot, cldcnv, lcrick, lcnorm, con_ttp,       &  ! inout
      &                   cld_frac, cld_lwp, cld_reliq, cld_iwp,         & !  ---  outputs
      &                   cld_reice,cld_rwp, cld_rerain,cld_swp,         &
      &                   cld_resnow)
@@ -776,13 +723,13 @@
               call progcld_thompson_wsm6 (plyr,plvl,tlyr,qlyr,qstl,     & !  --- inputs
      &                   rhly,tracer1,xlat,xlon,slmsk,dz,delp,          &
      &                   ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
-     &                   ntsw-1,ntgl-1,                                 &
+     &                   ntsw-1,ntgl-1,con_ttp,                         &
      &                   IX, NLAY, NLP1, uni_cld, lmfshal, lmfdeep2,    &
      &                   cldcov(:,1:NLAY), cnvw, effrl_inout,           &
      &                   effri_inout, effrs_inout,                      &
      &                   lwp_ex, iwp_ex, lwp_fc, iwp_fc,                &
      &                   dzlay,                                         &
-     &                   cldtot, cldcnv,                                &  ! inout
+     &                   cldtot, cldcnv, lcnorm,                        &  ! inout
      &                   cld_frac, cld_lwp, cld_reliq, cld_iwp,         & !  ---  outputs
      &                   cld_reice,cld_rwp, cld_rerain,cld_swp,         &
      &                   cld_resnow)
@@ -800,7 +747,7 @@
      &                    IX, LM, NLP1, uni_cld, lmfshal, lmfdeep2,     &
      &                    cldcov(:,1:LM), effrl, effri, effrs,          &
      &                    lwp_ex, iwp_ex, lwp_fc, iwp_fc,               &
-     &                    dzlay,  gridkm,                               &
+     &                    dzlay,  gridkm, top_at_1,                     &
      &                    cldtot, cldcnv,                               &  ! inout
      &                    cld_frac, cld_lwp, cld_reliq, cld_iwp,        & !  ---  outputs
      &                    cld_reice,cld_rwp, cld_rerain,cld_swp,        & 
@@ -822,7 +769,7 @@
      &                   cld_frac,                                      &
      &                   effrl, effri, effrr, effrs, effr_in ,          &
      &                   dzlay,                                         &
-     &                   cldtot, cldcnv,                                &  ! inout
+     &                   cldtot, cldcnv, lcrick, lcnorm, con_ttp,       &  ! inout
      &                   cld_frac, cld_lwp, cld_reliq, cld_iwp,         & !  ---  outputs
      &                   cld_reice,cld_rwp, cld_rerain,cld_swp,         & 
      &                   cld_resnow)
@@ -839,7 +786,7 @@
      &                   IX, LM, NLP1, uni_cld, lmfshal, lmfdeep2,      &
      &                   cldcov(:,1:LM), effrl, effri, effrs,           &
      &                   lwp_ex, iwp_ex, lwp_fc, iwp_fc,                &
-     &                   dzlay,  gridkm,                                &
+     &                   dzlay,  gridkm, top_at_1,                      &
      &                   cldtot, cldcnv,                                &  ! inout
      &                   cld_frac, cld_lwp, cld_reliq, cld_iwp,         & !  ---  outputs
      &                   cld_reice,cld_rwp, cld_rerain,cld_swp,         & 
@@ -849,12 +796,12 @@
               call progcld_thompson_wsm6 (plyr,plvl,tlyr,qlyr,qstl,     & !  --- inputs
      &                   rhly,tracer1,xlat,xlon,slmsk,dz,delp,          &
      &                   ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
-     &                   ntsw-1,ntgl-1,                                 &
+     &                   ntsw-1,ntgl-1,con_ttp,                         &
      &                   IX, NLAY, NLP1, uni_cld, lmfshal, lmfdeep2,    &
      &                   cldcov(:,1:NLAY), cnvw, effrl, effri, effrs,   &
      &                   lwp_ex, iwp_ex, lwp_fc, iwp_fc,                &
      &                   dzlay,                                         &
-     &                   cldtot, cldcnv,                                &  ! inout
+     &                   cldtot, cldcnv, lcnorm,                        &  ! inout
      &                   cld_frac, cld_lwp, cld_reliq, cld_iwp,         & !  ---  outputs
      &                   cld_reice,cld_rwp, cld_rerain,cld_swp,         & 
      &                   cld_resnow)
@@ -889,7 +836,7 @@
         call cmp_dcorr_lgth(ix, latdeg, julian, yearlen, de_lgth)
       endif
       if (idcor == idcor_con) then
-         de_lgth(:) = decorr_con
+         de_lgth(:) = dcorr_con
       endif
 
       ! Call subroutine get_alpha_exper to define alpha parameter for exponential cloud overlap options
@@ -914,8 +861,8 @@
       call gethml                                                       &
 !  ---  inputs:
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth, alpha,           &
-     &       IX, NLAY, iovr_rand, iovr_maxrand, iovr_max,               &
-     &       iovr_dcorr, iovr_exp, iovr_exprand,                        &
+     &       IX, NLAY, iovr, iovr_rand, iovr_maxrand, iovr_max,         &
+     &       iovr_dcorr, iovr_exp, iovr_exprand, top_at_1, si,          &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
      &     )
@@ -932,7 +879,7 @@
      &       xlat,xlon,slmsk,dz,delp, IX, NLAY, NLP1,                   &
      &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
      &       effrl,effri,effrr,effrs,effr_in,                           &
-     &       dzlay, cldtot, cldcnv,                                     &
+     &       dzlay, cldtot, cldcnv, lcrick, lcnorm, con_ttp,            &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp,                     & !  ---  outputs
      &       cld_reice,cld_rwp, cld_rerain,cld_swp, cld_resnow          &
      &      )
@@ -949,9 +896,7 @@
 !   top and base.  the three vertical cloud domains are set up in the   !
 !   initial subroutine "cld_init".                                      !
 !                                                                       !
-! usage:         call progcld_zhao_carr                                          !
-!                                                                       !
-! subprograms called:   gethml                                          !
+! usage:         call progcld_zhao_carr                                 !
 !                                                                       !
 ! attributes:                                                           !
 !   language:   fortran 90                                              !
@@ -987,6 +932,14 @@
 !   effrs           : effective radius for snow water
 !   effr_in         : logical, if .true. use input effective radii
 !   dzlay(ix,nlay)  : thickness between model layer centers (km)        !
+!   lmfshal         : mass-flux shallow conv scheme flag                !
+!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !
+!   lcrick          : control flag for eliminating CRICK                !
+!                     =t: apply layer smoothing to eliminate CRICK      !
+!                     =f: do not apply layer smoothing                  !
+!   lcnorm          : control flag for in-cld condensate                !
+!                     =t: normalize cloud condensate                    !
+!                     =f: not normalize cloud condensate                !
 !                                                                       !
 ! output variables:                                                     !
 !   cloud profiles:                                                     !
@@ -1000,19 +953,6 @@
 !  *** cld_swp   (:,:) - layer snow flake water path      not assigned  !
 !      cld_resnow(:,:) - mean eff radius for snow flake   (micron)      !
 !                                                                       !
-! module variables:                                                     !
-!   ivflip          : control flag of vertical index direction          !
-!                     =0: index from toa to surface                     !
-!                     =1: index from surface to toa                     !
-!   lmfshal         : mass-flux shallow conv scheme flag                !
-!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !
-!   lcrick          : control flag for eliminating CRICK                !
-!                     =t: apply layer smoothing to eliminate CRICK      !
-!                     =f: do not apply layer smoothing                  !
-!   lcnorm          : control flag for in-cld condensate                !
-!                     =t: normalize cloud condensate                    !
-!                     =f: not normalize cloud condensate                !
-!                                                                       !
 !  ====================    end of description    =====================  !
 !
       implicit none
@@ -1020,7 +960,8 @@
 !  ---  inputs
       integer,  intent(in) :: IX, NLAY, NLP1
 
-      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, effr_in
+      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, effr_in,      &
+     &     lcrick, lcnorm
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr,  tvly,  qlyr,  qstl, rhly, clw, cldcov, delp, dz,    &
@@ -1028,6 +969,7 @@
 
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
+      real (kind=kind_phys), intent(in) :: con_ttp
 
 !  --- inputs/outputs
 
@@ -1236,7 +1178,7 @@
      &       xlat,xlon,slmsk, dz, delp,                                 &
      &       ix, nlay, nlp1,                                            &
      &       deltaq,sup,kdt,me,                                         &
-     &       dzlay, cldtot, cldcnv,                                     &
+     &       dzlay, cldtot, cldcnv, lcrick, lcnorm, con_thgni, con_ttp, &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp,                     & !  ---  outputs
      &       cld_reice,cld_rwp, cld_rerain,cld_swp, cld_resnow          &
      &      )
@@ -1253,9 +1195,7 @@
 !   top and base.  the three vertical cloud domains are set up in the   !
 !   initial subroutine "cld_init".                                      !
 !                                                                       !
-! usage:         call progcld_zhao_carr_pdf                                          !
-!                                                                       !
-! subprograms called:   gethml                                          !
+! usage:         call progcld_zhao_carr_pdf                             !
 !                                                                       !
 ! attributes:                                                           !
 !   language:   fortran 90                                              !
@@ -1286,6 +1226,12 @@
 !   deltaq(ix,nlay) : half total water distribution width               !
 !   sup             : supersaturation                                   !
 !   dzlay(ix,nlay)  : thickness between model layer centers (km)        !
+!   lcrick          : control flag for eliminating crick                !
+!                     =t: apply layer smoothing to eliminate crick      !
+!                     =f: do not apply layer smoothing                  !
+!   lcnorm          : control flag for in-cld condensate                !
+!                     =t: normalize cloud condensate                    !
+!                     =f: not normalize cloud condensate                !
 !                                                                       !
 ! output variables:                                                     !
 !   cloud profiles:                                                     !
@@ -1299,28 +1245,18 @@
 !  *** cld_swp   (:,:) - layer snow flake water path      not assigned  !
 !      cld_resnow(:,:) - mean eff radius for snow flake   (micron)      !
 !                                                                       !
-! module variables:                                                     !
-!   ivflip          : control flag of vertical index direction          !
-!                     =0: index from toa to surface                     !
-!                     =1: index from surface to toa                     !
-!   lcrick          : control flag for eliminating crick                !
-!                     =t: apply layer smoothing to eliminate crick      !
-!                     =f: do not apply layer smoothing                  !
-!   lcnorm          : control flag for in-cld condensate                !
-!                     =t: normalize cloud condensate                    !
-!                     =f: not normalize cloud condensate                !
-!                                                                       !
 !  ====================    end of description    =====================  !
 !
       implicit none
 
 !  ---  inputs
       integer,  intent(in) :: ix, nlay, nlp1,kdt
-
+      logical,  intent(in) :: lcrick, lcnorm
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,    &
      &       tlyr, tvly, qlyr, qstl, rhly, clw, dz, delp, dzlay
 !     &       tlyr, tvly, qlyr, qstl, rhly, clw, cnvw, cnvc
 !      real (kind=kind_phys), dimension(:,:), intent(in) :: deltaq
+      real (kind=kind_phys), intent(in) :: con_thgni, con_ttp
       real (kind=kind_phys), dimension(:,:) :: deltaq, cnvw, cnvc
       real (kind=kind_phys) qtmp,qsc,rhs
       real (kind=kind_phys), intent(in) :: sup
@@ -1416,7 +1352,7 @@
           do k = 1, nlay
           do i = 1, ix
             tem1 = tlyr(i,k) - 273.16
-            if(tem1 < con_thgni) then  ! for pure ice, has to be consistent with gscond
+            if(tem1 < (con_thgni - 273.16)) then  ! for pure ice, has to be consistent with gscond
               qsc = sup * qstl(i,k)
               rhs = sup
             else
@@ -1536,7 +1472,7 @@
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,          & !  ---  inputs:
      &       xlat,xlon,slmsk,cldtot, dz, delp,                          &
      &       IX, NLAY, NLP1,                                            &
-     &       dzlay, cldtot1, cldcnv,                                    &
+     &       dzlay, cldtot1, cldcnv, lcrick, lcnorm, con_ttp,           &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp,                     & !  ---  outputs
      &       cld_reice,cld_rwp, cld_rerain,cld_swp, cld_resnow          &
      &      )
@@ -1553,9 +1489,7 @@
 !   top and base.  the three vertical cloud domains are set up in the   !
 !   initial subroutine "cld_init".                                      !
 !                                                                       !
-! usage:         call progcld_gfdl_lin                                          !
-!                                                                       !
-! subprograms called:   gethml                                          !
+! usage:         call progcld_gfdl_lin                                  !
 !                                                                       !
 ! attributes:                                                           !
 !   language:   fortran 90                                              !
@@ -1584,6 +1518,12 @@
 !   IX              : horizontal dimention                              !
 !   NLAY,NLP1       : vertical layer/level dimensions                   !
 !   dzlay(ix,nlay)  : thickness between model layer centers (km)        !
+!   lcrick          : control flag for eliminating CRICK                !
+!                     =t: apply layer smoothing to eliminate CRICK      !
+!                     =f: do not apply layer smoothing                  !
+!   lcnorm          : control flag for in-cld condensate                !
+!                     =t: normalize cloud condensate                    !
+!                     =f: not normalize cloud condensate                ! 
 !                                                                       !
 ! output variables:                                                     !
 !   cloud profiles:                                                     !
@@ -1597,28 +1537,17 @@
 !  *** cld_swp   (:,:) - layer snow flake water path      not assigned  !
 !      cld_resnow(:,:) - mean eff radius for snow flake   (micron)      !
 !                                                                       !
-! module variables:                                                     !
-!   ivflip          : control flag of vertical index direction          !
-!                     =0: index from toa to surface                     !
-!                     =1: index from surface to toa                     !
-!   lsashal         : control flag for shallow convection               !
-!   lcrick          : control flag for eliminating CRICK                !
-!                     =t: apply layer smoothing to eliminate CRICK      !
-!                     =f: do not apply layer smoothing                  !
-!   lcnorm          : control flag for in-cld condensate                !
-!                     =t: normalize cloud condensate                    !
-!                     =f: not normalize cloud condensate                !
-!                                                                       !
 !  ====================    end of description    =====================  !
 !
       implicit none
 
 !  ---  inputs
       integer,  intent(in) :: IX, NLAY, NLP1
-
+      logical,  intent(in) :: lcrick, lcnorm
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, tvly, qlyr, qstl, rhly, clw, cldtot, cnvw, cnvc,     &
      &       delp, dz, dzlay
+      real (kind=kind_phys) :: con_ttp
 
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
@@ -1786,7 +1715,7 @@
      &       IX, NLAY, NLP1, icloud,                                    &
      &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
      &       re_cloud,re_ice,re_snow,                                   &
-     &       dzlay, cldtot, cldcnv,                                     &
+     &       dzlay, cldtot, cldcnv, lcnorm,                             &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp,                     & !  ---  outputs
      &       cld_reice,cld_rwp, cld_rerain,cld_swp, cld_resnow          &
      &      )
@@ -1803,9 +1732,7 @@
 !   top and base.  the three vertical cloud domains are set up in the   !
 !   initial subroutine "cld_init".                                      !
 !                                                                       !
-! usage:         call progcld_fer_hires                                          !
-!                                                                       !
-! subprograms called:   gethml                                          !
+! usage:         call progcld_fer_hires                                 !
 !                                                                       !
 ! attributes:                                                           !
 !   language:   fortran 90                                              !
@@ -1837,6 +1764,14 @@
 !   lmfdeep2        : logical - true for mass flux deep convection      !
 !   cldcov          : layer cloud fraction (used when uni_cld=.true.    !
 !   dzlay(ix,nlay)  : thickness between model layer centers (km)        !
+!   lmfshal         : mass-flux shallow conv scheme flag                !
+!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !
+!   lcrick          : control flag for eliminating CRICK                !
+!                     =t: apply layer smoothing to eliminate CRICK      !
+!                     =f: do not apply layer smoothing                  !
+!   lcnorm          : control flag for in-cld condensate                !
+!                     =t: normalize cloud condensate                    !
+!                     =f: not normalize cloud condensate                !
 !                                                                       !
 ! output variables:                                                     !
 !   cloud profiles:                                                     !
@@ -1850,19 +1785,6 @@
 !  *** cld_swp   (:,:) - layer snow flake water path      not assigned  !
 !      cld_resnow(:,:) - mean eff radius for snow flake   (micron)      !
 !                                                                       !
-! module variables:                                                     !
-!   ivflip          : control flag of vertical index direction          !
-!                     =0: index from toa to surface                     !
-!                     =1: index from surface to toa                     !
-!   lmfshal         : mass-flux shallow conv scheme flag                !
-!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !
-!   lcrick          : control flag for eliminating CRICK                !
-!                     =t: apply layer smoothing to eliminate CRICK      !
-!                     =f: do not apply layer smoothing                  !
-!   lcnorm          : control flag for in-cld condensate                !
-!                     =t: normalize cloud condensate                    !
-!                     =f: not normalize cloud condensate                !
-!                                                                       !
 !  ====================    end of description    =====================  !
 !
       implicit none
@@ -1871,7 +1793,7 @@
       integer,  intent(in) :: IX, NLAY, NLP1, ICLOUD
       integer,  intent(in) :: ntrac, ntcw, ntiw, ntrw
 
-      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2
+      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, lcnorm
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, tvly, qlyr, qstl, rhly, cldcov, delp, dz, dzlay
@@ -2036,12 +1958,12 @@
       subroutine progcld_thompson_wsm6                                  &
      &     ( plyr,plvl,tlyr,qlyr,qstl,rhly,clw,                         &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &
-     &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,                            &
+     &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,con_ttp,                    &
      &       IX, NLAY, NLP1,                                            &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, cnvw,                  &
      &       re_cloud,re_ice,re_snow,                                   &
      &       lwp_ex, iwp_ex, lwp_fc, iwp_fc,                            &
-     &       dzlay, cldtot, cldcnv,                                     &
+     &       dzlay, cldtot, cldcnv, lcnorm,                             &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp,                     & !  ---  outputs
      &       cld_reice,cld_rwp, cld_rerain,cld_swp, cld_resnow          &
      &      )
@@ -2059,9 +1981,7 @@
 !   top and base.  the three vertical cloud domains are set up in the   !
 !   initial subroutine "cld_init".                                      !
 !                                                                       !
-! usage:         call progcld_thompson_wsm6                                          !
-!                                                                       !
-! subprograms called:   gethml                                          !
+! usage:         call progcld_thompson_wsm6                             !
 !                                                                       !
 ! attributes:                                                           !
 !   language:   fortran 90                                              !
@@ -2092,6 +2012,14 @@
 !   lmfshal         : logical - true for mass flux shallow convection   !
 !   lmfdeep2        : logical - true for mass flux deep convection      !
 !   cldcov          : layer cloud fraction (used when uni_cld=.true.    !
+!   lmfshal         : mass-flux shallow conv scheme flag                !
+!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !
+!   lcrick          : control flag for eliminating CRICK                !
+!                     =t: apply layer smoothing to eliminate CRICK      !
+!                     =f: do not apply layer smoothing                  !
+!   lcnorm          : control flag for in-cld condensate                !
+!                     =t: normalize cloud condensate                    !
+!                     =f: not normalize cloud condensate                !  
 !                                                                       !
 ! output variables:                                                     !
 !   cloud profiles:                                                     !
@@ -2110,19 +2038,6 @@
 !   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !
 !   de_lgth(ix)     : clouds decorrelation length (km)                  !
 !                                                                       !
-! module variables:                                                     !
-!   ivflip          : control flag of vertical index direction          !
-!                     =0: index from toa to surface                     !
-!                     =1: index from surface to toa                     !
-!   lmfshal         : mass-flux shallow conv scheme flag                !
-!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !
-!   lcrick          : control flag for eliminating CRICK                !
-!                     =t: apply layer smoothing to eliminate CRICK      !
-!                     =f: do not apply layer smoothing                  !
-!   lcnorm          : control flag for in-cld condensate                !
-!                     =t: normalize cloud condensate                    !
-!                     =f: not normalize cloud condensate                !
-!                                                                       !
 !  ====================    end of description    =====================  !
 !
       implicit none
@@ -2131,7 +2046,7 @@
       integer,  intent(in) :: IX, NLAY, NLP1
       integer,  intent(in) :: ntrac, ntcw, ntiw, ntrw, ntsw, ntgl
 
-      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2
+      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, lcnorm
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, qlyr, qstl, rhly, cldcov, delp, dz, dzlay,           &
@@ -2143,7 +2058,7 @@
 
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
-
+      real (kind=kind_phys), intent(in) :: con_ttp
 !  --- inputs/outputs
 
       real (kind=kind_phys), dimension(:,:), intent(inout) ::            &
@@ -2212,10 +2127,16 @@
 !>   The total condensate includes convective condensate.
         do k = 1, NLAY-1
           do i = 1, IX
-            cwp(i,k) = max(0.0, (clw(i,k,ntcw)+cnvw(i,k)*
-     &                  (1.-tem2d(i,k))) * gfac * delp(i,k))
-            cip(i,k) = max(0.0, (clw(i,k,ntiw) + cnvw(i,k)*
-     &                  tem2d(i,k)) *gfac * delp(i,k))
+            tem1 = cnvw(i,k)*(1.-tem2d(i,k))
+            cwp(i,k) = max(0.0, (clw(i,k,ntcw)+tem1) *
+     &                 gfac * delp(i,k))
+            if(tem1 > 1.e-12 .and.  clw(i,k,ntcw) < 1.e-12)
+     &                 rew(i,k)=reliq_def
+            tem2 = cnvw(i,k)*tem2d(i,k)
+            cip(i,k) = max(0.0, (clw(i,k,ntiw) + tem2 )
+     &             *gfac * delp(i,k))
+            if(tem2 > 1.e-12 .and.  clw(i,k,ntiw) < 1.e-12)
+     &             rei(i,k)=reice_def
             crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))
             csp(i,k) = max(0.0, clw(i,k,ntsw) * gfac * delp(i,k))
           enddo
@@ -2336,7 +2257,7 @@
      &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
      &       re_cloud,re_ice,re_snow,                                   &
      &       lwp_ex, iwp_ex, lwp_fc, iwp_fc,                            &
-     &       dzlay,  gridkm, cldtot, cldcnv,                            &
+     &       dzlay,  gridkm, top_at_1, cldtot, cldcnv,                  &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp,                     & !  ---  outputs
      &       cld_reice,cld_rwp, cld_rerain,cld_swp, cld_resnow          &
      &      )
@@ -2354,8 +2275,6 @@
 !   initial subroutine "cld_init".                                      !
 !                                                                       !
 ! usage:         call progcld_thompson                                  !
-!                                                                       !
-! subprograms called:   gethml                                          !
 !                                                                       !
 ! attributes:                                                           !
 !   language:   fortran 90                                              !
@@ -2386,7 +2305,16 @@
 !   uni_cld         : logical - true for cloud fraction from shoc       !
 !   lmfshal         : logical - true for mass flux shallow convection   !
 !   lmfdeep2        : logical - true for mass flux deep convection      !
+!   top_at_1        : logical - true if vertical ordereing is toa-2-sfc !
 !   cldcov          : layer cloud fraction (used when uni_cld=.true.    !
+!   lmfshal         : mass-flux shallow conv scheme flag                !
+!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !
+!   lcrick          : control flag for eliminating CRICK                !
+!                     =t: apply layer smoothing to eliminate CRICK      !
+!                     =f: do not apply layer smoothing                  !
+!   lcnorm          : control flag for in-cld condensate                !
+!                     =t: normalize cloud condensate                    !
+!                     =f: not normalize cloud condensate                !
 !                                                                       !
 ! output variables:                                                     !
 !   cloud profiles:                                                     !
@@ -2400,19 +2328,6 @@
 !  *** cld_swp   (:,:) - layer snow flake water path      not assigned  !
 !      cld_resnow(:,:) - mean eff radius for snow flake   (micron)      !
 !                                                                       !
-! module variables:                                                     !
-!   ivflip          : control flag of vertical index direction          !
-!                     =0: index from toa to surface                     !
-!                     =1: index from surface to toa                     !
-!   lmfshal         : mass-flux shallow conv scheme flag                !
-!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !
-!   lcrick          : control flag for eliminating CRICK                !
-!                     =t: apply layer smoothing to eliminate CRICK      !
-!                     =f: do not apply layer smoothing                  !
-!   lcnorm          : control flag for in-cld condensate                !
-!                     =t: normalize cloud condensate                    !
-!                     =f: not normalize cloud condensate                !
-!                                                                       !
 !  ====================    end of description    =====================  !
 !
       implicit none
@@ -2421,7 +2336,7 @@
       integer,  intent(in) :: IX, NLAY, NLP1
       integer,  intent(in) :: ntrac, ntcw, ntiw, ntrw, ntsw, ntgl
 
-      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2
+      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, top_at_1
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, qlyr, qstl, rhly, cldcov, delp, dz, dzlay,           &
@@ -2525,7 +2440,7 @@
 
          cldfra1d(:) = 0.0
 
-         if (ivflip .eq. 1) then
+         if (.not. top_at_1) then
             do k = 1, NLAY
                qv1d(k) = qlyr(i,k)
                qc1d(k) = max(0.0, clw(i,k,ntcw))
@@ -2619,7 +2534,7 @@
      &     ( plyr,plvl,tlyr,tvly,ccnd,ncnd,                             &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp, IX, NLAY, NLP1, cldtot,           &
      &       effrl,effri,effrr,effrs,effr_in,                           &
-     &       dzlay, cldtot1, cldcnv,                                     &
+     &       dzlay, cldtot1, cldcnv, lcrick, lcnorm, con_ttp,           &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp,                     & !  ---  outputs
      &       cld_reice,cld_rwp, cld_rerain,cld_swp, cld_resnow          &
      &      )
@@ -2640,8 +2555,6 @@
 !   using SHOC+MG2/3+convection (RAS or SAS or CSAW)                    !
 !                                                                       !
 ! usage:         call progclduni                                        !
-!                                                                       !
-! subprograms called:   gethml                                          !
 !                                                                       !
 ! attributes:                                                           !
 !   language:   fortran 90                                              !
@@ -2673,6 +2586,14 @@
 !   dz    (ix,nlay)      : layer thickness (km)                              !
 !   delp  (ix,nlay)      : model layer pressure thickness in mb (100Pa)      !
 !   dzlay(ix,nlay)  : thickness between model layer centers (km)        !
+!   lmfshal         : mass-flux shallow conv scheme flag                !
+!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !
+!   lcrick          : control flag for eliminating CRICK                !
+!                     =t: apply layer smoothing to eliminate CRICK      !
+!                     =f: do not apply layer smoothing                  !
+!   lcnorm          : control flag for in-cld condensate                !
+!                     =t: normalize cloud condensate                    !
+!                     =f: not normalize cloud condensate                !
 !                                                                       !
 ! output variables:                                                     !
 !   cloud profiles:                                                     !
@@ -2690,20 +2611,7 @@
 !   mtop  (IX,3)    : vertical indices for low, mid, hi cloud tops      !
 !   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !
 !   de_lgth(ix)     : clouds decorrelation length (km)                  !
-!   alpha(ix,nlay)  : alpha decorrelation parameter
-!                                                                       !
-! module variables:                                                     !
-!   ivflip          : control flag of vertical index direction          !
-!                     =0: index from toa to surface                     !
-!                     =1: index from surface to toa                     !
-!   lmfshal         : mass-flux shallow conv scheme flag                !
-!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !
-!   lcrick          : control flag for eliminating CRICK                !
-!                     =t: apply layer smoothing to eliminate CRICK      !
-!                     =f: do not apply layer smoothing                  !
-!   lcnorm          : control flag for in-cld condensate                !
-!                     =t: normalize cloud condensate                    !
-!                     =f: not normalize cloud condensate                !
+!   alpha(ix,nlay)  : alpha decorrelation parameter                     !
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
@@ -2711,8 +2619,9 @@
 
 !  ---  inputs
       integer,  intent(in) :: IX, NLAY, NLP1, ncnd
-      logical,  intent(in) :: effr_in
+      logical,  intent(in) :: effr_in, lcrick, lcnorm
 
+      real (kind=kind_phys), intent(in) :: con_ttp
       real (kind=kind_phys), dimension(:,:,:), intent(in) :: ccnd
       real (kind=kind_phys), dimension(:,:),   intent(in) :: plvl, plyr,&
      &       tlyr, tvly, cldtot, effrl, effri, effrr, effrs, dz, delp,  &
@@ -2930,8 +2839,8 @@
 !>\section detail Detailed Algorithm
       subroutine gethml                                                 &
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth, alpha,           &       !  ---  inputs:
-     &       IX, NLAY, iovr_rand, iovr_maxrand, iovr_max,               &
-     &       iovr_dcorr, iovr_exp, iovr_exprand,                        &
+     &       IX, NLAY, iovr, iovr_rand, iovr_maxrand, iovr_max,         &
+     &       iovr_dcorr, iovr_exp, iovr_exprand, top_at_1, si,          &
      &       clds, mtop, mbot                                           &       !  ---  outputs:
      &     )
 
@@ -2969,13 +2878,7 @@
 ! output variables:                                                     !
 !   clds  (IX,5)    : fraction of clouds for low, mid, hi, tot, bl      !
 !   mtop  (IX,3)    : vertical indices for low, mid, hi cloud tops      !
-!   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !
-!                                                                       !
-! external module variables:  (in physparam)                            !
-!   ivflip          : control flag of vertical index direction          !
-!                     =0: index from toa to surface                     !
-!                     =1: index from surface to toa                     !
-!                                                                       !
+!   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !                                                              !
 ! internal module variables:                                            !
 !   iovr            : control flag for cloud overlap                    !
 !                     =0 random overlapping clouds                      !
@@ -2990,8 +2893,10 @@
       implicit none!
 
 !  ---  inputs:
+      logical, intent(in) :: top_at_1
       integer, intent(in) :: IX, NLAY
       integer, intent(in) ::                                            &
+     &     iovr,                         !
      &     iovr_rand,                    ! Flag for random cloud overlap method
      &     iovr_maxrand,                 ! Flag for maximum-random cloud overlap method
      &     iovr_max,                     ! Flag for maximum cloud overlap method
@@ -3001,7 +2906,7 @@
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plyr, ptop1, &
      &       cldtot, cldcnv, dz
-      real (kind=kind_phys), dimension(:),   intent(in) :: de_lgth
+      real (kind=kind_phys), dimension(:),   intent(in) :: de_lgth, si
       real (kind=kind_phys), dimension(:,:), intent(in) :: alpha
 
 !  ---  outputs
@@ -3014,11 +2919,30 @@
       real (kind=kind_phys) :: pcur, pnxt, ccur, cnxt, alfa
 
       integer, dimension(IX):: idom, kbt1, kth1, kbt2, kth2
-      integer :: i, k, id, id1, kstr, kend, kinc
+      integer :: i, k, id, id1, kstr, kend, kinc,kl
 
 !
 !===> ... begin here
 !
+!> - Compute the top of BL cld (llyr), which is the topmost non
+!!    cld(low) layer for stratiform (at or above lowest 0.1 of the
+!!     atmosphere).
+
+      if (top_at_1) then    ! data from toa to sfc
+        lab_do_k0 : do k = NLAY, 2, -1
+          kl = k
+          if (si(k) < 0.9e0) exit lab_do_k0
+        enddo  lab_do_k0
+        llyr = kl
+      else                      ! data from sfc to top
+        lab_do_k1 : do k = 2, NLAY
+          kl = k
+          if (si(k) < 0.9e0) exit lab_do_k1
+        enddo  lab_do_k1
+
+        llyr = kl - 1
+      endif                     ! end_if_top_at_1
+
       clds(:,:) = 0.0
 
       do i = 1, IX
@@ -3032,7 +2956,7 @@
 !> - Calculate total and BL cloud fractions (maximum-random cloud
 !!    overlapping is operational).
 
-      if ( ivflip == 0 ) then                   ! input data from toa to sfc
+      if (top_at_1) then                   ! input data from toa to sfc
         kstr = NLAY
         kend = 1
         kinc = -1
@@ -3040,7 +2964,7 @@
         kstr = 1
         kend = NLAY
         kinc = 1
-      endif                                     ! end_if_ivflip
+      endif                                     ! end_if_top_at_1
 
       if ( iovr == iovr_rand ) then                     ! random overlap
 
@@ -3174,7 +3098,7 @@
 
 !> - Calculte high, mid, low cloud fractions and vertical indices of
 !!    cloud tops/bases.
-      if ( ivflip == 0 ) then                   ! input data from toa to sfc
+      if (top_at_1) then                   ! input data from toa to sfc
 
         do i = 1, IX
           cl1 (i) = 0.0
@@ -3338,7 +3262,7 @@
           enddo       ! end_do_i_loop
         enddo         ! end_do_k_loop
 
-      endif                                     ! end_if_ivflip
+      endif                                     ! end_if_top_at_1
 
 !
       return

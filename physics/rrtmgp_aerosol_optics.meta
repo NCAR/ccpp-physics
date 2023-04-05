@@ -21,6 +21,37 @@
   dimensions = ()
   type = logical
   intent = in
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_radiation
+  long_name = flag for vertical ordering in radiation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rd]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -31,20 +62,6 @@
 [nLev]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[nTracer]
-  standard_name = number_of_tracers
-  long_name = number of tracers
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[nTracerAer]
-  standard_name = number_of_aerosol_tracers_MG
-  long_name = number of aerosol tracers for Morrison Gettelman MP
   units = count
   dimensions = ()
   type = integer
@@ -112,9 +129,9 @@
   kind = kind_phys
   intent = in
 [tracer]
-  standard_name = chemical_tracers
-  long_name = chemical tracers
-  units = g g-1
+  standard_name = tracer_concentration
+  long_name = model layer mean tracer concentration
+  units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
@@ -143,6 +160,20 @@
   type = real
   kind = kind_phys
   intent = in
+[iaermdl]
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[iaerflg]
+  standard_name = control_for_aerosol_effects_in_radiation
+  long_name = control of aerosol effects in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
 [aerodp]
   standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
   long_name = vertical integrated optical depth for various aerosol species
@@ -151,20 +182,54 @@
   type = real
   kind = kind_phys
   intent = out
-[sw_optical_props_aerosol]
-  standard_name = shortwave_optical_properties_for_aerosols
-  long_name = Fortran DDT containing RRTMGP optical properties
-  units = DDT
-  dimensions = ()
-  type = ty_optical_props_2str
+[aersw_tau]
+  standard_name = aerosol_optical_depth_for_shortwave_bands_01_16
+  long_name = aerosol optical depth for shortwave bands 01-16
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_shortwave_radiation)
+  type = real
+  kind = kind_phys
   intent = out
-[lw_optical_props_aerosol]
-  standard_name = longwave_optical_properties_for_aerosols
-  long_name = Fortran DDT containing RRTMGP optical properties
-  units = DDT
-  dimensions = ()
-  type = ty_optical_props_1scl
-  intent = inout
+[aersw_ssa]
+  standard_name = aerosol_single_scattering_albedo_for_shortwave_bands_01_16
+  long_name = aerosol single scattering albedo for shortwave bands 01-16
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_shortwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = out
+[aersw_g]
+  standard_name = aerosol_asymmetry_parameter_for_shortwave_bands_01_16
+  long_name = aerosol asymmetry parameter for shortwave bands 01-16
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_shortwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = out
+[aerlw_tau]
+  standard_name = aerosol_optical_depth_for_longwave_bands_01_16
+  long_name = aerosol optical depth for longwave bands 01-16
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_longwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = out
+[aerlw_ssa]
+  standard_name = aerosol_single_scattering_albedo_for_longwave_bands_01_16
+  long_name = aerosol single scattering albedo for longwave bands 01-16
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_longwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = out
+[aerlw_g]
+  standard_name = aerosol_asymmetry_parameter_for_longwave_bands_01_16
+  long_name = aerosol asymmetry parameter for longwave bands 01-16
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_longwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -6,15 +6,12 @@ module GFS_rrtmgp_setup
   use module_radiation_astronomy, only : sol_init, sol_update
   use module_radiation_aerosols,  only : aer_init, aer_update
   use module_radiation_gases,     only : gas_init, gas_update
-  !  use GFS_cloud_diagnostics,      only : hml_cloud_diagnostics_initialize
-  ! *NOTE* These parameters below are required radiation_****** modules. They are not
-  !        directly used by the RRTMGP routines.
-  use physparam,                  only : isolar,  ictmflg, ico2flg, ioznflg, iaerflg,    &
-                                         iaermdl, ivflip
   implicit none
   
   public GFS_rrtmgp_setup_init, GFS_rrtmgp_setup_timestep_init, GFS_rrtmgp_setup_finalize
-  
+
+  private
+
   ! Version tag and last revision date
   character(40), parameter ::                                       &
        VTAGRAD='NCEP-RRTMGP_driver       v1.0  Sep 2019 '
@@ -28,7 +25,7 @@ module GFS_rrtmgp_setup
        is_initialized = .false.
   ! Control flag for the first time of reading climatological ozone data
   ! (set/reset in subroutines GFS_rrtmgp_setup_init/GFS_rrtmgp_setup_timestep_init, it is used only if 
-  ! the control parameter ioznflg=0)
+  ! the control parameter ntoz=0)
   logical :: loz1st = .true.
   
 contains
@@ -40,8 +37,9 @@ contains
   subroutine GFS_rrtmgp_setup_init(do_RRTMGP, imp_physics, imp_physics_fer_hires,        &
        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,  &
        imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer,     &
-       ntcw, num_p3d,  ntoz, iovr, isubc_sw, isubc_lw, icliq_sw, crick_proof, ccnorm,    &
-       norad_precip, idate, iflip, me, errmsg, errflg)
+       ntcw, ntoz, iovr, isubc_sw, isubc_lw, lalw1bd, idate, me, aeros_file,             &
+       iaermdl, iaerflg, con_pi, con_t0c, con_c, con_boltz, con_plnk, solar_file,        &
+       con_solr_2008, con_solr_2002, co2usr_file, co2cyc_file, ipsd0, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: do_RRTMGP
@@ -54,19 +52,24 @@ contains
          imp_physics_zhao_carr,     & ! Flag for zhao-carr scheme
          imp_physics_zhao_carr_pdf, & ! Flag for zhao-carr+PDF scheme
          imp_physics_mg               ! Flag for MG scheme
+    real(kind_phys), intent(in) :: &
+         con_pi, con_t0c, con_c, con_boltz, con_plnk, con_solr_2008, con_solr_2002
     real(kind_phys), dimension(:), intent(in) :: &
          si
     integer, intent(in) :: levr, ictm, isol, ico2, iaer, & 
-         ntcw, num_p3d, ntoz, iovr, isubc_sw, isubc_lw,  &
-         icliq_sw, iflip, me 
+         ntcw, ntoz, iovr, isubc_sw, isubc_lw,  &
+         me
     logical, intent(in) :: &
-         crick_proof, ccnorm, norad_precip
+         lalw1bd
     integer, intent(in), dimension(:) :: &
          idate
+    character(len=26),intent(in) :: aeros_file, solar_file, co2usr_file, co2cyc_file
 
     ! Outputs
-    character(len=*), intent(out) :: errmsg
-    integer,          intent(out) :: errflg
+    character(len=*), intent(out)   :: errmsg
+    integer,          intent(out)   :: errflg
+    integer,          intent(inout) :: ipsd0
+    integer,          intent(out)   :: iaermdl, iaerflg
     
     ! Initialize the CCPP error handling variables
     errmsg = ''
@@ -82,12 +85,6 @@ contains
     end if
 
     ! Set radiation parameters
-    isolar  = isol                     ! solar constant control flag
-    ictmflg = ictm                     ! data ic time/date control flag
-    ico2flg = ico2                     ! co2 data source control flag
-    ioznflg = ntoz                     ! ozone data source control flag
-    ivflip  = iflip                    ! vertical index direction control flag
-    
     if ( ictm==0 .or. ictm==-2 ) then
        iaerflg = mod(iaer, 100)        ! no volcanic aerosols for clim hindcast
     else
@@ -99,6 +96,11 @@ contains
        errflg = 1
        return
     endif
+
+    ! Assign initial permutation seed for mcica cloud-radiation
+    if ( isubc_sw>0 .or. isubc_lw>0 ) then
+       ipsd0 = 17*idate(1)+43*idate(2)+37*idate(3)+23*idate(4)
+    endif
     
     if ( me == 0 ) then
        print *,'  In rad_initialize (GFS_rrtmgp_setup_init), before calling radinit'
@@ -107,39 +109,27 @@ contains
                ' ictm     = ',ictm,      &
                ' isol     = ',isol,      &
                ' ico2     = ',ico2,      &
-               ' iaer     = ',iaer,      &
-               ' ntcw     = ',ntcw
-       print *,' np3d     = ',num_p3d,   &
+               ' iaermdl  = ',iaermdl,   &
+               ' iaerflg  = ',iaerflg,   &
+               ' ntcw     = ',ntcw,      &
                ' ntoz     = ',ntoz,      &
                ' iovr     = ',iovr,      &
                ' isubc_sw = ',isubc_sw,  &
                ' isubc_lw = ',isubc_lw,  &
-               ' icliq_sw = ',icliq_sw,  &
-               ' iflip    = ',iflip,     &
+               ' ipsd0    = ',ipsd0,     &
                ' me       = ',me
     endif
-    
-    loz1st = (ioznflg == 0)           ! first-time clim ozone data read flag
+
+    loz1st = (ntoz == 0)           ! first-time clim ozone data read flag
     month0 = 0
     iyear0 = 0
     monthd = 0
 
-!> -# Initialization
-!! - astronomy initialization routine:
-!! call module_radiation_astronomy::sol_init()
-!! - aerosols initialization routine:
-!! call module_radiation_aerosols::aer_init()
-!! - CO2 and other gases intialization routine:
-!! call module_radiation_gases::gas_init()
-
     ! Call initialization routines..
-    call sol_init ( me )
-    call aer_init ( levr, me )
-    call gas_init ( me )
-    !call hml_cloud_diagnostics_initialize(imp_physics, imp_physics_fer_hires,           &
-    !     imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,                      &
-    !     imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_mg, levr, me, si,&
-    !     errflg)
+    call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002, con_pi )
+    call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, con_t0c,    &
+         con_c, con_boltz, con_plnk, errflg, errmsg)
+    call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz, con_pi, errflg, errmsg )
 
     if ( me == 0 ) then
        print *,' return from rad_initialize (GFS_rrtmgp_setup_init) - after calling radinit'
@@ -156,16 +146,20 @@ contains
 !> \section arg_table_GFS_rrtmgp_setup_timestep_init
 !! \htmlinclude GFS_rrtmgp_setup_timestep_init.html
 !!
-  subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, lsswr, me, &
-                                             slag, sdec, cdec, solcon, errmsg, errflg)
+  subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, doSWrad, me,     &
+       iaermdl, aeros_file, isol, slag, sdec, cdec, solcon, con_pi, co2dat_file,            &
+       co2gbl_file, ictm, ico2, ntoz, errmsg, errflg)
      
     ! Inputs
     integer,         intent(in)  :: idate(:)
     integer,         intent(in)  :: jdate(:)
     real(kind_phys), intent(in)  :: deltsw
     real(kind_phys), intent(in)  :: deltim
-    logical,         intent(in)  :: lsswr
+    logical,         intent(in)  :: doSWrad
+    real(kind_phys), intent(in)  :: con_pi
     integer,         intent(in)  :: me
+    integer,         intent(in)  :: iaermdl,isol,ictm,ico2,ntoz
+    character(len=26), intent(in) :: aeros_file,co2dat_file,co2gbl_file
 
     ! Outputs
     real(kind_phys), intent(out) :: slag
@@ -201,7 +195,7 @@ contains
 
     ! Set up time stamp used for green house gases (** currently co2 only)
     ! get external data at initial condition time 
-    if ( ictmflg==0 .or. ictmflg==-2 ) then 
+    if ( ictm==0 .or. ictm==-2 ) then 
        kyear = idate(1)
        kmon  = idate(2)
        kday  = idate(3)
@@ -222,21 +216,21 @@ contains
     endif
 
     ! Update solar forcing...
-    if (lsswr) then
-       if ( isolar == 0 .or. isolar == 10 ) then
+    if (doSWrad) then
+       if ( isol == 0 .or. isol == 10 ) then
           lsol_chg = .false.
        elseif ( iyear0 /= iyear ) then
           lsol_chg = .true.
        else
-          lsol_chg = ( isolar==4 .and. lmon_chg )
+          lsol_chg = ( isol==4 .and. lmon_chg )
        endif
        iyear0 = iyear
-       call sol_update(jdate, kyear, deltsw, deltim, lsol_chg, me, slag, sdec, cdec, solcon)
+       call sol_update(jdate, kyear, deltsw, deltim, lsol_chg, me, slag, sdec, cdec, solcon, con_pi, errmsg, errflg)
     endif
 
     ! Update aerosols...
     if ( lmon_chg ) then
-       call aer_update ( iyear, imon, me )
+       call aer_update ( iyear, imon, me, iaermdl, aeros_file, errflg, errmsg)
     endif
 
     ! Update trace gases (co2 only)...
@@ -246,7 +240,8 @@ contains
     else
        lco2_chg = .false.
     endif
-    call gas_update (kyear, kmon, kday, khour, loz1st, lco2_chg, me )
+    call gas_update (kyear, kmon, kday, khour, loz1st, lco2_chg, me, co2dat_file,           &
+         co2gbl_file, ictm, ico2, ntoz, errflg, errmsg )
     
     if ( loz1st ) loz1st = .false.
 
