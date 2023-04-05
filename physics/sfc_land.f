@@ -27,9 +27,6 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
 
-
-!!      use physcons, only : hvap => con_hvap,  cp => con_cp,           &
-!!    &                     rvrdm1 => con_fvirt, rd => con_rd
 !
 !-----------------------------------
       subroutine sfc_land_run                                           &
@@ -41,7 +38,7 @@
 !  ---  outputs:
      &       sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp,               &
      &       gflux, runoff, drain, cmm, chh, zvfun,                     &
-     &       errmsg, errflg, naux2d, aux2d
+     &       errmsg, errflg
      &     )
 
 ! ===================================================================== !
@@ -122,9 +119,6 @@
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-      integer, intent(in) :: naux2d
-      real(kind_phys), intent(out) :: aux2d(:,:)
-
 !  ---  locals:
 
       integer :: i
@@ -150,20 +144,6 @@
          chh(i)     = chh_lnd(i)
          zvfun(i)   = zvfun_lnd(i)
       enddo
-
-      aux2d(:,1) = sncovr1(:)
-      aux2d(:,2) = qsurf(:)
-      aux2d(:,3) = hflx(:)
-      aux2d(:,4) = evap(:)
-      aux2d(:,5) = ep(:)
-      aux2d(:,6) = t2mmp(:)
-      aux2d(:,7) = q2mp(:)
-      aux2d(:,8) = gflux(:)
-      aux2d(:,9) = drain(:) 
-      aux2d(:,10) = runoff(:)
-      aux2d(:,11) = cmm(:)
-      aux2d(:,12) = chh(:)
-      aux2d(:,13) = zvfun(:)
  
       return
 !-----------------------------------
