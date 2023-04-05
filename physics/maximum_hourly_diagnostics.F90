@@ -29,14 +29,17 @@ contains
                                              gt0, refl_10cm, refdmax, refdmax263k, u10m, v10m,     &
                                              u10max, v10max, spd10max, pgr, t2m, q2m, t02max,      &
                                              t02min, rh02max, rh02min, dtp, rain, pratemax,        &
-                                             errmsg, errflg)
+                                             lightning_threat, ltg1_max,ltg2_max,ltg3_max,         &
+                                             wgrs, prsi, qgraupel, qsnowwat, qicewat, tgrs, con_rd,&
+                                             prsl, kdt, errmsg, errflg)
 
        ! Interface variables
-       integer, intent(in) :: im, levs
-       logical, intent(in) :: reset, lradar
+       integer, intent(in) :: im, levs, kdt
+       logical, intent(in) :: reset, lradar, lightning_threat
        integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_fer_hires, &
                               imp_physics_nssl
        real(kind_phys), intent(in   ) :: con_g
+       real(kind_phys), intent(in   ) :: con_rd
        real(kind_phys), intent(in   ) :: phil(:,:)
        real(kind_phys), intent(in   ) :: gt0(:,:)
        real(kind_phys), intent(in   ) :: refl_10cm(:,:)
@@ -55,19 +58,29 @@ contains
        real(kind_phys), intent(inout) :: rh02max(:)
        real(kind_phys), intent(inout) :: rh02min(:)
        real(kind_phys), intent(in   ) :: dtp
-       real(kind_phys), intent(in   ) :: rain(im)
-       real(kind_phys), intent(inout) :: pratemax(im)
+       real(kind_phys), intent(in   ) :: rain(:)
+       real(kind_phys), intent(in   ) :: tgrs(:,:)
+       real(kind_phys), intent(in   ) :: prsl(:,:)
+       real(kind_phys), intent(inout) :: pratemax(:)
+
+       real(kind_phys), intent(in), dimension(:,:) :: prsi, qgraupel, qsnowwat, qicewat, wgrs
+       real(kind_phys), intent(inout), dimension(:) :: ltg1_max, ltg2_max, ltg3_max
        character(len=*), intent(out)  :: errmsg
        integer, intent(out)           :: errflg
 
        ! Local variables
        real(kind_phys), dimension(:), allocatable :: refd, refd263k
-       real(kind_phys) :: tem, pshltr, QCQ, rh02
+       real(kind_phys) :: tem, pshltr, QCQ, rh02, dP, Q
        integer :: i
 
        ! Initialize CCPP error handling variables
        errmsg = ''
        errflg = 0
+
+!Lightning threat indices
+       if (lightning_threat) then
+         call lightning_threat_indices
+       endif
 
 !Calculate hourly max 1-km agl and -10C reflectivity
        if (lradar .and. (imp_physics == imp_physics_gfdl .or. &
@@ -133,6 +146,79 @@ contains
           t02min(i)  = min(t02min(i),t2m(i))  !<--- hourly min 2m t
           pratemax(i) = max(pratemax(i),(3.6E6/dtp)*rain(i))
        enddo
+
+     contains
+
+       subroutine lightning_threat_indices
+         implicit none
+         REAL(kind_phys), PARAMETER    :: clim1=1.50
+         REAL(kind_phys), PARAMETER    :: clim2=0.40*1.22
+         REAL(kind_phys), PARAMETER    :: clim3=0.02*1.22
+         !  coef1 and coef2 are modified from the values given
+         !  in McCaul et al. 
+         !  coef1 is x 1000 x 1.22
+         !  coef2 is x 1.22
+         !  are these tuning factors, scale factors??
+         !  McCaul et al. used a 2-km WRF simulation
+         REAL(kind_phys), PARAMETER    :: coef1=0.042*1000.*1.22
+         REAL(kind_phys), PARAMETER    :: coef2=0.20*1.22
+         
+         REAL(kind_phys) :: totice_colint(im), ltg1, ltg2, high_ltg1, high_wgrs, high_graupel, rho
+         LOGICAL :: ltg1_calc(im)
+         integer :: k, i, count
+
+         count = 0
+         high_ltg1 = 0
+         high_wgrs = 0
+         high_graupel = 0
+
+          totice_colint = 0
+          ltg1_calc = .false.
+          do k=1,levs-1
+             do i=1,im
+                dP = prsi(i,k) - prsi(i,k+1)
+                Q = qgraupel(i,k) + qsnowwat(i,k) + qicewat(i,k)
+                rho = prsl(i,k) / (con_rd * tgrs(i,k))
+                totice_colint(i) = totice_colint(i) + Q * rho * dP / con_g
+
+                IF ( .not.ltg1_calc(i) ) THEN
+                   IF ( 0.5*(tgrs(i,k+1) + tgrs(i,k)) < 258.15 ) THEN
+                      count = count + 1
+                      ltg1_calc(i) = .true.
+                      
+                      ltg1 = coef1*wgrs(i,k)* &
+                           (( qgraupel(i,k+1) + qgraupel(i,k) )*0.5 )
+                      if(ltg1 > high_ltg1) then
+                        high_ltg1 = ltg1
+                        high_graupel = qgraupel(i,k)
+                        high_wgrs = wgrs(i,k)
+                      endif
+                      
+                      IF ( ltg1 .LT. clim1 ) ltg1 = 0.
+                      
+                      IF ( ltg1 .GT. ltg1_max(i) ) THEN
+                         ltg1_max(i) = ltg1
+                      ENDIF
+                   ENDIF
+                ENDIF
+             enddo
+          enddo
+
+          do i=1,im
+             ltg2 = coef2 * totice_colint(i)
+
+             IF ( ltg2 .LT. clim2 ) ltg2 = 0.
+             
+             IF ( ltg2 .GT. ltg2_max(i) ) THEN
+                ltg2_max(i) = ltg2
+             ENDIF
+
+             ltg3_max(i) = 0.95 * ltg1_max(i) + 0.05 * ltg2_max(i)
+
+             IF ( ltg3_max(i) .LT. clim3 ) ltg3_max(i) = 0.
+          enddo
+
+       end subroutine lightning_threat_indices
 
    end subroutine maximum_hourly_diagnostics_run
 

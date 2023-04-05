@@ -9,6 +9,12 @@
 !> \defgroup gfs_drag_suite_mod GSL drag_suite Module
 !> This module contains the CCPP-compliant GSL orographic gravity wave drag scheme.
 !> @{
+!!
+!> \brief This subroutine initializes the orographic gravity wave drag scheme.
+!!
+!> \section arg_table_drag_suite_init Argument Table
+!! \htmlinclude drag_suite_init.html
+!!
       subroutine drag_suite_init(gwd_opt, errmsg, errflg)
 
       integer,          intent(in)  :: gwd_opt
@@ -377,12 +383,12 @@
    real(kind=kind_phys), intent(inout) ::                        &
      &                      dusfc(:),   dvsfc(:)
 !Output (optional):
-   real(kind=kind_phys), intent(out) ::                          &
+   real(kind=kind_phys), intent(inout) ::                        &
      &                      dusfc_ms(:),dvsfc_ms(:),             &
      &                      dusfc_bl(:),dvsfc_bl(:),             &
      &                      dusfc_ss(:),dvsfc_ss(:),             &
      &                      dusfc_fd(:),dvsfc_fd(:)
-   real(kind=kind_phys), intent(out) ::                          &
+   real(kind=kind_phys), intent(inout) ::                        &
      &         dtaux2d_ms(:,:),dtauy2d_ms(:,:),                  &
      &         dtaux2d_bl(:,:),dtauy2d_bl(:,:),                  &
      &         dtaux2d_ss(:,:),dtauy2d_ss(:,:),                  &

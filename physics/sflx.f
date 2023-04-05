@@ -116,6 +116,7 @@
      &       swdn, swnet, lwdn, sfcems, sfcprs, sfctmp,                 &
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, ivegsrc,             &
      &       vegtyp, soiltyp, slopetyp, shdmin, alb, snoalb,            &
+     &       rhonewsn, exticeden,                                       &
      &       bexpp, xlaip,                                              & !  sfc-perts, mgehne
      &       lheatstrg,                                                 &!  ---  input/outputs:
      &       tbot, cmc, t1, stc, smc, sh2o, sneqv, ch, cm,z0,           &!  ---  outputs:
@@ -123,7 +124,8 @@
      &       edir, et, ett, esnow, drip, dew, beta, etp, ssoil,         &
      &       flx1, flx2, flx3, runoff1, runoff2, runoff3,               &
      &       snomlt, sncovr, rc, pc, rsmin, xlai, rcs, rct, rcq,        &
-     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax)
+     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax,      &
+     &       errmsg, errflg )
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -310,9 +312,9 @@
       real (kind=kind_phys), intent(in) :: ffrozp, dt, zlvl, lwdn,      &
      &       sldpth(nsoil), swdn, swnet, sfcems, sfcprs, sfctmp,        &
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, shdmin, alb, snoalb, &
-     &       bexpp, xlaip                                               & !sfc-perts, mgehne
+     &       bexpp, xlaip, rhonewsn                                     & !sfc-perts, mgehne
 
-      logical, intent(in) :: lheatstrg
+      logical, intent(in) :: lheatstrg, exticeden
 
 !  ---  input/outputs:
       real (kind=kind_phys), intent(inout) :: tbot, cmc, t1, sneqv,     &
@@ -327,6 +329,8 @@
      &       runoff1, runoff2, runoff3, rc, pc, rsmin, xlai, rcs,       &
      &       rct, rcq, rcsoil, soilw, soilm, smcwlt, smcdry, smcref,    &
      &       smcmax
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 
 !  ---  locals:
 !     real (kind=kind_phys) ::  df1h,
@@ -346,6 +350,10 @@
 !
 !===> ...  begin here
 !
+! Initialize CCPP error-handling
+      errflg = 0
+      errmsg = ''
+
 !  --- ...  initialization
 
       runoff1 = 0.0
@@ -411,7 +419,7 @@
 
 !> - Call redprm() to set the land-surface paramters,
 !! including soil-type and veg-type dependent parameters.
-      call redprm
+      call redprm(errmsg, errflg)
         if(ivegsrc == 1) then
 !only igbp type has urban
 !urban
@@ -564,7 +572,7 @@
 !! using old and new snow.
         call snow_new
 !  ---  inputs:                                                         !
-!          ( sfctmp, sn_new,                                            !
+!          ( sfctmp, sn_new, rhonewsn, exticeden,                       !
 !  ---  input/outputs:                                                  !
 !            snowh, sndens )                                            !
 
@@ -877,7 +885,11 @@
 !            smc, ssoil, runoff1, runoff2, runoff3, edir, ec, et,       !
 !            ett, snomlt, drip, dew, flx1, flx3, esnow )                !
 
+!  run-total accumulated snow based on snowfall and snowmelt in [m]
+
       endif
+
+
 !> - Noah LSM post-processing:
 !>  - Calculate sensible heat (h) for return to parent model.
 
@@ -1668,7 +1680,7 @@
 !> This subroutine internally sets default values or optionally read-in
 !! via namelist i/o, all soil and vegetation parateters requied for the execusion
 !! of the Noah LSM.
-      subroutine redprm
+      subroutine redprm(errmsg, errflg)
 !...................................
 !  ---  inputs:
 !    &     ( nsoil, vegtyp, soiltyp, slopetyp, sldpth, zsoil,              &
@@ -1855,7 +1867,8 @@
 !    &       frzx, psisat, slope, snup, salp, bexp, dksat, dwsat,       &
 !    &       smcmax, smcwlt, smcref, smcdry, f1, quartz, fxexp, z0,     &
 !    &       czil, xlai, csoil, rtdis(nsoil)
-
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 !     integer, intent(out) :: nroot
 
 !  ---  locals:
@@ -1866,20 +1879,30 @@
 !
 !===> ...  begin here
 !
+! Initialize CCPP error-handling
+      errflg = 0
+      errmsg = ''
+
       if (soiltyp > defined_soil) then
         write(*,*) 'warning: too many soil types,soiltyp=',soiltyp,     &
      &   'defined_soil=',defined_soil
-        stop 333
+        errflg = 1
+        errmsg = 'ERROR(sflx.f): too many soil types'
+        return
       endif
 
       if (vegtyp > defined_veg) then
         write(*,*) 'warning: too many veg types'
-        stop 333
+        errflg = 1
+        errmsg = 'ERROR(sflx.f): too many veg types'
+        return
       endif
 
       if (slopetyp > defined_slope) then
         write(*,*) 'warning: too many slope types'
-        stop 333
+        errflg = 1
+        errmsg = 'ERROR(sflx.f): too many slope types'
+        return
       endif
 
 !  --- ...  set-up universal parameters (not dependent on soiltyp, vegtyp
@@ -1936,7 +1959,9 @@
 
       if (nroot > nsoil) then
         write(*,*) 'warning: too many root layers'
-        stop 333
+        errflg = 1
+        errmsg = 'ERROR(sflx.f): too many root layers'
+        return
       endif
 
 !  --- ...  calculate root distribution.  present version assumes uniform
@@ -2851,7 +2876,7 @@
       subroutine snow_new
 !...................................
 !  ---  inputs:
-!    &     ( sfctmp, sn_new,                                            &
+!    &     ( sfctmp, sn_new, rhonewsn, exticeden,                       &
 !  ---  input/outputs:
 !    &       snowh, sndens                                              &
 !    &     )
@@ -2900,10 +2925,14 @@
 !           snowcovered and glacierized basin', 6th nordic hydrological
 !           conference, vemadolen, sweden, 1980, 172-177pp.
 
-      if (tempc <= -15.0) then
-        dsnew = 0.05
+      if(.not. exticeden) then
+         if (tempc <= -15.0) then
+            dsnew = 0.05
+         else
+            dsnew = 0.05 + 0.0017*(tempc + 15.0)**1.5
+         endif
       else
-        dsnew = 0.05 + 0.0017*(tempc + 15.0)**1.5
+         dsnew = rhonewsn*0.001
       endif
 
 !  --- ...  adjustment of snow density depending on new snowfall

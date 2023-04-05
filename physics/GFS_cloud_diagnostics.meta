@@ -1,6 +1,7 @@
 [ccpp-table-properties]
   name = GFS_cloud_diagnostics
   type = scheme
+  dependencies = machine.F,radiation_clouds.f
 
 ########################################################################
 [ccpp-arg-table]
@@ -17,6 +18,13 @@
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
   units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr]
+  standard_name = flag_for_cloud_overlap_method_for_radiation
+  long_name = max-random overlap clouds
+  units = flag
   dimensions = ()
   type = integer
   intent = in
@@ -145,6 +153,21 @@
   long_name = ratio of a circle's circumference to its diameter
   units = none
   dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_radiation
+  long_name = flag for vertical ordering in radiation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[si]
+  standard_name = sigma_pressure_hybrid_vertical_coordinate
+  long_name = vertical sigma coordinate for radiation initialization
+  units = none
+  dimensions = (vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in

@@ -61,7 +61,7 @@
       end if
       
       !--- initialize soil vegetation
-      call set_soilveg(me, isot, ivegsrc, nlunit)
+      call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
       pores (:) = maxsmc (:)
       resid (:) = drysmc (:)
@@ -220,7 +220,8 @@
      &       lheatstrg, isot, ivegsrc,                                  &
      &       bexppert, xlaipert, vegfpert,pertvegf,                     &  ! sfc perts, mgehne
      &       albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,        &  
-     &       adjvisbmd, adjnirbmd, adjvisdfd, adjnirdfd,                &  
+     &       adjvisbmd, adjnirbmd, adjvisdfd, adjnirdfd, rhonewsn1,     &  
+     &       exticeden,                                                 &
 !  ---  in/outs:
      &       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
      &       canopy, trans, tsurf, zorl,                                &
@@ -252,7 +253,7 @@
      &                  -1.0_kind_phys, -2.0_kind_phys /
 
 !  ---  input:
-      integer, intent(in) :: im, km, isot, ivegsrc
+      integer, intent(in) :: im, km, isot, ivegsrc 
       real (kind=kind_phys), intent(in) :: grav, cp, hvap, rd, eps,     &
      &       epsm1, rvrdm1
       real (kind=kind_phys), intent(in) :: pertvegf
@@ -265,13 +266,13 @@
      &       snoalb, sfalb, zf,                                         &
      &       bexppert, xlaipert, vegfpert,                              &
      &       albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,        &
-     &       adjvisbmd, adjnirbmd, adjvisdfd, adjnirdfd
+     &       adjvisbmd, adjnirbmd, adjvisdfd, adjnirdfd, rhonewsn1
 
       real (kind=kind_phys),  intent(in) :: delt
 
       logical, dimension(:), intent(in) :: flag_iter, flag_guess, land
 
-      logical, intent(in) :: lheatstrg
+      logical, intent(in) :: lheatstrg, exticeden
 
 !  ---  in/out:
       real (kind=kind_phys), dimension(:), intent(inout) :: weasd,      &
@@ -292,7 +293,7 @@
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: rch, rho,                 &
      &       q0, qs1, theta1,       weasd_old, snwdph_old,              &
-     &       tprcp_old, srflag_old, tskin_old, canopy_old
+     &       tprcp_old, srflag_old, tskin_old, canopy_old              
 
       real (kind=kind_phys), dimension(km) :: et, sldpth, stsoil,       &
      &       smsoil, slsoil
@@ -309,8 +310,8 @@
      &       smcdry, smcref, smcmax, sneqv, snoalb1d, snowh,            &
      &       snomlt, sncovr, soilw, soilm, ssoil, tsea, th2, tbot,      &
      &       xlai, zlvl, swdn, tem, z0, bexpp, xlaip, vegfp,            &
-     &       mv, sv, alphav, betav, vegftmp, cpinv, hvapi, elocp
-
+     &       mv, sv, alphav, betav, vegftmp, cpinv, hvapi, elocp,       &
+     &       rhonewsn 
       integer :: couple, ice, nsoil, nroot, slope, stype, vtype
       integer :: i, k, iflag
 !
@@ -326,7 +327,6 @@
       errflg = 0
 
 !> - Save land-related prognostic fields for guess run.
-
       do i = 1, im
         if (land(i) .and. flag_guess(i)) then
           weasd_old(i)  = weasd(i)
@@ -335,7 +335,6 @@
           canopy_old(i) = canopy(i)
           tprcp_old(i)  = tprcp(i)
           srflag_old(i) = srflag(i)
-
           do k = 1, km
             smc_old(i,k) = smc(i,k)
             stc_old(i,k) = stc(i,k)
@@ -361,7 +360,6 @@
           sbsno(i)  = zero
           snowc(i)  = zero
           snohf(i)  = zero
-
 !> - Initialize variables wind, q, and rh at level 1.
 
           q0(i)   = max(q1(i), qmin)   !* q1=specific humidity at level 1 (kg/kg)
@@ -371,7 +369,6 @@
           qs1(i) = fpvs( t1(i) )        !* qs1=sat. humidity at level 1 (kg/kg)
           qs1(i) = max(eps*qs1(i) / (prsl1(i)+epsm1*qs1(i)), qmin)
           q0 (i) = min(qs1(i), q0(i))
-
           do k = 1, km
             zsoil(i,k) = zsoil_noah(k)
           enddo
@@ -524,7 +521,8 @@
 !> - Apply perturbation of soil type b parameter and leave area index.
           bexpp  = bexppert(i)                   ! sfc perts, mgehne
           xlaip  = xlaipert(i)                   ! sfc perts, mgehne
-
+!> - New snow depth variables 
+          rhonewsn = rhonewsn1(i)
 !> - Call Noah LSM gfssflx().
 
           call gfssflx                                                  & ! ccppdox: these is sflx in mpbl
@@ -533,6 +531,7 @@
      &       swdn, solnet, lwdn, sfcems, sfcprs, sfctmp,                &
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, ivegsrc,             &
      &       vtype, stype, slope, shdmin1d, alb, snoalb1d,              &
+     &       rhonewsn, exticeden,                                       &
      &       bexpp, xlaip,                                              & ! sfc-perts, mgehne
      &       lheatstrg,                                                 &
 !  ---  input/outputs:
@@ -543,7 +542,8 @@
      &       edir, et, ett, esnow, drip, dew, beta, etp, ssoil,         &
      &       flx1, flx2, flx3, runoff1, runoff2, runoff3,               &
      &       snomlt, sncovr, rc, pc, rsmin, xlai, rcs, rct, rcq,        &
-     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax)
+     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax,      &
+     &       errmsg, errflg )
 
 !> - Noah LSM: prepare variables for return to parent model and unit conversion.
 !  -   6. output (o):

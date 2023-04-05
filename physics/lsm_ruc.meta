@@ -634,6 +634,13 @@
   dimensions = ()
   type = logical
   intent = in
+[exticeden]
+  standard_name = do_external_surface_frozen_precipitation_density
+  long_name = flag for calculating frozen precip ice density outside of the LSM
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [lsoil_ruc]
   standard_name = vertical_dimension_of_soil_internal_to_land_surface_scheme
   long_name = number of soil layers internal to land surface model
@@ -644,6 +651,48 @@
 [lsoil]
   standard_name = vertical_dimension_of_soil
   long_name = soil vertical layer dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[mosaic_lu]
+  standard_name = control_for_fractional_landuse_in_ruc_land_surface_scheme
+  long_name = control for use of fractional landuse info in RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[mosaic_soil]
+  standard_name = control_for_fractional_soil_in_ruc_land_surface_scheme
+  long_name = control for use of fractional soil info in RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[isncond_opt]
+  standard_name = control_for_soil_thermal_conductivity_option_in_ruc_lsm
+  long_name = control for soil thermal conductivity option in RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[isncovr_opt]
+  standard_name = control_for_snow_cover_fraction_option_in_ruc_lsm
+  long_name = control for snow cover fraction option in RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[nlcat]
+  standard_name = number_of_vegetation_categories
+  long_name = number of vegetation categories
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[nscat]
+  standard_name = number_of_soil_categories
+  long_name = number of soil categories
   units = count
   dimensions = ()
   type = integer
@@ -667,6 +716,22 @@
   standard_name = longitude_in_degree
   long_name = longitude in degree east
   units = degree_east
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[oro]
+  standard_name = height_above_mean_sea_level
+  long_name = height_above_mean_sea_level
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sigma]
+  standard_name = standard_deviation_of_subgrid_orography
+  long_name = standard deviation of subgrid height_above_mean_sea_level
+  units = m
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -716,6 +781,22 @@
   units = index
   dimensions = (horizontal_loop_extent)
   type = integer
+  intent = in
+[vegtype_frac]
+  standard_name = fraction_of_vegetation_category
+  long_name = fraction of horizontal grid area occupied by given vegetation category
+  units = frac
+  dimensions = (horizontal_loop_extent,number_of_vegetation_categories)
+  type = real
+  kind = kind_phys
+  intent = in
+[soiltype_frac]
+  standard_name = fraction_of_soil_category
+  long_name = fraction of horizontal grid area occupied by given soil category
+  units = frac
+  dimensions = (horizontal_loop_extent,number_of_soil_categories)
+  type = real
+  kind = kind_phys
   intent = in
 [sigmaf]
   standard_name = vegetation_area_fraction
@@ -952,6 +1033,14 @@
   type = real
   kind = kind_phys
   intent = in
+[rhonewsn1]
+  standard_name = surface_frozen_precipitation_density
+  long_name = density of precipitation ice
+  units = kg m-3
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat !of dry air at constant pressure
@@ -1000,10 +1089,34 @@
   type = real
   kind = kind_phys
   intent = in
+[con_hfus]
+  standard_name = latent_heat_of_fusion_of_water_at_0C
+  long_name = latent heat of fusion
+  units = J kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [con_fvirt]
   standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
   long_name = rv/rd - 1 (rv = ideal gas constant for water vapor)
   units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[stbolt]
+  standard_name = stefan_boltzmann_constant
+  long_name = Stefan-Boltzmann constant
+  units = W m-2 K-4
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[rhoh2o]
+  standard_name = density_of_fresh_water
+  long_name = density of fresh water
+  units = kg m-3
   dimensions = ()
   type = real
   kind = kind_phys
@@ -1329,9 +1442,33 @@
   kind = kind_phys
   intent = inout
 [snowfallac_lnd]
-  standard_name = surface_snow_amount_over_land
-  long_name = run-total snow accumulation on the ground over land
+  standard_name = surface_snow_amount_assuming_variable_snow_density_over_land
+  long_name = run-total snow accumulation on the ground with variable snow density over land
   units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[acsnow_lnd]
+  standard_name = surface_snow_lwe_thickness_amount_over_land
+  long_name = run-total snowfall water equivalent over land
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[snowmt_lnd]
+  standard_name = surface_snow_melt_over_land
+  long_name = snow melt during timestep over land
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[snohf]
+  standard_name = snow_freezing_rain_upward_latent_heat_flux
+  long_name = latent heat flux due to snow and frz rain
+  units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -1465,8 +1602,24 @@
   kind = kind_phys
   intent = in
 [snowfallac_ice]
-  standard_name = surface_snow_amount_over_ice
-  long_name = run-total snow accumulation on the ground over ice
+  standard_name = surface_snow_amount_assuming_variable_snow_density_over_ice
+  long_name = run-total snow accumulation on the ground with variable snow density over ice
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[acsnow_ice]
+  standard_name = surface_snow_lwe_thickness_amount_over_ice
+  long_name = run-total snowfall water equivalent over ice
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[snowmt_ice]
+  standard_name = surface_snow_melt_over_ice
+  long_name = snow melt during timestep over ice
   units = kg m-2
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1505,7 +1658,7 @@
   kind = kind_phys
   intent = out
 [rhosnf]
-  standard_name = frozen_precipitation_density
+  standard_name = lsm_internal_surface_frozen_precipitation_density
   long_name = density of frozen precipitation
   units = kg m-3
   dimensions = (horizontal_loop_extent)
