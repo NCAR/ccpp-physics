@@ -70,7 +70,7 @@
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
      &   prslp(:,:), garea(:), hpbl(:), dot(:,:), phil(:,:),            &
-     &   qmicro(:,:),tmf(:,:),prevsq(:,:),q(:,:)
+     &   qmicro(:,:),tmf(:,:,:),prevsq(:,:),q(:,:)
 
       real(kind=kind_phys), intent(in) :: sigmain(:,:)
 !
@@ -156,10 +156,10 @@ c
 cc
 
 !  parameters for prognostic sigma closure
-      real(kind=kind_phys) omega_u(im,km),zdqca(im,km),qlks(im,km),
+      real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
-     &                     sigmab(im)
-      real(kind=kind_phys) gravinv,dxcrtas
+     &                     sigmab(im),qadv(im,km)
+      real(kind=kind_phys) gravinv,dxcrtas,invdelt
       logical flag_shallow
 c  physical parameters
 !     parameter(g=grav,asolfac=0.89)
@@ -247,6 +247,7 @@ c-----------------------------------------------------------------------
       errflg = 0
 
       gravinv = 1./grav
+      invdelt = 1./delt
 
       elocp = hvap/cp
       el2orc = hvap*hvap/(rv*cp)
@@ -524,7 +525,6 @@ c
          do i = 1, im
             dbyo1(i,k)=0.
             zdqca(i,k)=0.
-            qlks(i,k)=0.
             omega_u(i,k)=0.
             zeta(i,k)=1.0
          enddo
@@ -1270,7 +1270,7 @@ c
                 qcko(i,k)= qlk + qrch
                 pwo(i,k) = etah * c0t(i,k) * dz * qlk
                 cnvwt(i,k) = etah * qlk * grav / dp
-                qlks(i,k)=qlk
+                zdqca(i,k)=dq/eta(i,k)
               endif
 !
 !  compute buoyancy and drag for updraft velocity
@@ -1435,7 +1435,7 @@ c
                 qcko(i,k) = qlk + qrch
                 pwo(i,k) = etah * c0t(i,k) * dz * qlk
                 cnvwt(i,k) = etah * qlk * grav / dp
-                qlks(i,k)=qlk
+                zdqca(i,k)=dq/eta(i,k)
               endif
             endif
           endif
@@ -1601,24 +1601,13 @@ c
           if(dq > 0.) then
             qlko_ktcon(i) = dq
             qcko(i,k) = qrch
-            qlks(i,k) = qlko_ktcon(i)
+            zdqca(i,k) = dq
           endif
         endif
       enddo
       endif
 c
      
-       do k = 2, km1
-        do i = 1, im
-           if (cnvflg(i)) then
-              if(k > kbcon(i) .and. k < ktcon(i)) then
-                 zdqca(i,k)=((qlks(i,k)-qlks(i,k-1)) +
-     &                pwo(i,k)+dellal(i,k))
-              endif
-           endif
-        enddo
-      enddo
-
 c--- compute precipitation efficiency in terms of windshear
 c
 !! - Calculate the wind shear and precipitation efficiency according to equation 58 in Fritsch and Chappell (1980) \cite fritsch_and_chappell_1980 :
@@ -1935,11 +1924,32 @@ c     updraft velcoity
 c
 !> - From Bengtsson et al. (2022) \cite Bengtsson_2022 prognostic closure scheme, equation 8, call progsigma_calc() to compute updraft area fraction based on a moisture budget
       if(progsigma)then
+!     Initial computations, dynamic q-tendency
+         if(first_time_step .and. .not.restart)then
+            do k = 1,km
+               do i = 1,im
+                  qadv(i,k)=0.
+               enddo
+            enddo
+         else
+            do k = 1,km
+               do i = 1,im
+                  qadv(i,k)=(q(i,k) - prevsq(i,k))*invdelt
+               enddo
+            enddo
+         endif
+
+         do k = 1,km
+            do i = 1,im
+               tmfq(i,k)=tmf(i,k,1)
+            enddo
+         enddo
+
          flag_shallow = .true.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
-     &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
-     &        prevsq,q,kbcon1,ktcon,cnvflg,
-     &        sigmain,sigmaout,sigmab,errmsg,errflg)
+     &        del,tmfq,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
+     &        qadv,kbcon1,ktcon,cnvflg,
+     &        sigmain,sigmaout,sigmab)
       endif
 
 !> - From Han et al.'s (2017) \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity.
