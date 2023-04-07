@@ -3,6 +3,7 @@
 
 module cu_unified_deep
      use machine , only : kind_phys
+     use progsigma, only : progsigma_calc
 
      real(kind=kind_phys), parameter::g=9.81
      real(kind=kind_phys), parameter:: cp=1004.

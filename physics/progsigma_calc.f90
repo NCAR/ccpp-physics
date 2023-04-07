@@ -1,3 +1,11 @@
+      module progsigma
+
+        implicit none
+
+        public progsigma_calc
+
+      contains
+
 !>\file progsigma_calc.f90
 !! This file contains the subroutine that calculates the prognostic
 !! updraft area fraction that is used for closure computations in 
@@ -211,3 +219,5 @@
       endif
 
      end subroutine progsigma_calc
+
+end module progsigma

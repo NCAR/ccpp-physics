@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = cu_unified_driver
   type = scheme
-  dependencies = cu_unified_deep.F90,cu_unified_sh.F90,machine.F,physcons.F90
+  dependencies = cu_unified_deep.F90,cu_unified_sh.F90,machine.F,physcons.F90,progsigma_calc.f90
 
 ########################################################################
 [ccpp-arg-table]

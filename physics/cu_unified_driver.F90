@@ -9,12 +9,13 @@ module cu_unified_driver
    use machine   , only: kind_phys
    use cu_unified_deep, only: cu_unified_deep_run,neg_check,fct1d3
    use cu_unified_sh  , only: cu_unified_sh_run
+   use progsigma      , only: progsigma_calc
 
    implicit none
 
    private
 
-   public :: cu_unified_driver_init, cu_unified_driver_run
+   public :: cu_unified_driver_init, cu_unified_driver_run, progsigma_calc
 
 contains
 

@@ -3,6 +3,8 @@
 
 module cu_unified_sh
     use machine , only : kind_phys
+    use progsigma, only : progsigma_calc
+
     !real(kind=kind_phys), parameter:: c1_shal=0.0015! .0005
     real(kind=kind_phys), parameter:: c1_shal=0. !0.005! .0005
     real(kind=kind_phys), parameter:: g  =9.81
