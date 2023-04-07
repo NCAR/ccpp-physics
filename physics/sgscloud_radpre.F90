@@ -364,9 +364,6 @@
               endif ! qci_conv
             enddo
           enddo
-<<<<<<< HEAD
-        endif ! imfdeepcnv
-=======
 
         elseif (imfdeepcnv == imfdeepcnv_sas) then
 
@@ -462,7 +459,6 @@
           enddo
 
         endif ! convection scheme check
->>>>>>> 57c444f6535bf34cbe8e75a52a74ea3bec2f8f50
 
       endif ! timestep > 1
 
