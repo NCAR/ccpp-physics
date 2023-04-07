@@ -226,6 +226,27 @@
   dimensions = ()
   type = integer
   intent = in
+[ntsmoke]
+  standard_name = index_for_smoke_in_tracer_concentration_array
+  long_name = tracer index for smoke
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntdust]
+  standard_name = index_for_dust_in_tracer_concentration_array
+  long_name = tracer index for dust
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntcoarsepm]
+  standard_name = index_for_coarse_particulate_matter_in_tracer_concentration_array
+  long_name = tracer index for coarse particulate matter
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [iaermdl]
   standard_name = control_for_aerosol_radiation_scheme
   long_name = control of aerosol scheme in radiation
@@ -1271,6 +1292,14 @@
   type = real
   kind = kind_phys
   intent = out
+[ext550]
+  standard_name = aerosol_optical_depth_at_550nm
+  long_name = 3d optical extinction for total aerosol species
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [clouds6]
   standard_name = cloud_rain_water_path
   long_name = cloud rain water path
@@ -1444,19 +1473,11 @@
   dimensions = ()
   type = logical
   intent = in
-[smoke_ext]
-  standard_name = extinction_coefficient_in_air_due_to_smoke
-  long_name = extinction coefficient in air due to smoke
-  units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[dust_ext]
-  standard_name = extinction_coefficient_in_air_due_to_dust
-  long_name = extinction coefficient in air due to dust
-  units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+[fdb_coef]
+  standard_name = smoke_dust_direct_fdb_coef
+  long_name = smoke dust direct feedback coefficents
+  units = none
+  dimensions = (7)
   type = real
   kind = kind_phys
   intent = in
@@ -1471,13 +1492,6 @@
 [spp_rad]
   standard_name = control_for_radiation_spp_perturbations
   long_name = control for radiation spp perturbations
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[rrfs_smoke_band]
-  standard_name = index_of_shortwave_band_affected_by_smoke
-  long_name = rrtmg band number that smoke and dust should affect
   units = count
   dimensions = ()
   type = integer

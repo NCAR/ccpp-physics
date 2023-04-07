@@ -29,6 +29,14 @@
   dimensions = ()
   type = integer
   intent = in
+[fhswr]
+  standard_name = period_of_shortwave_radiation_calls
+  long_name = frequency for shortwave radiation
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [flag_init]
   standard_name = flag_for_first_timestep
   long_name = flag signaling first time step for time integration loop
@@ -218,6 +226,22 @@
   type = real
   kind = kind_phys
   intent = inout
+[qlc]
+  standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[qli]
+  standard_name = ice_water_mixing_ratio_convective_transport_tracer
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [imfdeepcnv]
   standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
@@ -235,6 +259,13 @@
 [imfdeepcnv_unified]
   standard_name = identifier_for_unified_deep_convection
   long_name = flag for Unified deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imfdeepcnv_sas]
+  standard_name = identifier_for_simplified_arakawa_schubert_deep_convection
+  long_name = flag for SAS deep convection scheme
   units = flag
   dimensions = ()
   type = integer
@@ -430,6 +461,13 @@
 [imp_physics_gfdl]
   standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imp_physics_fa]
+  standard_name = identifier_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
   units = flag
   dimensions = ()
   type = integer
