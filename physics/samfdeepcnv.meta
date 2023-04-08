@@ -70,10 +70,10 @@
   type = logical
   intent = in
 [tmf]
-  standard_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
-  long_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
+  standard_name = tendency_of_vertically_diffused_tracer_concentration
+  long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
   units = kg kg-1 s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
   type = real
   kind = kind_phys
   intent = in
