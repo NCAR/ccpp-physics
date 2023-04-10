@@ -32,7 +32,7 @@ module mp_nssl
                               imp_physics, imp_physics_nssl,  &
                               nssl_cccn, nssl_alphah, nssl_alphahl, &
                               nssl_alphar, nssl_ehw0_in, nssl_ehlw0_in,   &
-                              nssl_ccn_on, nssl_hail_on, nssl_invertccn ) 
+                              nssl_ccn_on, nssl_hail_on, nssl_invertccn, nssl_3moment ) 
                               
 
         use module_mp_nssl_2mom, only: nssl_2mom_init, nssl_2mom_init_const
@@ -54,12 +54,12 @@ module mp_nssl
          integer,                   intent(in)    :: imp_physics_nssl
          real(kind_phys),           intent(in)    :: nssl_cccn, nssl_alphah, nssl_alphahl
          real(kind_phys),           intent(in)    :: nssl_alphar, nssl_ehw0_in, nssl_ehlw0_in 
-         logical,                   intent(in)    :: nssl_ccn_on, nssl_hail_on, nssl_invertccn
+         logical,                   intent(in)    :: nssl_ccn_on, nssl_hail_on, nssl_invertccn, nssl_3moment
 
          ! Local variables: dimensions used in nssl_init
          integer               :: ims,ime, jms,jme, kms,kme, nx, nz, i,k
          real :: nssl_params(20)
-         integer :: ihailv
+         integer :: ihailv,ipc
          
 
  ! Initialize the CCPP error handling variables
@@ -104,9 +104,9 @@ module mp_nssl
 
 
          nssl_params(:) = 0.0
-         nssl_params(1)  = nssl_cccn
-         nssl_params(2)  = nssl_alphah
-         nssl_params(3)  = nssl_alphahl
+       !  nssl_params(1)  = nssl_cccn    ! use direct interface instead
+       !  nssl_params(2)  = nssl_alphah  ! use direct interface instead
+       !  nssl_params(3)  = nssl_alphahl ! use direct interface instead
          nssl_params(4)  = 4.e5 ! nssl_cnoh -- not used for 2-moment
          nssl_params(5)  = 4.e4 ! nssl_cnohl-- not used for 2-moment
          nssl_params(6)  = 4.e5 ! nssl_cnor-- not used for 2-moment
@@ -114,10 +114,6 @@ module mp_nssl
          nssl_params(8)  = 500. ! nssl_rho_qh
          nssl_params(9)  = 800. ! nssl_rho_qhl
          nssl_params(10) = 100. ! nssl_rho_qs
-         nssl_params(11) = 0 ! nssl_ipelec_tmp
-         nssl_params(12) = 11 ! nssl_isaund
-         nssl_params(13) = 0 ! 1= turn on cccna; 0 = turn off
-         nssl_params(14)  = nssl_alphar
          
          nssl_qccn = nssl_cccn/1.225
       !   if (mpirank==mpiroot) then
@@ -129,10 +125,21 @@ module mp_nssl
          ELSE
            ihailv = -1
          ENDIF
+         
+         IF ( nssl_3moment ) THEN
+           ipc = 8
+         ELSE
+           ipc = 5
+         ENDIF
 
 !           write(0,*) 'call nssl_2mom_init'
-         CALL nssl_2mom_init(ims,ime, jms,jme, kms,kme,nssl_params,ipctmp=5,mixphase=0, &
-                ihvol=ihailv,nssl_ehw0=nssl_ehw0_in,nssl_ehlw0=nssl_ehlw0_in,errmsg=errmsg,errflg=errflg,myrank=mpirank,mpiroot=mpiroot)
+         CALL nssl_2mom_init(ims,ime, jms,jme, kms,kme,nssl_params,ipctmp=ipc,mixphase=0,   &
+                ihvol=ihailv,nssl_ehw0=nssl_ehw0_in,nssl_ehlw0=nssl_ehlw0_in,errmsg=errmsg, &
+                nssl_alphar=nssl_alphar,                                                    &
+                nssl_alphah=nssl_alphah,                                                    &
+                nssl_alphahl=nssl_alphahl,                                                  &
+                nssl_cccn=nssl_cccn,                                                        &
+                errflg=errflg,myrank=mpirank,mpiroot=mpiroot)
 
          ! For restart runs, the init is done here
          if (restart) then
@@ -161,6 +168,7 @@ module mp_nssl
 !                             spechum, cccn, qc, qr, qi, qs, qh, qhl,         &
                              spechum, cccn, cccna, qc, qr, qi, qs, qh, qhl,         &
                              ccw, crw, cci, csw, chw, chl, vh, vhl,          &
+                             zrw, zhw, zhl,                                  &
                               tgrs, prslk, prsl, phii, omega, dtp,           &
                               prcp, rain, graupel, ice, snow, sr,            &
                              refl_10cm, do_radar_ref, first_time_step, restart, &
@@ -168,7 +176,8 @@ module mp_nssl
                              nleffr, nieffr, nseffr, nreffr,                 &
                              imp_physics, convert_dry_rho,                   &
                              imp_physics_nssl, nssl_ccn_on,                  &
-                             nssl_hail_on, nssl_invertccn, ntccn, ntccna,    &
+                             nssl_hail_on, nssl_invertccn, nssl_3moment,     &
+                             ntccn, ntccna,    &
                              errflg, errmsg)
 
         use module_mp_nssl_2mom, only: calcnfromq, na
@@ -197,6 +206,9 @@ module mp_nssl
          real(kind_phys),           intent(inout) :: chl(:,:) !(1:ncol,1:nlev) hail number
          real(kind_phys),           intent(inout) :: vh (:,:) !(1:ncol,1:nlev) graupel volume 
          real(kind_phys),           intent(inout) :: vhl(:,:) !(1:ncol,1:nlev) hail volume
+         real(kind_phys),           intent(inout) :: zrw(:,:) !(1:ncol,1:nlev) rain reflectivity
+         real(kind_phys),           intent(inout) :: zhw(:,:) !(1:ncol,1:nlev) graupel reflectivity
+         real(kind_phys),           intent(inout) :: zhl(:,:) !(1:ncol,1:nlev) hail reflectivity
          ! State variables and timestep information
          real(kind_phys),           intent(inout) :: tgrs (:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(in   ) :: prsl (:,:) !(1:ncol,1:nlev)
@@ -223,7 +235,7 @@ module mp_nssl
          integer, intent(in) :: nleffr, nieffr, nseffr, nreffr
          integer,                   intent(in)    :: imp_physics
          integer,                   intent(in)    :: imp_physics_nssl
-         logical,                   intent(in)    :: nssl_ccn_on, nssl_hail_on, nssl_invertccn
+         logical,                   intent(in)    :: nssl_ccn_on, nssl_hail_on, nssl_invertccn, nssl_3moment
          integer,                   intent(in)    :: ntccn, ntccna
         
         integer,          intent(out)   :: errflg
@@ -256,6 +268,9 @@ module mp_nssl
          ! create temporaries for hail in case it does not exist
          !real(kind_phys) :: chl_mp(1:ncol,1:nlev)           !< kg-1 (number mixing ratio)
          real(kind_phys) :: vhl_mp(1:ncol,1:nlev)           !< m3 kg-1 (volume mixing ratio)
+         real(kind_phys) :: zrw_mp(1:ncol,1:nlev)           !< m6 kg-1 (reflectivity)
+         real(kind_phys) :: zhw_mp(1:ncol,1:nlev)           !< m6 kg-1 (reflectivity)
+         real(kind_phys) :: zhl_mp(1:ncol,1:nlev)           !< m6 kg-1 (reflectivity)
          ! Vertical velocity and level width
          real(kind_phys) :: w(1:ncol,1:nlev)                !< m s-1
          real(kind_phys) :: dz(1:ncol,1:nlev)               !< m
@@ -342,10 +357,17 @@ module mp_nssl
          ns_mp = csw/(1.0_kind_phys-spechum)
          nh_mp = chw/(1.0_kind_phys-spechum)
          vh_mp = vh/(1.0_kind_phys-spechum)
+         IF ( nssl_3moment ) THEN
+           zrw_mp = zrw/(1.0_kind_phys-spechum)
+           zhw_mp = zhw/(1.0_kind_phys-spechum)
+         ENDIF
          IF ( nssl_hail_on ) THEN
            qhl_mp = qhl/(1.0_kind_phys-spechum)
            nhl_mp = chl/(1.0_kind_phys-spechum)
            vhl_mp = vhl/(1.0_kind_phys-spechum)
+           IF ( nssl_3moment ) THEN
+             zhl_mp = zhl/(1.0_kind_phys-spechum)
+           ENDIF
          ENDIF
          ELSE
 !         qv_mp = spechum ! /(1.0_kind_phys-spechum)
@@ -361,10 +383,18 @@ module mp_nssl
          ni_mp = cci
          ns_mp = csw
          nh_mp = chw
+         vh_mp = vh
+         IF ( nssl_3moment ) THEN
+           zrw_mp = zrw
+           zhw_mp = zhw
+         ENDIF
          IF ( nssl_hail_on ) THEN
            qhl_mp = qhl ! /(1.0_kind_phys-spechum)
            nhl_mp = chl
            vhl_mp = vhl
+           IF ( nssl_3moment ) THEN
+             zhl_mp = zhl
+           ENDIF
          ENDIF
          
          ENDIF
@@ -593,6 +623,9 @@ module mp_nssl
                      VHW=vh_mp,                     &
                      VHL=vhl_mp,                     &
                      cn=cn_mp,                        &
+                     ZRW=zrw_mp,                     &
+                     ZHW=zhw_mp,                     &
+                     ZHL=zhl_mp,                     &
 !                     cna=cna_mp, f_cna=( ntccna > 0 ),  & ! for future use
                       cna=cna_mp, f_cna=.false. ,           &
                     PII=prslk,                         &
@@ -645,6 +678,9 @@ module mp_nssl
                      CHL=nhl_mp,                       &
                      VHW=vh_mp,                     &
                      VHL=vhl_mp,                     &
+                     ZRW=zrw_mp,                     &
+                     ZHW=zhw_mp,                     &
+                     ZHL=zhl_mp,                     &
                 !     cn=cccn,                        &
                      PII=prslk,                         &
                      P=prsl,                                &
@@ -750,10 +786,17 @@ module mp_nssl
          csw      = ns_mp/(1.0_kind_phys+qv_mp)
          chw      = nh_mp/(1.0_kind_phys+qv_mp)
          vh       = vh_mp/(1.0_kind_phys+qv_mp)
+          IF ( nssl_3moment ) THEN
+           zrw = zrw_mp/(1.0_kind_phys+qv_mp)
+           zhw = zhw_mp/(1.0_kind_phys+qv_mp)
+          ENDIF
          IF ( nssl_hail_on ) THEN
           qhl     = qhl_mp/(1.0_kind_phys+qv_mp)
           chl     = nhl_mp/(1.0_kind_phys+qv_mp)
           vhl     = vhl_mp/(1.0_kind_phys+qv_mp)
+          IF ( nssl_3moment ) THEN
+           zhl = zhl_mp/(1.0_kind_phys+qv_mp)
+          ENDIF
          ENDIF
          ELSE
 !         spechum = qv_mp ! /(1.0_kind_phys+qv_mp)
@@ -770,10 +813,17 @@ module mp_nssl
          csw      = ns_mp
          chw      = nh_mp
          vh       = vh_mp
+          IF ( nssl_3moment ) THEN
+           zrw = zrw_mp
+           zhw = zhw_mp
+          ENDIF
          IF ( nssl_hail_on ) THEN
           qhl     = qhl_mp ! /(1.0_kind_phys+qv_mp)
           chl     = nhl_mp
           vhl     = vhl_mp
+          IF ( nssl_3moment ) THEN
+           zhl = zhl_mp
+          ENDIF
          ENDIF
          
          ENDIF
