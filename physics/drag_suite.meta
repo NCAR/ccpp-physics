@@ -536,7 +536,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [dx]
   standard_name = characteristic_grid_lengthscale
   long_name = size of the grid cell
