@@ -37,6 +37,7 @@
         use machine,          only: kind_phys
         use set_soilveg_mod,  only: set_soilveg
         use namelist_soilveg
+        use noahmp_tables
 
         implicit none
         integer,              intent(in) :: lsm
@@ -88,6 +89,8 @@
         !--- initialize soil vegetation
         call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
+        !--- read in noahmp table
+        call read_mp_table_parameters
 
         ! initialize psih and psim 
 
@@ -162,10 +165,6 @@
   use sfc_diff,   only : stability
 ! use module_sf_noahmplsm
   use module_sf_noahmp_glacier
-! use noahmp_tables, only : isice_table, co2_table, o2_table,            &
-!                           isurban_table, smcref_table, smcdry_table,   &
-!                           smcmax_table, co2_table, o2_table,           &
-!                           saim_table, laim_table
   use noahmp_tables
 
   implicit none
@@ -756,7 +755,6 @@ do i = 1, im
       soil_color_category = soilcol(i)
 !     soil_color_category = 4
 
-      call read_mp_table_parameters(dataset_identifier)
 
       call transfer_mp_parameters(vegetation_category, soil_category, &
                         slope_category, soil_color_category, crop_type,parameters)

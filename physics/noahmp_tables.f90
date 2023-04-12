@@ -308,7 +308,7 @@ module noahmp_tables
 
 contains
 
-  subroutine read_mp_table_parameters(dataset_identifier)
+  subroutine read_mp_table_parameters
     implicit none
 
 
