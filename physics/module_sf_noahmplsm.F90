@@ -442,7 +442,7 @@ contains
 		   shg     , shc     , shb     , evg     , evb     , ghv     , & ! out :
 		   ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
 		   chleaf  , chuc    , chv2    , chb2    , fpice   , pahv    , &
-                   pahg    , pahb    , pah     , esnow   , laisun  , laisha  , rb &
+                   pahg    , pahb    , pah     , esnow   , canhs   , laisun  , laisha  , rb &
 #ifdef CCPP
                    ,errmsg, errflg)
 #else
@@ -724,7 +724,7 @@ contains
   logical                             :: dveg_active !< flag to run dynamic vegetation
   logical                             :: crop_active !< flag to run crop model
 ! add canopy heat storage (C.He added based on GY Niu's communication)
-  real (kind=kind_phys)               :: canhs ! canopy heat storage change w/m2
+  real (kind=kind_phys)   , intent(out)  :: canhs ! canopy heat storage change w/m2
   
   ! intent (out) variables need to be assigned a value.  these normally get assigned values
   ! only if dveg == 2.

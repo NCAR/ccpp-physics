@@ -157,7 +157,45 @@
       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
       cmm, chh, evbs, evcw, sbsno, pah, ecan, etran, edir, snowc,&
       stm, snohf,smcwlt2, smcref2, wet1, t2mmp, q2mp,zvfun,      &
-      ztmax, errmsg, errflg)     
+      ztmax, errmsg, errflg,                                     &
+      canopy_heat_storage_ccpp,                                  &
+      rainfall_ccpp,                                             &
+      sw_absorbed_total_ccpp,                                    &
+      sw_reflected_total_ccpp,                                   &
+      lw_absorbed_total_ccpp,                                    &
+      temperature_bare_grd_ccpp,                                 &
+      temperature_veg_grd_ccpp,                                  &
+      temperature_veg_2m_ccpp,                                   &
+      temperature_bare_2m_ccpp,                                  &
+      spec_humidity_veg_2m_ccpp,                                 &
+      spec_humidity_bare_2m_ccpp,                                &
+      sw_absorbed_veg_ccpp,                                      &
+      sw_absorbed_ground_ccpp,                                   &
+      snowmelt_out_ccpp,                                         &
+      snowmelt_shallow_ccpp,                                     &
+      albedo_direct_snow_ccpp,                                   &
+      albedo_diffuse_snow_ccpp,                                  &
+      ch_vegetated_ccpp,                                         &
+      ch_bare_ground_ccpp,                                       &
+      sensible_heat_grd_veg_ccpp,                                &
+      sensible_heat_leaf_ccpp,                                   &
+      sensible_heat_grd_bar_ccpp,                                &
+      latent_heat_grd_veg_ccpp,                                  &
+      latent_heat_grd_bare_ccpp,                                 &
+      ground_heat_veg_ccpp,                                      &
+      ground_heat_bare_ccpp,                                     &
+      lw_absorbed_grd_veg_ccpp,                                  &
+      lw_absorbed_leaf_ccpp,                                     &
+      lw_absorbed_grd_bare_ccpp,                                 &
+      latent_heat_trans_ccpp,                                    &
+      latent_heat_leaf_ccpp,                                     &
+      ch_leaf_ccpp,                                              &
+      ch_below_canopy_ccpp,                                      &
+      ch_vegetated_2m_ccpp,                                      &
+      ch_bare_ground_2m_ccpp,                                    &
+      precip_adv_heat_veg_ccpp,                                  &
+      precip_adv_heat_grd_v_ccpp,                                &
+      precip_adv_heat_grd_b_ccpp                                 )
 
   use machine ,   only : kind_phys
   use funcphys,   only : fpvs
@@ -360,6 +398,45 @@
   character(len=*)    ,                    intent(out)   :: errmsg
   integer             ,                    intent(out)   :: errflg
 
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: canopy_heat_storage_ccpp ! within-canopy heat [W/m2]
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: rainfall_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: sw_absorbed_total_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: sw_reflected_total_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: lw_absorbed_total_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: temperature_bare_grd_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: temperature_veg_grd_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: temperature_veg_2m_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: temperature_bare_2m_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: spec_humidity_veg_2m_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: spec_humidity_bare_2m_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: sw_absorbed_veg_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: sw_absorbed_ground_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: snowmelt_out_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: snowmelt_shallow_ccpp
+  real(kind=kind_phys), dimension(:,:), intent(out), optional :: albedo_direct_snow_ccpp
+  real(kind=kind_phys), dimension(:,:), intent(out), optional :: albedo_diffuse_snow_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: ch_vegetated_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: ch_bare_ground_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: sensible_heat_grd_veg_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: sensible_heat_leaf_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: sensible_heat_grd_bar_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: latent_heat_grd_veg_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: latent_heat_grd_bare_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: ground_heat_veg_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: ground_heat_bare_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: lw_absorbed_grd_veg_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: lw_absorbed_leaf_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: lw_absorbed_grd_bare_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: latent_heat_trans_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: latent_heat_leaf_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: ch_leaf_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: ch_below_canopy_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: ch_vegetated_2m_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: ch_bare_ground_2m_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: precip_adv_heat_veg_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: precip_adv_heat_grd_v_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: precip_adv_heat_grd_b_ccpp
+
 !
 !  ---  some new options, hard code for now
 !
@@ -534,6 +611,8 @@
   real (kind=kind_phys)                            :: lai_sunlit            !   out | sunlit leaf area index [m2/m2]
   real (kind=kind_phys)                            :: lai_shaded            !   out | shaded leaf area index [m2/m2]
   real (kind=kind_phys)                            :: leaf_air_resistance   !   out | leaf boundary layer resistance [s/m]
+
+  real (kind=kind_phys)                            :: canopy_heat_storage   !   out | within-canopy heat [W/m2]
 
   real (kind=kind_phys)                            :: ustarx                !  inout |surface friction velocity
   real (kind=kind_phys)                            :: prslkix               !  in exner function
@@ -852,6 +931,7 @@ do i = 1, im
         vegetation_fraction    = vegetation_frac
         ch_vegetated           = 0.0
         ch_bare_ground         = ch_noahmp
+        canopy_heat_storage    = 0.0
 
       else  ! not glacier
 
@@ -916,12 +996,12 @@ do i = 1, im
           latent_heat_leaf      ,ch_leaf               ,ch_below_canopy       , &
           ch_vegetated_2m       ,ch_bare_ground_2m     ,precip_frozen_frac    , &
           precip_adv_heat_veg   ,precip_adv_heat_grd_v ,precip_adv_heat_grd_b , &
-          precip_adv_heat_total ,snow_sublimation      ,lai_sunlit            , &
+          precip_adv_heat_total ,snow_sublimation      ,canopy_heat_storage   , &
 #ifdef CCPP
-          lai_shaded            ,leaf_air_resistance   ,                        &
+          lai_sunlit            ,lai_shaded            ,leaf_air_resistance   ,                        &
           errmsg                ,errflg                )
 #else
-          lai_shaded            ,leaf_air_resistance   )
+          lai_sunlit            ,lai_shaded            ,leaf_air_resistance   )
 #endif
         
 #ifdef CCPP
@@ -1010,6 +1090,45 @@ do i = 1, im
       end if
 
       zsnsoxy   (i,:) = interface_depth
+
+      if(present(canopy_heat_storage_ccpp  )) canopy_heat_storage_ccpp  (i)   = canopy_heat_storage
+      if(present(rainfall_ccpp             )) rainfall_ccpp             (i)   = rainfall
+      if(present(sw_absorbed_total_ccpp    )) sw_absorbed_total_ccpp    (i)   = sw_absorbed_total
+      if(present(sw_reflected_total_ccpp   )) sw_reflected_total_ccpp   (i)   = sw_reflected_total
+      if(present(lw_absorbed_total_ccpp    )) lw_absorbed_total_ccpp    (i)   = lw_absorbed_total
+      if(present(temperature_bare_grd_ccpp )) temperature_bare_grd_ccpp (i)   = temperature_bare_grd
+      if(present(temperature_veg_grd_ccpp  )) temperature_veg_grd_ccpp  (i)   = temperature_veg_grd
+      if(present(temperature_veg_2m_ccpp   )) temperature_veg_2m_ccpp   (i)   = temperature_veg_2m
+      if(present(temperature_bare_2m_ccpp  )) temperature_bare_2m_ccpp  (i)   = temperature_bare_2m
+      if(present(spec_humidity_veg_2m_ccpp )) spec_humidity_veg_2m_ccpp (i)   = spec_humidity_veg_2m
+      if(present(spec_humidity_bare_2m_ccpp)) spec_humidity_bare_2m_ccpp(i)   = spec_humidity_bare_2m
+      if(present(sw_absorbed_veg_ccpp      )) sw_absorbed_veg_ccpp      (i)   = sw_absorbed_veg
+      if(present(sw_absorbed_ground_ccpp   )) sw_absorbed_ground_ccpp   (i)   = sw_absorbed_ground
+      if(present(snowmelt_out_ccpp         )) snowmelt_out_ccpp         (i)   = snowmelt_out
+      if(present(snowmelt_shallow_ccpp     )) snowmelt_shallow_ccpp     (i)   = snowmelt_shallow
+      if(present(albedo_direct_snow_ccpp   )) albedo_direct_snow_ccpp   (i,:) = albedo_direct_snow
+      if(present(albedo_diffuse_snow_ccpp  )) albedo_diffuse_snow_ccpp  (i,:) = albedo_diffuse_snow
+      if(present(ch_vegetated_ccpp         )) ch_vegetated_ccpp         (i)   = ch_vegetated
+      if(present(ch_bare_ground_ccpp       )) ch_bare_ground_ccpp       (i)   = ch_bare_ground
+      if(present(sensible_heat_grd_veg_ccpp)) sensible_heat_grd_veg_ccpp(i)   = sensible_heat_grd_veg
+      if(present(sensible_heat_leaf_ccpp   )) sensible_heat_leaf_ccpp   (i)   = sensible_heat_leaf
+      if(present(sensible_heat_grd_bar_ccpp)) sensible_heat_grd_bar_ccpp(i)   = sensible_heat_grd_bar
+      if(present(latent_heat_grd_veg_ccpp  )) latent_heat_grd_veg_ccpp  (i)   = latent_heat_grd_veg
+      if(present(latent_heat_grd_bare_ccpp )) latent_heat_grd_bare_ccpp (i)   = latent_heat_grd_bare
+      if(present(ground_heat_veg_ccpp      )) ground_heat_veg_ccpp      (i)   = ground_heat_veg
+      if(present(ground_heat_bare_ccpp     )) ground_heat_bare_ccpp     (i)   = ground_heat_bare
+      if(present(lw_absorbed_grd_veg_ccpp  )) lw_absorbed_grd_veg_ccpp  (i)   = lw_absorbed_grd_veg
+      if(present(lw_absorbed_leaf_ccpp     )) lw_absorbed_leaf_ccpp     (i)   = lw_absorbed_leaf
+      if(present(lw_absorbed_grd_bare_ccpp )) lw_absorbed_grd_bare_ccpp (i)   = lw_absorbed_grd_bare
+      if(present(latent_heat_trans_ccpp    )) latent_heat_trans_ccpp    (i)   = latent_heat_trans
+      if(present(latent_heat_leaf_ccpp     )) latent_heat_leaf_ccpp     (i)   = latent_heat_leaf
+      if(present(ch_leaf_ccpp              )) ch_leaf_ccpp              (i)   = ch_leaf
+      if(present(ch_below_canopy_ccpp      )) ch_below_canopy_ccpp      (i)   = ch_below_canopy
+      if(present(ch_vegetated_2m_ccpp      )) ch_vegetated_2m_ccpp      (i)   = ch_vegetated_2m
+      if(present(ch_bare_ground_2m_ccpp    )) ch_bare_ground_2m_ccpp    (i)   = ch_bare_ground_2m
+      if(present(precip_adv_heat_veg_ccpp  )) precip_adv_heat_veg_ccpp  (i)   = precip_adv_heat_veg
+      if(present(precip_adv_heat_grd_v_ccpp)) precip_adv_heat_grd_v_ccpp(i)   = precip_adv_heat_grd_v
+      if(present(precip_adv_heat_grd_b_ccpp)) precip_adv_heat_grd_b_ccpp(i)   = precip_adv_heat_grd_b
 
       wslakexy  (i)   = lake_water         ! not active
       fwetxy    (i)   = canopy_wet_fraction
