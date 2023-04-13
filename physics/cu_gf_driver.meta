@@ -553,6 +553,22 @@
   type = real
   kind = kind_phys
   intent = in
+[maxupmf]
+  standard_name = maximum_conv_up_draft_mass_flux
+  long_name = maximum convective up draft mass flux within a column
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[maxMF]
+  standard_name = maximum_mass_flux
+  long_name = maximum mass flux within a column
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

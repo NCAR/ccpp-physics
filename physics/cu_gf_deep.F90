@@ -560,6 +560,7 @@ contains
          c1d(i,:)= 0. !c1 ! 0. ! c1 ! max(.003,c1+float(csum(i))*.0001)
          entr_rate(i)=7.e-5 - min(20.,float(csum(i))) * 3.e-6
          if(xland1(i) == 0)entr_rate(i)=7.e-5
+         if(dx(i)<6500.) entr_rate(i)=2.e-4
          if(imid.eq.1)entr_rate(i)=3.e-4
 !         if(imid.eq.1)c1d(i,:)=c1  ! comment to test warm bias 08/14/17
          radius=.2/entr_rate(i)
@@ -571,6 +572,7 @@ contains
          endif
          sig(i)=(1.-frh)**2
          frh_out(i) = frh
+         if((dx(i)<6500.).and.(forcing(i,7).eq.0.))sig(i)=1.
       enddo
 !$acc end kernels
       sig_thresh = (1.-frh_thresh)**2
@@ -606,14 +608,15 @@ contains
 !
 !$acc kernels
       edtmax(:)=1.
-      if(imid.eq.1)edtmax(:)=.15
+!      if(imid.eq.1)edtmax(:)=.15
       edtmin(:)=.1
-      if(imid.eq.1)edtmin(:)=.05
+!      if(imid.eq.1)edtmin(:)=.05
 !$acc end kernels
 !
 !--- minimum depth (m), clouds must have
 !
       depth_min=3000.
+      if(dx(its)<6500.)depth_min=5000.
       if(imid.eq.1)depth_min=2500.
 !
 !--- maximum depth (mb) of capping 
@@ -1323,9 +1326,9 @@ contains
       do i=its,itf
         if(ierr(i)/=0)cycle
         beta=max(.025,.055-float(csum(i))*.0015)  !.02
-        if(imid.eq.0 .and. xland1(i) == 0)then
-              edtmax(i)=max(0.1,.4-float(csum(i))*.015) !.3)
-        endif
+!        if(imid.eq.0 .and. xland1(i) == 0)then
+!              edtmax(i)=max(0.1,.4-float(csum(i))*.015) !.3)
+!        endif
         if(imid.eq.1)beta=.025
         bud(i)=0.
         cdd(i,1:jmin(i))=.1*entr_rate(i)
@@ -1508,8 +1511,8 @@ contains
       tau_ecmwf    (:) = 0.
 !$acc end kernels
       !- way to calculate the fraction of cape consumed by shallow convection
-      iversion=1 ! ecmwf  
-      !iversion=0 ! orig    
+      !iversion=1 ! ecmwf
+      iversion=0 ! orig
       !
       ! betchold et al 2008 time-scale of cape removal
 !
@@ -1549,6 +1552,29 @@ contains
             endif
         enddo
 !$acc end kernels
+!$acc kernels
+          !-get the profiles modified only by bl tendencies
+          do i=its,itf
+           tn_bl(i,:)=0.;qo_bl(i,:)=0.
+           if ( ierr(i) == 0 )then
+            !below kbcon -> modify profiles
+            tn_bl(i,1:kbcon(i)) = tn(i,1:kbcon(i))
+            qo_bl(i,1:kbcon(i)) = qo(i,1:kbcon(i))
+                 !above kbcon -> keep environment profiles
+            tn_bl(i,kbcon(i)+1:ktf) = t(i,kbcon(i)+1:ktf)
+            qo_bl(i,kbcon(i)+1:ktf) = q(i,kbcon(i)+1:ktf)
+           endif
+          enddo
+!$acc end kernels
+          !> - Call cup_env() to calculate moist static energy, heights, qes, ... only by bl tendencies
+          call cup_env(zo,qeso_bl,heo_bl,heso_bl,tn_bl,qo_bl,po,z1,                              &
+                     psur,ierr,tcrit,-1,                                                         &
+                     itf,ktf, its,ite, kts,kte)
+          !> - Call cup_env_clev() to calculate environmental values on cloud levels only by bl tendencies
+          call cup_env_clev(tn_bl,qeso_bl,qo_bl,heo_bl,heso_bl,zo,po,qeso_cup_bl,qo_cup_bl,      &
+                              heo_cup_bl,heso_cup_bl,zo_cup,po_cup,gammao_cup_bl,tn_cup_bl,psur, &
+                              ierr,z1,                                                           &
+                              itf,ktf,its,ite, kts,kte)
 
         if(iversion == 1) then 
         !-- version ecmwf
@@ -1581,29 +1607,6 @@ contains
         
           !- version for real cloud-work function
           
-!$acc kernels
-          !-get the profiles modified only by bl tendencies
-          do i=its,itf
-           tn_bl(i,:)=0.;qo_bl(i,:)=0.
-           if ( ierr(i) == 0 )then
-            !below kbcon -> modify profiles
-            tn_bl(i,1:kbcon(i)) = tn(i,1:kbcon(i))
-            qo_bl(i,1:kbcon(i)) = qo(i,1:kbcon(i))
-                 !above kbcon -> keep environment profiles
-            tn_bl(i,kbcon(i)+1:ktf) = t(i,kbcon(i)+1:ktf)
-            qo_bl(i,kbcon(i)+1:ktf) = q(i,kbcon(i)+1:ktf)
-           endif 
-          enddo
-!$acc end kernels
-          !> - Call cup_env() to calculate moist static energy, heights, qes, ... only by bl tendencies
-          call cup_env(zo,qeso_bl,heo_bl,heso_bl,tn_bl,qo_bl,po,z1,                              &
-                     psur,ierr,tcrit,-1,                                                         &
-                     itf,ktf, its,ite, kts,kte)
-          !> - Call cup_env_clev() to calculate environmental values on cloud levels only by bl tendencies
-          call cup_env_clev(tn_bl,qeso_bl,qo_bl,heo_bl,heso_bl,zo,po,qeso_cup_bl,qo_cup_bl,      &
-                              heo_cup_bl,heso_cup_bl,zo_cup,po_cup,gammao_cup_bl,tn_cup_bl,psur, &
-                              ierr,z1,                                                           &
-                              itf,ktf,its,ite, kts,kte)
 !$acc kernels
           do i=its,itf
             if(ierr(i).eq.0)then
@@ -1661,7 +1664,7 @@ contains
                    aa1_bl(i) = aa1_bl(i)* tau_bl(i)/ dtime
                 !endif 
 #ifndef _OPENACC
-                print*,'aa0,aa1bl=',aa0(i),aa1_bl(i),aa0(i)-aa1_bl(i),tau_bl(i)!,dtime,xland(i)   
+!               print*,'aa0,aa1bl=',aa0(i),aa1_bl(i),aa0(i)-aa1_bl(i),tau_bl(i)!,dtime,xland(i)
 #endif  
             endif
            enddo
@@ -2116,6 +2119,9 @@ contains
            imid,ipr,itf,ktf,                                                &
            its,ite, kts,kte,                                                &
            dicycle,tau_ecmwf,aa1_bl,xf_dicycle)
+      do i=its,itf
+       if((dx(i)<6500.).and.(forcing(i,3).le.0.))sig(i)=1.
+      enddo
 !
 !$acc kernels
       do k=kts,ktf
@@ -2157,6 +2163,8 @@ contains
                xff_mid(i,1)=min(0.1,xff_mid(i,1))
              endif
              xff_mid(i,2)=min(0.1,.03*zws(i))
+             forcing(i,1)=xff_mid(i,1)
+             forcing(i,2)=xff_mid(i,2)
           endif
          enddo
 !$acc end kernels
@@ -2181,6 +2189,7 @@ contains
 !$acc kernels
       do i=its,itf
           if(ierr(i).eq.0 .and.pre(i).gt.0.) then
+             forcing(i,6)=sig(i)
              pre(i)=max(pre(i),0.)
              xmb_out(i)=xmb(i)
              outu(i,1)=dellu(i,1)*xmb(i) 
@@ -3308,11 +3317,11 @@ contains
              xff_ens3(4)=betajb*xff_ens3(4)
              xff_ens3(5)=xff_ens3(4)
              xff_ens3(6)=xff_ens3(4)
+             forcing(i,2)=xff_ens3(4)
              if(xff_ens3(4).lt.0.)xff_ens3(4)=0.
              if(xff_ens3(5).lt.0.)xff_ens3(5)=0.
              if(xff_ens3(6).lt.0.)xff_ens3(6)=0.
              xff_ens3(14)=xff_ens3(4)
-             forcing(i,2)=xff_ens3(4)
 !
 !--- more like krishnamurti et al.; pick max and average values
 !
@@ -3328,7 +3337,8 @@ contains
              xff_ens3(11)=aa1(i)/tau_ecmwf(i)
              xff_ens3(12)=aa1(i)/tau_ecmwf(i)
              xff_ens3(13)=(aa1(i))/tau_ecmwf(i) !(60.*15.) !tau_ecmwf(i)
-!             forcing(i,4)=xff_ens3(10)
+             forcing(i,4)=xff_ens3(10)
+!             forcing(i,5)= aa1_bl(i)/tau_ecmwf(i)
 
 !!- more like bechtold et al. (jas 2014)
 !!             if(dicycle == 1) xff_dicycle = max(0.,aa1_bl(i)/tau_ecmwf(i)) !(60.*30.) !tau_ecmwf(i)
@@ -3349,13 +3359,16 @@ contains
              endif ! ichoice
 
              xk(1)=(xaa0(i,1)-aa1(i))/mbdt
-             forcing(i,4)=aa0(i)
-             forcing(i,5)=aa1(i)
-             forcing(i,6)=xaa0(i,1)
-             forcing(i,7)=xk(1)
-             if(xk(1).le.0.and.xk(1).gt.-.01*mbdt) &
+             forcing(i,8)=mbdt*xk(1)/aa1(i)
+!             if(forcing(i,1).lt.0. .or. forcing(i,8).gt.-4.)ierr(i)=333
+!             if(forcing(i,2).lt.-0.05)ierr(i)=333
+!             forcing(i,4)=aa0(i)
+!             forcing(i,5)=aa1(i)
+!             forcing(i,6)=xaa0(i,1)
+!             forcing(i,7)=xk(1)
+             if(xk(1).lt.0.and.xk(1).gt.-.01*mbdt) &
                            xk(1)=-.01*mbdt
-             if(xk(1).gt.0.and.xk(1).lt.1.e-2)     &
+             if(xk(1).ge.0.and.xk(1).lt.1.e-2)     &
                            xk(1)=1.e-2
              !   enddo
 !
@@ -3446,13 +3459,13 @@ contains
                  xf_ens(i,11)=xf_ens(i,11)+xf_ens(i,11)*rand_clos(i,4)
                  xf_ens(i,12)=xf_ens(i,12)+xf_ens(i,12)*rand_clos(i,4)
                  xf_ens(i,13)=xf_ens(i,13)+xf_ens(i,13)*rand_clos(i,4)
-                 forcing(i,8)=xf_ens(i,11)
+!                 forcing(i,8)=xf_ens(i,11)
               else
                  xf_ens(i,10)=0.
                  xf_ens(i,11)=0.
                  xf_ens(i,12)=0.
                  xf_ens(i,13)=0.
-                 forcing(i,8)=0.
+                !forcing(i,8)=0.
               endif
 !srf-begin
 !!              if(xk(1).lt.0.)then
@@ -3504,13 +3517,16 @@ if(dicycle == 1 )then
           if(ierr(i) /=  0)cycle
              
             xk(1)=(xaa0(i,1)-aa1(i))/mbdt
-            if(xk(1).le.0.and.xk(1).gt.-.01*mbdt) xk(1)=-.01*mbdt
-            if(xk(1).gt.0.and.xk(1).lt.1.e-2)     xk(1)=1.e-2
-            
+!            forcing(i,8)=xk(1)
+            if(xk(1).lt.0.and.xk(1).gt.-.01*mbdt) xk(1)=-.01*mbdt
+            if(xk(1).ge.0.and.xk(1).lt.1.e-2)     xk(1)=1.e-2
+
             xff_dicycle  = (aa1(i)-aa1_bl(i))/tau_ecmwf(i)
+!            forcing(i,8)=xff_dicycle
             if(xk(1).lt.0) xf_dicycle(i)= max(0.,-xff_dicycle/xk(1))
- 
+
             xf_dicycle(i)= xf_ens(i,10)-xf_dicycle(i)
+!            forcing(i,6)=xf_dicycle(i)
        enddo
 !$acc end kernels
 else
@@ -4146,6 +4162,7 @@ endif
 !       used in cup_forcing_ens (including screening of some
 !       closures over water) to properly normalize xmb
            clos_wei=16./max(1.,closure_n(i))
+         clos_wei=1.
          xmb_ave(i)=min(xmb_ave(i),100.)
          xmb(i)=clos_wei*sig(i)*xmb_ave(i)
 
