@@ -4334,7 +4334,7 @@ endif   ! croptype == 0
 
 ! use sfc_diag to calculate t2mv and q2v for opt_sfc=1&3
     if(opt_diag ==3) then 
-     if(opt_stc == 1 .or. opt_stc == 3) then
+     if(opt_sfc == 1 .or. opt_sfc == 3) then
 
        fhi = fh2/fh
        wrk = 1.0 - fhi
@@ -4841,7 +4841,7 @@ endif   ! croptype == 0
 
 ! use sfc_diag to calculate t2mv and q2v for opt_sfc=1&3
     if(opt_diag ==3) then
-     if(opt_stc == 1 .or. opt_stc == 3) then
+     if(opt_sfc == 1 .or. opt_sfc == 3) then
 
        fhi = fh2/fh
        wrk = 1.0 - fhi
