@@ -13,7 +13,6 @@ module seas_mod
 
   implicit none
 
-  integer, parameter :: SEAS_OPT_DEFAULT = 1
   integer, parameter :: CHEM_OPT_GOCART  = 300
   integer, parameter :: chem_opt  = 300
 
@@ -22,26 +21,24 @@ module seas_mod
 
   private
 
-  public :: SEAS_OPT_DEFAULT
-
   public :: gocart_seasalt_driver
 
 CONTAINS
 
-  subroutine gocart_seasalt_driver(ktau,dt,alt,t_phy,moist,u_phy,  &
+  subroutine gocart_seasalt_driver(dt,alt,t_phy,u_phy,             &
          v_phy,chem,rho_phy,dz8w,u10,v10,ustar,p8w,tsk,            &
-         xland,xlat,xlong,area,g,emis_seas,pi, &
-         seashelp,num_emis_seas,num_moist,num_chem,seas_opt,  &
-         ids,ide, jds,jde, kds,kde,                                        &
-         ims,ime, jms,jme, kms,kme,                                        &
-         its,ite, jts,jte, kts,kte                                         )
+         xland,xlat,xlong,area,g,emis_seas,pi,                     &
+         seashelp,num_emis_seas,num_chem,seas_opt,                 &
+         ids,ide, jds,jde, kds,kde,                                &
+         ims,ime, jms,jme, kms,kme,                                &
+         its,ite, jts,jte, kts,kte                                )
 
-     INTEGER,      INTENT(IN   ) :: ktau,num_emis_seas,num_moist,num_chem,   &
+     INTEGER,      INTENT(IN   ) :: num_emis_seas,num_chem,        &
                                     ids,ide, jds,jde, kds,kde,               &
                                     ims,ime, jms,jme, kms,kme,               &
                                     its,ite, jts,jte, kts,kte,seas_opt
-     REAL(kind=kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme, num_moist ),                &
-           INTENT(IN ) ::                                   moist
+!     REAL(kind=kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme, num_moist ),                &
+!           INTENT(IN ) ::                                   moist
      REAL(kind=kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme, num_chem ),                 &
            INTENT(INOUT ) ::                                   chem
      REAL(kind=kind_phys), DIMENSION( ims:ime, 1, jms:jme,num_emis_seas),                    &
