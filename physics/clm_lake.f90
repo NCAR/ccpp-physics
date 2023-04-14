@@ -325,22 +325,6 @@ MODULE clm_lake
     
     real(kind_phys),    dimension( :,: )           ,INTENT(inout)  :: t_lake3d,       &    
                                                                                   lake_icefrac3d
-! Quick education on CCPP and deferred shape arrays.
-
-! CCPP requires deferred shape arrays as a workaround for its design
-! flaw: it needs an argument that can receive either a null pointer,
-! or an automatic storage array (which is not guaranteed to exist in
-! memory at all). Such a thing doesn't exist in Fortran, so the design
-! of CCPP assumes a compiler will accept either as an argument to a
-! deferred shape array.
-
-! Apparently there is a misunderstanding among developers of how a
-! deferred shape array is declared. If the array dimensions do not
-! have an UPPER bound, then it is deferred shape. A LOWER bound is
-! acceptable; it does not cease to be a deferred shape array.
-
-! That is why these seven arrays fit the CCPP design.
-
     real(kind_phys),    dimension( :,-nlevsnow+1: )  ,INTENT(inout)  :: t_soisno3d,     &    
                                                                                   h2osoi_ice3d,   &    
                                                                                   h2osoi_liq3d,   &    
@@ -443,25 +427,6 @@ MODULE clm_lake
       character*255 :: message
       logical, parameter :: feedback_to_atmosphere = .true. ! FIXME: REMOVE
 
-      ! Functionality to print extra values at problematic points specified by user
-      logical :: was_unhappy,is_unhappy
-
-      ! Points come from this file
-      character(*), parameter :: unhappy_txt = "unhappy.txt"
-
-      ! Special values of the unhappy_count to indicate data is unavailable
-      integer, parameter :: HAVE_NOT_READ_UNHAPPY_POINTS_YET = -1
-      integer, parameter :: FAILED_TO_READ_UNHAPPY_POINTS = -2
-
-      ! These "save" variables are protected by an OMP CRITICAL to
-      ! ensure they're only initialized once.
-
-      ! Number of unhappy points
-      integer, save :: unhappy_count = HAVE_NOT_READ_UNHAPPY_POINTS_YET
-
-      ! The latitude and longitude of unhappy points.
-      real(kind_lake), allocatable, save :: unhappy_lat(:),unhappy_lon(:)
-
       real(kind_lake) :: to_radians, lat_d, lon_d, qss
 
       integer :: month,num1,num2,day_of_month
@@ -477,34 +442,6 @@ MODULE clm_lake
       endif
 
       dtime=dtp
-
-      if(LAKEDEBUG) then
-        ! Have we read the unhappy points?
-        ! The first "if" ensures we don't initiate an OMP CRITICAL unless we have to.
-         if(unhappy_count==HAVE_NOT_READ_UNHAPPY_POINTS_YET) then
-            !$OMP CRITICAL
-
-            ! Check unhappy_count again since it probably changed
-            ! during the setup of the omp critical, when another
-            ! thread read in the unhappy points.
-            if(unhappy_count==HAVE_NOT_READ_UNHAPPY_POINTS_YET) then
-               call read_unhappy_points
-               if(unhappy_count>0) then
-1308              format("Read ",I0,' points from unhappy point list file "',A,'"!')
-                  print 1308,unhappy_count,unhappy_txt
-8031              format('Read unhappy xlat_d=',F20.12,' xlon_d=',F20.12)
-                  do i=1,unhappy_count
-                     print 8031,unhappy_lat(i),unhappy_lon(i)
-                  enddo
-               endif
-            endif
-            !$OMP END CRITICAL
-         endif
-         ! At this point, at least one thread should have read in the unhappy points.
-         if(unhappy_count==FAILED_TO_READ_UNHAPPY_POINTS .and. kdt<2) then
-            write(0,'(A)') "Could not read unhappy points. Will not print unhappy point data."
-         endif
-      endif
 
         ! Initialize any uninitialized lake points.
         call lakeini(kdt=kdt, ISLTYP=ISLTYP, gt0=gt0, snowd=snowd, weasd=weasd,           &
@@ -656,13 +593,6 @@ MODULE clm_lake
             enddo
             
           enddo
-          if(LAKEDEBUG.and.kdt<3) then
-             was_unhappy = point_is_unhappy(xlat_d(i),xlon_d(i))
-             if(was_unhappy) then
-                print *,'Unhappy point before LakeMain t_lake = ',t_lake(1,:)
-                print *,'Unhappy point before LakeMain t_soilsno = ',t_soisno(1,:)
-             endif
-          endif
 
           eflx_lwrad_net = -9999
           eflx_gnet = -9999
@@ -678,7 +608,6 @@ MODULE clm_lake
           lat_d = xlat_d(i)
           lon_d = xlon_d(i)
 
-          is_unhappy=.false.
             CALL LakeMain(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,   & !I  
                           forc_hgt_t,forc_hgt_u,forc_q, forc_u,         &
                           forc_v,forc_lwrad,prec, sabg,lat,             &
@@ -692,21 +621,7 @@ MODULE clm_lake
                           t_ref2m,q_ref2m, dtime,                       &
                           watsat, tksatu, tkmg, tkdry, csol,            &
                           taux,tauy,ram1,z0mg,ustar_out,errmsg,errflg,  &
-                          lat_d,lon_d,is_unhappy)
-            if(LAKEDEBUG) then
-               if((was_unhappy .or. is_unhappy) .and. kdt<3) then
-                  print *,'Unhappy point after LakeMain t_lake = ',t_lake(1,:)
-                  print *,'Unhappy point after LakeMain t_soilsno = ',t_soisno(1,:)
-               endif
-               if(is_unhappy .and. kdt<3) then
-3081              format('UNHAPPY AT: lat=',F20.12,' lon=',F20.12)
-                  print 3081,xlat_d(i),xlon_d(i)
-               endif
-               if(errflg/=0) then
-                  errflg=0 ! Bad. Remove this
-                  ! return ! should do this instead
-               endif
-            endif
+                          lat_d,lon_d)
            ! Renew Lake State Variables:(14)
            do c = 1,column
 
@@ -857,129 +772,6 @@ MODULE clm_lake
            print 3082,kdt,me,lake_points,snow_points,ice_points
         endif
 
-      CONTAINS
-
-        logical function point_is_unhappy(xlat_d,xlon_d)
-          ! Is this point near one of the points read in from the unhappy_txt file?
-          ! If lakedebug is false, then it will return false immediately.
-          implicit none
-          integer :: j
-          real(kind_phys), intent(in) :: xlat_d,xlon_d
-
-          if(lakedebug) then
-            do j=1,unhappy_count
-              if(abs(xlat_d-unhappy_lat(j))<.015 .and. abs(xlon_d-unhappy_lon(j))<.015) then
-                point_is_unhappy=.true.
-1444            format('Now processing unhappy point ',I0,' location xlat_d=',F20.12,' xlon_d=',F20.12,' close to xlat_d=',F20.12,' xlon_d=',F20.12)
-                print 1444,j,xlat_d,xlon_d,unhappy_lat(j),unhappy_lon(j)
-                return
-              endif
-            enddo
-          endif
-
-          ! No points matched or lakedebug is disabled.
-          point_is_unhappy=.false.
-        end function point_is_unhappy
-
-        subroutine read_unhappy_points
-          ! Reads points from unhappy_txt file into unhappy_lat and unhappy lon.
-          ! Sets unhappy_count to the number of points read in.
-          ! On error, sets unhappy_count to FAILED_TO_READ_UNHAPPY_POINTS
-          !
-          ! Also allocates unhappy_lat and unhappy_lon. Their size may
-          ! be larger than the number of unhappy points if the header
-          ! line with the point count has a higher count than the
-          ! number of data lines.
-          ! 
-          ! File format is:
-          ! ------------------------------------------
-          ! |5                                        |   number of points to read in.
-          ! |12.34567890000000000 12.34567890000000000|   Lat and lon, exactly 20 characters each, with one space between
-          ! |            18.70411 134.4567890000000000|   Lat and lon, exactly 20 characters each, with one space between
-          ! |-19.8567890000000000              -134.05|   Lat and lon, exactly 20 characters each, with one space between
-          ! |36.34567890000000000 28.34567890000000000|   Lat and lon, exactly 20 characters each, with one space between
-          ! |-85.4567890000000000 -41.4567890000000000|   Lat and lon, exactly 20 characters each, with one space between
-          ! -------------------------------------------
-          !
-          ! Longitudes must be between -180 and +180 degrees.
-          !
-          ! If the lat and lon fields are not exactly 20 characters,
-          ! with one space between them, the code will not work.  You
-          ! can space-pad them before the number or put lots of zeros
-          ! after the decimal point.
-          use ISO_FORTRAN_ENV, only: iostat_end, iostat_eor
-          implicit none
-          integer :: i,unhappy_iostat,unhappy_unit,expect_count,actual_count
-
-          ! This uses GOTOs to mimics a try-catch construct.  Do not
-          ! remove the GOTOs. They are the cleanest and most
-          ! maintainable way to implement error handlers in Fortran
-          ! when a long cleanup block is required in multiple places.
-
-          ! Number of points actually read in is 0 since we haven't read yet.
-          actual_count=0
-
-          ! Open the unhappy points file
-          open(file=unhappy_txt,form='formatted',newunit=unhappy_unit,action='read',iostat=unhappy_iostat,status='old')
-          if(unhappy_iostat/=0) then
-            write(message,'(A,A,A)') 'Could not open "',unhappy_txt,'"!!'
-            goto 1001 ! Error handler without closing file
-          endif
-
-          ! Determine how many points to read in.
-          expect_count=-1
-          read(unit=unhappy_unit,fmt='(I12)',iostat=unhappy_iostat) expect_count
-          if(unhappy_iostat/=0 .or. expect_count<0) then
-            write(message,'(A,A,A)') 'Could not read unhappy point count from "',unhappy_txt,'"!!'
-            goto 1000 ! Error handler that also closes the file
-          endif
-
-          ! Allocate enough data for the number of points we expect to read in
-          allocate(unhappy_lat(expect_count))
-          allocate(unhappy_lon(expect_count))
-
-          unhappy_lat = -999
-          unhappy_lon = -999
-
-          ! Read data, and determine the number of points actually in the file
-          do i=1,expect_count
-            read(unit=unhappy_unit,fmt='(F20.14,F20.14)',iostat=unhappy_iostat) &
-                 unhappy_lat(actual_count+1),unhappy_lon(actual_count+1)
-            if(unhappy_iostat==iostat_end) then
-              exit
-            else if(unhappy_iostat==iostat_eor) then
-              continue ! Probably a blank line
-            else if(unhappy_iostat/=0) then
-              write(message,'(A,A,A)') 'Error reading from "',unhappy_txt,'"!!'
-              goto 1000 ! Error handler that also closes the file
-            else
-              actual_count=actual_count+1
-            endif
-          enddo
-          
-          ! Indicate successful read by setting the unhappy_count to the number of points actually read in.
-          unhappy_count=actual_count
-          close(unhappy_iostat)
-
-          return ! Success!
-
-          ! Error handlers.
-
-          ! Theses do not set errmsg or error flag because this is
-          ! just an error in setting up a diagnostic, not in the model
-          ! itself.
-
-1000      continue ! Error handler, after file is opened
-          close(unhappy_iostat)
-          
-1001      continue ! Error handler, whether file was opened or not
-          write(0,'(A)') message
-          if(allocated(unhappy_lat)) deallocate(unhappy_lat)
-          if(allocated(unhappy_lon)) deallocate(unhappy_lon)
-          unhappy_count=FAILED_TO_READ_UNHAPPY_POINTS
-
-        end subroutine read_unhappy_points
-
     END SUBROUTINE clm_lake_run
 
 
@@ -995,11 +787,10 @@ MODULE clm_lake
                           eflx_sh_tot,eflx_lh_tot,                      &
                           t_ref2m,q_ref2m, dtime,                       &
                           watsat, tksatu, tkmg, tkdry, csol,            &
-                          taux,tauy,ram1,z0mg,ustar_out,errmsg,errflg, xlat_d,xlon_d,unhappy)
+                          taux,tauy,ram1,z0mg,ustar_out,errmsg,errflg, xlat_d,xlon_d)
     implicit none
     !in: 
 
-    logical :: unhappy
     integer, intent(inout) :: errflg
     character(*), intent(inout) :: errmsg
     real(kind_lake),intent(in) :: dtime              ! timestep
@@ -1146,7 +937,7 @@ MODULE clm_lake
                           eflx_sh_grnd,eflx_lwrad_out,eflx_lwrad_net,     &
                           eflx_soil_grnd,eflx_sh_tot,eflx_lh_tot,         &
                           eflx_lh_grnd,t_veg,t_ref2m,q_ref2m,taux,tauy,   &
-                          ram1,ws,ks,eflx_gnet,z0mg,ustar_out,errmsg,errflg,xlat_d,xlon_d,unhappy)
+                          ram1,ws,ks,eflx_gnet,z0mg,ustar_out,errmsg,errflg,xlat_d,xlon_d)
     if(errflg/=0) then
       return ! State is invalid now, so pass error to caller.
     endif
@@ -1201,7 +992,7 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
                           eflx_sh_grnd,eflx_lwrad_out,eflx_lwrad_net,     &
                           eflx_soil_grnd,eflx_sh_tot,eflx_lh_tot,         &
                           eflx_lh_grnd,t_veg,t_ref2m,q_ref2m,taux,tauy,   &
-                          ram1,ws,ks,eflx_gnet,z0mg,ustar_out,errmsg,errflg,xlat_d,xlon_d,unhappy)
+                          ram1,ws,ks,eflx_gnet,z0mg,ustar_out,errmsg,errflg,xlat_d,xlon_d)
   !==============================================================================
   ! DESCRIPTION:
   ! Calculates lake temperatures and surface fluxes for shallow lakes.
@@ -1224,7 +1015,6 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
     !in: 
 
     integer, intent(inout) :: errflg
-    logical :: unhappy
     character(len=*), intent(inout) :: errmsg
     real(kind_lake),intent(in) :: xlat_d,xlon_d
     real(kind_lake),intent(in) :: forc_t(1)          ! atmospheric temperature (Kelvin)
@@ -1364,8 +1154,6 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
     !    data eta /0.1_kind_lake, 0.5_kind_lake/
     !-----------------------------------------------------------------------
 
-    unhappy=.false.    
-    
     ! Begin calculations
     
     !dir$ concurrent
@@ -1384,7 +1172,6 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
        if (snl(c) > 0 .or. snl(c) < -5) then
          errmsg='snl is not defined in ShalLakeFluxesMod; snl: out of range value'
          errflg=1
-         unhappy=.true.
          return ! Cannot continue
        end if
        !       if (snl(c) /= 0) then
@@ -1699,7 +1486,6 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
          if (abs(eflx_sh_tot(p)) > 1500 .or. abs(eflx_lh_tot(p)) > 1500) then
 3018       format('CLM_Lake ShalLakeFluxes: WARNING: SH=',F12.4,' LH=',F12.4,' at xlat_d=',F10.3,' xlon_d=',F10.3)
            print 3018,eflx_sh_tot(p), eflx_lh_tot(p),xlat_d,xlon_d
-           unhappy = .true.
          end if
          if (abs(eflx_sh_tot(p)) > 10000 .or. abs(eflx_lh_tot(p)) > 10000 &
               .or. abs(t_grnd(c)-288)>200 ) then
@@ -1708,7 +1494,6 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
            ! errmsg=message
            ! errflg=1
            write(0,'(A)') trim(message)
-           unhappy = .true.
          endif
        endif
        ! 2 m height air temperature
