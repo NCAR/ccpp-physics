@@ -41,9 +41,9 @@ module cu_gf_driver_post
       integer, intent(out)          :: errflg
 
       ! Local variables
-      real, parameter :: dbzmin=-10.0      ! dcd
-      real :: cuprate               ! dcd
-      real :: ze, ze_conv, dbz_sum  ! dcd
+      real(kind_phys), parameter :: dbzmin=-10.0
+      real(kind_phys) :: cuprate
+      real(kind_phys) :: ze, ze_conv, dbz_sum
       integer :: i, k
 
       ! Initialize CCPP error handling variables
@@ -74,7 +74,7 @@ module cu_gf_driver_post
         ze_conv = 300.0 * cuprate**1.4
         if (maxupmf(i).gt.0.05) then
          do k = 1, km
-          ze = 10.0 ** (0.1 * refl_10cm(i,k))
+          ze = 10._kind_phys ** (0.1 * refl_10cm(i,k))
           dbz_sum = max(dbzmin, 10.0 * log10(ze + ze_conv))
           refl_10cm(i,k) = dbz_sum
          enddo

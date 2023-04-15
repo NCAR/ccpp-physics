@@ -28,6 +28,7 @@ module cu_gf_deep
      integer, parameter :: autoconv=1 !2
      integer, parameter :: aeroevap=1 !3
      real(kind=kind_phys), parameter :: scav_factor = 0.5
+     real(kind=kind_phys), parameter :: dx_thresh = 6500.
 !> still 16 ensembles for clousres
      integer, parameter:: maxens3=16
 
@@ -434,8 +435,6 @@ contains
       el2orc=xlv*xlv/(r_v*cp)
       evfact=0.25 ! .4
       evfactl=0.25 ! .2
-     !evfact=.0   ! for 4F5f
-     !evfactl=.4 
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -499,10 +498,7 @@ contains
          zws(i) = zws(i)*rho(i,kpbl(i)) !check if zrho is correct
       enddo
 !$acc end kernels
-!     cap_maxs=225.
-!     if(imid.eq.1)cap_maxs=150.
       cap_maxs=75. ! 150.
-!     if(imid.eq.1)cap_maxs=100.
 !$acc kernels
       do i=its,itf
         edto(i)=0.
@@ -510,13 +506,10 @@ contains
         xmb_out(i)=0.
         cap_max(i)=cap_maxs
         cap_max_increment(i)=20.
-!        if(imid.eq.1)cap_max_increment(i)=10.
 !
 ! for water or ice
 !
         if (xland1(i)==0) then
-!            if(imid.eq.0)cap_max(i)=cap_maxs-25.
-!            if(imid.eq.1)cap_max(i)=cap_maxs-50.
             cap_max_increment(i)=20.
         else
             if(ztexec(i).gt.0.)cap_max(i)=cap_max(i)+25.
@@ -525,7 +518,6 @@ contains
 #ifndef _OPENACC
         ierrc(i)=" "
 #endif
-!       cap_max_increment(i)=1.
       enddo
 !$acc end kernels
       if(use_excess == 0 )then
@@ -560,7 +552,7 @@ contains
          c1d(i,:)= 0. !c1 ! 0. ! c1 ! max(.003,c1+float(csum(i))*.0001)
          entr_rate(i)=7.e-5 - min(20.,float(csum(i))) * 3.e-6
          if(xland1(i) == 0)entr_rate(i)=7.e-5
-         if(dx(i)<6500.) entr_rate(i)=2.e-4
+         if(dx(i)<dx_thresh) entr_rate(i)=2.e-4
          if(imid.eq.1)entr_rate(i)=3.e-4
 !         if(imid.eq.1)c1d(i,:)=c1  ! comment to test warm bias 08/14/17
          radius=.2/entr_rate(i)
@@ -572,7 +564,7 @@ contains
          endif
          sig(i)=(1.-frh)**2
          frh_out(i) = frh
-         if((dx(i)<6500.).and.(forcing(i,7).eq.0.))sig(i)=1.
+         if((dx(i)<dx_thresh).and.(forcing(i,7).eq.0.))sig(i)=1.
       enddo
 !$acc end kernels
       sig_thresh = (1.-frh_thresh)**2
@@ -616,7 +608,7 @@ contains
 !--- minimum depth (m), clouds must have
 !
       depth_min=3000.
-      if(dx(its)<6500.)depth_min=5000.
+      if(dx(its)<dx_thresh)depth_min=5000.
       if(imid.eq.1)depth_min=2500.
 !
 !--- maximum depth (mb) of capping 
@@ -624,10 +616,6 @@ contains
 !
 !$acc kernels
       do i=its,itf
-!        if(imid.eq.0)then
-!          edtmax(i)=max(0.5,.8-float(csum(i))*.015) !.3)
-!          if(xland1(i) == 1 )edtmax(i)=max(0.7,1.-float(csum(i))*.015) !.3)
-!        endif
         kbmax(i)=1
         aa0(i)=0.
         aa1(i)=0.
@@ -638,11 +626,6 @@ contains
       enddo
 !$acc end kernels
       x_add=0.
-!     do i=its,itf
-!         cap_max(i)=cap_maxs
-!         cap_max3(i)=25.
-
-!     enddo
 !
 !--- max height(m) above ground where updraft air can originate
 !
@@ -656,7 +639,6 @@ contains
 !--- depth(m) over which downdraft detrains all its mass
 !
       z_detr=500.
-!     if(imid.eq.1)z_detr=800.
 !
 
 !
@@ -799,7 +781,6 @@ contains
 !
 !    never go too low...
 !
-!           if(imid.eq.0 .and. xland1(i).eq.0)x_add=150.
            x_add=0.
 !$acc loop seq
            do k=kbcon(i)+1,ktf
@@ -835,7 +816,6 @@ contains
             entr_rate_2d(i,k)=entr_rate(i)
          enddo
          if(ierr(i).eq.0)then
-!         if(imid.eq.0 .and. pmin_lev(i).lt.kbcon(i)+3)pmin_lev(i)=kbcon(i)+3
             kbcon(i)=max(2,kbcon(i))
             do k=kts+1,ktf
                frh = min(qo_cup(i,k)/qeso_cup(i,k),1.)
@@ -977,8 +957,6 @@ contains
           dbyo(i,k)=hco(i,k)-heso_cup(i,k)
        enddo
        ! for now no overshooting (only very little)
-       !kk=maxloc(dbyt(i,:),1)
-       !ki=maxloc(zuo(i,:),1)
 !$acc loop seq
        do k=ktop(i)-1,kbcon(i),-1
            if(dbyo(i,k).gt.0.)then
@@ -986,8 +964,6 @@ contains
               exit
            endif
         enddo
-        !ktop(i)=ktopkeep(i)
-        !if(ierr(i).eq.0)ktop(i)=ktopkeep(i)
       enddo
 !$acc end parallel
 
@@ -1067,27 +1043,6 @@ contains
 100   continue
       do i=its,itf
        if(ierr(i) /= 0) cycle                 
-!         do k=kbcon(i)+1,ktop(i)-1
-!c         do k=jmin(i)+1,ktop(i)-1
-!c          c1d(i,k)=c1
-!c         enddo
-         !if(imid.eq.1)c1d(i,:)=0.
-!         do k=kts,ktop(i)
-!          if(po(i,k).gt.700.)then
-!           c1d(i,k)=0.
-!          elseif(po(i,k).gt.600.)then
-!           c1d(i,k)=0.001
-!          elseif(po(i,k).gt.500.)then
-!           c1d(i,k)=0.002
-!          elseif(po(i,k).gt.400.)then
-!           c1d(i,k)=0.003
-!          elseif(po(i,k).gt.300.)then
-!           c1d(i,k)=0.004
-!          elseif(po(i,k).gt.200.)then
-!           c1d(i,k)=0.005
-!          endif
-!         enddo
-!         if(imid.eq.1)c1d(i,:)=0.003
 !$acc loop independent
        do k=ktop(i)+1,ktf
            hco(i,k)=heso_cup(i,k)
@@ -1113,10 +1068,6 @@ contains
              1,itf,ktf,                                                          &
              its,ite, kts,kte)
      endif
-!     !--- get melting profile 
-!     call get_melting_profile(ierr,tn_cup,po_cup, p_liq_ice,melting_layer,qrco    &
-!                             ,pwo,edto,pwdo,melting                                & 
-!                             ,itf,ktf,its,ite, kts,kte, cumulus                    )
 !---meltglac-------------------------------------------------
 
 !$acc kernels
@@ -1167,10 +1118,6 @@ contains
 ! for now no overshooting (only very little)
        kk=maxloc(dbyt(i,:),1)
        ki=maxloc(zuo(i,:),1)
-!       if(ipr .eq.1)write(16,*)'cupgf2',kk,ki
-!       if(kk.lt.ki+3)then
-!         ierr(i)=423
-!       endif
 !
 !$acc loop seq
         do k=ktop(i)-1,kbcon(i),-1
@@ -1179,8 +1126,6 @@ contains
               exit
            endif
         enddo
-        !ktop(i)=ktopkeep(i)
-        !if(ierr(i).eq.0)ktop(i)=ktopkeep(i)
       enddo
 !$acc end kernels
 
@@ -1217,72 +1162,7 @@ contains
         endif
       enddo
 !$acc end kernels
-
-!!      do 37 i=its,itf
-!         kzdown(i)=0
-!         if(ierr(i).eq.0)then
-!            zktop=(zo_cup(i,ktop(i))-z1(i))*.6
-!            if(imid.eq.1)zktop=(zo_cup(i,ktop(i))-z1(i))*.4
-!            zktop=min(zktop+z1(i),zcutdown+z1(i))
-!            do k=kts,ktf
-!              if(zo_cup(i,k).gt.zktop)then
-!                 kzdown(i)=k
-!                 kzdown(i)=min(kzdown(i),kstabi(i)-1)  !
-!                 go to 37
-!              endif
-!              enddo
-!         endif
-! 37   continue
-!!
-!!--- downdraft originating level - jmin
-!!
-!      call cup_minimi(heso_cup,k22,kzdown,jmin,ierr, &
-!           itf,ktf, &
-!           its,ite, kts,kte)
-!      do 100 i=its,itf
-!         if(ierr(i).eq.0)then
-!!
-!!-----srf-08aug2017-----begin
-!!        if(imid .ne. 1 .and. melt_glac) jmin(i)=max(jmin(i),maxloc(melting_layer(i,:),1))
-!!-----srf-08aug2017-----end
 !
-!!--- check whether it would have buoyancy, if there where
-!!--- no entrainment/detrainment
-!!
-!         jmini = jmin(i)
-!         keep_going = .true.
-!         do while ( keep_going )
-!           keep_going = .false.
-!           if ( jmini - 1 .lt. kdet(i)   ) kdet(i) = jmini-1
-!           if ( jmini     .ge. ktop(i)-1 ) jmini = ktop(i) - 2
-!           ki = jmini
-!           hcdo(i,ki)=heso_cup(i,ki)
-!           dz=zo_cup(i,ki+1)-zo_cup(i,ki)
-!           dh=0.
-!           do k=ki-1,1,-1
-!             hcdo(i,k)=heso_cup(i,jmini)
-!             dz=zo_cup(i,k+1)-zo_cup(i,k)
-!             dh=dh+dz*(hcdo(i,k)-heso_cup(i,k))
-!             if(dh.gt.0.)then
-!               jmini=jmini-1
-!               if ( jmini .gt. 5 ) then
-!                 keep_going = .true.
-!               else
-!                 ierr(i) = 9
-!                 ierrc(i) = "could not find jmini9"
-!                 exit
-!               endif
-!             endif
-!           enddo
-!         enddo
-!         jmin(i) = jmini 
-!         if ( jmini .le. 5 ) then
-!           ierr(i)=4
-!           ierrc(i) = "could not find jmini4"
-!         endif
-!       endif
-!100   continue
-!!
 ! - must have at least depth_min m between cloud convective base
 !     and cloud top.
 !
@@ -1326,9 +1206,6 @@ contains
       do i=its,itf
         if(ierr(i)/=0)cycle
         beta=max(.025,.055-float(csum(i))*.0015)  !.02
-!        if(imid.eq.0 .and. xland1(i) == 0)then
-!              edtmax(i)=max(0.1,.4-float(csum(i))*.015) !.3)
-!        endif
         if(imid.eq.1)beta=.025
         bud(i)=0.
         cdd(i,1:jmin(i))=.1*entr_rate(i)
@@ -1374,30 +1251,6 @@ contains
           endif
           if(zdo(i,ki+1).gt.0.)cdd(i,ki)= dd_massdetro(i,ki)/(dzo*zdo(i,ki+1))
         enddo
-!         cbeg=800. !po_cup(i,kbcon(i)) !850.
-!         cend=min(po_cup(i,ktop(i)),200.)
-!         cmid=.5*(cbeg+cend) !600.
-!         const_b=c1/((cmid*cmid-cbeg*cbeg)*(cbeg-cend)/(cend*cend-cbeg*cbeg)+cmid-cbeg)
-!         const_a=const_b*(cbeg-cend)/(cend*cend-cbeg*cbeg)
-!         const_c=-const_a*cbeg*cbeg-const_b*cbeg
-!         do k=kbcon(i)+1,ktop(i)-1
-!           c1d(i,k)=const_a*po_cup(i,k)*po_cup(i,k)+const_b*po_cup(i,k)+const_c
-!           c1d(i,k)=max(0.,c1d(i,k))
-!!           c1d(i,k)=c1
-!         enddo
-!!         if(imid.eq.1)c1d(i,:)=0.
-!!        do k=1,jmin(i)
-!!         c1d(i,k)=0.
-!!        enddo
-!!         c1d(i,jmin(i)-2)=c1/40.
-!!         if(imid.eq.1)c1d(i,jmin(i)-2)=c1/20.
-!!        do k=jmin(i)-1,ktop(i)
-!!          dz=zo_cup(i,ktop(i))-zo_cup(i,jmin(i))
-!!          c1d(i,k)=c1d(i,k-1)+c1*(zo_cup(i,k+1)-zo_cup(i,k))/dz
-!!          c1d(i,k)=max(0.,c1d(i,k))
-!!          c1d(i,k)=min(.002,c1d(i,k))
-!!        enddo
-!
 !
 !> - Compute downdraft moist static energy + moisture budget
           do k=2,jmin(i)+1
@@ -1428,7 +1281,6 @@ contains
              dbydo(i,ki)=hcdo(i,ki)-heso_cup(i,ki)
              bud(i)=bud(i)+dbydo(i,ki)*dzo
             enddo
-        !  endif
 
         if(bud(i).gt.0)then
           ierr(i)=7
@@ -1448,25 +1300,6 @@ contains
            itf,ktf,                                                              &
            its,ite, kts,kte)
 !
-!---meltglac-------------------------------------------------
-!--- calculate moisture properties of updraft
-!
-!      if(imid.eq.1)then
-!        call cup_up_moisture('mid',ierr,zo_cup,qco,qrco,pwo,pwavo,               &
-!             p_cup,kbcon,ktop,dbyo,clw_all,xland1,                               &
-!             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,                           &
-!             zqexec,ccn,rho,c1d,tn_cup,up_massentr,up_massdetr,psum,psumh,       &
-!             1,itf,ktf,                                                          &
-!             its,ite, kts,kte)
-!      else
-!         call cup_up_moisture('deep',ierr,zo_cup,qco,qrco,pwo,pwavo,             &
-!             p_cup,kbcon,ktop,dbyo,clw_all,xland1,                               &
-!             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,                           &
-!             zqexec,ccn,rho,c1d,tn_cup,up_massentr,up_massdetr,psum,psumh,       &
-!             1,itf,ktf,                                                          &
-!             its,ite, kts,kte)
-!      endif
-!---meltglac-------------------------------------------------
 !$acc kernels
       do i=its,itf
         if(ierr(i)/=0)cycle
@@ -1868,16 +1701,12 @@ contains
             !-- take out cloud liquid water for detrainment
             detup=up_massdetro(i,k)
             dz=zo_cup(i,k)-zo_cup(i,k-1)
-!!            if(k.lt.ktop(i) .and. k.ge.jmin(i)) then
-!!            if(k.lt.ktop(i) .and. c1d(i,k).gt.0) then
             if(k.lt.ktop(i)) then
                 dellaqc(i,k) = zuo(i,k)*c1d(i,k)*qrco(i,k)*dz/dp*g 
             else
                 dellaqc(i,k)=  detup*0.5*(qrco(i,k+1)+qrco(i,k)) *g/dp
             endif
-!!            if(imid.eq.1) dellaqc(i,k)=  detup*0.5*(qrco(i,k+1)+qrco(i,k)) *g/dp
-!            if(k.eq.ktop(i))dellaqc(i,k)= detup*0.5*(qrco(i,k+1)+qrco(i,k)) *g/dp
-!            !---
+            !---
             g_rain=  0.5*(pwo (i,k)+pwo (i,k+1))*g/dp
             e_dn  = -0.5*(pwdo(i,k)+pwdo(i,k+1))*g/dp*edto(i) ! pwdo < 0 and e_dn must > 0
             !-- condensation source term = detrained + flux divergence of
@@ -2120,7 +1949,7 @@ contains
            its,ite, kts,kte,                                                &
            dicycle,tau_ecmwf,aa1_bl,xf_dicycle)
       do i=its,itf
-       if((dx(i)<6500.).and.(forcing(i,3).le.0.))sig(i)=1.
+       if((dx(i)<dx_thresh).and.(forcing(i,3).le.0.))sig(i)=1.
       enddo
 !
 !$acc kernels
@@ -2170,8 +1999,8 @@ contains
 !$acc end kernels
        endif
        call cup_output_ens_3d(xff_mid,xf_ens,ierr,dellat_ens,dellaq_ens, &
-            dellaqc_ens,outt,                                            &
-            outq,outqc,zuo,pre,pwo_ens,xmb,ktop,                         &
+            dellaqc_ens,outt,outq,outqc,dx,                              &
+            zuo,pre,pwo_ens,xmb,ktop,                                    &
             edto,pwdo,'deep',ierr2,ierr3,                                &
             po_cup,pr_ens,maxens3,                                       &
             sig,closure_n,xland1,xmbm_in,xmbs_in,                        &
@@ -4018,7 +3847,7 @@ endif
 !> This subroutine calculates final output fields including
 !! physical tendencies, precipitation, and mass-flux.
    subroutine cup_output_ens_3d(xff_mid,xf_ens,ierr,dellat,dellaq,dellaqc,  &
-              outtem,outq,outqc,                                            &
+              outtem,outq,outqc,dx,                                         &
               zu,pre,pw,xmb,ktop,                                           &
               edt,pwd,name,ierr2,ierr3,p_cup,pr_ens,                        &
               maxens3,                                                      &
@@ -4064,7 +3893,7 @@ endif
         zu,pwd,p_cup
      real(kind=kind_phys),   dimension (its:ite)                                       &
          ,intent (in  )                   ::                           &
-        sig,xmbm_in,xmbs_in,edt
+        sig,xmbm_in,xmbs_in,edt,dx
      real(kind=kind_phys),   dimension (its:ite,2)                                     &
          ,intent (in  )                   ::                           &
         xff_mid
@@ -4161,8 +3990,11 @@ endif
 ! --- now use proper count of how many closures were actually
 !       used in cup_forcing_ens (including screening of some
 !       closures over water) to properly normalize xmb
+         if (dx(i).ge.dx_thresh)then
            clos_wei=16./max(1.,closure_n(i))
-         clos_wei=1.
+         else
+           clos_wei=1.
+         endif
          xmb_ave(i)=min(xmb_ave(i),100.)
          xmb(i)=clos_wei*sig(i)*xmb_ave(i)
 

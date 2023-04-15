@@ -108,8 +108,8 @@
   kind = kind_phys
   intent = in
 [maxupmf]
-  standard_name = maximum_conv_up_draft_mass_flux
-  long_name = maximum convective up draft mass flux within a column
+  standard_name = maximum_convective_updraft_mass_flux
+  long_name = maximum convective updraft mass flux within a column
   units = m s-1
   dimensions = (horizontal_loop_extent)
   type = real
