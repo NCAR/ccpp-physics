@@ -7,7 +7,8 @@
       module samfdeepcnv
 
       use samfcnv_aerosols, only : samfdeepcnv_aerosols
-
+      use progsigma, only : progsigma_calc
+ 
       contains
 
       subroutine samfdeepcnv_init(imfdeepcnv,imfdeepcnv_samf,            &

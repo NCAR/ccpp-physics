@@ -4,6 +4,7 @@
       module samfshalcnv
 
       use samfcnv_aerosols, only : samfshalcnv_aerosols
+      use progsigma, only : progsigma_calc
 
       contains
 
