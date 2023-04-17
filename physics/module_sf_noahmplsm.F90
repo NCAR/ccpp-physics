@@ -4339,15 +4339,15 @@ endif   ! croptype == 0
        fhi = fh2/fh
        wrk = 1.0 - fhi
         if(thsfc_loc) then ! Use local potential temperature
-          t2mv  = tv*wrk + sfctmp*prslkix*fhi - (grav+grav)/cp
+          t2mv  = tah*wrk + sfctmp*prslkix*fhi - (grav+grav)/cp
         else ! Use potential temperature referenced to 1000 hPa
-          t2mv  = tv*wrk + sfctmp*fhi - (grav+grav)/cp
+          t2mv  = tah*wrk + sfctmp*fhi - (grav+grav)/cp
         endif
 
-        if(evg >= 0.) then !  for evaporation>0, use inferred qsurf to deduce q2v
+        if((evc+tr)/fveg+evg >= 0.) then !  for evaporation>0, use inferred qsurf to deduce q2v
           q2v = qsfc*wrk + max(qmin,qair)*fhi
         else                   !  for dew formation, use saturated q at tskin
-          qss    = fpvs(tv)
+          qss    = fpvs(tah)
           qss    = ep_2 * qss / (psfc + epsm1 * qss)
           q2v= qss*wrk + max(qmin,qair)*fhi
         endif
