@@ -442,7 +442,8 @@ contains
 		   shg     , shc     , shb     , evg     , evb     , ghv     , & ! out :
 		   ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
 		   chleaf  , chuc    , chv2    , chb2    , fpice   , pahv    , &
-                   pahg    , pahb    , pah     , esnow   , canhs   , laisun  , laisha  , rb &
+                   pahg    , pahb    , pah     , esnow   , canhs   , laisun  , &
+                   laisha  , rb      , qsfcveg , qsfcbare                      &
 #ifdef CCPP
                    ,errmsg, errflg)
 #else
@@ -587,6 +588,8 @@ contains
   real (kind=kind_phys)                           , intent(out)   :: rb        !< leaf boundary layer resistance (s/m)
   real (kind=kind_phys)                           , intent(out)   :: laisun    !< sunlit leaf area index (m2/m2)
   real (kind=kind_phys)                           , intent(out)   :: laisha    !< shaded leaf area index (m2/m2)
+  real (kind=kind_phys)                           , intent(out)   :: qsfcveg   !< effective spec humid over vegetation 
+  real (kind=kind_phys)                           , intent(out)   :: qsfcbare  !< effective spec humid over bare soil 
 
 !jref:start; output
   real (kind=kind_phys)                           , intent(out)     :: t2mv   !< 2-m air temperature over vegetated part [k]
@@ -847,7 +850,9 @@ contains
                  emissi ,pah    ,canhs,                           &
 		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )                                            !out
 
-                 qsfc = q1                         !
+    qsfcveg  = eah*0.622/(sfcprs - 0.378*eah)
+    qsfcbare = qsfc
+    qsfc     = q1
 !jref:end
 #ifdef CCPP
     if (errflg /= 0) return

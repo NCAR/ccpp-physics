@@ -195,7 +195,10 @@
       ch_bare_ground_2m_ccpp,                                    &
       precip_adv_heat_veg_ccpp,                                  &
       precip_adv_heat_grd_v_ccpp,                                &
-      precip_adv_heat_grd_b_ccpp                                 )
+      precip_adv_heat_grd_b_ccpp,                                &
+      spec_humid_sfc_veg_ccpp,                                   &
+      spec_humid_sfc_bare_ccpp                                   &
+      )
 
   use machine ,   only : kind_phys
   use funcphys,   only : fpvs
@@ -436,6 +439,8 @@
   real(kind=kind_phys), dimension(:)  , intent(out), optional :: precip_adv_heat_veg_ccpp
   real(kind=kind_phys), dimension(:)  , intent(out), optional :: precip_adv_heat_grd_v_ccpp
   real(kind=kind_phys), dimension(:)  , intent(out), optional :: precip_adv_heat_grd_b_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: spec_humid_sfc_veg_ccpp
+  real(kind=kind_phys), dimension(:)  , intent(out), optional :: spec_humid_sfc_bare_ccpp
 
 !
 !  ---  some new options, hard code for now
@@ -613,6 +618,8 @@
   real (kind=kind_phys)                            :: leaf_air_resistance   !   out | leaf boundary layer resistance [s/m]
 
   real (kind=kind_phys)                            :: canopy_heat_storage   !   out | within-canopy heat [W/m2]
+  real (kind=kind_phys)                            :: spec_humid_sfc_veg    !   out | surface specific humidty over vegetation [kg/kg]
+  real (kind=kind_phys)                            :: spec_humid_sfc_bare   !   out | surface specific humidty over bare soil [kg/kg]
 
   real (kind=kind_phys)                            :: ustarx                !  inout |surface friction velocity
   real (kind=kind_phys)                            :: prslkix               !  in exner function
@@ -997,11 +1004,12 @@ do i = 1, im
           ch_vegetated_2m       ,ch_bare_ground_2m     ,precip_frozen_frac    , &
           precip_adv_heat_veg   ,precip_adv_heat_grd_v ,precip_adv_heat_grd_b , &
           precip_adv_heat_total ,snow_sublimation      ,canopy_heat_storage   , &
+          lai_sunlit            ,lai_shaded            ,leaf_air_resistance   , &
 #ifdef CCPP
-          lai_sunlit            ,lai_shaded            ,leaf_air_resistance   ,                        &
+          spec_humid_sfc_veg    ,spec_humid_sfc_bare   ,                        &
           errmsg                ,errflg                )
 #else
-          lai_sunlit            ,lai_shaded            ,leaf_air_resistance   )
+          spec_humid_sfc_veg    ,spec_humid_sfc_bare   )
 #endif
         
 #ifdef CCPP
@@ -1129,6 +1137,8 @@ do i = 1, im
       if(present(precip_adv_heat_veg_ccpp  )) precip_adv_heat_veg_ccpp  (i)   = precip_adv_heat_veg
       if(present(precip_adv_heat_grd_v_ccpp)) precip_adv_heat_grd_v_ccpp(i)   = precip_adv_heat_grd_v
       if(present(precip_adv_heat_grd_b_ccpp)) precip_adv_heat_grd_b_ccpp(i)   = precip_adv_heat_grd_b
+      if(present(spec_humid_sfc_veg_ccpp   )) spec_humid_sfc_veg_ccpp   (i)   = spec_humid_sfc_veg
+      if(present(spec_humid_sfc_bare_ccpp  )) spec_humid_sfc_bare_ccpp  (i)   = spec_humid_sfc_bare
 
       wslakexy  (i)   = lake_water         ! not active
       fwetxy    (i)   = canopy_wet_fraction
