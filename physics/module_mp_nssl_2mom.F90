@@ -1326,7 +1326,7 @@ MODULE module_mp_nssl_2mom
 
 
 
-      IF ( .false. ) THEN ! set to true to enable internal namelist read
+      IF ( .true. ) THEN ! set to true to enable internal namelist read
       open(15,file='input.nml',status='old',form='formatted',action='read')
       rewind(15)
       read(15,NML=nssl_mp_params,iostat=istat)
@@ -1633,7 +1633,7 @@ MODULE module_mp_nssl_2mom
         lccnuf = ltmp
         denscale(lccnuf) = 1
       ENDIF
-      write(0,*) 'nsslwrf: lccnuf = ',lccnuf
+
       lccn= ltmp+1 ! 9
       lnc = ltmp+2 ! 10
       lnr = ltmp+3 ! 11
