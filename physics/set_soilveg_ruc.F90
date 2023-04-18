@@ -4,6 +4,7 @@
 
       module set_soilveg_ruc_mod
 
+      use machine ,   only : kind_phys
       use namelist_soilveg_ruc
 
       implicit none
@@ -25,17 +26,17 @@
       integer me
 
       integer i
-      real refsmc1, wltsmc1
+      real(kind_phys) refsmc1, wltsmc1
 
       NAMELIST /SOIL_VEG_RUC/ SLOPE_DATA, ALBTBL, Z0TBL, LEMITBL,       &
      &  PCTBL, SHDTBL,                                                  &
      &  IFORTBL, RSTBL, RGLTBL, HSTBL, SNUPTBL, LAITBL, MAXALB,         &
+     &  MFSNO, SNCOVFAC,                                                &
      &  LPARAM, TOPT_DATA, CMCMAX_DATA, CFACTR_DATA,                    &
-     &  RSMAX_DATA, BARE, NATURAL, CROP, URBAN,                         &
+     &  RSMAX_DATA, BARE, GLACIER, NATURAL, CROP, URBAN,                &
      &  DEFINED_VEG, DEFINED_SOIL, DEFINED_SLOPE,                       &
      &  BB, DRYSMC, HC, MAXSMC, REFSMC, SATPSI, SATDK, SATDW,           &
-     &  WLTSMC, QTZ, mosaic_soil, mosaic_lu,                            &
-     &  REFSMCnoah, WLTSMCnoah, MAXSMCnoah
+     &  WLTSMC, QTZ, REFSMCnoah, WLTSMCnoah, MAXSMCnoah
 
       ! Initialize error-handling
       errflg = 0
@@ -200,15 +201,38 @@
      &               70., 55., 60., 75., 70.,  0.,  0.,  0.,    &
      &                0.,  0.,  0.,  0.,  0.,  0./) 
 
+       mfsno =        &  !< modified for RRFS Noah_MP snowmelt curve parameter ()
+     &                  (/  1.00, 1.00, 1.00, 1.00, 2.00, 2.00, &
+     &                      2.00, 2.00, 2.00, 2.00, 2.00, 2.00, &
+     &                      3.00, 3.00, 2.00, 2.00, 2.00, 2.00, &
+     &                      2.00, 2.00, 0.00, 0.00, 0.00, 0.00, &
+!     &                      3.00, 3.00, 2.00, 3.00, 3.00, 3.00, &
+!     &                      3.00, 3.00, 0.00, 0.00, 0.00, 0.00, &
+     &                      0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /)
+
+!-- Noah MP snowmelt curve values
+!     &                  (/  1.00, 1.00, 1.00, 1.00, 1.00, 2.00, &
+!     &                      2.00, 2.00, 2.00, 2.00, 3.00, 3.00, &
+!     &                      4.00, 4.00, 2.50, 3.00, 3.00, 3.50, &
+!     &                      3.50, 3.50, 0.00, 0.00, 0.00, 0.00, &
+!     &                      0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /)
+
+       sncovfac =      &  !< Noah_MP snow cover factor (m), first 5 categories are modified for RRFS
+     &                    (/ 0.030, 0.030, 0.030, 0.030, 0.030, &
+     !&                    (/ 0.008, 0.008, 0.008, 0.008, 0.008, &
+     &                       0.016, 0.016, 0.020, 0.020, 0.020, &
+     &                       0.020, 0.014, 0.042, 0.026, 0.030, &
+     &                       0.016, 0.030, 0.030, 0.030, 0.030, &
+     &                       0.000, 0.000, 0.000, 0.000, 0.000, &
+     &                       0.000, 0.000, 0.000, 0.000, 0.000 /)
+
       natural = 10
-      bare = 16
       crop = 12
       urban = 13
+      glacier = 15
+      bare = 16
       endif
 !  end if veg table
-
-! - set mosaic_lu=1 when info for fractional landuse is available
-      mosaic_lu = 0
 
       topt_data =298.0
       cmcmax_data =0.2e-3
@@ -411,9 +435,6 @@
            WLTSMCnoah(I) = WLTSMC1 - 0.5 * WLTSMC1
            endif
          END DO
-
-! - set mosaic_soil=1 when info for fractional landuse is available
-      mosaic_soil = 0
 
 ! PT 5/18/2015 - changed to FALSE to match atm_namelist setting
 ! PT LPARAM is not used anywhere
