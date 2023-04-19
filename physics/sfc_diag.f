@@ -149,7 +149,7 @@
             q2m(i) = qsurf(i)*wrk + max(qmin,q1c)*fhi
            endif ! flux method
 
-           if(.not. have_2m .and. diag_log) then
+           if(diag_log) then
            !-- Alternative logarithmic diagnostics:
             dT = t1(i) - tskin(i)
             dQ = qv1 - qsfcmr
