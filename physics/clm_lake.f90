@@ -99,6 +99,9 @@ MODULE clm_lake
     real(kind_lake) :: invhsub              !1/hsub [kg/J]
     real(kind_lake) :: rair                 !gas constant for dry air [J/kg/K]
     real(kind_lake) :: cpair                !specific heat of dry air [J/kg/K]
+    real(kind_lake) :: con_eps              !ratio of gas constants of air and water vapor [unitless]
+    real(kind_lake) :: one_minus_con_eps    !1 - con_eps [unitless]
+    real(kind_lake) :: con_fvirt            !1/con_eps - 1 [unitless]
     
     real(kind_lake), public, parameter :: spval = 1.e36 !special value for missing data (ocean)
     real(kind_lake), parameter  ::     depth_c = 50.    !below the level t_lake3d will be 277.0  !mchen
@@ -1159,8 +1162,8 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
     !dir$ concurrent
     !cdir nodep
     forc_th(1)  = forc_t(1) * (forc_psrf(1)/ forc_pbot(1))**(rair/cpair)
-    forc_vp(1)  = forc_q(1) * forc_pbot(1)/ (0.622 + 0.378 * forc_q(1))
-    forc_rho(1) = (forc_pbot(1) - 0.378 * forc_vp(1)) / (rair * forc_t(1))
+    forc_vp(1)  = forc_q(1) * forc_pbot(1)/ (con_eps + one_minus_con_eps * forc_q(1))
+    forc_rho(1) = (forc_pbot(1) - one_minus_con_eps * forc_vp(1)) / (rair * forc_t(1))
 
     do fc = 1, num_shlakec
        c = filter_shlakec(fc)
@@ -1199,7 +1202,7 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
        ! reference height
 
        thm(c) = forc_t(g) + 0.0098_kind_lake*forc_hgt_t(g)   ! intermediate variable
-       thv(c) = forc_th(g)*(1._kind_lake+0.61_kind_lake*forc_q(g))     ! virtual potential T
+       thv(c) = forc_th(g)*(1._kind_lake+con_fvirt*forc_q(g))     ! virtual potential T
     end do
 
     !dir$ concurrent
@@ -1278,7 +1281,7 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
        ur(p)    = max(1.0_kind_lake,sqrt(forc_u(g)*forc_u(g)+forc_v(g)*forc_v(g)))
        dth(p)   = thm(c)-t_grnd(c)
        dqh(p)   = forc_q(g)-qsatg(c)
-       dthv     = dth(p)*(1._kind_lake+0.61_kind_lake*forc_q(g))+0.61_kind_lake*forc_th(g)*dqh(p)
+       dthv     = dth(p)*(1._kind_lake+con_fvirt*forc_q(g))+con_fvirt*forc_th(g)*dqh(p)
        zldis(p) = forc_hgt_u(g) - 0._kind_lake
 
        ! Initialize Monin-Obukhov length and wind speed
@@ -1380,7 +1383,7 @@ SUBROUTINE ShalLakeFluxes(forc_t,forc_pbot,forc_psrf,forc_hgt,forc_hgt_q,       
           tstar = temp1(p)*dth(p)
           qstar = temp2(p)*dqh(p)
 
-          thvstar=tstar*(1._kind_lake+0.61_kind_lake*forc_q(g)) + 0.61_kind_lake*forc_th(g)*qstar
+          thvstar=tstar*(1._kind_lake+con_fvirt*forc_q(g)) + con_fvirt*forc_th(g)*qstar
           zeta=zldis(p)*vkc * grav*thvstar/(ustar(p)**2*thv(c))
 
           if (zeta >= 0._kind_lake) then     !stable
@@ -3742,7 +3745,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     es    = es    * 100.            ! pa
     esdT  = esdT  * 100.            ! pa/K
 
-    vp    = 1.0   / (p - 0.378*es)
+    vp    = 1.0   / (p - one_minus_con_eps*es)
     vp1   = 0.622 * vp
     vp2   = vp1   * vp
 
@@ -5133,10 +5136,12 @@ if_pergro: if (PERGRO) then
   !! \htmlinclude clm_lake_init.html
   !!
   subroutine clm_lake_init(con_pi,karman,con_g,con_sbc,con_t0c,rhowater,con_csol,con_cliq, &
-                           con_hfus,con_hvap,con_rd,con_cp,rholakeice,clm_lake_debug,errmsg,errflg)
+                           con_hfus,con_hvap,con_rd,con_cp,rholakeice,clm_lake_debug, &
+                           con_eps_model,con_fvirt_model,errmsg,errflg)
     implicit none
     real(kind_phys), intent(in) :: con_pi,karman,con_g,con_sbc,con_t0c, &
-         rhowater,con_csol,con_cliq, con_hfus,con_hvap,con_rd,con_cp,rholakeice
+         rhowater,con_csol,con_cliq, con_hfus,con_hvap,con_rd,con_cp, &
+         rholakeice,con_eps_model,con_fvirt_model
     INTEGER, INTENT(OUT) :: errflg
     CHARACTER(*), INTENT(OUT) :: errmsg
     logical, intent(in) :: clm_lake_debug
@@ -5166,6 +5171,9 @@ if_pergro: if (PERGRO) then
     invhsub = 1._kind_lake/hsub
     rair = con_rd
     cpair = con_cp
+    con_eps = con_eps_model
+    con_fvirt = con_fvirt_model
+    one_minus_con_eps = 1.0_kind_lake - con_eps
 
     !  dzlak(1) = 0.1_kind_lake
     !  dzlak(2) = 1._kind_lake
