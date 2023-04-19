@@ -4194,7 +4194,7 @@ endif   ! croptype == 0
         else
           wlcf= fwet
         endif
-        cvw  = wlcf*cvw
+        cvw  = wlcf*cew
         ctw  = (1.-fwet)*(laisune/(rb+rssun) + laishae/(rb+rssha))
         cgw  = 1./(rawg+rsurf)
         cond = caw + cvw + ctw + cgw
