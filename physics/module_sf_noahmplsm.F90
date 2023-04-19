@@ -3928,6 +3928,10 @@ endif   ! croptype == 0
 
   real (kind=kind_phys) :: t, tdc       !kelvin to degree celsius with limit -50 to +50
 
+! local variables
+  real(kind=kind_phys) :: cvw     !<water vapor conductance from the leaf to canopy air
+  real(kind=kind_phys) :: evpot   !<the potential evaporation from wet foliage per unit wetted area
+  real(kind=kind_phys) :: wlcf    !<wet leaf contribution factor
   real(kind=kind_phys) :: fhi, qss, wrk
   real(kind=kind_phys), parameter :: qmin=1.0e-8
 
@@ -4179,13 +4183,24 @@ endif   ! croptype == 0
 ! prepare for latent heat flux above veg.
 
         caw  = 1./rawc
-        cew  = fwet*vaie/rb
+        cew  = vaie/rb
+        evpot= fveg*rhoair*cpair*cew * (estv-eah) / gammav
+        if(evpot > 0. .and. fwet > 0.) then
+          if (tv > tfrz) then
+            wlcf = min(fwet,canliq*latheav/dt/evpot)
+          else
+            wlcf = min(fwet,canice*latheav/dt/evpot)
+          endif
+        else
+          wlcf= fwet
+        endif
+        cvw  = wlcf*cvw
         ctw  = (1.-fwet)*(laisune/(rb+rssun) + laishae/(rb+rssha))
         cgw  = 1./(rawg+rsurf)
-        cond = caw + cew + ctw + cgw
+        cond = caw + cvw + ctw + cgw
         aea  = (eair*caw + estg*cgw) / cond
-        bea  = (cew+ctw)/cond
-        cev  = (1.-bea)*cew*rhoair*cpair/gammav   ! barlage: change to vegetation v3.6
+        bea  = (cvw+ctw)/cond
+        cev  = (1.-bea)*cvw*rhoair*cpair/gammav   ! barlage: change to vegetation v3.6
         ctr  = (1.-bea)*ctw*rhoair*cpair/gammav
 
 ! evaluate surface fluxes with current temperature and solve for dts
@@ -4195,13 +4210,8 @@ endif   ! croptype == 0
 
         irc = fveg*(air + cir*tv**4)
         shc = fveg*rhoair*cpair*cvh * (  tv-tah)
-        evc = fveg*rhoair*cpair*cew * (estv-eah) / gammav ! barlage: change to v in v3.6
+        evc = fveg*rhoair*cpair*cvw * (estv-eah) / gammav ! barlage: change to v in v3.6
         tr  = fveg*rhoair*cpair*ctw * (estv-eah) / gammav
-	if (tv > tfrz) then
-          evc = min(canliq*latheav/dt,evc)    ! barlage: add if block for canice in v3.6
-	else
-          evc = min(canice*latheav/dt,evc)
-	end if
 
 ! canopy heat capacity
         hcv = 0.02*vaie*cwat + canliq*cwat/denh2o + canice*cice/denice !j/m2/k
