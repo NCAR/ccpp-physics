@@ -35,6 +35,10 @@ MODULE clm_lake
 
     public :: clm_lake_run, clm_lake_init, LAKEDEBUG
 
+    ! In WRF, the CLM Lake Model was hard-coded to use double precision, regardless of
+    ! precision of physics. For that reason, we retain double precision here. However,
+    ! we're not yet certain that all of CLM Lake needs to be double precision, so we
+    ! maintain a "kind_lake" to allow future experimentation in datatypes.
     integer, parameter, public :: kind_lake = kind_dbl_prec
 
     logical :: LAKEDEBUG = .false. ! Enable lots of checks and debug prints and errors
