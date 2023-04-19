@@ -78,7 +78,6 @@
      &                      fh2_wat,   fh2_lnd,   fh2_ice,              &  !intent(inout)
      &                    ztmax_wat, ztmax_lnd, ztmax_ice,              &  !intent(inout)
      &                    zvfun,                                        &  !intent(out)
-     &                    use_lake_model,                               &  !intent(in)
      &                    errmsg, errflg)                                  !intent(out)
 !
       implicit none
@@ -88,7 +87,6 @@
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
 
       integer, dimension(:), intent(in) :: vegtype
-      integer, dimension(:), intent(in) :: use_lake_model
 
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
       logical, dimension(:), intent(in) :: flag_iter, dry, icy
