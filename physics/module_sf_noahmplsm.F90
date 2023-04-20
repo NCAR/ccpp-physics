@@ -4207,6 +4207,11 @@ endif   ! croptype == 0
         shc = fveg*rhoair*cpair*cvh * (  tv-tah)
         evc = fveg*rhoair*cpair*cew * (estv-eah) / gammav ! barlage: change to v in v3.6
         tr  = fveg*rhoair*cpair*ctw * (estv-eah) / gammav
+	if (tv > tfrz) then
+          evc = min(canliq*latheav/dt,evc)    ! barlage: add if block for canice in v3.6
+	else
+          evc = min(canice*latheav/dt,evc)
+	end if
 
 ! canopy heat capacity
         hcv = 0.02*vaie*cwat + canliq*cwat/denh2o + canice*cice/denice !j/m2/k
