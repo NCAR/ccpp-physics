@@ -3928,10 +3928,7 @@ endif   ! croptype == 0
 
   real (kind=kind_phys) :: t, tdc       !kelvin to degree celsius with limit -50 to +50
 
-! local variables
-  real(kind=kind_phys) :: cvw     !<water vapor conductance from the leaf to canopy air
   real(kind=kind_phys) :: evpot   !<the potential evaporation from wet foliage per unit wetted area
-  real(kind=kind_phys) :: wlcf    !<wet leaf contribution factor
   real(kind=kind_phys) :: fhi, qss, wrk
   real(kind=kind_phys), parameter :: qmin=1.0e-8
 
@@ -4182,25 +4179,23 @@ endif   ! croptype == 0
 
 ! prepare for latent heat flux above veg.
 
+        evpot= fveg*rhoair*cpair*vaie/rb * (estv-eah) / gammav
         caw  = 1./rawc
-        cew  = vaie/rb
-        evpot= fveg*rhoair*cpair*cew * (estv-eah) / gammav
         if(evpot > 0. .and. fwet > 0.) then
           if (tv > tfrz) then
-            wlcf = min(fwet,canliq*latheav/dt/evpot)
+            cew = min(fwet,canliq*latheav/dt/evpot) * vaie/rb
           else
-            wlcf = min(fwet,canice*latheav/dt/evpot)
+            cew = min(fwet,canice*latheav/dt/evpot) * vaie/rb
           endif
         else
-          wlcf= fwet
+          cew= fwet * vaie/rb
         endif
-        cvw  = wlcf*cew
         ctw  = (1.-fwet)*(laisune/(rb+rssun) + laishae/(rb+rssha))
         cgw  = 1./(rawg+rsurf)
-        cond = caw + cvw + ctw + cgw
+        cond = caw + cew + ctw + cgw
         aea  = (eair*caw + estg*cgw) / cond
-        bea  = (cvw+ctw)/cond
-        cev  = (1.-bea)*cvw*rhoair*cpair/gammav   ! barlage: change to vegetation v3.6
+        bea  = (cew+ctw)/cond
+        cev  = (1.-bea)*cew*rhoair*cpair/gammav   ! barlage: change to vegetation v3.6
         ctr  = (1.-bea)*ctw*rhoair*cpair/gammav
 
 ! evaluate surface fluxes with current temperature and solve for dts
@@ -4210,7 +4205,7 @@ endif   ! croptype == 0
 
         irc = fveg*(air + cir*tv**4)
         shc = fveg*rhoair*cpair*cvh * (  tv-tah)
-        evc = fveg*rhoair*cpair*cvw * (estv-eah) / gammav ! barlage: change to v in v3.6
+        evc = fveg*rhoair*cpair*cew * (estv-eah) / gammav ! barlage: change to v in v3.6
         tr  = fveg*rhoair*cpair*ctw * (estv-eah) / gammav
 
 ! canopy heat capacity
