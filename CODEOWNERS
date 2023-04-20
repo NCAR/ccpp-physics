@@ -4,198 +4,198 @@
 
 # Default codeowners for files that don't have specific owners:
 
-*           @grantfirl @ChunxiZhang-NOAA @dustinswales @mzhangw
+*           @grantfirl @Qingfu-Liu @dustinswales @mzhangw
 
 
 # The following lines are from the CCPP Primary Schemes Points of Contact
 #   https://docs.google.com/spreadsheets/d/14y0Th_sSpCqlssEMNfSZ_Ni9wrpPqfpPY0kRG7jCZB8/edit#gid=0
 # (Internal NOAA document.)
 
-smoke/*                                        @haiqinli                            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/aerclm_def.F                           @AnningCheng-NOAA @andrewgettelman   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/aer_cloud.F                            @AnningCheng-NOAA @andrewgettelman   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/aerinterp.F90                          @AnningCheng-NOAA @andrewgettelman   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/bl_mynn_common.f90                     @joeolson42                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/calpreciptype.f90                                                           @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/cires_orowam2017.f                                                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/cires_tauamf_data.F90                                                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/cires_ugwp*                            @ValeryYudin-NOAA @mdtoyNOAA         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/cldmacro.F                             @AnningCheng-NOAA @andrewgettelman   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/cldwat2m_micro.F                       @AnningCheng-NOAA @andrewgettelman   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/cnvc90.*                                                                    @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/cs_conv_aw_adj.*                       @AnningCheng-NOAA                    @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/cs_conv.*                              @AnningCheng-NOAA                    @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/cu_gf*                                 @hannahcbarnes @haiqinli             @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/cu_ntiedtke*                           @ChunxiZhang-NOAA                    @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/date_def.f                             @XuLi-NOAA                           @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/dcyc2t3.*                              @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/drag_suite.*                           @mdtoyNOAA                           @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/flake*                                 @YihuaWu-NOAA                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/funcphys.f90                                                                @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/fv_sat_adj.*                           @RuiyuSun                            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/gcycle.F90                                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/get_phi_fv3.*                                                               @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/get_prs_fv3.*                                                               @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/gfdl_cloud_microphys.*                 @RuiyuSun                            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFDL_parse_tracers.F90                                                      @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/gfdl_sfc_layer.*                       @ZhanZhang-NOAA                      @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_cloud_diagnostics.*                @dustinswales                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_DCNV_generic_post.*                                                     @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_DCNV_generic_pre.*                                                      @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_debug.*                                                                 @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_GWD_generic_post.*                                                      @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_GWD_generic_pre.*                                                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_MP_generic_post.*                                                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_MP_generic_pre.*                                                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_PBL_generic_common.F90                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_PBL_generic_post.*                                                      @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_PBL_generic_pre.*                                                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_phys_time_vary.fv3.*                                                    @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_phys_time_vary.scm.*                                                    @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/gfs_phy_tracer_config.F                                                     @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_radiation_surface.*                                                     @grantfirl @ChunxiZhang-NOAA @dustinswales 
-physics/GFS_rad_time_vary.fv3.*                                                     @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_rad_time_vary.scm.*                                                     @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_rrtmgp_cloud_mp.*                  @dustinswales @Qingfu-Liu            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_rrtmgp_cloud_overlap.*             @dustinswales @Qingfu-Liu            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_rrtmgp_lw_post.*                   @dustinswales @Qingfu-Liu            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_rrtmg_post.*                       @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_rrtmgp_pre.*                       @dustinswales @Qingfu-Liu            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_rrtmg_pre.*                        @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_rrtmgp_setup.*                     @dustinswales @Qingfu-Liu            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_rrtmgp_sw_post.*                   @dustinswales @Qingfu-Liu            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_rrtmgp_sw_pre.*                    @dustinswales @Qingfu-Liu            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_rrtmg_setup.*                      @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_SCNV_generic_post.*                                                     @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_SCNV_generic_pre.*                                                      @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_stochastics.*                      @pjpegion @lisa-bengtsson            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_suite_interstitial_1.*                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_suite_interstitial_2.*                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_suite_interstitial_3.*                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_suite_interstitial_4.*                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_suite_interstitial_5.*                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_suite_interstitial_phys_reset.*                                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_suite_interstitial_rad_reset.*                                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_suite_stateout_reset.*                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_suite_stateout_update.*                                                 @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_surface_composites_inter.*                                              @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_surface_composites_post.*                                               @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_surface_composites_pre.*                                                @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_surface_generic_post.*                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_surface_generic_pre.*                                                   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_surface_loop_control_part1.*                                            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_surface_loop_control_part2.*                                            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_time_vary_pre.fv3.*                                                     @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/GFS_time_vary_pre.scm.*                                                     @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/gocart_tracer_config_stub.f                                                 @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/gwdc.*                                 @Songyou184                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/gwdps.*                                @Songyou184                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/h2o_def.*                                                                   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/h2ointerp.f90                                                               @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/h2ophys.*                              @SMoorthi-emc                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/hedmf.*                                @JongilHan66 @WeiguoWang-NOAA        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/iccn_def.F                                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/iccninterp.F90                                                              @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/iounitdef.f                                                                 @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/lsm_noah.*                             @HelinWei-NOAA                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/lsm_ruc.*                              @tanyasmirnova                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/machine.*                                                                   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/maximum_hourly_diagnostics.*                                                @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/mersenne_twister.f                                                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/mfpbl.f                                @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/mfpblt.f                               @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/mfpbltq.f                              @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/mfscu.f                                @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/mfscuq.f                               @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/micro_mg*                              @AnningCheng-NOAA @andrewgettelman   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/m_micro*                               @AnningCheng-NOAA @andrewgettelman   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_bfmicrophysics.f                                                     @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_BL_MYJPBL.*                     @Qingfu-Liu                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_bl_mynn.*                       @joeolson42                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_gfdl_cloud_microphys.*          @RuiyuSun                            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_MP_FER_HIRES.*                  @ericaligo-NOAA                      @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_mp_nssl_2mom.F90                                                     @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_mp_radar.*                      @gthompsnWRF @RuiyuSun               @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_mp_thompson*                    @gthompsnWRF @RuiyuSun               @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_nst*                            @XuLi-NOAA                           @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_sf_exchcoef.f90                                                      @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_SF_JSFC.F90                     @Qingfu-Liu                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_sf_mynn.F90                     @joeolson42                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_sf_ruclsm.*                     @tanyasmirnova                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/module_soil_pre.*                      @tanyasmirnova                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/moninshoc.*                            @SMoorthi-emc                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/mp_fer_hires.*                         @ericaligo-NOAA                      @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/mp_nssl.*                                                                   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/mp_thompson*                           @gthompsnWRF @RuiyuSun               @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/multi_gases.F90                        @RuiyuSun                            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/myjpbl_wrapper.*                       @Qingfu-Liu                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/myjsfc_wrapper.*                       @Qingfu-Liu                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/mynnedmf_wrapper.*                     @joeolson42                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/mynnsfc_wrapper.*                      @joeolson42                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/namelist_soilveg.*                     @HelinWei-NOAA @barlage @cenlinhe    @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/namelist_soilveg_ruc.*                 @tanyasmirnova                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/*noahmp*                               @barlage @cenlinhe                   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/ozinterp.f90                                                                @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/ozne_def.*                                                                  @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/ozphys*                                @SMoorthi-emc                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/physcons.F90                                                                @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/phys_tend.*                                                                 @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/progsigma_calc.f90                     @lisa-bengtsson                      @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/radcons.f90                            @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/radiation_aerosols.f                   @Qingfu-Liu @dustinswales @AnningCheng-NOAA           @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/radiation_astronomy.f                  @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/radiation_cloud_overlap.F90            @dustinswales @mjiacono              @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/radiation_clouds.f                     @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/radiation_gases.f                      @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/radiation_surface.*                    @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/radiation_tools.F90                    @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/radlw_*                                @mjiacono @Qingfu-Liu                @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/radsw_*                                @mjiacono @Qingfu-Liu                @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/rad_sw_pre.*                           @dustinswales @Qingfu-Liu            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/rascnv.*                               @SMoorthi-emc                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/rayleigh_damp.*                        @yangfanglin                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/rrtmg_lw_cloud_optics.F90              @dustinswales                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/rrtmg_lw_post.*                        @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/rrtmg_lw_pre.*                         @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/rrtmgp_aerosol_optics.*                @dustinswales                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/rrtmgp_lw_*                            @dustinswales                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/rrtmgp_sw_*                            @dustinswales                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/rrtmg_sw_cloud_optics.F90              @dustinswales                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/rrtmg_sw_post.*                        @Qingfu-Liu @dustinswales            @grantfirl @ChunxiZhang-NOAA @dustinswales 
-physics/rte-rrtmgp                             @RobertPincus @dustinswales          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/samfdeepcnv.*                          @JongilHan66 @lisa-bengtsson         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/samfshalcnv.*                          @JongilHan66 @lisa-bengtsson         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/samfaerosols.*                         @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/sascnvn.*                              @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/satmedmfvdif.*                         @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/satmedmfvdifq.*                        @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/scm_sfc_flux_spec.*                    @grantfirl                           @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/set_soilveg.*                          @HelinWei-NOAA @barlage @cenlinhe    @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/set_soilveg_ruc.*                      @tanyasmirnova                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/sfc_cice.*                             @wd20xw                              @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/sfc_diag.*							            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/sfc_diag_post.*							            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/sfc_diff.*                             @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/sfc_nst*                               @XuLi-NOAA                           @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/sfc_ocean.*                            @HelinWei-NOAA                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/sfc_sice.*                             @wd20xw                              @grantfirl @ChunxiZhang-NOAA @dustinswales
-#physics/sfcsub.F                                                                   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/sflx.f                                 @HelinWei-NOAA                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/sgscloud_radpost.*                                                          @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/sgscloud_radpre.*                                                           @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/shalcnv.*                              @JongilHan66                         @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/shinhongvdif.*                         @ChunxiZhang-NOAA                    @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/shoc.*                                 @SMoorthi-emc                        @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/surface_perturbation.*                 @HelinWei-NOAA                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/tridi.f                                @JongilHan66 @ChunxiZhang-NOAA @WeiguoWang-NOAA       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/ugwp_driver_v0.F                       @mdtoyNOAA                           @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/ugwpv1_gsldrag.*                       @mdtoyNOAA                           @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/ugwpv1_gsldrag_post.*                                                       @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/unified_ugwp*                          @mdtoyNOAA                           @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/wv_saturation.F                        @AnningCheng-NOAA @andrewgettelman   @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/ysuvdif.*                              @ChunxiZhang-NOAA                    @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/zhaocarr_gscond.*                      @RuiyuSun                            @grantfirl @ChunxiZhang-NOAA @dustinswales
-physics/zhaocarr_precpd.*                      @RuiyuSun                            @grantfirl @ChunxiZhang-NOAA @dustinswales
+smoke/*                                        @haiqinli                            @grantfirl @Qingfu-Liu @dustinswales
+physics/aerclm_def.F                           @AnningCheng-NOAA @andrewgettelman   @grantfirl @Qingfu-Liu @dustinswales
+physics/aer_cloud.F                            @AnningCheng-NOAA @andrewgettelman   @grantfirl @Qingfu-Liu @dustinswales
+physics/aerinterp.F90                          @AnningCheng-NOAA @andrewgettelman   @grantfirl @Qingfu-Liu @dustinswales
+physics/bl_mynn_common.f90                     @joeolson42                          @grantfirl @Qingfu-Liu @dustinswales
+physics/calpreciptype.f90                                                           @grantfirl @Qingfu-Liu @dustinswales
+physics/cires_orowam2017.f                                                          @grantfirl @Qingfu-Liu @dustinswales
+physics/cires_tauamf_data.F90                                                       @grantfirl @Qingfu-Liu @dustinswales
+physics/cires_ugwp*                            @ValeryYudin-NOAA @mdtoyNOAA         @grantfirl @Qingfu-Liu @dustinswales
+physics/cldmacro.F                             @AnningCheng-NOAA @andrewgettelman   @grantfirl @Qingfu-Liu @dustinswales
+physics/cldwat2m_micro.F                       @AnningCheng-NOAA @andrewgettelman   @grantfirl @Qingfu-Liu @dustinswales
+physics/cnvc90.*                                                                    @grantfirl @Qingfu-Liu @dustinswales
+physics/cs_conv_aw_adj.*                       @AnningCheng-NOAA                    @grantfirl @Qingfu-Liu @dustinswales
+physics/cs_conv.*                              @AnningCheng-NOAA                    @grantfirl @Qingfu-Liu @dustinswales
+physics/cu_gf*                                 @hannahcbarnes @haiqinli             @grantfirl @Qingfu-Liu @dustinswales
+physics/cu_ntiedtke*                                                                @grantfirl @Qingfu-Liu @dustinswales
+physics/date_def.f                             @XuLi-NOAA                           @grantfirl @Qingfu-Liu @dustinswales
+physics/dcyc2t3.*                              @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales
+physics/drag_suite.*                           @mdtoyNOAA                           @grantfirl @Qingfu-Liu @dustinswales
+physics/flake*                                 @YihuaWu-NOAA                        @grantfirl @Qingfu-Liu @dustinswales
+physics/funcphys.f90                                                                @grantfirl @Qingfu-Liu @dustinswales
+physics/fv_sat_adj.*                           @RuiyuSun                            @grantfirl @Qingfu-Liu @dustinswales
+physics/gcycle.F90                                                                  @grantfirl @Qingfu-Liu @dustinswales
+physics/get_phi_fv3.*                                                               @grantfirl @Qingfu-Liu @dustinswales
+physics/get_prs_fv3.*                                                               @grantfirl @Qingfu-Liu @dustinswales
+physics/gfdl_cloud_microphys.*                 @RuiyuSun                            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFDL_parse_tracers.F90                                                      @grantfirl @Qingfu-Liu @dustinswales
+physics/gfdl_sfc_layer.*                       @ZhanZhang-NOAA                      @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_cloud_diagnostics.*                @dustinswales                        @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_DCNV_generic_post.*                                                     @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_DCNV_generic_pre.*                                                      @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_debug.*                                                                 @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_GWD_generic_post.*                                                      @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_GWD_generic_pre.*                                                       @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_MP_generic_post.*                                                       @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_MP_generic_pre.*                                                        @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_PBL_generic_common.F90                                                  @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_PBL_generic_post.*                                                      @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_PBL_generic_pre.*                                                       @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_phys_time_vary.fv3.*                                                    @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_phys_time_vary.scm.*                                                    @grantfirl @Qingfu-Liu @dustinswales
+physics/gfs_phy_tracer_config.F                                                     @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_radiation_surface.*                                                     @grantfirl @Qingfu-Liu @dustinswales 
+physics/GFS_rad_time_vary.fv3.*                                                     @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_rad_time_vary.scm.*                                                     @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_rrtmgp_cloud_mp.*                  @dustinswales @Qingfu-Liu            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_rrtmgp_cloud_overlap.*             @dustinswales @Qingfu-Liu            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_rrtmgp_lw_post.*                   @dustinswales @Qingfu-Liu            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_rrtmg_post.*                       @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_rrtmgp_pre.*                       @dustinswales @Qingfu-Liu            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_rrtmg_pre.*                        @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_rrtmgp_setup.*                     @dustinswales @Qingfu-Liu            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_rrtmgp_sw_post.*                   @dustinswales @Qingfu-Liu            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_rrtmgp_sw_pre.*                    @dustinswales @Qingfu-Liu            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_rrtmg_setup.*                      @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_SCNV_generic_post.*                                                     @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_SCNV_generic_pre.*                                                      @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_stochastics.*                      @pjpegion @lisa-bengtsson            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_suite_interstitial_1.*                                                  @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_suite_interstitial_2.*                                                  @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_suite_interstitial_3.*                                                  @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_suite_interstitial_4.*                                                  @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_suite_interstitial_5.*                                                  @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_suite_interstitial_phys_reset.*                                         @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_suite_interstitial_rad_reset.*                                          @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_suite_stateout_reset.*                                                  @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_suite_stateout_update.*                                                 @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_surface_composites_inter.*                                              @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_surface_composites_post.*                                               @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_surface_composites_pre.*                                                @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_surface_generic_post.*                                                  @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_surface_generic_pre.*                                                   @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_surface_loop_control_part1.*                                            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_surface_loop_control_part2.*                                            @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_time_vary_pre.fv3.*                                                     @grantfirl @Qingfu-Liu @dustinswales
+physics/GFS_time_vary_pre.scm.*                                                     @grantfirl @Qingfu-Liu @dustinswales
+physics/gocart_tracer_config_stub.f                                                 @grantfirl @Qingfu-Liu @dustinswales
+physics/gwdc.*                                 @Songyou184                          @grantfirl @Qingfu-Liu @dustinswales
+physics/gwdps.*                                @Songyou184                          @grantfirl @Qingfu-Liu @dustinswales
+physics/h2o_def.*                                                                   @grantfirl @Qingfu-Liu @dustinswales
+physics/h2ointerp.f90                                                               @grantfirl @Qingfu-Liu @dustinswales
+physics/h2ophys.*                              @SMoorthi-emc                        @grantfirl @Qingfu-Liu @dustinswales
+physics/hedmf.*                                @JongilHan66 @WeiguoWang-NOAA        @grantfirl @Qingfu-Liu @dustinswales
+physics/iccn_def.F                                                                  @grantfirl @Qingfu-Liu @dustinswales
+physics/iccninterp.F90                                                              @grantfirl @Qingfu-Liu @dustinswales
+physics/iounitdef.f                                                                 @grantfirl @Qingfu-Liu @dustinswales
+physics/lsm_noah.*                             @HelinWei-NOAA                       @grantfirl @Qingfu-Liu @dustinswales
+physics/lsm_ruc.*                              @tanyasmirnova                       @grantfirl @Qingfu-Liu @dustinswales
+physics/machine.*                                                                   @grantfirl @Qingfu-Liu @dustinswales
+physics/maximum_hourly_diagnostics.*                                                @grantfirl @Qingfu-Liu @dustinswales
+physics/mersenne_twister.f                                                          @grantfirl @Qingfu-Liu @dustinswales
+physics/mfpbl.f                                @JongilHan66                         @grantfirl @Qingfu-Liu @dustinswales
+physics/mfpblt.f                               @JongilHan66                         @grantfirl @Qingfu-Liu @dustinswales
+physics/mfpbltq.f                              @JongilHan66                         @grantfirl @Qingfu-Liu @dustinswales
+physics/mfscu.f                                @JongilHan66                         @grantfirl @Qingfu-Liu @dustinswales
+physics/mfscuq.f                               @JongilHan66                         @grantfirl @Qingfu-Liu @dustinswales
+physics/micro_mg*                              @AnningCheng-NOAA @andrewgettelman   @grantfirl @Qingfu-Liu @dustinswales
+physics/m_micro*                               @AnningCheng-NOAA @andrewgettelman   @grantfirl @Qingfu-Liu @dustinswales
+physics/module_bfmicrophysics.f                                                     @grantfirl @Qingfu-Liu @dustinswales
+physics/module_BL_MYJPBL.*                     @Qingfu-Liu                          @grantfirl @Qingfu-Liu @dustinswales
+physics/module_bl_mynn.*                       @joeolson42                          @grantfirl @Qingfu-Liu @dustinswales
+physics/module_gfdl_cloud_microphys.*          @RuiyuSun                            @grantfirl @Qingfu-Liu @dustinswales
+physics/module_MP_FER_HIRES.*                  @ericaligo-NOAA                      @grantfirl @Qingfu-Liu @dustinswales
+physics/module_mp_nssl_2mom.F90                                                     @grantfirl @Qingfu-Liu @dustinswales
+physics/module_mp_radar.*                      @gthompsnWRF @RuiyuSun               @grantfirl @Qingfu-Liu @dustinswales
+physics/module_mp_thompson*                    @gthompsnWRF @RuiyuSun               @grantfirl @Qingfu-Liu @dustinswales
+physics/module_nst*                            @XuLi-NOAA                           @grantfirl @Qingfu-Liu @dustinswales
+physics/module_sf_exchcoef.f90                                                      @grantfirl @Qingfu-Liu @dustinswales
+physics/module_SF_JSFC.F90                     @Qingfu-Liu                          @grantfirl @Qingfu-Liu @dustinswales
+physics/module_sf_mynn.F90                     @joeolson42                          @grantfirl @Qingfu-Liu @dustinswales
+physics/module_sf_ruclsm.*                     @tanyasmirnova                       @grantfirl @Qingfu-Liu @dustinswales
+physics/module_soil_pre.*                      @tanyasmirnova                       @grantfirl @Qingfu-Liu @dustinswales
+physics/moninshoc.*                            @SMoorthi-emc                        @grantfirl @Qingfu-Liu @dustinswales
+physics/mp_fer_hires.*                         @ericaligo-NOAA                      @grantfirl @Qingfu-Liu @dustinswales
+physics/mp_nssl.*                                                                   @grantfirl @Qingfu-Liu @dustinswales
+physics/mp_thompson*                           @gthompsnWRF @RuiyuSun               @grantfirl @Qingfu-Liu @dustinswales
+physics/multi_gases.F90                        @RuiyuSun                            @grantfirl @Qingfu-Liu @dustinswales
+physics/myjpbl_wrapper.*                       @Qingfu-Liu                          @grantfirl @Qingfu-Liu @dustinswales
+physics/myjsfc_wrapper.*                       @Qingfu-Liu                          @grantfirl @Qingfu-Liu @dustinswales
+physics/mynnedmf_wrapper.*                     @joeolson42                          @grantfirl @Qingfu-Liu @dustinswales
+physics/mynnsfc_wrapper.*                      @joeolson42                          @grantfirl @Qingfu-Liu @dustinswales
+physics/namelist_soilveg.*                     @HelinWei-NOAA @barlage @cenlinhe    @grantfirl @Qingfu-Liu @dustinswales
+physics/namelist_soilveg_ruc.*                 @tanyasmirnova                       @grantfirl @Qingfu-Liu @dustinswales
+physics/*noahmp*                               @barlage @cenlinhe                   @grantfirl @Qingfu-Liu @dustinswales
+physics/ozinterp.f90                                                                @grantfirl @Qingfu-Liu @dustinswales
+physics/ozne_def.*                                                                  @grantfirl @Qingfu-Liu @dustinswales
+physics/ozphys*                                @SMoorthi-emc                        @grantfirl @Qingfu-Liu @dustinswales
+physics/physcons.F90                                                                @grantfirl @Qingfu-Liu @dustinswales
+physics/phys_tend.*                                                                 @grantfirl @Qingfu-Liu @dustinswales
+physics/progsigma_calc.f90                     @lisa-bengtsson                      @grantfirl @Qingfu-Liu @dustinswales
+physics/radcons.f90                            @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales
+physics/radiation_aerosols.f                   @Qingfu-Liu @dustinswales @AnningCheng-NOAA           @grantfirl @Qingfu-Liu @dustinswales
+physics/radiation_astronomy.f                  @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales
+physics/radiation_cloud_overlap.F90            @dustinswales @mjiacono              @grantfirl @Qingfu-Liu @dustinswales
+physics/radiation_clouds.f                     @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales
+physics/radiation_gases.f                      @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales
+physics/radiation_surface.*                    @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales
+physics/radiation_tools.F90                    @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales
+physics/radlw_*                                @mjiacono @Qingfu-Liu                @grantfirl @Qingfu-Liu @dustinswales
+physics/radsw_*                                @mjiacono @Qingfu-Liu                @grantfirl @Qingfu-Liu @dustinswales
+physics/rad_sw_pre.*                           @dustinswales @Qingfu-Liu            @grantfirl @Qingfu-Liu @dustinswales
+physics/rascnv.*                               @SMoorthi-emc                        @grantfirl @Qingfu-Liu @dustinswales
+physics/rayleigh_damp.*                        @yangfanglin                         @grantfirl @Qingfu-Liu @dustinswales
+physics/rrtmg_lw_cloud_optics.F90              @dustinswales                        @grantfirl @Qingfu-Liu @dustinswales
+physics/rrtmg_lw_post.*                        @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales
+physics/rrtmg_lw_pre.*                         @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales
+physics/rrtmgp_aerosol_optics.*                @dustinswales                        @grantfirl @Qingfu-Liu @dustinswales
+physics/rrtmgp_lw_*                            @dustinswales                        @grantfirl @Qingfu-Liu @dustinswales
+physics/rrtmgp_sw_*                            @dustinswales                        @grantfirl @Qingfu-Liu @dustinswales
+physics/rrtmg_sw_cloud_optics.F90              @dustinswales                        @grantfirl @Qingfu-Liu @dustinswales
+physics/rrtmg_sw_post.*                        @Qingfu-Liu @dustinswales            @grantfirl @Qingfu-Liu @dustinswales 
+physics/rte-rrtmgp                             @RobertPincus @dustinswales          @grantfirl @Qingfu-Liu @dustinswales
+physics/samfdeepcnv.*                          @JongilHan66 @lisa-bengtsson         @grantfirl @Qingfu-Liu @dustinswales
+physics/samfshalcnv.*                          @JongilHan66 @lisa-bengtsson         @grantfirl @Qingfu-Liu @dustinswales
+physics/samfaerosols.*                         @JongilHan66                         @grantfirl @Qingfu-Liu @dustinswales
+physics/sascnvn.*                              @JongilHan66                         @grantfirl @Qingfu-Liu @dustinswales
+physics/satmedmfvdif.*                         @JongilHan66                         @grantfirl @Qingfu-Liu @dustinswales
+physics/satmedmfvdifq.*                        @JongilHan66                         @grantfirl @Qingfu-Liu @dustinswales
+physics/scm_sfc_flux_spec.*                    @grantfirl                           @grantfirl @Qingfu-Liu @dustinswales
+physics/set_soilveg.*                          @HelinWei-NOAA @barlage @cenlinhe    @grantfirl @Qingfu-Liu @dustinswales
+physics/set_soilveg_ruc.*                      @tanyasmirnova                       @grantfirl @Qingfu-Liu @dustinswales
+physics/sfc_cice.*                             @wd20xw                              @grantfirl @Qingfu-Liu @dustinswales
+physics/sfc_diag.*                                                                  @grantfirl @Qingfu-Liu @dustinswales
+physics/sfc_diag_post.*                                                             @grantfirl @Qingfu-Liu @dustinswales
+physics/sfc_diff.*                             @JongilHan66                         @grantfirl @Qingfu-Liu @dustinswales
+physics/sfc_nst*                               @XuLi-NOAA                           @grantfirl @Qingfu-Liu @dustinswales
+physics/sfc_ocean.*                            @HelinWei-NOAA                       @grantfirl @Qingfu-Liu @dustinswales
+physics/sfc_sice.*                             @wd20xw                              @grantfirl @Qingfu-Liu @dustinswales
+#physics/sfcsub.F                                                                   @grantfirl @Qingfu-Liu @dustinswales
+physics/sflx.f                                 @HelinWei-NOAA                       @grantfirl @Qingfu-Liu @dustinswales
+physics/sgscloud_radpost.*                                                          @grantfirl @Qingfu-Liu @dustinswales
+physics/sgscloud_radpre.*                                                           @grantfirl @Qingfu-Liu @dustinswales
+physics/shalcnv.*                              @JongilHan66                         @grantfirl @Qingfu-Liu @dustinswales
+physics/shinhongvdif.*                                                              @grantfirl @Qingfu-Liu @dustinswales
+physics/shoc.*                                 @SMoorthi-emc                        @grantfirl @Qingfu-Liu @dustinswales
+physics/surface_perturbation.*                 @HelinWei-NOAA                       @grantfirl @Qingfu-Liu @dustinswales
+physics/tridi.f                                @JongilHan66 @WeiguoWang-NOAA        @grantfirl @Qingfu-Liu @dustinswales
+physics/ugwp_driver_v0.F                       @mdtoyNOAA                           @grantfirl @Qingfu-Liu @dustinswales
+physics/ugwpv1_gsldrag.*                       @mdtoyNOAA                           @grantfirl @Qingfu-Liu @dustinswales
+physics/ugwpv1_gsldrag_post.*                                                       @grantfirl @Qingfu-Liu @dustinswales
+physics/unified_ugwp*                          @mdtoyNOAA                           @grantfirl @Qingfu-Liu @dustinswales
+physics/wv_saturation.F                        @AnningCheng-NOAA @andrewgettelman   @grantfirl @Qingfu-Liu @dustinswales
+physics/ysuvdif.*                                                                   @grantfirl @Qingfu-Liu @dustinswales
+physics/zhaocarr_gscond.*                      @RuiyuSun                            @grantfirl @Qingfu-Liu @dustinswales
+physics/zhaocarr_precpd.*                      @RuiyuSun                            @grantfirl @Qingfu-Liu @dustinswales
 
 ########################################################################
 
