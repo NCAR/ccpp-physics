@@ -191,7 +191,9 @@
      &                     pwavo(im),   pwevo(im),  mbdt(im),
      &                     qcdo(im,km), qcond(im),  qevap(im),
      &                     rntot(im),   vshear(im), xaa0(im),
-     &                     xlamd(im),   xk(im),     cina(im),
+     &                     xlamd(im),   xlamdet(im),xlamddt(im),
+     &                     cxlamet(im), cxlamdt(im),
+     &                     xk(im),      cina(im),
      &                     xmb(im),     xmbmax(im), xpwav(im),
      &                     xpwev(im),   xlamx(im),  delebar(im,ntr),
 !     &                     xpwev(im),   delebar(im,ntr),
@@ -201,13 +203,12 @@
 cj
       real(kind=kind_phys) cinpcr,  cinpcrmx,  cinpcrmn,
      &                     cinacr,  cinacrmx,  cinacrmn,
-     &                     sfclfac, rhcrt
+     &                     sfclfac, rhcrt,
+     &                     tkcrt,   cmxfac
 cj
 !
 !  parameters for updraft velocity calculation
-      real(kind=kind_phys) bet1,    cd1,     f1,      gam1,
-!     &                     bb1,     bb2
-     &                     bb1,     bb2,     wucb
+      real(kind=kind_phys) bb1, bb2, csmf, wucb
 !
 !  parameters for prognostic sigma closure                                                                                                                                                      
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
@@ -229,7 +230,7 @@ c  physical parameters
 !      Until a realistic Nccn is provided, Nccns are assumed
 !      as Nccn=100 for sea and Nccn=1000 for land
 !
-      parameter(cm=1.0,cq=1.3)
+      parameter(cm=1.0,cq=1.0)
 !     parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
       parameter(clamd=0.03,tkemx=0.65,tkemn=0.05)
       parameter(clamca=0.03)
@@ -238,7 +239,8 @@ c  physical parameters
       parameter(cinpcrmx=180.,cinpcrmn=120.)
 !     parameter(cinacrmx=-120.,cinacrmn=-120.)
       parameter(cinacrmx=-120.,cinacrmn=-80.)
-      parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
+      parameter(bb1=4.0,bb2=0.8,csmf=0.2)
+      parameter(tkcrt=2.,cmxfac=15.)
       parameter(betaw=.03)
 
 !
@@ -254,7 +256,7 @@ c  variables for tracer wet deposition,
 !
 !  for updraft velocity calculation
       real(kind=kind_phys) wu2(im,km),     buo(im,km),    drag(im,km),
-     &                     wc(im)
+     &                     wush(im,km),    wc(im)
 !
 !  for updraft fraction & scale-aware function
       real(kind=kind_phys) scaldfunc(im), sigmagfm(im)
@@ -577,6 +579,7 @@ c
 !           vo(i,k)   = v1(i,k) * rcs(i)
             wu2(i,k)  = 0.
             buo(i,k)  = 0.
+            wush(i,k) = 0.
             drag(i,k) = 0.
             cnvwt(i,k)= 0.
           endif
@@ -805,7 +808,8 @@ c
           ptem1= .5*(cinpcrmx-cinpcrmn)
           cinpcr = cinpcrmx - ptem * ptem1
           tem1 = pfld(i,kb(i)) - pfld(i,kbcon(i))
-          if(tem1 > cinpcr) then
+          if(tem1 > cinpcr .and.
+     &       zi(i,kbcon(i)) > hpbl(i)) then
              cnvflg(i) = .false.
           endif
         endif
@@ -975,7 +979,29 @@ c
                endif
             enddo
         endif
-
+!
+!  if tkemean>tkcrt, tem=1+tkemean/tkcrt, clamt=tem*clam
+!       xlamdet=tem*xlamde, xlamddt=tem*xlamdd
+!       cxlamet=tem*cxlame, cxlamdt=tem*cxlamd
+!
+        do i=1,im
+          if(cnvflg(i)) then
+            xlamdet(i) = xlamde
+            xlamddt(i) = xlamdd
+            cxlamet(i) = cxlame
+            cxlamdt(i) = cxlamd
+            if(tkemean(i) > tkcrt) then
+              tem = 1. + tkemean(i)/tkcrt
+              tem1 = min(tem, cmxfac)
+              clamt(i) = tem1 * clam
+              xlamdet(i) = tem1 * xlamdet(i)
+              xlamddt(i) = tem1 * xlamddt(i)
+              cxlamet(i) = tem1 * cxlamet(i)
+              cxlamdt(i) = tem1 * cxlamdt(i)
+            endif
+          endif
+        enddo
+!
       else
 !
          if(do_ca .and. ca_entr)then
@@ -995,6 +1021,15 @@ c
                endif
             enddo
          endif
+!
+        do i=1,im
+          if(cnvflg(i)) then
+            xlamdet(i) = xlamde
+            xlamddt(i) = xlamdd
+            cxlamet(i) = cxlame
+            cxlamdt(i) = cxlamd
+          endif
+        enddo
 !
       endif !(.not. hwrf_samfdeep .and. ntk > 0)
 !
@@ -1083,7 +1118,7 @@ c
         do i=1,im
           if(cnvflg(i) .and.
      &      (k > kbcon(i) .and. k < kmax(i))) then
-              tem = cxlame * frh(i,k) * fent2(i,k)
+              tem = cxlamet(i) * frh(i,k) * fent2(i,k)
               xlamue(i,k) = xlamue(i,k)*fent1(i,k) + tem
           endif
         enddo
@@ -1093,9 +1128,9 @@ c
         do i=1,im
           if(cnvflg(i) .and.
      &      (k > kbcon(i) .and. k < kmax(i))) then
-              tem = cxlame * frh(i,k) * fent2(i,k)
+              tem = cxlamet(i) * frh(i,k) * fent2(i,k)
               xlamue(i,k) = xlamue(i,k)*fent1(i,k) + tem
-              tem1 = cxlamd * frh(i,k)
+              tem1 = cxlamdt(i) * frh(i,k)
               xlamud(i,k) = xlamud(i,k) + tem1
           endif
         enddo
@@ -1531,6 +1566,11 @@ c
                 buo(i,k) = buo(i,k) + grav * fv *
      &                     max(val,(qeso(i,k) - qo(i,k)))
                 drag(i,k) = max(xlamue(i,k),xlamud(i,k))
+!
+                tem = ((uo(i,k)-uo(i,k-1))/dz)**2
+                tem = tem+((vo(i,k)-vo(i,k-1))/dz)**2
+                wush(i,k) = csmf * sqrt(tem)
+!
               endif
 !
             endif
@@ -1701,8 +1741,6 @@ c
 !  compute updraft velocity square(wu2)
 !> - Calculate updraft velocity square(wu2) according to Han et al.'s (2017) \cite han_et_al_2017 equation 7.
 !
-      bb1 = 4.0
-      bb2 = 0.8
       if (hwrf_samfdeep) then
       do i = 1, im
         if (cnvflg(i)) then
@@ -1723,11 +1761,13 @@ c
           if (cnvflg(i)) then
             if(k > kbcon1(i) .and. k < ktcon(i)) then
               dz    = zi(i,k) - zi(i,k-1)
-              tem  = 0.25 * bb1 * (drag(i,k)+drag(i,k-1)) * dz
-              tem1 = 0.5 * bb2 * (buo(i,k)+buo(i,k-1)) * dz
+              tem  = 0.25 * bb1 * (drag(i,k-1)+drag(i,k)) * dz
+              tem1 = 0.5 * bb2 * (buo(i,k-1)+buo(i,k))
+              tem2 = wush(i,k) * sqrt(wu2(i,k-1))
+              tem2 = (tem1 - tem2) * dz
               ptem = (1. - tem) * wu2(i,k-1)
               ptem1 = 1. + tem
-              wu2(i,k) = (ptem + tem1) / ptem1
+              wu2(i,k) = (ptem + tem2) / ptem1
               wu2(i,k) = max(wu2(i,k), 0.)
             endif
           endif
@@ -1953,11 +1993,11 @@ c
           if (cnvflg(i) .and. k <= kmax(i)-1) then
            if(k < jmin(i) .and. k >= kd94(i)) then
               dz        = zi(i,k+1) - zi(i,k)
-              ptem      = xlamdd - xlamde
+              ptem      = xlamddt(i) - xlamdet(i)
               etad(i,k) = etad(i,k+1) * (1. - ptem * dz)
            else if(k < kd94(i)) then
               dz        = zi(i,k+1) - zi(i,k)
-              ptem      = xlamd(i) + xlamdd - xlamde
+              ptem      = xlamd(i) + xlamddt(i) - xlamdet(i)
               etad(i,k) = etad(i,k+1) * (1. - ptem * dz)
            endif
           endif
@@ -1996,11 +2036,11 @@ cj
           if (cnvflg(i) .and. k < jmin(i)) then
               dz = zi(i,k+1) - zi(i,k)
               if(k >= kd94(i)) then
-                 tem  = xlamde * dz
-                 tem1 = 0.5 * xlamdd * dz
+                 tem  = xlamdet(i) * dz
+                 tem1 = 0.5 * xlamddt(i) * dz
               else
-                 tem  = xlamde * dz
-                 tem1 = 0.5 * (xlamd(i)+xlamdd) * dz
+                 tem  = xlamdet(i) * dz
+                 tem1 = 0.5 * (xlamd(i)+xlamddt(i)) * dz
               endif
               factor = 1. + tem - tem1
               hcdo(i,k) = ((1.-tem1)*hcdo(i,k+1)+tem*0.5*
@@ -2024,7 +2064,7 @@ cj
         do i = 1, im
           if (cnvflg(i) .and. k < jmin(i)) then
               dz = zi(i,k+1) - zi(i,k)
-              tem  = 0.5 * xlamde * dz
+              tem  = 0.5 * xlamdet(i) * dz
               tem  = cq * tem
               factor = 1. + tem
               ecdo(i,k,n) = ((1.-tem)*ecdo(i,k+1,n)+tem*
@@ -2045,7 +2085,7 @@ c
 !             detad      = etad(i,k+1) - etad(i,k)
 cj
               dz = zi(i,k+1) - zi(i,k)
-              tem  = 0.5 * xlamde * dz
+              tem  = 0.5 * xlamdet(i) * dz
               tem  = cq * tem
               factor = 1. + tem
               qcdo(i,k) = ((1.-tem)*qrcdo(i,k+1)+tem*
@@ -2184,11 +2224,11 @@ c
               tem1 = 0.5 * (xlamud(i,k)+xlamud(i,k-1))
 c
               if(k <= kd94(i)) then
-                ptem  = xlamde
-                ptem1 = xlamd(i)+xlamdd
+                ptem  = xlamdet(i)
+                ptem1 = xlamd(i)+xlamddt(i)
               else
-                ptem  = xlamde
-                ptem1 = xlamdd
+                ptem  = xlamdet(i)
+                ptem1 = xlamddt(i)
               endif
 
               factor = grav / dp
@@ -2670,11 +2710,11 @@ cj
           if (asqecflg(i) .and. k < jmin(i)) then
               dz = zi(i,k+1) - zi(i,k)
               if(k >= kd94(i)) then
-                 tem  = xlamde * dz
-                 tem1 = 0.5 * xlamdd * dz
+                 tem  = xlamdet(i) * dz
+                 tem1 = 0.5 * xlamddt(i) * dz
               else
-                 tem  = xlamde * dz
-                 tem1 = 0.5 * (xlamd(i)+xlamdd) * dz
+                 tem  = xlamdet(i) * dz
+                 tem1 = 0.5 * (xlamd(i)+xlamddt(i)) * dz
               endif
               factor = 1. + tem - tem1
               hcdo(i,k) = ((1.-tem1)*hcdo(i,k+1)+tem*0.5*
@@ -2694,7 +2734,7 @@ cj
 !             detad    = etad(i,k+1) - etad(i,k)
 cj
               dz = zi(i,k+1) - zi(i,k)
-              tem  = 0.5 * xlamde * dz
+              tem  = 0.5 * xlamdet(i) * dz
               tem  = cq * tem
               factor = 1. + tem
               qcdo(i,k) = ((1.-tem)*qrcd(i,k+1)+tem*

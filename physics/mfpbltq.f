@@ -11,7 +11,7 @@
 !> @{
       subroutine mfpbltq(im,ix,km,kmpbl,ntcw,ntrac1,delt,
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
-     &   gdx,hpbl,kpbl,vpert,buo,xmf,
+     &   gdx,hpbl,kpbl,vpert,buo,wush,tkemean,vez0fun,xmf,
      &   tcko,qcko,ucko,vcko,xlamueq,a1)
 !
       use machine , only : kind_phys
@@ -33,7 +33,8 @@
      &                     plyr(im,km),pix(im,km),thlx(im,km),
      &                     thvx(im,km),zl(im,km), zm(im,km),
      &                     gdx(im),    hpbl(im),  vpert(im),
-     &                     buo(im,km), xmf(im,km),
+     &                     buo(im,km), wush(im,km), 
+     &                     tkemean(im),vez0fun(im),xmf(im,km),
      &                     tcko(im,km),qcko(im,km,ntrac1),
      &                     ucko(im,km),vcko(im,km),
      &                     xlamueq(im,km-1)
@@ -44,8 +45,8 @@ c  local variables and arrays
       integer   kpblx(im), kpbly(im)
 !
       real(kind=kind_phys) dt2,     dz,      ce0,
-     &                     cm,      cq,
-     &                     factor,  gocp,
+     &                     cm,      cq,      tkcrt,
+     &                     factor,  gocp,    cmxfac,
      &                     g,       b1,      f1,
      &                     bb1,     bb2,
      &                     alp,     vpertmax,a1,      pgcon,
@@ -59,7 +60,7 @@ c  local variables and arrays
 !
       real(kind=kind_phys) rbdn(im), rbup(im), hpblx(im),
      &                     xlamue(im,km-1), xlamuem(im,km-1)
-      real(kind=kind_phys) delz(im), xlamax(im)
+      real(kind=kind_phys) delz(im), xlamax(im), ce0t(im)
 !
       real(kind=kind_phys) wu2(im,km), thlu(im,km),
      &                     qtx(im,km), qtu(im,km)
@@ -73,7 +74,7 @@ c  local variables and arrays
       parameter(g=grav)
       parameter(gocp=g/cp)
       parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
-      parameter(ce0=0.4,cm=1.0,cq=1.3)
+      parameter(ce0=0.4,cm=1.0,cq=1.0,tkcrt=2.,cmxfac=5.)
       parameter(qmin=1.e-8,qlmin=1.e-12)
       parameter(alp=1.5,vpertmax=3.0,pgcon=0.55)
       parameter(b1=0.5,f1=0.15)
@@ -112,13 +113,27 @@ c  local variables and arrays
       enddo
 !
 !> - Compute entrainment rate
+!     
+!  if tkemean>tkcrt, ce0t=sqrt(tkemean/tkcrt)*ce0
+!
+      do i=1,im
+        if(cnvflg(i)) then 
+          ce0t(i) = ce0 * vez0fun(i)
+          if(tkemean(i) > tkcrt) then
+            tem = sqrt(tkemean(i)/tkcrt)
+            tem1 = min(tem, cmxfac)
+            tem2 = tem1 * ce0
+            ce0t(i) = max(ce0t(i), tem2)
+          endif
+        endif
+      enddo
 !
       do i=1,im
         if(cnvflg(i)) then
           k = kpbl(i) / 2
           k = max(k, 1)
           delz(i) = zl(i,k+1) - zl(i,k)
-          xlamax(i) = ce0 / delz(i)
+          xlamax(i) = ce0t(i) / delz(i)
         endif
       enddo
 !
@@ -129,7 +144,7 @@ c  local variables and arrays
               ptem = 1./(zm(i,k)+delz(i))
               tem = max((hpbl(i)-zm(i,k)+delz(i)) ,delz(i))
               ptem1 = 1./tem
-              xlamue(i,k) = ce0 * (ptem+ptem1)
+              xlamue(i,k) = ce0t(i) * (ptem+ptem1)
             else
               xlamue(i,k) = xlamax(i)
             endif
@@ -210,11 +225,13 @@ c  local variables and arrays
         do i = 1, im
           if(cnvflg(i)) then
             dz    = zm(i,k) - zm(i,k-1)
-            tem  = 0.25*bb1*(xlamue(i,k)+xlamue(i,k-1))*dz
-            tem1 = bb2 * buo(i,k) * dz
+            tem  = 0.25*bb1*(xlamue(i,k-1)+xlamue(i,k))*dz
+            tem1 = max(wu2(i,k-1), 0.)
+            tem1 = bb2 * buo(i,k) - wush(i,k) * sqrt(tem1)
+            tem2 = tem1 * dz
             ptem = (1. - tem) * wu2(i,k-1)
             ptem1 = 1. + tem
-            wu2(i,k) = (ptem + tem1) / ptem1
+            wu2(i,k) = (ptem + tem2) / ptem1
           endif
         enddo
       enddo
@@ -271,7 +288,7 @@ c  local variables and arrays
           k = kpbl(i) / 2
           k = max(k, 1)
           delz(i) = zl(i,k+1) - zl(i,k)
-          xlamax(i) = ce0 / delz(i)
+          xlamax(i) = ce0t(i) / delz(i)
         endif
       enddo
 !
@@ -283,7 +300,7 @@ c  local variables and arrays
               ptem = 1./(zm(i,k)+delz(i))
               tem = max((hpbl(i)-zm(i,k)+delz(i)) ,delz(i))
               ptem1 = 1./tem
-              xlamue(i,k) = ce0 * (ptem+ptem1)
+              xlamue(i,k) = ce0t(i) * (ptem+ptem1)
             else 
               xlamue(i,k) = xlamax(i)
             endif
