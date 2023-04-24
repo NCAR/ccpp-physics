@@ -896,8 +896,6 @@ c
           endif
         enddo
 !
-!  if tkemean>tkcrt, clamt=(1+tkemean/tkcrt)*clam
-!
         do i=1,im
           if(cnvflg(i)) then
             if(tkemean(i) > tkcrt) then

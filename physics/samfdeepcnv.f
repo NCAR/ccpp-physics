@@ -980,10 +980,6 @@ c
             enddo
         endif
 !
-!  if tkemean>tkcrt, tem=1+tkemean/tkcrt, clamt=tem*clam
-!       xlamdet=tem*xlamde, xlamddt=tem*xlamdd
-!       cxlamet=tem*cxlame, cxlamdt=tem*cxlamd
-!
         do i=1,im
           if(cnvflg(i)) then
             xlamdet(i) = xlamde

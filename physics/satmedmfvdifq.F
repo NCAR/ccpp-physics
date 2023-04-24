@@ -1359,8 +1359,6 @@
             endif
             ptem2 = ptem2 + ptem
 !
-!           tem2 = stress(i)*spd1(i)/zl(i,1)
-!           tem2 = stress(i)*ustar(i)*phim(i)/(vk*zl(i,1))
             tem2 = stress(i)*ustar(i)*phims(i)/(vk*zl(i,1))
             shrp = 0.5 * (tem1 + ptem1 + ptem2 + tem2)
           else
