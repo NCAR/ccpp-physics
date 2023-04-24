@@ -1136,16 +1136,9 @@
                 dz = zl(i,1)
                 tem = tsea(i)*(1.+fv*max(q1(i,1,1),qmin))
                 tem1 = 2.*gotvx(i,n)*(tem-thvx(i,k))
-!               e2(i,n-1) = e2(i,n) + tem1 * dz
-!
-!               tem2 = (u1(i,1)/dz)**2
-!               tem2 = tem2+(v1(i,1)/dz)**2
-!               tem2 = cs0*sqrt(e2(i,n))*sqrt(tem2)
-!
                 tem2 = ustar(i)*phims(i)/(vk*dz)
                 tem2 = cs0*sqrt(e2(i,n))*tem2
                 e2(i,n-1) = e2(i,n) + (tem1 - tem2) * dz
-!
               else
                 dz = zl(i,n) - zl(i,n-1)
                 tem1 = 2.*gotvx(i,n-1)*(thvx(i,n-1)-thvx(i,k))
