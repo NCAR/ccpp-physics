@@ -442,7 +442,8 @@ contains
 		   shg     , shc     , shb     , evg     , evb     , ghv     , & ! out :
 		   ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
 		   chleaf  , chuc    , chv2    , chb2    , fpice   , pahv    , &
-                   pahg    , pahb    , pah     , esnow   , canhs   , laisun  , laisha  , rb &
+                   pahg    , pahb    , pah     , esnow   , canhs   , laisun  , &
+                   laisha  , rb      , qsfcveg , qsfcbare                      &
 #ifdef CCPP
                    ,errmsg, errflg)
 #else
@@ -587,6 +588,8 @@ contains
   real (kind=kind_phys)                           , intent(out)   :: rb        !< leaf boundary layer resistance (s/m)
   real (kind=kind_phys)                           , intent(out)   :: laisun    !< sunlit leaf area index (m2/m2)
   real (kind=kind_phys)                           , intent(out)   :: laisha    !< shaded leaf area index (m2/m2)
+  real (kind=kind_phys)                           , intent(out)   :: qsfcveg   !< effective spec humid over vegetation 
+  real (kind=kind_phys)                           , intent(out)   :: qsfcbare  !< effective spec humid over bare soil 
 
 !jref:start; output
   real (kind=kind_phys)                           , intent(out)     :: t2mv   !< 2-m air temperature over vegetated part [k]
@@ -847,7 +850,9 @@ contains
                  emissi ,pah    ,canhs,                           &
 		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )                                            !out
 
-                 qsfc = q1                         !
+    qsfcveg  = eah*0.622/(sfcprs - 0.378*eah)
+    qsfcbare = qsfc
+    qsfc     = q1
 !jref:end
 #ifdef CCPP
     if (errflg /= 0) return
@@ -3923,6 +3928,7 @@ endif   ! croptype == 0
 
   real (kind=kind_phys) :: t, tdc       !kelvin to degree celsius with limit -50 to +50
 
+  real(kind=kind_phys) :: evpot   !<the potential evaporation from wet foliage per unit wetted area
   real(kind=kind_phys) :: fhi, qss, wrk
   real(kind=kind_phys), parameter :: qmin=1.0e-8
 
@@ -4173,8 +4179,17 @@ endif   ! croptype == 0
 
 ! prepare for latent heat flux above veg.
 
+        evpot= fveg*rhoair*cpair*vaie/rb * (estv-eah) / gammav
         caw  = 1./rawc
-        cew  = fwet*vaie/rb
+        if(evpot > 0. .and. fwet > 0.) then
+          if (tv > tfrz) then
+            cew = min(fwet,canliq*latheav/dt/evpot) * vaie/rb
+          else
+            cew = min(fwet,canice*latheav/dt/evpot) * vaie/rb
+          endif
+        else
+          cew= fwet * vaie/rb
+        endif
         ctw  = (1.-fwet)*(laisune/(rb+rssun) + laishae/(rb+rssha))
         cgw  = 1./(rawg+rsurf)
         cond = caw + cew + ctw + cgw
