@@ -3721,7 +3721,7 @@ MODULE module_mp_thompson
           prv_rev(k) = t1_evap*diffu(k)*(-ssatw(k))*N0_r(k)*rvs &
               * (t1_qr_ev*ilamr(k)**cre(10) &
               + t2_qr_ev*vsc2(k)*rhof2(k)*((lamr+0.5*fv_r)**(-cre(11))))
-          rate_max = MIN((rr(k)*odts), (qvs(k)-qv(k))*odts)
+          rate_max = MIN((rr(k)*odts), (qvs(k)-qv(k))*rho(k)*odts)
           prv_rev(k) = MIN(DBLE(rate_max*orho), prv_rev(k)*orho)
 
 !..TEST: G. Thompson  10 May 2013
