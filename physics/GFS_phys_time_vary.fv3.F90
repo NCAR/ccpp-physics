@@ -80,16 +80,21 @@
               zwtxy, xlaixy, xsaixy, lfmassxy, stmassxy, rtmassxy, woodxy, stblcpxy, fastcpxy,     &
               smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, snliqxy, tsnoxy , smoiseq, zsnsoxy,   &
               slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, con_t0c, lsm_cold_start, nthrds,    &
-              errmsg, errflg)
+              lkm, use_lake_model, lakefrac, lakedepth, iopt_lake, iopt_lake_clm, iopt_lake_flake, &
+              lakefrac_threshold, lakedepth_threshold, errmsg, errflg)
 
          implicit none
 
          ! Interface variables
          integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny, levs, iaermdl
          logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
-         integer,              intent(in)    :: idate(:)
-         real(kind_phys),      intent(in)    :: fhour
+         integer,              intent(in)    :: idate(:), iopt_lake, iopt_lake_clm, iopt_lake_flake
+         real(kind_phys),      intent(in)    :: fhour, lakefrac_threshold, lakedepth_threshold
          real(kind_phys),      intent(in)    :: xlat_d(:), xlon_d(:)
+
+         integer,              intent(in) :: lkm
+         integer,              intent(inout)  :: use_lake_model(:)
+         real(kind=kind_phys), intent(in   )  :: lakefrac(:), lakedepth(:)
 
          integer,              intent(inout) :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
          real(kind_phys),      intent(inout) :: ddy_o3(:),  ddy_h(:)
@@ -669,6 +674,27 @@
 
            endif noahmp_init
          endif lsm_init
+
+!Lake model
+         if(lkm>0 .and. iopt_lake>0) then
+           ! A lake model is enabled.
+           do i = 1, im
+             !if (lakefrac(i) > 0.0 .and. lakedepth(i) > 1.0 ) then
+
+             ! The lake data must say there's a lake here (lakefrac) with a depth (lakedepth)
+             if (lakefrac(i) > lakefrac_threshold .and. lakedepth(i) > lakedepth_threshold ) then
+               ! This is a lake point. Inform the other schemes to use a lake model, and possibly nsst (lkm)
+               use_lake_model(i) = lkm
+               cycle
+             else
+               ! Not a valid lake point.
+               use_lake_model(i) = 0
+             endif
+           enddo
+         else
+           ! Lake model is disabled or settings are invalid.
+           use_lake_model = 0
+         endif
 
          is_initialized = .true.
 
