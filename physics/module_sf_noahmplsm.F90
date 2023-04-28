@@ -5487,143 +5487,186 @@ endif   ! croptype == 0
 
 !>\ingroup NoahMP_LSM
 ! compute thermal roughness length based on option opt_trs.
-  subroutine thermalz0(parameters,fveg,z0m,z0mg,zlvl,zpd,ezpd,ustarx,          & !in
-                       vegtyp,vaie,ur,csigmaf0,csigmaf1,aone,cdmnv,cdmng,icom, & !in 
-                       z0mt,z0ht)                                                !out
+
+  subroutine thermalz0(parameters,    fveg,          z0m, z0mg,       zlvl,        zpd, ezpd, & !in
+                           ustarx,  vegtyp,         vaie,   ur, c_sigma_f0, c_sigma_f1,   a1, & !in
+                           cdmn_v,  cdmn_g, surface_flag,                                     & !in 
+                          z0m_out, z0h_out )                                                    !out
+
 ! compute thermal roughness length based on option opt_trs.
 ! -------------------------------------------------------------------------------------------------
     implicit none
 ! -------------------------------------------------------------------------------------------------
 ! inputs
 
-  type (noahmp_parameters), intent(in) :: parameters  !<
-    integer , intent(in   ) :: vegtyp                 !< vegetation type
-    integer , intent(in   ) :: icom                   !< 0=bared 1=vege 2=composition
-    real (kind=kind_phys), intent(in   ) :: fveg      !< green vegetation fraction [0.0-1.0]
-    real (kind=kind_phys), intent(in   ) :: z0m       !< z0 momentum (m)
-    real (kind=kind_phys), intent(in   ) :: z0mg      !< z0 momentum, ground (m)
-    real (kind=kind_phys), intent(in   ) :: zlvl      !< reference height  [m]
-    real (kind=kind_phys), intent(in   ) :: zpd       !< zero plane displacement (m)
-    real (kind=kind_phys), intent(in   ) :: ezpd      !< zero plane displacement (m)
-    real (kind=kind_phys), intent(in   ) :: ustarx    !< friction velocity (m/s)
-    real (kind=kind_phys), intent(in   ) :: vaie      !< reference height  [m]
-    real (kind=kind_phys), intent(in   ) :: ur        !< wind speed [m/s]
-    real (kind=kind_phys), intent(inout) :: csigmaf0  !< 
-    real (kind=kind_phys), intent(inout) :: csigmaf1  !< 
-    real (kind=kind_phys), intent(in   ) :: aone      !< 
-    real (kind=kind_phys), intent(in   ) :: cdmnv     !< 
-    real (kind=kind_phys), intent(in   ) :: cdmng     !< 
-    real (kind=kind_phys), intent(out  ) :: z0mt      !< composited z0 momentum (m) 
-    real (kind=kind_phys), intent(out  ) :: z0ht      !< composited z0 momentum (m) 
+  type (noahmp_parameters),intent(in   ) :: parameters   ! parameters data structure
+    integer              , intent(in   ) :: vegtyp       ! vegetation type
+    integer              , intent(in   ) :: surface_flag ! 0=bare 1=vegetation 2=composite
+    real (kind=kind_phys), intent(in   ) :: fveg         ! vegetation fraction [0.0-1.0]
+    real (kind=kind_phys), intent(in   ) :: z0m          ! z0 momentum [m]
+    real (kind=kind_phys), intent(in   ) :: z0mg         ! z0 momentum, ground [m]
+    real (kind=kind_phys), intent(in   ) :: zlvl         ! reference height  [m]
+    real (kind=kind_phys), intent(in   ) :: zpd          ! zero plane displacement [m]
+    real (kind=kind_phys), intent(in   ) :: ezpd         ! grid zero plane displacement [m]
+    real (kind=kind_phys), intent(in   ) :: ustarx       ! friction velocity [m/s]
+    real (kind=kind_phys), intent(in   ) :: vaie         ! exposed LAI + SAI  [m2/m2]
+    real (kind=kind_phys), intent(in   ) :: ur           ! wind speed [m/s]
+    real (kind=kind_phys), intent(in   ) :: a1           ! Blumel 99 eqn 43
+    real (kind=kind_phys), intent(in   ) :: cdmn_v       ! neutral momentum drag coefficient for vegetation
+    real (kind=kind_phys), intent(in   ) :: cdmn_g       ! neutral momentum drag coefficient for bare ground
+    real (kind=kind_phys), intent(inout) :: c_sigma_f0   ! C factor for no vegetation Blumel99 eqn 35
+    real (kind=kind_phys), intent(inout) :: c_sigma_f1   ! C factor for full vegetation Blumel99 eqn 39
+    real (kind=kind_phys), intent(out  ) :: z0m_out      ! output z0 momentum [m]
+    real (kind=kind_phys), intent(out  ) :: z0h_out      ! output z0 heat [m]
 
 ! local
-    real (kind=kind_phys)                :: czil1     ! canopy based czil
-    real (kind=kind_phys)                :: coeffa
-    real (kind=kind_phys)                :: coeffb
-    real (kind=kind_phys)                :: csigmafveg
-    real (kind=kind_phys)                :: gsigma
-    real (kind=kind_phys)                :: sigmaa
-    real (kind=kind_phys)                :: cdmn
-    real (kind=kind_phys)                :: kbsigmafveg
-    real (kind=kind_phys)                :: reyn
-    real (kind=kind_phys)                :: kbsigmaf0
-    real (kind=kind_phys)                :: kbsigmaf1
+    real (kind=kind_phys)                :: czil         ! Zilitinkevich factor
+    real (kind=kind_phys)                :: coeff_a      ! slope of Blumel99 eqn 40               Blumel99 eqn 41
+    real (kind=kind_phys)                :: coeff_b      ! intercept of Blumel99 eqn 40           Blumel99 eqn 42
+    real (kind=kind_phys)                :: c_sigma_fveg ! estimated C factor                     Blumel99 eqn 40
+    real (kind=kind_phys)                :: g_sigma      ! weighting function                     Blumel99 eqn 22
+    real (kind=kind_phys)                :: sigma_a      ! momentum partition factor              Blumel99 eqn 8
+    real (kind=kind_phys)                :: cdmn         ! grid neutral momentum drag coefficient Blumel99 eqn 21
+    real (kind=kind_phys)                :: reyn         ! roughness Reynolds number              Blumel99 eqn 36c
+    real (kind=kind_phys)                :: kb_sigma_f0  ! bare ground  kb^-1                     Blumel99 eqn 36ab
+    real (kind=kind_phys)                :: kb_sigma_f1  ! vegetated kb^-1                        Blumel99 eqn 38
+    real (kind=kind_phys)                :: kb_sigma_fveg! grid estimated kb^-1                   Blumel99 eqn 34
+    
+    integer, parameter :: bare_flag = 0, vegetated_flag = 1, composite_flag = 2
+    integer, parameter :: z0heqz0m  = 1, &
+                          chen09    = 2, &
+                          tessel    = 3, &
+                          blumel99  = 4
+    real (kind=kind_phys), parameter :: blumel_gamma = 0.5, &
+                                        blumel_zeta  = 1.0, &
+                                        viscosity    = 1.5e-5
 
 ! -------------------------------------------------------------------------------------------------
-    czil1     = 0.5
-    coeffa    = 0.0
-    coeffb    = 0.0
-    csigmafveg= 0.0
-    gsigma    = 0.0
-    cdmn      = 0.0
-    reyn      = 0.0
-    sigmaa    = 0.0
-    kbsigmafveg = 0.0
-    kbsigmaf0 = 0.0
-    kbsigmaf1 = 0.0
-    if( icom == 2 )then
-     if (opt_trs == 1) then
-        z0mt  = fveg * z0m      + (1.0 - fveg) * z0mg
-        z0ht = z0mt
-     elseif (opt_trs == 2) then
-        z0mt  = fveg * z0m      + (1.0 - fveg) * z0mg
-        czil1=10.0 ** (- 0.4 * parameters%hvt)
-        z0ht = fveg * z0m*exp(-czil1*0.4*258.2*sqrt(ustarx*z0m))  &
-            +(1.0 - fveg) * z0mg*exp(-czil1*0.4*258.2*sqrt(ustarx*z0mg))
-     elseif (opt_trs == 3) then
-        z0mt  = fveg * z0m      + (1.0 - fveg) * z0mg
-        if (vegtyp.le.5) then
-          z0ht = fveg * z0m    + (1.0 - fveg) * z0mg*0.1
-        else
-         z0ht = fveg * z0m*0.01 + (1.0 - fveg) * z0mg*0.1
-        endif
-     elseif (opt_trs == 4) then
-        coeffa     = (csigmaf0 - csigmaf1)/(1.0 - exp(-1.0*aone))
-        coeffb     = csigmaf0 - coeffa
-        csigmafveg = coeffa * exp(-1.0*aone*fveg) + coeffb
+    czil          = 0.5
+    coeff_a       = 0.0
+    coeff_b       = 0.0
+    c_sigma_fveg  = 0.0
+    g_sigma       = 0.0
+    cdmn          = 0.0
+    reyn          = 0.0
+    sigma_a       = 0.0
+    kb_sigma_fveg = 0.0
+    kb_sigma_f0   = 0.0
+    kb_sigma_f1   = 0.0
 
-        gsigma = fveg**0.5 + fveg*(1.0-fveg)*1.0
-!
-! 0.5 ~ 1.0 for the 0.5 place; 0 ~ 1.0 for the 1.0 place, adjustable empirical
+    surface_flag_select : select case(surface_flag)
+  
+    case (composite_flag) ! calculate grid based z0m and z0h
+
+      if (opt_trs == z0heqz0m) then
+
+        z0m_out  = fveg * z0m      + (1.0 - fveg) * z0mg   ! probably should be log
+        z0h_out = z0m_out
+
+      elseif (opt_trs == chen09) then
+
+        z0m_out  = fveg * z0m      + (1.0 - fveg) * z0mg   ! probably should be log
+        czil = 10.0 ** (- 0.4 * parameters%hvt)
+        z0h_out =       fveg  * z0m  * exp(-czil*0.4*258.2*sqrt(ustarx*z0m ))  &
+            + (1.0 - fveg) * z0mg * exp(-czil*0.4*258.2*sqrt(ustarx*z0mg))
+
+      elseif (opt_trs == tessel) then
+
+        z0m_out  = fveg * z0m      + (1.0 - fveg) * z0mg   ! probably should be log
+        if (vegtyp <= 5) then
+          z0h_out = fveg * z0m        + (1.0 - fveg) * z0mg * 0.1
+        else
+          z0h_out = fveg * z0m * 0.01 + (1.0 - fveg) * z0mg * 0.1
+        endif
+
+      elseif (opt_trs == blumel99) then
+
+        coeff_a      = (c_sigma_f0 - c_sigma_f1)/(1.0 - exp(-1.0*a1))  ! Blumel99 eqn 41
+        coeff_b      = c_sigma_f0 - coeff_a                            ! Blumel99 eqn 42
+        c_sigma_fveg = coeff_a * exp(-1.0*a1*fveg) + coeff_b           ! Blumel99 eqn 40
+
+! blumel_gamma = 0.5 ~ 1.0 and blumel_zeta = 0 ~ 1.0, adjustable empirical
 ! canopy roughness geometry parameter; currently fveg = 0.78 has the largest
 ! momentum flux; can test the fveg-based average by setting 0.5 to 1.0 and 1.0
-! to 0.0 ! see Blumel; JAM,1998
-!
+! to 0.0 ! see Blumel; JAM,1999
 
-        cdmn   = gsigma*cdmnv + (1.0-gsigma)*cdmng
-        z0mt = (zlvl - ezpd)*exp(-0.4/sqrt(cdmn))
+        g_sigma       = fveg**blumel_gamma + fveg*(1.0-fveg)*blumel_zeta   ! Blumel99 eqn 22
+        cdmn          = g_sigma*cdmn_v + (1.0-g_sigma)*cdmn_g              ! Blumel99 eqn 21
+        z0m_out          = (zlvl - ezpd)*exp(-0.4/sqrt(cdmn))                 ! Blumel99 eqn 24
+        kb_sigma_fveg = c_sigma_fveg/log((zlvl-ezpd)/z0m_out) - &
+                        log((zlvl-ezpd)/z0m_out)                              ! Blumel99 eqn 34
+        z0h_out          = z0m_out/exp(kb_sigma_fveg)
 
-        kbsigmafveg = csigmafveg/log((zlvl-ezpd)/z0mt) - log((zlvl-ezpd)/z0mt)
-        z0ht = z0mt/exp(kbsigmafveg)
-     endif
-
-    elseif( icom == 0 )then
-
-        z0mt = z0mg
-     if (opt_trs == 1) then
-        z0ht = z0mt
-     elseif (opt_trs == 2) then
-        czil1=10.0 ** (- 0.4 * parameters%hvt)
-        z0ht =z0mt*exp(-czil1*0.4*258.2*sqrt(ustarx*z0mt))
-     elseif (opt_trs == 3) then
-      if (vegtyp.le.5) then
-        z0ht = z0mt
-      else
-        z0ht = z0mt*0.01
-      endif
-     elseif (opt_trs == 4) then
-      reyn = ustarx*z0mt/(1.5e-05)
-      if (reyn .gt. 2.0) then
-        kbsigmaf0 = 2.46*reyn**0.25 - log(7.4)
-      else
-        kbsigmaf0 = - log(0.397)
       endif
 
-      z0ht = max(z0mt/exp(kbsigmaf0),1.0e-6)
-      csigmaf0 = log((zlvl-zpd)/z0mt)*(log((zlvl-zpd)/z0mt) + kbsigmaf0)
-     endif
+    case (bare_flag) ! calculate z0m and z0h over bare tile
 
-    elseif( icom == 1 )then
+      z0m_out = z0mg
+     
+      if (opt_trs == z0heqz0m) then
 
-        z0mt = z0m
-       if (opt_trs == 1) then
-         z0ht    = z0mt
-       elseif (opt_trs == 2) then
-         czil1= 10.0 ** (- 0.4 * parameters%hvt)
-         z0ht = z0mt*exp(-czil1*0.4*258.2*sqrt(ustarx*z0mt))
-       elseif (opt_trs == 3) then
-         if (vegtyp.le.5) then
-           z0ht = z0mt
-         else
-           z0ht = z0mt*0.01
-         endif
-        elseif (opt_trs == 4) then
-          sigmaa    = 1.0 - (0.5/(0.5+vaie))*exp(-vaie**2/8.0)
-          kbsigmaf1 = 16.4*(sigmaa*vaie**3)**(-0.25)*sqrt(parameters%dleaf*ur/log((zlvl-zpd)/z0mt))
-          z0ht       = z0mt/exp(kbsigmaf1)
-          csigmaf1  = log((zlvl-zpd)/z0mt)*(log((zlvl-zpd)/z0mt)+kbsigmaf1) ! for output for interpolation
+        z0h_out = z0m_out
+
+      elseif (opt_trs == chen09) then
+
+        czil = 10.0 ** (- 0.4 * parameters%hvt)
+        z0h_out = z0m_out * exp(-czil*0.4*258.2*sqrt(ustarx*z0m_out))
+
+      elseif (opt_trs == tessel) then
+
+        if (vegtyp <= 5) then
+          z0h_out = z0m_out
+        else
+          z0h_out = z0m_out * 0.01
         endif
-     endif
+
+      elseif (opt_trs == blumel99) then
+
+        reyn = ustarx*z0m_out/viscosity                      ! Blumel99 eqn 36c
+        if (reyn > 2.0) then
+          kb_sigma_f0 = 2.46*reyn**0.25 - log(7.4)        ! Blumel99 eqn 36a
+        else
+          kb_sigma_f0 = - log(0.397)                      ! Blumel99 eqn 36b
+        endif
+
+        z0h_out       = max(z0m_out/exp(kb_sigma_f0),1.0e-6)
+        c_sigma_f0 = log((zlvl-zpd)/z0m_out) *  &
+                     (log((zlvl-zpd)/z0m_out) + kb_sigma_f0) ! Blumel99 eqn 35
+
+      endif
+
+    case (vegetated_flag) ! calculate z0m and z0h over vegetated tile
+
+      z0m_out = z0m
+
+      if (opt_trs == z0heqz0m) then
+
+        z0h_out    = z0m_out
+
+      elseif (opt_trs == chen09) then
+
+        czil = 10.0 ** (- 0.4 * parameters%hvt)
+        z0h_out = z0m_out * exp(-czil*0.4*258.2*sqrt(ustarx*z0m_out))
+
+      elseif (opt_trs == tessel) then
+
+        if (vegtyp <= 5) then
+          z0h_out = z0m_out
+        else
+          z0h_out = z0m_out*0.01
+        endif
+
+      elseif (opt_trs == blumel99) then
+
+        sigma_a     = 1.0 - (0.5/(0.5+vaie)) * exp(-vaie**2/8.0)              ! Blumel99 eqn 8
+        kb_sigma_f1 = 16.4 * (sigma_a*vaie**3)**(-0.25) * &                   ! Blumel99 eqn 38
+                       sqrt(parameters%dleaf*ur/log((zlvl-zpd)/z0m_out))
+        z0h_out        = z0m_out/exp(kb_sigma_f1)
+        c_sigma_f1  = log((zlvl-zpd)/z0m_out)*(log((zlvl-zpd)/z0m_out)+kb_sigma_f1) ! Blumel99 eqn 39
+
+      endif
+
+    end select surface_flag_select
 
   end subroutine thermalz0
 
