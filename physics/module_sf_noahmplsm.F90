@@ -163,14 +163,19 @@ use sfc_diff, only   : stability
                       !   1 -> liu, et al. 2016
 
   integer :: opt_trs  !< options for thermal roughness scheme
-                      ! **1 -> z0h=z0 
-                      !   2 -> czil 
-                      !   3 -> ec style 
-                      !   4 -> kb inversed
+                      ! **1 -> z0h=z0m
+                      !   2 -> czil = f(canopy height) from Chen09
+                      !   3 -> ec style from TESSEL
+                      !   4 -> kb inverse from Blumel99
   integer :: opt_diag !< options for surface 2m/q diagnostic approach
                       !   1 -> external GFS sfc_diag 
                       ! **2 -> original NoahMP 2-title 
                       !   3 -> NoahMP 2-title + internal GFS sfc_diag 
+
+  integer :: opt_z0m  !< options for momentum roughness length
+                      ! **1 -> use z0m from MPTABLE
+                      !   2 -> z0m = f(canopy height, LAI/SAI) 
+
 !------------------------------------------------------------------------------------------!
 ! physical constants:                                                                      !
 !------------------------------------------------------------------------------------------!
@@ -1974,6 +1979,10 @@ endif   ! croptype == 0
   real (kind=kind_phys)                                  :: ezpd
   real (kind=kind_phys)                                  :: aone
 
+  real (kind=kind_phys)                                  :: canopy_density_factor
+  real (kind=kind_phys)                                  :: vai_limited
+  real (kind=kind_phys)                                  :: z0m_hvt_ratio(20)
+
 !jref:end  
 
   real (kind=kind_phys), parameter                   :: mpe    = 1.e-6
@@ -2012,6 +2021,11 @@ endif   ! croptype == 0
     csigmaf1  = 0.0
     csigmaf0  = 0.0
     aone      = 0.0
+    
+    canopy_density_factor = 1.0
+    vai_limited           = 2.0
+    z0m_hvt_ratio  = (/ 0.545,0.055,0.047,0.050,0.050,0.182,0.545,0.046,0.050,0.120, &
+                        0.060,0.075,0.067,0.093,0.000,0.000,0.000,0.075,0.100,0.060  /)
 
 !
 
@@ -2054,12 +2068,32 @@ endif   ! croptype == 0
 
      zpdg  = snowh
      if(veg) then
-        z0m  = parameters%z0mvt
-        zpd  = 0.65 * parameters%hvt
-        if(snowh.gt.zpd) zpd  = snowh
+
+       if(opt_z0m == 1) then
+
+         z0m  = parameters%z0mvt
+         zpd  = 0.65 * parameters%hvt
+
+       elseif(opt_z0m == 2) then
+
+         z0m = z0m_hvt_ratio(vegtyp) * parameters%hvt
+         zpd  = 0.65 * parameters%hvt
+         if(vegtyp /= 13) then
+           vai_limited = min(vai, 2.0)
+           canopy_density_factor = (1.0 -  exp(-vai_limited)) / (1.0 - exp(-2.0))
+           z0m  = exp(canopy_density_factor * log(z0m) + (1.0 - canopy_density_factor) * log(z0mg))
+           zpd  = canopy_density_factor * zpd
+         end if
+
+       end if
+
+       if(snowh.gt.zpd) zpd  = snowh
+
      else
+
         z0m  = z0mg
         zpd  = zpdg
+
      end if
 
 ! special case for urban
@@ -10154,9 +10188,10 @@ end subroutine psn_crop
 
 !>\ingroup NoahMP_LSM
 !!
-  subroutine noahmp_options(idveg     ,iopt_crs  ,iopt_btr  ,iopt_run  ,iopt_sfc  ,iopt_frz , & 
-                             iopt_inf  ,iopt_rad  ,iopt_alb  ,iopt_snf  ,iopt_tbot, iopt_stc, &
-			     iopt_rsf , iopt_soil, iopt_pedo, iopt_crop ,iopt_trs, iopt_diag )
+  subroutine noahmp_options(idveg    , iopt_crs , iopt_btr , iopt_run , iopt_sfc , iopt_frz , & 
+                             iopt_inf, iopt_rad , iopt_alb , iopt_snf , iopt_tbot, iopt_stc , &
+			     iopt_rsf, iopt_soil, iopt_pedo, iopt_crop, iopt_trs , iopt_diag, &
+                             iopt_z0m )
 
   implicit none
 
@@ -10180,6 +10215,7 @@ end subroutine psn_crop
   integer,  intent(in) :: iopt_crop !< crop model option (0->none; 1->liu et al.)
   integer,  intent(in) :: iopt_trs  !< thermal roughness scheme option (1->z0h=z0; 2->rb reversed)
   integer,  intent(in) :: iopt_diag !< surface 2m t/q diagnostic approach 
+  integer,  intent(in) :: iopt_z0m  !< momentum roughness length option
 
 ! -------------------------------------------------------------------------------------------------
 
@@ -10202,6 +10238,7 @@ end subroutine psn_crop
   opt_crop = iopt_crop
   opt_trs  = iopt_trs
   opt_diag = iopt_diag
+  opt_z0m  = iopt_z0m
   
   end subroutine noahmp_options
 
