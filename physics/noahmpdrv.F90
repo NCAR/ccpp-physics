@@ -1340,6 +1340,7 @@ do i = 1, im
         parameters%rc     =     rc_table(vegtype)       !tree crown radius (m)
         parameters%mfsno  =  mfsno_table(vegtype)       !snowmelt m parameter ()
 	parameters%scffac = scffac_table(vegtype)       !snow cover factor
+        parameters%cbiom  =  cbiom_table(vegtype)       !canopy biomass heat capacity parameter (m)
         parameters%saim   =   saim_table(vegtype,:)     !monthly stem area index, one-sided
         parameters%laim   =   laim_table(vegtype,:)     !monthly leaf area index, one-sided
         parameters%sla    =    sla_table(vegtype)       !single-side leaf area per kg [m2/kg]

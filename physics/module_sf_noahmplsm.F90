@@ -224,6 +224,7 @@ use machine ,   only : kind_phys
     real (kind=kind_phys) :: rc                 !< tree crown radius (m)
     real (kind=kind_phys) :: mfsno              !< snowmelt m parameter ()
     real (kind=kind_phys) :: scffac             !< snow cover factor (m)
+    real (kind=kind_phys) :: cbiom              !< canopy biomass heat capacity parameter (m)
     real (kind=kind_phys) :: saim(12)           !< monthly stem area index, one-sided
     real (kind=kind_phys) :: laim(12)           !< monthly leaf area index, one-sided
     real (kind=kind_phys) :: sla                !< single-side leaf area per kg [m2/kg]
@@ -4245,7 +4246,7 @@ endif   ! croptype == 0
 	end if
 
 ! canopy heat capacity
-        hcv = 0.02*vaie*cwat + canliq*cwat/denh2o + canice*cice/denice !j/m2/k
+        hcv = parameters%cbiom*vaie*cwat + canliq*cwat/denh2o + canice*cice/denice !j/m2/k
 
         b   = sav-irc-shc-evc-tr+pahv                          !additional w/m2
 !       a   = fveg*(4.*cir*tv**3 + csh + (cev+ctr)*destv) !volumetric heat capacity
