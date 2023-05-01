@@ -6179,7 +6179,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 !  compute q2 and q2sat
 
     q2 = 0.622 *  eah  / (sfcprs - 0.378 * eah) !specific humidity [kg/kg]
-    q2 = q2 / (1.0 + q2)                        !mixing ratio [kg/kg]
+    q2 = q2 / (1.0 - q2)                        !mixing ratio [kg/kg]
 
     call calhum(parameters,sfctmp, sfcprs, q2sat, dqsdt2)
 
