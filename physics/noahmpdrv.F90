@@ -203,8 +203,7 @@
   use machine ,   only : kind_phys
   use funcphys,   only : fpvs
 
-  use sfc_diff,   only : stability
-! use module_sf_noahmplsm
+  use module_sf_noahmplsm,   only : gfs_stability
   use module_sf_noahmp_glacier
   use noahmp_tables
 
@@ -451,6 +450,7 @@
   integer    :: iopt_pedo = 1 ! option for pedotransfer function
   integer    :: iopt_crop = 0 ! option for crop model
   integer    :: iopt_gla  = 2 ! option for glacier treatment
+  integer    :: iopt_z0m  = 2 ! option for z0m treatment
 
 !
 !  ---  local inputs to noah-mp and glacier subroutines; listed in order in noah-mp call
@@ -848,7 +848,8 @@ do i = 1, im
       call noahmp_options(idveg ,iopt_crs, iopt_btr , iopt_run, iopt_sfc,  &
                                  iopt_frz, iopt_inf , iopt_rad, iopt_alb,  &
                                  iopt_snf, iopt_tbot, iopt_stc, iopt_rsf,  &
-			         iopt_soil,iopt_pedo, iopt_crop,iopt_trs,iopt_diag)
+			         iopt_soil,iopt_pedo, iopt_crop,iopt_trs,  &
+                                 iopt_diag,iopt_z0m)
 
       if ( vegetation_category == isice_table )  then
 
@@ -1187,7 +1188,7 @@ do i = 1, im
 !      if ( .not. do_mynnsfclay) then   !GFS sfcdiff
        if ( iopt_sfc .ne. 4 ) then   !GFS sfcdiff
 
-      call       stability                                                               &
+      call       gfs_stability                                                               &
         (zf(i), zvfun(i), gdx, virtual_temperature, vptemp,wind(i), z0_total, z0h_total, & 
          tvs1, con_g, thsfc_loc,                                                         &
          rb1(i), fm1(i), fh1(i), fm101(i), fh21(i), cm(i), ch(i), stress1(i), ustar1(i))
@@ -1334,10 +1335,12 @@ do i = 1, im
         parameters%z0mvt  =  z0mvt_table(vegtype)       !momentum roughness length (m)
         parameters%hvt    =    hvt_table(vegtype)       !top of canopy (m)
         parameters%hvb    =    hvb_table(vegtype)       !bottom of canopy (m)
+        parameters%z0mhvt = z0mhvt_table(vegtype)       !momentum roughness length (m)
         parameters%den    =    den_table(vegtype)       !tree density (no. of trunks per m2)
         parameters%rc     =     rc_table(vegtype)       !tree crown radius (m)
         parameters%mfsno  =  mfsno_table(vegtype)       !snowmelt m parameter ()
 	parameters%scffac = scffac_table(vegtype)       !snow cover factor
+        parameters%cbiom  =  cbiom_table(vegtype)       !canopy biomass heat capacity parameter (m)
         parameters%saim   =   saim_table(vegtype,:)     !monthly stem area index, one-sided
         parameters%laim   =   laim_table(vegtype,:)     !monthly leaf area index, one-sided
         parameters%sla    =    sla_table(vegtype)       !single-side leaf area per kg [m2/kg]

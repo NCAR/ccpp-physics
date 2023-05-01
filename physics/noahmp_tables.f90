@@ -44,10 +44,12 @@ module noahmp_tables
     real :: z0mvt_table(mvt)       !< momentum roughness length (m)
     real :: hvt_table(mvt)         !< top of canopy (m)
     real :: hvb_table(mvt)         !< bottom of canopy (m)
+    real :: z0mhvt_table(mvt)      !< ratio of z0m to hvt
     real :: den_table(mvt)         !< tree density (no. of trunks per m2)
     real :: rc_table(mvt)          !< tree crown radius (m)
     real :: mfsno_table(mvt)       !< snowmelt curve parameter ()
     real :: scffac_table(mvt)      !< snow cover factor (m)
+    real :: cbiom_table(mvt)       !< canopy biomass heat capacity parameter (m)
     real :: saim_table(mvt,12)     !< monthly stem area index, one-sided
     real :: laim_table(mvt,12)     !< monthly leaf area index, one-sided
     real :: sla_table(mvt)         !< single-side leaf area per kg [m2/kg]
@@ -323,7 +325,8 @@ contains
                                               sai_sep, sai_oct, sai_nov, sai_dec, lai_jan, lai_feb, lai_mar, lai_apr,        &
                                               lai_may, lai_jun, lai_jul, lai_aug, lai_sep, lai_oct, lai_nov, lai_dec,        &
                                               rhol_vis, rhol_nir, rhos_vis, rhos_nir, taul_vis, taul_nir, taus_vis, taus_nir,&
-                                              ch2op, dleaf, z0mvt, hvt, hvb, den, rc, mfsno, scffac, xl, cwpvt, c3psn, kc25, &
+                                              ch2op, dleaf, z0mvt, hvt, hvb, z0mhvt,                                         &
+                                              den, rc, mfsno, scffac, cbiom, xl, cwpvt, c3psn, kc25,                         &
                                               akc, ko25, ako, avcmx, aqe, ltovrc, dilefc, dilefw, rmf25, sla, fragr, tmin,   &
                                               vcmx25, tdlef, bp, mp, qe25, rms25, rmr25, arm, folnmx, wdpool, wrrat, mrp,    &
                                               nroot, rgl, rs, hs, topt, rsmax, rtovrc, rswoodc, bf, wstrc, laimin,           &
@@ -331,7 +334,8 @@ contains
     namelist / noahmp_usgs_veg_categories /   veg_dataset_description, nveg
     namelist / noahmp_usgs_parameters     /   isurban, iswater, isbarren, isice, iscrop, eblforest, natural,                 &
                                               lcz_1, lcz_2, lcz_3, lcz_4, lcz_5, lcz_6, lcz_7, lcz_8, lcz_9, lcz_10, lcz_11, &
-                                              ch2op, dleaf, z0mvt, hvt, hvb, den, rc, mfsno, scffac, xl, cwpvt, c3psn, kc25, &
+                                              ch2op, dleaf, z0mvt, hvt, hvb, z0mhvt,                                         &
+                                              den, rc, mfsno, scffac, cbiom, xl, cwpvt, c3psn, kc25,                         &
                                               akc, ko25, ako, avcmx, aqe, ltovrc, dilefc, dilefw, rmf25, sla, fragr, tmin,   &
                                               vcmx25, tdlef, bp, mp, qe25, rms25, rmr25, arm, folnmx, wdpool, wrrat, mrp,    &
                                               nroot, rgl, rs, hs, topt, rsmax, rtovrc, rswoodc, bf, wstrc, laimin,           &
@@ -343,7 +347,8 @@ contains
     namelist / noahmp_modis_veg_categories /  veg_dataset_description, nveg
     namelist / noahmp_modis_parameters     /  isurban, iswater, isbarren, isice, iscrop, eblforest, natural,                 &
                                               lcz_1, lcz_2, lcz_3, lcz_4, lcz_5, lcz_6, lcz_7, lcz_8, lcz_9, lcz_10, lcz_11, &
-                                              ch2op, dleaf, z0mvt, hvt, hvb, den, rc, mfsno, scffac, xl, cwpvt, c3psn, kc25, &
+                                              ch2op, dleaf, z0mvt, hvt, hvb, z0mhvt,                                         &
+                                              den, rc, mfsno, scffac, cbiom, xl, cwpvt, c3psn, kc25,                         &
                                               akc, ko25, ako, avcmx, aqe, ltovrc, dilefc, dilefw, rmf25, sla, fragr, tmin,   &
                                               vcmx25, tdlef, bp, mp, qe25, rms25, rmr25, arm, folnmx, wdpool, wrrat, mrp,    &
                                               nroot, rgl, rs, hs, topt, rsmax, rtovrc, rswoodc, bf, wstrc, laimin,           &
@@ -502,10 +507,12 @@ contains
     z0mvt_table  = -1.0e36
     hvt_table    = -1.0e36
     hvb_table    = -1.0e36
+    z0mhvt_table = -1.0e36
     den_table    = -1.0e36
     rc_table     = -1.0e36
     mfsno_table  = -1.0e36
     scffac_table = -1.0e36
+    cbiom_table  = -1.0e36
     rhol_table   = -1.0e36
     rhos_table   = -1.0e36
     taul_table   = -1.0e36
@@ -814,10 +821,12 @@ rsurf_snow_table     = -1.0e36
     z0mvt_table  (1:nveg) = z0mvt  (1:nveg)
     hvt_table    (1:nveg) = hvt    (1:nveg)
     hvb_table    (1:nveg) = hvb    (1:nveg)
+    z0mhvt_table (1:nveg) = z0mhvt (1:nveg)
     den_table    (1:nveg) = den    (1:nveg)
     rc_table     (1:nveg) = rc     (1:nveg)
     mfsno_table  (1:nveg) = mfsno  (1:nveg)
     scffac_table (1:nveg) = scffac (1:nveg)
+    cbiom_table  (1:nveg) = cbiom  (1:nveg)
     xl_table     (1:nveg) = xl     (1:nveg)
     cwpvt_table  (1:nveg) = cwpvt  (1:nveg)
     c3psn_table  (1:nveg) = c3psn  (1:nveg)
