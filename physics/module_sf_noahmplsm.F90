@@ -9103,7 +9103,8 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
       fff   = parameters%bexp(iwt) / 3.0 ! calibratable, c.he changed based on gy niu's update
       rsbmx = hk(iwt) * 1.0e3 * exp(3.0) ! mm/s, calibratable, c.he changed based on gy niu's update
 
-      qdis = (1.0-fcrmax)*rsbmx*exp(-parameters%timean)*exp(-fff*(zwt-2.0))
+!      qdis = (1.0-fcrmax)*rsbmx*exp(-parameters%timean)*exp(-fff*(zwt-2.0))
+      qdis = (1.0-fcrmax)*rsbmx*exp(-parameters%timean)*exp(-fff*zwt) ! c.he changed based on gy niu's update
 
 ! matric potential at the layer above the water table
 
@@ -9114,7 +9115,9 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 
 ! recharge rate qin to groundwater
 
-      ka  = hk(iwt)
+!      ka  = hk(iwt)
+! harmonic average, c.he changed based on gy niu's update
+      ka  = 2.0*(hk(iwt)*parameters%dksat(iwt)*1.0e3) / (hk(iwt)+parameters%dksat(iwt)*1.0e3)
 
       wh_zwt  = - zwt * 1.e3                          !(mm)
       wh      = smpfz  - znode(iwt)*1.e3              !(mm)
