@@ -5814,19 +5814,19 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 
       if (opt_trs == z0heqz0m) then
 
-        z0m_out  = fveg * z0m      + (1.0 - fveg) * z0mg   ! probably should be log
+        z0m_out = exp(fveg * log(z0m)      + (1.0 - fveg) * log(z0mg))
         z0h_out = z0m_out
 
       elseif (opt_trs == chen09) then
 
-        z0m_out  = fveg * z0m      + (1.0 - fveg) * z0mg   ! probably should be log
+        z0m_out = exp(fveg * log(z0m)      + (1.0 - fveg) * log(z0mg))
         czil = 10.0 ** (- 0.4 * parameters%hvt)
         z0h_out =       fveg  * z0m  * exp(-czil*0.4*258.2*sqrt(ustarx*z0m ))  &
             + (1.0 - fveg) * z0mg * exp(-czil*0.4*258.2*sqrt(ustarx*z0mg))
 
       elseif (opt_trs == tessel) then
 
-        z0m_out  = fveg * z0m      + (1.0 - fveg) * z0mg   ! probably should be log
+        z0m_out  = exp(fveg * log(z0m)      + (1.0 - fveg) * log(z0mg))
         if (vegtyp <= 5) then
           z0h_out = fveg * z0m        + (1.0 - fveg) * z0mg * 0.1
         else
