@@ -8635,7 +8635,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 
        call wdfcnd2 (parameters,wdf,wcnd,sh2o(1),sicemax,1)
        infmax = max (infmax,wcnd)
-       infmax = min (infmax,px)
+       infmax = min (infmax,px/dt)
 
        runsrf= max(0., qinsur - infmax)
        pddum = qinsur - runsrf
