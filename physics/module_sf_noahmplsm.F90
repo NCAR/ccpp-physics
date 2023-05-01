@@ -5501,6 +5501,9 @@ endif   ! croptype == 0
     tem2   = max(fveg, 0.1_kind_phys)
     zvfun1 = sqrt(tem1 * tem2)
     gdx    = sqrt(garea1)
+    
+    gdx    = 3000.0   ! this will remove gdx effect
+    zvfun1 = 1.0      ! this will remove zvfun effect
 
     if(thsfc_loc) then            ! Use local potential temperature
       tvs   = tgb * virtfac
