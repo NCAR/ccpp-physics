@@ -219,6 +219,7 @@ use machine ,   only : kind_phys
     real (kind=kind_phys) :: z0mvt              !< momentum roughness length (m)
     real (kind=kind_phys) :: hvt                !< top of canopy (m)
     real (kind=kind_phys) :: hvb                !< bottom of canopy (m)
+    real (kind=kind_phys) :: z0mhvt             !< ratio of z0m to hvt
     real (kind=kind_phys) :: den                !< tree density (no. of trunks per m2)
     real (kind=kind_phys) :: rc                 !< tree crown radius (m)
     real (kind=kind_phys) :: mfsno              !< snowmelt m parameter ()
@@ -1980,7 +1981,6 @@ endif   ! croptype == 0
 
   real (kind=kind_phys)                                  :: canopy_density_factor
   real (kind=kind_phys)                                  :: vai_limited
-  real (kind=kind_phys)                                  :: z0m_hvt_ratio(20)
 
 !jref:end  
 
@@ -2023,8 +2023,6 @@ endif   ! croptype == 0
     
     canopy_density_factor = 1.0
     vai_limited           = 2.0
-    z0m_hvt_ratio  = (/ 0.545,0.055,0.047,0.050,0.050,0.182,0.545,0.046,0.050,0.120, &
-                        0.060,0.075,0.067,0.093,0.000,0.000,0.000,0.075,0.100,0.060  /)
 
 !
 
@@ -2075,7 +2073,7 @@ endif   ! croptype == 0
 
        elseif(opt_z0m == 2) then
 
-         z0m = z0m_hvt_ratio(vegtyp) * parameters%hvt
+         z0m = parameters%z0mhvt * parameters%hvt
          zpd  = 0.65 * parameters%hvt
          if(vegtyp /= 13) then
            vai_limited = min(vai, 2.0)

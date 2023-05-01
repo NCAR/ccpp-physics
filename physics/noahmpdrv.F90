@@ -450,7 +450,7 @@
   integer    :: iopt_pedo = 1 ! option for pedotransfer function
   integer    :: iopt_crop = 0 ! option for crop model
   integer    :: iopt_gla  = 2 ! option for glacier treatment
-  integer    :: iopt_z0m  = 1 ! option for z0m treatment
+  integer    :: iopt_z0m  = 2 ! option for z0m treatment
 
 !
 !  ---  local inputs to noah-mp and glacier subroutines; listed in order in noah-mp call
@@ -1335,6 +1335,7 @@ do i = 1, im
         parameters%z0mvt  =  z0mvt_table(vegtype)       !momentum roughness length (m)
         parameters%hvt    =    hvt_table(vegtype)       !top of canopy (m)
         parameters%hvb    =    hvb_table(vegtype)       !bottom of canopy (m)
+        parameters%z0mhvt = z0mhvt_table(vegtype)       !momentum roughness length (m)
         parameters%den    =    den_table(vegtype)       !tree density (no. of trunks per m2)
         parameters%rc     =     rc_table(vegtype)       !tree crown radius (m)
         parameters%mfsno  =  mfsno_table(vegtype)       !snowmelt m parameter ()
