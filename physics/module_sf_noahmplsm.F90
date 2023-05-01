@@ -5846,10 +5846,10 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 
         g_sigma       = fveg**blumel_gamma + fveg*(1.0-fveg)*blumel_zeta   ! Blumel99 eqn 22
         cdmn          = g_sigma*cdmn_v + (1.0-g_sigma)*cdmn_g              ! Blumel99 eqn 21
-        z0m_out          = (zlvl - ezpd)*exp(-0.4/sqrt(cdmn))                 ! Blumel99 eqn 24
+        z0m_out       = (zlvl - ezpd)*exp(-0.4/sqrt(cdmn))                 ! Blumel99 eqn 24
         kb_sigma_fveg = c_sigma_fveg/log((zlvl-ezpd)/z0m_out) - &
                         log((zlvl-ezpd)/z0m_out)                              ! Blumel99 eqn 34
-        z0h_out          = z0m_out/exp(kb_sigma_fveg)
+        z0h_out       = z0m_out/exp(kb_sigma_fveg)
 
       endif
 
@@ -5861,11 +5861,6 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 
         z0h_out = z0m_out
 
-      elseif (opt_trs == chen09) then
-
-        czil = 10.0 ** (- 0.4 * parameters%hvt)
-        z0h_out = z0m_out * exp(-czil*0.4*258.2*sqrt(ustarx*z0m_out))
-
       elseif (opt_trs == tessel) then
 
         if (vegtyp <= 5) then
@@ -5874,13 +5869,13 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
           z0h_out = z0m_out * 0.01
         endif
 
-      elseif (opt_trs == blumel99) then
+      elseif (opt_trs == blumel99 .or. opt_trs == chen09) then
 
         reyn = ustarx*z0m_out/viscosity                      ! Blumel99 eqn 36c
         if (reyn > 2.0) then
-          kb_sigma_f0 = 2.46*reyn**0.25 - log(7.4)        ! Blumel99 eqn 36a
+          kb_sigma_f0 = 2.46*reyn**0.25 - log(7.4)           ! Blumel99 eqn 36a
         else
-          kb_sigma_f0 = - log(0.397)                      ! Blumel99 eqn 36b
+          kb_sigma_f0 = - log(0.397)                         ! Blumel99 eqn 36b
         endif
 
         z0h_out       = max(z0m_out/exp(kb_sigma_f0),1.0e-6)
@@ -5912,8 +5907,8 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 
       elseif (opt_trs == blumel99) then
 
-        sigma_a     = 1.0 - (0.5/(0.5+vaie)) * exp(-vaie**2/8.0)              ! Blumel99 eqn 8
-        kb_sigma_f1 = 16.4 * (sigma_a*vaie**3)**(-0.25) * &                   ! Blumel99 eqn 38
+        sigma_a     = 1.0 - (0.5/(0.5+vaie)) * exp(-vaie**2/8.0)                    ! Blumel99 eqn 8
+        kb_sigma_f1 = 16.4 * (sigma_a*vaie**3)**(-0.25) * &                         ! Blumel99 eqn 38
                        sqrt(parameters%dleaf*ur/log((zlvl-zpd)/z0m_out))
         z0h_out        = z0m_out/exp(kb_sigma_f1)
         c_sigma_f1  = log((zlvl-zpd)/z0m_out)*(log((zlvl-zpd)/z0m_out)+kb_sigma_f1) ! Blumel99 eqn 39
