@@ -5084,7 +5084,7 @@ endif   ! croptype == 0
 
     real (kind=kind_phys),                intent(out) :: cm     !< drag coefficient for momentum
     real (kind=kind_phys),                intent(out) :: ch     !< drag coefficient for heat
-    real (kind=kind_phys),                intent(out) :: fv     !< friction velocity (m/s)
+    real (kind=kind_phys),              intent(inout) :: fv     !< friction velocity (m/s)
     real (kind=kind_phys),                intent(out) :: ch2    !< drag coefficient for heat
 
 ! locals
@@ -5239,7 +5239,7 @@ endif   ! croptype == 0
     real (kind=kind_phys), intent(inout) :: akhs
     real (kind=kind_phys), intent(inout) :: rlmo
     real (kind=kind_phys), intent(inout) :: wstar2
-    real (kind=kind_phys),   intent(out) :: ustar
+    real (kind=kind_phys), intent(inout) :: ustar
 
     real (kind=kind_phys)     zz, pslmu, pslms, pslhu, pslhs
     real (kind=kind_phys)     xx, pspmu, yy, pspms, psphu, psphs

@@ -1583,7 +1583,7 @@ contains
 #endif
 
 ! outputs
-    real (kind=kind_phys),                intent(out) :: fv     !< friction velocity (m/s)
+    real (kind=kind_phys),              intent(inout) :: fv     !< friction velocity (m/s)
     real (kind=kind_phys),                intent(out) :: cm     !< drag coefficient for momentum
     real (kind=kind_phys),                intent(out) :: ch     !< drag coefficient for heat
     real (kind=kind_phys),                intent(out) :: ch2    !< drag coefficient for heat
