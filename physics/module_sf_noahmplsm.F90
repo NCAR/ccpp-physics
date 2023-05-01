@@ -5028,8 +5028,7 @@ endif   ! croptype == 0
 
        tmprb  = cwpc*50. / (1. - exp(-cwpc/2.))
        rb     = tmprb * sqrt(parameters%dleaf/uc)
-       rb     = max(rb,20.0)
-!       rb = 200
+       rb     = min(max(rb, 5.0),50.0) ! limit rb to 5-50, typically rb<50
 
   end subroutine ragrb
 
