@@ -203,8 +203,7 @@
   use machine ,   only : kind_phys
   use funcphys,   only : fpvs
 
-  use sfc_diff,   only : stability
-! use module_sf_noahmplsm
+  use module_sf_noahmplsm,   only : gfs_stability
   use module_sf_noahmp_glacier
   use noahmp_tables
 
@@ -1189,7 +1188,7 @@ do i = 1, im
 !      if ( .not. do_mynnsfclay) then   !GFS sfcdiff
        if ( iopt_sfc .ne. 4 ) then   !GFS sfcdiff
 
-      call       stability                                                               &
+      call       gfs_stability                                                               &
         (zf(i), zvfun(i), gdx, virtual_temperature, vptemp,wind(i), z0_total, z0h_total, & 
          tvs1, con_g, thsfc_loc,                                                         &
          rb1(i), fm1(i), fh1(i), fm101(i), fh21(i), cm(i), ch(i), stress1(i), ustar1(i))

@@ -8,7 +8,6 @@ module module_sf_noahmplsm
   use  module_wrf_utl
 #endif
 use machine ,   only : kind_phys
-use sfc_diff, only   : stability
 
   implicit none
 
@@ -5511,10 +5510,233 @@ endif   ! croptype == 0
       tvs   = tgb/prsik1x * virtfac
     endif
 
-    call stability (zlvlb, zvfun1, gdx, tv1, thv1, ur, z0m, z0h, tvs, grav, thsfc_loc,  &
+    call gfs_stability (zlvlb, zvfun1, gdx, tv1, thv1, ur, z0m, z0h, tvs, grav, thsfc_loc,  &
          rb1, fm,fh,fm10,fh2,cm,ch,stress1,fv)
 
   end subroutine sfcdif3
+
+!== begin gfs_stability ==================================================================================
+
+subroutine gfs_stability                                              &
+!  ---  inputs:
+          ( z1, zvfun, gdx, tv1, thv1, wind, z0max, ztmax, tvs, grav,  &
+            thsfc_loc,                                                 &
+!  ---  outputs:
+            rb, fm, fh, fm10, fh2, cm, ch, stress, ustar)
+
+! Documentation below refers to UTN and STN which are:
+!  UTN (Unstable Tech Note) : NCEP Office Note 356
+!  STN (Stable Tech Note)   : NCEP Office Note 321
+
+integer, parameter :: kp = kind_phys
+real (kind=kind_phys), parameter :: ca=0.4_kind_phys  ! ca - von karman constant
+
+real(kind=kind_phys), intent(in) :: z1      ! height model level
+real(kind=kind_phys), intent(in) :: zvfun   ! vegetation adjustment factor
+real(kind=kind_phys), intent(in) :: gdx     ! grid spatial dimension
+real(kind=kind_phys), intent(in) :: tv1     ! virtual temperature at model level
+real(kind=kind_phys), intent(in) :: thv1    ! virtual potential temperature at model level
+real(kind=kind_phys), intent(in) :: wind    ! wind speed at model level
+real(kind=kind_phys), intent(in) :: z0max   ! momentum roughness length
+real(kind=kind_phys), intent(in) :: ztmax   ! thermal roughness length
+real(kind=kind_phys), intent(in) :: tvs     ! surface virtual temperature
+real(kind=kind_phys), intent(in) :: grav    ! local gravity 
+logical,              intent(in) :: thsfc_loc ! use local theta reference flag
+
+real(kind=kind_phys), intent(out) :: rb     ! bulk richardson number [-]
+real(kind=kind_phys), intent(out) :: fm     ! phi momentum function (UTN 1.1) [-]
+real(kind=kind_phys), intent(out) :: fh     ! phi heat function (UTN 1.2) [-]
+real(kind=kind_phys), intent(out) :: fm10   ! 10-meter phi momentum function [-]
+real(kind=kind_phys), intent(out) :: fh2    ! 2-meter phi heat function [-]
+real(kind=kind_phys), intent(out) :: cm     ! momentum exchange coeficient [-]
+real(kind=kind_phys), intent(out) :: ch     ! heat exchange coeficient [-]
+real(kind=kind_phys), intent(out) :: stress ! surface stress [m2/s2]
+real(kind=kind_phys), intent(out) :: ustar  ! friction velocity [m/s]
+
+!  ---  locals:
+real(kind=kind_phys), parameter :: a0       =   -3.975     ! UTN 2.37
+real(kind=kind_phys), parameter :: a1       =   12.32      ! UTN 2.37
+real(kind=kind_phys), parameter :: b1       =   -7.755     ! UTN 2.37
+real(kind=kind_phys), parameter :: b2       =    6.041     ! UTN 2.37
+real(kind=kind_phys), parameter :: a0p      =   -7.941     ! UTN 2.38
+real(kind=kind_phys), parameter :: a1p      =   24.75      ! UTN 2.38
+real(kind=kind_phys), parameter :: b1p      =   -8.705     ! UTN 2.38
+real(kind=kind_phys), parameter :: b2p      =    7.899     ! UTN 2.38
+
+real(kind=kind_phys), parameter :: alpha    =    5.0       ! alpha in e.g., STN 1.10
+real(kind=kind_phys), parameter :: alpha4   = 4.0 * alpha  ! term in aa
+real(kind=kind_phys), parameter :: xkrefsqr =    0.3       ! baseline maximum z/L
+real(kind=kind_phys), parameter :: xkmin    =    0.05      ! min multiplier for grid size and vegetation
+real(kind=kind_phys), parameter :: xkgdx    = 3000.0       ! critical grid scale for diffusivity[m^0.5]
+real(kind=kind_phys), parameter :: zolmin   =  -10.0       ! minimum z/L
+real(kind=kind_phys), parameter :: zero     =    0.0
+real(kind=kind_phys), parameter :: one      =    1.0
+
+real(kind=kind_phys) :: aa
+real(kind=kind_phys) :: aa0
+real(kind=kind_phys) :: bb
+real(kind=kind_phys) :: bb0
+real(kind=kind_phys) :: dtv
+real(kind=kind_phys) :: adtv
+real(kind=kind_phys) :: hl1
+real(kind=kind_phys) :: hl12
+real(kind=kind_phys) :: pm
+real(kind=kind_phys) :: ph
+real(kind=kind_phys) :: pm10
+real(kind=kind_phys) :: ph2
+real(kind=kind_phys) :: z1i
+real(kind=kind_phys) :: fms
+real(kind=kind_phys) :: fhs
+real(kind=kind_phys) :: hl0
+real(kind=kind_phys) :: hl0inf
+real(kind=kind_phys) :: hlinf
+real(kind=kind_phys) :: hl110
+real(kind=kind_phys) :: hlt
+real(kind=kind_phys) :: hltinf
+real(kind=kind_phys) :: olinf
+real(kind=kind_phys) :: tem1
+real(kind=kind_phys) :: tem2  
+real(kind=kind_phys) :: zolmax
+
+real(kind=kind_phys) xkzo
+
+z1i = one / z1   ! inverse of model height
+
+!
+!  set background diffusivities with one for gdx >= xkgdx and 
+!   as a function of horizontal grid size for gdx < xkgdx 
+!   (i.e., gdx/xkgdx for gdx < xkgdx)
+!
+
+if(gdx >= xkgdx) then
+  xkzo = one
+else
+  xkzo = gdx / xkgdx
+endif
+
+tem1 = tv1 - tvs
+if(tem1 > zero) then   ! for stable case, adjust for vegetation cover
+  tem2 = xkzo * zvfun
+  xkzo = min(max(tem2, xkmin), xkzo)
+endif
+
+zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
+
+!  compute stability indices (rb and hlinf)
+
+          dtv     = thv1 - tvs
+          adtv    = max(abs(dtv),0.001_kp)
+          dtv     = sign(1.0_kp,dtv) * adtv
+
+          if(thsfc_loc) then ! Use local potential temperature
+            rb      = max(-5000.0_kp, (grav+grav) * dtv * z1 &
+                   / ((thv1 + tvs) * wind * wind))
+          else ! Use potential temperature referenced to 1000 hPa
+            rb      = max(-5000.0_kp, grav * dtv * z1 &
+                   / (tv1 * wind * wind))
+          endif
+
+          tem1    = one / z0max                                  ! 1/z0m
+          tem2    = one / ztmax                                  ! 1/z0t
+          fm      = log((z0max+z1)  * tem1)                      ! neutral phi_m
+          fh      = log((ztmax+z1)  * tem2)                      ! neutral phi_h
+          fm10    = log((z0max+10.0_kp) * tem1)                  ! neutral phi_m at 10 meters
+          fh2     = log((ztmax+2.0_kp)  * tem2)                  ! neutral phi_h at 2 meters
+          hlinf   = rb * fm * fm / fh                            ! z/L STN 2.7
+          hlinf   = min(max(hlinf,zolmin),zolmax)                ! z/L, xi in STN/UTN
+!
+!  stable case
+!
+          if (dtv >= zero) then
+            hl1 = hlinf                                          ! z/L, xi in STN
+            if(hlinf > 0.25_kp) then                             ! z/L > 0.25, do two iterations
+              tem1   = hlinf * z1i                               ! 1/L
+              hl0inf = z0max * tem1                              ! z0m/z1, zi_0 in STN
+              hltinf = ztmax * tem1                              ! z0t/z1, zi_0 in STN
+              aa     = sqrt(one + alpha4 * hlinf)                ! sqrt term of STN 2.16 with z
+              aa0    = sqrt(one + alpha4 * hl0inf)               ! sqrt term of STN 2.16 with z0m
+              bb     = aa                                        ! sqrt term of STN 2.16 with z
+              bb0    = sqrt(one + alpha4 * hltinf)               ! sqrt term of STN 2.16 with z0t
+              pm     = aa0 - aa + log( (aa + one)/(aa0 + one) )  ! psi_m STN 3.11
+              ph     = bb0 - bb + log( (bb + one)/(bb0 + one) )  ! psi_h STN 3.11
+              fms    = fm - pm                                   ! phi_m STN 3.10
+              fhs    = fh - ph                                   ! phi_h STN 3.10
+              hl1    = fms * fms * rb / fhs                      ! z/L iteration STN 3.8
+              hl1    = min(hl1, zolmax)                          ! z/L iteration 
+            endif
+!
+!  second iteration
+!
+            tem1  = hl1 * z1i                                    ! 1/L
+            hl0   = z0max * tem1                                 ! z0m/z1
+            hlt   = ztmax * tem1                                 ! z0t/z1
+            aa    = sqrt(one + alpha4 * hl1)                     ! sqrt term of STN 2.16 with z
+            aa0   = sqrt(one + alpha4 * hl0)                     ! sqrt term of STN 2.16 with z0m
+            bb    = aa                                           ! sqrt term of STN 2.16 with z
+            bb0   = sqrt(one + alpha4 * hlt)                     ! sqrt term of STN 2.16 with z0t
+            pm    = aa0 - aa + log( (one+aa)/(one+aa0) )         ! psi_m STN 3.11
+            ph    = bb0 - bb + log( (one+bb)/(one+bb0) )         ! psi_h STN 3.11
+            hl110 = hl1 * 10.0_kp * z1i                          ! 10/L
+            aa    = sqrt(one + alpha4 * hl110)                   ! sqrt term of STN 2.16 with z=10m
+            pm10  = aa0 - aa + log( (one+aa)/(one+aa0) )         ! psi_m STN 3.11 with z=10m
+            hl12  = (hl1+hl1) * z1i                              ! 2/L
+!           aa    = sqrt(one + alpha4 * hl12)
+            bb    = sqrt(one + alpha4 * hl12)                    ! sqrt term of STN 2.16 with z=2m
+            ph2   = bb0 - bb + log( (one+bb)/(one+bb0) )         ! psi_m STN 3.11 with z=2m
+!
+!  unstable case - check for unphysical obukhov length
+!    see steps in UTN Sec. D
+!
+          else                          ! dtv < 0 case
+
+            olinf = z1 / hlinf                                   ! z/L, xi in UTN
+            tem1  = 50.0_kp * z0max                              ! 50 * z0m, z/L limit for calc methods, see UTN Sec. E
+            if(abs(olinf) <= tem1) then                          ! 
+              hlinf = -z1 / tem1                                 ! 
+              hlinf = max(hlinf, zolmin)
+            endif
+!
+!  get pm and ph
+!
+            if (hlinf >= -0.5_kp) then
+              hl1   = hlinf
+              pm    = (a0  + a1*hl1)  * hl1   / (one+ (b1+b2*hl1)  *hl1)  ! psi_m UTN 2.37
+              ph    = (a0p + a1p*hl1) * hl1   / (one+ (b1p+b2p*hl1)*hl1)  ! psi_h UTN 2.38
+              hl110 = hl1 * 10.0_kp * z1i                                 ! 10/L
+              pm10  = (a0 + a1*hl110) * hl110/(one+(b1+b2*hl110)*hl110)   ! psi_m UTN 2.37 with z=10m
+              hl12  = (hl1+hl1) * z1i                                     ! 2/L
+              ph2   = (a0p + a1p*hl12) * hl12/(one+(b1p+b2p*hl12)*hl12)   ! psi_h UTN 2.38 with z=2m
+            else                                                          ! z/L < -0.5
+              hl1   = -hlinf                                              ! -z/L
+              tem1  = one / sqrt(hl1)                                     ! sqrt(-z/L)
+              pm    = log(hl1) + 2.0_kp * sqrt(tem1) - 0.8776_kp          ! UTN 2.64, first three terms
+              ph    = log(hl1) + 0.5_kp * tem1 + 1.386_kp                 ! UTN 2.65, first three terms
+              hl110 = hl1 * 10.0_kp * z1i                                 ! 10/L
+              pm10  = log(hl110) + 2.0_kp/sqrt(sqrt(hl110)) - 0.8776_kp   ! psi_m UTN 2.64 with z=10m
+              hl12  = (hl1+hl1) * z1i                                     ! 2/L
+              ph2   = log(hl12) + 0.5_kp / sqrt(hl12) + 1.386_kp          ! psi_h UTN 2.65 with z=2m
+            endif
+
+          endif          ! end of if (dtv >= 0 ) then loop
+!
+!  finish the exchange coefficient computation to provide fm and fh
+!
+          fm        = fm - pm                                             ! phi_m
+          fh        = fh - ph                                             ! phi_h
+          fm10      = fm10 - pm10                                         ! phi_m at 10m
+          fh2       = fh2 - ph2                                           ! phi_h at 2m
+          cm        = ca * ca / (fm * fm)                                 ! momentum exchange coef = k^2/phi_m^2
+          ch        = ca * ca / (fm * fh)                                 ! heat exchange coef = k^2/phi_m/phi_h
+          tem1      = 0.00001_kp/z1                                       ! minimum exhange coef (?)
+          cm        = max(cm, tem1)
+          ch        = max(ch, tem1)
+          stress    = cm * wind * wind                                    ! surface stress = Cm*U*U
+          ustar     = sqrt(stress)                                        ! friction velocity
+
+      return
+!.................................
+      end subroutine gfs_stability
+!---------------------------------
 
 !== begin thermalz0
 !==================================================================================
