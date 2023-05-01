@@ -5820,17 +5820,25 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
       elseif (opt_trs == chen09) then
 
         z0m_out = exp(fveg * log(z0m)      + (1.0 - fveg) * log(z0mg))
-        czil = 10.0 ** (- 0.4 * parameters%hvt)
-        z0h_out =       fveg  * z0m  * exp(-czil*0.4*258.2*sqrt(ustarx*z0m ))  &
-            + (1.0 - fveg) * z0mg * exp(-czil*0.4*258.2*sqrt(ustarx*z0mg))
+        czil    = 10.0 ** (- 0.4 * parameters%hvt)
+
+        reyn = ustarx*z0m_out/viscosity                      ! Blumel99 eqn 36c
+        if (reyn > 2.0) then
+          kb_sigma_f0 = 2.46*reyn**0.25 - log(7.4)           ! Blumel99 eqn 36a
+        else
+          kb_sigma_f0 = - log(0.397)                         ! Blumel99 eqn 36b
+        endif
+
+        z0h_out = exp( fveg        * log(z0m * exp(-czil*0.4*258.2*sqrt(ustarx*z0m))) + &
+                      (1.0 - fveg) * log(max(z0m/exp(kb_sigma_f0),1.0e-6)) )
 
       elseif (opt_trs == tessel) then
 
         z0m_out  = exp(fveg * log(z0m)      + (1.0 - fveg) * log(z0mg))
         if (vegtyp <= 5) then
-          z0h_out = fveg * z0m        + (1.0 - fveg) * z0mg * 0.1
+          z0h_out = fveg * log(z0m)        + (1.0 - fveg) * log(z0mg * 0.1)
         else
-          z0h_out = fveg * z0m * 0.01 + (1.0 - fveg) * z0mg * 0.1
+          z0h_out = fveg * log(z0m * 0.01) + (1.0 - fveg) * log(z0mg * 0.1)
         endif
 
       elseif (opt_trs == blumel99) then
