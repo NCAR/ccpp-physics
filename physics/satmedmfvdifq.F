@@ -1687,7 +1687,7 @@ c
           endif
           if((pcnvflg(i) .or. scuflg(i)) .and.
      &       (k >= kbx .and. k <= kmx)) then
-            tem = f1(i,k) * del(i,k) / grav
+            tem = f1(i,k) * del(i,k) * gravi
             if(f1(i,k) < 0.) tsumn(i) = tsumn(i) + tem
             if(f1(i,k) > 0.) tsump(i) = tsump(i) + tem
           endif
@@ -1742,7 +1742,7 @@ c
       enddo
       do k = 1,km
         do i = 1,im
-          tem = f1(i,k) * del(i,k) / grav
+          tem = f1(i,k) * del(i,k) * gravi
           if(f1(i,k) < 0.) tsumn(i) = tsumn(i) + tem
           if(f1(i,k) > 0.) tsump(i) = tsump(i) + tem
         enddo
@@ -1934,7 +1934,7 @@ c
           endif
           if((pcnvflg(i) .or. scuflg(i)) .and.
      &       (k >= kbx .and. k <= kmx)) then
-            tem = f2(i,k) * del(i,k) / grav
+            tem = f2(i,k) * del(i,k) * gravi
             if(f2(i,k) < 0.) tsumn(i) = tsumn(i) + tem
             if(f2(i,k) > 0.) tsump(i) = tsump(i) + tem
           endif
@@ -1990,7 +1990,7 @@ c
       enddo
       do k = 1,km
         do i = 1,im
-          tem = f2(i,k) * del(i,k) / grav
+          tem = f2(i,k) * del(i,k) * gravi
           if(f2(i,k) < 0.) tsumn(i) = tsumn(i) + tem
           if(f2(i,k) > 0.) tsump(i) = tsump(i) + tem
         enddo
@@ -2119,7 +2119,7 @@ c
               endif
               if((pcnvflg(i) .or. scuflg(i)) .and.
      &           (k >= kbx .and. k <= kmx)) then
-                tem = f2(i,k+is) * del(i,k) / grav
+                tem = f2(i,k+is) * del(i,k) * gravi
                 if(f2(i,k+is) < 0.) tsumn(i) = tsumn(i) + tem
                 if(f2(i,k+is) > 0.) tsump(i) = tsump(i) + tem
               endif
@@ -2175,7 +2175,7 @@ c
           enddo
           do k = 1,km
             do i = 1,im
-              tem = f2(i,k+is) * del(i,k) / grav
+              tem = f2(i,k+is) * del(i,k) * gravi
               if(f2(i,k+is) < 0.) tsumn(i) = tsumn(i) + tem
               if(f2(i,k+is) > 0.) tsump(i) = tsump(i) + tem
             enddo
