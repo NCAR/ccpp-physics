@@ -1,16 +1,36 @@
 [ccpp-table-properties]
   name = ccpp_scheme_simulator
   type = scheme
-  dependencies = machine.F
+  dependencies = machine.F,module_ccpp_scheme_simulator.F90
 
-########################################################################
 [ccpp-arg-table]
   name = ccpp_scheme_simulator_run
   type = scheme
+[do_ccpp_scheme_sim]
+  standard_name = flag_for_ccpp_scheme_simulator
+  long_name = flag for ccpp scheme simulator
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration
   units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nCol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[nLay]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -28,6 +48,70 @@
   units = none
   dimensions = (8)
   type = integer
+  intent = in
+[nactive_proc]
+  standard_name = number_of_active_physics_process_in_CCPP_scheme_simulator
+  long_name = number of active physics process in CCPP scheme simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[proc_start]
+  standard_name = index_for_first_physics_process_in_CCPP_scheme_simulator
+  long_name = index for first physics process in CCPP scheme simulator
+  units     = count
+  dimensions = ()
+  type = integer
+  intent = inout
+[proc_end]
+  standard_name = index_for_last_physics_process_in_CCPP_scheme_simulator
+  long_name = index for last physics process in CCPP scheme simulator
+  units     = count
+  dimensions = ()
+  type = integer
+  intent = inout
+[iactive_scheme_inloop]
+  standard_name = count_for_active_scheme_in_CCPP_scheme_simulator
+  long_name = count for active physics scheme in CCPP scheme simulator
+  units     = count
+  dimensions = ()
+  type = integer
+  intent = inout
+[in_pre_active]
+  standard_name = flag_to_indicate_location_in_physics_process_loop_before_active_scheme
+  long_name = flag to indicate location in physics process loop before active scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = inout
+[in_post_active]
+  standard_name = flag_to_indicate_location_in_physics_process_loop_after_active_scheme
+  long_name = flag to indicate location in physics process loop after active scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = inout
+[active_name]
+  standard_name = name_of_active_physics_schemes_in_CCPP_scheme_simulator
+  long_name = name of active physics schemes in CCPP scheme simulator
+  units =
+  dimensions = (number_of_active_physics_process_in_CCPP_scheme_simulator)
+  type = character
+  kind = len=16
+  intent = in
+[iactive_scheme]
+  standard_name = index_of_active_physics_schemes_in_CCPP_scheme_simulator
+  long_name = index of active physics schemes in CCPP scheme simulator
+  units = count
+  dimensions = (number_of_active_physics_process_in_CCPP_scheme_simulator)
+  type = integer
+  intent = in
+[active_time_split_process]
+  standard_name = flag_to_indicate_process_type_in_CCPP_scheme_simulator
+  long_name = flag to indicate if active physics schemes are time-split process
+  units = flag
+  dimensions = (number_of_active_physics_process_in_CCPP_scheme_simulator)
+  type = logical
   intent = in
 [tgrs]
   standard_name = air_temperature
@@ -61,97 +145,13 @@
   type = real
   kind = kind_phys
   intent = in
-[dtend]
-  standard_name = cumulative_change_of_state_variables
-  long_name = diagnostic tendencies for state variables
+[active_phys_tend]
+  standard_name = tendencies_for_active_process_in_ccpp_scheme_simulator
+  long_name = tendencies for active physics process in ccpp scheme simulator
   units = mixed
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_prognostics_varaibles_in_CCPP_scheme_simulator)
   type = real
   kind = kind_phys
-  intent = in
-[dtidx]
-  standard_name = cumulative_change_of_state_variables_outer_index
-  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
-  units = index
-  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
-  type = integer
-  intent = in
-[index_of_process_dcnv]
-  standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
-  long_name = index of deep convection process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_process_longwave]
-  standard_name = index_of_longwave_heating_process_in_cumulative_change_index
-  long_name = index of longwave heating process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_process_shortwave]
-  standard_name = index_of_shortwave_heating_process_in_cumulative_change_index
-  long_name = index of shortwave heating process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_process_orographic_gwd]
-  standard_name = index_of_orographic_gravity_wave_drag_process_in_cumulative_change_index
-  long_name = index of orographic gravity wave drag process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_process_scnv]
-  standard_name = index_of_shallow_convection_process_process_in_cumulative_change_index
-  long_name = index of shallow convection process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_process_pbl]
-  standard_name = index_of_subgrid_scale_vertical_mixing_process_in_cumulative_change_index
-  long_name = index of subgrid scale vertical mixing process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_process_mp]
-  standard_name = index_of_microphysics_process_process_in_cumulative_change_index
-  long_name = index of microphysics transport process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_temperature]
-  standard_name = index_of_temperature_in_cumulative_change_index
-  long_name = index of temperature in first dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_x_wind]
-  standard_name = index_of_x_wind_in_cumulative_change_index
-  long_name = index of x-wind in first dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_y_wind]
-  standard_name = index_of_y_wind_in_cumulative_change_index
-  long_name = index of x-wind in first dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntqv]
-  standard_name = index_of_specific_humidity_in_tracer_concentration_array
-  long_name = tracer index for water vapor (specific humidity)
-  units = index
-  dimensions = ()
-  type = integer
   intent = in
 [gt0]
   standard_name = air_temperature_of_new_state
@@ -200,6 +200,13 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
+  intent = inout
+[physics_process]
+  standard_name = physics_process_type_for_CCPP_scheme_simulator
+  long_name = physics process type for CCPP scheme simulator
+  units = mixed
+  dimensions = (number_of_physics_process_in_CCPP_scheme_simulator)
+  type = base_physics_process
   intent = inout
 [errmsg]
   standard_name = ccpp_error_message
