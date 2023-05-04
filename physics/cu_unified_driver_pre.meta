@@ -1,37 +1,60 @@
 [ccpp-table-properties]
-  name = cu_gf_driver_post
+  name = cu_unified_driver_pre
   type = scheme
   dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
-  name = cu_gf_driver_post_run
+  name = cu_unified_driver_pre_run
   type = scheme
-[im]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
-  units = count
+[flag_init]
+  standard_name = flag_for_first_timestep
+  long_name = flag signaling first time step for time integration loop
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[flag_restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[kdt]
+  standard_name = index_of_timestep
+  long_name = current forecast iteration
+  units = index
   dimensions = ()
   type = integer
   intent = in
-[km]
-  standard_name = vertical_layer_dimension
-  long_name = number of vertical levels
-  units = count
+[fhour]
+  standard_name = forecast_time
+  long_name = curent forecast time
+  units = h
   dimensions = ()
-  type = integer
+  type = real
+  kind = kind_phys
+  intent = in
+[dtp]
+  standard_name = timestep_for_physics
+  long_name = physics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [t]
-  standard_name = air_temperature_of_new_state
-  long_name = temperature updated by physics
+  standard_name = air_temperature
+  long_name = model layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
 [q]
-  standard_name = specific_humidity_of_new_state
-  long_name = water vapor specific humidity updated by physics
+  standard_name = specific_humidity
+  long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -44,11 +67,27 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
 [prevsq]
   standard_name = specific_humidity_on_previous_timestep
   long_name = moisture from previous time step
   units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[forcet]
+  standard_name = tendency_of_air_temperature_due_to_nonphysics
+  long_name = temperature tendency due to dynamics only
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[forceq]
+  standard_name = tendendy_of_specific_humidity_due_to_nonphysics
+  long_name = moisture tendency due to dynamics only
+  units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
@@ -59,14 +98,14 @@
   units = none
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = in
+  intent = out
 [cactiv_m]
   standard_name = counter_for_grell_freitas_mid_level_convection
   long_name = midlevel convective activity memory
   units = none
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = in
+  intent = out
 [conv_act]
   standard_name = consecutive_calls_for_grell_freitas_convection
   long_name = Memory counter for GF
@@ -74,7 +113,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
 [conv_act_m]
   standard_name = consecutive_calls_for_grell_freitas_mid_level_convection
   long_name = Memory counter for GF midlevel
@@ -82,47 +121,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
-[dt]
-  standard_name = timestep_for_physics
-  long_name = physics time step
-  units = s
-  dimensions = ()
-  type = real
-  kind = kind_phys
   intent = in
-[garea]
-  standard_name = cell_area
-  long_name = grid cell area
-  units = m2
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[raincv]
-  standard_name = lwe_thickness_of_deep_convective_precipitation_amount
-  long_name = deep convective rainfall amount on physics timestep
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[maxupmf]
-  standard_name = maximum_convective_updraft_mass_flux
-  long_name = maximum convective updraft mass flux within a column
-  units = m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[refl_10cm]
-  standard_name = radar_reflectivity_10cm
-  long_name = instantaneous refl_10cm
-  units = dBZ
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -1,11 +1,11 @@
 [ccpp-table-properties]
-  name = cu_gf_driver
+  name = cu_unified_driver
   type = scheme
-  dependencies = cu_gf_deep.F90,cu_gf_sh.F90,machine.F,physcons.F90
+  dependencies = cu_unified_deep.F90,cu_unified_sh.F90,machine.F,physcons.F90,progsigma_calc.f90
 
 ########################################################################
 [ccpp-arg-table]
-  name = cu_gf_driver_init
+  name = cu_unified_driver_init
   type = scheme
 [imfshalcnv]
   standard_name = control_for_shallow_convection_scheme
@@ -14,9 +14,9 @@
   dimensions = ()
   type = integer
   intent = in
-[imfshalcnv_gf]
-  standard_name = identifier_for_grell_freitas_shallow_convection
-  long_name = flag for Grell-Freitas shallow convection scheme
+[imfshalcnv_unified]
+  standard_name = identifier_for_unified_shallow_convection
+  long_name = flag for Unified shallow convection scheme
   units = flag
   dimensions = ()
   type = integer
@@ -28,9 +28,9 @@
   dimensions = ()
   type = integer
   intent = in
-[imfdeepcnv_gf]
-  standard_name = identifier_for_grell_freitas_deep_convection
-  long_name = flag for Grell-Freitas deep convection scheme
+[imfdeepcnv_unified]
+  standard_name = identifier_for_unified_deep_convection
+  long_name = flag for Unified deep convection scheme
   units = flag
   dimensions = ()
   type = integer
@@ -67,7 +67,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = cu_gf_driver_run
+  name = cu_unified_driver_run
   type = scheme
 [ntracer]
   standard_name = number_of_tracers
@@ -120,6 +120,20 @@
   dimensions = ()
   type = logical
   intent = in
+[do_ca]
+  standard_name = flag_for_cellular_automata
+  long_name = cellular automata main switch
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[progsigma]
+  standard_name = do_prognostic_updraft_area_fraction
+  long_name = flag for prognostic sigma in cumuls scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in	
 [cactiv]
   standard_name = counter_for_grell_freitas_convection
   long_name = convective activity memory
@@ -150,6 +164,14 @@
   type = real
   kind = kind_phys
   intent = in
+[fv]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [xlv]
   standard_name = latent_heat_of_vaporization_of_water_at_0C
   long_name = latent heat of evaporation/sublimation
@@ -161,6 +183,14 @@
 [r_v]
   standard_name = gas_constant_water_vapor
   long_name = ideal gas constant for water vapor
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[r_d]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
   type = real
@@ -182,10 +212,50 @@
   type = real
   kind = kind_phys
   intent = in
+[tmf]
+  standard_name = tendency_of_vertically_diffused_tracer_concentration
+  long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+[qmicro]
+  standard_name = instantaneous_tendency_of_specific_humidity_due_to_microphysics
+  long_name = moisture tendency due to microphysics
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[sigmain]
+  standard_name = prognostic_updraft_area_fraction_in_convection
+  long_name = convective updraft area fraction
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[sigmaout]
+  standard_name = updraft_area_fraction_updated_by_physics
+  long_name = convective updraft area fraction updated by physics
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [phil]
   standard_name = geopotential
   long_name = layer geopotential
   units = m2 s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[delp]
+  standard_name = air_pressure_difference_between_midlayers
+  long_name = pres(k) - pres(k+1)
+  units = Pa
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
@@ -553,22 +623,22 @@
   type = real
   kind = kind_phys
   intent = in
-[maxupmf]
-  standard_name = maximum_convective_updraft_mass_flux
-  long_name = maximum convective updraft mass flux within a column
-  units = m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-[maxMF]
-  standard_name = maximum_mass_flux
-  long_name = maximum mass flux within a column
-  units = m s-1
+[ca_deep]
+  standard_name = cellular_automata_area_fraction_for_deep_convection_from_coupled_process
+  long_name = fraction of cellular automata for deep convection
+  units = frac
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
+[rainevap]
+  standard_name = physics_field_for_coupling
+  long_name = physics_field_for_coupling
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
