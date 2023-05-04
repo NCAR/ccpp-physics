@@ -398,7 +398,8 @@ module lsm_ruc
                                        con_fvirt, stbolt, rhoh2o
 
       logical, dimension(:),  intent(in) :: flag_iter, flag_guess
-      logical, dimension(:),  intent(in) :: land, icy, use_lake
+      logical, dimension(:),  intent(in) :: land, icy
+      integer, dimension(:),  intent(in) :: use_lake
       logical, dimension(:),  intent(in) :: flag_cice
       logical,                intent(in) :: frac_grid
       logical,                intent(in) :: do_mynnsfclay
@@ -576,7 +577,7 @@ module lsm_ruc
         endif
         ! - Set flag for ice points for uncoupled model (islmsk(i) == 4 when coupled to CICE)
         ! - Exclude ice on the lakes if the lake model is turned on.
-        flag_ice_uncoupled(i) = (flag_ice(i) .and. .not. use_lake(i))
+        flag_ice_uncoupled(i) = (flag_ice(i) .and. use_lake(i)<1)
         !> - Set flag for land and ice points.
         !- 10may19 - ice points are turned off.
         flag(i) = land(i) .or. flag_ice_uncoupled(i)

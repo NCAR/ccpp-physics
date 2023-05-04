@@ -236,12 +236,12 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-[use_flake]
-  standard_name = flag_for_using_flake
-  long_name = flag indicating lake points using flake model
+[use_lake_model]
+  standard_name = flag_for_using_lake_model
+  long_name = flag indicating lake points using a lake model
   units = flag
   dimensions = (horizontal_loop_extent)
-  type = logical
+  type = integer
   intent = in
 [lprnt]
   standard_name = flag_print
