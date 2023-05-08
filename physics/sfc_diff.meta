@@ -223,7 +223,7 @@
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
-  intent = in
+  intent = inout
 [dry]
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction

@@ -52,7 +52,7 @@ module scm_sfc_flux_spec
   subroutine scm_sfc_flux_spec_run (im, u1, v1, z1, t1, q1, p1, roughness_length, spec_sh_flux, spec_lh_flux, &
     exner_inverse, T_surf, cp, grav, hvap, rd, fvirt, vonKarman, tgice, islmsk, dry, frland, cice, icy, tisfc,&
     oceanfrac, min_seaice, cplflx, cplice, flag_cice, wet, min_lakeice, tsfcl, tsfc_wat, slmsk, lakefrac, lkm,&
-    lakedepth, use_flake, sh_flux, lh_flux, sh_flux_chs, u_star, sfc_stress, cm, ch, &
+    lakedepth, use_lake_model, sh_flux, lh_flux, sh_flux_chs, u_star, sfc_stress, cm, ch, &
     fm, fh, rb, u10m, v10m, wind1, qss, t2m, q2m, errmsg, errflg)
 
     use machine,             only: kind_phys
@@ -60,7 +60,7 @@ module scm_sfc_flux_spec
     integer, intent(in)    :: im, lkm
     integer, intent(inout) :: islmsk(:)
     logical, intent(in)    :: cplflx, cplice
-    logical, intent(inout) :: dry(:), icy(:), flag_cice(:), wet(:), use_flake(:)
+    logical, intent(inout) :: dry(:), icy(:), flag_cice(:), wet(:), use_lake_model(:)
     real(kind=kind_phys), intent(in)    :: cp, grav, hvap, rd, fvirt, vonKarman, min_seaice, tgice, min_lakeice
     real(kind=kind_phys), intent(in)    :: u1(:), v1(:), z1(:), t1(:), q1(:), p1(:), roughness_length(:), &
       spec_sh_flux(:), spec_lh_flux(:), exner_inverse(:), T_surf(:), oceanfrac(:), lakefrac(:), lakedepth(:)
@@ -212,12 +212,12 @@ module scm_sfc_flux_spec
   do i = 1, im
     if ((wet(i) .or. icy(i)) .and. lakefrac(i) > 0.0_kind_phys) then
       if (lkm == 1 .and. lakefrac(i) >= 0.15 .and. lakedepth(i) > 1.0_kind_phys) then
-        use_flake(i) = .true.
+        use_lake_model(i) = .true.
       else
-        use_flake(i) = .false.
+        use_lake_model(i) = .false.
       endif
     else
-      use_flake(i) = .false.
+      use_lake_model(i) = .false.
     endif
   enddo
 !

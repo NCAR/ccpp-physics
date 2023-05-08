@@ -5,46 +5,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = flake_driver_init
-  type = scheme
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-[errflg]
-  standard_name = ccpp_error_code
-  long_name = error code for error handling in CCPP
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = out
-
-########################################################################
-[ccpp-arg-table]
-  name = flake_driver_finalize
-  type = scheme
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-[errflg]
-  standard_name = ccpp_error_code
-  long_name = error code for error handling in CCPP
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = out
-
-########################################################################
-[ccpp-arg-table]
   name = flake_driver_run
   type = scheme
 [im]
@@ -86,9 +46,17 @@
   type = real
   kind = kind_phys
   intent = in
+[min_lakeice]
+  standard_name = min_lake_ice_area_fraction
+  long_name = minimum lake ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [dlwflx]
-  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_water
-  long_name = total sky surface downward longwave flux absorbed by the ground over water
+  standard_name = surface_downwelling_longwave_flux
+  long_name = surface downwelling longwave flux at current time
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
@@ -102,14 +70,6 @@
   type = real
   kind = kind_phys
   intent = in
-[weasd]
-  standard_name = water_equivalent_accumulated_snow_depth_over_ice
-  long_name = water equiv of acc snow depth over ice
-  units = mm
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [lakedepth]
   standard_name = lake_depth
   long_name = lake depth
@@ -118,12 +78,20 @@
   type = real
   kind = kind_phys
   intent = in
-[use_flake]
-  standard_name = flag_for_using_flake
-  long_name = flag indicating lake points using flake model
+[use_lake_model]
+  standard_name = flag_for_using_lake_model
+  long_name = flag indicating lake points using a lake model
   units = flag
   dimensions = (horizontal_loop_extent)
-  type = logical
+  type = integer
+  intent = in
+[snow]
+  standard_name = lwe_thickness_of_snow_amount_on_dynamics_timestep
+  long_name = snow fall at this time step
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = in
 [xlat]
   standard_name = latitude
@@ -164,13 +132,6 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-[flag_iter]
-  standard_name = flag_for_iteration
-  long_name = flag for iteration
-  units = flag
-  dimensions = (horizontal_loop_extent)
-  type = logical
-  intent = in
 [yearlen]
   standard_name = number_of_days_in_current_year
   long_name = number of days in a year
@@ -193,6 +154,35 @@
   dimensions = ()
   type = integer
   intent = in
+[flag_iter]
+  standard_name = flag_for_iteration
+  long_name = flag for iteration
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = in
+[first_time_step]
+  standard_name = flag_for_first_timestep
+  long_name = flag for first time step for time integration loop (cold/warmstart)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[flag_restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[weasd]
+  standard_name = water_equivalent_accumulated_snow_depth_over_ice
+  long_name = water equiv of acc snow depth over ice
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [snwdph]
   standard_name = surface_snow_thickness_water_equivalent_over_ice
   long_name = water equivalent snow depth over ice
@@ -210,8 +200,8 @@
   kind = kind_phys
   intent = inout
 [tsurf]
-  standard_name = surface_skin_temperature_after_iteration_over_water
-  long_name = surface skin temperature after iteration over water
+  standard_name = surface_skin_temperature_over_water
+  long_name = surface skin temperature over water
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -226,8 +216,8 @@
   kind = kind_phys
   intent = inout
 [t_sfc]
-  standard_name = surface_skin_temperature_over_water
-  long_name = surface skin temperature over water
+  standard_name = surface_skin_temperature_after_iteration_over_water
+  long_name = surface skin temperature after iteration over water
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
@@ -245,6 +235,22 @@
   standard_name = kinematic_surface_upward_latent_heat_flux_over_water
   long_name = kinematic surface upward latent heat flux over water
   units = kg kg-1 m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[lflx]
+  standard_name = surface_upward_potential_latent_heat_flux_over_water
+  long_name = surface upward potential latent heat flux over water
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gflx]
+  standard_name = upward_heat_flux_in_soil_over_water
+  long_name = soil heat flux over water
+  units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -297,6 +303,190 @@
   type = real
   kind = kind_phys
   intent = inout
+[h_ML]
+  standard_name = mixed_layer_depth_of_lakes
+  long_name = depth of lake mixing layer
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[t_wML]
+  standard_name = lake_mixed_layer_temperature
+  long_name = temperature of lake mixing layer
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[t_mnw]
+  standard_name = mean_temperature_of_the_water_column
+  long_name = thee  mean temperature of the water column
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[H_B]
+  standard_name = the_thermally_active_layer_depth_of_the_bottom_sediment
+  long_name = the depth of the thermally active layer of the bottom sediment
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[T_B]
+  standard_name = temperature_at_the_bottom_of_the_sediment_upper_layer
+  long_name = the temperature at the bottom of the sediment upper layer
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[t_bot1]
+  standard_name = lake_bottom_temperature
+  long_name = the temperature at the water-bottom sediment interface
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[t_bot2]
+  standard_name = temperature_for_bottom_layer_of_water
+  long_name = the temperature at the lake bottom layer water
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[c_t]
+  standard_name = shape_factor_of_water_temperature_vertical_profile
+  long_name = the shape factor of water temperature vertical profile
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[T_snow]
+  standard_name = temperature_of_snow_on_lake
+  long_name = the temperature of snow on a lake
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[T_ice]
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface skin temperature over ice
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[tsurf_ice]
+  standard_name = surface_skin_temperature_after_iteration_over_ice
+  long_name = surface skin temperature after iteration over ice
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+
+########################################################################
+[ccpp-table-properties]
+  name = flake_driver_post
+  type = scheme
+  dependencies = machine.F
+########################################################################
+[ccpp-arg-table]
+  name = flake_driver_post_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[lakedepth]
+  standard_name = lake_depth
+  long_name = lake depth
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[tsurf]
+  standard_name = surface_skin_temperature_after_iteration_over_water
+  long_name = surface skin temperature after iteration over water
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[h_ML]
+  standard_name = mixed_layer_depth_of_lakes
+  long_name = depth of lake mixing layer
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[t_wML]
+  standard_name = lake_mixed_layer_temperature
+  long_name = temperature of lake mixing layer
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[xz]
+  standard_name = diurnal_thermocline_layer_thickness
+  long_name = diurnal thermocline layer thickness
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[zm]
+  standard_name = ocean_mixed_layer_thickness
+  long_name = mixed layer thickness
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[tref]
+  standard_name = reference_sea_surface_temperature
+  long_name = reference/foundation temperature
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[tfco]
+  standard_name = sea_surface_temperature
+  long_name = sea surface temperature
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

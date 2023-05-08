@@ -256,6 +256,13 @@
   dimensions = ()
   type = integer
   intent = in
+[imfdeepcnv_unified]
+  standard_name = identifier_for_unified_deep_convection
+  long_name = flag for Unified deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [imfdeepcnv_sas]
   standard_name = identifier_for_simplified_arakawa_schubert_deep_convection
   long_name = flag for SAS deep convection scheme
