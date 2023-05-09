@@ -218,6 +218,35 @@
   dimensions = ()
   type = logical
   intent = in
+[use_lake_model]
+  standard_name = flag_for_using_lake_model
+  long_name = flag indicating lake points using a lake model
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+[iopt_lake]
+  standard_name = control_for_lake_model_selection
+  long_name = control for lake model selection
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[iopt_lake_clm]
+  standard_name = clm_lake_model_control_selection_value
+  long_name = value that indicates clm lake model in the control for lake model selection
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[lake_t2m]
+  standard_name =  temperature_at_2m_from_clm_lake
+  long_name = temperature at 2m from clm lake
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [diag_flux]
   standard_name = flag_for_flux_method_in_2m_diagnostics
   long_name = flag for flux method in 2-m diagnostics
@@ -240,6 +269,14 @@
   type = real
   kind = kind_phys
   intent = in
+[lake_q2m]
+  standard_name =  specific_humidity_at_2m_from_clm_lake
+  long_name = specific humidity at 2m from clm lake
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [cdq]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
   long_name = surface exchange coeff heat & moisture
@@ -247,6 +284,13 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = in
+[use_lake2m]
+  standard_name = use_2m_diagnostics_calculated_by_lake_model
+  long_name = model 2m diagnostics use the temperature and humidity calculated by the lake model
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
 [wind]
   standard_name = wind_speed_at_lowest_model_layer

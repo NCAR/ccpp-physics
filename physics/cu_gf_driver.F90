@@ -66,7 +66,7 @@ contains
                index_of_y_wind,index_of_process_scnv,index_of_process_dcnv,     &
                fhour,fh_dfi_radar,ix_dfi_radar,num_dfi_radar,cap_suppress,      &
                dfi_radar_max_intervals,ldiag3d,qci_conv,do_cap_suppress,        &
-               errmsg,errflg)
+               maxupmf,maxMF,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -74,12 +74,12 @@ contains
       integer, parameter :: maxens2=1
       integer, parameter :: maxens3=16
       integer, parameter :: ensdim=16
-      integer, parameter :: imid_gf=1    ! testgf2 turn on middle gf conv.
+      integer            :: imid_gf=1    ! gf congest conv.
       integer, parameter :: ideep=1
-      integer, parameter :: ichoice=0	! 0 2 5 13 8
+      integer            :: ichoice=0     ! 0 2 5 13 8
      !integer, parameter :: ichoicem=5	! 0 2 5 13
-      integer, parameter :: ichoicem=13	! 0 2 5 13
-      integer, parameter :: ichoice_s=3	! 0 1 2 3
+      integer, parameter :: ichoicem=13   ! 0 2 5 13
+      integer, parameter :: ichoice_s=3 ! 0 1 2 3
 
       logical, intent(in) :: do_cap_suppress
       real(kind=kind_phys), parameter :: aodc0=0.14
@@ -121,7 +121,7 @@ contains
 
    integer, dimension (:), intent(out) :: hbot,htop,kcnv
    integer, dimension (:), intent(in)  :: xland
-   real(kind=kind_phys),    dimension (:), intent(in) :: pbl
+   real(kind=kind_phys),    dimension (:), intent(in) :: pbl,maxMF
 !$acc declare copyout(hbot,htop,kcnv)
 !$acc declare copyin(xland,pbl)
    integer, dimension (im) :: tropics
@@ -129,7 +129,7 @@ contains
 !  ruc variable
    real(kind=kind_phys), dimension (:),   intent(in)  :: hfx2,qfx2,psuri
    real(kind=kind_phys), dimension (:,:), intent(out) :: ud_mf,dd_mf,dt_mf
-   real(kind=kind_phys), dimension (:),   intent(out) :: raincv,cld1d
+   real(kind=kind_phys), dimension (:),   intent(out) :: raincv,cld1d,maxupmf
    real(kind=kind_phys), dimension (:,:), intent(in)  :: t2di,p2di
 !$acc declare copyin(hfx2,qfx2,psuri,t2di,p2di)
 !$acc declare copyout(ud_mf,dd_mf,dt_mf,raincv,cld1d)
@@ -228,7 +228,7 @@ contains
 !  gf needs them in w/m2. define hfx and qfx after simple unit conversion
    real(kind=kind_phys), dimension (im)  :: hfx,qfx
 !$acc declare create(hfx,qfx)
-   real(kind=kind_phys) tem,tem1,tf,tcr,tcrf
+   real(kind=kind_phys) tem,tem1,tf,tcr,tcrf,psum
    real(kind=kind_phys) :: cliw_shal,clcw_shal,tem_shal, cliw_both, weight_sum
    real(kind=kind_phys) :: cliw_deep,clcw_deep,tem_deep, clcw_both
    integer :: cliw_deep_idx, clcw_deep_idx, cliw_shal_idx, clcw_shal_idx
@@ -537,6 +537,9 @@ contains
      subm(:,:)=0.
      dhdt(:,:)=0.
 
+     frhm(:)=0.
+     frhd(:)=0.
+
      do k=kts,ktf
       do i=its,itf
         p2d(i,k)=0.01*p2di(i,k)
@@ -601,17 +604,34 @@ contains
        endif
       enddo
      enddo
+     do i = its,itf
+       psum=0.
+       do k=kts,ktf-3
+        if (clcw(i,k) .gt. -999.0 .and. clcw(i,k+1) .gt. -999.0 )then
+           dp=(p2d(i,k)-p2d(i,k+1))
+           psum=psum+dp
+           clwtot = cliw(i,k) + clcw(i,k)
+           if(clwtot.lt.1.e-32)clwtot=0.
+           forcing(i,7)=forcing(i,7)+clwtot*dp
+        endif
+       enddo
+       if(psum.gt.0)forcing(i,7)=forcing(i,7)/psum
+       forcing2(i,7)=forcing(i,7)
+     enddo
      do k=kts,ktf-1
       do i = its,itf
         omeg(i,k)= w(i,k) !-g*rhoi(i,k)*w(i,k)
-!       dq=(q2d(i,k+1)-q2d(i,k))
-!       mconv(i)=mconv(i)+omeg(i,k)*dq/g
       enddo
      enddo
      do i = its,itf
       if(mconv(i).lt.0.)mconv(i)=0.
+      if(maxMF(i).gt.0.)ierr(i)=555
      enddo
 !$acc end kernels
+     if (dx(its)<6500.) then
+       ichoice=10
+       imid_gf=0
+     endif
 !
 !---- call cumulus parameterization
 !
@@ -654,8 +674,8 @@ contains
       if(imid_gf == 1)then
        call cu_gf_deep_run(        &
                itf,ktf,its,ite, kts,kte  &
-              ,dicycle_m       &
-              ,ichoicem       &
+              ,dicycle_m     &
+              ,ichoicem      &
               ,ipr           &
               ,ccn_m         &
               ,ccnclean      &
@@ -664,25 +684,23 @@ contains
               ,kpbli         &
               ,dhdt          &
               ,xlandi        &
-
               ,zo            &
-              ,forcing2      &
+              ,forcing       &
               ,t2d           &
               ,q2d           &
               ,ter11         &
               ,tshall        &
               ,qshall        &
-              ,p2d          &
+              ,p2d           &
               ,psur          &
               ,us            &
               ,vs            &
               ,rhoi          &
               ,hfx           &
               ,qfx           &
-              ,dx            & !hj dx(im)
+              ,dx            &
               ,mconv         &
               ,omeg          &
-
               ,cactiv_m      &
               ,cnvwtm        &
               ,zum           &
@@ -748,7 +766,7 @@ contains
               ,xlandi        &
 
               ,zo            &
-              ,forcing       &
+              ,forcing2      &
               ,t2d           &
               ,q2d           &
               ,ter11         &
@@ -761,7 +779,7 @@ contains
               ,rhoi          &
               ,hfx           &
               ,qfx           &
-              ,dx            & !hj replace dx(im)
+              ,dx            &
               ,mconv         &
               ,omeg          &
 
@@ -815,25 +833,6 @@ contains
                       outqc,pret,its,ite,kts,kte,itf,ktf,ktop)
 !
       endif
-!            do i=its,itf
-!              kcnv(i)=0
-!              if(pret(i).gt.0.)then
-!                 cuten(i)=1.
-!                 kcnv(i)= 1 !jmin(i)
-!              else
-!                 kbcon(i)=0
-!                 ktop(i)=0
-!                 cuten(i)=0.
-!              endif   ! pret > 0
-!              if(pretm(i).gt.0.)then
-!                 kcnv(i)= 1 !jmin(i)
-!                 cutenm(i)=1.
-!              else
-!                 kbconm(i)=0
-!                 ktopm(i)=0
-!                 cutenm(i)=0.
-!              endif   ! pret > 0
-!            enddo
 !$acc kernels
             do i=its,itf
               kcnv(i)=0
@@ -880,6 +879,7 @@ contains
             endif
 
             dtime_max=dt
+            forcing2(i,3)=0.
             do k=kts,kstop
                cnvc(i,k) = 0.04 * log(1. + 675. * zu(i,k) * xmb(i)) +   &
                            0.04 * log(1. + 675. * zum(i,k) * xmbm(i)) + &
@@ -954,6 +954,7 @@ contains
                              -(xmbm(i)*(zdm(i,k)-edtm(i)*zdm(i,k)))   &
                              -(xmbs(i)*zus(i,k))
                   trcflx_in1(k)=massflx(k)*.5*(clwtot+clwtot1)
+                  forcing2(i,3)=forcing2(i,3)+clwtot
                endif
              enddo
 
@@ -991,6 +992,13 @@ contains
             gdc(i,13,10)=hfx(i)
             gdc(i,15,10)=qfx(i)
             gdc(i,16,10)=pret(i)*3600.
+
+            if(forcing(i,6).gt.0.)then
+              maxupmf(i)=maxval(xmb(i)*zu(i,kts:ktf)/forcing(i,6))
+            else
+              maxupmf(i)=0.
+            endif
+
             if(ktop(i).gt.2 .and.pret(i).gt.0.)dt_mf(i,ktop(i)-1)=ud_mf(i,ktop(i))
             endif
             enddo
