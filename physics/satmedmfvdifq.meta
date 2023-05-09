@@ -273,6 +273,14 @@
   type = real
   kind = kind_phys
   intent = in
+[sigmaf]
+  standard_name = bounded_vegetation_area_fraction
+  long_name = areal fractional cover of green vegetation bounded on the bottom
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [psk]
   standard_name = surface_dimensionless_exner_function
   long_name = dimensionless Exner function at the surface interface
