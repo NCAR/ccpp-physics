@@ -54,7 +54,12 @@ contains
 !---   h2o_pres  -  vertical pressure level (mb)
 !---   h2o_time  -  time coordinate         (days)
 !---
-      allocate (h2o_lat(latsh2o), h2o_pres(levh2o),h2o_time(timeh2o+1))
+! NOTE: If there are multiple instances of CCPP physics, only the first instance
+! allocates these. All instances must use the same number of identical ozone values
+! jm 20230228
+      if ( .not.allocated(h2o_lat) ) allocate (h2o_lat(latsh2o))
+      if ( .not.allocated(h2o_pres)) allocate (h2o_pres(levh2o))
+      if ( .not.allocated(h2o_time)) allocate (h2o_time(timeh2o+1))
       allocate (h2o_lat4(latsh2o), h2o_pres4(levh2o),h2o_time4(timeh2o+1))
       rewind (kh2opltc)
       read (kh2opltc) h2o_coeff, latsh2o, levh2o, timeh2o, h2o_lat4, h2o_pres4, h2o_time4
@@ -69,7 +74,7 @@ contains
 !--- assume latitudes is on a uniform gaussian grid
 !---
       allocate (tempin(latsh2o))
-      allocate (h2oplin(latsh2o,levh2o,h2o_coeff,timeh2o))
+      if (.not.allocated(h2oplin)) allocate (h2oplin(latsh2o,levh2o,h2o_coeff,timeh2o))
       DO i=1,timeh2o
         do n=1,h2o_coeff
           DO k=1,levh2o
