@@ -18,7 +18,7 @@
 !!    
 !>\section rrtmg_pre_gen General Algorithm
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp, lextop,&
-        ltp, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_unified, me, ncnd, ntrac,   &
+        ltp, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_c3, me, ncnd, ntrac,        &
         num_p3d, npdf3d,                                                       &
         ncnvcld3d,ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, top_at_1,&
         ntrw, ntsw, ntgl, nthl, ntwa, ntoz, ntsmoke, ntdust, ntcoarsepm,       &
@@ -84,7 +84,7 @@
 
       integer,              intent(in)  :: im, levs, lm, lmk, lmp, ltp,        &
                                            n_var_lndp, imfdeepcnv,             &
-                                           imfdeepcnv_gf, imfdeepcnv_unified,  & 
+                                           imfdeepcnv_gf, imfdeepcnv_c3,       &
                                            me, ncnd, ntrac,                    &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
                                            ntcw, ntiw, ntlnc, ntinc,           &
@@ -819,7 +819,7 @@
             enddo
           endif
         elseif (imp_physics == imp_physics_gfdl) then            ! GFDL MP
-          if ((imfdeepcnv==imfdeepcnv_gf .or. imfdeepcnv==imfdeepcnv_unified) .and. kdt>1) then
+          if ((imfdeepcnv==imfdeepcnv_gf .or. imfdeepcnv==imfdeepcnv_c3) .and. kdt>1) then
               do k=1,lm
                 k1 = k + kd
                 do i=1,im

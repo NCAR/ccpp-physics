@@ -66,7 +66,8 @@ contains
                index_of_y_wind,index_of_process_scnv,index_of_process_dcnv,     &
                fhour,fh_dfi_radar,ix_dfi_radar,num_dfi_radar,cap_suppress,      &
                dfi_radar_max_intervals,ldiag3d,qci_conv,do_cap_suppress,        &
-               maxupmf,maxMF,errmsg,errflg)
+               maxupmf,maxMF,do_mynnedmf,ichoice_in,ichoicem_in,ichoice_s_in,   &
+               errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -76,10 +77,9 @@ contains
       integer, parameter :: ensdim=16
       integer            :: imid_gf=1    ! gf congest conv.
       integer, parameter :: ideep=1
-      integer            :: ichoice=0     ! 0 2 5 13 8
-     !integer, parameter :: ichoicem=5	! 0 2 5 13
-      integer, parameter :: ichoicem=13   ! 0 2 5 13
-      integer, parameter :: ichoice_s=3 ! 0 1 2 3
+      integer            :: ichoice=0    ! 0 2 5 13 8
+      integer            :: ichoicem=13  ! 0 2 5 13
+      integer            :: ichoice_s=3  ! 0 1 2 3
 
       logical, intent(in) :: do_cap_suppress
       real(kind=kind_phys), parameter :: aodc0=0.14
@@ -91,7 +91,8 @@ contains
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte
    integer, intent(in   ) :: im,km,ntracer
-   logical, intent(in   ) :: flag_init, flag_restart
+   integer, intent(in   ) :: ichoice_in,ichoicem_in,ichoice_s_in
+   logical, intent(in   ) :: flag_init, flag_restart, do_mynnedmf
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
    real (kind=kind_phys), intent(in) :: g,cp,xlv,r_v
    logical, intent(in   ) :: ldiag3d
@@ -246,6 +247,9 @@ contains
      errmsg = ''
      errflg = 0
 
+     ichoice   = ichoice_in
+     ichoicem  = ichoicem_in
+     ichoice_s = ichoice_s_in
      if(do_cap_suppress) then
 !$acc serial
        do itime=1,num_dfi_radar
@@ -625,7 +629,7 @@ contains
      enddo
      do i = its,itf
       if(mconv(i).lt.0.)mconv(i)=0.
-      if(maxMF(i).gt.0.)ierr(i)=555
+      if(do_mynnedmf.and.(maxMF(i).gt.0.))ierr(i)=555
      enddo
 !$acc end kernels
      if (dx(its)<6500.) then
@@ -660,7 +664,13 @@ contains
 
 !$acc kernels
           do i=its,itf
-           if(xmbs(i).gt.0.)cutens(i)=1.
+           if(xmbs(i).gt.0.)then
+            cutens(i)=1.
+            if (dx(i)<6500.) then
+             ierrm(i)=555
+             ierr (i)=555
+            endif
+           endif
           enddo
 !$acc end kernels
 !> - Call neg_check() for GF shallow convection
@@ -897,8 +907,8 @@ contains
 
                gdc(i,k,1)= max(0.,tun_rad_shall(i)*cupclws(i,k)*cutens(i))      ! my mod
                !gdc2(i,k,1)=max(0.,tun_rad_deep(i)*(cupclwm(i,k)*cutenm(i)+cupclw(i,k)*cuten(i)))
-               !gdc2(i,k,1)=max(0.,tun_rad_mid(i)*cupclwm(i,k)*cutenm(i)+tun_rad_deep(i)*cupclw(i,k)*cuten(i)+tun_rad_shall(i)*cupclws(i,k)*cutens(i))
-               gdc2(i,k,1) = min(0.1, max(0.01, tun_rad_mid(i)*frhm(i)))*cupclwm(i,k)*cutenm(i) + min(0.1, max(0.01, tun_rad_deep(i)*(frhd(i))))*cupclw(i,k)*cuten(i) + tun_rad_shall(i)*cupclws(i,k)*cutens(i)
+               gdc2(i,k,1)=max(0.,tun_rad_mid(i)*cupclwm(i,k)*cutenm(i)+frhd(i)*cupclw(i,k)*cuten(i)+tun_rad_shall(i)*cupclws(i,k)*cutens(i))
+               !gdc2(i,k,1) = min(0.1, max(0.01, tun_rad_mid(i)*frhm(i)))*cupclwm(i,k)*cutenm(i) + min(0.1, max(0.01, tun_rad_deep(i)*(frhd(i))))*cupclw(i,k)*cuten(i) + tun_rad_shall(i)*cupclws(i,k)*cutens(i)
                qci_conv(i,k)=gdc2(i,k,1)
                gdc(i,k,2)=(outt(i,k))*86400.
                gdc(i,k,3)=(outtm(i,k))*86400.

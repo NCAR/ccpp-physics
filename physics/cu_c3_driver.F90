@@ -1,41 +1,41 @@
-!>\file cu_unified_driver.F90
-!! This file is the unified cumulus scheme driver.
+!>\file cu_c3_driver.F90
+!! This file is the Community Convective Cloud (C3) scheme driver.
 
 
-module cu_unified_driver
+module cu_c3_driver
 
-   ! DH* TODO: replace constants with arguments to cu_unified_driver_run
+   ! DH* TODO: replace constants with arguments to cu_c3_driver_run
    !use physcons  , g => con_g, cp => con_cp, xlv => con_hvap, r_v => con_rv
    use machine   , only: kind_phys
-   use cu_unified_deep, only: cu_unified_deep_run,neg_check,fct1d3
-   use cu_unified_sh  , only: cu_unified_sh_run
+   use cu_c3_deep, only: cu_c3_deep_run,neg_check,fct1d3
+   use cu_c3_sh  , only: cu_c3_sh_run
    use progsigma      , only: progsigma_calc
 
    implicit none
 
    private
 
-   public :: cu_unified_driver_init, cu_unified_driver_run, progsigma_calc
+   public :: cu_c3_driver_init, cu_c3_driver_run, progsigma_calc
 
 contains
 
-!> \defgroup cu_unified_group Grell-Freitas Convection Module
+!> \defgroup cu_c3_group Grell-Freitas Convection Module
 !! This is the Grell-Freitas scale and aerosol aware scheme.
 !>@{
-!>\defgroup cu_unified_driver  Grell-Freitas Convection Driver Module
-!> \ingroup cu_unified_group
+!>\defgroup cu_c3_driver  Grell-Freitas Convection Driver Module
+!> \ingroup cu_c3_group
 !> This is Grell-Freitas cumulus scheme driver module.
 !!
-!! \section arg_table_cu_unified_driver_init Argument Table
-!! \htmlinclude cu_unified_driver_init.html
+!! \section arg_table_cu_c3_driver_init Argument Table
+!! \htmlinclude cu_c3_driver_init.html
 !!
-      subroutine cu_unified_driver_init(imfshalcnv, imfshalcnv_unified, imfdeepcnv, &
-                          imfdeepcnv_unified,mpirank, mpiroot, errmsg, errflg)
+      subroutine cu_c3_driver_init(imfshalcnv, imfshalcnv_c3, imfdeepcnv, &
+                          imfdeepcnv_c3,mpirank, mpiroot, errmsg, errflg)
 
          implicit none
 
-         integer,                   intent(in) :: imfshalcnv, imfshalcnv_unified
-         integer,                   intent(in) :: imfdeepcnv, imfdeepcnv_unified
+         integer,                   intent(in) :: imfshalcnv, imfshalcnv_c3
+         integer,                   intent(in) :: imfdeepcnv, imfdeepcnv_c3
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
          character(len=*),          intent(  out) :: errmsg
@@ -45,7 +45,7 @@ contains
          errmsg = ''
          errflg = 0
 
-      end subroutine cu_unified_driver_init
+      end subroutine cu_c3_driver_init
 
 !
 ! t2di is temp after advection, but before physics
@@ -53,11 +53,11 @@ contains
 !===================
 
 !> This is the Grell-Freitas convection scheme driver module.
-!! \section arg_table_cu_unified_driver_run Argument Table
-!! \htmlinclude cu_unified_driver_run.html
+!! \section arg_table_cu_c3_driver_run Argument Table
+!! \htmlinclude cu_c3_driver_run.html
 !!
-!>\section gen_unified_driver Grell-Freitas Cumulus Scheme Driver General Algorithm
-      subroutine cu_unified_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
+!>\section gen_c3_driver Grell-Freitas Cumulus Scheme Driver General Algorithm
+      subroutine cu_c3_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
                do_ca,progsigma,cactiv,cactiv_m,g,cp,fv,r_d,xlv,r_v,forcet,      &
                forceqv_spechum,phil,delp,raincv,tmf,qmicro,sigmain,             &
                qv_spechum,t,cld1d,us,vs,t2di,w,qv2di_spechum,p2di,psuri,        &
@@ -68,7 +68,7 @@ contains
                index_of_y_wind,index_of_process_scnv,index_of_process_dcnv,     &
                fhour,fh_dfi_radar,ix_dfi_radar,num_dfi_radar,cap_suppress,      &
                dfi_radar_max_intervals,ldiag3d,qci_conv,do_cap_suppress,        &
-               sigmaout,errmsg,errflg)
+               sigmaout, maxupmf,ichoice_in,ichoicem_in,ichoice_s_in,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -76,12 +76,11 @@ contains
       integer, parameter :: maxens2=1
       integer, parameter :: maxens3=16
       integer, parameter :: ensdim=16
-      integer, parameter :: imid_gf=1    ! testgf2 turn on middle gf conv.
+      integer            :: imid_gf=1   ! gf congest conv.
       integer, parameter :: ideep=1
-      integer, parameter :: ichoice=0	! 0 2 5 13 8
-     !integer, parameter :: ichoicem=5	! 0 2 5 13
-      integer, parameter :: ichoicem=13	! 0 2 5 13
-      integer, parameter :: ichoice_s=3	! 0 1 2 3
+      integer            :: ichoice=0   ! 0 2 5 13 8
+      integer            :: ichoicem=13 ! 0 2 5 13
+      integer            :: ichoice_s=3 ! 0 1 2 3
 
       logical, intent(in) :: do_cap_suppress
       real(kind=kind_phys), parameter :: aodc0=0.14
@@ -93,6 +92,7 @@ contains
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte
    integer, intent(in   ) :: im,km,ntracer
+   integer, intent(in   ) :: ichoice_in,ichoicem_in,ichoice_s_in
    logical, intent(in   ) :: flag_init, flag_restart
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend, &
         do_ca,progsigma
@@ -135,7 +135,7 @@ contains
 !  ruc variable
    real(kind=kind_phys), dimension (:),   intent(in)  :: hfx2,qfx2,psuri,ca_deep
    real(kind=kind_phys), dimension (:,:), intent(out) :: ud_mf,dd_mf,dt_mf
-   real(kind=kind_phys), dimension (:),   intent(out) :: raincv,cld1d,rainevap
+   real(kind=kind_phys), dimension (:),   intent(out) :: raincv,cld1d,maxupmf,rainevap
    real(kind=kind_phys), dimension (:,:), intent(in)  :: t2di,p2di
 !$acc declare copyin(hfx2,qfx2,psuri,t2di,p2di)
 !$acc declare copyout(ud_mf,dd_mf,dt_mf,raincv,cld1d)
@@ -234,7 +234,7 @@ contains
 !  gf needs them in w/m2. define hfx and qfx after simple unit conversion
    real(kind=kind_phys), dimension (im)  :: hfx,qfx
 !$acc declare create(hfx,qfx)
-   real(kind=kind_phys) tem,tem1,tf,tcr,tcrf
+   real(kind=kind_phys) tem,tem1,tf,tcr,tcrf,psum
    real(kind=kind_phys) :: cliw_shal,clcw_shal,tem_shal, cliw_both, weight_sum
    real(kind=kind_phys) :: cliw_deep,clcw_deep,tem_deep, clcw_both
    integer :: cliw_deep_idx, clcw_deep_idx, cliw_shal_idx, clcw_shal_idx
@@ -251,6 +251,10 @@ contains
   ! initialize ccpp error handling variables
      errmsg = ''
      errflg = 0
+
+     ichoice   = ichoice_in
+     ichoicem  = ichoicem_in
+     ichoice_s = ichoice_s_in
 
      if(do_cap_suppress) then
 !$acc serial
@@ -343,10 +347,7 @@ contains
      edtd(:)=0.
      zdd(:,:)=0.
      flux_tun(:)=5.
-! 10/11/2016 dx and tscl_kf are replaced with input dx(i), is dlength.
 ! dx for scale awareness
-!    dx=40075000./float(lonf)
-!    tscl_kf=dx/25000.
 !$acc end kernels
 
      if (imfshalcnv == 5) then
@@ -550,6 +551,9 @@ contains
      subm(:,:)=0.
      dhdt(:,:)=0.
 
+     frhm(:)=0.
+     frhd(:)=0.
+
      do k=kts,ktf
       do i=its,itf
         p2d(i,k)=0.01*p2di(i,k)
@@ -614,17 +618,33 @@ contains
        endif
       enddo
      enddo
+     do i = its,itf
+       psum=0.
+       do k=kts,ktf-3
+        if (clcw(i,k) .gt. -999.0 .and. clcw(i,k+1) .gt. -999.0 )then
+           dp=(p2d(i,k)-p2d(i,k+1))
+           psum=psum+dp
+           clwtot = cliw(i,k) + clcw(i,k)
+           if(clwtot.lt.1.e-32)clwtot=0.
+           forcing(i,7)=forcing(i,7)+clwtot*dp
+        endif
+       enddo
+       if(psum.gt.0)forcing(i,7)=forcing(i,7)/psum
+       forcing2(i,7)=forcing(i,7)
+     enddo
      do k=kts,ktf-1
       do i = its,itf
         omeg(i,k)= w(i,k) !-g*rhoi(i,k)*w(i,k)
-!       dq=(q2d(i,k+1)-q2d(i,k))
-!       mconv(i)=mconv(i)+omeg(i,k)*dq/g
       enddo
      enddo
      do i = its,itf
       if(mconv(i).lt.0.)mconv(i)=0.
      enddo
 !$acc end kernels
+     if (dx(its)<6500.) then
+       ichoice=10
+       imid_gf=0
+     endif
 !
 !---- call cumulus parameterization
 !
@@ -637,16 +657,16 @@ contains
           enddo
 !$acc end kernels
 !
-!> - Call shallow: cu_unified_sh_run()
+!> - Call shallow: cu_c3_sh_run()
 !
-          call cu_unified_sh_run (us,vs,                                              &
+          call cu_c3_sh_run (us,vs,                                              &
 ! input variables, must be supplied
                          zo,t2d,q2d,ter11,tshall,qshall,p2d,psur,dhdt,kpbli,     &
                          rhoi,hfx,qfx,xlandi,ichoice_s,tcrit,dt,                 &
 ! input variables. ierr should be initialized to zero or larger than zero for
 ! turning off shallow convection for grid points
                          zus,xmbs,kbcons,ktops,k22s,ierrs,ierrcs,                &
-!Prog closure
+! Prog closure
                          flag_init, flag_restart,fv,r_d,delp,tmfq,qmicro,        &
                          forceqv_spechum,sigmain,sigmaout,progsigma,dx,          &
 ! output tendencies
@@ -666,9 +686,9 @@ contains
 
        ipr=0
        jpr_deep=0 !340765
-!> - Call cu_unified_deep_run() for middle GF convection
+!> - Call cu_c3_deep_run() for middle GF convection
       if(imid_gf == 1)then
-       call cu_unified_deep_run(        &
+       call cu_c3_deep_run(        &
                itf,ktf,its,ite, kts,kte &
               ,flag_init     &
               ,flag_restart  &
@@ -685,7 +705,7 @@ contains
               ,xlandi        &
               ,delp          &
               ,zo            &
-              ,forcing2      &
+              ,forcing       &
               ,t2d           &
               ,q2d           &
               ,tmfq          &
@@ -696,14 +716,14 @@ contains
               ,ter11         &
               ,tshall        &
               ,qshall        &
-              ,p2d          &
+              ,p2d           &
               ,psur          &
               ,us            &
               ,vs            &
               ,rhoi          &
               ,hfx           &
               ,qfx           &
-              ,dx            & !hj dx(im)
+              ,dx            &
               ,do_ca         &
               ,progsigma     &
               ,ca_deep       &  
@@ -757,9 +777,9 @@ contains
       call neg_check('mid',ipn,dt,qcheck,outqm,outtm,outum,outvm,   &
                      outqcm,pretm,its,ite,kts,kte,itf,ktf,ktopm)
      endif
-!> - Call cu_unified_deep_run() for deep GF convection
+!> - Call cu_c3_deep_run() for deep GF convection
      if(ideep.eq.1)then
-      call cu_unified_deep_run(        &
+      call cu_c3_deep_run(        &
                itf,ktf,its,ite, kts,kte  &
               ,flag_init     &
               ,flag_restart  &
@@ -776,7 +796,7 @@ contains
               ,xlandi        &
               ,delp          &
               ,zo            &
-              ,forcing       &
+              ,forcing2      &
               ,t2d           &
               ,q2d           &
               ,tmfq          &
@@ -794,7 +814,7 @@ contains
               ,rhoi          &
               ,hfx           &
               ,qfx           &
-              ,dx            & !hj replace dx(im)
+              ,dx            &
               ,do_ca         &
               ,progsigma     &
               ,ca_deep       &
@@ -852,25 +872,6 @@ contains
                       outqc,pret,its,ite,kts,kte,itf,ktf,ktop)
 !
       endif
-!            do i=its,itf
-!              kcnv(i)=0
-!              if(pret(i).gt.0.)then
-!                 cuten(i)=1.
-!                 kcnv(i)= 1 !jmin(i)
-!              else
-!                 kbcon(i)=0
-!                 ktop(i)=0
-!                 cuten(i)=0.
-!              endif   ! pret > 0
-!              if(pretm(i).gt.0.)then
-!                 kcnv(i)= 1 !jmin(i)
-!                 cutenm(i)=1.
-!              else
-!                 kbconm(i)=0
-!                 ktopm(i)=0
-!                 cutenm(i)=0.
-!              endif   ! pret > 0
-!            enddo
 !$acc kernels
             do i=its,itf
               kcnv(i)=0
@@ -917,6 +918,7 @@ contains
             endif
 
             dtime_max=dt
+            forcing2(i,3)=0.
             do k=kts,kstop
                cnvc(i,k) = 0.04 * log(1. + 675. * zu(i,k) * xmb(i)) +   &
                            0.04 * log(1. + 675. * zum(i,k) * xmbm(i)) + &
@@ -991,6 +993,7 @@ contains
                              -(xmbm(i)*(zdm(i,k)-edtm(i)*zdm(i,k)))   &
                              -(xmbs(i)*zus(i,k))
                   trcflx_in1(k)=massflx(k)*.5*(clwtot+clwtot1)
+                  forcing2(i,3)=forcing2(i,3)+clwtot
                endif
              enddo
 
@@ -1028,6 +1031,13 @@ contains
             gdc(i,13,10)=hfx(i)
             gdc(i,15,10)=qfx(i)
             gdc(i,16,10)=pret(i)*3600.
+
+            if(forcing(i,6).gt.0.)then
+              maxupmf(i)=maxval(xmb(i)*zu(i,kts:ktf)/forcing(i,6))
+            else
+              maxupmf(i)=0.
+            endif
+
             if(ktop(i).gt.2 .and.pret(i).gt.0.)dt_mf(i,ktop(i)-1)=ud_mf(i,ktop(i))
             endif
             enddo
@@ -1192,6 +1202,6 @@ contains
 !$acc end parallel
           endif
         endif
-   end subroutine cu_unified_driver_run
+   end subroutine cu_c3_driver_run
 !>@}
-end module cu_unified_driver
+end module cu_c3_driver
