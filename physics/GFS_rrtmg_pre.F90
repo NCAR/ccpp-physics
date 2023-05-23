@@ -45,7 +45,8 @@
         gasvmr_ccl4,  gasvmr_cfc113, aerodp,ext550, clouds6, clouds7, clouds8, &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
-        aero_dir_fdb, fdb_coef, spp_wts_rad, spp_rad, ico2, errmsg, errflg)
+        aero_dir_fdb, fdb_coef, spp_wts_rad, spp_rad, ico2, latsozp, levozp,   &
+        blatc, dphiozc, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -101,7 +102,8 @@
                                            imp_physics_mg, imp_physics_wsm6,   &
                                            imp_physics_nssl,                   &
                                            imp_physics_fer_hires,              &
-                                           yearlen, icloud, iaermdl, iaerflg
+                                           yearlen, icloud, iaermdl, iaerflg,  &
+                                           latsozp, levozp
 
       integer,              intent(in)  ::                                     &
          iovr,                             & ! choice of cloud-overlap method
@@ -132,7 +134,7 @@
       integer,              intent(in) :: spp_rad
       real(kind_phys),      intent(in) :: spp_wts_rad(:,:)
 
-      real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp, dcorr_con
+      real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp, dcorr_con, blatc, dphiozc
       real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd, con_pi, con_g, con_ttp, con_thgni
 
       real(kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlat, xlon,    &
@@ -429,8 +431,7 @@
           enddo
         enddo
       else                                ! climatological ozone
-        call getozn (prslk1, xlat, im, lmk, top_at_1,    &     !  ---  inputs
-                     olyr)                                     !  ---  outputs
+        call getozn (prslk1, xlat, im, lmk, top_at_1, latsozp, levozp, blatc, dphiozc, olyr)
       endif                               ! end_if_ntoz
 
 !> - Call coszmn(), to compute cosine of zenith angle (only when SW is called)

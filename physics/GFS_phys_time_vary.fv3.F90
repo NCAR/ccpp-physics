@@ -2,7 +2,7 @@
 !!  Contains code related to GFS physics suite setup (physics part of time_vary_step)
 
 !>\defgroup mod_GFS_phys_time_vary GFS Physics Time Update
-!! This module contains GFS physics time vary subroutines including ozone, stratospheric water vapor,
+!! This module contains GFS physics time vary subroutines including stratospheric water vapor,
 !! aerosol, IN&CCN and surface properties updates.
    module GFS_phys_time_vary
 
@@ -13,9 +13,6 @@
       use machine, only : kind_phys
 
       use mersenne_twister, only: random_setseed, random_number
-
-      use ozne_def, only : levozp, oz_coeff, oz_lat, oz_pres, oz_time, ozplin
-      use ozinterp, only : read_o3data, setindxoz, ozinterpol
 
       use h2o_def,   only : levh2o, h2o_coeff, h2o_lat, h2o_pres, h2o_time, h2oplin
       use h2ointerp, only : read_h2odata, setindxh2o, h2ointerpol
@@ -66,9 +63,9 @@
 !>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
 !> @{
       subroutine GFS_phys_time_vary_init (                                                         &
-              me, master, ntoz, h2o_phys, iaerclm, iccn, iaermdl, iflip, im, levs,                 &
+              me, master, h2o_phys, iaerclm, iccn, iaermdl, iflip, im, levs,                 &
               nx, ny, idate, xlat_d, xlon_d,                                                       &
-              jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,          &
+              jindx1_h, jindx2_h, ddy_h, h2opl,fhour,          &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
               do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
@@ -85,15 +82,15 @@
          implicit none
 
          ! Interface variables
-         integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny, levs, iaermdl
+         integer,              intent(in)    :: me, master, iccn, iflip, im, nx, ny, levs, iaermdl
          logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhour
          real(kind_phys),      intent(in)    :: xlat_d(:), xlon_d(:)
 
-         integer,              intent(inout) :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
-         real(kind_phys),      intent(inout) :: ddy_o3(:),  ddy_h(:)
-         real(kind_phys),      intent(in)    :: ozpl(:,:,:), h2opl(:,:,:)
+         integer,              intent(inout) :: jindx1_h(:), jindx2_h(:)
+         real(kind_phys),      intent(inout) :: ddy_h(:)
+         real(kind_phys),      intent(in)    :: h2opl(:,:,:)
          integer,              intent(inout) :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
          real(kind_phys),      intent(inout) :: ddy_aer(:), ddx_aer(:)
          real(kind_phys),      intent(out)   :: aer_nm(:,:,:)
@@ -196,13 +193,12 @@
          jamax=-999
 
 !$OMP parallel num_threads(nthrds) default(none)                                    &
-!$OMP          shared (me,master,ntoz,h2o_phys,im,nx,ny,levs,idate)                 &
+!$OMP          shared (me,master,h2o_phys,im,nx,ny,levs,idate)                      &
 !$OMP          shared (xlat_d,xlon_d,imap,jmap,errmsg,errflg)                       &
-!$OMP          shared (levozp,oz_coeff,oz_pres,ozpl)                                &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres,h2opl)                             &
 !$OMP          shared (iamin, iamax, jamin, jamax)                                  &
 !$OMP          shared (iaerclm,iaermdl,ntrcaer,aer_nm,iflip,iccn)                   &
-!$OMP          shared (jindx1_o3,jindx2_o3,ddy_o3,jindx1_h,jindx2_h,ddy_h)          &
+!$OMP          shared (jindx1_h,jindx2_h,ddy_h)                                     &
 !$OMP          shared (jindx1_aer,jindx2_aer,ddy_aer,iindx1_aer,iindx2_aer,ddx_aer) &
 !$OMP          shared (jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci,ddx_ci)       &
 !$OMP          shared (do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau,ddy_j2tau)        &
@@ -213,31 +209,11 @@
 !$OMP sections
 
 !$OMP section
-!> - Call read_o3data() to read ozone data
-         call read_o3data (ntoz, me, master)
-
-         ! Consistency check that the hardcoded values for levozp and
-         ! oz_coeff in GFS_typedefs.F90 match what is set by read_o3data
-         ! in GFS_typedefs.F90: allocate (Tbd%ozpl (IM,levozp,oz_coeff))
-         if (size(ozpl, dim=2).ne.levozp) then
-            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",    &
-                  "levozp from read_o3data does not match value in GFS_typedefs.F90: ", &
-                  levozp, " /= ", size(ozpl, dim=2)
-            errflg = 1
-         end if
-         if (size(ozpl, dim=3).ne.oz_coeff) then
-            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",      &
-                  "oz_coeff from read_o3data does not match value in GFS_typedefs.F90: ", &
-                  oz_coeff, " /= ", size(ozpl, dim=3)
-            errflg = 1
-         end if
-
-!$OMP section
 !> - Call read_h2odata() to read stratospheric water vapor data
          call read_h2odata (h2o_phys, me, master)
 
          ! Consistency check that the hardcoded values for levh2o and
-         ! h2o_coeff in GFS_typedefs.F90 match what is set by read_o3data
+         ! h2o_coeff in GFS_typedefs.F90 match what is set by read_h2odata
          ! in GFS_typedefs.F90: allocate (Tbd%h2opl (IM,levh2o,h2o_coeff))
          if (size(h2opl, dim=2).ne.levh2o) then
             write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
@@ -294,12 +270,6 @@
 ! Need an OpenMP barrier here (implicit in "end sections")
 
 !$OMP sections
-
-!$OMP section
-!> - Call setindxoz() to initialize ozone data
-         if (ntoz > 0) then
-           call setindxoz (im, xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
-         endif
 
 !$OMP section
 !> - Call setindxh2o() to initialize stratospheric water vapor data
@@ -708,8 +678,8 @@
 !> @{
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
             me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, nsswr, fhswr, lsswr, fhour, &
-            imfdeepcnv, cal_pre, random_clds, nscyc, ntoz, h2o_phys, iaerclm, iccn, clstp,          &
-            jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
+            imfdeepcnv, cal_pre, random_clds, nscyc, h2o_phys, iaerclm, iccn, clstp,          &
+            jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm, fn_nml,      &
             imap, jmap, prsl, seed0, rann, nthrds, nx, ny, nsst, tile_num, nlunit, lsoil, lsoil_lsm,&
@@ -724,14 +694,14 @@
 
          ! Interface variables
          integer,              intent(in)    :: me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, &
-                                                nsswr, imfdeepcnv, iccn, nscyc, ntoz, iflip
+                                                nsswr, imfdeepcnv, iccn, nscyc, iflip
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhswr, fhour
          logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm
          real(kind_phys),      intent(out)   :: clstp
-         integer,              intent(in)    :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
-         real(kind_phys),      intent(in)    :: ddy_o3(:),  ddy_h(:)
-         real(kind_phys),      intent(inout) :: ozpl(:,:,:), h2opl(:,:,:)
+         integer,              intent(in)    :: jindx1_h(:), jindx2_h(:)
+         real(kind_phys),      intent(in)    :: ddy_h(:)
+         real(kind_phys),      intent(inout) :: h2opl(:,:,:)
          integer,              intent(in)    :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
          real(kind_phys),      intent(in)    :: ddy_aer(:), ddx_aer(:)
          real(kind_phys),      intent(inout) :: aer_nm(:,:,:)
@@ -788,8 +758,8 @@
 !$OMP parallel num_threads(nthrds) default(none)                                         &
 !$OMP          shared(kdt,nsswr,lsswr,clstp,imfdeepcnv,cal_pre,random_clds)              &
 !$OMP          shared(fhswr,fhour,seed0,cnx,cny,nrcm,wrk,rannie,rndval)                  &
-!$OMP          shared(rann,im,isc,jsc,imap,jmap,ntoz,me,idate,jindx1_o3,jindx2_o3)       &
-!$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,master) &
+!$OMP          shared(rann,im,isc,jsc,imap,jmap,me,idate)       &
+!$OMP          shared(h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,master) &
 !$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
 !$OMP          shared(ddx_ci,in_nm,ccn_nm,do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau)    &
 !$OMP          shared(ddy_j2tau,tau_amf,iflip)                                           &
@@ -841,14 +811,6 @@
           enddo
 
          endif  ! imfdeepcnv, cal_re, random_clds
-
-!$OMP section
-!> - Call ozinterpol() to make ozone interpolation
-         if (ntoz > 0) then
-           call ozinterpol (me, im, idate, fhour, &
-                            jindx1_o3, jindx2_o3, &
-                            ozpl, ddy_o3)
-         endif
 
 !$OMP section
 !> - Call h2ointerpol() to make stratospheric water vapor data interpolation
@@ -943,12 +905,6 @@
          errflg = 0
 
          if (.not.is_initialized) return
-
-         ! Deallocate ozone arrays
-         if (allocated(oz_lat)  ) deallocate(oz_lat)
-         if (allocated(oz_pres) ) deallocate(oz_pres)
-         if (allocated(oz_time) ) deallocate(oz_time)
-         if (allocated(ozplin)  ) deallocate(ozplin)
 
          ! Deallocate h2o arrays
          if (allocated(h2o_lat) ) deallocate(h2o_lat)

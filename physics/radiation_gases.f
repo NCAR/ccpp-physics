@@ -142,9 +142,6 @@
       module module_radiation_gases      
       use machine,           only : kind_phys, kind_io4
       use funcphys,          only : fpkapx
-      use ozne_def,          only : JMR => latsozc, LOZ => levozc,      &
-     &                              blte => blatc, dlte=> dphiozc,      &
-     &                              timeozc => timeozc
       use module_iounitdef,  only : NIO3CLM, NICO2CN
 !
       implicit   none
@@ -233,7 +230,7 @@
 !>\section gas_init_gen gas_init General Algorithm
 !-----------------------------------
       subroutine gas_init( me, co2usr_file, co2cyc_file, ico2flg,       &
-     &     ictmflg, ioznflg, con_pi, errflg, errmsg)
+     &     ictmflg, ioznflg, con_pi, JMR, LOZ, timeozc, errflg, errmsg)
 
 !  ===================================================================  !
 !                                                                       !
@@ -283,8 +280,10 @@
 
 !  ---  inputs:
       integer, intent(in) :: me, ictmflg, ioznflg, ico2flg
+      integer, intent(in) :: JMR, LOZ, timeozc
       character(len=26),intent(in) :: co2usr_file,co2cyc_file
       real(kind=kind_phys), intent(in) :: con_pi
+
 !  ---  output:
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -1115,7 +1114,8 @@
 !!                   ratio (g/g)
 !>\section getozn_gen getozn General Algorithm
 !-----------------------------------
-      subroutine getozn( prslk,xlat, IMAX, LM, top_at_1, o3mmr)
+      subroutine getozn( prslk,xlat, IMAX, LM, top_at_1, JMR, LOZ, blte,&
+     &     dlte, o3mmr)
 
 !  ===================================================================  !
 !                                                                       !
@@ -1144,7 +1144,8 @@
       implicit none
 
 !  ---  inputs:
-      integer,  intent(in) :: IMAX, LM
+      integer,  intent(in) :: IMAX, LM, JMR, LOZ
+      real(kind=kind_phys), intent(in) :: blte, dlte
       logical,  intent(in) :: top_at_1
       real (kind=kind_phys), intent(in) :: prslk(:,:), xlat(:)
 

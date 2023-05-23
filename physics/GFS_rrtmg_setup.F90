@@ -44,7 +44,7 @@ module GFS_rrtmg_setup
         iaermdl, iaerflg, aeros_file, con_pi, con_t0c, con_c, con_boltz,     &
         con_plnk, con_solr_2008, con_solr_2002, con_g, con_rd, co2usr_file,  &
         co2cyc_file, rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, isubclw,&
-        iswmode, ipsd0, ltp, lextop, errmsg, errflg)
+        iswmode, latsozp, levozp, timeozp, ipsd0, ltp, lextop, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:   GFS_rrtmg_setup_init - a subprogram to initialize radiation !
@@ -155,7 +155,8 @@ module GFS_rrtmg_setup
       integer, intent(in) :: levr, ictm, isol, ico2, iaer, ntcw, num_p3d, &
            ltp, npdf3d, ntoz, iovr, iovr_rand, iovr_maxrand, iovr_max,    &
            iovr_dcorr, iovr_exp, iovr_exprand, icliq_sw, imp_physics,     &
-           iflip, me, rad_hr_units, icliq_lw, isubcsw, isubclw, iswmode
+           iflip, me, rad_hr_units, icliq_lw, isubcsw, isubclw, iswmode,  &
+           latsozp, levozp, timeozp
       integer, intent(in) :: idate(:)
       logical, intent(in) :: lcrick, lcnorm, lnoprec, do_RRTMGP, lalw1bd, &
            inc_minor_gas, lextop
@@ -219,7 +220,7 @@ module GFS_rrtmg_setup
       call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file,  &
            con_pi, con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)
       call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz,   &
-           con_pi, errflg, errmsg)
+           con_pi, latsozp, levozp, timeozp, errflg, errmsg)
       call cld_init ( si, levr, imp_physics, me, con_g, con_rd, errflg, errmsg)
       call rlwinit ( me, rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, &
            iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
