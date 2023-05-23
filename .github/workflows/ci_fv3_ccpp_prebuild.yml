@@ -24,7 +24,7 @@ jobs:
       run: echo "GIT_REMOTE_HASH=`git rev-parse HEAD`" >> $GITHUB_ENV
 
     - name: Checkout latest fv3atm
-      run: git clone https://github.com/NOAA-EMC/fv3atm.git
+      run: git clone https://github.com/NCAR/fv3atm.git
 
     - name: Initialize submodules
       run: |

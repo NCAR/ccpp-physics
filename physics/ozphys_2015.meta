@@ -7,6 +7,20 @@
 [ccpp-arg-table]
   name = ozphys_2015_init
   type = scheme
+[nPts]
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[latsozp]
+  standard_name = number_of_latitudes_in_ozone_data
+  long_name = number of latitude in ozone data
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [oz_phys_2015]
   standard_name = flag_for_nrl_2015_ozone_scheme
   long_name = flag for new (2015) ozone physics
@@ -14,6 +28,176 @@
   dimensions = ()
   type = logical
   intent = in
+[oz_lat]
+  standard_name = ozone_data_latitude
+  long_name = ozone data latitude
+  units = deg
+  dimensions = (number_of_latitudes_in_ozone_data)
+  type = real
+  kind = kind_phys
+  intent = in
+[dlat]
+  standard_name = latitude_in_degree
+  long_name = latitude in degree north
+  units = degree_north
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[jindx1]
+  standard_name = lower_latitude_index_of_ozone_forcing_for_interpolation
+  long_name = interpolation low index for ozone
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = out
+[jindx2]
+  standard_name = upper_latitude_index_of_ozone_forcing_for_interpolation
+  long_name = interpolation high index for ozone
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = out
+[ddy]
+  standard_name = latitude_interpolation_weight_for_ozone_forcing
+  long_name = interpolation high index for ozone
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+
+########################################################################
+[ccpp-arg-table]
+  name = ozphys_2015_timestep_init
+  type = scheme
+[nPts]
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[idate]
+  standard_name = date_and_time_at_model_initialization_in_united_states_order
+  long_name = initial date with different size and ordering
+  units = none
+  dimensions = (4)
+  type = integer
+  intent = in
+[fhour]
+  standard_name = forecast_time
+  long_name = current forecast time
+  units = h
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[jindx1]
+  standard_name = lower_latitude_index_of_ozone_forcing_for_interpolation
+  long_name = interpolation low index for ozone
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+[jindx2]
+  standard_name = upper_latitude_index_of_ozone_forcing_for_interpolation
+  long_name = interpolation high index for ozone
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+[latsozp]
+  standard_name = number_of_latitudes_in_ozone_data
+  long_name = number of latitude in ozone data
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[levozp]
+  standard_name = number_of_levels_in_ozone_data
+  long_name = number of levels in ozone data
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[oz_coeff]
+  standard_name = number_of_coefficients_in_ozone_data
+  long_name = number of coefficients in ozone data
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[timeoz]
+  standard_name = number_of_times_in_ozone_data
+  long_name = number of times in ozone data
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ozplin]
+  standard_name = ozone_data
+  long_name = ozone data
+  units = 1
+  dimensions = (number_of_latitudes_in_ozone_data,number_of_levels_in_ozone_data,number_of_coefficients_in_ozone_data,number_of_times_in_ozone_data)
+  type = real
+  kind = kind_phys
+  intent = in
+[oz_time]
+  standard_name = ozone_data_time
+  long_name = ozone data time
+  units = none
+  dimensions = (13)
+  type = real
+  kind = kind_phys
+  intent = in
+[oz_pres]
+  standard_name = ozone_data_level_pressure
+  long_name = ozone data level pressure
+  units = Pa
+  dimensions = (number_of_levels_in_ozone_data)
+  type = real
+  kind = kind_phys
+  intent = in
+[oz_lat]
+  standard_name = ozone_data_latitude
+  long_name = ozone data latitude
+  units = deg
+  dimensions = (number_of_latitudes_in_ozone_data)
+  type = real
+  kind = kind_phys
+  intent = in
+[ddy]
+  standard_name = latitude_interpolation_weight_for_ozone_forcing
+  long_name = interpolation high index for ozone
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[ozplout]
+  standard_name = ozone_forcing
+  long_name = ozone forcing data
+  units = mixed
+  dimensions = (horizontal_dimension,number_of_levels_in_ozone_data,number_of_coefficients_in_ozone_data)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -49,7 +233,7 @@
   type = integer
   intent = in
 [ko3]
-  standard_name = vertical_dimension_of_ozone_forcing_data
+  standard_name = number_of_levels_in_ozone_data
   long_name = number of vertical layers in ozone forcing data
   units = count
   dimensions = ()
@@ -80,10 +264,10 @@
   kind = kind_phys
   intent = in
 [po3]
-  standard_name = natural_log_of_ozone_forcing_data_pressure_levels
+  standard_name = natural_log_of_ozone_data_pressure_levels
   long_name = natural log of ozone forcing data pressure levels
   units = 1
-  dimensions = (vertical_dimension_of_ozone_forcing_data)
+  dimensions = (number_of_levels_in_ozone_data)
   type = real
   kind = kind_phys
   intent = in
@@ -99,14 +283,14 @@
   standard_name = ozone_forcing
   long_name = ozone forcing data
   units = mixed
-  dimensions = (horizontal_loop_extent,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_forcing_data)
+  dimensions = (horizontal_loop_extent,number_of_levels_in_ozone_data,number_of_coefficients_in_ozone_data)
   type = real
   kind = kind_phys
   intent = in
 [pl_coeff]
-  standard_name = number_of_coefficients_in_ozone_forcing_data
+  standard_name = number_of_coefficients_in_ozone_data
   long_name = number of coefficients in ozone forcing data
-  units = index
+  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -182,13 +366,6 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  intent = in
-[me]
-  standard_name = mpi_rank
-  long_name = rank of the current MPI task
-  units = index
-  dimensions = ()
-  type = integer
   intent = in
 [errmsg]
   standard_name = ccpp_error_message
