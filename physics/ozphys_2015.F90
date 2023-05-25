@@ -83,7 +83,7 @@ contains
     integer, intent(in) :: &
          nPts,     & ! Horizontal dimension
          latsozp,  & ! Number of latitudes in ozone data
-         levozp,   & ! Number of levels in ozone data
+         levozp,   & ! Number of vertical layers in ozone data
          oz_coeff, & ! Number of coefficients in ozone data
          timeoz      ! Number of times in ozone data
     integer, intent(in),dimension(:) :: &
@@ -188,6 +188,7 @@ contains
 !> -  This code is specifically for NRL parameterization and
 !!     climatological T and O3 are in location 5 and 6 of prdout array
 !!\author June 2015 - Shrinivas Moorthi
+!!\author May 2023  - Dustin Swales
 ! ###########################################################################################
   subroutine ozphys_2015_run ( im, levs, ko3, dt, oz, tin, po3, prsl, prdout, pl_coeff,     &
        delp, ldiag3d, dtend, dtidx, ntoz, index_of_process_prod_loss,                       &
@@ -196,43 +197,43 @@ contains
 
     ! Inputs
     logical, intent(in) :: &
-         ldiag3d
+         ldiag3d                         ! Flag to output GFS diagnostic tendencies
     real(kind_phys),intent(in) :: &
-         con_g
+         con_g                           ! Physical constant: Gravitational acceleration (ms-2)
     integer, intent(in) :: &
-         im,       & !
-         levs,     & !
-         ko3,      & !
-         pl_coeff, & !
-         ntoz,     & !
-         index_of_process_prod_loss, & !
-         index_of_process_ozmix,     & !
-         index_of_process_temp,      &
-         index_of_process_overhead_ozone
+         im,                           & ! Horizontal dimension
+         levs,                         & ! Number of vertical layers
+         ko3,                          & ! Number of vertical layers in ozone forcing data
+         pl_coeff,                     & ! Number of coefficients in ozone forcing data
+         ntoz,                         & ! Index for ozone mixing ratio
+         index_of_process_prod_loss,   & ! Index for process in diagnostic tendency output
+         index_of_process_ozmix,       & ! Index for process in diagnostic tendency output
+         index_of_process_temp,        & ! Index for process in diagnostic tendency output
+         index_of_process_overhead_ozone ! Index for process in diagnostic tendency output
     integer, intent(in), dimension(:,:) :: &
-         dtidx       !
+         dtidx                           ! Bookkeeping indices for GFS diagnostic tendencies
     real(kind_phys), intent(in) :: &
-         dt          !
+         dt                              ! Physics timestep (seconds)
     real(kind_phys), intent(in), dimension(:) :: &
-         po3         !
+         po3                             ! Natural log of ozone forcing data pressure levels
     real(kind_phys), intent(in), dimension(:,:) :: &
-         prsl,     & !
-         tin,      & !
-         delp        !
+         prsl,                         & ! Air-pressure (Pa)
+         tin,                          & ! Temperature of new-state (K)
+         delp                            ! Difference between mid-layer pressures (Pa)
     real(kind_phys), intent(in), dimension(:,:,:) :: &
-         prdout      !
+         prdout                          ! Ozone forcing data
 
     ! In/Outs
     real(kind=kind_phys), intent(inout), dimension(:,:,:) :: &
-         dtend       !
+         dtend                           ! Diagnostic tendencies for state variables
 
     ! Outputs
     real(kind=kind_phys), intent(inout), dimension(:,:) :: &
-         oz          !
+         oz                              ! Ozone concentration updated by physics
     character(len=*), intent(out) :: &
-         errmsg      ! CCPP error message
+         errmsg                          ! CCPP error message
     integer, intent(out) :: &
-         errflg      ! CCPP error flag
+         errflg                          ! CCPP error flag
 
     ! Locals
     integer :: k, kmax, kmin, l, i, j

@@ -37,9 +37,10 @@ contains
   subroutine GFS_rrtmgp_setup_init(do_RRTMGP, imp_physics, imp_physics_fer_hires,        &
        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,  &
        imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer,     &
-       ntcw, ntoz, iovr, isubc_sw, isubc_lw, lalw1bd, idate, me, aeros_file,             &
-       iaermdl, iaerflg, con_pi, con_t0c, con_c, con_boltz, con_plnk, solar_file,        &
-       con_solr_2008, con_solr_2002, co2usr_file, co2cyc_file, ipsd0, errmsg, errflg)
+       ntcw, ntoz, iovr, latsozp, levozp, timeozp, isubc_sw, isubc_lw, lalw1bd, idate,   &
+       me, aeros_file, iaermdl, iaerflg, con_pi, con_t0c, con_c, con_boltz, con_plnk,    &
+       solar_file, con_solr_2008, con_solr_2002, co2usr_file, co2cyc_file, ipsd0,        &
+       errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: do_RRTMGP
@@ -57,8 +58,7 @@ contains
     real(kind_phys), dimension(:), intent(in) :: &
          si
     integer, intent(in) :: levr, ictm, isol, ico2, iaer, & 
-         ntcw, ntoz, iovr, isubc_sw, isubc_lw,  &
-         me
+         ntcw, ntoz, iovr, isubc_sw, isubc_lw, latsozp, levozp, timeozp, me
     logical, intent(in) :: &
          lalw1bd
     integer, intent(in), dimension(:) :: &
@@ -129,7 +129,8 @@ contains
     call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002, con_pi )
     call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, con_t0c,    &
          con_c, con_boltz, con_plnk, errflg, errmsg)
-    call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz, con_pi, errflg, errmsg )
+    call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz, con_pi, latsozp,     &
+         levozp, timeozp, errflg, errmsg )
 
     if ( me == 0 ) then
        print *,' return from rad_initialize (GFS_rrtmgp_setup_init) - after calling radinit'
