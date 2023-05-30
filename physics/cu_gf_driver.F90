@@ -1003,10 +1003,9 @@ contains
             gdc(i,15,10)=qfx(i)
             gdc(i,16,10)=pret(i)*3600.
 
+            maxupmf(i)=0.
             if(forcing(i,6).gt.0.)then
               maxupmf(i)=maxval(xmb(i)*zu(i,kts:ktf)/forcing(i,6))
-            else
-              maxupmf(i)=0.
             endif
 
             if(ktop(i).gt.2 .and.pret(i).gt.0.)dt_mf(i,ktop(i)-1)=ud_mf(i,ktop(i))

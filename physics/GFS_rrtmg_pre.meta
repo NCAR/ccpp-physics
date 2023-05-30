@@ -1466,6 +1466,13 @@
   dimensions = ()
   type = integer
   intent = in
+[rrfs_sd]
+  standard_name = do_smoke_coupling
+  long_name = flag controlling rrfs_sd collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [aero_dir_fdb]
   standard_name = do_smoke_aerosol_direct_feedback
   long_name = flag for smoke and dust radiation feedback

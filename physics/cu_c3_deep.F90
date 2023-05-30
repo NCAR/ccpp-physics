@@ -24,7 +24,7 @@ module cu_c3_deep
      integer, parameter:: use_excess=0
      real(kind=kind_phys), parameter :: fluxtune=1.5
 !> flag to turn off or modify mom transport by downdrafts
-     real(kind=kind_phys), parameter :: pgcd = 1.
+     real(kind=kind_phys), parameter :: pgcd = 0.1
 !
 !> aerosol awareness, do not use yet!
      integer, parameter :: autoconv=1 !2
@@ -51,11 +51,11 @@ contains
 !>\ingroup cu_c3_group
 !! This is C3 deep convection scheme module
 !> @{
-   integer function my_maxloc1d(A,N,dir)
+   integer function my_maxloc1d(A,N)
 !$acc routine vector
       implicit none
       real(kind_phys), intent(in) :: A(:)
-      integer, intent(in) :: N,dir
+      integer, intent(in) :: N
 
       real(kind_phys) :: imaxval
       integer :: i
@@ -589,8 +589,9 @@ contains
             entr_rate(i)=.2/radius
          endif
          sig(i)=(1.-frh)**2
-         frh_out(i) = frh
-         if((dx(i)<dx_thresh).and.(forcing(i,7).eq.0.))sig(i)=1.
+         !frh_out(i) = frh
+         if(forcing(i,7).eq.0.)sig(i)=1.
+         frh_out(i) = frh*sig(i)
       enddo
 !$acc end kernels
       sig_thresh = (1.-frh_thresh)**2
@@ -2016,9 +2017,6 @@ contains
            imid,ipr,itf,ktf,                                                &
            its,ite, kts,kte,                                                &
            dicycle,tau_ecmwf,aa1_bl,xf_dicycle,xf_progsigma)
-      do i=its,itf
-       if((dx(i)<dx_thresh).and.(forcing(i,3).le.0.))sig(i)=1.
-      enddo
 !
 
 !$acc kernels
@@ -4106,11 +4104,7 @@ endif
 ! --- now use proper count of how many closures were actually
 !       used in cup_forcing_ens (including screening of some
 !       closures over water) to properly normalize xmb
-         if (dx(i).ge.dx_thresh)then
-           clos_wei=16./max(1.,closure_n(i))
-         else
-           clos_wei=1.
-         endif
+         clos_wei=16./max(1.,closure_n(i))
          xmb_ave(i)=min(xmb_ave(i),100.)
          xmb(i)=clos_wei*sig(i)*xmb_ave(i)
 
@@ -4870,7 +4864,7 @@ endif
 
    if(zu(kpbli).gt.0.)  &
       zu(kts:min(ktf,kt-1))= zu(kts:min(ktf,kt-1))/zu(kpbli)
-     do k=my_maxloc1d(zu(:),kte,1),1,-1
+     do k=my_maxloc1d(zu(:),kte),1,-1
        if(zu(k).lt.1.e-6)then
          kb_adj=k+1
          exit
@@ -4929,7 +4923,7 @@ endif
 !      zu(kts:min(ktf,kt+1))= zu(kts:min(ktf,kt+1))/maxval(zu(kts:min(ktf,kt+1)))
    if(zu(kpbli).gt.0.)  &
       zu(kts:min(ktf,kt-1))= zu(kts:min(ktf,kt-1))/zu(kpbli)
-     do k=my_maxloc1d(zu(:),kte,1),1,-1
+     do k=my_maxloc1d(zu(:),kte),1,-1
        if(zu(k).lt.1.e-6)then
          kb_adj=k+1
          exit
@@ -4978,7 +4972,7 @@ endif
 
    if(zu(kpbli).gt.0.)  &
       zu(kts:min(ktf,kt-1))= zu(kts:min(ktf,kt-1))/zu(kpbli)
-     do k=my_maxloc1d(zu(:),kte,1),1,-1
+     do k=my_maxloc1d(zu(:),kte),1,-1
        if(zu(k).lt.1.e-6)then
          kb_adj=k+1
          exit
