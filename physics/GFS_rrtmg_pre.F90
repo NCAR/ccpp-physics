@@ -18,9 +18,10 @@
 !!    
 !>\section rrtmg_pre_gen General Algorithm
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp, lextop,&
-        ltp, imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d,      &
+        ltp, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_unified, me, ncnd, ntrac,   &
+        num_p3d, npdf3d,                                                       &
         ncnvcld3d,ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, top_at_1,&
-        ntrw, ntsw, ntgl, nthl, ntwa, ntoz,                                    &
+        ntrw, ntsw, ntgl, nthl, ntwa, ntoz, ntsmoke, ntdust, ntcoarsepm,       &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt,                       &
         ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2,                       &
         ntss3, ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl, ntchm,          &
@@ -41,11 +42,10 @@
         kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
         plvl, plyr, tlvl, tlyr, qlyr, olyr, gasvmr_co2, gasvmr_n2o, gasvmr_ch4,&
         gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
-        gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
+        gasvmr_ccl4,  gasvmr_cfc113, aerodp,ext550, clouds6, clouds7, clouds8, &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
-        aero_dir_fdb, smoke_ext, dust_ext,                                     &
-        spp_wts_rad, spp_rad, rrfs_smoke_band, ico2, errmsg, errflg)
+        aero_dir_fdb, fdb_coef, spp_wts_rad, spp_rad, ico2, errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -84,11 +84,13 @@
 
       integer,              intent(in)  :: im, levs, lm, lmk, lmp, ltp,        &
                                            n_var_lndp, imfdeepcnv,             &
-                                           imfdeepcnv_gf, me, ncnd, ntrac,     &
+                                           imfdeepcnv_gf, imfdeepcnv_unified,  & 
+                                           me, ncnd, ntrac,                    &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
                                            ntcw, ntiw, ntlnc, ntinc,           &
                                            ntrnc, ntsnc,ntccn,                 &
                                            ntrw, ntsw, ntgl, nthl, ntwa, ntoz, &
+                                           ntsmoke, ntdust, ntcoarsepm,        &
                                            ntclamt, nleffr, nieffr, nseffr,    &
                                            lndp_type,                          &
                                            kdt, imp_physics,                   &
@@ -113,7 +115,6 @@
          idcor,                            &
          idcor_hogan,                      &
          idcor_oreopoulos,                 &
-         rrfs_smoke_band,                  & ! Band number for rrfs-smoke dust and smoke
          ico2                                ! Flag for co2 source used in radiation
 
       integer, intent(in) :: ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2, ntss3,  &
@@ -126,7 +127,6 @@
                                           lmfshal, lmfdeep2, pert_clds, lcrick,&
                                           lcnorm, top_at_1, lextop, mraerosol
       logical,              intent(in) :: aero_dir_fdb
-      real(kind=kind_phys), dimension(:,:), intent(in) :: smoke_ext, dust_ext
 
       logical,              intent(in) :: nssl_ccn_on, nssl_invertccn
       integer,              intent(in) :: spp_rad
@@ -157,6 +157,7 @@
                                                              clouds2, clouds3, &
                                                              clouds4, clouds5
       real(kind=kind_phys), dimension(:,:), intent(in)  :: qci_conv
+      real(kind=kind_phys), dimension(:),   intent(in)  :: fdb_coef
       real(kind=kind_phys), dimension(:),   intent(out) :: lwp_ex,iwp_ex, &
                                                            lwp_fc,iwp_fc
 
@@ -187,6 +188,7 @@
                                                            gasvmr_ccl4,&
                                                            gasvmr_cfc113
       real(kind=kind_phys), dimension(:,:), intent(out) :: aerodp
+      real(kind=kind_phys), dimension(:,:), intent(out) :: ext550
       real(kind=kind_phys), dimension(:,:), intent(out) :: clouds6,   &
                                                            clouds7,   &
                                                            clouds8,   &
@@ -637,13 +639,28 @@
           enddo
         endif
 
+!>---   add smoke and dust ---
+       if (aero_dir_fdb) then
+         do k=1,lmk
+           do i=1,im
+             aer_nm(i,k,1 )=aer_nm(i,k,1 )+ qgrs(i,k,ntdust)*fdb_coef(1)*1.e-9    ! dust bin1
+             aer_nm(i,k,2 )=aer_nm(i,k,2 )+(qgrs(i,k,ntdust)*fdb_coef(2)          &
+                           +qgrs(i,k,ntcoarsepm)*fdb_coef(3))*1.e-9               ! dust bin2
+             aer_nm(i,k,3 )=aer_nm(i,k,3 )+qgrs(i,k,ntcoarsepm)*fdb_coef(4)*1.e-9 ! dust bin3
+             aer_nm(i,k,4 )=aer_nm(i,k,4 )+qgrs(i,k,ntcoarsepm)*fdb_coef(5)*1.e-9 ! dust bin4
+             aer_nm(i,k,12)=aer_nm(i,k,12)+qgrs(i,k,ntsmoke)*fdb_coef(6)*1.e-9    ! Smoke BC
+             aer_nm(i,k,14)=aer_nm(i,k,14)+qgrs(i,k,ntsmoke)*fdb_coef(7)*1.e-9    ! Smoke OA
+            enddo
+          enddo
+       endif
+
 
 !> - Call module_radiation_aerosols::setaer() to setup aerosols
 !! property profile for radiation.
       call setaer (plvl, plyr, prslk1, tvly, rhly, slmsk,    & !  ---  inputs
                    tracer1, aer_nm, xlon, xlat, IM, LMK, LMP,&
                    lsswr, lslwr, iaermdl, iaerflg, top_at_1, con_pi,  &
-                   con_rd, con_g, faersw, faerlw, aerodp, errflg, errmsg)         !  ---  outputs
+                   con_rd, con_g, faersw, faerlw, aerodp, ext550, errflg, errmsg)         !  ---  outputs
 
 ! CCPP
       do j = 1,NBDSW
@@ -656,16 +673,6 @@
           enddo
         enddo
        enddo
-
-      !> - Add aerosol direct feedback effect by smoke and dust
-      if(aero_dir_fdb) then ! add smoke/dust extinctions
-        do k = 1, LMK
-          do i = 1, IM
-            ! 550nm (~18000/cm)
-            faersw1(i,k,rrfs_smoke_band) = faersw1(i,k,rrfs_smoke_band) + MIN(4.,smoke_ext(i,k) + dust_ext(i,k))
-          enddo
-        enddo
-      endif
 
       do j = 1,NBDLW
         do k = 1, LMK
@@ -812,7 +819,7 @@
             enddo
           endif
         elseif (imp_physics == imp_physics_gfdl) then            ! GFDL MP
-          if ((imfdeepcnv==imfdeepcnv_gf) .and. kdt>1) then
+          if ((imfdeepcnv==imfdeepcnv_gf .or. imfdeepcnv==imfdeepcnv_unified) .and. kdt>1) then
               do k=1,lm
                 k1 = k + kd
                 do i=1,im
@@ -969,7 +976,8 @@
      &       imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,   &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
      &       idcor_hogan, idcor_oreopoulos, lcrick, lcnorm,             &
-     &       imfdeepcnv, imfdeepcnv_gf, do_mynnedmf, lgfdlmprad,        &
+     &       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_gf, do_mynnedmf,     &
+     &       lgfdlmprad,                                                &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &
      &       effrl_inout, effri_inout, effrs_inout,                     &

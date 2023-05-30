@@ -87,15 +87,14 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &  FLHC, FLQC,                        &
      &  U10, V10, TH2, T2, Q2,             &
      &  wstar, CHS2, CQS2,                 &
-     &  spp_wts_sfc, spp_sfc,               &
-!     &  CP, G, ROVCP, R, XLV,           &
-!     &  SVP1, SVP2, SVP3, SVPT0,        &
-!     &  EP1,EP2,KARMAN,                 &
-     &  lprnt, errmsg, errflg           )
+     &  spp_wts_sfc, spp_sfc,              &
+     &  lprnt, errmsg, errflg              )
 
 
 ! should be moved to inside the mynn:
       use machine , only : kind_phys
+      use physcons, only : cp     => con_cp,              &
+     &                     grav   => con_g
 
 !      USE module_sf_mynn, only : SFCLAY_mynn
 !tgs - info on iterations:
@@ -111,22 +110,11 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !-------------------------------------------------------------------
       implicit none
 !-------------------------------------------------------------------
-!  ---  constant parameters:
-!      real(kind=kind_phys), parameter :: rvovrd  = r_v/r_d
-      real(kind=kind_phys), parameter :: karman  = 0.4
-!      real(kind=kind_phys), parameter :: XLS     = 2.85E6
-!      real(kind=kind_phys), parameter :: p1000mb = 100000.
-      real(kind=kind_phys), parameter :: SVP1    = 0.6112
-      real(kind=kind_phys), parameter :: SVP2    = 17.67
-      real(kind=kind_phys), parameter :: SVP3    = 29.65
-      real(kind=kind_phys), parameter :: SVPT0   = 273.15
+!  ---  derive more constant parameters:
+      real(kind_phys), parameter :: g_inv=1./grav
 
-  REAL(kind=kind_phys), PARAMETER :: xlvcp=xlv/cp, xlscp=(xlv+xlf)/cp, ev=xlv,&
-       &rd=r_d, rk=cp/rd, svp11=svp1*1.e3, p608=ep_1, ep_3=1.-ep_2, g_inv=1./g
-
-
-  character(len=*), intent(out) :: errmsg
-  integer, intent(out) :: errflg
+      character(len=*), intent(out) :: errmsg
+      integer, intent(out) :: errflg
 
 !MISC CONFIGURATION OPTIONS
       INTEGER, PARAMETER  :: isfflx   = 1
@@ -141,29 +129,29 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
       integer, intent(in) :: spp_sfc ! flag for using SPP perturbations
 
-      real(kind=kind_phys), intent(in) :: delt
+      real(kind_phys), intent(in) :: delt
 
 !Input data
       integer, dimension(:), intent(in) :: vegtype
-      real(kind=kind_phys), dimension(:), intent(in) ::     &
+      real(kind_phys), dimension(:), intent(in) ::          &
      &                    sigmaf,shdmax,z0pert,ztpert
-      real(kind=kind_phys), dimension(:,:), intent(in) ::   &
+      real(kind_phys), dimension(:,:), intent(in) ::        &
      &                    spp_wts_sfc
 
-      real(kind=kind_phys), dimension(:,:),                 &
+      real(kind_phys), dimension(:,:),                      &
      &      intent(in)  ::                  phii
-      real(kind=kind_phys), dimension(:,:),                 &
+      real(kind_phys), dimension(:,:),                      &
      &      intent(in)  ::         exner, PRSL,             &
      &                     u, v, t3d, qvsh, qc
 
       logical, dimension(:), intent(in) :: wet, dry, icy
 
-      real(kind=kind_phys), dimension(:), intent(in)    ::  &
+      real(kind_phys), dimension(:), intent(in)    ::       &
      &                    tskin_wat, tskin_lnd, tskin_ice,  &
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,  &
      &                               snowh_lnd, snowh_ice
 
-      real(kind=kind_phys), dimension(:), intent(inout) ::  &
+      real(kind_phys), dimension(:), intent(inout) ::       &
      &                      znt_wat,   znt_lnd,   znt_ice,  &
      &                      ust_wat,   ust_lnd,   ust_ice,  &
      &                       cm_wat,    cm_lnd,    cm_ice,  &
@@ -179,22 +167,22 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &                     qsfc_wat,  qsfc_lnd,  qsfc_ice
 
 !MYNN-2D
-      real(kind=kind_phys), dimension(:), intent(in)    ::  &
+      real(kind_phys), dimension(:), intent(in)    ::       &
      &        dx, pblh, slmsk, ps,                          &
      &        qsfc_lnd_ruc, qsfc_ice_ruc
 
-      real(kind=kind_phys), dimension(:), intent(inout) ::  &
+      real(kind_phys), dimension(:), intent(inout) ::       &
      &        ustm, hflx, qflx, wspd, qsfc,                 &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
      &        CHS2, CQS2, rmol, zol, mol, ch,               &
      &        lh, wstar
      !LOCAL
-      real(kind=kind_phys), dimension(im) ::                &
+      real(kind_phys), dimension(im) ::                     &
      &        hfx, znt, psim, psih,                         &
      &        chs, ck, cd, mavail, xland, GZ1OZ0,           &
      &        cpm, qgh, qfx, snowh_wat
 
-     real(kind=kind_phys), dimension(im,levs) ::            &
+     real(kind_phys), dimension(im,levs) ::                 &
     &        dz, th, qv
 
 !MYNN-1D
@@ -291,9 +279,6 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              u3d=u,v3d=v,t3d=t3d,qv3d=qv,p3d=prsl,dz8w=dz,                    &
              th3d=th,pi3d=exner,qc3d=qc,                                      &
              PSFCPA=ps,PBLH=pblh,MAVAIL=mavail,XLAND=xland,DX=dx,             &
-             CP=cp,G=g,ROVCP=rcp,R=r_d,XLV=xlv,                               &
-             SVP1=svp1,SVP2=svp2,SVP3=svp3,SVPT0=svpt0,                       &
-             EP1=ep_1,EP2=ep_2,KARMAN=karman,                                 &
              ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,LSM_RUC=lsm_ruc,         &
              iz0tlnd=iz0tlnd,psi_opt=psi_opt,                                 &
              compute_flux=sfclay_compute_flux,compute_diag=sfclay_compute_diag,&
@@ -301,6 +286,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              z0pert=z0pert,ztpert=ztpert,                                     & !intent(in)
              redrag=redrag,sfc_z0_type=sfc_z0_type,                           & !intent(in)
              itimestep=itimestep,iter=iter,flag_iter=flag_iter,               &
+             flag_restart=flag_restart,                                       & 
                          wet=wet,              dry=dry,              icy=icy, &  !intent(in)
              tskin_wat=tskin_wat,  tskin_lnd=tskin_lnd,  tskin_ice=tskin_ice, &  !intent(in)
              tsurf_wat=tsurf_wat,  tsurf_lnd=tsurf_lnd,  tsurf_ice=tsurf_ice, &  !intent(in)
@@ -322,7 +308,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              ZNT=znt,USTM=ustm,ZOL=zol,MOL=mol,RMOL=rmol,                     &
              psim=psim,psih=psih,                                             &
              HFLX=hflx,HFX=hfx,QFLX=qflx,QFX=qfx,LH=lh,FLHC=flhc,FLQC=flqc,   &
-             QGH=qgh,QSFC=qsfc,   &
+             QGH=qgh,QSFC=qsfc,                                               &
              U10=u10,V10=v10,TH2=th2,T2=t2,Q2=q2,                             &
              GZ1OZ0=GZ1OZ0,WSPD=wspd,wstar=wstar,                             &
              spp_sfc=spp_sfc,pattern_spp_sfc=spp_wts_sfc,                     &
