@@ -29,6 +29,34 @@
   dimensions = ()
   type = integer
   intent = in
+[lkm]
+  standard_name = control_for_lake_model_execution_method
+  long_name = control for lake model execution: 0=no lake, 1=lake, 2=lake+nsst
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iopt_lake]
+  standard_name = control_for_lake_model_selection
+  long_name = control for lake model selection
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[iopt_lake_clm]
+  standard_name = clm_lake_model_control_selection_value
+  long_name = value that indicates clm lake model in the control for lake model selection
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[use_lake_model]
+  standard_name = flag_for_using_lake_model
+  long_name = flag indicating lake points using a lake model
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
 [rd]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
@@ -62,6 +90,13 @@
 [frac_grid]
   standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[frac_ice]
+  standard_name = flag_for_fractional_ice_when_fractional_landmask_is_disabled
+  long_name = flag for fractional ice when fractional landmask is disabled
   units = flag
   dimensions = ()
   type = logical

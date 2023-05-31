@@ -7,7 +7,8 @@
       module samfdeepcnv
 
       use samfcnv_aerosols, only : samfdeepcnv_aerosols
-
+      use progsigma, only : progsigma_calc
+ 
       contains
 
       subroutine samfdeepcnv_init(imfdeepcnv,imfdeepcnv_samf,            &
@@ -102,7 +103,7 @@
       real(kind=kind_phys), intent(in) :: nthresh
       real(kind=kind_phys), intent(in) :: ca_deep(:)
       real(kind=kind_phys), intent(in) :: sigmain(:,:),qmicro(:,:),     &
-     &     tmf(:,:),q(:,:), prevsq(:,:)
+     &     tmf(:,:,:),q(:,:), prevsq(:,:)
       real(kind=kind_phys), intent(out) :: rainevap(:)
       real(kind=kind_phys), intent(out) :: sigmaout(:,:)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
@@ -190,7 +191,9 @@
      &                     pwavo(im),   pwevo(im),  mbdt(im),
      &                     qcdo(im,km), qcond(im),  qevap(im),
      &                     rntot(im),   vshear(im), xaa0(im),
-     &                     xlamd(im),   xk(im),     cina(im),
+     &                     xlamd(im),   xlamdet(im),xlamddt(im),
+     &                     cxlamet(im), cxlamdt(im),
+     &                     xk(im),      cina(im),
      &                     xmb(im),     xmbmax(im), xpwav(im),
      &                     xpwev(im),   xlamx(im),  delebar(im,ntr),
 !     &                     xpwev(im),   delebar(im,ntr),
@@ -200,18 +203,17 @@
 cj
       real(kind=kind_phys) cinpcr,  cinpcrmx,  cinpcrmn,
      &                     cinacr,  cinacrmx,  cinacrmn,
-     &                     sfclfac, rhcrt
+     &                     sfclfac, rhcrt,
+     &                     tkcrt,   cmxfac
 cj
 !
 !  parameters for updraft velocity calculation
-      real(kind=kind_phys) bet1,    cd1,     f1,      gam1,
-!     &                     bb1,     bb2
-     &                     bb1,     bb2,     wucb
+      real(kind=kind_phys) bb1, bb2, csmf, wucb
 !
 !  parameters for prognostic sigma closure                                                                                                                                                      
-      real(kind=kind_phys) omega_u(im,km),zdqca(im,km),qlks(im,km),
-     &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im)
-      real(kind=kind_phys) gravinv
+      real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
+     &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im),qadv(im,km)
+      real(kind=kind_phys) gravinv,invdelt
       logical flag_shallow
 c  physical parameters
 !     parameter(grav=grav,asolfac=0.958)
@@ -228,7 +230,7 @@ c  physical parameters
 !      Until a realistic Nccn is provided, Nccns are assumed
 !      as Nccn=100 for sea and Nccn=1000 for land
 !
-      parameter(cm=1.0,cq=1.3)
+      parameter(cm=1.0,cq=1.0)
 !     parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
       parameter(clamd=0.03,tkemx=0.65,tkemn=0.05)
       parameter(clamca=0.03)
@@ -237,7 +239,8 @@ c  physical parameters
       parameter(cinpcrmx=180.,cinpcrmn=120.)
 !     parameter(cinacrmx=-120.,cinacrmn=-120.)
       parameter(cinacrmx=-120.,cinacrmn=-80.)
-      parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
+      parameter(bb1=4.0,bb2=0.8,csmf=0.2)
+      parameter(tkcrt=2.,cmxfac=15.)
       parameter(betaw=.03)
 
 !
@@ -253,7 +256,7 @@ c  variables for tracer wet deposition,
 !
 !  for updraft velocity calculation
       real(kind=kind_phys) wu2(im,km),     buo(im,km),    drag(im,km),
-     &                     wc(im)
+     &                     wush(im,km),    wc(im)
 !
 !  for updraft fraction & scale-aware function
       real(kind=kind_phys) scaldfunc(im), sigmagfm(im)
@@ -306,6 +309,7 @@ c    &            .743,.813,.886,.947,1.138,1.377,1.896/
       errflg = 0
 
       gravinv = 1./grav
+      invdelt = 1./delt
 
       elocp = hvap/cp
       el2orc = hvap*hvap/(rv*cp)
@@ -575,6 +579,7 @@ c
 !           vo(i,k)   = v1(i,k) * rcs(i)
             wu2(i,k)  = 0.
             buo(i,k)  = 0.
+            wush(i,k) = 0.
             drag(i,k) = 0.
             cnvwt(i,k)= 0.
           endif
@@ -585,7 +590,6 @@ c
          do i = 1, im
             dbyo1(i,k)=0.
             zdqca(i,k)=0.
-            qlks(i,k)=0.
             omega_u(i,k)=0.
             zeta(i,k)=1.0
          enddo
@@ -804,7 +808,8 @@ c
           ptem1= .5*(cinpcrmx-cinpcrmn)
           cinpcr = cinpcrmx - ptem * ptem1
           tem1 = pfld(i,kb(i)) - pfld(i,kbcon(i))
-          if(tem1 > cinpcr) then
+          if(tem1 > cinpcr .and.
+     &       zi(i,kbcon(i)) > hpbl(i)) then
              cnvflg(i) = .false.
           endif
         endif
@@ -974,7 +979,25 @@ c
                endif
             enddo
         endif
-
+!
+        do i=1,im
+          if(cnvflg(i)) then
+            xlamdet(i) = xlamde
+            xlamddt(i) = xlamdd
+            cxlamet(i) = cxlame
+            cxlamdt(i) = cxlamd
+            if(tkemean(i) > tkcrt) then
+              tem = 1. + tkemean(i)/tkcrt
+              tem1 = min(tem, cmxfac)
+              clamt(i) = tem1 * clam
+              xlamdet(i) = tem1 * xlamdet(i)
+              xlamddt(i) = tem1 * xlamddt(i)
+              cxlamet(i) = tem1 * cxlamet(i)
+              cxlamdt(i) = tem1 * cxlamdt(i)
+            endif
+          endif
+        enddo
+!
       else
 !
          if(do_ca .and. ca_entr)then
@@ -994,6 +1017,15 @@ c
                endif
             enddo
          endif
+!
+        do i=1,im
+          if(cnvflg(i)) then
+            xlamdet(i) = xlamde
+            xlamddt(i) = xlamdd
+            cxlamet(i) = cxlame
+            cxlamdt(i) = cxlamd
+          endif
+        enddo
 !
       endif !(.not. hwrf_samfdeep .and. ntk > 0)
 !
@@ -1082,7 +1114,7 @@ c
         do i=1,im
           if(cnvflg(i) .and.
      &      (k > kbcon(i) .and. k < kmax(i))) then
-              tem = cxlame * frh(i,k) * fent2(i,k)
+              tem = cxlamet(i) * frh(i,k) * fent2(i,k)
               xlamue(i,k) = xlamue(i,k)*fent1(i,k) + tem
           endif
         enddo
@@ -1092,9 +1124,9 @@ c
         do i=1,im
           if(cnvflg(i) .and.
      &      (k > kbcon(i) .and. k < kmax(i))) then
-              tem = cxlame * frh(i,k) * fent2(i,k)
+              tem = cxlamet(i) * frh(i,k) * fent2(i,k)
               xlamue(i,k) = xlamue(i,k)*fent1(i,k) + tem
-              tem1 = cxlamd * frh(i,k)
+              tem1 = cxlamdt(i) * frh(i,k)
               xlamud(i,k) = xlamud(i,k) + tem1
           endif
         enddo
@@ -1515,7 +1547,7 @@ c
                 pwavo(i) = pwavo(i) + pwo(i,k)
 !               cnvwt(i,k) = (etah*qlk + pwo(i,k)) * grav / dp
                 cnvwt(i,k) = etah * qlk * grav / dp
-                qlks(i,k)=qlk
+                zdqca(i,k)=dq/eta(i,k)
               endif
 !
 !  compute buoyancy and drag for updraft velocity
@@ -1530,6 +1562,11 @@ c
                 buo(i,k) = buo(i,k) + grav * fv *
      &                     max(val,(qeso(i,k) - qo(i,k)))
                 drag(i,k) = max(xlamue(i,k),xlamud(i,k))
+!
+                tem = ((uo(i,k)-uo(i,k-1))/dz)**2
+                tem = tem+((vo(i,k)-vo(i,k-1))/dz)**2
+                wush(i,k) = csmf * sqrt(tem)
+!
               endif
 !
             endif
@@ -1690,7 +1727,7 @@ c
                 pwavo(i) = pwavo(i) + pwo(i,k)
 !               cnvwt(i,k) = (etah*qlk + pwo(i,k)) * grav / dp
                 cnvwt(i,k) = etah * qlk * grav / dp
-                qlks(i,k)=qlk
+                zdqca(i,k)=dq/eta(i,k)
               endif
             endif
           endif
@@ -1700,8 +1737,6 @@ c
 !  compute updraft velocity square(wu2)
 !> - Calculate updraft velocity square(wu2) according to Han et al.'s (2017) \cite han_et_al_2017 equation 7.
 !
-      bb1 = 4.0
-      bb2 = 0.8
       if (hwrf_samfdeep) then
       do i = 1, im
         if (cnvflg(i)) then
@@ -1722,11 +1757,13 @@ c
           if (cnvflg(i)) then
             if(k > kbcon1(i) .and. k < ktcon(i)) then
               dz    = zi(i,k) - zi(i,k-1)
-              tem  = 0.25 * bb1 * (drag(i,k)+drag(i,k-1)) * dz
-              tem1 = 0.5 * bb2 * (buo(i,k)+buo(i,k-1)) * dz
+              tem  = 0.25 * bb1 * (drag(i,k-1)+drag(i,k)) * dz
+              tem1 = 0.5 * bb2 * (buo(i,k-1)+buo(i,k))
+              tem2 = wush(i,k) * sqrt(wu2(i,k-1))
+              tem2 = (tem1 - tem2) * dz
               ptem = (1. - tem) * wu2(i,k-1)
               ptem1 = 1. + tem
-              wu2(i,k) = (ptem + tem1) / ptem1
+              wu2(i,k) = (ptem + tem2) / ptem1
               wu2(i,k) = max(wu2(i,k), 0.)
             endif
           endif
@@ -1860,27 +1897,12 @@ c
           if(dq > 0.) then
             qlko_ktcon(i) = dq
             qcko(i,k) = qrch
-            qlks(i,k) = qlko_ktcon(i)
+            zdqca(i,k) = dq
           endif
         endif
       enddo
       endif
 c
-
-c store term needed for "termC" in prognostic area fraction closure
-      if(progsigma)then
-         do k = 2, km1
-            do i = 1, im
-               dp = 1000. * del(i,k)
-               if (cnvflg(i)) then
-                  if(k > kbcon(i) .and. k < ktcon(i)) then
-                     zdqca(i,k)=((qlks(i,k)-qlks(i,k-1)) +
-     &                    pwo(i,k)+dellal(i,k))
-                  endif
-               endif
-            enddo
-         enddo
-      endif
 
 ccccc if(lat.==.latd.and.lon.==.lond.and.cnvflg(i)) then
 ccccc   print *, ' aa1(i) before dwndrft =', aa1(i)
@@ -1967,11 +1989,11 @@ c
           if (cnvflg(i) .and. k <= kmax(i)-1) then
            if(k < jmin(i) .and. k >= kd94(i)) then
               dz        = zi(i,k+1) - zi(i,k)
-              ptem      = xlamdd - xlamde
+              ptem      = xlamddt(i) - xlamdet(i)
               etad(i,k) = etad(i,k+1) * (1. - ptem * dz)
            else if(k < kd94(i)) then
               dz        = zi(i,k+1) - zi(i,k)
-              ptem      = xlamd(i) + xlamdd - xlamde
+              ptem      = xlamd(i) + xlamddt(i) - xlamdet(i)
               etad(i,k) = etad(i,k+1) * (1. - ptem * dz)
            endif
           endif
@@ -2010,11 +2032,11 @@ cj
           if (cnvflg(i) .and. k < jmin(i)) then
               dz = zi(i,k+1) - zi(i,k)
               if(k >= kd94(i)) then
-                 tem  = xlamde * dz
-                 tem1 = 0.5 * xlamdd * dz
+                 tem  = xlamdet(i) * dz
+                 tem1 = 0.5 * xlamddt(i) * dz
               else
-                 tem  = xlamde * dz
-                 tem1 = 0.5 * (xlamd(i)+xlamdd) * dz
+                 tem  = xlamdet(i) * dz
+                 tem1 = 0.5 * (xlamd(i)+xlamddt(i)) * dz
               endif
               factor = 1. + tem - tem1
               hcdo(i,k) = ((1.-tem1)*hcdo(i,k+1)+tem*0.5*
@@ -2038,7 +2060,7 @@ cj
         do i = 1, im
           if (cnvflg(i) .and. k < jmin(i)) then
               dz = zi(i,k+1) - zi(i,k)
-              tem  = 0.5 * xlamde * dz
+              tem  = 0.5 * xlamdet(i) * dz
               tem  = cq * tem
               factor = 1. + tem
               ecdo(i,k,n) = ((1.-tem)*ecdo(i,k+1,n)+tem*
@@ -2059,7 +2081,7 @@ c
 !             detad      = etad(i,k+1) - etad(i,k)
 cj
               dz = zi(i,k+1) - zi(i,k)
-              tem  = 0.5 * xlamde * dz
+              tem  = 0.5 * xlamdet(i) * dz
               tem  = cq * tem
               factor = 1. + tem
               qcdo(i,k) = ((1.-tem)*qrcdo(i,k+1)+tem*
@@ -2198,11 +2220,11 @@ c
               tem1 = 0.5 * (xlamud(i,k)+xlamud(i,k-1))
 c
               if(k <= kd94(i)) then
-                ptem  = xlamde
-                ptem1 = xlamd(i)+xlamdd
+                ptem  = xlamdet(i)
+                ptem1 = xlamd(i)+xlamddt(i)
               else
-                ptem  = xlamde
-                ptem1 = xlamdd
+                ptem  = xlamdet(i)
+                ptem1 = xlamddt(i)
               endif
 
               factor = grav / dp
@@ -2684,11 +2706,11 @@ cj
           if (asqecflg(i) .and. k < jmin(i)) then
               dz = zi(i,k+1) - zi(i,k)
               if(k >= kd94(i)) then
-                 tem  = xlamde * dz
-                 tem1 = 0.5 * xlamdd * dz
+                 tem  = xlamdet(i) * dz
+                 tem1 = 0.5 * xlamddt(i) * dz
               else
-                 tem  = xlamde * dz
-                 tem1 = 0.5 * (xlamd(i)+xlamdd) * dz
+                 tem  = xlamdet(i) * dz
+                 tem1 = 0.5 * (xlamd(i)+xlamddt(i)) * dz
               endif
               factor = 1. + tem - tem1
               hcdo(i,k) = ((1.-tem1)*hcdo(i,k+1)+tem*0.5*
@@ -2708,7 +2730,7 @@ cj
 !             detad    = etad(i,k+1) - etad(i,k)
 cj
               dz = zi(i,k+1) - zi(i,k)
-              tem  = 0.5 * xlamde * dz
+              tem  = 0.5 * xlamdet(i) * dz
               tem  = cq * tem
               factor = 1. + tem
               qcdo(i,k) = ((1.-tem)*qrcd(i,k+1)+tem*
@@ -2885,11 +2907,33 @@ c
 
 !> - From Bengtsson et al. (2022) \cite Bengtsson_2022 prognostic closure scheme, equation 8, call progsigma_calc() to compute updraft area fraction based on a moisture budget
       if(progsigma)then
+
+!Initial computations, dynamic q-tendency                                                                                                                                               
+         if(first_time_step .and. .not.restart)then
+            do k = 1,km
+               do i = 1,im
+                  qadv(i,k)=0.
+               enddo
+            enddo
+         else
+            do k = 1,km
+               do i = 1,im
+                  qadv(i,k)=(q(i,k) - prevsq(i,k))*invdelt
+               enddo
+            enddo
+         endif
+         
+         do k = 1,km
+            do i = 1,im
+               tmfq(i,k)=tmf(i,k,1)
+            enddo
+         enddo
+
          flag_shallow = .false.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
-     &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
-     &        prevsq,q,kbcon1,ktcon,cnvflg,
-     &        sigmain,sigmaout,sigmab,errmsg,errflg)
+     &        del,tmfq,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
+     &        qadv,kbcon1,ktcon,cnvflg,
+     &        sigmain,sigmaout,sigmab)
       endif
 
 !> - From Han et al.'s (2017) \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity for the grid sizes where the quasi-equilibrium assumption of Arakawa-Schubert is not valid any longer.

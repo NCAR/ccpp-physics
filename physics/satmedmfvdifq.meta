@@ -62,13 +62,6 @@
   dimensions = ()
   type = integer
   intent = in
-[progsigma]
-  standard_name = do_prognostic_updraft_area_fraction
-  long_name = flag for prognostic sigma in cumuls scheme
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [ntrac]
   standard_name = number_of_vertical_diffusion_tracers
   long_name = number of tracers to diffuse vertically
@@ -208,14 +201,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[tmf]
-  standard_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
-  long_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
-  units = kg kg-1 s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [u1]
   standard_name = x_wind
   long_name = x component of layer wind
@@ -284,6 +269,14 @@
   standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
   long_name = function of surface roughness length and green vegetation fraction
   units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sigmaf]
+  standard_name = bounded_vegetation_area_fraction
+  long_name = areal fractional cover of green vegetation bounded on the bottom
+  units = frac
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

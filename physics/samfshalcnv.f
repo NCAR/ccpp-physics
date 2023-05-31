@@ -4,6 +4,7 @@
       module samfshalcnv
 
       use samfcnv_aerosols, only : samfshalcnv_aerosols
+      use progsigma, only : progsigma_calc
 
       contains
 
@@ -70,7 +71,7 @@
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
      &   prslp(:,:), garea(:), hpbl(:), dot(:,:), phil(:,:),            &
-     &   qmicro(:,:),tmf(:,:),prevsq(:,:),q(:,:)
+     &   qmicro(:,:),tmf(:,:,:),prevsq(:,:),q(:,:)
 
       real(kind=kind_phys), intent(in) :: sigmain(:,:)
 !
@@ -109,7 +110,8 @@
      &                     cm,      cq,
      &                     es,      etah,    h1,      shevf,
 !    &                     evfact,  evfactl,
-     &                     fact1,   fact2,   factor,  dthk,
+     &                     fact1,   fact2,   factor,
+     &                     cthk,    cthkmn,  dthk,
      &                     gamma,   pprime,  betaw,   tauadv,
      &                     qlk,     qrch,    qs,
      &                     rfact,   shear,   tfac,
@@ -121,7 +123,7 @@
      &                     ptem,    ptem1
 !
       integer              kb(im), kb1(im), kbcon(im), kbcon1(im),
-     &                     ktcon(im), ktcon1(im), ktconn(im),
+     &                     ktcon(im), ktcon1(im), 
      &                     kbm(im), kmax(im)
 !
       real(kind=kind_phys) aa1(im),     cina(im),
@@ -146,20 +148,18 @@ c
 !
       real(kind=kind_phys) cinpcr,  cinpcrmx,  cinpcrmn,
      &                     cinacr,  cinacrmx,  cinacrmn,
-     &                     sfclfac, rhcrt
+     &                     sfclfac, rhcrt,
+     &                     tkcrt,   cmxfac
 !
 !  parameters for updraft velocity calculation
-      real(kind=kind_phys) bet1,    cd1,     f1,      gam1,
-!     &                     bb1,     bb2
-     &                     bb1,     bb2,     wucb
-
+      real(kind=kind_phys) bb1, bb2, csmf, wucb
 cc
 
 !  parameters for prognostic sigma closure
-      real(kind=kind_phys) omega_u(im,km),zdqca(im,km),qlks(im,km),
+      real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
-     &                     sigmab(im)
-      real(kind=kind_phys) gravinv,dxcrtas
+     &                     sigmab(im),qadv(im,km)
+      real(kind=kind_phys) gravinv,dxcrtas,invdelt
       logical flag_shallow
 c  physical parameters
 !     parameter(g=grav,asolfac=0.89)
@@ -178,16 +178,19 @@ c  physical parameters
 !      Until a realistic Nccn is provided, Nccns are assumed
 !      as Nccn=100 for sea and Nccn=1000 for land
 !
-      parameter(cm=1.0,cq=1.3)
+      parameter(cm=1.0,cq=1.0)
 !     parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
       parameter(clamd=0.1,tkemx=0.65,tkemn=0.05)
       parameter(dtke=tkemx-tkemn)
-      parameter(dthk=25.,sfclfac=0.2,rhcrt=0.75)
+      parameter(cthk=200.,cthkmn=0.,dthk=25.)
+      parameter(sfclfac=0.2,rhcrt=0.75)
       parameter(cinpcrmx=180.,cinpcrmn=120.)
 !  shevf is an enhancing evaporation factor for shallow convection
       parameter(cinacrmx=-120.,shevf=2.0)
       parameter(dtmax=10800.,dtmin=600.)
-      parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
+      parameter(bb1=4.0,bb2=0.8,csmf=0.2)
+      parameter(tkcrt=2.,cmxfac=15.)
+!      parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
       parameter(betaw=.03,dxcrtc0=9.e3)
       parameter(h1=0.33333333)
 !  progsigma
@@ -205,7 +208,7 @@ c  variables for tracer wet deposition,
 !
 !  for updraft velocity calculation
       real(kind=kind_phys) wu2(im,km),     buo(im,km),    drag(im,km),
-     &                     wc(im)
+     &                     wush(im,km),    wc(im)
 !
 !  for updraft fraction & scale-aware function
       real(kind=kind_phys) scaldfunc(im), sigmagfm(im)
@@ -247,6 +250,7 @@ c-----------------------------------------------------------------------
       errflg = 0
 
       gravinv = 1./grav
+      invdelt = 1./delt
 
       elocp = hvap/cp
       el2orc = hvap*hvap/(rv*cp)
@@ -302,7 +306,6 @@ c
         rn(i)=0.
         kbcon(i)=km
         ktcon(i)=1
-        ktconn(i)=1
         kb(i)=km
         pdot(i) = 0.
         qlko_ktcon(i) = 0.
@@ -329,7 +332,6 @@ c
         rn(i)=0.
         kbcon(i)=km
         ktcon(i)=1
-        ktconn(i)=1
         kb(i)=km
         pdot(i) = 0.
         qlko_ktcon(i) = 0.
@@ -510,6 +512,7 @@ c
 !           vo(i,k)   = v1(i,k) * rcs(i)
             wu2(i,k)  = 0.
             buo(i,k)  = 0.
+            wush(i,k) = 0.
             drag(i,k) = 0.
             cnvwt(i,k) = 0.
           endif
@@ -524,7 +527,6 @@ c
          do i = 1, im
             dbyo1(i,k)=0.
             zdqca(i,k)=0.
-            qlks(i,k)=0.
             omega_u(i,k)=0.
             zeta(i,k)=1.0
          enddo
@@ -745,7 +747,8 @@ c
           cinpcr = cinpcrmx - ptem * ptem1
           tem1 = pfld(i,kb(i)) - pfld(i,kbcon(i))
 
-          if(tem1 > cinpcr) then
+          if(tem1 > cinpcr .and.
+     &       zi(i,kbcon(i)) > hpbl(i)) then
              cnvflg(i) = .false.
           endif
         endif
@@ -893,6 +896,16 @@ c
           endif
         enddo
 !
+        do i=1,im
+          if(cnvflg(i)) then
+            if(tkemean(i) > tkcrt) then
+              tem = 1. + tkemean(i)/tkcrt
+              tem1 = min(tem, cmxfac)
+              clamt(i) = tem1 * clam
+            endif
+          endif
+        enddo
+!
       else
 !
         do i= 1, im
@@ -969,7 +982,6 @@ c
               eta(i,k) = eta(i,k-1) * (1 + ptem * dz)
               if(eta(i,k) <= 0.) then
                 kmax(i) = k
-                ktconn(i) = k
                 kbm(i) = min(kbm(i),kmax(i))
                 flg(i) = .false.
               endif
@@ -1199,7 +1211,7 @@ c
 !> - Calculate the cloud top as the first level where parcel buoyancy becomes negative; the maximum possible value is at \f$p=0.7p_{sfc}\f$.
       do i = 1, im
         flg(i) = cnvflg(i)
-        if(flg(i)) ktcon(i) = kbm(i)
+        if(flg(i)) ktcon(i) = 1
       enddo
       do k = 2, km1
       do i=1,im
@@ -1211,6 +1223,18 @@ c
         endif
       enddo
       enddo
+c
+c turn off shallow convection if cloud depth is larger than cthk or less than cthkmn
+c
+      do i = 1, im
+        if(cnvflg(i)) then
+          tem = pfld(i,kbcon(i))-pfld(i,ktcon(i))
+          if(tem > cthk .or. tem < cthkmn) then
+            cnvflg(i) = .false.
+          endif
+        endif
+      enddo
+
 c
 c  specify upper limit of mass flux at cloud base
 c
@@ -1270,7 +1294,7 @@ c
                 qcko(i,k)= qlk + qrch
                 pwo(i,k) = etah * c0t(i,k) * dz * qlk
                 cnvwt(i,k) = etah * qlk * grav / dp
-                qlks(i,k)=qlk
+                zdqca(i,k)=dq/eta(i,k)
               endif
 !
 !  compute buoyancy and drag for updraft velocity
@@ -1285,6 +1309,11 @@ c
                 buo(i,k) = buo(i,k) + grav * fv *
      &                     max(val,(qeso(i,k) - qo(i,k)))
                 drag(i,k) = max(xlamue(i,k),xlamud(i))
+!
+                tem = ((uo(i,k)-uo(i,k-1))/dz)**2
+                tem = tem+((vo(i,k)-vo(i,k-1))/dz)**2
+                wush(i,k) = csmf * sqrt(tem)
+!
               endif
 !
             endif
@@ -1435,7 +1464,7 @@ c
                 qcko(i,k) = qlk + qrch
                 pwo(i,k) = etah * c0t(i,k) * dz * qlk
                 cnvwt(i,k) = etah * qlk * grav / dp
-                qlks(i,k)=qlk
+                zdqca(i,k)=dq/eta(i,k)
               endif
             endif
           endif
@@ -1444,9 +1473,6 @@ c
 !
 !  compute updraft velocity square(wu2)
 !> - Calculate updraft velocity square(wu2) according to Han et al.'s (2017) \cite han_et_al_2017 equation 7.
-!
-      bb1 = 4.0
-      bb2 = 0.8
 !
       if (hwrf_samfshal) then
       do i = 1, im
@@ -1467,11 +1493,13 @@ c
           if (cnvflg(i)) then
             if(k > kbcon1(i) .and. k < ktcon(i)) then
               dz    = zi(i,k) - zi(i,k-1)
-              tem  = 0.25 * bb1 * (drag(i,k)+drag(i,k-1)) * dz
-              tem1 = 0.5 * bb2 * (buo(i,k)+buo(i,k-1)) * dz
+              tem  = 0.25 * bb1 * (drag(i,k-1)+drag(i,k)) * dz
+              tem1 = 0.5 * bb2 * (buo(i,k-1)+buo(i,k))
+              tem2 = wush(i,k) * sqrt(wu2(i,k-1))
+              tem2 = (tem1 - tem2) * dz
               ptem = (1. - tem) * wu2(i,k-1)
               ptem1 = 1. + tem
-              wu2(i,k) = (ptem + tem1) / ptem1
+              wu2(i,k) = (ptem + tem2) / ptem1
               wu2(i,k) = max(wu2(i,k), 0.)
             endif
           endif
@@ -1601,24 +1629,13 @@ c
           if(dq > 0.) then
             qlko_ktcon(i) = dq
             qcko(i,k) = qrch
-            qlks(i,k) = qlko_ktcon(i)
+            zdqca(i,k) = dq
           endif
         endif
       enddo
       endif
 c
      
-       do k = 2, km1
-        do i = 1, im
-           if (cnvflg(i)) then
-              if(k > kbcon(i) .and. k < ktcon(i)) then
-                 zdqca(i,k)=((qlks(i,k)-qlks(i,k-1)) +
-     &                pwo(i,k)+dellal(i,k))
-              endif
-           endif
-        enddo
-      enddo
-
 c--- compute precipitation efficiency in terms of windshear
 c
 !! - Calculate the wind shear and precipitation efficiency according to equation 58 in Fritsch and Chappell (1980) \cite fritsch_and_chappell_1980 :
@@ -1935,11 +1952,32 @@ c     updraft velcoity
 c
 !> - From Bengtsson et al. (2022) \cite Bengtsson_2022 prognostic closure scheme, equation 8, call progsigma_calc() to compute updraft area fraction based on a moisture budget
       if(progsigma)then
+!     Initial computations, dynamic q-tendency
+         if(first_time_step .and. .not.restart)then
+            do k = 1,km
+               do i = 1,im
+                  qadv(i,k)=0.
+               enddo
+            enddo
+         else
+            do k = 1,km
+               do i = 1,im
+                  qadv(i,k)=(q(i,k) - prevsq(i,k))*invdelt
+               enddo
+            enddo
+         endif
+
+         do k = 1,km
+            do i = 1,im
+               tmfq(i,k)=tmf(i,k,1)
+            enddo
+         enddo
+
          flag_shallow = .true.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
-     &        del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
-     &        prevsq,q,kbcon1,ktcon,cnvflg,
-     &        sigmain,sigmaout,sigmab,errmsg,errflg)
+     &        del,tmfq,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
+     &        qadv,kbcon1,ktcon,cnvflg,
+     &        sigmain,sigmaout,sigmab)
       endif
 
 !> - From Han et al.'s (2017) \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity.
