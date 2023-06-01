@@ -49,13 +49,6 @@
   dimensions = (8)
   type = integer
   intent = in
-[nactive_proc]
-  standard_name = number_of_active_physics_process_in_CCPP_scheme_simulator
-  long_name = number of active physics process in CCPP scheme simulator
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [proc_start]
   standard_name = index_for_first_physics_process_in_CCPP_scheme_simulator
   long_name = index for first physics process in CCPP scheme simulator
@@ -66,13 +59,6 @@
 [proc_end]
   standard_name = index_for_last_physics_process_in_CCPP_scheme_simulator
   long_name = index for last physics process in CCPP scheme simulator
-  units     = count
-  dimensions = ()
-  type = integer
-  intent = inout
-[iactive_scheme_inloop]
-  standard_name = count_for_active_scheme_in_CCPP_scheme_simulator
-  long_name = count for active physics scheme in CCPP scheme simulator
   units     = count
   dimensions = ()
   type = integer
@@ -91,28 +77,6 @@
   dimensions = ()
   type = logical
   intent = inout
-[active_name]
-  standard_name = name_of_active_physics_schemes_in_CCPP_scheme_simulator
-  long_name = name of active physics schemes in CCPP scheme simulator
-  units =
-  dimensions = (number_of_active_physics_process_in_CCPP_scheme_simulator)
-  type = character
-  kind = len=16
-  intent = in
-[iactive_scheme]
-  standard_name = index_of_active_physics_schemes_in_CCPP_scheme_simulator
-  long_name = index of active physics schemes in CCPP scheme simulator
-  units = count
-  dimensions = (number_of_active_physics_process_in_CCPP_scheme_simulator)
-  type = integer
-  intent = in
-[active_time_split_process]
-  standard_name = flag_to_indicate_process_type_in_CCPP_scheme_simulator
-  long_name = flag to indicate if active physics schemes are time-split process
-  units = flag
-  dimensions = (number_of_active_physics_process_in_CCPP_scheme_simulator)
-  type = logical
-  intent = in
 [tgrs]
   standard_name = air_temperature
   long_name = model layer mean temperature
@@ -181,22 +145,6 @@
   standard_name = specific_humidity_of_new_state
   long_name = tracer concentration updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[dtdq_pbl]
-  standard_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
-  long_name = instantaneous_tendency_of_specific_humidity_due_to_PBL
-  units = kg kg-1 s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[dtdq_mp]
-  standard_name = instantaneous_tendency_of_specific_humidity_due_to_microphysics
-  long_name = moisture tendency due to microphysics
-  units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys

@@ -22,26 +22,21 @@ contains
 !! \htmlinclude ccpp_scheme_simulator_run.html
 !!
   subroutine ccpp_scheme_simulator_run(do_ccpp_scheme_sim, kdt, nCol, nLay, dtp, jdat,   &
-       nactive_proc, proc_start, proc_end, active_name, iactive_scheme, physics_process, &
-       active_time_split_process, iactive_scheme_inloop, in_pre_active, in_post_active,  &
-       tgrs, ugrs, vgrs, qgrs, active_phys_tend, gt0, gu0, gv0, gq0, dtdq_pbl, dtdq_mp,  &
-       errmsg, errflg)
+       proc_start, proc_end, physics_process, in_pre_active, in_post_active, tgrs, ugrs, &
+       vgrs, qgrs, active_phys_tend, gt0, gu0, gv0, gq0, errmsg, errflg)
 
     ! Inputs
-    logical,           intent(in)  :: do_ccpp_scheme_sim, active_time_split_process(:)
-    integer,           intent(in)  :: kdt, nCol, nLay, nactive_proc, jdat(8),            &
-                                      iactive_scheme(:)
+    logical,           intent(in)  :: do_ccpp_scheme_sim
+    integer,           intent(in)  :: kdt, nCol, nLay, jdat(8)
     real(kind_phys),   intent(in)  :: dtp, tgrs(:,:), ugrs(:,:), vgrs(:,:), qgrs(:,:,:), &
                                       active_phys_tend(:,:,:)
-    character(len=16), intent(in)  :: active_name(:)
 
     ! Outputs
     type(base_physics_process),intent(inout) :: physics_process(:)
-    real(kind_phys), intent(inout) :: gt0(:,:), gu0(:,:), gv0(:,:), gq0(:,:),            &
-                                      dtdq_pbl(:,:), dtdq_mp(:,:)
+    real(kind_phys), intent(inout) :: gt0(:,:), gu0(:,:), gv0(:,:), gq0(:,:)
     character(len=*),intent(out)   :: errmsg
     integer,         intent(out)   :: errflg
-    integer,         intent(inout) :: proc_start, proc_end, iactive_scheme_inloop
+    integer,         intent(inout) :: proc_start, proc_end
     logical,         intent(inout) :: in_pre_active, in_post_active
 
     ! Locals
@@ -77,10 +72,10 @@ contains
     !
     if (in_pre_active) then
        proc_start = 1
-       proc_end   = max(1,iactive_scheme(iactive_scheme_inloop)-1)
+       proc_end   = max(1,physics_process(1)%iactive_scheme-1)
     endif
     if (in_post_active) then
-       proc_start = iactive_scheme(iactive_scheme_inloop)
+       proc_start = physics_process(1)%iactive_scheme
        proc_end   = size(physics_process)
     endif
 
@@ -179,11 +174,6 @@ contains
     if (size(physics_process)+1 == iprc) then
        in_pre_active  = .true.
        in_post_active = .false.
-       iactive_scheme_inloop = 1
-    endif
-
-    if (iactive_scheme_inloop < nactive_proc) then
-       iactive_scheme_inloop = iactive_scheme_inloop + 1
     endif
 
   end subroutine ccpp_scheme_simulator_run

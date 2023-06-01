@@ -15,41 +15,45 @@ module module_ccpp_scheme_simulator
 
   ! Type containing 1D (time) physics tendencies. 
   type phys_tend_1d
-     real(kind_phys), dimension(:), pointer :: T
-     real(kind_phys), dimension(:), pointer :: u
-     real(kind_phys), dimension(:), pointer :: v
-     real(kind_phys), dimension(:), pointer :: q
+     real(kind_phys), dimension(:), allocatable :: T
+     real(kind_phys), dimension(:), allocatable :: u
+     real(kind_phys), dimension(:), allocatable :: v
+     real(kind_phys), dimension(:), allocatable :: q
+     real(kind_phys), dimension(:), allocatable :: p
+     real(kind_phys), dimension(:), allocatable :: z
   end type phys_tend_1d
 
   ! Type containing 2D (lev,time) physics tendencies.
   type phys_tend_2d
-     real(kind_phys), dimension(:),   pointer :: time
-     real(kind_phys), dimension(:,:), pointer :: T
-     real(kind_phys), dimension(:,:), pointer :: u
-     real(kind_phys), dimension(:,:), pointer :: v
-     real(kind_phys), dimension(:,:), pointer :: q
+     real(kind_phys), dimension(:),   allocatable :: time
+     real(kind_phys), dimension(:,:), allocatable :: T
+     real(kind_phys), dimension(:,:), allocatable :: u
+     real(kind_phys), dimension(:,:), allocatable :: v
+     real(kind_phys), dimension(:,:), allocatable :: q
+     real(kind_phys), dimension(:,:), allocatable :: p
+     real(kind_phys), dimension(:,:), allocatable :: z
   end type phys_tend_2d
 
   ! Type containing 3D (loc,lev,time) physics tendencies.
   type phys_tend_3d
-     real(kind_phys), dimension(:),     pointer :: time
-     real(kind_phys), dimension(:),     pointer :: lon
-     real(kind_phys), dimension(:),     pointer :: lat
-     real(kind_phys), dimension(:,:,:), pointer :: T
-     real(kind_phys), dimension(:,:,:), pointer :: u
-     real(kind_phys), dimension(:,:,:), pointer :: v
-     real(kind_phys), dimension(:,:,:), pointer :: q
+     real(kind_phys), dimension(:),     allocatable :: time
+     real(kind_phys), dimension(:),     allocatable :: lon
+     real(kind_phys), dimension(:),     allocatable :: lat
+     real(kind_phys), dimension(:,:,:), allocatable :: T
+     real(kind_phys), dimension(:,:,:), allocatable :: u
+     real(kind_phys), dimension(:,:,:), allocatable :: v
+     real(kind_phys), dimension(:,:,:), allocatable :: q
   end type phys_tend_3d
 
-  ! Type containing 4D (lon, lat,lev,time) physics tendencies.
+  ! Type containing 4D (lon,lat,lev,time) physics tendencies.
   type phys_tend_4d
-     real(kind_phys), dimension(:),       pointer :: time
-     real(kind_phys), dimension(:,:),     pointer :: lon
-     real(kind_phys), dimension(:,:),     pointer :: lat
-     real(kind_phys), dimension(:,:,:,:), pointer :: T
-     real(kind_phys), dimension(:,:,:,:), pointer :: u
-     real(kind_phys), dimension(:,:,:,:), pointer :: v
-     real(kind_phys), dimension(:,:,:,:), pointer :: q
+     real(kind_phys), dimension(:),       allocatable :: time
+     real(kind_phys), dimension(:,:),     allocatable :: lon
+     real(kind_phys), dimension(:,:),     allocatable :: lat
+     real(kind_phys), dimension(:,:,:,:), allocatable :: T
+     real(kind_phys), dimension(:,:,:,:), allocatable :: u
+     real(kind_phys), dimension(:,:,:,:), allocatable :: v
+     real(kind_phys), dimension(:,:,:,:), allocatable :: q
   end type phys_tend_4d
 
 ! This type contains the meta information and data for each physics process.
@@ -58,14 +62,17 @@ module module_ccpp_scheme_simulator
 !! \htmlinclude base_physics_process.html
 !!
   type base_physics_process
-     character(len=16)  :: name
-     logical            :: time_split = .false.
-     logical            :: use_sim    = .false.
-     integer            :: order
-     type(phys_tend_1d) :: tend1d
-     type(phys_tend_2d) :: tend2d
-     type(phys_tend_3d) :: tend3d
-     type(phys_tend_4d) :: tend4d
+     character(len=16)  :: name                 ! Physics process name
+     logical            :: time_split = .false. ! Is process time-split?
+     logical            :: use_sim    = .false. ! Is process "active"?
+     integer            :: order                ! Order of process in process-loop 
+     type(phys_tend_1d) :: tend1d               ! Instantaneous data
+     type(phys_tend_2d) :: tend2d               ! 2-dimensional data
+     type(phys_tend_3d) :: tend3d               ! Not used. Placeholder for 3-dimensional spatial data.
+     type(phys_tend_4d) :: tend4d               ! Not used. Placeholder for 4-dimensional spatio-tempo data.
+     character(len=16)  :: active_name          ! "Active" scheme: Physics process name
+     integer            :: iactive_scheme       ! "Active" scheme: Order of process in process-loop
+     logical            :: active_tsp           ! "Active" scheme: Is process time-split?
    contains
      generic,   public  :: linterp => linterp_1D, linterp_2D
      procedure, private :: linterp_1D
@@ -109,7 +116,7 @@ contains
   ! Type-bound procedure to compute tendency profile for time-of-day.
   !
   ! For use with 2D data (location, level, time) tendencies with diurnal (24-hr) forcing.
-  ! This assumes that the location dimension has a [longitude, latitude] associated with
+  ! This assumes that the location dimension has a [longitude, latitude] allocated with
   ! each location.
   ! ####################################################################################
   function linterp_2D(this, var_name, lon, lat, year, month, day, hour, min, sec) result(err_message)
@@ -180,7 +187,7 @@ contains
     integer, intent(in) :: year, month, day, hour, min, sec
     character(len=128) :: errmsg
 
-    if (associated(process%tend2d%T)) then
+    if (allocated(process%tend2d%T)) then
        errmsg = process%linterp("T", year,month,day,hour,min,sec)
     endif
 
@@ -193,7 +200,7 @@ contains
     integer, intent(in) :: year, month, day, hour, min, sec
     character(len=128) :: errmsg
 
-    if (associated(process%tend2d%T)) then
+    if (allocated(process%tend2d%T)) then
        errmsg = process%linterp("T", year,month,day,hour,min,sec)
     endif
 
@@ -206,13 +213,13 @@ contains
     integer, intent(in) :: year, month, day, hour, min, sec
     character(len=128) :: errmsg
 
-    if (associated(process%tend2d%T)) then
+    if (allocated(process%tend2d%T)) then
        errmsg = process%linterp("T", year,month,day,hour,min,sec)
     endif
-    if (associated(process%tend2d%u)) then
+    if (allocated(process%tend2d%u)) then
        errmsg = process%linterp("u", year,month,day,hour,min,sec)
     endif
-    if (associated(process%tend2d%v)) then
+    if (allocated(process%tend2d%v)) then
        errmsg = process%linterp("v", year,month,day,hour,min,sec)
     endif
 
@@ -225,16 +232,16 @@ contains
     integer, intent(in) :: year, month, day, hour, min, sec
     character(len=128) :: errmsg
 
-    if (associated(process%tend2d%T)) then
+    if (allocated(process%tend2d%T)) then
        errmsg = process%linterp("T", year,month,day,hour,min,sec)
     endif
-    if (associated(process%tend2d%u)) then
+    if (allocated(process%tend2d%u)) then
        errmsg = process%linterp("u", year,month,day,hour,min,sec)
     endif
-    if (associated(process%tend2d%v)) then
+    if (allocated(process%tend2d%v)) then
        errmsg = process%linterp("v", year,month,day,hour,min,sec)
     endif
-    if (associated(process%tend2d%q)) then
+    if (allocated(process%tend2d%q)) then
        errmsg = process%linterp("q", year,month,day,hour,min,sec)
     endif
 
@@ -247,16 +254,16 @@ contains
     integer, intent(in) :: year, month, day, hour, min, sec
     character(len=128) :: errmsg
 
-    if (associated(process%tend2d%T)) then
+    if (allocated(process%tend2d%T)) then
        errmsg = process%linterp("T", year,month,day,hour,min,sec)
     endif
-    if (associated(process%tend2d%u)) then
+    if (allocated(process%tend2d%u)) then
        errmsg = process%linterp("u", year,month,day,hour,min,sec)
     endif
-    if (associated(process%tend2d%v)) then
+    if (allocated(process%tend2d%v)) then
        errmsg = process%linterp("v", year,month,day,hour,min,sec)
     endif
-    if (associated(process%tend2d%q)) then
+    if (allocated(process%tend2d%q)) then
        errmsg = process%linterp("q", year,month,day,hour,min,sec)
     endif
 
@@ -269,16 +276,16 @@ contains
     integer, intent(in) :: year, month, day, hour, min, sec
     character(len=128) :: errmsg
 
-    if (associated(process%tend2d%T)) then
+    if (allocated(process%tend2d%T)) then
        errmsg = process%linterp("T", year,month,day,hour,min,sec)
     endif
-    if (associated(process%tend2d%u)) then
+    if (allocated(process%tend2d%u)) then
        errmsg = process%linterp("u", year,month,day,hour,min,sec)
     endif
-    if (associated(process%tend2d%v)) then
+    if (allocated(process%tend2d%v)) then
        errmsg = process%linterp("v", year,month,day,hour,min,sec)
     endif
-    if (associated(process%tend2d%q)) then
+    if (allocated(process%tend2d%q)) then
        errmsg = process%linterp("q", year,month,day,hour,min,sec)
     endif
 
@@ -291,10 +298,10 @@ contains
     integer, intent(in) :: year, month, day, hour, min, sec
     character(len=128) :: errmsg
 
-    if (associated(process%tend2d%T)) then
+    if (allocated(process%tend2d%T)) then
        errmsg = process%linterp("T", year,month,day,hour,min,sec)
     endif
-    if (associated(process%tend2d%q)) then
+    if (allocated(process%tend2d%q)) then
        errmsg = process%linterp("q", year,month,day,hour,min,sec)
     endif
   end subroutine sim_cldMP
