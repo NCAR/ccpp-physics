@@ -394,9 +394,9 @@ show some variables in the namelist that must match the SDF.
 <tr><td>cnvcld          <td>see \a GFS_typedefs.F90          <td>flag for convective cloud                      <td>.false.
 <tr><td>lgfdlmprad      <td>gfs_rrtmg_pre          <td>flag for GFDL mp scheme and radiation consistency     <td>.false.
 <tr><td>nssl_cccn       <td>mp_nssl          <td>CCN concentration (m^-3)                  <td>0.6e9 
-<tr><td>nssl_alphar     <td>mp_nssl          <td>rain shape parameter                            <td>0.0
-<tr><td>nssl_alphah     <td>mp_nssl          <td>graupel shape parameter                         <td>0.0
-<tr><td>nssl_alphahl    <td>mp_nssl          <td>hail shape parameter                            <td>1.0
+<tr><td>nssl_alphar     <td>mp_nssl          <td>rain PSD shape parameter                        <td>0.0
+<tr><td>nssl_alphah     <td>mp_nssl          <td>graupel PSD shape parameter                     <td>0.0
+<tr><td>nssl_alphahl    <td>mp_nssl          <td>hail PSD shape parameter                        <td>1.0
 <tr><td>nssl_hail_on    <td>mp_nssl          <td>NSSL flag to activate the hail category         <td>.false.
 <tr><td>nssl_ccn_on     <td>mp_nssl          <td>NSSL flag to activate the CCN category          <td>.true.
 <tr><td>nssl_invertccn  <td>mp_nssl          <td>NSSL flag to treat CCN as activated or unactivated      <td>.true.
