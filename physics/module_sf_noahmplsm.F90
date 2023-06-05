@@ -5529,7 +5529,6 @@ subroutine gfs_stability                                              &
 !  UTN (Unstable Tech Note) : NCEP Office Note 356
 !  STN (Stable Tech Note)   : NCEP Office Note 321
 
-integer, parameter :: kp = kind_phys
 real (kind=kind_phys), parameter :: ca=0.4_kind_phys  ! ca - von karman constant
 
 real(kind=kind_phys), intent(in) :: z1      ! height model level
@@ -5626,14 +5625,14 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 !  compute stability indices (rb and hlinf)
 
           dtv     = thv1 - tvs
-          adtv    = max(abs(dtv),0.001_kp)
-          dtv     = sign(1.0_kp,dtv) * adtv
+          adtv    = max(abs(dtv),0.001_kind_phys)
+          dtv     = sign(1.0_kind_phys,dtv) * adtv
 
           if(thsfc_loc) then ! Use local potential temperature
-            rb      = max(-5000.0_kp, (grav+grav) * dtv * z1 &
+            rb      = max(-5000.0_kind_phys, (grav+grav) * dtv * z1 &
                    / ((thv1 + tvs) * wind * wind))
           else ! Use potential temperature referenced to 1000 hPa
-            rb      = max(-5000.0_kp, grav * dtv * z1 &
+            rb      = max(-5000.0_kind_phys, grav * dtv * z1 &
                    / (tv1 * wind * wind))
           endif
 
@@ -5641,8 +5640,8 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
           tem2    = one / ztmax                                  ! 1/z0t
           fm      = log((z0max+z1)  * tem1)                      ! neutral phi_m
           fh      = log((ztmax+z1)  * tem2)                      ! neutral phi_h
-          fm10    = log((z0max+10.0_kp) * tem1)                  ! neutral phi_m at 10 meters
-          fh2     = log((ztmax+2.0_kp)  * tem2)                  ! neutral phi_h at 2 meters
+          fm10    = log((z0max+10.0_kind_phys) * tem1)                  ! neutral phi_m at 10 meters
+          fh2     = log((ztmax+2.0_kind_phys)  * tem2)                  ! neutral phi_h at 2 meters
           hlinf   = rb * fm * fm / fh                            ! z/L STN 2.7
           hlinf   = min(max(hlinf,zolmin),zolmax)                ! z/L, xi in STN/UTN
 !
@@ -5650,7 +5649,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 !
           if (dtv >= zero) then
             hl1 = hlinf                                          ! z/L, xi in STN
-            if(hlinf > 0.25_kp) then                             ! z/L > 0.25, do two iterations
+            if(hlinf > 0.25_kind_phys) then                             ! z/L > 0.25, do two iterations
               tem1   = hlinf * z1i                               ! 1/L
               hl0inf = z0max * tem1                              ! z0m/z1, zi_0 in STN
               hltinf = ztmax * tem1                              ! z0t/z1, zi_0 in STN
@@ -5677,7 +5676,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
             bb0   = sqrt(one + alpha4 * hlt)                     ! sqrt term of STN 2.16 with z0t
             pm    = aa0 - aa + log( (one+aa)/(one+aa0) )         ! psi_m STN 3.11
             ph    = bb0 - bb + log( (one+bb)/(one+bb0) )         ! psi_h STN 3.11
-            hl110 = hl1 * 10.0_kp * z1i                          ! 10/L
+            hl110 = hl1 * 10.0_kind_phys * z1i                          ! 10/L
             aa    = sqrt(one + alpha4 * hl110)                   ! sqrt term of STN 2.16 with z=10m
             pm10  = aa0 - aa + log( (one+aa)/(one+aa0) )         ! psi_m STN 3.11 with z=10m
             hl12  = (hl1+hl1) * z1i                              ! 2/L
@@ -5691,7 +5690,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
           else                          ! dtv < 0 case
 
             olinf = z1 / hlinf                                   ! z/L, xi in UTN
-            tem1  = 50.0_kp * z0max                              ! 50 * z0m, z/L limit for calc methods, see UTN Sec. E
+            tem1  = 50.0_kind_phys * z0max                              ! 50 * z0m, z/L limit for calc methods, see UTN Sec. E
             if(abs(olinf) <= tem1) then                          ! 
               hlinf = -z1 / tem1                                 ! 
               hlinf = max(hlinf, zolmin)
@@ -5699,23 +5698,23 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 !
 !  get pm and ph
 !
-            if (hlinf >= -0.5_kp) then
+            if (hlinf >= -0.5_kind_phys) then
               hl1   = hlinf
               pm    = (a0  + a1*hl1)  * hl1   / (one+ (b1+b2*hl1)  *hl1)  ! psi_m UTN 2.37
               ph    = (a0p + a1p*hl1) * hl1   / (one+ (b1p+b2p*hl1)*hl1)  ! psi_h UTN 2.38
-              hl110 = hl1 * 10.0_kp * z1i                                 ! 10/L
+              hl110 = hl1 * 10.0_kind_phys * z1i                                 ! 10/L
               pm10  = (a0 + a1*hl110) * hl110/(one+(b1+b2*hl110)*hl110)   ! psi_m UTN 2.37 with z=10m
               hl12  = (hl1+hl1) * z1i                                     ! 2/L
               ph2   = (a0p + a1p*hl12) * hl12/(one+(b1p+b2p*hl12)*hl12)   ! psi_h UTN 2.38 with z=2m
             else                                                          ! z/L < -0.5
               hl1   = -hlinf                                              ! -z/L
               tem1  = one / sqrt(hl1)                                     ! sqrt(-z/L)
-              pm    = log(hl1) + 2.0_kp * sqrt(tem1) - 0.8776_kp          ! UTN 2.64, first three terms
-              ph    = log(hl1) + 0.5_kp * tem1 + 1.386_kp                 ! UTN 2.65, first three terms
-              hl110 = hl1 * 10.0_kp * z1i                                 ! 10/L
-              pm10  = log(hl110) + 2.0_kp/sqrt(sqrt(hl110)) - 0.8776_kp   ! psi_m UTN 2.64 with z=10m
+              pm    = log(hl1) + 2.0_kind_phys * sqrt(tem1) - 0.8776_kind_phys          ! UTN 2.64, first three terms
+              ph    = log(hl1) + 0.5_kind_phys * tem1 + 1.386_kind_phys                 ! UTN 2.65, first three terms
+              hl110 = hl1 * 10.0_kind_phys * z1i                                 ! 10/L
+              pm10  = log(hl110) + 2.0_kind_phys/sqrt(sqrt(hl110)) - 0.8776_kind_phys   ! psi_m UTN 2.64 with z=10m
               hl12  = (hl1+hl1) * z1i                                     ! 2/L
-              ph2   = log(hl12) + 0.5_kp / sqrt(hl12) + 1.386_kp          ! psi_h UTN 2.65 with z=2m
+              ph2   = log(hl12) + 0.5_kind_phys / sqrt(hl12) + 1.386_kind_phys          ! psi_h UTN 2.65 with z=2m
             endif
 
           endif          ! end of if (dtv >= 0 ) then loop
@@ -5728,7 +5727,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
           fh2       = fh2 - ph2                                           ! phi_h at 2m
           cm        = ca * ca / (fm * fm)                                 ! momentum exchange coef = k^2/phi_m^2
           ch        = ca * ca / (fm * fh)                                 ! heat exchange coef = k^2/phi_m/phi_h
-          tem1      = 0.00001_kp/z1                                       ! minimum exhange coef (?)
+          tem1      = 0.00001_kind_phys/z1                                       ! minimum exhange coef (?)
           cm        = max(cm, tem1)
           ch        = max(ch, tem1)
           stress    = cm * wind * wind                                    ! surface stress = Cm*U*U

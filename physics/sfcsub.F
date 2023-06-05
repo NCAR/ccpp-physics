@@ -660,7 +660,7 @@
       data fnalbc2/'global_albedo4.1x1.grb'/
       data fntsfc/'global_sstclim.2x2.grb'/
       data fnsotc/'global_soiltype.1x1.grb'/
-      data fnsocc/'soil_color.clm.0.05.nc'/ 
+      data fnsocc/''/ 
       data fnvegc/'global_vegfrac.1x1.grb'/
       data fnvetc/'global_vegtype.1x1.grb'/
       data fnglac/'global_glacier.2x2.grb'/

@@ -90,7 +90,7 @@
         call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
         !--- read in noahmp table
-        call read_mp_table_parameters
+        call read_mp_table_parameters(errmsg, errflg)
 
         ! initialize psih and psim 
 

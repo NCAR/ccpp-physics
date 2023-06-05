@@ -164,7 +164,6 @@
          real(kind_phys),      intent(inout) :: tsnoxy (:,lsnow_lsm_lbound:)
          real(kind_phys),      intent(inout) :: smoiseq(:,:)
          real(kind_phys),      intent(inout) :: zsnsoxy(:,lsnow_lsm_lbound:)
-
          real(kind_phys),      intent(inout) :: slc(:,:)
          real(kind_phys),      intent(inout) :: smc(:,:)
          real(kind_phys),      intent(inout) :: stc(:,:)
