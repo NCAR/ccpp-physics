@@ -4246,7 +4246,7 @@ endif   ! croptype == 0
 	end if
 
 ! canopy heat capacity
-        hcv = parameters%cbiom*vaie*cwat + canliq*cwat/denh2o + canice*cice/denice !j/m2/k
+        hcv = fveg*(parameters%cbiom*vaie*cwat + canliq*cwat/denh2o + canice*cice/denice) !j/m2/k
 
         b   = sav-irc-shc-evc-tr+pahv                          !additional w/m2
 !       a   = fveg*(4.*cir*tv**3 + csh + (cev+ctr)*destv) !volumetric heat capacity
