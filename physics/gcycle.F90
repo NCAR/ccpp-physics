@@ -75,7 +75,7 @@ contains
                                            slmsk(:)
     integer,              intent(inout) :: vtype(:),   &
                                            stype(:),   &
-                                           scolor(:),  &        !soil color
+                                           scolor(:),  &
                                            slope(:)
 
     integer,              intent(in)    :: imap(:), jmap(:)
