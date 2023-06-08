@@ -108,6 +108,52 @@ and dynamical instability of waves described by the linear
 (Lindzen 1981 \cite lindzen_1981) and nonlinear 
 (Weinstock 1984 \cite weinstock_1984; Hines 1997 \cite hines_1997) saturation theories.
 
+\section ugwp_updates CCPP Physics Updates
+\version UFS-SRW v3.0.0
+
+We have added optional diagnostic outputs for the various tendencies supplied by the UGWP.  They can be switched on by setting the two following input namelist variables equal to “.true.”:  \p ldiag3d and \p ldiag_ugwp.
+
+The optional diagnostic outputs are:
+- \b dws3dt_ogw: time-averaged wind speed tendency due to mesoscale gravity wave drag
+- \b dws3dt_obl: time-averaged wind speed tendency due to blocking drag
+- \b dws3dt_oss: time-averaged wind speed tendency due to small-scale gravity wave drag
+- \b dws3dt_ofd: time-averaged wind speed tendency due to turbulent orographic form drag
+- \b ldu3dt_ogw: time-averaged x wind tendency due to mesoscale orographic gravity wave drag
+- \b ldu3dt_obl: time-averaged x wind tendency due to blocking drag
+- \b ldu3dt_oss: time-averaged x wind tendency due to small scale gravity wave drag
+- \b ldu3dt_ofd: time-averaged x wind tendency due to form drag
+- \b ldu3dt_ngw: time-averaged u momentum tendency due to non-stationary gravity wave drag
+- \b ldv3dt_ngw: time-averaged v momentum tendency due to non-stationary gravity wave drag
+- \b ldt3dt_ngw: time-averaged temperature tendency due to non-stationary gravity wave drag
+- \b dudt_ogw: instantaneous x wind tendency from mesoscale orographic gravity wave drag
+- \b dvdt_ogw: instantaneous y wind tendency from mesoscale orographic gravity wave drag
+- \b dudt_obl: instantaneous x wind tendency from blocking drag
+- \b dvdt_obl: instantaneous y wind tendency from blocking drag
+- \b dudt_oss: instantaneous x wind tendency from small scale GWD
+- \b dvdt_oss: instantaneous y wind tendency from small scale GWD
+- \b dudt_ofd: instantaneous x wind tendency from form drag
+- \b dvdt_ofd: instantaneous y wind tendency from form drag
+- \b du_ogwcol: instantaneous integrated x momentum flux from mesoscale orographic gravity wave drag
+- \b dv_ogwcol: instantaneous integrated y momentum flux from mesoscale orographic gravity wave drag
+- \b du_oblcol: instantaneous integrated x momentum flux from blocking drag
+- \b dv_oblcol: instantaneous integrated y momentum flux from blocking drag
+- \b du_osscol: instantaneous integrated x momentum flux from small scale gwd
+- \b dv_osscol: instantaneous integrated y momentum flux from small scale gwd
+- \b du_ofdcol: instantaneous integrated x momentum flux from form drag
+- \b dv_ofdcol: instantaneous integrated y momentum flux from form drag
+- \b du3_ogwcol: time-averaged surface x momentum flux from mesoscale orographic gravity wave drag
+- \b dv3_ogwcol: time-averaged surface y momentum flux from mesoscale orographic gravity wave drag
+- \b du3_oblcol: time-averaged surface x momentum flux from blocking drag
+- \b dv3_oblcol: time-averaged surface y momentum flux from blocking drag
+- \b du3_osscol: time-averaged surface x momentum flux from small scale gravity wave drag
+- \b dv3_osscol: time-averaged surface y momentum flux from small scale gravity wave drag
+- \b du3_ofdcol: time-averaged surface x momentum flux from form drag
+- \b dv3_ofdcol: time-averaged surface y momentum flux from form drag
+
+Note that the relevant diag_table entries for these variables are included in:
+ufs-weather-model/tests/parm/diag_table/diag_table_rap
+
+
 \section intra_UGWPv0 Intraphysics Communication
 - \ref arg_table_cires_ugwp_run
 

@@ -46,6 +46,9 @@ The UFS-SRW App. assembles the parameterizations in suites.
  - \subpage GFS_OCEAN 
  - \subpage GFS_SFCSICE 
 
+\b CLM \b Lake \b Model
+ - \subpage CLM_LAKE_model 
+
 \b Others
  - \subpage GFS_SPP
 

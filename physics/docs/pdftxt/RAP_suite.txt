@@ -26,6 +26,6 @@ The RAP suite uses the parameterizations in the following order:
 \include suite_SCM_RAP.xml  
 
 \section RAP_nml_option Namelist
-\snippet RE210/SCM_RAP_input.nml GFS_PHYSICS_NML
+\snippet SCM_RAP_input.nml GFS_PHYSICS_NML
 
 */
