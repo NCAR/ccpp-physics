@@ -470,11 +470,11 @@ MODULE module_mp_thompson
       end if
       if (mpirank==mpiroot) then
           if (is_aerosol_aware) then
-              write (0,'(a)') 'Using aerosol-aware version of Thompson microphysics'
+              write (*,'(a)') 'Using aerosol-aware version of Thompson microphysics'
           else if(merra2_aerosol_aware) then
-              write (0,'(a)') 'Using merra2 aerosol-aware version of Thompson microphysics'
+              write (*,'(a)') 'Using merra2 aerosol-aware version of Thompson microphysics'
           else
-              write (0,'(a)') 'Using non-aerosol-aware version of Thompson microphysics'
+              write (*,'(a)') 'Using non-aerosol-aware version of Thompson microphysics'
           end if
       end if
 
@@ -897,22 +897,22 @@ MODULE module_mp_thompson
 !>  - Call table_ccnact() to read a static file containing CCN activation of aerosols. The
 !! data were created from a parcel model by Feingold & Heymsfield with
 !! further changes by Eidhammer and Kriedenweis
-      if (mpirank==mpiroot) write(0,*) '  calling table_ccnAct routine'
+      if (mpirank==mpiroot) write(*,*) '  calling table_ccnAct routine'
       call table_ccnAct(errmsg,errflg)
       if (.not. errflg==0) return
 
 !>  - Call table_efrw() and table_efsw() to creat collision efficiency table 
 !! between rain/snow and cloud water
-      if (mpirank==mpiroot) write(0,*) '  creating qc collision eff tables'
+      if (mpirank==mpiroot) write(*,*) '  creating qc collision eff tables'
       call table_Efrw
       call table_Efsw
 
 !>  - Call table_dropevap() to creat rain drop evaporation table
-      if (mpirank==mpiroot) write(0,*) '  creating rain evap table'
+      if (mpirank==mpiroot) write(*,*) '  creating rain evap table'
       call table_dropEvap
 
 !>  - Call qi_aut_qs() to create conversion of some ice mass into snow category
-      if (mpirank==mpiroot) write(0,*) '  creating ice converting to snow table'
+      if (mpirank==mpiroot) write(*,*) '  creating ice converting to snow table'
       call qi_aut_qs
 
       call cpu_time(etime)
@@ -943,7 +943,7 @@ MODULE module_mp_thompson
       call cpu_time(stime)
 
 !>  - Call qr_acr_qg() to create rain collecting graupel & graupel collecting rain table
-      if (mpirank==mpiroot) write(0,*) '  creating rain collecting graupel table'
+      if (mpirank==mpiroot) write(*,*) '  creating rain collecting graupel table'
       call cpu_time(stime)
       call qr_acr_qg
       call cpu_time(etime)
@@ -957,7 +957,7 @@ MODULE module_mp_thompson
       if (mpirank==mpiroot) print '("Computing rain collecting snow table took ",f10.3," seconds.")', etime-stime
 
 !>  - Call freezeh2o() to create cloud water and rain freezing (Bigg, 1953) table
-      if (mpirank==mpiroot) write(0,*) '  creating freezing of water drops table'
+      if (mpirank==mpiroot) write(*,*) '  creating freezing of water drops table'
       call cpu_time(stime)
       call freezeH2O(threads)
       call cpu_time(etime)
@@ -970,7 +970,7 @@ MODULE module_mp_thompson
 
       endif if_not_iiwarm
 
-      if (mpirank==mpiroot) write(0,*) ' ... DONE microphysical lookup tables'
+      if (mpirank==mpiroot) write(*,*) ' ... DONE microphysical lookup tables'
 
       endif if_micro_init
 
