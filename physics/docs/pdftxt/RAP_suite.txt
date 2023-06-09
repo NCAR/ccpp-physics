@@ -23,9 +23,9 @@ The RAP suite uses the parameterizations in the following order:
  - \ref THOMPSON
 
 \section sdf_gsdsuite Suite Definition File 
-\include suite_SCM_RAP.xml  
+\include suite_FV3_RAP.xml  
 
 \section RAP_nml_option Namelist
-\snippet SCM_RAP_input.nml GFS_PHYSICS_NML
+\snippet FV3_RAP_input.nml GFS_PHYSICS_NML
 
 */
