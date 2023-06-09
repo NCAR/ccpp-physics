@@ -874,7 +874,7 @@ do i = 1, im
           thsfc_loc            ,prslkix              ,prsik1x              ,prslk1x              , &
           air_pressure_surface ,pblhx                ,iz0tlnd              ,itime                , &
 	  vegetation_frac      ,area_grid            ,psi_opt                                    , &
-          con_fvirt            ,con_eps              ,con_cp                                     , &
+          con_fvirt            ,con_eps              ,con_epsm1            ,con_cp               , &
           snowfall             ,snow_water_equiv_old ,snow_albedo_old      ,                       &
           cm_noahmp            ,ch_noahmp            ,snow_levels          ,snow_water_equiv     , &
           soil_moisture_vol    ,interface_depth      ,snow_depth           ,snow_level_ice       , &

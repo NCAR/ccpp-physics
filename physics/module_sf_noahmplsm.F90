@@ -749,7 +749,7 @@ contains
 ! --------------------------------------------------------------------------------------------------
 ! re-process atmospheric forcing
 
-   call atm (parameters,sfcprs  ,sfctmp   ,q2      ,                            &
+   call atm (parameters,ep_2, epsm1, sfcprs  ,sfctmp   ,q2      ,    &
              prcpconv, prcpnonc,prcpshcv,prcpsnow,prcpgrpl,prcphail, &
              soldn   ,cosz     ,thair   ,qair    ,                   & 
              eair    ,rhoair   ,qprecc  ,qprecl  ,solad   ,solai   , &
@@ -856,7 +856,7 @@ contains
                  emissi ,pah    ,canhs,                           &
 		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )                                            !out
 
-    qsfcveg  = eah*0.622/(sfcprs - 0.378*eah)
+    qsfcveg  = eah*ep_2/(sfcprs + epsm1*eah)
     qsfcbare = qsfc
     qsfc     = q1
 !jref:end
@@ -960,7 +960,7 @@ contains
 
 !>\ingroup NoahMP_LSM
 !! re-precess atmospheric forcing.
-  subroutine atm (parameters,sfcprs  ,sfctmp   ,q2      ,                             &
+  subroutine atm (parameters,ep_2,epsm1,sfcprs  ,sfctmp   ,q2      ,       &
                   prcpconv,prcpnonc ,prcpshcv,prcpsnow,prcpgrpl,prcphail , &
                   soldn   ,cosz     ,thair   ,qair    ,                    & 
                   eair    ,rhoair   ,qprecc  ,qprecl  ,solad   , solai   , &
@@ -973,6 +973,8 @@ contains
 ! inputs
 
   type (noahmp_parameters), intent(in) :: parameters
+  real (kind=kind_phys)                          , intent(in)  :: ep_2   !<
+  real (kind=kind_phys)                          , intent(in)  :: epsm1  !<
   real (kind=kind_phys)                          , intent(in)  :: sfcprs   !< pressure (pa)
   real (kind=kind_phys)                          , intent(in)  :: sfctmp   !< surface air temperature [k]
   real (kind=kind_phys)                          , intent(in)  :: q2       !< mixing ratio (kg/kg)
@@ -1017,8 +1019,8 @@ contains
 
        qair   = q2                       ! in wrf, driver converts to specific humidity
 
-       eair   = qair*sfcprs / (0.622+0.378*qair)
-       rhoair = (sfcprs-0.378*eair) / (rair*sfctmp)
+       eair   = qair*sfcprs / (ep_2-epsm1*qair)
+       rhoair = (sfcprs+epsm1*eair) / (rair*sfctmp)
 
        if(cosz <= 0.) then 
           swdown = 0.
@@ -2212,7 +2214,7 @@ endif   ! croptype == 0
         latheav = hsub
 	frozen_canopy = .true.
      end if
-     gammav = cpair*sfcprs/(0.622*latheav)
+     gammav = cpair*sfcprs/(ep_2*latheav)
 
      if (tg .gt. tfrz) then
         latheag = hvap
@@ -2221,14 +2223,14 @@ endif   ! croptype == 0
         latheag = hsub
 	frozen_ground = .true.
      end if
-     gammag = cpair*sfcprs/(0.622*latheag)
+     gammag = cpair*sfcprs/(ep_2*latheag)
 
 !     if (sfctmp .gt. tfrz) then
 !        lathea = hvap
 !     else
 !        lathea = hsub
 !     end if
-!     gamma = cpair*sfcprs/(0.622*lathea)
+!     gamma = cpair*sfcprs/(ep_2*lathea)
 
 ! surface temperatures of the ground and canopy and energy fluxes
 
@@ -2335,7 +2337,7 @@ endif   ! croptype == 0
         ts    = fveg * tah       + (1.0 - fveg) * tgb
         cm    = fveg * cmv       + (1.0 - fveg) * cmb      ! better way to average?
         ch    = fveg * chv       + (1.0 - fveg) * chb
-        q1    = fveg * (eah*0.622/(sfcprs - 0.378*eah)) + (1.0 - fveg)*qsfc
+        q1    = fveg * (eah*ep_2/(sfcprs + epsm1*eah)) + (1.0 - fveg)*qsfc
         q2e   = fveg * q2v       + (1.0 - fveg) * q2b
 
 ! effectibe skin temperature
@@ -4005,7 +4007,7 @@ endif   ! croptype == 0
 
 !jref - consistent surface specific humidity for sfcdif3 and sfcdif4
 
-        qsfc = 0.622*eair/(psfc-0.378*eair)  
+        qsfc = ep_2*eair/(psfc+epsm1*eair)  
 
 ! canopy height
         hcan = parameters%hvt
@@ -4092,11 +4094,11 @@ endif   ! croptype == 0
                        zlvl   ,zpd    ,z0m    ,z0h    ,ur     , & !in
                        mpe    ,iloc   ,jloc   ,                 & !in
 #ifdef CCPP
-                       moz ,mozsgn ,fm ,fh ,fm2 ,fh2 ,errmsg ,errflg ,& !inout
+                       moz ,mozsgn ,fm ,fh ,fm2 ,fh2 ,fv, errmsg ,errflg ,& !inout
 #else
-                       moz    ,mozsgn ,fm     ,fh     ,fm2,fh2, & !inout
+                       moz    ,mozsgn ,fm     ,fh     ,fm2,fh2, fv, & !inout
 #endif
-                       cm     ,ch     ,fv     ,ch2     )          !out
+                       cm     ,ch     ,ch2     )          !out
 #ifdef CCPP
           if (errflg /= 0) return
 #endif
@@ -4191,10 +4193,10 @@ endif   ! croptype == 0
         end if
 
         if (opt_crs == 2) then  ! jarvis
-         call  canres (parameters,parsun,tv    ,btran ,eah    ,sfcprs, & !in
+         call  canres (parameters,ep_2, epsm1,parsun,tv    ,btran ,eah    ,sfcprs, & !in
                        rssun ,psnsun,iloc  ,jloc   )          !out
 
-         call  canres (parameters,parsha,tv    ,btran ,eah    ,sfcprs, & !in
+         call  canres (parameters,ep_2, epsm1,parsha,tv    ,btran ,eah    ,sfcprs, & !in
                        rssha ,psnsha,iloc  ,jloc   )          !out
         end if
      end if
@@ -4268,7 +4270,7 @@ endif   ! croptype == 0
         hg = rhoair*cpair*(tg  - tah)   /rahg
 
 ! consistent specific humidity from canopy air vapor pressure
-        qsfc = (0.622*eah)/(sfcprs-0.378*eah)
+        qsfc = (ep_2*eah)/(sfcprs+epsm1*eah)
 
         if ( opt_sfc == 4 ) then
            qfx = (qsfc-qair)*rhoair*caw
@@ -4693,11 +4695,11 @@ endif   ! croptype == 0
                        zlvl   ,zpd    ,z0m    ,z0h    ,ur     , & !in
                        mpe    ,iloc   ,jloc   ,                 & !in
 #ifdef CCPP
-                       moz ,mozsgn ,fm ,fh ,fm2 ,fh2 ,errmsg ,errflg ,& !inout
+                       moz ,mozsgn ,fm ,fh ,fm2 ,fh2 ,fv,errmsg ,errflg ,& !inout
 #else
-                       moz ,mozsgn ,fm ,fh ,fm2 ,fh2 ,           & !inout
+                       moz ,mozsgn ,fm ,fh ,fm2 ,fh2 ,fv,           & !inout
 #endif
-                       cm     ,ch     ,fv     ,ch2     )          !out
+                       cm     ,ch     ,ch2     )          !out
 #ifdef CCPP
           if (errflg /= 0) return
 #endif
@@ -4814,7 +4816,7 @@ endif   ! croptype == 0
         else
             estg  = esati
         end if
-        qsfc = 0.622*(estg*rhsur)/(psfc-0.378*(estg*rhsur))
+        qsfc = ep_2*(estg*rhsur)/(psfc+epsm1*(estg*rhsur))
 
         qfx = (qsfc-qair)*cev*gamma/cpair
 
@@ -5041,11 +5043,11 @@ endif   ! croptype == 0
        &             zlvl   ,zpd    ,z0m    ,z0h    ,ur     , & !in
        &             mpe    ,iloc   ,jloc   ,                 & !in
 #ifdef CCPP
-       &             moz    ,mozsgn ,fm     ,fh     ,fm2,fh2,errmsg,errflg, & !inout
+       &             moz    ,mozsgn ,fm     ,fh     ,fm2,fh2,fv,errmsg,errflg, & !inout
 #else
-       &             moz    ,mozsgn ,fm     ,fh     ,fm2,fh2, & !inout
+       &             moz    ,mozsgn ,fm     ,fh     ,fm2,fh2, fv, & !inout
 #endif
-       &             cm     ,ch     ,fv     ,ch2     )          !out
+       &             cm     ,ch     ,ch2     )                      !out
 ! -------------------------------------------------------------------------------------------------
 ! computing surface drag coefficient cm for momentum and ch for heat
 ! -------------------------------------------------------------------------------------------------
@@ -5075,6 +5077,7 @@ endif   ! croptype == 0
     real (kind=kind_phys),              intent(inout) :: fh     !< sen heat stability correction, weighted by prior iters
     real (kind=kind_phys),              intent(inout) :: fm2    !< sen heat stability correction, weighted by prior iters
     real (kind=kind_phys),              intent(inout) :: fh2    !< sen heat stability correction, weighted by prior iters
+    real (kind=kind_phys),              intent(inout) :: fv     !< friction velocity (m/s)
 #ifdef CCPP
     character(len=*),  intent(inout) :: errmsg
     integer,           intent(inout) :: errflg
@@ -5084,7 +5087,6 @@ endif   ! croptype == 0
 
     real (kind=kind_phys),                intent(out) :: cm     !< drag coefficient for momentum
     real (kind=kind_phys),                intent(out) :: ch     !< drag coefficient for heat
-    real (kind=kind_phys),              intent(inout) :: fv     !< friction velocity (m/s)
     real (kind=kind_phys),                intent(out) :: ch2    !< drag coefficient for heat
 
 ! locals
@@ -6127,7 +6129,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 !! air temperature, atmospheric water vapor pressure deficit at the lowest
 !! model level, and soil moisture (preferably unfrozen soil moisture rather
 !! than total).
-  subroutine canres (parameters,par   ,sfctmp,rcsoil ,eah   ,sfcprs , & !in
+  subroutine canres (parameters,ep_2,epsm1,par   ,sfctmp,rcsoil ,eah   ,sfcprs , & !in
                      rc    ,psn   ,iloc   ,jloc  )           !out
 
 ! --------------------------------------------------------------------------------------------------
@@ -6149,6 +6151,8 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
   type (noahmp_parameters), intent(in) :: parameters      !<
     integer,                  intent(in)  :: iloc         !< grid index
     integer,                  intent(in)  :: jloc         !< grid index
+    real (kind=kind_phys),                     intent(in)  :: ep_2   !<
+    real (kind=kind_phys),                     intent(in)  :: epsm1  !<
     real (kind=kind_phys),                     intent(in)  :: par    !< par absorbed per unit sunlit lai (w/m2)
     real (kind=kind_phys),                     intent(in)  :: sfctmp !< canopy air temperature
     real (kind=kind_phys),                     intent(in)  :: sfcprs !< surface pressure (pa)
@@ -6181,7 +6185,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 
 !  compute q2 and q2sat
 
-    q2 = 0.622 *  eah  / (sfcprs - 0.378 * eah) !specific humidity [kg/kg]
+    q2 = ep_2 *  eah  / (sfcprs + epsm1 * eah) !specific humidity [kg/kg]
     q2 = q2 / (1.0 - q2)                        !mixing ratio [kg/kg]
 
     call calhum(parameters,sfctmp, sfcprs, q2sat, dqsdt2)
