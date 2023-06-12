@@ -341,10 +341,7 @@ contains
      edtd(:)=0.
      zdd(:,:)=0.
      flux_tun(:)=5.
-! 10/11/2016 dx and tscl_kf are replaced with input dx(i), is dlength.
 ! dx for scale awareness
-!    dx=40075000./float(lonf)
-!    tscl_kf=dx/25000.
 !$acc end kernels
 
      if (imfshalcnv == 3) then
@@ -629,7 +626,7 @@ contains
      enddo
      do i = its,itf
       if(mconv(i).lt.0.)mconv(i)=0.
-      if(do_mynnedmf.and.(maxMF(i).gt.0.))ierr(i)=555
+      if((dx(i)<6500.).and.do_mynnedmf.and.(maxMF(i).gt.0.))ierr(i)=555
      enddo
 !$acc end kernels
      if (dx(its)<6500.) then

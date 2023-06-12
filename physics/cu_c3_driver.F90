@@ -68,7 +68,8 @@ contains
                index_of_y_wind,index_of_process_scnv,index_of_process_dcnv,     &
                fhour,fh_dfi_radar,ix_dfi_radar,num_dfi_radar,cap_suppress,      &
                dfi_radar_max_intervals,ldiag3d,qci_conv,do_cap_suppress,        &
-               sigmaout, maxupmf,ichoice_in,ichoicem_in,ichoice_s_in,errmsg,errflg)
+               sigmaout,maxupmf,maxMF,do_mynnedmf,ichoice_in,ichoicem_in,       &
+               ichoice_s_in,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -93,7 +94,7 @@ contains
    integer      :: its,ite, jts,jte, kts,kte
    integer, intent(in   ) :: im,km,ntracer
    integer, intent(in   ) :: ichoice_in,ichoicem_in,ichoice_s_in
-   logical, intent(in   ) :: flag_init, flag_restart
+   logical, intent(in   ) :: flag_init, flag_restart, do_mynnedmf
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend, &
         do_ca,progsigma
    real (kind=kind_phys), intent(in) :: g,cp,fv,r_d,xlv,r_v
@@ -127,7 +128,7 @@ contains
 
    integer, dimension (:), intent(out) :: hbot,htop,kcnv
    integer, dimension (:), intent(in)  :: xland
-   real(kind=kind_phys),    dimension (:), intent(in) :: pbl
+   real(kind=kind_phys),    dimension (:), intent(in) :: pbl,maxMF
 !$acc declare copyout(hbot,htop,kcnv)
 !$acc declare copyin(xland,pbl)
    integer, dimension (im) :: tropics
@@ -639,6 +640,7 @@ contains
      enddo
      do i = its,itf
       if(mconv(i).lt.0.)mconv(i)=0.
+      if((dx(i)<6500.).and.do_mynnedmf.and.(maxMF(i).gt.0.))ierr(i)=555
      enddo
 !$acc end kernels
      if (dx(its)<6500.) then
@@ -676,7 +678,13 @@ contains
 
 !$acc kernels
           do i=its,itf
-           if(xmbs(i).gt.0.)cutens(i)=1.
+           if(xmbs(i).gt.0.)then
+            cutens(i)=1.
+            if (dx(i)<6500.) then
+             ierrm(i)=555
+             ierr (i)=555
+            endif
+           endif
           enddo
 !$acc end kernels
 !> - Call neg_check() for GF shallow convection
@@ -936,8 +944,8 @@ contains
 
                gdc(i,k,1)= max(0.,tun_rad_shall(i)*cupclws(i,k)*cutens(i))      ! my mod
                !gdc2(i,k,1)=max(0.,tun_rad_deep(i)*(cupclwm(i,k)*cutenm(i)+cupclw(i,k)*cuten(i)))
-               !gdc2(i,k,1)=max(0.,tun_rad_mid(i)*cupclwm(i,k)*cutenm(i)+tun_rad_deep(i)*cupclw(i,k)*cuten(i)+tun_rad_shall(i)*cupclws(i,k)*cutens(i))
-               gdc2(i,k,1) = min(0.1, max(0.01, tun_rad_mid(i)*frhm(i)))*cupclwm(i,k)*cutenm(i) + min(0.1, max(0.01, tun_rad_deep(i)*(frhd(i))))*cupclw(i,k)*cuten(i) + tun_rad_shall(i)*cupclws(i,k)*cutens(i)
+               gdc2(i,k,1)=max(0.,tun_rad_mid(i)*cupclwm(i,k)*cutenm(i)+tun_rad_deep(i)*cupclw(i,k)*cuten(i)+tun_rad_shall(i)*cupclws(i,k)*cutens(i))
+               !gdc2(i,k,1) = min(0.1, max(0.01, tun_rad_mid(i)*frhm(i)))*cupclwm(i,k)*cutenm(i) + min(0.1, max(0.01, tun_rad_deep(i)*(frhd(i))))*cupclw(i,k)*cuten(i) + tun_rad_shall(i)*cupclws(i,k)*cutens(i)
                qci_conv(i,k)=gdc2(i,k,1)
                gdc(i,k,2)=(outt(i,k))*86400.
                gdc(i,k,3)=(outtm(i,k))*86400.
