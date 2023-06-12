@@ -116,7 +116,7 @@ physics/module_gfdl_cloud_microphys.*          @RuiyuSun                        
 physics/module_MP_FER_HIRES.*                  @ericaligo-NOAA                      @grantfirl @Qingfu-Liu @dustinswales
 physics/module_mp_nssl_2mom.F90                                                     @grantfirl @Qingfu-Liu @dustinswales
 physics/module_mp_radar.*                      @gthompsnWRF @RuiyuSun               @grantfirl @Qingfu-Liu @dustinswales
-physics/module_mp_thompson*                    @gthompsnWRF @RuiyuSun               @grantfirl @Qingfu-Liu @dustinswales
+physics/module_mp_thompson*                    @gthompsnWRF @RuiyuSun @AndersJensen-NOAA @grantfirl @Qingfu-Liu @dustinswales
 physics/module_nst*                            @XuLi-NOAA                           @grantfirl @Qingfu-Liu @dustinswales
 physics/module_sf_exchcoef.f90                                                      @grantfirl @Qingfu-Liu @dustinswales
 physics/module_SF_JSFC.F90                     @Qingfu-Liu                          @grantfirl @Qingfu-Liu @dustinswales
@@ -126,7 +126,7 @@ physics/module_soil_pre.*                      @tanyasmirnova                   
 physics/moninshoc.*                            @SMoorthi-emc                        @grantfirl @Qingfu-Liu @dustinswales
 physics/mp_fer_hires.*                         @ericaligo-NOAA                      @grantfirl @Qingfu-Liu @dustinswales
 physics/mp_nssl.*                                                                   @grantfirl @Qingfu-Liu @dustinswales
-physics/mp_thompson*                           @gthompsnWRF @RuiyuSun               @grantfirl @Qingfu-Liu @dustinswales
+physics/mp_thompson*                           @gthompsnWRF @RuiyuSun @AndersJensen-NOAA @grantfirl @Qingfu-Liu @dustinswales
 physics/multi_gases.F90                        @RuiyuSun                            @grantfirl @Qingfu-Liu @dustinswales
 physics/myjpbl_wrapper.*                       @Qingfu-Liu                          @grantfirl @Qingfu-Liu @dustinswales
 physics/myjsfc_wrapper.*                       @Qingfu-Liu                          @grantfirl @Qingfu-Liu @dustinswales
