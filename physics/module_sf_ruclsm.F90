@@ -415,7 +415,7 @@ CONTAINS
                                                           curat, &
                                                        INFILTRP
    real (kind_phys)      ::  cq,r61,r273,arp,brp,x,evs,eis
-   real (kind_phys)      ::  cropsm
+   real (kind_phys)      ::  cropfr, cropsm, newsm, factor
 
    real (kind_phys)      ::  meltfactor, ac,as, wb,rovcp
    INTEGER   ::  NROOT
@@ -445,8 +445,8 @@ CONTAINS
          NDDZS=2*(nzs-2)
 
         !--
-        testptlat = 48.7074_kind_phys !39.958 !42.05 !39.0 !74.12 !29.5 
-        testptlon = 289.03_kind_phys !271.622 !286.75 !280.6 !164.0 !283.0 
+        testptlat = 35.55 !48.7074_kind_phys !39.958 !42.05 !39.0 !74.12 !29.5 
+        testptlon = 278.66 !289.03_kind_phys !271.622 !286.75 !280.6 !164.0 !283.0 
         !--
 
 
@@ -983,63 +983,49 @@ CONTAINS
 
 ! Fraction of cropland category in the grid box should not have soil moisture below 
 ! wilting point during the growing season.
-! Let's keep soil moisture 20% above wilting point for the fraction of grid box under
-! croplands.
+! Let's keep soil moisture 5% above wilting point for the crop fraction of grid box.
 ! This change violates LSM moisture budget, but
 ! can be considered as a compensation for irrigation not included into LSM. 
-!tgs - "irrigation" uses fractional landuse, therefore mosaic_lu=1.
+! "Irigation" could be applied when landuse fractional information
+! is available and mosaic_lu=1.
     if(mosaic_lu == 1) then
-    IF (lufrac(crop) > zero .and. lai(i,j) > 1.1_kind_phys) THEN
-    ! cropland
-        do k=1,nroot
-          cropsm=1.1_kind_phys*wilt - qmin
-          if(soilm1d(k) < cropsm*lufrac(crop)) then
-    IF (debug_print ) THEN
-      if (abs(xlat-testptlat).lt.0.2 .and. &
-          abs(xlon-testptlon).lt.0.2)then
-print * ,'Soil moisture is below wilting in cropland category at time step',ktau 
-          print*,'  lat,lon=',xlat,xlon  &
-                ,'lufrac(crop),k,soilm1d(k),wilt,cropsm', &
-                  lufrac(crop),k,soilm1d(k),wilt,cropsm
-      endif
-    ENDIF
-           soilm1d(k) = cropsm*lufrac(crop)
-    IF (debug_print ) THEN
-      if (abs(xlat-testptlat).lt.0.2 .and. &                  
-            abs(xlon-testptlon).lt.0.2)then
-        print*,'  lat,lon=',xlat,xlon
-        print * ,'Added soil water to cropland category, i,j,k,soilm1d(k)',i,j,k,soilm1d(k)
-      endif
-    ENDIF
-          endif
-        enddo
+      ! greenness factor: between 0 for min greenness and 1 for max greenness.
+      factor = max(zero,min(one,(vegfra(i,j)-shdmin(i,j))/max(one,(shdmax(i,j)-shdmin(i,j)))))
+             if (abs(xlat-testptlat).lt.0.1 .and. &
+                 abs(xlon-testptlon).lt.0.1)then
+                 print *,'  lat,lon=',xlat,xlon,' factor=',factor
+             endif
 
-    ELSEIF (ivgtyp(i,j) == natural .and. lai(i,j) > 0.7) THEN
-    ! grassland: assume that 40% of grassland is irrigated cropland
-        do k=1,nroot
-          cropsm=1.2_kind_phys*wilt - qmin
-          if(soilm1d(k) < cropsm*lufrac(natural)*0.4) then
-    IF (debug_print ) THEN
-      if (abs(xlat-testptlat).lt.0.2 .and. &
-          abs(xlon-testptlon).lt.0.2)then
-print * ,'Soil moisture is below wilting in mixed grassland/cropland category at time step',ktau 
-          print*,'  lat,lon=',xlat,xlon, &
-                 'lufrac(natural),k,soilm1d(k),wilt', &
-                  lufrac(natural),k,soilm1d(k),wilt
-      endif
-    ENDIF
-           soilm1d(k) = cropsm * lufrac(natural)*0.4_kind_phys
+      if((ivgtyp(i,j) == natural .or. ivgtyp(i,j) == crop) .and. factor > 0.75) then
+      ! cropland or grassland, apply irrigation during the growing seaspon when fraction 
+      ! of greenness is > 0.75.
 
-    IF (debug_print ) THEN
-      if (abs(xlat-testptlat).lt.0.2 .and. &  
-            abs(xlon-testptlon).lt.0.2)then
-        print*,'  lat,lon=',xlat,xlon
-        print * ,'Added soil water to grassland category, i,j,k,soilm1d(k)',i,j,k,soilm1d(k)
-      endif
-    ENDIF
-          endif
+        do k=1,nroot
+          cropsm=1.05_kind_phys*wilt - qmin
+          cropfr = min(one,lufrac(crop) + 0.4*lufrac(natural)) ! assume that 40% of natural is cropland
+          newsm = cropsm*cropfr + (1.-cropfr)*soilm1d(k)
+          if(soilm1d(k) < newsm) then
+           IF (debug_print ) THEN
+             if (abs(xlat-testptlat).lt.0.1 .and. &
+                 abs(xlon-testptlon).lt.0.1)then
+                 print * ,'Soil moisture is below wilting in cropland areas at time step',ktau 
+                 print * ,'  lat,lon=',xlat,xlon
+                 print * ,'  lufrac=',lufrac,'factor=',factor &
+                         ,'lai,ivgtyp,lufrac(crop),k,soilm1d(k),cropfr,wilt,cropsm,newsm,', &
+                           lai(i,j),ivgtyp(i,j),lufrac(crop),k,soilm1d(k),cropfr,wilt,cropsm,newsm
+             endif
+           ENDIF
+            soilm1d(k) = newsm
+           IF (debug_print ) THEN
+             if (abs(xlat-testptlat).lt.0.1 .and. &                  
+                 abs(xlon-testptlon).lt.0.1)then
+               print*,'  lat,lon=',xlat,xlon
+               print * ,'Added soil water to cropland areas, k,soilm1d(k)',k,soilm1d(k)
+             endif
+           ENDIF
+          endif ! < cropsm
         enddo
-    ENDIF
+      endif ! crop
     endif ! mosaic_lu
 
 !***  DIAGNOSTICS
@@ -6599,7 +6585,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
           TRANF(1)=(TOTLIQ-WILT)/(REF-WILT)*DID
         ENDIF 
 !-- uncomment next line for non-linear root distribution
-!          TRANF(1)=part(1)
+          TRANF(1)=part(1)
 
         DO K=2,NROOT
         totliq=soiliqw(k)+qmin
