@@ -8,20 +8,18 @@ follows the mass flux approach published by Grell (1993) \cite grell_1993.
 Further developments by Grell and \f$D\acute{e}v\acute{e}nyi\f$ (2002) \cite Grell_2002 included implementing 
 stochastics through allowing parameter perturbations. In GF scale awareness, and the aerosol dependence through rain generation (following
 Berry (1968) \cite berry_1968 and evaporation formulations (following Jiang et al. (2010) \cite Jiang_2010 ), depending on the 
-cloud concentration nuclei at cloud base were added. GF included mixed phase physics impact, momentum transport,
+cloud concentration nuclei at cloud base were added. The GF scheme includes mixed phase physics impact, momentum transport,
  a diurnal cycle closure (Bechtold et al. (2014) \cite bechtold_et_al_2014 ), and a trimodal spectral size to simulate the interaction
-and transition from shallow, congestus and deep convection regimes. The vertical massflux distribution of shallow, congestus and
-deep convection regimes is characterized by Probability Density Functions (PDF's). The three PDF's are meant to represent the average
+and transition from shallow, congestus and deep convection regimes. The vertical mass flux distribution of shallow, congestus and
+deep convection regimes is characterized by Probability Density Functions (PDFs). The three PDF's are meant to represent the average
 statistical mass flux characteristic of deep, congestus, and shallow (respectively) plumes in the grid area. Each PDF therefore represents
 a spectrum of plumes within the grid box. Forcing is different for each characteristic type. Entrainment and detrainment are derived 
-from the PDF's. The deep and congestus convection considers scale awareness (Arakawa et al. (2011) \cite Arakawa_2011 ), the shallow convection is not scale-aware. Aerosol dependence is implemented through dependence of rain generation and 
+from the PDF's. The deep and congestus convection considers scale awareness (Arakawa et al. (2011) \cite Arakawa_2011 ). However, the shallow convection is not scale-aware. Aerosol dependence is implemented through dependence of rain generation and 
 evaporation formulations depending on the cloud concentration nuclei at cloud base (Berry 1968 \cite berry_1968, 
 Jiang et al.(2010) \cite Jiang_2010, and Lee and Feingold (2010) \cite lee_and_feingold_2010 ). Wet scavenging is considered to add a memory impact. Aerosol dependence is considered experimental and 
 is turned off at this point. GF is able to transport tracers.
 
-
-\section version_cugf_enh CCPP Physics Updates
-\version CCPP v6.0.0
+\b CCPP \b v6.0.0 \b Updates:
 
 - GPU capabilities have been added
 - Cap suppressing (\p do_cap_suppress) based on radar data assimilation has been added. This is used only for the RAP suite
@@ -38,9 +36,10 @@ transition as grid spacing decreases into a shallow convection scheme
   - Coupled to the grid scale precipitation and radiation schemes through passing of diagnosed cloud liquid and ice from simulated
 precipitating convective cloud and shallow convective clouds
 
+\section version_cugf_enh CCPP Physics Updates
+
 \version UFS-SRW v3.0.0
-- The choices of closures for deep/mid/shallow convection are now namelist options
-- Updates for aerosol-awareness
+- Updates for aerosol-awareness (experimental)
 
 \b The \b Implementation \b of \b GF \b in \b RRFS
 

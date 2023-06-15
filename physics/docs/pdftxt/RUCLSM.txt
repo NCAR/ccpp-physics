@@ -10,7 +10,7 @@ processes in the RUC LSM (Smirnova et al. 2016 \cite Smirnova_2016 ) have proven
 the evolution of soil moisture, soil temperature, and snow in cycled models. Extension of the RAP domain to encompass all of North America and 
 adjacent high-latitude ocean areas necessitated further development of the RUC LSM for application in the tundra permafrost regions and over Arctic 
 sea ice (Smirnova et al. 2000 \cite Smirnova_2000). Other modifications include refinements in the snow model (snow "mosaic" approach, improvements in computation of snow cover fraction and snow thermal conductivity) and a more accurate specification of 
-albedo, roughness length, and other surface properties. Some of these recent modifications in the RUC LSM are described and evaluated in 
+albedo, roughness length, and other surface properties. Some of these modifications in the RUC LSM are described and evaluated in 
 Smirnova et al. 2016 \cite Smirnova_2016 .
 
 The parameterizations in the RUC LSM describe complicated atmosphere–land surface interactions (Fig.1) in an intentionally simplified fashion to avoid 
@@ -38,9 +38,10 @@ These adjustments are available in the current CCPP public release.
 
 Coupling of the RUC LSM to physically-based stochastic snow model (He et al.(2021) \cite he_et_al_2021) is also available in the current public release.
 
-The sensitivity of surface fluxes and turbine-height winds to the RUC LSM parameters has been explored by Geng Xia, NREL. This study
-will determine the uncertainty range for the selected parameters in the RUC LSM and will be described in the journal paper.
-## RUC LSM characteristics that differ from NOAH LSM:
+The sensitivity of surface fluxes and turbine-height winds to the RUC LSM parameters has been explored by Geng Xia, NREL 
+to determine the uncertainty range for the selected parameters in the RUC LSM.
+
+## RUC LSM characteristics that differ from Noah LSM:
 \image html ruc_lsm_veg_soil.png "Figure 1: RUC LSM Vegetation and Soil Model (Courtesy of T.G. Smirnova) " width=900
 \image html ruc_ranking.png "Figure 2: Model ranking as a function of normalized root mean square error of snow water equivalent and surface temperature (Courtesy of C. Menard)" width=900
 - \b Implicit \b solution of energy and moisture budgets in the layer spanning the ground surface

@@ -50,9 +50,9 @@ show some variables in the namelist that must match the SDF.
 <tr><td>do_sfcperts       <td>gfs_rrtmg_pre  <td>flag for stochastic surface perturbations option       <td>.false.
 <tr><td>imp_physics     <td>choice of microphysics scheme      <td>choice of microphysics scheme: \n                
                                                       <ul>
-                                                      <li> 11: GFDL microphysics scheme 
                                                       <li> 8: Thompson microphysics scheme   
                                                       <li> 10: Morrison-Gettelman microphysics scheme
+                                                      <li> 11: GFDL microphysics scheme
                                                       <li> 17: NSSL microphysics scheme with background CCN
                                                       <li> 18: NSSL microphysics scheme with predicted CCN (compatibility)
                                                       </ul>
@@ -258,7 +258,7 @@ show some variables in the namelist that must match the SDF.
                                                       <li> true: activate TKE advection 
                                                       </ul>  
                                                       <td>.false. 
-<tr><td>bl_mynn_tkebudget  <td>mynnedmf_wrapper  <td>flag to activate TKE budget                  <td>0
+<tr><td>tke_budget  <td>mynnedmf_wrapper  <td>flag to activating TKE budget                  <td>0
 <tr><td>bl_mynn_cloudpdf   <td>mynnedmf_wrapper  <td>flag to determine which cloud PDF to use \n 
                                                       <ul>
                                                       <li> 0: use Sommeria-Deardorff subgrid cloud PDF 
@@ -384,6 +384,9 @@ show some variables in the namelist that must match the SDF.
 <tr><td>t_sub             <td>gfdl_cloud_microphys       <td>temperature threshold for sublimation. Cloud ice, snow or graupel stops(starts) sublimation when temperature is lower(higher) then \p t_sub         <td>184.
 <tr><td>mp_print          <td>gfdl_cloud_microphys       <td>\a .true. to turn on GFDL cloud microphysics debugging print out. (not supported in GFS physics)       <td>.false.
 <tr><td>ltaerosol       <td>mp_thompson               <td>flag for using aerosol climotology in Thompson MP scheme          <td>.false.
+<tr><td>mraerosol       <td>                          <td>flag for merra2 aerosol aware                  <td>.false.
+<tr><td>lradar          <td>                          <td>flag for radar reflectivity                    <td>.false.
+<tr><td>nsfullradar_diag <td>                         <td>seconds between resetting radar reflectivity calculation   <td>.-999.0
 <tr><td>ttendlim        <td>mp_thompson               <td>temperature tendency limiter per time step in K/s, set to < 0 to deactivate   <td>-999.0
 <tr><td>ext_diag_thompson   <td>mp_thompson           <td>flag for extended diagnostic output from Thompson MP           <td>.false.
 <tr><td>thompson_ext_ndiag3d  <td>mp_thompson         <td>number of 3d arrays for extended diagnostic output from Thompson MP   <td> 37      
@@ -394,9 +397,11 @@ show some variables in the namelist that must match the SDF.
 <tr><td>cnvcld          <td>see \a GFS_typedefs.F90          <td>flag for convective cloud                      <td>.false.
 <tr><td>lgfdlmprad      <td>gfs_rrtmg_pre          <td>flag for GFDL mp scheme and radiation consistency     <td>.false.
 <tr><td>nssl_cccn       <td>mp_nssl          <td>CCN concentration (m^-3)                  <td>0.6e9 
-<tr><td>nssl_alphar     <td>mp_nssl          <td>rain PSD shape parameter                        <td>0.0
-<tr><td>nssl_alphah     <td>mp_nssl          <td>graupel PSD shape parameter                     <td>0.0
-<tr><td>nssl_alphahl    <td>mp_nssl          <td>hail PSD shape parameter                        <td>1.0
+<tr><td>nssl_alphah     <td>mp_nssl          <td>graupel shape parameter                         <td>0.0
+<tr><td>nssl_alphahl    <td>mp_nssl          <td>hail shape parameter                            <td>1.0
+<tr><td>nssl_alphar     <td>mp_nssl          <td>shape paramter for rain (imurain=1 only)         <td>0.0
+<tr><td>nssl_ehw0_in    <td>mp_nssl          <td>constant or max assumed graupel-droplet collection efficiency          <td>0.9
+<tr><td>nssl_ehlw0_in   <td>mp_nssl          <td>constant or max assumed hail-droplet collection efficiency          <td>0.9
 <tr><td>nssl_hail_on    <td>mp_nssl          <td>NSSL flag to activate the hail category         <td>.false.
 <tr><td>nssl_ccn_on     <td>mp_nssl          <td>NSSL flag to activate the CCN category          <td>.true.
 <tr><td>nssl_invertccn  <td>mp_nssl          <td>NSSL flag to treat CCN as activated or unactivated      <td>.true.
@@ -508,15 +513,20 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 0: USGS 
                                                       <li> 1: IGBP(20 category): IGBP must be selected if NoahMP is used 
                                                       <li> 2: UMD (13 category) 
+                                                      <li> 3: NLCD40 (40 category, NOAH WRFv4 only)
+                                                      <li> 4: USGS-RUC (28 category, NOAH WRFv4 only)
+                                                      <li> 5: MODIS-RUC (21 category, NOAH WRFv4 only)
                                                       </ul>
                                                       <td>2
+<tr><td>nvegcat
 <tr><td>isot            <td> lsm_noah, lsm_ruc, \ref noahmpdrv          <td>flag for soil type dataset choice:\n 
                                                       <ul> 
                                                       <li> 0: Zobler soil type (9 category) 
                                                       <li> 1: STATSGO soil type (19 category): STATSGO must be selected if NoahMP is used
+                                                      <li> 2: STAS-RUC soil type (19 category, NOAH WRFv4 only
                                                       </ul>
                                                       <td>0
-
+<tr><td>exticeden       <td> lsm_noah,lsm_ruc     <td>flag for calculating frozen precip ice density outside of the LSM   <td>.false.
 <tr><td>iopt_dveg         <td> \ref noahmpdrv         <td>options for dynamic vegetation  \n
                                                          <ul>
                                                          <li>1: off (use table LAI; use FVEG = SHDFAC from input)
@@ -613,7 +623,15 @@ show some variables in the namelist that must match the SDF.
                                                       <li>4: kb inversed 
                                                       </ul>
                                                       <td>2
+<tr><td>mosaic_lu
+<tr><td>mosaic_soil
+<tr><td>isncond_opt
+<tr><td>isncovr_opt
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b other \b surface \b scheme \b options
+<tr><td>lkm
+<tr><td>iopt_lake
+<tr><td>lakedepth_threshold
+<tr><td>lakefrac_threshold
 <tr><td>nstf_name(5)    <td>sfc_nst                   <td>NSST related paramters:\n                                                         
                                                       <ul>
                                                       <li> nstf_name(1): 0=NSST off, 1= NSST on but uncoupled, 2= NSST on and coupled

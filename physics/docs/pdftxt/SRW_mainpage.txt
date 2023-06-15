@@ -1,7 +1,7 @@
 /**
 \mainpage Introduction 
 
-Welcome to the scientific documentation for the physical parameterizations available in the  <a href="https://ufscommunity.org/about/what-is-ufs/">Unified Forecast System (UFS)</a> Short-Range Weather (SRW) Application version 3.0.0 (available through https://github.com/ufs-community/ufs-srweather-app/) and the suites that can be configured using them. The SRW app targets predictions of atmospheric behavior on a 
+Welcome to the scientific documentation for the physical parameterizations available in the  <a href="https://ufscommunity.org/about/what-is-ufs/">Unified Forecast System (UFS)</a> Short-Range Weather (SRW) Application version 3.0.0 (available through https://github.com/ufs-community/ufs-srweather-app/) and the suites that can be configured using them. The SRW App targets predictions of atmospheric behavior on a 
 limited spatial domain and on time scales from less than an hour out to several days. 
 
 The CCPP parameterizations are aggregated in suites by the host models. In this release, the UFS Short-Range Weather Application 3.0.0 
@@ -11,6 +11,14 @@ supports suites:
 - \ref RRFS_v1beta_page 
 - \ref WoFS_v0_page
 - \ref rap_suite_page
+
+\attention Here all supported suites are a recent snapshot of 
+<a href="https://github.com/ufs-community/ccpp-physics"> 
+the UFS fork for CCPP </a>. In this regard, GFS_v16 Suite is 
+not the same code as in the operational GFS v16. First of all, the operational GFS_v16 does not use CCPP at all. 
+Secondly, most of physics schemes hosted in CCPP repository have marched ahead since GFS was updated to version 16.0 on 22 March 2021. 
+This implication should be also applied to all other suites: as such, RAP/HRRR suites in this release are 
+the evolving version of the RAP/HRRR physics in operations. 
 
 
 */
