@@ -45,7 +45,7 @@
         gasvmr_ccl4,  gasvmr_cfc113, aerodp,ext550, clouds6, clouds7, clouds8, &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
-        aero_dir_fdb, fdb_coef, spp_wts_rad, spp_rad, ico2, latsozp, levozp,   &
+        aero_dir_fdb, fdb_coef, spp_wts_rad, spp_rad, ico2, latsozc, levozc,   &
         blatc, dphiozc, errmsg, errflg)
 
       use machine,                   only: kind_phys
@@ -103,7 +103,7 @@
                                            imp_physics_nssl,                   &
                                            imp_physics_fer_hires,              &
                                            yearlen, icloud, iaermdl, iaerflg,  &
-                                           latsozp, levozp
+                                           latsozc, levozc
 
       integer,              intent(in)  ::                                     &
          iovr,                             & ! choice of cloud-overlap method
@@ -431,7 +431,7 @@
           enddo
         enddo
       else                                ! climatological ozone
-        call getozn (prslk1, xlat, im, lmk, top_at_1, latsozp, levozp, blatc, dphiozc, olyr)
+        call getozn (prslk1, xlat, im, lmk, top_at_1, latsozc, levozc, blatc, dphiozc, olyr)
       endif                               ! end_if_ntoz
 
 !> - Call coszmn(), to compute cosine of zenith angle (only when SW is called)

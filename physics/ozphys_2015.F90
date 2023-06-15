@@ -3,7 +3,7 @@
 !!
 ! ###########################################################################################
 module ozphys_2015
-  use machine , only : kind_phys
+  use machine, only : kind_phys, kind_dbl_prec, kind_sngl_prec
   implicit none
   public ozphys_2015_init, ozphys_2015_timestep_init, ozphys_2015_run
 contains
@@ -78,7 +78,7 @@ contains
 !!
 ! ###########################################################################################
   subroutine ozphys_2015_timestep_init(nPts, idate, fhour, jindx1, jindx2, latsozp, levozp, &
-       oz_coeff, timeoz, ozplin, oz_time, oz_pres, oz_lat, ddy, ozplout, errmsg, errflg)
+       oz_coeff, timeoz, ozplin, oz_time, oz_lat, ddy, ozplout, errmsg, errflg)
     ! Inputs
     integer, intent(in) :: &
          nPts,     & ! Horizontal dimension
@@ -95,7 +95,6 @@ contains
     real(kind_phys), intent(in), dimension(:) :: &
          ddy,      & ! Interpolation high index for ozone data
          oz_lat,   & ! Latitudes for ozone data
-         oz_pres,  & ! Levels for ozone data
          oz_time     ! Time for ozone data
     real(kind_phys), intent(in), dimension(:,:,:,:) :: &
          ozplin      ! Ozone data
@@ -114,6 +113,8 @@ contains
     real(kind_phys) :: tem, tx1, tx2, rjday
     real(8) :: rinc(5)
     real(4) :: rinc4(5)
+    !real(kind_dbl_prec) :: rinc(5)
+    !real(kind_sngl_prec) :: rinc4(5)
 
     ! Initialize CCPP error handling variables
     errmsg = ''

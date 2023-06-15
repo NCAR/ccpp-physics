@@ -166,14 +166,6 @@
   type = real
   kind = kind_phys
   intent = in
-[oz_pres]
-  standard_name = ozone_data_level_pressure
-  long_name = ozone data level pressure
-  units = Pa
-  dimensions = (number_of_levels_in_ozone_data)
-  type = real
-  kind = kind_phys
-  intent = in
 [oz_lat]
   standard_name = ozone_data_latitude
   long_name = ozone data latitude

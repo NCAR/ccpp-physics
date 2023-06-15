@@ -117,7 +117,7 @@ contains
        vmr_n2o, vmr_co2, tsfg, tsfa, qs_lay, q_lay, tv_lay,                                 &
        relhum, deltaZ, deltaZc, deltaP, active_gases_array,                                 &
        tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, nDay, idxday, semis,             &
-       sfc_emiss_byband, ico2, latsozp, levozp, blatc, dphiozc, con_pi, errmsg, errflg)
+       sfc_emiss_byband, ico2, latsozc, levozc, blatc, dphiozc, con_pi, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
@@ -126,8 +126,8 @@ contains
          nLev,              & ! Number of vertical layers
          ico2,              & ! Flag for co2 radiation scheme 
          i_o3,              & ! Index into tracer array for ozone
-         latsozp,           & !
-         levozp
+         latsozc,           & !
+         levozc
     logical, intent(in) :: &
     	 doSWrad,           & ! Call SW radiation?
     	 doLWrad              ! Call LW radiation
@@ -354,7 +354,7 @@ contains
        enddo
     ! OR Use climatological ozone data
     else                               
-       call getozn (prslk(1:NCOL,:), xlat, nCol, nLev, top_at_1, latsozp, levozp, blatc,    &
+       call getozn (prslk(1:NCOL,:), xlat, nCol, nLev, top_at_1, latsozc, levozc, blatc,    &
             dphiozc, o3_lay)
     endif
 
