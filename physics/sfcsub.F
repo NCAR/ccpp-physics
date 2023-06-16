@@ -1123,9 +1123,6 @@
         snoclm(i) = 0.
         icefl1(i) = .true.
       enddo
-!     if(lprnt) print *,' tsffcsin=',tsffcs(iprnt)
-!     if(lprnt) print *,' slifcsin=',slifcs(iprnt)
-!     if(lprnt) print *,'slmskl=',slmskl(iprnt),' slmskw=',slmskw(iprnt)
 !
 !  read climatology fields
 !
@@ -1155,13 +1152,9 @@
      &,          imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk,me
      &,          lprnt,iprnt,fnalbc2,ialb,tile_num_ch,i_index,j_index)
 
-!     if(lprnt) print *,'tsfclm=',tsfclm(iprnt),' tsfcl2=',tsfcl2(iprnt)
 !
 !  scale surface roughness and albedo to model required units
 !
-!     do i=1,len
-!       print *, 'BEFORE QC socclm (i) is ',socclm (i)
-!     enddo
 
       zsca=100.
       call scale(zorclm,len,zsca)
@@ -1237,7 +1230,6 @@
 !     if(lprnt) print *,' aisclm=',aisclm(iprnt),' sliclm='
 !    &,sliclm(iprnt),' slmskw=',slmskw(iprnt)
 !
-!     write(6,*) 'sliclm'
 !     znnt=1.
 !     call nntprt(sliclm,len,znnt)
 !
@@ -1358,11 +1350,6 @@
      &            socjmx,socjmn,socsmx,socsmn,epssoc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
 
-!     do i=1,len
-!       print *, 'AFTER QC socclm (i) is ',socclm (i)
-!     enddo
-
-!     write(6,*) 'socclm after QC '
 !     znnt=1.
 !     call nntprt(socclm,len,znnt)
 
@@ -1466,9 +1453,6 @@
      &            vmnclm,vmxclm,slpclm,absclm,
      &            len,lsoil)
 
-!     do i=1,len
-!       print *, 'AFTER FILANL (i) is ',socanl (i)
-!     enddo
 !
 !  reverse scaling to match with grib analysis input
 !
@@ -1512,9 +1496,6 @@
      &           imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk
      &,          me, lanom)
 
-!     do i=1,len
-!       print *, 'AFTER ANALY (i) is ',socanl (i)
-!     enddo
 
 !     if(lprnt) print *,' tsfanl=',tsfanl(iprnt)
 !
@@ -1768,9 +1749,6 @@
      &            soclmx,soclmn,socomx,socomn,socimx,socimn,
      &            socjmx,socjmn,socsmx,socsmn,epssoc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-!     do i=1,len
-!       print *, 'AFTER QC (i) is ',socanl (i)
-!     enddo
 
 !clu [+16l]----------------------------------------------------------------------
 !     call qcmxmn('vmna    ',vmnanl,slianl,snoanl,icefl1,
@@ -2027,10 +2005,6 @@
      &                socjmx,socjmn,socsmx,socsmn,epssoc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
 
-!     do i=1,len
-!       print *, 'AFTER QC SOCFCS(i) is ',socfcs (i)
-!     enddo
-
 
 !clu [+16l] ---------------------------------------------------------------
 !         call qcmxmn('vmnf    ',vmnfcs,slifcs,snofcs,icefl1,
@@ -2260,17 +2234,11 @@
      &            sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &            sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-!     do i=1,len
-!       print *, 'BEFORE FINAL QC SOCANL(i) is ',socanl (i)
-!     enddo
 
       call qcmxmn('socm    ',socanl,slmskl,snoanl,icefl1,     
      &            soclmx,soclmn,socomx,socomn,socimx,socimn,
      &            socjmx,socjmn,socsmx,socsmn,epssoc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-!     do i=1,len
-!       print *, 'AFTER FINAL QC SOCANL(i) is ',socanl (i)
-!     enddo
 !cwu [+8l] add sih, sic,
       call qcmxmn('sihm    ',sihanl,slianl,snoanl,icefl1,
      &            sihlmx,sihlmn,sihomx,sihomn,sihimx,sihimn,
@@ -2822,8 +2790,6 @@
       call fixrdg(lugb,imsk,jmsk,fnmskh,
      &            kpds5,slmskh,gausm,blnmsk,bltmsk,me)
 
-!     print *,'in sfc_sub, aft fixrdg,slmskh=',maxval(slmskh),
-!    &  minval(slmskh),'mdata=',mdata,'imsk*jmsk=',imsk*jmsk
 
       do i=1,imsk*jmsk
          slmskh(i) = nint(slmskh(i))
@@ -3585,9 +3551,6 @@
      &                           wi1j2*sums        +wi2j2*sums        )
      &                        * wsumiv
                   endif
-!       print *,' slmask=',slmask(i),' sums=',sums,' sumn=',sumn
-!    &  ,' regin=',regin(i1,j2),regin(i2,j2),' j1=',j1,' j2=',j2
-!    &  ,' wij=',wi1j1, wi2j1, wi1j2, wi2j2,wsumiv
                 else
                   if (slmask(i) .eq. 1.0) then
                     sums = sum1
@@ -5059,8 +5022,6 @@
   100 format('rtsfl,ralbl,raisl,rsnol,rsmcl,rzorl,rvegl=',10f7.3)
       write(6,101) rtsfs,ralbs,raiss,rsnos,rsmcs,rzors,rvegs,rsics
   101 format('rtsfs,ralbs,raiss,rsnos,rsmcs,rzors,rvegs,rsics=',11f7.3)
-!     print *,' ralfl=',ralfl,' ralfs=',ralfs,' rsotl=',rsotl
-!    *,' rsots=',rsots,' rvetl=',rvetl,' rvets=',rvets
 
       write(6,102) rsocl,rsocs
   102 format('rsoc1, rsocs =',10f7.3)
@@ -5125,17 +5086,6 @@
         print *, 'dbgx-- csnol, csnos:',csnol,csnos
         print *, 'dbgx-- rsnol, rsnos:',rsnol,rsnos
       endif
-
-!     print *, rtsfs, qtsfs, raiss , qaiss
-!    *,        rsnos , qsnos, rzors , qzors, rvegs , qvegs
-!    *,        rvets , qvets, rsots , qsots
-!    *,        rcv, rcvb, rcvt, qcv, qcvb, qcvt
-!    *,        ralbs, qalbs, ralfs, qalfs
-!     print *, rtsfl, qtsfl, raisl , qaisl
-!    *,        rsnol , qsnol, rzorl , qzorl, rvegl , qvegl
-!    *,        rvetl , qvetl, rsotl , qsotl
-!    *,        ralbl, qalbl, ralfl, qalfl
-!
 !
       len_thread_m  = (len+num_threads-1) / num_threads
 
@@ -7083,9 +7033,6 @@ cjfe
       do  n=1,k
         gaul(n) = acos(a(n)) * radi
       enddo
-!
-!     print *,'gaussian lat (deg) for jmax=',k
-!     print *,(gaul(n),n=1,k)
 !
       return
    70 write(6,6000)
