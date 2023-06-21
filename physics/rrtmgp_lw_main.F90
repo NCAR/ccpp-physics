@@ -27,13 +27,6 @@ module rrtmgp_lw_main
   use rrtmgp_sampling,        only: sampled_mask, draw_samples
   implicit none
 
-  type(ty_gas_concs)          :: gas_concs
-  type(ty_optical_props_1scl) :: lw_optical_props_clrsky, lw_optical_props_aerosol_local
-  type(ty_optical_props_2str) :: lw_optical_props_clouds, lw_optical_props_cloudsByBand,    &
-       lw_optical_props_cnvcloudsByBand, lw_optical_props_pblcloudsByBand,                  &
-       lw_optical_props_precipByBand
-  type(ty_source_func_lw)     :: sources 
-
   public rrtmgp_lw_main_init, rrtmgp_lw_main_run
 contains
   ! #########################################################################################
@@ -93,33 +86,6 @@ contains
     call rrtmgp_lw_cloud_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_clouds,             &
          doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm, mpirank, mpiroot,    &
          errmsg, errflg)
-
-    ! DDTs
-    
-    ! ty_gas_concs
-    call check_error_msg('rrtmgp_lw_main_gas_concs_init',gas_concs%init(active_gases_array))
-
-    ! ty_optical_props
-    call check_error_msg('rrtmgp_lw_main_gas_optics_init',&
-         lw_optical_props_clrsky%alloc_1scl(rrtmgp_phys_blksz, nLay, lw_gas_props))
-    call check_error_msg('rrtmgp_lw_main_sources_init',&
-         sources%alloc(rrtmgp_phys_blksz, nLay, lw_gas_props))
-    call check_error_msg('rrtmgp_lw_main_cloud_optics_init',&
-         lw_optical_props_cloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
-    call check_error_msg('rrtmgp_lw_main_precip_optics_init',&
-         lw_optical_props_precipByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
-    call check_error_msg('rrtmgp_lw_mian_cloud_sampling_init', &
-         lw_optical_props_clouds%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props))
-    call check_error_msg('rrtmgp_lw_main_aerosol_optics_init',&
-         lw_optical_props_aerosol_local%alloc_1scl(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
-    if (doGP_sgs_cnv) then
-       call check_error_msg('rrtmgp_lw_main_cnv_cloud_optics_init',&
-            lw_optical_props_cnvcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
-    endif
-    if (doGP_sgs_pbl) then
-       call check_error_msg('rrtmgp_lw_main_pbl_cloud_optics_init',&
-            lw_optical_props_pblcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
-    endif
 
   end subroutine rrtmgp_lw_main_init
 !> @}
@@ -242,11 +208,48 @@ contains
     real(kind_phys), dimension(rrtmgp_phys_blksz,lw_gas_props%get_ngpt()) :: lw_Ds
     real(kind_phys), dimension(lw_gas_props%get_nband(),rrtmgp_phys_blksz) :: sfc_emiss_byband
 
+    ! Local RRTMGP DDTs.
+    type(ty_gas_concs)          :: gas_concs
+    type(ty_optical_props_1scl) :: lw_optical_props_clrsky, lw_optical_props_aerosol_local
+    type(ty_optical_props_2str) :: lw_optical_props_clouds, lw_optical_props_cloudsByBand,    &
+         lw_optical_props_cnvcloudsByBand, lw_optical_props_pblcloudsByBand,                  &
+         lw_optical_props_precipByBand
+    type(ty_source_func_lw)     :: sources 
+
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
 
     if (.not. doLWrad) return
+
+    !
+    ! Initialize RRTMGP DDTs (local)
+    !
+
+    ! ty_gas_concs
+    call check_error_msg('rrtmgp_lw_main_gas_concs_run',gas_concs%init(active_gases_array))
+
+    ! ty_optical_props
+    call check_error_msg('rrtmgp_lw_main_gas_optics_run',&
+         lw_optical_props_clrsky%alloc_1scl(rrtmgp_phys_blksz, nLay, lw_gas_props))
+    call check_error_msg('rrtmgp_lw_main_sources_run',&
+         sources%alloc(rrtmgp_phys_blksz, nLay, lw_gas_props))
+    call check_error_msg('rrtmgp_lw_main_cloud_optics_run',&
+         lw_optical_props_cloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
+    call check_error_msg('rrtmgp_lw_main_precip_optics_run',&
+         lw_optical_props_precipByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
+    call check_error_msg('rrtmgp_lw_mian_cloud_sampling_run', &
+         lw_optical_props_clouds%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props))
+    call check_error_msg('rrtmgp_lw_main_aerosol_optics_run',&
+         lw_optical_props_aerosol_local%alloc_1scl(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
+    if (doGP_sgs_cnv) then
+       call check_error_msg('rrtmgp_lw_main_cnv_cloud_optics_run',&
+            lw_optical_props_cnvcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
+    endif
+    if (doGP_sgs_pbl) then
+       call check_error_msg('rrtmgp_lw_main_pbl_cloud_optics_run',&
+            lw_optical_props_pblcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, lw_gas_props%get_band_lims_wavenumber()))
+    endif
 
     ! ######################################################################################
     !
