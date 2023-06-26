@@ -10,8 +10,8 @@
 !!
     subroutine GFS_suite_interstitial_3_run (otsptflag,                 &
                im, levs, nn, cscnv,imfshalcnv, imfdeepcnv,              &
-               imfshalcnv_samf, imfdeepcnv_samf, imfdeepcnv_unified,    &
-               imfshalcnv_unified,progsigma,                            &
+               imfshalcnv_samf, imfdeepcnv_samf, imfdeepcnv_c3,         &
+               imfshalcnv_c3,progsigma,                                 &
                first_time_step, restart,                                &
                satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,   &
                ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc,    &
@@ -40,7 +40,7 @@
       logical,              intent(in   )                   :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras, progsigma
       logical,              intent(in   )                   :: first_time_step, restart
       integer,              intent(in   )                   :: imfshalcnv, imfdeepcnv, imfshalcnv_samf,imfdeepcnv_samf
-      integer,              intent(in   )                   :: imfshalcnv_unified,imfdeepcnv_unified
+      integer,              intent(in   )                   :: imfshalcnv_c3,imfdeepcnv_c3
       integer,                                          intent(in) :: ntinc, ntlnc
       logical,                                          intent(in) :: ldiag3d, qdiag3d
       integer,              dimension(:,:),             intent(in) :: dtidx
@@ -84,7 +84,7 @@
       ! In case of using prognostic updraf area fraction, initialize area fraction here
       ! since progsigma_calc is called from both deep and shallow schemes.
       if(((imfshalcnv == imfshalcnv_samf) .or. (imfdeepcnv == imfdeepcnv_samf) &
-          .or. (imfshalcnv == imfshalcnv_unified) .or. (imfdeepcnv == imfdeepcnv_unified)) &
+          .or. (imfshalcnv == imfshalcnv_c3) .or. (imfdeepcnv == imfdeepcnv_c3)) &
           .and. progsigma)then
          if(first_time_step .and. .not. restart)then
             do k=1,levs
