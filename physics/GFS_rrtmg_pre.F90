@@ -18,7 +18,7 @@
 !!    
 !>\section rrtmg_pre_gen General Algorithm
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp, lextop,&
-        ltp, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_unified, me, ncnd, ntrac,   &
+        ltp, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_c3, me, ncnd, ntrac,        &
         num_p3d, npdf3d,                                                       &
         ncnvcld3d,ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, top_at_1,&
         ntrw, ntsw, ntgl, nthl, ntwa, ntoz, ntsmoke, ntdust, ntcoarsepm,       &
@@ -44,7 +44,7 @@
         gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
         gasvmr_ccl4,  gasvmr_cfc113, aerodp,ext550, clouds6, clouds7, clouds8, &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
-        faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha,           &
+        faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha, rrfs_sd,  &
         aero_dir_fdb, fdb_coef, spp_wts_rad, spp_rad, ico2, errmsg, errflg)
 
       use machine,                   only: kind_phys
@@ -84,7 +84,7 @@
 
       integer,              intent(in)  :: im, levs, lm, lmk, lmp, ltp,        &
                                            n_var_lndp, imfdeepcnv,             &
-                                           imfdeepcnv_gf, imfdeepcnv_unified,  & 
+                                           imfdeepcnv_gf, imfdeepcnv_c3,       &
                                            me, ncnd, ntrac,                    &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
                                            ntcw, ntiw, ntlnc, ntinc,           &
@@ -126,7 +126,7 @@
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds, lcrick,&
                                           lcnorm, top_at_1, lextop, mraerosol
-      logical,              intent(in) :: aero_dir_fdb
+      logical,              intent(in) :: rrfs_sd, aero_dir_fdb
 
       logical,              intent(in) :: nssl_ccn_on, nssl_invertccn
       integer,              intent(in) :: spp_rad
@@ -640,7 +640,7 @@
         endif
 
 !>---   add smoke and dust ---
-       if (aero_dir_fdb) then
+       if (rrfs_sd .and. aero_dir_fdb) then
          do k=1,lmk
            do i=1,im
              aer_nm(i,k,1 )=aer_nm(i,k,1 )+ qgrs(i,k,ntdust)*fdb_coef(1)*1.e-9    ! dust bin1
@@ -819,7 +819,7 @@
             enddo
           endif
         elseif (imp_physics == imp_physics_gfdl) then            ! GFDL MP
-          if ((imfdeepcnv==imfdeepcnv_gf .or. imfdeepcnv==imfdeepcnv_unified) .and. kdt>1) then
+          if ((imfdeepcnv==imfdeepcnv_gf .or. imfdeepcnv==imfdeepcnv_c3) .and. kdt>1) then
               do k=1,lm
                 k1 = k + kd
                 do i=1,im
