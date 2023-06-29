@@ -8206,6 +8206,12 @@ cjfe
         enddo
       endif
 
+!     initialize socclm in case there is no soil color data input
+
+         do i=1,len
+           socclm(i) = 4.
+         enddo
+
       if(fnsocc(1:8).ne.'        ') then
         do i=1,len
           socclm(i) =         soc(i)
