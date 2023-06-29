@@ -1,7 +1,7 @@
-!>\file cu_unified_sh.F90
-!! This file contains unified shallow convection scheme.
+!>\file cu_c3_sh.F90
+!! This file contains C3 shallow convection scheme.
 
-module cu_unified_sh
+module cu_c3_sh
     use machine , only : kind_phys
     use progsigma, only : progsigma_calc
 
@@ -16,9 +16,9 @@ module cu_unified_sh
 
 contains
 
-!>\defgroup cu_unified_sh_group Grell-Freitas Shallow Convection Module
+!>\defgroup cu_c3_sh_group Grell-Freitas Shallow Convection Module
 !! This module contains Grell-Freitas shallow convection scheme.
-!> \ingroup cu_unified_group
+!> \ingroup cu_c3_group
 !> @{
 !> GF shallow convection as described in Grell and
 !! Freitas (2014) \cite grell_and_freitas_2014. input variables are:
@@ -62,8 +62,8 @@ contains
 !!\param    itf,ktf,its,ite, kts,kte are dimensions
 !!\param    ipr               horizontal index of printed column
 !!\param    tropics            =0
-!>\section gen_cu_unified_sh_run Grell-Freitas Shallow Convection General Algorithm
-  subroutine cu_unified_sh_run (                                            &
+!>\section gen_cu_c3_sh_run Grell-Freitas Shallow Convection General Algorithm
+  subroutine cu_c3_sh_run (                                            &
                          us,vs,zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     & ! input variables, must be supplied
                          hfx,qfx,xland,ichoice,tcrit,dtime,         &
                          zuo,xmb_out,kbcon,ktop,k22,ierr,ierrc,     &
@@ -74,7 +74,7 @@ contains
 !
 ! this module needs some subroutines from gf_deep
 !
-  use cu_unified_deep,only:cup_env,cup_env_clev,get_cloud_bc,cup_minimi,  &
+  use cu_c3_deep,only:cup_env,cup_env_clev,get_cloud_bc,cup_minimi,  &
                       get_inversion_layers,rates_up_pdf,get_cloud_bc,     &
                       cup_up_aa0,cup_kbcon,get_lateral_massflux,          &
                       calculate_updraft_velocity
@@ -1116,6 +1116,6 @@ contains
 !              print*,'hlisq',qco(1,k),qrco(1,k),pwo(1,k)
 !             enddo
 
-   end subroutine cu_unified_sh_run
+   end subroutine cu_c3_sh_run
 !> @}
-end module cu_unified_sh
+end module cu_c3_sh

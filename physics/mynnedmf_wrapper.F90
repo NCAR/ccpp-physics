@@ -418,7 +418,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             FLAG_QI = .true.
             FLAG_QNI= .true.
             FLAG_QC = .true.
-            FLAG_QS = .true.
+            FLAG_QS = .false.
             FLAG_QNC= .true.
             FLAG_QNWFA= .true.
             FLAG_QNIFA= .true.
@@ -428,7 +428,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 sqv(i,k)   = qgrs_water_vapor(i,k)
                 sqc(i,k)   = qgrs_liquid_cloud(i,k)
                 sqi(i,k)   = qgrs_ice(i,k)
-                sqs(i,k)   = qgrs_snow(i,k)
+                sqs(i,k)   = 0. !qgrs_snow(i,k)
                 qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
                 qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
                 ozone(i,k) = qgrs_ozone(i,k)
@@ -441,7 +441,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             FLAG_QI = .true.
             FLAG_QNI= .true.
             FLAG_QC = .true.
-            FLAG_QS = .true.
+            FLAG_QS = .false.
             FLAG_QNC= .true.
             FLAG_QNWFA= .false.
             FLAG_QNIFA= .false.
@@ -451,7 +451,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 sqv(i,k)   = qgrs_water_vapor(i,k)
                 sqc(i,k)   = qgrs_liquid_cloud(i,k)
                 sqi(i,k)   = qgrs_ice(i,k)
-                sqs(i,k)   = qgrs_snow(i,k)
+                sqs(i,k)   = 0. !qgrs_snow(i,k)
                 qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
                 qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
                 ozone(i,k) = qgrs_ozone(i,k)
@@ -464,7 +464,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             FLAG_QI = .true.
             FLAG_QNI= .true.
             FLAG_QC = .true.
-            FLAG_QS = .true.
+            FLAG_QS = .false.
             FLAG_QNC= .false.
             FLAG_QNWFA= .false.
             FLAG_QNIFA= .false.
@@ -474,7 +474,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 sqv(i,k)   = qgrs_water_vapor(i,k)
                 sqc(i,k)   = qgrs_liquid_cloud(i,k)
                 sqi(i,k)   = qgrs_ice(i,k)
-                sqs(i,k)   = qgrs_snow(i,k)
+                sqs(i,k)   = 0. !qgrs_snow(i,k)
                 qnc(i,k)   = 0.
                 qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
                 ozone(i,k) = qgrs_ozone(i,k)
@@ -834,7 +834,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
                  dqdt_ice(i,k)                     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
-                 dqdt_snow(i,k)                    = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_snow(i,k)                    = 0.0 !RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                  !dqdt_ozone(i,k)                   = 0.0
                  dqdt_water_aer_num_conc(i,k)      = RQNWFABLTEN(i,k)
                  dqdt_ice_aer_num_conc(i,k)        = RQNIFABLTEN(i,k)
@@ -869,7 +869,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
                  dqdt_ice(i,k)                     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
-                 dqdt_snow(i,k)                    = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_snow(i,k)                    = 0.0 !RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                enddo
              enddo
              if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
@@ -887,7 +887,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice(i,k)           = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)  = RQNIBLTEN(i,k)
-                 dqdt_snow(i,k)          = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_snow(i,k)          = 0.0 !RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                  !dqdt_ozone(i,k)         = 0.0
                enddo
              enddo
@@ -896,7 +896,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                call dtend_helper(100+ntcw,RQCBLTEN)
                call dtend_helper(100+ntiw,RQIBLTEN)
                call dtend_helper(100+ntinc,RQNIBLTEN)
-               call dtend_helper(100+ntsw,RQSBLTEN)
+               !call dtend_helper(100+ntsw,RQSBLTEN)
              endif
              !do k=1,levs
              !  do i=1,im
