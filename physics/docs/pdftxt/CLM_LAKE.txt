@@ -36,7 +36,7 @@ in the UFS SRW App, is capable of capturing the effect of lakes on regional heat
 Lake depths for the RRFS lake configuration (Fig.1) are assigned from a global dataset provided by Kourzeneva et al.(2012) \cite Kourzeneva_2012,
 this dataset is referred to as GLOBv3 bathymetry in the UFS_UTL.
 
-\image html Lake_depths_RRFS3km.png "Figure 1: Lake depths for lakes in the 3-km RRFS domain." width=600
+@image html https://user-images.githubusercontent.com/12705538/250180794-76af93a2-a7ba-4e9a-9478-5657198862b8.png "Figure 1: Lake depths for lakes in the 3-km RRFS domain." width=600
 
 To cold-start the CLM lake model in the UFS SRW App:
 - Use the CLM option in the input.nml
@@ -48,8 +48,8 @@ To cold-start the CLM lake model in the UFS SRW App:
 - Lake ice at the top level is initialized from the GFS ice concentration
 
 The differences of surface variables from the experimental RRFS 6-h forecast with/without CLM lake model are shown in Figure 2 for 2-m temperature and in Figure 3 for 2-m dewpoint.
-\image html diff_t2m_lake_rrfs.png "Figure 2: Differences of 2-m temperature between the RRFS coupled to the CLM model and the RRFS without CLM." width=600
-\image html diff_td2m_lake_rrfs.png "Figure 3: Differences of 2-m dew point between the RRFS coupled to the CLM model and the RRFS without CLM." width=600
+@image html https://user-images.githubusercontent.com/12705538/250180790-63159300-33f6-4b34-9e9c-b65885213c30.png "Figure 2: Differences of 2-m temperature between the RRFS coupled to the CLM model and the RRFS without CLM." width=600
+@image html https://user-images.githubusercontent.com/12705538/250180787-8fc9a820-5f80-4f06-b50a-88b2d20ebc53.png "Figure 3: Differences of 2-m dew point between the RRFS coupled to the CLM model and the RRFS without CLM." width=600
  
 
 

@@ -43,7 +43,7 @@ to determine the uncertainty range for the selected parameters in the RUC LSM.
 
 ## RUC LSM characteristics that differ from Noah LSM:
 \image html ruc_lsm_veg_soil.png "Figure 1: RUC LSM Vegetation and Soil Model (Courtesy of T.G. Smirnova) " width=900
-\image html ruc_ranking.png "Figure 2: Model ranking as a function of normalized root mean square error of snow water equivalent and surface temperature (Courtesy of C. Menard)" width=900
+@image html https://user-images.githubusercontent.com/12705538/250180784-d50a3d4c-93db-4d8d-b12d-2c0ca22da5c3.png "Figure 2: Model ranking as a function of normalized root mean square error of snow water equivalent and surface temperature (Courtesy of C. Menard)" width=900
 - \b Implicit \b solution of energy and moisture budgets in the layer spanning the ground surface
 - \b 9 \b soil \b levels with high vertical resolution near surface
 RUC LSM has more levels in soil than \ref GFS_NOAH model with higher resolution near the interface with the atmosphere
@@ -80,7 +80,7 @@ Snow forms additional two layers on top of soil in RUC LSM
 \image html ruc_lsm_mosaic.png "Figure 4: 'Mosaic' approach for patchy snow (Courtesy of T.G. Smirnova) " width=900
   - New: additional options to compute snow cover fraction (\p isncovr_opt =2 and 3, Niu and Yang (2007) \cite Niu_2007). These options allowed to reduce overprediction of number of grid cells fully covered with snow which further reduced cold-biases over snow. Figure 5 demonstrates that option 3 of snow cover fraction computation (\p isncovr_opt = 3) in the UFS-based regional model matches better the satellite data for the test case on 6 February 2022.
 - New: added an option to use of a new formulation of snow thermal conductivity (\p isncond_opt = 2, Sturm et al. (1997) \cite sturm_1997);
-\image html sncov_rrfs_ruc.png "Figure 5: Snow cover fraction from MODIS (a,b), Regional UFS-based system (RRFS) original (c), and modified with isncover_opt=3 (d), 6 February 2022. (Courtesy of T.G. Smirnova)"  width=900
+@image html https://user-images.githubusercontent.com/12705538/250180782-925303ec-7751-4d7e-be8f-b3f1323f35d4.png "Figure 5: Snow cover fraction from MODIS (a,b), Regional UFS-based system (RRFS) original (c), and modified with isncover_opt=3 (d), 6 February 2022. (Courtesy of T.G. Smirnova)"  width=900
 - Iterative snow melting algorithm;
 - Density of snow on the ground - a function of compaction parameter and snow depth and temperature;
 - Snow albedo - a function of temperature and snow fraction;
