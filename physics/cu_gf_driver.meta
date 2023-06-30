@@ -569,6 +569,34 @@
   type = real
   kind = kind_phys
   intent = in
+[do_mynnedmf]
+  standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
+  long_name = flag to activate MYNN-EDMF
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ichoice_in]
+  standard_name = identifier_for_c3_or_gf_deep_convection_closure
+  long_name = flag for C3 or GF deep convection closure
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[ichoicem_in]
+  standard_name = identifier_for_c3_or_gf_mid_convection_closure
+  long_name = flag for C3 or GF mid convection closure
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[ichoice_s_in]
+  standard_name = identifier_for_c3_or_gf_shallow_convection_closure
+  long_name = flag for C3 or GF shallow convection closure
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
