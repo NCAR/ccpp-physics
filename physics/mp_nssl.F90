@@ -31,7 +31,7 @@ module mp_nssl
                               con_t0c, con_cliq, con_csol, con_eps,   &
                               imp_physics, imp_physics_nssl,  &
                               nssl_cccn, nssl_alphah, nssl_alphahl, &
-                              nssl_alphar, nssl_ehw0_in, nssl_ehlw0_in,   &
+                              nssl_alphar, nssl_ehw0, nssl_ehlw0,   &
                               nssl_ccn_on, nssl_hail_on, nssl_invertccn ) 
                               
 
@@ -53,7 +53,7 @@ module mp_nssl
          integer,                   intent(in)    :: imp_physics
          integer,                   intent(in)    :: imp_physics_nssl
          real(kind_phys),           intent(in)    :: nssl_cccn, nssl_alphah, nssl_alphahl
-         real(kind_phys),           intent(in)    :: nssl_alphar, nssl_ehw0_in, nssl_ehlw0_in 
+         real(kind_phys),           intent(in)    :: nssl_alphar, nssl_ehw0, nssl_ehlw0 
          logical,                   intent(in)    :: nssl_ccn_on, nssl_hail_on, nssl_invertccn
 
          ! Local variables: dimensions used in nssl_init
@@ -117,7 +117,7 @@ module mp_nssl
          nssl_params(11) = 0 ! nssl_ipelec_tmp
          nssl_params(12) = 11 ! nssl_isaund
          nssl_params(13) = 0 ! 1= turn on cccna; 0 = turn off
-         nssl_params(14)  = nssl_alphar
+         nssl_params(15)  = nssl_alphar
          
          nssl_qccn = nssl_cccn/1.225
       !   if (mpirank==mpiroot) then
@@ -132,7 +132,7 @@ module mp_nssl
 
 !           write(0,*) 'call nssl_2mom_init'
          CALL nssl_2mom_init(ims,ime, jms,jme, kms,kme,nssl_params,ipctmp=5,mixphase=0, &
-                ihvol=ihailv,nssl_ehw0=nssl_ehw0_in,nssl_ehlw0=nssl_ehlw0_in,errmsg=errmsg,errflg=errflg,myrank=mpirank,mpiroot=mpiroot)
+                ihvol=ihailv,nssl_ehw0=nssl_ehw0,nssl_ehlw0=nssl_ehlw0,errmsg=errmsg,errflg=errflg,myrank=mpirank,mpiroot=mpiroot)
 
          ! For restart runs, the init is done here
          if (restart) then
