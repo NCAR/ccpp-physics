@@ -3057,6 +3057,7 @@ MODULE module_mp_thompson
               pnr_sml(k) = smo0(k)/rs(k)*prr_sml(k) * 10.0**(-0.25*tempc)   ! RAIN2M
               pnr_sml(k) = MIN(DBLE(smo0(k)*odts), pnr_sml(k))
            elseif (ssati(k).lt. 0.) then
+              prr_sml(k) = 0.0
               prs_sde(k) = C_cube*t1_subl*diffu(k)*ssati(k)*rvs         &
                          * (t1_qs_sd*smo1(k)                            &
                          + t2_qs_sd*rhof2(k)*vsc2(k)*smof(k))
@@ -3073,6 +3074,7 @@ MODULE module_mp_thompson
               pnr_gml(k) = N0_g(k)*cgg(2)*ilamg(k)**cge(2) / rg(k)      &   ! RAIN2M
                          * prr_gml(k) * 10.0**(-0.5*tempc)
            elseif (ssati(k).lt. 0.) then
+              prr_gml(k) = 0.0
               prg_gde(k) = C_cube*t1_subl*diffu(k)*ssati(k)*rvs         &
                          * N0_g(k) * (t1_qg_sd*ilamg(k)**cge(10)        &
                          + t2_qg_sd*vsc2(k)*rhof2(k)*ilamg(k)**cge(11))
