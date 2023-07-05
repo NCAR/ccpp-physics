@@ -1228,7 +1228,7 @@ MODULE module_mp_nssl_2mom
       rho_qh   = nssl_params(8)
       rho_qhl  = nssl_params(9)
       rho_qs   = nssl_params(10)
-      alphar   = nssl_params(14)
+      alphar   = nssl_params(15)
       
 !      ipelec   = Nint(nssl_params(11))
 !      isaund   = Nint(nssl_params(12))
