@@ -7,7 +7,7 @@
 ! ########################################################################################
 module ccpp_scheme_simulator
   use machine, only: kind_phys
-  use module_ccpp_scheme_simulator, only: base_physics_process, sim_LWRAD, sim_SWRAD, &
+  use module_ccpp_scheme_simulator, only: base_physics_process, sim_LWRAD, sim_SWRAD,    &
        sim_PBL, sim_GWD, sim_DCNV, sim_SCNV, sim_cldMP
   implicit none
   public ccpp_scheme_simulator_run
@@ -22,15 +22,16 @@ contains
 !! \htmlinclude ccpp_scheme_simulator_run.html
 !!
   subroutine ccpp_scheme_simulator_run(do_ccpp_scheme_sim, kdt, nCol, nLay, dtp, jdat,   &
-       proc_start, proc_end, physics_process, in_pre_active, in_post_active, tgrs, ugrs, &
-       vgrs, qgrs, active_phys_tend, gt0, gu0, gv0, gq0, errmsg, errflg)
+       iactive_T, iactive_u, iactive_v, iactive_q, proc_start, proc_end, physics_process,&
+       in_pre_active, in_post_active, tgrs, ugrs, vgrs, qgrs, active_phys_tend, gt0, gu0,&
+       gv0, gq0, errmsg, errflg)
 
     ! Inputs
     logical,           intent(in)  :: do_ccpp_scheme_sim
-    integer,           intent(in)  :: kdt, nCol, nLay, jdat(8)
+    integer,           intent(in)  :: kdt, nCol, nLay, jdat(8), iactive_T, iactive_u,    &
+                                      iactive_v, iactive_q
     real(kind_phys),   intent(in)  :: dtp, tgrs(:,:), ugrs(:,:), vgrs(:,:), qgrs(:,:,:), &
                                       active_phys_tend(:,:,:)
-
     ! Outputs
     type(base_physics_process),intent(inout) :: physics_process(:)
     real(kind_phys), intent(inout) :: gt0(:,:), gu0(:,:), gv0(:,:), gq0(:,:)
@@ -125,18 +126,18 @@ contains
 
           ! Using data tendency from "active" scheme(s).
           else
-             physics_process(iprc)%tend1d%T = active_phys_tend(iCol,:,1)
-             physics_process(iprc)%tend1d%u = active_phys_tend(iCol,:,2)
-             physics_process(iprc)%tend1d%v = active_phys_tend(iCol,:,3)
-             physics_process(iprc)%tend1d%q = active_phys_tend(iCol,:,4)
+             if (iactive_T > 0) physics_process(iprc)%tend1d%T = active_phys_tend(iCol,:,iactive_T)
+             if (iactive_u > 0) physics_process(iprc)%tend1d%u = active_phys_tend(iCol,:,iactive_u)
+             if (iactive_v > 0) physics_process(iprc)%tend1d%v = active_phys_tend(iCol,:,iactive_v)
+             if (iactive_q > 0) physics_process(iprc)%tend1d%q = active_phys_tend(iCol,:,iactive_q)
           endif
 
           ! Update state now? (time-split scheme)
           if (physics_process(iprc)%time_split) then
-             gt1(iCol,:) = gt1(iCol,:) + (dTdt(iCol,:) + physics_process(iprc)%tend1d%T)*dtp
-             gu1(iCol,:) = gu1(iCol,:) + (dudt(iCol,:) + physics_process(iprc)%tend1d%u)*dtp
-             gv1(iCol,:) = gv1(iCol,:) + (dvdt(iCol,:) + physics_process(iprc)%tend1d%v)*dtp
-             gq1(iCol,:) = gq1(iCol,:) + (dqdt(iCol,:) + physics_process(iprc)%tend1d%q)*dtp
+             gt1(iCol,:)  = gt1(iCol,:) + (dTdt(iCol,:) + physics_process(iprc)%tend1d%T)*dtp
+             gu1(iCol,:)  = gu1(iCol,:) + (dudt(iCol,:) + physics_process(iprc)%tend1d%u)*dtp
+             gv1(iCol,:)  = gv1(iCol,:) + (dvdt(iCol,:) + physics_process(iprc)%tend1d%v)*dtp
+             gq1(iCol,:)  = gq1(iCol,:) + (dqdt(iCol,:) + physics_process(iprc)%tend1d%q)*dtp
              dTdt(iCol,:) = 0.
              dudt(iCol,:) = 0.
              dvdt(iCol,:) = 0.
@@ -149,11 +150,29 @@ contains
              dqdt(iCol,:) = dqdt(iCol,:) + physics_process(iprc)%tend1d%q
           endif
        enddo ! END: Loop over columns
+
+       ! Print diagnostics
+       if (physics_process(iprc)%use_sim) then
+          if (physics_process(iprc)%time_split) then
+             write(*,'(a25,i2,a4,i2,a5,a10,a35)') 'CCPP suite simulator: ',iprc,' of ',proc_end,' ',physics_process(iprc)%name,'time split scheme     (simulated)'
+          else
+             write(*,'(a25,i2,a4,i2,a5,a10,a35)') 'CCPP suite simulator: ',iprc,' of ',proc_end,' ',physics_process(iprc)%name,'process split scheme  (simulated)'
+          endif
+       else
+          if (physics_process(iprc)%time_split) then
+             write(*,'(a25,i2,a4,i2,a5,a10,a35)') 'CCPP suite simulator: ',iprc,' of ',proc_end,' ',physics_process(iprc)%name,'   time split scheme     (active)'
+          else
+             write(*,'(a25,i2,a4,i2,a5,a10,a35)') 'CCPP suite simulator: ',iprc,' of ',proc_end,' ',physics_process(iprc)%name,'   process split scheme  (active)'
+          endif
+          write(*,'(a25,i2)')                     '       # prog. vars.: ',physics_process(1)%nprg_active
+       endif
     enddo    ! END: Loop over physics processes
 
     !
     ! Update state with accumulated tendencies (process-split only)
+    ! (Suites where active scheme is last physical process)
     !
+    iprc = minval([iprc,proc_end])
     if (.not. physics_process(iprc)%time_split) then
        do iCol = 1,nCol
           gt0(iCol,:) = gt1(iCol,:) + dTdt(iCol,:)*dtp
@@ -171,7 +190,7 @@ contains
        in_post_active = .true.
     endif
 
-    if (size(physics_process)+1 == iprc) then
+    if (size(physics_process) == proc_end) then
        in_pre_active  = .true.
        in_post_active = .false.
     endif

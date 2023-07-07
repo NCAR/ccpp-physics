@@ -122,6 +122,34 @@
   type = real
   kind = kind_phys
   intent = out
+[iactive_T]
+  standard_name = index_for_active_T_in_CCPP_scheme_simulator
+  long_name = index into active process tracer array for temperature in CCPP scheme simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iactive_u]
+  standard_name = index_for_active_u_in_CCPP_scheme_simulator
+  long_name = index into active process tracer array for zonal wind in CCPP scheme simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iactive_v]
+  standard_name = index_for_active_v_in_CCPP_scheme_simulator
+  long_name = index into active process tracer array for meridional wind in CCPP scheme simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iactive_q]
+  standard_name = index_for_active_q_in_CCPP_scheme_simulator
+  long_name = index into active process tracer array for moisture in CCPP scheme simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

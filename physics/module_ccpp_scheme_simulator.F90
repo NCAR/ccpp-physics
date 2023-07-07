@@ -73,6 +73,7 @@ module module_ccpp_scheme_simulator
      character(len=16)  :: active_name          ! "Active" scheme: Physics process name
      integer            :: iactive_scheme       ! "Active" scheme: Order of process in process-loop
      logical            :: active_tsp           ! "Active" scheme: Is process time-split?
+     integer            :: nprg_active          ! "Active" scheme: Number of prognostic variables
    contains
      generic,   public  :: linterp => linterp_1D, linterp_2D
      procedure, private :: linterp_1D

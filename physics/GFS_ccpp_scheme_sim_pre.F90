@@ -24,8 +24,8 @@ contains
   subroutine GFS_ccpp_scheme_sim_pre_run(dtend, ntqv, dtidx, dtp, index_of_process_dcnv, &
        index_of_process_longwave, index_of_process_shortwave, index_of_process_scnv,     &
        index_of_process_orographic_gwd, index_of_process_pbl, index_of_process_mp,       &
-       index_of_temperature, index_of_x_wind, index_of_y_wind,                           &
-       physics_process, active_phys_tend, errmsg, errflg)
+       index_of_temperature, index_of_x_wind, index_of_y_wind, physics_process,          &
+       iactive_T, iactive_u, iactive_v, iactive_q, active_phys_tend, errmsg, errflg)
 
     ! Inputs
     integer, intent(in) :: ntqv, index_of_process_dcnv, index_of_process_longwave,       &
@@ -36,6 +36,7 @@ contains
     real(kind_phys), intent(in) :: dtp
     real(kind_phys), intent(in), dimension(:,:,:) :: dtend
     type(base_physics_process),intent(in) :: physics_process(:)
+    integer,         intent(in) :: iactive_T, iactive_u, iactive_v, iactive_q
 
     ! Outputs
     real(kind_phys), intent(out) :: active_phys_tend(:,:,:)
@@ -76,23 +77,33 @@ contains
 
     ! Heat
     idtend = dtidx(index_of_temperature,iactive)
-    if (idtend >= 1) active_phys_tend(:,:,1) = dtend(:,:,idtend)/dtp
+    if (idtend >= 1) then
+       active_phys_tend(:,:,iactive_T) = dtend(:,:,idtend)/dtp
+    endif
+
     ! u-wind
     idtend = dtidx(index_of_x_wind,iactive)
-    if (idtend >= 1) active_phys_tend(:,:,2) = dtend(:,:,idtend)/dtp
+    if (idtend >= 1) then
+       active_phys_tend(:,:,iactive_u) = dtend(:,:,idtend)/dtp
+    endif
+
     ! v-wind
     idtend = dtidx(index_of_y_wind,iactive)
-    if (idtend >= 1) active_phys_tend(:,:,3) = dtend(:,:,idtend)/dtp
+    if (idtend >= 1) then
+       active_phys_tend(:,:,iactive_v) = dtend(:,:,idtend)/dtp
+    endif
+
     ! Moisture
     idtend = dtidx(100+ntqv,iactive)
-    if (idtend >= 1) active_phys_tend(:,:,4) = dtend(:,:,idtend)/dtp
-
+    if (idtend >= 1) then
+       active_phys_tend(:,:,iactive_q) = dtend(:,:,idtend)/dtp
+    endif
 
   end subroutine GFS_ccpp_scheme_sim_pre_run
 
   ! ######################################################################################
-  subroutine load_ccpp_scheme_sim(nlunit, nml_file, physics_process, nprg_active,        &
-       errmsg, errflg)
+  subroutine load_ccpp_scheme_sim(nlunit, nml_file, physics_process, &
+       iactive_T, iactive_u, iactive_v, iactive_q, errmsg, errflg)
 
     ! Inputs
     integer,          intent (in) :: nlunit
@@ -100,7 +111,7 @@ contains
 
     ! Outputs
     type(base_physics_process),intent(inout),allocatable :: physics_process(:)
-    integer, intent(out)          :: nprg_active
+    integer, intent(inout)        :: iactive_T, iactive_u, iactive_v, iactive_q
     integer, intent(out)          :: errflg
     character(len=256), intent(out) :: errmsg
 
@@ -221,14 +232,17 @@ contains
           physics_process(iprc)%name       = "SWRAD"
           if (prc_SWRAD_cfg(1) == 1) then
              physics_process(iprc)%use_sim = .true.
+          else
+             physics_process(1)%nprg_active = 1
+             iactive_T   = 1
           endif
           if (prc_SWRAD_cfg(2) == 1) then
              physics_process(iprc)%time_split = .true.
           endif
+
           ! Data
           status = nf90_inq_varid(ncid, 'dT_dt_swrad', varID)
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%T)
-          nprg_active = 1
        endif
 
        if (iprc == prc_LWRAD_cfg(3)) then
@@ -237,14 +251,17 @@ contains
           physics_process(iprc)%name       = "LWRAD"
           if (prc_LWRAD_cfg(1) == 1) then
              physics_process(iprc)%use_sim = .true.
+          else
+             physics_process(1)%nprg_active = 1
+             iactive_T   = 1
           endif
           if (prc_LWRAD_cfg(2) == 1) then
              physics_process(iprc)%time_split = .true.
           endif
+
           ! Data
           status = nf90_inq_varid(ncid, 'dT_dt_lwrad', varID)
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%T)
-          nprg_active =1
        endif
 
        if (iprc == prc_GWD_cfg(3)) then
@@ -253,10 +270,16 @@ contains
           physics_process(iprc)%name       = "GWD"
           if (prc_GWD_cfg(1) == 1) then
              physics_process(iprc)%use_sim = .true.
+          else
+             physics_process(1)%nprg_active = 3
+             iactive_T   = 1
+             iactive_u   = 2
+             iactive_v   = 3
           endif
           if (prc_GWD_cfg(2) == 1) then
              physics_process(iprc)%time_split = .true.
           endif
+
           ! Data
           status = nf90_inq_varid(ncid, 'dT_dt_cgwd', varID)
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%T)
@@ -264,7 +287,6 @@ contains
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%u)
           status = nf90_inq_varid(ncid, 'dv_dt_cgwd', varID)
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%v)
-          nprg_active = 3
        endif
 
        if (iprc == prc_PBL_cfg(3)) then
@@ -273,10 +295,17 @@ contains
           physics_process(iprc)%name       = "PBL"
           if (prc_PBL_cfg(1) == 1) then
              physics_process(iprc)%use_sim = .true.
+          else
+             physics_process(1)%nprg_active = 4
+             iactive_T   = 1
+             iactive_u   = 2
+             iactive_v   = 3
+             iactive_q   = 4
           endif
           if (prc_PBL_cfg(2) == 1) then
              physics_process(iprc)%time_split = .true.
           endif
+
           ! Data
           status = nf90_inq_varid(ncid, 'dT_dt_pbl', varID)
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%T)
@@ -286,7 +315,6 @@ contains
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%u)
           status = nf90_inq_varid(ncid, 'dv_dt_pbl', varID)
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%v)
-          nprg_active = 4
        endif
 
        if (iprc == prc_SCNV_cfg(3)) then
@@ -295,10 +323,17 @@ contains
           physics_process(iprc)%name       = "SCNV"
           if (prc_SCNV_cfg(1) == 1) then
              physics_process(iprc)%use_sim = .true.
+          else
+             physics_process(1)%nprg_active = 4
+             iactive_T   = 1
+             iactive_u   = 2
+             iactive_v   = 3
+             iactive_q   = 4
           endif
           if (prc_SCNV_cfg(2) == 1) then
              physics_process(iprc)%time_split = .true.
           endif
+
           ! Data
           status = nf90_inq_varid(ncid, 'dT_dt_shalconv', varID)
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%T)
@@ -308,7 +343,6 @@ contains
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%v)
           status = nf90_inq_varid(ncid, 'dq_dt_shalconv', varID)
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%q)
-          nprg_active = 4
        endif
 
        if (iprc == prc_DCNV_cfg(3)) then
@@ -317,6 +351,12 @@ contains
           physics_process(iprc)%name       = "DCNV"
           if (prc_DCNV_cfg(1) == 1) then
              physics_process(iprc)%use_sim = .true.
+          else
+             physics_process(1)%nprg_active = 4
+             iactive_T   = 1
+             iactive_u   = 2
+             iactive_v   = 3
+             iactive_q   = 4
           endif
           if (prc_DCNV_cfg(2) == 1) then
              physics_process(iprc)%time_split = .true.
@@ -330,7 +370,6 @@ contains
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%v)
           status = nf90_inq_varid(ncid, 'dq_dt_deepconv', varID)
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%q)
-          nprg_active = 4
        endif
 
        if (iprc == prc_cldMP_cfg(3)) then
@@ -339,16 +378,20 @@ contains
           physics_process(iprc)%name       = "cldMP"
           if (prc_cldMP_cfg(1) == 1) then
              physics_process(iprc)%use_sim = .true.
+          else
+             physics_process(1)%nprg_active = 2
+             iactive_T   = 1
+             iactive_q   = 2
           endif
           if (prc_cldMP_cfg(2) == 1) then
              physics_process(iprc)%time_split = .true.
           endif
+
           ! Data
           status = nf90_inq_varid(ncid, 'dT_dt_micro', varID)
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%T)
           status = nf90_inq_varid(ncid, 'dq_dt_micro', varID)
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%q)
-          nprg_active = 2
        endif
 
        ! Which process-scheme is "active"? Is process time-split?
