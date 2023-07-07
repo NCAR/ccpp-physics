@@ -19,6 +19,8 @@
      &                    shflx,cdq,wind,                               &
      &                    zf,ps,u1,v1,t1,q1,prslki,evap,fm,fh,fm10,fh2, &
      &                    ust,tskin,qsurf,thsfc_loc,diag_flux,diag_log, &
+     &                    use_lake_model,iopt_lake,iopt_lake_clm,       &
+     &                    lake_t2m,lake_q2m,use_lake2m,                 &
      &                    f10m,u10m,v10m,t2m,q2m,dpt2m,errmsg,errflg    &
      &                   )
 !
@@ -27,7 +29,8 @@
       use physcons, only : con_t0c
       implicit none
 !
-      integer, intent(in) :: im, lsm, lsm_ruc
+      integer, intent(in) :: im, lsm, lsm_ruc, iopt_lake, iopt_lake_clm
+      logical, intent(in) :: use_lake2m
       logical, intent(in) :: thsfc_loc  ! Flag for reference pot. temp.
       logical, intent(in) :: diag_flux  ! Flag for flux method in 2-m diagnostics
       logical, intent(in) :: diag_log   ! Flag for 2-m log diagnostics under stable conditions
@@ -39,6 +42,9 @@
      &                      shflx, cdq, wind, xlat_d, xlon_d
       real(kind=kind_phys), dimension(:), intent(out) ::                &
      &                       f10m, u10m, v10m, t2m, q2m, dpt2m
+      real(kind=kind_phys), dimension(:), intent(in) :: lake_t2m,       &
+     &                       lake_q2m
+      integer, dimension(:), intent(in) :: use_lake_model
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
@@ -55,6 +61,7 @@
       real(kind=kind_phys) :: t2_alt, q2_alt
       real(kind=kind_phys) :: thcon, cqs, chs, chs2, cqs2
       real(kind=kind_phys) :: testptlat, testptlon
+      logical :: have_2m
 !
       real(kind=kind_phys) :: fhi, qss, wrk
 !     real(kind=kind_phys) sig2k, fhi, qss
@@ -80,27 +87,36 @@
 !
 !!
 
-
       do i = 1, im
         f10m(i) = fm10(i) / fm(i)
         u10m(i) = f10m(i) * u1(i)
         v10m(i) = f10m(i) * v1(i)
+        have_2m = use_lake_model(i)>0 .and. use_lake2m .and.            &
+     &                iopt_lake==iopt_lake_clm
+        if(have_2m) then
+           t2m(i) = lake_t2m(i)
+           q2m(i) = lake_q2m(i)
+        endif
         fhi     = fh2(i) / fh(i)
         wrk     = 1.0 - fhi
 
         if(lsm /= lsm_ruc) then
         !-- original method
-          if(thsfc_loc) then ! Use local potential temperature
+          if(have_2m) then
+             ! already have 2m T & Q from lake
+          else
+           if(thsfc_loc) then ! Use local potential temperature
             t2m(i)=tskin(i)*wrk + t1(i)*prslki(i)*fhi - (grav+grav)/cp
-          else ! Use potential temperature referenced to 1000 hPa
+           else ! Use potential temperature referenced to 1000 hPa
             t2m(i) = tskin(i)*wrk + t1(i)*fhi - (grav+grav)/cp
-          endif
-          if(evap(i) >= 0.) then !  for evaporation>0, use inferred qsurf to deduce q2m
+           endif
+           if(evap(i) >= 0.) then !  for evaporation>0, use inferred qsurf to deduce q2m
             q2m(i) = qsurf(i)*wrk + max(qmin,q1(i))*fhi
-          else                   !  for dew formation, use saturated q at tskin
+           else                   !  for dew formation, use saturated q at tskin
             qss    = fpvs(tskin(i))
             qss    = eps * qss/(ps(i) + epsm1 * qss)
             q2m(i) = qss*wrk + max(qmin,q1(i))*fhi
+           endif
           endif
           qss    = fpvs(t2m(i))
           qss    = eps * qss / (ps(i) + epsm1 * qss)
@@ -121,19 +137,20 @@
           cqs2 = chs2
           qsfcprox = max(qmin,qv1 + evap(i)/cqs) ! surface mix. ratio computed from the flux
 
-          if(diag_flux) then
-          !-- flux method
+         ruc_have_2m: if(.not.have_2m) then
+           if(diag_flux) then
+           !-- flux method
             th2m = tskin(i)*thcon - shflx(i)/chs2
             t2m(i) = th2m/thcon
             x2m = max(qmin,qsfcprox - evap(i)/cqs2) ! mix. ratio
             q2m(i) = x2m/(one + x2m) ! spec. humidity
-          else
+           else
             t2m(i) = tskin(i)*wrk + t1(i)*fhi - (grav+grav)/cp
             q2m(i) = qsurf(i)*wrk + max(qmin,q1c)*fhi
-          endif ! flux method
+           endif ! flux method
 
-          if(diag_log) then
-          !-- Alternative logarithmic diagnostics:
+           if(diag_log) then
+           !-- Alternative logarithmic diagnostics:
             dT = t1(i) - tskin(i)
             dQ = qv1 - qsfcmr
             dz1= zf(i) ! level of atm. forcing
@@ -163,29 +180,29 @@
             !   it cooler and drier with stable stratification
             t2m(i) = T2_alt  
             q2m(i) = Q2_alt
-          endif ! log method for stable regime
+           endif ! log method for stable regime
 
-          !-- check that T2m values lie in the range between tskin and t1
-          x2m     = max(min(tskin(i),t1(i)) , t2m(i))
-          t2m(i)  = min(max(tskin(i),t1(i)) , x2m)
-          !-- check that Q2m values lie in the range between qsurf and q1
-          x2m    = max(min(qsurf(i),q1c) , q2m(i))
-          q2m(i) = min(max(qsurf(i),q1c) , x2m)
+           !-- check that T2m values lie in the range between tskin and t1
+           x2m     = max(min(tskin(i),t1(i)) , t2m(i))
+           t2m(i)  = min(max(tskin(i),t1(i)) , x2m)
+           !-- check that Q2m values lie in the range between qsurf and q1
+           x2m    = max(min(qsurf(i),q1c) , q2m(i))
+           q2m(i) = min(max(qsurf(i),q1c) , x2m)
 
+           !-- make sure q2m is not oversaturated
+           qss    = fpvs(t2m(i))
+           qss    = eps * qss/(ps(i) + epsm1 * qss)
+           q2m(i) = min(q2m(i),qss)
 
-          !-- make sure q2m is not oversaturated
-          qss    = fpvs(t2m(i))
-          qss    = eps * qss/(ps(i) + epsm1 * qss)
-          q2m(i) = min(q2m(i),qss)
-
-         if(diag_flux) then
+           if(diag_flux) then
          !-- from WRF, applied in HRRR - Jimy Dudhia
          !   Limit Q2m diagnostic to no more than 5 percent higher than lowest level value
          !   This prevents unrealistic values when QFX is not mostly surface
          !   flux because calculation is based on surface flux only.
          !   Problems occurred in transition periods and weak winds and vegetation source
-           q2m(i) = min(q2m(i),1.05_kind_dbl_prec*q1c) ! works if qsurf > q1c, evaporation
-         endif
+            q2m(i) = min(q2m(i),1.05_kind_dbl_prec*q1c) ! works if qsurf > q1c, evaporation
+           endif
+         endif ruc_have_2m
 
 
          !-- Compute dew point, using vapor pressure
@@ -210,7 +227,6 @@
          endif
  100    format (";;; ",a,i4,a,2f14.7/(4(a10,'='es11.4)))
       endif ! RUC LSM
-
       enddo
 
       return

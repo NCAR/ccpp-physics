@@ -15,8 +15,8 @@
   type = integer
   intent = in
 [lkm]
-  standard_name = control_for_lake_surface_scheme
-  long_name = flag for lake surface model
+  standard_name = control_for_lake_model_execution_method
+  long_name = control for lake model execution: 0=no lake, 1=lake, 2=lake+nsst
   units = flag
   dimensions = ()
   type = integer
@@ -131,13 +131,27 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = inout
-[use_flake]
-  standard_name = flag_for_using_flake
-  long_name = flag indicating lake points using flake model
+[use_lake_model]
+  standard_name = flag_for_using_lake_model
+  long_name = flag indicating lake points using a lake model
   units = flag
   dimensions = (horizontal_loop_extent)
-  type = logical
-  intent = inout
+  type = integer
+  intent = in
+[iopt_lake]
+  standard_name = control_for_lake_model_selection
+  long_name = control for lake model selection
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[iopt_lake_clm]
+  standard_name = clm_lake_model_control_selection_value
+  long_name = value that indicates clm lake model in the control for lake model selection
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction

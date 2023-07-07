@@ -902,6 +902,73 @@
   dimensions = ()
   type = integer
   intent = in
+[lkm]
+  standard_name = control_for_lake_model_execution_method
+  long_name = control for lake model execution: 0=no lake, 1=lake, 2=lake+nsst
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[use_lake_model]
+  standard_name = flag_for_using_lake_model
+  long_name = flag indicating lake points using a lake model
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+[lakefrac]
+  standard_name = lake_area_fraction
+  long_name = fraction of horizontal grid area occupied by lake
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[lakedepth]
+  standard_name = lake_depth
+  long_name = lake depth
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[iopt_lake]
+  standard_name = control_for_lake_model_selection
+  long_name = control for lake model selection
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[iopt_lake_clm]
+  standard_name = clm_lake_model_control_selection_value
+  long_name = value that indicates clm lake model in the control for lake model selection
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[iopt_lake_flake]
+  standard_name = flake_model_control_selection_value
+  long_name = value that indicates flake model in the control for lake model selection
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[lakefrac_threshold]
+  standard_name = lakefrac_threshold_for_enabling_lake_model
+  long_name = fraction of horizontal grid area occupied by lake must be greater than this value to enable a lake model
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[lakedepth_threshold]
+  standard_name = lake_depth_threshold_for_enabling_lake_model
+  long_name = lake depth must be greater than this value to enable a lake model
+  units = m
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
