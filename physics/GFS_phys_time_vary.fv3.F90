@@ -919,7 +919,10 @@
                              fhour, iflip, jindx1_aer, jindx2_aer, &
                              ddy_aer, iindx1_aer,           &
                              iindx2_aer, ddx_aer,           &
-                             levs, prsl, aer_nm)
+                             levs, prsl, aer_nm, errmsg, errflg)
+           if(errflg /= 0) then
+             return
+           endif
          endif
 
 !> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
