@@ -1,8 +1,20 @@
 ! ########################################################################################
-! 
-! CCPP scheme to replace physics schemes with simulated data tendencies.
 !
-! Description:
+! Description: This scheme simulates the evolution of the internal physics state 
+!              represented by a CCPP Suite Definition File (SDF).
+!
+! To activate this scheme it must be a) embedded within the SDF and b) activated through
+! the physics namelist.
+! The derived-data type "base_physics_process" contains the metadata needed to reconstruct 
+! the temporal evolution of the state. An array of base_physics_process, physics_process,
+! is populated by the host during initialization and passed to the physics. Additionally, 
+! this type holds any data, or type-bound procedures, required by the scheme simulator(s).
+!
+! For this initial demonstration we are using 2-dimensional (height, time) forcing data,
+! which is on the same native vertical grid as the SCM. The dataset has a temporal 
+! resolution of 1-hour, created by averaging all local times from a Tropical Warm Pool 
+! International Cloud Experiment (TWPICE) case. This was to create a dataset with a 
+! (constant) diurnal cycle.
 !
 ! ########################################################################################
 module ccpp_scheme_simulator
@@ -160,9 +172,9 @@ contains
           endif
        else
           if (physics_process(iprc)%time_split) then
-             write(*,'(a25,i2,a4,i2,a5,a10,a35)') 'CCPP suite simulator: ',iprc,' of ',proc_end,' ',physics_process(iprc)%name,'   time split scheme     (active)'
+             write(*,'(a25,i2,a4,i2,a5,a10,a35)') 'CCPP suite simulator: ',iprc,' of ',proc_end,' ',physics_process(iprc)%name,'time split scheme        (active)'
           else
-             write(*,'(a25,i2,a4,i2,a5,a10,a35)') 'CCPP suite simulator: ',iprc,' of ',proc_end,' ',physics_process(iprc)%name,'   process split scheme  (active)'
+             write(*,'(a25,i2,a4,i2,a5,a10,a35)') 'CCPP suite simulator: ',iprc,' of ',proc_end,' ',physics_process(iprc)%name,'process split scheme     (active)'
           endif
           write(*,'(a25,i2)')                     '       # prog. vars.: ',physics_process(1)%nprg_active
        endif

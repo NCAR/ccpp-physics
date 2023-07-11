@@ -1,8 +1,12 @@
 ! ########################################################################################
 ! 
-! Interstitial CCPP scheme to couple UFS physics to ccpp_scheme_simulator.
-! ) load: read and load data into type used by ccpp_scheme_simulator
-! ) _run: prepare GFS diagnostic physics tendencies for ccpp_scheme_simulator 
+! Description: Interstitial CCPP scheme to couple UFS physics to ccpp_scheme_simulator.
+!
+! Contains:
+! - load_ccpp_scheme_sim(): read and load data into type used by ccpp_scheme_simulator.
+!      called once during model initialization
+! - GFS_ccpp_scheme_sim_pre_run(): prepare GFS diagnostic physics tendencies for 
+!      ccpp_scheme_simulator. 
 !
 ! ########################################################################################
 module GFS_ccpp_scheme_sim_pre
@@ -102,8 +106,8 @@ contains
   end subroutine GFS_ccpp_scheme_sim_pre_run
 
   ! ######################################################################################
-  subroutine load_ccpp_scheme_sim(nlunit, nml_file, physics_process, &
-       iactive_T, iactive_u, iactive_v, iactive_q, errmsg, errflg)
+  subroutine load_ccpp_scheme_sim(nlunit, nml_file, physics_process, iactive_T,          &
+       iactive_u, iactive_v, iactive_q, errmsg, errflg)
 
     ! Inputs
     integer,          intent (in) :: nlunit
@@ -121,7 +125,8 @@ contains
     logical :: exists, do_ccpp_scheme_sim
     integer :: nprc_sim
 
-    ! For each process there is a corresponding namelist entry, which is constructed as follows:
+    ! For each process there is a corresponding namelist entry, which is constructed as 
+    ! follows:
     ! {use_scheme_sim[0(no)/1(yes)], time_split[0(no)/1(yes)], order[1:nPhysProcess]}
     integer, dimension(3) ::    &
          prc_LWRAD_cfg = (/0,0,0/), &
@@ -133,8 +138,8 @@ contains
          prc_cldMP_cfg = (/0,0,0/)
 
     ! Namelist
-    namelist / ccpp_scheme_sim_nml / do_ccpp_scheme_sim, scheme_sim_file, nprc_sim,       &
-         prc_LWRAD_cfg, prc_SWRAD_cfg, prc_PBL_cfg, prc_GWD_cfg, prc_SCNV_cfg,            &
+    namelist / ccpp_scheme_sim_nml / do_ccpp_scheme_sim, scheme_sim_file, nprc_sim,      &
+         prc_LWRAD_cfg, prc_SWRAD_cfg, prc_PBL_cfg, prc_GWD_cfg, prc_SCNV_cfg,           &
          prc_DCNV_cfg, prc_cldMP_cfg
 
     errmsg = ''
