@@ -159,9 +159,9 @@ contains
     close (nlunit)
 
     ! Only proceed if scheme simulator requested.
-    if (prc_SWRAD_cfg(1) .or. prc_LWRAD_cfg(1) .or. prc_PBL_cfg(1)  .or.       &
-         prc_GWD_cfg(1)  .or. prc_SCNV_cfg(1)  .or. prc_DCNV_cfg(1) .or.       &
-         prc_cldMP_cfg(1)) then
+    if (prc_SWRAD_cfg(1)  == 1 .or. prc_LWRAD_cfg(1) == 1 .or. prc_PBL_cfg(1)  == 1 .or. &
+         prc_GWD_cfg(1)   == 1 .or. prc_SCNV_cfg(1)  == 1 .or. prc_DCNV_cfg(1) == 1 .or. &
+         prc_cldMP_cfg(1) == 1 ) then
     else
        return
     endif
