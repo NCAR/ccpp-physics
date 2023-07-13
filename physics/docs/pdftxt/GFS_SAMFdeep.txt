@@ -65,8 +65,6 @@
  rain conversion rate, entrainment and detrainment rates, overshooting layers,
  and maximum allowable cloudbase mass flux (as of June 2018).
 
-\b CCPP \b v6.0.0 \b Updates
-
 \subsection ca_page Cellular Automata Stochastic Convective Organization Scheme 
 
 \b Scientific \b Background
