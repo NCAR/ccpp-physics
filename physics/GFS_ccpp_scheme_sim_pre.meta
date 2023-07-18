@@ -7,6 +7,13 @@
 [ccpp-arg-table]
   name = GFS_ccpp_scheme_sim_pre_run
   type = scheme
+[do_ccpp_scheme_sim]
+  standard_name = flag_for_ccpp_scheme_simulator
+  long_name = flag for ccpp scheme simulator
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [physics_process]
   standard_name = physics_process_type_for_CCPP_scheme_simulator
   long_name = physics process type for CCPP scheme simulator

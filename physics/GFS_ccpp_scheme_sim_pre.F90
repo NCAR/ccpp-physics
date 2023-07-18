@@ -25,13 +25,15 @@ contains
 !! \section arg_table_GFS_ccpp_scheme_sim_pre_run
 !! \htmlinclude GFS_ccpp_scheme_sim_pre_run.html
 !! 
-  subroutine GFS_ccpp_scheme_sim_pre_run(dtend, ntqv, dtidx, dtp, index_of_process_dcnv, &
-       index_of_process_longwave, index_of_process_shortwave, index_of_process_scnv,     &
-       index_of_process_orographic_gwd, index_of_process_pbl, index_of_process_mp,       &
-       index_of_temperature, index_of_x_wind, index_of_y_wind, physics_process,          &
-       iactive_T, iactive_u, iactive_v, iactive_q, active_phys_tend, errmsg, errflg)
+  subroutine GFS_ccpp_scheme_sim_pre_run(do_ccpp_scheme_sim, dtend, ntqv, dtidx, dtp,    &
+       index_of_process_dcnv, index_of_process_longwave, index_of_process_shortwave,     &
+       index_of_process_scnv, index_of_process_orographic_gwd, index_of_process_pbl,     &
+       index_of_process_mp, index_of_temperature, index_of_x_wind, index_of_y_wind,      &
+       physics_process, iactive_T, iactive_u, iactive_v, iactive_q, active_phys_tend,    &
+       errmsg, errflg)
 
     ! Inputs
+    logical, intent(in) :: do_ccpp_scheme_sim
     integer, intent(in) :: ntqv, index_of_process_dcnv, index_of_process_longwave,       &
          index_of_process_shortwave, index_of_process_scnv,                              &
          index_of_process_orographic_gwd, index_of_process_pbl, index_of_process_mp,     &
@@ -53,6 +55,8 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
+
+    if (.not. do_ccpp_scheme_sim) return
 
     ! Get tendency for "active" process.
 
