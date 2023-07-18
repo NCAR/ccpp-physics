@@ -16,8 +16,8 @@
 !
       integer kpdtsf,kpdwet,kpdsno,kpdzor,kpdais,kpdtg3,kpdplr,kpdgla,
      &        kpdmxi,kpdscv,kpdsmc,kpdoro,kpdmsk,kpdstc,kpdacn,kpdveg,
-     &        kpdvet,kpdsot
-     &,       kpdvmn,kpdvmx,kpdslp,kpdabs
+     &        kpdvet,kpdsot,kpdsoc,                                      
+     &        kpdvmn,kpdvmx,kpdslp,kpdabs
      &,       kpdsnd, kpdabs_0, kpdabs_1, kpdalb(4)
       parameter(kpdtsf=11,  kpdwet=86, kpdsno=65,  kpdzor=83,
 !    &          kpdalb=84,  kpdais=91, kpdtg3=11,  kpdplr=224,
@@ -26,7 +26,7 @@
      &          kpdoro=8,   kpdmsk=81, kpdstc=11,  kpdacn=91, kpdveg=87,
 !cbosu  max snow albedo uses a grib id number of 159, not 255.
      &          kpdvmn=255, kpdvmx=255,kpdslp=236, kpdabs_0=255,
-     &          kpdvet=225, kpdsot=224,kpdabs_1=159,
+     &          kpdvet=225, kpdsot=224,kpdsoc=255,kpdabs_1=159,
      &          kpdsnd=66 )
 !
       integer, parameter :: kpdalb_0(4)=(/212,215,213,216/)
@@ -37,6 +37,7 @@
       integer, parameter :: xdata=7200, ydata=3600, mdata=xdata*ydata
       integer            :: veg_type_landice
       integer            :: soil_type_landice
+      integer            :: soil_color_landice
       integer            :: num_threads
 !
 !
@@ -81,7 +82,7 @@
      &,                   vmnfcs,vmxfcs,slpfcs,absfcs                     &
      &,                   tsffcs,snofcs,zorfcs,albfcs,tg3fcs              &
      &,                   cnpfcs,smcfcs,stcfcs,slifcs,aisfcs              &
-     &,                   vegfcs,vetfcs,sotfcs,alffcs                     &
+     &,                   vegfcs,vetfcs,sotfcs,socfcs,alffcs              & 
      &,                   cvfcs,cvbfcs,cvtfcs,me,nthrds,nlunit            &
      &,                   sz_nml,input_nml_file                           &
      &,                   min_ice                                         &
@@ -125,15 +126,17 @@
      &                     vetsmn,vetimx,vetimn,vetjmx,vetjmn,          &
      &                     sotlmx,sotlmn,sotomx,sotomn,sotsmx,          &
      &                     sotsmn,sotimx,sotimn,sotjmx,sotjmn,          &
+     &                     soclmx,soclmn,socomx,socomn,socsmx,          & 
+     &                     socsmn,socimx,socimn,socjmx,socjmn,          & 
      &                     alslmx,alslmn,alsomx,alsomn,alssmx,          &
      &                     alssmn,alsimx,alsimn,alsjmx,alsjmn,          &
      &                     epstsf,epsalb,epssno,epswet,epszor,          &
      &                     epsplr,epsoro,epssmc,epsscv,eptsfc,          &
      &                     epstg3,epsais,epsacn,epsveg,epsvet,          &
-     &                     epssot,epsalf,qctsfs,qcsnos,qctsfi,          &
+     &                     epssot,epssoc,epsalf,qctsfs,qcsnos,qctsfi,   & 
      &                     aislim,snwmin,snwmax,cplrl,cplrs,            &
      &                     cvegl,czors,csnol,csnos,czorl,csots,         &
-     &                     csotl,cvwgs,cvetl,cvets,calfs,               &
+     &                     csotl,csocs,csocl,cvwgs,cvetl,cvets,calfs,   & 
      &                     fcalfl,fcalfs,ccvt,ccnp,ccv,ccvb,            &
      &                     calbl,calfl,calbs,ctsfs,grboro,              &
      &                     grbmsk,ctsfl,deltf,caisl,caiss,              &
@@ -142,6 +145,7 @@
      &                     faiss,fsnol,bltmsk,falbs,cvegs,percrit,      &
      &                     deltsfc,critp2,critp3,blnmsk,critp1,         &
      &                     fcplrl,fcplrs,fczors,fvets,fsotl,fsots,      &
+     &                     fsocl,fsocs,                                 & 
      &                     fvetl,fplrs,fvegl,fvegs,fcsnol,fcsnos,       &
      &                     fczorl,fcalbs,fctsfl,fctsfs,fcalbl,          &
      &                     falfs,falfl,fh,crit,zsca,ztsfc,tem1,tem2     &
@@ -167,7 +171,7 @@
      &,                    sihnew
 
       integer imsk,jmsk,ifp,irtscv,irtacn,irtais,irtsno,irtzor,         &
-     &        irtalb,irtsot,irtalf,j,irtvet,irtsmc,irtstc,irtveg,       &
+     &        irtalb,irtsot,irtsoc,irtalf,j,irtvet,irtsmc,irtstc,irtveg,& 
      &        irtwet,k,iprnt,kk,irttsf,iret,i,igrdbg,iy,im,id,          &
      &        icalbl,icalbs,icalfl,ictsfs,lugb,len,lsoil,ih,            &
      &        ictsfl,iczors,icplrl,icplrs,iczorl,icalfs,icsnol,         &
@@ -238,6 +242,7 @@
 !     sli .. land/sea/sea-ice mask. (1/0/2 respectively)
 !     veg .. vegetation cover
 !     sot .. soil type
+!     soc .. soil color
 !cwu [+2l] add sih & sic
 !     sih .. sea ice thickness
 !     sic .. sea ice concentration
@@ -364,6 +369,10 @@
       parameter(sotlmx=16.,sotlmn=1.0,sotomx=0.0,sotomn=0.0,
      &          sotsmx=16.,sotsmn=1.0,sotimx=0.,sotimn=0.,
      &          sotjmx=0.,sotjmn=0.)
+!  soil color
+      parameter(soclmx=20.,soclmn=1.0,socomx=0.0,socomn=0.0,
+     &          socsmx=20.,socsmn=1.0,socimx=0.,socimn=0.,
+     &          socjmx=0.,socjmn=0.)
 !  fraction of vegetation for strongly and weakly zeneith angle dependent
 !  albedo
       parameter(alslmx=1.0,alslmn=0.0,alsomx=0.0,alsomn=0.0,
@@ -378,7 +387,7 @@
      &          epsais=0.,epsacn=0.01,epsveg=0.01,
      &          epssih=0.001,epssic=0.001,
      &          epsvmn=0.01,epsvmx=0.01,epsabs=0.001,epsslp=0.01,
-     &          epsvet=.01,epssot=.01,epsalf=.001)
+     &          epsvet=.01,epssot=.01,epssoc=0.01,epsalf=.001)
 !
 !  quality control of analysis snow and sea ice
 !
@@ -427,6 +436,7 @@
 !   vegetation cover           analysis             analysis
 !   vegetation type            analysis             analysis
 !   soil type                  analysis             analysis
+!   soil color                 analysis             analysis
 !   sea-ice thickness          forecast             forecast
 !   sea-ice concentration      analysis             analysis
 !   vegetation cover min       analysis             analysis
@@ -467,14 +477,14 @@
 !
       character*500 fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc           &
      &,             fnplrc,fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc           &
-     &,             fnvegc,fnvetc,fnsotc                                &
+     &,             fnvegc,fnvetc,fnsotc,fnsocc                         & 
      &,             fnvmnc,fnvmxc,fnslpc,fnabsc, fnalbc2
       real (kind=kind_io8) tsfclm(len), wetclm(len),   snoclm(len)      &
      &,    zorclm(len), albclm(len,4), aisclm(len)                      &
      &,    tg3clm(len), acnclm(len),   cnpclm(len)                      &
      &,    cvclm (len), cvbclm(len),   cvtclm(len)                      &
      &,    scvclm(len), tsfcl2(len),   vegclm(len)                      &
-     &,    vetclm(len), sotclm(len),   alfclm(len,2), sliclm(len)       &
+     &, vetclm(len), sotclm(len), socclm(len),alfclm(len,2), sliclm(len)&
      &,    smcclm(len,lsoil), stcclm(len,lsoil)                         &
      &,    sihclm(len), sicclm(len)                                     &
      &,    vmnclm(len), vmxclm(len), slpclm(len), absclm(len)
@@ -483,7 +493,7 @@
 !
       character*500 fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa           &
      &,             fnplra,fntg3a,fnscva,fnsmca,fnstca,fnacna           &
-     &,             fnvega,fnveta,fnsota                                &
+     &,             fnvega,fnveta,fnsota,fnsoca                         &
      &,             fnvmna,fnvmxa,fnslpa,fnabsa
 !
       real (kind=kind_io8) tsfanl(len), wetanl(len),   snoanl(len)      &
@@ -491,7 +501,8 @@
      &,    tg3anl(len), acnanl(len),   cnpanl(len)                      &
      &,    cvanl (len), cvbanl(len),   cvtanl(len)                      &
      &,    scvanl(len), tsfan2(len),   veganl(len)                      &
-     &,    vetanl(len), sotanl(len),   alfanl(len,2), slianl(len)       &
+     &,    vetanl(len), sotanl(len),   socanl(len)                      & 
+     &,    alfanl(len,2), slianl(len)                                   &
      &,    smcanl(len,lsoil), stcanl(len,lsoil)                         &
      &,    sihanl(len), sicanl(len)                                     &
      &,    vmnanl(len), vmxanl(len), slpanl(len), absanl(len)
@@ -505,7 +516,7 @@
      &,    tg3fcs(len), acnfcs(len),   cnpfcs(len)                      &
      &,    cvfcs (len), cvbfcs(len),   cvtfcs(len)                      &
      &,    slifcs(len), vegfcs(len)                                     &
-     &,    vetfcs(len), sotfcs(len),   alffcs(len,2)                    &
+     &,    vetfcs(len), sotfcs(len), socfcs(len),   alffcs(len,2)       &
      &,    smcfcs(len,lsoil), stcfcs(len,lsoil)                         &
      &,    sihfcs(len), sicfcs(len), sitfcs(len)                        &
      &,    vmnfcs(len), vmxfcs(len), slpfcs(len), absfcs(len)           &
@@ -536,7 +547,7 @@
 !
       real (kind=kind_io8), allocatable, dimension(:) ::                &
      &     tsffcsd, snofcsd, tg3fcsd, zorfcsd, slifcsd, aisfcsd,        &
-     &     cnpfcsd, vegfcsd, vetfcsd, sotfcsd, sihfcsd, sicfcsd,        &
+     &   cnpfcsd, vegfcsd, vetfcsd, sotfcsd, socfcsd, sihfcsd, sicfcsd, &
      &     vmnfcsd, vmxfcsd, slpfcsd, absfcsd
       real (kind=kind_io8), allocatable, dimension(:,:) ::              &
      &                                        smcfcsd, stcfcsd, albfcsd
@@ -574,6 +585,7 @@
 !       rec. 16    canopy water content (cnpanl)  -----> f10m
 !       rec. 17    vegetation type
 !       rec. 18    soil type
+!       rec. 18    soil color ? add later?
 !       rec. 19    zeneith angle dependent vegetation fraction (two types)
 !       rec. 20    uustar
 !       rec. 21    ffmm
@@ -609,11 +621,11 @@
       namelist/namsfc/fnglac,fnmxic,
      &                fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,
      &                fnplrc,fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,
-     &                fnvegc,fnvetc,fnsotc,fnalbc2,
+     &                fnvegc,fnvetc,fnsotc,fnsocc,fnalbc2,    
      &                fnvmnc,fnvmxc,fnslpc,fnabsc,
      &                fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,
      &                fnplra,fntg3a,fnscva,fnsmca,fnstca,fnacna,
-     &                fnvega,fnveta,fnsota,
+     &                fnvega,fnveta,fnsota,fnsoca,           
      &                fnvmna,fnvmxa,fnslpa,fnabsa,
      &                fnmskh,
      &                ldebug,lgchek,lqcbgs,critp1,critp2,critp3,
@@ -622,6 +634,7 @@
      &                ftsfl,ftsfs,falbl,falbs,faisl,faiss,fsnol,fsnos,
      &                fzorl,fzors,fplrl,fplrs,fsmcl,fsmcs,
      &                fstcl,fstcs,fvegl,fvegs,fvetl,fvets,fsotl,fsots,
+     &                fsocl,fsocs,                          
      &                fctsfl,fctsfs,fcalbl,fcalbs,fcsnol,fcsnos,
      &                fczorl,fczors,fcplrl,fcplrs,fcsmcl,fcsmcs,
      &                fcstcl,fcstcs,fsalfl,fsalfs,fcalfl,flalfs,
@@ -647,6 +660,7 @@
       data fnalbc2/'global_albedo4.1x1.grb'/
       data fntsfc/'global_sstclim.2x2.grb'/
       data fnsotc/'global_soiltype.1x1.grb'/
+      data fnsocc/''/ 
       data fnvegc/'global_vegfrac.1x1.grb'/
       data fnvetc/'global_vegtype.1x1.grb'/
       data fnglac/'global_glacier.2x2.grb'/
@@ -683,6 +697,7 @@
       data fnvega/'        '/
       data fnveta/'        '/
       data fnsota/'        '/
+      data fnsoca/'        '/  
 !clu [+4l] add fn()a for vmn, vmx, abs, slp
       data fnvmna/'        '/
       data fnvmxa/'        '/
@@ -704,6 +719,7 @@
       data fplrl/0.0/,      fplrs/0.0/
       data fvetl/0.0/,      fvets/99999.0/
       data fsotl/0.0/,      fsots/99999.0/
+      data fsocl/0.0/,      fsocs/99999.0/ 
       data fvegl/0.0/,      fvegs/99999.0/
 !cwu [+4l] add f()l and f()s for sih, sic and aislim, sihlim
       data fsihl/99999.0/,  fsihs/99999.0/
@@ -744,6 +760,7 @@
      &     fnplra,fntg3a,fnscva,fnsmca,fnstca,fnacna,fnvega,
      &     fnvetc,fnveta,
      &     fnsotc,fnsota,
+     &     fnsocc,fnsoca,
 !clu [+2l] add fn()c and fn()a for vmn, vmx, slp, abs
      &     fnvmnc,fnvmxc,fnabsc,fnslpc,
      &     fnvmna,fnvmxa,fnabsa,fnslpa,
@@ -753,6 +770,7 @@
      &     ftsfl,ftsfs,falbl,falbs,faisl,faiss,fsnol,fsnos,
      &     fzorl,fzors,fplrl,fplrs,fsmcl,fsmcs,falfl,falfs,
      &     fstcl,fstcs,fvegl,fvegs,fvetl,fvets,fsotl,fsots,
+     &     fsocl,fsocs,                   
      &     fctsfl,fctsfs,fcalbl,fcalbs,fcsnol,fcsnos,
      &     fczorl,fczors,fcplrl,fcplrs,fcsmcl,fcsmcs,
      &     fcstcl,fcstcs,fcalfl,fcalfs,
@@ -771,6 +789,7 @@
      &     ctsfl,  ctsfs,  calbl, calfl, calbs, calfs, csmcs,
      &     csnol,  csnos,  czorl, czors, cplrl, cplrs, cstcl,
      &     cstcs,  cvegl,  cvwgs, cvetl, cvets, csotl, csots,
+     &     csocl, csocs,                 
      &     csmcl
 !cwu [+1l] add c()l and c()s for sih, sic
      &,    csihl,  csihs,  csicl, csics
@@ -860,6 +879,7 @@
           print *,' fstcs=',fstcs(1:lsoil)
           print *,' aislim=',aislim,' sihnew=',sihnew
           print *,' isot=', isot,' ivegsrc=',ivegsrc
+          print *,' fnsotc =', fnsotc
         endif
 
         if (ivegsrc == 2) then   ! sib
@@ -872,6 +892,8 @@
         else
           soil_type_landice = 16
         endif
+
+        soil_color_landice = 10 !does not matter, only one source
 !
         deltf = deltsfc / 24.0
 !
@@ -981,6 +1003,15 @@
         csots = 0.                       !...  soil type over sea
         if (fsots >= 99999.) csots = 1.
         if (fsots > 0. .and. fsots < 99999)  csots = exp(-deltf/fsots)
+!
+        csocl = 0.                       !...  soil color over land
+        if (fsocl >= 99999.) csocl = 1.
+        if (fsocl > 0. .and. fsocl < 99999)  csocl = exp(-deltf/fsocl)
+!
+        csocs = 0.                       !...  soil color over sea
+        if (fsocs >= 99999.) csots = 1.
+        if (fsocs > 0. .and. fsocs < 99999)  csocs = exp(-deltf/fsocs)
+
 
 !cwu [+16l]---------------------------------------------------------------
 !
@@ -1092,9 +1123,6 @@
         snoclm(i) = 0.
         icefl1(i) = .true.
       enddo
-!     if(lprnt) print *,' tsffcsin=',tsffcs(iprnt)
-!     if(lprnt) print *,' slifcsin=',slifcs(iprnt)
-!     if(lprnt) print *,'slmskl=',slmskl(iprnt),' slmskw=',slmskw(iprnt)
 !
 !  read climatology fields
 !
@@ -1109,25 +1137,25 @@
       call clima(lugb,iy,im,id,ih,fh,len,lsoil,slmskl,slmskw,
      &           fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,
      &           fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,
-     &           fnvetc,fnsotc,
+     &           fnvetc,fnsotc,fnsocc,                   
      &           fnvmnc,fnvmxc,fnslpc,fnabsc,
      &           tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,aisclm,
      &           tg3clm,cvclm ,cvbclm,cvtclm,
      &           cnpclm,smcclm,stcclm,sliclm,scvclm,acnclm,vegclm,
-     &           vetclm,sotclm,alfclm,
+     &           vetclm,sotclm,socclm,alfclm,           
      &           vmnclm,vmxclm,slpclm,absclm,
      &           kpdtsf,kpdwet,kpdsno,kpdzor,kpdalb,kpdais,
      &           kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,
-     &           kpdvet,kpdsot,kpdalf,tsfcl0,
+     &           kpdvet,kpdsot,kpdsoc,kpdalf,tsfcl0,   
      &           kpdvmn,kpdvmx,kpdslp,kpdabs,
      &           deltsfc, lanom
      &,          imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk,me
      &,          lprnt,iprnt,fnalbc2,ialb,tile_num_ch,i_index,j_index)
 
-!     if(lprnt) print *,'tsfclm=',tsfclm(iprnt),' tsfcl2=',tsfcl2(iprnt)
 !
 !  scale surface roughness and albedo to model required units
 !
+
       zsca=100.
       call scale(zorclm,len,zsca)
       zsca=0.01
@@ -1150,7 +1178,7 @@
 !
 !  make sure vegetation type and soil type are non zero over land
 !
-      call landtyp(vetclm,sotclm,slpclm,slmskl,len)
+      call landtyp(vetclm,sotclm,socclm,slpclm,slmskl,len)
 !
 !cwu [-1l/+1l]
 !* ice concentration or ice mask (only ice mask used in the model now)
@@ -1202,7 +1230,6 @@
 !     if(lprnt) print *,' aisclm=',aisclm(iprnt),' sliclm='
 !    &,sliclm(iprnt),' slmskw=',slmskw(iprnt)
 !
-!     write(6,*) 'sliclm'
 !     znnt=1.
 !     call nntprt(sliclm,len,znnt)
 !
@@ -1317,6 +1344,15 @@
      &            sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &            sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
+! soil color
+      call qcmxmn('socc    ',socclm,slmskl,snoclm,icefl1,
+     &            soclmx,soclmn,socomx,socomn,socimx,socimn,
+     &            socjmx,socjmn,socsmx,socsmn,epssoc,
+     &            rla,rlo,len,kqcm,percrit,lgchek,me)
+
+!     znnt=1.
+!     call nntprt(socclm,len,znnt)
+
 !cwu [+8l] ---------------------------------------------------------------
       call qcmxmn('sihc    ',sihclm,sliclm,snoclm,icefl1,
      &            sihlmx,sihlmn,sihomx,sihomn,sihimx,sihimn,
@@ -1382,6 +1418,7 @@
         call monitr('vegclm',vegclm,sliclm,snoclm,len)
         call monitr('vetclm',vetclm,sliclm,snoclm,len)
         call monitr('sotclm',sotclm,sliclm,snoclm,len)
+        call monitr('socclm',socclm,sliclm,snoclm,len) 
 !cwu [+2l] add sih, sic
         call monitr('sihclm',sihclm,sliclm,snoclm,len)
         call monitr('sicclm',sicclm,sliclm,snoclm,len)
@@ -1405,16 +1442,17 @@
       call filanl(tsfanl,tsfan2,wetanl,snoanl,zoranl,albanl,aisanl,
      &            tg3anl,cvanl ,cvbanl,cvtanl,
      &            cnpanl,smcanl,stcanl,slianl,scvanl,veganl,
-     &            vetanl,sotanl,alfanl,
+     &            vetanl,sotanl,socanl,alfanl,                   
      &            sihanl,sicanl,
      &            vmnanl,vmxanl,slpanl,absanl,
      &            tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,aisclm,
      &            tg3clm,cvclm ,cvbclm,cvtclm,
      &            cnpclm,smcclm,stcclm,sliclm,scvclm,vegclm,
-     &            vetclm,sotclm,alfclm,
+     &            vetclm,sotclm,socclm,alfclm,                  
      &            sihclm,sicclm,
      &            vmnclm,vmxclm,slpclm,absclm,
      &            len,lsoil)
+
 !
 !  reverse scaling to match with grib analysis input
 !
@@ -1440,23 +1478,24 @@
       call analy(lugb,iy,im,id,ih,fh,len,lsoil,slmskl,slmskw,
      &           fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,
      &           fntg3a,fnscva,fnsmca,fnstca,fnacna,fnvega,
-     &           fnveta,fnsota,
+     &           fnveta,fnsota,fnsoca,                         
      &           fnvmna,fnvmxa,fnslpa,fnabsa,      
      &           tsfanl,wetanl,snoanl,zoranl,albanl,aisanl,
      &           tg3anl,cvanl ,cvbanl,cvtanl,
      &           smcanl,stcanl,slianl,scvanl,acnanl,veganl,
-     &           vetanl,sotanl,alfanl,tsfan0,
+     &           vetanl,sotanl,socanl,alfanl,tsfan0,          
      &           vmnanl,vmxanl,slpanl,absanl,
      &           kpdtsf,kpdwet,kpdsno,kpdsnd,kpdzor,kpdalb,kpdais,
      &           kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,
-     &           kpdvet,kpdsot,kpdalf,
+     &           kpdvet,kpdsot,kpdsoc,kpdalf,                
      &           kpdvmn,kpdvmx,kpdslp,kpdabs,
      &           irttsf,irtwet,irtsno,irtzor,irtalb,irtais,
      &           irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,
-     &           irtvet,irtsot,irtalf
+     &           irtvet,irtsot,irtsoc,irtalf                
      &,          irtvmn,irtvmx,irtslp,irtabs,
      &           imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk
      &,          me, lanom)
+
 
 !     if(lprnt) print *,' tsfanl=',tsfanl(iprnt)
 !
@@ -1705,6 +1744,12 @@
      &            sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &            sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
+! soil color
+      call qcmxmn('soca    ',socanl,slmskl,snoanl,icefl1,
+     &            soclmx,soclmn,socomx,socomn,socimx,socimn,
+     &            socjmx,socjmn,socsmx,socsmn,epssoc,
+     &            rla,rlo,len,kqcm,percrit,lgchek,me)
+
 !clu [+16l]----------------------------------------------------------------------
 !     call qcmxmn('vmna    ',vmnanl,slianl,snoanl,icefl1,
       call qcmxmn('vmna    ',vmnanl,slmskl,snoanl,icefl1,
@@ -1758,6 +1803,7 @@
         call monitr('veganl',veganl,slianl,snoanl,len)
         call monitr('vetanl',vetanl,slianl,snoanl,len)
         call monitr('sotanl',sotanl,slianl,snoanl,len)
+        call monitr('socanl',socanl,slianl,snoanl,len)  
 !cwu [+2l] add sih, sic
         call monitr('sihanl',sihanl,slianl,snoanl,len)
         call monitr('sicanl',sicanl,slianl,snoanl,len)
@@ -1789,7 +1835,7 @@
         call filfcs(tsffcs,wetfcs,snofcs,zorfcs,albfcs,
      &              tg3fcs,cvfcs ,cvbfcs,cvtfcs,
      &              cnpfcs,smcfcs,stcfcs,slifcs,aisfcs,
-     &              vegfcs,vetfcs,sotfcs,alffcs,
+     &              vegfcs,vetfcs,sotfcs,socfcs,alffcs,  
 !cwu [+1l] add ()fcs for sih, sic
      &              sihfcs,sicfcs,
 !clu [+1l] add ()fcs for vmn, vmx, slp, abs
@@ -1797,12 +1843,17 @@
      &              tsfanl,wetanl,snoanl,zoranl,albanl,
      &              tg3anl,cvanl ,cvbanl,cvtanl,
      &              cnpanl,smcanl,stcanl,slianl,aisanl,
-     &              veganl,vetanl,sotanl,alfanl,
+     &              veganl,vetanl,sotanl,socanl,alfanl, 
 !cwu [+1l] add ()anl for sih, sic
      &              sihanl,sicanl,
 !clu [+1l] add ()anl for vmn, vmx, slp, abs
      &              vmnanl,vmxanl,slpanl,absanl,
      &              len,lsoil)
+
+      do i=1,len
+        print *, 'AFTER FILFCS (i) is ',socfcs (i)
+      enddo
+
         if (sig1t(1) /= 0.) then
           call usesgt(sig1t,slianl,tg3anl,len,lsoil,tsffcs,stcfcs,
      &                tsfimx)
@@ -1949,6 +2000,11 @@
      &                sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &                sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
+          call qcmxmn('socf    ',socfcs,slmskl,snofcs,icefl1,  
+     &                soclmx,soclmn,socomx,socomn,socimx,socimn,
+     &                socjmx,socjmn,socsmx,socsmn,epssoc,
+     &                rla,rlo,len,kqcm,percrit,lgchek,me)
+
 
 !clu [+16l] ---------------------------------------------------------------
 !         call qcmxmn('vmnf    ',vmnfcs,slifcs,snofcs,icefl1,
@@ -2002,6 +2058,7 @@
         call monitr('vegfcs',vegfcs,slifcs,snofcs,len)
         call monitr('vetfcs',vetfcs,slifcs,snofcs,len)
         call monitr('sotfcs',sotfcs,slifcs,snofcs,len)
+        call monitr('socfcs',socfcs,slifcs,snofcs,len)
 !cwu [+2l] add sih, sic
         call monitr('sihfcs',sihfcs,slifcs,snofcs,len)
         call monitr('sicfcs',sicfcs,slifcs,snofcs,len)
@@ -2066,23 +2123,23 @@
      &           tsffcs,wetfcs,snofcs,zorfcs,albfcs,aisfcs,
      &           cvfcs ,cvbfcs,cvtfcs,
      &           cnpfcs,smcfcs,stcfcs,slifcs,vegfcs,
-     &           vetfcs,sotfcs,alffcs,
+     &           vetfcs,sotfcs,socfcs,alffcs,        
      &           sihanl,sicanl,
      &           vmnanl,vmxanl,slpanl,absanl,
      &           tsfanl,tsfan2,wetanl,snoanl,zoranl,albanl,aisanl,
      &           cvanl ,cvbanl,cvtanl,
      &           cnpanl,smcanl,stcanl,slianl,veganl,
-     &           vetanl,sotanl,alfanl,
+     &           vetanl,sotanl,socanl,alfanl,       
      &           ctsfl,calbl,caisl,csnol,csmcl,czorl,cstcl,cvegl,
      &           ctsfs,calbs,caiss,csnos,csmcs,czors,cstcs,cvegs,
-     &           ccv,ccvb,ccvt,ccnp,cvetl,cvets,csotl,csots,
+     &           ccv,ccvb,ccvt,ccnp,cvetl,cvets,csotl,csots,csocl,csocs, 
      &           calfl,calfs,
      &           csihl,csihs,csicl,csics,
      &           cvmnl,cvmns,cvmxl,cvmxs,cslpl,cslps,cabsl,cabss, 
      &           irttsf,irtwet,irtsno,irtzor,irtalb,irtais,
      &           irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,
      &           irtvmn,irtvmx,irtslp,irtabs,
-     &           irtvet,irtsot,irtalf,landice,me)
+     &           irtvet,irtsot,irtsoc,irtalf,landice,me)
 
       call setzro(snoanl,epssno,len)
 
@@ -2177,6 +2234,11 @@
      &            sotlmx,sotlmn,sotomx,sotomn,sotimx,sotimn,
      &            sotjmx,sotjmn,sotsmx,sotsmn,epssot,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
+
+      call qcmxmn('socm    ',socanl,slmskl,snoanl,icefl1,     
+     &            soclmx,soclmn,socomx,socomn,socimx,socimn,
+     &            socjmx,socjmn,socsmx,socsmn,epssoc,
+     &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !cwu [+8l] add sih, sic,
       call qcmxmn('sihm    ',sihanl,slianl,snoanl,icefl1,
      &            sihlmx,sihlmn,sihomx,sihomn,sihimx,sihimn,
@@ -2269,6 +2331,7 @@
         call monitr('veganl',veganl,slianl,snoanl,len)
         call monitr('vetanl',vetanl,slianl,snoanl,len)
         call monitr('sotanl',sotanl,slianl,snoanl,len)
+        call monitr('socanl',socanl,slianl,snoanl,len)
 !cwu [+2l] add sih, sic,
         call monitr('sihanl',sihanl,slianl,snoanl,len)
         call monitr('sicanl',sicanl,slianl,snoanl,len)
@@ -2284,7 +2347,8 @@
         allocate (tsffcsd(len), snofcsd(len), tg3fcsd(len),             &
      &            zorfcsd(len), slifcsd(len), aisfcsd(len),             &
      &            cnpfcsd(len), vegfcsd(len), vetfcsd(len),             &
-     &            sotfcsd(len), sihfcsd(len), sicfcsd(len),             &
+     &            sotfcsd(len), socfcsd(len),sihfcsd(len),              &
+     &            sicfcsd(len),                                         & 
      &            vmnfcsd(len), vmxfcsd(len), slpfcsd(len),             &
      &            absfcsd(len))
          allocate (smcfcsd(len,lsoil), stcfcsd(len,lsoil),              &
@@ -2302,6 +2366,7 @@
           vegfcsd(i) = veganl(i) - vegfcs(i)
           vetfcsd(i) = vetanl(i) - vetfcs(i)
           sotfcsd(i) = sotanl(i) - sotfcs(i)
+          socfcsd(i) = socanl(i) - socfcs(i) 
 !clu [+2l] add sih, sic
           sihfcsd(i) = sihanl(i) - sihfcs(i)
           sicfcsd(i) = sicanl(i) - sicfcs(i)
@@ -2355,6 +2420,7 @@
         call monitr('vegdif',vegfcsd,slianl,snoanl,len)
         call monitr('vetdif',vetfcsd,slianl,snoanl,len)
         call monitr('sotdif',sotfcsd,slianl,snoanl,len)
+        call monitr('socdif',socfcsd,slianl,snoanl,len) 
 !cwu [+2l] add sih, sic
         call monitr('sihdif',sihfcsd,slianl,snoanl,len)
         call monitr('sicdif',sicfcsd,slianl,snoanl,len)
@@ -2365,7 +2431,7 @@
         call monitr('absdif',absfcsd,slianl,snoanl,len)
        endif
        deallocate (tsffcsd, snofcsd, tg3fcsd, zorfcsd, slifcsd,         &
-     &             aisfcsd, cnpfcsd, vegfcsd, vetfcsd, sotfcsd,         &
+     &             aisfcsd, cnpfcsd, vegfcsd, vetfcsd, sotfcsd,socfcsd, & 
      &             sihfcsd, sicfcsd, vmnfcsd, vmxfcsd, slpfcsd,         &
      &             absfcsd)
         deallocate (smcfcsd, stcfcsd, albfcsd)
@@ -2388,6 +2454,7 @@
         vegfcs(i) = veganl(i)
         vetfcs(i) = vetanl(i)
         sotfcs(i) = sotanl(i)
+        socfcs(i) = socanl(i)   
 !clu [+4l] add vmn, vmx, slp, abs
         vmnfcs(i) = vmnanl(i)
         vmxfcs(i) = vmxanl(i)
@@ -2723,8 +2790,6 @@
       call fixrdg(lugb,imsk,jmsk,fnmskh,
      &            kpds5,slmskh,gausm,blnmsk,bltmsk,me)
 
-!     print *,'in sfc_sub, aft fixrdg,slmskh=',maxval(slmskh),
-!    &  minval(slmskh),'mdata=',mdata,'imsk*jmsk=',imsk*jmsk
 
       do i=1,imsk*jmsk
          slmskh(i) = nint(slmskh(i))
@@ -3486,9 +3551,6 @@
      &                           wi1j2*sums        +wi2j2*sums        )
      &                        * wsumiv
                   endif
-!       print *,' slmask=',slmask(i),' sums=',sums,' sumn=',sumn
-!    &  ,' regin=',regin(i1,j2),regin(i2,j2),' j1=',j1,' j2=',j2
-!    &  ,' wij=',wi1j1, wi2j1, wi1j2, wi2j2,wsumiv
                 else
                   if (slmask(i) .eq. 1.0) then
                     sums = sum1
@@ -3645,14 +3707,14 @@
      &                  aisanl,                                         &
      &                  tg3anl,cvanl ,cvbanl,cvtanl,                    &
      &                  cnpanl,smcanl,stcanl,slianl,scvanl,veganl,      &
-     &                  vetanl,sotanl,alfanl,                           &
+     &                  vetanl,sotanl,socanl,alfanl,                    & !socanl: soil color
      &                  sihanl,sicanl,                                  & !cwu [+1l] add ()anl for sih, sic
      &                  vmnanl,vmxanl,slpanl,absanl,                    & !clu [+1l] add ()anl for vmn, vmx, slp, abs 
      &                  tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,      &
      &                  aisclm,                                         &
      &                  tg3clm,cvclm ,cvbclm,cvtclm,                    &
      &                  cnpclm,smcclm,stcclm,sliclm,scvclm,vegclm,      &
-     &                  vetclm,sotclm,alfclm,                           &
+     &                  vetclm,sotclm,socclm,alfclm,                    & !socclm: soil color
      &                  sihclm,sicclm,                                  & !cwu [+1l] add ()clm for sih, sic
      &                  vmnclm,vmxclm,slpclm,absclm,                    & !clu [+1l] add ()clm for vmn, vmx, slp, abs
      &                  len,lsoil)
@@ -3668,7 +3730,7 @@
      &     cnpanl(len),                                                 &
      &     smcanl(len,lsoil),stcanl(len,lsoil),                         &
      &     slianl(len),scvanl(len),veganl(len),                         &
-     &     vetanl(len),sotanl(len),alfanl(len,2)                        &
+     &     vetanl(len),sotanl(len),socanl(len),alfanl(len,2)            & !socanl:soil color
      &,    sihanl(len),sicanl(len)                                      &
      &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
       real (kind=kind_io8) tsfclm(len),tsfcl2(len),wetclm(len),         &
@@ -3679,7 +3741,7 @@
      &     cnpclm(len),                                                 &
      &     smcclm(len,lsoil),stcclm(len,lsoil),                         &
      &     sliclm(len),scvclm(len),vegclm(len),                         &
-     &     vetclm(len),sotclm(len),alfclm(len,2)                        &
+     &     vetclm(len),sotclm(len),socclm(len),alfclm(len,2)            & !socclm:soil color
      &,    sihclm(len),sicclm(len)                                      &
      &,    vmnclm(len),vmxclm(len),slpclm(len),absclm(len)
 !
@@ -3698,6 +3760,7 @@
         veganl(i)   = vegclm(i)      !  vegetation cover
         vetanl(i)   = vetclm(i)      !  vegetation type
         sotanl(i)   = sotclm(i)      !  soil type
+        socanl(i)   = socclm(i)      !  soil color
         cvanl(i)    = cvclm(i)       !  cv
         cvbanl(i)   = cvbclm(i)      !  cvb
         cvtanl(i)   = cvtclm(i)      !  cvt
@@ -3735,20 +3798,20 @@
       subroutine analy(lugb,iy,im,id,ih,fh,len,lsoil,slmskl,slmskw,     &
      &                 fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,       &
      &                 fntg3a,fnscva,fnsmca,fnstca,fnacna,fnvega,       &
-     &                 fnveta,fnsota,                                   &
+     &                 fnveta,fnsota,fnsoca,                            & !fnsoca: soil color
      &                 fnvmna,fnvmxa,fnslpa,fnabsa,                     & !clu [+1l] add fn()a for vmn, vmx, slp, abs
      &                 tsfanl,wetanl,snoanl,zoranl,albanl,aisanl,       &
      &                 tg3anl,cvanl ,cvbanl,cvtanl,                     &
      &                 smcanl,stcanl,slianl,scvanl,acnanl,veganl,       &
-     &                 vetanl,sotanl,alfanl,tsfan0,                     &
+     &                 vetanl,sotanl,socanl,alfanl,tsfan0,              & !soil color
      &                 vmnanl,vmxanl,slpanl,absanl,                     & !clu [+1l] add ()anl for vmn, vmx, slp, abs
      &                 kpdtsf,kpdwet,kpdsno,kpdsnd,kpdzor,kpdalb,kpdais,&
      &                 kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,       &
-     &                 kprvet,kpdsot,kpdalf,                            &
+     &                 kprvet,kpdsot,kpdsoc,kpdalf,                     & !kpdsoc: soil color
      &                 kpdvmn,kpdvmx,kpdslp,kpdabs,                     & !clu [+1l] add kpd() for vmn, vmx, slp, abs
      &                 irttsf,irtwet,irtsno,irtzor,irtalb,irtais,       & !cggg snow mods
      &                 irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,       &
-     &                 irtvet,irtsot,irtalf                             &
+     &                 irtvet,irtsot,irtsoc,irtalf                      & !irtsoc: soil color
      &,                irtvmn,irtvmx,irtslp,irtabs                      & !clu [+1l] add irt() for vmn, vmx, slp, abs
      &,                imsk, jmsk, slmskh, outlat, outlon               &
      &,                gaus, blno, blto, me, lanom)
@@ -3756,9 +3819,9 @@
       implicit none
       logical  lanom
       integer irtsmc,irtacn,irtstc,irtvet,irtveg,irtscv,irtzor,irtsno,  &
-     &        irtalb,irttg3,irtais,iret,me,kk,kpdvet,i,irtalf,irtsot,   &
+     &   irtalb,irttg3,irtais,iret,me,kk,kpdvet,i,irtalf,irtsot,irtsoc, &  !irtsoc:soil color
      &        imsk,jmsk,irtwet,lsoil,len,kpdtsf,kpdsno,kpdsnd,kpdwet,iy,&
-     &        lugb,im,ih,id,kpdveg,kpdstc,kprvet,irttsf,kpdsot,kpdsmc,  &
+     &   lugb,im,ih,id,kpdveg,kpdstc,kprvet,irttsf,kpdsot,kpdsoc,kpdsmc,&  !kpdsoc: soil color
      &        kpdais,kpdzor,kpdtg3,kpdacn,kpdscv,j                      &
      &,       kpdvmn,kpdvmx,kpdslp,kpdabs,irtvmn,irtvmx,irtslp,irtabs
       real (kind=kind_io8) blto,blno,fh
@@ -3774,15 +3837,15 @@
 !
       character*500 fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,          &
      &             fntg3a,fnscva,fnsmca,fnstca,fnacna,fnvega,           &
-     &             fnveta,fnsota
-     &,            fnvmna,fnvmxa,fnslpa,fnabsa
+     &             fnveta,fnsota,fnsoca,                                & !fnsoca: soil color
+     &             fnvmna,fnvmxa,fnslpa,fnabsa
 
       real (kind=kind_io8) tsfanl(len), wetanl(len),   snoanl(len),     &
      &     zoranl(len), albanl(len,4), aisanl(len),                     &
      &     tg3anl(len), acnanl(len),                                    &
      &     cvanl (len), cvbanl(len),   cvtanl(len),                     &
      &     slianl(len), scvanl(len),   veganl(len),                     &
-     &     vetanl(len), sotanl(len),   alfanl(len,2),                   &
+     &     vetanl(len), sotanl(len),   socanl(len),alfanl(len,2),       & !socanl: soil color
      &     smcanl(len,lsoil), stcanl(len,lsoil),                        &
      &     tsfan0(len)                                                  &
      &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
@@ -4267,6 +4330,36 @@
         endif
       endif
 
+!
+!  soil color
+!
+      irtsoc=0
+      if(fnsoca(1:8).ne.'        ') then
+        call fixrda(lugb,fnsoca,kpdsoc,slmskl,
+     &             iy,im,id,ih,fh,socanl,len,iret
+     &,            imsk, jmsk, slmskh, gaus,blno, blto
+     &,            outlat, outlon, me)
+        irtsoc=iret
+        if(iret.eq.1) then
+          write(6,*) 'FATAL ERROR: soil color analysis read error.'
+          call abort
+        elseif(iret.eq.-1) then
+          if (me .eq. 0) then
+          print *,'old soil color analysis provided',
+     &            ' indicating proper file name is given.'
+          print *,' no error suspected.'
+          write(6,*) 'forecast guess will be used'
+          endif
+        else
+          if (me .eq. 0) print *,'soil color analysis provided.'
+        endif
+      else
+        if (me .eq. 0) then
+!       print *,'************************************************'
+        print *,'no soil color anly available. climatology used'
+        endif
+      endif
+
 !clu [+120l]--------------------------------------------------------------
 !
 !  min vegetation cover
@@ -4397,13 +4490,13 @@
       subroutine filfcs(tsffcs,wetfcs,snofcs,zorfcs,albfcs,             &
      &                  tg3fcs,cvfcs ,cvbfcs,cvtfcs,                    &
      &                  cnpfcs,smcfcs,stcfcs,slifcs,aisfcs,             &
-     &                  vegfcs, vetfcs, sotfcs, alffcs,                 &
+     &                  vegfcs, vetfcs, sotfcs,socfcs, alffcs,          & !socfcs: soil color
      &                  sihfcs,sicfcs,                                  & !cwu [+1l] add ()fcs for sih, sic
      &                  vmnfcs,vmxfcs,slpfcs,absfcs,                    & !clu [+1l] add ()fcs for vmn, vmx, slp, abs
      &                  tsfanl,wetanl,snoanl,zoranl,albanl,             &
      &                  tg3anl,cvanl ,cvbanl,cvtanl,                    &
      &                  cnpanl,smcanl,stcanl,slianl,aisanl,             &
-     &                  veganl, vetanl, sotanl, alfanl,                 &
+     &                  veganl, vetanl, sotanl,socanl, alfanl,          & !soil color
      &                  sihanl,sicanl,                                  & !cwu [+1l] add ()anl for sih, sic
      &                  vmnanl,vmxanl,slpanl,absanl,                    & !clu [+1l] add ()anl for vmn, vmx, slp, abs
      &                  len,lsoil)
@@ -4418,7 +4511,7 @@
      &     cnpfcs(len),                                                 &
      &     smcfcs(len,lsoil),stcfcs(len,lsoil),                         &
      &     slifcs(len),vegfcs(len),                                     &
-     &     vetfcs(len),sotfcs(len),alffcs(len,2)                        &
+     &     vetfcs(len),sotfcs(len),socfcs(len),alffcs(len,2)            & !socfcs: soil color
      &,    sihfcs(len),sicfcs(len)                                      &
      &,    vmnfcs(len),vmxfcs(len),slpfcs(len),absfcs(len)
       real (kind=kind_io8) tsfanl(len),wetanl(len),snoanl(len),         &
@@ -4428,7 +4521,7 @@
      &     cnpanl(len),                                                 &
      &     smcanl(len,lsoil),stcanl(len,lsoil),                         &
      &     slianl(len),veganl(len),                                     &
-     &     vetanl(len),sotanl(len),alfanl(len,2)                        &
+     &     vetanl(len),sotanl(len),socanl(len),alfanl(len,2)            & !socanl:soil color
      &,    sihanl(len),sicanl(len)                                      &
      &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
 !
@@ -4457,6 +4550,7 @@
         vegfcs(i)   = veganl(i)      !  vegetation cover
         vetfcs(i)   = vetanl(i)      !  vegetation type
         sotfcs(i)   = sotanl(i)      !  soil type
+        socfcs(i)   = socanl(i)      !  soil color
         alffcs(i,1) = alfanl(i,1)    !  vegetation fraction for albedo
         alffcs(i,2) = alfanl(i,2)    !  vegetation fraction for albedo
 !cwu [+2l] add sih, sic
@@ -4688,41 +4782,43 @@
      &                 tsffcs,wetfcs,snofcs,zorfcs,albfcs,aisfcs,       &
      &                 cvfcs ,cvbfcs,cvtfcs,                            &
      &                 cnpfcs,smcfcs,stcfcs,slifcs,vegfcs,              &
-     &                 vetfcs,sotfcs,alffcs,                            &
+     &                 vetfcs,sotfcs,socfcs,alffcs,                     & !socfcs:soil color
      &                 sihanl,sicanl,                                   &
      &                 vmnanl,vmxanl,slpanl,absanl,                     &
      &                 tsfanl,tsfan2,wetanl,snoanl,zoranl,albanl,aisanl,&
      &                 cvanl ,cvbanl,cvtanl,                            &
      &                 cnpanl,smcanl,stcanl,slianl,veganl,              &
-     &                 vetanl,sotanl,alfanl,                            &
+     &                 vetanl,sotanl,socanl,alfanl,                     & !socanl:soil color
      &                 ctsfl,calbl,caisl,csnol,csmcl,czorl,cstcl,cvegl, &
      &                 ctsfs,calbs,caiss,csnos,csmcs,czors,cstcs,cvegs, &
      &                 ccv,ccvb,ccvt,ccnp,cvetl,cvets,csotl,csots,      &
+     &                 csocl,csocs,                                     & !csocl,csocs:soil color 
      &                 calfl,calfs,                                     &
      &                 csihl,csihs,csicl,csics,                         &
      &                 cvmnl,cvmns,cvmxl,cvmxs,cslpl,cslps,cabsl,cabss, &
      &                 irttsf,irtwet,irtsno,irtzor,irtalb,irtais,       &
      &                 irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,       &
      &                 irtvmn,irtvmx,irtslp,irtabs,                     &
-     &                 irtvet,irtsot,irtalf, landice, me)
+     &                 irtvet,irtsot,irtsoc,irtalf, landice, me)    
       use machine , only : kind_io8,kind_io4
       use sfccyc_module, only : veg_type_landice, soil_type_landice,    &
-     &                          num_threads, zero, one
+     &                    num_threads, zero, one,soil_color_landice
       implicit none
       integer k,i,im,id,iy,len,lsoil,ih,irtacn,irtsmc,irtscv,irtais,    &
-     &        irttg3,irtstc,irtalf,me,irtsot,irtveg,irtvet, irtzor,     &
+     &     irttg3,irtstc,irtalf,me,irtsot,irtsoc,irtveg,irtvet, irtzor, & !irtsoc:soil color
      &        irtalb,irtsno,irttsf,irtwet,j                             &
      &,       irtvmn,irtvmx,irtslp,irtabs
       logical, intent(in)  :: landice
-      real (kind=kind_io8) rvegs,rvets,rzors,raiss,rsnos,rsots,rcnp,    &
-     &                     rcvt,rcv,rcvb,rsnol,rzorl,raisl,ralbl,       &
-     &                     ralfl,rvegl,ralbs,ralfs,rtsfs,rvetl,rsotl,   &
+      real (kind=kind_io8) rvegs,rvets,rzors,raiss,rsnos,rsots,rsocs,   & !rsocs:soil color
+     &                     rcnp,rcvt,rcv,rcvb,rsnol,rzorl,raisl,ralbl,  &
+     &                 ralfl,rvegl,ralbs,ralfs,rtsfs,rvetl,rsotl,rsocl, &
      &                     qzors,qvegs,qsnos,qalfs,qaiss,qvets,qcvt,    &
-     &                     qcnp,qcvb,qsots,qcv,qaisl,qsnol,qalfl,       &
-     &                     qtsfl,qalbl,qzorl,qtsfs,qalbs,qsotl,qvegl,   &
+     &                    qcnp,qcvb,qsots,qsocs,qcv,qaisl,qsnol,qalfl,  &
+     &               qtsfl,qalbl,qzorl,qtsfs,qalbs,qsotl,qsocl,qvegl,   &
      &                     qvetl,rtsfl,calbs,caiss,ctsfs,czorl,cvegl,   &
      &                     csnos,ccvb,ccvt,ccv,czors,cvegs,caisl,csnol, &
      &                     calbl,fh,ctsfl,ccnp,csots,calfl,csotl,cvetl, &
+     &                     csocl,csocs,                                 & !csocl,csocs:soil color 
      &                     cvets,calfs,deltsfc,                         &
      &                     csihl,csihs,csicl,csics,                     &
      &                     rsihl,rsihs,rsicl,rsics,                     &
@@ -4739,7 +4835,7 @@
      &     cnpfcs(len),                                                 &
      &     smcfcs(len,lsoil),stcfcs(len,lsoil),                         &
      &     slifcs(len), vegfcs(len),                                    &
-     &     vetfcs(len), sotfcs(len),   alffcs(len,2)                    &
+     &     vetfcs(len), sotfcs(len),socfcs(len),   alffcs(len,2)        & !socfcs:soil color
      &,    sihfcs(len), sicfcs(len)                                     &
      &,    vmnfcs(len),vmxfcs(len),slpfcs(len),absfcs(len)
       real (kind=kind_io8) tsfanl(len),tsfan2(len),                     &
@@ -4749,7 +4845,7 @@
      &     cnpanl(len),                                                 &
      &     smcanl(len,lsoil),stcanl(len,lsoil),                         &
      &     slianl(len), veganl(len),                                    &
-     &     vetanl(len), sotanl(len),   alfanl(len,2)                    &
+     &     vetanl(len), sotanl(len),socanl(len), alfanl(len,2)          & !socanl:soil color
      &,    sihanl(len),sicanl(len)                                      &
      &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
 !
@@ -4787,6 +4883,7 @@
       rvegl = cvegl
       rvetl = cvetl
       rsotl = csotl
+      rsocl = csocl  !soil color
       rsihl = csihl
       rsicl = csicl
       rvmnl = cvmnl
@@ -4804,6 +4901,7 @@
       rvegs = cvegs
       rvets = cvets
       rsots = csots
+      rsocs = csocs !soil color
       rsihs = csihs
       rsics = csics
       rvmns = cvmns
@@ -4885,6 +4983,11 @@
         rsots = 1.
       endif
 
+      if(irtsoc == -1) then   !soil color
+        rsocl = 1.
+        rsocs = 1.
+      endif
+
       if(irtacn == -1) then
         rsicl = 1.
         rsics = 1.
@@ -4919,8 +5022,10 @@
   100 format('rtsfl,ralbl,raisl,rsnol,rsmcl,rzorl,rvegl=',10f7.3)
       write(6,101) rtsfs,ralbs,raiss,rsnos,rsmcs,rzors,rvegs,rsics
   101 format('rtsfs,ralbs,raiss,rsnos,rsmcs,rzors,rvegs,rsics=',11f7.3)
-!     print *,' ralfl=',ralfl,' ralfs=',ralfs,' rsotl=',rsotl
-!    *,' rsots=',rsots,' rvetl=',rvetl,' rvets=',rvets
+
+      write(6,102) rsocl,rsocs
+  102 format('rsoc1, rsocs =',10f7.3)
+
       endif
 !
       qtsfl = 1. - rtsfl
@@ -4933,6 +5038,8 @@
       qvegl = 1. - rvegl
       qvetl = 1. - rvetl
       qsotl = 1. - rsotl
+      qsocl = 1. - rsocl  !soil color
+
       qsihl = 1. - rsihl
       qsicl = 1. - rsicl
       qvmnl = 1. - rvmnl
@@ -4950,6 +5057,8 @@
       qvegs = 1. - rvegs
       qvets = 1. - rvets
       qsots = 1. - rsots
+      qsocs = 1. - rsocs 
+
       qsihs = 1. - rsihs
       qsics = 1. - rsics
       qvmns = 1. - rvmns
@@ -4977,17 +5086,6 @@
         print *, 'dbgx-- csnol, csnos:',csnol,csnos
         print *, 'dbgx-- rsnol, rsnos:',rsnol,rsnos
       endif
-
-!     print *, rtsfs, qtsfs, raiss , qaiss
-!    *,        rsnos , qsnos, rzors , qzors, rvegs , qvegs
-!    *,        rvets , qvets, rsots , qsots
-!    *,        rcv, rcvb, rcvt, qcv, qcvb, qcvt
-!    *,        ralbs, qalbs, ralfs, qalfs
-!     print *, rtsfl, qtsfl, raisl , qaisl
-!    *,        rsnol , qsnol, rzorl , qzorl, rvegl , qvegl
-!    *,        rvetl , qvetl, rsotl , qsotl
-!    *,        ralbl, qalbl, ralfl, qalfl
-!
 !
       len_thread_m  = (len+num_threads-1) / num_threads
 
@@ -4999,9 +5097,11 @@
           if(slianl(i) == zero) then
             vetanl(i) = vetfcs(i)*rvets + vetanl(i)*qvets
             sotanl(i) = sotfcs(i)*rsots + sotanl(i)*qsots
+            socanl(i) = socfcs(i)*rsocs + socanl(i)*qsocs
           else
             vetanl(i) = vetfcs(i)*rvetl + vetanl(i)*qvetl
             sotanl(i) = sotfcs(i)*rsotl + sotanl(i)*qsotl
+            socanl(i) = socfcs(i)*rsocl + socanl(i)*qsocl
           endif
         enddo
       enddo
@@ -5066,7 +5166,7 @@
 !
       enddo
 
-! at landice points, set the soil type, slope type and
+! at landice points, set the soil type, color,slope type and
 ! greenness fields to flag values.
 
       if (landice) then
@@ -5074,6 +5174,7 @@
           if (nint(slianl(i)) == 1) then
             if (nint(vetanl(i)) == veg_type_landice) then
               sotanl(i) = soil_type_landice
+              socanl(i) = soil_color_landice 
               veganl(i) = 0.0
               slpanl(i) = 9.0
               vmnanl(i) = 0.0
@@ -6895,12 +6996,12 @@ cjfe
       end
 
 !>\ingroup mod_sfcsub
-      subroutine landtyp(vegtype,soiltype,slptype,slmask,len)
+      subroutine landtyp(vegtype,soiltype,colortype,slptype,slmask,len)
       use machine , only : kind_io8,kind_io4
       implicit none
       integer i,len
       real (kind=kind_io8) vegtype(len),soiltype(len),slmask(len)       &
-     &,                    slptype(len)  
+     &,                    slptype(len),colortype(len)  
 !
 !  make sure that the soil type and veg type are non-zero over land
 !
@@ -6908,6 +7009,7 @@ cjfe
         if (slmask(i) .eq. 1) then
           if (vegtype(i)  .eq. 0.)  vegtype(i)  = 7
           if (soiltype(i) .eq. 0.)  soiltype(i) = 2
+          if (colortype(i) .eq. 0.)  colortype(i)= 4
           if (slptype(i)  .eq. 0.)  slptype(i)  = 1
         endif
       enddo
@@ -6931,9 +7033,6 @@ cjfe
       do  n=1,k
         gaul(n) = acos(a(n)) * radi
       enddo
-!
-!     print *,'gaussian lat (deg) for jmax=',k
-!     print *,(gaul(n),n=1,k)
 !
       return
    70 write(6,6000)
@@ -6966,16 +7065,16 @@ cjfe
       subroutine clima(lugb,iy,im,id,ih,fh,len,lsoil,slmskl,slmskw,     &
      &                 fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,       &
      &                 fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,       &
-     &                 fnvetc,fnsotc,                                   &
+     &                 fnvetc,fnsotc,fnsocc,                            &
      &                 fnvmnc,fnvmxc,fnslpc,fnabsc,                     &
      &                 tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,aisclm,&
      &                 tg3clm,cvclm ,cvbclm,cvtclm,                     &
      &                 cnpclm,smcclm,stcclm,sliclm,scvclm,acnclm,vegclm,&
-     &                 vetclm,sotclm,alfclm,                            &
+     &                 vetclm,sotclm,socclm,alfclm,                     &
      &                 vmnclm,vmxclm,slpclm,absclm,                     &
      &                 kpdtsf,kpdwet,kpdsno,kpdzor,kpdalb,kpdais,       &
      &                 kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,       &
-     &                 kpdvet,kpdsot,kpdalf,tsfcl0,                     &
+     &                 kpdvet,kpdsot,kpdsoc,kpdalf,tsfcl0,              & 
      &                 kpdvmn,kpdvmx,kpdslp,kpdabs,                     &
      &                 deltsfc, lanom                                   &
      &,                imsk, jmsk, slmskh, outlat, outlon               &
@@ -6993,13 +7092,13 @@ cjfe
      &        jy,mon1,is2,isx,kpd9,is1,l,nn,mon2,mon,is,kpdsno,         &
      &        kpdzor,kpdtsf,kpdwet,kpdscv,kpdacn,kpdais,kpdtg3,im,id,   &
      &        lugb,iy,len,lsoil,ih,kpdsmc,iprnt,me,m1,m2,k1,k2,         &
-     &        kpdvet,kpdsot,kpdstc,kpdveg,jmsk,imsk,j,ialb              &
+     &        kpdvet,kpdsot,kpdsoc,kpdstc,kpdveg,jmsk,imsk,j,ialb       & 
      &,       kpdvmn,kpdvmx,kpdslp,kpdabs,landice_cat
       integer kpdalb(4), kpdalf(2)
 !
       character*500 fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,          &
      &             fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,           &
-     &             fnvetc,fnsotc,fnalbc2                                &
+     &             fnvetc,fnsotc,fnsocc,fnalbc2                         &
      &,            fnvmnc,fnvmxc,fnslpc,fnabsc
       real (kind=kind_io8) tsfclm(len),tsfcl2(len),                     &
      &     wetclm(len),snoclm(len),                                     &
@@ -7009,7 +7108,7 @@ cjfe
      &     cnpclm(len),                                                 &
      &     smcclm(len,lsoil),stcclm(len,lsoil),                         &
      &     sliclm(len),scvclm(len),vegclm(len),                         &
-     &     vetclm(len),sotclm(len),alfclm(len,2)                        &
+     &     vetclm(len),sotclm(len),socclm(len),alfclm(len,2)            & 
      &,    vmnclm(len),vmxclm(len),slpclm(len),absclm(len)
       real (kind=kind_io8) slmskh(imsk,jmsk)
       real (kind=kind_io8) outlat(len), outlon(len)
@@ -7051,7 +7150,7 @@ cjfe
      &                     zor(:,:),wet(:,:),
      &                     ais(:,:), acn(:,:),   scv(:,:), smc(:,:,:),
      &                     tg3(:),   alb(:,:,:), alf(:,:),
-     &                     vet(:),   sot(:),     tsf2(:),
+     &                     vet(:),   sot(:), soc(:),    tsf2(:),         
      &                     veg(:,:), stc(:,:,:)
      &,                    vmn(:), vmx(:),  slp(:), absm(:)
 !
@@ -7060,7 +7159,7 @@ cjfe
       data mon1s/0/, mon2s/0/, sea1s/0/, sea2s/0/
 !
       save first, tsf, sno, zor, wet,  ais, acn, scv, smc, tg3,
-     &     alb,   alf, vet, sot, tsf2, veg, stc,
+     &     alb,   alf, vet, sot, soc,tsf2, veg, stc,                    
      &     vmn,   vmx, slp, absm,
      &     mon1s, mon2s, sea1s, sea2s, dayhf, k1, k2, m1, m2,
      &     landice_cat
@@ -7115,7 +7214,7 @@ cjfe
      &           wet(len,2), ais(len,2),      acn(len,2),
      &           scv(len,2), smc(len,lsoil,2),
      &           tg3(len),   alb(len,4,2),    alf(len,2),
-     &           vet(len),   sot(len), tsf2(len),
+     &           vet(len),   sot(len), soc(len),tsf2(len),  
 !clu [+1l] add vmn, vmx, slp, abs
      &           vmn(len),   vmx(len), slp(len), absm(len),
      &           veg(len,2), stc(len,lsoil,2))
@@ -7394,6 +7493,7 @@ cjfe
         endif
 !
 !  soil type
+        print *,'in FIXREAD fnsotc =',fnsotc 
 !
         if(fnsotc(1:8).ne.'        ') then
           if ( index(fnsotc, "tileX.nc") == 0) then ! grib file
@@ -7407,6 +7507,24 @@ cjfe
      &                       kpdsot, sot, 1, len, me)
           endif
           if (me .eq. 0) write(6,*) 'climatological soil type read in.'
+        endif
+
+!
+!  soil color
+!
+        If(fnsocc(1:8).ne.'        ') then
+          if ( index(fnsocc, "tileX.nc") == 0) then ! grib file
+            kpd7=-1
+            call fixrdc(lugb,fnsocc,kpdsoc,kpd7,kpd9,slmskl,
+     &                  soc,len,iret
+     &,                 imsk, jmsk, slmskh, gaus,blno, blto
+     &,                 outlat, outlon, me)
+          else
+            call fixrdc_tile(fnsocc, tile_num_ch, i_index, j_index,
+     &                       255, soc, 1, len, me)
+           if (me .eq. 0) write(6,*) 'Soil color data name is',fnsocc
+          endif
+          if (me .eq. 0) write(6,*) 'climatological soil color read in.'
         endif
 
 !
@@ -8088,6 +8206,17 @@ cjfe
         enddo
       endif
 
+!     initialize socclm in case there is no soil color data input
+
+         do i=1,len
+           socclm(i) = 4.
+         enddo
+
+      if(fnsocc(1:8).ne.'        ') then
+        do i=1,len
+          socclm(i) =         soc(i)
+        enddo
+      endif
 
 !clu ----------------------------------------------------------------------
 !
@@ -8217,6 +8346,8 @@ cjfe
           error=nf90_inq_varid(ncid, 'vegetation_type', id_var)
         case(236)
           error=nf90_inq_varid(ncid, 'slope_type', id_var)
+        case(255)
+          ERROR=NF90_INQ_VARID(NCID, 'soil_color', id_var)
         case(256:257)
           error=nf90_inq_varid(ncid, 'vegetation_greenness', id_var)
         case default
