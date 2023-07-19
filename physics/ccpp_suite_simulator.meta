@@ -64,15 +64,15 @@
   type = integer
   intent = inout
 [in_pre_active]
-  standard_name = flag_to_indicate_location_in_physics_process_loop_before_active_suite
-  long_name = flag to indicate location in physics process loop before active suite
+  standard_name = flag_to_indicate_location_in_physics_process_loop_before_active_scheme
+  long_name = flag to indicate location in physics process loop before active scheme
   units = flag
   dimensions = ()
   type = logical
   intent = inout
 [in_post_active]
-  standard_name = flag_to_indicate_location_in_physics_process_loop_after_active_suite
-  long_name = flag to indicate location in physics process loop after active suite
+  standard_name = flag_to_indicate_location_in_physics_process_loop_after_active_scheme
+  long_name = flag to indicate location in physics process loop after active scheme
   units = flag
   dimensions = ()
   type = logical
