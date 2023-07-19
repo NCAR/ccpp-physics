@@ -1,31 +1,31 @@
 ! ########################################################################################
 ! 
-! Description: Interstitial CCPP scheme to couple UFS physics to ccpp_scheme_simulator.
+! Description: Interstitial CCPP suite to couple UFS physics to ccpp_suite_simulator.
 !
 ! Contains:
-! - load_ccpp_scheme_sim(): read and load data into type used by ccpp_scheme_simulator.
+! - load_ccpp_suite_sim(): read and load data into type used by ccpp_suite_simulator.
 !      called once during model initialization
-! - GFS_ccpp_scheme_sim_pre_run(): prepare GFS diagnostic physics tendencies for 
-!      ccpp_scheme_simulator. 
+! - GFS_ccpp_suite_sim_pre_run(): prepare GFS diagnostic physics tendencies for 
+!      ccpp_suite_simulator. 
 !
 ! ########################################################################################
-module GFS_ccpp_scheme_sim_pre
+module GFS_ccpp_suite_sim_pre
   use machine, only: kind_phys
-  use module_ccpp_scheme_simulator, only: base_physics_process
+  use module_ccpp_suite_simulator, only: base_physics_process
   use netcdf
   implicit none
-  public GFS_ccpp_scheme_sim_pre_run, load_ccpp_scheme_sim
+  public GFS_ccpp_suite_sim_pre_run, load_ccpp_suite_sim
 contains
 
   ! ######################################################################################
   !
-  ! SUBROUTINE GFS_ccpp_scheme_sim_pre_run
+  ! SUBROUTINE GFS_ccpp_suite_sim_pre_run
   !
   ! ######################################################################################
-!! \section arg_table_GFS_ccpp_scheme_sim_pre_run
-!! \htmlinclude GFS_ccpp_scheme_sim_pre_run.html
+!! \section arg_table_GFS_ccpp_suite_sim_pre_run
+!! \htmlinclude GFS_ccpp_suite_sim_pre_run.html
 !! 
-  subroutine GFS_ccpp_scheme_sim_pre_run(do_ccpp_scheme_sim, dtend, ntqv, dtidx, dtp,    &
+  subroutine GFS_ccpp_suite_sim_pre_run(do_ccpp_suite_sim, dtend, ntqv, dtidx, dtp,      &
        index_of_process_dcnv, index_of_process_longwave, index_of_process_shortwave,     &
        index_of_process_scnv, index_of_process_orographic_gwd, index_of_process_pbl,     &
        index_of_process_mp, index_of_temperature, index_of_x_wind, index_of_y_wind,      &
@@ -33,7 +33,7 @@ contains
        errmsg, errflg)
 
     ! Inputs
-    logical, intent(in) :: do_ccpp_scheme_sim
+    logical, intent(in) :: do_ccpp_suite_sim
     integer, intent(in) :: ntqv, index_of_process_dcnv, index_of_process_longwave,       &
          index_of_process_shortwave, index_of_process_scnv,                              &
          index_of_process_orographic_gwd, index_of_process_pbl, index_of_process_mp,     &
@@ -56,7 +56,7 @@ contains
     errmsg = ''
     errflg = 0
 
-    if (.not. do_ccpp_scheme_sim) return
+    if (.not. do_ccpp_suite_sim) return
 
     ! Get tendency for "active" process.
 
@@ -64,7 +64,7 @@ contains
     ! DJS2023: For the UFS and SCM, the physics tendencies are stored in a multi-dimensional
     ! array, CCPP standard_name = cumulative_change_of_state_variables.
     ! These are not the instantaneous physics tendencies that are applied to the state by 
-    ! the physics schemes. Not all schemes output physics tendencies...
+    ! the physics suites. Not all suites output physics tendencies...
     ! Rather these are intended for diagnostic puposes and are accumulated over some 
     ! interval.
     ! In the UFS/SCM this is controlled by the diagnostic bucket interval, namelist option 
@@ -107,10 +107,10 @@ contains
        active_phys_tend(:,:,iactive_q) = dtend(:,:,idtend)/dtp
     endif
 
-  end subroutine GFS_ccpp_scheme_sim_pre_run
+  end subroutine GFS_ccpp_suite_sim_pre_run
 
   ! ######################################################################################
-  subroutine load_ccpp_scheme_sim(nlunit, nml_file, physics_process, iactive_T,          &
+  subroutine load_ccpp_suite_sim(nlunit, nml_file, physics_process, iactive_T,           &
        iactive_u, iactive_v, iactive_q, errmsg, errflg)
 
     ! Inputs
@@ -125,13 +125,13 @@ contains
 
     ! Local variables
     integer :: ncid, dimID, varID, status, ios, iprc, nlev_data, ntime_data
-    character(len=256) :: scheme_sim_file
-    logical :: exists, do_ccpp_scheme_sim
+    character(len=256) :: suite_sim_file
+    logical :: exists, do_ccpp_suite_sim
     integer :: nprc_sim
 
     ! For each process there is a corresponding namelist entry, which is constructed as 
     ! follows:
-    ! {use_scheme_sim[0(no)/1(yes)], time_split[0(no)/1(yes)], order[1:nPhysProcess]}
+    ! {use_suite_sim[0(no)/1(yes)], time_split[0(no)/1(yes)], order[1:nPhysProcess]}
     integer, dimension(3) ::    &
          prc_LWRAD_cfg = (/0,0,0/), &
          prc_SWRAD_cfg = (/0,0,0/), &
@@ -142,7 +142,7 @@ contains
          prc_cldMP_cfg = (/0,0,0/)
 
     ! Namelist
-    namelist / ccpp_scheme_sim_nml / do_ccpp_scheme_sim, scheme_sim_file, nprc_sim,      &
+    namelist / ccpp_suite_sim_nml / do_ccpp_suite_sim, suite_sim_file, nprc_sim,         &
          prc_LWRAD_cfg, prc_SWRAD_cfg, prc_PBL_cfg, prc_GWD_cfg, prc_SCNV_cfg,           &
          prc_DCNV_cfg, prc_cldMP_cfg
 
@@ -152,17 +152,17 @@ contains
     ! Read in namelist
     inquire (file = trim (nml_file), exist = exists)
     if (.not. exists) then
-        errmsg = 'CCPP scheme simulator namelist file: '//trim(nml_file)//' does not exist.'
+        errmsg = 'CCPP suite simulator namelist file: '//trim(nml_file)//' does not exist.'
         errflg = 1
         return
     else
         open (unit = nlunit, file = nml_file, action = 'read', status = 'old', iostat = ios)
     endif
     rewind (nlunit)
-    read (nlunit, nml = ccpp_scheme_sim_nml, iostat=status)
+    read (nlunit, nml = ccpp_suite_sim_nml, iostat=status)
     close (nlunit)
 
-    ! Only proceed if scheme simulator requested.
+    ! Only proceed if suite simulator requested.
     if (prc_SWRAD_cfg(1)  == 1 .or. prc_LWRAD_cfg(1) == 1 .or. prc_PBL_cfg(1)  == 1 .or. &
          prc_GWD_cfg(1)   == 1 .or. prc_SCNV_cfg(1)  == 1 .or. prc_DCNV_cfg(1) == 1 .or. &
          prc_cldMP_cfg(1) == 1 ) then
@@ -171,9 +171,9 @@ contains
     endif
 
     ! Check that input data file exists.
-    inquire (file = trim (scheme_sim_file), exist = exists)
+    inquire (file = trim (suite_sim_file), exist = exists)
     if (.not. exists) then
-       errmsg = 'CCPP scheme simulator file: '//trim(scheme_sim_file)//' does not exist'
+       errmsg = 'CCPP suite simulator file: '//trim(suite_sim_file)//' does not exist'
        errflg = 1
        return
     endif
@@ -183,9 +183,9 @@ contains
     !
 
     ! Open file
-    status = nf90_open(trim(scheme_sim_file), NF90_NOWRITE, ncid)
+    status = nf90_open(trim(suite_sim_file), NF90_NOWRITE, ncid)
     if (status /= nf90_noerr) then
-       errmsg = 'Error reading in CCPP scheme simulator file: '//trim(scheme_sim_file)
+       errmsg = 'Error reading in CCPP suite simulator file: '//trim(suite_sim_file)
        errflg = 1
        return
     endif
@@ -195,7 +195,7 @@ contains
     if (status == nf90_noerr) then
        status = nf90_inquire_dimension(ncid, dimid, len = ntime_data)
     else
-       errmsg = 'CCPP scheme simulator file: '//trim(scheme_sim_file)//' does not contain [time] dimension'
+       errmsg = 'CCPP suite simulator file: '//trim(suite_sim_file)//' does not contain [time] dimension'
        errflg = 1
        return
     endif
@@ -204,7 +204,7 @@ contains
     if (status == nf90_noerr) then
        status = nf90_inquire_dimension(ncid, dimid, len = nlev_data)
     else
-       errmsg = 'CCPP scheme simulator file: '//trim(scheme_sim_file)//' does not contain [lev] dimension'
+       errmsg = 'CCPP suite simulator file: '//trim(suite_sim_file)//' does not contain [lev] dimension'
        errflg = 1
        return
     endif
@@ -230,7 +230,7 @@ contains
        if (status == nf90_noerr) then
           status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%time)
        else
-          errmsg = 'SCM data tendency file: '//trim(scheme_sim_file)//' does not contain times variable'
+          errmsg = 'SCM data tendency file: '//trim(suite_sim_file)//' does not contain times variable'
           errflg = 1
           return
        endif
@@ -403,7 +403,7 @@ contains
           if (status == nf90_noerr) status = nf90_get_var(  ncid, varID, physics_process(iprc)%tend2d%q)
        endif
 
-       ! Which process-scheme is "active"? Is process time-split?
+       ! Which process-suite is "active"? Is process time-split?
        if (.not. physics_process(iprc)%use_sim) then
           physics_process(1)%iactive_scheme = iprc
           physics_process(1)%active_name    = physics_process(iprc)%name
@@ -416,20 +416,20 @@ contains
 
     if (physics_process(1)%iactive_scheme == 0) then
        errflg = 1
-       errmsg = "ERROR: No active scheme set for CCPP scheme simulator"
+       errmsg = "ERROR: No active suite set for CCPP suite simulator"
        return
     endif
 
     print*, "-----------------------------------"
-    print*, "--- Using CCPP scheme simulator ---"
+    print*, "--- Using CCPP suite simulator ---"
     print*, "-----------------------------------"
     do iprc = 1,nprc_sim
        if (physics_process(iprc)%use_sim) then
-          print*,"  simulate_scheme: ", trim(physics_process(iprc)%name)
+          print*,"  simulate_suite: ", trim(physics_process(iprc)%name)
           print*,"      order:       ", physics_process(iprc)%order
           print*,"      time_split:  ", physics_process(iprc)%time_split
        else
-          print*, "  active_scheme:   ", trim(physics_process(1)%active_name)
+          print*, "  active_suite:   ", trim(physics_process(1)%active_name)
           print*, "      order:       ", physics_process(physics_process(1)%iactive_scheme)%order
           print*, "      time_split : ", physics_process(1)%active_tsp
        endif
@@ -437,6 +437,6 @@ contains
     print*, "-----------------------------------"
     print*, "-----------------------------------"
 
-  end subroutine load_ccpp_scheme_sim
+  end subroutine load_ccpp_suite_sim
 
-end module GFS_ccpp_scheme_sim_pre
+end module GFS_ccpp_suite_sim_pre

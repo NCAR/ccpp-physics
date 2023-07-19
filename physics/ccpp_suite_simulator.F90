@@ -1,14 +1,14 @@
 ! ########################################################################################
 !
-! Description: This scheme simulates the evolution of the internal physics state 
+! Description: This suite simulates the evolution of the internal physics state 
 !              represented by a CCPP Suite Definition File (SDF).
 !
-! To activate this scheme it must be a) embedded within the SDF and b) activated through
+! To activate this suite it must be a) embedded within the SDF and b) activated through
 ! the physics namelist.
 ! The derived-data type "base_physics_process" contains the metadata needed to reconstruct 
 ! the temporal evolution of the state. An array of base_physics_process, physics_process,
 ! is populated by the host during initialization and passed to the physics. Additionally, 
-! this type holds any data, or type-bound procedures, required by the scheme simulator(s).
+! this type holds any data, or type-bound procedures, required by the suite simulator(s).
 !
 ! For this initial demonstration we are using 2-dimensional (height, time) forcing data,
 ! which is on the same native vertical grid as the SCM. The dataset has a temporal 
@@ -17,29 +17,29 @@
 ! (constant) diurnal cycle.
 !
 ! ########################################################################################
-module ccpp_scheme_simulator
+module ccpp_suite_simulator
   use machine, only: kind_phys
-  use module_ccpp_scheme_simulator, only: base_physics_process, sim_LWRAD, sim_SWRAD,    &
+  use module_ccpp_suite_simulator, only: base_physics_process, sim_LWRAD, sim_SWRAD,    &
        sim_PBL, sim_GWD, sim_DCNV, sim_SCNV, sim_cldMP
   implicit none
-  public ccpp_scheme_simulator_run
+  public ccpp_suite_simulator_run
 contains
 
   ! ######################################################################################
   !
-  ! SUBROUTINE ccpp_scheme_simulator_run
+  ! SUBROUTINE ccpp_suite_simulator_run
   !
   ! ######################################################################################
-!! \section arg_table_ccpp_scheme_simulator_run
-!! \htmlinclude ccpp_scheme_simulator_run.html
+!! \section arg_table_ccpp_suite_simulator_run
+!! \htmlinclude ccpp_suite_simulator_run.html
 !!
-  subroutine ccpp_scheme_simulator_run(do_ccpp_scheme_sim, kdt, nCol, nLay, dtp, jdat,   &
+  subroutine ccpp_suite_simulator_run(do_ccpp_suite_sim, kdt, nCol, nLay, dtp, jdat,     &
        iactive_T, iactive_u, iactive_v, iactive_q, proc_start, proc_end, physics_process,&
        in_pre_active, in_post_active, tgrs, ugrs, vgrs, qgrs, active_phys_tend, gt0, gu0,&
        gv0, gq0, errmsg, errflg)
 
     ! Inputs
-    logical,           intent(in)  :: do_ccpp_scheme_sim
+    logical,           intent(in)  :: do_ccpp_suite_sim
     integer,           intent(in)  :: kdt, nCol, nLay, jdat(8), iactive_T, iactive_u,    &
                                       iactive_v, iactive_q
     real(kind_phys),   intent(in)  :: dtp, tgrs(:,:), ugrs(:,:), vgrs(:,:), qgrs(:,:,:), &
@@ -60,7 +60,7 @@ contains
     errmsg = ''
     errflg = 0
 
-    if (.not. do_ccpp_scheme_sim) return
+    if (.not. do_ccpp_suite_sim) return
 
     ! Current forecast time (Data-format specific)
     year  = jdat(1)
@@ -207,6 +207,6 @@ contains
        in_post_active = .false.
     endif
 
-  end subroutine ccpp_scheme_simulator_run
+  end subroutine ccpp_suite_simulator_run
 
-end module ccpp_scheme_simulator
+end module ccpp_suite_simulator

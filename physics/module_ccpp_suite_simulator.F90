@@ -1,12 +1,12 @@
 ! ########################################################################################
 !
 ! This module contains the type, base_physics_process, and supporting subroutines needed
-! by the ccpp scheme simulator.
+! by the ccpp suite simulator.
 !
 ! ########################################################################################
-module module_ccpp_scheme_simulator
-!> \section arg_table_module_ccpp_scheme_simulator Argument table
-!! \htmlinclude module_ccpp_scheme_simulator.html
+module module_ccpp_suite_simulator
+!> \section arg_table_module_ccpp_suite_simulator Argument table
+!! \htmlinclude module_ccpp_suite_simulator.html
 !!
   use machine, only : kind_phys
   implicit none
@@ -307,4 +307,4 @@ contains
     endif
   end subroutine sim_cldMP
 
-end module module_ccpp_scheme_simulator
+end module module_ccpp_suite_simulator

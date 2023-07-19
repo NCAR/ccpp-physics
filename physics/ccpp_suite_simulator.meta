@@ -1,14 +1,14 @@
 [ccpp-table-properties]
-  name = ccpp_scheme_simulator
+  name = ccpp_suite_simulator
   type = scheme
-  dependencies = machine.F,module_ccpp_scheme_simulator.F90
+  dependencies = machine.F,module_ccpp_suite_simulator.F90
 
 [ccpp-arg-table]
-  name = ccpp_scheme_simulator_run
+  name = ccpp_suite_simulator_run
   type = scheme
-[do_ccpp_scheme_sim]
-  standard_name = flag_for_ccpp_scheme_simulator
-  long_name = flag for ccpp scheme simulator
+[do_ccpp_suite_sim]
+  standard_name = flag_for_ccpp_suite_simulator
+  long_name = flag for ccpp suite simulator
   units = flag
   dimensions = ()
   type = logical
@@ -50,29 +50,29 @@
   type = integer
   intent = in
 [proc_start]
-  standard_name = index_for_first_physics_process_in_CCPP_scheme_simulator
-  long_name = index for first physics process in CCPP scheme simulator
+  standard_name = index_for_first_physics_process_in_CCPP_suite_simulator
+  long_name = index for first physics process in CCPP suite simulator
   units     = count
   dimensions = ()
   type = integer
   intent = inout
 [proc_end]
-  standard_name = index_for_last_physics_process_in_CCPP_scheme_simulator
-  long_name = index for last physics process in CCPP scheme simulator
+  standard_name = index_for_last_physics_process_in_CCPP_suite_simulator
+  long_name = index for last physics process in CCPP suite simulator
   units     = count
   dimensions = ()
   type = integer
   intent = inout
 [in_pre_active]
-  standard_name = flag_to_indicate_location_in_physics_process_loop_before_active_scheme
-  long_name = flag to indicate location in physics process loop before active scheme
+  standard_name = flag_to_indicate_location_in_physics_process_loop_before_active_suite
+  long_name = flag to indicate location in physics process loop before active suite
   units = flag
   dimensions = ()
   type = logical
   intent = inout
 [in_post_active]
-  standard_name = flag_to_indicate_location_in_physics_process_loop_after_active_scheme
-  long_name = flag to indicate location in physics process loop after active scheme
+  standard_name = flag_to_indicate_location_in_physics_process_loop_after_active_suite
+  long_name = flag to indicate location in physics process loop after active suite
   units = flag
   dimensions = ()
   type = logical
@@ -110,37 +110,37 @@
   kind = kind_phys
   intent = in
 [active_phys_tend]
-  standard_name = tendencies_for_active_process_in_ccpp_scheme_simulator
-  long_name = tendencies for active physics process in ccpp scheme simulator
+  standard_name = tendencies_for_active_process_in_ccpp_suite_simulator
+  long_name = tendencies for active physics process in ccpp suite simulator
   units = mixed
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_prognostics_varaibles_in_CCPP_scheme_simulator)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_prognostics_varaibles_in_CCPP_suite_simulator)
   type = real
   kind = kind_phys
   intent = in
 [iactive_T]
-  standard_name = index_for_active_T_in_CCPP_scheme_simulator
-  long_name = index into active process tracer array for temperature in CCPP scheme simulator
+  standard_name = index_for_active_T_in_CCPP_suite_simulator
+  long_name = index into active process tracer array for temperature in CCPP suite simulator
   units = count
   dimensions = ()
   type = integer
   intent = in
 [iactive_u]
-  standard_name = index_for_active_u_in_CCPP_scheme_simulator
-  long_name = index into active process tracer array for zonal wind in CCPP scheme simulator
+  standard_name = index_for_active_u_in_CCPP_suite_simulator
+  long_name = index into active process tracer array for zonal wind in CCPP suite simulator
   units = count
   dimensions = ()
   type = integer
   intent = in
 [iactive_v]
-  standard_name = index_for_active_v_in_CCPP_scheme_simulator
-  long_name = index into active process tracer array for meridional wind in CCPP scheme simulator
+  standard_name = index_for_active_v_in_CCPP_suite_simulator
+  long_name = index into active process tracer array for meridional wind in CCPP suite simulator
   units = count
   dimensions = ()
   type = integer
   intent = in
 [iactive_q]
-  standard_name = index_for_active_q_in_CCPP_scheme_simulator
-  long_name = index into active process tracer array for moisture in CCPP scheme simulator
+  standard_name = index_for_active_q_in_CCPP_suite_simulator
+  long_name = index into active process tracer array for moisture in CCPP suite simulator
   units = count
   dimensions = ()
   type = integer
@@ -178,10 +178,10 @@
   kind = kind_phys
   intent = inout
 [physics_process]
-  standard_name = physics_process_type_for_CCPP_scheme_simulator
-  long_name = physics process type for CCPP scheme simulator
+  standard_name = physics_process_type_for_CCPP_suite_simulator
+  long_name = physics process type for CCPP suite simulator
   units = mixed
-  dimensions = (number_of_physics_process_in_CCPP_scheme_simulator)
+  dimensions = (number_of_physics_process_in_CCPP_suite_simulator)
   type = base_physics_process
   intent = inout
 [errmsg]

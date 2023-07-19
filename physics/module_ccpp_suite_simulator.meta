@@ -9,12 +9,12 @@
 
 ########################################################################
 [ccpp-table-properties]
-  name = module_ccpp_scheme_simulator
+  name = module_ccpp_suite_simulator
   type = module
   dependencies = machine.F
 
 [ccpp-arg-table]
-  name = module_ccpp_scheme_simulator
+  name = module_ccpp_suite_simulator
   type = module
 [base_physics_process]
   standard_name = base_physics_process
