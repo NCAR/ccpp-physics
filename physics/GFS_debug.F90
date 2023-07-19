@@ -488,6 +488,10 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%vtype_save', Sfcprop%vtype_save)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%stype'     , Sfcprop%stype)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%stype_save', Sfcprop%stype_save)
+
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%scolor'     , Sfcprop%scolor)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%scolore_save', Sfcprop%scolor_save)
+
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%uustar'    , Sfcprop%uustar)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%oro'       , Sfcprop%oro)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%oro_uf'    , Sfcprop%oro_uf)
@@ -1531,7 +1535,7 @@
 !! \htmlinclude GFS_checkland_run.html
 !!
       subroutine GFS_checkland_run (me, master, blkno, im, kdt, iter, flag_iter, flag_guess, &
-              flag_init, flag_restart, frac_grid, isot, ivegsrc, stype, vtype, slope,        &
+              flag_init, flag_restart, frac_grid, isot, ivegsrc, stype,scolor, vtype, slope,        &
               dry, icy, wet, lake, ocean, oceanfrac, landfrac, lakefrac, slmsk, islmsk,      &
               zorl, zorlw, zorll, zorli, fice, errmsg, errflg )
 
@@ -1554,6 +1558,8 @@
          integer,          intent(in   ) :: isot
          integer,          intent(in   ) :: ivegsrc
          integer,          intent(in   ) :: stype(:)
+         integer,          intent(in   ) :: scolor(:)
+
          integer,          intent(in   ) :: vtype(:)
          integer,          intent(in   ) :: slope(:)
          logical,          intent(in   ) :: dry(:)
@@ -1598,6 +1604,8 @@
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, flag_iter(i)  :', i, blkno, flag_iter(i)
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, flag_guess(i) :', i, blkno, flag_guess(i)
              write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, stype(i)      :', i, blkno, stype(i)
+
+             write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, scolor(i)      :', i, blkno, scolor(i)
              write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, vtype(i)      :', i, blkno, vtype(i)
              write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, slope(i)      :', i, blkno, slope(i)
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, dry(i)        :', i, blkno, dry(i)

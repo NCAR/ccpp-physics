@@ -1,11 +1,11 @@
 [ccpp-table-properties]
-  name = cu_unified_driver
+  name = cu_c3_driver
   type = scheme
-  dependencies = cu_unified_deep.F90,cu_unified_sh.F90,machine.F,physcons.F90,progsigma_calc.f90
+  dependencies = cu_c3_deep.F90,cu_c3_sh.F90,machine.F,physcons.F90,progsigma_calc.f90
 
 ########################################################################
 [ccpp-arg-table]
-  name = cu_unified_driver_init
+  name = cu_c3_driver_init
   type = scheme
 [imfshalcnv]
   standard_name = control_for_shallow_convection_scheme
@@ -14,9 +14,9 @@
   dimensions = ()
   type = integer
   intent = in
-[imfshalcnv_unified]
-  standard_name = identifier_for_unified_shallow_convection
-  long_name = flag for Unified shallow convection scheme
+[imfshalcnv_c3]
+  standard_name = identifier_for_c3_shallow_convection
+  long_name = flag for C3 shallow convection scheme
   units = flag
   dimensions = ()
   type = integer
@@ -28,9 +28,9 @@
   dimensions = ()
   type = integer
   intent = in
-[imfdeepcnv_unified]
-  standard_name = identifier_for_unified_deep_convection
-  long_name = flag for Unified deep convection scheme
+[imfdeepcnv_c3]
+  standard_name = identifier_for_c3_deep_convection
+  long_name = flag for C3 deep convection scheme
   units = flag
   dimensions = ()
   type = integer
@@ -67,7 +67,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = cu_unified_driver_run
+  name = cu_c3_driver_run
   type = scheme
 [ntracer]
   standard_name = number_of_tracers
@@ -639,6 +639,50 @@
   type = real
   kind = kind_phys
   intent = out
+[maxupmf]
+  standard_name = maximum_convective_updraft_mass_flux
+  long_name = maximum convective updraft mass flux within a column
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[maxMF]
+  standard_name = maximum_mass_flux
+  long_name = maximum mass flux within a column
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[do_mynnedmf]
+  standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
+  long_name = flag to activate MYNN-EDMF
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ichoice_in]
+  standard_name = identifier_for_c3_or_gf_deep_convection_closure
+  long_name = flag for C3 or GF deep convection closure
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[ichoicem_in]
+  standard_name = identifier_for_c3_or_gf_mid_convection_closure
+  long_name = flag for C3 or GF mid convection closure
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[ichoice_s_in]
+  standard_name = identifier_for_c3_or_gf_shallow_convection_closure
+  long_name = flag for C3 or GF shallow convection closure
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
