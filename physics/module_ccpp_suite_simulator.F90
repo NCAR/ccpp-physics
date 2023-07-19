@@ -94,21 +94,39 @@ contains
     character(len=*), intent(in) :: var_name
     integer, intent(in) :: year, month, day, hour, min, sec
     character(len=128) :: err_message
-    integer :: ti(1), tf(1)
+    integer :: ti(1), tf(1), ntime
     real(kind_phys) :: w1, w2
 
     ! Interpolation weights
     call this%cmp_time_wts(year, month, day, hour, min, sec, w1, w2, ti, tf)
 
+    ntime = size(this%tend2d%T(1,:))
+
     select case(var_name)
     case("T")
-       this%tend1d%T = w1*this%tend2d%T(:,ti(1)) + w2*this%tend2d%T(:,tf(1))
+       if (tf(1) .le. ntime) then
+          this%tend1d%T = w1*this%tend2d%T(:,ti(1)) + w2*this%tend2d%T(:,tf(1))
+       else
+          this%tend1d%T = this%tend2d%T(:,1)
+       endif
     case("u")
-       this%tend1d%u = w1*this%tend2d%u(:,ti(1)) + w2*this%tend2d%u(:,tf(1))
+       if (tf(1) .le. ntime) then
+          this%tend1d%u = w1*this%tend2d%u(:,ti(1)) + w2*this%tend2d%u(:,tf(1))
+       else
+          this%tend1d%u = this%tend2d%u(:,1)
+       endif
     case("v")
-       this%tend1d%v = w1*this%tend2d%v(:,ti(1)) + w2*this%tend2d%v(:,tf(1))
+       if (tf(1) .le. ntime) then
+          this%tend1d%v = w1*this%tend2d%v(:,ti(1)) + w2*this%tend2d%v(:,tf(1))
+       else
+          this%tend1d%v = this%tend2d%v(:,1)
+       endif
     case("q")
-       this%tend1d%q = w1*this%tend2d%q(:,ti(1)) + w2*this%tend2d%q(:,tf(1))
+       if (tf(1) .le. ntime) then
+          this%tend1d%q = w1*this%tend2d%q(:,ti(1)) + w2*this%tend2d%q(:,tf(1))
+       else
+          this%tend1d%q = this%tend2d%q(:,1)
+       endif
     end select
 
   end function linterp_1D
