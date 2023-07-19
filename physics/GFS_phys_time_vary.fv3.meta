@@ -1794,6 +1794,13 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+[scolor]
+  standard_name = soil_color_classification
+  long_name = soil color for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
 [shdmin]
   standard_name = min_vegetation_area_fraction
   long_name = min fractional coverage of green vegetation
