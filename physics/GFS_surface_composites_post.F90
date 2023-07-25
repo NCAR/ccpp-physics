@@ -24,7 +24,7 @@ contains
 !!
    subroutine GFS_surface_composites_post_run (                                                                                   &
       im, kice, km, rd, rvrdm1, cplflx, cplwav2atm, frac_grid, flag_cice, thsfc_loc, islmsk, dry, wet, icy, wind, t1, q1, prsl1,  &
-      landfrac, lakefrac, oceanfrac, zorl, zorlo, zorll, zorli, garea,                                                            &
+      landfrac, lakefrac, oceanfrac, zorl, zorlo, zorll, zorli, garea, frac_ice,                                                  &
       cd, cd_wat, cd_lnd, cd_ice, cdq, cdq_wat, cdq_lnd, cdq_ice, rb, rb_wat, rb_lnd, rb_ice, stress, stress_wat, stress_lnd,     &
       stress_ice, ffmm, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh, ffhh_wat, ffhh_lnd, ffhh_ice, uustar, uustar_wat, uustar_lnd,         &
       uustar_ice, fm10, fm10_wat, fm10_lnd, fm10_ice, fh2, fh2_wat, fh2_lnd, fh2_ice, tsurf_wat, tsurf_lnd, tsurf_ice,            &
@@ -32,16 +32,17 @@ contains
       ep1d_lnd, ep1d_ice, weasd, weasd_lnd, weasd_ice, snowd, snowd_lnd, snowd_ice, tprcp, tprcp_wat,                             &
       tprcp_lnd, tprcp_ice, evap, evap_wat, evap_lnd, evap_ice, hflx, hflx_wat, hflx_lnd, hflx_ice, qss, qss_wat, qss_lnd,        &
       qss_ice, tsfc, tsfco, tsfcl, tsfc_wat, tisfc, hice, cice, tiice,                                                            &
-      sigmaf, zvfun, lheatstrg, h0facu, h0facs, hflxq, hffac, stc,                                                                &
+      sigmaf, zvfun, lheatstrg, h0facu, h0facs, hflxq, hffac, stc, lkm, iopt_lake, iopt_lake_clm, use_lake_model,                                                               &
       grav, prsik1, prslk1, prslki, z1, ztmax_wat, ztmax_lnd, ztmax_ice, huge, errmsg, errflg)
 
       implicit none
 
-      integer,                              intent(in) :: im, kice, km
-      logical,                              intent(in) :: cplflx, frac_grid, cplwav2atm
+      integer,                              intent(in) :: im, kice, km, lkm, iopt_lake, iopt_lake_clm
+      logical,                              intent(in) :: cplflx, frac_grid, cplwav2atm, frac_ice
       logical,                              intent(in) :: lheatstrg
-      logical, dimension(:),                intent(in) :: flag_cice, dry, wet, icy
-      integer, dimension(:),                intent(in) :: islmsk
+      logical, dimension(:),                intent(in) :: flag_cice, dry, icy
+      logical, dimension(:),             intent(inout) :: wet
+      integer, dimension(:),                intent(in) :: islmsk, use_lake_model
       real(kind=kind_phys), dimension(:),   intent(in) :: wind, t1, q1, prsl1, landfrac, lakefrac, oceanfrac,                   &
         cd_wat, cd_lnd, cd_ice, cdq_wat, cdq_lnd, cdq_ice, rb_wat, rb_lnd, rb_ice, stress_wat,                                  &
         stress_lnd, stress_ice, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh_wat, ffhh_lnd, ffhh_ice, uustar_wat, uustar_lnd, uustar_ice, &
@@ -88,7 +89,7 @@ contains
 
       ! --- generate ocean/land/ice composites
 
-      if (frac_grid) then
+       fractional_grid: if (frac_grid) then
 
         do i=1, im
 
@@ -260,11 +261,38 @@ contains
           endif
         enddo
 
-      else
+      else ! not fractional grid
 
         do i=1,im
-          if (islmsk(i) == 1) then
+
+          if (use_lake_model(i)>0) then
+            if(frac_ice .and. icy(i)) then
+              call composite_icy(iopt_lake==iopt_lake_clm)
+              call composite_wet_and_icy
+            else
+              call composite_wet
+            endif
+          else if (islmsk(i) == 1) then
           !-- land
+            call composite_land
+          elseif (islmsk(i) == 0) then
+          !-- water
+            call composite_wet
+          else ! islmsk(i) == 2
+          !-- ice
+            call composite_icy(.false.)
+            call composite_wet_and_icy
+          endif
+        enddo
+
+      endif fractional_grid
+
+      ! --- compositing done
+
+   contains
+
+     subroutine composite_land
+            implicit none
             zorl(i)   = zorll(i)
             cd(i)     = cd_lnd(i)
             cdq(i)    = cdq_lnd(i)
@@ -289,8 +317,10 @@ contains
             qss(i)    = qss_lnd(i)
             hice(i)   = zero
             cice(i)   = zero
-          elseif (islmsk(i) == 0) then
-          !-- water
+     end subroutine composite_land
+
+     subroutine composite_wet
+            implicit none
             zorl(i)   = zorlo(i)
             cd(i)     = cd_wat(i)
             cdq(i)    = cdq_wat(i)
@@ -316,8 +346,11 @@ contains
             qss(i)    = qss_wat(i)
             hice(i)   = zero
             cice(i)   = zero
-          else ! islmsk(i) == 2
-          !-- ice
+     end subroutine composite_wet
+
+     subroutine composite_icy(is_clm)
+            implicit none
+            logical, intent(in) :: is_clm
             zorl(i)   = zorli(i)
             cd(i)     = cd_ice(i)
             cdq(i)    = cdq_ice(i)
@@ -332,12 +365,20 @@ contains
             chh(i)    = chh_ice(i)
             gflx(i)   = gflx_ice(i)
             ep1d(i)   = ep1d_ice(i)
-            weasd(i)  = weasd_ice(i) * cice(i)
-            snowd(i)  = snowd_ice(i) * cice(i)
+            if(is_clm) then
+              weasd(i)  = weasd_ice(i)
+              snowd(i)  = snowd_ice(i)
+            else
+              weasd(i)  = weasd_ice(i) * cice(i)
+              snowd(i)  = snowd_ice(i) * cice(i)
+            endif
             qss(i)    = qss_ice(i)
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
-!
+     end subroutine composite_icy
+
+     subroutine composite_wet_and_icy
+            implicit none
             txi = cice(i)
             txo = one - txi
             evap(i)   = txi * evap_ice(i)   + txo * evap_wat(i)
@@ -366,13 +407,7 @@ contains
             do k=1,min(kice,km) ! store tiice in stc to reduce output in the nonfrac grid case
               stc(i,k) = tiice(i,k)
             enddo
-          endif
-
-        enddo
-
-      endif ! if (frac_grid)
-
-      ! --- compositing done
+     end subroutine composite_wet_and_icy
 
    end subroutine GFS_surface_composites_post_run
 

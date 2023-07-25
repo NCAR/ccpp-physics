@@ -32,7 +32,7 @@
 !            imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,  !
 !            iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,     !
 !            idcor_hogan, idcor_oreopoulos,                            !
-!            imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_unified, do_mynnedmf, lgfdlmprad,       !
+!            imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_c3, do_mynnedmf, lgfdlmprad,       !
 !            uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,              !
 !            effrl, effri, effrr, effrs, effr_in,                      !
 !            effrl_inout, effri_inout, effrs_inout,                    !
@@ -347,7 +347,7 @@
      &       imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,   &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
      &       idcor_hogan, idcor_oreopoulos, lcrick, lcnorm,             &
-     &       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_unified,             &
+     &       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_c3,                  &
      &       do_mynnedmf, lgfdlmprad,                                   &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &
@@ -450,7 +450,7 @@
 !   idcor_oreopoulos: flag for decorrelation-length: (=2)               !
 !   imfdeepcnv      :  flag for mass-flux deep convection scheme        !
 !   imfdeepcnv_gf   :  flag for scale- & aerosol-aware Grell-Freitas scheme (GSD)
-!   imfdeepcnv_unified   :  flag for unified convection scheme
+!   imfdeepcnv_c3   :  flag for unified convection scheme
 !   do_mynnedmf     :  flag for MYNN-EDMF                               !
 !   lgfdlmprad      :  flag for GFDLMP radiation interaction            !
 !   uni_cld         : logical - true for cloud fraction from shoc       !
@@ -511,7 +511,7 @@
       integer,  intent(in) :: ntrac, ntcw, ntiw, ntrw, ntsw, ntgl,      &
      &                        ntclamt
       integer,  intent(in) :: kdt, imfdeepcnv, imfdeepcnv_gf,           &
-     &     imfdeepcnv_unified
+     &     imfdeepcnv_c3
       integer,  intent(in) ::                                           &
      &     imp_physics,                 ! Flag for MP scheme
      &     imp_physics_nssl,            ! Flag for NSSL scheme
@@ -702,7 +702,7 @@
         elseif ( imp_physics == imp_physics_nssl ) then                              ! NSSL MP
 
           if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf .or.          &
-     &          imfdeepcnv == imfdeepcnv_unified) then ! MYNN PBL or GF or unified conv
+     &          imfdeepcnv == imfdeepcnv_c3) then ! MYNN PBL or GF or unified conv
               !-- MYNN PBL or convective GF
               !-- use cloud fractions with SGS clouds
               do k=1,NLAY
@@ -742,7 +742,7 @@
         elseif(imp_physics == imp_physics_thompson) then                              ! Thompson MP
 
           if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf               &
-     &          .or. imfdeepcnv == imfdeepcnv_unified) then ! MYNN PBL or GF conv
+     &          .or. imfdeepcnv == imfdeepcnv_c3) then ! MYNN PBL or GF conv
 
             if (icloud == 3) then
               call progcld_thompson (plyr,plvl,tlyr,qlyr,qstl,rhly,     & !  --- inputs
@@ -2081,7 +2081,8 @@
 
 !  ---  constant values
       real (kind=kind_phys), parameter :: xrc3 = 100.
-
+      real (kind=kind_phys), parameter :: snow2ice = 0.25
+      real (kind=kind_phys), parameter :: coef_t = 0.025
 !
 !===> ... begin here
 
@@ -2097,7 +2098,7 @@
           rei   (i,k) = re_ice(i,k)
           rer   (i,k) = rrain_def            ! default rain radius to 1000 micron
           res   (i,k) = re_snow(i,K)
-          tem2d (i,k) = min( 1.0, max( 0.0, (con_ttp-tlyr(i,k))*0.05 ) )
+          tem2d (i,k) = min(1.0, max( 0.0, (con_ttp-tlyr(i,k))*coef_t))
           clwf(i,k)   = 0.0
         enddo
       enddo
@@ -2138,12 +2139,14 @@
             if(tem1 > 1.e-12 .and.  clw(i,k,ntcw) < 1.e-12)
      &                 rew(i,k)=reliq_def
             tem2 = cnvw(i,k)*tem2d(i,k)
-            cip(i,k) = max(0.0, (clw(i,k,ntiw) + tem2 )
-     &             *gfac * delp(i,k))
+            cip(i,k) = max(0.0, (clw(i,k,ntiw) +
+     &             snow2ice*clw(i,k,ntsw) + tem2) *
+     &             gfac * delp(i,k))
             if(tem2 > 1.e-12 .and.  clw(i,k,ntiw) < 1.e-12)
      &             rei(i,k)=reice_def
             crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))
-            csp(i,k) = max(0.0, clw(i,k,ntsw) * gfac * delp(i,k))
+            csp(i,k) = max(0.0, (1.-snow2ice)*clw(i,k,ntsw) *
+     &             gfac * delp(i,k))
           enddo
         enddo
 

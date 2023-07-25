@@ -36,7 +36,8 @@
       use set_soilveg_mod, only: set_soilveg
 
       ! --- needed for Noah MP init
-      use noahmp_tables, only: laim_table,saim_table,sla_table,      &
+      use noahmp_tables, only: read_mp_table_parameters,             &
+                               laim_table,saim_table,sla_table,      &
                                bexp_table,smcmax_table,smcwlt_table, &
                                dwsat_table,dksat_table,psisat_table, &
                                isurban_table,isbarren_table,         &
@@ -80,16 +81,21 @@
               zwtxy, xlaixy, xsaixy, lfmassxy, stmassxy, rtmassxy, woodxy, stblcpxy, fastcpxy,     &
               smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, snliqxy, tsnoxy , smoiseq, zsnsoxy,   &
               slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, con_t0c, lsm_cold_start, nthrds,    &
-              errmsg, errflg)
+              lkm, use_lake_model, lakefrac, lakedepth, iopt_lake, iopt_lake_clm, iopt_lake_flake, &
+              lakefrac_threshold, lakedepth_threshold, errmsg, errflg)
 
          implicit none
 
          ! Interface variables
          integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny, levs, iaermdl
          logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
-         integer,              intent(in)    :: idate(:)
-         real(kind_phys),      intent(in)    :: fhour
+         integer,              intent(in)    :: idate(:), iopt_lake, iopt_lake_clm, iopt_lake_flake
+         real(kind_phys),      intent(in)    :: fhour, lakefrac_threshold, lakedepth_threshold
          real(kind_phys),      intent(in)    :: xlat_d(:), xlon_d(:)
+
+         integer,              intent(in) :: lkm
+         integer,              intent(inout)  :: use_lake_model(:)
+         real(kind=kind_phys), intent(in   )  :: lakefrac(:), lakedepth(:)
 
          integer,              intent(inout) :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
          real(kind_phys),      intent(inout) :: ddy_o3(:),  ddy_h(:)
@@ -167,6 +173,7 @@
          real(kind_phys),      intent(in)    :: canopy(:)
          real(kind_phys),      intent(in)    :: tg3(:)
          integer,              intent(in)    :: stype(:)
+
          real(kind_phys),      intent(in)    :: con_t0c
 
          integer,              intent(in)    :: nthrds
@@ -288,6 +295,10 @@
 !$OMP section
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
          call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
+
+!$OMP section
+!> - read in NoahMP table (needed for NoahMP init)
+         call read_mp_table_parameters(errmsg, errflg)
 
 !$OMP end sections
 
@@ -464,8 +475,8 @@
 !$OMP          shared(isbarren_table,isice_table,isurban_table)         &
 !$omp          shared(iswater_table,laim_table,sla_table,bexp_table)    &
 !$omp          shared(stc,smc,slc,tg3,snowxy,tsnoxy,snicexy,snliqxy)    &
-!$omp          shared(zsnsoxy,STYPE,SMCMAX_TABLE,SMCWLT_TABLE,zs,dzs)   &
-!$omp          shared(DWSAT_TABLE,DKSAT_TABLE,PSISAT_TABLE,smoiseq)     &
+!$omp          shared(zsnsoxy,stype,smcmax_table,smcwlt_table,zs,dzs)   & 
+!$omp          shared(dwsat_table,dksat_table,psisat_table,smoiseq)     &
 !$OMP          shared(smcwtdxy,deeprechxy,rechxy,errmsg,errflg)         &
 !$OMP          private(vegtyp,masslai,masssai,snd,dzsno,dzsnso,isnow)   &
 !$OMP          private(soiltyp,bexp,smcmax,smcwlt,dwsat,dksat,psisat,ddz)
@@ -670,6 +681,27 @@
            endif noahmp_init
          endif lsm_init
 
+!Lake model
+         if(lkm>0 .and. iopt_lake>0) then
+           ! A lake model is enabled.
+           do i = 1, im
+             !if (lakefrac(i) > 0.0 .and. lakedepth(i) > 1.0 ) then
+
+             ! The lake data must say there's a lake here (lakefrac) with a depth (lakedepth)
+             if (lakefrac(i) > lakefrac_threshold .and. lakedepth(i) > lakedepth_threshold ) then
+               ! This is a lake point. Inform the other schemes to use a lake model, and possibly nsst (lkm)
+               use_lake_model(i) = lkm
+               cycle
+             else
+               ! Not a valid lake point.
+               use_lake_model(i) = 0
+             endif
+           enddo
+         else
+           ! Lake model is disabled or settings are invalid.
+           use_lake_model = 0
+         endif
+
          is_initialized = .true.
 
       contains
@@ -716,7 +748,7 @@
             kice, ialb, isot, ivegsrc, input_nml_file, use_ufo, nst_anl, frac_grid, fhcyc, phour,   &
             lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref,  &
             tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
-            zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype, shdmin, shdmax, snowd,        &
+            zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype,scolor, shdmin, shdmax, snowd, &
             cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac,                             &
             do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, errmsg, errflg)
 
@@ -763,7 +795,7 @@
                                       zorli(:), zorll(:), zorlo(:), weasd(:), snoalb(:),             &
                                       canopy(:), vfrac(:), shdmin(:), shdmax(:),                     &
                                       snowd(:), cv(:), cvb(:), cvt(:), oro(:), oro_uf(:), slmsk(:)
-         integer,              intent(inout) :: vtype(:), stype(:), slope(:)
+         integer,              intent(inout) :: vtype(:), stype(:),scolor(:), slope(:) 
 
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
@@ -887,7 +919,10 @@
                              fhour, iflip, jindx1_aer, jindx2_aer, &
                              ddy_aer, iindx1_aer,           &
                              iindx2_aer, ddx_aer,           &
-                             levs, prsl, aer_nm)
+                             levs, prsl, aer_nm, errmsg, errflg)
+           if(errflg /= 0) then
+             return
+           endif
          endif
 
 !> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
@@ -899,7 +934,7 @@
                  frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc,        &
                  tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,         &
                  zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,            &
-                 stype, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,                    &
+                 stype, scolor, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,            &
                  xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
            endif
          endif

@@ -1,21 +1,21 @@
-!> \file cu_gf_driver_post.F90
-!!  Contains code related to GF convective schemes to be used within the GFS physics suite.
+!> \file cu_c3_driver_post.F90
+!!  Contains code related to C3 convective schemes to be used within the GFS physics suite.
 
-module cu_gf_driver_post
+module cu_c3_driver_post
 
    implicit none
 
    private
 
-   public :: cu_gf_driver_post_run
+   public :: cu_c3_driver_post_run
 
    contains
 
-!>\ingroup cu_gf_group
-!> \section arg_table_cu_gf_driver_post_run Argument Table
-!! \htmlinclude cu_gf_driver_post_run.html
+!>\ingroup cu_c3_group
+!> \section arg_table_cu_c3_driver_post_run Argument Table
+!! \htmlinclude cu_c3_driver_post_run.html
 !!
-   subroutine cu_gf_driver_post_run (im, km, t, q, prevst, prevsq, cactiv, cactiv_m, conv_act, conv_act_m,dt, garea, raincv, maxupmf, refl_10cm, errmsg, errflg)
+   subroutine cu_c3_driver_post_run (im, km, t, q, prevst, prevsq, cactiv, cactiv_m, conv_act, conv_act_m, dt, garea, raincv, maxupmf, refl_10cm, errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -83,6 +83,6 @@ module cu_gf_driver_post
       enddo
 !$acc end kernels
 
-   end subroutine cu_gf_driver_post_run
+   end subroutine cu_c3_driver_post_run
 
-end module cu_gf_driver_post
+end module cu_c3_driver_post
