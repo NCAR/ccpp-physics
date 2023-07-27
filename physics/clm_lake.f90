@@ -454,7 +454,6 @@ MODULE clm_lake
       dtime=dtp
 
         ! Initialize any uninitialized lake points.
-       if(.not.flag_restart) then
         call lakeini(kdt=kdt, ISLTYP=ISLTYP, gt0=gt0, snowd=snowd, weasd=weasd,           &
                               lakedepth_default=lakedepth_default, fhour=fhour,           &
              oro_lakedepth=oro_lakedepth, savedtke12d=savedtke12d, snowdp2d=snowdp2d,     &
@@ -484,7 +483,6 @@ MODULE clm_lake
           errflg=1
           return
         endif
-      endif ! .not. restart
 
       lake_points=0
       snow_points=0
@@ -2032,8 +2030,8 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
           !                   + (cwat-cice_eff)*lake_icefrac(c)*tfrz*dz_lake(c,j) !enthalpy reconciliation term
           t_lake_bef(c,j) = t_lake(c,j)
          if(debug_print) then
-           if (abs(xlat_d-52.1152).lt.0.1 .and.     &
-            abs(xlon_d-260.405).lt.0.1)then
+           if (abs(xlat_d-51.393).lt.0.1 .and.     &
+               abs(xlon_d-261.117).lt.0.1)then
             print *,' ocvts(c) at xlat_d,xlon_d',xlat_d,xlon_d
             print *,'j,dz_lake(c,j) ', j,dz_lake(c,j)
             print*,'cv_lake(c,j),lake_icefrac(c,j),t_lake(c,j),cfus,ocvts(c)', &
@@ -2056,8 +2054,8 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                       + hfus*h2osoi_liq(c,j) !&
              !                      + (cpliq-cpice)*h2osoi_ice(c,j)*tfrz !enthalpy reconciliation term
          if(debug_print) then
-           if (abs(xlat_d-52.1152).lt.0.1 .and.     &
-               abs(xlon_d-260.405).lt.0.1)then
+           if (abs(xlat_d-51.393).lt.0.1 .and.     &
+               abs(xlon_d-261.117).lt.0.1)then
              print *,' ocvts(c) at xlat_d,xlon_d',xlat_d,xlon_d
              print *,' j,jtop(c)',j,jtop(c),'h2osoi_liq(c,j) ',h2osoi_liq(c,j),'h2osoi_ice(c,j)',h2osoi_ice(c,j)
              print *,' cv(c,j),t_soisno(c,j),hfus,ocvts(c)',c,j,cv(c,j),t_soisno(c,j),hfus,ocvts(c)
@@ -2522,8 +2520,8 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
           !                   + (cwat-cice_eff)*lake_icefrac(c)*tfrz*dz_lake(c,j) !enthalpy reconciliation term
           fin(c) = fin(c) + phi(c,j)
          if(debug_print) then
-           if (abs(xlat_d-52.1152).lt.0.1 .and.     &
-               abs(xlon_d-260.405).lt.0.1)then
+            if (abs(xlat_d-51.393).lt.0.1 .and.     &
+                abs(xlon_d-261.117).lt.0.1)then
              print *,' ncvts(c) at  xlat_d,xlon_d',xlat_d,xlon_d
              print *,' new cv_lake(c,j),t_lake(c,j),cfus,lake_icefrac(c,j),ncvts(c),fin(c)', &
                          j,cv_lake(c,j),t_lake(c,j),cfus,lake_icefrac(c,j),ncvts(c),fin(c)
@@ -2545,8 +2543,8 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                       + hfus*h2osoi_liq(c,j) !&
              !                      + (cpliq-cpice)*h2osoi_ice(c,j)*tfrz !enthalpy reconciliation term
           if(debug_print) then
-            if (abs(xlat_d-52.1152).lt.0.1 .and.     &
-                abs(xlon_d-260.405).lt.0.1)then
+            if (abs(xlat_d-51.393).lt.0.1 .and.     &
+                abs(xlon_d-261.117).lt.0.1)then
               print *,' ncvts(c) at xlat_d,xlon_d',xlat_d,xlon_d
               print *,'new j,jtop(c)',j,jtop(c),'h2osoi_liq(c,j) ',h2osoi_liq(c,j),'h2osoi_ice(c,j)',h2osoi_ice(c,j)
               print *,'new cv(c,j),t_soisno(c,j),hfus,ncvts(c)',c,j,cv(c,j),t_soisno(c,j),hfus,ncvts(c)
@@ -2569,8 +2567,8 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
        c = pcolumn(p)
        errsoi(c) = (ncvts(c)-ocvts(c)) / dtime - fin(c)
       if(debug_print) then
-        if (abs(xlat_d-52.1152).lt.0.1 .and.     &
-            abs(xlon_d-260.405).lt.0.1)then
+        if (abs(xlat_d-51.393).lt.0.1 .and.     &
+            abs(xlon_d-261.117).lt.0.1)then
           print *,'xlat_d,xlon_d',xlat_d,xlon_d
           print *,'errsoi(c),fin(c),ncvts(c),ocvts(c),dtime,lake_icefrac(c,:),h2osno(c)', &
                    errsoi(c),fin(c),ncvts(c),ocvts(c),dtime,lake_icefrac(c,:),h2osno(c)
@@ -2603,7 +2601,9 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
         else
           print *,'Soil Energy Balance Error at column, ', c, 'G, fintotal, column E tendency = ', &
              eflx_gnet(p), fin(c), (ncvts(c)-ocvts(c)) / dtime,'xlat_d,xlon_d',xlat_d,xlon_d
-          print *,'ncvts(c),ocvts(c),dtime,errsoi(c)',ncvts(c),ocvts(c),dtime,errsoi(c),'xlat_d,xlon_d',xlat_d,xlon_d
+          print *,'errsoi(c),ncvts(c),ocvts(c)',errsoi(c),ncvts(c),ocvts(c),'xlat_d,xlon_d',xlat_d,xlon_d
+          print *,'lake_icefrac(c,:),h2osno(c)', lake_icefrac(c,:),h2osno(c)
+          print *,'t_lake(c,:),t_soisno(c,:)',t_lake(c,:),t_soisno(c,:)
         end if
       end if ! LAKEDEBUG
     end do
@@ -5653,23 +5653,34 @@ if_pergro: if (PERGRO) then
 
      t_lake3d(i,1)        = tsfc(i)
      t_grnd2d(i)          = tsfc(i)
+
+     ! initial lake temperature
      if (lake_icefrac3d(i,1) <= 0.) then
-       t_lake3d(i,1)        = max(tfrz,tsfc(i))
-       t_grnd2d(i)          = max(tfrz,tsfc(i))
+     ! no ice
+       t_lake3d(i,1)        = max(tfrz,t_lake3d(i,1))
+       t_grnd2d(i)          = t_lake3d(i,1)
+     elseif (lake_icefrac3d(i,1) > 0. .and. lake_icefrac3d(i,1) < 1.) then
+     ! fractional ice
+       t_lake3d(i,1)        = tfrz
      endif
+
      do k = 2, nlevlake
        if(z_lake3d(i,k).le.depth_c) then
-         t_lake3d(i,k) = tsfc(i)+(277.2_kind_lake-tsfc(i))/depth_c*z_lake3d(i,k)
+         t_lake3d(i,k) = t_lake3d(i,1)+(277.2_kind_lake-t_lake3d(i,1))/depth_c*z_lake3d(i,k)
+         if (lake_icefrac3d(i,1) <= 0.) then
+         ! no ice
+           t_lake3d(i,k)        = max(tfrz,t_lake3d(i,k))
+         elseif (lake_icefrac3d(i,1) > 0. .and. lake_icefrac3d(i,1) < 1.) then
+         ! fractional ice
+           t_lake3d(i,k)        = tfrz
+         endif
        else
          t_lake3d(i,k) = 277.2_kind_lake
        end if
-       if (lake_icefrac3d(i,k) <= 0.) then
-         t_lake3d(i,k) = max(tfrz,t_lake3d(i,k))
-       endif
      enddo
 
      ! initial t_soisno3d
-     ! in snow
+     ! in snow on ice
      if(snowdp2d(i) > 0.) then
        do k = snl2d(i)+1, 0
          t_soisno3d(i,k) =min(tfrz,tsfc(i))
