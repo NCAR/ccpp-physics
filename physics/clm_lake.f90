@@ -692,7 +692,7 @@ MODULE clm_lake
                 gflx_wat(I)     = eflx_gnet(c)              ![W/m/m]   upward_heat_flux_in_soil_over_water
                 ep1d_water(i)   = eflx_lh_tot(c)            ![W/m/m]   surface_upward_potential_latent_heat_flux_over_water
                 tsurf_water(I)  = t_grnd(c)                 ![K]       surface skin temperature after iteration over water
-                tsurf_ice(i)    = t_grnd(i)                 ! surface_skin_temperature_after_iteration_over_ice
+                tsurf_ice(i)    = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
                 tsfc_wat(i)     = t_grnd(c)                 ![K]       surface skin temperature over water
                 tisfc(i)        = t_grnd(c)
                 tsfc(i)         = t_grnd(c)
