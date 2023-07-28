@@ -736,7 +736,7 @@ MODULE clm_lake
 !                    uustar_ice(i) = uustar_water(i)           ! surface_friction_velocity_over_ice
                   endif
 
-                  tsurf_ice(i)  = t_grnd(i)                 ! surface_skin_temperature_after_iteration_over_ice
+                  tsurf_ice(i)  = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
                   tisfc(i)      = t_grnd(c)                 ! surface_skin_temperature_over_ice
                   tsfc(i)       = t_grnd(c)                 ! surface_skin_temperature_over_ice
                   weasdi(i)     = h2osno(c)                 ! water_equivalent_accumulated_snow_depth_over_ice
