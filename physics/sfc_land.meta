@@ -153,7 +153,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [qsurf]
   standard_name = surface_specific_humidity_over_land
   long_name = surface air saturation specific humidity over land
@@ -161,7 +161,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [evap]
   standard_name = kinematic_surface_upward_latent_heat_flux_over_land
   long_name = kinematic surface upward latent heat flux over land
@@ -169,7 +169,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [hflx]
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_land
   long_name = kinematic surface upward sensible heat flux over land
@@ -177,7 +177,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [ep]
   standard_name = surface_upward_potential_latent_heat_flux_over_land
   long_name = surface upward potential latent heat flux over land
@@ -185,7 +185,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [t2mmp]
   standard_name = temperature_at_2m_from_noahmp
   long_name = 2 meter temperature from noahmp
@@ -193,7 +193,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [q2mp]
   standard_name = specific_humidity_at_2m_from_noahmp
   long_name = 2 meter specific humidity from noahmp
@@ -201,7 +201,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [gflux]
   standard_name = upward_heat_flux_in_soil_over_land
   long_name = soil heat flux over land
@@ -209,7 +209,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [runoff]
   standard_name = surface_runoff_flux
   long_name = surface runoff flux
@@ -217,7 +217,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [drain]
   standard_name = subsurface_runoff_flux
   long_name = subsurface runoff flux
@@ -225,7 +225,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [cmm]
   standard_name = surface_drag_wind_speed_for_momentum_in_air_over_land
   long_name = momentum exchange coefficient over land
@@ -233,7 +233,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [chh]
   standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land
   long_name = thermal exchange coefficient over land
@@ -241,7 +241,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [zvfun]
   standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
   long_name = function of surface roughness length and green vegetation fraction
@@ -249,7 +249,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
