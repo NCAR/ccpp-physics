@@ -1,8 +1,8 @@
 # Doxyfile 1.9.3
 
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "CCPP Scidoc for SRW v2.1.0"
-PROJECT_NUMBER         = "SRW v2.1.0"
+PROJECT_NAME           = "CCPP SciDoc for UFS-SRW v3.0.0"
+PROJECT_NUMBER         = "SRW v3.0.0"
 PROJECT_BRIEF          = "Common Community Physics Package Developed at DTC"
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
@@ -115,9 +115,10 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 
 INPUT                  =  pdftxt/SRW_mainpage.txt              \
-                          pdftxt/SRW_all_shemes_list.txt     \
+                          pdftxt/SRW_all_schemes_list.txt     \
                           pdftxt/GFS_v16_suite.txt       \
                           pdftxt/HRRR_suite.txt          \
+                          pdftxt/RAP_suite.txt      \
                           pdftxt/RRFS_v1beta_suite.txt   \
                           pdftxt/WoFS_v0_suite.txt   \
                           pdftxt/RRFS_SGSCLOUD.txt       \
@@ -144,6 +145,7 @@ INPUT                  =  pdftxt/SRW_mainpage.txt              \
                           pdftxt/RUCLSM.txt          \
                           pdftxt/THOMPSON.txt        \
                           pdftxt/suite_input.nml.txt    \
+                          pdftxt/CLM_LAKE.txt     \
                           pdftxt/GFS_SPP.txt     \
                         ../fv_sat_adj.F90    \
                         ../GFS_time_vary_pre.fv3.F90 \
@@ -206,6 +208,7 @@ INPUT                  =  pdftxt/SRW_mainpage.txt              \
                         ../sfc_nst_pre.f              \
                         ../sfc_nst_post.f             \
                         ../sfc_ocean.F                \
+                        ../clm_lake.f90              \
                         ../module_nst_model.f90       \
                         ../module_nst_parameters.f90  \
                         ../module_nst_water_prop.f90  \
@@ -283,7 +286,6 @@ INPUT                  =  pdftxt/SRW_mainpage.txt              \
                         ../mp_nssl.F90        \
                         ../module_mp_nssl_2mom.F90    \
                         ../funcphys.f90     \
-                        ../physparam.f      \
                         ../physcons.F90     \
                         ../radcons.f90      \
                         ../mersenne_twister.f \
@@ -302,7 +304,7 @@ EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
 EXCLUDE_SYMBOLS        =
-EXAMPLE_PATH           = pdftxt/RE210 \
+EXAMPLE_PATH           = pdftxt/RE300 \
                          doc/html
 EXAMPLE_PATTERNS       = 
 EXAMPLE_RECURSIVE      = NO
@@ -540,7 +542,7 @@ DIRECTORY_GRAPH        = YES
 DIR_GRAPH_MAX_DEPTH    = 1
 DOT_IMAGE_FORMAT       = SVG
 INTERACTIVE_SVG        = NO
-DOT_PATH               = 
+DOT_PATH               = /Users/man.zhang/homebrew/bin/dot 
 DOTFILE_DIRS           =
 MSCFILE_DIRS           =
 DIAFILE_DIRS           =
