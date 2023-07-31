@@ -3398,8 +3398,8 @@ MODULE module_mp_thompson
          tcond(k) = (5.69 + 0.0168*tempc)*1.0E-5 * 418.936
          ocp(k) = 1./(Cp*(1.+0.887*qv(k)))
          lvt2(k)=lvap(k)*lvap(k)*ocp(k)*oRv*otemp*otemp
-
-         nwfa(k) = MAX(11.1E6*rho(k), (nwfa1d(k) + nwfaten(k)*DT)*rho(k))
+         if (is_aerosol_aware)                                                 &
+           nwfa(k) = MAX(11.1E6*rho(k), (nwfa1d(k) + nwfaten(k)*DT)*rho(k))
       enddo
 
       do k = kts, kte
@@ -3652,7 +3652,8 @@ MODULE module_mp_thompson
           qvten(k) = qvten(k) - prw_vcd(k)
           qcten(k) = qcten(k) + prw_vcd(k)
           ncten(k) = ncten(k) + pnc_wcd(k)
-          nwfaten(k) = nwfaten(k) - pnc_wcd(k)
+          if (is_aerosol_aware)                                            &   
+            nwfaten(k) = nwfaten(k) - pnc_wcd(k)
           tten(k) = tten(k) + lvap(k)*ocp(k)*prw_vcd(k)*(1-IFDRY)
           rc(k) = MAX(R1, (qc1d(k) + DT*qcten(k))*rho(k))
           if (rc(k).eq.R1) L_qc(k) = .false.
@@ -3741,7 +3742,8 @@ MODULE module_mp_thompson
           qrten(k) = qrten(k) - prv_rev(k)
           qvten(k) = qvten(k) + prv_rev(k)
           nrten(k) = nrten(k) - pnr_rev(k)
-          nwfaten(k) = nwfaten(k) + pnr_rev(k)
+          if (is_aerosol_aware)                                            &
+            nwfaten(k) = nwfaten(k) + pnr_rev(k)
           tten(k) = tten(k) - lvap(k)*ocp(k)*prv_rev(k)*(1-IFDRY)
 
           rr(k) = MAX(R1, (qr1d(k) + DT*qrten(k))*rho(k))
@@ -4230,10 +4232,12 @@ MODULE module_mp_thompson
          qv1d(k) = MAX(1.E-10, qv1d(k) + qvten(k)*DT)
          qc1d(k) = qc1d(k) + qcten(k)*DT
          nc1d(k) = MAX(2./rho(k), MIN(nc1d(k) + ncten(k)*DT, Nt_c_max))
-         nwfa1d(k) = MAX(11.1E6, MIN(9999.E6,                           &
-                       (nwfa1d(k)+nwfaten(k)*DT)))
-         nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6,                       &
-                       (nifa1d(k)+nifaten(k)*DT)))
+         if (is_aerosol_aware) then
+           nwfa1d(k) = MAX(11.1E6, MIN(9999.E6,                           &
+                         (nwfa1d(k)+nwfaten(k)*DT)))
+           nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6,                       &
+                         (nifa1d(k)+nifaten(k)*DT)))
+         end if
          if (qc1d(k) .le. R1) then
            qc1d(k) = 0.0
            nc1d(k) = 0.0
