@@ -112,7 +112,7 @@
      &       cmm_lnd, chh_lnd, zvfun_lnd
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(:), intent(out) ::               &
+      real (kind=kind_phys), dimension(:), intent(inout) ::             &
      &       sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp, gflux,        &
      &       runoff, drain, cmm, chh, zvfun
 !
