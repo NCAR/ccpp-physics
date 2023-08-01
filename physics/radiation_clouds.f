@@ -2081,7 +2081,8 @@
 
 !  ---  constant values
       real (kind=kind_phys), parameter :: xrc3 = 100.
-
+      real (kind=kind_phys), parameter :: snow2ice = 0.25
+      real (kind=kind_phys), parameter :: coef_t = 0.025
 !
 !===> ... begin here
 
@@ -2097,7 +2098,7 @@
           rei   (i,k) = re_ice(i,k)
           rer   (i,k) = rrain_def            ! default rain radius to 1000 micron
           res   (i,k) = re_snow(i,K)
-          tem2d (i,k) = min( 1.0, max( 0.0, (con_ttp-tlyr(i,k))*0.05 ) )
+          tem2d (i,k) = min(1.0, max( 0.0, (con_ttp-tlyr(i,k))*coef_t))
           clwf(i,k)   = 0.0
         enddo
       enddo
@@ -2138,12 +2139,14 @@
             if(tem1 > 1.e-12 .and.  clw(i,k,ntcw) < 1.e-12)
      &                 rew(i,k)=reliq_def
             tem2 = cnvw(i,k)*tem2d(i,k)
-            cip(i,k) = max(0.0, (clw(i,k,ntiw) + tem2 )
-     &             *gfac * delp(i,k))
+            cip(i,k) = max(0.0, (clw(i,k,ntiw) +
+     &             snow2ice*clw(i,k,ntsw) + tem2) *
+     &             gfac * delp(i,k))
             if(tem2 > 1.e-12 .and.  clw(i,k,ntiw) < 1.e-12)
      &             rei(i,k)=reice_def
             crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))
-            csp(i,k) = max(0.0, clw(i,k,ntsw) * gfac * delp(i,k))
+            csp(i,k) = max(0.0, (1.-snow2ice)*clw(i,k,ntsw) *
+     &             gfac * delp(i,k))
           enddo
         enddo
 
