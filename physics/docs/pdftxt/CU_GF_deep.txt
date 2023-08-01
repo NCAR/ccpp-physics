@@ -6,17 +6,17 @@ The Grell-Freitas (GF) scheme, as described in Grell and Freitas (2014) \cite gr
 Freitas et al. (2018) \cite freitas_et_al_2018, Freitas et al. (2021) \cite freitas_et_al_2021, and Lin et al. (2022) \cite Lin_2022
 follows the mass flux approach published by Grell (1993) \cite grell_1993.
 Further developments by Grell and \f$D\acute{e}v\acute{e}nyi\f$ (2002) \cite Grell_2002 included implementing 
-stochastics through allowing parameter perturbations. In GF scale awareness, and the aerosol dependence through rain generation (following
+stochastics through allowing parameter perturbations. The GF scheme takes into account aerosol dependence through rain generation (following
 Berry (1968) \cite berry_1968 and evaporation formulations (following Jiang et al. (2010) \cite Jiang_2010 ), depending on the 
 cloud concentration nuclei at cloud base were added. The GF scheme includes mixed phase physics impact, momentum transport,
  a diurnal cycle closure (Bechtold et al. (2014) \cite bechtold_et_al_2014 ), and a trimodal spectral size to simulate the interaction
 and transition from shallow, congestus and deep convection regimes. The vertical mass flux distribution of shallow, congestus and
-deep convection regimes is characterized by Probability Density Functions (PDFs). The three PDF's are meant to represent the average
+deep convection regimes is characterized by Probability Density Functions (PDFs). The three PDFs are meant to represent the average
 statistical mass flux characteristic of deep, congestus, and shallow (respectively) plumes in the grid area. Each PDF therefore represents
 a spectrum of plumes within the grid box. Forcing is different for each characteristic type. Entrainment and detrainment are derived 
-from the PDF's. The deep and congestus convection considers scale awareness (Arakawa et al. (2011) \cite Arakawa_2011 ). However, the shallow convection is not scale-aware. Aerosol dependence is implemented through dependence of rain generation and 
+from the PDFs. Aerosol dependence (considered experimental and not supported in this release) is implemented through dependence of rain generation and 
 evaporation formulations depending on the cloud concentration nuclei at cloud base (Berry 1968 \cite berry_1968, 
-Jiang et al.(2010) \cite Jiang_2010, and Lee and Feingold (2010) \cite lee_and_feingold_2010 ). Wet scavenging is considered to add a memory impact. Aerosol dependence is considered experimental and is turned off at this point. GF is able to transport tracers.
+Jiang et al.(2010) \cite Jiang_2010, and Lee and Feingold (2010) \cite lee_and_feingold_2010 ). Wet scavenging is considered to add a memory impact. GF is able to transport tracers.
 Recently, GPU capabilities and cap suppressing (\p do_cap_suppress) based on radar data assimilation have been added,and they are used only for the RAP suite.
 
 The impacts of GF scheme in operational RAP/HRRR include:(a)uses mass-flux schemes, which are more physically realistic than (sounding) adjustment schemes;
