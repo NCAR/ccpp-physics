@@ -31,8 +31,8 @@ reduces the mixing length in a strong shear environment such as a hurricane.
 background diffusivity in the inversion layers is reduced as a function of surface
 roughness and green vegetation fraction.
 - To reduce the PBL overgrowth, the PBL updraft overshoot is not only limited by
-bulk Richardson number-based-PBL depth, but the virtual potential temperature at
-top of the surface layer rather than that at the model first layer is also used as
+bulk Richardson number-based PBL depth, but the virtual potential temperature at
+the top of the surface layer rather than that at the model first layer is also used as
 the near-surface virtual potential temperature in the bulk-Richardson number
 computation. This helps to largely suppress the unrealistic widespread popcorn-like precipitation.
 - Updraft entrainment rates for moisture, hydrometeors, and tracers are increased by about 30%.

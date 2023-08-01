@@ -2746,7 +2746,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
     ! DESCRIPTION:
     !> Calculation of the phase change within snow, soil, & lake layers:
     !!\n (1) Check the conditions for which the phase change may take place,
-    !!     i.e., the layer temperature is great than the freezing point
+    !!     i.e., the layer temperature is greater than the freezing point
     !!     and the ice mass is not equal to zero (i.e. melting),       
     !!     or the layer temperature is less than the freezing point    
     !!     and the liquid water mass is greater than the allowable supercooled 

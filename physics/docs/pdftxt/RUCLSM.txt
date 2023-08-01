@@ -17,7 +17,7 @@ The parameterizations in the RUC LSM describe complicated atmosphere–land surf
 excessive sensitivity to multiple uncertain surface parameters. Nevertheless, the RUC LSM, when coupled with the hourly-assimilating atmospheric model, 
 demonstrated over years of ongoing cycling (Benjamin et al. 2004a,b \cite Benjamin_2004a \cite Benjamin_2004b ; Berbery et al. 1999 \cite Berbery_1999) 
 that it can produce a realistic evolution of hydrologic and time-varying soil fields (i.e., soil moisture and temperature) that cannot be directly 
-observed over large areas, as well as the evolution of snow  cover on the ground surface. This result is possible only if the soil–vegetation–snow 
+observed over large areas, as well as the evolution of snow cover on the ground surface. This result is possible only if the soil–vegetation–snow 
 component of the coupled model, constrained only by atmospheric boundary conditions and the specification of surface characteristics, has sufficient 
 skill to avoid long-term drift.
 
@@ -28,7 +28,7 @@ included in phase 2(d) of the Project for the Intercomparison of Land Surface Pr
 Luo et al. 2003 \cite Luo_2003 ). The RUC LSM was also tested during the Snow Models Intercomparison Project (SnowMIP, SnowMIP2, ESM-SnowMIP), 
 with emphasis on snow parameterizations for both grassland and forest locations in different parts of the world 
 (Etchevers et al. 2002, 2004 \cite Etchevers_2002 \cite Etchevers_2004; Essery et al. 2009 \cite Essery_2009 ; Rutter et al. 2009 \cite Rutter_2009 , 
-Krinner et al. 2018 \cite Krinner_2018 ). The analysis of RUC LSM performance over 10 reference sites in ESM-SnowMIP rated it on the 4th place 
+Krinner et al. 2018 \cite Krinner_2018 ). The analysis of RUC LSM performance over 10 reference sites in ESM-SnowMIP rated it 4th place 
 among the 26 participating models. The results were published in Menard et al.(2021) \cite Menard_2021 and Essery et al. (2020) \cite essery_et_al_2020.
 RUC LSM received high rankings in ESM-SnowMIP experiement in terms of multi-year snow cover and surface temperature simulations
 for several sites located in different parts of the world (Fig.2, Menard et al.2021 \cite Menard_2021).
@@ -61,7 +61,7 @@ specifying surface
 parameters for the dominant soil and land-use category in the grid box, RUC LSM has an option to take into account the sub-grid scale heterogeneity
 in the computation of such parameters as roughness length, emissivity, soil porosity, soil heat capacity and others. The difference in
 roughness between the mosaic and dominant category presented on Figure 3, is positive from contribution of the forests, which helped to 
-reduce high biases of surface wind speeds in these regions. In the cropland regions, roughness lenghth has also a seasonal variability depending on the growing phase of the plants. This again helped to improve the wind forecasts during the warm season.
+reduce high biases of surface wind speeds in these regions. In cropland regions, roughness length also has a seasonal variability depending on the growing phase of the plants. This again helped to improve the wind forecasts during the warm season.
 Turning on sub-grid-scale heterogeneity option requries: \p mosaic_lu = 1 and \p mosaic_soil = 1 in the namelist, and fractions of soil and vegetation types in a grid cell.
 \image html  ruc_lsm_heterogeneity.png "Figure 3:  sub-grid scale heterogeneity of surface parameters in RUC LSM (Courtesy of T.G. Smirnova)" width=900
 
