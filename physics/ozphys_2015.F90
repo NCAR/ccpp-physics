@@ -5,176 +5,13 @@
 module ozphys_2015
   use machine, only : kind_phys, kind_dbl_prec, kind_sngl_prec
   implicit none
-  public ozphys_2015_init, ozphys_2015_timestep_init, ozphys_2015_run
+  public ozphys_2015_run
 contains
 
 ! ###########################################################################################
 !>\defgroup GFS_ozphys_2015 GFS Ozone Photochemistry (2015) Module
 !! This module contains the CCPP-compliant Ozone 2015 photochemistry scheme.
 !> @{
-!> \section arg_table_ozphys_2015_init Argument Table
-!! \htmlinclude ozphys_2015_init.html
-!!
-! ###########################################################################################
-  subroutine ozphys_2015_init(oz_phys_2015, nPts, latsozp, oz_lat, dlat, jindx1, jindx2,    &
-       ddy, errmsg, errflg)
-    ! Inputs
-    logical, intent(in) :: &
-         oz_phys_2015 ! Control flag for NRL 2015 ozone physics scheme
-    integer, intent(in) :: &
-         nPts,      & ! Horizontal dimension
-         latsozp      ! Number of latitudes in ozone data
-    real(kind_phys),  intent(in), dimension(:) :: &
-         oz_lat,    & ! Latitudes of ozone data
-         dlat         ! Latitudes of grid
-    ! Outputs
-    integer, intent(out), dimension(:) :: &
-         jindx1,    & ! Interpolation index (low) for ozone data
-         jindx2       ! Interpolation index (high) for ozone data
-    real(kind_phys), intent(out), dimension(:) :: &
-         ddy          ! Interpolation high index for ozone data
-    character(len=*), intent(out) :: &
-         errmsg       ! CCPP error message
-    integer, intent(out) :: &
-         errflg       ! CCPP error flag
-
-    ! Local
-    integer i,j
-
-    ! Initialize CCPP error handling variables
-    errmsg = ''
-    errflg = 0
-    
-    ! Sanity check
-    if (.not.oz_phys_2015) then
-       write (errmsg,'(*(a))') 'Logic error: oz_phys_2015 == .false.'
-       errflg = 1
-       return
-    endif
-
-    ! Set indices
-    do j=1,nPts
-       jindx2(j) = latsozp + 1
-       do i=1,latsozp
-          if (dlat(j) < oz_lat(i)) then
-             jindx2(j) = i
-             exit
-          endif
-       enddo
-       jindx1(j) = max(jindx2(j)-1,1)
-       jindx2(j) = min(jindx2(j),latsozp)
-       if (jindx2(j) .ne. jindx1(j)) then
-          ddy(j) = (dlat(j) - oz_lat(jindx1(j))) / (oz_lat(jindx2(j)) - oz_lat(jindx1(j)))
-       else
-          ddy(j) = 1.0
-       endif
-    enddo
-    
-  end subroutine ozphys_2015_init
-
-! ###########################################################################################
-!> \section arg_table_ozphys_2015_timestep_init Argument Table
-!! \htmlinclude ozphys_2015_timestep_init.html
-!!
-! ###########################################################################################
-  subroutine ozphys_2015_timestep_init(nPts, idate, fhour, jindx1, jindx2, latsozp, levozp, &
-       oz_coeff, timeoz, ozplin, oz_time, oz_lat, ddy, ozplout, errmsg, errflg)
-    ! Inputs
-    integer, intent(in) :: &
-         nPts,     & ! Horizontal dimension
-         latsozp,  & ! Number of latitudes in ozone data
-         levozp,   & ! Number of vertical layers in ozone data
-         oz_coeff, & ! Number of coefficients in ozone data
-         timeoz      ! Number of times in ozone data
-    integer, intent(in),dimension(:) :: &
-         idate,    & ! Initial date with different size and ordering
-         jindx1,   & ! Interpolation index (low) for ozone
-         jindx2      ! Interpolation index (high) for ozone
-    real(kind_phys), intent(in) :: &
-         fhour       ! Forecast hour
-    real(kind_phys), intent(in), dimension(:) :: &
-         ddy,      & ! Interpolation high index for ozone data
-         oz_lat,   & ! Latitudes for ozone data
-         oz_time     ! Time for ozone data
-    real(kind_phys), intent(in), dimension(:,:,:,:) :: &
-         ozplin      ! Ozone data
-
-    ! Outputs
-    real(kind_phys), intent(out), dimension(:,:,:) :: &
-         ozplout     ! Ozone forcing data
-    character(len=*), intent(out) :: &
-         errmsg      ! CCPP error message
-    integer,          intent(out) :: &
-         errflg      ! CCPP error flag
-
-    ! Local
-    integer :: idat(8),jdat(8),iday,j,j1,j2,l,nc,n1,n2,jdow,jdoy,&
-         jday,w3kindreal,w3kindint
-    real(kind_phys) :: tem, tx1, tx2, rjday
-    real(8) :: rinc(5)
-    real(4) :: rinc4(5)
-    !real(kind_dbl_prec) :: rinc(5)
-    !real(kind_sngl_prec) :: rinc4(5)
-
-    ! Initialize CCPP error handling variables
-    errmsg = ''
-    errflg = 0
-
-    !
-    idat=0
-    idat(1)=idate(4)
-    idat(2)=idate(2)
-    idat(3)=idate(3)
-    idat(5)=idate(1)
-    rinc=0.
-    rinc(2)=fhour
-    call w3kind(w3kindreal,w3kindint)
-    if(w3kindreal==4) then
-       rinc4=rinc
-       CALL w3movdat(rinc4,idat,jdat)
-    else
-       CALL w3movdat(rinc,idat,jdat)
-    endif
-    !
-    jdow = 0
-    jdoy = 0
-    jday = 0
-    call w3doxdat(jdat,jdow,jdoy,jday)
-    rjday = jdoy + jdat(5) / 24.
-    IF (RJDAY < oz_time(1)) RJDAY = RJDAY + 365.
-    !
-    n2 = timeoz + 1
-    do j=2,timeoz
-       if (rjday < oz_time(j)) then
-          n2 = j
-          exit
-       endif
-    enddo
-    n1 = n2 - 1
-    
-    tx1 = (oz_time(n2) - rjday) / (oz_time(n2) - oz_time(n1))
-    tx2 = 1.0 - tx1
-    
-    if (n2 > timeoz) n2 = n2 - timeoz
-    !
-    do nc=1,oz_coeff
-       do L=1,levozp
-          do J=1,npts
-             J1  = jindx1(J)
-             J2  = jindx2(J)
-             TEM = 1.0 - ddy(J)
-             ozplout(j,L,nc) = tx1*(TEM*ozplin(J1,L,nc,n1)+ddy(J)*ozplin(J2,L,nc,n1)) & 
-                  + tx2*(TEM*ozplin(J1,L,nc,n2)+ddy(J)*ozplin(J2,L,nc,n2))
-          enddo
-       enddo
-    enddo
-
-    !
-    return
-
-  end subroutine ozphys_2015_timestep_init
-
-! ###########################################################################################  
 !> The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (
 !! \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77) provided by Naval
@@ -187,11 +24,11 @@ contains
 !> -  This code assumes that both prsl and po3 are from bottom to top
 !!     as are all other variables.
 !> -  This code is specifically for NRL parameterization and
-!!     climatological T and O3 are in location 5 and 6 of prdout array
-!!\author June 2015 - Shrinivas Moorthi
-!!\author May 2023  - Dustin Swales
+!!     climatological T and O3 are in location 5 and 6 of oz_data array
+!!\author   June 2015 - Shrinivas Moorthi
+!!\modified May  2023 - Dustin Swales
 ! ###########################################################################################
-  subroutine ozphys_2015_run ( im, levs, ko3, dt, oz, tin, po3, prsl, prdout, pl_coeff,     &
+  subroutine ozphys_2015_run ( im, levs, ko3, dt, oz, tin, po3, prsl, oz_data, pl_coeff,    &
        delp, ldiag3d, dtend, dtidx, ntoz, index_of_process_prod_loss,                       &
        index_of_process_ozmix, index_of_process_temp, index_of_process_overhead_ozone,      &
        con_g, errmsg, errflg)
@@ -222,7 +59,7 @@ contains
          tin,                          & ! Temperature of new-state (K)
          delp                            ! Difference between mid-layer pressures (Pa)
     real(kind_phys), intent(in), dimension(:,:,:) :: &
-         prdout                          ! Ozone forcing data
+         oz_data                          ! Ozone forcing data
 
     ! In/Outs
     real(kind=kind_phys), intent(inout), dimension(:,:,:) :: &
@@ -298,7 +135,7 @@ contains
           do j=1,pl_coeff
              do i=1,im
                 if (flg(i)) then
-                   prod(i,j)  = wk2(i) * prdout(i,k,j) + wk3(i) * prdout(i,k+1,j)
+                   prod(i,j)  = wk2(i) * oz_data(i,k,j) + wk3(i) * oz_data(i,k+1,j)
                 endif
              enddo
           enddo
@@ -307,10 +144,10 @@ contains
        do j=1,pl_coeff
           do i=1,im
              if (wk1(i) < po3(ko3)) then
-                prod(i,j) = prdout(i,ko3,j)
+                prod(i,j) = oz_data(i,ko3,j)
              endif
              if (wk1(i) >= po3(1)) then
-                prod(i,j) = prdout(i,1,j)
+                prod(i,j) = oz_data(i,1,j)
              endif
           enddo
        enddo

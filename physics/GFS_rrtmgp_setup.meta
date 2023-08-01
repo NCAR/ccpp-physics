@@ -267,22 +267,22 @@
   type = integer
   intent = inout
 [levozp]
-  standard_name = number_of_levels_in_ozone_data
-  long_name = number of levels in ozone data
+  standard_name = number_of_levels_in_ozone_climotology_data
+  long_name = number of levels in ozone climotology data
   units = count
   dimensions = ()
   type = integer
   intent = in
 [timeozp]
-  standard_name = number_of_times_in_ozone_data
-  long_name = number of times in ozone data
+  standard_name = number_of_times_in_ozone_climotology_data
+  long_name = number of times in ozone climotology data
   units = count
   dimensions = ()
   type = integer
   intent = in
 [latsozp]
-  standard_name = number_of_latitudes_in_ozone_data
-  long_name = number of latitude in ozone data
+  standard_name = number_of_latitudes_in_ozone_climotology_data
+  long_name = number of latitude in ozone climotology data
   units = count
   dimensions = ()
   type = integer
