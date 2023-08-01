@@ -5,7 +5,7 @@
 
 The WoFS_v0 suite is targeted for use in the upcoming operational implementation
 of the NOAA's Warn-on-Forecast System (WoFS) and for the RRFS ensemble. 
-This suite is most applicable for runs at 3-km resolution and higher since it does 
+This suite is most applicable for runs at <=3-km resolution and higher since it does 
 not parameterize deep convection.
 
 The WoFS suite uses the parameterizations in the following order:
