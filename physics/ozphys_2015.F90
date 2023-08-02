@@ -5,7 +5,7 @@
 module ozphys_2015
   use machine, only : kind_phys, kind_dbl_prec, kind_sngl_prec
   implicit none
-  public ozphys_2015_run
+  public ozphys_2015_init, ozphys_2015_run
 contains
 
 ! ###########################################################################################
@@ -17,8 +17,6 @@ contains
 !! \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77) provided by Naval
 !! Research Laboratory through CHEM2D chemistry model
 !! (McCormack et al. (2006) \cite mccormack_et_al_2006).
-!! \section arg_table_ozphys_2015_run Argument Table
-!! \htmlinclude ozphys_2015_run.html
 !!
 !> \section genal_ozphys_2015 GFS ozphys_2015_run General Algorithm
 !> -  This code assumes that both prsl and po3 are from bottom to top
@@ -28,13 +26,50 @@ contains
 !!\author   June 2015 - Shrinivas Moorthi
 !!\modified May  2023 - Dustin Swales
 ! ###########################################################################################
-  subroutine ozphys_2015_run ( im, levs, ko3, dt, oz, tin, po3, prsl, oz_data, pl_coeff,    &
-       delp, ldiag3d, dtend, dtidx, ntoz, index_of_process_prod_loss,                       &
+
+! ###########################################################################################
+! SUBROUTINE ozphys_2015_init
+! ###########################################################################################
+!! \section arg_table_ozphys_2015_init Argument Table
+!! \htmlinclude ozphys_2015_init.html
+!!
+  subroutine ozphys_2015_init(oz_phys, errmsg, errflg)
+    ! Inputs
+    logical, intent(in) :: &
+         oz_phys
+    ! Outputs
+    character(len=*), intent(out) :: &
+         errmsg
+    integer, intent(out) :: &
+         errflg
+
+    ! Initialize CCPP error handling variables
+    errmsg = ''
+    errflg = 0
+
+    ! Sanity check
+    if (.not.oz_phys) then
+       write (errmsg,'(*(a))') 'Logic error: oz_phys_2015 == .false.'
+       errflg = 1
+       return
+    endif
+
+  end subroutine ozphys_2015_init
+
+! ###########################################################################################
+! SUBROUTINE ozphys_2015_run
+! ###########################################################################################
+!! \section arg_table_ozphys_2015_run Argument Table
+!! \htmlinclude ozphys_2015_run.html
+!!
+  subroutine ozphys_2015_run (oz_phys, im, levs, ko3, dt, oz, tin, po3, prsl, oz_data,      &
+       pl_coeff, delp, ldiag3d, dtend, dtidx, ntoz, index_of_process_prod_loss,             &
        index_of_process_ozmix, index_of_process_temp, index_of_process_overhead_ozone,      &
        con_g, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
+         oz_phys,                      & !
          ldiag3d                         ! Flag to output GFS diagnostic tendencies
     real(kind_phys),intent(in) :: &
          con_g                           ! Physical constant: Gravitational acceleration (ms-2)
@@ -87,6 +122,13 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
+
+    ! Sanity checkt
+    if (.not.oz_phys) then
+       write (errmsg,'(*(a))') 'Logic error: oz_phys_2015 == .false.'
+       errflg = 1
+       return
+    endif
 
     ! Are UFS diagnostic tendencies requested? If so, set up bookeeping indices...
     if(ldiag3d) then

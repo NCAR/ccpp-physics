@@ -21,13 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-[oz_phys]
-  standard_name = flag_for_nrl_2015_ozone_scheme
-  long_name = flag for new (2015) ozone physics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [oz_lat]
   standard_name = ozone_data_latitude
   long_name = ozone data latitude

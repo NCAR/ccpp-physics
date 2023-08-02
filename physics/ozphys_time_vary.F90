@@ -9,18 +9,16 @@ module ozphys_time_vary
 contains
 
 ! ###########################################################################################
-!>\defgroup GFS Ozone Photochemistry (2015) Module
-!! This module contains the CCPP-compliant Ozone 2015 photochemistry scheme.
+!>\defgroup GFS Ozone Data Module
+!! This module updates the ozone data used by physics.
 !> @{
 !> \section arg_table_ozphys_time_vary_init Argument Table
 !! \htmlinclude ozphys_time_vary_init.html
 !!
 ! ###########################################################################################
-  subroutine ozphys_time_vary_init(oz_phys, nPts, latsozp, oz_lat, dlat, jindx1, jindx2,    &
+  subroutine ozphys_time_vary_init(nPts, latsozp, oz_lat, dlat, jindx1, jindx2,    &
        ddy, errmsg, errflg)
     ! Inputs
-    logical, intent(in) :: &
-         oz_phys      ! Control flag for NRL ozone scheme
     integer, intent(in) :: &
          nPts,      & ! Horizontal dimension
          latsozp      ! Number of latitudes in ozone data
@@ -44,13 +42,6 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-    
-    ! Sanity check
-    if (.not.oz_phys) then
-       write (errmsg,'(*(a))') 'Logic error: oz_phys == .false.'
-       errflg = 1
-       return
-    endif
 
     ! Set indices
     do j=1,nPts
@@ -111,10 +102,8 @@ contains
     integer :: idat(8),jdat(8),iday,j,j1,j2,l,nc,n1,n2,jdow,jdoy,&
          jday,w3kindreal,w3kindint
     real(kind_phys) :: tem, tx1, tx2, rjday
-    real(8) :: rinc(5)
-    real(4) :: rinc4(5)
-    !real(kind_dbl_prec) :: rinc(5)
-    !real(kind_sngl_prec) :: rinc4(5)
+    real(kind_dbl_prec) :: rinc(5)
+    real(kind_sngl_prec) :: rinc4(5)
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -169,7 +158,6 @@ contains
        enddo
     enddo
 
-    !
     return
 
   end subroutine ozphys_time_vary_timestep_init
