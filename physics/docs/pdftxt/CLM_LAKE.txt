@@ -38,7 +38,8 @@ this dataset is referred to as GLOBv3 bathymetry in the UFS_UTL.
 
 @image html https://user-images.githubusercontent.com/12705538/250180794-76af93a2-a7ba-4e9a-9478-5657198862b8.png "Figure 1: Lake depths for lakes in the 3-km RRFS domain." width=600
 
-To cold-start the CLM lake model in the UFS weather model:
+To cold-start the CLM lake model in regional configurations of the UFS:
+
 - Use the CLM option in the input.nml
 \n  - lkm = 1
 \n  - iopt_lake = 2
