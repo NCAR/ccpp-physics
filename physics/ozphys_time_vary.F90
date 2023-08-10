@@ -16,8 +16,8 @@ contains
 !! \htmlinclude ozphys_time_vary_init.html
 !!
 ! ###########################################################################################
-  subroutine ozphys_time_vary_init(nPts, latsozp, oz_lat, dlat, jindx1, jindx2,    &
-       ddy, errmsg, errflg)
+  subroutine ozphys_time_vary_init(nPts, latsozp, oz_lat, dlat, jindx1, jindx2, ddy,        &
+       errmsg, errflg)
     ! Inputs
     integer, intent(in) :: &
          nPts,      & ! Horizontal dimension

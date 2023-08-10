@@ -125,71 +125,46 @@
   type = real
   kind = kind_phys
   intent = in
-[ldiag3d]
-  standard_name = flag_for_diagnostics_3D
-  long_name = flag for calculating 3-D diagnostic fields
-  units = flag
+[con_1ovg]
+  standard_name = one_divided_by_the_gravitational_acceleration
+  long_name = inverse of gravitational acceleration
+  units = s2 m-1
   dimensions = ()
-  type = logical
+  type = real
+  kind = kind_phys
   intent = in
-[dtend]
-  standard_name = cumulative_change_of_state_variables
-  long_name = diagnostic tendencies for state variables
-  units = mixed
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
+[do3_dt_prd]
+  standard_name = ozone_tendency_due_to_production_and_loss_rate
+  long_name = ozone tendency due to production and loss rate
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
-[dtidx]
-  standard_name = cumulative_change_of_state_variables_outer_index
-  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
-  units = index
-  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
-  type = integer
-  intent = in
-[ntoz]
-  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for ozone mixing ratio
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_process_prod_loss]
-  standard_name = index_of_production_and_loss_process_in_cumulative_change_index
-  long_name = index of production and loss effect in photochemistry process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_process_ozmix]
-  standard_name = index_of_ozone_mixing_ratio_process_in_cumulative_change_index
-  long_name = index of ozone mixing ratio effect in photochemistry process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_process_temp]
-  standard_name = index_of_temperature_process_in_cumulative_change_index
-  long_name = index of temperature effect in photochemistry process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_process_overhead_ozone]
-  standard_name = index_of_overhead_process_in_cumulative_change_index
-  long_name = index of overhead ozone effect in photochemistry process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[con_g]
-  standard_name = gravitational_acceleration
-  long_name = gravitational acceleration
-  units = m s-2
-  dimensions = ()
+[do3_dt_ozmx]
+  standard_name = ozone_tendency_due_to_ozone_mixing_ratio
+  long_name = ozone tendency due to ozone mixing ratio
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
+[do3_dt_temp]
+  standard_name = ozone_tendency_due_to_temperature
+  long_name = ozone tendency due to temperature
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[do3_dt_ohoz]
+  standard_name = ozone_tendency_due_to_overhead_ozone_column
+  long_name = ozone tendency due to overhead ozone column
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -63,42 +63,35 @@ contains
 !! \htmlinclude ozphys_2015_run.html
 !!
   subroutine ozphys_2015_run (oz_phys, im, levs, ko3, dt, oz, tin, po3, prsl, oz_data,      &
-       pl_coeff, delp, ldiag3d, dtend, dtidx, ntoz, index_of_process_prod_loss,             &
-       index_of_process_ozmix, index_of_process_temp, index_of_process_overhead_ozone,      &
-       con_g, errmsg, errflg)
+       pl_coeff, delp, con_1ovg, do3_dt_prd, do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
-         oz_phys,                      & !
-         ldiag3d                         ! Flag to output GFS diagnostic tendencies
+         oz_phys        ! Flag for ozone_physics_2015 scheme.
     real(kind_phys),intent(in) :: &
-         con_g                           ! Physical constant: Gravitational acceleration (ms-2)
+         con_1ovg       ! Physical constant: One divided by gravitational acceleration (m-1 s2)
     integer, intent(in) :: &
-         im,                           & ! Horizontal dimension
-         levs,                         & ! Number of vertical layers
-         ko3,                          & ! Number of vertical layers in ozone forcing data
-         pl_coeff,                     & ! Number of coefficients in ozone forcing data
-         ntoz,                         & ! Index for ozone mixing ratio
-         index_of_process_prod_loss,   & ! Index for process in diagnostic tendency output
-         index_of_process_ozmix,       & ! Index for process in diagnostic tendency output
-         index_of_process_temp,        & ! Index for process in diagnostic tendency output
-         index_of_process_overhead_ozone ! Index for process in diagnostic tendency output
-    integer, intent(in), dimension(:,:) :: &
-         dtidx                           ! Bookkeeping indices for GFS diagnostic tendencies
+         im,          & ! Horizontal dimension
+         levs,        & ! Number of vertical layers
+         ko3,         & ! Number of vertical layers in ozone forcing data
+         pl_coeff       ! Number of coefficients in ozone forcing data
     real(kind_phys), intent(in) :: &
-         dt                              ! Physics timestep (seconds)
+         dt             ! Physics timestep (seconds)
     real(kind_phys), intent(in), dimension(:) :: &
-         po3                             ! Natural log of ozone forcing data pressure levels
+         po3            ! Natural log of ozone forcing data pressure levels
     real(kind_phys), intent(in), dimension(:,:) :: &
-         prsl,                         & ! Air-pressure (Pa)
-         tin,                          & ! Temperature of new-state (K)
-         delp                            ! Difference between mid-layer pressures (Pa)
+         prsl,        & ! Air-pressure (Pa)
+         tin,         & ! Temperature of new-state (K)
+         delp           ! Difference between mid-layer pressures (Pa)
     real(kind_phys), intent(in), dimension(:,:,:) :: &
-         oz_data                          ! Ozone forcing data
+         oz_data        ! Ozone forcing data
 
-    ! In/Outs
-    real(kind=kind_phys), intent(inout), dimension(:,:,:) :: &
-         dtend                           ! Diagnostic tendencies for state variables
+    ! Outputs (optional)
+    real(kind=kind_phys), intent(inout), dimension(:,:), pointer, optional :: &
+         do3_dt_prd,  & ! Physics tendency: production and loss effect
+         do3_dt_ozmx, & ! Physics tendency: ozone mixing ratio effect
+         do3_dt_temp, & ! Physics tendency: temperature effect
+         do3_dt_ohoz    ! Physics tendency: overhead ozone effect
 
     ! Outputs
     real(kind=kind_phys), intent(inout), dimension(:,:) :: &
@@ -110,9 +103,7 @@ contains
 
     ! Locals
     integer :: k, kmax, kmin, l, i, j
-    integer, dimension(4) :: idtend
     logical, dimension(im) :: flg
-    real :: gravi
     real(kind_phys) :: pmax, pmin, tem, temp
     real(kind_phys), dimension(im) :: wk1, wk2, wk3, ozib
     real(kind_phys), dimension(im,pl_coeff) :: prod
@@ -130,19 +121,8 @@ contains
        return
     endif
 
-    ! Are UFS diagnostic tendencies requested? If so, set up bookeeping indices...
-    if(ldiag3d) then
-       idtend(1) = dtidx(100+ntoz,index_of_process_prod_loss)          ! was ozp1
-       idtend(2) = dtidx(100+ntoz,index_of_process_ozmix)              ! was ozp2
-       idtend(3) = dtidx(100+ntoz,index_of_process_temp)               ! was ozp3
-       idtend(4) = dtidx(100+ntoz,index_of_process_overhead_ozone)     ! was ozp4
-    else
-       idtend=0
-    endif
-
     ! Temporaries
     ozi = oz
-    gravi=1.0/con_g
 
     colo3(:,levs+1) = 0.0
     coloz(:,levs+1) = 0.0
@@ -194,8 +174,8 @@ contains
           enddo
        enddo
        do i=1,im
-          colo3(i,l) = colo3(i,l+1) + ozi(i,l)  * delp(i,l)*gravi
-          coloz(i,l) = coloz(i,l+1) + prod(i,6) * delp(i,l)*gravi
+          colo3(i,l) = colo3(i,l+1) + ozi(i,l)  * delp(i,l)*con_1ovg
+          coloz(i,l) = coloz(i,l+1) + prod(i,6) * delp(i,l)*con_1ovg
           prod(i,2)  = min(prod(i,2), 0.0)
        enddo
        do i=1,im
@@ -204,18 +184,12 @@ contains
                                                        + prod(i,4) * (colo3(i,l)-coloz(i,l))
           oz(i,l) = (ozib(i)  + tem*dt) / (1.0 - prod(i,2)*dt)
        enddo
-       if(idtend(1)>=1) then
-          dtend(:,l,idtend(1)) = dtend(:,l,idtend(1)) + (prod(:,1)-prod(:,2)*prod(:,6))*dt
-       endif
-       if(idtend(2)>=1) then
-          dtend(:,l,idtend(2)) = dtend(:,l,idtend(2)) + (oz(:,l) - ozib(:))
-       endif
-       if(idtend(3)>=1) then
-          dtend(:,l,idtend(3)) = dtend(:,l,idtend(3)) + prod(:,3)*(tin(:,l)-prod(:,5))*dt
-       endif
-       if(idtend(4)>=1) then
-          dtend(:,l,idtend(4)) = dtend(:,l,idtend(4)) + prod(:,4) * (colo3(:,l)-coloz(:,l))*dt
-       endif
+
+       ! Diagnostics (optional)
+       if (associated(do3_dt_prd))  do3_dt_prd(:,l)  = (prod(:,1)-prod(:,2)*prod(:,6))*dt
+       if (associated(do3_dt_ozmx)) do3_dt_ozmx(:,l) = (oz(:,l) - ozib(:))
+       if (associated(do3_dt_temp)) do3_dt_temp(:,l) = prod(:,3)*(tin(:,l)-prod(:,5))*dt
+       if (associated(do3_dt_ohoz)) do3_dt_ohoz(:,l) = prod(:,4) * (colo3(:,l)-coloz(:,l))*dt
     enddo
 
     return
