@@ -22,7 +22,7 @@ in the lake.
 Testing of the CLM lake model within RAP/HRRR applications showed computational efficiency of the model with no change of even
 0.1% in run time. The lake/snow variables have to be continuously transfered within the CLM lake model from one forecast to another,
 constrained by the atmospheric data assimilation. The lake-cycling initialization in RAP/HRRR has been effective overall, owing to 
-accurate houly estimates of near-surface temperature, moisture and winds, and shortwave and longwave estimates provided to the 1-d CLM
+accurate hourly estimates of near-surface temperature, moisture and winds, and shortwave and longwave estimates provided to the 1-d CLM
 lake model every time step (Benjamin et al. (2022) \cite gmd-15-6659-2022). Cycling techniques showed improvements over initializing
 lake temperatures from the SST analysis, which is problematic for small water bodies. The improvements are particularly eminent during transition 
 periods between cold and warm seasons, and in the regions with anomalous weather conditions. The CLM lake model has the potential 

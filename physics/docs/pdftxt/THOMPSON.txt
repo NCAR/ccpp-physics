@@ -89,8 +89,8 @@ Two namelist variables control the usage of the semi-Lagrangian sedimentation, \
 the upper level and reduce the OLR bias.
 
 - For the non-aerosol option of the scheme, the cloud number concentration is divided into two parts (over land and others). The number 
-concentration over the ocean is reduced to a smaller numer (50/L) from its default (100/L). The purpose is to reduce the bias in surface
-downward shortwave radiative flux off the coastal regional including the Southeast Pacific. 
+concentration over the ocean is reduced to a smaller number (50/L) from its default (100/L). The purpose is to reduce the bias in surface
+downward shortwave radiative flux off the coastal region including the Southeast Pacific. 
 
 \section intra_thompson Intraphysics Communication
 - \ref arg_table_mp_thompson_run

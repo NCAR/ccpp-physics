@@ -68,7 +68,7 @@ to the parameterization.
 - If the in-core saturation adjustment is used (\p do_sat_adj=.true.), it is invoked at shorter timesteps along with the dynamical solver.
 
 
-The UFS Short Range Weather Application (SRW App) v3.0.0 supports four physicsphysics suites.
+The UFS Short Range Weather Application (SRW App) v3.0.0 supports four physics suites.
 
 Table 1.  Physics suites and primary schemes supported in SRW v3.0.0  
 \tableofcontents
