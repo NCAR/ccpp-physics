@@ -106,6 +106,7 @@ MODULE module_sf_mynn
 
   REAL(kind_phys), DIMENSION(0:1000 ),SAVE :: psim_stab,psim_unstab, &
                                      psih_stab,psih_unstab
+!$acc declare create(psim_stab, psim_unstab, psih_stab, psih_unstab)
 
 CONTAINS
 
@@ -344,7 +345,12 @@ CONTAINS
      &                     qsfc_wat,  qsfc_lnd,  qsfc_ice
 
 ! CCPP error handling
+#ifndef _OPENACC
       character(len=*), intent(inout) :: errmsg
+#else
+!Necessary since OpenACC does not support assumed-size arrays
+      character(len=200), intent(inout) :: errmsg
+#endif
       integer,          intent(inout) :: errflg
 
 !ADDITIONAL OUTPUT
@@ -371,6 +377,20 @@ CONTAINS
       errflg = 0
       errmsg = ''
 
+!$acc enter data copyin( dz8w,U3D,V3D,QV3D,QC3D,P3D,T3D,       &
+!$acc                       pattern_spp_sfc, errmsg)
+
+!$acc enter data copyin( UST_WAT(:), UST_LND(:),  UST_ICE(:),     &
+!$acc                    MOL(:),     QFLX(:),     HFLX(:),        &
+!$acc                    QSFC(:),    QSFC_WAT(:), QSFC_LND(:),    &
+!$acc                    QSFC_ICE(:))
+
+!$acc enter data create( dz8w1d(:),  dz2w1d(:),   U1D(:),         &
+!$acc                    V1D(:),     U1D2(:),     V1D2(:),        &
+!$acc                    QV1D(:),    QC1D(:),     P1D(:),         &
+!$acc                    T1D(:),     rstoch1D(:), qstar(:))
+
+
       IF (debug_code >= 1) THEN
         write(*,*)"======= printing of constants:"
         write(*,*)"cp=",    cp," g=",     grav
@@ -382,6 +402,10 @@ CONTAINS
       itf=ite !MIN0(ite,ide-1)
       ktf=kte !MIN0(kte,kde-1)
 
+!$acc parallel loop present(dz8w,U3D,V3D,QV3D,QC3D,P3D,T3D,       &
+!$acc                       pattern_spp_sfc,dz8w1d,dz2w1d,U1D,    &
+!$acc                       V1D,U1D2,V1D2,QV1D,QC1D,P1D,T1D,      &
+!$acc                       rstoch1D,qstar)
       DO i=its,ite
          dz8w1d(I) = dz8w(i,kts)
          dz2w1d(I) = dz8w(i,kts+1)
@@ -403,6 +427,9 @@ CONTAINS
       ENDDO
 
       IF (itimestep==1 .AND. iter==1) THEN
+!$acc parallel loop present(U1D,V1D,UST_WAT,UST_LND,UST_ICE,MOL,  &
+!$acc                       QFLX,HFLX,QV3D,QSFC,QSFC_WAT,         &
+!$acc                       QSFC_LND,QSFC_ICE)
          DO i=its,ite
             IF (.not. flag_restart) THEN
                !Everything here is used before calculated
@@ -431,6 +458,9 @@ CONTAINS
             endif ! lsm==lsm_ruc
          ENDDO
       ENDIF
+
+!$acc exit data delete( dz8w,U3D,V3D,QV3D,QC3D,P3D,T3D,         &
+!$acc                   pattern_spp_sfc, QC1D)
 
       CALL SFCLAY1D_mynn(flag_iter,                             &
            J,U1D,V1D,T1D,QV1D,P1D,dz8w1d,                       &
@@ -470,6 +500,16 @@ CONTAINS
            ims,ime, jms,jme, kms,kme,                           &
            its,ite, jts,jte, kts,kte,                           &
            errmsg, errflg                                       )
+
+!$acc exit data copyout( UST_WAT(:), UST_LND(:),  UST_ICE(:),   &
+!$acc                    MOL(:),     QFLX(:),     HFLX(:),      &
+!$acc                    QSFC(:),    QSFC_WAT(:), QSFC_LND(:),  &
+!$acc                    QSFC_ICE(:), errmsg)
+
+!$acc exit data delete( dz8w1d(:),   dz2w1d(:),   U1D(:),       &
+!$acc                   V1D(:),      U1D2(:),     V1D2(:),      &
+!$acc                   QV1D(:),     T1D(:),      P1D(:),       &
+!$acc                   rstoch1D(:), qstar(:))
 
     END SUBROUTINE SFCLAY_MYNN
 
@@ -626,7 +666,12 @@ CONTAINS
 !JOE-end
 
 ! CCPP error handling
+#ifndef _OPENACC
       character(len=*), intent(inout) :: errmsg
+#else
+! Necessary since OpenACC does not support assumed-size arrays
+      character(len=200), intent(inout) :: errmsg
+#endif
       integer,          intent(inout) :: errflg
 
 !----------------------------------------------------------------
@@ -679,6 +724,58 @@ CONTAINS
       errflg = 0
       errmsg = ''
 !-------------------------------------------------------------------
+!$acc update device(psim_stab, psim_unstab, psih_stab, psih_unstab)
+
+!$acc enter data create( ZA,     ZA2,    THV1D,  TH1D,   TC1D,   TV1D,  &
+!$acc                    RHO1D,  QVSH,   PSIH2,  PSIM10, PSIH10, WSPDI, &
+!$acc                    GOVRTH, PSFC,   THCON,                         &
+!$acc                    zratio_lnd,   zratio_ice,   zratio_wat,        &
+!$acc                    TSK_lnd,      TSK_ice,      TSK_wat,           &
+!$acc                    THSK_lnd,     THSK_ice,     THSK_wat,          &
+!$acc                    THVSK_lnd,    THVSK_ice,    THVSK_wat,         &
+!$acc                    GZ1OZ0_lnd,   GZ1OZ0_ice,   GZ1OZ0_wat,        &
+!$acc                    GZ1OZt_lnd,   GZ1OZt_ice,   GZ1OZt_wat,        &
+!$acc                    GZ2OZ0_lnd,   GZ2OZ0_ice,   GZ2OZ0_wat,        &
+!$acc                    GZ2OZt_lnd,   GZ2OZt_ice,   GZ2OZt_wat,        &
+!$acc                    GZ10OZ0_lnd,  GZ10OZ0_ice,  GZ10OZ0_wat,       &
+!$acc                    GZ10OZt_lnd,  GZ10OZt_ice,  GZ10OZt_wat,       &
+!$acc                    ZNTstoch_lnd, ZNTstoch_ice, ZNTstoch_wat,      &
+!$acc                    ZT_lnd,       ZT_ice,       ZT_wat,            &
+!$acc                    ZQ_lnd,       ZQ_ice,       ZQ_wat,            &
+!$acc                    PSIQ_lnd,     PSIQ_ice,     PSIQ_wat,          &
+!$acc                    PSIQ2_lnd,    PSIQ2_ice,    PSIQ2_wat,         &
+!$acc                    QSFCMR_lnd,   QSFCMR_ice,   QSFCMR_wat )
+
+!$acc enter data copyin(flag_iter, dry, wet, icy, CPM, MAVAIL, &
+!$acc                   QFX, FLHC, FLQC, CHS, CH, CHS2, CQS2, USTM, &
+!$acc                   HFX, LH, wstar, qstar, PBLH, ZOL, MOL, RMOL, &
+!$acc                   T2, TH2, Q2, QV1D, PSFCPA, &
+!$acc                   WSPD, U10, V10, U1D, V1D, U1D2, V1D2, &
+!$acc                   T1D, P1D, rstoch1D, sigmaf, &
+!$acc                   shdmax, vegtype, z0pert, ztpert, dx, QGH, &
+!$acc                   dz2w1d, dz8w1d, &
+!$acc                   stress_wat, stress_lnd, stress_ice, &
+!$acc                   rb_wat, rb_lnd, rb_ice, &
+!$acc                   tskin_wat, tskin_lnd, tskin_ice, &
+!$acc                   tsurf_wat, tsurf_lnd, tsurf_ice, &
+!$acc                   psim, psih, &
+!$acc                   UST_wat, UST_lnd, UST_ice, &
+!$acc                   ZNT_wat, ZNT_lnd, ZNT_ice, &
+!$acc                   QSFC, QSFC_lnd, QSFC_wat, QSFC_ice, &
+!$acc                   QFLX, QFLX_lnd, QFLX_wat, QFLX_ice, &
+!$acc                   HFLX, HFLX_lnd, HFLX_wat, HFLX_ice, &
+!$acc                   PSIX_wat, PSIX_lnd, PSIX_ice, &
+!$acc                   PSIX10_wat, PSIX10_lnd, PSIX10_ice, &
+!$acc                   PSIT2_lnd, PSIT2_wat, PSIT2_ice, &
+!$acc                   PSIT_lnd, PSIT_wat, PSIT_ice, &
+!$acc                   ch_lnd, ch_wat, ch_ice, &
+!$acc                   cm_lnd, cm_wat, cm_ice, &
+!$acc                   snowh_lnd, errmsg)
+
+!$acc parallel loop present(PSFCPA, PSFC, QSFC, T1D, flag_iter,               &
+!$acc                       QSFC_wat, QSFCMR_wat, wet, TSK_wat, tskin_wat,    &
+!$acc                       QSFC_lnd, QSFCMR_lnd, dry, TSK_lnd, tskin_lnd,    &
+!$acc                       QSFC_ice, QSFCMR_ice, icy, TSK_ice, tskin_ice)
       DO I=its,ite
 
          ! PSFC ( in cmb) is used later in saturation checks
@@ -700,7 +797,9 @@ CONTAINS
                ENDIF
                QSFC_wat(I)=EP2*E1/(PSFC(I)-ep3*E1)             !specific humidity
                QSFCMR_wat(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio
+#ifndef _OPENACC
                IF(QSFC_wat(I)>1..or.QSFC_wat(I)<0.) print *,' QSFC_wat(I)',itimestep,i,QSFC_wat(I),TSK_wat(i)
+#endif
             ENDIF
             IF (dry(i)) THEN
               TSK_lnd(I) = tskin_lnd(i)
@@ -720,7 +819,9 @@ CONTAINS
                  QSFC_lnd(I)=0.5*(QSFC_lnd(I) + QSFC(I))
                  QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))       !mixing ratio
               endif ! lsm
+#ifndef _OPENACC
               IF(QSFC_lnd(I)>1..or.QSFC_lnd(I)<0.) print *,' QSFC_lnd(I)',itimestep,i,QSFC_lnd(I),Tskin_lnd(i),tsurf_lnd(i),qsfc(i)
+#endif
             ENDIF
             IF (icy(i)) THEN
               TSK_ice(I) = tskin_ice(i)
@@ -738,7 +839,9 @@ CONTAINS
                  QSFC_ice(I)=EP2*E1/(PSFC(I)-ep3*E1)             !specific humidity
                  QSFCMR_ice(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio
               endif ! lsm
+#ifndef _OPENACC
               IF(QSFC_ice(I)>1..or.QSFC_ice(I)<0.) print *,' QSFC_ice(I)',itimestep,i,QSFC_ice(I),TSK_ice(i)
+#endif
             ENDIF
 
          ELSE
@@ -791,6 +894,7 @@ CONTAINS
        endif ! flag_iter
       ENDDO
 
+#ifndef _OPENACC
       IF (debug_code >= 1) THEN
         write(0,*)"ITIMESTEP=",ITIMESTEP," iter=",iter
         DO I=its,ite
@@ -815,7 +919,12 @@ CONTAINS
            ENDIF
         ENDDO
       ENDIF
+#endif
 
+!$acc parallel loop present(PSFC, PSFCPA, QVSH, QV1D, THCON, flag_iter,        &
+!$acc       dry, tskin_lnd, TSK_lnd, tsurf_lnd, THSK_lnd, THVSK_lnd, qsfc_lnd, &
+!$acc       icy, tskin_ice, TSK_ice, tsurf_ice, THSK_ice, THVSK_ice, qsfc_ice, &
+!$acc       wet, tskin_wat, TSK_wat, tsurf_wat, THSK_wat, THVSK_wat)
       DO I=its,ite
          ! PSFC ( in cmb) is used later in saturation checks
          PSFC(I)=PSFCPA(I)/1000.
@@ -829,8 +938,10 @@ CONTAINS
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_lnd(I) = TSK_lnd(I)*THCON(I)   !(K)
            THVSK_lnd(I) = THSK_lnd(I)*(1.+EP1*qsfc_lnd(I))
+#ifndef _OPENACC
            if(THVSK_lnd(I) < 170. .or. THVSK_lnd(I) > 360.) &
            print *,'THVSK_lnd(I)',itimestep,i,THVSK_lnd(I),THSK_lnd(i),tsurf_lnd(i),tskin_lnd(i),qsfc_lnd(i)
+#endif
          endif
          if(icy(i)) then
            TSK_ice(I) = tskin_ice(i)
@@ -838,8 +949,10 @@ CONTAINS
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_ice(I) = TSK_ice(I)*THCON(I)   !(K)
            THVSK_ice(I) = THSK_ice(I)*(1.+EP1*qsfc_ice(I))   !(K)
+#ifndef _OPENACC
            if(THVSK_ice(I) < 170. .or. THVSK_ice(I) > 360.) &
            print *,'THVSK_ice(I)',itimestep,i,THVSK_ice(I),THSK_ice(i),tsurf_ice(i),tskin_ice(i),qsfc_ice(i)
+#endif
          endif
          if(wet(i)) then
            TSK_wat(I) = tskin_wat(i)
@@ -847,24 +960,29 @@ CONTAINS
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_wat(I) = TSK_wat(I)*THCON(I)   !(K)
            THVSK_wat(I) = THSK_wat(I)*(1.+EP1*QVSH(I))   !(K)
+#ifndef _OPENACC
            if(THVSK_wat(I) < 170. .or. THVSK_wat(I) > 360.) &
            print *,'THVSK_wat(I)',i,THVSK_wat(I),THSK_wat(i),tsurf_wat(i),tskin_wat(i),qsfc_wat(i)
+#endif
          endif
         endif ! flag_iter
       ENDDO
 
+!$acc parallel loop present(TH1D, T1D, P1D, TC1D)
       DO I=its,ite
          ! CONVERT LOWEST LAYER TEMPERATURE TO POTENTIAL TEMPERATURE:
          TH1D(I)=T1D(I)*(100000./P1D(I))**ROVCP  !(Theta, K)
          TC1D(I)=T1D(I)-273.15                   !(T, Celsius)
       ENDDO
 
+!$acc parallel loop present(THV1D, TH1D, QVSH, TV1D, T1D)
       DO I=its,ite
          ! CONVERT TO VIRTUAL TEMPERATURE
          THV1D(I)=TH1D(I)*(1.+EP1*QVSH(I))             !(K)
          TV1D(I)=T1D(I)*(1.+EP1*QVSH(I))               !(K)
       ENDDO
 
+!$acc parallel loop present(RHO1D, P1D, TV1D, TH1D, ZA, ZA2, dz2w1d, dz8w1d, GOVRTH)
       DO I=its,ite
          RHO1D(I)=P1D(I)/(Rd*TV1D(I))     !now using value calculated in sfc driver
          ZA(I)=0.5*dz8w1d(I)              !height of first half-sigma level
@@ -873,11 +991,13 @@ CONTAINS
       ENDDO
 
       !tgs - should QFX and HFX be separate for land, ice and water?
+!$acc parallel loop present(QFX, QFLX, RHO1D, HFX, HFLX)
       DO I=its,ite
          QFX(i)=QFLX(i)*RHO1D(I)
          HFX(i)=HFLX(i)*RHO1D(I)*cp
       ENDDO
 
+#ifndef _OPENACC
       IF (debug_code ==2) THEN
         !write(*,*)"ITIMESTEP=",ITIMESTEP
         DO I=its,ite
@@ -890,7 +1010,9 @@ CONTAINS
           write(*,*)"RHO1D=", RHO1D(i)," GOVRTH=",GOVRTH(i)
         ENDDO
       ENDIF
+#endif
 
+!$acc parallel loop present(T1D,P1D,QGH,QV1D,CPM)
       DO I=its,ite
          ! QGH CHANGED TO USE LOWEST-LEVEL AIR TEMP
          ! Q2SAT = QGH IN LSM
@@ -908,6 +1030,7 @@ CONTAINS
          CPM(I)=CP*(1.+0.84*QV1D(I))
       ENDDO
 
+#ifndef _OPENACC
       IF (debug_code == 2) THEN
          write(*,*)"ITIMESTEP=",ITIMESTEP
          DO I=its,ite
@@ -925,7 +1048,13 @@ CONTAINS
             endif
          ENDDO
       ENDIF
+#endif
 
+!$acc parallel loop present(flag_iter,U1D,V1D,WSPD,wet,dry,icy,    &
+!$acc                    THV1D,THVSK_wat,THVSK_lnd,THVSK_ice,   &
+!$acc                    hfx,RHO1D,qfx,WSTAR,pblh,dx,GOVRTH,ZA, &
+!$acc                    TSK_wat,TSK_lnd,TSK_ice,               &
+!$acc                    rb_wat,rb_lnd,rb_ice)
       DO I=its,ite
         if( flag_iter(i) ) then
          ! DH* 20200401 - note. A weird bug in Intel 18 on hera prevents using the
@@ -1041,6 +1170,7 @@ CONTAINS
          WSPD(I) = MAX(WSPD_ice,WSPD_wat)
          WSPD(I) = MAX(WSPD_lnd,WSPD(I))
 
+#ifndef _OPENACC
          IF (debug_code == 2) THEN
             write(*,*)"===== After rb calc in mynn sfc layer:"
             write(*,*)"ITIMESTEP=",ITIMESTEP
@@ -1049,6 +1179,7 @@ CONTAINS
             IF (wet(i))write(*,*)"rb_wat=", rb_wat(I)," DTHVDZ=",DTHVDZ
             IF (dry(i))write(*,*)"rb_lnd=", rb_lnd(I)," DTHVDZ=",DTHVDZ
          ENDIF
+#endif
 
          ! IF PREVIOUSLY UNSTABLE, DO NOT LET INTO REGIMES 1 AND 2 (STABLE)
          !if (itimestep .GT. 1) THEN
@@ -1067,6 +1198,29 @@ CONTAINS
 !--------------------------------------------------------------------
 !--------------------------------------------------------------------
 
+!$acc parallel loop present(flag_iter, errmsg, &
+!$acc                    wet, dry, icy, &
+!$acc                    ZT_wat, ZT_lnd, ZT_ice, &
+!$acc                    ZNT_wat, ZNT_lnd, ZNT_ice, &
+!$acc                    ZNTstoch_wat, ZNTstoch_lnd, ZNTstoch_ice, &
+!$acc                    UST_wat, UST_lnd, UST_ice, &
+!$acc                    ZQ_wat, ZQ_lnd, ZQ_ice, &
+!$acc                    snowh_lnd, &
+!$acc                    THVSK_wat, THVSK_lnd, THVSK_ice, &
+!$acc                    qsfc_wat, qsfc_lnd, qsfc_ice, &
+!$acc                    GZ1OZ0_wat, GZ1OZt_wat, GZ2OZ0_wat, GZ2OZt_wat, GZ10OZ0_wat, GZ10OZt_wat, &
+!$acc                    GZ1OZ0_lnd, GZ1OZt_lnd, GZ2OZ0_lnd, GZ2OZt_lnd, GZ10OZ0_lnd, GZ10OZt_lnd, &
+!$acc                    GZ1OZ0_ice, GZ1OZt_ice, GZ2OZ0_ice, GZ2OZt_ice, GZ10OZ0_ice, GZ10OZt_ice, &
+!$acc                    zratio_wat, zratio_lnd, zratio_ice, &
+!$acc                    stress_wat, stress_lnd, stress_ice, &
+!$acc                    rb_wat, rb_lnd, rb_ice, &
+!$acc                    psim, psih, psim10, psih10, psih2, &
+!$acc                    psix_wat, psix10_wat, psit_wat, psit2_wat, psiq_wat, psiq2_wat, &
+!$acc                    psix_lnd, psix10_lnd, psit_lnd, psit2_lnd, psiq_lnd, psiq2_lnd, &
+!$acc                    psix_ice, psix10_ice, psit_ice, psit2_ice, psiq_ice, psiq2_ice, &
+!$acc                    WSPD, WSPDI, U1D, V1D, TC1D, THV1D, rstoch1D, USTM, ZA, ZOL, QVSH, &
+!$acc                    shdmax, vegtype, z0pert, ztpert, mol, rmol, qstar, sigmaf)
+
  DO I=its,ite
    if( flag_iter(i) ) then
 
@@ -1082,10 +1236,12 @@ CONTAINS
        if (sfc_z0_type >= 0) then ! Avoid calculation is using wave model
           ! CALCULATE z0 (znt)
           !--------------------------------------
+#ifndef _OPENACC
           IF (debug_code == 2) THEN
             write(*,*)"=============Input to ZNT over water:"
             write(*,*)"u*:",UST_wat(i)," wspd=",WSPD(i)," visc=",visc," za=",ZA(I)
           ENDIF
+#endif
           IF ( PRESENT(ISFTCFLX) ) THEN
              IF ( ISFTCFLX .EQ. 0 ) THEN
                 IF (COARE_OPT .EQ. 3.0) THEN
@@ -1122,10 +1278,12 @@ CONTAINS
           ZNTstoch_wat(I)  = ZNT_wat(I)
        endif
 
+#ifndef _OPENACC
        IF (debug_code > 1) THEN
           write(*,*)"==========Output ZNT over water:"
           write(*,*)"ZNT:",ZNTstoch_wat(i)
        ENDIF
+#endif
 
        !COMPUTE ROUGHNESS REYNOLDS NUMBER (restar) USING NEW ZNT
        ! AHW: Garrattt formula: Calculate roughness Reynolds number
@@ -1136,10 +1294,12 @@ CONTAINS
        !--------------------------------------
        !CALCULATE z_t and z_q
        !--------------------------------------
+#ifndef _OPENACC
        IF (debug_code > 1) THEN
           write(*,*)"=============Input to ZT over water:"
           write(*,*)"u*:",UST_wat(i)," restar=",restar," visc=",visc
        ENDIF
+#endif
 
        IF ( PRESENT(ISFTCFLX) ) THEN
           IF ( ISFTCFLX .EQ. 0 ) THEN
@@ -1183,10 +1343,12 @@ CONTAINS
                                     rstoch1D(i),spp_sfc)
           ENDIF
        ENDIF
+#ifndef _OPENACC
        IF (debug_code > 1) THEN
          write(*,*)"=============Output ZT & ZQ over water:"
          write(*,*)"ZT:",ZT_wat(i)," ZQ:",ZQ_wat(i)
        ENDIF
+#endif
 
        GZ1OZ0_wat(I)= LOG((ZA(I)+ZNTstoch_wat(I))/ZNTstoch_wat(I))
        GZ1OZt_wat(I)= LOG((ZA(I)+ZNTstoch_wat(i))/ZT_wat(i))
@@ -1232,7 +1394,10 @@ CONTAINS
                 ! or initialized to zero, but certainly not set correctly
                 errmsg = 'Logic error: qstar is not set correctly when calling Yang_2008'
                 errflg = 1
+#ifndef _OPENACC
+! Necessary since OpenACC does not support branching in parallel code
                 return
+#endif
                 CALL Yang_2008(ZNTSTOCH_lnd(i),ZT_lnd(i),ZQ_lnd(i),UST_lnd(i),MOL(I),&
                               qstar(I),restar,visc)
              ELSEIF ( IZ0TLND .EQ. 3 ) THEN
@@ -1249,6 +1414,8 @@ CONTAINS
                          UST_lnd(I),KARMAN,1.0_kind_phys,0,spp_sfc,rstoch1D(i))
           ENDIF
        ENDIF
+
+#ifndef _OPENACC
        IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN
          write(0,*)"===(land) capture bad input in mynn sfc layer, i=:",i
          write(0,*)" ZNT=", ZNTstoch_lnd(i)," ZT=",Zt_lnd(i)
@@ -1257,7 +1424,7 @@ CONTAINS
          " ust=", ust_lnd(i)," snowh=", snowh_lnd(i),"psfcpa=",PSFCPA(i), &
          " dz=",dz8w1d(i)," qflx=",qflx_lnd(i)," hflx=",hflx_lnd(i)," hpbl=",pblh(i)
        ENDIF
-
+#endif
 
        GZ1OZ0_lnd(I)= LOG((ZA(I)+ZNTstoch_lnd(I))/ZNTstoch_lnd(I))
        GZ1OZt_lnd(I)= LOG((ZA(I)+ZNTstoch_lnd(i))/ZT_lnd(i))
@@ -1323,6 +1490,7 @@ CONTAINS
              ZOL(I)=MAX(ZOL(I),0.0_kind_phys)
              ZOL(I)=MIN(ZOL(I),20._kind_phys)
 
+#ifndef _OPENACC
              IF (debug_code >= 1) THEN
                IF (ZNTstoch_wat(i) < 1E-8 .OR. Zt_wat(i) < 1E-10) THEN
                  write(0,*)"===(wet) capture bad input in mynn sfc layer, i=:",i
@@ -1333,6 +1501,7 @@ CONTAINS
                  " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
                ENDIF
              ENDIF
+#endif
 
              !Use Pedros iterative function to find z/L
              !zol(I)=zolri(rb_wat(I),ZA(I),ZNTstoch_wat(I),ZT_wat(I),ZOL(I),psi_opt)
@@ -1390,6 +1559,7 @@ CONTAINS
              ZOL(I)=MAX(ZOL(I),-20.0_kind_phys)
              ZOL(I)=MIN(ZOL(I),0.0_kind_phys)
 
+#ifndef _OPENACC
              IF (debug_code >= 1) THEN
                IF (ZNTstoch_wat(i) < 1E-8 .OR. Zt_wat(i) < 1E-10) THEN
                  write(0,*)"===(wet) capture bad input in mynn sfc layer, i=:",i
@@ -1400,6 +1570,7 @@ CONTAINS
                  " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
                ENDIF
              ENDIF
+#endif
 
              !Use Pedros iterative function to find z/L
              !zol(I)=zolri(rb_wat(I),ZA(I),ZNTstoch_wat(I),ZT_wat(I),ZOL(I),psi_opt)
@@ -1460,6 +1631,7 @@ CONTAINS
              ZOL(I)=MAX(ZOL(I),0.0_kind_phys)
              ZOL(I)=MIN(ZOL(I),20._kind_phys)
 
+#ifndef _OPENACC
              IF (debug_code >= 1) THEN
                IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN
                  write(0,*)"===(land) capture bad input in mynn sfc layer, i=:",i
@@ -1470,6 +1642,7 @@ CONTAINS
                  " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
                ENDIF
              ENDIF
+#endif
 
              !Use Pedros iterative function to find z/L
              !zol(I)=zolri(rb_lnd(I),ZA(I),ZNTstoch_lnd(I),ZT_lnd(I),ZOL(I),psi_opt)
@@ -1526,6 +1699,7 @@ CONTAINS
              ZOL(I)=MAX(ZOL(I),-20.0_kind_phys)
              ZOL(I)=MIN(ZOL(I),0.0_kind_phys)
 
+#ifndef _OPENACC
              IF (debug_code >= 1) THEN
                IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN
                  write(0,*)"===(land) capture bad input in mynn sfc layer, i=:",i
@@ -1536,6 +1710,7 @@ CONTAINS
                  " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
                ENDIF
              ENDIF
+#endif
 
              !Use Pedros iterative function to find z/L
              !zol(I)=zolri(rb_lnd(I),ZA(I),ZNTstoch_lnd(I),ZT_lnd(I),ZOL(I),psi_opt)
@@ -1595,6 +1770,7 @@ CONTAINS
              ZOL(I)=MAX(ZOL(I),0.0_kind_phys)
              ZOL(I)=MIN(ZOL(I),20._kind_phys)
 
+#ifndef _OPENACC
              IF (debug_code >= 1) THEN
                IF (ZNTstoch_ice(i) < 1E-8 .OR. Zt_ice(i) < 1E-10) THEN
                  write(0,*)"===(ice) capture bad input in mynn sfc layer, i=:",i
@@ -1605,6 +1781,7 @@ CONTAINS
                  " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
                ENDIF
              ENDIF
+#endif
 
              !Use Pedros iterative function to find z/L
              !zol(I)=zolri(rb_ice(I),ZA(I),ZNTstoch_ice(I),ZT_ice(I),ZOL(I),psi_opt)
@@ -1661,6 +1838,7 @@ CONTAINS
              ZOL(I)=MAX(ZOL(I),-20.0_kind_phys)
              ZOL(I)=MIN(ZOL(I),0.0_kind_phys)
 
+#ifndef _OPENACC
              IF (debug_code >= 1) THEN
                IF (ZNTstoch_ice(i) < 1E-8 .OR. Zt_ice(i) < 1E-10) THEN
                  write(0,*)"===(ice) capture bad input in mynn sfc layer, i=:",i
@@ -1671,6 +1849,7 @@ CONTAINS
                  " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
                ENDIF
              ENDIF
+#endif
 
              !Use Pedros iterative function to find z/L
              !zol(I)=zolri(rb_ice(I),ZA(I),ZNTstoch_ice(I),ZT_ice(I),ZOL(I),psi_opt)
@@ -1821,6 +2000,14 @@ CONTAINS
    endif ! flag_iter
  ENDDO   ! end i-loop
 
+#ifdef _OPENACC
+ ! Necessary since OpenACC does not support branching in parallel code
+ IF (errflg == 1) THEN
+    return
+ ENDIF
+#endif
+
+#ifndef _OPENACC
  IF (debug_code == 2) THEN
     DO I=its,ite
        IF(wet(i))write(*,*)"==== AT END OF MAIN LOOP, i=",i, "(wet)"
@@ -1841,10 +2028,29 @@ CONTAINS
        write(*,*)"============================================="
     ENDDO ! end i-loop
  ENDIF
+#endif
 
    !----------------------------------------------------------
    !  COMPUTE SURFACE HEAT AND MOISTURE FLUXES
    !----------------------------------------------------------
+!$acc parallel loop present(flag_iter, dry, wet, icy, &
+!$acc                    QFX, HFX, FLHC, FLQC, LH, CHS, CH, CHS2, CQS2, &
+!$acc                    RHO1D, MAVAIL, USTM, &
+!$acc                    UST_lnd, UST_wat, UST_ice, &
+!$acc                    PSIQ_lnd, PSIT_lnd, PSIX_lnd, &
+!$acc                    PSIQ_wat, PSIT_wat, PSIX_wat, &
+!$acc                    PSIQ_ice, PSIT_ice, PSIX_ice, &
+!$acc                    PSIQ2_lnd, PSIT2_lnd, &
+!$acc                    PSIQ2_wat, PSIT2_wat, &
+!$acc                    PSIQ2_ice, PSIT2_ice, &
+!$acc                    QSFC, QSFC_lnd, QSFC_wat, QSFC_ice, &
+!$acc                    QFLX, QFLX_lnd, QFLX_wat, QFLX_ice, &
+!$acc                    HFLX, HFLX_lnd, HFLX_wat, HFLX_ice, &
+!$acc                    QSFCMR_lnd, QSFCMR_wat, QSFCMR_ice, &
+!$acc                    QV1D, WSPD, WSPDI, CPM, TH1D, &
+!$acc                    THSK_lnd, THSK_wat, THSK_ice, &
+!$acc                    ch_lnd, ch_wat, ch_ice, &
+!$acc                    cm_lnd, cm_wat, cm_ice)
  DO I=its,ite
   if( flag_iter(i) ) then
 
@@ -2008,12 +2214,14 @@ CONTAINS
 
       ENDIF
 
+#ifndef _OPENACC
       IF (debug_code > 1) THEN
          write(*,*)"QFX=",QFX(I),"FLQC=",FLQC(I)
          if(icy(i))write(*,*)"ice, MAVAIL:",MAVAIL(I)," u*=",UST_ice(I)," psiq=",PSIQ_ice(i)
          if(dry(i))write(*,*)"lnd, MAVAIL:",MAVAIL(I)," u*=",UST_lnd(I)," psiq=",PSIQ_lnd(i)
          if(wet(i))write(*,*)"ocn, MAVAIL:",MAVAIL(I)," u*=",UST_wat(I)," psiq=",PSIQ_wat(i)
       ENDIF
+#endif
 
       ! The exchange coefficient for cloud water is assumed to be the
       ! same as that for heat. CH is multiplied by WSPD.
@@ -2040,6 +2248,18 @@ CONTAINS
 ENDDO ! end i-loop
 
 IF (compute_diag) then
+   !$acc parallel loop present(flag_iter, dry, wet, icy, &
+   !$acc                    ZA, ZA2, T2, TH2, TH1D, Q2, QV1D, PSFCPA, &
+   !$acc                    THSK_lnd, THSK_wat, THSK_ice, &
+   !$acc                    QSFC_lnd, QSFC_wat, QSFC_ice, &
+   !$acc                    U10, V10, U1D, V1D, U1D2, V1D2, &
+   !$acc                    ZNTstoch_lnd, ZNTstoch_lnd, ZNTstoch_ice, &
+   !$acc                    PSIX_lnd, PSIX_wat, PSIX_ice, &
+   !$acc                    PSIX10_lnd, PSIX10_wat, PSIX10_ice, &
+   !$acc                    PSIT2_lnd, PSIT2_wat, PSIT2_ice, &
+   !$acc                    PSIT_lnd, PSIT_wat, PSIT_ice, &
+   !$acc                    PSIQ2_lnd, PSIQ2_wat, PSIQ2_ice, &
+   !$acc                    PSIQ_lnd, PSIQ_wat, PSIQ_ice)
    DO I=its,ite
      if( flag_iter(i) ) then
       !-----------------------------------------------------
@@ -2154,6 +2374,16 @@ ENDIF ! end compute_diag
 ! DEBUG - SUSPICIOUS VALUES
 !-----------------------------------------------------
 IF ( debug_code == 2) THEN
+   !$acc parallel loop present(dry, wet, icy, CPM, MAVAIL, &
+   !$acc                    HFX, LH, wstar, RHO1D, PBLH, ZOL, ZA, MOL, &
+   !$acc                    PSIM, PSIH, WSTAR, T1D, TH1D, THV1D, QVSH, &
+   !$acc                    UST_wat, UST_lnd, UST_ice, &
+   !$acc                    THSK_wat, THSK_lnd, THSK_ice, &
+   !$acc                    THVSK_wat, THVSK_lnd, THVSK_ice, &
+   !$acc                    ZNTstoch_wat, ZNTstoch_lnd, ZNTstoch_ice, &
+   !$acc                    ZT_wat, ZT_lnd, ZT_ice, &
+   !$acc                    QSFC_wat, QSFC_lnd, QSFC_ice, &
+   !$acc                    PSIX_wat, PSIX_lnd, PSIX_ice)
    DO I=its,ite
       yesno = 0
       IF (compute_flux) THEN
@@ -2258,6 +2488,54 @@ IF ( debug_code == 2) THEN
     ENDDO ! end i-loop
  ENDIF ! end debug option
 
+!$acc exit data copyout(CPM, FLHC, FLQC, CHS, CH, CHS2, CQS2,&
+!$acc                   USTM, wstar, qstar, ZOL, MOL, RMOL,  &
+!$acc                   HFX, QFX, LH, QSFC, QFLX, HFLX,      &
+!$acc                   T2, TH2, Q2, WSPD, U10, V10,         &
+!$acc                   QGH, psim, psih,                     &
+!$acc                   stress_wat, stress_lnd, stress_ice,  &
+!$acc                   rb_wat,     rb_lnd,     rb_ice,      &
+!$acc                   UST_wat,    UST_lnd,    UST_ice,     &
+!$acc                   ZNT_wat,    ZNT_lnd,    ZNT_ice,     &
+!$acc                   QSFC_lnd,   QSFC_wat,   QSFC_ice,    &
+!$acc                   QFLX_lnd,   QFLX_wat,   QFLX_ice,    &
+!$acc                   HFLX_lnd,   HFLX_wat,   HFLX_ice,    &
+!$acc                   PSIX_wat,   PSIX_lnd,   PSIX_ice,    &
+!$acc                   PSIX10_wat, PSIX10_lnd, PSIX10_ice,  &
+!$acc                   PSIT2_lnd,  PSIT2_wat,  PSIT2_ice,   &
+!$acc                   PSIT_lnd,   PSIT_wat,   PSIT_ice,    &
+!$acc                   ch_lnd,     ch_wat,     ch_ice,      &
+!$acc                   cm_lnd,     cm_wat,     cm_ice,      &
+!$acc                   errmsg)
+
+!$acc exit data delete( flag_iter, dry, wet, icy, dx,         &
+!$acc                   MAVAIL, PBLH, PSFCPA, z0pert, ztpert, &
+!$acc                   QV1D, U1D, V1D, U1D2, V1D2, T1D, P1D, &
+!$acc                   rstoch1D, sigmaf, shdmax, vegtype,    &
+!$acc                   dz2w1d, dz8w1d, snowh_lnd,            &
+!$acc                   tskin_wat, tskin_lnd, tskin_ice,      &
+!$acc                   tsurf_wat, tsurf_lnd, tsurf_ice)
+
+!$acc exit data delete(  ZA,     ZA2,    THV1D,  TH1D,   TC1D,   TV1D,  &
+!$acc                    RHO1D,  QVSH,   PSIH2,  PSIM10, PSIH10, WSPDI, &
+!$acc                    GOVRTH, PSFC,   THCON,                         &
+!$acc                    zratio_lnd,   zratio_ice,   zratio_wat,        &
+!$acc                    TSK_lnd,      TSK_ice,      TSK_wat,           &
+!$acc                    THSK_lnd,     THSK_ice,     THSK_wat,          &
+!$acc                    THVSK_lnd,    THVSK_ice,    THVSK_wat,         &
+!$acc                    GZ1OZ0_lnd,   GZ1OZ0_ice,   GZ1OZ0_wat,        &
+!$acc                    GZ1OZt_lnd,   GZ1OZt_ice,   GZ1OZt_wat,        &
+!$acc                    GZ2OZ0_lnd,   GZ2OZ0_ice,   GZ2OZ0_wat,        &
+!$acc                    GZ2OZt_lnd,   GZ2OZt_ice,   GZ2OZt_wat,        &
+!$acc                    GZ10OZ0_lnd,  GZ10OZ0_ice,  GZ10OZ0_wat,       &
+!$acc                    GZ10OZt_lnd,  GZ10OZt_ice,  GZ10OZt_wat,       &
+!$acc                    ZNTstoch_lnd, ZNTstoch_ice, ZNTstoch_wat,      &
+!$acc                    ZT_lnd,       ZT_ice,       ZT_wat,            &
+!$acc                    ZQ_lnd,       ZQ_ice,       ZQ_wat,            &
+!$acc                    PSIQ_lnd,     PSIQ_ice,     PSIQ_wat,          &
+!$acc                    PSIQ2_lnd,    PSIQ2_ice,    PSIQ2_wat,         &
+!$acc                    QSFCMR_lnd,   QSFCMR_ice,   QSFCMR_wat )
+
 END SUBROUTINE SFCLAY1D_mynn
 !-------------------------------------------------------------------
 !>\ingroup mynn_sfc
@@ -2272,6 +2550,7 @@ END SUBROUTINE SFCLAY1D_mynn
   SUBROUTINE zilitinkevich_1995(Z_0,Zt,Zq,restar,ustar,KARMAN,&
         & landsea,IZ0TLND2,spp_sfc,rstoch)
 
+       !$acc routine seq
        IMPLICIT NONE
        REAL(kind_phys), INTENT(IN)       :: Z_0,restar,ustar,KARMAN,landsea
        INTEGER,  OPTIONAL,   INTENT(IN)  :: IZ0TLND2
@@ -2341,6 +2620,7 @@ END SUBROUTINE SFCLAY1D_mynn
     !This is an update version from Davis et al. 2008, which
     !corrects a small-bias in Z_0 (AHW real-time 2012).
 
+       !$acc routine seq
        IMPLICIT NONE
        REAL(kind_phys), INTENT(IN)  :: ustar
        REAL(kind_phys), INTENT(OUT) :: Z_0
@@ -2368,7 +2648,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !>This formulation for roughness length was designed account for.
 !!wave steepness.
    SUBROUTINE Taylor_Yelland_2001(Z_0,ustar,wsp10)
-
+       !$acc routine seq
        IMPLICIT NONE
        REAL(kind_phys), INTENT(IN)  :: ustar,wsp10
        REAL(kind_phys), INTENT(OUT) :: Z_0
@@ -2396,7 +2676,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !! The Charnock parameter CZC is varied from .011 to .018.
 !! between 10-m wsp = 10 and 18..
    SUBROUTINE charnock_1955(Z_0,ustar,wsp10,visc,zu)
-
+       !$acc routine seq
        IMPLICIT NONE
        REAL(kind_phys), INTENT(IN)  :: ustar, visc, wsp10, zu
        REAL(kind_phys), INTENT(OUT) :: Z_0
@@ -2421,7 +2701,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !!The Charnock parameter CZC is varied from about .005 to .028
 !!between 10-m wind speeds of 6 and 19 m/s.
    SUBROUTINE edson_etal_2013(Z_0,ustar,wsp10,visc,zu)
-
+       !$acc routine seq
        IMPLICIT NONE
        REAL(kind_phys), INTENT(IN)  :: ustar, visc, wsp10, zu
        REAL(kind_phys), INTENT(OUT) :: Z_0
@@ -2450,7 +2730,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !!data. The formula for land uses a constant ratio (Z_0/7.4) taken
 !!from Garratt (1992).
    SUBROUTINE garratt_1992(Zt,Zq,Z_0,Ren,landsea)
-
+       !$acc routine seq
        IMPLICIT NONE
        REAL(kind_phys), INTENT(IN)  :: Ren, Z_0,landsea
        REAL(kind_phys), INTENT(OUT) :: Zt,Zq
@@ -2486,7 +2766,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !!
 !!This is for use over water only.
     SUBROUTINE fairall_etal_2003(Zt,Zq,Ren,ustar,visc,rstoch,spp_sfc)
-
+       !$acc routine seq
        IMPLICIT NONE
        REAL(kind_phys), INTENT(IN)   :: Ren,ustar,visc,rstoch
        INTEGER, INTENT(IN)           :: spp_sfc
@@ -2530,7 +2810,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !! The actual reference is unknown. This was passed along by Jim Edson (personal communication).
 !! This is for use over water only, preferably open ocean.
     SUBROUTINE fairall_etal_2014(Zt,Zq,Ren,ustar,visc,rstoch,spp_sfc)
-
+       !$acc routine seq
        IMPLICIT NONE
        REAL(kind_phys), INTENT(IN)  :: Ren,ustar,visc,rstoch
        INTEGER, INTENT(IN)          :: spp_sfc
@@ -2578,6 +2858,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !!This should only be used over land!
        SUBROUTINE Yang_2008(Z_0,Zt,Zq,ustar,tstar,qst,Ren,visc)
 
+       !$acc routine seq
        IMPLICIT NONE
        REAL(kind_phys), INTENT(IN)  :: Z_0, Ren, ustar, tstar, qst, visc
        REAL(kind_phys) ::      ht,     &! roughness height at critical Reynolds number
@@ -2613,6 +2894,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !>\ingroup mynn_sfc
     SUBROUTINE GFS_z0_lnd(z0max,shdmax,z1,vegtype,ivegsrc,z0pert)
 
+        !$acc routine seq
         REAL(kind_phys), INTENT(OUT)  :: z0max
         REAL(kind_phys), INTENT(IN)   :: shdmax,z1,z0pert
         INTEGER, INTENT(IN)           :: vegtype,ivegsrc
@@ -2673,6 +2955,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !>\ingroup mynn_sfc
     SUBROUTINE GFS_zt_lnd(ztmax,z0max,sigmaf,ztpert,ustar_lnd)
 
+        !$acc routine seq
         REAL(kind_phys), INTENT(OUT)  :: ztmax
         REAL(kind_phys), INTENT(IN)   :: z0max,sigmaf,ztpert,ustar_lnd
         REAL(kind_phys)               :: czilc, tem1, tem2
@@ -2701,6 +2984,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !>\ingroup mynn_sfc
     SUBROUTINE GFS_z0_wat(z0rl_wat,ustar_wat,WSPD,z1,sfc_z0_type,redrag)
 
+        !$acc routine seq
         REAL(kind_phys), INTENT(OUT)  :: z0rl_wat
         REAL(kind_phys), INTENT(INOUT):: ustar_wat
         REAL(kind_phys), INTENT(IN)   :: wspd,z1
@@ -2753,11 +3037,16 @@ END SUBROUTINE SFCLAY1D_mynn
 !--------------------------------------------------------------------
 !>\ingroup mynn_sfc
     SUBROUTINE GFS_zt_wat(ztmax,z0rl_wat,restar,WSPD,z1,sfc_z0_type,errmsg,errflg)
-
+        !$acc routine seq
         real(kind_phys), INTENT(OUT)  :: ztmax
         real(kind_phys), INTENT(IN)   :: wspd,z1,z0rl_wat,restar
         INTEGER, INTENT(IN)           :: sfc_z0_type
+#ifndef _OPENACC
         character(len=*), intent(out) :: errmsg
+#else
+! Necessary since OpenACC does not support assumed-size arrays
+        character(len=200), intent(out) :: errmsg
+#endif
         integer,          intent(out) :: errflg
         real(kind_phys)               :: z0,z0max,wind10m,rat,ustar_wat
         real(kind_phys), PARAMETER    :: charnock = 0.014, z0s_max=.317e-2
@@ -2798,6 +3087,7 @@ END SUBROUTINE SFCLAY1D_mynn
               errflg = 1
               errmsg = 'ERROR(GFS_zt_wat): sfc_z0_type not valid.'
               return
+
             endif
 
     END SUBROUTINE GFS_zt_wat
@@ -2807,6 +3097,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !! Weiguo Wang, 2019-0425
 
       SUBROUTINE znot_m_v6(uref, znotm)
+      !$acc routine seq
       use machine , only : kind_phys
       IMPLICIT NONE
 ! Calculate areodynamical roughness over water with input 10-m wind
@@ -2856,6 +3147,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !!
       SUBROUTINE znot_t_v6(uref, znott)
 
+      !$acc routine seq
       IMPLICIT NONE
 !> Calculate scalar roughness over water with input 10-m wind
 !! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
@@ -2922,6 +3214,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !!
       SUBROUTINE znot_m_v7(uref, znotm)
 
+      !$acc routine seq
       IMPLICIT NONE
 !> Calculate areodynamical roughness over water with input 10-m wind
 !! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
@@ -2971,6 +3264,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !!
       SUBROUTINE znot_t_v7(uref, znott)
 
+      !$acc routine seq
       IMPLICIT NONE
 !> Calculate scalar roughness over water with input 10-m wind
 !! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
@@ -3040,6 +3334,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !! This should only be used over snow/ice!
     SUBROUTINE Andreas_2002(Z_0,bvisc,ustar,Zt,Zq)
 
+       !$acc routine seq
        IMPLICIT NONE
        REAL(kind_phys), INTENT(IN)  :: Z_0, bvisc, ustar
        REAL(kind_phys), INTENT(OUT) :: Zt, Zq
@@ -3313,6 +3608,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !! and Holtslag (1991) for stable conditions.
     SUBROUTINE Li_etal_2010(zL, Rib, zaz0, z0zt)
 
+       !$acc routine seq
        IMPLICIT NONE
        REAL(kind_phys), INTENT(OUT)  :: zL
        REAL(kind_phys), INTENT(IN) :: Rib, zaz0, z0zt
@@ -3471,6 +3767,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
       REAL(kind_phys) function zolrib(ri,za,z0,zt,logz0,logzt,zol1,psi_opt)
 
+      !$acc routine seq
       ! This iterative algorithm to compute z/L from bulk-Ri
 
       IMPLICIT NONE
@@ -3480,7 +3777,7 @@ END SUBROUTINE SFCLAY1D_mynn
       REAL(kind_phys) :: zol20,zol3,zolt,zolold
       INTEGER :: n
       INTEGER, PARAMETER :: nmax = 20
-      REAL(kind_phys), DIMENSION(nmax):: zLhux
+      !REAL(kind_phys), DIMENSION(nmax):: zLhux
       REAL(kind_phys) :: psit2,psix2
 
       !print*,"+++++++INCOMING: z/L=",zol1," ri=",ri
@@ -3522,7 +3819,7 @@ END SUBROUTINE SFCLAY1D_mynn
         endif
         !print*,"n=",n," psit2=",psit2," psix2=",psix2
         zolrib=ri*psix2**2/psit2
-        zLhux(n)=zolrib
+        !zLhux(n)=zolrib
         n=n+1
       enddo
 
@@ -3530,7 +3827,7 @@ END SUBROUTINE SFCLAY1D_mynn
          !print*,"iter FAIL, n=",n," Ri=",ri," z/L=",zolri
          !if convergence fails, use approximate values:
          CALL Li_etal_2010(zolrib, ri, za/z0, z0/zt)
-         zLhux(n)=zolrib
+         !zLhux(n)=zolrib
          !print*,"FAILED, n=",n," Ri=",ri," z0=",z0
          !print*,"z/L=",zLhux(1:nmax)
       else
@@ -3595,6 +3892,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !
 !>\ingroup mynn_sfc
    real(kind_phys) function psim_stable_full(zolf)
+        !$acc routine seq
         real(kind_phys) :: zolf
 
         !psim_stable_full=-6.1*log(zolf+(1+zolf**2.5)**(1./2.5))
@@ -3605,6 +3903,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !>\ingroup mynn_sfc
    real(kind_phys) function psih_stable_full(zolf)
+        !$acc routine seq
         real(kind_phys) :: zolf
 
         !psih_stable_full=-5.3*log(zolf+(1+zolf**1.1)**(1./1.1))
@@ -3615,6 +3914,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !>\ingroup mynn_sfc
    real(kind_phys) function psim_unstable_full(zolf)
+        !$acc routine seq
         real(kind_phys) :: zolf,x,ym,psimc,psimk
 
         x=(1.-16.*zolf)**.25
@@ -3633,6 +3933,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !>\ingroup mynn_sfc
    real(kind_phys) function psih_unstable_full(zolf)
+        !$acc routine seq
         real(kind_phys) :: zolf,y,yh,psihc,psihk
 
         y=(1.-16.*zolf)**.5
@@ -3654,6 +3955,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !>\ingroup mynn_sfc
 !!
    REAL(kind_phys) function psim_stable_full_gfs(zolf)
+        !$acc routine seq
         REAL(kind_phys) :: zolf
         REAL(kind_phys), PARAMETER :: alpha4 = 20.
         REAL(kind_phys) :: aa
@@ -3667,6 +3969,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !>\ingroup mynn_sfc
 !!
    real(kind_phys) function psih_stable_full_gfs(zolf)
+        !$acc routine seq
         real(kind_phys) :: zolf
         real(kind_phys), PARAMETER :: alpha4 = 20.
         real(kind_phys) :: bb
@@ -3680,6 +3983,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !>\ingroup mynn_sfc
 !!
    real(kind_phys) function psim_unstable_full_gfs(zolf)
+        !$acc routine seq
         real(kind_phys) :: zolf
         real(kind_phys) :: hl1,tem1
         real(kind_phys), PARAMETER :: a0=-3.975,  a1=12.32,  &
@@ -3700,6 +4004,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !>\ingroup mynn_sfc
 !!
    real(kind_phys) function psih_unstable_full_gfs(zolf)
+        !$acc routine seq
         real(kind_phys) :: zolf
         real(kind_phys) :: hl1,tem1
         real(kind_phys), PARAMETER :: a0p=-7.941, a1p=24.75, &
@@ -3720,6 +4025,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !>\ingroup mynn_sfc
 !! look-up table functions - or, if beyond -10 < z/L < 10, recalculate
    real(kind_phys) function psim_stable(zolf,psi_opt)
+        !$acc routine seq
         integer :: nzol,psi_opt
         real(kind_phys) :: rzol,zolf
 
@@ -3740,6 +4046,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !>\ingroup mynn_sfc
    real(kind_phys) function psih_stable(zolf,psi_opt)
+        !$acc routine seq
         integer :: nzol,psi_opt
         real(kind_phys) :: rzol,zolf
 
@@ -3760,6 +4067,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !>\ingroup mynn_sfc
    real(kind_phys) function psim_unstable(zolf,psi_opt)
+        !$acc routine seq
         integer :: nzol,psi_opt
         real(kind_phys) :: rzol,zolf
 
@@ -3780,6 +4088,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !>\ingroup mynn_sfc
    real(kind_phys) function psih_unstable(zolf,psi_opt)
+        !$acc routine seq
         integer :: nzol,psi_opt
         real(kind_phys) :: rzol,zolf
 
