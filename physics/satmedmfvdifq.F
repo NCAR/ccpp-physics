@@ -22,7 +22,7 @@
 !! and to reduce the negative wind speed bias in upper troposphere
 !!
 !! Incorporate the LES-based changes for TC simulation
-!! (Chen et al.,2022, https://doi.org/10.1175/WAF-D-21-0168.1)
+!! (Chen et al.,2022 \cite Chen_2022)
 !! with additional improvements on MF working with Cu schemes
 !! Xiaomin Chen, 5/2/2022
 !!
@@ -443,7 +443,9 @@
          endif
       enddo
 !           
-! compute a function for green vegetation fraction and surface roughness
+!>  - Compute a function for green vegetation fraction and surface roughness.
+!! Entrainment rate in updraft is a function of vegetation fraction and surface
+!! roughness length
 !       
       do i = 1,im
         tem = (sigmaf(i) - vegflo) / (vegfup - vegflo)
@@ -745,7 +747,7 @@
         endif
       enddo
 !
-!  compute mean tke within pbl
+!>  - Compute mean tke within pbl
 !
       do i = 1, im
         sumx(i) = 0.
@@ -766,8 +768,8 @@
         endif
       enddo
 !
-!  compute wind shear term as a sink term for updraft and downdraft
-!  velocity
+!>  - Compute wind shear term as a sink term for updraft and downdraft
+!!  velocity
 !
       kps = max(kmpbl, kmscu)
       do k = 2, kps
