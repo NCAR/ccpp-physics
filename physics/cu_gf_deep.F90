@@ -28,6 +28,7 @@ module cu_gf_deep
      integer, parameter :: autoconv=1 !2
      integer, parameter :: aeroevap=1 !3
      real(kind=kind_phys), parameter :: scav_factor = 0.5
+
      real(kind=kind_phys), parameter :: dx_thresh = 6500.
 !> still 16 ensembles for clousres
      integer, parameter:: maxens3=16
