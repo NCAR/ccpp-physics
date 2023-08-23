@@ -324,7 +324,7 @@ contains
        rand_clos(:,:) = 0.
      else 
        do i=1,im
-         spp_wts_cu_deep_tmp=min(max(-1.0, spp_wts_cu_deep(i,1)),1.0)
+         spp_wts_cu_deep_tmp=min(max(-1.0_kind_phys, spp_wts_cu_deep(i,1)),1.0_kind_phys)
          rand_mom(i)    = spp_wts_cu_deep_tmp 
          rand_vmas(i)   = spp_wts_cu_deep_tmp 
          rand_clos(i,:) = spp_wts_cu_deep_tmp
