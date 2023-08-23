@@ -3,8 +3,8 @@
 
 \section RRFS_v1beta_suite_overview Overview
 
-The RRFS_v1beta suite is the primary suite target for the upcoming operational implementation of
-the Rapid Refresh Forecast System (RRFS), which is used in the UFS SRW App.  This suite is most 
+The RRFS_v1beta suite is one of the candidates for the future operational implementation of
+the Rapid Refresh Forecast System (RRFS), which can be configured using the UFS SRW App.  This suite is most 
 applicable for runs at 3-km resolution since it does not parameterize
 deep convection. 
 
