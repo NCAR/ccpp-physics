@@ -2326,7 +2326,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
      real, dimension(its:ite, 1, na) :: xfall
      real, dimension(kts:kte, nproc) :: thproclocal
      integer, parameter :: nor = 0, ng = 0
-     integer :: nx,ny,nz
+     integer :: nx,ny,nz,ngs
      integer ix,jy,kz,i,j,k,il,n
      integer :: infdo
      real :: ssival, ssifac, t8s, t9s, qvapor
@@ -2915,6 +2915,9 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
        
 !      ENDIF ! .false.
  
+
+      ngs = 128
+
       IF ( isedonly /= 1 ) THEN
    ! call nssl_2mom_gs: main gather-scatter routine to calculate microphysics
 
@@ -2939,7 +2942,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
      &   timevtcalc,axtra2d, makediag        &
      &   ,has_wetscav, rainprod2d, evapprod2d  &
      & ,errmsg,errflg &
-     &   ,elec2,its,ids,ide,jds,jde          &
+     &   ,elec2,its,ids,ide,jds,jde,ngs      &
      & )
 
 
@@ -2964,7 +2967,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
      &  ,an,dn1,t77 & 
      &  ,pn,wn & 
      &  ,axtra2d, makediag  &
-     &  ,ssat,t00,t77,flag_qndrop)
+     &  ,ssat,t00,t77,flag_qndrop,ngs)
 
 ! recalculate dn1 after temperature changes 
       DO kz = kts,kte
@@ -8999,7 +9002,7 @@ END SUBROUTINE nssl_2mom_driver
      &  ,an,dn,p2 & 
      &  ,pn,w & 
      &  ,axtra,io_flag &
-     &  ,ssfilt,t00,t77,flag_qndrop  &
+     &  ,ssfilt,t00,t77,flag_qndrop,ngs  &
      & )
 
 
@@ -9064,7 +9067,7 @@ END SUBROUTINE nssl_2mom_driver
       real, parameter :: cwmas20 = 1000.*0.523599*(2.*20.e-6)**3 ! mass of 20-micron radius droplet, for sat. adj.
       integer nxmpb,nzmpb,nxz
       integer mgs,ngs,numgs,inumgs
-      parameter (ngs=500)
+!      parameter (ngs=1 )
       integer ngscnt,igs(ngs),kgs(ngs)
       integer kgsp(ngs),kgsm(ngs)
       integer nsvcnt
@@ -9095,7 +9098,7 @@ END SUBROUTINE nssl_2mom_driver
       integer ifilt   ! =1 to filter ssat, =0 to set ssfilt=ssat
       parameter ( ifilt = 0 ) 
       real temp1,temp2 ! ,ssold
-      real :: ssmax(ngs) = 0.0       ! maximum SS experienced by a parcel
+      real :: ssmax(ngs)       ! maximum SS experienced by a parcel
       real ssmx
       real dnnet,dqnet
 !      real cnu,rnu,snu,cinu
@@ -11598,7 +11601,7 @@ END SUBROUTINE nssl_2mom_driver
      & ,timevtcalc,axtra,io_flag  &
      & , has_wetscav,rainprod2d, evapprod2d &
      & ,errmsg,errflg &
-     & ,elec,its,ids,ide,jds,jde &
+     & ,elec,its,ids,ide,jds,jde,ngs &
      & )
 
 
@@ -11830,7 +11833,7 @@ END SUBROUTINE nssl_2mom_driver
 !
       integer nxmpb,nzmpb,nxz
       integer jgs,mgs,ngs,numgs
-      parameter (ngs=500) !500)
+!      parameter (ngs=1 ) !500)
       integer, parameter :: ngsz = 500
       integer ntt
       parameter (ntt=300)
