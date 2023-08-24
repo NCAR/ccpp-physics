@@ -31,7 +31,7 @@ module mp_nssl
                               con_t0c, con_cliq, con_csol, con_eps,   &
                               imp_physics, imp_physics_nssl,  &
                               nssl_cccn, nssl_alphah, nssl_alphahl, &
-                              nssl_alphar, nssl_ehw0_in, nssl_ehlw0_in,   &
+                              nssl_alphar, nssl_ehw0, nssl_ehlw0,   &
                               nssl_ccn_on, nssl_hail_on, nssl_invertccn, nssl_3moment ) 
                               
 
@@ -53,7 +53,7 @@ module mp_nssl
          integer,                   intent(in)    :: imp_physics
          integer,                   intent(in)    :: imp_physics_nssl
          real(kind_phys),           intent(in)    :: nssl_cccn, nssl_alphah, nssl_alphahl
-         real(kind_phys),           intent(in)    :: nssl_alphar, nssl_ehw0_in, nssl_ehlw0_in 
+         real(kind_phys),           intent(in)    :: nssl_alphar, nssl_ehw0, nssl_ehlw0
          logical,                   intent(in)    :: nssl_ccn_on, nssl_hail_on, nssl_invertccn, nssl_3moment
 
          ! Local variables: dimensions used in nssl_init

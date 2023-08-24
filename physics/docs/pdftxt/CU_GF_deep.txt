@@ -3,44 +3,29 @@
 \section gfcu_descrip  Description
 
 The Grell-Freitas (GF) scheme, as described in Grell and Freitas (2014) \cite grell_and_freitas_2014,
-Freitas et al. (2018) \cite freitas_et_al_2018, Freitas et al. (2021) \cite freitas_et_al_2021, and Lin et al. (2022) 
-(under review) follows the mass flux approach published by Grell (1993) \cite grell_1993.
+Freitas et al. (2018) \cite freitas_et_al_2018, Freitas et al. (2021) \cite freitas_et_al_2021, and Lin et al. (2022) \cite Lin_2022
+follows the mass flux approach published by Grell (1993) \cite grell_1993.
 Further developments by Grell and \f$D\acute{e}v\acute{e}nyi\f$ (2002) \cite Grell_2002 included implementing 
-stochastics through allowing parameter perturbations. In GF1 scale awareness, and the aerosol dependence through rain generation (following
-Berry (1968) \cite berry_1968 and evaporation formulations (following Jiang et al. (2010) \cite Jiang_2010 ), depending on the 
-cloud concentration nuclei at cloud base were added. FG included mixed phase physics impact, momentum transport (as in ECMWF),
- a diurnal cycle closure (Bechtold et al. (2014) \cite bechtold_et_al_2014 ), and a trimodal spectral size to simulate the interaction
-and transition from shallow, congestus and deep convection regimes. In order for this trimodal size spectrum to be
-accurately represented, GF's deep and shallow convective schemes must be run together. 
-The vertical massflux distribution of shallow, congestus and
-deep convection regimes is characterized by Probability Density Functions (PDF's). The three PDF's are meant to represent the average
-statistical mass flux characteristic of deep, congestus, and shallow (respectively) plumes in the grid area. Each PDF therefore represents
-a spectrum of plumes within the grid box. Forcing is different for each characteristic type. Entrainment and detrainment are derived 
-from the PDF's. The deep convection considers scale awareness (Arakawa et al. (2011) \cite Arakawa_2011 ), the congestus type convection 
-as well as the shallow convection are not scale-aware. Aerosol dependence is implemented through dependence of rain generation and 
-evaporation formulations depending on the cloud concentration nuclei at cloud base (Berry 1968 \cite berry_1968, 
-Jiang et al.(2010) \cite Jiang_2010, and Lee and Feingold (2010) \cite lee_and_feingold_2010 ). Aerosol dependence is considered experimental and 
-is turned off at this point. GF is able to transport tracers.
+stochastics through allowing parameter perturbations.
+The GF scheme includes mixed phase physics impact, momentum transport, a diurnal cycle closure (Bechtold et al. (2014) \cite bechtold_et_al_2014 ), and a trimodal spectral size to simulate the interaction and transition from shallow, congestus and deep convection regimes.
+The vertical mass flux distribution of shallow, congestus and deep convection regimes is characterized by Probability Density Functions (PDFs). The three PDFs are meant to represent the average statistical mass flux characteristic of deep, congestus, and shallow (respectively) plumes in the grid area. Each PDF therefore represents a spectrum of plumes within the grid box. Forcing is different for each characteristic type. Entrainment and detrainment are derived from the PDFs. 
+The GF scheme takes into account aerosol dependence (considered experimental and not supported in this release), which is implemented through rain generation (following Berry (1968) \cite berry_1968 and evaporation formulations depending on the cloud concentration nuclei at cloud base (Jiang et al. (2010) \cite Jiang_2010), and Lee and Feingold (2010) \cite lee_and_feingold_2010). Wet scavenging is considered to add a memory impact. GF is able to transport tracers. Recently, GPU capabilities and cap suppressing (\p do_cap_suppress) based on radar data assimilation have been added, and they are used only for the RAP suite.
 
-A paper describing the latest changes and modifications is in process and will be submitted to GMD.
+The impacts of GF scheme in operational RAP/HRRR include: (a)uses mass-flux schemes, which are more physically realistic than (sounding) adjustment schemes;
+(b)takes parameterization uncertainty into account by allowing parameters from multiple convective schemes which can be perturbed 
+internally or with temporal and spatial correlation patterns; (c)for higher resolutions (less than 10 km), in addition to scale awareness as in Arakawa et al. (2011) \cite Arakawa_2011 GF can transition as grid spacing decreases into a shallow convection scheme; (d)Coupled to the grid-scale precipitation and radiation schemes through passing of diagnosed cloud liquid and ice from simulated precipitating convective cloud and shallow convective clouds.
 
 \section version_cugf_enh CCPP Physics Updates
-\version CCPP v6.0.0
 
-- GPU capabilities have been added
-- Cap suppressing (\p do_cap_suppress) based on radar data assimilation has been added. This is used only for the RAP suite
-- Some fixed parameters have been made scale-aware
-- Updated coupling between radiation and convection has been implemented 
+\version UFS-SRW v3.0.0
 
-\b Operational \b Impacts \b in \b RAP/HRRR
+<b>The Implementation of GF in RRFS prototypes</b>
+- Updates for aerosol-awareness (experimental)
+- Scale-awareness is turned off when explicit microphysics is not active anywhere in the column
+- GF is completely turned off at grid points when MYNN produces shallow convection at that point
+- Radar reflectivity considers mass flux PDF as well as whether scale-awareness is turned on at the grid point in equation.
 
-  - Uses mass-flux schemes, which are more physically realistic than (sounding) adjustment schemes
-  - Takes parameterization uncertainty into account by allowing parameters from multiple convective schemes which can be perturbed 
-internally or with temporal and spatial correlation patterns
-  - For higher resolutions (less than 10 km), in addition to scale awareness as in Arakawa et al. (2011) \cite Arakawa_2011 GF can
-transition as grid spacing decreases into a shallow convection scheme
-  - Coupled to the grid scale precipitation and radiation schemes through passing of diagnosed cloud liquid and ice from simulated
-precipitating convective cloud and shallow convective clouds
+<b>The implementation of GF in HAFS is ongoing.</b>
 
 \section intra_rough_gf Intraphysics Communication
 The GF scheme passes cloud hydrometeors to the grid-scale microphysics scheme (\ref THOMPSON ) through detrainment from each 

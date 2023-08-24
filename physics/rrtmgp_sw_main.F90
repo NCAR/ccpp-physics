@@ -20,12 +20,6 @@ module rrtmgp_sw_main
   use rrtmgp_sampling,        only: sampled_mask, draw_samples
   implicit none
 
-  type(ty_gas_concs)          :: gas_concs
-  type(ty_optical_props_2str) :: sw_optical_props_accum, sw_optical_props_aerosol_local,    &
-       sw_optical_props_cloudsByBand, sw_optical_props_cnvcloudsByBand,                     &
-       sw_optical_props_pblcloudsByBand, sw_optical_props_precipByBand,                     &
-       sw_optical_props_clouds
-
   public rrtmgp_sw_main_init, rrtmgp_sw_main_run
 
 contains
@@ -80,30 +74,6 @@ contains
          doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm, mpirank, mpiroot,      &
          errmsg, errflg)
 
-    ! DDTs
-
-    ! ty_gas_concs
-    call check_error_msg('rrtmgp_sw_main_gas_concs_init',gas_concs%init(active_gases_array))
-
-    ! ty_optical_props
-    call check_error_msg('rrtmgp_sw_main_accumulated_optics_init',&
-         sw_optical_props_accum%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props))
-    call check_error_msg('rrtmgp_sw_main_cloud_optics_init',&
-         sw_optical_props_cloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
-    call check_error_msg('rrtmgp_sw_main_precip_optics_init',&
-         sw_optical_props_precipByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
-    call check_error_msg('rrtmgp_sw_mian_cloud_sampling_init', &
-         sw_optical_props_clouds%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props))
-    call check_error_msg('rrtmgp_sw_main_aerosol_optics_init',&
-         sw_optical_props_aerosol_local%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
-    if (doGP_sgs_cnv) then
-       call check_error_msg('rrtmgp_sw_main_cnv_cloud_optics_init',&
-            sw_optical_props_cnvcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
-    endif
-    if (doGP_sgs_pbl) then
-       call check_error_msg('rrtmgp_sw_main_pbl_cloud_optics_init',&
-            sw_optical_props_pblcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
-    endif
   end subroutine rrtmgp_sw_main_init
 
   ! #########################################################################################
@@ -241,11 +211,40 @@ contains
          uvb_bnd       = (/29000,38000/)
     real(kind_phys), dimension(rrtmgp_phys_blksz,sw_gas_props%get_ngpt()) :: toa_src_sw
 
+    type(ty_gas_concs)          :: gas_concs
+    type(ty_optical_props_2str) :: sw_optical_props_accum, sw_optical_props_aerosol_local,    &
+         sw_optical_props_cloudsByBand, sw_optical_props_cnvcloudsByBand,                     &
+         sw_optical_props_pblcloudsByBand, sw_optical_props_precipByBand,                     &
+         sw_optical_props_clouds
+
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
 
     if (.not. doSWrad) return
+
+    ! ty_gas_concs
+    call check_error_msg('rrtmgp_sw_main_gas_concs_init',gas_concs%init(active_gases_array))
+
+    ! ty_optical_props
+    call check_error_msg('rrtmgp_sw_main_accumulated_optics_init',&
+         sw_optical_props_accum%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props))
+    call check_error_msg('rrtmgp_sw_main_cloud_optics_init',&
+         sw_optical_props_cloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+    call check_error_msg('rrtmgp_sw_main_precip_optics_init',&
+         sw_optical_props_precipByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+    call check_error_msg('rrtmgp_sw_mian_cloud_sampling_init', &
+         sw_optical_props_clouds%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props))
+    call check_error_msg('rrtmgp_sw_main_aerosol_optics_init',&
+         sw_optical_props_aerosol_local%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+    if (doGP_sgs_cnv) then
+       call check_error_msg('rrtmgp_sw_main_cnv_cloud_optics_init',&
+            sw_optical_props_cnvcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+    endif
+    if (doGP_sgs_pbl) then
+       call check_error_msg('rrtmgp_sw_main_pbl_cloud_optics_init',&
+            sw_optical_props_pblcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+    endif
 
     if (nDay .gt. 0) then
 

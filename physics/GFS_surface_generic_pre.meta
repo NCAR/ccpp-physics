@@ -50,6 +50,13 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+[scolor]
+  standard_name = soil_color_classification
+  long_name = soil color for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
 [vtype]
   standard_name = vegetation_type_classification
   long_name = vegetation type for lsm
@@ -67,6 +74,13 @@
 [stype_save]
   standard_name = soil_type_classification_save
   long_name = soil type for lsm save
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = out
+[scolor_save]
+  standard_name = soil_color_classification_save
+  long_name = soil color for lsm save
   units = index
   dimensions = (horizontal_dimension)
   type = integer
@@ -162,6 +176,13 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
+[scolor]
+  standard_name = soil_color_classification
+  long_name = soil color for lsm
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = inout
 [vtype]
   standard_name = vegetation_type_classification
   long_name = vegetation type for lsm
@@ -186,6 +207,13 @@
 [stype_save]
   standard_name = soil_type_classification_save
   long_name = soil type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+[scolor_save]
+  standard_name = soil_color_classification_save
+  long_name = soil color for lsm save
   units = index
   dimensions = (horizontal_loop_extent)
   type = integer

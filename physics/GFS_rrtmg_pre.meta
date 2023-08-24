@@ -79,9 +79,9 @@
   dimensions = ()
   type = integer
   intent = in
-[imfdeepcnv_unified]
-  standard_name = identifier_for_unified_deep_convection
-  long_name = flag for Unified deep convection scheme
+[imfdeepcnv_c3]
+  standard_name = identifier_for_c3_deep_convection
+  long_name = flag for C3 deep convection scheme
   units = flag
   dimensions = ()
   type = integer
@@ -1465,6 +1465,13 @@
   units = flag
   dimensions = ()
   type = integer
+  intent = in
+[rrfs_sd]
+  standard_name = do_smoke_coupling
+  long_name = flag controlling rrfs_sd collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [aero_dir_fdb]
   standard_name = do_smoke_aerosol_direct_feedback
