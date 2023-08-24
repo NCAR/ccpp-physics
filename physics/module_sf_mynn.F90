@@ -345,12 +345,7 @@ CONTAINS
      &                     qsfc_wat,  qsfc_lnd,  qsfc_ice
 
 ! CCPP error handling
-#ifndef _OPENACC
       character(len=*), intent(inout) :: errmsg
-#else
-!Necessary since OpenACC does not support assumed-size arrays
-      character(len=200), intent(inout) :: errmsg
-#endif
       integer,          intent(inout) :: errflg
 
 !ADDITIONAL OUTPUT
@@ -378,7 +373,7 @@ CONTAINS
       errmsg = ''
 
 !$acc enter data copyin( dz8w,U3D,V3D,QV3D,QC3D,P3D,T3D,       &
-!$acc                       pattern_spp_sfc, errmsg)
+!$acc                       pattern_spp_sfc)
 
 !$acc enter data copyin( UST_WAT(:), UST_LND(:),  UST_ICE(:),     &
 !$acc                    MOL(:),     QFLX(:),     HFLX(:),        &
@@ -504,7 +499,7 @@ CONTAINS
 !$acc exit data copyout( UST_WAT(:), UST_LND(:),  UST_ICE(:),   &
 !$acc                    MOL(:),     QFLX(:),     HFLX(:),      &
 !$acc                    QSFC(:),    QSFC_WAT(:), QSFC_LND(:),  &
-!$acc                    QSFC_ICE(:), errmsg)
+!$acc                    QSFC_ICE(:))
 
 !$acc exit data delete( dz8w1d(:),   dz2w1d(:),   U1D(:),       &
 !$acc                   V1D(:),      U1D2(:),     V1D2(:),      &
@@ -666,13 +661,24 @@ CONTAINS
 !JOE-end
 
 ! CCPP error handling
-#ifndef _OPENACC
       character(len=*), intent(inout) :: errmsg
-#else
-! Necessary since OpenACC does not support assumed-size arrays
-      character(len=200), intent(inout) :: errmsg
-#endif
       integer,          intent(inout) :: errflg
+
+! Local fixed-size errmsg character array for error messages on accelerator
+! devices distinct from the host (e.g. GPUs). Necessary since OpenACC does
+! not support assumed-size (len=*) arrays like errmsg. Additional
+! device_errflg integer to denote when device_errmsg needs to be synced
+! with errmsg.
+      character(len=512) :: device_errmsg
+      integer            :: device_errflg
+
+! Special versions of the fixed-size errmsg character array for error messages
+! on the device and it's errflag counterpart. These are necessary to ensure
+! the return statements at lines 1417 and 2030 are executed only for this
+! special case, and not any and all error messages set on the device.
+      character(len=512) :: device_special_errmsg
+      integer            :: device_special_errflg
+
 
 !----------------------------------------------------------------
 ! LOCAL VARS
@@ -723,6 +729,10 @@ CONTAINS
       ! Initialize error-handling
       errflg = 0
       errmsg = ''
+      device_errflg = errflg
+      device_errmsg = errmsg
+      device_special_errflg = errflg
+      device_special_errmsg = errmsg
 !-------------------------------------------------------------------
 !$acc update device(psim_stab, psim_unstab, psih_stab, psih_unstab)
 
@@ -770,7 +780,9 @@ CONTAINS
 !$acc                   PSIT_lnd, PSIT_wat, PSIT_ice, &
 !$acc                   ch_lnd, ch_wat, ch_ice, &
 !$acc                   cm_lnd, cm_wat, cm_ice, &
-!$acc                   snowh_lnd, errmsg)
+!$acc                   snowh_lnd, &
+!$acc                   device_errmsg, device_errflg, &
+!$acc                   device_special_errmsg, device_special_errflg)
 
 !$acc parallel loop present(PSFCPA, PSFC, QSFC, T1D, flag_iter,               &
 !$acc                       QSFC_wat, QSFCMR_wat, wet, TSK_wat, tskin_wat,    &
@@ -1198,7 +1210,9 @@ CONTAINS
 !--------------------------------------------------------------------
 !--------------------------------------------------------------------
 
-!$acc parallel loop present(flag_iter, errmsg, &
+!$acc parallel loop present(flag_iter, &
+!$acc                    device_errmsg, device_errflg, &
+!$acc                    device_special_errmsg, device_special_errflg, &
 !$acc                    wet, dry, icy, &
 !$acc                    ZT_wat, ZT_lnd, ZT_ice, &
 !$acc                    ZNT_wat, ZNT_lnd, ZNT_ice, &
@@ -1330,7 +1344,7 @@ CONTAINS
              ENDIF
           ELSEIF ( ISFTCFLX .EQ. 4 ) THEN
              !GFS zt formulation
-             CALL GFS_zt_wat(ZT_wat(i),ZNTstoch_wat(i),restar,WSPD(i),ZA(i),sfc_z0_type,errmsg,errflg)
+             CALL GFS_zt_wat(ZT_wat(i),ZNTstoch_wat(i),restar,WSPD(i),ZA(i),sfc_z0_type,device_errmsg,device_errflg)
              ZQ_wat(i)=ZT_wat(i)
           ENDIF
        ELSE
@@ -1392,10 +1406,14 @@ CONTAINS
              ELSEIF ( IZ0TLND .EQ. 2 ) THEN
                 ! DH note - at this point, qstar is either not initialized
                 ! or initialized to zero, but certainly not set correctly
-                errmsg = 'Logic error: qstar is not set correctly when calling Yang_2008'
-                errflg = 1
+                device_special_errmsg = 'Logic error: qstar is not set correctly when calling Yang_2008'
+                device_special_errflg = 1
 #ifndef _OPENACC
 ! Necessary since OpenACC does not support branching in parallel code
+! Must sync errmsg and errflg with device_errmsg and device_errflg, respectively
+! so that proper error message and error flag codes are returned.
+                errmsg = device_special_errmsg
+                errflg = device_special_errflg
                 return
 #endif
                 CALL Yang_2008(ZNTSTOCH_lnd(i),ZT_lnd(i),ZQ_lnd(i),UST_lnd(i),MOL(I),&
@@ -2001,8 +2019,14 @@ CONTAINS
  ENDDO   ! end i-loop
 
 #ifdef _OPENACC
- ! Necessary since OpenACC does not support branching in parallel code
- IF (errflg == 1) THEN
+! Necessary since OpenACC does not support branching in parallel code.
+! Must sync host errflg, errmsg to determine if return must be triggered
+! and correct error message and error flag code returned.
+! This code is being executed on the HOST side only, pulling data from DEVICE.
+!$acc exit data copyout(device_special_errflg, device_special_errmsg)
+ IF (device_special_errflg /= 0) THEN
+    errflg = device_special_errflg
+    errmsg = device_special_errmsg
     return
  ENDIF
 #endif
@@ -2506,7 +2530,13 @@ IF ( debug_code == 2) THEN
 !$acc                   PSIT_lnd,   PSIT_wat,   PSIT_ice,    &
 !$acc                   ch_lnd,     ch_wat,     ch_ice,      &
 !$acc                   cm_lnd,     cm_wat,     cm_ice,      &
-!$acc                   errmsg)
+!$acc                   device_errmsg, device_errflg)
+
+! Final sync of device and host error flags and messages
+IF (device_errflg /= 0) THEN
+    errflg = device_errflg
+    errmsg = device_errmsg
+ENDIF
 
 !$acc exit data delete( flag_iter, dry, wet, icy, dx,         &
 !$acc                   MAVAIL, PBLH, PSFCPA, z0pert, ztpert, &
@@ -3036,24 +3066,27 @@ END SUBROUTINE SFCLAY1D_mynn
     END SUBROUTINE GFS_z0_wat
 !--------------------------------------------------------------------
 !>\ingroup mynn_sfc
-    SUBROUTINE GFS_zt_wat(ztmax,z0rl_wat,restar,WSPD,z1,sfc_z0_type,errmsg,errflg)
+    SUBROUTINE GFS_zt_wat(ztmax,z0rl_wat,restar,WSPD,z1,sfc_z0_type,device_errmsg,device_errflg)
         !$acc routine seq
         real(kind_phys), INTENT(OUT)  :: ztmax
         real(kind_phys), INTENT(IN)   :: wspd,z1,z0rl_wat,restar
         INTEGER, INTENT(IN)           :: sfc_z0_type
-#ifndef _OPENACC
-        character(len=*), intent(out) :: errmsg
-#else
-! Necessary since OpenACC does not support assumed-size arrays
-        character(len=200), intent(out) :: errmsg
-#endif
-        integer,          intent(out) :: errflg
+
+! Using device_errmsg and device_errflg rather than the CCPP errmsg and errflg
+! so that this subroutine can be run on an accelerator device with OpenACC.
+!        character(len=*), intent(out) :: errmsg
+!        integer,          intent(out) :: errflg
+        character(len=512), intent(out) :: device_errmsg
+        integer,            intent(out) :: device_errflg
+
         real(kind_phys)               :: z0,z0max,wind10m,rat,ustar_wat
         real(kind_phys), PARAMETER    :: charnock = 0.014, z0s_max=.317e-2
 
         ! Initialize error-handling
-        errflg = 0
-        errmsg = ''
+!        errflg = 0
+!        errmsg = ''
+        device_errflg = 0
+        device_errmsg = ''
 
 !            z0           = 0.01 * z0rl_wat
 !Already converted to meters in the wrapper
@@ -3084,8 +3117,10 @@ END SUBROUTINE SFCLAY1D_mynn
               call znot_t_v7(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
             else if (sfc_z0_type > 0) then
               write(0,*)'no option for sfc_z0_type=',sfc_z0_type
-              errflg = 1
-              errmsg = 'ERROR(GFS_zt_wat): sfc_z0_type not valid.'
+!              errflg = 1
+!              errmsg = 'ERROR(GFS_zt_wat): sfc_z0_type not valid.'
+              device_errflg = 1
+              device_errmsg = 'ERROR(GFS_zt_wat): sfc_z0_type not valid.'
               return
 
             endif
