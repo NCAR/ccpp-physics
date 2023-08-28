@@ -25,9 +25,9 @@ National Centers for Environmental Prediction (NCEP) in 2021. The GFS_v16 suite 
 
 \section gfs16_nml_opt_des Namelist 
 \ref GFDL_cloud namelist options 
-\snippet RE210/FV3_GFS_v16_input.nml GFDL_CLOUD_MP_NML
+\snippet RE300/FV3_GFS_v16_input.nml GFDL_CLOUD_MP_NML
 Other namelist options
-\snippet RE210/FV3_GFS_v16_input.nml GFS_PHYSICS_NML
+\snippet RE300/FV3_GFS_v16_input.nml GFS_PHYSICS_NML
 
 - nstf_name = \f$[2,0,0,0,0]^1 [2,1,0,0,0]^2\f$
  - \f$^1\f$ NSST is on and coupled with spin up off

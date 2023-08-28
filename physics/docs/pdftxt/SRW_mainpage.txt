@@ -1,15 +1,23 @@
 /**
 \mainpage Introduction 
 
-Welcome to the scientific documentation for the physical parameterizations available in the  <a href="https://ufscommunity.org/about/what-is-ufs/">Unified Forecast System (UFS)</a> Short-Range Weather (SRW) Application version 2.1.0 (available through https://github.com/ufs-community/ufs-srweather-app/) and the suites that can be configured using them. The SRW app targets predictions of atmospheric behavior on a 
+Welcome to the scientific documentation for the physical parameterizations available in the  <a href="https://ufscommunity.org/about/what-is-ufs/">Unified Forecast System (UFS)</a> Short-Range Weather (SRW) Application version 3.0.0 (available through https://github.com/ufs-community/ufs-srweather-app/) and the suites that can be configured using them. The SRW App targets predictions of atmospheric behavior on a 
 limited spatial domain and on time scales from less than an hour out to several days. 
 
-The CCPP parameterizations are aggregated in suites by the host models. In this release, the UFS Short-Range Weather Application 2.1.0 
+The CCPP parameterizations are aggregated in suites by the host models. In this release, the UFS Short-Range Weather Application 3.0.0 
 supports suites:
 - \ref GFS_v16_page
 - \ref HRRR_suite_page
 - \ref RRFS_v1beta_page 
 - \ref WoFS_v0_page
+- \ref rap_suite_page
 
+\attention <b>Important note:</b><br>All supported suites are a recent snapshot of <a href="https://github.com/ufs-community/ccpp-physics"> 
+the UFS fork for CCPP </a>. In this regard, they may differ substantially from the suites used in operational models. For example, the GFS_v16 Suite is 
+not the same code as in the operational GFS v16. While the suite is nominally the same, using the same schemes as the operational version, most
+of the individual physics schemes hosted in the CCPP repository have changed, including new development and bug fixes compared to the versions included
+in GFS version 16.0, which was released on 22 March 2021. 
+This implication should be also applied to all other suites: RAP/HRRR suites in this release do not correspond directly to the
+the evolving version of the RAP/HRRR physics in operations. 
 
 */
