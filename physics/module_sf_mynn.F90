@@ -780,11 +780,11 @@ CONTAINS
 !$acc                   PSIT_lnd, PSIT_wat, PSIT_ice, &
 !$acc                   ch_lnd, ch_wat, ch_ice, &
 !$acc                   cm_lnd, cm_wat, cm_ice, &
-!$acc                   snowh_lnd, &
+!$acc                   snowh_lnd, snowh_wat, snowh_ice, &
 !$acc                   device_errmsg, device_errflg, &
 !$acc                   device_special_errmsg, device_special_errflg)
 
-!$acc parallel loop present(PSFCPA, PSFC, QSFC, T1D, flag_iter,               &
+!$acc parallel loop present(PSFCPA, PSFC, QSFC, T1D, flag_iter, tsurf_lnd,    &
 !$acc                       QSFC_wat, QSFCMR_wat, wet, TSK_wat, tskin_wat,    &
 !$acc                       QSFC_lnd, QSFCMR_lnd, dry, TSK_lnd, tskin_lnd,    &
 !$acc                       QSFC_ice, QSFCMR_ice, icy, TSK_ice, tskin_ice)
@@ -809,9 +809,7 @@ CONTAINS
                ENDIF
                QSFC_wat(I)=EP2*E1/(PSFC(I)-ep3*E1)             !specific humidity
                QSFCMR_wat(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio
-#ifndef _OPENACC
                IF(QSFC_wat(I)>1..or.QSFC_wat(I)<0.) print *,' QSFC_wat(I)',itimestep,i,QSFC_wat(I),TSK_wat(i)
-#endif
             ENDIF
             IF (dry(i)) THEN
               TSK_lnd(I) = tskin_lnd(i)
@@ -831,9 +829,7 @@ CONTAINS
                  QSFC_lnd(I)=0.5*(QSFC_lnd(I) + QSFC(I))
                  QSFCMR_lnd(I)=QSFC_lnd(I)/(1.-QSFC_lnd(I))       !mixing ratio
               endif ! lsm
-#ifndef _OPENACC
               IF(QSFC_lnd(I)>1..or.QSFC_lnd(I)<0.) print *,' QSFC_lnd(I)',itimestep,i,QSFC_lnd(I),Tskin_lnd(i),tsurf_lnd(i),qsfc(i)
-#endif
             ENDIF
             IF (icy(i)) THEN
               TSK_ice(I) = tskin_ice(i)
@@ -851,9 +847,7 @@ CONTAINS
                  QSFC_ice(I)=EP2*E1/(PSFC(I)-ep3*E1)             !specific humidity
                  QSFCMR_ice(I)=EP2*E1/(PSFC(I)-E1)                !mixing ratio
               endif ! lsm
-#ifndef _OPENACC
               IF(QSFC_ice(I)>1..or.QSFC_ice(I)<0.) print *,' QSFC_ice(I)',itimestep,i,QSFC_ice(I),TSK_ice(i)
-#endif
             ENDIF
 
          ELSE
@@ -906,7 +900,10 @@ CONTAINS
        endif ! flag_iter
       ENDDO
 
-#ifndef _OPENACC
+!$acc serial present(pblh, PSFCPA, dz8w1d, qflx, hflx,                       &
+!$acc      dry, tskin_lnd, tsurf_lnd, qsfc_lnd, znt_lnd, ust_lnd, snowh_lnd, &
+!$acc      icy, tskin_ice, tsurf_ice, qsfc_ice, znt_ice, ust_ice, snowh_ice, &
+!$acc      wet, tskin_wat, tsurf_wat, qsfc_wat, znt_wat, ust_wat, snowh_wat)
       IF (debug_code >= 1) THEN
         write(0,*)"ITIMESTEP=",ITIMESTEP," iter=",iter
         DO I=its,ite
@@ -931,12 +928,12 @@ CONTAINS
            ENDIF
         ENDDO
       ENDIF
-#endif
+!$acc end serial
 
 !$acc parallel loop present(PSFC, PSFCPA, QVSH, QV1D, THCON, flag_iter,        &
 !$acc       dry, tskin_lnd, TSK_lnd, tsurf_lnd, THSK_lnd, THVSK_lnd, qsfc_lnd, &
 !$acc       icy, tskin_ice, TSK_ice, tsurf_ice, THSK_ice, THVSK_ice, qsfc_ice, &
-!$acc       wet, tskin_wat, TSK_wat, tsurf_wat, THSK_wat, THVSK_wat)
+!$acc       wet, tskin_wat, TSK_wat, tsurf_wat, THSK_wat, THVSK_wat, qsfc_wat)
       DO I=its,ite
          ! PSFC ( in cmb) is used later in saturation checks
          PSFC(I)=PSFCPA(I)/1000.
@@ -950,10 +947,8 @@ CONTAINS
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_lnd(I) = TSK_lnd(I)*THCON(I)   !(K)
            THVSK_lnd(I) = THSK_lnd(I)*(1.+EP1*qsfc_lnd(I))
-#ifndef _OPENACC
            if(THVSK_lnd(I) < 170. .or. THVSK_lnd(I) > 360.) &
            print *,'THVSK_lnd(I)',itimestep,i,THVSK_lnd(I),THSK_lnd(i),tsurf_lnd(i),tskin_lnd(i),qsfc_lnd(i)
-#endif
          endif
          if(icy(i)) then
            TSK_ice(I) = tskin_ice(i)
@@ -961,10 +956,8 @@ CONTAINS
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_ice(I) = TSK_ice(I)*THCON(I)   !(K)
            THVSK_ice(I) = THSK_ice(I)*(1.+EP1*qsfc_ice(I))   !(K)
-#ifndef _OPENACC
            if(THVSK_ice(I) < 170. .or. THVSK_ice(I) > 360.) &
            print *,'THVSK_ice(I)',itimestep,i,THVSK_ice(I),THSK_ice(i),tsurf_ice(i),tskin_ice(i),qsfc_ice(i)
-#endif
          endif
          if(wet(i)) then
            TSK_wat(I) = tskin_wat(i)
@@ -972,10 +965,8 @@ CONTAINS
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_wat(I) = TSK_wat(I)*THCON(I)   !(K)
            THVSK_wat(I) = THSK_wat(I)*(1.+EP1*QVSH(I))   !(K)
-#ifndef _OPENACC
            if(THVSK_wat(I) < 170. .or. THVSK_wat(I) > 360.) &
            print *,'THVSK_wat(I)',i,THVSK_wat(I),THSK_wat(i),tsurf_wat(i),tskin_wat(i),qsfc_wat(i)
-#endif
          endif
         endif ! flag_iter
       ENDDO
@@ -1009,7 +1000,10 @@ CONTAINS
          HFX(i)=HFLX(i)*RHO1D(I)*cp
       ENDDO
 
-#ifndef _OPENACC
+!$acc serial present(THV1D, TV1D, RHO1D, GOVRTH, &
+!$acc                dry, tsk_lnd, thvsk_lnd,    &
+!$acc                icy, tsk_ice, thvsk_ice,    &
+!$acc                wet, tsk_wat, thvsk_wat)
       IF (debug_code ==2) THEN
         !write(*,*)"ITIMESTEP=",ITIMESTEP
         DO I=its,ite
@@ -1022,7 +1016,7 @@ CONTAINS
           write(*,*)"RHO1D=", RHO1D(i)," GOVRTH=",GOVRTH(i)
         ENDDO
       ENDIF
-#endif
+!$acc end serial
 
 !$acc parallel loop present(T1D,P1D,QGH,QV1D,CPM)
       DO I=its,ite
@@ -1042,7 +1036,10 @@ CONTAINS
          CPM(I)=CP*(1.+0.84*QV1D(I))
       ENDDO
 
-#ifndef _OPENACC
+!$acc serial present(QGH,                       &
+!$acc                wet, QSFC_wat, QSFCMR_wat, &
+!$acc                dry, QSFC_lnd, QSFCMR_lnd, &
+!$acc                icy, QSFC_ice, QSFCMR_ice)
       IF (debug_code == 2) THEN
          write(*,*)"ITIMESTEP=",ITIMESTEP
          DO I=its,ite
@@ -1060,7 +1057,7 @@ CONTAINS
             endif
          ENDDO
       ENDIF
-#endif
+!$acc end serial
 
 !$acc parallel loop present(flag_iter,U1D,V1D,WSPD,wet,dry,icy,    &
 !$acc                    THV1D,THVSK_wat,THVSK_lnd,THVSK_ice,   &
@@ -1182,7 +1179,6 @@ CONTAINS
          WSPD(I) = MAX(WSPD_ice,WSPD_wat)
          WSPD(I) = MAX(WSPD_lnd,WSPD(I))
 
-#ifndef _OPENACC
          IF (debug_code == 2) THEN
             write(*,*)"===== After rb calc in mynn sfc layer:"
             write(*,*)"ITIMESTEP=",ITIMESTEP
@@ -1191,7 +1187,6 @@ CONTAINS
             IF (wet(i))write(*,*)"rb_wat=", rb_wat(I)," DTHVDZ=",DTHVDZ
             IF (dry(i))write(*,*)"rb_lnd=", rb_lnd(I)," DTHVDZ=",DTHVDZ
          ENDIF
-#endif
 
          ! IF PREVIOUSLY UNSTABLE, DO NOT LET INTO REGIMES 1 AND 2 (STABLE)
          !if (itimestep .GT. 1) THEN
@@ -1210,7 +1205,7 @@ CONTAINS
 !--------------------------------------------------------------------
 !--------------------------------------------------------------------
 
-!$acc parallel loop present(flag_iter, &
+!$acc parallel loop present(flag_iter, PSFCPA, dz8w1d, pblh, &
 !$acc                    device_errmsg, device_errflg, &
 !$acc                    device_special_errmsg, device_special_errflg, &
 !$acc                    wet, dry, icy, &
@@ -1219,8 +1214,10 @@ CONTAINS
 !$acc                    ZNTstoch_wat, ZNTstoch_lnd, ZNTstoch_ice, &
 !$acc                    UST_wat, UST_lnd, UST_ice, &
 !$acc                    ZQ_wat, ZQ_lnd, ZQ_ice, &
-!$acc                    snowh_lnd, &
+!$acc                    snowh_wat, snowh_lnd, snowh_ice, &
 !$acc                    THVSK_wat, THVSK_lnd, THVSK_ice, &
+!$acc                    tskin_wat, tskin_lnd, tskin_ice, &
+!$acc                    tsurf_wat, tsurf_lnd, tsurf_ice, &
 !$acc                    qsfc_wat, qsfc_lnd, qsfc_ice, &
 !$acc                    GZ1OZ0_wat, GZ1OZt_wat, GZ2OZ0_wat, GZ2OZt_wat, GZ10OZ0_wat, GZ10OZt_wat, &
 !$acc                    GZ1OZ0_lnd, GZ1OZt_lnd, GZ2OZ0_lnd, GZ2OZt_lnd, GZ10OZ0_lnd, GZ10OZt_lnd, &
@@ -1228,12 +1225,14 @@ CONTAINS
 !$acc                    zratio_wat, zratio_lnd, zratio_ice, &
 !$acc                    stress_wat, stress_lnd, stress_ice, &
 !$acc                    rb_wat, rb_lnd, rb_ice, &
+!$acc                    qflx, qflx_lnd, &
+!$acc                    hflx, hflx_lnd, &
 !$acc                    psim, psih, psim10, psih10, psih2, &
 !$acc                    psix_wat, psix10_wat, psit_wat, psit2_wat, psiq_wat, psiq2_wat, &
 !$acc                    psix_lnd, psix10_lnd, psit_lnd, psit2_lnd, psiq_lnd, psiq2_lnd, &
 !$acc                    psix_ice, psix10_ice, psit_ice, psit2_ice, psiq_ice, psiq2_ice, &
 !$acc                    WSPD, WSPDI, U1D, V1D, TC1D, THV1D, rstoch1D, USTM, ZA, ZOL, QVSH, &
-!$acc                    shdmax, vegtype, z0pert, ztpert, mol, rmol, qstar, sigmaf)
+!$acc                    shdmax, vegtype, z0pert, ztpert, mol, rmol, wstar, qstar, sigmaf)
 
  DO I=its,ite
    if( flag_iter(i) ) then
@@ -1250,12 +1249,12 @@ CONTAINS
        if (sfc_z0_type >= 0) then ! Avoid calculation is using wave model
           ! CALCULATE z0 (znt)
           !--------------------------------------
-#ifndef _OPENACC
+
           IF (debug_code == 2) THEN
             write(*,*)"=============Input to ZNT over water:"
             write(*,*)"u*:",UST_wat(i)," wspd=",WSPD(i)," visc=",visc," za=",ZA(I)
           ENDIF
-#endif
+
           IF ( PRESENT(ISFTCFLX) ) THEN
              IF ( ISFTCFLX .EQ. 0 ) THEN
                 IF (COARE_OPT .EQ. 3.0) THEN
@@ -1292,12 +1291,10 @@ CONTAINS
           ZNTstoch_wat(I)  = ZNT_wat(I)
        endif
 
-#ifndef _OPENACC
        IF (debug_code > 1) THEN
           write(*,*)"==========Output ZNT over water:"
           write(*,*)"ZNT:",ZNTstoch_wat(i)
        ENDIF
-#endif
 
        !COMPUTE ROUGHNESS REYNOLDS NUMBER (restar) USING NEW ZNT
        ! AHW: Garrattt formula: Calculate roughness Reynolds number
@@ -1308,12 +1305,10 @@ CONTAINS
        !--------------------------------------
        !CALCULATE z_t and z_q
        !--------------------------------------
-#ifndef _OPENACC
        IF (debug_code > 1) THEN
           write(*,*)"=============Input to ZT over water:"
           write(*,*)"u*:",UST_wat(i)," restar=",restar," visc=",visc
        ENDIF
-#endif
 
        IF ( PRESENT(ISFTCFLX) ) THEN
           IF ( ISFTCFLX .EQ. 0 ) THEN
@@ -1357,12 +1352,11 @@ CONTAINS
                                     rstoch1D(i),spp_sfc)
           ENDIF
        ENDIF
-#ifndef _OPENACC
+
        IF (debug_code > 1) THEN
          write(*,*)"=============Output ZT & ZQ over water:"
          write(*,*)"ZT:",ZT_wat(i)," ZQ:",ZQ_wat(i)
        ENDIF
-#endif
 
        GZ1OZ0_wat(I)= LOG((ZA(I)+ZNTstoch_wat(I))/ZNTstoch_wat(I))
        GZ1OZt_wat(I)= LOG((ZA(I)+ZNTstoch_wat(i))/ZT_wat(i))
@@ -1433,7 +1427,6 @@ CONTAINS
           ENDIF
        ENDIF
 
-#ifndef _OPENACC
        IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN
          write(0,*)"===(land) capture bad input in mynn sfc layer, i=:",i
          write(0,*)" ZNT=", ZNTstoch_lnd(i)," ZT=",Zt_lnd(i)
@@ -1442,7 +1435,6 @@ CONTAINS
          " ust=", ust_lnd(i)," snowh=", snowh_lnd(i),"psfcpa=",PSFCPA(i), &
          " dz=",dz8w1d(i)," qflx=",qflx_lnd(i)," hflx=",hflx_lnd(i)," hpbl=",pblh(i)
        ENDIF
-#endif
 
        GZ1OZ0_lnd(I)= LOG((ZA(I)+ZNTstoch_lnd(I))/ZNTstoch_lnd(I))
        GZ1OZt_lnd(I)= LOG((ZA(I)+ZNTstoch_lnd(i))/ZT_lnd(i))
@@ -1508,7 +1500,6 @@ CONTAINS
              ZOL(I)=MAX(ZOL(I),0.0_kind_phys)
              ZOL(I)=MIN(ZOL(I),20._kind_phys)
 
-#ifndef _OPENACC
              IF (debug_code >= 1) THEN
                IF (ZNTstoch_wat(i) < 1E-8 .OR. Zt_wat(i) < 1E-10) THEN
                  write(0,*)"===(wet) capture bad input in mynn sfc layer, i=:",i
@@ -1519,7 +1510,6 @@ CONTAINS
                  " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
                ENDIF
              ENDIF
-#endif
 
              !Use Pedros iterative function to find z/L
              !zol(I)=zolri(rb_wat(I),ZA(I),ZNTstoch_wat(I),ZT_wat(I),ZOL(I),psi_opt)
@@ -1577,7 +1567,6 @@ CONTAINS
              ZOL(I)=MAX(ZOL(I),-20.0_kind_phys)
              ZOL(I)=MIN(ZOL(I),0.0_kind_phys)
 
-#ifndef _OPENACC
              IF (debug_code >= 1) THEN
                IF (ZNTstoch_wat(i) < 1E-8 .OR. Zt_wat(i) < 1E-10) THEN
                  write(0,*)"===(wet) capture bad input in mynn sfc layer, i=:",i
@@ -1588,7 +1577,6 @@ CONTAINS
                  " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
                ENDIF
              ENDIF
-#endif
 
              !Use Pedros iterative function to find z/L
              !zol(I)=zolri(rb_wat(I),ZA(I),ZNTstoch_wat(I),ZT_wat(I),ZOL(I),psi_opt)
@@ -1649,7 +1637,6 @@ CONTAINS
              ZOL(I)=MAX(ZOL(I),0.0_kind_phys)
              ZOL(I)=MIN(ZOL(I),20._kind_phys)
 
-#ifndef _OPENACC
              IF (debug_code >= 1) THEN
                IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN
                  write(0,*)"===(land) capture bad input in mynn sfc layer, i=:",i
@@ -1660,7 +1647,6 @@ CONTAINS
                  " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
                ENDIF
              ENDIF
-#endif
 
              !Use Pedros iterative function to find z/L
              !zol(I)=zolri(rb_lnd(I),ZA(I),ZNTstoch_lnd(I),ZT_lnd(I),ZOL(I),psi_opt)
@@ -1717,7 +1703,6 @@ CONTAINS
              ZOL(I)=MAX(ZOL(I),-20.0_kind_phys)
              ZOL(I)=MIN(ZOL(I),0.0_kind_phys)
 
-#ifndef _OPENACC
              IF (debug_code >= 1) THEN
                IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN
                  write(0,*)"===(land) capture bad input in mynn sfc layer, i=:",i
@@ -1728,7 +1713,6 @@ CONTAINS
                  " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
                ENDIF
              ENDIF
-#endif
 
              !Use Pedros iterative function to find z/L
              !zol(I)=zolri(rb_lnd(I),ZA(I),ZNTstoch_lnd(I),ZT_lnd(I),ZOL(I),psi_opt)
@@ -1788,7 +1772,6 @@ CONTAINS
              ZOL(I)=MAX(ZOL(I),0.0_kind_phys)
              ZOL(I)=MIN(ZOL(I),20._kind_phys)
 
-#ifndef _OPENACC
              IF (debug_code >= 1) THEN
                IF (ZNTstoch_ice(i) < 1E-8 .OR. Zt_ice(i) < 1E-10) THEN
                  write(0,*)"===(ice) capture bad input in mynn sfc layer, i=:",i
@@ -1799,7 +1782,6 @@ CONTAINS
                  " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
                ENDIF
              ENDIF
-#endif
 
              !Use Pedros iterative function to find z/L
              !zol(I)=zolri(rb_ice(I),ZA(I),ZNTstoch_ice(I),ZT_ice(I),ZOL(I),psi_opt)
@@ -1856,7 +1838,6 @@ CONTAINS
              ZOL(I)=MAX(ZOL(I),-20.0_kind_phys)
              ZOL(I)=MIN(ZOL(I),0.0_kind_phys)
 
-#ifndef _OPENACC
              IF (debug_code >= 1) THEN
                IF (ZNTstoch_ice(i) < 1E-8 .OR. Zt_ice(i) < 1E-10) THEN
                  write(0,*)"===(ice) capture bad input in mynn sfc layer, i=:",i
@@ -1867,7 +1848,6 @@ CONTAINS
                  " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
                ENDIF
              ENDIF
-#endif
 
              !Use Pedros iterative function to find z/L
              !zol(I)=zolri(rb_ice(I),ZA(I),ZNTstoch_ice(I),ZT_ice(I),ZOL(I),psi_opt)
@@ -2031,7 +2011,13 @@ CONTAINS
  ENDIF
 #endif
 
-#ifndef _OPENACC
+!$acc serial present(wet, dry, icy,                  &
+!$acc        PSIM, PSIH, CPM, RHO1D, ZOL, wspd, MOL, &
+!$acc        wstar, qstar, THV1D, HFX, MAVAIL, QVSH, &
+!$acc         THVSK_wat,    THVSK_lnd,    THVSK_ice, &
+!$acc           UST_wat,      UST_lnd,      UST_ice, &
+!$acc      ZNTstoch_wat, ZNTstoch_lnd, ZNTstoch_ice, &
+!$acc            zt_wat,       zt_lnd,       zt_ice)
  IF (debug_code == 2) THEN
     DO I=its,ite
        IF(wet(i))write(*,*)"==== AT END OF MAIN LOOP, i=",i, "(wet)"
@@ -2052,7 +2038,7 @@ CONTAINS
        write(*,*)"============================================="
     ENDDO ! end i-loop
  ENDIF
-#endif
+!$acc end serial
 
    !----------------------------------------------------------
    !  COMPUTE SURFACE HEAT AND MOISTURE FLUXES
@@ -2238,14 +2224,12 @@ CONTAINS
 
       ENDIF
 
-#ifndef _OPENACC
       IF (debug_code > 1) THEN
          write(*,*)"QFX=",QFX(I),"FLQC=",FLQC(I)
          if(icy(i))write(*,*)"ice, MAVAIL:",MAVAIL(I)," u*=",UST_ice(I)," psiq=",PSIQ_ice(i)
          if(dry(i))write(*,*)"lnd, MAVAIL:",MAVAIL(I)," u*=",UST_lnd(I)," psiq=",PSIQ_lnd(i)
          if(wet(i))write(*,*)"ocn, MAVAIL:",MAVAIL(I)," u*=",UST_wat(I)," psiq=",PSIQ_wat(i)
       ENDIF
-#endif
 
       ! The exchange coefficient for cloud water is assumed to be the
       ! same as that for heat. CH is multiplied by WSPD.
@@ -2397,17 +2381,17 @@ ENDIF ! end compute_diag
 !-----------------------------------------------------
 ! DEBUG - SUSPICIOUS VALUES
 !-----------------------------------------------------
+!$acc serial present(dry, wet, icy, CPM, MAVAIL, &
+!$acc       HFX, LH, wstar, RHO1D, PBLH, ZOL, ZA, MOL, &
+!$acc       PSIM, PSIH, WSTAR, T1D, TH1D, THV1D, QVSH, &
+!$acc       UST_wat, UST_lnd, UST_ice, &
+!$acc       THSK_wat, THSK_lnd, THSK_ice, &
+!$acc       THVSK_wat, THVSK_lnd, THVSK_ice, &
+!$acc       ZNTstoch_wat, ZNTstoch_lnd, ZNTstoch_ice, &
+!$acc       ZT_wat, ZT_lnd, ZT_ice, &
+!$acc       QSFC_wat, QSFC_lnd, QSFC_ice, &
+!$acc       PSIX_wat, PSIX_lnd, PSIX_ice)
 IF ( debug_code == 2) THEN
-   !$acc parallel loop present(dry, wet, icy, CPM, MAVAIL, &
-   !$acc                    HFX, LH, wstar, RHO1D, PBLH, ZOL, ZA, MOL, &
-   !$acc                    PSIM, PSIH, WSTAR, T1D, TH1D, THV1D, QVSH, &
-   !$acc                    UST_wat, UST_lnd, UST_ice, &
-   !$acc                    THSK_wat, THSK_lnd, THSK_ice, &
-   !$acc                    THVSK_wat, THVSK_lnd, THVSK_ice, &
-   !$acc                    ZNTstoch_wat, ZNTstoch_lnd, ZNTstoch_ice, &
-   !$acc                    ZT_wat, ZT_lnd, ZT_ice, &
-   !$acc                    QSFC_wat, QSFC_lnd, QSFC_ice, &
-   !$acc                    PSIX_wat, PSIX_lnd, PSIX_ice)
    DO I=its,ite
       yesno = 0
       IF (compute_flux) THEN
@@ -2511,6 +2495,7 @@ IF ( debug_code == 2) THEN
       ENDIF
     ENDDO ! end i-loop
  ENDIF ! end debug option
+!$acc end serial
 
 !$acc exit data copyout(CPM, FLHC, FLQC, CHS, CH, CHS2, CQS2,&
 !$acc                   USTM, wstar, qstar, ZOL, MOL, RMOL,  &
@@ -2542,7 +2527,8 @@ ENDIF
 !$acc                   MAVAIL, PBLH, PSFCPA, z0pert, ztpert, &
 !$acc                   QV1D, U1D, V1D, U1D2, V1D2, T1D, P1D, &
 !$acc                   rstoch1D, sigmaf, shdmax, vegtype,    &
-!$acc                   dz2w1d, dz8w1d, snowh_lnd,            &
+!$acc                   dz2w1d, dz8w1d,                       &
+!$acc                   snowh_wat, snowh_lnd, snowh_ice,      &
 !$acc                   tskin_wat, tskin_lnd, tskin_ice,      &
 !$acc                   tsurf_wat, tsurf_lnd, tsurf_ice)
 
