@@ -1,7 +1,8 @@
 [ccpp-table-properties]
   name = gfdl_sfc_layer
   type = scheme
-  dependencies = ../../hooks/machine.F,../SFC_Layer/module_sf_exchcoef.f90,../../Land/RUC/namelist_soilveg_ruc.F90,../../Land/Noahmp/noahmp_tables.f90
+  relative_path = ../../
+  dependencies = hooks/machine.F,SFC_Layer/module_sf_exchcoef.f90,SFC_Models/Land/RUC/namelist_soilveg_ruc.F90,Land/Noahmp/noahmp_tables.f90
 
 ########################################################################
 [ccpp-arg-table]

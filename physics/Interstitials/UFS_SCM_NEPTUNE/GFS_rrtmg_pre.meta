@@ -7,7 +7,7 @@
   dependencies = Radiation/iounitdef.f,Radiation/RRTMG/radcons.f90,Radiation/radiation_aerosols.f
   dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
   dependencies = Radiation/radlw_param.f,Radiation/radsw_param.f,Radiation/radiation_cloud_overlap.F90
-  dependencies = Land/Noah/surface_perturbation.F90
+  dependencies = SFC_Models/Land/Noah/surface_perturbation.F90
 
 ########################################################################
 [ccpp-arg-table]
