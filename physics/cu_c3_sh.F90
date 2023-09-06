@@ -95,23 +95,23 @@ contains
   ! outq   = output q tendency (per s)
   ! outqc  = output qc tendency (per s)
   ! pre    = output precip
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (inout  )                 ::                           &
         cnvwt,outt,outq,outqc,cupclw,zuo,outu,outv
 !$acc declare copy(cnvwt,outt,outq,outqc,cupclw,zuo,outu,outv)
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (in  )                      ::                         &
         tmf, qmicro, sigmain, forceqv_spechum
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (out  )                   ::                           &
         xmb_out
-     integer,    dimension (its:ite)                                   &
+     integer,    dimension (its:)                                   &
         ,intent (inout  )                 ::                           &
         ierr
-     integer,    dimension (its:ite)                                   &
+     integer,    dimension (its:)                                   &
         ,intent (out  )                   ::                           &
         kbcon,ktop,k22
-     integer,    dimension (its:ite)                                   &
+     integer,    dimension (its:)                                   &
         ,intent (in  )                    ::                           &
         kpbl,tropics
 !$acc declare copyout(xmb_out,kbcon,ktop,k22) copyin(kpbl,tropics) copy(ierr)
@@ -119,13 +119,13 @@ contains
   ! basic environmental input includes a flag (ierr) to turn off
   ! convection for this call only and at that particular gridpoint
   !
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (in   )                   ::                           &
         t,po,tn,dhdt,rho,us,vs,delp
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (inout)                   ::                           &
          q,qo
-     real(kind=kind_phys), dimension (its:ite)                                         &
+     real(kind=kind_phys), dimension (its:)                                         &
         ,intent (in   )                   ::                           &
         xland,z1,psur,hfx,qfx,dx
        
@@ -133,7 +133,7 @@ contains
         ,intent (in   )                   ::                           &
         dtime,tcrit,fv,r_d
 !$acc declare sigmaout                                                                                                                                                                                                                      
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (out)                     ::                           &
         sigmaout
 
@@ -245,7 +245,7 @@ contains
       real(kind=kind_phys) buo_flux,pgeoh,dp,entup,detup,totmas
 
      real(kind=kind_phys) xff_shal(3),blqe,xkshal
-     character*50 :: ierrc(its:ite)
+     character*50 :: ierrc(its:)
      real(kind=kind_phys),    dimension (its:ite,kts:kte) ::                           &
        up_massentr,up_massdetr,up_massentro,up_massdetro,up_massentru,up_massdetru
 !$acc declare create(up_massentr,up_massdetr,up_massentro,up_massdetro,up_massentru,up_massdetru)
