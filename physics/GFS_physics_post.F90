@@ -1,20 +1,20 @@
 ! ###########################################################################################
-!> \file GFS_physics_diagnostics.F90
+!> \file GFS_physics_post.F90
 !!
 ! ###########################################################################################
-module GFS_physics_diagnostics
+module GFS_physics_post
   use machine, only : kind_phys, kind_dbl_prec, kind_sngl_prec
   implicit none
-  public GFS_physics_diagnostics_init, GFS_physics_diagnostics_run
+  public GFS_physics_post_init, GFS_physics_post_run
 contains
 
 ! ########################################################################################### 
-! SUBROUTINE GFS_physics_diagnostics_init
+! SUBROUTINE GFS_physics_post_init
 ! ###########################################################################################
-!! \section arg_table_GFS_physics_diagnostics_init Argument Table
-!! \htmlinclude GFS_physics_diagnostics_init.html
+!! \section arg_table_GFS_physics_post_init Argument Table
+!! \htmlinclude GFS_physics_post_init.html
 !!
-  subroutine GFS_physics_diagnostics_init(errmsg, errflg)
+  subroutine GFS_physics_post_init(errmsg, errflg)
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -22,15 +22,15 @@ contains
     integer, intent(out) :: &
          errflg         ! CCPP error flag
 
-  end subroutine GFS_physics_diagnostics_init
+  end subroutine GFS_physics_post_init
 
 ! ###########################################################################################
-! SUBROUTINE GFS_physics_diagnostics_run
+! SUBROUTINE GFS_physics_post_run
 ! ###########################################################################################
-!! \section arg_table_GFS_physics_diagnostics_run Argument Table
-!! \htmlinclude GFS_physics_diagnostics_run.html
+!! \section arg_table_GFS_physics_post_run Argument Table
+!! \htmlinclude GFS_physics_post_run.html
 !!
-  subroutine GFS_physics_diagnostics_run(nCol, nLev, ntoz, dtidx, ip_prod_loss, ip_ozmix,   &
+  subroutine GFS_physics_post_run(nCol, nLev, ntoz, dtidx, ip_prod_loss, ip_ozmix,   &
        ip_temp, ip_overhead_ozone, do3_dt_prd, do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz, dtend,&
        errmsg, errflg)
     ! Inputs
@@ -69,7 +69,7 @@ contains
 
     ! #######################################################################################
     !
-    ! Ozone physics diagnostics
+    ! Ozone physics diagnostic
     !
     ! #######################################################################################
     idtend = dtidx(100+ntoz,ip_prod_loss)
@@ -92,6 +92,6 @@ contains
        dtend(:,:,idtend) = dtend(:,:,idtend) + do3_dt_ohoz
     endif
 
-  end subroutine GFS_physics_diagnostics_run
+  end subroutine GFS_physics_post_run
 
-end module GFS_physics_diagnostics
+end module GFS_physics_post

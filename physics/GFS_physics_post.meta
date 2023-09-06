@@ -1,11 +1,11 @@
 [ccpp-table-properties]
-  name = GFS_physics_diagnostics
+  name = GFS_physics_post
   type = scheme
   dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_physics_diagnostics_init
+  name = GFS_physics_post_init
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message
@@ -25,7 +25,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_physics_diagnostics_run
+  name = GFS_physics_post_run
   type = scheme
 [nCol]
   standard_name = horizontal_loop_extent

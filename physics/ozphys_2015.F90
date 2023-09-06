@@ -17,6 +17,7 @@ contains
 !! \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77) provided by Naval
 !! Research Laboratory through CHEM2D chemistry model
 !! (McCormack et al. (2006) \cite mccormack_et_al_2006).
+!! (https://doi.org/10.5194/acp-6-4943-2006)
 !!
 !> \section genal_ozphys_2015 GFS ozphys_2015_run General Algorithm
 !> -  This code assumes that both prsl and po3 are from bottom to top
