@@ -15,6 +15,26 @@ module aerinterp
 
 contains
 
+      logical function netcdf_check(status, errmsg, errflg, why)
+      use netcdf
+      implicit none
+      character(len=*), intent(inout) :: errmsg
+      integer, intent(out) :: errflg
+      integer, intent(in) :: status
+      character(len=*), intent(in) :: why
+
+      netcdf_check = (status == NF90_NOERR)
+
+      if(netcdf_check) then
+        errflg = 0
+        errmsg = ' '
+      else
+        errflg = 1
+        errmsg = trim(why) // ': ' // trim(nf90_strerror(status))
+      endif
+
+      END function netcdf_check
+
       SUBROUTINE read_aerdata (me, master, iflip, idate, errmsg, errflg)
       use machine, only: kind_phys, kind_io4, kind_io8
       use aerclm_def
@@ -26,12 +46,16 @@ contains
       integer, intent(inout) :: errflg
 
 !--- locals
-      integer      :: ncid, varid, ndims, dim1, dim2, dim3, hmx
+      integer      :: ncid, varid, ndims, hmx
       integer      :: i, j, k, n, ii, imon, klev
       character    :: fname*50, mn*2, vname*10
       logical      :: file_exist
+      integer :: dimids(NF90_MAX_VAR_DIMS)
+      integer :: dimlen(NF90_MAX_VAR_DIMS)
 
-      integer, allocatable  :: invardims(:)
+      errflg = 0
+      errmsg = ' '
+
 !
 !! ===================================================================
       if (me == master) then
@@ -60,25 +84,37 @@ contains
 !! fetch dim spec and lat/lon from m01 data set
 !! ===================================================================
       fname=trim("aeroclim.m"//'01'//".nc")
-      call nf_open(fname , nf90_NOWRITE, ncid)
+      ncid = -1
+      if(.not.netcdf_check(nf90_open(fname , nf90_NOWRITE, ncid), &
+           errmsg, errflg, 'open '//trim(fname))) then
+        return
+      endif
 
       vname =  trim(specname(1))
-      call nf_inq_varid(ncid, vname, varid)
-      call nf_inq_varndims(ncid, varid, ndims)
-
-      if(.not. allocated(invardims)) allocate(invardims(3))
-      call nf_inq_vardimid(ncid,varid,invardims)
-      call nf_inq_dimlen(ncid, invardims(1), dim1)
-      call nf_inq_dimlen(ncid, invardims(2), dim2)
-      call nf_inq_dimlen(ncid, invardims(3), dim3)
+      varid = -1
+      if(.not.netcdf_check(nf90_inq_varid(ncid, vname, varid), &
+           errmsg, errflg, 'find id of '//trim(vname)//' var')) then
+        return
+      endif
+      ndims = 0
+      if(.not.netcdf_check(nf90_inquire_variable(ncid, varid, ndims=ndims, dimids=dimids), &
+           errmsg, errflg, 'inquire details about '//trim(vname)//' var')) then
+        return
+      endif
+      do i=1,ndims
+        if(.not.netcdf_check(nf90_inquire_dimension(ncid, dimids(i), len=dimlen(i)), &
+             errmsg, errflg, 'inquire details about dimension')) then
+          return
+        endif
+      enddo
 
 ! specify latsaer, lonsaer, hmx
-      lonsaer = dim1
-      latsaer = dim2
-      levsw = dim3
+      lonsaer = dimlen(1)
+      latsaer = dimlen(2)
+      levsw = dimlen(3)
 
       if(me==master) then
-         print *, 'MERRA2 dim: ',dim1, dim2, dim3
+         print *, 'MERRA2 dim: ',dimlen(1:ndims)
       endif
 
 ! allocate arrays
@@ -89,11 +125,29 @@ contains
       endif
 
 ! construct lat/lon array
-      call nf_inq_varid(ncid, 'lat', varid)
-      call nf_get_var(ncid, varid, aer_lat)
-      call nf_inq_varid(ncid, 'lon', varid)
-      call nf_get_var(ncid, varid, aer_lon)
-      call nf_close(ncid)
+      varid = -1
+      if(.not.netcdf_check(nf90_inq_varid(ncid, 'lat', varid), &
+           errmsg, errflg, 'find id of lat var')) then
+        return
+      endif
+      aer_lat = 0
+      if(.not.netcdf_check(nf90_get_var(ncid, varid, aer_lat, (/ 1, 1, 1 /), (/latsaer, 1, 1/)), &
+           errmsg, errflg, 'read lat var')) then
+        return
+      endif
+      varid = -1
+      if(.not.netcdf_check(nf90_inq_varid(ncid, 'lon', varid), &
+           errmsg, errflg, 'find id of lon var')) then
+        return
+      endif
+      aer_lon = 0
+      if(.not.netcdf_check(nf90_get_var(ncid, varid, aer_lon, (/ 1, 1, 1 /), (/lonsaer, 1, 1/)), &
+           errmsg, errflg, 'read lon var')) then
+        return
+      endif
+      if(.not.netcdf_check(nf90_close(ncid), errmsg, errflg, 'close '//trim(fname))) then
+        return
+      endif
       END SUBROUTINE read_aerdata
 !
 !**********************************************************************
@@ -157,8 +211,10 @@ contains
       n1 = n2 - 1
       if (n2 > 12) n2 = n2 -12
 !! ===================================================================
-      call read_netfaer(n1, iflip, 1)
-      call read_netfaer(n2, iflip, 2)
+      call read_netfaer(n1, iflip, 1, errmsg, errflg)
+      if(errflg/=0) return
+      call read_netfaer(n2, iflip, 2, errmsg, errflg)
+      if(errflg/=0) return
 !! ===================================================================
       n1sv=n1
       n2sv=n2
@@ -224,12 +280,14 @@ contains
 !**********************************************************************
 !
       SUBROUTINE aerinterpol( me,master,nthrds,npts,IDATE,FHOUR,iflip, jindx1,jindx2, &
-                             ddy,iindx1,iindx2,ddx,lev,prsl,aerout)
+                             ddy,iindx1,iindx2,ddx,lev,prsl,aerout, errmsg,errflg)
 !
       use machine, only: kind_phys, kind_io4, kind_io8
       use aerclm_def
 
       implicit none
+      integer, intent(inout) :: errflg
+      character(*), intent(inout) :: errmsg
       integer, intent(in) :: iflip
       integer   i1,i2, iday,j,j1,j2,l,npts,nc,n1,n2,lev,k,i,ii, klev
       real(kind=kind_phys) fhour,temj, tx1, tx2,temi, tem
@@ -252,6 +310,8 @@ contains
       integer w3kindreal,w3kindint
 
 !
+      errflg = 0
+      errmsg = ' '
       IDAT = 0
       IDAT(1) = IDATE(4)
       IDAT(2) = IDATE(2)
@@ -298,7 +358,7 @@ contains
           enddo       !j-loop (lat)
         ENDDO         ! ii-loop (ntracaerm)
 !! ===================================================================
-        call read_netfaer(n2, iflip, 2)
+        call read_netfaer(n2, iflip, 2, errmsg, errflg)
         n1sv=n1
         n2sv=n2
       end if
@@ -390,11 +450,13 @@ contains
       RETURN
       END SUBROUTINE aerinterpol
 
-      subroutine read_netfaer(nf, iflip,nt)
+      subroutine read_netfaer(nf, iflip,nt, errmsg,errflg)
       use machine, only: kind_phys, kind_io4, kind_io8
       use aerclm_def
       use netcdf
       integer, intent(in) :: iflip, nf, nt
+      integer, intent(inout) :: errflg
+      character(*), intent(inout) :: errmsg
       integer      :: ncid, varid, i,j,k,ii,klev
       character    :: fname*50, mn*2, vname*10
       real(kind=kind_io4),allocatable,dimension(:,:,:) :: buff
@@ -406,13 +468,30 @@ contains
       allocate (pres_tmp(lonsaer, levsw))
       allocate (buffx(lonsaer, latsaer, levsw, 1))
 
+      errflg = 0
+      errmsg = ' '
+      buff = 0
+      pres_tmp = 0
+      buffx = 0
+
       write(mn,'(i2.2)') nf 
       fname=trim("aeroclim.m"//mn//".nc")
-      call nf_open(fname , nf90_NOWRITE, ncid)
+      ncid = -1
+      if(.not.netcdf_check(nf90_open(fname , nf90_NOWRITE, ncid), &
+           errmsg, errflg, 'open '//trim(fname))) then
+        return
+      endif
 
 ! ====> construct 3-d pressure array (Pa)
-      call nf_inq_varid(ncid, "DELP", varid)
-      call nf_get_var(ncid, varid, buff)
+      varid = -1
+      if(.not.netcdf_check(nf90_inq_varid(ncid, "DELP", varid), &
+           errmsg, errflg, 'find id of DELP var')) then
+        return
+      endif
+      if(.not.netcdf_check(nf90_get_var(ncid, varid, buff), &
+           errmsg, errflg, 'read DELP var')) then
+        return
+      endif
 
       do j = jamin, jamax
         do i = iamin, iamax
@@ -441,8 +520,15 @@ contains
 ! for GFS, iflip 0: toa to sfc; 1: sfc to toa
       DO ii = 1, ntrcaerm
         vname=trim(specname(ii))
-        call nf_inq_varid(ncid, vname, varid)
-        call nf_get_var(ncid, varid, buffx)
+        varid = -1
+        if(.not.netcdf_check(nf90_inq_varid(ncid, vname, varid), &
+             errmsg, errflg, 'get id of '//trim(vname)//' var')) then
+          return
+        endif
+        if(.not.netcdf_check(nf90_get_var(ncid, varid, buffx), &
+             errmsg, errflg, 'read '//trim(vname)//' var')) then
+          return
+        endif
 
         do j = jamin, jamax
           do k = 1, levsaer
@@ -464,10 +550,11 @@ contains
       ENDDO         ! ii-loop (ntracaerm)
 
 ! close the file
-      call nf_close(ncid)
+      if(.not.netcdf_check(nf90_close(ncid), errmsg, errflg, 'close '//trim(fname))) then
+        return
+      endif
       deallocate (buff, pres_tmp)
       deallocate (buffx)
-      return
       END SUBROUTINE read_netfaer
 
 end module aerinterp

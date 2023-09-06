@@ -1,21 +1,21 @@
-!> \file cu_unified_driver_pre.F90
-!!  Contains code related to the unified convective schemes to be used within the GFS physics suite.
+!> \file cu_c3_driver_pre.F90
+!!  Contains code related to the C3 convective schemes to be used within the GFS physics suite.
 
-module cu_unified_driver_pre
+module cu_c3_driver_pre
 
    implicit none
 
    private
 
-   public :: cu_unified_driver_pre_run
+   public :: cu_c3_driver_pre_run
 
    contains
 
-!>\ingroup cu_unified_group
-!> \section arg_table_cu_unified_driver_pre_run Argument Table
-!! \htmlinclude cu_unified_driver_pre_run.html
+!>\ingroup cu_c3_group
+!> \section arg_table_cu_c3_driver_pre_run Argument Table
+!! \htmlinclude cu_c3_driver_pre_run.html
 !!
-   subroutine cu_unified_driver_pre_run (flag_init, flag_restart, kdt, fhour, dtp, t, q, prevst, prevsq, &
+   subroutine cu_c3_driver_pre_run (flag_init, flag_restart, kdt, fhour, dtp, t, q, prevst, prevsq, &
                                     forcet, forceq, cactiv, cactiv_m, conv_act, conv_act_m,         &
                                     errmsg, errflg)
 
@@ -79,6 +79,6 @@ module cu_unified_driver_pre
       cactiv_m(:)=nint(conv_act_m(:))
 !$acc end kernels
 
-   end subroutine cu_unified_driver_pre_run
+   end subroutine cu_c3_driver_pre_run
 
-end module cu_unified_driver_pre
+end module cu_c3_driver_pre

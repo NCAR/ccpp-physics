@@ -543,6 +543,13 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
+[scolor]
+  standard_name = soil_color_classification
+  long_name = soil color for lsm
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
 [vtype]
   standard_name = vegetation_type_classification
   long_name = vegetation type for lsm

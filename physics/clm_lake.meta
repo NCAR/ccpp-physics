@@ -7,6 +7,13 @@
 [ccpp-arg-table]
   name = clm_lake_run
   type = scheme
+[flag_restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -934,6 +941,13 @@
   dimensions = ()
   type = logical
   active = (control_for_lake_model_selection == 3)
+  intent = in
+[clm_debug_print]
+  standard_name = flag_for_printing_in_clm_lake_model
+  long_name = flag for printing in clm lake model
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [errmsg]
   standard_name = ccpp_error_message

@@ -50,9 +50,9 @@ show some variables in the namelist that must match the SDF.
 <tr><td>do_sfcperts       <td>gfs_rrtmg_pre  <td>flag for stochastic surface perturbations option       <td>.false.
 <tr><td>imp_physics     <td>choice of microphysics scheme      <td>choice of microphysics scheme: \n                
                                                       <ul>
-                                                      <li> 11: GFDL microphysics scheme 
                                                       <li> 8: Thompson microphysics scheme   
                                                       <li> 10: Morrison-Gettelman microphysics scheme
+                                                      <li> 11: GFDL microphysics scheme
                                                       <li> 17: NSSL microphysics scheme with background CCN
                                                       <li> 18: NSSL microphysics scheme with predicted CCN (compatibility)
                                                       </ul>
@@ -222,10 +222,13 @@ show some variables in the namelist that must match the SDF.
 <tr><td>xkzm_h          <td> \ref satmedmfvdifq          <td>background vertical diffusion for heat and q        <td>1.0d0
 <tr><td>xkzm_m          <td> \ref satmedmfvdifq           <td>background vertical diffusion for momentum          <td>1.0d0
 <tr><td>xkzm_s          <td> \ref satmedmfvdifq           <td>sigma threshold for background mom. diffusion       <td>1.0d0
-<tr><td>dspfac          <td> \ref satmedmfvdifq     <td>TKE dissipative heating factor                    <td>1.0
+<tr><td>dspfac          <td> \ref satmedmfvdifq           <td>TKE dissipative heating factor                    <td>1.0
 <tr><td>bl_upfr         <td> \ref satmedmfvdifq             <td>updraft fraction in boundary layer mass flux scheme       <td>0.13
 <tr><td>bl_dnfr         <td> \ref satmedmfvdifq             <td>downdraft fraction in boundary layer mass flux scheme     <td>0.1  
-<tr><td>grav_settling   <td>mynnedmf_wrapper          <td>flag to activate gravitational settling of cloud droplets as described in Nakanishi (2000) \cite nakanishi_2000 <td>0
+<tr><td>rlmx            <td> \ref satmedmfvdifq           <td>maximum allowed mixing length in boundary layer mass flux scheme <td>300.
+<tr><td>elmx            <td> \ref satmedmfvdifq           <td>maximum allowed dissipation mixing length in boundary layer mass flux scheme <td>300.
+<tr><td>sfc_rlm         <td> \ref satmedmfvdifq           <td>choice of near surface mixing lenghth in boundary layer mass flux scheme     <td>0
+<tr><td>tc_pbl          <td> \ref satmedmfvdifq           <td>control for TC applications in the PBL scheme           <td>0
 <tr><td>bl_mynn_mixlength    <td>mynnedmf_wrapper     <td>flag for different version of mixing length formulation \n 
                                                       <ul>
                                                       <li> 0: Original form from Nakanishi and Niino (2009) \cite NAKANISHI_2009 . NO scale-awareness is applied to the master mixing length, regardless of "scaleware" setting 
@@ -258,7 +261,7 @@ show some variables in the namelist that must match the SDF.
                                                       <li> true: activate TKE advection 
                                                       </ul>  
                                                       <td>.false. 
-<tr><td>bl_mynn_tkebudget  <td>mynnedmf_wrapper  <td>flag to activate TKE budget                  <td>0
+<tr><td>tke_budget  <td>mynnedmf_wrapper  <td>flag to activating TKE budget                  <td>0
 <tr><td>bl_mynn_cloudpdf   <td>mynnedmf_wrapper  <td>flag to determine which cloud PDF to use \n 
                                                       <ul>
                                                       <li> 0: use Sommeria-Deardorff subgrid cloud PDF 
@@ -384,6 +387,9 @@ show some variables in the namelist that must match the SDF.
 <tr><td>t_sub             <td>gfdl_cloud_microphys       <td>temperature threshold for sublimation. Cloud ice, snow or graupel stops(starts) sublimation when temperature is lower(higher) then \p t_sub         <td>184.
 <tr><td>mp_print          <td>gfdl_cloud_microphys       <td>\a .true. to turn on GFDL cloud microphysics debugging print out. (not supported in GFS physics)       <td>.false.
 <tr><td>ltaerosol       <td>mp_thompson               <td>flag for using aerosol climotology in Thompson MP scheme          <td>.false.
+<tr><td>mraerosol       <td>                          <td>flag for merra2 aerosol aware                  <td>.false.
+<tr><td>lradar          <td>                          <td>flag for radar reflectivity                    <td>.false.
+<tr><td>nsfullradar_diag <td>                         <td>seconds between resetting radar reflectivity calculation   <td>.-999.0
 <tr><td>ttendlim        <td>mp_thompson               <td>temperature tendency limiter per time step in K/s, set to < 0 to deactivate   <td>-999.0
 <tr><td>ext_diag_thompson   <td>mp_thompson           <td>flag for extended diagnostic output from Thompson MP           <td>.false.
 <tr><td>thompson_ext_ndiag3d  <td>mp_thompson         <td>number of 3d arrays for extended diagnostic output from Thompson MP   <td> 37      
@@ -396,9 +402,14 @@ show some variables in the namelist that must match the SDF.
 <tr><td>nssl_cccn       <td>mp_nssl          <td>CCN concentration (m^-3)                  <td>0.6e9 
 <tr><td>nssl_alphah     <td>mp_nssl          <td>graupel shape parameter                         <td>0.0
 <tr><td>nssl_alphahl    <td>mp_nssl          <td>hail shape parameter                            <td>1.0
+<tr><td>nssl_alphar     <td>mp_nssl          <td>shape paramter for rain (imurain=1 only)         <td>0.0
+<tr><td>nssl_ehw0_in    <td>mp_nssl          <td>constant or max assumed graupel-droplet collection efficiency          <td>0.9
+<tr><td>nssl_ehlw0_in   <td>mp_nssl          <td>constant or max assumed hail-droplet collection efficiency          <td>0.9
 <tr><td>nssl_hail_on    <td>mp_nssl          <td>NSSL flag to activate the hail category         <td>.false.
 <tr><td>nssl_ccn_on     <td>mp_nssl          <td>NSSL flag to activate the CCN category          <td>.true.
 <tr><td>nssl_invertccn  <td>mp_nssl          <td>NSSL flag to treat CCN as activated or unactivated      <td>.true.
+<tr><td>nssl_ehw0       <td>mp_nssl          <td>NSSL graupel-droplet collection efficiency      <td>0.9
+<tr><td>nssl_ehlw0      <td>mp_nssl          <td>NSSL hail-droplet collection efficiency         <td>0.9
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b gravity \b drag \b scheme \b options
 <tr><td>knob_ugwp_version <td>cires_ugwp                 <td>parameter selects a version of the UGWP implementation in FV3GFS-127L  \n       
                                                          <ul>
@@ -505,15 +516,19 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 0: USGS 
                                                       <li> 1: IGBP(20 category): IGBP must be selected if NoahMP is used 
                                                       <li> 2: UMD (13 category) 
+                                                      <li> 3: NLCD40 (40 category, NOAH WRFv4 only)
+                                                      <li> 4: USGS-RUC (28 category, NOAH WRFv4 only)
+                                                      <li> 5: MODIS-RUC (21 category, NOAH WRFv4 only)
                                                       </ul>
                                                       <td>2
 <tr><td>isot            <td> lsm_noah, lsm_ruc, \ref noahmpdrv          <td>flag for soil type dataset choice:\n 
                                                       <ul> 
                                                       <li> 0: Zobler soil type (9 category) 
                                                       <li> 1: STATSGO soil type (19 category): STATSGO must be selected if NoahMP is used
+                                                      <li> 2: STAS-RUC soil type (19 category, NOAH WRFv4 only
                                                       </ul>
                                                       <td>0
-
+<tr><td>exticeden       <td> lsm_noah,lsm_ruc     <td>flag for calculating frozen precip ice density outside of the LSM   <td>.false.
 <tr><td>iopt_dveg         <td> \ref noahmpdrv         <td>options for dynamic vegetation  \n
                                                          <ul>
                                                          <li>1: off (use table LAI; use FVEG = SHDFAC from input)
@@ -603,14 +618,42 @@ show some variables in the namelist that must match the SDF.
                                                          </ul>
                                                          <td>1
 <tr><td>iopt_trs    <td>\ref noahmpdrv                   <td>options for thermal roughness scheme:\n 
-                                                      <ul>
-                                                      <li>1: z0h=z0m  
-                                                      <li>2: canopy based czil
-                                                      <li>3: ec 
-                                                      <li>4: kb inversed 
-                                                      </ul>
-                                                      <td>2
+                                                         <ul>
+                                                         <li>1: z0h=z0m  
+                                                         <li>2: canopy based czil
+                                                         <li>3: ec 
+                                                         <li>4: kb inversed 
+                                                         </ul>
+                                                         <td>2
+<tr><td>mosaic_lu        <td>\ref lsm_ruc                <td> control for use of fractional landuse in RUC land surface model    
+                                                         <ul>
+                                                         <li>1: use of fractional landuse in RUC LSM
+                                                         </ul>
+                                                         <td>0
+<tr><td>mosaic_soil      <td>\ref lsm_ruc                <td> control for use of fractional soil in RUC land surface model       
+                                                         <ul>
+                                                         <li>1: use of fractional soil in RUC LSM
+                                                         </ul>
+                                                         <td>0
+<tr><td>isncond_opt      <td>\ref lsm_ruc                <td> control for soil thermal conductivity option in RUC land surface model    
+                                                         <ul>
+                                                         <li>1: constant
+                                                         <li>2: Sturm et al.(1997) \cite sturm_1997
+                                                         </ul>
+                                                         <td>1
+<tr><td>isncovr_opt      <td>\ref lsm_ruc                <td> control for snow cover fraction option in RUC land surface model 
+                                                         <ul>
+                                                         <li>1: original formulation using threshold snow depth to compute snow fraction 
+                                                         <li>2: Niu-Yang(2007) \cite Niu_2007
+                                                         <li>3: updated Niu-Yang similar to Noah MP
+                                                         </ul>
+                                                         <td>1
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b other \b surface \b scheme \b options
+<tr><td>lkm              <td>\ref clm_lake                         <td>0: no lake; 1: lake; 2: lake&nsst             <td>0
+<tr><td>iopt_lake        <td>\ref clm_lake                         <td>1: flake; 2: CLM lake                         <td>2
+<tr><td>lakedepth_threshold     <td>\ref clm_lake                  <td> lakedepth must be greater than this value to enable a lake model    <td>1.0
+<tr><td>lakefrac_threshold      <td>\ref clm_lake                  <td> lakefrac must be greater than this value to enable a lake model     <td>0.0
+<tr><td>use_lake2m              <td>\ref clm_lake                  <td> use 2m T&Q from CLM lake model      <td>.false.
 <tr><td>nstf_name(5)    <td>sfc_nst                   <td>NSST related paramters:\n                                                         
                                                       <ul>
                                                       <li> nstf_name(1): 0=NSST off, 1= NSST on but uncoupled, 2= NSST on and coupled
