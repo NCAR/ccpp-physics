@@ -67,6 +67,7 @@ contains
                fhour,fh_dfi_radar,ix_dfi_radar,num_dfi_radar,cap_suppress,      &
                dfi_radar_max_intervals,ldiag3d,qci_conv,do_cap_suppress,        &
                maxupmf,maxMF,do_mynnedmf,ichoice_in,ichoicem_in,ichoice_s_in,   &
+               spp_cu_deep,spp_wts_cu_deep,                                     &
                errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
@@ -80,6 +81,10 @@ contains
       integer            :: ichoice=0    ! 0 2 5 13 8
       integer            :: ichoicem=13  ! 0 2 5 13
       integer            :: ichoice_s=3  ! 0 1 2 3
+      integer, intent(in) :: spp_cu_deep ! flag for using SPP perturbations
+      real(kind_phys), dimension(:,:), intent(in) ::        &
+     &                    spp_wts_cu_deep
+      real(kind=kind_phys) :: spp_wts_cu_deep_tmp
 
       logical, intent(in) :: do_cap_suppress
       real(kind=kind_phys), parameter :: aodc0=0.14
@@ -313,9 +318,18 @@ contains
 ! these should be coming in from outside
 !
 !    cactiv(:)      = 0
-     rand_mom(:)    = 0.
-     rand_vmas(:)   = 0.
-     rand_clos(:,:) = 0.
+     if (spp_cu_deep == 0) then
+       rand_mom(:)    = 0.
+       rand_vmas(:)   = 0.
+       rand_clos(:,:) = 0.
+     else 
+       do i=1,im
+         spp_wts_cu_deep_tmp=min(max(-1.0_kind_phys, spp_wts_cu_deep(i,1)),1.0_kind_phys)
+         rand_mom(i)    = spp_wts_cu_deep_tmp 
+         rand_vmas(i)   = spp_wts_cu_deep_tmp 
+         rand_clos(i,:) = spp_wts_cu_deep_tmp
+       end do
+     end if
 !$acc end kernels
 !
      its=1
@@ -630,7 +644,7 @@ contains
      enddo
 !$acc end kernels
      if (dx(its)<6500.) then
-       ichoice=10
+!       ichoice=10
        imid_gf=0
      endif
 !
@@ -734,7 +748,7 @@ contains
               ,rand_mom      & ! for stochastics mom, if temporal and spatial patterns exist
               ,rand_vmas     & ! for stochastics vertmass, if temporal and spatial patterns exist
               ,rand_clos     & ! for stochastics closures, if temporal and spatial patterns exist
-              ,0             & ! flag to what you want perturbed
+              ,spp_cu_deep   & ! flag to what you want perturbed
                                ! 1 = momentum transport
                                ! 2 = normalized vertical mass flux profile
                                ! 3 = closures
@@ -816,7 +830,7 @@ contains
               ,rand_mom      & ! for stochastics mom, if temporal and spatial patterns exist
               ,rand_vmas     & ! for stochastics vertmass, if temporal and spatial patterns exist
               ,rand_clos     & ! for stochastics closures, if temporal and spatial patterns exist
-              ,0             & ! flag to what you want perturbed
+              ,spp_cu_deep   & ! flag to what you want perturbed
                                ! 1 = momentum transport
                                ! 2 = normalized vertical mass flux profile
                                ! 3 = closures

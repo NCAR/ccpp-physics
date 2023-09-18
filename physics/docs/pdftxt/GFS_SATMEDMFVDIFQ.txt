@@ -25,26 +25,33 @@ to take into account nonlocal transport by large eddies(mfpbltq.f)
 - A new mass-flux paramterization for stratocumulus-top-induced turbulence mixing has been introduced (mfscuq.f; previously,
 it was an eddy diffusion form)
 - For local turbulence mixing, a TKE closure model is used.
-
-
-\section v6_pbl_enh CCPP Physics Updates
-\version CCPP v6.0.0
-
-- Wind shear effect in characteristic mixing length calculation is included, which 
+- Wind shear effect in characteristic mixing length calculation is included, which
 reduces the mixing length in a strong shear environment such as a hurricane.
-- To better predict surface inversion as well as capping inversion near the PBL top, 
-background diffusivity in the inversion layers is reduced as a function of surface 
+- To better predict surface inversion as well as capping inversion near the PBL top,
+background diffusivity in the inversion layers is reduced as a function of surface
 roughness and green vegetation fraction.
-- To reduce the PBL overgrowth, the PBL updraft overshoot is not only limited by 
-bulk Richardson number-based-PBL depth, but the virtual potential temperature at 
-top of the surface layer rather than that at the model first layer is also used as 
-the near-surface virtual potential temperature in the bulk-Richardson number 
+- To reduce the PBL overgrowth, the PBL updraft overshoot is not only limited by
+bulk Richardson number-based PBL depth, but the virtual potential temperature at
+the top of the surface layer rather than that at the model first layer is also used as
+the near-surface virtual potential temperature in the bulk-Richardson number
 computation. This helps to largely suppress the unrealistic widespread popcorn-like precipitation.
 - Updraft entrainment rates for moisture, hydrometeors, and tracers are increased by about 30%.
-- A positive definite total variation diminishing (TVD) mass-flux transport scheme for moisture, hydrometeors, 
+- A positive definite total variation diminishing (TVD) mass-flux transport scheme for moisture, hydrometeors,
 and tracers and a method for removing negative tracer mixing ratio values have been implemented.
 
 \sa NCEP Office Note 505 \cite https://doi.org/10.25923/cybh-w893 and 506 \cite https://doi.org/10.25923/5051-3r70
+
+
+\section v6_pbl_enh CCPP Physics Updates
+\version UFS-SRW v3.0.0
+- To reduce the negative hurricane intensity biases, a parameterization for environmental wind shear effect
+is included in the GFS TKE-EDMF PBL and cumulus schemes. In addition, the entrainment rates are enhanced 
+proportional to the sub-cloud or PBL mean TKE (turbulent kinetic energy) when TKE is larger than a threshold
+value. 
+
+- To enhance the underestimated CAPE forecasts in the GFS, the entrainment rate in the TKE-EDMF PBL scheme is
+increased as a function of vegetation fraction and surface roughness length.
+
 
 \section intra_satmedmfvdifq Intraphysics Communication
 - \ref arg_table_satmedmfvdifq_run
