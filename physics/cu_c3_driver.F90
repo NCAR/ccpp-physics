@@ -340,8 +340,8 @@ contains
 !
 !> - Set tuning constants for radiation coupling
 !
-     tun_rad_shall(:)=.01
-     tun_rad_mid(:)=.3 !.02
+     tun_rad_shall(:)=.012
+     tun_rad_mid(:)=.15 !.02
      tun_rad_deep(:)=.3 !.065
      edt(:)=0.
      edtm(:)=0.

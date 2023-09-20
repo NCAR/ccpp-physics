@@ -6,12 +6,12 @@ module cu_c3_sh
     use progsigma, only : progsigma_calc
 
     !real(kind=kind_phys), parameter:: c1_shal=0.0015! .0005
-    real(kind=kind_phys), parameter:: c1_shal=0. !0.005! .0005
     real(kind=kind_phys), parameter:: g  =9.81
     real(kind=kind_phys), parameter:: cp =1004.
     real(kind=kind_phys), parameter:: xlv=2.5e6
     real(kind=kind_phys), parameter:: r_v=461.
-    real(kind=kind_phys), parameter:: c0_shal=.001
+    real(kind=kind_phys)  :: c0_shal=.004
+    real(kind=kind_phys)  :: c1_shal=0. !0.005! .0005
     real(kind=kind_phys), parameter:: fluxtune=1.5
 
 contains
@@ -274,6 +274,8 @@ contains
         ktopx(i)=0
         if(xland(i).gt.1.5 .or. xland(i).lt.0.5)then
             xland1(i)=0
+            c0_shal=.001
+            c1_shal=.001
 !            ierr(i)=100
         endif
         pre(i)=0.
@@ -669,11 +671,11 @@ contains
           if(qco(i,k)>=trash ) then 
               dz=z_cup(i,k)-z_cup(i,k-1)
               ! cloud liquid water
-              c1d(i,k)=.02*up_massdetr(i,k-1)
+              c1d(i,k)=c1_shal! 0. !.02*up_massdetr(i,k-1)
               qrco(i,k)= (qco(i,k)-trash)/(1.+(c0_shal+c1d(i,k))*dz)
               if(qrco(i,k).lt.0.)then  ! hli new test 02/12/19
                  qrco(i,k)=0.
-                 c1d(i,k)=0.
+                 !c1d(i,k)=0.
               endif
               pwo(i,k)=c0_shal*dz*qrco(i,k)*zuo(i,k)
               clw_all(i,k)=qco(i,k)-trash !LB total cloud before rain and detrain
