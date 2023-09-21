@@ -67,14 +67,14 @@
         integer, intent(in) :: myerrflg
         character(*), intent(out) :: errmsg
         integer, intent(inout) :: errflg
-        if(myerrflg == 0) return
-        if(errflg /= 0) return
-        !$OMP CRITICAL
-        if(errflg == 0) then
-          errmsg = myerrmsg
-          errflg = myerrflg
+        if(myerrflg /= 0 .and. errflg == 0) then
+          !$OMP CRITICAL
+          if(errflg == 0) then
+            errmsg = myerrmsg
+            errflg = myerrflg
+          endif
+          !$OMP END CRITICAL
         endif
-        !$OMP END CRITICAL
       end subroutine copy_error
 
 !> \section arg_table_GFS_phys_time_vary_init Argument Table
@@ -209,7 +209,7 @@
          real(kind=kind_phys), dimension(:), allocatable :: dzsnso
 
          integer :: myerrflg
-         character(255) :: myerrmsg
+         character(len=255) :: myerrmsg
 
          ! Initialize CCPP error handling variables
          errmsg = ''
@@ -288,6 +288,7 @@
          if (iaerclm) then
            ntrcaer = ntrcaerm
            myerrflg = 0
+           myerrmsg = 'read_aerdata failed without a message'
            call read_aerdata (me,master,iflip,idate,myerrmsg,myerrflg)
            call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          else if(iaermdl ==2 ) then
@@ -315,6 +316,7 @@
 !> - Call tau_amf dats for  ugwp_v1
          if (do_ugwp_v1) then
             myerrflg = 0
+            myerrmsg = 'read_tau_amf failed without a message'
             call read_tau_amf(me, master, myerrmsg, myerrflg)
             call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          endif
@@ -322,12 +324,14 @@
 !$OMP section
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
          myerrflg = 0
+         myerrmsg = 'set_soilveg failed without a message'
          call set_soilveg(me, isot, ivegsrc, nlunit, myerrmsg, myerrflg)
          call copy_error(myerrmsg, myerrflg, errmsg, errflg)
 
 !$OMP section
 !> - read in NoahMP table (needed for NoahMP init)
          myerrflg = 0
+         myerrmsg = 'read_mp_table_parameters failed without a message'
          call read_mp_table_parameters(myerrmsg, myerrflg)
          call copy_error(myerrmsg, myerrflg, errmsg, errflg)
 
