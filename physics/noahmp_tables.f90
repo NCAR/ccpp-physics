@@ -484,6 +484,9 @@ contains
                                                       sr2006_psi_e_a, sr2006_psi_e_b, sr2006_psi_e_c, sr2006_smcmax_a,       &
                                                       sr2006_smcmax_b
 
+    errmsg = ''
+    errflg = 0
+
     ! initialize our variables to bad values, so that if the namelist read fails, we come to a screeching halt as soon as we try to use anything.
     ! vegetation parameters
     isurban_table      = -99999
