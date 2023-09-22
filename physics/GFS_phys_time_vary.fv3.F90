@@ -226,7 +226,7 @@
 !$OMP          shared (xlat_d,xlon_d,imap,jmap,errmsg,errflg)                       &
 !$OMP          shared (levozp,oz_coeff,oz_pres,ozpl)                                &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres,h2opl)                             &
-!$OMP          shared (iamin, iamax, jamin, jamax)                                  &
+!$OMP          shared (iamin, iamax, jamin, jamax, lsm_noahmp)                      &
 !$OMP          shared (iaerclm,iaermdl,ntrcaer,aer_nm,iflip,iccn)                   &
 !$OMP          shared (jindx1_o3,jindx2_o3,ddy_o3,jindx1_h,jindx2_h,ddy_h)          &
 !$OMP          shared (jindx1_aer,jindx2_aer,ddy_aer,iindx1_aer,iindx2_aer,ddx_aer) &
@@ -240,6 +240,7 @@
 
 !$OMP section
 !> - Call read_o3data() to read ozone data
+       need_o3data: if(ntoz > 0) then
          call read_o3data (ntoz, me, master)
 
          ! Consistency check that the hardcoded values for levozp and
@@ -259,9 +260,11 @@
                   oz_coeff, " /= ", size(ozpl, dim=3)
             call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          end if
+       endif need_o3data
 
 !$OMP section
 !> - Call read_h2odata() to read stratospheric water vapor data
+       need_h2odata: if(h2o_phys) then
          call read_h2odata (h2o_phys, me, master)
 
          ! Consistency check that the hardcoded values for levh2o and
@@ -281,6 +284,7 @@
             myerrflg = 1
             call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          end if
+       endif need_h2odata
 
 !$OMP section
 !> - Call read_aerdata() to read aerosol climatology, Anning added coupled
@@ -330,10 +334,12 @@
 
 !$OMP section
 !> - read in NoahMP table (needed for NoahMP init)
-         myerrflg = 0
-         myerrmsg = 'read_mp_table_parameters failed without a message'
-         call read_mp_table_parameters(myerrmsg, myerrflg)
-         call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+         if(lsm == lsm_noahmp) then
+           myerrflg = 0
+           myerrmsg = 'read_mp_table_parameters failed without a message'
+           call read_mp_table_parameters(myerrmsg, myerrflg)
+           call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+         endif
 
 !$OMP end sections
 
