@@ -134,7 +134,7 @@ module mp_nssl
 
 !           write(0,*) 'call nssl_2mom_init'
          CALL nssl_2mom_init(ims,ime, jms,jme, kms,kme,nssl_params,ipctmp=ipc,mixphase=0,   &
-                ihvol=ihailv,nssl_ehw0=nssl_ehw0_in,nssl_ehlw0=nssl_ehlw0_in,errmsg=errmsg, &
+                ihvol=ihailv,nssl_ehw0=nssl_ehw0,nssl_ehlw0=nssl_ehlw0,errmsg=errmsg, &
                 nssl_alphar=nssl_alphar,                                                    &
                 nssl_alphah=nssl_alphah,                                                    &
                 nssl_alphahl=nssl_alphahl,                                                  &
