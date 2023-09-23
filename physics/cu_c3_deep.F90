@@ -4489,10 +4489,8 @@ endif
                endif
                if(k.gt.kbcon(i)+1)c1d(i,k)=clwdet*up_massdetr(i,k-1)
                if(k.gt.kbcon(i)+1)c1d_b(i,k)=clwdet*up_massdetr(i,k-1)
-               !if(is_deep.and.k.gt.kklev(i))then
                 c1d(i,k)=0.005
                 c1d_b(i,k)=0.005
-               !endif
 
                if(autoconv.eq.2) then
 ! 

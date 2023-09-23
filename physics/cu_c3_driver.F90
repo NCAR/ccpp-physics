@@ -644,7 +644,6 @@ contains
      enddo
 !$acc end kernels
      if (dx(its)<6500.) then
-       ichoice=10
        imid_gf=0
      endif
 !
@@ -680,10 +679,6 @@ contains
           do i=its,itf
            if(xmbs(i).gt.0.)then
             cutens(i)=1.
-            if (dx(i)<6500.) then
-             ierrm(i)=555
-             ierr (i)=555
-            endif
            endif
           enddo
 !$acc end kernels
@@ -1041,8 +1036,8 @@ contains
             gdc(i,16,10)=pret(i)*3600.
 
             maxupmf(i)=0.
-            if(forcing(i,6).gt.0.)then
-              maxupmf(i)=maxval(xmb(i)*zu(i,kts:ktf)/forcing(i,6))
+            if(forcing2(i,6).gt.0.)then
+              maxupmf(i)=maxval(xmb(i)*zu(i,kts:ktf)/forcing2(i,6))
             endif
 
             if(ktop(i).gt.2 .and.pret(i).gt.0.)dt_mf(i,ktop(i)-1)=ud_mf(i,ktop(i))

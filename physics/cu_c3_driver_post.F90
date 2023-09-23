@@ -66,19 +66,18 @@ module cu_c3_driver_post
           conv_act_m(i)=0.0
         endif
         ! reflectivity parameterization for parameterized convection (reference:Unipost MDLFLD.f)
-        if(sqrt(garea(i)).lt.6500.)then
         ze      = 0.0
         ze_conv = 0.0
         dbz_sum = 0.0
-        cuprate = raincv(i) * 3600.0 / dt          ! cu precip rate (mm/h)
-        ze_conv = 300.0 * cuprate**1.4
-        if (maxupmf(i).gt.0.05) then
+        cuprate = max(0.1,1.e3*raincv(i) * 3600.0 / dt)          ! cu precip rate (mm/h)
+        if(cuprate .lt. 0.05) cuprate=0.
+        ze_conv = 300.0 * cuprate**1.5
+        if (maxupmf(i).gt.0.1 .and. cuprate.gt.0.) then
          do k = 1, km
           ze = 10._kind_phys ** (0.1 * refl_10cm(i,k))
           dbz_sum = max(dbzmin, 10.0 * log10(ze + ze_conv))
           refl_10cm(i,k) = dbz_sum
          enddo
-        endif
         endif
       enddo
 !$acc end kernels

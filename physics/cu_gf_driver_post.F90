@@ -66,7 +66,6 @@ module cu_gf_driver_post
           conv_act_m(i)=0.0
         endif
         ! reflectivity parameterization for parameterized convection (reference:Unipost MDLFLD.f)
-        !if(sqrt(garea(i)).lt.6500.)then
         ze      = 0.0
         ze_conv = 0.0
         dbz_sum = 0.0
@@ -80,7 +79,6 @@ module cu_gf_driver_post
           refl_10cm(i,k) = dbz_sum
          enddo
         endif
-        !endif
       enddo
 !$acc end kernels
 
