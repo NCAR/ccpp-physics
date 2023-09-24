@@ -2612,7 +2612,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
      nx = ite-its+1
      ny = 1         ! set up as 2D slabs
      nz = kte-kts+1
-     ngs = Max(nz,64)
+     ngs = 64
      
      IF ( .not. flag_ccn ) THEN
        renucfrac = 1.0
