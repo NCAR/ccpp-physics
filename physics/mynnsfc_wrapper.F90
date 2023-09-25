@@ -191,6 +191,16 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &            IMS,IME,JMS,JME,KMS,KME,                  &
      &            ITS,ITE,JTS,JTE,KTS,KTE
 
+!$acc enter data create(hfx, znt, psim, psih, chs,          &
+!$acc                   mavail, xland, GZ1OZ0, cpm, qgh,    &
+!$acc                   qfx, snowh_wat)
+
+!$acc enter data create(dz, th, qv)
+
+!$acc enter data copyin(rmol, phii, t3d, exner, qvsh, slmsk, xland)
+
+!$acc enter data copyin(dry, wet, icy, znt_lnd, znt_wat, znt_ice, qsfc_lnd, qsfc_ice, qsfc_lnd_ruc, qsfc_ice_ruc)
+
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
@@ -203,6 +213,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !         write(0,*)"iter=",iter
 !      endif
 
+!$acc kernels
       ! prep MYNN-only variables
       dz(:,:) = 0
       th(:,:) = 0
@@ -210,6 +221,9 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       hfx(:)  = 0
       qfx(:)  = 0
       rmol(:) = 0
+!$acc end kernels
+
+!$acc parallel loop collapse(2) present(dz, phii, th, t3d, exner, qv, qvsh)
       do k=1,2 !levs
         do i=1,im
            dz(i,k)=(phii(i,k+1) - phii(i,k))*g_inv
@@ -219,6 +233,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
         enddo
       enddo
 
+!$acc parallel loop present(slmsk, xland, qgh, mavail, cpm, snowh_wat)
       do i=1,im
           if (slmsk(i)==1. .or. slmsk(i)==2.)then !sea/land/ice mask (=0/1/2) in FV3
             xland(i)=1.0                          !but land/water = (1/2) in SFCLAY_mynn
@@ -235,6 +250,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
           snowh_wat(i) = 0.0
       enddo
 
+!$acc kernels
       ! cm -> m
       where (dry) znt_lnd=znt_lnd*0.01
       where (wet) znt_wat=znt_wat*0.01
@@ -245,6 +261,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
         where (dry) qsfc_lnd = qsfc_lnd_ruc/(1.+qsfc_lnd_ruc) ! spec. hum
         where (icy) qsfc_ice = qsfc_ice_ruc/(1.+qsfc_ice_ruc) ! spec. hum.
       end if
+!$acc end kernels
 
 !      if (lprnt) then
 !          write(0,*)"CALLING SFCLAY_mynn; input:"
@@ -274,6 +291,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !          write(0,*)"PBLH=",pblh(1)," xland=",xland(1)
 !       endif
 
+!$acc exit data delete(qsfc_lnd_ruc, qsfc_ice_ruc)
+!$acc exit data delete(phii, qvsh, slmsk)
 
         CALL SFCLAY_mynn(                                                     &
              u3d=u,v3d=v,t3d=t3d,qv3d=qv,p3d=prsl,dz8w=dz,                    &
@@ -318,6 +337,13 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              errmsg=errmsg, errflg=errflg                                     )
         if (errflg/=0) return
 
+!$acc exit data delete(hfx, znt, psim, psih, chs,          &
+!$acc                   mavail, xland, GZ1OZ0, cpm, qgh,    &
+!$acc                   qfx, snowh_wat, t3d, exner)
+!$acc exit data delete(dz, th, qv)
+!$acc exit data copyout(rmol)
+!$acc exit data copyout(qsfc_lnd, qsfc_ice)
+
         !! POST MYNN SURFACE LAYER (INTERSTITIAL) WORK:
         !do i = 1, im
         !   !* Taken from sfc_nst.f
@@ -336,10 +362,15 @@ SUBROUTINE mynnsfc_wrapper_run(            &
         !   znt_ice(i)=znt_ice(i)*100.
         !enddo
 
+!$acc kernels
         ! m -> cm
         where (dry) znt_lnd=znt_lnd*100.
         where (wet) znt_wat=znt_wat*100.
         where (icy) znt_ice=znt_ice*100.
+!$acc end kernels
+
+!$acc exit data delete(dry, wet, icy)
+!$acc exit data copyout(znt_lnd, znt_wat, znt_ice)
 
 !      if (lprnt) then
 !         write(0,*)
