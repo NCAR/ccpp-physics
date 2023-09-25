@@ -21238,7 +21238,6 @@ END SUBROUTINE nssl_2mom_driver
       pqwvi(mgs) =    &
      &  -Min(0.0, qrcev(mgs))   &
      &  -Min(0.0, qhcev(mgs))   &
-     &  -Min(0.0, qfcev(mgs))   &
      &  -Min(0.0, qhlcev(mgs))   &
      &  -Min(0.0, qscev(mgs))   &
 !     >  +il5(mgs)*(-qhsbv(mgs) - qhlsbv(mgs) )   &
@@ -21249,7 +21248,6 @@ END SUBROUTINE nssl_2mom_driver
       pqwvd(mgs) =     &
      &  -Max(0.0, qrcev(mgs))   &
      &  -Max(0.0, qhcev(mgs))   &
-     &  -Max(0.0, qfcev(mgs))   &
      &  -Max(0.0, qhlcev(mgs))   &
      &  -Max(0.0, qscev(mgs))   &
      &  +il5(mgs)*(-qiint(mgs)   &
