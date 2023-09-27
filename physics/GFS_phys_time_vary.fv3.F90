@@ -220,14 +220,6 @@
 !$OMP sections
 
 !$OMP section
-!> - Setup spatial interpolation indices for ozone physics.
-         if (ntoz > 0) then
-            !$OMP CRITICAL
-            call ozphys%setup_forcing(xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
-            !$OMP END CRITICAL
-         endif
-
-!$OMP section
 !> - Call read_h2odata() to read stratospheric water vapor data
          call read_h2odata (h2o_phys, me, master)
 
@@ -293,6 +285,12 @@
 ! Need an OpenMP barrier here (implicit in "end sections")
 
 !$OMP sections
+
+!$OMP section
+!> - Setup spatial interpolation indices for ozone physics.
+         if (ntoz > 0) then
+            call ozphys%setup_forcing(xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
+         endif
 
 !$OMP section
 !> - Call setindxh2o() to initialize stratospheric water vapor data
@@ -803,21 +801,7 @@
             return
          end if
 
-!$OMP parallel num_threads(nthrds) default(none)                                         &
-!$OMP          shared(kdt,nsswr,lsswr,clstp,imfdeepcnv,cal_pre,random_clds)              &
-!$OMP          shared(fhswr,fhour,seed0,cnx,cny,nrcm,wrk,rannie,rndval)                  &
-!$OMP          shared(rann,im,isc,jsc,imap,jmap,ntoz,me,idate,jindx1_o3,jindx2_o3)       &
-!$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,master) &
-!$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
-!$OMP          shared(ddx_ci,in_nm,ccn_nm,do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau)    &
-!$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys)                              &
-!$OMP          private(iseed,iskip,i,j,rjday,idat,rinc,w3kindreal,w3kindint,jdat)&
-!$OMP          private(jdow,jdoy,jday,rinc4,n1,n2)
-
-!$OMP sections
-
-!$OMP section
-!> - Compute temporal interpolation indices for updating gas concentrations.
+         !> - Compute temporal interpolation indices for updating gas concentrations.
          idat=0
          idat(1)=idate(4)
          idat(2)=idate(2)
@@ -849,12 +833,17 @@
          n1 = n2 - 1
          if (n2 > ozphys%ntime) n2 = n2 - ozphys%ntime
 
-         !> - Update ozone concentration.
-         if (ntoz > 0) then
-            !$OMP CRITICAL
-            call ozphys%update_forcing(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
-            !$OMP END CRITICAL
-         endif
+!$OMP parallel num_threads(nthrds) default(none)                                         &
+!$OMP          shared(kdt,nsswr,lsswr,clstp,imfdeepcnv,cal_pre,random_clds)              &
+!$OMP          shared(fhswr,fhour,seed0,cnx,cny,nrcm,wrk,rannie,rndval)                  &
+!$OMP          shared(rann,im,isc,jsc,imap,jmap,ntoz,me,idate,jindx1_o3,jindx2_o3)       &
+!$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,master) &
+!$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
+!$OMP          shared(ddx_ci,in_nm,ccn_nm,do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau)    &
+!$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys)                                    &
+!$OMP          private(iseed,iskip,i,j)
+
+!$OMP sections
 
 !$OMP section
 
@@ -900,6 +889,12 @@
           enddo
 
          endif  ! imfdeepcnv, cal_re, random_clds
+
+!$OMP section
+!> - Update ozone concentration.
+         if (ntoz > 0) then
+            call ozphys%update_forcing(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
+         endif
 
 !$OMP section
 !> - Call h2ointerpol() to make stratospheric water vapor data interpolation
