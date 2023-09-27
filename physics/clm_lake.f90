@@ -554,6 +554,19 @@ MODULE clm_lake
              dz_lake(c,:) = z_lake(1,:)
            enddo
 
+           ! Soil hydraulic and thermal properties
+           isl = ISLTYP(i)   
+           if (isl == 0  ) isl = 14
+           if (isl == 14 ) isl = isl + 1 
+
+           watsat = 0.489_kind_lake - 0.00126_kind_lake*sand(isl)
+           csol   = (2.128_kind_lake*sand(isl)+2.385_kind_lake*clay(isl)) / (sand(isl)+clay(isl))*1.e6_kind_lake  ! J/(m3 K)
+           tkm    = (8.80_kind_lake*sand(isl)+2.92_kind_lake*clay(isl))/(sand(isl)+clay(isl))          ! W/(m K)
+           bd     = (1._kind_lake-watsat(1,1))*2.7e3_kind_lake
+           tkmg   = tkm ** (1._kind_lake- watsat(1,1))
+           tkdry  = (0.135_kind_lake*bd + 64.7_kind_lake) / (2.7e3_kind_lake - 0.947_kind_lake*bd)
+           tksatu = tkmg(1,1)*0.57_kind_lake**watsat(1,1)
+
            do c = 1,column
      
             forc_t(c)          = SFCTMP           ! [K]
@@ -593,21 +606,6 @@ MODULE clm_lake
             do k = -nlevsnow+0,nlevsoil
                zi(c,k)            = zi3d(i,k)
             enddo
-            do k = 1,nlevsoil
-               ! Soil hydraulic and thermal properties
-               isl = ISLTYP(i)   
-               if (isl == 0  ) isl = 14
-               if (isl == 14 ) isl = isl + 1 
-
-               watsat(c,k) = 0.489_kind_lake - 0.00126_kind_lake*sand(isl)
-               csol(c,k) = (2.128_kind_lake*sand(isl)+2.385_kind_lake*clay(isl)) / (sand(isl)+clay(isl))*1.e6_kind_lake  ! J/(m3 K)
-               tkm                = (8.80_kind_lake*sand(isl)+2.92_kind_lake*clay(isl))/(sand(isl)+clay(isl))          ! W/(m K)
-               bd                 = (1._kind_lake-watsat(c,k))*2.7e3_kind_lake
-               tkmg(c,k)          = tkm ** (1._kind_lake- watsat(c,k))
-               tkdry(c,k)         = (0.135_kind_lake*bd + 64.7_kind_lake) / (2.7e3_kind_lake - 0.947_kind_lake*bd)
-               tksatu(c,k)        = tkmg(c,k)*0.57_kind_lake**watsat(c,k)
-            enddo
-            
           enddo
 
           eflx_lwrad_net = -9999
