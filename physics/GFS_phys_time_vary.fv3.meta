@@ -30,6 +30,13 @@
   dimensions = ()
   type = logical
   intent = in
+[ntoz]
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for ozone mixing ratio
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [iaerclm]
   standard_name = flag_for_aerosol_input_MG_radiation
   long_name = flag for using aerosols in Morrison-Gettelman MP_radiation
@@ -72,36 +79,6 @@
   dimensions = ()
   type = integer
   intent = in
-  intent = in
-[ntoz]
-  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for ozone mixing ratio
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[jindx1_o3]
-  standard_name = lower_latitude_index_of_ozone_forcing_for_interpolation
-  long_name = interpolation low index for ozone
-  units = index
-  dimensions = (horizontal_dimension)
-  type = integer
-  intent = in
-[jindx2_o3]
-  standard_name = upper_latitude_index_of_ozone_forcing_for_interpolation
-  long_name = interpolation high index for ozone
-  units = index
-  dimensions = (horizontal_dimension)
-  type = integer
-  intent = in
-[ddy_o3]
-  standard_name = latitude_interpolation_weight_for_ozone_forcing
-  long_name = interpolation high index for ozone
-  units = none
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
 [nx]
   standard_name = number_of_points_in_x_direction_for_this_MPI_rank
   long_name = number of points in x direction for this MPI rank
@@ -139,6 +116,28 @@
   type = real
   kind = kind_phys
   intent = in
+[jindx1_o3]
+  standard_name = lower_latitude_index_of_ozone_forcing_for_interpolation
+  long_name = interpolation low index for ozone
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+[jindx2_o3]
+  standard_name = upper_latitude_index_of_ozone_forcing_for_interpolation
+  long_name = interpolation high index for ozone
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+[ddy_o3]
+  standard_name = latitude_interpolation_weight_for_ozone_forcing
+  long_name = interpolation high index for ozone
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [jindx1_h]
   standard_name = lower_latitude_index_of_stratospheric_water_vapor_forcing_for_interpolation
   long_name = interpolation low index for stratospheric water vapor
