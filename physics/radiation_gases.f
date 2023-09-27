@@ -1,17 +1,14 @@
 !>  \file radiation_gases.f
-!!  This file contains routines that set up ozone climatological
-!!  profiles and other constant gas profiles, such as co2, ch4, n2o,
-!!  o2, and those of cfc gases.  All data are entered as mixing ratio
-!!  by volume, except ozone which is mass mixing ratio (g/g).
+!!  This file contains routines that set up gas profiles, such as co2, 
+!!  ch4, n2o, o2, and those of cfc gases.  All data are entered as mixing
+!!  ratio by volume
 
 !  ==========================================================  !!!!!
 !              'module_radiation_gases'  description           !!!!!
 !  ==========================================================  !!!!!
 !                                                                      !
-!   set up ozone climatological profiles and other constant gas        !
-!   profiles, such as co2, ch4, n2o, o2, and those of cfc gases.  All  !
-!   data are entered as mixing ratio by volume, except ozone which is  !
-!   mass mixing ratio (g/g).                                           !
+!   set up constant gas profiles, such as co2, ch4, n2o, o2, and those !
+!   of cfc gases. All data are entered as mixing ratio by volume       !
 !                                                                      !
 !   in the module, the externally callabe subroutines are :            !
 !                                                                      !
@@ -23,16 +20,10 @@
 !                                                                      !
 !      'gas_update' -- read in data and update with time               !
 !         input:                                                       !
-!           ( iyear, imon, iday, ihour, loz1st, ldoco2, me )           !
+!           ( iyear, imon, iday, ihour, ldoco2, me )                   !
 !         output:                                                      !
 !           ( errflg, errmsg )                                         !
 !                                                                      !
-!      'getozn'     -- setup climatological ozone profile              !
-!         input:                                                       !
-!           ( prslk,xlat,                                              !
-!             IMAX, LM )                                               !
-!         output:                                                      !
-!           ( o3mmr )                                                  !
 !                                                                      !
 !      'getgases'   -- setup constant gas profiles for LW and SW       !
 !         input:                                                       !
@@ -47,7 +38,6 @@
 !       'module module_iounitdef'           in 'iounitdef.f'           !
 !                                                                      !
 !   unit used for radiative active gases:                              !
-!      ozone : mass mixing ratio                     (g/g)             !
 !      co2   : volume mixing ratio                   (p/p)             !
 !      n2o   : volume mixing ratio                   (p/p)             !
 !      ch4   : volume mixing ratio                   (p/p)             !
@@ -81,15 +71,6 @@
 !                  seasonal cycle calculations                         !
 !     aug 2011 - y-t hou     fix a bug in subr getgases doing vertical !
 !                  co2 mapping. (for top_at_1 case, not affact opr).   !
-!     aug 2012 - y-t hou     modified subr getozn.  moved the if-first !
-!                  block to subr gas_init to ensure threading safe in  !
-!                  climatology ozone applications. (not affect gfs)    !
-!                  also changed the initialization subr into two parts:!
-!                  'gas_init' is called at the start of run to set up  !
-!                  module parameters; and 'gas_update' is called within!
-!                  the time loop to check and update data sets. defined!
-!                  the climatology ozone parameters k1oz,k2oz,facoz as !
-!                  module variables and are set in subr 'gas_update'   !
 !     nov 2012 - y-t hou     modified control parameters thru module   !
 !                  'physparam'.                                        !
 !     jan 2013 - z. janjic/y. hou   modified ilon (longitude index)    !
@@ -105,10 +86,8 @@
 
 !> \defgroup module_radiation_gases_mod Radiation Gases Module
 !> @{
-!> This module sets up ozone climatological profiles and other constant
-!! gas profiles, such as co2, ch4, n2o, o2, and those of cfc gases. All
-!! data are entered as mixing ratio by volume, except ozone which is
-!! mass mixing ratio (g/g).
+!> This module sets up constant gas profiles, such as co2, ch4, n2o, o2,
+!! and those of cfc gases. All data are entered as mixing ratio by volume.
 !!\image html rad_gas_AGGI.png "Figure 1: Atmospheric radiative forcing, relative to 1750, by long-lived greenhouse gases and the 2016 update of the NOAA Annual Greenhouse Gas Index (AGGI)"
 !! NOAA Annual Greenhouse Gas Index (AGGI) shows that from 1990 to 2016, 
 !! radiative forcing by long-lived greenhouse gases (LLGHGs) increased by
@@ -120,10 +99,6 @@
 !!\n ICO2=0: use prescribed global annual mean value (currently = 380 ppmv)  
 !!\n ICO2=1: use observed global annual mean value
 !!\n ICO2=2: use observed monthly 2-d data table in \f$15^o\f$ horizontal resolution
-!!
-!! O3 Distribution (namelist control parameter -\b NTOZ):
-!!\n NTOZ=0: use seasonal and zonal averaged climatological ozone
-!!\n NTOZ>0: use 3-D prognostic ozone
 !!
 !! Trace Gases (currently using the global mean climatology in unit of ppmv):
 !! \f$CH_4-1.50\times10^{-6}\f$;
@@ -137,8 +112,8 @@
 !!
 !!\version NCEP-Radiation_gases     v5.1  Nov 2012
 
-!> This module sets up ozone climatological profiles and other constant gas
-!! profiles, such as co2, ch4, n2o, o2, and those of cfc gases.
+!> This module sets up constant gas rofiles, such as co2, ch4, n2o, o2, and those 
+!! of cfc gases.
       module module_radiation_gases      
       use machine,           only : kind_phys, kind_io4
       use funcphys,          only : fpkapx
@@ -179,21 +154,7 @@
 ! gfdl 1999 value
       real (kind=kind_phys), parameter :: f113vmr_def= 8.2000e-11
 
-!  ---  ozone seasonal climatology parameters defined in module ozne_def
-!   - 4x5 ozone data parameter
-!     integer, parameter :: JMR=45, LOZ=17
-!     real (kind=kind_phys), parameter :: blte=-86.0, dlte=4.0
-!   - geos ozone data
-!     integer, parameter :: JMR=18, LOZ=17
-!     real (kind=kind_phys), parameter :: blte=-85.0, dlte=10.0
-
 !  ---  module variables to be set in subroutin gas_init and/or gas_update
-
-! variables for climatology ozone (ioznflg = 0)
-
-      real (kind=kind_phys), allocatable :: pkstr(:), o3r(:,:,:)
-      integer :: k1oz = 0,  k2oz = 0
-      real (kind=kind_phys) :: facoz = 0.0
 
 !  arrays for co2 2-d monthly data and global mean values from observed data
 
@@ -209,33 +170,30 @@
 
 !  ---  public interfaces
 
-      public  gas_init, gas_update, getgases, getozn
+      public  gas_init, gas_update, getgases
 
 
 ! =================
       contains
 ! =================
 
-!> This subroutine sets up ozone, co2, etc. parameters. If climatology
-!! ozone then read in monthly ozone data.
+!> This subroutine sets up co2, etc. parameters.
 !!\param me           print message control flag
 !!\param co2usr_file  co2 user defined data table
 !!\param co2cyc_file  co2 climotology monthly cycle data table
 !!\param ictmflg      data ic time/date control flag
 !!\param ico2flg      co2 data source control flag
-!!\param ioznflg      ozone data control flag
 !!\param con_pi       physical constant Pi
 !!\param errflg       error flag
 !!\param errmsg       error message
 !>\section gas_init_gen gas_init General Algorithm
 !-----------------------------------
       subroutine gas_init( me, co2usr_file, co2cyc_file, ico2flg,       &
-     &     ictmflg, ioznflg, con_pi, JMR, LOZ, timeozc, errflg, errmsg)
+     &     ictmflg, con_pi, errflg, errmsg)
 
 !  ===================================================================  !
 !                                                                       !
-!  gas_init sets up ozone, co2, etc. parameters.  if climatology ozone  !
-!  then read in monthly ozone data.                                     !
+!  gas_init sets up co2, etc. parameters.                               !
 !                                                                       !
 !  inputs:                                                              !
 !     me          - print message control flag                          !
@@ -256,9 +214,6 @@
 !                           further data extrapolation.                 !
 !                   =yyyy1: use yyyy data for the fcst. if needed, do   !
 !                           extrapolation to match the fcst time.       !
-!     ioznflg     - ozone data control flag                             !
-!                   =0: use climatological ozone profile                !
-!                   >0: use interactive ozone profile                   ! 
 !     co2usr_file - external co2 user defined data table                !
 !     co2cyc_file - external co2 climotology monthly cycle data table   ! 
 !     con_pi      - physical constant Pi                                !
@@ -266,9 +221,6 @@
 !  outputs: (CCPP error handling)                                       !
 !     errflg      - error flag                                          !
 !     errmsg      - error message                                       !
-!                                                                       !
-!  internal module variables:                                           !
-!     pkstr, o3r - arrays for climatology ozone data                    !
 !                                                                       !
 !  usage:    call gas_init                                              !
 !                                                                       !
@@ -279,8 +231,7 @@
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: me, ictmflg, ioznflg, ico2flg
-      integer, intent(in) :: JMR, LOZ, timeozc
+      integer, intent(in) :: me, ictmflg, ico2flg
       character(len=26),intent(in) :: co2usr_file,co2cyc_file
       real(kind=kind_phys), intent(in) :: con_pi
 
@@ -291,10 +242,7 @@
 !  ---  locals:
       real (kind=kind_phys), dimension(IMXCO2,JMXCO2) :: co2dat
       real (kind=kind_phys) :: co2g1, co2g2
-      real (kind=kind_phys) :: pstr(LOZ)
-      real (kind=kind_io4)  :: o3clim4(JMR,LOZ,12), pstr4(LOZ)
 
-      integer    :: imond(12), ilat(JMR,12)
       integer    :: i, j, k, iyr, imo
       logical    :: file_exist, lextpl
       character  :: cline*100, cform*8
@@ -315,78 +263,6 @@
 
       kyrsav  = 0
       kmonsav = 1
-
-!  --- ...  climatology ozone data section
-
-      if ( ioznflg > 0 ) then
-        if ( me == 0 ) then
-          print *,' - Using interactive ozone distribution'
-        endif
-      else
-        if ( timeozc /= 12 ) then
-          print *,' - Using climatology ozone distribution'
-          print *,' timeozc=',timeozc, ' is not monthly mean',          &
-     &            ' - job aborting in subroutin gas_init!!!'
-          errflg = 1
-          errmsg = 'ERROR(gas_init): Climatological o3 distribution '// &
-     &         'is not monthly mean'
-          return
-        endif
-
-        allocate (pkstr(LOZ), o3r(JMR,LOZ,12))
-        rewind NIO3CLM
-
-        if ( LOZ == 17 ) then       ! For the operational ozone climatology
-          do k = 1, LOZ
-            read (NIO3CLM,15) pstr4(k)
-   15       format(f10.3)
-          enddo
-
-          do imo = 1, 12
-            do j = 1, JMR
-              read (NIO3CLM,16) imond(imo), ilat(j,imo),                &
-     &                          (o3clim4(j,k,imo),k=1,10)
-   16         format(i2,i4,10f6.2)
-              read (NIO3CLM,20) (o3clim4(j,k,imo),k=11,LOZ)
-   20         format(6x,10f6.2)
-            enddo
-          enddo
-        else                      ! For newer ozone climatology
-          read (NIO3CLM)
-          do k = 1, LOZ
-            read (NIO3CLM) pstr4(k)
-          enddo
-
-          do imo = 1, 12
-            do k = 1, LOZ
-              read (NIO3CLM) (o3clim4(j,k,imo),j=1,JMR)
-            enddo
-          enddo
-        endif   ! end if_LOZ_block
-!
-        do imo = 1, 12
-          do k = 1, LOZ
-            do j = 1, JMR
-              o3r(j,k,imo) = o3clim4(j,k,imo) * 1.655e-6
-            enddo
-          enddo
-        enddo
-
-        do k = 1, LOZ
-          pstr(k) = pstr4(k)
-        enddo
-
-        if ( me == 0 ) then
-          print *,' - Using climatology ozone distribution'
-          print *,'   Found ozone data for levels pstr=',               &
-     &            (pstr(k),k=1,LOZ)
-!         print *,' O3=',(o3r(15,k,1),k=1,LOZ)
-        endif
-
-        do k = 1, LOZ
-          pkstr(k) = fpkapx(pstr(k)*100.0)
-        enddo
-      endif   ! end if_ioznflg_block
 
 !  --- ...  co2 data section
 
@@ -541,20 +417,18 @@
 !!\param imon        month of the year
 !!\param iday        day of the month
 !!\param ihour       hour of the day
-!!\param loz1st      clim ozone 1st time update control flag
 !!\param ldoco2      co2 update control flag
 !!\param me          print message control flag
 !!\param co2dat_file co2 2d monthly obsv data table
 !!\param co2gbl_file co2 global annual mean data table 
 !!\param ictmflg     data ic time/date control flag
 !!\param ico2flg     co2 data source control flag
-!!\param ioznflg     ozone data control flag
 !!\param errflg      error flag
 !!\param errmsg      error message
 !>\section gen_gas_update gas_update General Algorithm
 !-----------------------------------
-      subroutine gas_update(iyear, imon, iday, ihour, loz1st, ldoco2,   &
-     &     me, co2dat_file, co2gbl_file, ictmflg, ico2flg, ioznflg,     &
+      subroutine gas_update(iyear, imon, iday, ihour, ldoco2,           &
+     &     me, co2dat_file, co2gbl_file, ictmflg, ico2flg,              &
      &     errflg, errmsg )
 
 !  ===================================================================  !
@@ -567,7 +441,6 @@
 !     imon        - month of the year                       1           !
 !     iday        - day of the month                        1           !
 !     ihour       - hour of the day                         1           !
-!     loz1st      - clim ozone 1st time update control flag 1           !
 !     ldoco2      - co2 update control flag                 1           !
 !     me          - print message control flag              1           !
 !     ico2flg     - co2 data source control flag                        !
@@ -587,9 +460,6 @@
 !                           further data extrapolation.                 !
 !                   =yyyy1: use yyyy data for the fcst. if needed, do   !
 !                           extrapolation to match the fcst time.       !
-!     ioznflg     - ozone data control flag                             !
-!                   =0: use climatological ozone profile                !
-!                   >0: use interactive ozone profile                   !
 !     ivflip      - vertical profile indexing flag                      !
 !     co2dat_file - external co2 2d monthly obsv data table             !
 !     co2gbl_file - external co2 global annual mean data table          !
@@ -603,8 +473,6 @@
 !     co2cyc_sav - monthly cycle co2 vol mixing ratio  IMXCO2*JMXCO2*12 !
 !     co2_glb    - global annual mean co2 mixing ratio                  !
 !     gco2cyc    - global monthly mean co2 variation       12           !
-!     k1oz,k2oz,facoz                                                   !
-!                - climatology ozone parameters             1           !
 !                                                                       !
 !  usage:    call gas_update                                            !
 !                                                                       !
@@ -616,9 +484,8 @@
 
 !  ---  inputs:
       integer, intent(in) :: iyear,imon,iday,ihour,me,ictmflg,ico2flg
-      integer, intent(in) :: ioznflg
       character(len=26),intent(in) :: co2dat_file, co2gbl_file
-      logical, intent(in) :: loz1st, ldoco2
+      logical, intent(in) :: ldoco2
 
 !  ---  output:
       character(len=*), intent(out) :: errmsg
@@ -642,35 +509,6 @@
 ! Initialize the CCPP error handling variables
       errmsg = ''
       errflg = 0
-
-!> - Ozone data section
-
-      if ( ioznflg == 0 ) then
-        midmon = mdays(imon)/2 + 1
-        change = loz1st .or. ( (iday==midmon) .and. (ihour==0) )
-!
-        if ( change ) then
-          if ( iday < midmon ) then
-            k1oz = mod(imon+10, 12) + 1
-            midm = mdays(k1oz)/2 + 1
-            k2oz = imon
-            midp = mdays(k1oz) + midmon
-          else
-            k1oz = imon
-            midm = midmon
-            k2oz = mod(imon, 12) + 1
-            midp = mdays(k2oz)/2 + 1 + mdays(k1oz)
-          endif
-        endif
-!
-        if (iday < midmon) then
-         id = iday + mdays(k1oz)
-        else
-         id = iday
-        endif
-
-        facoz = float(id - midm) / float(midp - midm)
-      endif
 
 !> - co2 data section
 
@@ -1101,121 +939,6 @@
       return
 !...................................
       end subroutine getgases
-!-----------------------------------
-
-!> This subroutine sets up climatological ozone profile for radiation
-!! calculation. This code is originally written by Shrinivas Moorthi.
-!!\param prslk       (IMAX,LM), exner function = \f$(p/p0)^{rocp}\f$
-!!\param xlat        (IMAX), latitude in radians, default to pi/2 ->
-!!                    -pi/2 range, otherwise see in-line comment
-!!\param IMAX, LM    (1), horizontal and vertical dimensions
-!!\param top_at_1    (1), vertical profile indexing flag
-!!\param o3mmr       (IMAX,LM), output ozone profile in mass mixing
-!!                   ratio (g/g)
-!>\section getozn_gen getozn General Algorithm
-!-----------------------------------
-      subroutine getozn( prslk,xlat, IMAX, LM, top_at_1, JMR, LOZ, blte,&
-     &     dlte, o3mmr)
-
-!  ===================================================================  !
-!                                                                       !
-!  getozn sets up climatological ozone profile for radiation calculation!
-!                                                                       !
-!  this code is originally written By Shrinivas Moorthi                 !
-!                                                                       !
-!  inputs:                                                              !
-!     prslk (IMAX,LM)  - exner function = (p/p0)**rocp                  !
-!     xlat  (IMAX)     - latitude in radians, default to pi/2 -> -pi/2  !
-!                        range, otherwise see in-line comment           !
-!     IMAX, LM         - horizontal and vertical dimensions             !
-!     top_at_1         - vertical profile indexing flag                 !
-!                                                                       !
-!  outputs:                                                             !
-!     o3mmr (IMAX,LM)  - output ozone profile in mass mixing ratio (g/g)!
-!                                                                       !
-!  module variables:                                                    !
-!     k1oz, k2oz       - ozone data interpolation indices               !
-!     facoz            - ozone data interpolation factor                !
-!                                                                       !
-!  usage:    call getozn                                                !
-!                                                                       !
-!  ===================================================================  !
-!
-      implicit none
-
-!  ---  inputs:
-      integer,  intent(in) :: IMAX, LM, JMR, LOZ
-      real(kind=kind_phys), intent(in) :: blte, dlte
-      logical,  intent(in) :: top_at_1
-      real (kind=kind_phys), intent(in) :: prslk(:,:), xlat(:)
-
-!  ---  outputs:
-      real (kind=kind_phys), intent(out) :: o3mmr(:,:)
-
-!  ---  locals:
-      real (kind=kind_phys) :: o3i(IMAX,LOZ), wk1(IMAX), deglat, elte,  &
-     &                         tem, tem1, tem2, tem3, tem4, temp
-      integer :: i, j, k, l, j1, j2, ll
-!
-!===> ...  begin here
-!
-      elte = blte + (JMR-1)*dlte
-
-      do i = 1, IMAX
-        deglat = xlat(i) * raddeg        ! if xlat in pi/2 -> -pi/2 range
-!       deglat = 90.0 - xlat(i)*raddeg   ! if xlat in 0 -> pi range
-
-        if (deglat > blte .and. deglat < elte) then
-          tem1 = (deglat - blte) / dlte + 1
-          j1   = tem1
-          j2   = j1 + 1
-          tem1 = tem1 - j1
-        elseif (deglat <= blte) then
-          j1   = 1
-          j2   = 1
-          tem1 = 1.0
-        elseif (deglat >= elte) then
-          j1   = JMR
-          j2   = JMR
-          tem1 = 1.0
-        endif
-
-        tem2 = 1.0 - tem1
-        do j = 1, LOZ
-          tem3     = tem2*o3r(j1,j,k1oz) + tem1*o3r(j2,j,k1oz)
-          tem4     = tem2*o3r(j1,j,k2oz) + tem1*o3r(j2,j,k2oz)
-          o3i(i,j) = tem4*facoz          + tem3*(1.0 - facoz)
-        enddo
-      enddo
-
-      do l = 1, LM
-        ll = l
-        if (.not. top_at_1) ll = LM -l + 1
-
-        do i = 1, IMAX
-          wk1(i) = prslk(i,ll)
-        enddo
-
-        do k = 1, LOZ-1
-          temp = 1.0 / (pkstr(k+1) - pkstr(k))
-
-          do i = 1, IMAX
-            if (wk1(i) > pkstr(k) .and. wk1(i) <= pkstr(k+1)) then
-              tem       = (pkstr(k+1) - wk1(i)) * temp
-              o3mmr(I,ll) = tem * o3i(i,k) + (1.0 - tem) * o3i(i,k+1)
-            endif
-          enddo
-        enddo
-
-        do i = 1, IMAX
-          if (wk1(i) > pkstr(LOZ)) o3mmr(i,ll) = o3i(i,LOZ)
-          if (wk1(i) < pkstr(1))   o3mmr(i,ll) = o3i(i,1)
-        enddo
-      enddo
-!
-      return
-!...................................
-      end subroutine getozn
 !-----------------------------------
 
 !

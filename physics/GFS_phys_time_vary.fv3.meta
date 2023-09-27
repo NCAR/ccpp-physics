@@ -2,7 +2,7 @@
   name = GFS_phys_time_vary
   type = scheme
   dependencies = aerclm_def.F,aerinterp.F90,gcycle.F90,h2o_def.f,h2ointerp.f90,iccn_def.F,iccninterp.F90,machine.F,mersenne_twister.f
-  dependencies = namelist_soilveg.f,set_soilveg.f,sfcsub.F,cires_tauamf_data.F90,noahmp_tables.f90
+  dependencies = namelist_soilveg.f,set_soilveg.f,sfcsub.F,cires_tauamf_data.F90,noahmp_tables.f90,module_ozphys.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -71,6 +71,36 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+  intent = in
+[ntoz]
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for ozone mixing ratio
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[jindx1_o3]
+  standard_name = lower_latitude_index_of_ozone_forcing_for_interpolation
+  long_name = interpolation low index for ozone
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+[jindx2_o3]
+  standard_name = upper_latitude_index_of_ozone_forcing_for_interpolation
+  long_name = interpolation high index for ozone
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+[ddy_o3]
+  standard_name = latitude_interpolation_weight_for_ozone_forcing
+  long_name = interpolation high index for ozone
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
   intent = in
 [nx]
   standard_name = number_of_points_in_x_direction_for_this_MPI_rank
@@ -932,6 +962,13 @@
   type = real
   kind = kind_phys
   intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1107,6 +1144,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ntoz]
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for ozone mixing ratio
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [h2o_phys]
   standard_name = flag_for_stratospheric_water_vapor_physics
   long_name = flag for stratospheric water vapor physics
@@ -1136,6 +1180,36 @@
   type = real
   kind = kind_phys
   intent = out
+[jindx1_o3]
+  standard_name = lower_latitude_index_of_ozone_forcing_for_interpolation
+  long_name = interpolation low index for ozone
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+[jindx2_o3]
+  standard_name = upper_latitude_index_of_ozone_forcing_for_interpolation
+  long_name = interpolation high index for ozone
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+[ddy_o3]
+  standard_name = latitude_interpolation_weight_for_ozone_forcing
+  long_name = interpolation high index for ozone
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[ozpl]
+  standard_name = ozone_forcing
+  long_name = ozone forcing data
+  units = mixed
+  dimensions = (horizontal_dimension,number_of_levels_in_ozone_data,number_of_coefficients_in_ozone_data)
+  type = real
+  kind = kind_phys
+  intent = inout
 [jindx1_h]
   standard_name = lower_latitude_index_of_stratospheric_water_vapor_forcing_for_interpolation
   long_name = interpolation low index for stratospheric water vapor
@@ -1868,6 +1942,13 @@
   type = real
   kind = kind_phys
   intent = inout
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

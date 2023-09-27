@@ -2,7 +2,7 @@
   name = GFS_rrtmgp_pre
   type = scheme
   dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,radcons.f90,radiation_aerosols.f
-  dependencies = radiation_astronomy.f,radiation_gases.f,radiation_tools.F90,rrtmg_lw_cloud_optics.F90
+  dependencies = radiation_astronomy.f,radiation_gases.f,radiation_tools.F90,rrtmg_lw_cloud_optics.F90,module_ozphys.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -503,35 +503,12 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
-[latsozc]
-  standard_name = number_of_latitudes_in_ozone_climotology_data
-  long_name = number of latitude in ozone climotology data
-  units = count
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
   dimensions = ()
-  type = integer
-  intent = in
-[levozc]
-  standard_name = number_of_levels_in_ozone_climotology_data
-  long_name = number of levels in ozone climotology data
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[dphiozc]
-  standard_name = ozone_data_parameter_1
-  long_name = ozone data parameter 1
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[blatc]
-  standard_name = ozone_data_parameter_2
-  long_name = ozone data parameter 2
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
+  type = ty_ozphys
   intent = in
 [errmsg]
   standard_name = ccpp_error_message

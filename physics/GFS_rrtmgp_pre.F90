@@ -8,7 +8,8 @@ module GFS_rrtmgp_pre
   use machine,                    only: kind_phys
   use funcphys,                   only: fpvs
   use module_radiation_astronomy, only: coszmn 
-  use module_radiation_gases,     only: NF_VGAS, getgases, getozn
+  use module_radiation_gases,     only: NF_VGAS, getgases
+  use module_ozphys,              only: ty_ozphys
   use mo_gas_concentrations,      only: ty_gas_concs
   use radiation_tools,            only: check_error_msg,cmp_tlev
   use rrtmgp_lw_gas_optics,       only: lw_gas_props
@@ -117,25 +118,23 @@ contains
        vmr_n2o, vmr_co2, tsfg, tsfa, qs_lay, q_lay, tv_lay,                                 &
        relhum, deltaZ, deltaZc, deltaP, active_gases_array,                                 &
        tsfc_radtime, coszen, coszdg, top_at_1, iSFC, iTOA, nDay, idxday, semis,             &
-       sfc_emiss_byband, ico2, latsozc, levozc, blatc, dphiozc, con_pi, errmsg, errflg)
+       sfc_emiss_byband, ico2, ozphys, con_pi, errmsg, errflg)
     
-    ! Inputs   
+    ! Inputs
     integer, intent(in)    :: &
          me,                & ! MPI rank
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
          ico2,              & ! Flag for co2 radiation scheme 
-         i_o3,              & ! Index into tracer array for ozone
-         latsozc,           & !
-         levozc
+         i_o3                 ! Index into tracer array for ozone
+    type(ty_ozphys),intent(in) :: &
+         ozphys
     logical, intent(in) :: &
     	 doSWrad,           & ! Call SW radiation?
     	 doLWrad              ! Call LW radiation
     real(kind_phys), intent(in) :: &
          fhswr,             & ! Frequency of SW radiation call.
-         fhlwr,             & ! Frequency of LW radiation call.
-         blatc,             & !
-         dphiozc
+         fhlwr                ! Frequency of LW radiation call.
     real(kind_phys), intent(in) :: &
          con_g,             & ! Physical constant: gravitational constant
          con_rd,            & ! Physical constant: gas-constant for dry air
@@ -353,9 +352,8 @@ contains
           enddo
        enddo
     ! OR Use climatological ozone data
-    else                               
-       call getozn (prslk(1:NCOL,:), xlat, nCol, nLev, top_at_1, latsozc, levozc, blatc,    &
-            dphiozc, o3_lay)
+    else
+       call ozphys%oz_clim(xlat, prslk, con_pi, o3_lay)
     endif
 
     ! #######################################################################################

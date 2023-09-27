@@ -10,9 +10,11 @@
       use omp_lib
 #endif
 
-      use machine, only : kind_phys
+      use machine, only : kind_phys, kind_dbl_prec, kind_sngl_prec
 
       use mersenne_twister, only: random_setseed, random_number
+
+      use module_ozphys, only: ty_ozphys
 
       use h2o_def,   only : levh2o, h2o_coeff, h2o_lat, h2o_pres, h2o_time, h2oplin
       use h2ointerp, only : read_h2odata, setindxh2o, h2ointerpol
@@ -64,9 +66,9 @@
 !>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
 !> @{
       subroutine GFS_phys_time_vary_init (                                                         &
-              me, master, h2o_phys, iaerclm, iccn, iaermdl, iflip, im, levs,                 &
+              me, master, ntoz, h2o_phys, iaerclm, iccn, iaermdl, iflip, im, levs,                 &
               nx, ny, idate, xlat_d, xlon_d,                                                       &
-              jindx1_h, jindx2_h, ddy_h, h2opl,fhour,          &
+              jindx1_o3, jindx2_o3, ddy_o3, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,                &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
               do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
@@ -79,12 +81,12 @@
               smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, snliqxy, tsnoxy , smoiseq, zsnsoxy,   &
               slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, con_t0c, lsm_cold_start, nthrds,    &
               lkm, use_lake_model, lakefrac, lakedepth, iopt_lake, iopt_lake_clm, iopt_lake_flake, &
-              lakefrac_threshold, lakedepth_threshold, errmsg, errflg)
+              lakefrac_threshold, lakedepth_threshold, ozphys, errmsg, errflg)
 
          implicit none
 
          ! Interface variables
-         integer,              intent(in)    :: me, master, iccn, iflip, im, nx, ny, levs, iaermdl
+         integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny, levs, iaermdl
          logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
          integer,              intent(in)    :: idate(:), iopt_lake, iopt_lake_clm, iopt_lake_flake
          real(kind_phys),      intent(in)    :: fhour, lakefrac_threshold, lakedepth_threshold
@@ -93,8 +95,8 @@
          integer,              intent(in) :: lkm
          integer,              intent(inout)  :: use_lake_model(:)
          real(kind=kind_phys), intent(in   )  :: lakefrac(:), lakedepth(:)
-         integer,              intent(inout) :: jindx1_h(:), jindx2_h(:)
-         real(kind_phys),      intent(inout) :: ddy_h(:)
+         integer,              intent(inout) :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
+         real(kind_phys),      intent(inout) :: ddy_o3(:),  ddy_h(:)
          real(kind_phys),      intent(in)    :: h2opl(:,:,:)
 
          integer,              intent(inout) :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
@@ -113,6 +115,7 @@
          real(kind_phys),      intent(in)    :: min_seaice, fice(:)
          real(kind_phys),      intent(in)    :: landfrac(:)
          real(kind_phys),      intent(inout) :: weasd(:)
+         type(ty_ozphys),      intent(in)    :: ozphys
 
          ! NoahMP - only allocated when NoahMP is used
          integer, intent(in) :: lsoil, lsnow_lsm_lbound, lsnow_lsm_ubound
@@ -200,20 +203,29 @@
          jamax=-999
 
 !$OMP parallel num_threads(nthrds) default(none)                                    &
-!$OMP          shared (me,master,h2o_phys,im,nx,ny,levs,idate)                      &
+!$OMP          shared (me,master,ntoz,h2o_phys,im,nx,ny,levs,idate)                 &
 !$OMP          shared (xlat_d,xlon_d,imap,jmap,errmsg,errflg)                       &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres,h2opl)                             &
 !$OMP          shared (iamin, iamax, jamin, jamax)                                  &
 !$OMP          shared (iaerclm,iaermdl,ntrcaer,aer_nm,iflip,iccn)                   &
-!$OMP          shared (jindx1_h,jindx2_h,ddy_h)                                     &
+!$OMP          shared (jindx1_o3,jindx2_o3,ddy_o3,jindx1_h,jindx2_h,ddy_h)          &
 !$OMP          shared (jindx1_aer,jindx2_aer,ddy_aer,iindx1_aer,iindx2_aer,ddx_aer) &
 !$OMP          shared (jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci,ddx_ci)       &
 !$OMP          shared (do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau,ddy_j2tau)        &
 !$OMP          shared (isot,ivegsrc,nlunit,sncovr,sncovr_ice,lsm,lsm_ruc)           &
 !$OMP          shared (min_seaice,fice,landfrac,vtype,weasd,snupx,salp_data)        &
+!$OMP          shared (ozphys)                                                      &
 !$OMP          private (ix,i,j,rsnow,vegtyp)
 
 !$OMP sections
+
+!$OMP section
+!> - Setup spatial interpolation indices for ozone physics.
+         if (ntoz > 0) then
+            !$OMP CRITICAL
+            call ozphys%setup_forcing(xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
+            !$OMP END CRITICAL
+         endif
 
 !$OMP section
 !> - Call read_h2odata() to read stratospheric water vapor data
@@ -710,8 +722,8 @@
 !> @{
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
             me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, nsswr, fhswr, lsswr, fhour, &
-            imfdeepcnv, cal_pre, random_clds, nscyc, h2o_phys, iaerclm, iccn, clstp,          &
-            jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
+            imfdeepcnv, cal_pre, random_clds, nscyc, ntoz, h2o_phys, iaerclm, iccn, clstp,          &
+            jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm, fn_nml,      &
             imap, jmap, prsl, seed0, rann, nthrds, nx, ny, nsst, tile_num, nlunit, lsoil, lsoil_lsm,&
@@ -719,21 +731,21 @@
             lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref,  &
             tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
             zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype,scolor, shdmin, shdmax, snowd, &
-            cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac,                             &
+            cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac, ozphys,               &
             do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, errmsg, errflg)
 
          implicit none
 
          ! Interface variables
          integer,              intent(in)    :: me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, &
-                                                nsswr, imfdeepcnv, iccn, nscyc, iflip
+                                                nsswr, imfdeepcnv, iccn, nscyc, ntoz, iflip
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhswr, fhour
          logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm
          real(kind_phys),      intent(out)   :: clstp
-         integer,              intent(in)    :: jindx1_h(:), jindx2_h(:)
-         real(kind_phys),      intent(in)    :: ddy_h(:)
-         real(kind_phys),      intent(inout) :: h2opl(:,:,:)
+         integer,              intent(in)    :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
+         real(kind_phys),      intent(in)    :: ddy_o3(:),  ddy_h(:)
+         real(kind_phys),      intent(inout) :: ozpl(:,:,:), h2opl(:,:,:)
          integer,              intent(in)    :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
          real(kind_phys),      intent(in)    :: ddy_aer(:), ddx_aer(:)
          real(kind_phys),      intent(inout) :: aer_nm(:,:,:)
@@ -749,6 +761,7 @@
          integer,              intent(in)    :: jindx1_tau(:), jindx2_tau(:)
          real(kind_phys),      intent(in)    :: ddy_j1tau(:), ddy_j2tau(:)
          real(kind_phys),      intent(inout) :: tau_amf(:)
+         type(ty_ozphys),      intent(in)    :: ozphys
 
          ! For gcycle only
          integer,              intent(in)    :: nthrds, nx, ny, nsst, tile_num, nlunit, lsoil
@@ -771,10 +784,13 @@
          integer,              intent(out)   :: errflg
 
          ! Local variables
-         integer :: i, j, k, iseed, iskip, ix
-         real(kind=kind_phys) :: wrk(1)
-         real(kind=kind_phys) :: rannie(cny)
-         real(kind=kind_phys) :: rndval(cnx*cny*nrcm)
+         integer :: i, j, k, iseed, iskip, ix, idat(8), jdat(8), iday, j1, j2, nc, n1, n2, jdow,     &
+              jdoy, jday, w3kindreal, w3kindint
+         real(kind_phys) :: wrk(1), tem, tx1, tx2, rjday
+         real(kind_phys) :: rannie(cny)
+         real(kind_phys) :: rndval(cnx*cny*nrcm)
+         real(kind_dbl_prec)  :: rinc(5)
+         real(kind_sngl_prec) :: rinc4(5)
 
          ! Initialize CCPP error handling variables
          errmsg = ''
@@ -790,14 +806,55 @@
 !$OMP parallel num_threads(nthrds) default(none)                                         &
 !$OMP          shared(kdt,nsswr,lsswr,clstp,imfdeepcnv,cal_pre,random_clds)              &
 !$OMP          shared(fhswr,fhour,seed0,cnx,cny,nrcm,wrk,rannie,rndval)                  &
-!$OMP          shared(rann,im,isc,jsc,imap,jmap,me,idate)       &
-!$OMP          shared(h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,master) &
+!$OMP          shared(rann,im,isc,jsc,imap,jmap,ntoz,me,idate,jindx1_o3,jindx2_o3)       &
+!$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,master) &
 !$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
 !$OMP          shared(ddx_ci,in_nm,ccn_nm,do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau)    &
-!$OMP          shared(ddy_j2tau,tau_amf,iflip)                                           &
-!$OMP          private(iseed,iskip,i,j,k)
+!$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys)                              &
+!$OMP          private(iseed,iskip,i,j,rjday,idat,rinc,w3kindreal,w3kindint,jdat)&
+!$OMP          private(jdow,jdoy,jday,rinc4,n1,n2)
 
 !$OMP sections
+
+!$OMP section
+!> - Compute temporal interpolation indices for updating gas concentrations.
+         idat=0
+         idat(1)=idate(4)
+         idat(2)=idate(2)
+         idat(3)=idate(3)
+         idat(5)=idate(1)
+         rinc=0.
+         rinc(2)=fhour
+         call w3kind(w3kindreal,w3kindint)
+         if(w3kindreal==4) then
+            rinc4=rinc
+            CALL w3movdat(rinc4,idat,jdat)
+         else
+            CALL w3movdat(rinc,idat,jdat)
+         endif
+         jdow = 0
+         jdoy = 0
+         jday = 0
+         call w3doxdat(jdat,jdow,jdoy,jday)
+         rjday = jdoy + jdat(5) / 24.
+         if (rjday < ozphys%time(1)) rjday = rjday + 365.
+
+         n2 = ozphys%ntime + 1
+         do j=2,ozphys%ntime
+            if (rjday < ozphys%time(j)) then
+               n2 = j
+               exit
+            endif
+         enddo
+         n1 = n2 - 1
+         if (n2 > ozphys%ntime) n2 = n2 - ozphys%ntime
+
+         !> - Update ozone concentration.
+         if (ntoz > 0) then
+            !$OMP CRITICAL
+            call ozphys%update_forcing(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
+            !$OMP END CRITICAL
+         endif
 
 !$OMP section
 

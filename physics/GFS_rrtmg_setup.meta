@@ -2,7 +2,7 @@
   name = GFS_rrtmg_setup
   type = scheme
   dependencies = iounitdef.f,module_bfmicrophysics.f,radcons.f90,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f
-  dependencies = module_mp_thompson.F90,radiation_gases.f,radlw_main.F90,radlw_param.f,radsw_main.F90,radsw_param.f,machine.F
+  dependencies = module_mp_thompson.F90,radiation_gases.f,radlw_main.F90,radlw_param.f,radsw_main.F90,radsw_param.f,machine.F,module_ozphys.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -170,27 +170,6 @@
   standard_name = control_for_sw_scattering_choice
   long_name = control of rrtmg shortwave scattering choice
   units = 1
-  dimensions = ()
-  type = integer
-  intent = in
-[levozp]
-  standard_name = number_of_levels_in_ozone_climotology_data
-  long_name = number of levels in ozone climotology data
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[timeozp]
-  standard_name = number_of_times_in_ozone_climotology_data
-  long_name = number of times in ozone climotology data
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[latsozp]
-  standard_name = number_of_latitudes_in_ozone_climotology_data
-  long_name = number of latitude in ozone climotology data
-  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -530,6 +509,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = inout
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
