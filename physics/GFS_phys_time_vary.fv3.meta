@@ -23,19 +23,19 @@
   dimensions = ()
   type = integer
   intent = in
-[h2o_phys]
-  standard_name = flag_for_stratospheric_water_vapor_physics
-  long_name = flag for stratospheric water vapor physics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [ntoz]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
   units = index
   dimensions = ()
   type = integer
+  intent = in
+[h2o_phys]
+  standard_name = flag_for_stratospheric_water_vapor_physics
+  long_name = flag for stratospheric water vapor physics
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [iaerclm]
   standard_name = flag_for_aerosol_input_MG_radiation
