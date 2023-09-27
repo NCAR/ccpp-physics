@@ -41,21 +41,22 @@ module module_ozphys
      integer                      :: k2oz          !< Upper interpolation index in datac(dim=3), time dim 
      real(kind_phys)              :: facoz         !< Parameter for ozone climotology
      contains
-       procedure, public :: load_forcing
-       procedure, public :: load_clim
-       procedure, public :: setup_forcing
-       procedure, public :: update_forcing
-       procedure, public :: update_clim
-       procedure, public :: oz_prog_2015
-       procedure, public :: oz_prog_2006
-       procedure, public :: oz_clim
+       procedure, public :: load_o3prog
+       procedure, public :: setup_o3prog
+       procedure, public :: update_o3prog
+       procedure, public :: run_o3prog_2015
+       procedure, public :: run_o3prog_2006
+       !
+       procedure, public :: load_o3clim
+       procedure, public :: update_o3clim
+       procedure, public :: run_o3clim
   end type ty_ozphys
   
 contains
   ! #########################################################################################
   ! Procedure (type-bound) for loading ozone forcing data.
   ! #########################################################################################
-  function load_forcing(this, file, fileID) result (err_message)
+  function load_o3prog(this, file, fileID) result (err_message)
     class(ty_ozphys), intent(inout) :: this
     integer,          intent(in)    :: fileID
     character(len=*), intent(in)    :: file
@@ -97,12 +98,12 @@ contains
     deallocate(tempin)
     close(fileID)
 
-  end function load_forcing
+  end function load_o3prog
 
   ! #########################################################################################
   ! Procedure for setting up interpolation indices between data and model grid.
   ! #########################################################################################
-  subroutine setup_forcing(this, lat, idx1, idx2, idxh)
+  subroutine setup_o3prog(this, lat, idx1, idx2, idxh)
     class(ty_ozphys), intent(in)  :: this
     real(kind_phys),  intent(in)  :: lat(:)
     integer,          intent(out) :: idx1(:), idx2(:)
@@ -126,12 +127,12 @@ contains
        endif
     enddo
 
-  end subroutine setup_forcing
+  end subroutine setup_o3prog
 
   ! #########################################################################################
   ! Procedure (type-bound) for updating ozone data.
   ! #########################################################################################
-  subroutine update_forcing(this, idx1, idx2, idxh, rjday, idxt1, idxt2, ozpl)
+  subroutine update_o3prog(this, idx1, idx2, idxh, rjday, idxt1, idxt2, ozpl)
     class(ty_ozphys), intent(in)  :: this
     integer,          intent(in)  :: idx1(:), idx2(:)
     real(kind_phys),  intent(in)  :: idxh(:)
@@ -156,12 +157,12 @@ contains
        enddo
     enddo
 
-  end subroutine update_forcing
+  end subroutine update_o3prog
 
   ! #########################################################################################
   ! Procedure (type-bound) for NRL prognostic ozone (2015).
   ! #########################################################################################
-  subroutine oz_prog_2015(this, con_1ovg, dt, p, t, dp, ozpl, oz, do3_dt_prd, do3_dt_ozmx,  &
+  subroutine run_o3prog_2015(this, con_1ovg, dt, p, t, dp, ozpl, oz, do3_dt_prd, do3_dt_ozmx,  &
        do3_dt_temp, do3_dt_ohoz)
     class(ty_ozphys), intent(in) :: this
     real(kind_phys),intent(in) :: &
@@ -267,21 +268,20 @@ contains
     enddo
 
     return
-  end subroutine oz_prog_2015
+  end subroutine run_o3prog_2015
 
   ! #########################################################################################
   ! Procedure (type-bound) for NRL prognostic ozone (2006).
   ! #########################################################################################
-  subroutine oz_prog_2006(this)
+  subroutine run_o3prog_2006(this)
     class(ty_ozphys), intent(in) :: this
     return
-  end subroutine oz_prog_2006
+  end subroutine run_o3prog_2006
 
   ! #########################################################################################
   ! Procedure (type-bound) for NRL updating climotological ozone.
-  ! Build this up from getozn.
   ! #########################################################################################
-  subroutine oz_clim(this, lat, prslk, con_pi, oz)
+  subroutine run_o3clim(this, lat, prslk, con_pi, oz)
     class(ty_ozphys), intent(in) :: this
     real(kind_phys),  intent(in) :: &
          con_pi  ! Physics constant: Pi
@@ -356,12 +356,12 @@ contains
     enddo
 
     return
-  end subroutine oz_clim
+  end subroutine run_o3clim
 
   ! #########################################################################################
   ! Procedure (type-bound) for loading ozone climo data.
   ! #########################################################################################
-  function load_clim(this, file, fileID) result (err_message)
+  function load_o3clim(this, file, fileID) result (err_message)
     class(ty_ozphys), intent(inout) :: this
     integer,          intent(in)    :: fileID
     character(len=*), intent(in)    :: file
@@ -432,12 +432,12 @@ contains
         this%pkstr(iLev) = fpkapx(this%pstr(iLev)*100.0)
      enddo
 
-  end function load_clim
+   end function load_o3clim
 
   ! #########################################################################################
   ! Procedure (type-bound) for updating ozone climotological data.
   ! #########################################################################################
-  subroutine update_clim(this, imon, iday, ihour, loz1st)
+  subroutine update_o3clim(this, imon, iday, ihour, loz1st)
     class(ty_ozphys), intent(inout) :: this
     integer, intent(in) :: imon, iday, ihour
     logical, intent(in) :: loz1st
@@ -471,6 +471,6 @@ contains
     
     this%facoz = float(id - midm) / float(midp - midm)
 
-  end subroutine update_clim
+  end subroutine update_o3clim
 
 end module module_ozphys

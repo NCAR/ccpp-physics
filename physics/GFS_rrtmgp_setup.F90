@@ -243,7 +243,7 @@ contains
     call gas_update (kyear, kmon, kday, khour, lco2_chg, me, co2dat_file, co2gbl_file, ictm,&
          ico2, errflg, errmsg )
     if (ntoz == 0) then
-       call ozphys%update_clim(kmon, kday, khour, loz1st)
+       call ozphys%update_o3clim(kmon, kday, khour, loz1st)
     endif
     
     if ( loz1st ) loz1st = .false.

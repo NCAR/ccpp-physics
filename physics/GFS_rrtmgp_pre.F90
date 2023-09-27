@@ -353,7 +353,7 @@ contains
        enddo
     ! OR Use climatological ozone data
     else
-       call ozphys%oz_clim(xlat, prslk, con_pi, o3_lay)
+       call ozphys%run_o3clim(xlat, prslk, con_pi, o3_lay)
     endif
 
     ! #######################################################################################

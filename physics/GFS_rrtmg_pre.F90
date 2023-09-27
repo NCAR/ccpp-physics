@@ -434,7 +434,7 @@
           enddo
         enddo
       else                                ! climatological ozone
-         call ozphys%oz_clim(xlat, prslk1, con_pi, olyr)
+         call ozphys%run_o3clim(xlat, prslk1, con_pi, olyr)
       endif                               ! end_if_ntoz
 
 !> - Call coszmn(), to compute cosine of zenith angle (only when SW is called)

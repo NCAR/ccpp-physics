@@ -95,6 +95,7 @@
          integer,              intent(in) :: lkm
          integer,              intent(inout)  :: use_lake_model(:)
          real(kind=kind_phys), intent(in   )  :: lakefrac(:), lakedepth(:)
+
          integer,              intent(inout) :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
          real(kind_phys),      intent(inout) :: ddy_o3(:),  ddy_h(:)
          real(kind_phys),      intent(in)    :: h2opl(:,:,:)
@@ -289,7 +290,7 @@
 !$OMP section
 !> - Setup spatial interpolation indices for ozone physics.
          if (ntoz > 0) then
-            call ozphys%setup_forcing(xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
+           call ozphys%setup_o3prog(xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
          endif
 
 !$OMP section
@@ -729,7 +730,7 @@
             lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref,  &
             tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
             zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype,scolor, shdmin, shdmax, snowd, &
-            cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac, ozphys,               &
+            cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac, ozphys,                     &
             do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, errmsg, errflg)
 
          implicit none
@@ -841,7 +842,7 @@
 !$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
 !$OMP          shared(ddx_ci,in_nm,ccn_nm,do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau)    &
 !$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys)                                    &
-!$OMP          private(iseed,iskip,i,j,k)
+!$OMP          private(iseed,iskip,i,j,k,rjday,n1,n2)
 
 !$OMP sections
 
@@ -893,7 +894,7 @@
 !$OMP section
 !> - Update ozone concentration.
          if (ntoz > 0) then
-            call ozphys%update_forcing(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
+            call ozphys%update_o3prog(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
          endif
 
 !$OMP section
