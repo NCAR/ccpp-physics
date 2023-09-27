@@ -2078,10 +2078,6 @@ contains
 
 !> - Call rain_evap_below_cloudbase() to calculate evaporation below cloud base
 
-!      call rain_evap_below_cloudbase(itf,ktf,its,ite,                    &
-!           kts,kte,ierr,kbcon,xmb,psur,xland,qo_cup,                     &
-!           po_cup,qes_cup,pwavo,edto,pwevo,pre,outt,outq)      !,outbuoy)
-
       k=1
 !$acc kernels
       do i=its,itf

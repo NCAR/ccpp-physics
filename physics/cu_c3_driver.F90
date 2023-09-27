@@ -949,38 +949,6 @@ contains
               !gdc(i,k,8)=(outq(i,k))*86400.*xlv/cp
                gdc(i,k,8)=(outqm(i,k)+outqs(i,k)+outq(i,k))*86400.*xlv/cp
                gdc(i,k,9)=gdc(i,k,2)+gdc(i,k,3)+gdc(i,k,4)
-!
-!> - Calculate subsidence effect on clw
-!
-!              dsubclw=0.
-!              dsubclwm=0.
-!              dsubclws=0.
-!              dp=100.*(p2d(i,k)-p2d(i,k+1))
-!              if (clcw(i,k) .gt. -999.0 .and. clcw(i,k+1) .gt. -999.0 )then
-!                 clwtot = cliw(i,k) + clcw(i,k)
-!                 clwtot1= cliw(i,k+1) + clcw(i,k+1)
-!                 dsubclw=((-edt(i)*zd(i,k+1)+zu(i,k+1))*clwtot1   &
-!                      -(-edt(i)*zd(i,k)  +zu(i,k))  *clwtot  )*g/dp
-!                 dsubclwm=((-edtm(i)*zdm(i,k+1)+zum(i,k+1))*clwtot1   &
-!                      -(-edtm(i)*zdm(i,k)  +zum(i,k))  *clwtot  )*g/dp
-!                 dsubclws=(zus(i,k+1)*clwtot1-zus(i,k)*clwtot)*g/dp
-!                 dsubclw=dsubclw+(zu(i,k+1)*clwtot1-zu(i,k)*clwtot)*g/dp
-!                 dsubclwm=dsubclwm+(zum(i,k+1)*clwtot1-zum(i,k)*clwtot)*g/dp
-!                 dsubclws=dsubclws+(zus(i,k+1)*clwtot1-zus(i,k)*clwtot)*g/dp
-!              endif
-!              tem  = dt*(outqcs(i,k)*cutens(i)+outqc(i,k)*cuten(i)       &
-!                    +outqcm(i,k)*cutenm(i)                           &
-!                     +dsubclw*xmb(i)+dsubclws*xmbs(i)+dsubclwm*xmbm(i) &
-!                    )
-!              tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
-!              if (clcw(i,k) .gt. -999.0) then
-!               cliw(i,k) = max(0.,cliw(i,k) + tem * tem1)            ! ice
-!               clcw(i,k) = max(0.,clcw(i,k) + tem *(1.0-tem1))       ! water
-!              else
-!                cliw(i,k) = max(0.,cliw(i,k) + tem)
-!              endif
-!
-!            enddo
 
 !> - FCT treats subsidence effect to cloud ice/water (begin)
                dp=100.*(p2d(i,k)-p2d(i,k+1))

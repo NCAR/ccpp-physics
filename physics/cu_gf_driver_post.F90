@@ -69,7 +69,7 @@ module cu_gf_driver_post
         ze      = 0.0
         ze_conv = 0.0
         dbz_sum = 0.0
-        cuprate = max(0.1,1.e3*raincv(i) * 3600.0 / dt)          ! cu precip rate (mm/h)
+        cuprate = 1.e3*raincv(i) * 3600.0 / dt          ! cu precip rate (mm/h)
         if(cuprate .lt. 0.05) cuprate=0.
         ze_conv = 300.0 * cuprate**1.5
         if (maxupmf(i).gt.0.1 .and. cuprate.gt.0.) then
