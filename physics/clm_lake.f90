@@ -551,7 +551,7 @@ MODULE clm_lake
 
            do c = 2,column
              z_lake(c,:) = z_lake(1,:)
-             dz_lake(c,:) = z_lake(1,:)
+             dz_lake(c,:) = dz_lake(1,:)
            enddo
 
            ! Soil hydraulic and thermal properties
