@@ -162,12 +162,12 @@ contains
   ! #########################################################################################
   ! Procedure (type-bound) for NRL prognostic ozone (2015).
   ! #########################################################################################
-  subroutine run_o3prog_2015(this, con_1ovg, dt, p, t, dp, ozpl, oz, do3_dt_prd, do3_dt_ozmx,  &
-       do3_dt_temp, do3_dt_ohoz)
+  subroutine run_o3prog_2015(this, con_1ovg, dt, p, t, dp, ozpl, oz, do3_dt_prd,            &
+       do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
     class(ty_ozphys), intent(in) :: this
-    real(kind_phys),intent(in) :: &
+    real(kind_phys),  intent(in) :: &
          con_1ovg       ! Physical constant: One divided by gravitational acceleration (m-1 s2)
-    real(kind_phys), intent(in) :: &
+    real(kind_phys),  intent(in) :: &
          dt             ! Model timestep (sec)
     real(kind_phys),  intent(in), dimension(:,:) :: &
          p,           & ! Model Pressure (Pa)
@@ -253,7 +253,7 @@ contains
           prod(iCol,2)     = min(prod(iCol,2), 0.0)
        enddo
        do iCol=1,nCol
-          ozib(iCol) = ozi(iCol,iLev) ! no filling
+          ozib(iCol) = ozi(iCol,iLev)
           tem        = prod(iCol,1) - prod(iCol,2) * prod(iCol,6) &
                                     + prod(iCol,3) * (t(iCol,iLev) - prod(iCol,5)) &
                                     + prod(iCol,4) * (colo3(iCol,iLev)-coloz(iCol,iLev))
@@ -273,8 +273,123 @@ contains
   ! #########################################################################################
   ! Procedure (type-bound) for NRL prognostic ozone (2006).
   ! #########################################################################################
-  subroutine run_o3prog_2006(this)
+  subroutine run_o3prog_2006(this, con_1ovg, dt, p, t, dp, ozpl, oz, do3_dt_prd,            &
+       do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
     class(ty_ozphys), intent(in) :: this
+    real(kind_phys),  intent(in) :: &
+         con_1ovg       ! Physical constant: One divided by gravitational acceleration (m-1 s2)
+    real(kind_phys),  intent(in) :: &
+         dt             ! Model timestep (sec)
+    real(kind_phys),  intent(in), dimension(:,:) :: &
+         p,           & ! Model Pressure (Pa)
+         t,           & ! Model temperature (K)
+         dp             ! Model layer thickness (Pa)
+    real(kind_phys), intent(in), dimension(:,:,:) :: &
+         ozpl           ! Ozone forcing data
+    real(kind_phys), intent(inout), dimension(:,:) :: &
+         oz             ! Ozone concentration updated by physics
+    real(kind_phys), intent(inout), dimension(:,:), pointer, optional :: &
+         do3_dt_prd,  & ! Physics tendency: production and loss effect
+         do3_dt_ozmx, & ! Physics tendency: ozone mixing ratio effect
+         do3_dt_temp, & ! Physics tendency: temperature effect
+         do3_dt_ohoz    ! Physics tendency: overhead ozone effect
+
+    ! Locals
+    integer :: k, kmax, kmin, iLev, iCol, nCol, nLev, iCf
+    logical, dimension(size(p,1)) :: flg
+    real(kind_phys) :: pmax, pmin, tem, temp
+    real(kind_phys), dimension(size(p,1)) :: wk1, wk2, wk3, ozib
+    real(kind_phys), dimension(size(p,1),this%ncf) :: prod
+    real(kind_phys), dimension(size(p,1),size(p,2)) :: ozi
+    real(kind_phys), dimension(size(p,1),size(p,2)+1) :: colo3, coloz
+
+    ! Dimensions
+    nCol = size(p,1)
+    nLev = size(p,2)
+
+    ! Temporaries
+    ozi = oz
+
+    !> - Calculate vertical integrated column ozone values.
+    if (this%ncf > 2) then
+       colo3(:,nLev+1) = 0.0
+       do iLev=nLev,1,-1
+          do iCol=1,nCol
+             colo3(iCol,iLev) = colo3(iCol,iLev+1) + ozi(iCol,iLev) * dp(iCol,iLev) * con_1ovg
+          enddo
+       enddo
+    endif
+
+    !> - Apply vertically linear interpolation to the ozone coefficients.
+    do iLev=1,nLev
+       pmin =  1.0e10
+       pmax = -1.0e10
+
+       do iCol=1,nCol
+          wk1(iCol)    = log(p(iCol,iLev))
+          pmin         = min(wk1(iCol), pmin)
+          pmax         = max(wk1(iCol), pmax)
+          prod(iCol,:) = 0._kind_phys
+       enddo
+       kmax = 1
+       kmin = 1
+       do k=1,this%nlev-1
+          if (pmin < this%po3(k)) kmax = k
+          if (pmax < this%po3(k)) kmin = k
+       enddo
+
+       do k=kmin,kmax
+          temp = 1.0 / (this%po3(k) - this%po3(k+1))
+          do iCol=1,nCol
+             flg(iCol) = .false.
+             if (wk1(iCol) < this%po3(k) .and. wk1(iCol) >= this%po3(k+1)) then
+                flg(iCol) = .true.
+                wk2(iCol) = (wk1(iCol) - this%po3(k+1)) * temp
+                wk3(iCol) = 1.0 - wk2(iCol)
+             endif
+          enddo
+          do iCf=1,this%ncf
+             do iCol=1,nCol
+                if (flg(iCol)) then
+                   prod(iCol,iCf)  = wk2(iCol) * ozpl(iCol,k,iCf) + wk3(iCol) * ozpl(iCol,k+1,iCf)
+                endif
+             enddo
+          enddo
+       enddo
+
+       do iCf=1,this%ncf
+          do iCol=1,nCol
+             if (wk1(iCol) < this%po3(this%nlev)) then
+                prod(iCol,iCf) = ozpl(iCol,this%nlev,iCf)
+             endif
+             if (wk1(iCol) >= this%po3(1)) then
+                prod(iCol,iCf) = ozpl(iCol,1,iCf)
+             endif
+          enddo
+       enddo
+
+       if (this%ncf == 2) then
+          do iCol=1,nCol
+             ozib(iCol)    = ozi(iCol,iLev)
+             oz(iCol,iLev) = (ozib(iCol) + prod(iCol,1)*dt) / (1.0 + prod(iCol,2)*dt)
+          enddo
+       endif
+
+       if (this%ncf == 4) then
+          do iCol=1,nCol
+             ozib(iCol)    = ozi(iCol,iLev)
+             tem           = prod(iCol,1) + prod(iCol,3)*t(iCol,iLev) + prod(iCol,4)*colo3(iCol,iLev+1)
+             oz(iCol,iLev) = (ozib(iCol)  + tem*dt) / (1.0 + prod(iCol,2)*dt)
+          enddo
+       endif
+       ! Diagnostics (optional)
+       if (associated(do3_dt_prd))  do3_dt_prd(:,iLev)  = prod(:,1)*dt
+       if (associated(do3_dt_ozmx)) do3_dt_ozmx(:,iLev) = (oz(:,iLev) - ozib(:))
+       if (associated(do3_dt_temp)) do3_dt_temp(:,iLev) = prod(:,3) * t(:,iLev) * dt
+       if (associated(do3_dt_ohoz)) do3_dt_ohoz(:,iLev) = prod(:,4) * colo3(:,iLev) * dt
+
+    enddo
+
     return
   end subroutine run_o3prog_2006
 

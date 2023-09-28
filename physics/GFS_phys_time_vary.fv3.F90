@@ -802,38 +802,6 @@
             return
          end if
 
-         !> - Compute temporal interpolation indices for updating gas concentrations.
-         idat=0
-         idat(1)=idate(4)
-         idat(2)=idate(2)
-         idat(3)=idate(3)
-         idat(5)=idate(1)
-         rinc=0.
-         rinc(2)=fhour
-         call w3kind(w3kindreal,w3kindint)
-         if(w3kindreal==4) then
-            rinc4=rinc
-            CALL w3movdat(rinc4,idat,jdat)
-         else
-            CALL w3movdat(rinc,idat,jdat)
-         endif
-         jdow = 0
-         jdoy = 0
-         jday = 0
-         call w3doxdat(jdat,jdow,jdoy,jday)
-         rjday = jdoy + jdat(5) / 24.
-         if (rjday < ozphys%time(1)) rjday = rjday + 365.
-
-         n2 = ozphys%ntime + 1
-         do j=2,ozphys%ntime
-            if (rjday < ozphys%time(j)) then
-               n2 = j
-               exit
-            endif
-         enddo
-         n1 = n2 - 1
-         if (n2 > ozphys%ntime) n2 = n2 - ozphys%ntime
-
 !$OMP parallel num_threads(nthrds) default(none)                                         &
 !$OMP          shared(kdt,nsswr,lsswr,clstp,imfdeepcnv,cal_pre,random_clds)              &
 !$OMP          shared(fhswr,fhour,seed0,cnx,cny,nrcm,wrk,rannie,rndval)                  &
@@ -841,8 +809,9 @@
 !$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,master) &
 !$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
 !$OMP          shared(ddx_ci,in_nm,ccn_nm,do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau)    &
-!$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys)                                    &
-!$OMP          private(iseed,iskip,i,j,k,rjday,n1,n2)
+!$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys,rjday,n1,n2,idat,jdat,rinc,rinc4)   &
+!$OMP          shared(w3kindreal,w3kindint,jdow,jdoy,jday)                               &
+!$OMP          private(iseed,iskip,i,j,k)
 
 !$OMP sections
 
@@ -892,6 +861,38 @@
          endif  ! imfdeepcnv, cal_re, random_clds
 
 !$OMP section
+         !> - Compute temporal interpolation indices for updating gas concentrations.
+         idat=0
+         idat(1)=idate(4)
+         idat(2)=idate(2)
+         idat(3)=idate(3)
+         idat(5)=idate(1)
+         rinc=0.
+         rinc(2)=fhour
+         call w3kind(w3kindreal,w3kindint)
+         if(w3kindreal==4) then
+            rinc4=rinc
+            CALL w3movdat(rinc4,idat,jdat)
+         else
+            CALL w3movdat(rinc,idat,jdat)
+         endif
+         jdow = 0
+         jdoy = 0
+         jday = 0
+         call w3doxdat(jdat,jdow,jdoy,jday)
+         rjday = jdoy + jdat(5) / 24.
+         if (rjday < ozphys%time(1)) rjday = rjday + 365.
+
+         n2 = ozphys%ntime + 1
+         do j=2,ozphys%ntime
+            if (rjday < ozphys%time(j)) then
+               n2 = j
+                      exit
+            endif
+         enddo
+         n1 = n2 - 1
+         if (n2 > ozphys%ntime) n2 = n2 - ozphys%ntime
+
 !> - Update ozone concentration.
          if (ntoz > 0) then
             call ozphys%update_o3prog(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)

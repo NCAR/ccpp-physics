@@ -69,7 +69,8 @@ contains
             do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
     endif
     if (oz_phys_2006) then
-       call ozphys%run_o3prog_2006()
+       call ozphys%run_o3prog_2006(con_1ovg, dtp, prsl, gt0, dp, ozpl, oz0, do3_dt_prd,    &
+            do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
     endif
 
     ! If using Ferrier-Aligo microphysics, set bounds on the mass-weighted rime factor.
