@@ -1,6 +1,11 @@
 ! ###########################################################################################
 !> \file GFS_physics_post.F90
 !!
+!! This module contains GFS specific calculations (e.g. diagnostics) and suite specific
+!! code (e.g Saving fields for subsequent physics timesteps).  For interoperability across a 
+!! wide range of hosts, CCPP compliant schemes should avoid including such calculations. This 
+!! module/scheme is intended for such "host-specific" computations.
+!!
 ! ###########################################################################################
 module GFS_physics_post
   use machine, only : kind_phys, kind_dbl_prec, kind_sngl_prec
@@ -30,9 +35,10 @@ contains
 !! \section arg_table_GFS_physics_post_run Argument Table
 !! \htmlinclude GFS_physics_post_run.html
 !!
-  subroutine GFS_physics_post_run(nCol, nLev, ntoz, dtidx, ip_prod_loss, ip_ozmix,   &
-       ip_temp, ip_overhead_ozone, do3_dt_prd, do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz, dtend,&
-       errmsg, errflg)
+  subroutine GFS_physics_post_run(nCol, nLev, ntoz, dtidx, ip_prod_loss, ip_ozmix, ip_temp, &
+       ip_overhead_ozone, do3_dt_prd, do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz, dtend, errmsg, &
+       errflg)
+
     ! Inputs
     integer, intent(in) :: &
          nCol,           & ! Horizontal dimension

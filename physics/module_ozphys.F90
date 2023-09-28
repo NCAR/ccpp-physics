@@ -2,6 +2,39 @@
 !> \section arg_table_module_ozphys Argument table                               
 !! \htmlinclude module_ozphys.html                                               
 !!
+!
+!> The operational GFS currently parameterizes ozone production and destruction based on 
+!! monthly mean coefficients (\c global_o3prdlos.f77) provided by Naval Research Laboratory
+!! through CHEM2D chemistry model (McCormack et al. (2006) \cite mccormack_et_al_2006).
+!!
+!! There are two implementations of this parameterization within this module.
+!! run_o3prog_2006 - Relies on either two/four mean monthly coefficients. This is explained
+!!                   in (https://doi.org/10.5194/acp-6-4943-2006. See Eq.(4)).
+!! run_o3prog_2015 - Relies on six mean monthly coefficients, specifically for NRL 
+!!                   parameterization and climatological T and O3 are in location 5 and 6 of
+!!                   the coefficient array.
+!! 
+!! Both of these rely on the scheme being setup correctly by invoking the load(), setup(), 
+!! and update() procedures prior to calling the run() procedure.
+!!
+!! load_o3prog()   - Read in data and load into type ty_ozphys (called once from host)
+!! setup_o3prog()  - Create spatial interpolation indices      (called once, after model grid is known)
+!! update_o3prog() - Update ozone concentration in time        (call in physics loop, before run())
+!!                   *CAVEAT* Since the radiation is often run at a lower temporal resolution
+!!                            than the rest of the physics, update_o3prog() needs to be
+!!                            called before the radiation, which is called before the physics.
+!!                            For example, within the physics loop:
+!!                                update_o3prog() -> radiation() -> run_o3prog() -> physics....
+!!
+!! Additionally, there is the functionality to not use interactive ozone, instead reverting
+!! to ozone climatology. In this case, analagous to when using prognostic ozone, there are
+!! update() and run() procedures that need to be called before the radiation.
+!! For example, within the physics loop:
+!!     update_o3clim() -> run_o3clim() -> radiation() -> physics...
+!!
+!!\author   June 2015 - Shrinivas Moorthi
+!!\modified Sep  2023 - Dustin Swales
+!!
 ! #########################################################################################
 module module_ozphys
   use machine,  only : kind_phys
@@ -14,7 +47,8 @@ module module_ozphys
 !> \section arg_table_ty_ozphys Argument Table 
 !! \htmlinclude ty_ozphys.html
 !!
-!! All data field are ordered from surface-to-toa (j=1=isfc)
+!> Derived type containing data and procedures needed by ozone photochemistry parameterization
+!! *Note* All data field are ordered from surface-to-toa.
 !!
 ! #########################################################################################
   type ty_ozphys
@@ -54,7 +88,7 @@ module module_ozphys
   
 contains
   ! #########################################################################################
-  ! Procedure (type-bound) for loading ozone forcing data.
+  ! Procedure (type-bound) for loading data for prognostic ozone.
   ! #########################################################################################
   function load_o3prog(this, file, fileID) result (err_message)
     class(ty_ozphys), intent(inout) :: this
@@ -101,7 +135,9 @@ contains
   end function load_o3prog
 
   ! #########################################################################################
-  ! Procedure for setting up interpolation indices between data and model grid.
+  ! Procedure (type-bound) for setting up interpolation indices between data-grid and 
+  ! model-grid. 
+  ! Called once during initialization
   ! #########################################################################################
   subroutine setup_o3prog(this, lat, idx1, idx2, idxh)
     class(ty_ozphys), intent(in)  :: this
@@ -130,7 +166,7 @@ contains
   end subroutine setup_o3prog
 
   ! #########################################################################################
-  ! Procedure (type-bound) for updating ozone data.
+  ! Procedure (type-bound) for updating data used in prognostic ozone scheme.
   ! #########################################################################################
   subroutine update_o3prog(this, idx1, idx2, idxh, rjday, idxt1, idxt2, ozpl)
     class(ty_ozphys), intent(in)  :: this
@@ -474,7 +510,7 @@ contains
   end subroutine run_o3clim
 
   ! #########################################################################################
-  ! Procedure (type-bound) for loading ozone climo data.
+  ! Procedure (type-bound) for loading data for climotological ozone.
   ! #########################################################################################
   function load_o3clim(this, file, fileID) result (err_message)
     class(ty_ozphys), intent(inout) :: this
@@ -546,46 +582,47 @@ contains
         this%pstr(iLev)  = pstr4(iLev)
         this%pkstr(iLev) = fpkapx(this%pstr(iLev)*100.0)
      enddo
-
+     
    end function load_o3clim
 
-  ! #########################################################################################
-  ! Procedure (type-bound) for updating ozone climotological data.
-  ! #########################################################################################
-  subroutine update_o3clim(this, imon, iday, ihour, loz1st)
-    class(ty_ozphys), intent(inout) :: this
-    integer, intent(in) :: imon, iday, ihour
-    logical, intent(in) :: loz1st
+   ! #########################################################################################
+   ! Procedure (type-bound) for updating temporal interpolation index when using climotological
+   ! ozone
+   ! #########################################################################################
+   subroutine update_o3clim(this, imon, iday, ihour, loz1st)
+     class(ty_ozphys), intent(inout) :: this
+     integer, intent(in) :: imon, iday, ihour
+     logical, intent(in) :: loz1st
 
-    integer ::  midmon=15, midm=15, midp=45, id
-    integer, parameter, dimension(13) :: mdays = (/31,28,31,30,31,30,31,31,30,31,30,31,30/)
-    logical :: change
+     integer ::  midmon=15, midm=15, midp=45, id
+     integer, parameter, dimension(13) :: mdays = (/31,28,31,30,31,30,31,31,30,31,30,31,30/)
+     logical :: change
 
-    midmon = mdays(imon)/2 + 1
-    change = loz1st .or. ( (iday==midmon) .and. (ihour==0) )
+     midmon = mdays(imon)/2 + 1
+     change = loz1st .or. ( (iday==midmon) .and. (ihour==0) )
     
-    if ( change ) then
-       if ( iday < midmon ) then
-          this%k1oz = mod(imon+10, 12) + 1
-          midm = mdays(this%k1oz)/2 + 1
-          this%k2oz = imon
-          midp = mdays(this%k1oz) + midmon
-       else
-          this%k1oz = imon
-          midm = midmon
-          this%k2oz = mod(imon, 12) + 1
-          midp = mdays(this%k2oz)/2 + 1 + mdays(this%k1oz)
-       endif
-    endif
+     if ( change ) then
+        if ( iday < midmon ) then
+           this%k1oz = mod(imon+10, 12) + 1
+           midm = mdays(this%k1oz)/2 + 1
+           this%k2oz = imon
+           midp = mdays(this%k1oz) + midmon
+        else
+           this%k1oz = imon
+           midm = midmon
+           this%k2oz = mod(imon, 12) + 1
+           midp = mdays(this%k2oz)/2 + 1 + mdays(this%k1oz)
+        endif
+     endif
     
-    if (iday < midmon) then
-       id = iday + mdays(this%k1oz)
-    else
-       id = iday
-    endif
+     if (iday < midmon) then
+        id = iday + mdays(this%k1oz)
+     else
+        id = iday
+     endif
     
-    this%facoz = float(id - midm) / float(midp - midm)
+     this%facoz = float(id - midm) / float(midp - midm)
 
-  end subroutine update_o3clim
+   end subroutine update_o3clim
 
-end module module_ozphys
+ end module module_ozphys
