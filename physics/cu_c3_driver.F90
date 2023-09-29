@@ -340,8 +340,8 @@ contains
 !
 !> - Set tuning constants for radiation coupling
 !
-     tun_rad_shall(:)=.01
-     tun_rad_mid(:)=.3 !.02
+     tun_rad_shall(:)=.012
+     tun_rad_mid(:)=.15 !.02
      tun_rad_deep(:)=.3 !.065
      edt(:)=0.
      edtm(:)=0.
@@ -644,7 +644,6 @@ contains
      enddo
 !$acc end kernels
      if (dx(its)<6500.) then
-       ichoice=10
        imid_gf=0
      endif
 !
@@ -680,10 +679,6 @@ contains
           do i=its,itf
            if(xmbs(i).gt.0.)then
             cutens(i)=1.
-            if (dx(i)<6500.) then
-             ierrm(i)=555
-             ierr (i)=555
-            endif
            endif
           enddo
 !$acc end kernels
@@ -954,38 +949,6 @@ contains
               !gdc(i,k,8)=(outq(i,k))*86400.*xlv/cp
                gdc(i,k,8)=(outqm(i,k)+outqs(i,k)+outq(i,k))*86400.*xlv/cp
                gdc(i,k,9)=gdc(i,k,2)+gdc(i,k,3)+gdc(i,k,4)
-!
-!> - Calculate subsidence effect on clw
-!
-!              dsubclw=0.
-!              dsubclwm=0.
-!              dsubclws=0.
-!              dp=100.*(p2d(i,k)-p2d(i,k+1))
-!              if (clcw(i,k) .gt. -999.0 .and. clcw(i,k+1) .gt. -999.0 )then
-!                 clwtot = cliw(i,k) + clcw(i,k)
-!                 clwtot1= cliw(i,k+1) + clcw(i,k+1)
-!                 dsubclw=((-edt(i)*zd(i,k+1)+zu(i,k+1))*clwtot1   &
-!                      -(-edt(i)*zd(i,k)  +zu(i,k))  *clwtot  )*g/dp
-!                 dsubclwm=((-edtm(i)*zdm(i,k+1)+zum(i,k+1))*clwtot1   &
-!                      -(-edtm(i)*zdm(i,k)  +zum(i,k))  *clwtot  )*g/dp
-!                 dsubclws=(zus(i,k+1)*clwtot1-zus(i,k)*clwtot)*g/dp
-!                 dsubclw=dsubclw+(zu(i,k+1)*clwtot1-zu(i,k)*clwtot)*g/dp
-!                 dsubclwm=dsubclwm+(zum(i,k+1)*clwtot1-zum(i,k)*clwtot)*g/dp
-!                 dsubclws=dsubclws+(zus(i,k+1)*clwtot1-zus(i,k)*clwtot)*g/dp
-!              endif
-!              tem  = dt*(outqcs(i,k)*cutens(i)+outqc(i,k)*cuten(i)       &
-!                    +outqcm(i,k)*cutenm(i)                           &
-!                     +dsubclw*xmb(i)+dsubclws*xmbs(i)+dsubclwm*xmbm(i) &
-!                    )
-!              tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
-!              if (clcw(i,k) .gt. -999.0) then
-!               cliw(i,k) = max(0.,cliw(i,k) + tem * tem1)            ! ice
-!               clcw(i,k) = max(0.,clcw(i,k) + tem *(1.0-tem1))       ! water
-!              else
-!                cliw(i,k) = max(0.,cliw(i,k) + tem)
-!              endif
-!
-!            enddo
 
 !> - FCT treats subsidence effect to cloud ice/water (begin)
                dp=100.*(p2d(i,k)-p2d(i,k+1))
@@ -1041,8 +1004,8 @@ contains
             gdc(i,16,10)=pret(i)*3600.
 
             maxupmf(i)=0.
-            if(forcing(i,6).gt.0.)then
-              maxupmf(i)=maxval(xmb(i)*zu(i,kts:ktf)/forcing(i,6))
+            if(forcing2(i,6).gt.0.)then
+              maxupmf(i)=maxval(xmb(i)*zu(i,kts:ktf)/forcing2(i,6))
             endif
 
             if(ktop(i).gt.2 .and.pret(i).gt.0.)dt_mf(i,ktop(i)-1)=ud_mf(i,ktop(i))

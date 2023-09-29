@@ -2078,10 +2078,6 @@ contains
 
 !> - Call rain_evap_below_cloudbase() to calculate evaporation below cloud base
 
-      call rain_evap_below_cloudbase(itf,ktf,its,ite,                    &
-           kts,kte,ierr,kbcon,xmb,psur,xland,qo_cup,                     &
-           po_cup,qes_cup,pwavo,edto,pwevo,pre,outt,outq)      !,outbuoy)
-
       k=1
 !$acc kernels
       do i=its,itf
@@ -2137,7 +2133,7 @@ contains
          do k = ktop(i), 1, -1
               rain =  pwo(i,k) + edto(i) * pwdo(i,k)
               rn(i) = rn(i) + rain * xmb(i) * .001 * dtime
-            !if(po(i,k).gt.400.)then
+              if(k.gt.jmin(i))then
               if(flg(i))then
               q1=qo(i,k)+(outq(i,k))*dtime
               t1=tn(i,k)+(outt(i,k))*dtime
@@ -2162,7 +2158,7 @@ contains
                 pre(i)=max(pre(i),0.)
                 delqev(i) = delqev(i) + .001*dp*qevap(i)/g
               endif
-            !endif ! 400mb
+            endif 
           endif
         enddo
 !       pre(i)=1000.*rn(i)/dtime
@@ -4429,7 +4425,7 @@ endif
 !
 !now do the rest
 !
-            kklev(i)=maxloc(zu(i,:),1)
+            kklev(i)=maxloc(zu(i,2:ktop(i)),1)
 !$acc loop seq
             do k=kbcon(i)+1,ktop(i)
                if(t(i,k) > 273.16) then
@@ -4489,6 +4485,8 @@ endif
                endif
                if(k.gt.kbcon(i)+1)c1d(i,k)=clwdet*up_massdetr(i,k-1)
                if(k.gt.kbcon(i)+1)c1d_b(i,k)=clwdet*up_massdetr(i,k-1)
+                c1d(i,k)=0.005
+                c1d_b(i,k)=0.005
 
                if(autoconv.eq.2) then
 ! 
