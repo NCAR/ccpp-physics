@@ -5826,7 +5826,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
       elseif (opt_trs == chen09) then
 
 !       z0m_out = exp(fveg * log(z0m)      + (1.0 - fveg) * log(z0mg))
-!       z0m_out = fveg * z0m      + (1.0 - fveg) * z0mg
+        z0m_out = fveg * z0m      + (1.0 - fveg) * z0mg
         czil    = 10.0 ** (- 0.4 * parameters%hvt)
 
         reyn = ustarx*z0m_out/viscosity                      ! Blumel99 eqn 36c
