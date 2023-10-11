@@ -951,19 +951,20 @@ MODULE module_mp_nssl_2mom
       real, parameter :: cawbolton = 17.67
 
       real, parameter :: tfrh = 233.15
+! --------------------------
+      ! For CCPP, the following variables should be set by the host model, but initial values are set just in case
       real :: tfr = 273.15
-
       real :: cp = 1004.0, rd = 287.04
       real :: rw = 461.5              ! gas const. for water vapor
-      REAL, PRIVATE ::      cpl = 4190.0
-      REAL, PRIVATE ::      cpigb = 2106.0
-      real :: cpi 
-      real :: cap 
-      real :: tfrcbw
-      real :: tfrcbi
-      real :: rovcp
-      real, public :: rdorv = 0.622
-
+      real :: cpl = 4190.0
+      real :: cpigb = 2106.0
+      real :: cpi = 1.0/1004.0
+      real :: cap = 287.04/1004.0
+      real :: tfrcbw = 273.15 - cbw
+      real :: tfrcbi = 273.15 - cbi
+      real :: rovcp = 287.04/1004.0
+      real :: rdorv = 0.622
+! --------------------------
       real, parameter :: poo = 1.0e+05
       real, parameter :: advisc0 = 1.832e-05     ! reference dynamic viscosity (SMT; see Beard & Pruppacher 71)
       real, parameter :: advisc1 = 1.718e-05     ! dynamic viscosity constant used in thermal conductivity calc
@@ -4113,7 +4114,7 @@ END SUBROUTINE nssl_2mom_driver
           g1palp = gmoi(i) + (gmoi(i+1) - gmoi(i))*del*dgami
 
           tmp = dn(ix,jy,kz)*an(ix,jy,kz,lh)/(hwdn*an(ix,jy,kz,lnh))
-          diam = (6.0*tmp/(3.14159))**(1./3.)
+          diam = (6.0*tmp/pi)**(1./3.)
           IF ( lzh > 1 ) THEN ! 3moment
             cwchtmp = ((3. + alpha2d(ix,1,kz,2))*(2. + alpha2d(ix,1,kz,2))*(1.0 + alpha2d(ix,1,kz,2)))**(-1./3.)
           ENDIF
@@ -4184,7 +4185,7 @@ END SUBROUTINE nssl_2mom_driver
           g1palp = gmoi(i) + (gmoi(i+1) - gmoi(i))*del*dgami
 
           tmp = dn(ix,jy,kz)*an(ix,jy,kz,lhl)/(hwdn*an(ix,jy,kz,lnhl))
-          diam = (6.0*tmp/(3.14159))**(1./3.)
+          diam = (6.0*tmp/pi)**(1./3.)
           IF ( lzhl > 1 ) THEN ! 3moment
             cwchltmp = ((3. + alpha2d(ix,1,kz,3))*(2. + alpha2d(ix,1,kz,3))*(1.0 + alpha2d(ix,1,kz,3)))**(-1./3.)
           ENDIF
