@@ -10,7 +10,7 @@
 module GFS_physics_post
   use machine, only : kind_phys, kind_dbl_prec, kind_sngl_prec
   implicit none
-  public GFS_physics_post_init, GFS_physics_post_run
+  public GFS_physics_post_run
 contains
 
 ! ###########################################################################################
