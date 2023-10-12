@@ -60,6 +60,22 @@
 
       contains
 
+      subroutine copy_error(myerrmsg, myerrflg, errmsg, errflg)
+        implicit none
+        character(*), intent(in) :: myerrmsg
+        integer, intent(in) :: myerrflg
+        character(*), intent(out) :: errmsg
+        integer, intent(inout) :: errflg
+        if(myerrflg /= 0 .and. errflg == 0) then
+          !$OMP CRITICAL
+          if(errflg == 0) then
+            errmsg = myerrmsg
+            errflg = myerrflg
+          endif
+          !$OMP END CRITICAL
+        endif
+      end subroutine copy_error
+
 !> \section arg_table_GFS_phys_time_vary_init Argument Table
 !! \htmlinclude GFS_phys_time_vary_init.html
 !!
@@ -193,6 +209,9 @@
          real(kind=kind_phys), dimension(:), allocatable :: dzsno
          real(kind=kind_phys), dimension(:), allocatable :: dzsnso
 
+         integer :: myerrflg
+         character(len=255) :: myerrmsg
+
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
@@ -207,7 +226,7 @@
 !$OMP          shared (me,master,ntoz,h2o_phys,im,nx,ny,levs,idate)                 &
 !$OMP          shared (xlat_d,xlon_d,imap,jmap,errmsg,errflg)                       &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres,h2opl)                             &
-!$OMP          shared (iamin, iamax, jamin, jamax)                                  &
+!$OMP          shared (iamin, iamax, jamin, jamax, lsm_noahmp)                      &
 !$OMP          shared (iaerclm,iaermdl,ntrcaer,aer_nm,iflip,iccn)                   &
 !$OMP          shared (jindx1_o3,jindx2_o3,ddy_o3,jindx1_h,jindx2_h,ddy_h)          &
 !$OMP          shared (jindx1_aer,jindx2_aer,ddy_aer,iindx1_aer,iindx2_aer,ddx_aer) &
@@ -216,36 +235,43 @@
 !$OMP          shared (isot,ivegsrc,nlunit,sncovr,sncovr_ice,lsm,lsm_ruc)           &
 !$OMP          shared (min_seaice,fice,landfrac,vtype,weasd,snupx,salp_data)        &
 !$OMP          shared (ozphys)                                                      &
-!$OMP          private (ix,i,j,rsnow,vegtyp)
+!$OMP          private (ix,i,j,rsnow,vegtyp,myerrmsg,myerrflg)
 
 !$OMP sections
 
 !$OMP section
 !> - Call read_h2odata() to read stratospheric water vapor data
+       need_h2odata: if(h2o_phys) then
          call read_h2odata (h2o_phys, me, master)
 
          ! Consistency check that the hardcoded values for levh2o and
          ! h2o_coeff in GFS_typedefs.F90 match what is set by read_h2odata
          ! in GFS_typedefs.F90: allocate (Tbd%h2opl (IM,levh2o,h2o_coeff))
          if (size(h2opl, dim=2).ne.levh2o) then
-            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
+            write(myerrmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
                   "levh2o from read_h2odata does not match value in GFS_typedefs.F90: ", &
                   levh2o, " /= ", size(h2opl, dim=2)
-            errflg = 1
+            myerrflg = 1
+            call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          end if
          if (size(h2opl, dim=3).ne.h2o_coeff) then
-            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",       &
+            write(myerrmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",       &
                   "h2o_coeff from read_h2odata does not match value in GFS_typedefs.F90: ", &
                   h2o_coeff, " /= ", size(h2opl, dim=3)
-            errflg = 1
+            myerrflg = 1
+            call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          end if
+       endif need_h2odata
 
 !$OMP section
 !> - Call read_aerdata() to read aerosol climatology, Anning added coupled
 !>  added coupled gocart and radiation option to initializing aer_nm
          if (iaerclm) then
            ntrcaer = ntrcaerm
-           call read_aerdata (me,master,iflip,idate,errmsg,errflg)
+           myerrflg = 0
+           myerrmsg = 'read_aerdata failed without a message'
+           call read_aerdata (me,master,iflip,idate,myerrmsg,myerrflg)
+           call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          else if(iaermdl ==2 ) then
            do ix=1,ntrcaerm
              do j=1,levs
@@ -270,16 +296,27 @@
 !$OMP section
 !> - Call tau_amf dats for  ugwp_v1
          if (do_ugwp_v1) then
-            call read_tau_amf(me, master, errmsg, errflg)
+            myerrflg = 0
+            myerrmsg = 'read_tau_amf failed without a message'
+            call read_tau_amf(me, master, myerrmsg, myerrflg)
+            call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          endif
 
 !$OMP section
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
-         call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
+         myerrflg = 0
+         myerrmsg = 'set_soilveg failed without a message'
+         call set_soilveg(me, isot, ivegsrc, nlunit, myerrmsg, myerrflg)
+         call copy_error(myerrmsg, myerrflg, errmsg, errflg)
 
 !$OMP section
 !> - read in NoahMP table (needed for NoahMP init)
-         call read_mp_table_parameters(errmsg, errflg)
+         if(lsm == lsm_noahmp) then
+           myerrflg = 0
+           myerrmsg = 'read_mp_table_parameters failed without a message'
+           call read_mp_table_parameters(myerrmsg, myerrflg)
+           call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+         endif
 
 !$OMP end sections
 
@@ -374,7 +411,9 @@
          if (errflg/=0) return
 
          if (iaerclm) then
+           ! This call is outside the OpenMP section, so it should access errmsg & errflg directly.
            call read_aerdataf (me, master, iflip, idate, fhour, errmsg, errflg)
+           ! If it is moved to an OpenMP section, it must use myerrmsg, myerrflg, and copy_error.
            if (errflg/=0) return
          end if
 
@@ -460,7 +499,8 @@
 !$omp          shared(dwsat_table,dksat_table,psisat_table,smoiseq)     &
 !$OMP          shared(smcwtdxy,deeprechxy,rechxy,errmsg,errflg)         &
 !$OMP          private(vegtyp,masslai,masssai,snd,dzsno,dzsnso,isnow)   &
-!$OMP          private(soiltyp,bexp,smcmax,smcwlt,dwsat,dksat,psisat,ddz)
+!$OMP          private(soiltyp,bexp,smcmax,smcwlt,dwsat,dksat,psisat)   &
+!$OMP          private(myerrmsg,myerrflg,ddz)
              do ix=1,im
                if (landfrac(ix) >= drythresh) then
                  tvxy(ix)     = tsfcl(ix)
@@ -575,8 +615,9 @@
                    dzsno(-1)    = 0.20_kind_phys
                    dzsno(0)     = snd - 0.05_kind_phys - 0.20_kind_phys
                  else
-                   errmsg = 'Error in GFS_phys_time_vary.fv3.F90: Problem with the logic assigning snow layers in Noah MP initialization'
-                   errflg = 1
+                   myerrmsg = 'Error in GFS_phys_time_vary.fv3.F90: Problem with the logic assigning snow layers in Noah MP initialization'
+                   myerrflg = 1
+                   call copy_error(myerrmsg, myerrflg, errmsg, errflg)
                  endif
 
 ! Now we have the snowxy field
