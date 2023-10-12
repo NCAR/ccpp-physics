@@ -44,24 +44,10 @@ module dust_data_mod
   ! Never used:
   ! real(kind_phys), parameter :: fengsha_alpha = 0.3
   ! real(kind_phys), parameter :: fengsha_gamma = 1.3
+
   ! -- FENGSHA threshold velocities based on Dale A. Gillette's data
   integer, parameter :: fengsha_maxstypes = 13
-!  real(kind_phys), dimension(fengsha_maxstypes) :: dust_uthres = &
-!    (/ 0.065,   & ! Sand            - 1
-!       0.20,    & ! Loamy Sand      - 2
-!       0.52,    & ! Sandy Loam      - 3
-!       0.50,    & ! Silt Loam       - 4
-!       0.50,    & ! Silt            - 5
-!       0.60,    & ! Loam            - 6
-!       0.73,    & ! Sandy Clay Loam - 7
-!       0.73,    & ! Silty Clay Loam - 8
-!       0.80,    & ! Clay Loam       - 9
-!       0.95,    & ! Sandy Clay      - 10
-!       0.95,    & ! Silty Clay      - 11
-!       1.00,    & ! Clay            - 12
-!       9.999 /)   ! Other           - 13
-!  dust_uthres = 0.065, 0.18, 0.27, 0.30, 0.35, 0.38, 0.35, 0.41, 0.41,
-!                0.45,0.50,0.45,9999.0
+
   real(kind_phys), dimension(fengsha_maxstypes), parameter :: dust_uthres = &
     (/ 0.065,   & ! Sand            - 1
        0.18,    & ! Loamy Sand      - 2
@@ -76,12 +62,16 @@ module dust_data_mod
        0.50,    & ! Silty Clay      - 11
        0.45,    & ! Clay            - 12
        9999.0 /)   ! Other           - 13
-  ! -- FENGSHA uses precalculated drag partition from ASCAT. See: Prigent et al. (2012,2015)
+
+  ! -- FENGSHA uses precalculated drag partition
   integer, parameter :: dust_calcdrag = 1
-
-  real(kind_phys) :: dust_alpha = 2.2
+  ! -- FENGSHA dust moisture parameterization 1:fecan  -  2:shao 
+  integer :: dust_moist_opt = 1
+  
+  real(kind_phys) :: dust_alpha = 1.0
   real(kind_phys) :: dust_gamma = 1.0
-
+  real(kind_phys) :: dust_moist_correction = 1.0
+  real(kind_phys) :: dust_drylimit_factor = 1.0
 
   ! -- sea salt parameters
   integer,            dimension(nsalt), parameter :: spoint    = (/ 1, 2, 2, 2, 2, 2, 3, 3, 3 /)  ! 1 Clay, 2 Silt, 3 Sand
@@ -93,7 +83,7 @@ module dust_data_mod
     (/      1.,     0.2,     0.2,     0.2,     0.2,     0.2,   0.333,   0.333,   0.333 /)
 
 
-  ! -- soil vagatation parameters
+  ! -- soil vegatation parameters
   integer, parameter :: max_soiltyp = 30
   real(kind_phys), dimension(max_soiltyp), parameter :: &
     maxsmc = (/ 0.421, 0.464, 0.468, 0.434, 0.406, 0.465, &
