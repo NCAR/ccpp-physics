@@ -353,10 +353,10 @@ contains
                    ims,ime, jms,jme, kms,kme,                          &
                    its,ite, jts,jte, kts,kte, errmsg, errflg           )
         if(errflg/=0) return
-    end if
-    do i = its,ite
+      do i = its,ite
          fire_heat_flux_out(i) = min(max(0.,fire_heat_flux(i,1)),50000.) ! JLS - W m-2 [0 - 10,000]
-    enddo
+      enddo
+    end if
     ! -- add biomass burning emissions at every timestep
     if (addsmoke_flag == 1) then
     call add_emis_burn(dt,dz8w,rho_phy,rel_hum,chem,                 &
