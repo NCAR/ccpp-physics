@@ -63,6 +63,55 @@
   dimensions = ()
   type = integer
   intent = in
+[ntracp100]
+  standard_name = number_of_tracers_plus_one_hundred
+  long_name = number of tracers plus one hundred
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[nprocess]
+  standard_name = number_of_cumulative_change_processes
+  long_name = number of processes that cause changes in state variables
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[nprocess_summed]
+  standard_name = number_of_physics_causes_of_tracer_changes
+  long_name = number of causes in dtidx per tracer summed for total physics tendency
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ip_physics]
+  standard_name = index_of_all_physics_process_in_cumulative_change_index
+  long_name = index of all physics transport process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ip_photochem]
+  standard_name = index_of_photochemistry_process_in_cumulative_change_index
+  long_name = index of photochemistry process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[is_photochem]
+  standard_name = flags_for_photochemistry_processes_to_sum
+  long_name = flags for photochemistry processes to sum as the total photochemistry process cumulative change
+  units = flag
+  dimensions = (number_of_cumulative_change_processes)
+  type = logical
+  intent = in
+[ldiag3d]
+  standard_name = flag_for_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ip_prod_loss]
   standard_name = index_of_production_and_loss_process_in_cumulative_change_index
   long_name = index of production and loss effect in photochemistry process in second dimension of array cumulative change index
