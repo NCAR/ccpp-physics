@@ -97,6 +97,7 @@ CONTAINS
                    MAVAIL,CANWAT,VEGFRA,                         &
                    ALB,ZNT,Z0,SNOALB,ALBBCK,LAI,                 & 
                    landusef, nlcat, soilctop, nscat,             &
+                   smcwlt, smcref,                               & 
                    QSFC,QSG,QVG,QCG,DEW,SOILT1,TSNAV,            &
                    TBOT,IVGTYP,ISLTYP,XLAND,                     &
                    ISWATER,ISICE,XICE,XICE_THRESHOLD,            &
@@ -107,6 +108,7 @@ CONTAINS
                    RUNOFF1,RUNOFF2,ACRUNOFF,SFCEXC,              &
                    SFCEVP,GRDFLX,SNOWFALLAC,ACSNOW,SNOM,         &
                    SMFR3D,KEEPFR3DFLAG,                          &
+                   add_fire_heat_flux,fire_heat_flux,            &
                    myj,shdmin,shdmax,rdlai2d,                    &
                    ims,ime, jms,jme, kms,kme,                    &
                    its,ite, jts,jte, kts,kte,                    &
@@ -239,6 +241,8 @@ CONTAINS
    real (kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN )::   SHDMIN
    real (kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN )::   hgt
    real (kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN )::   stdev
+   LOGICAL, intent(in) :: add_fire_heat_flux
+   real (kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN ):: fire_heat_flux
    LOGICAL, intent(in) :: rdlai2d
 
    real (kind_phys),       DIMENSION( 1:nsl), INTENT(IN   )  :: ZS
@@ -252,6 +256,8 @@ CONTAINS
                                                          SNOALB, &
                                                             ALB, &
                                                             LAI, &
+                                                         SMCWLT, &
+                                                         SMCREF, &
                                                           EMISS, &
                                                         EMISBCK, &
                                                          MAVAIL, & 
@@ -757,6 +763,8 @@ CONTAINS
 
        !-- update background emissivity for land points, can have vegetation mosaic effect
        EMISBCK(I,J) = EMISSL(I,J)
+       smcwlt(i,j)  = wilt
+       smcref(i,j)  = ref
 
     IF (debug_print ) THEN
       if(init)then
@@ -961,6 +969,7 @@ CONTAINS
                 snoalb(i,j),albbck(i,j),lai(i,j),                &
                 hgt(i,j),stdev(i,j),                             &   !new
                 myj,seaice(i,j),isice,                           &
+                add_fire_heat_flux,fire_heat_flux(i,j),          &
 !--- soil fixed fields
                 QWRTZ,                                           &
                 rhocs,dqm,qmin,ref,                              &
@@ -1212,6 +1221,7 @@ CONTAINS
                 QKMS,TKMS,PC,MAVAIL,CST,VEGFRA,ALB,ZNT,          &
                 ALB_SNOW,ALB_SNOW_FREE,lai,hgt,stdev,            &
                 MYJ,SEAICE,ISICE,                                &
+                add_fire_heat_flux,fire_heat_flux,               &
                 QWRTZ,rhocs,dqm,qmin,ref,wilt,psis,bclh,ksat,    & !--- soil fixed fields
                 sat,cn,zsmain,zshalf,DTDZS,DTDZS2,tbq,           &
                 cp,rovcp,g0,lv,stbolt,cw,c1sn,c2sn,              & !--- constants
@@ -1256,7 +1266,9 @@ CONTAINS
                                                          SEAICE, &
                                                             RHO, &
                                                            QKMS, &
-                                                           TKMS
+                                                           TKMS, &
+                                                 fire_heat_flux      
+   LOGICAL,   INTENT(IN   )  ::              add_fire_heat_flux      
                                                              
    INTEGER,   INTENT(IN   )  ::                          IVGTYP, ISLTYP
 !--- 2-D variables
@@ -1813,6 +1825,10 @@ CONTAINS
          UPFLUX  = T3 *SOILT
          XINET   = EMISS_snowfree*(GLW-UPFLUX)
          RNET    = GSWnew + XINET
+         IF ( add_fire_heat_flux ) then ! JLS
+            RNET = RNET + fire_heat_flux
+         ENDIF
+
     IF (debug_print ) THEN
      print *,'Fractional snow - snowfrac=',snowfrac
      print *,'Snowfrac<1 GSWin,GSWnew -',GSWin,GSWnew,'SOILT, RNET',soilt,rnet
@@ -1933,6 +1949,9 @@ CONTAINS
 
       if (SEAICE .LT. 0.5_kind_phys) then
 ! LAND
+         IF ( add_fire_heat_flux ) then ! JLS
+            RNET = RNET + fire_heat_flux
+         ENDIF
            if(snow_mosaic==one)then
               snfr=one
            else
@@ -2049,6 +2068,9 @@ CONTAINS
           eeta = eetas*(one-snowfrac) + eeta*snowfrac
           qfx = qfxs*(one-snowfrac) + qfx*snowfrac
           hfx = hfxs*(one-snowfrac) + hfx*snowfrac
+          !IF ( add_fire_heat_flux ) then ! JLS
+          !   hfx = hfx + fire_heat_flux
+          !ENDIF
           s = ss*(one-snowfrac) + s*snowfrac
           evapl = evapls*(one-snowfrac)
           sublim = sublim*snowfrac
@@ -2094,6 +2116,9 @@ CONTAINS
           eeta = eetas*(one-snowfrac) + eeta*snowfrac
           qfx = qfxs*(one-snowfrac) + qfx*snowfrac
           hfx = hfxs*(one-snowfrac) + hfx*snowfrac
+          !IF ( add_fire_heat_flux ) then ! JLS
+          !   hfx = hfx + fire_heat_flux
+          !ENDIF
           s = ss*(one-snowfrac) + s*snowfrac
           prcpl = prcpls*(one-snowfrac) + prcpl*snowfrac
           fltot = fltots*(one-snowfrac) + fltot*snowfrac
@@ -6611,7 +6636,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
                 /(REF-WILT)*DID
         ENDIF
 !-- uncomment next line for non-linear root distribution
-!          TRANF(k)=part(k)
+          TRANF(k)=part(k)
         END DO
 
 ! For LAI> 3 =>  transpiration at potential rate (F.Tardieu, 2013)
