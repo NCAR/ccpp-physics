@@ -38,6 +38,7 @@ subroutine ebu_driver (      flam_frac,ebb_smoke,ebu,           &
                              t_phy,q_vap,                            &   ! RAR: moist is replaced with q_vap
                              rho_phy,vvel,u_phy,v_phy,p_phy,         &
                              z_at_w,z,g,con_cp,con_rd,               &   ! scale_fire_emiss is part of config_flags
+                             fire_heat_flux,dxy,                     &
                              plume_frp, k_min, k_max,                &   ! RAR:
                              ids,ide, jds,jde, kds,kde,              &
                              ims,ime, jms,jme, kms,kme,              &
@@ -66,6 +67,8 @@ subroutine ebu_driver (      flam_frac,ebb_smoke,ebu,           &
    real(kind=kind_phys), INTENT(IN )  :: g, con_cp, con_rd
    real(kind=kind_phys), DIMENSION( ims:ime, jms:jme ), INTENT(IN )  :: ebb_smoke
    real(kind=kind_phys), DIMENSION( ims:ime, jms:jme ), INTENT(OUT ) :: flam_frac
+   real(kind=kind_phys), DIMENSION( ims:ime, jms:jme ), INTENT(OUT ) :: fire_heat_flux
+   real(kind=kind_phys), DIMENSION( ims:ime, jms:jme ), INTENT(IN )  :: dxy
 
 !   real(kind=kind_phys), DIMENSION( ims:ime, 1, jms:jme ),                 &
 !         INTENT(IN ) ::                                   ebu_in
@@ -184,6 +187,7 @@ check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumeri
                               !num_ebu, eburn_in, eburn_out,         &
                               u_in, v_in, w_in, theta_in ,pi_in,    &
                               rho_phyin, qv_in, zmid, z_lev,        &
+                              fire_heat_flux(i,j),dxy(i,j),         &
                               plume_frp(i,j,1), k_min(i,j),         & 
                               k_max(i,j), dbg_opt, g, con_cp,       &
                               con_rd, cpor, errmsg, errflg )
