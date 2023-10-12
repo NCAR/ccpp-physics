@@ -2,14 +2,16 @@
 !!  Contains code related to GFS physics suite setup (physics part of time_vary_step)
 
 !>\defgroup mod_GFS_phys_time_vary GFS Physics Time Update
-!! This module contains GFS physics time vary subroutines including, stratospheric water vapor,
+!! This module contains GFS physics time vary subroutines including stratospheric water vapor,
 !! aerosol, IN&CCN and surface properties updates.
 !> @{
    module GFS_phys_time_vary
 
-      use machine, only : kind_phys
+      use machine, only : kind_phys, kind_dbl_prec, kind_sngl_prec
 
       use mersenne_twister, only: random_setseed, random_number
+
+      use module_ozphys, only: ty_ozphys
 
       use h2o_def,   only : levh2o, h2o_coeff, h2o_lat, h2o_pres, h2o_time, h2oplin
       use h2ointerp, only : read_h2odata, setindxh2o, h2ointerpol
@@ -58,8 +60,8 @@
 !>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
 !! @{
       subroutine GFS_phys_time_vary_init (                                                         &
-              me, master, h2o_phys, iaerclm, iccn, iflip, im, nx, ny, idate, xlat_d, xlon_d, &
-              jindx1_h, jindx2_h, ddy_h, h2opl,fhour,          &
+              me, master, ntoz, h2o_phys, iaerclm, iccn, iflip, im, nx, ny, idate, xlat_d, xlon_d, &
+              jindx1_o3, jindx2_o3, ddy_o3, ozphys, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,        &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
               do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
@@ -76,14 +78,14 @@
          implicit none
 
          ! Interface variables
-         integer,              intent(in)    :: me, master, iccn, iflip, im, nx, ny
+         integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny
          logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhour
          real(kind_phys),      intent(in)    :: xlat_d(:), xlon_d(:)
 
-         integer,              intent(inout) :: jindx1_h(:), jindx2_h(:)
-         real(kind_phys),      intent(inout) :: ddy_h(:)
+         integer,              intent(inout) :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
+         real(kind_phys),      intent(inout) :: ddy_o3(:),  ddy_h(:)
          real(kind_phys),      intent(in)    :: h2opl(:,:,:)
          integer,              intent(inout) :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
          real(kind_phys),      intent(inout) :: ddy_aer(:), ddx_aer(:)
@@ -101,6 +103,7 @@
          real(kind_phys),      intent(in)    :: min_seaice, fice(:)
          real(kind_phys),      intent(in)    :: landfrac(:)
          real(kind_phys),      intent(inout) :: weasd(:)
+         type(ty_ozphys),      intent(in)    :: ozphys
 
          ! NoahMP - only allocated when NoahMP is used
          integer, intent(in) :: lsoil, lsnow_lsm_lbound, lsnow_lsm_ubound
@@ -243,6 +246,11 @@
 
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
          call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
+
+!> - Setup spatial interpolation indices for ozone physics.
+         if (ntoz > 0) then
+            call ozphys%setup_o3prog(xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
+         endif
 
 !> - Call setindxh2o() to initialize stratospheric water vapor data
          if (h2o_phys) then
@@ -625,8 +633,8 @@
 !! @{
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
             me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, nsswr, fhswr, lsswr, fhour, &
-            imfdeepcnv, cal_pre, random_clds,         h2o_phys, iaerclm, iccn, clstp,          &
-            jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
+            imfdeepcnv, cal_pre, random_clds, ozphys, ntoz, h2o_phys, iaerclm, iccn, clstp,         &
+            jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm,              &
             imap, jmap, prsl, seed0, rann, do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,&
@@ -636,14 +644,14 @@
 
          ! Interface variables
          integer,              intent(in)    :: me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, &
-                                                nsswr, imfdeepcnv, iccn, iflip
+                                                nsswr, imfdeepcnv, iccn, ntoz, iflip
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhswr, fhour
          logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm
          real(kind_phys),      intent(out)   :: clstp
-         integer,              intent(in)    :: jindx1_h(:), jindx2_h(:)
-         real(kind_phys),      intent(in)    :: ddy_h(:)
-         real(kind_phys),      intent(inout) :: h2opl(:,:,:)
+         integer,              intent(in)    :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
+         real(kind_phys),      intent(in)    :: ddy_o3(:),  ddy_h(:)
+         real(kind_phys),      intent(inout) :: ozpl(:,:,:), h2opl(:,:,:)
          integer,              intent(in)    :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
          real(kind_phys),      intent(in)    :: ddy_aer(:), ddx_aer(:)
          real(kind_phys),      intent(inout) :: aer_nm(:,:,:)
@@ -659,15 +667,19 @@
          integer,              intent(in)    :: jindx1_tau(:), jindx2_tau(:)
          real(kind_phys),      intent(in)    :: ddy_j1tau(:), ddy_j2tau(:)
          real(kind_phys),      intent(inout) :: tau_amf(:)
+         type(ty_ozphys),      intent(in)    :: ozphys
          integer,              intent(in)    :: nthrds
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
 
          ! Local variables
-         integer :: i, j, k, iseed, iskip, ix
-         real(kind=kind_phys) :: wrk(1)
-         real(kind=kind_phys) :: rannie(cny)
-         real(kind=kind_phys) :: rndval(cnx*cny*nrcm)
+         integer :: i, j, k, iseed, iskip, ix, idat(8), jdat(8), iday, j1, j2, nc, n1, n2, jdow,     &
+              jdoy, jday, w3kindreal, w3kindint
+         real(kind_phys) :: wrk(1), tem, tx1, tx2, rjday
+         real(kind_phys) :: rannie(cny)
+         real(kind_phys) :: rndval(cnx*cny*nrcm)
+         real(kind_dbl_prec)  :: rinc(5)
+         real(kind_sngl_prec) :: rinc4(5)
 
          ! Initialize CCPP error handling variables
          errmsg = ''
@@ -720,6 +732,43 @@
           enddo
 
          endif  ! imfdeepcnv, cal_re, random_clds
+
+        !> - Compute temporal interpolation indices for updating gas concentrations.
+         idat=0
+         idat(1)=idate(4)
+         idat(2)=idate(2)
+         idat(3)=idate(3)
+         idat(5)=idate(1)
+         rinc=0.
+         rinc(2)=fhour
+         call w3kind(w3kindreal,w3kindint)
+         if(w3kindreal==4) then
+            rinc4=rinc
+            CALL w3movdat(rinc4,idat,jdat)
+         else
+            CALL w3movdat(rinc,idat,jdat)
+         endif
+         jdow = 0
+         jdoy = 0
+         jday = 0
+         call w3doxdat(jdat,jdow,jdoy,jday)
+         rjday = jdoy + jdat(5) / 24.
+         if (rjday < ozphys%time(1)) rjday = rjday + 365.
+
+         n2 = ozphys%ntime + 1
+         do j=2,ozphys%ntime
+            if (rjday < ozphys%time(j)) then
+               n2 = j
+                      exit
+            endif
+         enddo
+         n1 = n2 - 1
+         if (n2 > ozphys%ntime) n2 = n2 - ozphys%ntime
+
+!> - Update ozone concentration.
+         if (ntoz > 0) then
+            call ozphys%update_o3prog(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
+         endif
 
 !> - Call h2ointerpol() to make stratospheric water vapor data interpolation
          if (h2o_phys) then

@@ -13,22 +13,6 @@ module GFS_physics_post
   public GFS_physics_post_init, GFS_physics_post_run
 contains
 
-! ########################################################################################### 
-! SUBROUTINE GFS_physics_post_init
-! ###########################################################################################
-!! \section arg_table_GFS_physics_post_init Argument Table
-!! \htmlinclude GFS_physics_post_init.html
-!!
-  subroutine GFS_physics_post_init(errmsg, errflg)
-
-    ! Outputs
-    character(len=*), intent(out) :: &
-         errmsg         ! CCPP error message
-    integer, intent(out) :: &
-         errflg         ! CCPP error flag
-
-  end subroutine GFS_physics_post_init
-
 ! ###########################################################################################
 ! SUBROUTINE GFS_physics_post_run
 ! ###########################################################################################
@@ -36,9 +20,9 @@ contains
 !! \htmlinclude GFS_physics_post_run.html
 !!
   subroutine GFS_physics_post_run(nCol, nLev, ntoz, ntracp100, nprocess, nprocess_summed,   &
-       dtidx, is_photochem, ldiag3d, ip_physics, ip_photochem,         &
-       ip_prod_loss, ip_ozmix, ip_temp, ip_overhead_ozone, do3_dt_prd, do3_dt_ozmx,         &
-       do3_dt_temp, do3_dt_ohoz, dtend, errmsg, errflg)
+       dtidx, is_photochem, ldiag3d, ip_physics, ip_photochem, ip_prod_loss, ip_ozmix,      &
+       ip_temp, ip_overhead_ozone, do3_dt_prd, do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz,       &
+       dtend, errmsg, errflg)
 
     ! Inputs
     integer, intent(in) :: &
@@ -49,7 +33,7 @@ contains
          nprocess,       & ! Number of processes that cause changes in state variables 
          nprocess_summed,& ! Number of causes in dtidx per tracer summed for total physics tendency
          ip_physics,     & ! Index for process in diagnostic tendency output
-         ip_photochem,   & ! 
+         ip_photochem,   & ! Index for process in diagnostic tendency output
          ip_prod_loss,   & ! Index for process in diagnostic tendency output
          ip_ozmix,       & ! Index for process in diagnostic tendency output
          ip_temp,        & ! Index for process in diagnostic tendency output
