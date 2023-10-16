@@ -348,12 +348,26 @@
               tvs        = half * (tsurf_wat(i)+tskin_wat(i))/prsik1(i)
      &                          * virtfac
             endif
-
-            z0           = 0.01_kp * z0rl_wat(i)
-            z0max        = max(zmin, min(z0,z1(i)))
-!           ustar_wat(i) = sqrt(grav * z0 / charnock)
+!
             wind10m      = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
+!
+            if (sfc_z0_type == -1) then    ! using wave model derived momentum roughness
+              tem1 = 0.11 * vis / ustar_wat(i)
+              z0 = tem1 +  0.01_kp * z0rl_wav(i)
 
+              if (redrag) then
+                z0max = max(min(z0, z0s_max),1.0e-7_kp)
+              else
+                z0max = max(min(z0,0.1_kp), 1.0e-7_kp)
+              endif
+              z0rl_wat(i) = 100.0_kp * z0max   ! cm
+            else
+              z0    = 0.01_kp * z0rl_wat(i)
+              z0max = max(zmin, min(z0,z1(i)))
+            endif
+!
+!           ustar_wat(i) = sqrt(grav * z0 / charnock)
+!
 !**  test xubin's new z0
 
 !           ztmax  = z0max
@@ -423,17 +437,18 @@
                  z0rl_wat(i) = 1.0e-4_kp
               endif
 
-            elseif (z0rl_wav(i) <= 1.0e-7_kp .or.                       &
-     &              z0rl_wav(i) > 1.0_kp) then
-!             z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
-              tem1 = 0.11 * vis / ustar_wat(i)
-              z0 = tem1 + (charnock/grav)*ustar_wat(i)*ustar_wat(i)
+!           elseif (z0rl_wav(i) <= 1.0e-7_kp .or.                       &
+!    &              z0rl_wav(i) > 1.0_kp) then
+!!            z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
+!             tem1 = 0.11 * vis / ustar_wat(i)
+!             z0 = tem1 + (charnock/grav)*ustar_wat(i)*ustar_wat(i)
 
-              if (redrag) then
-                z0rl_wat(i) = 100.0_kp * max(min(z0, z0s_max),1.0e-7_kp)
-              else
-                z0rl_wat(i) = 100.0_kp * max(min(z0,0.1_kp), 1.0e-7_kp)
-              endif
+!             if (redrag) then
+!               z0rl_wat(i) = 100.0_kp * max(min(z0, z0s_max),1.0e-7_kp)
+!             else
+!               z0rl_wat(i) = 100.0_kp * max(min(z0,0.1_kp), 1.0e-7_kp)
+!             endif
+
             endif
 
           endif              ! end of if(open ocean)
