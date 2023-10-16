@@ -366,8 +366,6 @@
               z0max = max(zmin, min(z0,z1(i)))
             endif
 !
-!           ustar_wat(i) = sqrt(grav * z0 / charnock)
-!
 !**  test xubin's new z0
 
 !           ztmax  = z0max
