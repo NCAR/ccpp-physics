@@ -7492,9 +7492,6 @@ cjfe
           call abort
         endif
 !
-!  soil type
-        print *,'in FIXREAD fnsotc =',fnsotc 
-!
         if(fnsotc(1:8).ne.'        ') then
           if ( index(fnsotc, "tileX.nc") == 0) then ! grib file
             kpd7=-1
