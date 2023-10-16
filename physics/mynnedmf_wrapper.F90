@@ -131,7 +131,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  edmf_a,edmf_w,edmf_qt,          &
      &  edmf_thl,edmf_ent,edmf_qc,      &
      &  sub_thl,sub_sqv,det_thl,det_sqv,&
-     &  nupdraft,maxMF,ktop_plume,      &
+     &  maxwidth,maxMF,ztop_plume,      &
+     &  ktop_plume,                     &
      &  dudt, dvdt, dtdt,                                  &
      &  dqdt_water_vapor,            dqdt_liquid_cloud,    & ! <=== ntqv, ntcw
      &  dqdt_ice,                    dqdt_snow,            & ! <=== ntiw, ntsw
@@ -310,9 +311,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind_phys), dimension(:), intent(out) ::                      &
      &        ch,dtsfc1,dqsfc1,dusfc1,dvsfc1,                            &
      &        dtsfci_diag,dqsfci_diag,dusfci_diag,dvsfci_diag,           &
-     &        maxMF
+     &        maxMF,maxwidth,ztop_plume
       integer, dimension(:), intent(inout) ::                            &
-     &        kpbl,nupdraft,ktop_plume
+     &        kpbl,ktop_plume
 
       real(kind_phys), dimension(:), intent(inout) ::                    &
      &        dusfc_cpl,dvsfc_cpl,dtsfc_cpl,dqsfc_cpl
@@ -748,7 +749,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             edmf_thl=edmf_thl,edmf_ent=edmf_ent,edmf_qc=edmf_qc,& !output
      &             sub_thl3D=sub_thl,sub_sqv3D=sub_sqv,                &
      &             det_thl3D=det_thl,det_sqv3D=det_sqv,                &
-     &             nupdraft=nupdraft,maxMF=maxMF,                      & !output
+     &             maxwidth=maxwidth,maxMF=maxMF,ztop_plume=ztop_plume,& !output
      &             ktop_plume=ktop_plume,                              & !output
      &             spp_pbl=spp_pbl,pattern_spp_pbl=spp_wts_pbl,        & !input
      &             RTHRATEN=htrlw,                                     & !input
@@ -1005,8 +1006,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           print*,"dudt:",dudt(1,1),dudt(1,2),dudt(1,levs)
           print*,"dvdt:",dvdt(1,1),dvdt(1,2),dvdt(1,levs)
           print*,"dqdt:",dqdt_water_vapor(1,1),dqdt_water_vapor(1,2),dqdt_water_vapor(1,levs)
-          print*,"ktop_plume:",ktop_plume(1)," maxmf:",maxmf(1)
-          print*,"nup:",nupdraft(1)
+          print*,"ztop_plume:",ztop_plume(1)," maxmf:",maxmf(1)
+          print*,"maxwidth:",maxwidth(1)
           print*
        endif
 

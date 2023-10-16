@@ -26,7 +26,7 @@ MODULE module_sf_mynn
 !
 !   LAND only:
 !   "iz0tlnd" namelist option is used to select the following momentum options:
-!   (default) =0: Zilitinkevich (1995); Czil now set to 0.085
+!   (default) =0: Zilitinkevich (1995); Czil now set to 0.095
 !             =1: Czil_new (modified according to Chen & Zhang 2008)
 !             =2: Modified Yang et al (2002, 2008) - generalized for all landuse
 !             =3: constant zt = z0/7.4 (original form; Garratt 1992)
@@ -225,7 +225,7 @@ CONTAINS
 !   (water      =1: z0 from Davis et al (2008), zt & zq from COARE3.0/3.5
 !    only)      =2: z0 from Davis et al (2008), zt & zq from Garratt (1992)
 !               =3: z0 from Taylor and Yelland (2004), zt and zq from COARE 3.0/3.5
-!-- iz0tlnd     =0: Zilitinkevich (1995) with Czil=0.085,
+!-- iz0tlnd     =0: Zilitinkevich (1995) with Czil=0.095,
 !   (land       =1: Czil_new (modified according to Chen & Zhang 2008)
 !    only)      =2: Modified Yang et al (2002, 2008) - generalized for all landuse
 !               =3: constant zt = z0/7.4 (Garratt 1992)
@@ -2604,7 +2604,7 @@ END SUBROUTINE SFCLAY1D_mynn
           IF ( IZ0TLND2 .EQ. 1 ) THEN
              CZIL = 10.0 ** ( -0.40 * ( Z_0 / 0.07 ) )
           ELSE
-             CZIL = 0.085 !0.075 !0.10
+             CZIL = 0.095 !0.075 !0.10
           END IF
 
           Zt = Z_0*EXP(-KARMAN*CZIL*SQRT(restar))
