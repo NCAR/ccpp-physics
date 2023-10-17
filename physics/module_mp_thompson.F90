@@ -3581,7 +3581,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+ !  DROPLET NUCLEATION
            if (clap .gt. eps) then
             if (is_aerosol_aware .or. merra2_aerosol_aware) then
-               xnc = MAX(2., activ_ncloud(temp(k), w1d(k)+rand3, nwfa(k)))
+               xnc = MAX(2., activ_ncloud(temp(k), w1d(k)+rand3, nwfa(k), lsml))
             else
                if(lsml == 1) then
                  xnc = Nt_c_l
