@@ -725,7 +725,7 @@
   units = none
   dimensions = (number_of_perturbed_spp_schemes)
   type = character
-  kind = len=3
+  kind = len=10
   intent = in
 [cplchm]
   standard_name = flag_for_chemistry_coupling

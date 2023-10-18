@@ -210,17 +210,17 @@
   kind = kind_phys
   intent = in
 [nsoil]
-  standard_name = vertical_dimension_of_soil
-  long_name = soil vertical layer dimension
+  standard_name = vertical_dimension_of_soil_internal_to_land_surface_scheme
+  long_name = number of soil layers internal to land surface model
   units = count
   dimensions = ()
   type = integer
   intent = in
 [smc]
-  standard_name = volume_fraction_of_condensed_water_in_soil
-  long_name = volumetric fraction of soil moisture
+  standard_name = volume_fraction_of_soil_moisture_for_land_surface_model
+  long_name = volumetric fraction of soil moisture for lsm
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil_internal_to_land_surface_scheme)
   type = real
   kind = kind_phys
   intent = inout
@@ -611,6 +611,32 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[dust_moist_opt_in]
+  standard_name = control_for_dust_soil_moisture_option
+  long_name = smoke dust moisture parameterization 1 - fecan 2 - shao
+  units = index
+  dimensions = ()
+  type = integer
+  active = (do_smoke_coupling)
+  intent = in
+[dust_moist_correction_in]
+  standard_name = dust_moist_correction_fengsha_dust_scheme
+  long_name = moisture correction term for fengsha dust emission
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  active = (do_smoke_coupling)
+  intent = in
+[dust_drylimit_factor_in]
+  standard_name = dust_drylimit_factor_fengsha_dust_scheme
+  long_name = moisture correction term for drylimit in fengsha dust emission
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  active = (do_smoke_coupling)
   intent = in
 [dust_alpha_in]
   standard_name = alpha_fengsha_dust_scheme
