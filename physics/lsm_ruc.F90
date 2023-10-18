@@ -649,38 +649,27 @@ module lsm_ruc
       nsoil = lsoil_ruc
 
       do i  = 1, im ! i - horizontal loop
-        ! reassign smcref2 and smcwlt2 to RUC values at kdt=1
-        if(kdt == 1) then
-          if(.not. land(i)) then
-            !water and sea ice
-            smcref (i,1) = one
-            smcwlt (i,1) = zero
-            xlai   (i,1) = zero
+        if(.not. land(i)) then
+          !water and sea ice
+          smcref (i,1) = one
+          smcwlt (i,1) = zero
+          xlai   (i,1) = zero
+        elseif (kdt == 1) then
+          !land
+          ! reassign smcref2 and smcwlt2 to RUC values at kdt=1
+          smcref (i,1) = REFSMC(stype(i))
+          smcwlt (i,1) = WLTSMC(stype(i))
+          !-- rdlai is .true. when the LAI data is available in the INPUT/sfc_data.nc on cold-start
+          if(rdlai) then
+            xlai(i,1) = laixy(i)
           else
-            !land 
-            smcref (i,1) = REFSMC(stype(i))
-            smcwlt (i,1) = WLTSMC(stype(i))
-
-            !-- rdlai is .true. when the LAI data is available in the INPUT/sfc_data.nc on cold-start
-            if(rdlai) then
-              xlai(i,1) = laixy(i)
-            else
-              xlai(i,1) = LAITBL(vtype(i))
-            endif
+            xlai(i,1) = LAITBL(vtype(i))
           endif
         else
-        !-- if kdt > 1, parameters with sub-grid heterogeneity
-          if(.not. land(i)) then
-            !water and sea ice
-            smcref (i,1) = one
-            smcwlt (i,1) = zero
-            xlai   (i,1) = zero
-          else
-            !land
-            smcref (i,1) = smcref2 (i)
-            smcwlt (i,1) = smcwlt2 (i)
-            xlai   (i,1) = laixy (i)
-          endif
+          !-- land and kdt > 1, parameters has sub-grid heterogeneity
+          smcref (i,1) = smcref2 (i)
+          smcwlt (i,1) = smcwlt2 (i)
+          xlai   (i,1) = laixy (i)
         endif
       enddo
 
