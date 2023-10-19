@@ -3,7 +3,7 @@
   type = scheme
   relative_path = ../../
   dependencies = hooks/machine.F,MP/Thompson/module_mp_thompson.F90
-  dependencies = Radiation/iounitdef.f,Radiation/radiation_aerosols.f
+  dependencies = Radiation/radiation_aerosols.f
   dependencies = Radiation/radiation_gases.f,Radiation/radiation_astronomy.f
 
 ########################################################################

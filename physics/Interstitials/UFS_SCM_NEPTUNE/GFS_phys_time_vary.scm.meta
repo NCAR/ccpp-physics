@@ -3,8 +3,8 @@
   type = scheme
   relative_path = ../../
   dependencies = hooks/machine.F
-  dependencies = Interstitials/GFS/iccn_def.F,Interstitials/GFS/iccninterp.F90,Interstitials/GFS/sfcsub.F
-  dependencies = Radiation/mersenne_twister.f
+  dependencies = Interstitials/UFS_SCM_NEPTUNE/iccn_def.F,Interstitials/UFS_SCM_NEPTUNE/iccninterp.F90
+  dependencies = Interstitials/UFS_SCM_NEPTUNE/sfcsub.F,Radiation/mersenne_twister.f
   dependencies = MP/Morrison_Gettelman/aerclm_def.F,MP/Morrison_Gettelman/aerinterp.F90
   dependencies = SFC_Models/Land/namelist_soilveg.f,SFC_Models/Land/set_soilveg.f,SFC_Models/Land/Noahmp/noahmp_tables.f90
   dependencies = o3_photo/ozinterp.f90,o3_photo/ozne_def.f

@@ -3,7 +3,7 @@
   type = scheme
   relative_path = ../../
   dependencies = hooks/machine.F
-  dependencies = Radiation/iounitdef.f,Radiation/radiation_aerosols.f,Radiation/RRTMG/radlw_param.f,Radiation/RRTMG/radsw_param.f
+  dependencies = Radiation/radiation_aerosols.f,Radiation/RRTMG/radlw_param.f,Radiation/RRTMG/radsw_param.f
 
 ########################################################################
 [ccpp-arg-table]

@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = ozne_def
   type = module
-  dependencies = ../../hooks/machine.F
+  dependencies = ../hooks/machine.F
 
 [ccpp-arg-table]
   name = ozne_def

@@ -3,9 +3,9 @@
   type = scheme
   relative_path = ../../
   dependencies = hooks/machine.F
-  dependencies = Radiaiton/iounitdef.f,Radiaiton/RRTMG/radcons.f90,Radiaiton/radiation_aerosols.f
-  dependencies = Radiaiton/radiation_astronomy.f,Radiaiton/radiation_clouds.f,Radiaiton/radiation_gases.f
-  dependencies = Radiaiton/radlw_main.F90,Radiaiton/radlw_param.f,Radiaiton/radsw_main.F90,Radiaiton/radsw_param.f
+  dependencies = Radiation/radiation_aerosols.f
+  dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
+  dependencies = Radiation/RRTMG/radlw_main.F90,Radiation/RRTMG/radlw_param.f,Radiation/RRTMG/radsw_main.F90,Radiation/RRTMG/radsw_param.f
   dependencies = MP/Thompson/module_mp_thompson.F90
 
 ########################################################################

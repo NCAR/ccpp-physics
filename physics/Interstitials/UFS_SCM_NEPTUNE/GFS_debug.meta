@@ -200,7 +200,7 @@
 [ccpp-table-properties]
   name = GFS_interstitialtoscreen
   type = scheme
-  dependencies = machine.F
+  dependencies = ../../hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -399,7 +399,7 @@
 [ccpp-table-properties]
   name = GFS_abort
   type = scheme
-  dependencies = machine.F
+  dependencies = ../../hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -439,7 +439,7 @@
 [ccpp-table-properties]
   name = GFS_checkland
   type = scheme
-  dependencies = machine.F
+  dependencies = ../../hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -698,7 +698,7 @@
 [ccpp-table-properties]
   name = GFS_checktracers
   type = scheme
-  dependencies = machine.F
+  dependencies = ../../hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]
