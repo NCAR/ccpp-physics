@@ -1,5 +1,5 @@
 !>\file module_bl_mynn.F90
-! This file contains the entity of MYNN-EDMF PBL scheme.
+!! This file contains the entity of MYNN-EDMF PBL scheme.
 ! **********************************************************************
 ! *   An improved Mellor-Yamada turbulence closure model               *
 ! *                                                                    *
