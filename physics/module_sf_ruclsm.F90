@@ -4071,7 +4071,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
         RHOnewCSN=sheatsn * RHOnewSN
 
       if(isncond_opt == 1) then
-         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
+         if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
         !-- some areas with large snow depth have unrealistically 
         !-- low snow density (in the Rockie's with snow depth > 1 m). 
         !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
@@ -4088,13 +4088,13 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          if(rhosn < 156._kind_phys .or. (newsnow > zero .and. rhonewsn < 156._kind_phys)) then
            keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
            !-- fact is added by tgs based on 4 Jan 2017 testing 
-           fact = 5._kind_phys
+           !fact = 5._kind_phys
          else
            keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
-           fact = 2._kind_phys
+           !fact = 2._kind_phys
          endif
 
-         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
+         if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
          !-- some areas with large snow depth have unrealistically 
          !-- low snow density (in the Rockie's with snow depth > 1 m). 
          !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
@@ -4535,7 +4535,7 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 
         RHOCSN=sheatsn* RHOSN
         if(isncond_opt == 1) then
-         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
+         if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
           !-- some areas with large snow depth have unrealistically 
           !-- low snow density (in the Rockie's with snow depth > 1 m). 
           !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
@@ -4552,13 +4552,13 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          if(rhosn < 156._kind_phys .or. (newsn > zero .and. rhonewsn < 156._kind_phys)) then
            keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
            !-- fact is added by tgs based on 4 Jan 2017 testing 
-           fact = 5._kind_phys
+           !fact = 5._kind_phys
          else
            keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
-           fact = 2._kind_phys
+           !fact = 2._kind_phys
          endif
         
-         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
+         if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
          !-- some areas with large snow depth have unrealistically 
          !-- low snow density (in the Rockie's with snow depth > 1 m). 
          !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
@@ -5219,7 +5219,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
         RHOCSN=sheatsn* RHOSN
         RHOnewCSN=sheatsn* RHOnewSN
         if(isncond_opt == 1) then
-         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
+         if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
           !-- some areas with large snow depth have unrealistically 
           !-- low snow density (in the Rockie's with snow depth > 1 m). 
           !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
@@ -5236,10 +5236,10 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
            if(rhosn < 156._kind_phys .or. (newsnow > zero .and. rhonewsn < 156._kind_phys)) then
              keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
              !-- fact is added by tgs based on 4 Jan 2017 testing 
-             fact = 5._kind_phys
+             !fact = 5._kind_phys
            else
              keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
-             fact = 2._kind_phys
+             !fact = 2._kind_phys
              if(debug_print) then
                print *,'SnowTemp xlat,xlon,rhosn,keff', xlat,xlon,rhosn,keff,keff/rhocsn*fact
                print *,'SNOWTEMP - 0.265/rhocsn',0.265_kind_phys/rhocsn
@@ -5249,7 +5249,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
            print *,'SNOWTEMP - xlat,xlon,newsnow,rhonewsn,rhosn,fact,keff',xlat,xlon,newsnow, rhonewsn,rhosn,fact,keff
        endif
 
-         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
+         if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
            !-- some areas with large snow depth have unrealistically 
            !-- low snow density (in the Rockie's with snow depth > 1 m). 
            !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
@@ -5802,7 +5802,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
 
           RHOCSN=sheatsn* RHOSN
           if(isncond_opt == 1) then
-            if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
+            if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
             !-- some areas with large snow depth have unrealistically 
             !-- low snow density (in the Rockie's with snow depth > 1 m). 
             !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
@@ -5819,10 +5819,10 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
             if(rhosn < 156._kind_phys .or. (newsnow > zero .and. rhonewsn < 156._kind_phys)) then
               keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
               !-- fact is added by tgs based on 4 Jan 2017 testing 
-              fact = 5._kind_phys
+              !fact = 5._kind_phys
             else
               keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
-              fact = 2._kind_phys
+              !fact = 2._kind_phys
               if(debug_print) then
                 print *,'End SNOWTEMP - xlat,xlon,rhosn,keff',xlat,xlon,rhosn,keff
                 print *,'End SNOWTEMP - 0.265/rhocsn',0.265/rhocsn
@@ -5833,7 +5833,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
                     xlat,xlon,newsnow, rhonewsn,rhosn,fact,keff,keff/rhocsn*fact
        endif
 
-         if(newsnow <= zero .and. snhei > 3.0_kind_phys*SNHEI_crit .and. rhosn > 250._kind_phys) then
+         if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
             !-- some areas with large snow depth have unrealistically 
             !-- low snow density (in the Rockie's with snow depth > 1 m). 
             !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
