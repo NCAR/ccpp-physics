@@ -348,7 +348,9 @@ c
 !
       do i=1,im
         cnvflg(i) = .true.
-        if(do_mynnedmf.and.(maxMF(i).gt.0.))cnvflg(i)=.false.
+        if(do_mynnedmf) then
+            if(maxMF(i).gt.0.)cnvflg(i)=.false.
+        endif
         sfcpbl(i) = sfclfac * hpbl(i)
         rn(i)=0.
         mbdt(i)=10.
