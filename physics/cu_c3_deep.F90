@@ -97,6 +97,9 @@ contains
               ,tmf           &  ! instantanious tendency from turbulence
               ,qmicro        &  ! instantanious tendency from microphysics
               ,forceqv_spechum & !instantanious tendency from dynamics
+              ,betascu       &  ! Tuning parameter for shallow clouds
+              ,betamcu       &  ! Tuning parameter for mid-level clouds
+              ,betadcu       &  ! Tuning parameter for deep clouds
               ,sigmain       &  ! input area fraction after advection
               ,sigmaout      &  ! updated prognostic area fraction
               ,z1            &  ! terrain
@@ -233,8 +236,8 @@ contains
 
        
        real(kind=kind_phys)                                                            &
-        ,intent (in   )                   ::                           &
-        dtime,ccnclean,fv,r_d
+        ,intent (in   )                   ::                                           &
+        dtime,ccnclean,fv,r_d,betascu,betamcu,betadcu
 
 
 !
@@ -386,13 +389,16 @@ contains
      real(kind=kind_phys), dimension (its:ite) :: pefc
      real(kind=kind_phys) entdo,dp,subin,detdo,entup,                    &
       detup,subdown,entdoj,entupk,detupk,totmas
+     real(kind=kind_phys)                 ::                             &
+          sigmind,sigminm,sigmins
+     parameter(sigmind=0.005,sigmins=0.03,sigminm=0.01)
 
      real(kind=kind_phys), dimension (its:ite) :: lambau,flux_tun,zws,ztexec,zqexec
 !$acc declare create(lambau,flux_tun,zws,ztexec,zqexec)
 
      integer :: jprnt,jmini,start_k22
      logical :: keep_going,flg(its:ite),cnvflg(its:ite)
-     logical :: flag_shallow
+     logical :: flag_shallow,flag_mid
 
 !$acc declare create(flg)
      
@@ -1988,7 +1994,11 @@ contains
 ! equation 8, call progsigma_calc() to compute updraft area fraction based on a moisture budget
                    
       if(progsigma)then
+         flag_mid = .false.
          flag_shallow = .false.
+         if(imid.eq.1)then
+            flag_mid = .true.
+         endif
          do k=kts,ktf
             do i=its,itf
                del(i,k) = delp(i,k)*0.001
@@ -2003,9 +2013,9 @@ contains
             endif
          enddo
          call progsigma_calc(itf,ktf,flag_init,flag_restart,flag_shallow,  &
-              del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,xlv,dtime,           &
-              forceqv_spechum,kbcon,ktop,cnvflg,                           &
-              sigmain,sigmaout,sigmab)        
+              flag_mid,del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,xlv,dtime,  &
+              forceqv_spechum,kbcon,ktop,cnvflg,betascu,betamcu,betadcu,   &
+              sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)        
       endif
 
 !$acc end kernels
@@ -3147,7 +3157,7 @@ contains
 !       pcrit,acrit,acritt
      integer, dimension (its:ite)         :: kloc
      real(kind=kind_phys)                                ::                           &
-       a1,a_ave,xff0,xomg,gravinv!,aclim1,aclim2,aclim3,aclim4
+       a1,a_ave,xff0,xomg,gravinv
 
      real(kind=kind_phys), dimension (its:ite) :: ens_adj
 !$acc declare create(kloc,ens_adj)
@@ -5748,7 +5758,7 @@ endif
     do k = 2, ktf-1
        do i = 1, itf
          if (ierr(i)==0) then
-           if(k >= kbcon(i) .and. k < ktcon(i))then
+           if(k >= kbcon(i) .and. k < ktcon(i) .and. dbyo(i,k)>0.)then
               gamma   = el2orc * qeso(i,k+1) / (to(i,k+1)**2)
               if(k >= kbcon(i) .and. clw_all(i,k)>0.)then
                buo(i,k) = buo(i,k) - g * qlk(i,k)  

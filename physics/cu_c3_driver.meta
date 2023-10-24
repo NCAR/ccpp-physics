@@ -244,6 +244,29 @@
   type = real
   kind = kind_phys
   intent = out
+[betascu]
+  standard_name = tuning_param_for_shallow_cu
+  long_name = tuning param for shallow cu in case prognostic closure is used
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[betamcu]
+  standard_name = tuning_param_for_midlevel_cu
+  long_name = tuning param for midlevel cu in case prognostic closure is used
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[betadcu]
+  standard_name = tuning_param_for_deep_cu
+  long_name = tuning param for deep cu in case prognostic closure is used
+  units = none
+  dimensions = ()
+  type = real
+  intent = in
 [phil]
   standard_name = geopotential
   long_name = layer geopotential

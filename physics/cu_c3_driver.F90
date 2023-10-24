@@ -60,7 +60,8 @@ contains
       subroutine cu_c3_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
                do_ca,progsigma,cactiv,cactiv_m,g,cp,fv,r_d,xlv,r_v,forcet,      &
                forceqv_spechum,phil,delp,raincv,tmf,qmicro,sigmain,             &
-               qv_spechum,t,cld1d,us,vs,t2di,w,qv2di_spechum,p2di,psuri,        &
+               betascu,betamcu,betadcu,qv_spechum,t,cld1d,us,vs,t2di,w,         &
+               qv2di_spechum,p2di,psuri,                                        &
                hbot,htop,kcnv,xland,hfx2,qfx2,aod_gf,cliw,clcw,ca_deep,rainevap,&
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
                flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
@@ -97,7 +98,7 @@ contains
    logical, intent(in   ) :: flag_init, flag_restart, do_mynnedmf
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend, &
         do_ca,progsigma
-   real (kind=kind_phys), intent(in) :: g,cp,fv,r_d,xlv,r_v
+   real (kind=kind_phys), intent(in) :: g,cp,fv,r_d,xlv,r_v,betascu,betamcu,betadcu
    logical, intent(in   ) :: ldiag3d
 
    real(kind=kind_phys), intent(inout)                      :: dtend(:,:,:)
@@ -587,7 +588,7 @@ contains
       hfx(i)=hfx2(i)*cp*rhoi(i,1)
       qfx(i)=qfx2(i)*xlv*rhoi(i,1)
       dx(i) = sqrt(garea(i))
-     enddo
+     enddo    
 
      do i=its,itf
       do k=kts,kpbli(i)
@@ -669,7 +670,8 @@ contains
                          zus,xmbs,kbcons,ktops,k22s,ierrs,ierrcs,                &
 ! Prog closure
                          flag_init, flag_restart,fv,r_d,delp,tmfq,qmicro,        &
-                         forceqv_spechum,sigmain,sigmaout,progsigma,dx,          &
+                         forceqv_spechum,betascu,betamcu,betadcu,sigmain,        &
+                         sigmaout,progsigma,dx,                                  &
 ! output tendencies
                          outts,outqs,outqcs,outus,outvs,cnvwt,prets,cupclws,     &
 ! dimesnional variables
@@ -714,6 +716,9 @@ contains
               ,tmfq          &
               ,qmicro        &
               ,forceqv_spechum &
+              ,betascu       &
+              ,betamcu       &
+              ,betadcu       &
               ,sigmain       &
               ,sigmaout      &
               ,ter11         &
@@ -805,6 +810,9 @@ contains
               ,tmfq          &
               ,qmicro        &
               ,forceqv_spechum &
+              ,betascu       &
+              ,betamcu       &
+              ,betadcu       &
               ,sigmain       &
               ,sigmaout      &
               ,ter11         &
