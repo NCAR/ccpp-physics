@@ -4071,23 +4071,15 @@ print *, 'TSO before calling SNOWTEMP: ', tso
         RHOnewCSN=sheatsn * RHOnewSN
 
       if(isncond_opt == 1) then
-         if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
-        !-- some areas with large snow depth have unrealistically 
-        !-- low snow density (in the Rockie's with snow depth > 1 m). 
-        !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
-        !-- In future a better compaction scheme is needed for these areas.
-          thdifsn = 2.5e-6_kind_phys
-        else
-          !-- old version thdifsn = 0.265/RHOCSN
-          THDIFSN = 0.265_kind_phys/RHOCSN
-        endif
+        !-- old version thdifsn = 0.265/RHOCSN
+        THDIFSN = 0.265_kind_phys/RHOCSN
       else
       !-- 07Jun19 - thermal conductivity (K_eff) from Sturm et al.(1997)
       !-- keff = 10. ** (2.650 * RHOSN*1.e-3 - 1.652)
          fact = one
          if(rhosn < 156._kind_phys .or. (newsnow > zero .and. rhonewsn < 156._kind_phys)) then
            keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
-           !-- fact is added by tgs based on 4 Jan 2017 testing 
+           !-- fact is tuning parameter added by tgs based on 4 Jan 2017 testing 
            !fact = 5._kind_phys
          else
            keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
@@ -4097,9 +4089,10 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
          !-- some areas with large snow depth have unrealistically 
          !-- low snow density (in the Rockie's with snow depth > 1 m). 
-         !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
+         !-- Based on Sturm et al. keff=0.452 typical for hard snow slabs
+         !-- with rhosn=488 kg/m^3. Thdifsn = 0.452/(2090*488)=4.431718e-7
          !-- In future a better compaction scheme is needed for these areas.
-           thdifsn = 2.5e-6_kind_phys
+           thdifsn = 4.431718e-7_kind_phys 
          else
            thdifsn = keff/rhocsn * fact
          endif
@@ -4535,23 +4528,15 @@ print *, 'TSO before calling SNOWTEMP: ', tso
 
         RHOCSN=sheatsn* RHOSN
         if(isncond_opt == 1) then
-         if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
-          !-- some areas with large snow depth have unrealistically 
-          !-- low snow density (in the Rockie's with snow depth > 1 m). 
-          !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
-          !-- In future a better compaction scheme is needed for these areas.
-            thdifsn = 2.5e-6_kind_phys
-          else
-          !-- old version thdifsn = 0.265/RHOCSN
-            THDIFSN = 0.265_kind_phys/RHOCSN
-          endif
+        !-- old version thdifsn = 0.265/RHOCSN
+          THDIFSN = 0.265_kind_phys/RHOCSN
         else
       !-- 07Jun19 - thermal conductivity (K_eff) from Sturm et al.(1997)
       !-- keff = 10. ** (2.650 * RHOSN*1.e-3 - 1.652)
          fact = one
          if(rhosn < 156._kind_phys .or. (newsn > zero .and. rhonewsn < 156._kind_phys)) then
            keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
-           !-- fact is added by tgs based on 4 Jan 2017 testing 
+           !-- fact is a tuning parameter
            !fact = 5._kind_phys
          else
            keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
@@ -4561,9 +4546,10 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
          !-- some areas with large snow depth have unrealistically 
          !-- low snow density (in the Rockie's with snow depth > 1 m). 
-         !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
+         !-- Based on Sturm et al. keff=0.452 typical for hard snow slabs
+         !-- with rhosn=488 kg/m^3. Thdifsn = 0.452/(2090*488)=4.431718e-7
          !-- In future a better compaction scheme is needed for these areas.
-           thdifsn = 2.5e-6_kind_phys
+           thdifsn = 4.431718e-7_kind_phys
          else
            thdifsn = keff/rhocsn * fact
          endif
@@ -5219,23 +5205,15 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
         RHOCSN=sheatsn* RHOSN
         RHOnewCSN=sheatsn* RHOnewSN
         if(isncond_opt == 1) then
-         if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
-          !-- some areas with large snow depth have unrealistically 
-          !-- low snow density (in the Rockie's with snow depth > 1 m). 
-          !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
-          !-- In future a better compaction scheme is needed for these areas.
-            thdifsn = 2.5e-6_kind_phys
-          else
-          !-- old version thdifsn = 0.265/RHOCSN
-            THDIFSN = 0.265_kind_phys/RHOCSN
-          endif
+        !-- old version thdifsn = 0.265/RHOCSN
+          THDIFSN = 0.265_kind_phys/RHOCSN
         else
         !-- 07Jun19 - thermal conductivity (K_eff) from Sturm et al.(1997)
         !-- keff = 10. ** (2.650 * RHOSN*1.e-3 - 1.652)
            fact = one
            if(rhosn < 156._kind_phys .or. (newsnow > zero .and. rhonewsn < 156._kind_phys)) then
              keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
-             !-- fact is added by tgs based on 4 Jan 2017 testing 
+             !-- fact is a tuning parameter
              !fact = 5._kind_phys
            else
              keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
@@ -5252,9 +5230,10 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
          if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
            !-- some areas with large snow depth have unrealistically 
            !-- low snow density (in the Rockie's with snow depth > 1 m). 
-           !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
+           !-- Based on Sturm et al. keff=0.452 typical for hard snow slabs
+           !-- with rhosn=488 kg/m^3. Thdifsn = 0.452/(2090*488)=4.431718e-7
            !-- In future a better compaction scheme is needed for these areas.
-             thdifsn = 2.5e-6_kind_phys
+             thdifsn = 4.431718e-7_kind_phys
            else
              thdifsn = keff/rhocsn * fact
            endif
@@ -5802,23 +5781,15 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
 
           RHOCSN=sheatsn* RHOSN
           if(isncond_opt == 1) then
-            if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
-            !-- some areas with large snow depth have unrealistically 
-            !-- low snow density (in the Rockie's with snow depth > 1 m). 
-            !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
-            !-- In future a better compaction scheme is needed for these areas.
-              thdifsn = 2.5e-6_kind_phys
-            else
-            !-- old version thdifsn = 0.265/RHOCSN
-              THDIFSN = 0.265_kind_phys/RHOCSN
-            endif
+          !-- old version thdifsn = 0.265/RHOCSN
+            THDIFSN = 0.265_kind_phys/RHOCSN
           else
           !-- 07Jun19 - thermal conductivity (K_eff) from Sturm et al.(1997)
           !-- keff = 10. ** (2.650 * RHOSN*1.e-3 - 1.652)
             fact = one
             if(rhosn < 156._kind_phys .or. (newsnow > zero .and. rhonewsn < 156._kind_phys)) then
               keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
-              !-- fact is added by tgs based on 4 Jan 2017 testing 
+              !-- fact is a tuning parameter
               !fact = 5._kind_phys
             else
               keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
@@ -5836,9 +5807,10 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
          if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
             !-- some areas with large snow depth have unrealistically 
             !-- low snow density (in the Rockie's with snow depth > 1 m). 
-            !-- Based on Sturm et al. the 2.5e-6 is typical for hard snow slabs.
+            !-- Based on Sturm et al. keff=0.452 typical for hard snow slabs
+            !-- with rhosn=488 kg/m^3. Thdifsn = 0.452/(2090*488)=4.431718e-7
             !-- In future a better compaction scheme is needed for these areas.
-              thdifsn = 2.5e-6_kind_phys
+              thdifsn = 4.431718e-7_kind_phys
             else
               thdifsn = keff/rhocsn * fact
             endif
