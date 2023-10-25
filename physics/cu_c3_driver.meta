@@ -133,6 +133,13 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = inout
+[cnx]
+  standard_name = number_of_x_points_for_current_cubed_sphere_tile
+  long_name = number of points in x direction for this cubed sphere face
+  units = count
+  dimensions = ()
+  type = integer
   intent = in	
 [cactiv]
   standard_name = counter_for_grell_freitas_convection

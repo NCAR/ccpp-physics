@@ -5758,7 +5758,7 @@ endif
     do k = 2, ktf-1
        do i = 1, itf
          if (ierr(i)==0) then
-           if(k >= kbcon(i) .and. k < ktcon(i) .and. dbyo(i,k)>0.)then
+           if(k >= kbcon(i) .and. k < ktcon(i))then
               gamma   = el2orc * qeso(i,k+1) / (to(i,k+1)**2)
               if(k >= kbcon(i) .and. clw_all(i,k)>0.)then
                buo(i,k) = buo(i,k) - g * qlk(i,k)  
