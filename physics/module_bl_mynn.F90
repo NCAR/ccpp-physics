@@ -3868,6 +3868,14 @@ CONTAINS
               q1_rh   =-3. + 3.*(rh_hack-rhcrit)/(1.-rhcrit)
               q1(k)   =max(q1_rh, q1(k) )
            endif
+           !ensure adequate RH & q1 when qs is at least 1e-7 (above the PBLH)
+           if (qs(k)>1.e-7 .and. zagl .gt. pblh2) then
+              rh_hack =min(1.0, rhcrit + 0.08*(7.0 + log10(qs(k))))
+              rh(k)   =max(rh(k), rh_hack)
+              !add rh-based q1
+              q1_rh   =-3. + 3.*(rh_hack-rhcrit)/(1.-rhcrit)
+              q1(k)   =max(q1_rh, q1(k) )
+           endif
 
            q1k   = q1(k)          ! backup Q1 for later modification
 
@@ -5842,7 +5850,7 @@ ENDIF
    real(kind_phys),dimension(kts:kte+1) ::  envi_a,envi_w        !environmental variables defined at model interface
    real(kind_phys):: temp,sublim,qc_ent,qv_ent,qt_ent,thl_ent,detrate, &
            detrateUV,oow,exc_fac,aratio,detturb,qc_grid,qc_sgs,        &
-           qc_plume,exc_heat,exc_moist,tk_int
+           qc_plume,exc_heat,exc_moist,tk_int,tvs
    real(kind_phys), parameter :: Cdet   = 1./45.
    real(kind_phys), parameter :: dzpmax = 300. !limit dz used in detrainment - can be excessing in thick layers
    !parameter "Csub" determines the propotion of upward vertical velocity that contributes to
@@ -5967,16 +5975,17 @@ ENDIF
   else
      hux = -0.005  ! LAND    ! dT/dz must be < - 0.5 K per 100 m.
   endif
+  tvs = ts*(1.0+p608*qv(kts))
   do k=1,max(1,k50-1) !use "-1" because k50 used interface heights (zw). 
     if (k == 1) then
-      if ((th(k)-ts)/(0.5*dz(k)) < hux) then
+      if ((thv(k)-tvs)/(0.5*dz(k)) < hux) then
         superadiabatic = .true.
       else
         superadiabatic = .false.
         exit
       endif
     else
-      if ((th(k)-th(k-1))/(0.5*(dz(k)+dz(k-1))) < hux) then
+      if ((thv(k)-thv(k-1))/(0.5*(dz(k)+dz(k-1))) < hux) then
         superadiabatic = .true.
       else
         superadiabatic = .false.
@@ -6052,10 +6061,14 @@ if ( fltv2 > 0.002 .AND. (maxwidth > minwidth) .AND. superadiabatic) then
        acfac = .5*tanh((fltv2 - 0.01)/0.03) + .5
     endif
     !add a windspeed-dependent adjustment to acfac that tapers off
-    !the mass-flux scheme linearly above sfc wind speeds of 15 m/s.
+    !the mass-flux scheme linearly above sfc wind speeds of 10 m/s.
     !Note: this effect may be better represented by an increase in
     !entrainment rate for high wind consitions (more ambient turbulence).
-    ac_wsp = 1.0 - min(max(wspd_pbl - 15.0, 0.0), 10.0)/10.0
+    if (wspd_pbl .le. 10.) then
+       ac_wsp = 1.0
+    else
+       ac_wsp = 1.0 - min((wspd_pbl - 10.0)/15., 1.0)
+    endif
     acfac  = acfac * ac_wsp
 
     ! Find the portion of the total fraction (Atot) of each plume size:
@@ -6091,7 +6104,7 @@ if ( fltv2 > 0.002 .AND. (maxwidth > minwidth) .AND. superadiabatic) then
     else
        if ((landsea-1.5).GE.0) then
          !water: increase factor to compensate for decreased pwmin/pwmax
-         exc_fac = 0.58*4.0*min(cloud_base/1000., 1.0)
+         exc_fac = 0.58*4.0
        else
          !land: no need to increase factor - already sufficiently large superadiabatic layers
          exc_fac = 0.58
