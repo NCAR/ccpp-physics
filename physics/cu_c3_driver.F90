@@ -30,7 +30,8 @@ contains
 !! \htmlinclude cu_c3_driver_init.html
 !!
       subroutine cu_c3_driver_init(imfshalcnv, imfshalcnv_c3, imfdeepcnv, &
-                          imfdeepcnv_c3,mpirank, mpiroot, errmsg, errflg)
+                          imfdeepcnv_c3,progsigma, cnx, mpirank, mpiroot, &
+                          errmsg, errflg)
 
          implicit none
 
@@ -38,12 +39,21 @@ contains
          integer,                   intent(in) :: imfdeepcnv, imfdeepcnv_c3
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
+         integer,                   intent(in)    :: cnx
+         logical,                   intent(inout) :: progsigma
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
 
          ! initialize ccpp error handling variables
          errmsg = ''
          errflg = 0
+
+         if(progsigma)then
+            if(cnx < 384)then
+               progsigma=.false.
+               write(*,*)'Forcing prognostic closure to .false. due to coarse resolution'
+            endif
+         endif
 
       end subroutine cu_c3_driver_init
 
@@ -58,7 +68,7 @@ contains
 !!
 !>\section gen_c3_driver Grell-Freitas Cumulus Scheme Driver General Algorithm
       subroutine cu_c3_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
-               do_ca,progsigma,cnx,cactiv,cactiv_m,g,cp,fv,r_d,xlv,r_v,forcet,  &
+               do_ca,progsigma,cactiv,cactiv_m,g,cp,fv,r_d,xlv,r_v,forcet,      &
                forceqv_spechum,phil,delp,raincv,tmf,qmicro,sigmain,             &
                betascu,betamcu,betadcu,qv_spechum,t,cld1d,us,vs,t2di,w,         &
                qv2di_spechum,p2di,psuri,                                        &
@@ -93,14 +103,14 @@ contains
       integer            :: ishallow_g3 ! depend on imfshalcnv
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte
-   integer, intent(in   ) :: im,km,ntracer,cnx
+   integer, intent(in   ) :: im,km,ntracer
    integer, intent(in   ) :: ichoice_in,ichoicem_in,ichoice_s_in
    logical, intent(in   ) :: flag_init, flag_restart, do_mynnedmf
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend, &
         do_ca
    real (kind=kind_phys), intent(in) :: g,cp,fv,r_d,xlv,r_v,betascu,betamcu,betadcu
    logical, intent(in   ) :: ldiag3d
-   logical, intent(inout) :: progsigma
+   logical, intent(in   ) :: progsigma
    real(kind=kind_phys), intent(inout)                      :: dtend(:,:,:)
 !$acc declare copy(dtend)
    integer, intent(in)                                      :: dtidx(:,:), &
@@ -278,14 +288,6 @@ contains
 !$acc kernels
         cap_suppress_j(:) = 0
 !$acc end kernels
-     endif
-
-
-     if(progsigma)then
-        if(cnx < 384)then
-           progsigma=.false.
-           write(*,*)'Forcing prognostic closure to .false. due to coarse resolution'
-        endif
      endif
 
      if(ldiag3d) then
