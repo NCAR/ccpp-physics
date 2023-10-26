@@ -610,6 +610,14 @@
   type = real
   kind = kind_phys
   intent = out
+[max_hail_diam_sfc]
+  standard_name = max_hail_diameter_sfc
+  long_name = instantaneous maximum hail diameter at lowest model level
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [fullradar_diag]
   standard_name = do_full_radar_reflectivity
   long_name = flag for computing full radar reflectivity

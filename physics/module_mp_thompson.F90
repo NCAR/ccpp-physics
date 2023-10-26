@@ -2464,17 +2464,17 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !> - Calculate y-intercept, slope values for graupel.
 !+---+-----------------------------------------------------------------+
-      do k = kte, kts, -1
-         ygra1 = alog10(max(1.E-9, rg(k)))
-         zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
-         N0_exp = 10.**(zans1)
-         N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
-         lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
-         lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
-         ilamg(k) = 1./lamg
-         N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
-      enddo
-
+      ! do k = kte, kts, -1
+      !    ygra1 = alog10(max(1.E-9, rg(k)))
+      !    zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
+      !    N0_exp = 10.**(zans1)
+      !    N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
+      !    lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
+      !    lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
+      !    ilamg(k) = 1./lamg
+      !    N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
+      ! enddo
+      call graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
       endif
 
 !+---+-----------------------------------------------------------------+
@@ -3541,17 +3541,17 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !> - Calculate y-intercept, slope values for graupel.
 !+---+-----------------------------------------------------------------+
-      do k = kte, kts, -1
-         ygra1 = alog10(max(1.E-9, rg(k)))
-         zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
-         N0_exp = 10.**(zans1)
-         N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
-         lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
-         lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
-         ilamg(k) = 1./lamg
-         N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
-      enddo
-
+      ! do k = kte, kts, -1
+      !    ygra1 = alog10(max(1.E-9, rg(k)))
+      !    zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
+      !    N0_exp = 10.**(zans1)
+      !    N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
+      !    lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
+      !    lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
+      !    ilamg(k) = 1./lamg
+      !    N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
+      ! enddo
+      call graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
       endif
 
 !+---+-----------------------------------------------------------------+
@@ -6085,16 +6085,17 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 
       if (ANY(L_qg .eqv. .true.)) then
-      do k = kte, kts, -1
-         ygra1 = alog10(max(1.E-9, rg(k)))
-         zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
-         N0_exp = 10.**(zans1)
-         N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
-         lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
-         lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
-         ilamg(k) = 1./lamg
-         N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
-      enddo
+      ! do k = kte, kts, -1
+      !    ygra1 = alog10(max(1.E-9, rg(k)))
+      !    zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
+      !    N0_exp = 10.**(zans1)
+      !    N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
+      !    lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
+      !    lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
+      !    ilamg(k) = 1./lamg
+      !    N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
+      ! enddo
+      call graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
       endif
 
 !+---+-----------------------------------------------------------------+
@@ -6470,6 +6471,43 @@ MODULE module_mp_thompson
       rql(:) = max(qn(:),R1)
 
   END SUBROUTINE semi_lagrange_sedim
+
+!>\ingroup aathompson
+!! @brief Calculates graupel size distribution parameters
+!!
+!! Calculates graupel intercept and slope parameters for
+!! for a vertical column 
+!!  
+!! @param[in]    kts     integer start index for vertical column
+!! @param[in]    kte     integer end index for vertical column
+!! @param[in]    rand1   real random number for stochastic physics
+!! @param[in]    rg      real array, size(kts:kte) for graupel mass concentration [kg m^3]
+!! @param[out]   ilamg   double array, size(kts:kte) for inverse graupel slope parameter [m]
+!! @param[out]   N0_g    double array, size(kts:kte) for graupel intercept paramter [m-4]
+subroutine graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
+
+   implicit none
+
+   integer, intent(in) :: kts, kte
+   real, intent(in) :: rand1
+   real, intent(in) :: rg(:)
+   double precision, intent(out) :: ilamg(:), N0_g(:)
+
+   integer :: k
+   real :: ygra1, zans1, N0_exp, lam_exp, lamg
+
+    do k = kte, kts, -1
+      ygra1 = alog10(max(1.e-9, rg(k)))
+      zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
+      N0_exp = 10.**(zans1)
+      N0_exp = max1(dble(gonv_min), min(N0_exp, dble(gonv_max)))
+      lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
+      lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
+      ilamg(k) = 1./lamg
+      N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
+   enddo
+
+end subroutine graupel_psd_parameters
 
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+

@@ -4,6 +4,7 @@
 !>\ingroup aathompson
 module module_mp_thompson_make_number_concentrations
 
+      use machine, only : kind_phys
       use physcons, only: PI => con_pi
 
       implicit none
@@ -35,7 +36,7 @@ module module_mp_thompson_make_number_concentrations
       !IMPLICIT NONE
       REAL, PARAMETER:: Ice_density = 890.0
       !REAL, PARAMETER:: PI = 3.1415926536
-      real, intent(in):: Q_ice, temp
+      real(kind_phys), intent(in):: Q_ice, temp
       integer idx_rei
       real corr, reice, deice
       double precision lambda
@@ -134,7 +135,7 @@ module module_mp_thompson_make_number_concentrations
 
       !IMPLICIT NONE
 
-      real, intent(in):: Q_cloud, qnwfa
+      real(kind_phys), intent(in):: Q_cloud, qnwfa
 
       !real, parameter:: PI = 3.1415926536
       real, parameter:: am_r = PI*1000./6.
@@ -173,7 +174,7 @@ module module_mp_thompson_make_number_concentrations
 
       IMPLICIT NONE
 
-      real, intent(in):: Q_rain, temp
+      real(kind_phys), intent(in):: Q_rain, temp
       double precision:: lambda, N0, qnr
       !real, parameter:: PI = 3.1415926536
       real, parameter:: am_r = PI*1000./6.
