@@ -676,7 +676,7 @@ contains
               dz=z_cup(i,k)-z_cup(i,k-1)
               ! cloud liquid water
               c1d(i,k)=c1_shal! 0. !.02*up_massdetr(i,k-1)
-              clw_all(i,k)=max(0.,qco(i,k)-trash)
+              clw_all(i,k)=max(0._kind_phys,qco(i,k)-trash)
               qrco(i,k)= (qco(i,k)-trash)/(1.+(c0_shal+c1d(i,k))*dz)
               if(qrco(i,k).lt.0.)then  ! hli new test 02/12/19
                  qrco(i,k)=0.
