@@ -993,6 +993,7 @@ MODULE module_mp_thompson
                               rainprod, evapprod,                     &
 #endif
                               refl_10cm, diagflag, do_radar_ref,      &
+                              max_hail_diam_sfc,                      &
                               vt_dbz_wt, first_time_step,             &
                               re_cloud, re_ice, re_snow,              &
                               has_reqc, has_reqi, has_reqs,           &
@@ -1062,6 +1063,8 @@ MODULE module_mp_thompson
                           GRAUPELNC, GRAUPELNCV
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT)::       &
                           refl_10cm
+      REAL, DIMENSION(ims:ime, jms:jme), INTENT(INOUT)::       &
+                          max_hail_diam_sfc
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           vt_dbz_wt
       LOGICAL, INTENT(IN) :: first_time_step
@@ -1678,6 +1681,8 @@ MODULE module_mp_thompson
          last_step_only: IF ((ndt>1 .and. it==ndt) .or. &
                              (nsteps>1 .and. istep==nsteps) .or. &
                              (nsteps==1 .and. ndt==1)) THEN
+
+           max_hail_diam_sfc(i,j) = hail_mass_99th_percentile(kts, kte, qg1d, t1d, p1d)
 
 !> - Call calc_refl10cm()
 
@@ -6496,7 +6501,7 @@ subroutine graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
    integer :: k
    real :: ygra1, zans1, N0_exp, lam_exp, lamg
 
-    do k = kte, kts, -1
+   do k = kte, kts, -1
       ygra1 = alog10(max(1.e-9, rg(k)))
       zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
       N0_exp = 10.**(zans1)
@@ -6508,6 +6513,45 @@ subroutine graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
    enddo
 
 end subroutine graupel_psd_parameters
+
+!>\ingroup aathompson
+!! @brief Calculates graupel/hail maximum diameter
+!!
+!! Calculates graupel/hail maximum diameter (currently the 99th percentile of mass distribtuion)
+!! for a vertical column 
+!!  
+!! @param[in]    kts             integer start index for vertical column
+!! @param[in]    kte             integer end index for vertical column
+!! @param[in]    qg              real array, size(kts:kte) for graupel mass mixing ratio [kg kg^-1]
+!! @param[in]    temperature     double array, size(kts:kte) temperature [K]
+!! @param[in]    pressure        double array, size(kts:kte) pressure [Pa]
+!! @param[out]   max_hail_diam   real maximum hail diameter [m]
+function hail_mass_99th_percentile(kts, kte, qg, temperature, pressure, qv) result(max_hail_diam)
+
+   implicit none
+   
+   integer, intent(in) :: kts, kte
+   real, intent(in) :: qg(:), temperature(:), pressure(:), qv(:)
+   real, intent(out) :: max_hail_diam
+
+   real :: rho(:), rg(:), max_hail_column
+   real, parameter :: random_number = 0.
+
+   max_hail_column = 0.
+   rg = 0.
+   do k = kts, kte
+      rho(k) = 0.622*pressure(k)/(R*temperature(k)*(max(1.e-10, qv(k))+0.622))
+      if (qg(k) .gt. R1) then
+         rg(k) = qg(k)*rho(k)
+      endif 
+   enddo 
+
+   call graupel_psd_parameters(kts, kte, random_number, rg, ilamg, N0_g)
+
+   where(rg .gt. 1.e-9) max_hail_column = 10.05 * ilamg
+   max_hail_diam = max_hail_column(kts)
+   
+end function hail_mass_99th_percentile
 
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
