@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = clm_lake
   type = scheme
-  dependencies = ../../hooks/machine.F
+  dependencies = ../../../hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]

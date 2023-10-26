@@ -2,7 +2,7 @@
   name = sfc_diag
   type = scheme
   relative_path = ../../
-  dependencies = tools/funcphys.f90,hooks/machine.F
+  dependencies = tools/funcphys.f90,hooks/machine.F,hooks/physcons.F90
 
 ########################################################################
 [ccpp-arg-table]

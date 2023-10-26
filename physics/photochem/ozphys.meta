@@ -1,15 +1,15 @@
 [ccpp-table-properties]
-  name = ozphys_2015
+  name = ozphys
   type = scheme
-  dependencies = ../../hooks/machine.F
+  dependencies = ../hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]
-  name = ozphys_2015_init
+  name = ozphys_init
   type = scheme
-[oz_phys_2015]
-  standard_name = flag_for_nrl_2015_ozone_scheme
-  long_name = flag for new (2015) ozone physics
+[oz_phys]
+  standard_name = flag_for_nrl_2006_ozone_scheme
+  long_name = flag for old (2006) ozone physics
   units = flag
   dimensions = ()
   type = logical
@@ -32,7 +32,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = ozphys_2015_run
+  name = ozphys_run
   type = scheme
 [im]
   standard_name = horizontal_loop_extent
@@ -97,13 +97,13 @@
   intent = in
 [prdout]
   standard_name = ozone_forcing
-  long_name = ozone forcing data
+  long_name = ozone forcing coefficients
   units = mixed
   dimensions = (horizontal_loop_extent,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_forcing_data)
   type = real
   kind = kind_phys
   intent = in
-[pl_coeff]
+[oz_coeff]
   standard_name = number_of_coefficients_in_ozone_forcing_data
   long_name = number of coefficients in ozone forcing data
   units = index
@@ -132,6 +132,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
+  active = (flag_for_diagnostics_3D)
   intent = inout
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index

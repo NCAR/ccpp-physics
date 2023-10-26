@@ -1,7 +1,8 @@
 [ccpp-table-properties]
   name = cu_c3_driver
   type = scheme
-  dependencies = cu_c3_deep.F90,cu_c3_sh.F90,../../hooks/machine.F,../../hooks/physcons.F90,../progsigma_calc.f90
+  dependencies = ../../hooks/machine.F
+  dependencies = cu_c3_deep.F90,cu_c3_sh.F90,../progsigma_calc.f90
 
 ########################################################################
 [ccpp-arg-table]

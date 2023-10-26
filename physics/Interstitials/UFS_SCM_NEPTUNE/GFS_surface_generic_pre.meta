@@ -2,7 +2,7 @@
   name = GFS_surface_generic_pre
   type = scheme
   relative_path = ../../
-  dependencies = hooks/machine.F,Land/Noah/surface_perturbation.F90
+  dependencies = hooks/machine.F,SFC_Models/Land/Noah/surface_perturbation.F90
 
 ########################################################################
 [ccpp-arg-table]

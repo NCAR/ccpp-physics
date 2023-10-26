@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = sfc_ocean
   type = scheme
-  dependencies = ../../tools/funcphys.f90,../../hooks/machine.F
+  dependencies = ../../../tools/funcphys.f90,../../../hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]

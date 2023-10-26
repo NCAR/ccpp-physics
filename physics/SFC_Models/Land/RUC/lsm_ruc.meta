@@ -1,7 +1,8 @@
 [ccpp-table-properties]
   name = lsm_ruc
   type = scheme
-  dependencies = ../../hooks/machine.F,module_sf_ruclsm.F90,module_soil_pre.F90,namelist_soilveg_ruc.F90,set_soilveg_ruc.F90
+  dependencies = ../../../hooks/machine.F,../../../hooks/physcons.F90
+  dependencies = module_sf_ruclsm.F90,module_soil_pre.F90,namelist_soilveg_ruc.F90,set_soilveg_ruc.F90
 
 ########################################################################
 [ccpp-arg-table]

@@ -1,7 +1,9 @@
 [ccpp-table-properties]
   name = m_micro
   type = scheme
-  dependencies = ../../hooks/machine.F,../../hooks/physcons.F90,aer_cloud.F,aerclm_def.F,cldmacro.F,cldwat2m_micro.F,micro_mg_utils.F90,micro_mg2_0.F90,micro_mg3_0.F90,wv_saturation.F
+  dependencies = ../../hooks/machine.F,../../hooks/physcons.F90
+  dependencies = aer_cloud.F,aerclm_def.F,cldmacro.F,cldwat2m_micro.F
+  dependencies = micro_mg_utils.F90,micro_mg2_0.F90,micro_mg3_0.F90,wv_saturation.F
 
 ########################################################################
 [ccpp-arg-table]

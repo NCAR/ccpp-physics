@@ -2,7 +2,7 @@
   name = sgscloud_radpre
   type = scheme
   relative_path = ../../
-  dependencies = tools/funcphys.f90,hooks/machine.F,hooks/physcons.F90
+  dependencies = tools/funcphys.f90,hooks/machine.F
   dependencies = hooks/physcons.F90,Radiation/RRTMG/radcons.f90
   dependencies = Radiation/radiation_clouds.f,MP/Thompson/module_mp_thompson.F90
 

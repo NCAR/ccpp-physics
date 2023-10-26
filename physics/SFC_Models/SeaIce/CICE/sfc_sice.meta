@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = sfc_sice
   type = scheme
-  relative_path	= ../../
+  relative_path	= ../../../
   dependencies = tools/funcphys.f90,hooks/machine.F
 
 ########################################################################
