@@ -216,10 +216,10 @@
                 qi(i,k) = ice_frac*qi_bl(i,k)
 
                 !eff radius cloud ice (microns), from Mishra et al. (2014, JGR Atmos, fig 6b)
-                if(qi(i,k)>1.E-8)clouds5(i,k)=max(173.45 + 2.14*Tc, 20.)
+                clouds5(i,k)=max(173.45 + 2.14*Tc, 20.)
                 !eff radius cloud ice (microns), from Mishra et al. (2014, JGR Atmos, fig 8b)
                 !iwc = qi(i,k)*1.0e6*rho(i,k)
-                !IF(qi(i,k)>1.E-8)clouds5(i,k)=MAX(139.7 + 1.76*Tc + 13.49*LOG(iwc), 20.)
+                !clouds5(i,k)=MAX(139.7 + 1.76*Tc + 13.49*LOG(iwc), 20.)
 
                 !calculate the ice water path using additional BL clouds
                 clouds4(i,k) = max(0.0, qi(i,k) * gfac * delp(i,k))
@@ -229,7 +229,7 @@
                 qs(i,k) = snow_frac*qi_bl(i,k)
 
                 !eff radius cloud ice (microns), from Mishra et al. (2014, JGR Atmos, fig 6b)
-                if(qs(i,k)>1.E-8)clouds9(i,k)=max(2.*(173.45 + 2.14*Tc), 50.)
+                clouds9(i,k)=max(2.*(173.45 + 2.14*Tc), 50.)
 
                 !calculate the snow water path using additional BL clouds
                 clouds8(i,k) = max(0.0, qs(i,k) * gfac * delp(i,k))

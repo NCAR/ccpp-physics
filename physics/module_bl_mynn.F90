@@ -519,7 +519,7 @@ CONTAINS
     real(kind_phys), dimension(kts:kte) ::                  &
          &thl,tl,qv1,qc1,qi1,qs1,sqw,                       &
          &el, dfm, dfh, dfq, tcd, qcd, pdk, pdt, pdq, pdc,  &
-         &vt, vq, sgm
+         &vt, vq, sgm, kzero
     real(kind_phys), dimension(kts:kte) ::                  &
          &thetav,sh,sm,u1,v1,w1,p1,                         &
          &ex1,dz1,th1,tk1,rho1,qke1,tsq1,qsq1,cov1,         &
@@ -635,6 +635,7 @@ CONTAINS
     maxwidth(its:ite)=0.
     maxmf(its:ite)=0.
     maxKHtopdown(its:ite)=0.
+    kzero(kts:kte)=0.
 
     ! DH* CHECK HOW MUCH OF THIS INIT IF-BLOCK IS ACTUALLY NEEDED FOR RESTARTS
 !> - Within the MYNN-EDMF, there is a dependecy check for the first time step,
@@ -743,7 +744,7 @@ CONTAINS
                 !keep snow out for now - increases ceiling bias
                 sqw(k)=sqv(k)+sqc(k)+sqi(k)!+sqs(k)
                 thl(k)=th1(k) - xlvcp/ex1(k)*sqc(k) &
-                    &         - xlscp/ex1(k)*(sqi(k)+sqs(k))
+                    &         - xlscp/ex1(k)*(sqi(k))!+sqs(k))
                 !Use form from Tripoli and Cotton (1981) with their
                 !suggested min temperature to improve accuracy.
                 !thl(k)=th(i,k)*(1.- xlvcp/MAX(tk1(k),TKmin)*sqc(k) &
@@ -990,10 +991,10 @@ CONTAINS
           else
              zw(k)=zw(k-1)+dz(i,k-1)
           endif
-          !keep snow out for now - increases ceiling bias                                                                                                
+          !keep snow out for now - increases ceiling bias
           sqw(k)= sqv(k)+sqc(k)+sqi(k)!+sqs(k)
           thl(k)= th1(k) - xlvcp/ex1(k)*sqc(k) &
-               &         - xlscp/ex1(k)*(sqi(k)+sqs(k))
+               &         - xlscp/ex1(k)*(sqi(k))!+sqs(k))
           !Use form from Tripoli and Cotton (1981) with their
           !suggested min temperature to improve accuracy.
           !thl(k)=th(i,k)*(1.- xlvcp/MAX(tk1(k),TKmin)*sqc(k) &
@@ -1223,9 +1224,9 @@ CONTAINS
        call mynn_tendencies(kts,kte,i,                   &
                &delt, dz1, rho1,                         &
                &u1, v1, th1, tk1, qv1,                   &
-               &qc1, qi1, qs1, qnc1, qni1,               &
+               &qc1, qi1, kzero, qnc1, qni1,             & !kzero replaces qs1 - not mixing snow
                &ps(i), p1, ex1, thl,                     &
-               &sqv, sqc, sqi, sqs, sqw,                 &
+               &sqv, sqc, sqi, kzero, sqw,               & !kzero replaces sqs - not mixing snow
                &qnwfa1, qnifa1, qnbca1, ozone1,          &
                &ust(i),flt,flq,flqv,flqc,                &
                &wspd(i),uoce(i),voce(i),                 &
@@ -3850,11 +3851,11 @@ CONTAINS
            q1(k)  = qmq  / sgm(k)  ! Q1, the normalized saturation
 
            !Add condition for falling/settling into low-RH layers, so at least
-           !some cloud fraction is applied for all qc and qi.
+           !some cloud fraction is applied for all qc, qs, and qi.
            rh_hack= rh(k)
            !ensure adequate RH & q1 when qi is at least 1e-9
            if (qi(k)>1.e-9) then
-              rh_hack =min(1.0, rhcrit + 0.06*(9.0 + log10(qi(k))))
+              rh_hack =min(1.0, rhcrit + 0.07*(9.0 + log10(qi(k))))
               rh(k)   =max(rh(k), rh_hack)
               !add rh-based q1
               q1_rh   =-3. + 3.*(rh_hack-rhcrit)/(1.-rhcrit)
@@ -3869,8 +3870,8 @@ CONTAINS
               q1(k)   =max(q1_rh, q1(k) )
            endif
            !ensure adequate RH & q1 when qs is at least 1e-7 (above the PBLH)
-           if (qs(k)>1.e-7 .and. zagl .gt. pblh2) then
-              rh_hack =min(1.0, rhcrit + 0.08*(7.0 + log10(qs(k))))
+           if (qs(k)>1.e-8 .and. zagl .gt. pblh2) then
+              rh_hack =min(1.0, rhcrit + 0.07*(8.0 + log10(qs(k))))
               rh(k)   =max(rh(k), rh_hack)
               !add rh-based q1
               q1_rh   =-3. + 3.*(rh_hack-rhcrit)/(1.-rhcrit)
@@ -4614,7 +4615,8 @@ ENDIF
 !============================================
 ! MIX SNOW ( sqs )
 !============================================
-IF (bl_mynn_cloudmix > 0 .AND. FLAG_QS) THEN
+!hard-code to not mix snow
+IF (bl_mynn_cloudmix > 0 .AND. .false.) THEN
 
     k=kts
 !rho-weighted:
@@ -4981,7 +4983,7 @@ ENDIF
       !===================
       ! CLOUD SNOW TENDENCY
       !===================
-      IF (FLAG_QS) THEN
+      IF (.false.) THEN !disabled
          DO k=kts,kte
            Dqs(k)=(sqs2(k)/(1.-sqs2(k)) - qs(k))/delt
          ENDDO
