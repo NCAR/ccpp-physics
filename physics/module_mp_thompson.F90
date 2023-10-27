@@ -1682,7 +1682,7 @@ MODULE module_mp_thompson
                              (nsteps>1 .and. istep==nsteps) .or. &
                              (nsteps==1 .and. ndt==1)) THEN
 
-           max_hail_diam_sfc(i,j) = hail_mass_99th_percentile(kts, kte, qg1d, t1d, p1d)
+           max_hail_diam_sfc(i,j) = hail_mass_99th_percentile(kts, kte, qg1d, t1d, p1d, qv1d)
 
 !> - Call calc_refl10cm()
 
@@ -6525,6 +6525,7 @@ end subroutine graupel_psd_parameters
 !! @param[in]    qg              real array, size(kts:kte) for graupel mass mixing ratio [kg kg^-1]
 !! @param[in]    temperature     double array, size(kts:kte) temperature [K]
 !! @param[in]    pressure        double array, size(kts:kte) pressure [Pa]
+!! @param[in]    qv              real array, size(kts:kte) water vapor mixing ratio [kg kg^-1]
 !! @param[out]   max_hail_diam   real maximum hail diameter [m]
 function hail_mass_99th_percentile(kts, kte, qg, temperature, pressure, qv) result(max_hail_diam)
 
@@ -6532,9 +6533,11 @@ function hail_mass_99th_percentile(kts, kte, qg, temperature, pressure, qv) resu
    
    integer, intent(in) :: kts, kte
    real, intent(in) :: qg(:), temperature(:), pressure(:), qv(:)
-   real, intent(out) :: max_hail_diam
+   real :: max_hail_diam
 
-   real :: rho(:), rg(:), max_hail_column
+   integer :: k
+   real :: rho(kts:kte), rg(kts:kte), max_hail_column(kts:kte)
+   double precision :: ilamg(kts:kte), N0_g(kts:kte)
    real, parameter :: random_number = 0.
 
    max_hail_column = 0.
