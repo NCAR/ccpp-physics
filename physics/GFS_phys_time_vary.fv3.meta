@@ -1205,7 +1205,7 @@
   standard_name = ozone_forcing
   long_name = ozone forcing data
   units = mixed
-  dimensions = (horizontal_dimension,number_of_levels_in_ozone_data,number_of_coefficients_in_ozone_data)
+  dimensions = (horizontal_dimension,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_data)
   type = real
   kind = kind_phys
   intent = inout
