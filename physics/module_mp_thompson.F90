@@ -6499,7 +6499,8 @@ subroutine graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
    double precision, intent(out) :: ilamg(:), N0_g(:)
 
    integer :: k
-   real :: ygra1, zans1, N0_exp, lam_exp, lamg
+   real :: ygra1, zans1
+   double precision :: N0_exp, lam_exp, lamg
 
    do k = kte, kts, -1
       ygra1 = alog10(max(1.e-9, rg(k)))
