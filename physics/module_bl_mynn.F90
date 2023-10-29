@@ -232,6 +232,18 @@
 !                bl_mynn_cloudpdf = 2 (Chab-Becht).
 !            Removed WRF_CHEM dependencies.
 !            Many miscellaneous tweaks.
+! v4.5.2 / CCPP
+!            Some code optimization. Removed many conditions from loops. Redesigned the mass-
+!                flux scheme to use 8 plumes instead of a variable n plumes. This results in
+!                the removal of the output variable "nudprafts" and adds maxwidth and ztop_plume.
+!            Revision option bl_mynn_cloudpdf = 2, which now ensures cloud fractions for all
+!                optically relevant mixing ratios (tip from Greg Thompson). Also, added flexibility
+!                for tuning near-surface cloud fractions to remove excess fog/low ceilings.
+!            Now outputs all SGS cloud mixing ratios as grid-mean values, not in-cloud. This 
+!                results in a change in the pre-radiation code to no longer multiply mixing ratios
+!                by cloud fractions.
+!            Lots of code cleanup: removal of test code, comments, changing text case, etc.
+!            Many misc tuning/tweaks.
 !
 ! Many of these changes are now documented in references listed above.
 !====================================================================
