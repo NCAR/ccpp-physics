@@ -3046,7 +3046,6 @@ CONTAINS
        ! q-variance (pdq), and covariance (pdc)
        pdk(k) = elq*( sm(k)*gm(k)                &
             &        +sh(k)*gh(k)+gamv ) +       &
-!fix?            &   TKEprodTD(k)
             &    0.5*TKEprodTD(k)        ! xmchen
        pdt(k) = elh*( sh(k)*dtl(k)+gamt )*dtl(k)
        pdq(k) = elh*( sh(k)*dqw(k)+gamq )*dqw(k)
@@ -3091,7 +3090,6 @@ CONTAINS
        !qBUOY1D(k) = elq*(sh(k)*(-dTdz*grav/thl(k)) + gamv) !! ORIGINAL CODE
        
        !! Buoyncy term takes the TKEprodTD(k) production now
-!fix?  qBUOY1D(k) = elq*(sh(k)*gh(k)+gamv)+TKEprodTD(k) !staggered
        qBUOY1D(k) = elq*(sh(k)*gh(k)+gamv)+0.5*TKEprodTD(k) ! xmchen
 
        !!!Dissipation Term (now it evaluated in mym_predict)
@@ -3801,7 +3799,7 @@ CONTAINS
 
         !Diagnostic statistical scheme of Chaboureau and Bechtold (2002), JAS
         !but with use of higher-order moments to estimate sigma
-        pblh2=MAX(10.,pblh1)
+        pblh2=MAX(10._kind_phys,pblh1)
         zagl = 0.
         dzm1 = 0.
         DO k = kts,kte-1
@@ -3811,7 +3809,7 @@ CONTAINS
            t      = th(k)*exner(k)
            xl     = xl_blend(t)              ! obtain latent heat
            qsat_tk= qsat_blend(t,  p(k))     ! saturation water vapor mixing ratio at tk and p
-           rh(k)  = MAX(MIN(1.00,qw(k)/MAX(1.E-10,qsat_tk)),0.001)
+           rh(k)  = MAX(MIN(1.0_kind_phys,qw(k)/MAX(1.E-10,qsat_tk)),0.001_kind_phys)
 
            !dqw/dT: Clausius-Clapeyron
            dqsl   = qsat_tk*ep_2*xlv/( r_d*t**2 )
@@ -3840,7 +3838,7 @@ CONTAINS
            !sgm(k) = max( sgm(k), qsat_tk*0.035 )
 
            !introduce vertical grid spacing dependence on min sgm
-           wt     = max(500. - max(dz(k)-100.,0.0), 0.0)/500. !=1 for dz < 100 m, =0 for dz > 600 m
+           wt     = max(500. - max(dz(k)-100.,0.0), 0.0_kind_phys)/500. !=1 for dz < 100 m, =0 for dz > 600 m
            sgm(k) = sgm(k) + sgm(k)*0.2*(1.0-wt) !inflate sgm for coarse dz
 
            !allow min sgm to vary with dz and z.
@@ -3855,7 +3853,7 @@ CONTAINS
            rh_hack= rh(k)
            !ensure adequate RH & q1 when qi is at least 1e-9
            if (qi(k)>1.e-9) then
-              rh_hack =min(1.0, rhcrit + 0.07*(9.0 + log10(qi(k))))
+              rh_hack =min(1.0_kind_phys, rhcrit + 0.07*(9.0 + log10(qi(k))))
               rh(k)   =max(rh(k), rh_hack)
               !add rh-based q1
               q1_rh   =-3. + 3.*(rh_hack-rhcrit)/(1.-rhcrit)
@@ -3863,7 +3861,7 @@ CONTAINS
            endif
            !ensure adequate RH & q1 when qc is at least 1e-6
            if (qc(k)>1.e-6) then
-              rh_hack =min(1.0, rhcrit + 0.09*(6.0 + log10(qc(k))))
+              rh_hack =min(1.0_kind_phys, rhcrit + 0.09*(6.0 + log10(qc(k))))
               rh(k)   =max(rh(k), rh_hack)
               !add rh-based q1
               q1_rh   =-3. + 3.*(rh_hack-rhcrit)/(1.-rhcrit)
@@ -3871,7 +3869,7 @@ CONTAINS
            endif
            !ensure adequate RH & q1 when qs is at least 1e-7 (above the PBLH)
            if (qs(k)>1.e-8 .and. zagl .gt. pblh2) then
-              rh_hack =min(1.0, rhcrit + 0.07*(8.0 + log10(qs(k))))
+              rh_hack =min(1.0_kind_phys, rhcrit + 0.07*(8.0 + log10(qs(k))))
               rh(k)   =max(rh(k), rh_hack)
               !add rh-based q1
               q1_rh   =-3. + 3.*(rh_hack-rhcrit)/(1.-rhcrit)
@@ -3953,10 +3951,10 @@ CONTAINS
            elseif (q1k .ge. -2.5 .and. q1k .lt. -1.7) then
               Fng = 3.0 + exp(-3.8*(q1k+1.7))
            else
-              Fng = min(23.9 + exp(-1.6*(q1k+2.5)), 60.)
+              Fng = min(23.9 + exp(-1.6*(q1k+2.5)), 60._kind_phys)
            endif
 
-           cfmax = min(cldfra_bl1D(k), 0.6)
+           cfmax = min(cldfra_bl1D(k), 0.6_kind_phys)
            !Further limit the cf going into vt & vq near the surface
            zsl   = min(max(25., 0.1*pblh2), 100.)
            wt    = min(zagl/zsl, 1.0) !=0 at z=0 m, =1 above ekman layer
@@ -4921,9 +4919,6 @@ ENDIF
             sqi2(k) = 0.0         ! if sqw2 > qsat 
             sqc2(k) = 0.0
          ENDIF
-         !dqv(k) = (sqv2(k) - sqv(k))/delt
-         !dqc(k) = (sqc2(k) - sqc(k))/delt
-         !dqi(k) = (sqi2(k) - sqi(k))/delt
       ENDDO
    ENDIF
 
@@ -4932,7 +4927,7 @@ ENDIF
     ! WATER VAPOR TENDENCY
     !=====================
     DO k=kts,kte
-       Dqv(k)=(sqv2(k)/(1.-sqv2(k)) - qv(k))/delt
+       Dqv(k)=(sqv2(k) - sqv(k))/delt
        !if (sqv2(k) < 0.0)print*,"neg qv:",sqv2(k),k
     ENDDO
 
@@ -4943,7 +4938,7 @@ ENDIF
       !print*,"FLAG_QC:",FLAG_QC
       IF (FLAG_QC) THEN
          DO k=kts,kte
-            Dqc(k)=(sqc2(k)/(1.-sqv2(k)) - qc(k))/delt
+            Dqc(k)=(sqc2(k) - sqc(k))/delt
             !if (sqc2(k) < 0.0)print*,"neg qc:",sqc2(k),k
          ENDDO
       ELSE
@@ -4971,7 +4966,7 @@ ENDIF
       !===================
       IF (FLAG_QI) THEN
          DO k=kts,kte
-           Dqi(k)=(sqi2(k)/(1.-sqv2(k)) - qi(k))/delt
+           Dqi(k)=(sqi2(k) - sqi(k))/delt
            !if (sqi2(k) < 0.0)print*,"neg qi:",sqi2(k),k
          ENDDO
       ELSE
@@ -4985,7 +4980,7 @@ ENDIF
       !===================
       IF (.false.) THEN !disabled
          DO k=kts,kte
-           Dqs(k)=(sqs2(k)/(1.-sqs2(k)) - qs(k))/delt
+           Dqs(k)=(sqs2(k) - sqs(k))/delt
          ENDDO
       ELSE
          DO k=kts,kte
@@ -5009,10 +5004,11 @@ ENDIF
     ELSE !-MIX CLOUD SPECIES?
       !CLOUDS ARE NOT NIXED (when bl_mynn_cloudmix == 0)
       DO k=kts,kte
-         Dqc(k)=0.
+         Dqc(k) =0.
          Dqnc(k)=0.
-         Dqi(k)=0.
+         Dqi(k) =0.
          Dqni(k)=0.
+         Dqs(k) =0.
       ENDDO
     ENDIF
 
@@ -6007,30 +6003,27 @@ ENDIF
   ! Criteria (1)
     maxwidth = min(dx*dcut, lmax)
   !Criteria (2)
-    maxwidth = min(maxwidth, 1.1*PBLH) 
+    maxwidth = min(maxwidth, 1.1_kind_phys*PBLH) 
   ! Criteria (3)
     if ((landsea-1.5) .lt. 0) then  !land
-       maxwidth = MIN(maxwidth, 0.5*cloud_base)
+       maxwidth = MIN(maxwidth, 0.5_kind_phys*cloud_base)
     else                            !water
-       maxwidth = MIN(maxwidth, 0.9*cloud_base)
+       maxwidth = MIN(maxwidth, 0.9_kind_phys*cloud_base)
     endif
   ! Criteria (4)
-    wspd_pbl=SQRT(MAX(u(kts)**2 + v(kts)**2, 0.01))
+    wspd_pbl=SQRT(MAX(u(kts)**2 + v(kts)**2, 0.01_kind_phys))
     !Note: area fraction (acfac) is modified below
   ! Criteria (5) - only a function of flt (not fltv)
     if ((landsea-1.5).LT.0) then  !land
-      !width_flx = MAX(MIN(1000.*(0.6*tanh((flt - 0.050)/0.03) + .5),1000.), 0.)
-      !width_flx = MAX(MIN(1000.*(0.6*tanh((flt - 0.040)/0.03) + .5),1000.), 0.) 
-      width_flx = MAX(MIN(1000.*(0.6*tanh((fltv - 0.040)/0.04) + .5),1000.), 0.)
+      width_flx = MAX(MIN(1000.*(0.6*tanh((fltv - 0.040)/0.04) + .5),1000._kind_phys), 0._kind_phys)
     else                          !water
-      !width_flx = MAX(MIN(1000.*(0.6*tanh((flt - 0.003)/0.01) + .5),1000.), 0.)
-      width_flx = MAX(MIN(1000.*(0.6*tanh((fltv - 0.007)/0.02) + .5),1000.), 0.)
+      width_flx = MAX(MIN(1000.*(0.6*tanh((fltv - 0.007)/0.02) + .5),1000._kind_phys), 0._kind_phys)
     endif
     maxwidth = MIN(maxwidth, width_flx)
     minwidth = lmin
     !allow min plume size to increase in large flux conditions (eddy diffusivity should be
     !large enough to handle the representation of small plumes).
-    if (maxwidth .ge. (lmax - 1.0) .and. fltv .gt. 0.2)minwidth = lmin + dlmin*min((fltv-0.2)/0.3, 1.) 
+    if (maxwidth .ge. (lmax - 1.0) .and. fltv .gt. 0.2)minwidth = lmin + dlmin*min((fltv-0.2)/0.3, 1._kind_phys) 
 
     if (maxwidth .le. minwidth) then ! deactivate MF component
        nup2 = 0
@@ -6048,7 +6041,7 @@ if ( fltv2 > 0.002 .AND. (maxwidth > minwidth) .AND. superadiabatic) then
     ! Find coef C for number size density N
     cn = 0.
     d  =-1.9  !set d to value suggested by Neggers 2015 (JAMES).
-    dl = (maxwidth - minwidth)/real(nup-1)
+    dl = (maxwidth - minwidth)/real(nup-1,kind=kind_phys)
     do i=1,NUP
        ! diameter of plume
        l = minwidth + dl*real(i-1)
