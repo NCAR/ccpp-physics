@@ -1381,7 +1381,7 @@ CONTAINS
           ZNTstoch_lnd(I)  = ZNT_lnd(I)
        endif
        !add limit to prevent ridiculous values of z0 (more than dz/15)
-       ZNTstoch_lnd(I) = min(ZNTstoch_lnd(I), dz8w1d(i)*0.0666)
+       ZNTstoch_lnd(I) = min(ZNTstoch_lnd(I), dz8w1d(i)*0.0666_kind_phys)
 
        !--------------------------------------
        ! LAND
