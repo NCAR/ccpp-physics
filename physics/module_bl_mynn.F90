@@ -3879,7 +3879,7 @@ CONTAINS
               q1_rh   =-3. + 3.*(rh_hack-rhcrit)/(1.-rhcrit)
               q1(k)   =max(q1_rh, q1(k) )
            endif
-           !ensure adequate RH & q1 when qs is at least 1e-7 (above the PBLH)
+           !ensure adequate RH & q1 when qs is at least 1e-8 (above the PBLH)
            if (qs(k)>1.e-8 .and. zagl .gt. pblh2) then
               rh_hack =min(1.0_kind_phys, rhcrit + 0.07*(8.0 + log10(qs(k))))
               rh(k)   =max(rh(k), rh_hack)
