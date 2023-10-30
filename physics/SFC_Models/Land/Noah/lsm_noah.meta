@@ -2,7 +2,7 @@
   name = lsm_noah
   type = scheme
   dependencies = ../../../tools/funcphys.f90,../../../hooks/machine.F
-  dependencies = ../set_soilveg.f,sflx.f,surface_perturbation.F90
+  dependencies = set_soilveg.f,sflx.f,surface_perturbation.F90
 
 ########################################################################
 [ccpp-arg-table]
