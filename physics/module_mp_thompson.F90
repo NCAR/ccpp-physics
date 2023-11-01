@@ -1510,6 +1510,14 @@ MODULE module_mp_thompson
             enddo
          endif
 
+         if (merra2_aerosol_aware) then
+            do k = kts, kte
+               nc(i,k,j) = nc1d(k)
+               nwfa(i,k,j) = nwfa1d(k)
+               nifa(i,k,j) = nifa1d(k)
+            enddo
+         endif
+
          do k = kts, kte
             qv(i,k,j) = qv1d(k)
             qc(i,k,j) = qc1d(k)
