@@ -2,7 +2,7 @@
   name = GFS_rrtmgp_setup
   type = scheme
   dependencies = iounitdef.f,machine.F,module_bfmicrophysics.f,radiation_aerosols.f,radiation_astronomy.f
-  dependencies = module_mp_thompson.F90,radiation_gases.f
+  dependencies = module_mp_thompson.F90,radiation_gases.f,module_ozphys.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -389,6 +389,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = inout
 [iaermdl]
   standard_name = control_for_aerosol_radiation_scheme
   long_name = control of aerosol scheme in radiation
