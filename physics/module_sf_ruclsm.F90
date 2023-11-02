@@ -1521,7 +1521,7 @@ CONTAINS
     ENDIF
 
 	if(snhei.gt.0.0081_kind_phys*rhowater/rhosn) then
-!*** Update snow density for current temperature (Koren et al. 1999)
+!*** Update snow density for current temperature (Koren et al 1999,doi:10.1029/1999JD900232.)
         BSN=delt/3600._kind_phys*c1sn*exp(0.08_kind_phys*min(zero,tsnav)-c2sn*rhosn*1.e-3_kind_phys)
        if(bsn*snwe*100._kind_phys.lt.1.e-4_kind_phys) goto 777
         XSN=rhosn*(exp(bsn*snwe*100._kind_phys)-one)/(bsn*snwe*100._kind_phys)
@@ -4079,11 +4079,8 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          fact = one
          if(rhosn < 156._kind_phys .or. (newsnow > zero .and. rhonewsn < 156._kind_phys)) then
            keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
-           !-- fact is tuning parameter added by tgs based on 4 Jan 2017 testing 
-           !fact = 5._kind_phys
          else
            keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
-           !fact = 2._kind_phys
          endif
 
          if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
@@ -4536,11 +4533,8 @@ print *, 'TSO before calling SNOWTEMP: ', tso
          fact = one
          if(rhosn < 156._kind_phys .or. (newsn > zero .and. rhonewsn < 156._kind_phys)) then
            keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
-           !-- fact is a tuning parameter
-           !fact = 5._kind_phys
          else
            keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
-           !fact = 2._kind_phys
          endif
         
          if(newsnow <= zero .and. snhei > one .and. rhosn > 250._kind_phys) then
@@ -5213,11 +5207,8 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
            fact = one
            if(rhosn < 156._kind_phys .or. (newsnow > zero .and. rhonewsn < 156._kind_phys)) then
              keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
-             !-- fact is a tuning parameter
-             !fact = 5._kind_phys
            else
              keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
-             !fact = 2._kind_phys
              if(debug_print) then
                print *,'SnowTemp xlat,xlon,rhosn,keff', xlat,xlon,rhosn,keff,keff/rhocsn*fact
                print *,'SNOWTEMP - 0.265/rhocsn',0.265_kind_phys/rhocsn
@@ -5789,11 +5780,8 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
             fact = one
             if(rhosn < 156._kind_phys .or. (newsnow > zero .and. rhonewsn < 156._kind_phys)) then
               keff = 0.023_kind_phys + 0.234_kind_phys * rhosn * 1.e-3_kind_phys
-              !-- fact is a tuning parameter
-              !fact = 5._kind_phys
             else
               keff = 0.138_kind_phys - 1.01_kind_phys * rhosn*1.e-3_kind_phys + 3.233_kind_phys * rhosn**2 * 1.e-6_kind_phys
-              !fact = 2._kind_phys
               if(debug_print) then
                 print *,'End SNOWTEMP - xlat,xlon,rhosn,keff',xlat,xlon,rhosn,keff
                 print *,'End SNOWTEMP - 0.265/rhocsn',0.265/rhocsn
