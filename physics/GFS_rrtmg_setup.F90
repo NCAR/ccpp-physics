@@ -7,7 +7,7 @@
 module GFS_rrtmg_setup
 
    use machine, only:  kind_phys
-
+   use module_ozphys, only: ty_ozphys
    implicit none
 
    public GFS_rrtmg_setup_init, GFS_rrtmg_setup_timestep_init, GFS_rrtmg_setup_finalize
@@ -218,8 +218,7 @@ module GFS_rrtmg_setup
            con_pi )
       call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file,  &
            con_pi, con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)
-      call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz,   &
-           con_pi, errflg, errmsg)
+      call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, con_pi, errflg, errmsg )
       call cld_init ( si, levr, imp_physics, me, con_g, con_rd, errflg, errmsg)
       call rlwinit ( me, rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, &
            iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
@@ -245,7 +244,8 @@ module GFS_rrtmg_setup
 !!
    subroutine GFS_rrtmg_setup_timestep_init (idate, jdate, deltsw, deltim, &
         lsswr, me, iaermdl, iaerflg, isol, aeros_file, slag, sdec, cdec,   &
-        solcon, con_pi, co2dat_file, co2gbl_file, ictm, ico2, ntoz, errmsg, errflg)
+        solcon, con_pi, co2dat_file, co2gbl_file, ictm, ico2, ntoz, ozphys,&
+        errmsg, errflg)
 
       implicit none
 
@@ -258,6 +258,7 @@ module GFS_rrtmg_setup
       logical,              intent(in)  :: lsswr
       integer,              intent(in)  :: me
       integer,              intent(in)  :: iaermdl, iaerflg, isol, ictm, ico2, ntoz
+      type(ty_ozphys),      intent(inout) :: ozphys
       character(len=26),    intent(in)  :: aeros_file, co2dat_file, co2gbl_file
       real(kind=kind_phys), intent(out) :: slag
       real(kind=kind_phys), intent(out) :: sdec
@@ -278,7 +279,7 @@ module GFS_rrtmg_setup
       errflg = 0
 
       call radupdate(idate,jdate,deltsw,deltim,lsswr,me,iaermdl, iaerflg,isol,aeros_file,&
-           slag,sdec,cdec,solcon,con_pi,co2dat_file,co2gbl_file,ictm,ico2,ntoz,errflg,errmsg)
+           slag,sdec,cdec,solcon,con_pi,co2dat_file,co2gbl_file,ictm,ico2,ntoz,ozphys,errflg,errmsg)
 
    end subroutine GFS_rrtmg_setup_timestep_init
 
@@ -326,7 +327,7 @@ module GFS_rrtmg_setup
 !-----------------------------------
       subroutine radupdate( idate,jdate,deltsw,deltim,lsswr,me, iaermdl,&
            iaerflg, isol, aeros_file, slag,sdec,cdec,solcon, con_pi,    &
-           co2dat_file,co2gbl_file, ictm, ico2, ntoz, errflg, errmsg)
+           co2dat_file,co2gbl_file, ictm, ico2, ntoz, ozphys, errflg, errmsg)
 !...................................
 
 ! =================   subprogram documentation block   ================ !
@@ -370,6 +371,7 @@ module GFS_rrtmg_setup
 
 !  ---  inputs:
       integer, intent(in) :: idate(:), jdate(:), me, iaermdl, iaerflg, isol, ictm, ntoz, ico2
+      type(ty_ozphys),intent(inout) :: ozphys
       logical, intent(in) :: lsswr
       character(len=26),intent(in) :: aeros_file,co2dat_file,co2gbl_file
 
@@ -462,8 +464,11 @@ module GFS_rrtmg_setup
         lco2_chg = .false.
       endif
 
-      call gas_update ( kyear,kmon,kday,khour,loz1st,lco2_chg, me, co2dat_file, &
-           co2gbl_file, ictm, ico2, ntoz, errflg, errmsg )
+      call gas_update ( kyear,kmon,kday,khour,lco2_chg, me, co2dat_file, &
+           co2gbl_file, ictm, ico2, errflg, errmsg )
+      if (ntoz == 0) then
+         call ozphys%update_o3clim(kmon, kday, khour, loz1st)
+      endif
 
       if ( loz1st ) loz1st = .false.
 
