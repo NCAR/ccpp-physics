@@ -5849,7 +5849,6 @@ MODULE module_mp_thompson
          endif
          lamc = (nc(k)*am_r*g_ratio(inu_c)/rc(k))**obmr
          re_qc1d(k) = SNGL(0.5D0 * DBLE(3.+inu_c)/lamc)
-         if (lsml .ne. 1) re_qc1d(k) = max(re_qc1d(k), 7.0E-6)
       enddo
       endif
 
