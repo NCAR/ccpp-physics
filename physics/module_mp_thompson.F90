@@ -2469,16 +2469,6 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !> - Calculate y-intercept, slope values for graupel.
 !+---+-----------------------------------------------------------------+
-      ! do k = kte, kts, -1
-      !    ygra1 = alog10(max(1.E-9, rg(k)))
-      !    zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
-      !    N0_exp = 10.**(zans1)
-      !    N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
-      !    lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
-      !    lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
-      !    ilamg(k) = 1./lamg
-      !    N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
-      ! enddo
       call graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
       endif
 
@@ -3546,16 +3536,6 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !> - Calculate y-intercept, slope values for graupel.
 !+---+-----------------------------------------------------------------+
-      ! do k = kte, kts, -1
-      !    ygra1 = alog10(max(1.E-9, rg(k)))
-      !    zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
-      !    N0_exp = 10.**(zans1)
-      !    N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
-      !    lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
-      !    lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
-      !    ilamg(k) = 1./lamg
-      !    N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
-      ! enddo
       call graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
       endif
 
@@ -6101,16 +6081,6 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 
       if (ANY(L_qg .eqv. .true.)) then
-      ! do k = kte, kts, -1
-      !    ygra1 = alog10(max(1.E-9, rg(k)))
-      !    zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
-      !    N0_exp = 10.**(zans1)
-      !    N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
-      !    lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
-      !    lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
-      !    ilamg(k) = 1./lamg
-      !    N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
-      ! enddo
       call graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
       endif
 
@@ -6517,7 +6487,7 @@ subroutine graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
       ygra1 = alog10(max(1.e-9, rg(k)))
       zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
       N0_exp = 10.**(zans1)
-      N0_exp = max1(dble(gonv_min), min(N0_exp, dble(gonv_max)))
+      N0_exp = max(dble(gonv_min), min(N0_exp, dble(gonv_max)))
       lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
       lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
       ilamg(k) = 1./lamg
