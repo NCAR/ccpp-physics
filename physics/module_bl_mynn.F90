@@ -3638,7 +3638,8 @@ CONTAINS
     real(kind_phys), parameter :: qpct_sfc=0.025
     real(kind_phys), parameter :: qpct_pbl=0.030
     real(kind_phys), parameter :: qpct_trp=0.040
-    real(kind_phys), parameter :: rhcrit  =0.83 !for hom pdf min sigma
+    real(kind_phys), parameter :: rhcrit  =0.83 !for cloudpdf = 2
+    real(kind_phys), parameter :: rhmax   =1.01 !for cloudpdf = 2
     integer :: i,j,k
 
     real(kind_phys):: erf
@@ -3821,7 +3822,7 @@ CONTAINS
            t      = th(k)*exner(k)
            xl     = xl_blend(t)              ! obtain latent heat
            qsat_tk= qsat_blend(t,  p(k))     ! saturation water vapor mixing ratio at tk and p
-           rh(k)  = MAX(MIN(1.0_kind_phys,qw(k)/MAX(1.E-10,qsat_tk)),0.001_kind_phys)
+           rh(k)  = MAX(MIN(rhmax, qw(k)/MAX(1.E-10,qsat_tk)),0.001_kind_phys)
 
            !dqw/dT: Clausius-Clapeyron
            dqsl   = qsat_tk*ep_2*xlv/( r_d*t**2 )
@@ -3863,28 +3864,28 @@ CONTAINS
            !Add condition for falling/settling into low-RH layers, so at least
            !some cloud fraction is applied for all qc, qs, and qi.
            rh_hack= rh(k)
-           !ensure adequate RH & q1 when qi is at least 1e-9
-           if (qi(k)>1.e-9) then
-              rh_hack =min(1.0_kind_phys, rhcrit + 0.07*(9.0 + log10(qi(k))))
+           !ensure adequate RH & q1 when qi is at least 1e-9 (above the PBLH)
+           if (qi(k)>1.e-9 .and. zagl .gt. pblh2) then
+              rh_hack =min(rhmax, rhcrit + 0.07*(9.0 + log10(qi(k))))
               rh(k)   =max(rh(k), rh_hack)
               !add rh-based q1
-              q1_rh   =-3. + 3.*(rh_hack-rhcrit)/(1.-rhcrit)
+              q1_rh   =-3. + 3.*(rh(k)-rhcrit)/(1.-rhcrit)
               q1(k)   =max(q1_rh, q1(k) )
            endif
            !ensure adequate RH & q1 when qc is at least 1e-6
            if (qc(k)>1.e-6) then
-              rh_hack =min(1.0_kind_phys, rhcrit + 0.09*(6.0 + log10(qc(k))))
+              rh_hack =min(rhmax, rhcrit + 0.09*(6.0 + log10(qc(k))))
               rh(k)   =max(rh(k), rh_hack)
               !add rh-based q1
-              q1_rh   =-3. + 3.*(rh_hack-rhcrit)/(1.-rhcrit)
+              q1_rh   =-3. + 3.*(rh(k)-rhcrit)/(1.-rhcrit)
               q1(k)   =max(q1_rh, q1(k) )
            endif
            !ensure adequate RH & q1 when qs is at least 1e-8 (above the PBLH)
            if (qs(k)>1.e-8 .and. zagl .gt. pblh2) then
-              rh_hack =min(1.0_kind_phys, rhcrit + 0.07*(8.0 + log10(qs(k))))
+              rh_hack =min(rhmax, rhcrit + 0.07*(8.0 + log10(qs(k))))
               rh(k)   =max(rh(k), rh_hack)
               !add rh-based q1
-              q1_rh   =-3. + 3.*(rh_hack-rhcrit)/(1.-rhcrit)
+              q1_rh   =-3. + 3.*(rh(k)-rhcrit)/(1.-rhcrit)
               q1(k)   =max(q1_rh, q1(k) )
            endif
 

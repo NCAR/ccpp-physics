@@ -947,7 +947,7 @@ CONTAINS
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_lnd(I) = TSK_lnd(I)*THCON(I)   !(K)
            THVSK_lnd(I) = THSK_lnd(I)*(1.+EP1*qsfc_lnd(I))
-           if(THVSK_lnd(I) < 170. .or. THVSK_lnd(I) > 360.) &
+           if(THVSK_lnd(I) < 160. .or. THVSK_lnd(I) > 390.) &
            print *,'THVSK_lnd(I)',itimestep,i,THVSK_lnd(I),THSK_lnd(i),tsurf_lnd(i),tskin_lnd(i),qsfc_lnd(i)
          endif
          if(icy(i)) then
@@ -956,7 +956,7 @@ CONTAINS
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_ice(I) = TSK_ice(I)*THCON(I)   !(K)
            THVSK_ice(I) = THSK_ice(I)*(1.+EP1*qsfc_ice(I))   !(K)
-           if(THVSK_ice(I) < 170. .or. THVSK_ice(I) > 360.) &
+           if(THVSK_ice(I) < 160. .or. THVSK_ice(I) > 390.) &
            print *,'THVSK_ice(I)',itimestep,i,THVSK_ice(I),THSK_ice(i),tsurf_ice(i),tskin_ice(i),qsfc_ice(i)
          endif
          if(wet(i)) then
@@ -965,7 +965,7 @@ CONTAINS
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_wat(I) = TSK_wat(I)*THCON(I)   !(K)
            THVSK_wat(I) = THSK_wat(I)*(1.+EP1*QVSH(I))   !(K)
-           if(THVSK_wat(I) < 170. .or. THVSK_wat(I) > 360.) &
+           if(THVSK_wat(I) < 160. .or. THVSK_wat(I) > 390.) &
            print *,'THVSK_wat(I)',i,THVSK_wat(I),THSK_wat(i),tsurf_wat(i),tskin_wat(i),qsfc_wat(i)
          endif
         endif ! flag_iter
