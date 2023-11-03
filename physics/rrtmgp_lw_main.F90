@@ -20,7 +20,6 @@ module rrtmgp_lw_main
   use rrtmgp_lw_gas_optics,   only: lw_gas_props,rrtmgp_lw_gas_optics_init
   use rrtmgp_lw_cloud_optics, only: lw_cloud_props, rrtmgp_lw_cloud_optics_init, abssnow0,   &
                                     abssnow1, absrain
-  use module_radiation_gases, only: NF_VGAS, getgases, getozn
   use GFS_rrtmgp_pre,         only: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4,         &
                                     iStr_o2, iStr_ccl4, iStr_cfc11, iStr_cfc12, iStr_cfc22,  &
                                     eps, oneminus, ftiny
