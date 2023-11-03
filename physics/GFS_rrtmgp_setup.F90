@@ -6,6 +6,7 @@ module GFS_rrtmgp_setup
   use module_radiation_astronomy, only : sol_init, sol_update
   use module_radiation_aerosols,  only : aer_init, aer_update
   use module_radiation_gases,     only : gas_init, gas_update
+  use module_ozphys,              only : ty_ozphys
   implicit none
   
   public GFS_rrtmgp_setup_init, GFS_rrtmgp_setup_timestep_init, GFS_rrtmgp_setup_finalize
@@ -37,9 +38,10 @@ contains
   subroutine GFS_rrtmgp_setup_init(do_RRTMGP, imp_physics, imp_physics_fer_hires,        &
        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,  &
        imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer,     &
-       ntcw, ntoz, iovr, isubc_sw, isubc_lw, lalw1bd, idate, me, aeros_file,             &
-       iaermdl, iaerflg, con_pi, con_t0c, con_c, con_boltz, con_plnk, solar_file,        &
-       con_solr_2008, con_solr_2002, co2usr_file, co2cyc_file, ipsd0, errmsg, errflg)
+       ntcw, ntoz, iovr, isubc_sw, isubc_lw, lalw1bd, idate,               &
+       me, aeros_file, iaermdl, iaerflg, con_pi, con_t0c, con_c, con_boltz, con_plnk,    &
+       solar_file, con_solr_2008, con_solr_2002, co2usr_file, co2cyc_file, ipsd0,        &
+       errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: do_RRTMGP
@@ -56,9 +58,7 @@ contains
          con_pi, con_t0c, con_c, con_boltz, con_plnk, con_solr_2008, con_solr_2002
     real(kind_phys), dimension(:), intent(in) :: &
          si
-    integer, intent(in) :: levr, ictm, isol, ico2, iaer, & 
-         ntcw, ntoz, iovr, isubc_sw, isubc_lw,  &
-         me
+    integer, intent(in) :: levr, ictm, isol, ico2, iaer, ntcw, ntoz, iovr, isubc_sw, isubc_lw, me
     logical, intent(in) :: &
          lalw1bd
     integer, intent(in), dimension(:) :: &
@@ -129,7 +129,7 @@ contains
     call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002, con_pi )
     call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, con_t0c,    &
          con_c, con_boltz, con_plnk, errflg, errmsg)
-    call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, ntoz, con_pi, errflg, errmsg )
+    call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, con_pi, errflg, errmsg )
 
     if ( me == 0 ) then
        print *,' return from rad_initialize (GFS_rrtmgp_setup_init) - after calling radinit'
@@ -148,7 +148,7 @@ contains
 !!
   subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, doSWrad, me,     &
        iaermdl, aeros_file, isol, slag, sdec, cdec, solcon, con_pi, co2dat_file,            &
-       co2gbl_file, ictm, ico2, ntoz, errmsg, errflg)
+       co2gbl_file, ictm, ico2, ntoz, ozphys, errmsg, errflg)
      
     ! Inputs
     integer,         intent(in)  :: idate(:)
@@ -160,7 +160,7 @@ contains
     integer,         intent(in)  :: me
     integer,         intent(in)  :: iaermdl,isol,ictm,ico2,ntoz
     character(len=26), intent(in) :: aeros_file,co2dat_file,co2gbl_file
-
+    type(ty_ozphys),intent(inout) :: ozphys
     ! Outputs
     real(kind_phys), intent(out) :: slag
     real(kind_phys), intent(out) :: sdec
@@ -240,8 +240,11 @@ contains
     else
        lco2_chg = .false.
     endif
-    call gas_update (kyear, kmon, kday, khour, loz1st, lco2_chg, me, co2dat_file,           &
-         co2gbl_file, ictm, ico2, ntoz, errflg, errmsg )
+    call gas_update (kyear, kmon, kday, khour, lco2_chg, me, co2dat_file, co2gbl_file, ictm,&
+         ico2, errflg, errmsg )
+    if (ntoz == 0) then
+       call ozphys%update_o3clim(kmon, kday, khour, loz1st)
+    endif
     
     if ( loz1st ) loz1st = .false.
 
