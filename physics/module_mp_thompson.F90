@@ -6527,6 +6527,8 @@ function hail_mass_99th_percentile(kts, kte, qg, temperature, pressure, qv) resu
       rho(k) = 0.622*pressure(k)/(R*temperature(k)*(max(1.e-10, qv(k))+0.622))
       if (qg(k) .gt. R1) then
          rg(k) = qg(k)*rho(k)
+      else
+         rg(k) = R1
       endif 
    enddo 
 
