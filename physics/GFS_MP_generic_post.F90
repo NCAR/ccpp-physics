@@ -139,7 +139,8 @@
 !
 ! Combine convective reflectivity with MP reflectivity for selected
 ! parameterizations.
-      if (imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_nssl .and. imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf .or. imfshalcnv == imfshalcnv_gf) then
+     if ( (imp_physics==imp_physics_thompson .or. imp_physics==imp_physics_nssl) .and. &
+       (imfdeepcnv==imfdeepcnv_samf .or. imfdeepcnv==imfdeepcnv_gf .or. imfshalcnv==imfshalcnv_gf) ) then
          do i=1,im
            lfrz = .true.
            zfrz(i) = phil(i,1) / con_g 
