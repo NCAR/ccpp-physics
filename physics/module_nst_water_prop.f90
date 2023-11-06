@@ -42,7 +42,7 @@ contains
   ! ------------------------------------------------------
 !>\ingroup gfs_nst_main_mod
 !! This subroutine computes thermal expansion coefficient (alpha)
-!! and saline contraction coefficient (beta). 
+!! and saline contraction coefficient (beta).
   subroutine rhocoef(t, s, rhoref, alpha, beta)
     ! ------------------------------------------------------
 
@@ -124,7 +124,7 @@ contains
   !======================
   !
 !>\ingroup gfs_nst_main_mod
-!! This subroutine computes the fraction of the solar radiation absorbed 
+!! This subroutine computes the fraction of the solar radiation absorbed
 !! by the depth z following Paulson and Simpson (1981) \cite paulson_and_simpson_1981 .
   elemental subroutine sw_ps_9b(z,fxp)
     !
@@ -138,10 +138,11 @@ contains
     ! fxp: fraction of the solar radiation absorbed by the ocean at depth z (w/m^2)
     !
     implicit none
-    real,intent(in):: z
-    real,intent(out):: fxp
-    real, dimension(9), parameter :: f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/) &
-                                ,gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
+    real(kind=kind_phys), intent(in)  :: z
+    real(kind=kind_phys), intent(out) :: fxp
+    real(kind=kind_phys), dimension(9), parameter :: &
+         f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/) &
+         ,gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
     !
     if(z>0) then
       fxp=1.0-(f(1)*exp(-z/gamma(1))+f(2)*exp(-z/gamma(2))+f(3)*exp(-z/gamma(3))+ &
@@ -159,7 +160,7 @@ contains
   !======================
   !
 !>\ingroup gfs_nst_main_mod
-!! This subroutine 
+!! This subroutine
   elemental subroutine sw_ps_9b_aw(z,aw)
     !
     ! d(fw)/d(z) for 9-band
@@ -171,10 +172,11 @@ contains
     ! fxp: fraction of the solar radiation absorbed by the ocean at depth z (w/m^2)
     !
     implicit none
-    real,intent(in):: z
-    real,intent(out):: aw
-    real, dimension(9), parameter :: f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/) &
-                                ,gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
+    real(kind=kind_phys), intent(in)  :: z
+    real(kind=kind_phys), intent(out) :: aw
+    real(kind=kind_phys), dimension(9), parameter :: &
+         f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/) &
+         ,gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
     !
     if(z>0) then
       aw=(f(1)/gamma(1))*exp(-z/gamma(1))+(f(2)/gamma(2))*exp(-z/gamma(2))+(f(3)/gamma(3))*exp(-z/gamma(3))+ &
