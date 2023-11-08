@@ -84,7 +84,7 @@
      &    clam,c0s,c1,betal,betas,evef,pgcon,asolfac,                   &
      &    do_ca, ca_closure, ca_entr, ca_trigger, nthresh,ca_deep,      &
      &    rainevap,sigmain,sigmaout,betadcu,betamcu,betascu,            &
-     &    errmsg,errflg)
+     &    maxMF, do_mynnedmf,errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -100,12 +100,13 @@
      &   prslp(:,:),  garea(:), hpbl(:), dot(:,:), phil(:,:)
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       logical, intent(in)  :: first_time_step,restart,hwrf_samfdeep,    &
-     &     progsigma
+     &     progsigma,do_mynnedmf
       real(kind=kind_phys), intent(in) :: nthresh,betadcu,betamcu,      &
-     &                                    betascu                       
+     &                                    betascu
       real(kind=kind_phys), intent(in) :: ca_deep(:)
       real(kind=kind_phys), intent(in) :: sigmain(:,:),qmicro(:,:),     &
      &     tmf(:,:,:),q(:,:), prevsq(:,:)
+      real(kind=kind_phys),    dimension (:), intent(in) :: maxMF
       real(kind=kind_phys), intent(out) :: rainevap(:)
       real(kind=kind_phys), intent(out) :: sigmaout(:,:)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
@@ -349,6 +350,9 @@ c
 !
       do i=1,im
         cnvflg(i) = .true.
+        if(do_mynnedmf) then
+            if(maxMF(i).gt.0.)cnvflg(i)=.false.
+        endif
         sfcpbl(i) = sfclfac * hpbl(i)
         rn(i)=0.
         mbdt(i)=10.
