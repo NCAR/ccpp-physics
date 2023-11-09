@@ -450,6 +450,21 @@
   type = real
   kind = kind_phys
   intent = out
+[maxMF]
+  standard_name = maximum_mass_flux
+  long_name = maximum mass flux within a column
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[do_mynnedmf]
+  standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
+  long_name = flag to activate MYNN-EDMF
+  units = flag 
+  dimensions = ()
+  type = logical
+  intent = in
 [qlcn]
   standard_name = mass_fraction_of_convective_cloud_liquid_water
   long_name = mass fraction of convective cloud liquid water
