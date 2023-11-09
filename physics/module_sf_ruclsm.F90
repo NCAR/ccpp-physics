@@ -1825,7 +1825,10 @@ CONTAINS
          UPFLUX  = T3 *SOILT
          XINET   = EMISS_snowfree*(GLW-UPFLUX)
          RNET    = GSWnew + XINET
-         IF ( add_fire_heat_flux ) then ! JLS
+         IF ( add_fire_heat_flux .and. fire_heat_flux >0 ) then ! JLS
+          IF (debug_print ) THEN
+            print *,'RNET snow-free, fire_heat_flux, xlat/xlon',RNET, fire_heat_flux,xlat,xlon
+          ENDIF
             RNET = RNET + fire_heat_flux
          ENDIF
 
@@ -1949,7 +1952,10 @@ CONTAINS
 
       if (SEAICE .LT. 0.5_kind_phys) then
 ! LAND
-         IF ( add_fire_heat_flux ) then ! JLS
+         IF ( add_fire_heat_flux .and. fire_heat_flux>0 ) then ! JLS
+          IF (debug_print ) THEN
+           print *,'RNET snow, fire_heat_flux, xlat/xlon',RNET, fire_heat_flux,xlat,xlon
+          ENDIF
             RNET = RNET + fire_heat_flux
          ENDIF
            if(snow_mosaic==one)then
@@ -2242,6 +2248,13 @@ CONTAINS
 
        if(SEAICE .LT. 0.5_kind_phys) then
 !  LAND
+         IF ( add_fire_heat_flux .and. fire_heat_flux>0) then ! JLS
+          IF (debug_print ) THEN
+           print *,'RNET no snow, fire_heat_flux, xlat/xlon',RNET, fire_heat_flux,xlat,xlon
+          endif
+            RNET = RNET + fire_heat_flux
+         ENDIF
+
          CALL SOIL(debug_print,xlat, xlon, testptlat, testptlon,&
 !--- input variables
             i,j,iland,isoil,delt,ktau,conflx,nzs,nddzs,nroot,   &

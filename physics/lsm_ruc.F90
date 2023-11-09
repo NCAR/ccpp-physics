@@ -360,6 +360,7 @@ module lsm_ruc
      &       cm_ice, ch_ice, snowfallac_ice, acsnow_ice, snowmt_ice,    &
      &       albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice,      &
      &       add_fire_heat_flux, fire_heat_flux_out,                    &
+     &       frac_grid_burned_out,                                      &
      ! --- out
      &       rhosnf, sbsno,                                             &
      &       cmm_lnd, chh_lnd, cmm_ice, chh_ice,                        &
@@ -431,7 +432,8 @@ module lsm_ruc
 !  ---  in
       real (kind_phys), dimension(:), intent(in) ::                      &
      &       rainnc, rainc, ice, snow, graupel, rhonewsn1
-      real (kind_phys), dimension(:), intent(in) :: fire_heat_flux_out
+      real (kind_phys), dimension(:), intent(in) :: fire_heat_flux_out,  &
+                                                    frac_grid_burned_out
       logical, intent(in) :: add_fire_heat_flux
 !  ---  in/out:
 !  --- on RUC levels
@@ -984,13 +986,6 @@ module lsm_ruc
         snoalb1d_lnd(i,j) = snoalb(i)
         albbck_lnd(i,j)   = min(0.9_kind_phys,albbcksol(i)) !sfalb_lnd_bck(i)
 
-        IF ( add_fire_heat_flux .and. fire_heat_flux_out(i) > 0) then !  JLS
-        ! limit albedo and greenness in the areas affected by the fire
-          albbck_lnd(i,j)   = min(0.1_kind_phys,albbck_lnd(i,j))
-          shdfac(i,j)       = min(50._kind_phys,shdfac(i,j)) ! %
-        ENDIF
-
-
         !-- spp_lsm
         if (spp_lsm == 1) then
           !-- spp for LSM is dimentioned as (1:lsoil_ruc)
@@ -1012,6 +1007,19 @@ module lsm_ruc
 
         alb_lnd(i,j) = albbck_lnd(i,j) * (one-sncovr_lnd(i,j)) + snoalb(i) * sncovr_lnd(i,j) ! sfalb_lnd(i)
         solnet_lnd(i,j) = dswsfc(i)*(one-alb_lnd(i,j)) !..net sw rad flx (dn-up) at sfc in w/m2
+
+        IF ( add_fire_heat_flux .and. fire_heat_flux_out(i) > 0) then !  JLS
+          if (debug_print) then 
+           print *,'alb_lnd before fire, xlat/xlon ', alb_lnd(i,j), xlat_d(i),xlon_d(i)
+           print *,'fire_heat_flux_out, frac_grid_burned_out, xlat/xlon ', &
+                    fire_heat_flux_out(i),frac_grid_burned_out(i),xlat_d(i),xlon_d(i)
+          endif
+          ! limit albedo in the areas affected by the fire
+          alb_lnd(i,j)   = alb_lnd(i,j) * (one-frac_grid_burned_out(i)) + 0.08_kind_phys*frac_grid_burned_out(i)
+          if (debug_print) then
+           print *,'alb_lnd after fire, xlat/xlon ', alb_lnd(i,j), xlat_d(i),xlon_d(i)
+          endif
+        ENDIF
 
         cmc(i,j) = canopy(i)            !  [mm] 
         soilt_lnd(i,j) = tsurf_lnd(i)   
