@@ -55,6 +55,7 @@ contains
                    seas_opt_in, dust_opt_in, drydep_opt_in, coarsepm_settling_in,          &
                    do_plumerise_in, plumerisefire_frq_in, addsmoke_flag_in,                &
                    wetdep_ls_opt_in,wetdep_ls_alpha_in, fire_heat_flux_out,                &
+                   frac_grid_burned_out,                                                   &
                    smoke_forecast_in, aero_ind_fdb_in,dbg_opt_in,errmsg,errflg)
 
     implicit none
@@ -89,6 +90,7 @@ contains
     real(kind_phys), dimension(:,:), intent(inout) :: ebu_smoke
     real(kind_phys), dimension(:,:), intent(inout) :: fire_in
     real(kind_phys), dimension(:), intent(out) :: fire_heat_flux_out
+    real(kind_phys), dimension(:), intent(out) :: frac_grid_burned_out
     real(kind_phys), dimension(:), intent(inout) :: max_fplume, min_fplume       
     real(kind_phys), dimension(:), intent(  out) :: hwp
     real(kind_phys), dimension(:,:), intent(out) :: smoke_ext, dust_ext
@@ -134,7 +136,7 @@ contains
     real(kind_phys), dimension(ims:im, jms:jme) :: ebu_in
     real(kind_phys), dimension(ims:im, jms:jme, num_frp_plume ) :: plume_frp
     real(kind_phys), dimension(ims:im, jms:jme )  :: coef_bb_dc, flam_frac,             &
-                     fire_hist, peak_hr, fire_heat_flux
+                     fire_hist, peak_hr
     real(kind_phys), dimension(ims:im,kms:kme,jms:jme ) :: ext3d_smoke, ext3d_dust
     integer,         dimension(ims:im, jms:jme )  :: min_fplume2, max_fplume2
     logical :: call_fire
@@ -338,23 +340,25 @@ contains
     !-- /scratch2/BMC/ap-fc/Ravan/rapid-refresh/WRFV3.9/smoke
     ! Every hour (per namelist) the ebu_driver is called to calculate ebu, but
     ! the plumerise is controlled by the namelist option of plumerise_flag
-    do i = its,ite
-       fire_heat_flux_out(i) = 0.
-    enddo
     if (call_fire) then
         call ebu_driver (                                              &
-                   flam_frac,ebu_in,ebu,                          &
+                   flam_frac,ebu_in,ebu,                               &
                    t_phy,moist(:,:,:,p_qv),                            &
                    rho_phy,vvel,u_phy,v_phy,p_phy,                     &
                    z_at_w,zmid,g,con_cp,con_rd,                        &
-                   fire_heat_flux,dxy,                                 &
                    plume_frp, min_fplume2, max_fplume2,                &   ! new approach
                    ids,ide, jds,jde, kds,kde,                          &
                    ims,ime, jms,jme, kms,kme,                          &
                    its,ite, jts,jte, kts,kte, errmsg, errflg           )
         if(errflg/=0) return
       do i = its,ite
-         fire_heat_flux_out(i) = min(max(0.,fire_heat_flux(i,1)),50000.) ! JLS - W m-2 [0 - 10,000]
+         if ( plume_frp(i,1,p_frp_hr) .ge. 1.E7 ) then
+            fire_heat_flux_out(i) = min(max(0.,0.88*plume_frp(i,1,p_frp_hr)/0.55/dxy(i,1)) ,50000.) ! JLS - W m-2 [0 - 10,000]
+            frac_grid_burned_out(i) = min(max(0., 1.3*0.0006*plume_frp(i,1,p_frp_hr)/dxy(i,1) ),1.)
+         else
+            fire_heat_flux_out(i)   = 0.0
+            frac_grid_burned_out(i) = 0.0
+         endif
       enddo
     end if
     ! -- add biomass burning emissions at every timestep

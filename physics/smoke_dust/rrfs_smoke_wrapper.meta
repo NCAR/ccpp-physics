@@ -748,6 +748,14 @@
   type = real
   kind = kind_phys
   intent = out
+[frac_grid_burned_out]
+  standard_name = fraction_of_grid_cell_burning
+  long_name = ration of the burnt area to the grid cell area
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [dbg_opt_in]
   standard_name = do_smoke_debug
   long_name = flag for rrfs smoke plumerise debug

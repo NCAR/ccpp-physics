@@ -28,7 +28,6 @@ CONTAINS
 !                         firesize,mean_fct,                         &
                         ! nspecies,eburn_in,eburn_out,               &
                          up,vp,wp,theta,pp,dn0,rv,zt_rams,zm_rams,  &
-                         fire_heat_flux, dxy,                       &
                          frp_inst,k1,k2, dbg_opt, g, cp, rgas,      &
                          cpor,  errmsg, errflg   )
 
@@ -43,9 +42,6 @@ CONTAINS
   real(kind=kind_phys) :: g, cp, rgas, cpor
 
   integer :: ng,m1,m2,m3,ia,iz,ja,jz,ibcon,mynum,i,j,k,imm,ixx,ispc !,nspecies
-
-  real(kind=kind_phys), intent(in)  :: dxy
-  real(kind=kind_phys), intent(out) :: fire_heat_flux ! JLS
 
   INTEGER, INTENT (OUT) :: k1,k2
   character(*), intent(inout) :: errmsg
@@ -110,7 +106,6 @@ CONTAINS
 IF (frp_inst<frp_threshold) THEN
    k1=1
    k2=2
-   fire_heat_flux = 0.
    !return
 END IF
     
@@ -177,7 +172,7 @@ END IF
          END IF
     
        !- get fire properties (burned area, plume radius, heating rates ...)
-       call get_fire_properties(coms,imm,iveg_ag,burnt_area,FRP,dxy,fire_heat_flux,errmsg,errflg)
+       call get_fire_properties(coms,imm,iveg_ag,burnt_area,FRP,errmsg,errflg)
        if(errflg/=0) return
 
        !------  generates the plume rise    ------
@@ -439,14 +434,12 @@ end subroutine set_grid
   END SUBROUTINE set_flam_vert
 !-------------------------------------------------------------------------
 
-subroutine get_fire_properties(coms,imm,iveg_ag,burnt_area,FRP,dxy,heat_flux_out,errmsg,errflg)
+subroutine get_fire_properties(coms,imm,iveg_ag,burnt_area,FRP,errmsg,errflg)
 !use module_zero_plumegen_coms
 implicit none
 type(plumegen_coms), pointer :: coms
 integer ::  moist,  i,  icount,imm,iveg_ag  !,plumerise_flag
 real(kind=kind_phys)::   bfract,  effload,  heat,  hinc ,burnt_area,heat_fluxW,FRP
-real(kind=kind_phys), intent(in) :: dxy
-real(kind=kind_phys), intent(out) :: heat_flux_out 
 !real(kind=kind_phys),    dimension(2,4) :: heat_flux
 integer, intent(inout) :: errflg
 character(*), intent(inout) :: errmsg
@@ -465,7 +458,6 @@ coms%area = burnt_area! area of burn, m^2
 !ELSEIF ( PLUMERISE_flag == 2) THEN
     ! "beta" factor converts FRP to convective energy
     heat_fluxW = beta*(FRP/coms%area)/0.55 ! in W/m^2
-    heat_flux_out = heat_fluxW * coms%area / dxy
 ! FIXME: These five lines were not in the known-working version. Delete them?
 !    if(coms%area<1e-6) then
 !      heat_fluxW = 0
