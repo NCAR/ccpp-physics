@@ -12,6 +12,8 @@ module module_nst_water_prop
   public :: rhocoef,density,sw_rad,sw_rad_aw,sw_rad_sum,sw_rad_upper,sw_rad_upper_aw,sw_rad_skin,grv,solar_time_from_julian,compjd, &
             sw_ps_9b,sw_ps_9b_aw,get_dtzm_point,get_dtzm_2d
 
+  integer, parameter :: kp = kind_phys
+  real (kind=kind_phys), parameter :: zero = 0.0_kp, one = 1.0_kp, half=0.5_kp
   !
   interface sw_ps_9b
      module procedure sw_ps_9b
@@ -78,7 +80,7 @@ contains
          + 7.6438e-5 * tc**2 -  8.2467e-7 * tc**3        &
          + 5.3875e-9 * tc**4 -  1.5 * 5.72466e-3 * s**.5 &
          + 1.5 * 1.0227e-4 * tc * s**.5                  &
-         -  1.5 * 1.6546e-6 * tc**2 * s**.5              &
+         - 1.5 * 1.6546e-6 * tc**2 * s**.5               &
          + 2.0 * 4.8314e-4 * s
 
     beta = beta / rhoref
@@ -104,7 +106,7 @@ contains
     ! introduction to dynamical oceanography, pp310).
     ! compression effects are not included
 
-    rho = 0.0
+    rho = zero
     tc = t - t0k
 
     !  effect of temperature on density (lines 1-3)
@@ -144,12 +146,12 @@ contains
          f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/) &
          ,gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
     !
-    if(z>0) then
-      fxp=1.0-(f(1)*exp(-z/gamma(1))+f(2)*exp(-z/gamma(2))+f(3)*exp(-z/gamma(3))+ &
+    if(z>zero) then
+      fxp=one-(f(1)*exp(-z/gamma(1))+f(2)*exp(-z/gamma(2))+f(3)*exp(-z/gamma(3))+ &
                f(4)*exp(-z/gamma(4))+f(5)*exp(-z/gamma(5))+f(6)*exp(-z/gamma(6))+ &
                f(7)*exp(-z/gamma(7))+f(8)*exp(-z/gamma(8))+f(9)*exp(-z/gamma(9)))
     else
-       fxp=0.
+       fxp=zero
     endif
     !
   end subroutine sw_ps_9b
@@ -178,12 +180,12 @@ contains
          f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/) &
          ,gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
     !
-    if(z>0) then
+    if(z>zero) then
       aw=(f(1)/gamma(1))*exp(-z/gamma(1))+(f(2)/gamma(2))*exp(-z/gamma(2))+(f(3)/gamma(3))*exp(-z/gamma(3))+ &
          (f(1)/gamma(4))*exp(-z/gamma(4))+(f(2)/gamma(5))*exp(-z/gamma(5))+(f(6)/gamma(6))*exp(-z/gamma(6))+ &
          (f(1)/gamma(7))*exp(-z/gamma(7))+(f(2)/gamma(8))*exp(-z/gamma(8))+(f(9)/gamma(9))*exp(-z/gamma(9))
     else
-       aw=0.
+       aw=zero
     endif
     !
   end subroutine sw_ps_9b_aw
@@ -212,12 +214,12 @@ contains
     real(kind=kind_phys),dimension(9) :: zgamma
     real(kind=kind_phys),dimension(9) :: f_c
     !
-    if(z>0) then
+    if(z>zero) then
        zgamma=z/gamma
-       f_c=f*(1.-1./zgamma*(1-exp(-zgamma)))
+       f_c=f*(one-one/zgamma*(one-exp(-zgamma)))
        fxp=sum(f_c)
     else
-       fxp=0.
+       fxp=zero
     endif
     !
   end subroutine sw_fairall_6exp_v1
@@ -251,15 +253,15 @@ contains
     real(kind=kind_phys),dimension(9) :: zgamma
     real(kind=kind_phys),dimension(9) :: f_aw
     !
-    if(z>0) then
+    if(z>zero) then
        zgamma=z/gamma
-       f_aw=(f/z)*((gamma/z)*(1-exp(-zgamma))-exp(-zgamma))
+       f_aw=(f/z)*((gamma/z)*(one-exp(-zgamma))-exp(-zgamma))
        aw=sum(f_aw)
 
 !      write(*,'(a,f6.2,f12.6,9f10.4)') 'z,aw in sw_rad_aw : ',z,aw,f_aw
 
     else
-       aw=0.
+       aw=zero
     endif
     !
   end subroutine sw_fairall_6exp_v1_aw
@@ -293,9 +295,9 @@ contains
 !    f_sum=(zgamma/z)*exp(-zgamma)
 !    sum=sum(f_sum)
 
-    sum=(1.0/gamma(1))*exp(-z/gamma(1))+(1.0/gamma(2))*exp(-z/gamma(2))+(1.0/gamma(3))*exp(-z/gamma(3))+ &
-        (1.0/gamma(4))*exp(-z/gamma(4))+(1.0/gamma(5))*exp(-z/gamma(5))+(1.0/gamma(6))*exp(-z/gamma(6))+ &
-        (1.0/gamma(7))*exp(-z/gamma(7))+(1.0/gamma(8))*exp(-z/gamma(8))+(1.0/gamma(9))*exp(-z/gamma(9))
+    sum=(one/gamma(1))*exp(-z/gamma(1))+(one/gamma(2))*exp(-z/gamma(2))+(one/gamma(3))*exp(-z/gamma(3))+ &
+        (one/gamma(4))*exp(-z/gamma(4))+(one/gamma(5))*exp(-z/gamma(5))+(one/gamma(6))*exp(-z/gamma(6))+ &
+        (one/gamma(7))*exp(-z/gamma(7))+(one/gamma(8))*exp(-z/gamma(8))+(one/gamma(9))*exp(-z/gamma(9))
     !
   end subroutine sw_fairall_6exp_v1_sum
   !
@@ -321,10 +323,10 @@ contains
     real(kind=kind_phys),intent(in):: z,f_sol_0
     real(kind=kind_phys),intent(out):: df_sol_z
     !
-    if(z>0) then
-       df_sol_z=f_sol_0*(0.137+11.0*z-6.6e-6/z*(1.-exp(-z/8.e-4)))
+    if(z>zero) then
+       df_sol_z=f_sol_0*(0.137+11.0*z-6.6e-6/z*(one-exp(-z/8.e-4)))
     else
-       df_sol_z=0.
+       df_sol_z=zero
     endif
     !
   end subroutine sw_fairall_simple_v1
@@ -352,10 +354,10 @@ contains
     real(kind=kind_phys),intent(in):: z,f_sol_0
     real(kind=kind_phys),intent(out):: df_sol_z
     !
-    if(z>0) then
-       df_sol_z=f_sol_0*(0.065+11.0*z-6.6e-5/z*(1.-exp(-z/8.e-4)))
+    if(z>zero) then
+       df_sol_z=f_sol_0*(0.065+11.0*z-6.6e-5/z*(one-exp(-z/8.e-4)))
     else
-       df_sol_z=0.
+       df_sol_z=zero
     endif
     !
   end subroutine sw_wick_v1
@@ -388,11 +390,11 @@ contains
     real(kind=kind_phys), dimension(3), parameter :: f=(/0.45,0.27,0.28/) &
          ,gamma=(/12.8,0.357,0.014/)
     !
-    if(z>0) then
-       f_c      = f*gamma(int(1-exp(-z/gamma)))
-       df_sol_z = f_sol_0*(1.0-sum(f_c)/z)
+    if(z>zero) then
+       f_c      = f*gamma(int(one-exp(-z/gamma)))
+       df_sol_z = f_sol_0*(one-sum(f_c)/z)
     else
-       df_sol_z = 0.
+       df_sol_z = zero
     endif
     !
   end subroutine sw_soloviev_3exp_v1
@@ -416,14 +418,14 @@ contains
     real(kind=kind_phys),intent(in):: z,f_sol_0
     real(kind=kind_phys),intent(out):: df_sol_z
     !
-    if(z>0) then
-       df_sol_z=f_sol_0*(1.0                 &
-            -(0.28*0.014*(1.-exp(-z/0.014))  &
-            +0.27*0.357*(1.-exp(-z/0.357))   &
-            +.45*12.82*(1.-exp(-z/12.82)))/z &
+    if(z>zero) then
+       df_sol_z=f_sol_0*(one                    &
+            -(0.28*0.014*(one-exp(-z/0.014))    &
+            + 0.27*0.357*(one-exp(-z/0.357))    &
+            + 0.45*12.82*(one-exp(-z/12.82)))/z &
             )
     else
-       df_sol_z=0.
+       df_sol_z=zero
     endif
     !
   end subroutine sw_soloviev_3exp_v2
@@ -445,15 +447,15 @@ contains
     real(kind=kind_phys),intent(out):: aw
     real(kind=kind_phys):: fxp
     !
-    if(z>0) then
-       fxp=(1.0                                &
-            -(0.28*0.014*(1.-exp(-z/0.014))    &
-            + 0.27*0.357*(1.-exp(-z/0.357))    &
-            + 0.45*12.82*(1.-exp(-z/12.82)))/z &
+    if(z>zero) then
+       fxp=(one                                 &
+            -(0.28*0.014*(one-exp(-z/0.014))    &
+            + 0.27*0.357*(one-exp(-z/0.357))    &
+            + 0.45*12.82*(one-exp(-z/12.82)))/z &
             )
-       aw=1.0-fxp-(0.28*exp(-z/0.014)+0.27*exp(-z/0.357)+0.45*exp(-z/12.82))
+       aw=one-fxp-(0.28*exp(-z/0.014)+0.27*exp(-z/0.357)+0.45*exp(-z/12.82))
     else
-       aw=0.
+       aw=zero
     endif
   end subroutine sw_soloviev_3exp_v2_aw
   !
@@ -475,10 +477,10 @@ contains
     real(kind=kind_phys),intent(in):: z
     real(kind=kind_phys),intent(out):: fxp
     !
-    if(z>0) then
-       fxp=.065+11.*z-6.6e-5/z*(1.-exp(-z/8.0e-4))
+    if(z>zero) then
+       fxp=.065+11.*z-6.6e-5/z*(one-exp(-z/8.0e-4))
     else
-       fxp=0.
+       fxp=zero
     endif
     !
   end subroutine sw_ohlmann_v1
@@ -497,7 +499,7 @@ function grv(lat)
 
   phi=lat*pi/180
   x=sin(phi)
-  grv=gamma*(1+(c1*x**2)+(c2*x**4)+(c3*x**6)+(c4*x**8))
+  grv=gamma*(one+(c1*x**2)+(c2*x**4)+(c3*x**6)+(c4*x**8))
   !print *,'grav=',grv,lat
 end function grv
 
@@ -511,14 +513,14 @@ subroutine solar_time_from_julian(jday,xlon,soltim)
   real(kind=kind_phys), intent(in)  :: jday
   real(kind=kind_phys), intent(in)  :: xlon
   real(kind=kind_phys), intent(out) :: soltim
-  real(kind=kind_phys)                            :: fjd,xhr,xmin,xsec,intime
+  real(kind=kind_phys)                           :: fjd,xhr,xmin,xsec,intime
   integer                                        :: nn
   !
   fjd=jday-floor(jday)
   fjd=jday
-  xhr=floor(fjd*24.0)-sign(12.0,fjd-0.5)
-  xmin=nint(fjd*1440.0)-(xhr+sign(12.0,fjd-0.5))*60
-  xsec=0
+  xhr=floor(fjd*24.0)-sign(12.0,fjd-half)
+  xmin=nint(fjd*1440.0)-(xhr+sign(12.0,fjd-half))*60.0
+  xsec=zero
   intime=xhr+xmin/60.0+xsec/3600.0+24.0
   soltim=mod(xlon/15.0+intime,24.0)*3600.0
 end subroutine solar_time_from_julian
@@ -570,7 +572,7 @@ end subroutine solar_time_from_julian
       jd=iw3jdn(jyr,jmnth,jday)
       if(jhr.lt.12) then
         jd=jd-1
-        fjd=0.5+jhr/24.+jmn/1440.
+        fjd=half+jhr/24.+jmn/1440.
       else
         fjd=(jhr-12)/24.+jmn/1440.
       endif
@@ -618,35 +620,35 @@ end subroutine solar_time_from_julian
 !
 ! get the mean warming in the range of z=z1 to z=z2
 !
-  dtw = 0.0
-  if ( xt > 0.0 ) then
+  dtw = zero
+  if ( xt > zero ) then
     dt_warm = (xt+xt)/xz      ! Tw(0)
     if ( z1 < z2) then
       if ( z2 < xz ) then
-        dtw = dt_warm*(1.0-(z1+z2)/(xz+xz))
+        dtw = dt_warm*(one-(z1+z2)/(xz+xz))
       elseif ( z1 < xz .and. z2 >= xz ) then
-        dtw = 0.5*(1.0-z1/xz)*dt_warm*(xz-z1)/(z2-z1)
+        dtw = half*(one-z1/xz)*dt_warm*(xz-z1)/(z2-z1)
       endif
     elseif ( z1 == z2 ) then
       if ( z1 < xz ) then
-        dtw = dt_warm*(1.0-z1/xz)
+        dtw = dt_warm*(one-z1/xz)
       endif
     endif
   endif
 !
 ! get the mean cooling in the range of z=z1 to z=z2
 !
-  dtc = 0.0
-  if ( zc > 0.0 ) then
+  dtc = zero
+  if ( zc > zero ) then
     if ( z1 < z2) then
       if ( z2 < zc ) then
-        dtc = dt_cool*(1.0-(z1+z2)/(zc+zc))
+        dtc = dt_cool*(one-(z1+z2)/(zc+zc))
       elseif ( z1 < zc .and. z2 >= zc ) then
-        dtc = 0.5*(1.0-z1/zc)*dt_cool*(zc-z1)/(z2-z1)
+        dtc = half*(one-z1/zc)*dt_cool*(zc-z1)/(z2-z1)
       endif
     elseif ( z1 == z2 ) then
       if ( z1 < zc ) then
-        dtc = dt_cool*(1.0-z1/zc)
+        dtc = dt_cool*(one-z1/zc)
       endif
     endif
   endif
@@ -706,7 +708,6 @@ end subroutine solar_time_from_julian
 ! Local variables
   integer :: i,j
   real (kind=kind_phys) :: dt_warm, dtw, dtc, xzi
-  real (kind=kind_phys), parameter :: zero=0.0, half=0.5, one=1.0
 
 
 !$omp parallel do num_threads (nth) private(j,i,dtw,dtc,xzi)
