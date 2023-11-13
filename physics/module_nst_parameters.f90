@@ -12,34 +12,34 @@ module module_nst_parameters
   use machine, only :  kind_phys
   !
   ! air constants and coefficients from the atmospehric model
-  use physcons, only: &
-       eps =>  con_eps &
-       ,cp_a => con_cp &          !< spec heat air @p    (j/kg/k)
-       , epsm1 => con_epsm1 &
-       , hvap => con_hvap &       !< lat heat h2o cond   (j/kg)
-       ,sigma_r => con_sbc  &     !< stefan-boltzmann    (w/m2/k4)
-       ,grav => con_g         &   !< acceleration due to gravity (kg/m/s^2)
-       ,omega => con_omega    &    !< ang vel of earth    (1/s)
-       ,rvrdm1 => con_fvirt &
-       ,rd => con_rd &
-       ,rocp => con_rocp  &        !< r/cp          
+  use physcons, only:       &
+        eps =>  con_eps     &         !< con_rd/con_rv (nd)
+       ,cp_a => con_cp      &         !< spec heat air @p    (j/kg/k)
+       ,epsm1 => con_epsm1  &         !< eps - 1 (nd)
+       ,hvap => con_hvap    &         !< lat heat h2o cond   (j/kg)
+       ,sigma_r => con_sbc  &         !< stefan-boltzmann    (w/m2/k4)
+       ,grav => con_g       &         !< acceleration due to gravity (kg/m/s^2)
+       ,omega => con_omega  &         !< ang vel of earth    (1/s)
+       ,rvrdm1 => con_fvirt &         !< con_rv/con_rd-1. (nd)
+       ,rd => con_rd        &         !< gas constant air (j/kg/k)
+       ,rocp => con_rocp    &         !< r/cp
        ,pi => con_pi
   !
   ! note: take timestep from here later
-  public 
+  public
   integer :: &
        niter_conv = 5, &
        niter_z_w  = 5, &
        niter_sfs  = 5
-  real (kind=kind_phys), parameter :: & 
+  real (kind=kind_phys), parameter :: &
        !
        ! general constants
         sec_in_day=86400.       &
        ,sec_in_hour=3600.       &
        ,solar_time_6am=21600.0  &
        ,const_rot=0.000073      &          !< constant to calculate corioli force
-       ,ri_c=0.65               & 
-       ,ri_g=0.25               & 
+       ,ri_c=0.65               &
+       ,ri_g=0.25               &
        ,eps_z_w=0.01            &          !< criteria to finish iterations for z_w
        ,eps_conv=0.01           &          !< criteria to finish iterations for d_conv
        ,eps_sfs=0.01            &          !< criteria to finish iterations for d_sfs
@@ -52,7 +52,7 @@ module module_nst_parameters
        ,tau_min=0.005           &          !< minimum of wind stress for dtm
        ,exp_const=9.5           &          !< coefficient in exponet profile
        ,delz=0.1                &          !< vertical increment for integral calculation   (m)
-       ,von=0.4                 &          !< von karman's "constant"      
+       ,von=0.4                 &          !< von karman's "constant"
        ,t0k=273.16              &          !<  celsius to kelvin
        ,gray=0.97               &
        ,sst_max=308.16          &
@@ -63,20 +63,20 @@ module module_nst_parameters
        ,omg_sh = 1.0            &          !< trace factor to apply sensible heat due to rainfall effect
        ,visw=1.e-6 &                       !< m2/s kinematic viscosity water
        ,novalue=0 &
-       ,smallnumber=1.e-6 & 
+       ,smallnumber=1.e-6 &
        ,timestep_oc=sec_in_day/8. &        !< time step in the ocean model (3 hours)
-       ,radian=2.*pi/180.       & 
-       ,rad2deg=180./pi       & 
+       ,radian=2.*pi/180.       &
+       ,rad2deg=180./pi       &
        ,cp_w=4000.   &                     !< specific heat water (j/kg/k )
        ,rho0_w=1022.0 &                    !< density water (kg/m3 ) (or 1024.438)
        ,vis_w=1.e-6  &                     !< kinematic viscosity water (m2/s )
        ,tc_w=0.6    &                      !< thermal conductivity water (w/m/k )
        ,capa_w =3950.0 &                   !< heat capacity of sea water      !
-       ,thref =1.0e-3                      !< reference value of specific volume (m**3/kg) 
+       ,thref =1.0e-3                      !< reference value of specific volume (m**3/kg)
 
 !!$!============================================
 !!$
-!!$  ,lvapor=2.453e6 &        ! latent heat of vaporization note: make it function of t ????? note the same as hvap        
+!!$  ,lvapor=2.453e6 &        ! latent heat of vaporization note: make it function of t ????? note the same as hvap
 !!$       ,alpha=1 ! thermal expansion coefficient
 !!$  ,beta ! saline contraction coefficient
 !!$  ,cp=1 !=1 specific heat of sea water
@@ -95,7 +95,7 @@ module module_nst_parameters
 !!$      fdg=1.00     !based on results from flux workshop august 1995
 !!$      tok=273.16   ! celsius to kelvin
 !!$      twopi=3.14159*2.
-!!$ 
+!!$
 !!$c air constants and coefficients
 !!$      rgas=287.1                  !j/kg/k     gas const. dry air
 !!$      xlv=(2.501-0.00237*ts)*1e+6  !j/kg  latent heat of vaporization at ts
@@ -104,7 +104,7 @@ module module_nst_parameters
 !!$      rhoa=p*100./(rgas*(t+tok)*(1.+.61*q)) !kg/m3  moist air density ( " )
 !!$      visa=1.326e-5*(1+6.542e-3*t+8.301e-6*t*t-4.84e-9*t*t*t)   !m2/s
 !!$          !kinematic viscosity of dry air - andreas (1989) crrel rep. 89-11
-!!$c 
+!!$c
 !!$c cool skin constants
 !!$      al=2.1e-5*(ts+3.2)**0.79     !water thermal expansion coefft.
 !!$      be=0.026                     !salinity expansion coefft.
@@ -126,11 +126,11 @@ module module_nst_parameters
 !!$  real, parameter    :: rhoref = 1024.438  !sea water reference density, kg/m^3
 !!$  real   , parameter :: hslab=50.0         !slab ocean depth
 !!$  real   , parameter :: bad=-1.0e+10
-!!$  real   , parameter :: tmin=2.68e+02 
+!!$  real   , parameter :: tmin=2.68e+02
 !!$  real   , parameter :: tmax=3.11e+02
 !!$
 !!$  real, parameter :: grav =9.81           !gravity, kg/m/s^2
-!!$  real, parameter :: capa =3950.0         !heat capacity of sea water 
+!!$  real, parameter :: capa =3950.0         !heat capacity of sea water
 !!$  real, parameter :: rhoref = 1024.438    !sea water reference density, kg/m^3
 !!$  real, parameter :: tmin=2.68e+02        !normal minimal temp
 !!$  real, parameter :: tmax=3.11e+02        !normal max temp
