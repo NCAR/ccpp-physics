@@ -142,9 +142,10 @@
      if ( (imp_physics==imp_physics_thompson .or. imp_physics==imp_physics_nssl) .and. &
        (imfdeepcnv==imfdeepcnv_samf .or. imfdeepcnv==imfdeepcnv_gf .or. imfshalcnv==imfshalcnv_gf) ) then
          do i=1,im
+           factor(i) = 0.0
            lfrz = .true.
            zfrz(i) = phil(i,1) / con_g 
-           do k = levs, 2, -1
+           do k = levs, 1, -1
              zo(i,k) =  phil(i,k) / con_g 
              if (gt0(i,k) >= 273.16 .and. lfrz) then
               zfrz(i) = zo(i,k)
@@ -152,13 +153,9 @@
              endif
            enddo
          enddo
-
+!
          do i=1,im
-           factor(i) = 0.0
-         enddo
-
-         do i=1,im
-           if(rainc (i) > 0.0 .or. htop(i) > 0) then
+           if(rainc (i) > 0.0 .and. htop(i) > 0) then
              factor(i) = -2./max(1000., zo(i,htop(i)) - zfrz(i))
            endif
          enddo
