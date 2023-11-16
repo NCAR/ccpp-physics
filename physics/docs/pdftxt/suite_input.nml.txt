@@ -54,7 +54,7 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 10: Morrison-Gettelman microphysics scheme
                                                       <li> 11: GFDL microphysics scheme
                                                       <li> 17: NSSL microphysics scheme with background CCN
-                                                      <li> 18: NSSL microphysics scheme with predicted CCN (compatibility)
+                                                      <li> 18: NSSL microphysics scheme with predicted CCN (compatibility: 18 = 17 + nssl_ccn_on=.true.)
                                                       </ul>
                                                       <td>99
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b radiation \b scheme \b options
@@ -406,6 +406,7 @@ show some variables in the namelist that must match the SDF.
 <tr><td>nssl_ehw0_in    <td>mp_nssl          <td>constant or max assumed graupel-droplet collection efficiency          <td>0.9
 <tr><td>nssl_ehlw0_in   <td>mp_nssl          <td>constant or max assumed hail-droplet collection efficiency          <td>0.9
 <tr><td>nssl_hail_on    <td>mp_nssl          <td>NSSL flag to activate the hail category         <td>.false.
+<tr><td>nssl_3moment    <td>mp_nssl          <td>NSSL flag to activate 3-moment for rain/graupel (and hail if activated)<td>.false.
 <tr><td>nssl_ccn_on     <td>mp_nssl          <td>NSSL flag to activate the CCN category          <td>.true.
 <tr><td>nssl_invertccn  <td>mp_nssl          <td>NSSL flag to treat CCN as activated or unactivated      <td>.true.
 <tr><td>nssl_ehw0       <td>mp_nssl          <td>NSSL graupel-droplet collection efficiency      <td>0.9
