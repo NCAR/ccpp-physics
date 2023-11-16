@@ -142,9 +142,9 @@
          do i=1,im
            factor(i) = 0.0
            lfrz = .true.
-           zfrz(i) = phil(i,1) / con_g 
+           zfrz(i) = phil(i,1)*onebg 
            do k = levs, 1, -1
-             zo(i,k) =  phil(i,k) / con_g 
+             zo(i,k) =  phil(i,k)*onebg 
              if (gt0(i,k) >= 273.16 .and. lfrz) then
               zfrz(i) = zo(i,k)
               lfrz = .false.
