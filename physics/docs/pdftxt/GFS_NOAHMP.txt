@@ -4,21 +4,15 @@
 
 This implementation of the NoahMP Land Surface Model (LSM) is adapted from the version implemented in WRF v3.7 with additions by NOAA EMC staff to work with the UFS Atmosphere model. Authoritative documentation of the NoahMP scheme can be accessed at the following links:
 
-[University of Texas at Austin NoahMP Documentation](http://www.jsg.utexas.edu/noah-mp "University of Texas at Austin NoahMP Documentation")
+- Technical documentation freely available at He et al. (2023) \cite He_2023.
 
-[NCAR Research Application Laboratory NoahMP Documentation](https://ral.ucar.edu/solutions/products/noah-multiparameterization-land-surface-model-noah-mp-lsm "NCAR RAL NoahMP Documentation")
+- A primary reference for the NoahMP LSM is Niu et al. (2011) \cite niu_et_al_2011.
 
-A primary reference for the NoahMP LSM is Niu et al. (2011) \cite niu_et_al_2011.
-
-The CCPP interface to the NoahMP LSM is a driving software layer on top of the actual NoahMP LSM. During the run sequence, code organization is as follows:
-+ \ref noahmpdrv_run() calls
- + \ref transfer_mp_parameters()
- + \ref noahmp_options()
- + \ref noahmp_options_glacier() and noahmp_glacier() if over the ice vegetation type (glacier)
- + \ref noahmp_sflx() if over other vegetation types
- + \ref penman()
- 
-Note that noahmp_glacer() and noahmp_sflx() are the actual NoahMP codes.
+\section noahmp_update CCPP Physics Updates
+\version UFS-SRW v3.0.0
+- As part of a larger-scale effort to unify how microphysics outputs (in particular snow) are used in the land models and outputs, an additional option for using the unified frozen precipitation fraction in NoahMP was added
+- Diagnostic 2-meter temperature and humidity are based on vegetation and bare-ground tiles
+- Bug fixes for GFS-based thermal roughness length scheme
  
 \section intra_noahmp Intraphysics Communication
  +  \ref arg_table_noahmpdrv_run

@@ -2,7 +2,7 @@
 !!  Contains code related to GFS physics suite setup (physics part of time_vary_step)
 
 !>\defgroup mod_GFS_phys_time_vary GFS Physics Time Update
-!! This module contains GFS physics time vary subroutines including ozone, stratospheric water vapor,
+!! This module contains GFS physics time vary subroutines including stratospheric water vapor,
 !! aerosol, IN&CCN and surface properties updates.
    module GFS_phys_time_vary
 
@@ -10,12 +10,11 @@
       use omp_lib
 #endif
 
-      use machine, only : kind_phys
+      use machine, only : kind_phys, kind_dbl_prec, kind_sngl_prec
 
       use mersenne_twister, only: random_setseed, random_number
 
-      use ozne_def, only : levozp, oz_coeff, oz_lat, oz_pres, oz_time, ozplin
-      use ozinterp, only : read_o3data, setindxoz, ozinterpol
+      use module_ozphys, only: ty_ozphys
 
       use h2o_def,   only : levh2o, h2o_coeff, h2o_lat, h2o_pres, h2o_time, h2oplin
       use h2ointerp, only : read_h2odata, setindxh2o, h2ointerpol
@@ -36,7 +35,8 @@
       use set_soilveg_mod, only: set_soilveg
 
       ! --- needed for Noah MP init
-      use noahmp_tables, only: laim_table,saim_table,sla_table,      &
+      use noahmp_tables, only: read_mp_table_parameters,             &
+                               laim_table,saim_table,sla_table,      &
                                bexp_table,smcmax_table,smcwlt_table, &
                                dwsat_table,dksat_table,psisat_table, &
                                isurban_table,isbarren_table,         &
@@ -60,6 +60,22 @@
 
       contains
 
+      subroutine copy_error(myerrmsg, myerrflg, errmsg, errflg)
+        implicit none
+        character(*), intent(in) :: myerrmsg
+        integer, intent(in) :: myerrflg
+        character(*), intent(out) :: errmsg
+        integer, intent(inout) :: errflg
+        if(myerrflg /= 0 .and. errflg == 0) then
+          !$OMP CRITICAL
+          if(errflg == 0) then
+            errmsg = myerrmsg
+            errflg = myerrflg
+          endif
+          !$OMP END CRITICAL
+        endif
+      end subroutine copy_error
+
 !> \section arg_table_GFS_phys_time_vary_init Argument Table
 !! \htmlinclude GFS_phys_time_vary_init.html
 !!
@@ -68,7 +84,7 @@
       subroutine GFS_phys_time_vary_init (                                                         &
               me, master, ntoz, h2o_phys, iaerclm, iccn, iaermdl, iflip, im, levs,                 &
               nx, ny, idate, xlat_d, xlon_d,                                                       &
-              jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,          &
+              jindx1_o3, jindx2_o3, ddy_o3, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,                &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
               do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
@@ -81,7 +97,7 @@
               smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, snliqxy, tsnoxy , smoiseq, zsnsoxy,   &
               slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, con_t0c, lsm_cold_start, nthrds,    &
               lkm, use_lake_model, lakefrac, lakedepth, iopt_lake, iopt_lake_clm, iopt_lake_flake, &
-              lakefrac_threshold, lakedepth_threshold, errmsg, errflg)
+              lakefrac_threshold, lakedepth_threshold, ozphys, errmsg, errflg)
 
          implicit none
 
@@ -98,7 +114,8 @@
 
          integer,              intent(inout) :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
          real(kind_phys),      intent(inout) :: ddy_o3(:),  ddy_h(:)
-         real(kind_phys),      intent(in)    :: ozpl(:,:,:), h2opl(:,:,:)
+         real(kind_phys),      intent(in)    :: h2opl(:,:,:)
+
          integer,              intent(inout) :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
          real(kind_phys),      intent(inout) :: ddy_aer(:), ddx_aer(:)
          real(kind_phys),      intent(out)   :: aer_nm(:,:,:)
@@ -115,6 +132,7 @@
          real(kind_phys),      intent(in)    :: min_seaice, fice(:)
          real(kind_phys),      intent(in)    :: landfrac(:)
          real(kind_phys),      intent(inout) :: weasd(:)
+         type(ty_ozphys),      intent(in)    :: ozphys
 
          ! NoahMP - only allocated when NoahMP is used
          integer, intent(in) :: lsoil, lsnow_lsm_lbound, lsnow_lsm_ubound
@@ -172,6 +190,7 @@
          real(kind_phys),      intent(in)    :: canopy(:)
          real(kind_phys),      intent(in)    :: tg3(:)
          integer,              intent(in)    :: stype(:)
+
          real(kind_phys),      intent(in)    :: con_t0c
 
          integer,              intent(in)    :: nthrds
@@ -190,6 +209,9 @@
          real(kind=kind_phys), dimension(:), allocatable :: dzsno
          real(kind=kind_phys), dimension(:), allocatable :: dzsnso
 
+         integer :: myerrflg
+         character(len=255) :: myerrmsg
+
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
@@ -203,9 +225,8 @@
 !$OMP parallel num_threads(nthrds) default(none)                                    &
 !$OMP          shared (me,master,ntoz,h2o_phys,im,nx,ny,levs,idate)                 &
 !$OMP          shared (xlat_d,xlon_d,imap,jmap,errmsg,errflg)                       &
-!$OMP          shared (levozp,oz_coeff,oz_pres,ozpl)                                &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres,h2opl)                             &
-!$OMP          shared (iamin, iamax, jamin, jamax)                                  &
+!$OMP          shared (iamin, iamax, jamin, jamax, lsm_noahmp)                      &
 !$OMP          shared (iaerclm,iaermdl,ntrcaer,aer_nm,iflip,iccn)                   &
 !$OMP          shared (jindx1_o3,jindx2_o3,ddy_o3,jindx1_h,jindx2_h,ddy_h)          &
 !$OMP          shared (jindx1_aer,jindx2_aer,ddy_aer,iindx1_aer,iindx2_aer,ddx_aer) &
@@ -213,56 +234,44 @@
 !$OMP          shared (do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau,ddy_j2tau)        &
 !$OMP          shared (isot,ivegsrc,nlunit,sncovr,sncovr_ice,lsm,lsm_ruc)           &
 !$OMP          shared (min_seaice,fice,landfrac,vtype,weasd,snupx,salp_data)        &
-!$OMP          private (ix,i,j,rsnow,vegtyp)
+!$OMP          shared (ozphys)                                                      &
+!$OMP          private (ix,i,j,rsnow,vegtyp,myerrmsg,myerrflg)
 
 !$OMP sections
 
 !$OMP section
-!> - Call read_o3data() to read ozone data
-         call read_o3data (ntoz, me, master)
-
-         ! Consistency check that the hardcoded values for levozp and
-         ! oz_coeff in GFS_typedefs.F90 match what is set by read_o3data
-         ! in GFS_typedefs.F90: allocate (Tbd%ozpl (IM,levozp,oz_coeff))
-         if (size(ozpl, dim=2).ne.levozp) then
-            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",    &
-                  "levozp from read_o3data does not match value in GFS_typedefs.F90: ", &
-                  levozp, " /= ", size(ozpl, dim=2)
-            errflg = 1
-         end if
-         if (size(ozpl, dim=3).ne.oz_coeff) then
-            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",      &
-                  "oz_coeff from read_o3data does not match value in GFS_typedefs.F90: ", &
-                  oz_coeff, " /= ", size(ozpl, dim=3)
-            errflg = 1
-         end if
-
-!$OMP section
 !> - Call read_h2odata() to read stratospheric water vapor data
+       need_h2odata: if(h2o_phys) then
          call read_h2odata (h2o_phys, me, master)
 
          ! Consistency check that the hardcoded values for levh2o and
-         ! h2o_coeff in GFS_typedefs.F90 match what is set by read_o3data
+         ! h2o_coeff in GFS_typedefs.F90 match what is set by read_h2odata
          ! in GFS_typedefs.F90: allocate (Tbd%h2opl (IM,levh2o,h2o_coeff))
          if (size(h2opl, dim=2).ne.levh2o) then
-            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
+            write(myerrmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
                   "levh2o from read_h2odata does not match value in GFS_typedefs.F90: ", &
                   levh2o, " /= ", size(h2opl, dim=2)
-            errflg = 1
+            myerrflg = 1
+            call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          end if
          if (size(h2opl, dim=3).ne.h2o_coeff) then
-            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",       &
+            write(myerrmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",       &
                   "h2o_coeff from read_h2odata does not match value in GFS_typedefs.F90: ", &
                   h2o_coeff, " /= ", size(h2opl, dim=3)
-            errflg = 1
+            myerrflg = 1
+            call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          end if
+       endif need_h2odata
 
 !$OMP section
 !> - Call read_aerdata() to read aerosol climatology, Anning added coupled
 !>  added coupled gocart and radiation option to initializing aer_nm
          if (iaerclm) then
            ntrcaer = ntrcaerm
-           call read_aerdata (me,master,iflip,idate,errmsg,errflg)
+           myerrflg = 0
+           myerrmsg = 'read_aerdata failed without a message'
+           call read_aerdata (me,master,iflip,idate,myerrmsg,myerrflg)
+           call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          else if(iaermdl ==2 ) then
            do ix=1,ntrcaerm
              do j=1,levs
@@ -287,12 +296,27 @@
 !$OMP section
 !> - Call tau_amf dats for  ugwp_v1
          if (do_ugwp_v1) then
-            call read_tau_amf(me, master, errmsg, errflg)
+            myerrflg = 0
+            myerrmsg = 'read_tau_amf failed without a message'
+            call read_tau_amf(me, master, myerrmsg, myerrflg)
+            call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          endif
 
 !$OMP section
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
-         call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
+         myerrflg = 0
+         myerrmsg = 'set_soilveg failed without a message'
+         call set_soilveg(me, isot, ivegsrc, nlunit, myerrmsg, myerrflg)
+         call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+
+!$OMP section
+!> - read in NoahMP table (needed for NoahMP init)
+         if(lsm == lsm_noahmp) then
+           myerrflg = 0
+           myerrmsg = 'read_mp_table_parameters failed without a message'
+           call read_mp_table_parameters(myerrmsg, myerrflg)
+           call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+         endif
 
 !$OMP end sections
 
@@ -301,9 +325,9 @@
 !$OMP sections
 
 !$OMP section
-!> - Call setindxoz() to initialize ozone data
+!> - Setup spatial interpolation indices for ozone physics.
          if (ntoz > 0) then
-           call setindxoz (im, xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
+           call ozphys%setup_o3prog(xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
          endif
 
 !$OMP section
@@ -387,7 +411,9 @@
          if (errflg/=0) return
 
          if (iaerclm) then
+           ! This call is outside the OpenMP section, so it should access errmsg & errflg directly.
            call read_aerdataf (me, master, iflip, idate, fhour, errmsg, errflg)
+           ! If it is moved to an OpenMP section, it must use myerrmsg, myerrflg, and copy_error.
            if (errflg/=0) return
          end if
 
@@ -469,11 +495,12 @@
 !$OMP          shared(isbarren_table,isice_table,isurban_table)         &
 !$omp          shared(iswater_table,laim_table,sla_table,bexp_table)    &
 !$omp          shared(stc,smc,slc,tg3,snowxy,tsnoxy,snicexy,snliqxy)    &
-!$omp          shared(zsnsoxy,STYPE,SMCMAX_TABLE,SMCWLT_TABLE,zs,dzs)   &
-!$omp          shared(DWSAT_TABLE,DKSAT_TABLE,PSISAT_TABLE,smoiseq)     &
+!$omp          shared(zsnsoxy,stype,smcmax_table,smcwlt_table,zs,dzs)   & 
+!$omp          shared(dwsat_table,dksat_table,psisat_table,smoiseq)     &
 !$OMP          shared(smcwtdxy,deeprechxy,rechxy,errmsg,errflg)         &
 !$OMP          private(vegtyp,masslai,masssai,snd,dzsno,dzsnso,isnow)   &
-!$OMP          private(soiltyp,bexp,smcmax,smcwlt,dwsat,dksat,psisat,ddz)
+!$OMP          private(soiltyp,bexp,smcmax,smcwlt,dwsat,dksat,psisat)   &
+!$OMP          private(myerrmsg,myerrflg,ddz)
              do ix=1,im
                if (landfrac(ix) >= drythresh) then
                  tvxy(ix)     = tsfcl(ix)
@@ -588,8 +615,9 @@
                    dzsno(-1)    = 0.20_kind_phys
                    dzsno(0)     = snd - 0.05_kind_phys - 0.20_kind_phys
                  else
-                   errmsg = 'Error in GFS_phys_time_vary.fv3.F90: Problem with the logic assigning snow layers in Noah MP initialization'
-                   errflg = 1
+                   myerrmsg = 'Error in GFS_phys_time_vary.fv3.F90: Problem with the logic assigning snow layers in Noah MP initialization'
+                   myerrflg = 1
+                   call copy_error(myerrmsg, myerrflg, errmsg, errflg)
                  endif
 
 ! Now we have the snowxy field
@@ -742,8 +770,8 @@
             kice, ialb, isot, ivegsrc, input_nml_file, use_ufo, nst_anl, frac_grid, fhcyc, phour,   &
             lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref,  &
             tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
-            zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype, shdmin, shdmax, snowd,        &
-            cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac,                             &
+            zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype,scolor, shdmin, shdmax, snowd, &
+            cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac, ozphys,                     &
             do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, errmsg, errflg)
 
          implicit none
@@ -773,6 +801,7 @@
          integer,              intent(in)    :: jindx1_tau(:), jindx2_tau(:)
          real(kind_phys),      intent(in)    :: ddy_j1tau(:), ddy_j2tau(:)
          real(kind_phys),      intent(inout) :: tau_amf(:)
+         type(ty_ozphys),      intent(in)    :: ozphys
 
          ! For gcycle only
          integer,              intent(in)    :: nthrds, nx, ny, nsst, tile_num, nlunit, lsoil
@@ -789,16 +818,19 @@
                                       zorli(:), zorll(:), zorlo(:), weasd(:), snoalb(:),             &
                                       canopy(:), vfrac(:), shdmin(:), shdmax(:),                     &
                                       snowd(:), cv(:), cvb(:), cvt(:), oro(:), oro_uf(:), slmsk(:)
-         integer,              intent(inout) :: vtype(:), stype(:), slope(:)
+         integer,              intent(inout) :: vtype(:), stype(:),scolor(:), slope(:) 
 
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
 
          ! Local variables
-         integer :: i, j, k, iseed, iskip, ix
-         real(kind=kind_phys) :: wrk(1)
-         real(kind=kind_phys) :: rannie(cny)
-         real(kind=kind_phys) :: rndval(cnx*cny*nrcm)
+         integer :: i, j, k, iseed, iskip, ix, idat(8), jdat(8), iday, j1, j2, nc, n1, n2, jdow,     &
+              jdoy, jday, w3kindreal, w3kindint
+         real(kind_phys) :: wrk(1), tem, tx1, tx2, rjday
+         real(kind_phys) :: rannie(cny)
+         real(kind_phys) :: rndval(cnx*cny*nrcm)
+         real(kind_dbl_prec)  :: rinc(5)
+         real(kind_sngl_prec) :: rinc4(5)
 
          ! Initialize CCPP error handling variables
          errmsg = ''
@@ -818,7 +850,8 @@
 !$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,master) &
 !$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
 !$OMP          shared(ddx_ci,in_nm,ccn_nm,do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau)    &
-!$OMP          shared(ddy_j2tau,tau_amf,iflip)                                           &
+!$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys,rjday,n1,n2,idat,jdat,rinc,rinc4)   &
+!$OMP          shared(w3kindreal,w3kindint,jdow,jdoy,jday)                               &
 !$OMP          private(iseed,iskip,i,j,k)
 
 !$OMP sections
@@ -869,11 +902,41 @@
          endif  ! imfdeepcnv, cal_re, random_clds
 
 !$OMP section
-!> - Call ozinterpol() to make ozone interpolation
+         !> - Compute temporal interpolation indices for updating gas concentrations.
+         idat=0
+         idat(1)=idate(4)
+         idat(2)=idate(2)
+         idat(3)=idate(3)
+         idat(5)=idate(1)
+         rinc=0.
+         rinc(2)=fhour
+         call w3kind(w3kindreal,w3kindint)
+         if(w3kindreal==4) then
+            rinc4=rinc
+            CALL w3movdat(rinc4,idat,jdat)
+         else
+            CALL w3movdat(rinc,idat,jdat)
+         endif
+         jdow = 0
+         jdoy = 0
+         jday = 0
+         call w3doxdat(jdat,jdow,jdoy,jday)
+         rjday = jdoy + jdat(5) / 24.
+         if (rjday < ozphys%time(1)) rjday = rjday + 365.
+
+         n2 = ozphys%ntime + 1
+         do j=2,ozphys%ntime
+            if (rjday < ozphys%time(j)) then
+               n2 = j
+                      exit
+            endif
+         enddo
+         n1 = n2 - 1
+         if (n2 > ozphys%ntime) n2 = n2 - ozphys%ntime
+
+!> - Update ozone concentration.
          if (ntoz > 0) then
-           call ozinterpol (me, im, idate, fhour, &
-                            jindx1_o3, jindx2_o3, &
-                            ozpl, ddy_o3)
+            call ozphys%update_o3prog(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
          endif
 
 !$OMP section
@@ -928,7 +991,7 @@
                  frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc,        &
                  tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,         &
                  zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,            &
-                 stype, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,                    &
+                 stype, scolor, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,            &
                  xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
            endif
          endif
@@ -972,12 +1035,6 @@
          errflg = 0
 
          if (.not.is_initialized) return
-
-         ! Deallocate ozone arrays
-         if (allocated(oz_lat)  ) deallocate(oz_lat)
-         if (allocated(oz_pres) ) deallocate(oz_pres)
-         if (allocated(oz_time) ) deallocate(oz_time)
-         if (allocated(ozplin)  ) deallocate(ozplin)
 
          ! Deallocate h2o arrays
          if (allocated(h2o_lat) ) deallocate(h2o_lat)

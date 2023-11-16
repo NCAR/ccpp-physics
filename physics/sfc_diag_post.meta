@@ -28,6 +28,13 @@
   dimensions = ()
   type = integer
   intent = in
+[opt_diag]
+  standard_name = control_for_land_surface_scheme_surface_diagnose_approach
+  long_name = choice for surface diagnose approach option (see noahmp module for definition)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [dry]
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
@@ -74,6 +81,13 @@
   type = real
   kind = kind_phys
   intent = in
+[vegtype]
+  standard_name = vegetation_type_classification
+  long_name = vegetation type at each grid cell
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent= in
 [t2mmp]
   standard_name = temperature_at_2m_from_noahmp
   long_name = 2 meter temperature from noahmp
