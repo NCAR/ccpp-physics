@@ -13,17 +13,18 @@
 !! \htmlinclude sfc_diag_post_run.html
 !!
 #endif
-      subroutine sfc_diag_post_run (im, lsm, lsm_noahmp, dry, lssav, dtf, con_eps, con_epsm1, pgr,&
-                 t2mmp,q2mp, t2m, q2m, u10m, v10m, tmpmin, tmpmax, spfhmin, spfhmax,                  &
+      subroutine sfc_diag_post_run (im, lsm, lsm_noahmp, opt_diag, dry, lssav, dtf, con_eps, con_epsm1, pgr,&
+                 vegtype,t2mmp,q2mp, t2m, q2m, u10m, v10m, tmpmin, tmpmax, spfhmin, spfhmax,                  &
                          wind10mmax, u10mmax, v10mmax, dpt2m, errmsg, errflg)
 
         use machine,               only: kind_phys, kind_dbl_prec
 
         implicit none
 
-        integer,                              intent(in) :: im, lsm, lsm_noahmp
-        logical,                              intent(in) :: lssav
-        real(kind=kind_phys),                 intent(in) :: dtf, con_eps, con_epsm1
+        integer,                             intent(in) :: im, lsm, lsm_noahmp,opt_diag
+        integer,              dimension(:),  intent(in) :: vegtype    !  vegetation type (integer index)
+        logical,                             intent(in) :: lssav
+        real(kind=kind_phys),                intent(in) :: dtf, con_eps, con_epsm1
         logical             , dimension(:),  intent(in) :: dry
         real(kind=kind_phys), dimension(:),  intent(in) :: pgr, u10m, v10m
         real(kind=kind_phys), dimension(:),  intent(inout) :: t2m, q2m, tmpmin, tmpmax, spfhmin, spfhmax
@@ -41,12 +42,25 @@
         errflg = 0
 
         if (lsm == lsm_noahmp) then
+!     over shrublands use opt_diag=2
+          do i=1, im
+           if(dry(i)) then
+             if (vegtype(i) == 6 .or. vegtype(i) == 7  & 
+                .or. vegtype(i) == 16) then
+              t2m(i) = t2mmp(i)
+              q2m(i) = q2mp(i)
+             endif
+           endif
+          enddo
+             
+         if (opt_diag == 2 .or. opt_diag == 3) then
           do i=1,im
             if(dry(i)) then
               t2m(i) = t2mmp(i)
               q2m(i) = q2mp(i)
-            endif
+             endif
           enddo
+         endif
         endif
 
         if (lssav) then

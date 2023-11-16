@@ -16,6 +16,7 @@ The UFS-SRW App. assembles the parameterizations in suites.
  - \subpage GFS_NOAH 
  - \subpage RUCLSM 
  - \subpage NoahMP 
+ - \subpage CLM_LAKE_model
 
 \b Cumulus \b Parameterizations
  - \subpage GFS_SAMFdeep 
@@ -67,21 +68,21 @@ to the parameterization.
 - If the in-core saturation adjustment is used (\p do_sat_adj=.true.), it is invoked at shorter timesteps along with the dynamical solver.
 
 
-The UFS Short Range Weather Application (SRW App) v2.1.0 supports four physicsphysics suites.
+The UFS Short Range Weather Application (SRW App) v3.0.0 supports four physics suites.
 
-Table 1.  Physics suites and primary schemes supported in SRW v2.1.0  
+Table 1.  Physics suites and primary schemes supported in SRW v3.0.0  
 \tableofcontents
-| Physics suites   |     GFS_v16        |       HRRR                     |   RRFS_v1beta      |   WoFS_v0     |         
-|------------------|--------------------|--------------------------------|--------------------|---------------|
-|\b Deep \b Cu     | \ref GFS_SAMFdeep  |   \a  off                      |   \a off           |   \a off      |
-|\b Shallow \b Cu  | \ref GFS_SAMFshal  |   \ref MYNNEDMF                | \ref MYNNEDMF      |  \ref MYNNEDMF |
-|\b Microphysics   | \ref GFDL_cloud    |   \ref THOMPSON    | \ref THOMPSON      | \ref NSSLMICRO_page     |
-|\b PBL/TURB       | \ref GFS_SATMEDMFVDIFQ     |  \ref MYNNEDMF    | \ref MYNNEDMF     |   \ref MYNNEDMF    |
-|\b Radiation      | \ref GFS_RRTMG     |   \ref GFS_RRTMG              | \ref GFS_RRTMG     |   \ref GFS_RRTMG    |
-|\b Surface \b Layer | \ref GFS_SFCLYR  |   \ref SFC_MYNNSFL            | \ref SFC_MYNNSFL   |   \ref SFC_MYNNSFL  |
-|\b LSM            | \ref GFS_NOAH      |   \ref RUCLSM                 |   \ref NoahMP      | \ref GFS_NOAH   |
-|\b Gravity \b Wave \b Drag| \ref GFS_UGWP_v0  |   \ref GFS_drag_suite | \ref  GFS_UGWP_v0  |   \ref GFS_UGWP_v0   |
-|\b Sea \b Ice     | \ref GFS_SFCSICE   |   \ref RUCLSM                | \ref GFS_SFCSICE   |   \ref GFS_SFCSICE     |  
+| Physics suites     |     GFS_v16        |       HRRR                     |   RRFS_v1beta      |   WoFS_v0     |    RAP        |         
+|--------------------|--------------------|--------------------------------|--------------------|---------------|---------------|
+|\b Deep \b Cu       | \ref GFS_SAMFdeep  |   \a  off                      |   \a off           |   \a off      |  \ref CU_GF   |
+|\b Shallow \b Cu    | \ref GFS_SAMFshal  |   \ref MYNNEDMF                | \ref MYNNEDMF      |  \ref MYNNEDMF | \ref CU_GF   |
+|\b Microphysics     | \ref GFDL_cloud    |   \ref THOMPSON    | \ref THOMPSON      | \ref NSSLMICRO_page     |    \ref THOMPSON|
+|\b PBL/TURB         | \ref GFS_SATMEDMFVDIFQ     |  \ref MYNNEDMF    | \ref MYNNEDMF     |   \ref MYNNEDMF    | \ref MYNNEDMF |
+|\b Radiation        | \ref GFS_RRTMG     |   \ref GFS_RRTMG              | \ref GFS_RRTMG     |   \ref GFS_RRTMG    | \ref GFS_RRTMG |
+|\b Surface \b Layer | \ref GFS_SFCLYR  |   \ref SFC_MYNNSFL            | \ref SFC_MYNNSFL   |   \ref SFC_MYNNSFL  | \ref SFC_MYNNSFL |
+|\b LSM              | \ref GFS_NOAH      |   \ref RUCLSM  and \ref CLM_LAKE_model |   \ref NoahMP      | \ref GFS_NOAH   | \ref RUCLSM |
+|\b Gravity \b Wave \b Drag| \ref GFS_UGWP_v0  |   \ref GFS_drag_suite | \ref  GFS_UGWP_v0  |   \ref GFS_UGWP_v0   | \ref GFS_drag_suite |
+|\b Ice and \b Snow       | \ref GFS_SFCSICE   |   \ref RUCLSM                | \ref GFS_SFCSICE   |   \ref GFS_SFCSICE     | \ref RUCLSM | 
 \tableofcontents
 
 
