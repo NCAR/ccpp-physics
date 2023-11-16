@@ -87,7 +87,10 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,                &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,tc_pbl,                                    &
-     &     do_canopy, vegtype, lai,                                     &                      
+     &     do_canopy, vegtype, lai,                                     &
+!TODO -Canopy Inputs
+!     &     rdcanopylai, rdcanopyfch, rdcanopyffrac, rdcanopyclu,        &
+!     &     canopylaixy, canopyfchxy, canopyffracxy, canopycluxy,        & 
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg)
@@ -115,6 +118,13 @@
       logical, intent(in)  :: do_canopy
       integer, intent(in)  :: vegtype(:)
       real(kind=kind_phys), intent(in) :: lai(:)
+!TODO Canopy Inputs
+!      logical, intent(in)  :: rdcanopylai, rdcanopyfch, rdcanopyffrac,  &
+!                              rdcanopyclu
+!      real(kind=kind_phys), intent(in) :: canopylaixy(:),               &
+!                                          canopyfchxy(:),               &
+!                                          canopyffracxy(:),             &
+!                                          canopycluxy(:)
       !----------------------------------------------
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
      &                     tdt(:,:),    rtg(:,:,:)
@@ -275,7 +285,9 @@
       real(kind=kind_phys) FCH,       MOL,   HOL, TLCAN,
      &                     SIGMACAN,  RRCAN, BBCAN,
      &                     AACAN,     ZCAN,  ZFL, BOTCAN,
-     &                     EDDYVEST1, EDDYVEST_INT
+     &                     EDDYVEST1, EDDYVEST_INT,
+     &                     XCANOPYLAI, XCANOPYFCH,
+     &                     XCANOPYFFRAC, XCANOPYCLU
 
       ! in canopy eddy diffusivity [ m**2/s ]
       real(kind=kind_phys), allocatable  :: EDDYVESTX ( : )
@@ -1334,7 +1346,29 @@
       if (do_canopy) then 
         do k = 1, km1-1
           do i = 1, im
-                      FCH = hvt_table(vegtype(i)) !top of canopy
+!TODO: Canopy Inputs
+!                      if(rdcanopylai) then
+!                        XCANOPYLAI = canopylaixy(i)
+!                      else
+!                        XCANOPYLAI = 0.0
+!                      endif
+!                      if(rdcanopyfch) then
+!                        XCANOPYFCH = canopyfchxy(i)
+!                      else
+!                        XCANOPYFCH = 0.0
+!                      endif
+!                      if(rdcanopyffrac) then
+!                       XCANOPYFFRAC = canopyffracxy(i)
+!                      else
+!                        XCANOPYFFRAC = 0.0
+!                      endif
+!                      if(rdcanopyclu) then
+!                        XCANOPYCLU = canopycluxy(i)
+!                      else
+!                        XCANOPYCLU = 0.0
+!                      endif
+!                      FCH = XCANOPYFCH !top of canopy from input file
+                      FCH = hvt_table(vegtype(i)) !top of canopy from table
                       IF (k .EQ. 1) THEN !use model layer interfaces
                         KCAN = 1
                       ELSE 
@@ -1347,11 +1381,13 @@
                       END IF
                       IF (KCAN .EQ. 1) THEN !canopy inside model layer
 !                       Check for other Contiguous Canopy Grid Cell Conditions
+!TODO: Canopy Inputs
+!                        IF ( XCANOPYLAI .LT. 0.1  !from canopy inputs
                         IF ( lai(i) .LT. 0.1  !from LSM
      &                   .OR. FCH .LT. 0.5 ) THEN
-!     &                   .OR. MAX(0.0, 1.0 - FRT) .GT. 0.5
+!     &                   .OR. MAX(0.0, 1.0 - XCANOPYFFRAC) .GT. 0.5
 !     &                   .OR. POPU .GT. 10000.0
-!     &                   .OR. EXP(-0.5*LAI*CLU).GT. 0.45
+!     &                   .OR. EXP(-0.5*XCANOPYLAI*XCANOPYCLU).GT. 0.45
 !     &                      .AND. FCH .LT. 18.0 ) THEN 
 !                         not a contigous canopy cell
                               dkt(i,k)= dkt(i,k)
