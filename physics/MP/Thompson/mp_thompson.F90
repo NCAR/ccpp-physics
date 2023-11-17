@@ -329,6 +329,7 @@ module mp_thompson
                               first_time_step, istep, nsteps,      &
                               prcp, rain, graupel, ice, snow, sr,  &
                               refl_10cm, fullradar_diag,           &
+                              max_hail_diam_sfc,                   &
                               do_radar_ref, aerfld,                &
                               mpicomm, mpirank, mpiroot, blkno,    &
                               ext_diag, diag3d, reset_diag3d,      &
@@ -387,6 +388,7 @@ module mp_thompson
          real(kind_phys),           intent(  out) :: sr(:)
          ! Radar reflectivity
          real(kind_phys),           intent(inout) :: refl_10cm(:,:)
+         real(kind_phys),           intent(inout) :: max_hail_diam_sfc(:)
          logical,                   intent(in   ) :: do_radar_ref
          logical,                   intent(in)    :: sedi_semi
          integer,                   intent(in)    :: decfl
@@ -698,6 +700,7 @@ module mp_thompson
                               graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
                               refl_10cm=refl_10cm,                                           &
                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                              max_hail_diam_sfc=max_hail_diam_sfc,                           &
                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
                               aero_ind_fdb=aero_ind_fdb, rand_perturb_on=spp_mp_opt,         &
                               kme_stoch=kme_stoch,                                           &
@@ -738,6 +741,7 @@ module mp_thompson
                               graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
                               refl_10cm=refl_10cm,                                           &
                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                              max_hail_diam_sfc=max_hail_diam_sfc,                           &
                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
                               rand_perturb_on=spp_mp_opt, kme_stoch=kme_stoch,               &
                               rand_pert=spp_wts_mp, spp_var_list=spp_var_list,               &

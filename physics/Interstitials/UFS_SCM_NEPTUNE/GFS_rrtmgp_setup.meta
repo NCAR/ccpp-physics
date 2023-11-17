@@ -3,7 +3,7 @@
   type = scheme
   relative_path = ../../
   dependencies = hooks/machine.F,MP/Thompson/module_mp_thompson.F90
-  dependencies = Radiation/radiation_aerosols.f
+  dependencies = Radiation/radiation_aerosols.f,photochem/module_ozphys.F90
   dependencies = Radiation/radiation_gases.f,Radiation/radiation_astronomy.f
 
 ########################################################################
@@ -391,6 +391,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = inout
 [iaermdl]
   standard_name = control_for_aerosol_radiation_scheme
   long_name = control of aerosol scheme in radiation

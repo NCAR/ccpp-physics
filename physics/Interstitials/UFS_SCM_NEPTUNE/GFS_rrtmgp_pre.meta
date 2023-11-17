@@ -2,7 +2,7 @@
   name = GFS_rrtmgp_pre
   type = scheme
   relative_path	= ../../
-  dependencies = tools/funcphys.f90,hooks/machine.F,Radiation/radiation_aerosols.f
+  dependencies = tools/funcphys.f90,hooks/machine.F,Radiation/radiation_aerosols.f,photochem/module_ozphys.F90
   dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_gases.f,Radiation/radiation_tools.F90
 
 ########################################################################
@@ -504,6 +504,13 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

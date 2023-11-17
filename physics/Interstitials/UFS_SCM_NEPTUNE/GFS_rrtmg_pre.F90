@@ -45,7 +45,8 @@
         gasvmr_ccl4,  gasvmr_cfc113, aerodp,ext550, clouds6, clouds7, clouds8, &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha, rrfs_sd,  &
-        aero_dir_fdb, fdb_coef, spp_wts_rad, spp_rad, ico2, errmsg, errflg)
+        aero_dir_fdb, fdb_coef, spp_wts_rad, spp_rad, ico2, ozphys,      &
+        errmsg, errflg)
 
       use machine,                   only: kind_phys
 
@@ -53,7 +54,7 @@
       use funcphys,                  only: fpvs
 
       use module_radiation_astronomy,only: coszmn                      ! sol_init, sol_update
-      use module_radiation_gases,    only: NF_VGAS, getgases, getozn   ! gas_init, gas_update,
+      use module_radiation_gases,    only: NF_VGAS, getgases           ! gas_init, gas_update,
       use module_radiation_aerosols, only: NF_AESW, NF_AELW, setaer, & ! aer_init, aer_update,
      &                                     NSPC1
       use module_radiation_clouds,   only: NF_CLDS,                  & ! cld_init
@@ -80,6 +81,8 @@
                                            make_IceNumber,           &
                                            make_DropletNumber,       &
                                            make_RainNumber
+      ! For NRL Ozone
+      use module_ozphys, only: ty_ozphys
       implicit none
 
       integer,              intent(in)  :: im, levs, lm, lmk, lmp, ltp,        &
@@ -249,6 +252,9 @@
       real (kind=kind_phys) :: max_relh
       integer  :: iflag
       integer  :: islmsk
+
+      ! For NRL Ozone
+      type(ty_ozphys),intent(in) :: ozphys
 
       integer :: ids, ide, jds, jde, kds, kde, &
                  ims, ime, jms, jme, kms, kme, &
@@ -420,7 +426,6 @@
 
 
 !> - Get layer ozone mass mixing ratio (if use ozone climatology data,
-!!    call getozn()).
 
       if (ntoz > 0) then            ! interactive ozone generation
         do k=1,lmk
@@ -429,8 +434,7 @@
           enddo
         enddo
       else                                ! climatological ozone
-        call getozn (prslk1, xlat, im, lmk, top_at_1,    &     !  ---  inputs
-                     olyr)                                     !  ---  outputs
+         call ozphys%run_o3clim(xlat, prslk1, con_pi, olyr)
       endif                               ! end_if_ntoz
 
 !> - Call coszmn(), to compute cosine of zenith angle (only when SW is called)

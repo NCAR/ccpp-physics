@@ -210,6 +210,13 @@
   dimensions = ()
   type = logical
   intent = in
+[nssl_3moment]
+  standard_name = nssl_3moment
+  long_name = 3-moment activation flag in NSSL microphysics scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 ########################################################################
 [ccpp-arg-table]
   name = mp_nssl_run
@@ -383,6 +390,30 @@
   standard_name = hail_volume_of_new_state
   long_name = hail particle volume
   units = m3 kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[zrw]
+  standard_name = reflectivity_of_rain_of_new_state
+  long_name = rain reflectivity
+  units = m6 kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[zhw]
+  standard_name = reflectivity_of_graupel_of_new_state
+  long_name = graupel reflectivity
+  units = m6 kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[zhl]
+  standard_name = reflectivity_of_hail_of_new_state
+  long_name = hail reflectivity
+  units = m6 kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
@@ -610,6 +641,13 @@
 [nssl_invertccn]
   standard_name = nssl_invertccn
   long_name = flag to invert CCN in NSSL microphysics scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[nssl_3moment]
+  standard_name = nssl_3moment
+  long_name = 3-moment activation flag in NSSL microphysics scheme
   units = flag
   dimensions = ()
   type = logical

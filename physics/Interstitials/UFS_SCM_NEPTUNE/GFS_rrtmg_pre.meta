@@ -8,6 +8,7 @@
   dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
   dependencies = Radiation/RRTMG/radlw_param.f,Radiation/RRTMG/radsw_param.f,Radiation/radiation_cloud_overlap.F90
   dependencies = SFC_Models/Land/Noah/surface_perturbation.F90
+  dependencies = photochem/module_ozphys.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -250,6 +251,13 @@
   units = index
   dimensions = ()
   type = integer
+  intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
   intent = in
 [iaermdl]
   standard_name = control_for_aerosol_radiation_scheme

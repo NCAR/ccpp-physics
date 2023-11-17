@@ -97,6 +97,7 @@
   real(kind=kind_phys),parameter:: con_dldt   =con_cvap-con_cliq
   real(kind=kind_phys),parameter:: con_xpona  =-con_dldt/con_rv
   real(kind=kind_phys),parameter:: con_xponb  =-con_dldt/con_rv+con_hvap/(con_rv*con_ttp)
+  real(kind=kind_phys),parameter:: con_1ovg   = 1._kind_phys/con_g
 
 !> \name Other Physics/Chemistry constants (source: 2002 CODATA)
   real(kind=kind_phys),parameter:: con_c      =2.99792458e+8_kind_phys             !< speed of light (\f$m/s\f$)

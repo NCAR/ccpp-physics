@@ -8,7 +8,7 @@
   dependencies = Radiation/mersenne_twister.f
   dependencies = MP/Morrison_Gettelman/aerclm_def.F,MP/Morrison_Gettelman/aerinterp.F90
   dependencies = SFC_Models/Land/Noah/namelist_soilveg.f,SFC_Models/Land/Noah/set_soilveg.f,SFC_Models/Land/Noahmp/noahmp_tables.f90
-  dependencies = photochem/ozinterp.f90,photochem/ozne_def.f
+  dependencies = photochem/module_ozphys.F90
   dependencies = photochem/h2o_def.f,photochem/h2ointerp.f90
   dependencies = GWD/cires_tauamf_data.F90
 
@@ -146,14 +146,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[ozpl]
-  standard_name = ozone_forcing
-  long_name = ozone forcing data
-  units = mixed
-  dimensions = (horizontal_dimension,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_forcing_data)
-  type = real
-  kind = kind_phys
-  intent = in
 [jindx1_h]
   standard_name = lower_latitude_index_of_stratospheric_water_vapor_forcing_for_interpolation
   long_name = interpolation low index for stratospheric water vapor
@@ -977,6 +969,13 @@
   type = real
   kind = kind_phys
   intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1214,7 +1213,7 @@
   standard_name = ozone_forcing
   long_name = ozone forcing data
   units = mixed
-  dimensions = (horizontal_dimension,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_forcing_data)
+  dimensions = (horizontal_dimension,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_data)
   type = real
   kind = kind_phys
   intent = inout
@@ -1950,6 +1949,13 @@
   type = real
   kind = kind_phys
   intent = inout
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

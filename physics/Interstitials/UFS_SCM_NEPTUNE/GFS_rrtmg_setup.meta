@@ -6,7 +6,7 @@
   dependencies = Radiation/radiation_aerosols.f
   dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
   dependencies = Radiation/RRTMG/radlw_main.F90,Radiation/RRTMG/radlw_param.f,Radiation/RRTMG/radsw_main.F90,Radiation/RRTMG/radsw_param.f
-  dependencies = MP/Thompson/module_mp_thompson.F90
+  dependencies = MP/Thompson/module_mp_thompson.F90,photochem/module_ozphys.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -513,6 +513,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = inout
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter

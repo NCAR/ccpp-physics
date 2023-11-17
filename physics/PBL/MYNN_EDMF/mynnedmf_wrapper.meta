@@ -964,17 +964,26 @@
   type = real
   kind = kind_phys
   intent = inout
-[nupdraft]
-  standard_name = number_of_plumes
-  long_name = number of plumes per grid column
-  units = count
+[maxwidth]
+  standard_name = maximum_width_of_plumes
+  long_name = maximum width of plumes per grid column
+  units = m
   dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = inout
+  type = real
+  kind = kind_phys
+  intent = out
 [maxMF]
   standard_name = maximum_mass_flux
   long_name = maximum mass flux within a column
   units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[ztop_plume]
+  standard_name = height_of_tallest_plume_in_a_column
+  long_name = height of tallest plume in a column
+  units = m
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
