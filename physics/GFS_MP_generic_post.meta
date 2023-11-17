@@ -312,6 +312,14 @@
   dimensions = ()
   type = integer
   intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degree Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [tsfc]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
