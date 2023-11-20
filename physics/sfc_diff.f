@@ -61,6 +61,7 @@
      &                    z0pert,ztpert,                                &  ! mg, sfc-perts !intent(in)
      &                    flag_iter,redrag,                             &  !intent(in)
      &                    u10m,v10m,sfc_z0_type,                        &  !hafs,z0 type !intent(in)
+     &                    u1,v1,ssu,ssv                                 &  !intent(in)
      &                    wet,dry,icy,                                  &  !intent(in)
      &                    thsfc_loc,                                    &  !intent(in)
      &                    tskin_wat, tskin_lnd, tskin_ice,              &  !intent(in)
@@ -95,6 +96,7 @@
       logical, intent(in) :: thsfc_loc ! Flag for reference pressure in theta calculation
 
       real(kind=kind_phys), dimension(:), intent(in)    :: u10m,v10m
+      real(kind=kind_phys), dimension(:), intent(in)    :: u1,v1,ssu,ssv
       real(kind=kind_phys), intent(in) :: rvrdm1, eps, epsm1, grav
       real(kind=kind_phys), dimension(:), intent(in)    ::              &
      &                    ps,t1,q1,z1,garea,prsl1,prslki,prsik1,prslk1, &
@@ -128,6 +130,7 @@
 !
       real(kind=kind_phys) :: rat, tv1, thv1, restar, wind10m,
      &                        czilc, tem1, tem2, virtfac
+      real(kind=kind_phys), dimension(im) :: windrel
 !
 
       real(kind=kind_phys) :: tvs, z0, z0max, ztmax, gdx
@@ -167,6 +170,9 @@
 !
 !       write(0,*)'in sfc_diff, sfc_z0_type=',sfc_z0_type
 
+      do i=1,im
+          windrel(i) = sqrt((u1(i)-ssu(i))**2+(v1(i)-ssv(i))**2)
+      enddo
       do i=1,im
         if(flag_iter(i)) then
 
@@ -274,7 +280,7 @@
 !
             call stability
 !  ---  inputs:
-     &       (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
+     &       (z1(i), zvfun(i), gdx, tv1, thv1, windrel(i),
      &        z0max, ztmax_lnd(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &        rb_lnd(i), fm_lnd(i), fh_lnd(i), fm10_lnd(i), fh2_lnd(i),
@@ -328,7 +334,7 @@
 !
             call stability
 !  ---  inputs:
-     &     (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
+     &     (z1(i), zvfun(i), gdx, tv1, thv1, windrel(i),
      &      z0max, ztmax_ice(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &      rb_ice(i), fm_ice(i), fh_ice(i), fm10_ice(i), fh2_ice(i),

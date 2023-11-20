@@ -75,7 +75,7 @@
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
       subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,               &
      &     ntiw,ntke,grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,                       &
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,ssu,ssv,swh,hlw,xmu,               &
      &     garea,zvfun,sigmaf,                                          &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
@@ -110,6 +110,7 @@
      &                     tdt(:,:),    rtg(:,:,:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(:,:),     v1(:,:),                        &
+     &                     ssu(:),      ssv(:),                         &
      &                     t1(:,:),     q1(:,:,:),                      &
      &                     swh(:,:),    hlw(:,:),                       &
      &                     xmu(:),       garea(:),                      &
@@ -2376,8 +2377,10 @@ c
          enddo
       enddo
       do i = 1,im
-        dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
-        dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
+!        dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
+!        dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
+        dusfc(i) = -1.*rho_a(i)*stress(i)*(u1(i,1)-ssu(i))/spd1(i)
+        dvsfc(i) = -1.*rho_a(i)*stress(i)*(v1(i,1)-ssv(i))/spd1(i)
       enddo
 !
       if(ldiag3d .and. .not. gen_tend) then

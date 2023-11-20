@@ -24,7 +24,7 @@
 !...................................
 !  ---  inputs:
      &     ( im, hvap, cp, rd, eps, epsm1, rvrdm1, ps, u1, v1, t1, q1,  &
-     &       tskin, cm, ch, lseaspray, fm, fm10,                        &
+     &       tskin, cm, ch, lseaspray, fm, fm10, ssu, ssv,               &
      &       prsl1, prslki, wet, use_lake_model, wind,                  &,  ! --- inputs
      &       flag_iter, use_med_flux, dqsfc_med, dtsfc_med,             &
      &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &   ! --- outputs
@@ -66,6 +66,7 @@
 !     im       - integer, horizontal dimension                     1    !
 !     ps       - real, surface pressure                            im   !
 !     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
+!     ssu,ssv - real, u/v component of surface ocean current (m/s) im   !
 !     t1       - real, surface layer mean temperature ( k )        im   !
 !     q1       - real, surface layer mean specific humidity        im   !
 !     tskin    - real, ground surface skin temperature ( k )       im   !
@@ -109,7 +110,8 @@
      &                 eps, epsm1, rvrdm1
 
       real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,    &
-     &      t1, q1, tskin, cm, ch, fm, fm10, prsl1, prslki, wind
+     &      t1, q1, tskin, cm, ch, fm, fm10, prsl1, prslki, wind, ssu,  & 
+     &      ssv
 
 ! For sea spray effect
       logical, intent(in) :: lseaspray
@@ -133,7 +135,7 @@
 !  ---  locals:
 
       real (kind=kind_phys) :: qss, rch, tem,
-     &                         elocp, cpinv, hvapi
+     &                         elocp, cpinv, hvapi, windref
       real (kind=kind_phys), dimension(im) :: rho, q0
 
       integer :: i
@@ -157,6 +159,7 @@
 !  -- ...  initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+        print *, 'ssu ssv',ssu(1),ssv(1)
 
       cpinv = one/cp
       hvapi = one/hvap
@@ -169,13 +172,15 @@
 !           ps is in pascals, wind is wind speed,
 !           rho is density, qss is sat. hum. at surface
 
+!       windref  = wind(i)
         if ( flag(i) ) then
+          windref  = sqrt((u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2)
           if (use_med_flux) then
             q0(i)    = max( q1(i), qmin )
             rho(i)   = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0(i)))
 
-            tem      = ch(i) * wind(i)
-            cmm(i)   = cm(i) * wind(i)
+            tem      = ch(i) * windref
+            cmm(i)   = cm(i) * windref
             chh(i)   = rho(i) * tem
 
             hflx(i)  = dtsfc_med(i)
@@ -192,9 +197,9 @@
 
 !  --- ...    rcp  = rho cp ch v
 
-            rch      = rho(i) * cp * ch(i) * wind(i)
-            tem      = ch(i) * wind(i)
-            cmm(i)   = cm(i) * wind(i)
+            rch      = rho(i) * cp * ch(i) * windref
+            tem      = ch(i) * windref
+            cmm(i)   = cm(i) * windref
             chh(i)   = rho(i) * tem
 
 !> - Calcualte sensible and latent heat flux over open water

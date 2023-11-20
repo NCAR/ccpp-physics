@@ -16,7 +16,7 @@
 !> \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
-     &       pi, tgice, sbc, ps, u1, v1, t1, q1, tref, cm, ch,          &
+     &       pi, tgice, sbc, ps, u1, v1, ssu, ssv, t1, q1, tref, cm, ch,&
      &       lseaspray, fm, fm10,                                       &
      &       prsl1, prslki, prsik1, prslk1, wet, use_lake_model, xlon,  &
      &       sinlat, stress,                                            &
@@ -36,7 +36,7 @@
 !                                                                       !
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
-!          ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      !
+!          ( im, ps, u1, v1, ssu, ssv,t1, q1, tref, cm, ch,             !
 !            lseaspray, fm, fm10,                                       !
 !            prsl1, prslki, wet, use_lake_model, xlon, sinlat, stress,  !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
@@ -222,6 +222,7 @@
      &                     rho_a, theta1, tv1, wndmag
 
       real(kind=kind_phys) elocp,tem,cpinv,hvapi
+      real(kind=kind_phys) windref
 !
 !    nstm related prognostic fields
 !
@@ -309,7 +310,9 @@ cc
 !           qss is saturation specific humidity at the water surface
 !!
       do i = 1, im
+!        windref  = wind(i)
         if ( flag(i) ) then
+          windref  = sqrt((u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2)
 
           nswsfc(i) = sfcnsw(i) ! net solar radiation at the air-sea surface (positive downward)
           wndmag(i) = sqrt(u1(i)*u1(i) + v1(i)*v1(i))
@@ -334,9 +337,9 @@ cc
 
 !  --- ...  rcp = rho cp ch v
 
-          rch(i)     = rho_a(i) * cp * ch(i) * wind(i)
-          cmm(i)     = cm (i)   * wind(i)
-          chh(i)     = rho_a(i) * ch(i) * wind(i)
+          rch(i)     = rho_a(i) * cp * ch(i) * windref
+          cmm(i)     = cm (i)   * windref
+          chh(i)     = rho_a(i) * ch(i) * windref
 
 !> - Calculate latent and sensible heat flux over open water with tskin.
 !           at previous time step
