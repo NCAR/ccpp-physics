@@ -131,7 +131,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  edmf_a,edmf_w,edmf_qt,          &
      &  edmf_thl,edmf_ent,edmf_qc,      &
      &  sub_thl,sub_sqv,det_thl,det_sqv,&
-     &  nupdraft,maxMF,ktop_plume,      &
+     &  maxwidth,maxMF,ztop_plume,      &
+     &  ktop_plume,                     &
      &  dudt, dvdt, dtdt,                                  &
      &  dqdt_water_vapor,            dqdt_liquid_cloud,    & ! <=== ntqv, ntcw
      &  dqdt_ice,                    dqdt_snow,            & ! <=== ntiw, ntsw
@@ -310,9 +311,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind_phys), dimension(:), intent(out) ::                      &
      &        ch,dtsfc1,dqsfc1,dusfc1,dvsfc1,                            &
      &        dtsfci_diag,dqsfci_diag,dusfci_diag,dvsfci_diag,           &
-     &        maxMF
+     &        maxMF,maxwidth,ztop_plume
       integer, dimension(:), intent(inout) ::                            &
-     &        kpbl,nupdraft,ktop_plume
+     &        kpbl,ktop_plume
 
       real(kind_phys), dimension(:), intent(inout) ::                    &
      &        dusfc_cpl,dvsfc_cpl,dtsfc_cpl,dqsfc_cpl
@@ -325,6 +326,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       integer :: idtend
       real(kind_phys), dimension(im) :: dusfci1,dvsfci1,dtsfci1,dqsfci1
       real(kind_phys), allocatable :: save_qke_adv(:,:)
+      real(kind_phys), dimension(levs) :: kzero
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -355,6 +357,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          !print*,"in MYNN, initflag=",initflag
       endif
 
+      kzero = zero !generic zero array
       !initialize arrays for test
       EMIS_ANT_NO = 0.
 
@@ -391,7 +394,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          FLAG_QNI= .true.
          FLAG_QC = .true.
          FLAG_QNC= .true.
-         FLAG_QS = .false. !.true.
+         FLAG_QS = .true.
          FLAG_QNWFA= nssl_ccn_on ! ERM: Perhaps could use this field for CCN field?
          FLAG_QNIFA= .false.
          FLAG_QNBCA= .false.
@@ -400,7 +403,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               sqv(i,k)   = qgrs_water_vapor(i,k)
               sqc(i,k)   = qgrs_liquid_cloud(i,k)
               sqi(i,k)   = qgrs_ice(i,k)
-              sqs(i,k)   = 0.0 !qgrs_snow(i,k)
+              sqs(i,k)   = qgrs_snow(i,k)
               ozone(i,k) = qgrs_ozone(i,k)
               qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
               qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
@@ -418,7 +421,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             FLAG_QI = .true.
             FLAG_QNI= .true.
             FLAG_QC = .true.
-            FLAG_QS = .false.
+            FLAG_QS = .true. !pipe it in, but do not mix
             FLAG_QNC= .true.
             FLAG_QNWFA= .true.
             FLAG_QNIFA= .true.
@@ -428,7 +431,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 sqv(i,k)   = qgrs_water_vapor(i,k)
                 sqc(i,k)   = qgrs_liquid_cloud(i,k)
                 sqi(i,k)   = qgrs_ice(i,k)
-                sqs(i,k)   = 0. !qgrs_snow(i,k)
+                sqs(i,k)   = qgrs_snow(i,k)
                 qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
                 qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
                 ozone(i,k) = qgrs_ozone(i,k)
@@ -441,7 +444,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             FLAG_QI = .true.
             FLAG_QNI= .true.
             FLAG_QC = .true.
-            FLAG_QS = .false.
+            FLAG_QS = .true.
             FLAG_QNC= .true.
             FLAG_QNWFA= .false.
             FLAG_QNIFA= .false.
@@ -451,7 +454,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 sqv(i,k)   = qgrs_water_vapor(i,k)
                 sqc(i,k)   = qgrs_liquid_cloud(i,k)
                 sqi(i,k)   = qgrs_ice(i,k)
-                sqs(i,k)   = 0. !qgrs_snow(i,k)
+                sqs(i,k)   = qgrs_snow(i,k)
                 qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
                 qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
                 ozone(i,k) = qgrs_ozone(i,k)
@@ -464,7 +467,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             FLAG_QI = .true.
             FLAG_QNI= .true.
             FLAG_QC = .true.
-            FLAG_QS = .false.
+            FLAG_QS = .true.
             FLAG_QNC= .false.
             FLAG_QNWFA= .false.
             FLAG_QNIFA= .false.
@@ -474,7 +477,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 sqv(i,k)   = qgrs_water_vapor(i,k)
                 sqc(i,k)   = qgrs_liquid_cloud(i,k)
                 sqi(i,k)   = qgrs_ice(i,k)
-                sqs(i,k)   = 0. !qgrs_snow(i,k)
+                sqs(i,k)   = qgrs_snow(i,k)
                 qnc(i,k)   = 0.
                 qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
                 ozone(i,k) = qgrs_ozone(i,k)
@@ -565,7 +568,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          call moisture_check2(levs, delt,            &
                               delp(i,:), exner(i,:), &
                               sqv(i,:),  sqc(i,:),   &
-                              sqi(i,:),  sqs(i,:),   &
+                              sqi(i,:),  kzero(:),   &
                               t3d(i,:)               )
       enddo
 
@@ -748,7 +751,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             edmf_thl=edmf_thl,edmf_ent=edmf_ent,edmf_qc=edmf_qc,& !output
      &             sub_thl3D=sub_thl,sub_sqv3D=sub_sqv,                &
      &             det_thl3D=det_thl,det_sqv3D=det_sqv,                &
-     &             nupdraft=nupdraft,maxMF=maxMF,                      & !output
+     &             maxwidth=maxwidth,maxMF=maxMF,ztop_plume=ztop_plume,& !output
      &             ktop_plume=ktop_plume,                              & !output
      &             spp_pbl=spp_pbl,pattern_spp_pbl=spp_wts_pbl,        & !input
      &             RTHRATEN=htrlw,                                     & !input
@@ -834,7 +837,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
                  dqdt_ice(i,k)                     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
-                 dqdt_snow(i,k)                    = 0.0 !RQSBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_snow(i,k)                    = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                  !dqdt_ozone(i,k)                   = 0.0
                  dqdt_water_aer_num_conc(i,k)      = RQNWFABLTEN(i,k)
                  dqdt_ice_aer_num_conc(i,k)        = RQNIFABLTEN(i,k)
@@ -869,7 +872,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
                  dqdt_ice(i,k)                     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
-                 dqdt_snow(i,k)                    = 0.0 !RQSBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_snow(i,k)                    = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                enddo
              enddo
              if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
@@ -887,7 +890,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice(i,k)           = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)  = RQNIBLTEN(i,k)
-                 dqdt_snow(i,k)          = 0.0 !RQSBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_snow(i,k)          = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                  !dqdt_ozone(i,k)         = 0.0
                enddo
              enddo
@@ -917,7 +920,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
                  dqdt_ice(i,k)                     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
-                 !dqdt_snow(i,k)                    = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_snow(i,k)                    = RQSBLTEN(i,k) !/(1.0 + qv(i,k))
                  IF ( nssl_ccn_on ) THEN ! 
                    dqdt_cccn(i,k)      = RQNWFABLTEN(i,k)
                  ENDIF
@@ -1005,8 +1008,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           print*,"dudt:",dudt(1,1),dudt(1,2),dudt(1,levs)
           print*,"dvdt:",dvdt(1,1),dvdt(1,2),dvdt(1,levs)
           print*,"dqdt:",dqdt_water_vapor(1,1),dqdt_water_vapor(1,2),dqdt_water_vapor(1,levs)
-          print*,"ktop_plume:",ktop_plume(1)," maxmf:",maxmf(1)
-          print*,"nup:",nupdraft(1)
+          print*,"ztop_plume:",ztop_plume(1)," maxmf:",maxmf(1)
+          print*,"maxwidth:",maxwidth(1)
           print*
        endif
 
