@@ -36,7 +36,7 @@
 !                                                                       !
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
-!          ( im, ps, u1, v1, ssu, ssv,t1, q1, tref, cm, ch,             !
+!          ( im, ps, u1, v1, ssu,ssv, t1, q1, tref, cm, ch,             !
 !            lseaspray, fm, fm10,                                       !
 !            prsl1, prslki, wet, use_lake_model, xlon, sinlat, stress,  !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
@@ -75,6 +75,7 @@
 !     im       - integer, horiz dimension                          1    !
 !     ps       - real, surface pressure (pa)                       im   !
 !     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
+!     ssu, ssv - real, u/v component of surface current (m/s)      im   !
 !     t1       - real, surface layer mean temperature ( k )        im   !
 !     q1       - real, surface layer mean specific humidity        im   !
 !     tref     - real, reference/foundation temperature ( k )      im   !
@@ -185,7 +186,7 @@
       real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps,   &
      &       epsm1, rvrdm1, rd, rhw0, sbc, pi, tgice
       real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,    &
-     &       t1, q1, tref, cm, ch, fm, fm10,                            &
+     &       ssu, ssv, t1, q1, tref, cm, ch, fm, fm10,                            &
      &       prsl1, prslki, prsik1, prslk1, xlon, xcosz,                &
      &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, wind
       real (kind=kind_phys), intent(in) :: timestep
@@ -222,7 +223,6 @@
      &                     rho_a, theta1, tv1, wndmag
 
       real(kind=kind_phys) elocp,tem,cpinv,hvapi
-      real(kind=kind_phys) windref
 !
 !    nstm related prognostic fields
 !
@@ -259,11 +259,28 @@
       real (kind=kind_phys), parameter :: alps=0.75,bets=0.75,gams=0.15,
      &                       ws10cr=30., conlf=7.2e-9, consf=6.4e-8
 !
+      
+      integer   ii
+      real(kind=kind_phys) :: ssumax, ssvmax
+      real(kind=kind_phys) :: windrel
+      logical         :: check_ssu_ssv
 !======================================================================================================
 cc
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+      check_ssu_ssv=.true.
+      if(check_ssu_ssv) then
+        ssumax=0.0
+        ssvmax=0.0
+        do ii=1,im
+        if(ssu(ii) .gt. ssumax) ssumax=ssu(ii)
+        if(ssv(ii) .gt. ssvmax) ssvmax=ssv(ii)
+        enddo
+        print*, 'in sfc_nst ssumax,ssvmax =',ssumax,ssvmax
+        print*, 'in sfc_nst wind(1),u1(1),v1(1) =',wind(1),u1(1),v1(1)
+      endif
+      !if(abs(ssumax-0.02) .lt. 0.01) check_ssu_ssv=.false.
 
       if (nstf_name1 == 0) return ! No NSST model used
 
@@ -310,9 +327,7 @@ cc
 !           qss is saturation specific humidity at the water surface
 !!
       do i = 1, im
-!        windref  = wind(i)
         if ( flag(i) ) then
-          windref  = sqrt((u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2)
 
           nswsfc(i) = sfcnsw(i) ! net solar radiation at the air-sea surface (positive downward)
           wndmag(i) = sqrt(u1(i)*u1(i) + v1(i)*v1(i))
@@ -337,9 +352,10 @@ cc
 
 !  --- ...  rcp = rho cp ch v
 
-          rch(i)     = rho_a(i) * cp * ch(i) * windref
-          cmm(i)     = cm (i)   * windref
-          chh(i)     = rho_a(i) * ch(i) * windref
+          windrel    = sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
+          rch(i)     = rho_a(i) * cp * ch(i) * windrel
+          cmm(i)     = cm (i)   * windrel
+          chh(i)     = rho_a(i) * ch(i) * windrel
 
 !> - Calculate latent and sensible heat flux over open water with tskin.
 !           at previous time step

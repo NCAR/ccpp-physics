@@ -17,6 +17,7 @@
      &                    lsm,lsm_ruc,grav,cp,eps,epsm1,con_rocp,       &
      &                    con_karman,                                   &
      &                    shflx,cdq,wind,                               &
+     &                    ssu,ssv,                                      &
      &                    zf,ps,u1,v1,t1,q1,prslki,evap,fm,fh,fm10,fh2, &
      &                    ust,tskin,qsurf,thsfc_loc,diag_flux,diag_log, &
      &                    use_lake_model,iopt_lake,iopt_lake_clm,       &
@@ -38,6 +39,7 @@
       real(kind=kind_phys), intent(in) :: con_karman
       real(kind=kind_phys), dimension(:), intent( in) ::                &
      &                      zf, ps, u1, v1, t1, q1, ust, tskin,         &
+     &                      ssu, ssv,                                   &
      &                      qsurf, prslki, evap, fm, fh, fm10, fh2,     &
      &                      shflx, cdq, wind, xlat_d, xlon_d
       real(kind=kind_phys), dimension(:), intent(out) ::                &
@@ -67,10 +69,25 @@
 !     real(kind=kind_phys) sig2k, fhi, qss
 !
 !     real, parameter :: g=grav
+      integer   ii
+      real(kind=kind_phys) :: ssumax, ssvmax
+      logical              :: check_ssu_ssv
 !
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+      
+      check_ssu_ssv=.true.
+      if(check_ssu_ssv) then
+        ssumax=0.0
+        ssvmax=0.0
+        do ii=1,im
+        if(ssu(ii) .gt. ssumax) ssumax=ssu(ii)
+        if(ssv(ii) .gt. ssvmax) ssvmax=ssv(ii)
+        enddo
+        print*, 'in sfc_diag ssumax,ssvmax =',ssumax,ssvmax
+      endif
+      !if(abs(ssumax-0.02).lt.0.01) check_ssu_ssv=.false.
 
       !--
       testptlat = 35.3_kind_phys 
@@ -89,8 +106,8 @@
 
       do i = 1, im
         f10m(i) = fm10(i) / fm(i)
-        u10m(i) = f10m(i) * u1(i)
-        v10m(i) = f10m(i) * v1(i)
+        u10m(i) = ssu(i) + f10m(i) * (u1(i)-ssu(i))
+        v10m(i) = ssv(i) + f10m(i) * (v1(i)-ssv(i))
         have_2m = use_lake_model(i)>0 .and. use_lake2m .and.            &
      &                iopt_lake==iopt_lake_clm
         if(have_2m) then

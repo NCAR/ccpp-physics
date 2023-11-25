@@ -135,10 +135,14 @@
 !  ---  locals:
 
       real (kind=kind_phys) :: qss, rch, tem,
-     &                         elocp, cpinv, hvapi, windref
+     &                         elocp, cpinv, hvapi, windrel
       real (kind=kind_phys), dimension(im) :: rho, q0
 
       integer :: i
+      integer :: ii
+      real (kind=kind_phys) :: ssumax,ssvmax
+      !logical,save :: check_ssu_ssv=.true.
+      logical :: check_ssu_ssv
 
       logical :: flag(im)
 !
@@ -159,7 +163,16 @@
 !  -- ...  initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-        print *, 'ssu ssv',ssu(1),ssv(1)
+      check_ssu_ssv=.false.
+       if(check_ssu_ssv) then
+         ssumax=0.0
+         ssvmax=0.0
+         do ii=1,im
+          if(ssu(ii) .gt. ssumax) ssumax=ssu(ii)
+          if(ssv(ii) .gt. ssvmax) ssvmax=ssv(ii)
+         enddo
+         print *, 'in sfc_ocean ssumax ssvmax',ssumax, ssvmax
+        endif
 
       cpinv = one/cp
       hvapi = one/hvap
@@ -172,15 +185,14 @@
 !           ps is in pascals, wind is wind speed,
 !           rho is density, qss is sat. hum. at surface
 
-!       windref  = wind(i)
         if ( flag(i) ) then
-          windref  = sqrt((u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2)
           if (use_med_flux) then
+            windrel  = sqrt((u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2)
             q0(i)    = max( q1(i), qmin )
             rho(i)   = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0(i)))
 
-            tem      = ch(i) * windref
-            cmm(i)   = cm(i) * windref
+            tem      = ch(i) * windrel
+            cmm(i)   = cm(i) * windrel
             chh(i)   = rho(i) * tem
 
             hflx(i)  = dtsfc_med(i)
@@ -197,9 +209,10 @@
 
 !  --- ...    rcp  = rho cp ch v
 
-            rch      = rho(i) * cp * ch(i) * windref
-            tem      = ch(i) * windref
-            cmm(i)   = cm(i) * windref
+            windrel  = sqrt((u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2)
+            rch      = rho(i) * cp * ch(i) * windrel
+            tem      = ch(i) * windrel
+            cmm(i)   = cm(i) * windrel
             chh(i)   = rho(i) * tem
 
 !> - Calcualte sensible and latent heat flux over open water

@@ -211,6 +211,22 @@
   type = real
   kind = kind_phys
   intent = in
+[ssu]
+  standard_name = ocn_current_zonal
+  long_name = ocn_current_zonal
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[ssv]
+  standard_name = ocn_current_merid
+  long_name = ocn_current_merid
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [t1]
   standard_name = air_temperature
   long_name = layer mean air temperature

@@ -61,7 +61,7 @@
      &                    z0pert,ztpert,                                &  ! mg, sfc-perts !intent(in)
      &                    flag_iter,redrag,                             &  !intent(in)
      &                    u10m,v10m,sfc_z0_type,                        &  !hafs,z0 type !intent(in)
-     &                    u1,v1,ssu,ssv                                 &  !intent(in)
+     &                    u1,v1,ssu,ssv,                                &  
      &                    wet,dry,icy,                                  &  !intent(in)
      &                    thsfc_loc,                                    &  !intent(in)
      &                    tskin_wat, tskin_lnd, tskin_ice,              &  !intent(in)
@@ -127,10 +127,13 @@
 !     locals
 !
       integer   i
+      integer   ii
+      real(kind=kind_phys) :: ssumax, ssvmax
+      real(kind=kind_phys), dimension(im)  :: windrel
+      logical :: check_ssu_ssv
 !
       real(kind=kind_phys) :: rat, tv1, thv1, restar, wind10m,
      &                        czilc, tem1, tem2, virtfac
-      real(kind=kind_phys), dimension(im) :: windrel
 !
 
       real(kind=kind_phys) :: tvs, z0, z0max, ztmax, gdx
@@ -168,11 +171,26 @@
 !  ps is in pascals, wind is wind speed,
 !  surface roughness length is converted to m from cm
 !
+
 !       write(0,*)'in sfc_diff, sfc_z0_type=',sfc_z0_type
 
+      
+      check_ssu_ssv=.true.
+      if(check_ssu_ssv) then
+        ssumax=0.0
+        ssvmax=0.0
+        do ii=1,im
+        if(ssu(ii) .gt. ssumax) ssumax=ssu(ii)
+        if(ssv(ii) .gt. ssvmax) ssvmax=ssv(ii)
+        enddo
+        print*, 'in sfc_diff ssumax,ssvmax =',ssumax,ssvmax
+        print*, 'in sfc_diff wind(1),u1(1),v1(1) =',wind(1),u1(1),v1(1)
+      endif
+      !if(abs(ssumax-0.02) .lt. 0.01) check_ssu_ssv=.false.
       do i=1,im
-          windrel(i) = sqrt((u1(i)-ssu(i))**2+(v1(i)-ssv(i))**2)
+      windrel(i)=sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
       enddo
+
       do i=1,im
         if(flag_iter(i)) then
 
@@ -389,7 +407,7 @@
 !
             call stability
 !  ---  inputs:
-     &       (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
+     &       (z1(i), zvfun(i), gdx, tv1, thv1, windrel(i),
      &        z0max, ztmax_wat(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &        rb_wat(i), fm_wat(i), fh_wat(i), fm10_wat(i), fh2_wat(i),
