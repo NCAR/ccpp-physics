@@ -1,3 +1,4 @@
+
 !>\file module_nst_water_prop.f90
 !! This file contains GFS NSST water property subroutines.
 
@@ -5,46 +6,45 @@
 !!This module contains GFS NSST water property subroutines.
 !!\ingroup gfs_nst_main_mod
 module module_nst_water_prop
-  use machine, only : kind_phys
-  use module_nst_parameters, only : t0k
+  use machine ,               only : kind_phys
+  use module_nst_parameters , only : t0k, zero, one, half
+
+  implicit none
   !
   private
-  public :: rhocoef,density,sw_rad,sw_rad_aw,sw_rad_sum,sw_rad_upper,sw_rad_upper_aw,sw_rad_skin,grv,solar_time_from_julian,compjd, &
-            sw_ps_9b,sw_ps_9b_aw,get_dtzm_point,get_dtzm_2d
+  public :: rhocoef, density, sw_rad_skin, grv, sw_ps_9b, sw_ps_9b_aw, get_dtzm_point, get_dtzm_2d
 
-  integer, parameter :: kp = kind_phys
-  real (kind=kind_phys), parameter :: zero = 0.0_kp, one = 1.0_kp, half=0.5_kp
   !
   interface sw_ps_9b
      module procedure sw_ps_9b
-  end interface
+  end interface sw_ps_9b
   interface sw_ps_9b_aw
      module procedure sw_ps_9b_aw
-  end interface
+  end interface sw_ps_9b_aw
   !
   interface sw_rad
      module procedure sw_fairall_6exp_v1  ! sw_wick_v1
-  end interface
+  end interface sw_rad
   interface sw_rad_aw
      module procedure sw_fairall_6exp_v1_aw
-  end interface
+  end interface sw_rad_aw
   interface sw_rad_sum
      module procedure sw_fairall_6exp_v1_sum
-  end interface
+  end interface sw_rad_sum
   interface sw_rad_upper
      module procedure sw_soloviev_3exp_v2
-  end interface
+  end interface sw_rad_upper
   interface sw_rad_upper_aw
      module procedure sw_soloviev_3exp_v2_aw
-  end interface
+  end interface sw_rad_upper_aw
   interface sw_rad_skin
      module procedure sw_ohlmann_v1
-  end interface
+  end interface sw_rad_skin
 contains
   ! ------------------------------------------------------
-!>\ingroup gfs_nst_main_mod
-!! This subroutine computes thermal expansion coefficient (alpha)
-!! and saline contraction coefficient (beta).
+  !>\ingroup gfs_nst_main_mod
+  !! This subroutine computes thermal expansion coefficient (alpha)
+  !! and saline contraction coefficient (beta).
   subroutine rhocoef(t, s, rhoref, alpha, beta)
     ! ------------------------------------------------------
 
@@ -55,7 +55,6 @@ contains
     !  dynamical oceanography, pp310.
     !  note: compression effects are not included
 
-    implicit none
     real(kind=kind_phys), intent(in)  :: t, s, rhoref
     real(kind=kind_phys), intent(out) :: alpha, beta
     real(kind=kind_phys) :: tc
@@ -87,11 +86,10 @@ contains
 
   end subroutine rhocoef
   ! ----------------------------------------
-!>\ingroup gfs_nst_main_mod
-!! This subroutine computes sea water density.
+  !>\ingroup gfs_nst_main_mod
+  !! This subroutine computes sea water density.
   subroutine density(t, s, rho)
     ! ----------------------------------------
-    implicit none
 
     ! input
     real(kind=kind_phys), intent(in)  :: t     !unit, k
@@ -125,9 +123,9 @@ contains
   !
   !======================
   !
-!>\ingroup gfs_nst_main_mod
-!! This subroutine computes the fraction of the solar radiation absorbed
-!! by the depth z following Paulson and Simpson (1981) \cite paulson_and_simpson_1981 .
+  !>\ingroup gfs_nst_main_mod
+  !! This subroutine computes the fraction of the solar radiation absorbed
+  !! by the depth z following Paulson and Simpson (1981) \cite paulson_and_simpson_1981 .
   elemental subroutine sw_ps_9b(z,fxp)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z
@@ -139,17 +137,15 @@ contains
     ! output:
     ! fxp: fraction of the solar radiation absorbed by the ocean at depth z (w/m^2)
     !
-    implicit none
     real(kind=kind_phys), intent(in)  :: z
     real(kind=kind_phys), intent(out) :: fxp
-    real(kind=kind_phys), dimension(9), parameter :: &
-         f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/) &
-         ,gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
+    real(kind=kind_phys), dimension(9), parameter :: f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/)
+    real(kind=kind_phys), dimension(9), parameter :: gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
     !
     if(z>zero) then
-      fxp=one-(f(1)*exp(-z/gamma(1))+f(2)*exp(-z/gamma(2))+f(3)*exp(-z/gamma(3))+ &
-               f(4)*exp(-z/gamma(4))+f(5)*exp(-z/gamma(5))+f(6)*exp(-z/gamma(6))+ &
-               f(7)*exp(-z/gamma(7))+f(8)*exp(-z/gamma(8))+f(9)*exp(-z/gamma(9)))
+       fxp=one-(f(1)*exp(-z/gamma(1))+f(2)*exp(-z/gamma(2))+f(3)*exp(-z/gamma(3))+ &
+                f(4)*exp(-z/gamma(4))+f(5)*exp(-z/gamma(5))+f(6)*exp(-z/gamma(6))+ &
+                f(7)*exp(-z/gamma(7))+f(8)*exp(-z/gamma(8))+f(9)*exp(-z/gamma(9)))
     else
        fxp=zero
     endif
@@ -161,8 +157,8 @@ contains
   !
   !======================
   !
-!>\ingroup gfs_nst_main_mod
-!! This subroutine
+  !>\ingroup gfs_nst_main_mod
+  !! This subroutine
   elemental subroutine sw_ps_9b_aw(z,aw)
     !
     ! d(fw)/d(z) for 9-band
@@ -173,17 +169,15 @@ contains
     ! output:
     ! fxp: fraction of the solar radiation absorbed by the ocean at depth z (w/m^2)
     !
-    implicit none
     real(kind=kind_phys), intent(in)  :: z
     real(kind=kind_phys), intent(out) :: aw
-    real(kind=kind_phys), dimension(9), parameter :: &
-         f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/) &
-         ,gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
+    real(kind=kind_phys), dimension(9), parameter :: f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/)
+    real(kind=kind_phys), dimension(9), parameter :: gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
     !
     if(z>zero) then
-      aw=(f(1)/gamma(1))*exp(-z/gamma(1))+(f(2)/gamma(2))*exp(-z/gamma(2))+(f(3)/gamma(3))*exp(-z/gamma(3))+ &
-         (f(1)/gamma(4))*exp(-z/gamma(4))+(f(2)/gamma(5))*exp(-z/gamma(5))+(f(6)/gamma(6))*exp(-z/gamma(6))+ &
-         (f(1)/gamma(7))*exp(-z/gamma(7))+(f(2)/gamma(8))*exp(-z/gamma(8))+(f(9)/gamma(9))*exp(-z/gamma(9))
+       aw=(f(1)/gamma(1))*exp(-z/gamma(1))+(f(2)/gamma(2))*exp(-z/gamma(2))+(f(3)/gamma(3))*exp(-z/gamma(3))+ &
+          (f(1)/gamma(4))*exp(-z/gamma(4))+(f(2)/gamma(5))*exp(-z/gamma(5))+(f(6)/gamma(6))*exp(-z/gamma(6))+ &
+          (f(1)/gamma(7))*exp(-z/gamma(7))+(f(2)/gamma(8))*exp(-z/gamma(8))+(f(9)/gamma(9))*exp(-z/gamma(9))
     else
        aw=zero
     endif
@@ -191,10 +185,10 @@ contains
   end subroutine sw_ps_9b_aw
   !
   !======================
-!>\ingroup gfs_nst_main_mod
-!! This subroutine computes fraction of the solar radiation absorbed by the ocean at the depth
-!! z (Fairall et al. (1996) \cite fairall_et_al_1996, p. 1298) following Paulson and Simpson
-!! (1981) \cite paulson_and_simpson_1981 .
+  !>\ingroup gfs_nst_main_mod
+  !! This subroutine computes fraction of the solar radiation absorbed by the ocean at the depth
+  !! z (Fairall et al. (1996) \cite fairall_et_al_1996, p. 1298) following Paulson and Simpson
+  !! (1981) \cite paulson_and_simpson_1981 .
   elemental subroutine sw_fairall_6exp_v1(z,fxp)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -206,13 +200,13 @@ contains
     ! output:
     ! fxp: fraction of the solar radiation absorbed by the ocean at depth z (w/m^2)
     !
-    implicit none
-    real(kind=kind_phys),intent(in):: z
-    real(kind=kind_phys),intent(out):: fxp
-    real(kind=kind_phys), dimension(9), parameter :: f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/) &
-         ,gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
-    real(kind=kind_phys),dimension(9) :: zgamma
-    real(kind=kind_phys),dimension(9) :: f_c
+    real(kind=kind_phys), intent(in)  :: z
+    real(kind=kind_phys), intent(out) :: fxp
+
+    real(kind=kind_phys), dimension(9), parameter :: f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/)
+    real(kind=kind_phys), dimension(9), parameter :: gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
+    real(kind=kind_phys), dimension(9) :: zgamma
+    real(kind=kind_phys), dimension(9) :: f_c
     !
     if(z>zero) then
        zgamma=z/gamma
@@ -227,10 +221,10 @@ contains
   !======================
   !
   !
-!>\ingroup gfs_nst_main_mod
-!! This subroutine calculates fraction of the solar radiation absorbed by the
-!! ocean at the depth z (fairall et al.(1996) \cite fairall_et_al_1996; p.1298)
-!! following Paulson and Simpson (1981) \cite paulson_and_simpson_1981.
+  !>\ingroup gfs_nst_main_mod
+  !! This subroutine calculates fraction of the solar radiation absorbed by the
+  !! ocean at the depth z (fairall et al.(1996) \cite fairall_et_al_1996; p.1298)
+  !! following Paulson and Simpson (1981) \cite paulson_and_simpson_1981.
   elemental subroutine sw_fairall_6exp_v1_aw(z,aw)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -244,34 +238,31 @@ contains
     !
     ! fxp: fraction of the solar radiation absorbed by the ocean at depth z (w/m^2)
     !
-    implicit none
-    real(kind=kind_phys),intent(in):: z
-    real(kind=kind_phys),intent(out):: aw
-    real(kind=kind_phys) :: fxp
-    real(kind=kind_phys), dimension(9), parameter :: f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/) &
-         ,gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
-    real(kind=kind_phys),dimension(9) :: zgamma
-    real(kind=kind_phys),dimension(9) :: f_aw
+    real(kind=kind_phys), intent(in)  :: z
+    real(kind=kind_phys), intent(out) :: aw
+
+    real(kind=kind_phys), dimension(9), parameter :: f=(/0.237,0.36,0.179,0.087,0.08,0.0246,0.025,0.007,0.0004/)
+    real(kind=kind_phys), dimension(9), parameter :: gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
+    real(kind=kind_phys), dimension(9) :: zgamma
+    real(kind=kind_phys), dimension(9) :: f_aw
     !
     if(z>zero) then
        zgamma=z/gamma
        f_aw=(f/z)*((gamma/z)*(one-exp(-zgamma))-exp(-zgamma))
        aw=sum(f_aw)
-
-!      write(*,'(a,f6.2,f12.6,9f10.4)') 'z,aw in sw_rad_aw : ',z,aw,f_aw
-
+       !      write(*,'(a,f6.2,f12.6,9f10.4)') 'z,aw in sw_rad_aw : ',z,aw,f_aw
     else
        aw=zero
     endif
     !
   end subroutine sw_fairall_6exp_v1_aw
   !
-!>\ingroup gfs_nst_main_mod
-!! This subroutine computes fraction of the solar radiation absorbed by the ocean at the
-!! depth z (Fairall et al.(1996) \cite fairall_et_al_1996 , p.1298) following Paulson and
-!! Simpson (1981) \cite paulson_and_simpson_1981 .
-!>\param[in] z     depth (m)
-!>\param[out] sum  for convection depth calculation
+  !>\ingroup gfs_nst_main_mod
+  !! This subroutine computes fraction of the solar radiation absorbed by the ocean at the
+  !! depth z (Fairall et al.(1996) \cite fairall_et_al_1996 , p.1298) following Paulson and
+  !! Simpson (1981) \cite paulson_and_simpson_1981 .
+  !>\param[in] z     depth (m)
+  !>\param[out] sum  for convection depth calculation
   elemental subroutine sw_fairall_6exp_v1_sum(z,sum)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -284,30 +275,30 @@ contains
     ! sum: for convection depth calculation
     !
     !
-    implicit none
-    real(kind=kind_phys),intent(in):: z
-    real(kind=kind_phys),intent(out):: sum
-    real(kind=kind_phys), dimension(9), parameter :: gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
-    real(kind=kind_phys),dimension(9) :: zgamma
-    real(kind=kind_phys),dimension(9) :: f_sum
-    !
-!    zgamma=z/gamma
-!    f_sum=(zgamma/z)*exp(-zgamma)
-!    sum=sum(f_sum)
+    real(kind=kind_phys), intent(in)  :: z
+    real(kind=kind_phys), intent(out) :: sum
 
-    sum=(one/gamma(1))*exp(-z/gamma(1))+(one/gamma(2))*exp(-z/gamma(2))+(one/gamma(3))*exp(-z/gamma(3))+ &
-        (one/gamma(4))*exp(-z/gamma(4))+(one/gamma(5))*exp(-z/gamma(5))+(one/gamma(6))*exp(-z/gamma(6))+ &
-        (one/gamma(7))*exp(-z/gamma(7))+(one/gamma(8))*exp(-z/gamma(8))+(one/gamma(9))*exp(-z/gamma(9))
+    real(kind=kind_phys), dimension(9), parameter :: gamma=(/34.8,2.27,3.15e-2,5.48e-3,8.32e-4,1.26e-4,3.13e-4,7.82e-5,1.44e-5/)
+    real(kind=kind_phys), dimension(9) :: zgamma
+    real(kind=kind_phys), dimension(9) :: f_sum
+    !
+    !    zgamma=z/gamma
+    !    f_sum=(zgamma/z)*exp(-zgamma)
+    !    sum=sum(f_sum)
+
+    sum=( one/gamma(1))*exp(-z/gamma(1))+(one/gamma(2))*exp(-z/gamma(2))+(one/gamma(3))*exp(-z/gamma(3))+ &
+         (one/gamma(4))*exp(-z/gamma(4))+(one/gamma(5))*exp(-z/gamma(5))+(one/gamma(6))*exp(-z/gamma(6))+ &
+         (one/gamma(7))*exp(-z/gamma(7))+(one/gamma(8))*exp(-z/gamma(8))+(one/gamma(9))*exp(-z/gamma(9))
     !
   end subroutine sw_fairall_6exp_v1_sum
   !
   !======================
-!>\ingroup gfs_nst_main_mod
-!! Solar radiation absorbed by the ocean at the depth z (Fairall et al. (1996)
-!! \cite fairall_et_al_1996, p.1298)
-!!\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
-!!\param[in] z           depth (m)
-!!\param[out] df_sol_z   solar radiation absorbed by the ocean at depth z (\f$W m^{-2}\f$)
+  !>\ingroup gfs_nst_main_mod
+  !! Solar radiation absorbed by the ocean at the depth z (Fairall et al. (1996)
+  !! \cite fairall_et_al_1996, p.1298)
+  !!\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
+  !!\param[in] z           depth (m)
+  !!\param[out] df_sol_z   solar radiation absorbed by the ocean at depth z (\f$W m^{-2}\f$)
   elemental subroutine sw_fairall_simple_v1(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1298)
@@ -319,9 +310,8 @@ contains
     ! output:
     ! df_sol_z: solar radiation absorbed by the ocean at depth z (w/m^2)
     !
-    implicit none
-    real(kind=kind_phys),intent(in):: z,f_sol_0
-    real(kind=kind_phys),intent(out):: df_sol_z
+    real(kind=kind_phys), intent(in)  :: z,f_sol_0
+    real(kind=kind_phys), intent(out) :: df_sol_z
     !
     if(z>zero) then
        df_sol_z=f_sol_0*(0.137+11.0*z-6.6e-6/z*(one-exp(-z/8.e-4)))
@@ -333,12 +323,12 @@ contains
   !
   !======================
   !
-!>\ingroup gfs_nst_main_mod
-!! solar radiation absorbed by the ocean at the depth z (Zeng and Beljaars (2005)
-!! \cite zeng_and_beljaars_2005 , p.5).
-!>\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
-!>\param[in] z           depth (m)
-!>\param[out] df_sol_z   solar radiation absorbed by the ocean at depth z (\f$W m^{-2}\f$)
+  !>\ingroup gfs_nst_main_mod
+  !! solar radiation absorbed by the ocean at the depth z (Zeng and Beljaars (2005)
+  !! \cite zeng_and_beljaars_2005 , p.5).
+  !>\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
+  !>\param[in] z           depth (m)
+  !>\param[out] df_sol_z   solar radiation absorbed by the ocean at depth z (\f$W m^{-2}\f$)
   elemental subroutine sw_wick_v1(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (zeng and beljaars, 2005, p.5)
@@ -350,9 +340,8 @@ contains
     ! output:
     ! df_sol_z: solar radiation absorbed by the ocean at depth z (w/m^2)
     !
-    implicit none
-    real(kind=kind_phys),intent(in):: z,f_sol_0
-    real(kind=kind_phys),intent(out):: df_sol_z
+    real(kind=kind_phys), intent(in)  :: z,f_sol_0
+    real(kind=kind_phys), intent(out) :: df_sol_z
     !
     if(z>zero) then
        df_sol_z=f_sol_0*(0.065+11.0*z-6.6e-5/z*(one-exp(-z/8.e-4)))
@@ -364,13 +353,13 @@ contains
   !
   !======================
   !
-!>\ingroup gfs_nst_main_mod
-!! This subroutine computes solar radiation absorbed by the ocean at the depth z
-!! (Fairall et al.(1996) \cite fairall_et_al_1996 , p.1301) following
-!! Soloviev and Vershinsky (1982) \cite soloviev_and_vershinsky_1982.
-!>\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
-!>\param[in] z           depth (m)
-!>\param[out] df_sol_z   solar radiation absorbed by the ocean at depth z (\f$W m^{-2}\f$)
+  !>\ingroup gfs_nst_main_mod
+  !! This subroutine computes solar radiation absorbed by the ocean at the depth z
+  !! (Fairall et al.(1996) \cite fairall_et_al_1996 , p.1301) following
+  !! Soloviev and Vershinsky (1982) \cite soloviev_and_vershinsky_1982.
+  !>\param[in] f_sol_0     solar radiation at the ocean surface (\f$W m^{-2}\f$)
+  !>\param[in] z           depth (m)
+  !>\param[out] df_sol_z   solar radiation absorbed by the ocean at depth z (\f$W m^{-2}\f$)
   elemental subroutine sw_soloviev_3exp_v1(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1301)
@@ -383,12 +372,11 @@ contains
     ! output:
     ! df_sol_z: solar radiation absorbed by the ocean at depth z (w/m^2)
     !
-    implicit none
-    real(kind=kind_phys),intent(in):: z,f_sol_0
-    real(kind=kind_phys),intent(out):: df_sol_z
-    real(kind=kind_phys),dimension(3) :: f_c
-    real(kind=kind_phys), dimension(3), parameter :: f=(/0.45,0.27,0.28/) &
-         ,gamma=(/12.8,0.357,0.014/)
+    real(kind=kind_phys), intent(in)  :: z,f_sol_0
+    real(kind=kind_phys), intent(out) :: df_sol_z
+    real(kind=kind_phys), dimension(3) :: f_c
+    real(kind=kind_phys), dimension(3), parameter :: f=(/0.45,0.27,0.28/)
+    real(kind=kind_phys), dimension(3), parameter :: gamma=(/12.82,0.357,0.014/)
     !
     if(z>zero) then
        f_c      = f*gamma(int(one-exp(-z/gamma)))
@@ -401,7 +389,7 @@ contains
   !
   !======================
   !
-!>\ingroup gfs_nst_main_mod
+  !>\ingroup gfs_nst_main_mod
   elemental subroutine sw_soloviev_3exp_v2(f_sol_0,z,df_sol_z)
     !
     ! solar radiation absorbed by the ocean at the depth z (fairall et all, 1996, p. 1301)
@@ -414,9 +402,8 @@ contains
     ! output:
     ! df_sol_z: solar radiation absorbed by the ocean at depth z (w/m^2)
     !
-    implicit none
-    real(kind=kind_phys),intent(in):: z,f_sol_0
-    real(kind=kind_phys),intent(out):: df_sol_z
+    real(kind=kind_phys), intent(in)  :: z,f_sol_0
+    real(kind=kind_phys), intent(out) :: df_sol_z
     !
     if(z>zero) then
        df_sol_z=f_sol_0*(one                    &
@@ -430,7 +417,7 @@ contains
     !
   end subroutine sw_soloviev_3exp_v2
 
-!>\ingroup gfs_nst_main_mod
+  !>\ingroup gfs_nst_main_mod
   elemental subroutine sw_soloviev_3exp_v2_aw(z,aw)
     !
     ! aw = d(fxp)/d(z)
@@ -442,10 +429,9 @@ contains
     ! output:
     ! aw: d(fxp)/d(z)
     !
-    implicit none
-    real(kind=kind_phys),intent(in):: z
-    real(kind=kind_phys),intent(out):: aw
-    real(kind=kind_phys):: fxp
+    real(kind=kind_phys), intent(in)  :: z
+    real(kind=kind_phys), intent(out) :: aw
+    real(kind=kind_phys) :: fxp
     !
     if(z>zero) then
        fxp=(one                                 &
@@ -462,7 +448,7 @@ contains
   !
   !======================
   !
-!>\ingroup gfs_nst_main_mod
+  !>\ingroup gfs_nst_main_mod
   elemental subroutine sw_ohlmann_v1(z,fxp)
     !
     ! fraction of the solar radiation absorbed by the ocean at the depth z
@@ -473,9 +459,8 @@ contains
     ! output:
     ! fxp: fraction of the solar radiation absorbed by the ocean at depth z (w/m^2)
     !
-    implicit none
-    real(kind=kind_phys),intent(in):: z
-    real(kind=kind_phys),intent(out):: fxp
+    real(kind=kind_phys), intent(in)  :: z
+    real(kind=kind_phys), intent(out) :: fxp
     !
     if(z>zero) then
        fxp=.065+11.*z-6.6e-5/z*(one-exp(-z/8.0e-4))
@@ -486,276 +471,264 @@ contains
   end subroutine sw_ohlmann_v1
   !
 
-!>\ingroup gfs_nst_main_mod
-function grv(x)
-  real(kind=kind_phys) :: x    !< sin(lat)
-  real(kind=kind_phys) :: gamma,c1,c2,c3,c4
-  gamma=9.7803267715
-  c1=0.0052790414
-  c2=0.0000232718
-  c3=0.0000001262
-  c4=0.0000000007
+  !>\ingroup gfs_nst_main_mod
+  real(kind_phys) function grv(x)
+    real(kind=kind_phys) :: x    !< sin(lat)
+    real(kind=kind_phys) :: gamma,c1,c2,c3,c4
+    gamma=9.7803267715
+    c1=0.0052790414
+    c2=0.0000232718
+    c3=0.0000001262
+    c4=0.0000000007
 
-  grv=gamma*(1.0+(c1*x**2)+(c2*x**4)+(c3*x**6)+(c4*x**8))
-end function grv
+    grv=gamma*(one+(c1*x**2)+(c2*x**4)+(c3*x**6)+(c4*x**8))
+  end function grv
 
-!>\ingroup gfs_nst_main_mod
-!>This subroutine computes solar time from the julian date.
-subroutine solar_time_from_julian(jday,xlon,soltim)
+  !>\ingroup gfs_nst_main_mod
+  !>This subroutine computes solar time from the julian date.
+  subroutine solar_time_from_julian(jday,xlon,soltim)
+    !
+    ! calculate solar time from the julian date
+    !
+    real(kind=kind_phys), intent(in)  :: jday
+    real(kind=kind_phys), intent(in)  :: xlon
+    real(kind=kind_phys), intent(out) :: soltim
+    real(kind=kind_phys) :: fjd,xhr,xmin,xsec,intime
+    !
+    fjd=jday-floor(jday)
+    fjd=jday
+    xhr=floor(fjd*24.0)-sign(12.0,fjd-half)
+    xmin=nint(fjd*1440.0)-(xhr+sign(12.0,fjd-half))*60.0
+    xsec=zero
+    intime=xhr+xmin/60.0+xsec/3600.0+24.0
+    soltim=mod(xlon/15.0+intime,24.0)*3600.0
+  end subroutine solar_time_from_julian
+
   !
-  ! calculate solar time from the julian date
+  !***********************************************************************
   !
-  implicit none
-  real(kind=kind_phys), intent(in)  :: jday
-  real(kind=kind_phys), intent(in)  :: xlon
-  real(kind=kind_phys), intent(out) :: soltim
-  real(kind=kind_phys)                           :: fjd,xhr,xmin,xsec,intime
-  integer                                        :: nn
-  !
-  fjd=jday-floor(jday)
-  fjd=jday
-  xhr=floor(fjd*24.0)-sign(12.0,fjd-half)
-  xmin=nint(fjd*1440.0)-(xhr+sign(12.0,fjd-half))*60.0
-  xsec=zero
-  intime=xhr+xmin/60.0+xsec/3600.0+24.0
-  soltim=mod(xlon/15.0+intime,24.0)*3600.0
-end subroutine solar_time_from_julian
-
-!
-!***********************************************************************
-!
-!>\ingroup gfs_nst_main_mod
-!> This subroutine computes julian day and fraction from year,
-!! month, day and time UTC.
-      subroutine compjd(jyr,jmnth,jday,jhr,jmn,jd,fjd)
-!fpp$ noconcur r
-!$$$  subprogram documentation block
-!                .      .    .                                       .
-! subprogram:    compjd      computes julian day and fraction
-!   prgmmr: kenneth campana  org: w/nmc23    date: 89-07-07
-!
-! abstract: computes julian day and fraction
-!   from year, month, day and time utc.
-!
-! program history log:
-!   77-05-06  ray orzol,gfdl
-!   98-05-15  iredell   y2k compliance
-!
-! usage:    call compjd(jyr,jmnth,jday,jhr,jmn,jd,fjd)
-!   input argument list:
-!     jyr      - year (4 digits)
-!     jmnth    - month
-!     jday     - day
-!     jhr      - hour
-!     jmn      - minutes
-!   output argument list:
-!     jd       - julian day.
-!     fjd      - fraction of the julian day.
-!
-! subprograms called:
-!   iw3jdn     compute julian day number
-!
-! attributes:
-!   language: fortran.
-!
-!$$$
-      use machine , only :kind_phys
-      implicit none
-!
-      integer jyr,jmnth,jday,jhr,jmn,jd
-      integer iw3jdn
-      real (kind=kind_phys) fjd
-      jd=iw3jdn(jyr,jmnth,jday)
-      if(jhr.lt.12) then
-        jd=jd-1
-        fjd=half+jhr/24.+jmn/1440.
-      else
-        fjd=(jhr-12)/24.+jmn/1440.
-      endif
-      end subroutine compjd
-
-!>\ingroup gfs_nst_main_mod
-!>This subroutine computes dtm (the mean of \f$dT(z)\f$).
- subroutine get_dtzm_point(xt,xz,dt_cool,zc,z1,z2,dtm)
-! ===================================================================== !
-!                                                                       !
-!  description:  get dtm = mean of dT(z) (z1 - z2) with NSST dT(z)      !
-!                dT(z) = (1-z/xz)*dt_warm - (1-z/zc)*dt_cool            !
-!                                                                       !
-!  usage:                                                               !
-!                                                                       !
-!    call get_dtm12                                                     !
-!                                                                       !
-!       inputs:                                                         !
-!          (xt,xz,dt_cool,zc,z1,z2,                                     !
-!       outputs:                                                        !
-!          dtm)                                                         !
-!                                                                       !
-!  program history log:                                                 !
-!                                                                       !
-!         2015  -- xu li       createad original code                   !
-!  inputs:                                                              !
-!     xt      - real, heat content in dtl                            1  !
-!     xz      - real, dtl thickness                                  1  !
-!     dt_cool - real, sub-layer cooling amount                       1  !
-!     zc      - sub-layer cooling thickness                          1  !
-!     z1      - lower bound of depth of sea temperature              1  !
-!     z2      - upper bound of depth of sea temperature              1  !
-!  outputs:                                                             !
-!     dtm   - mean of dT(z)  (z1 to z2)                              1  !
-!
-  use machine , only : kind_phys
-
-  implicit none
-
-  real (kind=kind_phys), intent(in)  :: xt,xz,dt_cool,zc,z1,z2
-  real (kind=kind_phys), intent(out) :: dtm
-! Local variables
-  real (kind=kind_phys) :: dt_warm,dtw,dtc
-
-!
-! get the mean warming in the range of z=z1 to z=z2
-!
-  dtw = zero
-  if ( xt > zero ) then
-    dt_warm = (xt+xt)/xz      ! Tw(0)
-    if ( z1 < z2) then
-      if ( z2 < xz ) then
-        dtw = dt_warm*(one-(z1+z2)/(xz+xz))
-      elseif ( z1 < xz .and. z2 >= xz ) then
-        dtw = half*(one-z1/xz)*dt_warm*(xz-z1)/(z2-z1)
-      endif
-    elseif ( z1 == z2 ) then
-      if ( z1 < xz ) then
-        dtw = dt_warm*(one-z1/xz)
-      endif
+  !>\ingroup gfs_nst_main_mod
+  !> This subroutine computes julian day and fraction from year,
+  !! month, day and time UTC.
+  subroutine compjd(jyr,jmnth,jday,jhr,jmn,jd,fjd)
+    !fpp$ noconcur r
+    !$$$  subprogram documentation block
+    !                .      .    .                                       .
+    ! subprogram:    compjd      computes julian day and fraction
+    !   prgmmr: kenneth campana  org: w/nmc23    date: 89-07-07
+    !
+    ! abstract: computes julian day and fraction
+    !   from year, month, day and time utc.
+    !
+    ! program history log:
+    !   77-05-06  ray orzol,gfdl
+    !   98-05-15  iredell   y2k compliance
+    !
+    ! usage:    call compjd(jyr,jmnth,jday,jhr,jmn,jd,fjd)
+    !   input argument list:
+    !     jyr      - year (4 digits)
+    !     jmnth    - month
+    !     jday     - day
+    !     jhr      - hour
+    !     jmn      - minutes
+    !   output argument list:
+    !     jd       - julian day.
+    !     fjd      - fraction of the julian day.
+    !
+    ! subprograms called:
+    !   iw3jdn     compute julian day number
+    !
+    ! attributes:
+    !   language: fortran.
+    !
+    !$$$
+    !
+    integer :: jyr,jmnth,jday,jhr,jmn,jd
+    integer :: iw3jdn
+    real (kind=kind_phys) fjd
+    jd=iw3jdn(jyr,jmnth,jday)
+    if(jhr.lt.12) then
+       jd=jd-1
+       fjd=half+jhr/24.+jmn/1440.
+    else
+       fjd=(jhr-12)/24.+jmn/1440.
     endif
-  endif
-!
-! get the mean cooling in the range of z=z1 to z=z2
-!
-  dtc = zero
-  if ( zc > zero ) then
-    if ( z1 < z2) then
-      if ( z2 < zc ) then
-        dtc = dt_cool*(one-(z1+z2)/(zc+zc))
-      elseif ( z1 < zc .and. z2 >= zc ) then
-        dtc = half*(one-z1/zc)*dt_cool*(zc-z1)/(z2-z1)
-      endif
-    elseif ( z1 == z2 ) then
-      if ( z1 < zc ) then
-        dtc = dt_cool*(one-z1/zc)
-      endif
+  end subroutine compjd
+
+  !>\ingroup gfs_nst_main_mod
+  !>This subroutine computes dtm (the mean of \f$dT(z)\f$).
+  subroutine get_dtzm_point(xt,xz,dt_cool,zc,z1,z2,dtm)
+    ! ===================================================================== !
+    !                                                                       !
+    !  description:  get dtm = mean of dT(z) (z1 - z2) with NSST dT(z)      !
+    !                dT(z) = (1-z/xz)*dt_warm - (1-z/zc)*dt_cool            !
+    !                                                                       !
+    !  usage:                                                               !
+    !                                                                       !
+    !    call get_dtm12                                                     !
+    !                                                                       !
+    !       inputs:                                                         !
+    !          (xt,xz,dt_cool,zc,z1,z2,                                     !
+    !       outputs:                                                        !
+    !          dtm)                                                         !
+    !                                                                       !
+    !  program history log:                                                 !
+    !                                                                       !
+    !         2015  -- xu li       createad original code                   !
+    !  inputs:                                                              !
+    !     xt      - real, heat content in dtl                            1  !
+    !     xz      - real, dtl thickness                                  1  !
+    !     dt_cool - real, sub-layer cooling amount                       1  !
+    !     zc      - sub-layer cooling thickness                          1  !
+    !     z1      - lower bound of depth of sea temperature              1  !
+    !     z2      - upper bound of depth of sea temperature              1  !
+    !  outputs:                                                             !
+    !     dtm   - mean of dT(z)  (z1 to z2)                              1  !
+    !
+    real (kind=kind_phys), intent(in)  :: xt,xz,dt_cool,zc,z1,z2
+    real (kind=kind_phys), intent(out) :: dtm
+    ! Local variables
+    real (kind=kind_phys) :: dt_warm,dtw,dtc
+
+    !
+    ! get the mean warming in the range of z=z1 to z=z2
+    !
+    dtw = zero
+    if ( xt > zero ) then
+       dt_warm = (xt+xt)/xz      ! Tw(0)
+       if ( z1 < z2) then
+          if ( z2 < xz ) then
+             dtw = dt_warm*(one-(z1+z2)/(xz+xz))
+          elseif ( z1 < xz .and. z2 >= xz ) then
+             dtw = half*(one-z1/xz)*dt_warm*(xz-z1)/(z2-z1)
+          endif
+       elseif ( z1 == z2 ) then
+          if ( z1 < xz ) then
+             dtw = dt_warm*(one-z1/xz)
+          endif
+       endif
     endif
-  endif
-
-!
-! get the mean T departure from Tf in the range of z=z1 to z=z2
-!
-  dtm = dtw - dtc
-
- end subroutine get_dtzm_point
-
-!>\ingroup gfs_nst_main_mod
- subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,z1,z2,nx,ny,nth,dtm)
-!subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,icy,z1,z2,nx,ny,dtm)
-! ===================================================================== !
-!                                                                       !
-!  description:  get dtm = mean of dT(z) (z1 - z2) with NSST dT(z)      !
-!                dT(z) = (1-z/xz)*dt_warm - (1-z/zc)*dt_cool            !
-!                                                                       !
-!  usage:                                                               !
-!                                                                       !
-!    call get_dtzm_2d                                                   !
-!                                                                       !
-!       inputs:                                                         !
-!          (xt,xz,dt_cool,zc,z1,z2,                                     !
-!       outputs:                                                        !
-!          dtm)                                                         !
-!                                                                       !
-!  program history log:                                                 !
-!                                                                       !
-!         2015  -- xu li       createad original code                   !
-!  inputs:                                                              !
-!     xt      - real, heat content in dtl                            1  !
-!     xz      - real, dtl thickness                                  1  !
-!     dt_cool - real, sub-layer cooling amount                       1  !
-!     zc      - sub-layer cooling thickness                          1  !
-!     wet     - logical, flag for wet point (ocean or lake)          1  !
-!     icy     - logical, flag for ice point (ocean or lake)          1  !
-!     nx      - integer, dimension in x-direction (zonal)            1  !
-!     ny      - integer, dimension in y-direction (meridional)       1  !
-!     z1      - lower bound of depth of sea temperature              1  !
-!     z2      - upper bound of depth of sea temperature              1  !
-!     nth     - integer, num of openmp thread                        1  !
-!  outputs:                                                             !
-!     dtm   - mean of dT(z)  (z1 to z2)                              1  !
-!
-  use machine , only : kind_phys
-
-  implicit none
-
-  integer, intent(in) :: nx,ny, nth
-  real (kind=kind_phys), dimension(nx,ny), intent(in)  :: xt,xz,dt_cool,zc
-  logical, dimension(nx,ny), intent(in)  :: wet
-! logical, dimension(nx,ny), intent(in)  :: wet,icy
-  real (kind=kind_phys), intent(in)  :: z1,z2
-  real (kind=kind_phys), dimension(nx,ny), intent(out) :: dtm
-! Local variables
-  integer :: i,j
-  real (kind=kind_phys) :: dt_warm, dtw, dtc, xzi
-
-
-!$omp parallel do num_threads (nth) private(j,i,dtw,dtc,xzi)
-  do j = 1, ny
-    do i= 1, nx
-
-      dtm(i,j) = zero      ! initialize dtm
-
-      if ( wet(i,j) ) then
-!
-!       get the mean warming in the range of z=z1 to z=z2
-!
-        dtw = zero
-        if ( xt(i,j) > zero ) then
-          xzi = one / xz(i,j)
-          dt_warm = (xt(i,j)+xt(i,j)) * xzi      ! Tw(0)
-          if (z1 < z2) then
-            if ( z2 < xz(i,j) ) then
-              dtw = dt_warm * (one-half*(z1+z2)*xzi)
-            elseif (z1 < xz(i,j) .and. z2 >= xz(i,j) ) then
-              dtw = half*(one-z1*xzi)*dt_warm*(xz(i,j)-z1)/(z2-z1)
-            endif
-          elseif (z1 == z2 ) then
-            if (z1 < xz(i,j) ) then
-              dtw = dt_warm * (one-z1*xzi)
-            endif
+    !
+    ! get the mean cooling in the range of z=z1 to z=z2
+    !
+    dtc = zero
+    if ( zc > zero ) then
+       if ( z1 < z2) then
+          if ( z2 < zc ) then
+             dtc = dt_cool*(one-(z1+z2)/(zc+zc))
+          elseif ( z1 < zc .and. z2 >= zc ) then
+             dtc = half*(one-z1/zc)*dt_cool*(zc-z1)/(z2-z1)
           endif
-        endif
-!
-!       get the mean cooling in the range of z=0 to z=zsea
-!
-        dtc = zero
-        if ( zc(i,j) > zero ) then
-          if ( z1 < z2) then
-            if ( z2 < zc(i,j) ) then
-              dtc = dt_cool(i,j) * (one-(z1+z2)/(zc(i,j)+zc(i,j)))
-            elseif ( z1 < zc(i,j) .and. z2 >= zc(i,j) ) then
-              dtc = half*(one-z1/zc(i,j))*dt_cool(i,j)*(zc(i,j)-z1)/(z2-z1)
-            endif
-          elseif ( z1 == z2 ) then
-            if ( z1 < zc(i,j) ) then
-              dtc = dt_cool(i,j) * (one-z1/zc(i,j))
-            endif
+       elseif ( z1 == z2 ) then
+          if ( z1 < zc ) then
+             dtc = dt_cool*(one-z1/zc)
           endif
-        endif
-! get the mean T departure from Tf in the range of z=z1 to z=z2
-        dtm(i,j) = dtw - dtc
-      endif        ! if ( wet(i,j)) then
+       endif
+    endif
+
+    !
+    ! get the mean T departure from Tf in the range of z=z1 to z=z2
+    !
+    dtm = dtw - dtc
+
+  end subroutine get_dtzm_point
+
+  !>\ingroup gfs_nst_main_mod
+  subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,z1,z2,nx,ny,nth,dtm)
+    !subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,icy,z1,z2,nx,ny,dtm)
+    ! ===================================================================== !
+    !                                                                       !
+    !  description:  get dtm = mean of dT(z) (z1 - z2) with NSST dT(z)      !
+    !                dT(z) = (1-z/xz)*dt_warm - (1-z/zc)*dt_cool            !
+    !                                                                       !
+    !  usage:                                                               !
+    !                                                                       !
+    !    call get_dtzm_2d                                                   !
+    !                                                                       !
+    !       inputs:                                                         !
+    !          (xt,xz,dt_cool,zc,z1,z2,                                     !
+    !       outputs:                                                        !
+    !          dtm)                                                         !
+    !                                                                       !
+    !  program history log:                                                 !
+    !                                                                       !
+    !         2015  -- xu li       createad original code                   !
+    !  inputs:                                                              !
+    !     xt      - real, heat content in dtl                            1  !
+    !     xz      - real, dtl thickness                                  1  !
+    !     dt_cool - real, sub-layer cooling amount                       1  !
+    !     zc      - sub-layer cooling thickness                          1  !
+    !     wet     - logical, flag for wet point (ocean or lake)          1  !
+    !     icy     - logical, flag for ice point (ocean or lake)          1  !
+    !     nx      - integer, dimension in x-direction (zonal)            1  !
+    !     ny      - integer, dimension in y-direction (meridional)       1  !
+    !     z1      - lower bound of depth of sea temperature              1  !
+    !     z2      - upper bound of depth of sea temperature              1  !
+    !     nth     - integer, num of openmp thread                        1  !
+    !  outputs:                                                             !
+    !     dtm   - mean of dT(z)  (z1 to z2)                              1  !
+    !
+    integer, intent(in) :: nx,ny, nth
+    real (kind=kind_phys), dimension(nx,ny), intent(in)  :: xt,xz,dt_cool,zc
+    logical, dimension(nx,ny), intent(in)  :: wet
+    ! logical, dimension(nx,ny), intent(in)  :: wet,icy
+    real (kind=kind_phys), intent(in)  :: z1,z2
+    real (kind=kind_phys), dimension(nx,ny), intent(out) :: dtm
+    ! Local variables
+    integer :: i,j
+    real (kind=kind_phys) :: dt_warm, dtw, dtc, xzi
+
+
+    !$omp parallel do num_threads (nth) private(j,i,dtw,dtc,xzi)
+    do j = 1, ny
+       do i= 1, nx
+
+          dtm(i,j) = zero      ! initialize dtm
+
+          if ( wet(i,j) ) then
+             !
+             !       get the mean warming in the range of z=z1 to z=z2
+             !
+             dtw = zero
+             if ( xt(i,j) > zero ) then
+                xzi = one / xz(i,j)
+                dt_warm = (xt(i,j)+xt(i,j)) * xzi      ! Tw(0)
+                if (z1 < z2) then
+                   if ( z2 < xz(i,j) ) then
+                      dtw = dt_warm * (one-half*(z1+z2)*xzi)
+                   elseif (z1 < xz(i,j) .and. z2 >= xz(i,j) ) then
+                      dtw = half*(one-z1*xzi)*dt_warm*(xz(i,j)-z1)/(z2-z1)
+                   endif
+                elseif (z1 == z2 ) then
+                   if (z1 < xz(i,j) ) then
+                      dtw = dt_warm * (one-z1*xzi)
+                   endif
+                endif
+             endif
+             !
+             !       get the mean cooling in the range of z=0 to z=zsea
+             !
+             dtc = zero
+             if ( zc(i,j) > zero ) then
+                if ( z1 < z2) then
+                   if ( z2 < zc(i,j) ) then
+                      dtc = dt_cool(i,j) * (one-(z1+z2)/(zc(i,j)+zc(i,j)))
+                   elseif ( z1 < zc(i,j) .and. z2 >= zc(i,j) ) then
+                      dtc = half*(one-z1/zc(i,j))*dt_cool(i,j)*(zc(i,j)-z1)/(z2-z1)
+                   endif
+                elseif ( z1 == z2 ) then
+                   if ( z1 < zc(i,j) ) then
+                      dtc = dt_cool(i,j) * (one-z1/zc(i,j))
+                   endif
+                endif
+             endif
+             ! get the mean T departure from Tf in the range of z=z1 to z=z2
+             dtm(i,j) = dtw - dtc
+          endif        ! if ( wet(i,j)) then
+       enddo
     enddo
-  enddo
-!
+    !
 
- end subroutine get_dtzm_2d
+  end subroutine get_dtzm_2d
 
 end module module_nst_water_prop

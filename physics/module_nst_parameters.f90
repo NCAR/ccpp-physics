@@ -9,70 +9,83 @@
 !! history:
 !!  20210305: X.Li, reduce z_w_max from 30 m to 20 m
 module module_nst_parameters
+
   use machine, only :  kind_phys
   !
   ! air constants and coefficients from the atmospehric model
-  use physcons, only:       &
-        eps =>  con_eps     &         !< con_rd/con_rv (nd)
-       ,cp_a => con_cp      &         !< spec heat air @p    (j/kg/k)
-       ,epsm1 => con_epsm1  &         !< eps - 1 (nd)
-       ,hvap => con_hvap    &         !< lat heat h2o cond   (j/kg)
-       ,sigma_r => con_sbc  &         !< stefan-boltzmann    (w/m2/k4)
-       ,grav => con_g       &         !< acceleration due to gravity (kg/m/s^2)
-       ,omega => con_omega  &         !< ang vel of earth    (1/s)
-       ,rvrdm1 => con_fvirt &         !< con_rv/con_rd-1. (nd)
-       ,rd => con_rd        &         !< gas constant air (j/kg/k)
-       ,rocp => con_rocp    &         !< r/cp
-       ,pi => con_pi
+  use physcons, only:        &
+        eps     =>  con_eps  &         !< con_rd/con_rv (nd)
+       ,cp_a    => con_cp    &         !< spec heat air @p    (j/kg/k)
+       ,epsm1   => con_epsm1 &         !< eps - 1 (nd)
+       ,hvap    => con_hvap  &         !< lat heat h2o cond   (j/kg)
+       ,sigma_r => con_sbc   &         !< stefan-boltzmann    (w/m2/k4)
+       ,grav    => con_g     &         !< acceleration due to gravity (kg/m/s^2)
+       ,omega   => con_omega &         !< ang vel of earth    (1/s)
+       ,rvrdm1  => con_fvirt &         !< con_rv/con_rd-1. (nd)
+       ,rd      => con_rd    &         !< gas constant air (j/kg/k)
+       ,rocp    => con_rocp  &         !< r/cp
+       ,pi      => con_pi
+
+  implicit none
+
+  private
+
+  public :: sigma_r
+  public :: zero, one, half
+  public :: niter_conv, niter_z_w, niter_sfs
+  public :: z_w_max, z_w_min, z_w_ini, z_c_max, z_c_ini, eps_z_w, eps_conv, eps_sfs
+  public :: ri_c, ri_g, omg_m, omg_sh,  tc_w, visw, cp_w, t0k, ustar_a_min, delz, exp_const
+  public :: rad2deg, const_rot, tw_max, sst_max, solar_time_6am, tau_min, wd_max
+
+  real(kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys, half = 0.5_kind_phys
   !
   ! note: take timestep from here later
-  public
   integer :: &
        niter_conv = 5, &
        niter_z_w  = 5, &
        niter_sfs  = 5
-  real (kind=kind_phys), parameter :: &
-       !
-       ! general constants
-        sec_in_day=86400.       &
-       ,sec_in_hour=3600.       &
-       ,solar_time_6am=21600.0  &
-       ,const_rot=0.000073      &          !< constant to calculate corioli force
-       ,ri_c=0.65               &
-       ,ri_g=0.25               &
-       ,eps_z_w=0.01            &          !< criteria to finish iterations for z_w
-       ,eps_conv=0.01           &          !< criteria to finish iterations for d_conv
-       ,eps_sfs=0.01            &          !< criteria to finish iterations for d_sfs
-       ,z_w_max=20.0            &          !< max warm layer thickness
-       ,z_w_min=0.2             &          !< min warm layer thickness
-       ,z_w_ini=0.2             &          !< initial warm layer thickness in dtl_onset
-       ,z_c_max=0.01            &          !< maximum of sub-layer thickness (m)
-       ,z_c_ini=0.001           &          !< initial value of z_c
-       ,ustar_a_min=0.031       &          !< minimum of friction wind speed (m/s): 0.031 ~ 1m/s at 10 m hight
-       ,tau_min=0.005           &          !< minimum of wind stress for dtm
-       ,exp_const=9.5           &          !< coefficient in exponet profile
-       ,delz=0.1                &          !< vertical increment for integral calculation   (m)
-       ,von=0.4                 &          !< von karman's "constant"
-       ,t0k=273.16              &          !<  celsius to kelvin
-       ,gray=0.97               &
-       ,sst_max=308.16          &
-       ,tw_max=5.0              &
-       ,wd_max=2.0              &
-       ,omg_m =1.0              &          !< trace factor to apply salinity effect
-       ,omg_rot = 1.0           &          !< trace factor to apply rotation effect
-       ,omg_sh = 1.0            &          !< trace factor to apply sensible heat due to rainfall effect
-       ,visw=1.e-6 &                       !< m2/s kinematic viscosity water
-       ,novalue=0 &
-       ,smallnumber=1.e-6 &
-       ,timestep_oc=sec_in_day/8. &        !< time step in the ocean model (3 hours)
-       ,radian=2.*pi/180.       &
-       ,rad2deg=180./pi       &
-       ,cp_w=4000.   &                     !< specific heat water (j/kg/k )
-       ,rho0_w=1022.0 &                    !< density water (kg/m3 ) (or 1024.438)
-       ,vis_w=1.e-6  &                     !< kinematic viscosity water (m2/s )
-       ,tc_w=0.6    &                      !< thermal conductivity water (w/m/k )
-       ,capa_w =3950.0 &                   !< heat capacity of sea water      !
-       ,thref =1.0e-3                      !< reference value of specific volume (m**3/kg)
+  !
+  ! general constants
+  real (kind=kind_phys), parameter ::  &
+        sec_in_day     = 86400.        &
+       ,sec_in_hour    = 3600.         &
+       ,solar_time_6am = 21600.0       &
+       ,const_rot      = 0.000073      &       !< constant to calculate corioli force
+       ,ri_c           = 0.65          &
+       ,ri_g           = 0.25          &
+       ,eps_z_w        = 0.01          &       !< criteria to finish iterations for z_w
+       ,eps_conv       = 0.01          &       !< criteria to finish iterations for d_conv
+       ,eps_sfs        = 0.01          &       !< criteria to finish iterations for d_sfs
+       ,z_w_max        = 20.0          &       !< max warm layer thickness
+       ,z_w_min        = 0.2           &       !< min warm layer thickness
+       ,z_w_ini        = 0.2           &       !< initial warm layer thickness in dtl_onset
+       ,z_c_max        = 0.01          &       !< maximum of sub-layer thickness (m)
+       ,z_c_ini        = 0.001         &       !< initial value of z_c
+       ,ustar_a_min    = 0.031         &       !< minimum of friction wind speed (m/s): 0.031 ~ 1m/s at 10 m hight
+       ,tau_min        = 0.005         &       !< minimum of wind stress for dtm
+       ,exp_const      = 9.5           &       !< coefficient in exponet profile
+       ,delz           = 0.1           &       !< vertical increment for integral calculation   (m)
+       ,von            = 0.4           &       !< von karman's "constant"
+       ,t0k            = 273.16        &       !<  celsius to kelvin
+       ,gray           = 0.97          &
+       ,sst_max        = 308.16        &
+       ,tw_max         = 5.0           &
+       ,wd_max         = 2.0           &
+       ,omg_m          = 1.0           &       !< trace factor to apply salinity effect
+       ,omg_rot        = 1.0           &       !< trace factor to apply rotation effect
+       ,omg_sh         = 1.0           &       !< trace factor to apply sensible heat due to rainfall effect
+       ,visw           = 1.e-6         &       !< m2/s kinematic viscosity water
+       ,novalue        = 0             &
+       ,smallnumber    = 1.e-6         &
+       ,timestep_oc    = sec_in_day/8. &       !< time step in the ocean model (3 hours)
+       ,radian         = 2.*pi/180.    &
+       ,rad2deg        = 180./pi       &
+       ,cp_w           = 4000.         &       !< specific heat water (j/kg/k )
+       ,rho0_w         = 1022.0        &       !< density water (kg/m3 ) (or 1024.438)
+       ,vis_w          = 1.e-6         &       !< kinematic viscosity water (m2/s )
+       ,tc_w           = 0.6           &       !< thermal conductivity water (w/m/k )
+       ,capa_w         = 3950.0        &       !< heat capacity of sea water      !
+       ,thref          = 1.0e-3                !< reference value of specific volume (m**3/kg)
 
 !!$!============================================
 !!$
