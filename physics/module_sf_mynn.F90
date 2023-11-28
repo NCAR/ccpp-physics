@@ -26,7 +26,7 @@ MODULE module_sf_mynn
 !
 !   LAND only:
 !   "iz0tlnd" namelist option is used to select the following momentum options:
-!   (default) =0: Zilitinkevich (1995); Czil now set to 0.085
+!   (default) =0: Zilitinkevich (1995); Czil now set to 0.095
 !             =1: Czil_new (modified according to Chen & Zhang 2008)
 !             =2: Modified Yang et al (2002, 2008) - generalized for all landuse
 !             =3: constant zt = z0/7.4 (original form; Garratt 1992)
@@ -225,7 +225,7 @@ CONTAINS
 !   (water      =1: z0 from Davis et al (2008), zt & zq from COARE3.0/3.5
 !    only)      =2: z0 from Davis et al (2008), zt & zq from Garratt (1992)
 !               =3: z0 from Taylor and Yelland (2004), zt and zq from COARE 3.0/3.5
-!-- iz0tlnd     =0: Zilitinkevich (1995) with Czil=0.085,
+!-- iz0tlnd     =0: Zilitinkevich (1995) with Czil=0.095,
 !   (land       =1: Czil_new (modified according to Chen & Zhang 2008)
 !    only)      =2: Modified Yang et al (2002, 2008) - generalized for all landuse
 !               =3: constant zt = z0/7.4 (Garratt 1992)
@@ -947,7 +947,7 @@ CONTAINS
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_lnd(I) = TSK_lnd(I)*THCON(I)   !(K)
            THVSK_lnd(I) = THSK_lnd(I)*(1.+EP1*qsfc_lnd(I))
-           if(THVSK_lnd(I) < 170. .or. THVSK_lnd(I) > 360.) &
+           if(THVSK_lnd(I) < 160. .or. THVSK_lnd(I) > 390.) &
            print *,'THVSK_lnd(I)',itimestep,i,THVSK_lnd(I),THSK_lnd(i),tsurf_lnd(i),tskin_lnd(i),qsfc_lnd(i)
          endif
          if(icy(i)) then
@@ -956,7 +956,7 @@ CONTAINS
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_ice(I) = TSK_ice(I)*THCON(I)   !(K)
            THVSK_ice(I) = THSK_ice(I)*(1.+EP1*qsfc_ice(I))   !(K)
-           if(THVSK_ice(I) < 170. .or. THVSK_ice(I) > 360.) &
+           if(THVSK_ice(I) < 160. .or. THVSK_ice(I) > 390.) &
            print *,'THVSK_ice(I)',itimestep,i,THVSK_ice(I),THSK_ice(i),tsurf_ice(i),tskin_ice(i),qsfc_ice(i)
          endif
          if(wet(i)) then
@@ -965,7 +965,7 @@ CONTAINS
            ! CONVERT SKIN TEMPERATURES TO POTENTIAL TEMPERATURE:
            THSK_wat(I) = TSK_wat(I)*THCON(I)   !(K)
            THVSK_wat(I) = THSK_wat(I)*(1.+EP1*QVSH(I))   !(K)
-           if(THVSK_wat(I) < 170. .or. THVSK_wat(I) > 360.) &
+           if(THVSK_wat(I) < 160. .or. THVSK_wat(I) > 390.) &
            print *,'THVSK_wat(I)',i,THVSK_wat(I),THSK_wat(i),tsurf_wat(i),tskin_wat(i),qsfc_wat(i)
          endif
         endif ! flag_iter
@@ -1380,6 +1380,8 @@ CONTAINS
        else
           ZNTstoch_lnd(I)  = ZNT_lnd(I)
        endif
+       !add limit to prevent ridiculous values of z0 (more than dz/15)
+       ZNTstoch_lnd(I) = min(ZNTstoch_lnd(I), dz8w1d(i)*0.0666_kind_phys)
 
        !--------------------------------------
        ! LAND
@@ -2604,7 +2606,7 @@ END SUBROUTINE SFCLAY1D_mynn
           IF ( IZ0TLND2 .EQ. 1 ) THEN
              CZIL = 10.0 ** ( -0.40 * ( Z_0 / 0.07 ) )
           ELSE
-             CZIL = 0.085 !0.075 !0.10
+             CZIL = 0.095 !0.075 !0.10
           END IF
 
           Zt = Z_0*EXP(-KARMAN*CZIL*SQRT(restar))

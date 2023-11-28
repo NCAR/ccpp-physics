@@ -993,6 +993,7 @@ MODULE module_mp_thompson
                               rainprod, evapprod,                     &
 #endif
                               refl_10cm, diagflag, do_radar_ref,      &
+                              max_hail_diam_sfc,                      &
                               vt_dbz_wt, first_time_step,             &
                               re_cloud, re_ice, re_snow,              &
                               has_reqc, has_reqi, has_reqs,           &
@@ -1062,6 +1063,8 @@ MODULE module_mp_thompson
                           GRAUPELNC, GRAUPELNCV
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT)::       &
                           refl_10cm
+      REAL, DIMENSION(ims:ime, jms:jme), INTENT(INOUT)::       &
+                          max_hail_diam_sfc
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           vt_dbz_wt
       LOGICAL, INTENT(IN) :: first_time_step
@@ -1416,6 +1419,7 @@ MODULE module_mp_thompson
                qcten1(k) = 0.
             endif initialize_extended_diagnostics
          enddo
+         lsml = lsm(i,j)
          if (is_aerosol_aware .or. merra2_aerosol_aware) then
             do k = kts, kte
                nc1d(k) = nc(i,k,j)
@@ -1423,7 +1427,6 @@ MODULE module_mp_thompson
                nifa1d(k) = nifa(i,k,j)
             enddo
          else
-            lsml = lsm(i,j)
             do k = kts, kte
                if(lsml == 1) then
                  nc1d(k) = Nt_c_l/rho(k)
@@ -1502,6 +1505,14 @@ MODULE module_mp_thompson
               nifa1d(kts) = nifa1d(kts) + nifa2d(i,j)*dt
             end if
 
+            do k = kts, kte
+               nc(i,k,j) = nc1d(k)
+               nwfa(i,k,j) = nwfa1d(k)
+               nifa(i,k,j) = nifa1d(k)
+            enddo
+         endif
+
+         if (merra2_aerosol_aware) then
             do k = kts, kte
                nc(i,k,j) = nc1d(k)
                nwfa(i,k,j) = nwfa1d(k)
@@ -1670,6 +1681,8 @@ MODULE module_mp_thompson
          last_step_only: IF ((ndt>1 .and. it==ndt) .or. &
                              (nsteps>1 .and. istep==nsteps) .or. &
                              (nsteps==1 .and. ndt==1)) THEN
+
+           max_hail_diam_sfc(i,j) = hail_mass_99th_percentile(kts, kte, qg1d, t1d, p1d, qv1d)
 
 !> - Call calc_refl10cm()
 
@@ -2456,17 +2469,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !> - Calculate y-intercept, slope values for graupel.
 !+---+-----------------------------------------------------------------+
-      do k = kte, kts, -1
-         ygra1 = alog10(max(1.E-9, rg(k)))
-         zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
-         N0_exp = 10.**(zans1)
-         N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
-         lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
-         lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
-         ilamg(k) = 1./lamg
-         N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
-      enddo
-
+      call graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
       endif
 
 !+---+-----------------------------------------------------------------+
@@ -3533,17 +3536,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !> - Calculate y-intercept, slope values for graupel.
 !+---+-----------------------------------------------------------------+
-      do k = kte, kts, -1
-         ygra1 = alog10(max(1.E-9, rg(k)))
-         zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
-         N0_exp = 10.**(zans1)
-         N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
-         lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
-         lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
-         ilamg(k) = 1./lamg
-         N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
-      enddo
-
+      call graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
       endif
 
 !+---+-----------------------------------------------------------------+
@@ -3581,7 +3574,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+ !  DROPLET NUCLEATION
            if (clap .gt. eps) then
             if (is_aerosol_aware .or. merra2_aerosol_aware) then
-               xnc = MAX(2., activ_ncloud(temp(k), w1d(k)+rand3, nwfa(k)))
+               xnc = MAX(2., activ_ncloud(temp(k), w1d(k)+rand3, nwfa(k), lsml))
             else
                if(lsml == 1) then
                  xnc = Nt_c_l
@@ -5358,14 +5351,15 @@ MODULE module_mp_thompson
 ! TO_DO ITEM:  For radiation cooling producing fog, in which case the
 !.. updraft velocity could easily be negative, we could use the temp
 !.. and its tendency to diagnose a pretend postive updraft velocity.
-      real function activ_ncloud(Tt, Ww, NCCN)
+      real function activ_ncloud(Tt, Ww, NCCN, lsm_in)
 
       implicit none
       REAL, INTENT(IN):: Tt, Ww, NCCN
+      INTEGER, INTENT(IN):: lsm_in
       REAL:: n_local, w_local
       INTEGER:: i, j, k, l, m, n
       REAL:: A, B, C, D, t, u, x1, x2, y1, y2, nx, wy, fraction
-
+      REAL:: lower_lim_nuc_frac
 
 !     ta_Na = (/10.0, 31.6, 100.0, 316.0, 1000.0, 3160.0, 10000.0/)  ntb_arc
 !     ta_Ww = (/0.01, 0.0316, 0.1, 0.316, 1.0, 3.16, 10.0, 31.6, 100.0/)  ntb_arw
@@ -5412,6 +5406,14 @@ MODULE module_mp_thompson
       l = 3
       m = 2
 
+      if (lsm_in .eq. 1) then       ! land
+         lower_lim_nuc_frac = 0.
+      else if (lsm_in .eq. 0) then  ! water
+         lower_lim_nuc_frac = 0.15
+      else
+         lower_lim_nuc_frac = 0.15  ! catch-all for anything else	
+      endif
+
       A = tnccn_act(i-1,j-1,k,l,m)
       B = tnccn_act(i,j-1,k,l,m)
       C = tnccn_act(i,j,k,l,m)
@@ -5426,7 +5428,8 @@ MODULE module_mp_thompson
 !     u = (w_local-ta_Ww(j-1))/(ta_Ww(j)-ta_Ww(j-1))
 
       fraction = (1.0-t)*(1.0-u)*A + t*(1.0-u)*B + t*u*C + (1.0-t)*u*D
-
+      fraction = MAX(fraction, lower_lim_nuc_frac)
+      
 !     if (NCCN*fraction .gt. 0.75*Nt_c_max) then
 !        write(*,*) ' DEBUG-GT ', n_local, w_local, Tt, i, j, k
 !     endif
@@ -6077,16 +6080,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 
       if (ANY(L_qg .eqv. .true.)) then
-      do k = kte, kts, -1
-         ygra1 = alog10(max(1.E-9, rg(k)))
-         zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
-         N0_exp = 10.**(zans1)
-         N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
-         lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
-         lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
-         ilamg(k) = 1./lamg
-         N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
-      enddo
+      call graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
       endif
 
 !+---+-----------------------------------------------------------------+
@@ -6462,6 +6456,88 @@ MODULE module_mp_thompson
       rql(:) = max(qn(:),R1)
 
   END SUBROUTINE semi_lagrange_sedim
+
+!>\ingroup aathompson
+!! @brief Calculates graupel size distribution parameters
+!!
+!! Calculates graupel intercept and slope parameters for
+!! for a vertical column 
+!!  
+!! @param[in]    kts     integer start index for vertical column
+!! @param[in]    kte     integer end index for vertical column
+!! @param[in]    rand1   real random number for stochastic physics
+!! @param[in]    rg      real array, size(kts:kte) for graupel mass concentration [kg m^3]
+!! @param[out]   ilamg   double array, size(kts:kte) for inverse graupel slope parameter [m]
+!! @param[out]   N0_g    double array, size(kts:kte) for graupel intercept paramter [m-4]
+subroutine graupel_psd_parameters(kts, kte, rand1, rg, ilamg, N0_g)
+
+   implicit none
+
+   integer, intent(in) :: kts, kte
+   real, intent(in) :: rand1
+   real, intent(in) :: rg(:)
+   double precision, intent(out) :: ilamg(:), N0_g(:)
+
+   integer :: k
+   real :: ygra1, zans1
+   double precision :: N0_exp, lam_exp, lamg
+
+   do k = kte, kts, -1
+      ygra1 = alog10(max(1.e-9, rg(k)))
+      zans1 = 3.4 + 2./7.*(ygra1+8.) + rand1
+      N0_exp = 10.**(zans1)
+      N0_exp = max(dble(gonv_min), min(N0_exp, dble(gonv_max)))
+      lam_exp = (N0_exp*am_g*cgg(1)/rg(k))**oge1
+      lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
+      ilamg(k) = 1./lamg
+      N0_g(k) = N0_exp/(cgg(2)*lam_exp) * lamg**cge(2)
+   enddo
+
+end subroutine graupel_psd_parameters
+
+!>\ingroup aathompson
+!! @brief Calculates graupel/hail maximum diameter
+!!
+!! Calculates graupel/hail maximum diameter (currently the 99th percentile of mass distribtuion)
+!! for a vertical column 
+!!  
+!! @param[in]    kts             integer start index for vertical column
+!! @param[in]    kte             integer end index for vertical column
+!! @param[in]    qg              real array, size(kts:kte) for graupel mass mixing ratio [kg kg^-1]
+!! @param[in]    temperature     double array, size(kts:kte) temperature [K]
+!! @param[in]    pressure        double array, size(kts:kte) pressure [Pa]
+!! @param[in]    qv              real array, size(kts:kte) water vapor mixing ratio [kg kg^-1]
+!! @param[out]   max_hail_diam   real maximum hail diameter [m]
+function hail_mass_99th_percentile(kts, kte, qg, temperature, pressure, qv) result(max_hail_diam)
+
+   implicit none
+   
+   integer, intent(in) :: kts, kte
+   real, intent(in) :: qg(:), temperature(:), pressure(:), qv(:)
+   real :: max_hail_diam
+
+   integer :: k
+   real :: rho(kts:kte), rg(kts:kte), max_hail_column(kts:kte)
+   double precision :: ilamg(kts:kte), N0_g(kts:kte)
+   real, parameter :: random_number = 0.
+
+   max_hail_column = 0.
+   rg = 0.
+   do k = kts, kte
+      rho(k) = 0.622*pressure(k)/(R*temperature(k)*(max(1.e-10, qv(k))+0.622))
+      if (qg(k) .gt. R1) then
+         rg(k) = qg(k)*rho(k)
+      else
+         rg(k) = R1
+      endif 
+   enddo 
+
+   call graupel_psd_parameters(kts, kte, random_number, rg, ilamg, N0_g)
+
+   where(rg .gt. 1.e-9) max_hail_column = 10.05 * ilamg
+   max_hail_diam = max_hail_column(kts)
+   
+end function hail_mass_99th_percentile
 
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+

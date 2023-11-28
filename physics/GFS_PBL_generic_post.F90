@@ -10,9 +10,9 @@
 !!
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
-        trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv,                                                              &
+        trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz,                                            &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
-        imp_physics_fer_hires, imp_physics_nssl, nssl_ccn_on, ltaerosol,   mraerosol, nssl_hail_on,                            &
+        imp_physics_fer_hires, imp_physics_nssl, nssl_ccn_on, ltaerosol, mraerosol, nssl_hail_on, nssl_3moment,                &
         cplflx, cplaqm, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,                 &
         shinhong, do_ysu, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                   &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,           &
@@ -30,12 +30,12 @@
       integer, parameter  :: kp = kind_phys
       integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm, kdt
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
-      integer, intent(in) :: ntccn, nthl, nthnc, ntgv, nthv
+      integer, intent(in) :: ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       integer, intent(in) :: imp_physics_nssl
-      logical, intent(in) :: nssl_ccn_on, nssl_hail_on
+      logical, intent(in) :: nssl_ccn_on, nssl_hail_on, nssl_3moment
       logical, intent(in) :: ltaerosol, cplflx, cplaqm, cplchm, lssav, ldiag3d, lsidea, use_med_flux, mraerosol
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
@@ -270,8 +270,16 @@
                dqdt(i,k,ntgv) = dvdftra(i,k,14) 
                dqdt(i,k,nthv) = dvdftra(i,k,15) 
                dqdt(i,k,ntoz) = dvdftra(i,k,16) 
+               n = 16
                IF ( nssl_ccn_on ) THEN
-               dqdt(i,k,ntccn) = dvdftra(i,k,17)
+                 dqdt(i,k,ntccn) = dvdftra(i,k,n+1)
+                 n = n+1
+               ENDIF
+               IF ( nssl_3moment ) THEN
+                 dqdt(i,k,ntrz) = dvdftra(i,k,n+1)
+                 dqdt(i,k,ntgz) = dvdftra(i,k,n+2)
+                 dqdt(i,k,nthz) = dvdftra(i,k,n+3)
+                 n = n+3
                ENDIF
               enddo
             enddo
@@ -292,9 +300,16 @@
                dqdt(i,k,ntsnc) = dvdftra(i,k,10)
                dqdt(i,k,ntgnc) = dvdftra(i,k,11)
                dqdt(i,k,ntgv) = dvdftra(i,k,12) 
-               dqdt(i,k,ntoz) = dvdftra(i,k,13) 
+               dqdt(i,k,ntoz) = dvdftra(i,k,13)
+               n = 13
                IF ( nssl_ccn_on ) THEN
-               dqdt(i,k,ntccn) = dvdftra(i,k,14)
+                 dqdt(i,k,ntccn) = dvdftra(i,k,n+1)
+                 n = n+1
+               ENDIF
+               IF ( nssl_3moment ) THEN
+                 dqdt(i,k,ntrz) = dvdftra(i,k,n+1)
+                 dqdt(i,k,ntgz) = dvdftra(i,k,n+2)
+                 n = n+2
                ENDIF
               enddo
             enddo

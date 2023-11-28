@@ -57,7 +57,7 @@
      &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
      &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,                & 
-     &     sigmain,sigmaout,errmsg,errflg)
+     &     sigmain,sigmaout,betadcu,betamcu,betascu,errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -67,7 +67,8 @@
       integer, intent(in)  :: im, km, itc, ntc, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(:)
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap,               &
-     &   eps, epsm1, fv, grav, hvap, rd, rv, t0c
+     &   eps, epsm1, fv, grav, hvap, rd, rv, t0c, betascu, betadcu,     &
+     &   betamcu
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
      &   prslp(:,:), garea(:), hpbl(:), dot(:,:), phil(:,:),            &
@@ -159,8 +160,9 @@ cc
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
      &                     sigmab(im),qadv(im,km)
-      real(kind=kind_phys) gravinv,dxcrtas,invdelt
-      logical flag_shallow
+      real(kind=kind_phys) gravinv,dxcrtas,invdelt,sigmind,sigmins,
+     &                     sigminm
+      logical flag_shallow,flag_mid
 c  physical parameters
 !     parameter(g=grav,asolfac=0.89)
 !     parameter(g=grav)
@@ -194,7 +196,7 @@ c  physical parameters
       parameter(betaw=.03,dxcrtc0=9.e3)
       parameter(h1=0.33333333)
 !  progsigma
-      parameter(dxcrtas=30.e3)
+      parameter(dxcrtas=30.e3,sigmind=0.01,sigmins=0.03,sigminm=0.01)
 c  local variables and arrays
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
      &                     uo(im,km),      vo(im,km),     qeso(im,km),
@@ -1974,10 +1976,11 @@ c
          enddo
 
          flag_shallow = .true.
+         flag_mid = .false.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
-     &        del,tmfq,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
-     &        qadv,kbcon1,ktcon,cnvflg,
-     &        sigmain,sigmaout,sigmab)
+     &        flag_mid,del,tmfq,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,
+     &        delt,qadv,kbcon1,ktcon,cnvflg,betascu,betamcu,betadcu,
+     &        sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)
       endif
 
 !> - From Han et al.'s (2017) \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity.
