@@ -175,7 +175,7 @@
 !       write(0,*)'in sfc_diff, sfc_z0_type=',sfc_z0_type
 
       
-      check_ssu_ssv=.true.
+      check_ssu_ssv=.false.
       if(check_ssu_ssv) then
         ssumax=0.0
         ssvmax=0.0
@@ -186,7 +186,6 @@
         print*, 'in sfc_diff ssumax,ssvmax =',ssumax,ssvmax
         print*, 'in sfc_diff wind(1),u1(1),v1(1) =',wind(1),u1(1),v1(1)
       endif
-      !if(abs(ssumax-0.02) .lt. 0.01) check_ssu_ssv=.false.
       do i=1,im
       windrel(i)=sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
       enddo

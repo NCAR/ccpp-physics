@@ -269,7 +269,7 @@ cc
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-      check_ssu_ssv=.true.
+      check_ssu_ssv=.false.
       if(check_ssu_ssv) then
         ssumax=0.0
         ssvmax=0.0
@@ -280,7 +280,6 @@ cc
         print*, 'in sfc_nst ssumax,ssvmax =',ssumax,ssvmax
         print*, 'in sfc_nst wind(1),u1(1),v1(1) =',wind(1),u1(1),v1(1)
       endif
-      !if(abs(ssumax-0.02) .lt. 0.01) check_ssu_ssv=.false.
 
       if (nstf_name1 == 0) return ! No NSST model used
 

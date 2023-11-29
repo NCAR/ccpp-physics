@@ -77,7 +77,7 @@
       errmsg = ''
       errflg = 0
       
-      check_ssu_ssv=.true.
+      check_ssu_ssv=.false.
       if(check_ssu_ssv) then
         ssumax=0.0
         ssvmax=0.0
@@ -87,7 +87,6 @@
         enddo
         print*, 'in sfc_diag ssumax,ssvmax =',ssumax,ssvmax
       endif
-      !if(abs(ssumax-0.02).lt.0.01) check_ssu_ssv=.false.
 
       !--
       testptlat = 35.3_kind_phys 

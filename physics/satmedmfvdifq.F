@@ -280,13 +280,11 @@
       parameter(cs0=0.4,csmf=0.5)
       parameter(rchck=1.5,ndt=20)
 
-!BL
       integer   ii
       real(kind=kind_phys) :: ssumax, ssvmax
       logical :: check_ssu_ssv
 
-      write(*,*)'in_satmedmfvdifq,u1 v1',u1(1,1),v1(1,1)
-      check_ssu_ssv=.true.
+      check_ssu_ssv=.false.
       if(check_ssu_ssv) then
         ssumax=0.0
         ssvmax=0.0
@@ -294,10 +292,9 @@
          if(ssu(ii) .gt. ssumax) ssumax=ssu(ii)
          if(ssv(ii) .gt. ssvmax) ssvmax=ssv(ii)
         enddo
+        write(*,*)'in_satmedmfvdifq,u1 v1',u1(1,1),v1(1,1)
         print*, 'in satmedmfvdifq.F ssumax,ssvmax =',ssumax,ssvmax
       endif
-      !if(abs(ssumax-0.02) .lt. 0.01) check_ssu_ssv=.false.
-!BL
 
       if (tc_pbl == 0) then
         ck0 = 0.4

@@ -255,18 +255,16 @@
       errmsg = ''
       errflg = 0
 !
-      check_ssu_ssv=.true.
+      check_ssu_ssv=.false.
       if(check_ssu_ssv) then
         ssumax=0.0
         ssvmax=0.0
         do ii=1,im
         if(ssu(ii) .gt. ssumax) ssumax=ssu(ii)
         if(ssv(ii) .gt. ssvmax) ssvmax=ssv(ii)
-        !windrel(ii) = sqrt((u1(ii)-ssu(ii))**2+(v1(ii)-ssv(ii))**2)
         enddo
         print*, 'in satmedmfvdif.F ssumax,ssvmax =',ssumax,ssvmax
       endif
-      !if(abs(ssumax-0.02) .lt. 0.01) check_ssu_ssv=.false.
 
 !> -# Compute preliminary variables from input arguments
       dt2  = delt
