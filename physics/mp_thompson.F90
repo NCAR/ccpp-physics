@@ -409,7 +409,7 @@ module mp_thompson
          integer,                   intent(in) :: n_var_spp
          real(kind_phys),           intent(in) :: spp_wts_mp(:,:)
          real(kind_phys),           intent(in) :: spp_prt_list(:)
-         character(len=3),          intent(in) :: spp_var_list(:)
+         character(len=10),          intent(in) :: spp_var_list(:)
          real(kind_phys),           intent(in) :: spp_stddev_cutoff(:)
 
          logical, intent (in) :: cplchm
