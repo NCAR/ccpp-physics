@@ -1,0 +1,60 @@
+/**
+\page CLM_LAKE_model CLM Lake Model 
+\section des_clmlake  Description
+
+The Community Land Model (CLM) lake model is a multi-level one-dimensional lake model that has been implemented within the operational 3-km HRRR and
+13-km RAP for small lakes (Benjamin et al. (2022) \cite gmd-15-6659-2022). This implementation is from the Community Land Model version 4.5 (Oleson et al. (2013) \cite Oleson2013). 
+Subin et al. (2012) \cite Subin_2012 describe the  1-d CLM lake model as applied within the Community Earth System
+Model (CESM) as a component of the overall CESM CLM (Lawrence et al. (2019) \cite Lawrence_2019). Gu et al. (2015) \cite Gu2015 
+describe the introduction of the CLM lake model into the WRF model and inital experiments using its 1-d solution for both
+lakes Superior (average depth of 147 m) and Erie (average depth of 19 m).
+
+The atmospheric inputs into the model are temperature, water vapor, horizontal wind components from the lowest atmospheric level
+and shortwave and longwave radiative fluxes. The CLM lake model then provides latent heat and sensible heat fluxes back to the 
+atmosphere. It also computes 2-m temperature/moisture, skin temperature, lake temperature, ice fraction, ice thickness, snow water
+equivalent and snow depth. The CLM lake model divides the vertical lake profile into 10 layers driven by wind-driven eddies. The
+thickness of the top layer is fixed to 10-cm and the rest of the lake depth is divided evenly into the other 9 layers. Energy
+transfer (heat and kinetic energy) occurs between lake layers via eddy and molecular diffusion as a function of the vertical 
+temperature gradient. The CLM lake model also uses a 10-layer soil model beneath the lake, a multi-layer ice formation model and
+up to 5-layer snow-on-ice model. Multiple layers in lake model have the potential to better represent vertical mixing processes 
+in the lake.
+
+Testing of the CLM lake model within RAP/HRRR applications showed computational efficiency of the model with no change of even
+0.1% in run time. The lake/snow variables have to be continuously transfered within the CLM lake model from one forecast to another,
+constrained by the atmospheric data assimilation. The lake-cycling initialization in RAP/HRRR has been effective overall, owing to 
+accurate hourly estimates of near-surface temperature, moisture and winds, and shortwave and longwave estimates provided to the 1-d CLM
+lake model every time step (Benjamin et al. (2022) \cite gmd-15-6659-2022). Cycling techniques showed improvements over initializing
+lake temperatures from the SST analysis, which is problematic for small water bodies. The improvements are particularly eminent during transition 
+periods between cold and warm seasons, and in the regions with anomalous weather conditions. The CLM lake model has the potential 
+to improve surface prediction in the vicinity of small lakes.
+
+The CLM lake model requires bathymetry for the lake points in the model domain. Grid points are assigned as lake points when the 
+fraction of lake coverage in the grid cell exceeds 50% and when this point is disconnected from oceans. The lake water mask is 
+therefore binary, set to either 1 or 0. This binary approach for models with higher horizontal resolution --- for example, 3-km resolution in 
+in the UFS SRW App --- is capable of capturing the effect of lakes on regional heat and moisture fluxes.
+
+Lake depths for the RRFS lake configuration (Fig.1) are assigned from a global dataset provided by Kourzeneva et al.(2012) \cite Kourzeneva_2012,
+this dataset is referred to as GLOBv3 bathymetry in the UFS_UTL.
+
+@image html https://user-images.githubusercontent.com/12705538/250180794-76af93a2-a7ba-4e9a-9478-5657198862b8.png "Figure 1: Lake depths for lakes in the 3-km RRFS domain." width=600
+
+To cold-start the CLM lake model in regional configurations of the UFS:
+
+- Use the CLM option in the input.nml
+\n  - lkm = 1
+\n  - iopt_lake = 2
+- Lake temperature is initialized from interpolation between SST at the surface and \f$-4^oC\f$ at 50-m depth
+\n  - A special case is for the Great Salt Lake, the temperature is limited with +/- 3 K from the bi-weekly climatology
+- Temperature for soil under the lake is initialized from bottom lake temperature at the top to the substrate soil temperature at the bottom of soil layer
+- Lake ice at the top level is initialized from the GFS ice concentration
+
+The differences of surface variables from the experimental RRFS 6-h forecast with/without CLM lake model are shown in Figure 2 for 2-m temperature and in Figure 3 for 2-m dewpoint.
+@image html https://user-images.githubusercontent.com/12705538/250180790-63159300-33f6-4b34-9e9c-b65885213c30.png "Figure 2: Differences of 2-m temperature between the RRFS coupled to the CLM model and the RRFS without CLM." width=600
+@image html https://user-images.githubusercontent.com/12705538/250180787-8fc9a820-5f80-4f06-b50a-88b2d20ebc53.png "Figure 3: Differences of 2-m dew point between the RRFS coupled to the CLM model and the RRFS without CLM." width=600
+ 
+
+
+\section intra_clmlake Intraphysics Communication
+- \ref arg_table_clm_lake_run
+
+*/

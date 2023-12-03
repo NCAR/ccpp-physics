@@ -991,10 +991,12 @@ CONTAINS
     if(mosaic_lu == 1) then
       ! greenness factor: between 0 for min greenness and 1 for max greenness.
       factor = max(zero,min(one,(vegfra(i,j)-shdmin(i,j))/max(one,(shdmax(i,j)-shdmin(i,j)))))
+           if (debug_print ) then
              if (abs(xlat-testptlat).lt.0.1 .and. &
                  abs(xlon-testptlon).lt.0.1)then
                  print *,'  lat,lon=',xlat,xlon,' factor=',factor
              endif
+           endif
 
       if((ivgtyp(i,j) == natural .or. ivgtyp(i,j) == crop) .and. factor > 0.75) then
       ! cropland or grassland, apply irrigation during the growing seaspon when fraction 
