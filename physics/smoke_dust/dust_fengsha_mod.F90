@@ -22,7 +22,7 @@ contains
 
   subroutine gocart_dust_fengsha_driver(dt,              &
        chem,rho_phy,smois,p8w,ssm,                       &
-       isltyp,vegfra,snowh,xland,area,g,emis_dust,       &
+       isltyp,snowh,xland,area,g,emis_dust, &
        ust,znt,clay,sand,rdrag,uthr,                     &
        num_emis_dust,num_chem,num_soil_layers,           &
        ids,ide, jds,jde, kds,kde,                        &
@@ -37,7 +37,6 @@ contains
 
     ! 2d input variables
     REAL(kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: ssm     ! Sediment supply map
-    REAL(kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: vegfra  ! vegetative fraction (-)
     REAL(kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: snowh   ! snow height (m)
     REAL(kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: xland   ! dominant land use type
     REAL(kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: area    ! area of grid cell
@@ -141,9 +140,9 @@ contains
              endif
 
              ! limit where there is lots of vegetation
-             if (vegfra(i,j) .gt. .17) then
-                ilwi = 0
-             endif
+             !if (sum(vegfra(i,:,j)) .gt. .17) then
+             !   ilwi = 0
+             !endif
 
              ! limit where there is snow on the ground
              if (snowh(i,j) .gt. 0) then

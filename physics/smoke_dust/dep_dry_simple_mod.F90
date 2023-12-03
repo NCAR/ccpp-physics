@@ -1,7 +1,7 @@
-!>\file dep_dry_mod.F90
+!>\file dep_dry_simple_mod.F90
 !! This file is for the dry depostion driver.
 
-module dep_dry_mod
+module dep_dry_simple_mod
 
   use machine ,        only : kind_phys
 
@@ -9,11 +9,11 @@ module dep_dry_mod
 
   private
 
-  public :: dry_dep_driver
+  public :: dry_dep_driver_simple
 
 contains
 
-    subroutine dry_dep_driver(rmol,ust,ndvel,ddvel,rel_hum,               &
+    subroutine dry_dep_driver_simple(rmol,ust,ndvel,ddvel,                &
                ids,ide, jds,jde, kds,kde,                                 &
                ims,ime, jms,jme, kms,kme,                                 &
                its,ite, jts,jte, kts,kte                                  )
@@ -26,8 +26,8 @@ contains
                                   its,ite, jts,jte, kts,kte
       REAL(kind_phys),  DIMENSION( ims:ime , jms:jme )        ,           &
           INTENT(INOUT) :: ust, rmol
-      REAL(kind_phys),  DIMENSION( ims:ime , kms:kme , jms:jme ),         &
-               INTENT(IN   ) :: rel_hum
+!      REAL(kind_phys),  DIMENSION( ims:ime , kms:kme , jms:jme ),         &
+!               INTENT(IN   ) :: rel_hum
 
       REAL(kind_phys), PARAMETER :: kpart=500.
       REAL(kind_phys) :: dvpart
@@ -56,14 +56,14 @@ contains
                dvpart = dvpart*(1.+(-300.*rmol(i,j))**0.66667)
             ENDIF
 
-            IF (rel_hum(i,1,j)>0.8) THEN    ! HIGH RELATIVE HUMIDITY CORRECTION
-               dvpart = dvpart*(1.+0.37*exp((rel_hum(i,1,j)-0.8)/0.2))
-            END IF
+!            IF (rel_hum(i,1,j)>0.8) THEN    ! HIGH RELATIVE HUMIDITY CORRECTION
+!               dvpart = dvpart*(1.+0.37*exp((rel_hum(i,1,j)-0.8)/0.2))
+!            END IF
             ddvel(i,j,nv) = MIN(0.50,dvpart)        ! m/s
           enddo
          enddo
         enddo
 
-end subroutine dry_dep_driver
+end subroutine dry_dep_driver_simple
 
-end module dep_dry_mod
+end module dep_dry_simple_mod

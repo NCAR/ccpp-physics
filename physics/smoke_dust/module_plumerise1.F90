@@ -34,11 +34,12 @@
 !                              'aggr'   /) ! grassland
 
 CONTAINS
-subroutine ebu_driver (      flam_frac,ebb_smoke,ebu,           &
+subroutine ebu_driver (      flam_frac,ebu_in,ebu,coef_bb_dc,        &
                              t_phy,q_vap,                            &   ! RAR: moist is replaced with q_vap
                              rho_phy,vvel,u_phy,v_phy,p_phy,         &
                              z_at_w,z,g,con_cp,con_rd,               &   ! scale_fire_emiss is part of config_flags
-                             plume_frp, k_min, k_max,                &   ! RAR:
+                             frp_hr, k_min, k_max,                   &   ! RAR:
+                             wind_eff_opt,                           &
                              ids,ide, jds,jde, kds,kde,              &
                              ims,ime, jms,jme, kms,kme,              &
                              its,ite, jts,jte, kts,kte, errmsg, errflg)
@@ -51,7 +52,7 @@ subroutine ebu_driver (      flam_frac,ebb_smoke,ebu,           &
 
    REAL(kind_phys), PARAMETER :: frp_threshold= 1.e+7   ! Minimum FRP (Watts) to have plume rise 
     
-   real(kind=kind_phys), DIMENSION( ims:ime, jms:jme, 2 ), INTENT(IN ) :: plume_frp         ! RAR: FRP etc. array
+   real(kind=kind_phys), DIMENSION( ims:ime, jms:jme), INTENT(IN ) :: frp_hr         ! RAR: FRP array
 
 !   TYPE(grid_config_rec_type),  INTENT(IN )    :: config_flags
    character(*), intent(inout) :: errmsg
@@ -59,13 +60,15 @@ subroutine ebu_driver (      flam_frac,ebb_smoke,ebu,           &
    INTEGER,      INTENT(IN   ) :: ids,ide, jds,jde, kds,kde,               &
                                   ims,ime, jms,jme, kms,kme,               &
                                   its,ite, jts,jte, kts,kte
+   INTEGER,      INTENT(IN   ) :: wind_eff_opt
 !   real(kind=kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme, num_moist ),                &
 !         INTENT(IN ) ::                                   moist
    real(kind=kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(INOUT ) ::  ebu
-
+   real(kind_phys), DIMENSION(ims:ime,jms:jme), INTENT(IN)    ::  coef_bb_dc ! RAR:
    real(kind=kind_phys), INTENT(IN )  :: g, con_cp, con_rd
-   real(kind=kind_phys), DIMENSION( ims:ime, jms:jme ), INTENT(IN )  :: ebb_smoke
+   real(kind=kind_phys), DIMENSION( ims:ime, jms:jme ), INTENT(IN )  :: ebu_in
    real(kind=kind_phys), DIMENSION( ims:ime, jms:jme ), INTENT(OUT ) :: flam_frac
+   real(kind=kind_phys), DIMENSION( ims:ime, jms:jme ) :: frp_hr_coef_bb_dc
 
 !   real(kind=kind_phys), DIMENSION( ims:ime, 1, jms:jme ),                 &
 !         INTENT(IN ) ::                                   ebu_in
@@ -130,12 +133,19 @@ subroutine ebu_driver (      flam_frac,ebb_smoke,ebu,           &
           enddo
        !enddo
 
+! Apply the diurnal cycle coefficient
+        do j=jts,jte
+        do i=its,ite
+           frp_hr_coef_bb_dc(i,j) = frp_hr(i,j)*coef_bb_dc(i,j)
+        enddo
+        enddo
+
 ! For now the flammable fraction is constant, based on the namelist. The next
 ! step to use LU index and meteorology to parameterize it
        do j=jts,jte
         do i=its,ite
            flam_frac(i,j)= 0.
-           if (plume_frp(i,j,1) > frp_threshold) then 
+           if (frp_hr_coef_bb_dc(i,j) > frp_threshold) then 
               flam_frac(i,j)= 0.9
            end if
         enddo
@@ -171,7 +181,7 @@ check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumeri
 
              IF (dbg_opt) then
                WRITE(*,*) 'module_plumerise1: i,j ',i,j
-               WRITE(*,*) 'module_plumerise1: plume_frp(i,j,:) ',plume_frp(i,j,:)
+               WRITE(*,*) 'module_plumerise1: frp_hr(i,j) ',frp_hr_coef_bb_dc(i,j)
                WRITE(*,*) 'module_plumerise1: ebu(i,kts,j) ',ebu(i,kts,j)
                WRITE(*,*) 'module_plumerise1: u_in(10),v_in(10),w_in(kte),qv_in(10),pi_in(10) ',u_in(10),v_in(10),w_in(kte),qv_in(10),pi_in(10)
                WRITE(*,*) 'module_plumerise1: zmid(kte),z_lev(kte),rho_phyin(kte),theta_in(kte) ',zmid(kte),z_lev(kte),rho_phyin(kte),theta_in(kte)
@@ -179,12 +189,13 @@ check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumeri
              END IF
 
 ! RAR: the plume rise calculation step:
-               CALL plumerise(kte,1,1,1,1,1,1,         &
+               CALL plumerise(kte,1,1,1,1,1,1,                      &
                               !firesize,mean_fct,                    & 
                               !num_ebu, eburn_in, eburn_out,         &
                               u_in, v_in, w_in, theta_in ,pi_in,    &
                               rho_phyin, qv_in, zmid, z_lev,        &
-                              plume_frp(i,j,1), k_min(i,j),         & 
+                              wind_eff_opt,                         &
+                              frp_hr_coef_bb_dc(i,j), k_min(i,j),              & 
                               k_max(i,j), dbg_opt, g, con_cp,       &
                               con_rd, cpor, errmsg, errflg )
                              !k_max(i,j), config_flags%debug_chem )
@@ -195,9 +206,9 @@ check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumeri
                dz_plume= z_at_w(i,kp2,j) - z_at_w(i,kp1,j)
 
                   do k=kp1,kp2-1     
-                     ebu(i,k,j)= flam_frac(i,j)* ebb_smoke(i,j)* (z_at_w(i,k+1,j)-z_at_w(i,k,j))/dz_plume
+                     ebu(i,k,j)= flam_frac(i,j)* ebu_in(i,j)* (z_at_w(i,k+1,j)-z_at_w(i,k,j))/dz_plume
                   enddo
-                  ebu(i,kts,j)=   (1.-flam_frac(i,j))* ebb_smoke(i,j)
+                  ebu(i,kts,j)=   (1.-flam_frac(i,j))* ebu_in(i,j)
 
                IF ( dbg_opt ) then
                    WRITE(*,*) 'module_plumerise1: i,j ',i,j

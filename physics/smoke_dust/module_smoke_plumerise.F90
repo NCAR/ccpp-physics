@@ -14,9 +14,9 @@
 module module_smoke_plumerise
 
   use machine , only : kind_phys
-  use plume_data_mod,  only : num_frp_plume, p_frp_hr, p_frp_std,                  &
+  use plume_data_mod,  only : num_frp_plume, p_frp_hr, p_frp_std
                               !tropical_forest, boreal_forest, savannah, grassland,   &
-                              wind_eff
+                             ! wind_eff
   USE module_zero_plumegen_coms
 
   !real(kind=kind_phys),parameter :: rgas=r_d
@@ -24,16 +24,18 @@ module module_smoke_plumerise
 CONTAINS
 
 ! RAR:
-    subroutine plumerise(m1,m2,m3,ia,iz,ja,jz,             &
+    subroutine plumerise(m1,m2,m3,ia,iz,ja,jz,                       &
 !                         firesize,mean_fct,                         &
                         ! nspecies,eburn_in,eburn_out,               &
                          up,vp,wp,theta,pp,dn0,rv,zt_rams,zm_rams,  &
+                         wind_eff_opt,                              &
                          frp_inst,k1,k2, dbg_opt, g, cp, rgas,      &
                          cpor,  errmsg, errflg   )
 
   implicit none
 
   LOGICAL, INTENT (IN) :: dbg_opt
+  INTEGER, INTENT (IN) :: wind_eff_opt
 
 !  INTEGER, PARAMETER ::  ihr_frp=1, istd_frp=2!, imean_fsize=3, istd_fsize=4       ! RAR:
 
@@ -42,6 +44,7 @@ CONTAINS
   real(kind=kind_phys) :: g, cp, rgas, cpor
 
   integer :: ng,m1,m2,m3,ia,iz,ja,jz,ibcon,mynum,i,j,k,imm,ixx,ispc !,nspecies
+
 
   INTEGER, INTENT (OUT) :: k1,k2
   character(*), intent(inout) :: errmsg
@@ -68,9 +71,12 @@ CONTAINS
 !  integer, parameter :: grassland       = 4
 !  real(kind=kind_phys), dimension(nveg_agreg) :: firesize,mean_fct
 
-  INTEGER, PARAMETER :: wind_eff = 1
+  INTEGER ::  wind_eff
 
   type(plumegen_coms), pointer :: coms
+
+! Set wind effect from namelist
+  wind_eff = wind_eff_opt
 
 !  integer:: iloop
   !REAL(kind=kind_phys), INTENT (IN)   :: convert_smold_to_flam
