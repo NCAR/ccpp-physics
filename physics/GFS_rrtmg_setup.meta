@@ -2,7 +2,7 @@
   name = GFS_rrtmg_setup
   type = scheme
   dependencies = iounitdef.f,module_bfmicrophysics.f,radcons.f90,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f
-  dependencies = module_mp_thompson.F90,radiation_gases.f,radlw_main.F90,radlw_param.f,radsw_main.F90,radsw_param.f,machine.F
+  dependencies = module_mp_thompson.F90,radiation_gases.f,radlw_main.F90,radlw_param.f,radsw_main.F90,radsw_param.f,machine.F,module_ozphys.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -509,6 +509,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = inout
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
