@@ -7,6 +7,13 @@
 [ccpp-arg-table]
   name = clm_lake_run
   type = scheme
+[flag_restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -282,6 +289,14 @@
   type = real
   kind = kind_phys
   intent = in
+[input_lakedepth]
+  standard_name = lake_depth_before_correction
+  long_name = lake depth_before_correction
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
@@ -709,76 +724,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[z_lake3d]
-  standard_name = depth_of_lake_interface_layers
-  long_name = depth of lake interface layers
-  units = fraction
-  dimensions = (horizontal_loop_extent, lake_vertical_dimension_for_clm_lake_model)
-  type = real
-  kind = kind_phys
-  intent = inout
-[dz_lake3d]
-  standard_name = thickness_of_lake_layers
-  long_name = thickness of lake layers
-  units = fraction
-  dimensions = (horizontal_loop_extent, lake_vertical_dimension_for_clm_lake_model)
-  type = real
-  kind = kind_phys
-  intent = inout
-[watsat3d]
-  standard_name = saturated_volumetric_soil_water_in_lake_model
-  long_name = saturated volumetric soil water in lake model
-  units = m
-  dimensions = (horizontal_loop_extent, lake_vertical_dimension_for_clm_lake_model)
-  type = real
-  kind = kind_phys
-  intent = inout
-[csol3d]
-  standard_name = soil_heat_capacity_in_lake_model
-  long_name = soil heat capacity in lake model
-  units = m
-  dimensions = (horizontal_loop_extent, lake_vertical_dimension_for_clm_lake_model)
-  type = real
-  kind = kind_phys
-  intent = inout
-[sand3d]
-  standard_name = clm_lake_percent_sand
-  long_name = percent sand in clm lake model
-  units = percent
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension_for_clm_lake_model)
-  type = integer
-  intent = inout
-[clay3d]
-  standard_name = clm_lake_percent_clay
-  long_name = percent clay in clm lake model
-  units = percent
-  dimensions = (horizontal_loop_extent,soil_vertical_dimension_for_clm_lake_model)
-  type = integer
-  intent = inout
-[tkmg3d]
-  standard_name = soil_mineral_thermal_conductivity_in_lake_model
-  long_name = soil mineral thermal conductivity in lake model
-  units = m
-  dimensions = (horizontal_loop_extent, lake_vertical_dimension_for_clm_lake_model)
-  type = real
-  kind = kind_phys
-  intent = inout
-[tkdry3d]
-  standard_name = dry_soil_thermal_conductivity_in_lake_model
-  long_name = dry soil thermal conductivity in lake model
-  units = m
-  dimensions = (horizontal_loop_extent, lake_vertical_dimension_for_clm_lake_model)
-  type = real
-  kind = kind_phys
-  intent = inout
-[tksatu3d]
-  standard_name = saturated_soil_thermal_conductivity_in_lake_model
-  long_name = saturated soil thermal conductivity in lake model
-  units = m
-  dimensions = (horizontal_loop_extent, lake_vertical_dimension_for_clm_lake_model)
-  type = real
-  kind = kind_phys
-  intent = inout
 [clm_lakedepth]
   standard_name = clm_lake_depth
   long_name = clm internal copy of lake depth with 10.0 replaced by default lake depth
@@ -934,6 +879,13 @@
   dimensions = ()
   type = logical
   active = (control_for_lake_model_selection == 3)
+  intent = in
+[clm_debug_print]
+  standard_name = flag_for_printing_in_clm_lake_model
+  long_name = flag for printing in clm lake model
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [errmsg]
   standard_name = ccpp_error_message
