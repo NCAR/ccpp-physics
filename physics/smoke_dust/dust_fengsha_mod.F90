@@ -61,6 +61,8 @@ contains
     REAL(kind_phys), INTENT(IN) :: dt ! time step
     REAL(kind_phys), INTENT(IN) :: g  ! gravity (m/s**2)
 
+
+
     ! Local variables
     integer :: nmx,i,j,k,imx,jmx,lmx
     integer :: ilwi
@@ -75,6 +77,7 @@ contains
     real(kind_phys), DIMENSION (num_emis_dust) :: distribution
     real(kind_phys), dimension (3) :: massfrac
     real(kind_phys) :: erodtot
+    real(kind_phys) :: moist_volumetric
 
     ! conversion values
     conver=1.e-9
@@ -174,10 +177,13 @@ contains
                 endif
              endif
 
+             ! soil moisture correction factor 
+             moist_volumetric = dust_moist_correction * smois(i,2,j) 
+
              ! Call dust emission routine.
              
              call source_dust(imx,jmx, lmx, nmx, dt, tc, ustar, massfrac, & 
-                  erodtot, dxy, smois(i,1,j), airden, airmas, bems, g, dust_alpha, dust_gamma, &
+                  erodtot, dxy, moist_volumetric, airden, airmas, bems, g, dust_alpha, dust_gamma, &
                   R, uthr(i,j))
 
              ! convert back to concentration
@@ -457,10 +463,16 @@ contains
 
    !  Now compute size-dependent total emission flux
    !  ----------------------------------------------
-   ! Fecan moisture correction
-   ! -------------------------
-   h = moistureCorrectionFecan(slc, sand, clay, rhop)
-   
+
+   if (dust_moist_opt .eq. 1) then
+
+      ! Fecan moisture correction
+      ! -------------------------
+      h = moistureCorrectionFecan(slc, sand, clay)
+   else
+      ! shao soil moisture correction 
+      h = moistureCorrectionShao(slc)
+   end if
    ! Adjust threshold
    ! ----------------
    u_thresh = uthrs * h
@@ -478,7 +490,7 @@ contains
 
  end subroutine DustEmissionFENGSHA
 !-----------------------------------------------------------------
-  real function soilMoistureConvertVol2Grav(vsoil, sandfrac, rhop)
+  real function soilMoistureConvertVol2Grav(vsoil, sandfrac)
 
 ! !USES:
     implicit NONE
@@ -486,7 +498,6 @@ contains
 ! !INPUT PARAMETERS:
     REAL(kind_phys), intent(in) :: vsoil       ! volumetric soil moisture fraction [1]
     REAL(kind_phys), intent(in) :: sandfrac    ! fractional sand content [1]
-    REAL(kind_phys), intent(in) :: rhop        ! dry dust density [kg m-3]
 
 ! !DESCRIPTION: Convert soil moisture fraction from volumetric to gravimetric.
 !
@@ -500,20 +511,21 @@ contains
 
 !  !CONSTANTS:
     REAL(kind_phys), parameter :: rhow = 1000.    ! density of water [kg m-3]
-
+    REAL(kind_phys), parameter :: rhop = 1700.    ! density of dry soil 
 !EOP
 !-------------------------------------------------------------------------
 !  Begin...
 
 !  Saturated volumetric water content (sand-dependent) ! [m3 m-3]
-    vsat = 0.489 - 0.00126 * ( 100. * sandfrac )
+    vsat = 0.489 - 0.126 * sandfrac 
+    
 
 !  Gravimetric soil content
-    soilMoistureConvertVol2Grav = vsoil * rhow / (rhop * (1. - vsat))
+    soilMoistureConvertVol2Grav = 100.0 * (vsoil * rhow / rhop / ( 1. - vsat))
 
   end function soilMoistureConvertVol2Grav
 !----------------------------------------------------------------
-  real function moistureCorrectionFecan(slc, sand, clay, rhop)
+  real function moistureCorrectionFecan(slc, sand, clay)
 
 ! !USES:
     implicit NONE
@@ -522,7 +534,6 @@ contains
     REAL(kind_phys), intent(in) :: slc     ! liquid water content of top soil layer, volumetric fraction [1]
     REAL(kind_phys), intent(in) :: sand    ! fractional sand content [1]
     REAL(kind_phys), intent(in) :: clay    ! fractional clay content [1]
-    REAL(kind_phys), intent(in) :: rhop    ! dry dust density [kg m-3]
 
 ! !DESCRIPTION: Compute correction factor to account for Fecal soil moisture
 !
@@ -540,15 +551,46 @@ contains
 !  Begin...
 
 !  Convert soil moisture from volumetric to gravimetric
-    grvsoilm = soilMoistureConvertVol2Grav(slc, sand, 2650.)
+    grvsoilm = soilMoistureConvertVol2Grav(slc, sand)
 
 !  Compute fecan dry limit
-    drylimit = clay * (14.0 * clay + 17.0)
+    drylimit = dust_drylimit_factor * clay * (14.0 * clay + 17.0)
 
 !  Compute soil moisture correction
     moistureCorrectionFecan = sqrt(1.0 + 1.21 * max(0., grvsoilm - drylimit)**0.68)
 
   end function moistureCorrectionFecan
+!----------------------------------------------------------------
+  real function moistureCorrectionShao(slc)
+
+! !USES:
+    implicit NONE
+
+! !INPUT PARAMETERS:
+    REAL(kind_phys), intent(in) :: slc     ! liquid water content of top soil layer, volumetric fraction [1]
+
+! !DESCRIPTION: Compute correction factor to account for Fecal soil moisture
+!
+! !REVISION HISTORY:
+!
+!  02Apr2020, B.Baker/NOAA    - Original implementation
+!  01Apr2020, R.Montuoro/NOAA - Adapted for GOCART process library
+
+!  !Local Variables
+    real :: grvsoilm
+    real :: drylimit
+
+!EOP
+!---------------------------------------------------------------
+!  Begin...
+
+    if (slc < 0.03) then
+       moistureCorrectionShao = exp(22.7 * slc) 
+    else
+       moistureCorrectionShao = exp(95.3 * slc - 2.029)
+    end if
+
+  end function moistureCorrectionShao
 !---------------------------------------------------------------
   real function DustFluxV2HRatioMB95(clay, kvhmax)
 
