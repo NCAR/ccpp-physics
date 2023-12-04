@@ -12,7 +12,8 @@
                                      num_moist, num_chem, num_emis_seas, num_emis_dust, &
                                      DUST_OPT_FENGSHA, p_qv, p_atm_shum, p_atm_cldq,    &
                                      p_smoke, p_dust_1, p_coarse_pm, epsilc
-   use dust_data_mod,         only : dust_alpha, dust_gamma
+   use dust_data_mod,         only : dust_alpha, dust_gamma, dust_moist_opt, &
+                                     dust_moist_correction, dust_drylimit_factor
    use plume_data_mod,        only : p_frp_std, p_frp_hr, num_frp_plume
    use seas_mod,              only : gocart_seasalt_driver
    use dust_fengsha_mod,      only : gocart_dust_fengsha_driver
@@ -49,10 +50,12 @@ contains
                    ebb_smoke_hr, frp_hr, frp_std_hr,                                       &
                    coef_bb, ebu_smoke,fhist, min_fplume, max_fplume, hwp, wetness,         &
                    smoke_ext, dust_ext, ndvel, ddvel_inout,rrfs_sd,                        &
+                   dust_moist_opt_in, dust_moist_correction_in, dust_drylimit_factor_in,   & 
                    dust_alpha_in, dust_gamma_in, fire_in,                                  &
                    seas_opt_in, dust_opt_in, drydep_opt_in, coarsepm_settling_in,          &
                    do_plumerise_in, plumerisefire_frq_in, addsmoke_flag_in,                &
-                   wetdep_ls_opt_in,wetdep_ls_alpha_in,                                    &
+                   wetdep_ls_opt_in,wetdep_ls_alpha_in, fire_heat_flux_out,                &
+                   frac_grid_burned_out,                                                   &
                    smoke_forecast_in, aero_ind_fdb_in,dbg_opt_in,errmsg,errflg)
 
     implicit none
@@ -86,17 +89,22 @@ contains
     real(kind_phys), dimension(:), intent(inout) :: coef_bb, fhist
     real(kind_phys), dimension(:,:), intent(inout) :: ebu_smoke
     real(kind_phys), dimension(:,:), intent(inout) :: fire_in
+    real(kind_phys), dimension(:), intent(out) :: fire_heat_flux_out
+    real(kind_phys), dimension(:), intent(out) :: frac_grid_burned_out
     real(kind_phys), dimension(:), intent(inout) :: max_fplume, min_fplume       
     real(kind_phys), dimension(:), intent(  out) :: hwp
     real(kind_phys), dimension(:,:), intent(out) :: smoke_ext, dust_ext
     real(kind_phys), dimension(:,:), intent(inout) :: nwfa, nifa
     real(kind_phys), dimension(:,:), intent(inout) :: ddvel_inout
-    real (kind=kind_phys), dimension(:), intent(in) :: wetness
-    integer, intent(in   ) :: imp_physics, imp_physics_thompson
-    real (kind=kind_phys), intent(in) :: dust_alpha_in, dust_gamma_in, wetdep_ls_alpha_in
-    integer,        intent(in) :: seas_opt_in, dust_opt_in, drydep_opt_in,        &
-                                  coarsepm_settling_in, plumerisefire_frq_in,     &
-                                  addsmoke_flag_in, wetdep_ls_opt_in
+    real(kind_phys), dimension(:), intent(in) :: wetness
+    real(kind_phys), intent(in) :: dust_alpha_in, dust_gamma_in, wetdep_ls_alpha_in
+    real(kind_phys), intent(in) :: dust_moist_correction_in
+    real(kind_phys), intent(in) :: dust_drylimit_factor_in
+    integer, intent(in) :: dust_moist_opt_in
+    integer, intent(in) :: imp_physics, imp_physics_thompson
+    integer, intent(in) :: seas_opt_in, dust_opt_in, drydep_opt_in,        &
+                           coarsepm_settling_in, plumerisefire_frq_in,     &
+                           addsmoke_flag_in, wetdep_ls_opt_in
     logical, intent(in   ) :: do_plumerise_in, rrfs_sd
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
@@ -314,6 +322,9 @@ contains
        ! Set at compile time in dust_data_mod:
        dust_alpha = dust_alpha_in
        dust_gamma = dust_gamma_in
+       dust_moist_opt = dust_moist_opt_in
+       dust_moist_correction = dust_moist_correction_in
+       dust_drylimit_factor = dust_drylimit_factor_in
        call gocart_dust_fengsha_driver(dt,chem,rho_phy,smois,p8w,ssm,   &
             isltyp,vegfrac,snowh,xland,dxy,g,emis_dust,ust,znt,         &
             clayf,sandf,rdrag,uthr,                                     &
@@ -331,7 +342,7 @@ contains
     ! the plumerise is controlled by the namelist option of plumerise_flag
     if (call_fire) then
         call ebu_driver (                                              &
-                   flam_frac,ebu_in,ebu,                          &
+                   flam_frac,ebu_in,ebu,                               &
                    t_phy,moist(:,:,:,p_qv),                            &
                    rho_phy,vvel,u_phy,v_phy,p_phy,                     &
                    z_at_w,zmid,g,con_cp,con_rd,                        &
@@ -340,8 +351,16 @@ contains
                    ims,ime, jms,jme, kms,kme,                          &
                    its,ite, jts,jte, kts,kte, errmsg, errflg           )
         if(errflg/=0) return
+      do i = its,ite
+         if ( plume_frp(i,1,p_frp_hr) .ge. 1.E7 ) then
+            fire_heat_flux_out(i) = min(max(0.,0.88*plume_frp(i,1,p_frp_hr)/0.55/dxy(i,1)) ,50000.) ! JLS - W m-2 [0 - 10,000]
+            frac_grid_burned_out(i) = min(max(0., 1.3*0.0006*plume_frp(i,1,p_frp_hr)/dxy(i,1) ),1.)
+         else
+            fire_heat_flux_out(i)   = 0.0
+            frac_grid_burned_out(i) = 0.0
+         endif
+      enddo
     end if
-
     ! -- add biomass burning emissions at every timestep
     if (addsmoke_flag == 1) then
     call add_emis_burn(dt,dz8w,rho_phy,rel_hum,chem,                 &

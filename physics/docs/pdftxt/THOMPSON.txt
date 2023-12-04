@@ -70,10 +70,8 @@ for the model to provide useful guidance for aircraft icing forecasts
 
 - Can account for cloud phase changes and provides a sound physical basis for diagnosing precipitation type reaching the ground
 
-\section v6_enh_thompson CCPP Physics Updates
-\version CCPP v6.0.0
 
-Three mechanisms are available improve the stability of the scheme for weather forecast applications: 
+Recently, three mechanisms have been implemented to improve the stability of the scheme for weather forecast applications: 
 \a inner \a loop, \a subcycle, and \a semi-Lagrangian \a sedimentation \a of \a rain \a and \a graupel. 
 The inner loop  and the subcycle are similar in that the physics time step is subdivided and the scheme 
 is activated more often than others in the physics suite. However, they differ in implementation. 
@@ -82,7 +80,17 @@ Conversely, the subcycle method is controlled by CCPP Framework through the "sub
 The two methods should be used exclusively. The Semi-Lagrangian sedimentation of rain and graupel (based on Juang and Hong 2010 \cite Henry_Juang_2010 ) 
 increases numerical stability by applying the subtime step only to sedimentation computation. 
 Two namelist variables control the usage of the semi-Lagrangian sedimentation, \p sedi_semi and \p decfl. 
-\p sedi_semi is set to ‘true’ to activate the method. Decfl is a parameter that needs to avoid deformation of the arriving grids, currently, "10". 
+\p sedi_semi is set to ‘true’ to activate the method. \p Decfl is a parameter that needs to avoid deformation of the arriving grids, currently, "10". 
+
+\section v6_enh_thompson CCPP Physics Updates
+\version UFS-SRW v3.0.0
+
+- The ice generation supersaturation requirement for nonaerosol option is reduced from 0.25 to 0.15. The purpose is to generate more ice in
+the upper level and reduce the OLR bias.
+
+- For the non-aerosol option of the scheme, the cloud number concentration is divided into two parts (over land and others). The number 
+concentration over the ocean is reduced to a smaller number (50/L) from its default (100/L). The purpose is to reduce the bias in surface
+downward shortwave radiative flux off the coastal region including the Southeast Pacific. 
 
 \section intra_thompson Intraphysics Communication
 - \ref arg_table_mp_thompson_run
