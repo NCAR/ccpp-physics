@@ -115,7 +115,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 
 INPUT                  =  pdftxt/mainpage.txt              \
-                          pdftxt/all_shemes_list.txt     \
+                          pdftxt/all_schemes_list.txt     \
                           pdftxt/GFS_v16_suite.txt       \
                           pdftxt/GFS_v17_p8_suite.txt    \
                           pdftxt/RAP_suite.txt           \

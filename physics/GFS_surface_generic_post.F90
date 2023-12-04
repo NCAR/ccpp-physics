@@ -130,6 +130,8 @@
 
         if (cplflx .or. cpllnd) then
           do i=1,im
+            dlwsfci_cpl (i) = adjsfcdlw(i)
+            dswsfci_cpl (i) = adjsfcdsw(i)
             dlwsfc_cpl  (i) = dlwsfc_cpl(i) + adjsfcdlw(i)*dtf
             dswsfc_cpl  (i) = dswsfc_cpl(i) + adjsfcdsw(i)*dtf
             psurfi_cpl  (i) = pgr(i)
@@ -138,8 +140,6 @@
 
         if (cplflx) then
           do i=1,im
-            dlwsfci_cpl (i) = adjsfcdlw(i)
-            dswsfci_cpl (i) = adjsfcdsw(i)
             dnirbmi_cpl (i) = adjnirbmd(i)
             dnirdfi_cpl (i) = adjnirdfd(i)
             dvisbmi_cpl (i) = adjvisbmd(i)
@@ -242,7 +242,7 @@
             tedir(i)   = tedir(i)   + edir(i) * dtf
             if (lsm == lsm_noahmp) then
              paha(i)    = paha(i)    + pah(i)   * dtf
-             twa(i)     = waxy(i) 
+             twa(i)     = waxy(i)
             endif
           enddo
         endif
@@ -252,7 +252,7 @@
 !    heat torage parameterization the kinematic sensible heat flux
 !    (hflx) as surface boundary forcing to the pbl scheme is
 !    reduced in a factor of hffac given as a function of surface roughness &
-!    green vegetation fraction (zvfun) 
+!    green vegetation fraction (zvfun)
 !
         do i=1,im
           hflxq(i) = hflx(i)
