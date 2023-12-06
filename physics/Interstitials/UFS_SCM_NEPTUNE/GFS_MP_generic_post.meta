@@ -254,6 +254,72 @@
   type = real
   kind = kind_phys
   intent = in
+[phil]
+  standard_name = geopotential
+  long_name = layer geopotential
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[htop]
+  standard_name = vertical_index_at_cloud_top
+  long_name = index for cloud top
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in 
+[refl_10cm]
+  standard_name = radar_reflectivity_10cm
+  long_name = instantaneous refl_10cm
+  units = dBZ
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[imfshalcnv]
+  standard_name = control_for_shallow_convection_scheme
+  long_name = flag for mass-flux shallow convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imfshalcnv_gf]
+  standard_name = identifier_for_grell_freitas_shallow_convection
+  long_name = flag for Grell-Freitas shallow convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imfdeepcnv]
+  standard_name = control_for_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imfdeepcnv_gf]
+  standard_name = identifier_for_grell_freitas_deep_convection
+  long_name = flag for Grell-Freitas deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imfdeepcnv_samf]
+  standard_name = identifer_for_scale_aware_mass_flux_deep_convection
+  long_name = flag for SAMF deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degree Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [tsfc]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
