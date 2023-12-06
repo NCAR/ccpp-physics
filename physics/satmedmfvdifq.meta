@@ -233,6 +233,13 @@
   type = real
   kind = kind_phys
   intent = in
+[iopt_flx_over_ocn]
+  standard_name = flag_for_air_sea_flux_computation_over_water
+  long_name = air-sea flux option
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [t1]
   standard_name = air_temperature
   long_name = layer mean air temperature

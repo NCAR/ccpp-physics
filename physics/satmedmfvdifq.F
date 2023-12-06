@@ -75,8 +75,8 @@
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
       subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,               &
      &     ntiw,ntke,grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,ssu,ssv,swh,hlw,xmu,               &
-     &     garea,zvfun,sigmaf,                                          &
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,ssu,ssv,iopt_flx_over_ocn,         &
+     &     swh,hlw,xmu,garea,zvfun,sigmaf,                              &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
@@ -127,6 +127,7 @@
       real(kind=kind_phys), intent(inout), dimension(:,:,:) :: dtend
       integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
      &       index_of_x_wind, index_of_y_wind, index_of_process_pbl
+      integer, intent(in) :: iopt_flx_over_ocn
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(:),     dvsfc(:),                      &
      &                     dtsfc(:),     dqsfc(:),                      &
@@ -143,6 +144,7 @@
 !----------------------------------------------------------------------
 !***
 !***  local variables
+      real(kind=kind_phys) spd1_m(im)
 !***
       integer i,is,k,n,ndt,km1,kmpbl,kmscu,ntrac1,idtend
       integer kps,kbx,kmx
@@ -280,20 +282,20 @@
       parameter(cs0=0.4,csmf=0.5)
       parameter(rchck=1.5,ndt=20)
 
-      integer   ii
       real(kind=kind_phys) :: ssumax, ssvmax
       logical :: check_ssu_ssv
 
       check_ssu_ssv=.false.
-      if(check_ssu_ssv) then
+      if(check_ssu_ssv .and. iopt_flx_over_ocn == 1) then
         ssumax=0.0
         ssvmax=0.0
-        do ii=1,im
-         if(ssu(ii) .gt. ssumax) ssumax=ssu(ii)
-         if(ssv(ii) .gt. ssvmax) ssvmax=ssv(ii)
+        do i=1,im
+         if(ssu(i) .gt. ssumax) ssumax=ssu(i)
+         if(ssv(i) .gt. ssvmax) ssvmax=ssv(i)
         enddo
         write(*,*)'in_satmedmfvdifq,u1 v1',u1(1,1),v1(1,1)
-        print*, 'in satmedmfvdifq.F ssumax,ssvmax =',ssumax,ssvmax
+        print*, 'in satmedmfvdifq.F ssumax,ssvmax',ssumax,ssvmax
+        print*,'in satmedmfvdifq.F iopt_flx_over_ocn',iopt_flx_over_ocn
       endif
 
       if (tc_pbl == 0) then
@@ -2393,10 +2395,14 @@ c
          enddo
       enddo
       do i = 1,im
-!        dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
-!        dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
-        dusfc(i) = -1.*rho_a(i)*stress(i)*(u1(i,1)-ssu(i))/spd1(i)
-        dvsfc(i) = -1.*rho_a(i)*stress(i)*(v1(i,1)-ssv(i))/spd1(i)
+        if(iopt_flx_over_ocn == 1) then
+          spd1_m(i)=sqrt( (u1(i,1)-ssu(i))**2+(v1(i,1)-ssv(i))**2 )
+          dusfc(i) = -1.*rho_a(i)*stress(i)*(u1(i,1)-ssu(i))/spd1_m(i)
+          dvsfc(i) = -1.*rho_a(i)*stress(i)*(v1(i,1)-ssv(i))/spd1_m(i)
+        else
+          dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
+          dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
+        endif
       enddo
 !
       if(ldiag3d .and. .not. gen_tend) then

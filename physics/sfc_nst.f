@@ -16,8 +16,8 @@
 !> \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
-     &       pi, tgice, sbc, ps, u1, v1, ssu, ssv, t1, q1, tref, cm, ch,&
-     &       lseaspray, fm, fm10,                                       &
+     &       pi, tgice, sbc, ps, u1, v1, ssu, ssv, iopt_flx_over_ocn,   &
+     &       t1, q1, tref, cm, ch, lseaspray, fm, fm10,                 &
      &       prsl1, prslki, prsik1, prslk1, wet, use_lake_model, xlon,  &
      &       sinlat, stress,                                            &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
@@ -36,8 +36,8 @@
 !                                                                       !
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
-!          ( im, ps, u1, v1, ssu,ssv, t1, q1, tref, cm, ch,             !
-!            lseaspray, fm, fm10,                                       !
+!          ( im, ps, u1, v1, ssu,ssv, iopt_flx_over_ocn,                !
+!            t1, q1, tref, cm, ch, lseaspray, fm, fm10,                                       !
 !            prsl1, prslki, wet, use_lake_model, xlon, sinlat, stress,  !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
 !            wind,  flag_iter, flag_guess, nstf_name1, nstf_name4,      !
@@ -76,6 +76,8 @@
 !     ps       - real, surface pressure (pa)                       im   !
 !     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
 !     ssu, ssv - real, u/v component of surface current (m/s)      im   !
+!     iopt_flx_over_ocn - integer, option to include               1    !
+!                       ocean current in the computation of flux        !
 !     t1       - real, surface layer mean temperature ( k )        im   !
 !     q1       - real, surface layer mean specific humidity        im   !
 !     tref     - real, reference/foundation temperature ( k )      im   !
@@ -182,7 +184,7 @@
 
 !  ---  inputs:
       integer, intent(in) :: im, kdt, ipr, nstf_name1, nstf_name4,      &
-     &       nstf_name5
+     &       nstf_name5, iopt_flx_over_ocn
       real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps,   &
      &       epsm1, rvrdm1, rd, rhw0, sbc, pi, tgice
       real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,    &
@@ -260,25 +262,34 @@
      &                       ws10cr=30., conlf=7.2e-9, consf=6.4e-8
 !
       
-      integer   ii
       real(kind=kind_phys) :: ssumax, ssvmax
-      real(kind=kind_phys) :: windrel
-      logical         :: check_ssu_ssv
+      real(kind=kind_phys) :: windrel(im)
+      logical              :: check_ssu_ssv
 !======================================================================================================
 cc
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
       check_ssu_ssv=.false.
-      if(check_ssu_ssv) then
+      if(check_ssu_ssv .and. iopt_flx_over_ocn ==1) then
         ssumax=0.0
         ssvmax=0.0
-        do ii=1,im
-        if(ssu(ii) .gt. ssumax) ssumax=ssu(ii)
-        if(ssv(ii) .gt. ssvmax) ssvmax=ssv(ii)
+        do i=1,im
+        if(ssu(i) .gt. ssumax) ssumax=ssu(i)
+        if(ssv(i) .gt. ssvmax) ssvmax=ssv(i)
         enddo
         print*, 'in sfc_nst ssumax,ssvmax =',ssumax,ssvmax
+        print*, 'in sfc_nst iopt_flx_over_ocn =',iopt_flx_over_ocn
         print*, 'in sfc_nst wind(1),u1(1),v1(1) =',wind(1),u1(1),v1(1)
+      endif
+      if(iopt_flx_over_ocn ==1) then
+        do i=1,im
+        windrel(i) = sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
+        enddo
+      else
+        do i=1,im
+        windrel(i) = wind(i)
+        enddo
       endif
 
       if (nstf_name1 == 0) return ! No NSST model used
@@ -351,10 +362,10 @@ cc
 
 !  --- ...  rcp = rho cp ch v
 
-          windrel    = sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
-          rch(i)     = rho_a(i) * cp * ch(i) * windrel
-          cmm(i)     = cm (i)   * windrel
-          chh(i)     = rho_a(i) * ch(i) * windrel
+          !windrel    = sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
+          rch(i)     = rho_a(i) * cp * ch(i) * windrel(i)
+          cmm(i)     = cm (i)   * windrel(i)
+          chh(i)     = rho_a(i) * ch(i) * windrel(i)
 
 !> - Calculate latent and sensible heat flux over open water with tskin.
 !           at previous time step

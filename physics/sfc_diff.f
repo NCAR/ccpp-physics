@@ -61,7 +61,7 @@
      &                    z0pert,ztpert,                                &  ! mg, sfc-perts !intent(in)
      &                    flag_iter,redrag,                             &  !intent(in)
      &                    u10m,v10m,sfc_z0_type,                        &  !hafs,z0 type !intent(in)
-     &                    u1,v1,ssu,ssv,                                &  
+     &                    u1,v1,ssu,ssv,iopt_flx_over_ocn,              &  
      &                    wet,dry,icy,                                  &  !intent(in)
      &                    thsfc_loc,                                    &  !intent(in)
      &                    tskin_wat, tskin_lnd, tskin_ice,              &  !intent(in)
@@ -86,6 +86,7 @@
       integer, parameter  :: kp = kind_phys
       integer, intent(in) :: im, ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
+      integer, intent(in) :: iopt_flx_over_ocn ! option for including ocean current in the computation of flux
 
       integer, dimension(:), intent(in) :: vegtype
 
@@ -129,10 +130,10 @@
       integer   i
       integer   ii
       real(kind=kind_phys) :: ssumax, ssvmax
-      real(kind=kind_phys), dimension(im)  :: windrel
+      real(kind=kind_phys), dimension(im)  :: windrel, wind10m
       logical :: check_ssu_ssv
 !
-      real(kind=kind_phys) :: rat, tv1, thv1, restar, wind10m,
+      real(kind=kind_phys) :: rat, tv1, thv1, restar,
      &                        czilc, tem1, tem2, virtfac
 !
 
@@ -176,7 +177,7 @@
 
       
       check_ssu_ssv=.false.
-      if(check_ssu_ssv) then
+      if(check_ssu_ssv .and. iopt_flx_over_ocn == 1) then
         ssumax=0.0
         ssvmax=0.0
         do ii=1,im
@@ -184,11 +185,18 @@
         if(ssv(ii) .gt. ssvmax) ssvmax=ssv(ii)
         enddo
         print*, 'in sfc_diff ssumax,ssvmax =',ssumax,ssvmax
+        print*, 'in sfc_diff iopt_flx_over_ocn =',iopt_flx_over_ocn
         print*, 'in sfc_diff wind(1),u1(1),v1(1) =',wind(1),u1(1),v1(1)
+        do i=1,im
+          windrel(i)=sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
+          wind10m(i)= sqrt( (u10m(i)-ssu(i))**2 + (v10m(i)-ssv(i))**2 )
+        enddo
+      else
+        do i=1,im
+          wind10m(i)= sqrt( u10m(i)**2 + v10m(i)**2 )
+          windrel(i)=wind(i)
+        enddo
       endif
-      do i=1,im
-      windrel(i)=sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
-      enddo
 
       do i=1,im
         if(flag_iter(i)) then
@@ -375,7 +383,7 @@
             z0           = 0.01_kp * z0rl_wat(i)
             z0max        = max(zmin, min(z0,z1(i)))
 !           ustar_wat(i) = sqrt(grav * z0 / charnock)
-            wind10m      = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
+!           wind10m      = sqrt(u10m(i)*u10m(i) + v10m(i)*v10m(i))
 
 !**  test xubin's new z0
 
@@ -394,9 +402,9 @@
             ztmax_wat(i) = max(z0max * exp(-rat), zmin)
 !
             if (sfc_z0_type == 6) then
-              call znot_t_v6(wind10m, ztmax_wat(i))   ! 10-m wind,m/s, ztmax(m)
+              call znot_t_v6(wind10m(i), ztmax_wat(i))   ! 10-m wind,m/s, ztmax(m)
             else if (sfc_z0_type == 7) then
-              call znot_t_v7(wind10m, ztmax_wat(i))   ! 10-m wind,m/s, ztmax(m)
+              call znot_t_v7(wind10m(i), ztmax_wat(i))   ! 10-m wind,m/s, ztmax(m)
             else if (sfc_z0_type > 0) then
               write(0,*)'no option for sfc_z0_type=',sfc_z0_type
               errflg = 1
@@ -437,10 +445,10 @@
                 endif
 
               elseif (sfc_z0_type == 6) then   ! wang
-                 call znot_m_v6(wind10m, z0)   ! wind, m/s, z0, m
+                 call znot_m_v6(wind10m(i), z0)   ! wind, m/s, z0, m
                  z0rl_wat(i) = 100.0_kp * z0   ! cm
               elseif (sfc_z0_type == 7) then   ! wang
-                 call znot_m_v7(wind10m, z0)   ! wind, m/s, z0, m
+                 call znot_m_v7(wind10m(i), z0)   ! wind, m/s, z0, m
                  z0rl_wat(i) = 100.0_kp * z0   ! cm
               else
                  z0rl_wat(i) = 1.0e-4_kp

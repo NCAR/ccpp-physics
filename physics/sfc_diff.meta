@@ -249,6 +249,13 @@
   dimensions = ()
   type = integer
   intent = in
+[iopt_flx_over_ocn]
+  standard_name = flag_for_air_sea_flux_computation_over_water
+  long_name = air-sea flux option
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction

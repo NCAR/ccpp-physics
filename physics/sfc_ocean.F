@@ -24,7 +24,8 @@
 !...................................
 !  ---  inputs:
      &     ( im, hvap, cp, rd, eps, epsm1, rvrdm1, ps, u1, v1, t1, q1,  &
-     &       tskin, cm, ch, lseaspray, fm, fm10, ssu, ssv,               &
+     &       tskin, cm, ch, lseaspray, fm, fm10,                        &
+     &       ssu, ssv, iopt_flx_over_ocn,                               &
      &       prsl1, prslki, wet, use_lake_model, wind,                  &,  ! --- inputs
      &       flag_iter, use_med_flux, dqsfc_med, dtsfc_med,             &
      &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &   ! --- outputs
@@ -39,6 +40,7 @@
 !    call sfc_ocean                                                     !
 !       inputs:                                                         !
 !        ( im, ps, u1, v1, t1, q1, tskin, cm, ch, lseaspray, fm, fm10,  !
+!            ssu, ssv, iopt_flx_over_ocn,                               !
 !            prsl1, prslki, wet, use_lake_model, wind, flag_iter,       !
 !            use_med_flux,                                              !
 !       outputs:                                                        !
@@ -67,6 +69,8 @@
 !     ps       - real, surface pressure                            im   !
 !     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
 !     ssu,ssv - real, u/v component of surface ocean current (m/s) im   !
+!     iopt_flx_over_ocn - integer, option for including            1    !
+!                       ocean current in the computation of flux        !
 !     t1       - real, surface layer mean temperature ( k )        im   !
 !     q1       - real, surface layer mean specific humidity        im   !
 !     tskin    - real, ground surface skin temperature ( k )       im   !
@@ -106,6 +110,7 @@
      &           zero = 0.0_kind_phys, qmin = 1.0e-8_kind_phys
 !  ---  inputs:
       integer, intent(in) :: im
+      integer, intent(in) :: iopt_flx_over_ocn
       real (kind=kind_phys), intent(in) :: hvap, cp, rd,                &
      &                 eps, epsm1, rvrdm1
 
@@ -135,11 +140,10 @@
 !  ---  locals:
 
       real (kind=kind_phys) :: qss, rch, tem,
-     &                         elocp, cpinv, hvapi, windrel
+     &                         elocp, cpinv, hvapi, windrel(im)
       real (kind=kind_phys), dimension(im) :: rho, q0
 
       integer :: i
-      integer :: ii
       real (kind=kind_phys) :: ssumax,ssvmax
       !logical,save :: check_ssu_ssv=.true.
       logical :: check_ssu_ssv
@@ -164,15 +168,25 @@
       errmsg = ''
       errflg = 0
       check_ssu_ssv=.false.
-       if(check_ssu_ssv) then
+       if(check_ssu_ssv .and. iopt_flx_over_ocn == 1) then
          ssumax=0.0
          ssvmax=0.0
-         do ii=1,im
-          if(ssu(ii) .gt. ssumax) ssumax=ssu(ii)
-          if(ssv(ii) .gt. ssvmax) ssvmax=ssv(ii)
+         do i=1,im
+          if(ssu(i) .gt. ssumax) ssumax=ssu(i)
+          if(ssv(i) .gt. ssvmax) ssvmax=ssv(i)
          enddo
-         print *, 'in sfc_ocean ssumax ssvmax',ssumax, ssvmax
+         print *, 'in sfc_ocean ssumax,ssvmax',ssumax,ssvmax
+         print *, 'in sfc_ocean iopt_flx_over_ocn',iopt_flx_over_ocn
         endif
+      if(iopt_flx_over_ocn == 1) then
+         do i=1,im
+         windrel(i) = sqrt((u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2)
+         enddo
+      else
+         do i=1,im
+         windrel(i) = wind(i)
+         enddo
+      endif
 
       cpinv = one/cp
       hvapi = one/hvap
@@ -187,12 +201,11 @@
 
         if ( flag(i) ) then
           if (use_med_flux) then
-            windrel  = sqrt((u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2)
             q0(i)    = max( q1(i), qmin )
             rho(i)   = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0(i)))
 
-            tem      = ch(i) * windrel
-            cmm(i)   = cm(i) * windrel
+            tem      = ch(i) * windrel(i)
+            cmm(i)   = cm(i) * windrel(i)
             chh(i)   = rho(i) * tem
 
             hflx(i)  = dtsfc_med(i)
@@ -209,10 +222,9 @@
 
 !  --- ...    rcp  = rho cp ch v
 
-            windrel  = sqrt((u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2)
-            rch      = rho(i) * cp * ch(i) * windrel
-            tem      = ch(i) * windrel
-            cmm(i)   = cm(i) * windrel
+            rch      = rho(i) * cp * ch(i) * windrel(i)
+            tem      = ch(i) * windrel(i)
+            cmm(i)   = cm(i) * windrel(i)
             chh(i)   = rho(i) * tem
 
 !> - Calcualte sensible and latent heat flux over open water

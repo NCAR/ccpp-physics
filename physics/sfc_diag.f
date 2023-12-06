@@ -17,7 +17,7 @@
      &                    lsm,lsm_ruc,grav,cp,eps,epsm1,con_rocp,       &
      &                    con_karman,                                   &
      &                    shflx,cdq,wind,                               &
-     &                    ssu,ssv,                                      &
+     &                    ssu,ssv,iopt_flx_over_ocn,                    &
      &                    zf,ps,u1,v1,t1,q1,prslki,evap,fm,fh,fm10,fh2, &
      &                    ust,tskin,qsurf,thsfc_loc,diag_flux,diag_log, &
      &                    use_lake_model,iopt_lake,iopt_lake_clm,       &
@@ -31,6 +31,7 @@
       implicit none
 !
       integer, intent(in) :: im, lsm, lsm_ruc, iopt_lake, iopt_lake_clm
+      integer, intent(in) :: iopt_flx_over_ocn
       logical, intent(in) :: use_lake2m
       logical, intent(in) :: thsfc_loc  ! Flag for reference pot. temp.
       logical, intent(in) :: diag_flux  ! Flag for flux method in 2-m diagnostics
@@ -78,14 +79,15 @@
       errflg = 0
       
       check_ssu_ssv=.false.
-      if(check_ssu_ssv) then
+      if(check_ssu_ssv .and. iopt_flx_over_ocn ==1) then
         ssumax=0.0
         ssvmax=0.0
         do ii=1,im
         if(ssu(ii) .gt. ssumax) ssumax=ssu(ii)
         if(ssv(ii) .gt. ssvmax) ssvmax=ssv(ii)
         enddo
-        print*, 'in sfc_diag ssumax,ssvmax =',ssumax,ssvmax
+        print*, 'in sfc_diag ssumax ssvmax=', ssumax, ssvmax
+        print*, 'in sfc_diag iopt_flx_over_ocn=', iopt_flx_over_ocn
       endif
 
       !--
@@ -105,8 +107,13 @@
 
       do i = 1, im
         f10m(i) = fm10(i) / fm(i)
-        u10m(i) = ssu(i) + f10m(i) * (u1(i)-ssu(i))
-        v10m(i) = ssv(i) + f10m(i) * (v1(i)-ssv(i))
+        if(iopt_flx_over_ocn ==1) then
+          u10m(i) = ssu(i) + f10m(i) * (u1(i)-ssu(i))
+          v10m(i) = ssv(i) + f10m(i) * (v1(i)-ssv(i))
+        else
+          u10m(i) = f10m(i) * u1(i)
+          v10m(i) = f10m(i) * v1(i)
+        endif
         have_2m = use_lake_model(i)>0 .and. use_lake2m .and.            &
      &                iopt_lake==iopt_lake_clm
         if(have_2m) then

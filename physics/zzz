@@ -1,0 +1,12 @@
+#!/bin/sh
+export src1=/scratch1/NCEPDEV/stmp4/Bin.Li/20231201/ufs-weather-model/FV3/ccpp/physics/physics
+cp $src1/satmedmfvdifq.F .
+cp $src1/satmedmfvdifq.meta .
+cp $src1/sfc_diff.f .
+cp $src1/sfc_diff.meta .
+cp $src1/sfc_diag.f .
+cp $src1/sfc_diag.meta .
+cp $src1/sfc_nst.f .
+cp $src1/sfc_nst.meta .
+cp $src1/sfc_ocean.F .
+cp $src1/sfc_ocean.meta .
