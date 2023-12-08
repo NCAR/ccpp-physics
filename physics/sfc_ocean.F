@@ -25,7 +25,7 @@
 !  ---  inputs:
      &     ( im, hvap, cp, rd, eps, epsm1, rvrdm1, ps, u1, v1, t1, q1,  &
      &       tskin, cm, ch, lseaspray, fm, fm10,                        &
-     &       ssu, ssv, iopt_flx_over_ocn,                               &
+     &       ssu, ssv, icplocn2atm,                                     &
      &       prsl1, prslki, wet, use_lake_model, wind,                  &,  ! --- inputs
      &       flag_iter, use_med_flux, dqsfc_med, dtsfc_med,             &
      &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &   ! --- outputs
@@ -40,7 +40,7 @@
 !    call sfc_ocean                                                     !
 !       inputs:                                                         !
 !        ( im, ps, u1, v1, t1, q1, tskin, cm, ch, lseaspray, fm, fm10,  !
-!            ssu, ssv, iopt_flx_over_ocn,                               !
+!            ssu, ssv, icplocn2atm,                                     !
 !            prsl1, prslki, wet, use_lake_model, wind, flag_iter,       !
 !            use_med_flux,                                              !
 !       outputs:                                                        !
@@ -69,7 +69,7 @@
 !     ps       - real, surface pressure                            im   !
 !     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
 !     ssu,ssv - real, u/v component of surface ocean current (m/s) im   !
-!     iopt_flx_over_ocn - integer, option for including            1    !
+!     icplocn2atm - integer, option for including                  1    !
 !                       ocean current in the computation of flux        !
 !     t1       - real, surface layer mean temperature ( k )        im   !
 !     q1       - real, surface layer mean specific humidity        im   !
@@ -110,7 +110,7 @@
      &           zero = 0.0_kind_phys, qmin = 1.0e-8_kind_phys
 !  ---  inputs:
       integer, intent(in) :: im
-      integer, intent(in) :: iopt_flx_over_ocn
+      integer, intent(in) :: icplocn2atm
       real (kind=kind_phys), intent(in) :: hvap, cp, rd,                &
      &                 eps, epsm1, rvrdm1
 
@@ -144,9 +144,6 @@
       real (kind=kind_phys), dimension(im) :: rho, q0
 
       integer :: i
-      real (kind=kind_phys) :: ssumax,ssvmax
-      !logical,save :: check_ssu_ssv=.true.
-      logical :: check_ssu_ssv
 
       logical :: flag(im)
 !
@@ -167,18 +164,8 @@
 !  -- ...  initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-      check_ssu_ssv=.false.
-       if(check_ssu_ssv .and. iopt_flx_over_ocn == 1) then
-         ssumax=0.0
-         ssvmax=0.0
-         do i=1,im
-          if(ssu(i) .gt. ssumax) ssumax=ssu(i)
-          if(ssv(i) .gt. ssvmax) ssvmax=ssv(i)
-         enddo
-         print *, 'in sfc_ocean ssumax,ssvmax',ssumax,ssvmax
-         print *, 'in sfc_ocean iopt_flx_over_ocn',iopt_flx_over_ocn
-        endif
-      if(iopt_flx_over_ocn == 1) then
+
+      if(icplocn2atm == 1) then
          do i=1,im
          windrel(i) = sqrt((u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2)
          enddo
