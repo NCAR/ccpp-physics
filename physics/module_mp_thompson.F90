@@ -1427,9 +1427,9 @@ module module_mp_thompson
                else
                   do k = kts, kte
                      if(lsml == 1) then
-                     nc1d(k) = Nt_c_l/rho(k)
+                        nc1d(k) = Nt_c_l/rho(k)
                      else
-                     nc1d(k) = Nt_c_o/rho(k)
+                        nc1d(k) = Nt_c_o/rho(k)
                      endif
                      nwfa1d(k) = 11.1E6
                      nifa1d(k) = naIN1*0.01
