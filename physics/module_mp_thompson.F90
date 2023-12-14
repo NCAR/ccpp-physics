@@ -59,7 +59,7 @@
 
 module module_mp_thompson
 
-   use machine, only: kind_phys, kind_dbl_prec
+   use machine, only: kind_phys, kind_sngl_prec, kind_dbl_prec
    use module_mp_radar
 
 #ifdef MPI
@@ -396,7 +396,7 @@ module module_mp_thompson
    real (kind_dbl_prec), allocatable, dimension(:,:,:) :: tnr_rev
    real (kind_dbl_prec), allocatable, dimension(:,:,:) ::               &
                tpc_wev, tnc_wev
-   real (kind_phys), allocatable, dimension(:,:,:,:,:) :: tnccn_act
+   real (kind_sngl_prec), allocatable, dimension(:,:,:,:,:) :: tnccn_act
 
 !..Variables holding a bunch of exponents and gamma values (cloud water,
 !.. cloud ice, rain, snow, then graupel).
@@ -5282,37 +5282,37 @@ module module_mp_thompson
       logical:: opened
 
       iunit_mp_th1 = -1
-        DO i = 20,99
-          INQUIRE ( i , OPENED = opened )
-          IF ( .NOT. opened ) THEN
+      do_loop_ccn : do i = 20, 99
+         INQUIRE (i, OPENED=opened)
+         if (.not. opened) then
             iunit_mp_th1 = i
-            GOTO 2010
-          ENDIF
-        ENDDO
- 2010   CONTINUE
-      IF ( iunit_mp_th1 < 0 ) THEN
-        write(0,*) 'module_mp_thompson: table_ccnAct: '//   &
-                   'Can not find unused fortran unit to read in lookup table.'
-        return
-      ENDIF
+            exit do_loop_ccn
+         endif
+      enddo do_loop_ccn
 
-        !WRITE(*, '(A,I2)') 'module_mp_thompson: opening CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
-        OPEN(iunit_mp_th1,FILE='CCN_ACTIVATE.BIN',                      &
-             FORM='UNFORMATTED',STATUS='OLD',CONVERT='BIG_ENDIAN',ERR=9009)
+      if (iunit_mp_th1 < 0) then
+         write(0,*) 'module_mp_thompson: table_ccnAct: '//   &
+                   'Can not find unused fortran unit to read in lookup table.'
+         return
+      endif
+
+      !WRITE(*, '(A,I2)') 'module_mp_thompson: opening CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
+      OPEN(iunit_mp_th1, FILE='CCN_ACTIVATE.BIN',                      &
+            FORM='UNFORMATTED', STATUS='OLD', CONVERT='BIG_ENDIAN', ERR=9009)
 
 !sms$serial begin
-      READ(iunit_mp_th1,ERR=9010) tnccn_act
+      READ(iunit_mp_th1, ERR=9010) tnccn_act
 !sms$serial end
 
-      RETURN
+      return
  9009 CONTINUE
-      WRITE( errmess , '(A,I2)' ) 'module_mp_thompson: error opening CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
+      WRITE(errmess , '(A,I2)') 'module_mp_thompson: error opening CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
       errflag = 1
-      RETURN
+      return
  9010 CONTINUE
-      WRITE( errmess , '(A,I2)' ) 'module_mp_thompson: error reading CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
+      WRITE(errmess , '(A,I2)') 'module_mp_thompson: error reading CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
       errflag = 1
-      RETURN
+      return
 
    end subroutine table_ccnAct
 
