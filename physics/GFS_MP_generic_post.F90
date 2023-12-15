@@ -21,7 +21,8 @@
       subroutine GFS_MP_generic_post_run(                                                                                 &
         im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl,    &
         imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, cpllnd, progsigma, con_g, rhowater, rainmin, dtf, &
-        frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_q,      &
+        frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, phil, htop, refl_10cm,              & 
+        imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf, con_t0c, snow, graupel, save_t, save_q,        &
         rain0, ice0, snow0, graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp,&
         totprcp, totice, totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl,    &
         pwat, frzr, frzrb, frozr, frozrb, tsnowp, tsnowpb, rhonewsn1, exticeden,                                          & 
@@ -40,12 +41,13 @@
       integer, intent(in) :: imp_physics_nssl, iopt_lake_clm, iopt_lake, lkm
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, cpllnd, progsigma, exticeden
       integer, intent(in) :: index_of_temperature,index_of_process_mp,use_lake_model(:)
-
+      integer, intent(in) :: imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf
+      integer, dimension (:), intent(in) :: htop
       integer                                                :: dfi_radar_max_intervals
-      real(kind=kind_phys),                    intent(in)    :: fh_dfi_radar(:), fhour
+      real(kind=kind_phys),                    intent(in)    :: fh_dfi_radar(:), fhour, con_t0c
       real(kind=kind_phys),                    intent(in)    :: radar_tten_limits(:)
       integer                                                :: ix_dfi_radar(:)
-      real(kind=kind_phys), dimension(:,:),    intent(inout) :: gt0
+      real(kind=kind_phys), dimension(:,:),    intent(inout) :: gt0,refl_10cm
 
       real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g, rainmin, rhowater
       real(kind=kind_phys), dimension(:),      intent(in)    :: rain1, xlat, xlon, tsfc
@@ -53,7 +55,7 @@
       real(kind=kind_phys), dimension(:),      intent(in)    :: rain0, ice0, snow0, graupel0
       real(kind=kind_phys), dimension(:,:),    intent(in)    :: rann
       real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsl, save_t, del
-      real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsi, phii
+      real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsi, phii,phil
       real(kind=kind_phys), dimension(:,:,:),  intent(in)    :: gq0, save_q
 
       real(kind=kind_phys), dimension(:,:,:),  intent(in)    :: dfi_radar_tten
@@ -112,6 +114,17 @@
       real :: snowrat,grauprat,icerat,curat,prcpncfr,prcpcufr
       real :: rhonewsnow,rhoprcpice,rhonewgr,rhonewice
 
+      real(kind_phys), parameter :: dbzmin=-20.0
+      real(kind_phys) :: cuprate
+      real(kind_phys) :: ze, ze_conv, dbz_sum
+
+      real(kind_phys), dimension(1:im,1:levs) :: zo
+      real(kind_phys), dimension(1:im)        :: zfrz
+      real(kind_phys), dimension(1:im)        :: factor
+      real(kind_phys) ze_mp, fctz, delz
+      logical :: lfrz
+
+
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
@@ -121,6 +134,52 @@
       do i = 1, im
         rain(i) = rainc(i) + frain * rain1(i) ! time-step convective plus explicit
       enddo
+!
+! Combine convective reflectivity with MP reflectivity for selected
+! parameterizations.
+     if ( (imp_physics==imp_physics_thompson .or. imp_physics==imp_physics_nssl) .and. &
+       (imfdeepcnv==imfdeepcnv_samf .or. imfdeepcnv==imfdeepcnv_gf .or. imfshalcnv==imfshalcnv_gf) ) then
+         do i=1,im
+           factor(i) = 0.0
+           lfrz = .true.
+           zfrz(i) = phil(i,1)*onebg 
+           do k = levs, 1, -1
+             zo(i,k) =  phil(i,k)*onebg 
+             if (gt0(i,k) >= con_t0c .and. lfrz) then
+              zfrz(i) = zo(i,k)
+              lfrz = .false.
+             endif
+           enddo
+         enddo
+!
+         do i=1,im
+           if(rainc (i) > 0.0 .and. htop(i) > 0) then
+             factor(i) = -2./max(1000., zo(i,htop(i)) - zfrz(i))
+           endif
+         enddo
+
+! combine the reflectivity from both Thompson MP and samfdeep convection
+
+         do k=1,levs
+           do i=1,im
+             if(rainc(i) > 0. .and. k <= htop(i)) then
+               fctz = 0.0
+               delz = zo(i,k) - zfrz(i)
+               if(delz <0.0) then
+                 fctz = 1. ! wrong
+               else
+                 fctz = 10.**(factor(i)*delz)
+               endif
+               cuprate = rainc(i) * 3.6e6 / dtp  ! cu precip rate (mm/h)
+               ze_conv = 300.0 * cuprate**1.4
+               ze_conv = fctz * ze_conv
+               ze_mp = 10._kind_phys ** (0.1 * refl_10cm(i,k))
+               dbz_sum = max(DBZmin, 10.*log10(ze_mp + ze_conv))
+               refl_10cm(i,k) = dbz_sum
+             endif
+           enddo
+         enddo
+      endif
 
 ! compute surface snowfall, graupel/sleet, freezing rain and precip ice density
       if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_nssl ) then

@@ -617,7 +617,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [fullradar_diag]
   standard_name = do_full_radar_reflectivity
   long_name = flag for computing full radar reflectivity

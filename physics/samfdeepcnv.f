@@ -83,7 +83,8 @@
      &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
      &    clam,c0s,c1,betal,betas,evef,pgcon,asolfac,                   &
      &    do_ca, ca_closure, ca_entr, ca_trigger, nthresh,ca_deep,      &
-     &    rainevap,sigmain, sigmaout, errmsg,errflg)
+     &    rainevap,sigmain,sigmaout,betadcu,betamcu,betascu,            &
+     &    maxMF, do_mynnedmf,errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -99,15 +100,16 @@
      &   prslp(:,:),  garea(:), hpbl(:), dot(:,:), phil(:,:)
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       logical, intent(in)  :: first_time_step,restart,hwrf_samfdeep,    &
-     &     progsigma
-      real(kind=kind_phys), intent(in) :: nthresh
+     &     progsigma,do_mynnedmf
+      real(kind=kind_phys), intent(in) :: nthresh,betadcu,betamcu,      &
+     &                                    betascu
       real(kind=kind_phys), intent(in) :: ca_deep(:)
       real(kind=kind_phys), intent(in) :: sigmain(:,:),qmicro(:,:),     &
      &     tmf(:,:,:),q(:,:), prevsq(:,:)
+      real(kind=kind_phys),    dimension (:), intent(in) :: maxMF
       real(kind=kind_phys), intent(out) :: rainevap(:)
       real(kind=kind_phys), intent(out) :: sigmaout(:,:)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
-
       integer, intent(inout)  :: kcnv(:)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
       real(kind=kind_phys), intent(inout) ::   qtr(:,:,:),              &
@@ -213,8 +215,9 @@ cj
 !  parameters for prognostic sigma closure                                                                                                                                                      
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im),qadv(im,km)
-      real(kind=kind_phys) gravinv,invdelt
-      logical flag_shallow
+      real(kind=kind_phys) gravinv,invdelt,sigmind,sigminm,sigmins
+      parameter(sigmind=0.01,sigmins=0.03,sigminm=0.01)
+      logical flag_shallow, flag_mid
 c  physical parameters
 !     parameter(grav=grav,asolfac=0.958)
 !     parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
@@ -347,6 +350,9 @@ c
 !
       do i=1,im
         cnvflg(i) = .true.
+        if(do_mynnedmf) then
+            if(maxMF(i).gt.0.)cnvflg(i)=.false.
+        endif
         sfcpbl(i) = sfclfac * hpbl(i)
         rn(i)=0.
         mbdt(i)=10.
@@ -2930,10 +2936,11 @@ c
          enddo
 
          flag_shallow = .false.
+         flag_mid = .false.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
-     &        del,tmfq,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,delt,
-     &        qadv,kbcon1,ktcon,cnvflg,
-     &        sigmain,sigmaout,sigmab)
+     &        flag_mid,del,tmfq,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,
+     &        delt,qadv,kbcon1,ktcon,cnvflg,betascu,betamcu,betadcu,
+     &        sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)
       endif
 
 !> - From Han et al.'s (2017) \cite han_et_al_2017 equation 6, calculate cloud base mass flux as a function of the mean updraft velcoity for the grid sizes where the quasi-equilibrium assumption of Arakawa-Schubert is not valid any longer.
