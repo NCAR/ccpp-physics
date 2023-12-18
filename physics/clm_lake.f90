@@ -239,6 +239,9 @@ MODULE clm_lake
       real(kind_lake) :: depthratio
 
       if (input_lakedepth(i) == spval .or. input_lakedepth(i) < 0.1) then
+        ! This is a safeguard against:
+        ! 1. missing in the lakedepth database (== spval)
+        ! 2. errors in model cycling or unexpected changes in the orography database (< 0.1)
         clm_lakedepth(i) = zlak(nlevlake) + 0.5_kind_lake*dzlak(nlevlake)
         z_lake(1:nlevlake) = zlak(1:nlevlake)
         dz_lake(1:nlevlake) = dzlak(1:nlevlake)
