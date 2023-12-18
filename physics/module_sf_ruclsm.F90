@@ -1703,6 +1703,7 @@ CONTAINS
        IF (NEWSN > zero .and. snowfracnewsn > 0.99_kind_phys .and. rhosnfall < 450._kind_phys) THEN
        ! new snow
              KEEP_SNOW_ALBEDO = one
+             ! turn off separate treatment of snow covered and snow-free portions of the grid cell
              snow_mosaic=0.  ! ???
       ENDIF
 
