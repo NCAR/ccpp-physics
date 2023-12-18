@@ -170,7 +170,7 @@
 !       write(0,*)'in sfc_diff, sfc_z0_type=',sfc_z0_type
 
       do i=1,im
-        if(flag_iter(i) .or. lake_freeze(i) then
+        if(flag_iter(i) .or. lake_freeze(i)) then
 
           ! Need to initialize ztmax arrays
           ztmax_lnd(i) = 1. ! log(1) = 0
