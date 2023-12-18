@@ -268,7 +268,7 @@ MODULE clm_lake
          ! Atmospheric model state inputs:
          tg3, pgr, zlvl, gt0, prsi, phii, qvcurr, gu0, gv0, xlat_d, xlon_d,       &
          ch, cm, dlwsfci, dswsfci, oro_lakedepth, wind, rho0, tsfc,               &
-         flag_iter, ISLTYP, rainncprv, raincprv,                                  &
+         flag_iter, lake_freeze, ISLTYP, rainncprv, raincprv,                     &
 
          ! Feedback to atmosphere:
          evap_wat,     evap_ice,   hflx_wat,    hflx_ice,  gflx_wat, gflx_ice,    &
@@ -325,6 +325,8 @@ MODULE clm_lake
          rainncprv, raincprv
     REAL(KIND_PHYS), DIMENSION(:,:), INTENT(in) :: gu0, gv0, prsi, gt0, phii
     LOGICAL, DIMENSION(:), INTENT(IN) :: flag_iter
+    LOGICAL, DIMENSION(:), INTENT(INOUT) :: lake_freeze
+
     INTEGER, DIMENSION(:), INTENT(IN) :: ISLTYP
 
     !
@@ -753,6 +755,11 @@ MODULE clm_lake
                   snodi(i)      = snowdp(c)*1.e3            ! surface_snow_thickness_water_equivalent_over_ice
                   weasd(i)      = weasdi(i)
                   snowd(i)      = snodi(c)                  ! surface_snow_thickness_water_equivalent_over_ice
+
+
+                  if (icy(i) .eq. .false.) then
+                     lake_freeze(i)=.true.
+                  end if
 
                   ! Ice points are icy:
                   icy(i)=.true.                             ! flag_nonzero_sea_ice_surface_fraction
