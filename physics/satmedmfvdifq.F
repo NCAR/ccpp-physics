@@ -9,7 +9,6 @@
       use mfscuq_mod
       !PCC_CANOPY
       use canopy_utils_mod
-      use noahmp_tables, only : hvt_table
 
       contains
 
@@ -89,8 +88,8 @@
      &     rlmx,elmx,sfc_rlm,tc_pbl,                                    &
      &     do_canopy, vegtype, lai,                                     &
 !TODO -Canopy Inputs
-!     &     rdcanopylai, rdcanopyfch, rdcanopyffrac, rdcanopyclu,        &
-!     &     canopylaixy, canopyfchxy, canopyffracxy, canopycluxy,        & 
+!     &     rdcanopylai, rdcanopyfch, rdcanopyfrt, rdcanopyclu,        &
+!     &     canopylaixy, canopyfchxy, canopyfrtxy, canopycluxy,        & 
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg)
@@ -119,11 +118,11 @@
       integer, intent(in)  :: vegtype(:)
       real(kind=kind_phys), intent(in) :: lai(:)
 !TODO Canopy Inputs
-!      logical, intent(in)  :: rdcanopylai, rdcanopyfch, rdcanopyffrac,  &
+!      logical, intent(in)  :: rdcanopylai, rdcanopyfch, rdcanopyfrt,  &
 !                              rdcanopyclu
 !      real(kind=kind_phys), intent(in) :: canopylaixy(:),               &
 !                                          canopyfchxy(:),               &
-!                                          canopyffracxy(:),             &
+!                                          canopyfrtxy(:),             &
 !                                          canopycluxy(:)
       !----------------------------------------------
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
@@ -285,9 +284,10 @@
       real(kind=kind_phys) FCH,       MOL,   HOL, TLCAN,
      &                     SIGMACAN,  RRCAN, BBCAN,
      &                     AACAN,     ZCAN,  ZFL, BOTCAN,
-     &                     EDDYVEST1, EDDYVEST_INT,
-     &                     XCANOPYLAI, XCANOPYFCH,
-     &                     XCANOPYFFRAC, XCANOPYCLU
+     &                     EDDYVEST1, EDDYVEST_INT
+!TODO Canopy Inputs
+!     &                     XCANOPYLAI, XCANOPYFCH,
+!     &                     XCANOPYFRT, XCANOPYCLU
 
       ! in canopy eddy diffusivity [ m**2/s ]
       real(kind=kind_phys), allocatable  :: EDDYVESTX ( : )
@@ -295,7 +295,15 @@
       real(kind=kind_phys), allocatable  :: ZCANX     ( : )
       ! Declare local maximum canopy layers
       integer, parameter :: MAXCAN = 1000
-
+      integer, parameter :: mvt   = 30 ! use 30 instead of 27
+      !Based on MODIS IGBP 20 Category Dataset
+      real :: fch_table(mvt)         !< top of canopy (m)
+       data   ( fch_table(i),i=1,mvt)   /
+     &          20.0, 20.0, 18.0, 16.0, 16.0, 1.10,
+     &          1.10, 13.0, 10.0, 1.00, 5.00, 2.00,
+     &          15.0, 1.50, 0.00, 0.00, 0.00, 4.00,
+     &          2.00, 0.50, 0.00, 0.00, 0.00, 0.00,
+     &          0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
 !----------------------------------------------
 
 !!
@@ -1359,10 +1367,10 @@
 !                      else
 !                        XCANOPYFCH = 0.0
 !                      endif
-!                      if(rdcanopyffrac) then
-!                       XCANOPYFFRAC = canopyffracxy(i)
+!                      if(rdcanopyfrt) then
+!                       XCANOPYFRT = canopyfrtxy(i)
 !                      else
-!                        XCANOPYFFRAC = 0.0
+!                        XCANOPYFRT = 0.0
 !                      endif
 !                      if(rdcanopyclu) then
 !                        XCANOPYCLU = canopycluxy(i)
@@ -1370,7 +1378,7 @@
 !                        XCANOPYCLU = 0.0
 !                      endif
 !                      FCH = XCANOPYFCH !top of canopy from input file
-                      FCH = hvt_table(vegtype(i)) !top of canopy from table
+                      FCH = fch_table(vegtype(i)) !top of canopy from table
                       IF (k .EQ. 1) THEN !use model layer interfaces
                         KCAN = 1
                       ELSE 
@@ -1387,7 +1395,7 @@
 !                        IF ( XCANOPYLAI .LT. 0.1  !from canopy inputs
                         IF ( lai(i) .LT. 0.1  !from LSM
      &                   .OR. FCH .LT. 0.5 ) THEN
-!     &                   .OR. MAX(0.0, 1.0 - XCANOPYFFRAC) .GT. 0.5
+!     &                   .OR. MAX(0.0, 1.0 - XCANOPYFRT) .GT. 0.5
 !     &                   .OR. POPU .GT. 10000.0
 !     &                   .OR. EXP(-0.5*XCANOPYLAI*XCANOPYCLU).GT. 0.45
 !     &                      .AND. FCH .LT. 18.0 ) THEN 

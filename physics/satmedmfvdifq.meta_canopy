@@ -595,7 +595,7 @@
   dimensions = ()
   type = logical
   intent = in
-[rdcanopyffrac]
+[rdcanopyfrt]
   standard_name = flag_for_reading_canopy_forest_fraction_from_input
   long_name = flag for reading canopy forest fraction from initial conditions
   units = flag
@@ -625,7 +625,7 @@
   type = real
   kind = kind_phys
   intent = in
-[canopyffracxy]
+[canopyfrtxy]
   standard_name = canopy_forest_fraction
   long_name = canopy forest fraction
   units = none
