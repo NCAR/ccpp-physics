@@ -757,7 +757,7 @@ MODULE clm_lake
                   snowd(i)      = snodi(c)                  ! surface_snow_thickness_water_equivalent_over_ice
 
 
-                  if (icy(i) .eq. .false.) then
+                  if (.not. icy(i)) then
                      lake_freeze(i)=.true.
                   end if
 
