@@ -31,8 +31,8 @@
       implicit none
 !
       integer, intent(in) :: im, lsm, lsm_ruc, iopt_lake, iopt_lake_clm
-      integer, intent(in) :: icplocn2atm
       logical, intent(in) :: use_lake2m
+      integer, intent(in) :: icplocn2atm
       logical, intent(in) :: thsfc_loc  ! Flag for reference pot. temp.
       logical, intent(in) :: diag_flux  ! Flag for flux method in 2-m diagnostics
       logical, intent(in) :: diag_log   ! Flag for 2-m log diagnostics under stable conditions
@@ -74,7 +74,7 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-      
+
       !--
       testptlat = 35.3_kind_phys 
       testptlon = 273.0_kind_phys
@@ -92,12 +92,12 @@
 
       do i = 1, im
         f10m(i) = fm10(i) / fm(i)
-        if(icplocn2atm ==1) then
-          u10m(i) = ssu(i) + f10m(i) * (u1(i)-ssu(i))
-          v10m(i) = ssv(i) + f10m(i) * (v1(i)-ssv(i))
-        else
+        if(icplocn2atm ==0) then
           u10m(i) = f10m(i) * u1(i)
           v10m(i) = f10m(i) * v1(i)
+        else
+          u10m(i) = ssu(i)+f10m(i) * (u1(i)-ssu(i))
+          v10m(i) = ssv(i)+f10m(i) * (v1(i)-ssv(i))
         endif
         have_2m = use_lake_model(i)>0 .and. use_lake2m .and.            &
      &                iopt_lake==iopt_lake_clm

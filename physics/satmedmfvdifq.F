@@ -144,7 +144,7 @@
 !----------------------------------------------------------------------
 !***
 !***  local variables
-      real(kind=kind_phys) spd1_m(im)
+      real(kind=kind_phys) spd1_m
 !***
       integer i,is,k,n,ndt,km1,kmpbl,kmscu,ntrac1,idtend
       integer kps,kbx,kmx
@@ -2379,13 +2379,13 @@ c
          enddo
       enddo
       do i = 1,im
-        if(icplocn2atm == 1) then
-          spd1_m(i)=sqrt( (u1(i,1)-ssu(i))**2+(v1(i,1)-ssv(i))**2 )
-          dusfc(i) = -1.*rho_a(i)*stress(i)*(u1(i,1)-ssu(i))/spd1_m(i)
-          dvsfc(i) = -1.*rho_a(i)*stress(i)*(v1(i,1)-ssv(i))/spd1_m(i)
-        else
+        if(icplocn2atm == 0) then
           dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
           dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
+        else
+          spd1_m=sqrt( (u1(i,1)-ssu(i))**2+(v1(i,1)-ssv(i))**2 )
+          dusfc(i) = -1.*rho_a(i)*stress(i)*(u1(i,1)-ssu(i))/spd1_m
+          dvsfc(i) = -1.*rho_a(i)*stress(i)*(v1(i,1)-ssv(i))/spd1_m
         endif
       enddo
 !

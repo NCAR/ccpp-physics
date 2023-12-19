@@ -40,7 +40,7 @@
 !    call sfc_ocean                                                     !
 !       inputs:                                                         !
 !        ( im, ps, u1, v1, t1, q1, tskin, cm, ch, lseaspray, fm, fm10,  !
-!            ssu, ssv, icplocn2atm,                                     !
+!             ssu, ssv, icplocn2atm,                                    !
 !            prsl1, prslki, wet, use_lake_model, wind, flag_iter,       !
 !            use_med_flux,                                              !
 !       outputs:                                                        !
@@ -69,8 +69,8 @@
 !     ps       - real, surface pressure                            im   !
 !     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
 !     ssu,ssv - real, u/v component of surface ocean current (m/s) im   !
-!     icplocn2atm - integer, option for including                  1    !
-!                       ocean current in the computation of flux        !
+!     icplocn2atm - integrt, =1 if ssu and ssv are used in the     1    !
+!                computation of air-sea fluxes                          !
 !     t1       - real, surface layer mean temperature ( k )        im   !
 !     q1       - real, surface layer mean specific humidity        im   !
 !     tskin    - real, ground surface skin temperature ( k )       im   !
@@ -110,19 +110,18 @@
      &           zero = 0.0_kind_phys, qmin = 1.0e-8_kind_phys
 !  ---  inputs:
       integer, intent(in) :: im
-      integer, intent(in) :: icplocn2atm
       real (kind=kind_phys), intent(in) :: hvap, cp, rd,                &
      &                 eps, epsm1, rvrdm1
 
       real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,    &
-     &      t1, q1, tskin, cm, ch, fm, fm10, prsl1, prslki, wind, ssu,  & 
-     &      ssv
+     &    t1, q1, tskin, cm, ch, fm, fm10, prsl1, prslki, wind, ssu,ssv
 
 ! For sea spray effect
       logical, intent(in) :: lseaspray
 !
       logical, dimension(:), intent(in) :: flag_iter, wet
       integer, dimension(:), intent(in) :: use_lake_model
+      integer, intent(in) :: icplocn2atm
 !
       logical, intent(in) :: use_med_flux
 
@@ -140,8 +139,9 @@
 !  ---  locals:
 
       real (kind=kind_phys) :: qss, rch, tem,
-     &                         elocp, cpinv, hvapi, windrel(im)
+     &                         elocp, cpinv, hvapi
       real (kind=kind_phys), dimension(im) :: rho, q0
+      real (kind=kind_phys), dimension(im) :: windrel
 
       integer :: i
 
@@ -165,16 +165,6 @@
       errmsg = ''
       errflg = 0
 
-      if(icplocn2atm == 1) then
-         do i=1,im
-         windrel(i) = sqrt((u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2)
-         enddo
-      else
-         do i=1,im
-         windrel(i) = wind(i)
-         enddo
-      endif
-
       cpinv = one/cp
       hvapi = one/hvap
       elocp = hvap/cp
@@ -187,12 +177,21 @@
 !           rho is density, qss is sat. hum. at surface
 
         if ( flag(i) ) then
+          if (icplocn2atm == 1) then
+          windrel(i)=sqrt( (u1(i)-ssu(i))**2+(v1(i)-ssv(i))**2 )
+          endif
+          
           if (use_med_flux) then
             q0(i)    = max( q1(i), qmin )
             rho(i)   = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0(i)))
-
-            tem      = ch(i) * windrel(i)
-            cmm(i)   = cm(i) * windrel(i)
+            
+            if (icplocn2atm == 0) then
+              tem      = ch(i) * wind(i)
+              cmm(i)   = cm(i) * wind(i)
+            else
+              tem      = ch(i) * windrel(i)
+              cmm(i)   = cm(i) * windrel(i)
+            endif
             chh(i)   = rho(i) * tem
 
             hflx(i)  = dtsfc_med(i)
@@ -209,9 +208,15 @@
 
 !  --- ...    rcp  = rho cp ch v
 
-            rch      = rho(i) * cp * ch(i) * windrel(i)
-            tem      = ch(i) * windrel(i)
-            cmm(i)   = cm(i) * windrel(i)
+            if (icplocn2atm == 0) then
+              rch      = rho(i) * cp * ch(i) * wind(i)
+              tem      = ch(i) * wind(i)
+              cmm(i)   = cm(i) * wind(i)
+            else
+              rch      = rho(i) * cp * ch(i) * windrel(i)
+              tem      = ch(i) * windrel(i)
+              cmm(i)   = cm(i) * windrel(i)
+            endif
             chh(i)   = rho(i) * tem
 
 !> - Calcualte sensible and latent heat flux over open water

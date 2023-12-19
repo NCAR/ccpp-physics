@@ -240,21 +240,12 @@ contains
     !     real (kind=kind_phys), parameter :: alps=1.0, bets=1.0, gams=0.2,
     real (kind=kind_phys), parameter :: alps=0.75,bets=0.75,gams=0.15, &
          ws10cr=30., conlf=7.2e-9, consf=6.4e-8
-    real (kind=kind_phys) :: windrel(im)
+    real (kind=kind_phys) :: windrel
     !
     !======================================================================================================
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-    if(icplocn2atm ==1) then
-      do i=1,im
-        windrel(i) = sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
-      enddo
-    else
-      do i=1,im
-        windrel(i) = wind(i)
-      enddo
-    endif
 
     if (nstf_name1 == 0) return ! No NSST model used
 
@@ -326,9 +317,16 @@ contains
 
           !  --- ...  rcp = rho cp ch v
 
-          rch(i)     = rho_a(i) * cp * ch(i) * windrel(i)
-          cmm(i)     = cm (i)   * windrel(i)
-          chh(i)     = rho_a(i) * ch(i) * windrel(i)
+          if(icplocn2atm ==0) then
+            rch(i)     = rho_a(i) * cp * ch(i) * wind(i)
+            cmm(i)     = cm (i)   * wind(i)
+            chh(i)     = rho_a(i) * ch(i) * wind(i)
+          else
+            windrel= sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
+            rch(i)     = rho_a(i) * cp * ch(i) * windrel
+            cmm(i)     = cm (i)   * windrel
+            chh(i)     = rho_a(i) * ch(i) * windrel
+          endif
 
           !> - Calculate latent and sensible heat flux over open water with tskin.
           !           at previous time step
