@@ -17,9 +17,9 @@ CONTAINS
 
    IMPLICIT NONE
 
-   INTEGER,      INTENT(IN   ) :: julday,                         &
-                                  ids,ide, jds,jde, kds,kde,      &
-                                  ims,ime, jms,jme, kms,kme,               &
+   INTEGER,      INTENT(IN   ) :: julday,                           &
+                                  ids,ide, jds,jde, kds,kde,        &
+                                  ims,ime, jms,jme, kms,kme,        &
                                   its,ite, jts,jte, kts,kte
 
    real(kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme, num_chem ),                 &
@@ -49,14 +49,14 @@ CONTAINS
     ! bx_bburn  =  20.041288 * 3600.,  RAR: this depends on the vegetation class, location (local time) etc.
     real(kind_phys) :: timeq, fire_age, age_hr,  dt1,dt2,dtm         ! For BB emis. diurnal cycle calculation
    ! For Gaussian diurnal cycle
-   REAL, PARAMETER :: sc_factor=1.  ! to scale up the wildfire emissions, TBD later
-   REAL, PARAMETER :: rinti=2.1813936e-8, ax2=3400., const2=130., &
-                      coef2=10.6712963e-4, cx2=7200., timeq_max=3600.*24.
+   real(kind_phys), PARAMETER :: sc_factor=1.  ! to scale up the wildfire emissions, TBD later
+   real(kind_phys), PARAMETER :: rinti=2.1813936e-8, ax2=3400., const2=130., &
+                   coef2=10.6712963e-4, cx2=7200., timeq_max=3600.*24.
 !>-- Fire parameters
-  real(kind=kind_phys), dimension(1:5), parameter :: avg_fire_dur   = (/8.9, 4.2, 3.3, 3.0, 1.4/)
-  real(kind=kind_phys), dimension(1:5), parameter :: sigma_fire_dur = (/8.7, 6.0, 5.5, 5.2, 2.4/)
+   real(kind_phys), dimension(1:5), parameter :: avg_fire_dur   = (/8.9, 4.2, 3.3, 3.0, 1.4/)
+   real(kind_phys), dimension(1:5), parameter :: sigma_fire_dur = (/8.7, 6.0, 5.5, 5.2, 2.4/)
 
-    timeq= gmt*3600. + real(time_int,4)
+    timeq= gmt*3600._kind_phys + real(time_int,4)
     timeq= mod(timeq,timeq_max)
 
 
@@ -94,28 +94,26 @@ CONTAINS
 
           SELECT CASE ( fire_type(i,j) )   !Ag, urban fires, bare land etc.
           CASE (1)
-           !   these fires will have exponentially decreasing diurnal cycle,
-           !   these fires decrease 55% in 2 hours, end in 5 hours
-            !   r_q(i,j) = rinti* ax1 * exp(- (time_int**2)/(cx1**2) )
-              ! We assume 1hr latency in ingesting the sat. data 
-             coef_bb_dc(i,j) = 1./((2*pi)**0.5 * sigma_fire_dur(1) *fire_age) * &
+             ! these fires will have exponentially decreasing diurnal cycle,
+             ! We assume 1hr latency in ingesting the sat. data 
+             coef_bb_dc(i,j) = 1._kind_phys/((2*pi)**0.5_kind_phys * sigma_fire_dur(1) *fire_age) * &
                            exp(- ( log(fire_age) - avg_fire_dur(1))**2 /(2*sigma_fire_dur(1)**2 ))
           CASE (3)
-             age_hr= fire_age/3600.
+             age_hr= fire_age/3600._kind_phys
 
              IF (swdown(i,j)<.1 .AND. age_hr> 12. .AND. fhist(i,j)>0.75) THEN
-                 fhist(i,j)= 0.75
+                 fhist(i,j)= 0.75_kind_phys
              ENDIF
              IF (swdown(i,j)<.1 .AND. age_hr> 24. .AND. fhist(i,j)>0.5) THEN
-                 fhist(i,j)= 0.5
+                 fhist(i,j)= 0.5_kind_phys
              ENDIF
              IF (swdown(i,j)<.1 .AND. age_hr> 48. .AND. fhist(i,j)>0.25) THEN
-                 fhist(i,j)= 0.25
+                 fhist(i,j)= 0.25_kind_phys
              ENDIF
    
              ! this is based on hwp, hourly or instantenous TBD
-             dc_hwp= ebu_in(i,j)* hwp(i,j)/ MAX(1.,hwp_prevd(i,j))
-             dc_hwp= MAX(0.,dc_hwp)
+             dc_hwp= ebu_in(i,j)* hwp(i,j)/ MAX(1._kind_phys,hwp_prevd(i,j))
+             dc_hwp= MAX(0._kind_phys,dc_hwp)
    
              !coef_bb_dc(i,j)=  sc_factor* fhist(i,j)* rate_ebb2(i,j)* (1. + log(
              !hwp_(i,j)/ hwp_day_avg(i,j))) 
@@ -124,32 +122,38 @@ CONTAINS
              dt1= abs(timeq - peak_hr(i,j))
              dt2= timeq_max - peak_hr(i,j) + timeq   ! peak hour is always <86400.
              dtm= MIN(dt1,dt2)
-             dc_gp = rinti*( ax2 * exp(- dtm**2/(2.*cx2**2) ) + const2 - coef2*timeq )
-             dc_gp = MAX(0.,dc_gp)
+             dc_gp = rinti*( ax2 * exp(- dtm**2/(2._kind_phys*cx2**2) ) + const2 - coef2*timeq )
+             dc_gp = MAX(0._kind_phys,dc_gp)
    
-             dc_fn = MAX(dc_hwp/dc_gp,3.)
-             coef_bb_dc(i,j) = sc_factor* fhist(i,j)* dc_fn
-   
-             do k=kts,kfire_max
-                conv= coef_bb_dc(i,j)*dtstep/(rho_phy(i,k,j)* dz8w(i,k,j))
-  
-                dm_smoke= conv*ebu(i,k,j)
-   !              print*,'hli dm_smoke',dm_smoke,conv,ebu(i,k,j,p_ebu_smoke)
-  
-                chem(i,k,j,p_smoke) = chem(i,k,j,p_smoke) + dm_smoke
-                chem(i,k,j,p_smoke) = MIN(chem(i,k,j,p_smoke),5.e+3)
-  
-                if ( dbg_opt .and. (k==kts .OR. k==kfire_max) ) then
-                  WRITE(6,*) 'add_emiss_burn: i,j,k ',i,j,k
-                  WRITE(6,*) 'add_emiss_burn: rho_phy(i,k,j),dz8w(i,k,j),conv ',rho_phy(i,k,j),dz8w(i,k,j),conv
-                  WRITE(6,*) 'add_emiss_burn: ebu(i,k,j),dm_smoke ', ebu(i,k,j),dm_smoke
-                endif
-             enddo
+             dc_fn = MAX(dc_hwp/dc_gp,3._kind_phys)
+             coef_bb_dc(i,j) = fhist(i,j)* dc_fn
           CASE DEFAULT
           END SELECT
        enddo
       enddo
      endif
+
+     do j=jts,jte
+      do i=its,ite
+       do k=kts,kfire_max
+           if (ebb_dcycle==1) then
+            conv= dtstep/(rho_phy(i,k,j)* dz8w(i,k,j))
+           elseif (ebb_dcycle==2) then
+            conv= sc_factor*coef_bb_dc(i,j)*dtstep/(rho_phy(i,k,j)* dz8w(i,k,j))
+           endif
+           dm_smoke= conv*ebu(i,k,j)
+           chem(i,k,j,p_smoke) = chem(i,k,j,p_smoke) + dm_smoke
+           chem(i,k,j,p_smoke) = MIN(chem(i,k,j,p_smoke),5.e+3)
+
+           if ( dbg_opt .and. (k==kts .OR. k==kfire_max) ) then
+             WRITE(6,*) 'add_emiss_burn: i,j,k ',i,j,k
+             WRITE(6,*) 'add_emiss_burn: rho_phy(i,k,j),dz8w(i,k,j),conv',rho_phy(i,k,j),dz8w(i,k,j),conv
+             WRITE(6,*) 'add_emiss_burn: ebu(i,k,j),dm_smoke ', ebu(i,k,j),dm_smoke
+           endif
+       enddo
+      enddo
+     enddo
+
 
     END subroutine add_emis_burn
 

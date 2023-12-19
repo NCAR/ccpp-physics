@@ -614,7 +614,7 @@
   intent = in
 [nchem]
   standard_name = number_of_chemical_species_vertically_mixed
-  long_name = number of chemical vertically mixed
+  long_name = number of chemical species vertically mixed
   units = count
   dimensions = ()
   type = integer

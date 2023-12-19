@@ -9,7 +9,7 @@ module dep_dry_emerson_mod
 
   use machine ,        only : kind_phys
   use dep_data_mod     ! JLS
-  use rrfs_smoke_config
+  use rrfs_smoke_config, only : num_chem, p_smoke, p_dust_1, p_coarse_pm
 
   implicit none
 
@@ -20,7 +20,7 @@ module dep_dry_emerson_mod
 contains
     subroutine dry_dep_driver_emerson(rmol,ustar,znt,ndvel,ddvel,vgrav,   &
                chem,delz,snowh,t_phy,p_phy,rho_phy,ivgtyp,g0,dt,          &
-               settling_flag,drydep_flux,settling_flux,                   &
+               settling_flag,drydep_flux,settling_flux,dbg_opt,           &
                ids,ide, jds,jde, kds,kde,                                 &
                ims,ime, jms,jme, kms,kme,                                 &
                its,ite, jts,jte, kts,kte                                  )
@@ -38,13 +38,14 @@ contains
                                    ims,ime, jms,jme, kms,kme,              &
                                    its,ite, jts,jte, kts,kte
        REAL(kind_phys), DIMENSION( ims:ime , jms:jme )        ,            &
-           INTENT(INOUT) :: ustar, rmol, znt, snowh
+           INTENT(IN) :: ustar, rmol, znt, snowh
        REAL(kind_phys), DIMENSION( ims:ime , kms:kme , jms:jme ),          &
            INTENT(IN   ) :: t_phy, rho_phy, p_phy, delz                    
        INTEGER, DIMENSION(ims:ime,jms:jme), INTENT(IN) ::  ivgtyp          
        REAL(kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme, num_chem ),  &
                                              INTENT(INOUT ) :: chem
        REAL(kind_phys), INTENT(IN) :: g0,dt
+       LOGICAL, INTENT(IN) :: dbg_opt
  !
  ! Output arrays
        REAL(kind_phys), DIMENSION( ims:ime, jms:jme, ndvel ), INTENT(INOUT) :: ddvel
@@ -73,6 +74,7 @@ contains
        real(kind_phys) :: Rs                      ! Surface resistance
        real(kind_phys) :: vgpart
        real(kind_phys) :: growth_fac,vsettl,dtmax,conver,converi,dzmin
+       real(kind_phys) :: rmol_local
        real(kind_phys), dimension( kts:kte) :: rho_col, delz_col
        real(kind_phys), dimension(ndvel)    :: dt_settl, chem_before, chem_after
        real(kind_phys), dimension( kts:kte, ndvel ) :: cblk_col, vg_col
@@ -93,6 +95,7 @@ contains
        do j = jts, jte
           do i = its, ite
              aer_res(i,j) = 0.0
+             rmol_local = rmol(i,j)
              do k = kts, kte
                 delz_col(k) = delz(i,k,j)
                 rho_col(k)  = rho_phy(i,k,j)
@@ -108,14 +111,9 @@ contains
                 !     where beta = 1.458e-6 [ kg sec^-1 K**-0.5 ], s = 110.4 [ K ].
                 amu = 1.458E-6 * t_phy(i,k,j) * sqrt(t_phy(i,k,j)) / ( t_phy(i,k,j) + 110.4 )
                 ! Aerodynamic resistance
-                call depvel( rmol(i,j), dep_ref_hgt, znt(i,j), ustar(i,j), vgpart, aer_res(i,j) )
+                call depvel( rmol_local, dep_ref_hgt, znt(i,j), ustar(i,j), vgpart, aer_res(i,j) )
                 ! depvel uses meters, need to convert to s/cm
-                aer_res(i,j) = max(aer_res(i,j)/100.,0.) 
-                ! Get the aerosol properties dp and aerodens and mean free path (xlm)
-                ! FOR RRFS-SD, diameters and densities are explicityly defined
-                !call modpar( cblk,t_phy(i,k,j),p_phy(i,k,j), amu,               &
-                !             pmasssn,pmassa,pmassc,pdensn,pdensa,pdensc,        &
-                !             dgnuc,dgacc,dgcor,knnuc,knacc,kncor,xlm, ndvel     )
+                aer_res(i,j) = max(aer_res(i,j)/100._kind_phys,0._kind_phys) 
                 ! Air kinematic viscosity (cm^2/s)
                 airkinvisc = ( 1.8325e-4 * ( 416.16 / ( t_phy(i,k,j) + 120.0 ) ) *   &
                              ( ( t_phy(i,k,j) / 296.16 )**1.5 ) ) / ( rho_phy(i,k,j) / 28.966e3 ) ! Convert density to mol/cm^3
@@ -182,6 +180,10 @@ contains
                       ! Compute final ddvel = aer_res + RS, set max at max_dep_vel in dep_data_mod.F[ m/s]
                       ! The /100. term converts from cm/s to m/s, required for MYNN.
                       ddvel(i,j,nv) = min( (1. / (aer_res(i,j) + Rs ))/100., max_dep_vel)
+                      if ( dbg_opt ) then
+                         WRITE(6,*) 'dry_dep_mod_emerson: i,j,nv',i,j,nv
+                         WRITE(6,*) 'dry_dep_mod_emerson: deposition velocity (m/s) ',ddvel(i,j,nv)
+                      endif
                       drydep_flux(i,j,nv) = chem(i,kts,j,chem_pointers(nv))*p_phy(i,kts,j) / &
                                             (RSI*t_phy(i,kts,j))*ddvel(i,j,nv)*dt*1.E-6 
                    endif ! k == kts
@@ -216,9 +218,10 @@ contains
                ndt_settl(nv) = MAX( 1, INT( ntdt /dtmax) )
                ! Limit maximum number of iterations
                IF (ndt_settl(nv) > 12) ndt_settl(nv) = 12 
-               dt_settl(nv) = REAL(ntdt) / REAL(ndt_settl(nv))
+               dt_settl(nv) = REAL(ntdt,kind=kind_phys) /REAL(ndt_settl(nv),kind=kind_phys)
              enddo
              do nv = 1, ndvel
+               chem_before(nv) = 0._kind_phys
                do k = kts, kte
                 chem_before(nv) = chem_before(nv) + (cblk_col(k,nv) * rho_phy(i,k,j) * delz(i,k,j) ) ! ug/m2
               enddo
@@ -229,6 +232,8 @@ contains
              endif
              ! Put cblk back into chem array
              do nv= 1, ndvel
+                chem_after(nv) = 0._kind_phys
+                settling_flux(i,j,nv) = 0._kind_phys
                 do k = kts, kte
                    chem(i,k,j,chem_pointers(nv)) = cblk_col(k,nv)
                    chem_after(nv) = chem_after(nv) + (cblk_col(k,nv) * rho_phy(i,k,j) * delz(i,k,j) ) ! ug/m2
@@ -302,7 +307,7 @@ subroutine depvel( rmol, zr, z0, ustar, vgpart, aer_res )
         ELSE IF (rmol==0.) THEN
           polint = 0.74*alog(zr/z0)
         ELSE
-          polint = 0.74*alog(zr/z0) + 4.7*rmol*(zr-z0)
+          polint = 0.74_kind_phys*alog(zr/z0) + 4.7_kind_phys*rmol*(zr-z0)
         END IF
         vgpart = ustar*vk/polint
         aer_res = polint/(karman*max(ustar,1.0e-4))
@@ -310,81 +315,6 @@ end subroutine depvel
 !
 !--------------------------------------------------------------------------------
 !
-subroutine modpar(  cblk, blkta, blkprs, amu,                   &
-                    pmassn,pmassa,pmassc, pdensn,pdensa,pdensc, &
-                    dgnuc,dgacc,dgcor,knnuc,knacc,kncor, xlm,ndvel   )
-        IMPLICIT NONE
-
-        INTEGER, INTENT(IN) :: ndvel
-        REAL(kind_phys), DIMENSION(ndvel), INTENT( IN) :: cblk
-        REAL(kind_phys), INTENT(IN ) :: blkta, blkprs, amu
-        REAL(kind_phys), INTENT(OUT) :: pmassn,pmassa,pmassc,pdensn,pdensa,pdensc, &
-                                        dgnuc,dgacc,dgcor,knnuc,knacc,kncor,xlm
-!
-! Local
-        REAL(kind_phys) :: xxlsgn,xxlsga,xxlsgc,l2sginin,l2sginia,l2sginic, &
-                           en1,ea1,ec1,esn04,esa04,esc04, &
-                           esn08,esa08,esc08,esn16,esa16,esc16, &
-                           esn20,esa20,esc20,esn36,esa36,esc36
-        REAL(kind_phys), DIMENSION( 6 )     :: nblk ! number densities
-! Pointers
-        INTEGER, PARAMETER :: vnu0  = 1
-        INTEGER, PARAMETER :: vac0  = 2
-        INTEGER, PARAMETER :: vcorn = 3
-        INTEGER, PARAMETER :: vnu3  = 4
-        INTEGER, PARAMETER :: vac3  = 5
-        INTEGER, PARAMETER :: vcor3 = 6
-!
-        xxlsgn = log(sginin)
-        xxlsga = log(sginia)
-        xxlsgc = log(sginic)
-        l2sginin = xxlsgn**2
-        l2sginia = xxlsga**2
-        l2sginic = xxlsgc**2
-        en1 = exp(0.125*l2sginin)
-        ea1 = exp(0.125*l2sginia)
-        ec1 = exp(0.125*l2sginic)
-        esn04 = en1**4
-        esa04 = ea1**4
-        esc04 = ec1**4
-        esn08 = esn04*esn04
-        esa08 = esa04*esa04
-        esc08 = esc04*esc04
-        esn16 = esn08*esn08
-        esa16 = esa08*esa08
-        esc16 = esc08*esc08
-        esn20 = esn16*esn04
-        esa20 = esa16*esa04
-        esc20 = esc16*esc04
-        esn36 = esn16*esn20
-        esa36 = esa16*esa20
-        esc36 = esc16*esc20
-! First step in WRF-Chem is to add together the aitken, accumulation, and coarse modes
-! Calculate number densities
-        nblk(vnu0)  = max(conmin,0.0)
-        nblk(vnu3)  = max(conmin,0.0)
-        nblk(vac0)  = max(conmin, (cblk(1)/rhosmoke + cblk(2)/rhodust)*fact_wfa)
-        nblk(vcorn) = max(conmin, cblk(3)/rhodust*fact_wfa)
-        nblk(vac3)  = max(conmin,smokefac*cblk(2) + dustfac*cblk(1)) ! Accumulation is smoke + fine dust
-        nblk(vcor3) = max(conmin,dustfac*cblk(3))
-! Dust in coarse
-        pmassn = max(conmin,0.0)
-        pmassa = max(conmin,cblk(1) + cblk(2))
-        pmassc = max(conmin,cblk(3))
-        pdensn = max(conmin,0.0)
-        pdensa = max(densmin,(f6dpim9*pmassa/nblk(vac3)))
-        pdensc = max(densmin,(f6dpim9*pmassc/nblk(vcor3)))
-! Calculate mean free path
-        xlm    = 6.6328E-8*pss0*blkta/(tss0*blkprs*1.e3)
-! Calculate diameters
-        dgnuc  = max(dgmin,0.0)
-        dgacc  = max(dgmin,(nblk(vac3)/(nblk(vac0)*esa36))**one3)
-        dgcor  = max(dgmin,(nblk(vcor3)/(nblk(vcorn)*esc36))**one3)
-! Calculate Knudsen numbers
-        knnuc  = 2.0*xlm/dgnuc
-        knacc  = 2.0*xlm/dgacc
-        kncor  = 2.0*xlm/dgcor
-end subroutine modpar
 !
 !--------------------------------------------------------------------------------
 !

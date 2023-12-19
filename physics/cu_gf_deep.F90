@@ -223,6 +223,7 @@ contains
      real(kind=kind_phys), dimension (its:ite,nchem)                   &
          , intent (out) :: wetdpc_deep
      real(kind=kind_phys), intent (in) :: fscav(:)
+!$acc declare copy(chem3d) copyout(wetdpc_deep) copyin(fscav)
 
      real(kind=kind_phys)                                              &
         ,intent (in   )                   ::                           &
@@ -314,6 +315,8 @@ contains
      real(kind=kind_phys), dimension (kts:kte) :: trac,trcflx_in,trcflx_out,trc,trco
      real(kind=kind_phys), dimension (its:ite,kts:kte) :: pwdper, massflx
      integer :: nv
+!$acc declare create(chem,chem_cup,chem_up,chem_down,dellac,dellac2,chem_c,chem_pw,chem_pwd,   &
+!$acc                         chem_pwav,chem_psum,pwdper,massflux)
 
      real(kind=kind_phys),    dimension (its:ite,kts:kte) ::            &
         entr_rate_2d,mentrd_rate_2d,he,hes,qes,z, heo,heso,qeso,zo,     &                    
@@ -424,7 +427,7 @@ contains
      integer, dimension (its:ite,kts:kte) ::  k_inv_layers 
      real(kind=kind_phys),    dimension (its:ite) :: c0    ! HCB
      real(kind=kind_phys),    dimension (its:ite,kts:kte) :: c0t3d    ! hli for smoke/dust wet scavenging
-!$acc declare create(pmin_lev,start_level,ktopkeep,dtempdz,k_inv_layers,c0)
+!$acc declare create(pmin_lev,start_level,ktopkeep,dtempdz,k_inv_layers,c0,c0t3d)
  
 ! rainevap from sas
      real(kind=kind_phys) zuh2(40)
@@ -2046,6 +2049,7 @@ contains
 ! initialize tracers if they exist
 !
          chem (:,:,:) = 0.
+!$acc kernels
          do nv = 1,nchem
           do k = 1, ktf
            do i = 1, itf
@@ -2069,7 +2073,7 @@ contains
          do i=its,itf
            if(ierr(i).eq.0)then
            do k=kts,jmin(i)
-              pwdper(i,k)=-edtc(i,1)*pwdo(i,k)/pwavo(i)
+             if(pwavo(i).ne.0.) pwdper(i,k)=-edtc(i,1)*pwdo(i,k)/pwavo(i)
            enddo
            pwdper(i,:)=0.
            do nv=1,nchem
@@ -2094,8 +2098,6 @@ contains
                 trash=chem_c(i,k,nv)/(1.+c0t3d(i,k)*dz)
                 chem_pw=c0t3d(i,k)*dz*trash*zuo(i,k)
                 chem_up(i,k,nv)=trash2+trash
-!               chem_pw(i,k,nv)=min(chem_up(i,k,nv),chem_c(i,k,nv)*pwo(i,k)/zuo(i,k)/(1.e-8+qrco(i,k)))
-!               chem_up(i,k,nv)=chem_up(i,k,nv)-chem_pw(i,k,nv)
                 chem_pwav(i,nv)=chem_pwav(i,nv)+chem_pw(i,k,nv)! *g/dp
               enddo
               do k=ktop(i)+1,ktf
@@ -2109,11 +2111,11 @@ contains
                do ki=jmin(i),2,-1
                  dp=100.*(po_cup(i,ki)-po_cup(i,ki+1))
                  chem_down(i,ki,nv)=(chem_down(i,ki+1,nv)*zdo(i,ki+1)          &
-                       -.5*dd_massdetro(i,ki)*chem_down(i,ki+1,nv)+            &
+                       -.5_kind_phys*dd_massdetro(i,ki)*chem_down(i,ki+1,nv)+            &
                        dd_massentro(i,ki)*chem(i,ki,nv))   /                   &
-                       (zdo(i,ki+1)-.5*dd_massdetro(i,ki)+dd_massentro(i,ki))
+                       (zdo(i,ki+1)-.5_kind_phys*dd_massdetro(i,ki)+dd_massentro(i,ki))
                  chem_down(i,ki,nv)=chem_down(i,ki,nv)+pwdper(i,ki)*chem_pwav(i,nv)
-                 chem_pwd(i,ki,nv)=max(0.,pwdper(i,ki)*chem_pwav(i,nv))
+                 chem_pwd(i,ki,nv)=max(0._kind_phys,pwdper(i,ki)*chem_pwav(i,nv))
                enddo
 !   total wet deposition
                do k=1,ktf-1
@@ -2167,6 +2169,7 @@ contains
       dellac2(:,:,:)=0.
       massflx(:,:)=0.
       do nv=1,nchem
+!$acc loop private(trcflx_in)
       do i=its,itf
         if(ierr(i).eq.0)then
          trcflx_in(:)=0.
@@ -2174,8 +2177,8 @@ contains
 
 ! initialize fct routine
          do k=kts,ktop(i)
-            dp=100.*(po_cup(i,k)-po_cup(i,k+1))
-            dtime_max=min(dtime_max,.5*dp)
+            dp=100._kind_phys*(po_cup(i,k)-po_cup(i,k+1))
+            dtime_max=min(dtime_max,.5_kind_phys*dp)
             massflx(i,k)=-xmb(i)*(zuo(i,k)-edto(i)*zdo(i,k))
             trcflx_in(k)=massflx(i,k)*chem_cup(i,k,nv)
          enddo
@@ -2212,6 +2215,7 @@ contains
           wetdpc_deep(i,nv)=max(wetdpc_deep(i,nv),qamin)
          enddo
         enddo
+!$acc end kernels
 
       endif ! nchem > 0
 
@@ -4345,6 +4349,7 @@ endif
         ,intent (in   )                   ::                      &
         kbcon,ktop,k22,xland1
 !$acc declare copyin(p_cup,rho,q,zu,gamma_cup,qe_cup,up_massentr,up_massdetr,dby,qes_cup,z_cup,zqexec,c0,kbcon,ktop,k22,xland1)
+!$acc declare copy(c0t3d)
      real(kind=kind_phys),    intent (in  ) ::                    & ! HCB
         ccnclean
 !
@@ -4421,7 +4426,9 @@ endif
         c0_iceconv=0.01
         c1d_b=c1d
         bdsp(:)=bdispm
+!$acc kernels
         c0t3d = 0.
+!$acc end kernels
 
 !
 !--- no precip for small clouds

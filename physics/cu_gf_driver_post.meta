@@ -85,7 +85,7 @@
   intent = out
 [rrfs_sd]
   standard_name = do_smoke_coupling
-  long_name = flag controlling rrfs_sd collection (default off)
+  long_name = flag controlling rrfs_sd collection
   units = flag
   dimensions = ()
   type = logical

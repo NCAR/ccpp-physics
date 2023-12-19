@@ -32,6 +32,9 @@ subroutine wetdep_ls(dt,var,rain,moist,                                         
    integer :: nv,i,j,k,km,kb,kbeg
   !real(kind_phys), parameter :: alpha = .5 ! scavenging factor
 
+    wetdpr_smoke   =0.
+    wetdpr_dust    =0.
+    wetdpr_coarsepm=0.
 
     do nv=1,nchem
       do i=its,ite

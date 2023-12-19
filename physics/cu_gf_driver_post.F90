@@ -35,7 +35,7 @@ module cu_gf_driver_post
       integer,          intent(in)  :: ntsmoke, ntdust, ntcoarsepm
       real(kind_phys),  intent(inout) :: chem3d(:,:,:), gq0(:,:,:)
       character(len=*), intent(out) :: errmsg
-!$acc declare copyin(t,q,cactiv,cactiv_m) copyout(prevst,prevsq,conv_act,conv_act_m)
+!$acc declare copyin(t,q,cactiv,cactiv_m) copyout(prevst,prevsq,conv_act,conv_act_m,chem3d,gq0)
       integer, intent(out)          :: errflg
 
       ! Local variables
@@ -61,13 +61,13 @@ module cu_gf_driver_post
           conv_act_m(i)=0.0
         endif
       enddo
-!$acc end kernels
 
       if (rrfs_sd) then
        gq0(:,:,ntsmoke   ) = chem3d(:,:,1)
        gq0(:,:,ntdust    ) = chem3d(:,:,2)
        gq0(:,:,ntcoarsepm) = chem3d(:,:,3)
       endif
+!$acc end kernels
 
    end subroutine cu_gf_driver_post_run
 

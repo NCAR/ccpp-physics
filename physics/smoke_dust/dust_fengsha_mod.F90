@@ -140,9 +140,6 @@ contains
              endif
 
              ! limit where there is lots of vegetation
-             !if (sum(vegfra(i,:,j)) .gt. .17) then
-             !   ilwi = 0
-             !endif
 
              ! limit where there is snow on the ground
              if (snowh(i,j) .gt. 0) then

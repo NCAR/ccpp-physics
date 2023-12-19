@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrfs_smoke_wrapper
   type = scheme
-  dependencies = dep_dry_simple_mod.F90,module_wetdep_ls.F90,dust_data_mod.F90,dust_fengsha_mod.F90,module_add_emiss_burn.F90,module_plumerise1.F90,module_smoke_plumerise.F90,module_zero_plumegen_coms.F90,plume_data_mod.F90,rrfs_smoke_config.F90,seas_data_mod.F90,seas_mod.F90,seas_ngac_mod.F90,coarsepm_settling_mod.F90, dep_dry_mod_emerson.F90,dep_data_mod.F90
+  dependencies = dep_dry_simple_mod.F90,module_wetdep_ls.F90,dust_data_mod.F90,dust_fengsha_mod.F90,module_add_emiss_burn.F90,module_plumerise.F90,module_smoke_plumerise.F90,module_zero_plumegen_coms.F90,plume_data_mod.F90,rrfs_smoke_config.F90,seas_data_mod.F90,seas_mod.F90,seas_ngac_mod.F90,coarsepm_settling_mod.F90, dep_dry_mod_emerson.F90,dep_data_mod.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -50,6 +50,13 @@
   dimensions = ()
   type = logical
   intent = in
+[add_fire_heat_flux_in]
+  standard_name = flag_for_fire_heat_flux
+  long_name = flag to add fire heat flux to LSM
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [do_plumerise_in]
   standard_name = do_smoke_plumerise
   long_name = rrfs smoke plumerise option
@@ -64,7 +71,7 @@
   dimensions = ()
   type = integer
   intent = in
-[wind_eff_opt_in]
+[plume_wind_eff_in]
   standard_name = option_for_wind_effects_on_smoke_plumerise
   long_name = wind effect plumerise option
   units = index
@@ -551,7 +558,7 @@
   standard_name = anthropogenic_background_input
   long_name = anthropogenic background input
   units = various
-  dimensions = (horizontal_loop_extent,4)
+  dimensions = (horizontal_loop_extent,1)
   type = real
   kind = kind_phys
   intent = in
@@ -567,7 +574,7 @@
   standard_name = emission_smoke_prvd_RRFS
   long_name = emission fire RRFS daily
   units = various
-  dimensions = (horizontal_dimension,4)
+  dimensions = (horizontal_loop_extent,4)
   type = real
   kind = kind_phys
   intent = in
@@ -692,7 +699,7 @@
   type = real
   kind = kind_phys
   intent = inout
-[frp_input]
+[frp_output]
   standard_name = frp_hourly
   long_name = hourly fire radiative power
   units = MW

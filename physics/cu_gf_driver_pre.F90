@@ -44,7 +44,7 @@ module cu_gf_driver_pre
       real(kind_phys),  intent(in)  :: conv_act(:)
       real(kind_phys),  intent(in)  :: conv_act_m(:)
       real(kind_phys),  intent(inout) :: chem3d(:,:,:), gq0(:,:,:)
-!$acc declare copyin(conv_act,conv_act_m)
+!$acc declare copyin(conv_act,conv_act_m) copy(chem3d,gq0)
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -81,13 +81,13 @@ module cu_gf_driver_pre
 !$acc kernels
       cactiv(:)=nint(conv_act(:))
       cactiv_m(:)=nint(conv_act_m(:))
-!$acc end kernels
 
       if (rrfs_sd) then
        chem3d(:,:,1) = gq0(:,:,ntsmoke)
        chem3d(:,:,2) = gq0(:,:,ntdust)
        chem3d(:,:,3) = gq0(:,:,ntcoarsepm)
       endif
+!$acc end kernels
 
    end subroutine cu_gf_driver_pre_run
 

@@ -64,7 +64,6 @@ SUBROUTINE coarsepm_settling_driver(dt,t_phy,                         &
           airmas(1,1,kk)=-(p8w(i,k+1,j)-p8w(i,k,j))*area(i,j)/g
           airden(1,1,kk)=rho_phy(i,k,j)
           tmp(1,1,kk)=t_phy(i,k,j)
-!          rh(1,1,kk) = rel_hum(i,k,j) ! hli
           do nv = 1, num_chem
             chem_before(i,j,k,nv) =  chem(i,k,j,nv)  
           enddo

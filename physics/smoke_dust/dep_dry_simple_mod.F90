@@ -26,8 +26,6 @@ contains
                                   its,ite, jts,jte, kts,kte
       REAL(kind_phys),  DIMENSION( ims:ime , jms:jme )        ,           &
           INTENT(INOUT) :: ust, rmol
-!      REAL(kind_phys),  DIMENSION( ims:ime , kms:kme , jms:jme ),         &
-!               INTENT(IN   ) :: rel_hum
 
       REAL(kind_phys), PARAMETER :: kpart=500.
       REAL(kind_phys) :: dvpart
@@ -56,9 +54,6 @@ contains
                dvpart = dvpart*(1.+(-300.*rmol(i,j))**0.66667)
             ENDIF
 
-!            IF (rel_hum(i,1,j)>0.8) THEN    ! HIGH RELATIVE HUMIDITY CORRECTION
-!               dvpart = dvpart*(1.+0.37*exp((rel_hum(i,1,j)-0.8)/0.2))
-!            END IF
             ddvel(i,j,nv) = MIN(0.50,dvpart)        ! m/s
           enddo
          enddo

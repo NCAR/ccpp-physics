@@ -45,7 +45,6 @@ module plume_data_mod
   integer, parameter :: savannah        = 3
   integer, parameter :: grassland       = 4
   integer, parameter :: nveg_agreg      = 4
-!  integer, parameter :: wind_eff        = 1
 
   public
 

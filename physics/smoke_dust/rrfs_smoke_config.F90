@@ -31,6 +31,7 @@ module rrfs_smoke_config
   integer :: ebb_dcycle  = 2 ! 1: read in ebb_smoke(i,24), 2: daily
   logical :: dbg_opt     = .true.
   logical :: aero_ind_fdb = .false.
+  logical :: add_fire_heat_flux= .false.
   logical :: do_rrfs_sd = .true.
 !  integer :: wind_eff_opt = 1
   logical :: extended_sd_diags = .false.
@@ -39,8 +40,6 @@ module rrfs_smoke_config
   ! --
   integer, parameter :: CHEM_OPT_GOCART= 1
   integer, parameter :: num_moist=2, num_chem=20, num_emis_seas=5, num_emis_dust=5
-
-  integer, parameter :: DUST_OPT_FENGSHA = 5
 
   ! -- hydrometeors
   integer, parameter :: p_qv=1

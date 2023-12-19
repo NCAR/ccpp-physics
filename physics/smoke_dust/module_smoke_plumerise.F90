@@ -24,9 +24,7 @@ module module_smoke_plumerise
 CONTAINS
 
 ! RAR:
-    subroutine plumerise(m1,m2,m3,ia,iz,ja,jz,                       &
-!                         firesize,mean_fct,                         &
-                        ! nspecies,eburn_in,eburn_out,               &
+    subroutine plumerise(m1,m2,m3,ia,iz,ja,jz,                      &
                          up,vp,wp,theta,pp,dn0,rv,zt_rams,zm_rams,  &
                          wind_eff_opt,                              &
                          frp_inst,k1,k2, dbg_opt, g, cp, rgas,      &

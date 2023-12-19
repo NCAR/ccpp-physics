@@ -155,9 +155,10 @@ contains
    integer, intent(in   ) :: imfshalcnv
    integer, dimension(:), intent(inout) :: cactiv,cactiv_m
    real(kind_phys), dimension(:), intent(in) :: fscav
+!$acc declare copyin(fscav)
    real(kind_phys), dimension(:,:,:), intent(inout) :: chem3d
    real(kind_phys), dimension(:,:), intent(inout) :: wetdpc_deep
-!$acc declare copy(cactiv,cactiv_m)
+!$acc declare copy(cactiv,cactiv_m,chem3d,wetdpc_deep)
 
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
@@ -188,14 +189,14 @@ contains
    integer, dimension (im) :: k22s,kbcons,ktops,k22,jmin,jminm
    integer, dimension (im) :: kbconm,ktopm,k22m
 !$acc declare create(k22_shallow,kbcon_shallow,ktop_shallow,rand_mom,rand_vmas,        &
-!$acc                rand_clos,gdc,gdc2,ht,ccn_gf,ccn_m,dx,frhm,frhd, &
+!$acc                rand_clos,gdc,gdc2,ht,ccn_gf,ccn_m,dx,frhm,frhd,wetdpc_mid, &
 !$acc                outt,outq,outqc,phh,subm,cupclw,cupclws, &
 !$acc                dhdt,zu,zus,zd,phf,zum,zdm,outum,outvm,   &
 !$acc                outts,outqs,outqcs,outu,outv,outus,outvs, &
 !$acc                outtm,outqm,outqcm,submm,cupclwm,         &
 !$acc                cnvwt,cnvwts,cnvwtm,hco,hcdo,zdo,zdd,hcom,hcdom,zdom, &
 !$acc                tau_ecmwf,edt,edtm,edtd,ter11,aa0,xlandi, &
-!$acc                pret,prets,pretm,hexec,forcing,forcing2,  &
+!$acc                pret,prets,pretm,hexec,forcing,forcing2,wetdpc_mid,  &
 !$acc                kbcon, ktop,ierr,ierrs,ierrm,kpbli, &
 !$acc                k22s,kbcons,ktops,k22,jmin,jminm,kbconm,ktopm,k22m)
 
