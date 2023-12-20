@@ -460,6 +460,8 @@
    real(kind=kind_phys), parameter       ::  ce      = 0.8
    real(kind=kind_phys), parameter       ::  cg      = 0.5
    real(kind=kind_phys), parameter       ::  sgmalolev  = 0.5  ! max sigma lvl for dtfac
+   real(kind=kind_phys), parameter       ::  plolevmeso = 70.0 ! pres lvl for mesosphere OGWD reduction (Pa)
+   real(kind=kind_phys), parameter       ::  facmeso    = 0.5  ! fractional velocity reduction for OGWD
    integer,parameter    ::  kpblmin = 2
 
 !
@@ -472,7 +474,7 @@
                             rcsks,wdir,ti,rdz,tem2,dw2,shr2,      &
                             bvf2,rdelks,wtkbj,tem,gfobnv,hd,fro,  &
                             rim,temc,tem1,efact,temv,dtaux,dtauy, &
-                            dtauxb,dtauyb,eng0,eng1
+                            dtauxb,dtauyb,eng0,eng1,ksmax,dtfac_meso
 !
    logical              ::  ldrag(im),icrilv(im),                 &
                             flag(im),kloop1(im)
@@ -887,6 +889,14 @@ IF ( (do_gsl_drag_ls_bl).and.                            &
          ldrag(i) = ldrag(i) .or. bnv2(i,1).le.0.0
          ldrag(i) = ldrag(i) .or. ulow(i).eq.1.0
          ldrag(i) = ldrag(i) .or. var_stoch(i) .le. 0.0
+!  Check if mesoscale gravity waves will propagate vertically or be evanescent
+!  and not impart a drag force -- consider the maximum sub-grid horizontal
+!  topographic wavelength to be one-half the horizontal grid spacing -- calculate
+!  ksmax accordingly
+         ksmax = 4.0*pi/dx(i)   ! based on wavelength = 0.5*dx(i)
+         if ( bnv2(i,1).gt.0.0 ) then
+            ldrag(i) = ldrag(i) .or. sqrt(bnv2(i,1))*rulow(i).lt.ksmax
+         endif
 !
 !  set all ri low level values to the low level value
 !
@@ -1106,7 +1116,19 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
          enddo
 !
          do k = kts,km
-            taud_ms(i,k)  = taud_ms(i,k)*dtfac(i)* ls_taper(i) *(1.-rstoch(i))
+
+            ! Check if well into mesosphere -- if so, perform similar reduction of
+            ! velocity tendency due to mesoscale GWD to prevent sudden reversal of
+            ! wind direction (similar to above)
+            dtfac_meso = 1.0
+            if (prsl(i,k).le.plolevmeso) then
+               if (taud_ms(i,k).ne.0.)                                  &
+                  dtfac_meso = min(dtfac_meso,facmeso*abs(velco(i,k)    &
+                     /(deltim*rcs*taud_ms(i,k))))
+            end if
+
+            taud_ms(i,k)  = taud_ms(i,k)*dtfac(i)*dtfac_meso*           &
+                               ls_taper(i) *(1.-rstoch(i))
             taud_bl(i,k)  = taud_bl(i,k)*dtfac(i)* ls_taper(i) *(1.-rstoch(i))
 
             dtaux  = taud_ms(i,k) * xn(i)

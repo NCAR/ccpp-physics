@@ -813,7 +813,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [dlwflx]
   standard_name = surface_downwelling_longwave_flux
   long_name = surface downwelling longwave flux at current time
@@ -1746,6 +1746,29 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[add_fire_heat_flux]
+  standard_name = flag_for_fire_heat_flux
+  long_name = flag to add fire heat flux to LSM
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[fire_heat_flux_out]
+  standard_name = surface_fire_heat_flux
+  long_name = heat flux of fire at the surface
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[frac_grid_burned_out]
+  standard_name = fraction_of_grid_cell_burning
+  long_name = ration of the burnt area to the grid cell area
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = in
 [errmsg]
   standard_name = ccpp_error_message

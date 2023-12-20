@@ -13,7 +13,8 @@
                                          gu0, gv0, gt0, gq0, nsamftrac, ntqv,            &
                                          save_u, save_v, save_t, save_q, clw,            &
                                          ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,   &
-                                         ntgnc, nthl, nthnc, nthv, ntgv,ntsigma,         &
+                                         ntgnc, nthl, nthnc, nthv, ntgv,                 &
+                                         ntrz, ntgz, nthz, ntsigma,                      &
                                          cscnv, satmedmf, trans_trac, ras, ntrac,        &
                                          dtidx, index_of_process_dcnv, errmsg, errflg)
 
@@ -22,7 +23,8 @@
       implicit none
 
       integer, intent(in) :: im, levs, nsamftrac, ntqv, index_of_process_dcnv, dtidx(:,:), &
-           ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntrac,ntgnc,nthl,nthnc,nthv,ntgv,ntsigma
+           ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntrac,ntgnc,nthl,nthnc,nthv,ntgv,  &
+           ntrz, ntgz, nthz, ntsigma
       logical, intent(in) :: ldiag3d, qdiag3d, do_cnvgwd, cplchm
       real(kind=kind_phys), dimension(:,:),   intent(in)    :: gu0
       real(kind=kind_phys), dimension(:,:),   intent(in)    :: gv0
@@ -68,6 +70,7 @@
                     n /= ntrw  .and. n /= ntsw  .and. n /= ntrnc   .and. &
                     n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc   .and. &
                     n /= nthl  .and. n /= nthnc .and. n /= nthv    .and. &
+                    n /= ntrz  .and. n /= ntgz  .and. n /= nthz    .and. &
                     n /= ntgv  .and. n/= ntsigma) then
                   tracers = tracers + 1
                   if(dtidx(100+n,index_of_process_dcnv)>0) then

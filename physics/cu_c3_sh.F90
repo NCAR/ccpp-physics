@@ -68,7 +68,8 @@ contains
                          hfx,qfx,xland,ichoice,tcrit,dtime,         &
                          zuo,xmb_out,kbcon,ktop,k22,ierr,ierrc,     &
                          flag_init, flag_restart,fv,r_d,delp,tmf,qmicro, & 
-                         forceqv_spechum,sigmain,sigmaout,progsigma,dx,  &
+                         forceqv_spechum,betascu,betamcu,betadcu,sigmain,&
+                         sigmaout,progsigma,dx,  &
                          outt,outq,outqc,outu,outv,cnvwt,pre,cupclw,     & ! output tendencies
                          itf,ktf,its,ite, kts,kte,ipr,tropics)  ! dimesnional variables
 !
@@ -131,7 +132,7 @@ contains
        
      real(kind=kind_phys)                                                              &
         ,intent (in   )                   ::                           &
-        dtime,tcrit,fv,r_d
+        dtime,tcrit,fv,r_d,betascu,betamcu,betadcu
 !$acc declare sigmaout                                                                                                                                                                                                                      
      real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (out)                     ::                           &
@@ -234,15 +235,18 @@ contains
 !$acc       cap_max_increment,lambau,                                       &
 !$acc       kstabi,xland1,kbmax,ktopx)
 
-     logical :: flag_shallow
+     logical :: flag_shallow,flag_mid
      logical, dimension(its:ite) :: cnvflg
      integer                              ::                           &
        kstart,i,k,ki
-     real(kind=kind_phys)                                 ::                           &
+     real(kind=kind_phys)                 ::                           &
       dz,mbdt,zkbmax,                                                  &
       cap_maxs,trash,trash2,frh,el2orc,gravinv
       
-      real(kind=kind_phys) buo_flux,pgeoh,dp,entup,detup,totmas
+     real(kind=kind_phys) buo_flux,pgeoh,dp,entup,detup,totmas
+     real(kind=kind_phys)                 ::                           &
+          sigmind,sigminm,sigmins
+     parameter(sigmind=0.005,sigmins=0.03,sigminm=0.01)
 
      real(kind=kind_phys) xff_shal(3),blqe,xkshal
      character*50 :: ierrc(its:)
@@ -672,13 +676,13 @@ contains
               dz=z_cup(i,k)-z_cup(i,k-1)
               ! cloud liquid water
               c1d(i,k)=c1_shal! 0. !.02*up_massdetr(i,k-1)
+              clw_all(i,k)=max(0._kind_phys,qco(i,k)-trash)
               qrco(i,k)= (qco(i,k)-trash)/(1.+(c0_shal+c1d(i,k))*dz)
               if(qrco(i,k).lt.0.)then  ! hli new test 02/12/19
                  qrco(i,k)=0.
                  !c1d(i,k)=0.
               endif
               pwo(i,k)=c0_shal*dz*qrco(i,k)*zuo(i,k)
-              clw_all(i,k)=qco(i,k)-trash !LB total cloud before rain and detrain
               ! cloud water vapor 
               qco (i,k)= trash+qrco(i,k)
         
@@ -960,6 +964,7 @@ contains
 ! equation 8, call progsigma_calc() to compute updraft area fraction based on a moisture budget
       if(progsigma)then
          flag_shallow = .true.
+         flag_mid = .false.
          do k=kts,ktf
             do i=its,itf
                del(i,k) = delp(i,k)*0.001
@@ -974,9 +979,9 @@ contains
             endif
          enddo
          call progsigma_calc(itf,ktf,flag_init,flag_restart,flag_shallow,  &
-              del,tmf,qmicro,dbyo,zdqca,omega_u,zeta,xlv,dtime,            &
-              forceqv_spechum,kbcon,ktop,cnvflg,                           &
-              sigmain,sigmaout,sigmab)
+              flag_mid,del,tmf,qmicro,dbyo,zdqca,omega_u,zeta,xlv,dtime,  &
+              forceqv_spechum,kbcon,ktop,cnvflg,betascu,betamcu,betadcu,   &
+              sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)
 
       endif
 

@@ -267,6 +267,27 @@
   dimensions = ()
   type = integer
   intent = in
+[ntrz]
+  standard_name = index_of_reflectivity_of_rain_in_tracer_concentration_array
+  long_name = tracer index for rain reflectivity
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntgz]
+  standard_name = index_of_reflectivity_of_graupel_in_tracer_concentration_array
+  long_name = tracer index for graupel reflectivity
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nthz]
+  standard_name = index_of_reflectivity_of_hail_in_tracer_concentration_array
+  long_name = tracer index for hail reflectivity
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [clw]
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other convective trans. tracers
