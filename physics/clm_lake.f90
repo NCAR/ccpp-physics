@@ -270,7 +270,7 @@ MODULE clm_lake
 
          ! Atmospheric model state inputs:
          tg3, pgr, zlvl, gt0, prsi, phii, qvcurr, gu0, gv0, xlat_d, xlon_d,       &
-         ch, cm, dlwsfci, dswsfci, oro_lakedepth, wind, rho0, tsfc,               &
+         ch, cm, dlwsfci, dswsfci, oro_lakedepth, wind, tsfc,                     &
          flag_iter, flag_lakefreeze, ISLTYP, rainncprv, raincprv,                 &
 
          ! Feedback to atmosphere:
