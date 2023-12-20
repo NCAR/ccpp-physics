@@ -94,8 +94,8 @@ contains
       integer, parameter :: dicycle_m=0 !- diurnal cycle flag
       integer            :: ishallow_g3 ! depend on imfshalcnv
 !-------------------------------------------------------------
-   integer      :: its,ite, jts,jte, kts,kte, nchem
-   integer, intent(in   ) :: im,km,ntracer
+   integer      :: its,ite, jts,jte, kts,kte
+   integer, intent(in   ) :: im,km,ntracer, nchem
    integer, intent(in   ) :: ichoice_in,ichoicem_in,ichoice_s_in
    logical, intent(in   ) :: flag_init, flag_restart, do_mynnedmf
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
