@@ -91,6 +91,30 @@
   dimensions = ()
   type = real
   intent = in
+[shflx]
+  standard_name = surface_upward_temperature_flux
+  long_name = kinematic surface upward sensible heat flux
+  units = K m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[cdq]
+  standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
+  long_name = surface exchange coeff heat & moisture
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[wind]
+  standard_name = wind_speed_at_lowest_model_layer
+  long_name = wind speed at lowest model level
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [zf]
   standard_name = height_above_ground_at_lowest_model_layer
   long_name = layer 1 height above ground (not MSL)
@@ -194,7 +218,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [tskin]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -214,6 +238,20 @@
 [thsfc_loc]
   standard_name = flag_for_reference_pressure_theta
   long_name = flag for reference pressure in theta calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[diag_flux]
+  standard_name = flag_for_flux_method_in_2m_diagnostics
+  long_name = flag for flux method in 2-m diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[diag_log]
+  standard_name = flag_for_log_method_in_2m_diagnostics
+  long_name = flag for log method in 2-m diagnostics
   units = flag
   dimensions = ()
   type = logical
@@ -247,40 +285,10 @@
   type = real
   kind = kind_phys
   intent = in
-[diag_flux]
-  standard_name = flag_for_flux_method_in_2m_diagnostics
-  long_name = flag for flux method in 2-m diagnostics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[diag_log]
-  standard_name = flag_for_log_method_in_2m_diagnostics
-  long_name = flag for log method in 2-m diagnostics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[shflx]
-  standard_name = surface_upward_temperature_flux
-  long_name = kinematic surface upward sensible heat flux
-  units = K m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [lake_q2m]
   standard_name =  specific_humidity_at_2m_from_clm_lake
   long_name = specific humidity at 2m from clm lake
   units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[cdq]
-  standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
-  long_name = surface exchange coeff heat & moisture
-  units = none
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -290,15 +298,7 @@
   long_name = model 2m diagnostics use the temperature and humidity calculated by the lake model
   units = flag
   dimensions = ()
-  type = integer
-  intent = in
-[wind]
-  standard_name = wind_speed_at_lowest_model_layer
-  long_name = wind speed at lowest model level
-  units = m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
+  type = logical
   intent = in
 [f10m]
   standard_name = ratio_of_wind_at_surface_adjacent_layer_to_wind_at_10m

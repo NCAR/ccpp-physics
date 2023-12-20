@@ -41,10 +41,11 @@
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, cpllnd, progsigma, exticeden
       integer, intent(in) :: index_of_temperature,index_of_process_mp,use_lake_model(:)
 
-      integer                                                :: dfi_radar_max_intervals
-      real(kind=kind_phys),                    intent(in)    :: fh_dfi_radar(:), fhour
+      integer,                                 intent(in)    :: dfi_radar_max_intervals
+      real(kind=kind_phys),                    intent(in)    :: fhour
+      real(kind=kind_phys),                    intent(in)    :: fh_dfi_radar(:)
       real(kind=kind_phys),                    intent(in)    :: radar_tten_limits(:)
-      integer                                                :: ix_dfi_radar(:)
+      integer,                                 intent(in)    :: ix_dfi_radar(:)
       real(kind=kind_phys), dimension(:,:),    intent(inout) :: gt0
 
       real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g, rainmin, rhowater

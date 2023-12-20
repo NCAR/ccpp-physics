@@ -2,6 +2,7 @@
   name = GFS_diagtoscreen
   type = scheme
   dependencies = machine.F
+  dependencies = ../../../scm/src/GFS_typedefs.F90,../../../scm/src/CCPP_typedefs.F90
 
 ########################################################################
 [ccpp-arg-table]

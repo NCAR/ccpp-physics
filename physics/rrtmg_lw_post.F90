@@ -19,18 +19,18 @@
       
       implicit none
       
-      integer,                                     intent(in) :: im, levs, ltp, lm, kd
-      logical,                                     intent(in) :: lslwr, lwhtr
-      real(kind=kind_phys), dimension(im),         intent(in) ::  tsfa
-      real(kind=kind_phys), dimension(im, LM+LTP), intent(in) ::  htlwc
-      real(kind=kind_phys), dimension(im, LM+LTP), intent(in) ::  htlw0
+      integer,                               intent(in) :: im, levs, ltp, lm, kd
+      logical,                               intent(in) :: lslwr, lwhtr
+      real(kind=kind_phys), dimension(:),    intent(in) ::  tsfa
+      real(kind=kind_phys), dimension(:, :), intent(in) ::  htlwc
+      real(kind=kind_phys), dimension(:, :), intent(in) ::  htlw0
       
-      type(sfcflw_type), dimension(im),            intent(in) :: sfcflw
+      type(sfcflw_type), dimension(:),       intent(in) :: sfcflw
       
-      real(kind=kind_phys), dimension(im),         intent(inout) ::  tsflw, sfcdlw
-      real(kind=kind_phys), dimension(im, levs),   intent(inout) ::  htrlw, lwhc
-      character(len=*),                            intent(out) :: errmsg
-      integer,                                     intent(out) :: errflg
+      real(kind=kind_phys), dimension(:),    intent(inout) ::  tsflw, sfcdlw
+      real(kind=kind_phys), dimension(:, :), intent(inout) ::  htrlw, lwhc
+      character(len=*),                      intent(out) :: errmsg
+      integer,                               intent(out) :: errflg
       
       ! local variables
       integer :: k1, k

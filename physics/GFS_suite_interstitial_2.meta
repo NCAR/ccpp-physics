@@ -276,21 +276,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[use_LW_jacobian]
-  standard_name = flag_to_calc_RRTMGP_LW_jacobian
-  long_name = logical flag to control RRTMGP LW calculation
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[htrlwu]
-  standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_timestep
-  long_name = total sky longwave heating rate on physics time step
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
 [adjsfculw]
   standard_name = surface_upwelling_longwave_flux
   long_name = surface upwelling longwave flux at current time
@@ -468,6 +453,21 @@
   long_name = definition of NetCDF float FillValue
   units = none
   dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[use_LW_jacobian]
+  standard_name = flag_to_calc_RRTMGP_LW_jacobian
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[htrlwu]
+  standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_timestep
+  long_name = total sky longwave heating rate on physics time step
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in

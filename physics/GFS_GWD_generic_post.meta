@@ -86,6 +86,13 @@
   type = real
   kind = kind_phys
   intent = inout
+[flag_for_gwd_generic_tend]
+  standard_name = flag_for_generic_tendency_due_to_gravity_wave_drag
+  long_name = true if GFS_GWD_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
@@ -128,13 +135,6 @@
   units = index
   dimensions = ()
   type = integer
-  intent = in
-[flag_for_gwd_generic_tend]
-  standard_name = flag_for_generic_tendency_due_to_gravity_wave_drag
-  long_name = true if GFS_GWD_generic should calculate tendencies
-  units = flag
-  dimensions = ()
-  type = logical
   intent = in
 [errmsg]
   standard_name = ccpp_error_message

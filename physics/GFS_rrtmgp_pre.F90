@@ -45,9 +45,9 @@ contains
     ! Inputs
     integer, intent(in) :: &
          nGases       ! Number of active gases in RRTMGP
-    character(len=*), intent(in) :: &
+    character(len=128), intent(in) :: &
          active_gases ! List of active gases from namelist
-    character(len=*), dimension(:), intent(out) :: &
+    character(len=128), dimension(:), intent(out) :: &
          active_gases_array ! List of active gases from namelist as array
 
     ! Outputs

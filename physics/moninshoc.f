@@ -9,6 +9,9 @@
 
       contains
 
+!> \section arg_table_moninshoc_init Argument Table
+!! \htmlinclude moninshocinitn.html
+!!
       subroutine moninshoc_init (do_shoc, errmsg, errflg)
 
       implicit none

@@ -22,13 +22,6 @@
   type = real
   kind = kind_phys
   intent = in
-[levs]
-  standard_name = vertical_layer_dimension
-  long_name = vertical layer dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [fhswr]
   standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
@@ -36,6 +29,13 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = vertical layer dimension
+  units = count
+  dimensions = ()
+  type = integer
   intent = in
 [flag_init]
   standard_name = flag_for_first_timestep
@@ -154,14 +154,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[qs]
-  standard_name = snow_mixing_ratio
-  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [qv]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -202,6 +194,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[qs]
+  standard_name = snow_mixing_ratio
+  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [qg]
   standard_name = graupel_mixing_ratio
   long_name = graupel mixing ratio wrt dry+vapor (no condensates)
@@ -210,14 +210,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[ud_mf]
-  standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
-  long_name = (updraft mass flux) * delt
-  units = kg m-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
 [qci_conv]
   standard_name = convective_cloud_condesate_after_rainout
   long_name = convective cloud condesate after rainout
@@ -242,6 +234,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[ud_mf]
+  standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
+  long_name = (updraft mass flux) * delt
+  units = kg m-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [imfdeepcnv]
   standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme

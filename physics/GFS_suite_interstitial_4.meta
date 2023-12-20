@@ -120,17 +120,17 @@
   dimensions = ()
   type = integer
   intent = in
-[nn]
-  standard_name = number_of_tracers_for_convective_transport
-  long_name = number of tracers for convective transport
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [ntccn]
   standard_name = index_of_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
   long_name = tracer index for cloud condensation nuclei number concentration
   units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nn]
+  standard_name = number_of_tracers_for_convective_transport
+  long_name = number of tracers for convective transport
+  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -155,6 +155,27 @@
   dimensions = ()
   type = integer
   intent = in
+[imp_physics_nssl]
+  standard_name = identifier_for_nssl_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[nssl_invertccn]
+  standard_name = nssl_invertccn
+  long_name = flag to invert CCN in NSSL micro
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [imp_physics_zhao_carr]
   standard_name = identifier_for_zhao_carr_microphysics_scheme
   long_name = choice of Zhao-Carr microphysics scheme
@@ -172,27 +193,6 @@
 [convert_dry_rho]
   standard_name = flag_for_converting_hydrometeors_from_moist_to_dry_air
   long_name = flag for converting hydrometeors from moist to dry air
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[imp_physics_nssl]
-  standard_name = identifier_for_nssl_microphysics_scheme
-  long_name = choice of NSSL 2-moment microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[nssl_ccn_on]
-  standard_name = nssl_ccn_on
-  long_name = CCN activation flag in NSSL micro
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[nssl_invertccn]
-  standard_name = nssl_invertccn
-  long_name = flag to invert CCN in NSSL micro
   units = flag
   dimensions = ()
   type = logical
@@ -221,22 +221,6 @@
   type = real
   kind = kind_phys
   intent = in
-[save_lnc]
-  standard_name = liquid_cloud_number_concentration_save
-  long_name = liquid cloud number concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[save_inc]
-  standard_name = ice_cloud_number_concentration_save
-  long_name = ice cloud number concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -244,6 +228,28 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
+  type = real
+  kind = kind_phys
+  intent = inout
+[index_of_process_conv_trans]
+  standard_name = index_of_convective_transport_process_in_cumulative_change_index
+  long_name = index of convective transport process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
   intent = in
 [gq0]
   standard_name = tracer_concentration_of_new_state
@@ -316,35 +322,6 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
-[dtidx]
-  standard_name = cumulative_change_of_state_variables_outer_index
-  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
-  units = index
-  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
-  type = integer
-  intent = in
-[dtend]
-  standard_name = cumulative_change_of_state_variables
-  long_name = diagnostic tendencies for state variables
-  units = mixed
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
-  type = real
-  kind = kind_phys
-  intent = inout
-[ntk]
-  standard_name = index_for_turbulent_kinetic_energy_convective_transport_tracer
-  long_name = index for turbulent kinetic energy in the convectively transported tracer array
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntke]
-  standard_name = index_of_turbulent_kinetic_energy_in_tracer_concentration_array
-  long_name = tracer index for turbulent kinetic energy
-  units = index
-  dimensions = ()
-  type = integer
   intent = in
 [ldiag3d]
   standard_name = flag_for_diagnostics_3D
@@ -360,9 +337,32 @@
   dimensions = ()
   type = logical
   intent = in
-[index_of_process_conv_trans]
-  standard_name = index_of_convective_transport_process_in_cumulative_change_index
-  long_name = index of convective transport process in second dimension of array cumulative change index
+[save_lnc]
+  standard_name = liquid_cloud_number_concentration_save
+  long_name = liquid cloud number concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[save_inc]
+  standard_name = ice_cloud_number_concentration_save
+  long_name = ice cloud number concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[ntk]
+  standard_name = index_for_turbulent_kinetic_energy_convective_transport_tracer
+  long_name = index for turbulent kinetic energy in the convectively transported tracer array
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntke]
+  standard_name = index_of_turbulent_kinetic_energy_in_tracer_concentration_array
+  long_name = tracer index for turbulent kinetic energy
   units = index
   dimensions = ()
   type = integer

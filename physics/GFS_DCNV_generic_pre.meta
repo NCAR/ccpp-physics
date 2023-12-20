@@ -126,55 +126,14 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
-  intent = in
-[dtidx]
-  standard_name = cumulative_change_of_state_variables_outer_index
-  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
-  units = index
-  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
-  type = integer
-  intent = in
-[index_of_process_dcnv]
-  standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
-  long_name = index of deep convection process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[cscnv]
-  standard_name = flag_for_Chikira_Sugiyama_deep_convection
-  long_name = flag for Chikira-Sugiyama convection
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[satmedmf]
-  standard_name = flag_for_scale_aware_TKE_moist_EDMF_PBL
-  long_name = flag for scale-aware TKE moist EDMF PBL scheme
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[trans_trac]
-  standard_name = flag_for_convective_transport_of_tracers
-  long_name = flag for convective transport of tracers
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[ras]
-  standard_name = flag_for_relaxed_arakawa_schubert_deep_convection
-  long_name = flag for ras convection scheme
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[ntsigma]
-  standard_name = index_of_updraft_area_fraction_in_tracer_concentration_array
-  long_name = tracer index of updraft_area_fraction
-  units = index
-  dimensions = ()
-  type = integer
+  intent = inout
+[clw]
+  standard_name = convective_transportable_tracers
+  long_name = array to contain cloud water and other convective trans. tracers
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
+  type = real
+  kind = kind_phys
   intent = in
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
@@ -253,13 +212,6 @@
   dimensions = ()
   type = integer
   intent = in
-[ntgv]
-  standard_name = index_of_graupel_volume_in_tracer_concentration_array
-  long_name = tracer index for graupel particle volume
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
 [nthv]
   standard_name = index_of_hail_volume_in_tracer_concentration_array
   long_name = tracer index for hail particle volume
@@ -267,18 +219,66 @@
   dimensions = ()
   type = integer
   intent = in
-[clw]
-  standard_name = convective_transportable_tracers
-  long_name = array to contain cloud water and other convective trans. tracers
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
-  type = real
-  kind = kind_phys
+[ntgv]
+  standard_name = index_of_graupel_volume_in_tracer_concentration_array
+  long_name = tracer index for graupel particle volume
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntsigma]
+  standard_name = index_of_updraft_area_fraction_in_tracer_concentration_array
+  long_name = tracer index of updraft_area_fraction
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[cscnv]
+  standard_name = flag_for_Chikira_Sugiyama_deep_convection
+  long_name = flag for Chikira-Sugiyama convection
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[satmedmf]
+  standard_name = flag_for_scale_aware_TKE_moist_EDMF_PBL
+  long_name = flag for scale-aware TKE moist EDMF PBL scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[trans_trac]
+  standard_name = flag_for_convective_transport_of_tracers
+  long_name = flag for convective transport of tracers
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ras]
+  standard_name = flag_for_relaxed_arakawa_schubert_deep_convection
+  long_name = flag for ras convection scheme
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [ntrac]
   standard_name = number_of_tracers
   long_name = number of tracers
   units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+[index_of_process_dcnv]
+  standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
+  long_name = index of deep convection process in second dimension of array cumulative change index
+  units = index
   dimensions = ()
   type = integer
   intent = in

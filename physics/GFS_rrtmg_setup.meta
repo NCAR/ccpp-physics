@@ -2,7 +2,7 @@
   name = GFS_rrtmg_setup
   type = scheme
   dependencies = iounitdef.f,module_bfmicrophysics.f,radcons.f90,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f
-  dependencies = module_mp_thompson.F90,radiation_gases.f,radlw_main.F90,radlw_param.f,radsw_main.F90,radsw_param.f,machine.F
+  dependencies = module_mp_thompson.F90,radiation_gases.f,rrtmg_lw_main.F90,radlw_param.f,rrtmg_sw_main.F90,radsw_param.f,machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -44,22 +44,6 @@
   dimensions =  ()
   type = character
   kind = len=26
-  intent = in
-[con_solr_2008]
-  standard_name = solar_constant_2008
-  long_name = solar constant Tim 2008
-  units = W m-2
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_solr_2002]
-  standard_name = solar_constant_2002
-  long_name= solar constant Liu 2002
-  units = W m-2
-  dimensions = ()
-  type = real
-  kind = kind_phys
   intent = in
 [ico2]
   standard_name = control_for_co2
@@ -110,27 +94,6 @@
   dimensions = ()
   type = integer
   intent = in
-[iovr_exp]
-  standard_name = flag_for_exponential_cloud_overlap_method
-  long_name = choice of exponential cloud overlap method
-  units         = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[iovr_exprand]
-  standard_name = flag_for_exponential_random_cloud_overlap_method
-  long_name = choice of exponential-random cloud overlap method
-  units     = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[iovr_max]
-  standard_name = flag_for_maximum_cloud_overlap_method
-  long_name = choice of maximum cloud overlap method
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [iovr_rand]
   standard_name = flag_for_random_cloud_overlap_method
   long_name = choice of random cloud overlap method
@@ -145,6 +108,13 @@
   dimensions = ()
   type = integer
   intent = in
+[iovr_max]
+  standard_name = flag_for_maximum_cloud_overlap_method
+  long_name = choice of maximum cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [iovr_dcorr]
   standard_name = flag_for_decorrelation_length_cloud_overlap_method
   long_name = choice of decorrelation-length cloud overlap method
@@ -152,24 +122,17 @@
   dimensions = ()
   type = integer
   intent = in
-[isubcsw]
-  standard_name = flag_for_sw_clouds_grid_approximation
-  long_name = flag for sw clouds sub-grid approximation
-  units = flag
+[iovr_exp]
+  standard_name = flag_for_exponential_cloud_overlap_method
+  long_name = choice of exponential cloud overlap method
+  units         = flag
   dimensions = ()
   type = integer
   intent = in
-[isubclw]
-  standard_name = flag_for_lw_clouds_sub_grid_approximation
-  long_name = flag for lw clouds sub-grid approximation
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[iswmode]
-  standard_name = control_for_sw_scattering_choice
-  long_name = control of rrtmg shortwave scattering choice
-  units = 1
+[iovr_exprand]
+  standard_name = flag_for_exponential_random_cloud_overlap_method
+  long_name = choice of exponential-random cloud overlap method
+  units     = flag
   dimensions = ()
   type = integer
   intent = in
@@ -236,6 +199,27 @@
   dimensions = ()
   type = integer
   intent = in
+[lalw1bd]
+  standard_name = do_longwave_aerosol_band_properties
+  long_name = control of band or multiband longwave aerosol properties
+  units = 1
+  dimensions = ()
+  type = logical
+  intent = in
+[iaermdl]
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+[iaerflg]
+  standard_name = control_for_aerosol_effects_in_radiation
+  long_name = control of aerosol effects in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
 [aeros_file]
   standard_name = aerosol_data_file
   long_name = aerosol data file
@@ -243,6 +227,78 @@
   dimensions =  ()
   type = character
   kind = len=26
+  intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degree Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_c]
+  standard_name = speed_of_light_in_vacuum
+  long_name = speed of light in vacuum
+  units = m s-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_boltz]
+  standard_name = boltzmann_constant
+  long_name = Boltzmann constant
+  units = J K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_plnk]
+  standard_name = planck_constant
+  long_name = Planck constant
+  units = J s-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_solr_2008]
+  standard_name = solar_constant_2008
+  long_name = solar constant Tim 2008
+  units = W m-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_solr_2002]
+  standard_name = solar_constant_2002
+  long_name= solar constant Liu 2002
+  units = W m-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rd]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [co2usr_file]
   standard_name = co2_user_data_table_file
@@ -269,7 +325,7 @@
   intent = in
 [inc_minor_gas]
   standard_name = flag_to_include_minor_gases_in_rrtmg
-  long_name = flag to include minor trace gases	in rrtmg
+  long_name = flag to include minor trace gases in rrtmg
   units = flag
   dimensions = ()
   type = logical
@@ -281,69 +337,34 @@
   dimensions = ()
   type = integer
   intent = in
-[con_pi]
-  standard_name = pi
-  long_name = ratio of a circle's circumference to its diameter
-  units = none
+[isubcsw]
+  standard_name = flag_for_sw_clouds_grid_approximation
+  long_name = flag for sw clouds sub-grid approximation
+  units = flag
   dimensions = ()
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
-[con_c]
-  standard_name = speed_of_light_in_vacuum
-  long_name = speed of light in vacuum
-  units = m s-1
+[isubclw]
+  standard_name = flag_for_lw_clouds_sub_grid_approximation
+  long_name = flag for lw clouds sub-grid approximation
+  units = flag
   dimensions = ()
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
-[con_plnk]
-  standard_name = planck_constant
-  long_name = Planck constant
-  units = J s-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_boltz]
-  standard_name = boltzmann_constant
-  long_name = Boltzmann constant
-  units = J K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_t0c]
-  standard_name = temperature_at_zero_celsius
-  long_name = temperature at 0 degree Celsius
-  units = K
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_rd]
-  standard_name = gas_constant_of_dry_air
-  long_name = ideal gas constant for dry air
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_g]
-  standard_name = gravitational_acceleration
-  long_name = gravitational acceleration
-  units = m s-2
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[lalw1bd]
-  standard_name = do_longwave_aerosol_band_properties
-  long_name = control of band or multiband longwave aerosol properties
+[iswmode]
+  standard_name = control_for_sw_scattering_choice
+  long_name = control of rrtmg shortwave scattering choice
   units = 1
   dimensions = ()
-  type = logical
+  type = integer
   intent = in
+[ipsd0]
+  standard_name = initial_seed_for_mcica
+  long_name = initial permutaion seed for mcica radiation
+  units = 1
+  dimensions =  ()
+  type = integer
+  intent = inout
 [ltp]
   standard_name = extra_top_layer
   long_name = extra top layer for radiation
@@ -358,27 +379,6 @@
   dimensions = ()
   type = logical
   intent = in
-[ipsd0]
-  standard_name = initial_seed_for_mcica
-  long_name = initial permutaion seed for mcica radiation
-  units = 1
-  dimensions =  ()
-  type = integer
-  intent = inout
-[iaermdl]
-  standard_name = control_for_aerosol_radiation_scheme
-  long_name = control of aerosol scheme in radiation
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = out
-[iaerflg]
-  standard_name = control_for_aerosol_effects_in_radiation
-  long_name = control of aerosol effects in radiation
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -472,6 +472,46 @@
   type = character
   kind = len=26
   intent = in
+[slag]
+  standard_name = equation_of_time
+  long_name = equation of time (radian)
+  units = radian
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+[sdec]
+  standard_name = sine_of_solar_declination_angle
+  long_name = sin of the solar declination angle
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+[cdec]
+  standard_name = cosine_of_solar_declination_angle
+  long_name = cos of the solar declination angle
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+[solcon]
+  standard_name = solar_constant
+  long_name = solar constant (sun-earth distant adjusted)
+  units = W m-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [co2dat_file]
   standard_name = co2_monthly_obs_data_table_file
   long_name = co2 monthly observation data table
@@ -509,46 +549,6 @@
   dimensions = ()
   type = integer
   intent = in
-[con_pi]
-  standard_name = pi
-  long_name = ratio of a circle's circumference to its diameter
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[slag]
-  standard_name = equation_of_time
-  long_name = equation of time (radian)
-  units = radian
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
-[sdec]
-  standard_name = sine_of_solar_declination_angle
-  long_name = sin of the solar declination angle
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
-[cdec]
-  standard_name = cosine_of_solar_declination_angle
-  long_name = cos of the solar declination angle
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
-[solcon]
-  standard_name = solar_constant
-  long_name = solar constant (sun-earth distant adjusted)
-  units = W m-2
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

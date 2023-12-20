@@ -8,6 +8,9 @@
 
       contains
 
+!! \section arg_table_samfshalcnv_init Argument Table
+!! \htmlinclude samfshalcnv_init.html
+!!
       subroutine samfshalcnv_init(imfshalcnv, imfshalcnv_samf,          &
      &                            errmsg, errflg)
 

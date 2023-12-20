@@ -90,13 +90,6 @@
   dimensions = ()
   type = integer
   intent = in
-[karman]
-  standard_name = von_karman_constant
-  long_name = von karman constant
-  units = none
-  dimensions = ()
-  type = real
-  intent = in
 [xlat]
   standard_name = latitude
   long_name = latitude
@@ -161,6 +154,13 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[karman]
+  standard_name = von_karman_constant
+  long_name = von karman constant
+  units = none
+  dimensions = ()
+  type = real
   intent = in
 [cplwav2atm]
   standard_name = flag_for_one_way_ocean_wave_coupling_to_atmosphere

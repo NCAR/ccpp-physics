@@ -774,7 +774,7 @@
   units = index
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = in
+  intent = inout
 [vtype]
   standard_name = vegetation_type_classification
   long_name = vegetation type at each grid cell

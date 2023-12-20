@@ -101,16 +101,16 @@
   type = integer
   intent = in
 [xlat_d]
-  standard_name = latitude_in_degree
-  long_name = latitude in degree north
+  standard_name = latitude
+  long_name = latitude
   units = degree_north
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
 [xlon_d]
-  standard_name = longitude_in_degree
-  long_name = longitude in degree east
+  standard_name = longitude
+  long_name = longitude
   units = degree_east
   dimensions = (horizontal_dimension)
   type = real

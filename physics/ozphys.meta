@@ -125,6 +125,13 @@
   dimensions = ()
   type = logical
   intent = in
+[ntoz]
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for ozone mixing ratio
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
@@ -139,13 +146,6 @@
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
   units = index
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
-  type = integer
-  intent = in
-[ntoz]
-  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for ozone mixing ratio
-  units = index
-  dimensions = ()
   type = integer
   intent = in
 [index_of_process_prod_loss]

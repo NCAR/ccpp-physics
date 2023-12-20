@@ -21,6 +21,13 @@
   dimensions = ()
   type = integer
   intent = in
+[nday]
+  standard_name = daytime_points_dimension
+  long_name = daytime points dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [iSFC]
   standard_name = vertical_index_for_surface_in_RRTMGP
   long_name = index for surface layer in RRTMGP
@@ -35,33 +42,12 @@
   dimensions = ()
   type = integer
   intent = in
-[nday]
-  standard_name = daytime_points_dimension
-  long_name = daytime points dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [idxday]
   standard_name = daytime_points
   long_name = daytime points
   units = index
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = in
-[doSWrad]
-  standard_name = flag_for_calling_shortwave_radiation
-  long_name = logical flags for sw radiation calls
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[do_sw_clrsky_hr]
-  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep_assuming_clear_sky
-  long_name = flag to output sw heating rate
-  units = flag
-  dimensions = ()
-  type = logical
   intent = in
 [doLWrad]
   standard_name = flag_for_calling_longwave_radiation
@@ -70,9 +56,23 @@
   dimensions = ()
   type = logical
   intent = in
+[doSWrad]
+  standard_name = flag_for_calling_shortwave_radiation
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [do_lw_clrsky_hr]
   standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep_assuming_clear_sky
   long_name = flag to output lw heating rate
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[do_sw_clrsky_hr]
+  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep_assuming_clear_sky
+  long_name = flag to output sw heating rate
   units = flag
   dimensions = ()
   type = logical
@@ -97,22 +97,6 @@
   long_name = frequency for shortwave radiation
   units = s
   dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[coszen]
-  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
-  long_name = mean cos of zenith angle over rad call period
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[coszdg]
-  standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
-  long_name = daytime mean cosz over rad call period
-  units = none
-  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -148,6 +132,14 @@
   type = real
   kind = kind_phys
   intent = in
+[p_lev]
+  standard_name = air_pressure_at_interface_for_RRTMGP
+  long_name = air pressure level
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [tsfa]
   standard_name = surface_air_temperature_for_radiation
   long_name = lowest model layer air temperature for radiation
@@ -156,10 +148,26 @@
   type = real
   kind = kind_phys
   intent = in
-[p_lev]
-  standard_name = air_pressure_at_interface_for_RRTMGP
-  long_name = air pressure level
-  units = Pa
+[coszen]
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
+  long_name = mean cos of zenith angle over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[coszdg]
+  standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
+  long_name = daytime mean cosz over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[fluxlwDOWN_clrsky]
+  standard_name = RRTMGP_lw_flux_profile_downward_clrsky
+  long_name = RRTMGP downward longwave clr-sky flux profile
+  units = W m-2
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
@@ -188,9 +196,9 @@
   type = real
   kind = kind_phys
   intent = in
-[fluxlwDOWN_clrsky]
-  standard_name = RRTMGP_lw_flux_profile_downward_clrsky
-  long_name = RRTMGP downward longwave clr-sky flux profile
+[fluxswDOWN_clrsky]
+  standard_name = RRTMGP_sw_flux_profile_downward_clrsky
+  long_name = RRTMGP downward shortwave clr-sky flux profile
   units = W m-2
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
@@ -215,14 +223,6 @@
 [fluxswUP_clrsky]
   standard_name = RRTMGP_sw_flux_profile_upward_clrsky
   long_name = RRTMGP upward shortwave clr-sky flux profile
-  units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[fluxswDOWN_clrsky]
-  standard_name = RRTMGP_sw_flux_profile_downward_clrsky
-  long_name = RRTMGP downward shortwave clr-sky flux profile
   units = W m-2
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real

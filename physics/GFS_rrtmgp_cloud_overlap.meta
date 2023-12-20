@@ -144,13 +144,6 @@
   dimensions = ()
   type = integer
   intent = in
-[iovr_convcld]
-  standard_name = flag_for_convective_cloud_overlap_method_for_radiation
-  long_name = flag for convective cloud overlap method
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [iovr_dcorr]
   standard_name = flag_for_decorrelation_length_cloud_overlap_method
   long_name = choice of decorrelation-length cloud overlap method
@@ -209,6 +202,13 @@
   type = real
   kind = kind_phys
   intent = in
+[iovr_convcld]
+  standard_name = flag_for_convective_cloud_overlap_method_for_radiation
+  long_name = flag for convective cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [top_at_1]
   standard_name = flag_for_vertical_ordering_in_radiation
   long_name = flag for vertical ordering in radiation
@@ -253,17 +253,17 @@
   type = real
   kind = kind_phys
   intent = out
-[precip_overlap_param]
-  standard_name = precip_overlap_param
-  long_name = precipitation overlap parameter
+[cnv_cloud_overlap_param]
+  standard_name = convective_cloud_overlap_param
+  long_name = convective cloud overlap parameter
   units = km
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
-[cnv_cloud_overlap_param]
-  standard_name = convective_cloud_overlap_param
-  long_name = convective cloud overlap parameter
+[precip_overlap_param]
+  standard_name = precip_overlap_param
+  long_name = precipitation overlap parameter
   units = km
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real

@@ -20,6 +20,13 @@
   dimensions = ()
   type = integer
   intent = in
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -27,13 +34,6 @@
   dimensions = ()
   type = character
   kind = len=*
-  intent = out
-[errflg]
-  standard_name = ccpp_error_code
-  long_name = error code for error handling in CCPP
-  units = 1
-  dimensions = ()
-  type = integer
   intent = out
 [threads]
   standard_name = number_of_openmp_threads
@@ -259,6 +259,22 @@
   type = real
   kind = kind_phys
   intent = inout
+[cccn]
+  standard_name = cloud_condensation_nuclei_number_concentration_of_new_state
+  long_name = number concentration of cloud condensation nuclei updated by physics
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[cccna]
+  standard_name = activated_cloud_condensation_nuclei_number_concentration_of_new_state
+  long_name = number concentration of activated cloud condensation nuclei updated by physics
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [qc]
   standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = cloud water mixing ratio wrt dry+vapor (no condensates)
@@ -303,22 +319,6 @@
   standard_name = hail_mixing_ratio_of_new_state
   long_name = moist (dry+vapor, no condensates) mixing ratio of hail updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[cccn]
-  standard_name = cloud_condensation_nuclei_number_concentration_of_new_state
-  long_name = number concentration of cloud condensation nuclei updated by physics
-  units = kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[cccna]
-  standard_name = activated_cloud_condensation_nuclei_number_concentration_of_new_state
-  long_name = number concentration of activated cloud condensation nuclei updated by physics
-  units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
@@ -442,7 +442,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [rain]
   standard_name = lwe_thickness_of_explicit_rain_amount
   long_name = explicit rain fall on physics timestep
@@ -450,7 +450,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [graupel]
   standard_name = lwe_thickness_of_graupel_amount
   long_name = graupel fall on physics timestep
@@ -458,7 +458,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [ice]
   standard_name = lwe_thickness_of_ice_amount
   long_name = ice fall on physics timestep
@@ -466,7 +466,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [snow]
   standard_name = lwe_thickness_of_snow_amount
   long_name = snow fall on physics timestep
@@ -474,7 +474,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [sr]
   standard_name = ratio_of_snowfall_to_rainfall
   long_name = ratio of snowfall to large-scale rainfall
@@ -490,7 +490,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [do_radar_ref]
   standard_name = flag_for_radar_reflectivity
   long_name = flag for radar reflectivity
@@ -558,16 +558,16 @@
   dimensions = ()
   type = integer
   intent = in
-[nreffr]
-  standard_name = index_of_rain_effective_radius_in_xyz_dimensioned_restart_array
-  long_name = the index of rain effective radius in phy_f3d
+[nseffr]
+  standard_name = index_of_snow_effective_radius_in_xyz_dimensioned_restart_array
+  long_name = the index of snow effective radius in phy_f3d
   units = index
   dimensions = ()
   type = integer
   intent = in
-[nseffr]
-  standard_name = index_of_snow_effective_radius_in_xyz_dimensioned_restart_array
-  long_name = the index of snow effective radius in phy_f3d
+[nreffr]
+  standard_name = index_of_rain_effective_radius_in_xyz_dimensioned_restart_array
+  long_name = the index of rain effective radius in phy_f3d
   units = index
   dimensions = ()
   type = integer

@@ -437,16 +437,16 @@
   dimensions = ()
   type = integer
   intent = in
-[ntcw]
-  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for cloud condensate (or liquid water)
+[ntiw]
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for  ice water
   units = index
   dimensions = ()
   type = integer
   intent = in
-[ntiw]
-  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for  ice water
+[ntcw]
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
   type = integer
@@ -486,28 +486,6 @@
   dimensions = ()
   type = integer
   intent = in
-[dfi_radar_max_intervals]
-  standard_name = maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals
-  long_name = maximum allowed number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[ldiag3d]
-  standard_name = flag_for_diagnostics_3D
-  long_name = flag for 3d diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[qci_conv]
-  standard_name = convective_cloud_condesate_after_rainout
-  long_name = convective cloud condesate after rainout
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [fhour]
   standard_name = forecast_time
   long_name = current forecast time
@@ -515,13 +493,6 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  intent = in
-[do_cap_suppress]
-  standard_name = flag_for_radar_derived_convection_suppression
-  long_name = flag for radar-derived convection suppression
-  units = flag
-  dimensions = ()
-  type = logical
   intent = in
 [fh_dfi_radar]
   standard_name = forecast_lead_times_bounding_radar_derived_temperature_or_convection_suppression_intervals
@@ -552,6 +523,35 @@
   dimensions = (horizontal_loop_extent,number_of_radar_derived_temperature_or_convection_suppression_intervals)
   type = real
   kind = kind_phys
+  intent = in
+[dfi_radar_max_intervals]
+  standard_name = maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = maximum allowed number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ldiag3d]
+  standard_name = flag_for_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[qci_conv]
+  standard_name = convective_cloud_condesate_after_rainout
+  long_name = convective cloud condesate after rainout
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[do_cap_suppress]
+  standard_name = flag_for_radar_derived_convection_suppression
+  long_name = flag for radar-derived convection suppression
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [maxupmf]
   standard_name = maximum_convective_updraft_mass_flux

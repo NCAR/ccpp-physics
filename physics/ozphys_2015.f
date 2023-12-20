@@ -56,7 +56,8 @@
       implicit none
 !
       real(kind=kind_phys),intent(in) :: con_g
-      real :: gravi
+      real(kind=kind_phys) :: gravi
+      logical, intent(in) ::  ldiag3d
       integer, intent(in) :: im, levs, ko3, pl_coeff,me
       real(kind=kind_phys), intent(in) :: po3(:),                       &
      &                                    prsl(:,:), tin(:,:),          &
@@ -72,7 +73,7 @@
       integer,          intent(out) :: errflg
 
       integer k,kmax,kmin,l,i,j, idtend(4)
-      logical              ldiag3d, flg(im), qdiag3d
+      logical              flg(im)
       real(kind=kind_phys) pmax, pmin, tem, temp
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im),prod(im,pl_coeff), &
      &                     ozib(im), colo3(im,levs+1), coloz(im,levs+1),&

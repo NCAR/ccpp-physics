@@ -44,6 +44,13 @@
   dimensions = ()
   type = integer
   intent = in
+[n_var_lndp]
+  standard_name = number_of_perturbed_land_surface_variables
+  long_name = number of land surface variables perturbed
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [lextop]
   standard_name = do_extra_top_layer_for_radiation
   long_name = use an extra top layer for radiation
@@ -54,13 +61,6 @@
 [ltp]
   standard_name = extra_top_layer
   long_name = extra top layer for radiation
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[n_var_lndp]
-  standard_name = number_of_perturbed_land_surface_variables
-  long_name = number of land surface variables perturbed
   units = count
   dimensions = ()
   type = integer
@@ -177,6 +177,20 @@
   dimensions = ()
   type = integer
   intent = in
+[ntccn]
+  standard_name = index_of_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
+  long_name = tracer index for cloud condensation nuclei number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_radiation
+  long_name = flag for vertical ordering in radiation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ntrw]
   standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for rain water
@@ -201,13 +215,6 @@
 [nthl]
   standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for hail
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntccn]
-  standard_name = index_of_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
-  long_name = tracer index for cloud condensation nuclei number concentration
   units = index
   dimensions = ()
   type = integer
@@ -246,34 +253,6 @@
   units = index
   dimensions = ()
   type = integer
-  intent = in
-[iaermdl]
-  standard_name = control_for_aerosol_radiation_scheme
-  long_name = control of aerosol scheme in radiation
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = in
-[iaerflg]
-  standard_name = control_for_aerosol_effects_in_radiation
-  long_name = control of aerosol effects in radiation
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = in
-[nssl_ccn_on]
-  standard_name = nssl_ccn_on
-  long_name = CCN activation flag in NSSL micro
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[nssl_invertccn]
-  standard_name = nssl_invertccn
-  long_name = flag to invert CCN in NSSL micro
-  units = flag
-  dimensions = ()
-  type = logical
   intent = in
 [ntclamt]
   standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
@@ -443,6 +422,20 @@
   dimensions = ()
   type = integer
   intent = in
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[nssl_invertccn]
+  standard_name = nssl_invertccn
+  long_name = flag to invert CCN in NSSL micro
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [imp_physics_thompson]
   standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
@@ -541,13 +534,6 @@
   dimensions = ()
   type = integer
   intent = in
-[dcorr_con]
-  standard_name = decorrelation_length_used_by_overlap_method
-  long_name = decorrelation length (default) used by cloud overlap method (iovr)
-  units = km
-  dimensions = ()
-  type = real
-  intent = in
 [idcor]
   standard_name = flag_for_decorrelation_length_method
   long_name = flag for decorrelation length method used in cloud overlap method (iovr)
@@ -575,6 +561,13 @@
   units = flag
   dimensions = ()
   type = integer
+  intent = in
+[dcorr_con]
+  standard_name = decorrelation_length_used_by_overlap_method
+  long_name = decorrelation length (default) used by cloud overlap method (iovr)
+  units = km
+  dimensions = ()
+  type = real
   intent = in
 [julian]
   standard_name = forecast_julian_day
@@ -662,6 +655,13 @@
   dimensions = ()
   type = logical
   intent = in
+[lcnorm]
+  standard_name = flag_for_in_cloud_condensate
+  long_name = flag for cloud condensate normalized by cloud cover
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [lmfdeep2]
   standard_name = flag_for_scale_aware_mass_flux_deep_convection_for_radiation
   long_name = flag for some scale-aware mass-flux convection scheme active
@@ -672,13 +672,6 @@
 [lcrick]
   standard_name = flag_for_CRICK_proof_cloud_water
   long_name = flag for CRICK-Proof cloud water
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[lcnorm]
-  standard_name = flag_for_in_cloud_condensate
-  long_name = flag for cloud condensate normalized by cloud cover
   units = flag
   dimensions = ()
   type = logical
@@ -723,46 +716,6 @@
   type = real
   kind = kind_phys
   intent = in
-[con_pi]
-  standard_name = pi
-  long_name = ratio of a circle's circumference to its diameter
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_rd]
-  standard_name = gas_constant_of_dry_air
-  long_name = ideal gas constant for dry air
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_g]
-  standard_name = gravitational_acceleration
-  long_name = gravitational acceleration
-  units = m s-2
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_ttp]
-  standard_name = triple_point_temperature_of_water
-  long_name = triple point temperature of water
-  units = K
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_thgni]
-  standard_name	= temperature_ice_nucleation_starts
-  long_name = temperature the H.G.Nuc. ice starts
-  units = K
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
 [epsm1]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
   long_name = (rd/rv) - 1
@@ -791,6 +744,14 @@
   standard_name = ratio_of_gas_constant_dry_air_to_specific_heat_of_dry_air_at_constant_pressure
   long_name = (rd/cp)
   units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rd]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
   dimensions = ()
   type = real
   kind = kind_phys
@@ -976,6 +937,60 @@
   units = flag
   dimensions = ()
   type = integer
+  intent = in
+[iaermdl]
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[iaerflg]
+  standard_name = control_for_aerosol_effects_in_radiation
+  long_name = control of aerosol effects in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_ttp]
+  standard_name = triple_point_temperature_of_water
+  long_name = triple point temperature of water
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_thgni]
+  standard_name = temperature_ice_nucleation_starts
+  long_name = temperature the H.G.Nuc. ice starts
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[si]
+  standard_name = sigma_pressure_hybrid_vertical_coordinate
+  long_name = vertical sigma coordinate for radiation initialization
+  units = none
+  dimensions = (vertical_interface_dimension)
+  type = real
+  kind = kind_phys
   intent = in
 [coszen]
   standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
@@ -1444,28 +1459,6 @@
   type = real
   kind = kind_phys
   intent = out
-[top_at_1]
-  standard_name = flag_for_vertical_ordering_in_radiation
-  long_name = flag for vertical ordering in radiation
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[si]
-  standard_name = sigma_pressure_hybrid_vertical_coordinate
-  long_name = vertical sigma coordinate for radiation initialization
-  units = none
-  dimensions = (vertical_interface_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[ico2]
-  standard_name = control_for_co2
-  long_name = prescribed global mean value (old opernl)
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [rrfs_sd]
   standard_name = do_smoke_coupling
   long_name = flag controlling rrfs_sd collection (default off)
@@ -1500,6 +1493,13 @@
   standard_name = control_for_radiation_spp_perturbations
   long_name = control for radiation spp perturbations
   units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ico2]
+  standard_name = control_for_co2
+  long_name = prescribed global mean value (old opernl)
+  units = flag
   dimensions = ()
   type = integer
   intent = in

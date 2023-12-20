@@ -359,7 +359,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [prsl]
   standard_name = air_pressure
   long_name = mean layer pressure
@@ -812,7 +812,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [qwt]
   standard_name = tke_tendency_due_to_vertical_transport
   long_name = tke tendency due to vertical transport and diffusion
@@ -820,7 +820,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [qshear]
   standard_name = tke_tendency_due_to_shear
   long_name = tke tendency due to shear
@@ -828,7 +828,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [qbuoy]
   standard_name = tke_tendency_due_to_buoyancy
   long_name = tke tendency due to buoyancy production or consumption
@@ -836,7 +836,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [qdiss]
   standard_name = tke_tendency_due_to_dissipation
   long_name = tke tendency due to the dissipation of tke
@@ -844,7 +844,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [PBLH]
   standard_name = atmosphere_boundary_layer_thickness
   long_name = PBL thickness
@@ -1140,13 +1140,6 @@
   dimensions = ()
   type = integer
   intent = in
-[ntoz]
-  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for ozone mixing ratio
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
 [ntqv]
   standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)
@@ -1171,6 +1164,13 @@
 [ntsw]
   standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for snow water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntoz]
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for ozone mixing ratio
   units = index
   dimensions = ()
   type = integer
@@ -1360,20 +1360,6 @@
   dimensions = ()
   type = integer
   intent = in
-[imp_physics_nssl]
-  standard_name = identifier_for_nssl_microphysics_scheme
-  long_name = choice of NSSL 2-moment microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[nssl_ccn_on]
-  standard_name = nssl_ccn_on
-  long_name = CCN activation flag in NSSL micro
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [chem3d]
   standard_name = chem3d_mynn_pbl_transport
   long_name = mynn pbl transport of smoke and dust
@@ -1390,16 +1376,16 @@
   type = real
   kind = kind_phys
   intent = inout
-[rrfs_sd]
-  standard_name = do_smoke_coupling
-  long_name = flag controlling rrfs_sd collection (default off)
+[mix_chem]
+  standard_name = do_planetary_boundary_layer_smoke_mixing
+  long_name = flag for rrfs smoke mynn tracer mixing
   units = flag
   dimensions = ()
   type = logical
   intent = in
-[mix_chem]
-  standard_name = do_planetary_boundary_layer_smoke_mixing
-  long_name = flag for rrfs smoke mynn tracer mixing
+[rrfs_sd]
+  standard_name = do_smoke_coupling
+  long_name = flag controlling rrfs_sd collection (default off)
   units = flag
   dimensions = ()
   type = logical
@@ -1436,6 +1422,20 @@
 [smoke_dbg]
   standard_name = do_smoke_debug
   long_name = flag for rrfs smoke plumerise debug
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[imp_physics_nssl]
+  standard_name = identifier_for_nssl_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
   units = flag
   dimensions = ()
   type = logical

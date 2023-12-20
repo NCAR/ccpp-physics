@@ -43,9 +43,23 @@
   dimensions = ()
   type = logical
   intent = in
+[imfshalcnv]
+  standard_name = control_for_shallow_convection_scheme
+  long_name = flag for mass-flux shallow convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [imfdeepcnv]
   standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imfshalcnv_samf]
+  standard_name = identifier_for_scale_aware_mass_flux_shallow_convection
+  long_name = flag for SAMF shallow convection scheme
   units = flag
   dimensions = ()
   type = integer
@@ -60,20 +74,6 @@
 [imfdeepcnv_c3]
   standard_name = identifier_for_c3_deep_convection
   long_name = flag for C3 deep convection scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[imfshalcnv]
-  standard_name = control_for_shallow_convection_scheme
-  long_name = flag for mass-flux shallow convection scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[imfshalcnv_samf]
-  standard_name = identifier_for_scale_aware_mass_flux_shallow_convection
-  long_name = flag for SAMF shallow convection scheme
   units = flag
   dimensions = ()
   type = integer
@@ -259,7 +259,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -302,6 +302,20 @@
   dimensions = ()
   type = integer
   intent = in
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+[ntlnc]
+  standard_name = index_of_mass_number_concentration_of_cloud_droplets_in_tracer_concentration_array
+  long_name = tracer index for liquid number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [imp_physics_wsm6]
   standard_name = identifier_for_wsm6_microphysics_scheme
   long_name = choice of WSM6 microphysics scheme
@@ -316,13 +330,6 @@
   dimensions = ()
   type = integer
   intent = in
-[imp_physics_nssl]
-  standard_name = identifier_for_nssl_microphysics_scheme
-  long_name = choice of NSSL 2-moment microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -330,6 +337,20 @@
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
+  intent = in
+[ntinc]
+  standard_name = index_of_mass_number_concentration_of_cloud_ice_in_tracer_concentration_array
+  long_name = tracer index for ice    number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[imp_physics_nssl]
+  standard_name = identifier_for_nssl_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
 [prsl]
   standard_name = air_pressure
@@ -430,6 +451,43 @@
   dimensions = ()
   type = integer
   intent = in
+[save_lnc]
+  standard_name = liquid_cloud_number_concentration_save
+  long_name = liquid cloud number concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[save_inc]
+  standard_name = ice_cloud_number_concentration_save
+  long_name = ice cloud number concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ldiag3d]
+  standard_name = flag_for_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[qdiag3d]
+  standard_name = flag_for_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[index_of_process_conv_trans]
+  standard_name = index_of_convective_transport_process_in_cumulative_change_index
+  long_name = index of convective transport process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [clw]
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other convective trans. tracers
@@ -470,64 +528,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[ldiag3d]
-  standard_name = flag_for_diagnostics_3D
-  long_name = flag for 3d diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[qdiag3d]
-  standard_name = flag_for_tracer_diagnostics_3D
-  long_name = flag for 3d tracer diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[index_of_process_conv_trans]
-  standard_name = index_of_convective_transport_process_in_cumulative_change_index
-  long_name = index of convective transport process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[save_lnc]
-  standard_name = liquid_cloud_number_concentration_save
-  long_name = liquid cloud number concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[save_inc]
-  standard_name = ice_cloud_number_concentration_save
-  long_name = ice cloud number concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[ntlnc]
-  standard_name = index_of_mass_number_concentration_of_cloud_droplets_in_tracer_concentration_array
-  long_name = tracer index for liquid number concentration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntinc]
-  standard_name = index_of_mass_number_concentration_of_cloud_ice_in_tracer_concentration_array
-  long_name = tracer index for ice    number concentration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[dtidx]
-  standard_name = cumulative_change_of_state_variables_outer_index
-  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
-  units = index
-  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
-  type = integer
-  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

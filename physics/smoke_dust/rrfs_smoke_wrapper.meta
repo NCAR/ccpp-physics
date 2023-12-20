@@ -176,7 +176,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [us3d]
   standard_name = x_wind_of_new_state
   long_name = updated x-direction wind
@@ -184,7 +184,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [vs3d]
   standard_name = y_wind_of_new_state
   long_name = updated y-direction wind
@@ -192,7 +192,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [spechum]
   standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
@@ -200,7 +200,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [w]
   standard_name = lagrangian_tendency_of_air_pressure
   long_name = layer mean vertical velocity
@@ -223,7 +223,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [vegtype]
   standard_name = vegetation_type_classification
   long_name = vegetation type at each grid cell
@@ -664,21 +664,6 @@
   dimensions = ()
   type = integer
   intent = in
-[wetdep_ls_opt_in]
-  standard_name = control_for_smoke_wet_deposition
-  long_name = rrfs smoke large scale wet deposition option
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[wetdep_ls_alpha_in]
-  standard_name = alpha_for_ls_wet_depoistion
-  long_name = alpha paramter for ls wet deposition
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
 [do_plumerise_in]
   standard_name = do_smoke_plumerise
   long_name = rrfs smoke plumerise option
@@ -699,6 +684,21 @@
   units = index
   dimensions = ()
   type = integer
+  intent = in
+[wetdep_ls_opt_in]
+  standard_name = control_for_smoke_wet_deposition
+  long_name = rrfs smoke large scale wet deposition option
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[wetdep_ls_alpha_in]
+  standard_name = alpha_for_ls_wet_depoistion
+  long_name = alpha paramter for ls wet deposition
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [smoke_forecast_in]
   standard_name = do_smoke_forecast

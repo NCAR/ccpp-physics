@@ -21,37 +21,6 @@
   dimensions = ()
   type = logical
   intent = in
-[top_at_1]
-  standard_name = flag_for_vertical_ordering_in_radiation
-  long_name = flag for vertical ordering in radiation
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[con_pi]
-  standard_name = pi
-  long_name = ratio of a circle's circumference to its diameter
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_rd]
-  standard_name = gas_constant_of_dry_air
-  long_name = ideal gas constant for dry air
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_g]
-  standard_name = gravitational_acceleration
-  long_name = gravitational acceleration
-  units = m s-2
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -174,35 +143,42 @@
   dimensions = ()
   type = integer
   intent = in
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_radiation
+  long_name = flag for vertical ordering in radiation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rd]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [aerodp]
   standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
   long_name = vertical integrated optical depth for various aerosol species
   units = none
   dimensions = (horizontal_loop_extent,number_of_species_for_aerosol_optical_depth)
-  type = real
-  kind = kind_phys
-  intent = out
-[aersw_tau]
-  standard_name = aerosol_optical_depth_for_shortwave_bands_01_16
-  long_name = aerosol optical depth for shortwave bands 01-16
-  units = none
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_shortwave_radiation)
-  type = real
-  kind = kind_phys
-  intent = out
-[aersw_ssa]
-  standard_name = aerosol_single_scattering_albedo_for_shortwave_bands_01_16
-  long_name = aerosol single scattering albedo for shortwave bands 01-16
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_shortwave_radiation)
-  type = real
-  kind = kind_phys
-  intent = out
-[aersw_g]
-  standard_name = aerosol_asymmetry_parameter_for_shortwave_bands_01_16
-  long_name = aerosol asymmetry parameter for shortwave bands 01-16
-  units = none
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_shortwave_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -227,6 +203,30 @@
   long_name = aerosol asymmetry parameter for longwave bands 01-16
   units = none
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_longwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = out
+[aersw_tau]
+  standard_name = aerosol_optical_depth_for_shortwave_bands_01_16
+  long_name = aerosol optical depth for shortwave bands 01-16
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_shortwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = out
+[aersw_ssa]
+  standard_name = aerosol_single_scattering_albedo_for_shortwave_bands_01_16
+  long_name = aerosol single scattering albedo for shortwave bands 01-16
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_shortwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = out
+[aersw_g]
+  standard_name = aerosol_asymmetry_parameter_for_shortwave_bands_01_16
+  long_name = aerosol asymmetry parameter for shortwave bands 01-16
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_shortwave_radiation)
   type = real
   kind = kind_phys
   intent = out

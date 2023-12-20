@@ -267,6 +267,13 @@
   dimensions = ()
   type = integer
   intent = in
+[nssl_ccn_on]
+  standard_name = nssl_ccn_on
+  long_name = CCN activation flag in NSSL micro
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
@@ -277,13 +284,6 @@
 [mraerosol]
   standard_name = do_merra2_aerosol_awareness
   long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[nssl_ccn_on]
-  standard_name = nssl_ccn_on
-  long_name = CCN activation flag in NSSL micro
   units = flag
   dimensions = ()
   type = logical
@@ -411,49 +411,6 @@
   type = real
   kind = kind_phys
   intent = in
-[dtend]
-  standard_name = cumulative_change_of_state_variables
-  long_name = diagnostic tendencies for state variables
-  units = mixed
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
-  type = real
-  kind = kind_phys
-  intent = inout
-[dtidx]
-  standard_name = cumulative_change_of_state_variables_outer_index
-  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
-  units = index
-  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
-  type = integer
-  intent = in
-[index_of_temperature]
-  standard_name = index_of_temperature_in_cumulative_change_index
-  long_name = index of temperature in first dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_x_wind]
-  standard_name = index_of_x_wind_in_cumulative_change_index
-  long_name = index of x-wind in first dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_y_wind]
-  standard_name = index_of_y_wind_in_cumulative_change_index
-  long_name = index of x-wind in first dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[index_of_process_pbl]
-  standard_name = index_of_subgrid_scale_vertical_mixing_process_in_cumulative_change_index
-  long_name = index of subgrid scale vertical mixing process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
 [dqsfc1]
   standard_name = instantaneous_surface_upward_latent_heat_flux
   long_name = surface upward latent heat flux valid for current call
@@ -550,6 +507,49 @@
   type = real
   kind = kind_phys
   intent = inout
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+[index_of_temperature]
+  standard_name = index_of_temperature_in_cumulative_change_index
+  long_name = index of temperature in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_x_wind]
+  standard_name = index_of_x_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_y_wind]
+  standard_name = index_of_y_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_process_pbl]
+  standard_name = index_of_subgrid_scale_vertical_mixing_process_in_cumulative_change_index
+  long_name = index of subgrid scale vertical mixing process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [dqsfc_cpl]
   standard_name = cumulative_surface_upward_latent_heat_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc latent heat flux multiplied by timestep
@@ -780,17 +780,17 @@
   dimensions = ()
   type = logical
   intent = in
-[dqsfc_med]
-  standard_name = surface_upward_latent_heat_flux_over_ocean_from_mediator
-  long_name = sfc latent heat flux input over ocean for coupling
+[dtsfc_med]
+  standard_name = surface_upward_sensible_heat_flux_over_ocean_from_mediator
+  long_name = sfc sensible heat flux input over ocean for coupling
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
-[dtsfc_med]
-  standard_name = surface_upward_sensible_heat_flux_over_ocean_from_mediator
-  long_name = sfc sensible heat flux input over ocean for coupling
+[dqsfc_med]
+  standard_name = surface_upward_latent_heat_flux_over_ocean_from_mediator
+  long_name = sfc latent heat flux input over ocean for coupling
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real

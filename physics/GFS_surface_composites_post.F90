@@ -41,7 +41,7 @@ contains
       logical,                              intent(in) :: cplflx, frac_grid, cplwav2atm, frac_ice
       logical,                              intent(in) :: lheatstrg
       logical, dimension(:),                intent(in) :: flag_cice, dry, icy
-      logical, dimension(:),             intent(inout) :: wet
+      logical, dimension(:),                intent(in) :: wet
       integer, dimension(:),                intent(in) :: islmsk, use_lake_model
       real(kind=kind_phys), dimension(:),   intent(in) :: wind, t1, q1, prsl1, landfrac, lakefrac, oceanfrac,                   &
         cd_wat, cd_lnd, cd_ice, cdq_wat, cdq_lnd, cdq_ice, rb_wat, rb_lnd, rb_ice, stress_wat,                                  &

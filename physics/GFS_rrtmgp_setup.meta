@@ -101,30 +101,6 @@
   dimensions = ()
   type = integer
   intent = in
-[solar_file]
-  standard_name = solar_constant_file
-  long_name = external solar constant data table file
-  units = none
-  dimensions =  ()
-  type = character
-  kind = len=26
-  intent = in
-[con_solr_2008]
-  standard_name = solar_constant_2008
-  long_name = solar constant Tim 2008
-  units = W m-2
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_solr_2002]
-  standard_name = solar_constant_2002
-  long_name= solar constant Liu 2002
-  units = W m-2
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
 [ico2]
   standard_name = control_for_co2
   long_name = prescribed global mean value (old opernl)
@@ -203,10 +179,32 @@
   type = character
   kind = len=26
   intent = in
+[iaermdl]
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+[iaerflg]
+  standard_name = control_for_aerosol_effects_in_radiation
+  long_name = control of aerosol effects in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
   units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degree Celsius
+  units = K
   dimensions = ()
   type = real
   kind = kind_phys
@@ -219,14 +217,6 @@
   type = real
   kind = kind_phys
   intent = in
-[con_plnk]
-  standard_name = planck_constant
-  long_name = Planck constant
-  units = J s-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
 [con_boltz]
   standard_name = boltzmann_constant
   long_name = Boltzmann constant
@@ -235,10 +225,34 @@
   type = real
   kind = kind_phys
   intent = in
-[con_t0c]
-  standard_name = temperature_at_zero_celsius
-  long_name = temperature at 0 degree Celsius
-  units = K
+[con_plnk]
+  standard_name = planck_constant
+  long_name = Planck constant
+  units = J s-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[solar_file]
+  standard_name = solar_constant_file
+  long_name = external solar constant data table file
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[con_solr_2008]
+  standard_name = solar_constant_2008
+  long_name = solar constant Tim 2008
+  units = W m-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_solr_2002]
+  standard_name = solar_constant_2002
+  long_name= solar constant Liu 2002
+  units = W m-2
   dimensions = ()
   type = real
   kind = kind_phys
@@ -266,20 +280,6 @@
   dimensions =  ()
   type = integer
   intent = inout
-[iaermdl]
-  standard_name = control_for_aerosol_radiation_scheme
-  long_name = control of aerosol scheme in radiation
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = out
-[iaerflg]
-  standard_name = control_for_aerosol_effects_in_radiation
-  long_name = control of aerosol effects in radiation
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -344,6 +344,13 @@
   dimensions = ()
   type = integer
   intent = in
+[iaermdl]
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
 [aeros_file]
   standard_name = aerosol_data_file
   long_name = aerosol data file
@@ -351,6 +358,53 @@
   dimensions =  ()
   type = character
   kind = len=26
+  intent = in
+[isol]
+  standard_name = control_for_solar_constant
+  long_name = use prescribed solar constant
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[slag]
+  standard_name = equation_of_time
+  long_name = equation of time (radian)
+  units = radian
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+[sdec]
+  standard_name = sine_of_solar_declination_angle
+  long_name = sin of the solar declination angle
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+[cdec]
+  standard_name = cosine_of_solar_declination_angle
+  long_name = cos of the solar declination angle
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+[solcon]
+  standard_name = solar_constant
+  long_name = solar constant (sun-earth distant adjusted)
+  units = W m-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [co2dat_file]
   standard_name = co2_monthly_obs_data_table_file
@@ -389,60 +443,6 @@
   dimensions = ()
   type = integer
   intent = in
-[iaermdl]
-  standard_name = control_for_aerosol_radiation_scheme
-  long_name = control of aerosol scheme in radiation
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = in
-[isol]
-  standard_name = control_for_solar_constant
-  long_name = use prescribed solar constant
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[con_pi]
-  standard_name = pi
-  long_name = ratio of a circle's circumference to its diameter
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[slag]
-  standard_name = equation_of_time
-  long_name = equation of time (radian)
-  units = radian
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
-[sdec]
-  standard_name = sine_of_solar_declination_angle
-  long_name = sin of the solar declination angle
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
-[cdec]
-  standard_name = cosine_of_solar_declination_angle
-  long_name = cos of the solar declination angle
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
-[solcon]
-  standard_name = solar_constant
-  long_name = solar constant (sun-earth distant adjusted)
-  units = W m-2
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

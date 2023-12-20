@@ -11,6 +11,9 @@
  
       contains
 
+!! \section arg_table_samfdeepcnv_init Argument Table
+!! \htmlinclude samfdeepcnv_init.html
+!!
       subroutine samfdeepcnv_init(imfdeepcnv,imfdeepcnv_samf,            &
      &                            errmsg, errflg)
 

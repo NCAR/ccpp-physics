@@ -44,7 +44,7 @@
       integer,                                          intent(in) :: ntinc, ntlnc
       logical,                                          intent(in) :: ldiag3d, qdiag3d
       integer,              dimension(:,:),             intent(in) :: dtidx
-      real,                 dimension(:,:),            intent(out) :: save_lnc, save_inc
+      real(kind=kind_phys), dimension(:,:),            intent(out) :: save_lnc, save_inc
 
       real(kind=kind_phys), intent(in   )                   :: rhcbot, rhcmax, rhcpbl, rhctop
       real(kind=kind_phys), intent(in   ), dimension(:)     :: work1, work2

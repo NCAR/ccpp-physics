@@ -71,6 +71,13 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+[vtype_save]
+  standard_name = vegetation_type_classification_save
+  long_name = vegetation type for lsm save
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = out
 [stype_save]
   standard_name = soil_type_classification_save
   long_name = soil type for lsm save
@@ -81,13 +88,6 @@
 [scolor_save]
   standard_name = soil_color_classification_save
   long_name = soil color for lsm save
-  units = index
-  dimensions = (horizontal_dimension)
-  type = integer
-  intent = out
-[vtype_save]
-  standard_name = vegetation_type_classification_save
-  long_name = vegetation type for lsm save
   units = index
   dimensions = (horizontal_dimension)
   type = integer
@@ -197,34 +197,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
-[vtype_save]
-  standard_name = vegetation_type_classification_save
-  long_name = vegetation type for lsm save
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = out
-[stype_save]
-  standard_name = soil_type_classification_save
-  long_name = soil type for lsm save
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = out
-[scolor_save]
-  standard_name = soil_color_classification_save
-  long_name = soil color for lsm save
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = out
-[slope_save]
-  standard_name = surface_slope_classification_save
-  long_name = sfc slope type for lsm save
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = out
 [prsik_1]
   standard_name = surface_dimensionless_exner_function
   long_name = dimensionless Exner function at lowest model interface
@@ -483,6 +455,34 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = out
+[vtype_save]
+  standard_name = vegetation_type_classification_save
+  long_name = vegetation type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+[stype_save]
+  standard_name = soil_type_classification_save
+  long_name = soil type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+[scolor_save]
+  standard_name = soil_color_classification_save
+  long_name = soil color for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+[slope_save]
+  standard_name = surface_slope_classification_save
+  long_name = sfc slope type for lsm save
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
   intent = out
 [errmsg]
   standard_name = ccpp_error_message
