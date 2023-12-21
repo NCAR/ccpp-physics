@@ -194,6 +194,13 @@
   dimensions = ()
   type = logical
   intent = in
+[flag_lakefreeze]
+  standard_name = flag_for_lake_water_freeze
+  long_name = flag for lake water freeze
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = in
 [u10m]
   standard_name = x_wind_at_10m
   long_name = 10 meter u wind speed

@@ -1703,7 +1703,8 @@ CONTAINS
        IF (NEWSN > zero .and. snowfracnewsn > 0.99_kind_phys .and. rhosnfall < 450._kind_phys) THEN
        ! new snow
              KEEP_SNOW_ALBEDO = one
-             !snow_mosaic=0.  ! ???
+             ! turn off separate treatment of snow covered and snow-free portions of the grid cell
+             snow_mosaic=0.  ! ???
       ENDIF
 
     IF (debug_print ) THEN
@@ -2076,7 +2077,6 @@ CONTAINS
           hfx = hfxs*(one-snowfrac) + hfx*snowfrac
           s = ss*(one-snowfrac) + s*snowfrac
           evapl = evapls*(one-snowfrac)
-          sublim = sublim*snowfrac
           prcpl = prcpls*(one-snowfrac) + prcpl*snowfrac
           fltot = fltots*(one-snowfrac) + fltot*snowfrac
           ALB   = MAX(keep_snow_albedo*alb,              &
@@ -2088,10 +2088,6 @@ CONTAINS
 
           runoff1 = runoff1s*(one-snowfrac) + runoff1*snowfrac
           runoff2 = runoff2s*(one-snowfrac) + runoff2*snowfrac
-          smelt = smelt * snowfrac
-          snoh = snoh * snowfrac
-          snflx = snflx * snowfrac
-          snom = snom * snowfrac
           mavail = mavails*(one-snowfrac) + one*snowfrac
           infiltr = infiltrs*(one-snowfrac) + infiltr*snowfrac
 
@@ -2115,7 +2111,7 @@ CONTAINS
           qvg = qvgs*(one-snowfrac) + qvg*snowfrac
           qsg = qsgs*(one-snowfrac) + qsg*snowfrac
           qcg = qcgs*(one-snowfrac) + qcg*snowfrac
-          sublim = eeta*snowfrac
+          sublim = eeta
           eeta = eetas*(one-snowfrac) + eeta*snowfrac
           qfx = qfxs*(one-snowfrac) + qfx*snowfrac
           hfx = hfxs*(one-snowfrac) + hfx*snowfrac
@@ -2129,10 +2125,6 @@ CONTAINS
               (emissn - emiss_snowfree) * snowfrac), emissn))
           runoff1 = runoff1s*(one-snowfrac) + runoff1*snowfrac
           runoff2 = runoff2s*(one-snowfrac) + runoff2*snowfrac
-          smelt = smelt * snowfrac
-          snoh = snoh * snowfrac
-          snflx = snflx * snowfrac
-          snom = snom * snowfrac
     IF (debug_print ) THEN
       print *,'SOILT combined on ice', soilt
     ENDIF
@@ -2215,15 +2207,13 @@ CONTAINS
        IF (debug_print ) then
        !if (abs(xlat-testptlat).lt.0.2 .and. abs(xlon-testptlon).lt.0.2)then
          print *,'Snowfallac xlat, xlon',xlat,xlon
-         print *,'newsn,rhonewsn,newsnowratio=',newsn,rhonewsn,newsnowratio
+         print *,'newsn [m],rhonewsn,newsnowratio=',newsn,rhonewsn,newsnowratio
          print *,'Time-step newsn depth [m], swe [m]',newsn,newsn*rhonewsn
          print *,'Time-step smelt: swe [m]' ,smelt*delt
          print *,'Time-step sublim: swe,[kg m-2]',sublim*delt
        endif
 
-      snowfallac = snowfallac + max(zero,(newsn*rhonewsn -                               & ! source of snow (swe) [m]
-                                       (smelt+sublim*1.e-3_kind_phys)*delt*newsnowratio) & ! sink: melting and sublimation, (swe) [m]
-                                       /rhonewsn)*rhowater ! snow accumulation in snow depth [mm]
+      snowfallac = snowfallac + newsn * 1.e3_kind_phys    ! accumulated snow depth [mm], using variable snow density
 
        IF (debug_print ) THEN
        !if (abs(xlat-testptlat).lt.0.2 .and. abs(xlon-testptlon).lt.0.2)then
@@ -5596,7 +5586,7 @@ print *, 'SNOWTEMP: SNHEI,SNTH,SOILT1: ',SNHEI,SNTH,SOILT1,soilt
         nmelt = 1
         soiltfrac=snowfrac*tfrz+(one-snowfrac)*SOILT
         QSG=min(QSG, QSN(soiltfrac,TBQ)/PP)
-        qvg=qsg
+        qvg=snowfrac*qsg+(one-snowfrac)*qvg
         T3      = STBOLT*TN*TN*TN
         UPFLUX  = T3 * 0.5_kind_phys*(TN + SOILTfrac)
         XINET   = EMISS*(GLW-UPFLUX)
