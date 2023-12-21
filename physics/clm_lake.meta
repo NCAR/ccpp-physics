@@ -305,14 +305,6 @@
   type = real
   kind = kind_phys
   intent = in
-[rho0]
-  standard_name = air_pressure_at_surface_adjacent_layer
-  long_name = mean pressure at lowest model layer
-  units = Pa
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [tsfc]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -328,6 +320,13 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
+[flag_lakefreeze]
+  standard_name = flag_for_lake_water_freeze
+  long_name = flag for lake water freeze
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = inout
 [isltyp]
   standard_name = soil_type_classification
   long_name = soil type at each grid cell
@@ -728,6 +727,30 @@
   standard_name = clm_lake_depth
   long_name = clm internal copy of lake depth with 10.0 replaced by default lake depth
   units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[t1]
+  standard_name = air_temperature_at_surface_adjacent_layer
+  long_name = mean temperature at lowest model layer
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[qv1]
+  standard_name = specific_humidity_at_surface_adjacent_layer
+  long_name = water vapor specific humidity at lowest model layer
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[prsl1]
+  standard_name = air_pressure_at_surface_adjacent_layer
+  long_name = mean pressure at lowest model layer
+  units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
