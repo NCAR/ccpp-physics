@@ -75,14 +75,14 @@ module module_mp_thompson
    logical, parameter, private :: homogIce = .true.
 
    integer, parameter, private :: IFDRY = 0
-   real(kind_phys), parameter, private :: T_0 = 273.15
-   real(kind_phys), parameter, private :: PI = 3.1415926536
+   real(wp), parameter, private :: T_0 = 273.15
+   real(wp), parameter, private :: PI = 3.1415926536
 
 !..Densities of rain, snow, graupel, and cloud ice.
-   real(kind_phys), parameter, private :: rho_w = 1000.0
-   real(kind_phys), parameter, private :: rho_s = 100.0
-   real(kind_phys), parameter, private :: rho_g = 500.0
-   real(kind_phys), parameter, private :: rho_i = 890.0
+   real(wp), parameter, private :: rho_w = 1000.0
+   real(wp), parameter, private :: rho_s = 100.0
+   real(wp), parameter, private :: rho_g = 500.0
+   real(wp), parameter, private :: rho_i = 890.0
 
 !..Prescribed number of cloud droplets.  Set according to known data or
 !.. roughly 100 per cc (100.E6 m^-3) for Maritime cases and
@@ -91,143 +91,143 @@ module module_mp_thompson
 !.. scheme.  In 2-moment cloud water, Nt_c represents a maximum of
 !.. droplet concentration and nu_c is also variable depending on local
 !.. droplet number concentration.
-   !real(kind_phys), parameter :: Nt_c = 100.e6
-   real(kind_phys), parameter :: Nt_c_o = 50.e6
-   real(kind_phys), parameter :: Nt_c_l = 100.e6
-   real(kind_phys), parameter, private :: Nt_c_max = 1999.e6
+   !real(wp), parameter :: Nt_c = 100.e6
+   real(wp), parameter :: Nt_c_o = 50.e6
+   real(wp), parameter :: Nt_c_l = 100.e6
+   real(wp), parameter, private :: Nt_c_max = 1999.e6
 
 !..Declaration of constants for assumed CCN/IN aerosols when none in
 !.. the input data.  Look inside the init routine for modifications
 !.. due to surface land-sea points or vegetation characteristics.
-   real(kind_phys), parameter :: naIN0 = 1.5e6
-   real(kind_phys), parameter :: naIN1 = 0.5e6
-   real(kind_phys), parameter :: naCCN0 = 300.0e6
-   real(kind_phys), parameter :: naCCN1 = 50.0e6
+   real(wp), parameter :: naIN0 = 1.5e6
+   real(wp), parameter :: naIN1 = 0.5e6
+   real(wp), parameter :: naCCN0 = 300.0e6
+   real(wp), parameter :: naCCN1 = 50.0e6
 
 !..Generalized gamma distributions for rain, graupel and cloud ice.
 !.. N(D) = N_0 * D**mu * exp(-lamda*D);  mu=0 is exponential.
-   real(kind_phys), parameter, private :: mu_r = 0.0
-   real(kind_phys), parameter, private :: mu_g = 0.0
-   real(kind_phys), parameter, private :: mu_i = 0.0
-   real(kind_phys), private ::  mu_c_o, mu_c_l
+   real(wp), parameter, private :: mu_r = 0.0
+   real(wp), parameter, private :: mu_g = 0.0
+   real(wp), parameter, private :: mu_i = 0.0
+   real(wp), private ::  mu_c_o, mu_c_l
 
 !..Sum of two gamma distrib for snow (Field et al. 2005).
 !.. N(D) = M2**4/M3**3 * [Kap0*exp(-M2*Lam0*D/M3)
 !..    + Kap1*(M2/M3)**mu_s * D**mu_s * exp(-M2*Lam1*D/M3)]
 !.. M2 and M3 are the (bm_s)th and (bm_s+1)th moments respectively
 !.. calculated as function of ice water content and temperature.
-   real(kind_phys), parameter, private :: mu_s = 0.6357
-   real(kind_phys), parameter, private :: Kap0 = 490.6
-   real(kind_phys), parameter, private :: Kap1 = 17.46
-   real(kind_phys), parameter, private :: Lam0 = 20.78
-   real(kind_phys), parameter, private :: Lam1 = 3.29
+   real(wp), parameter, private :: mu_s = 0.6357
+   real(wp), parameter, private :: Kap0 = 490.6
+   real(wp), parameter, private :: Kap1 = 17.46
+   real(wp), parameter, private :: Lam0 = 20.78
+   real(wp), parameter, private :: Lam1 = 3.29
 
 !..Y-intercept parameter for graupel is not constant and depends on
 !.. mixing ratio.  Also, when mu_g is non-zero, these become equiv
 !.. y-intercept for an exponential distrib and proper values are
 !.. computed based on same mixing ratio and total number concentration.
-   real(kind_phys), parameter, private :: gonv_min = 1.E2
-   real(kind_phys), parameter, private :: gonv_max = 1.E6
+   real(wp), parameter, private :: gonv_min = 1.E2
+   real(wp), parameter, private :: gonv_max = 1.E6
 
 !..Mass power law relations:  mass = am*D**bm
 !.. Snow from Field et al. (2005), others assume spherical form.
-   real(kind_phys), parameter, private :: am_r = PI*rho_w/6.0
-   real(kind_phys), parameter, private :: bm_r = 3.0
-   real(kind_phys), parameter, private :: am_s = 0.069
-   real(kind_phys), parameter, private :: bm_s = 2.0
-   real(kind_phys), parameter, private :: am_g = PI*rho_g/6.0
-   real(kind_phys), parameter, private :: bm_g = 3.0
-   real(kind_phys), parameter, private :: am_i = PI*rho_i/6.0
-   real(kind_phys), parameter, private :: bm_i = 3.0
+   real(wp), parameter, private :: am_r = PI*rho_w/6.0
+   real(wp), parameter, private :: bm_r = 3.0
+   real(wp), parameter, private :: am_s = 0.069
+   real(wp), parameter, private :: bm_s = 2.0
+   real(wp), parameter, private :: am_g = PI*rho_g/6.0
+   real(wp), parameter, private :: bm_g = 3.0
+   real(wp), parameter, private :: am_i = PI*rho_i/6.0
+   real(wp), parameter, private :: bm_i = 3.0
 
 !..Fallspeed power laws relations:  v = (av*D**bv)*exp(-fv*D)
 !.. Rain from Ferrier (1994), ice, snow, and graupel from
 !.. Thompson et al (2008). Coefficient fv is zero for graupel/ice.
-   real(kind_phys), parameter, private :: av_r = 4854.0
-   real(kind_phys), parameter, private :: bv_r = 1.0
-   real(kind_phys), parameter, private :: fv_r = 195.0
-   real(kind_phys), parameter, private :: av_s = 40.0
-   real(kind_phys), parameter, private :: bv_s = 0.55
-   real(kind_phys), parameter, private :: fv_s = 100.0
-   real(kind_phys), parameter, private :: av_g = 442.0
-   real(kind_phys), parameter, private :: bv_g = 0.89
-   real(kind_phys), parameter, private :: bv_i = 1.0
-   real(kind_phys), parameter, private :: av_c = 0.316946E8
-   real(kind_phys), parameter, private :: bv_c = 2.0
+   real(wp), parameter, private :: av_r = 4854.0
+   real(wp), parameter, private :: bv_r = 1.0
+   real(wp), parameter, private :: fv_r = 195.0
+   real(wp), parameter, private :: av_s = 40.0
+   real(wp), parameter, private :: bv_s = 0.55
+   real(wp), parameter, private :: fv_s = 100.0
+   real(wp), parameter, private :: av_g = 442.0
+   real(wp), parameter, private :: bv_g = 0.89
+   real(wp), parameter, private :: bv_i = 1.0
+   real(wp), parameter, private :: av_c = 0.316946E8
+   real(wp), parameter, private :: bv_c = 2.0
 
 !..Capacitance of sphere and plates/aggregates: D**3, D**2
-   real(kind_phys), parameter, private :: C_cube = 0.5
-   real(kind_phys), parameter, private :: C_sqrd = 0.15
+   real(wp), parameter, private :: C_cube = 0.5
+   real(wp), parameter, private :: C_sqrd = 0.15
 
 !..Collection efficiencies.  Rain/snow/graupel collection of cloud
 !.. droplets use variables (Ef_rw, Ef_sw, Ef_gw respectively) and
 !.. get computed elsewhere because they are dependent on stokes
 !.. number.
-   real(kind_phys), parameter, private :: Ef_si = 0.05
-   real(kind_phys), parameter, private :: Ef_rs = 0.95
-   real(kind_phys), parameter, private :: Ef_rg = 0.75
-   real(kind_phys), parameter, private :: Ef_ri = 0.95
+   real(wp), parameter, private :: Ef_si = 0.05
+   real(wp), parameter, private :: Ef_rs = 0.95
+   real(wp), parameter, private :: Ef_rg = 0.75
+   real(wp), parameter, private :: Ef_ri = 0.95
 
 !..Minimum microphys values
 !.. R1 value, 1.E-12, cannot be set lower because of numerical
 !.. problems with Paul Field's moments and should not be set larger
 !.. because of truncation problems in snow/ice growth.
-   real(kind_phys), parameter, private :: R1 = 1.e-12
-   real(kind_phys), parameter, private :: R2 = 1.e-6
-   real(kind_phys), parameter :: eps = 1.E-15
+   real(wp), parameter, private :: R1 = 1.e-12
+   real(wp), parameter, private :: R2 = 1.e-6
+   real(wp), parameter :: eps = 1.E-15
 
 !..Constants in Cooper curve relation for cloud ice number.
-   real(kind_phys), parameter, private :: TNO = 5.0
-   real(kind_phys), parameter, private :: ATO = 0.304
+   real(wp), parameter, private :: TNO = 5.0
+   real(wp), parameter, private :: ATO = 0.304
 
 !..Rho_not used in fallspeed relations (rho_not/rho)**.5 adjustment.
-   real(kind_phys), parameter, private :: rho_not = 101325.0 / (287.05*298.0)
+   real(wp), parameter, private :: rho_not = 101325.0 / (287.05*298.0)
 
 !..Schmidt number
-   real(kind_phys), parameter, private :: Sc = 0.632
-   real(kind_phys), private :: Sc3
+   real(wp), parameter, private :: Sc = 0.632
+   real(wp), private :: Sc3
 
 !..Homogeneous freezing temperature
-   real(kind_phys), parameter, private:: HGFR = 235.16
+   real(wp), parameter, private:: HGFR = 235.16
 
 !..Water vapor and air gas constants at constant pressure
-   real(kind_phys), parameter, private :: Rv = 461.5
-   real(kind_phys), parameter, private :: oRv = 1./Rv
-   real(kind_phys), parameter, private :: R = 287.04
-   real(kind_phys), parameter, private :: RoverRv = R*oRv
-   real(kind_phys), parameter, private :: Cp = 1004.0
-   real(kind_phys), parameter, private :: R_uni = 8.314                           !< J (mol K)-1
+   real(wp), parameter, private :: Rv = 461.5
+   real(wp), parameter, private :: oRv = 1./Rv
+   real(wp), parameter, private :: R = 287.04
+   real(wp), parameter, private :: RoverRv = R*oRv
+   real(wp), parameter, private :: Cp = 1004.0
+   real(wp), parameter, private :: R_uni = 8.314                           !< J (mol K)-1
 
-   real(kind_dbl_prec), parameter, private :: k_b = 1.38065e-23           !< Boltzmann constant [J/K]
-   real(kind_dbl_prec), parameter, private :: M_w = 18.01528e-3           !< molecular mass of water [kg/mol]
-   real(kind_dbl_prec), parameter, private :: M_a = 28.96e-3              !< molecular mass of air [kg/mol]
-   real(kind_dbl_prec), parameter, private :: N_avo = 6.022e23            !< Avogadro number [1/mol]
-   real(kind_dbl_prec), parameter, private :: ma_w = M_w / N_avo          !< mass of water molecule [kg]
-   real(kind_phys), parameter, private :: ar_volume = 4./3.*PI*(2.5e-6)**3        !< assume radius of 0.025 micrometer, 2.5e-6 cm
+   real(dp), parameter, private :: k_b = 1.38065e-23           !< Boltzmann constant [J/K]
+   real(dp), parameter, private :: M_w = 18.01528e-3           !< molecular mass of water [kg/mol]
+   real(dp), parameter, private :: M_a = 28.96e-3              !< molecular mass of air [kg/mol]
+   real(dp), parameter, private :: N_avo = 6.022e23            !< Avogadro number [1/mol]
+   real(dp), parameter, private :: ma_w = M_w / N_avo          !< mass of water molecule [kg]
+   real(wp), parameter, private :: ar_volume = 4./3.*PI*(2.5e-6)**3        !< assume radius of 0.025 micrometer, 2.5e-6 cm
 
 !..Enthalpy of sublimation, vaporization, and fusion at 0C.
-   real(kind_phys), parameter, private :: lsub = 2.834e6
-   real(kind_phys), parameter, private :: lvap0 = 2.5e6
-   real(kind_phys), parameter, private :: lfus = lsub - lvap0
-   real(kind_phys), parameter, private :: olfus = 1./lfus
+   real(wp), parameter, private :: lsub = 2.834e6
+   real(wp), parameter, private :: lvap0 = 2.5e6
+   real(wp), parameter, private :: lfus = lsub - lvap0
+   real(wp), parameter, private :: olfus = 1./lfus
 
 !..Ice initiates with this mass (kg), corresponding diameter calc.
 !..Min diameters and mass of cloud, rain, snow, and graupel (m, kg).
-   real(kind_phys), parameter, private :: xm0i = R1
-   real(kind_phys), parameter, private :: D0c = 1.e-6
-   real(kind_phys), parameter, private :: D0r = 50.e-6
-   real(kind_phys), parameter, private :: D0s = 300.e-6
-   real(kind_phys), parameter, private :: D0g = 350.e-6
-   real(kind_phys), private :: D0i, xm0s, xm0g
+   real(wp), parameter, private :: xm0i = R1
+   real(wp), parameter, private :: D0c = 1.e-6
+   real(wp), parameter, private :: D0r = 50.e-6
+   real(wp), parameter, private :: D0s = 300.e-6
+   real(wp), parameter, private :: D0g = 350.e-6
+   real(wp), private :: D0i, xm0s, xm0g
 
 !..Min and max radiative effective radius of cloud water, cloud ice, and snow;
 !.. performed by subroutine calc_effectRad. On purpose, these should stay PUBLIC.
-   real(kind_phys), parameter :: re_qc_min = 2.50e-6               ! 2.5 microns
-   real(kind_phys), parameter :: re_qc_max = 50.0e-6               ! 50 microns
-   real(kind_phys), parameter :: re_qi_min = 2.50e-6               ! 2.5 microns
-   real(kind_phys), parameter :: re_qi_max = 125.0e-6              ! 125 microns
-   real(kind_phys), parameter :: re_qs_min = 5.00e-6               ! 5 microns
-   real(kind_phys), parameter :: re_qs_max = 999.0e-6              ! 999 microns (1 mm)
+   real(wp), parameter :: re_qc_min = 2.50e-6               ! 2.5 microns
+   real(wp), parameter :: re_qc_max = 50.0e-6               ! 50 microns
+   real(wp), parameter :: re_qi_min = 2.50e-6               ! 2.5 microns
+   real(wp), parameter :: re_qi_max = 125.0e-6              ! 125 microns
+   real(wp), parameter :: re_qs_min = 5.00e-6               ! 5 microns
+   real(wp), parameter :: re_qs_max = 999.0e-6              ! 999 microns (1 mm)
 
 !..Lookup table dimensions
    integer, parameter, private :: nbins = 100
@@ -254,16 +254,16 @@ module module_mp_thompson
    integer, parameter, private :: ntb_IN = 55
    integer, private:: niIN2
 
-   real(kind_dbl_prec), dimension(nbins+1) :: xDx
-   real(kind_dbl_prec), dimension(nbc) :: Dc, dtc
-   real(kind_dbl_prec), dimension(nbi) :: Di, dti
-   real(kind_dbl_prec), dimension(nbr) :: Dr, dtr
-   real(kind_dbl_prec), dimension(nbs) :: Ds, dts
-   real(kind_dbl_prec), dimension(nbg) :: Dg, dtg
-   real(kind_dbl_prec), dimension(nbc) :: t_Nc
+   real(dp), dimension(nbins+1) :: xDx
+   real(dp), dimension(nbc) :: Dc, dtc
+   real(dp), dimension(nbi) :: Di, dti
+   real(dp), dimension(nbr) :: Dr, dtr
+   real(dp), dimension(nbs) :: Ds, dts
+   real(dp), dimension(nbg) :: Dg, dtg
+   real(dp), dimension(nbc) :: t_Nc
 
 !> Lookup tables for cloud water content (kg/m**3).
-   real(kind_phys), dimension(ntb_c), parameter, private :: &
+   real(wp), dimension(ntb_c), parameter, private :: &
    r_c = (/1.e-6,2.e-6,3.e-6,4.e-6,5.e-6,6.e-6,7.e-6,8.e-6,9.e-6, &
             1.e-5,2.e-5,3.e-5,4.e-5,5.e-5,6.e-5,7.e-5,8.e-5,9.e-5, &
             1.e-4,2.e-4,3.e-4,4.e-4,5.e-4,6.e-4,7.e-4,8.e-4,9.e-4, &
@@ -271,7 +271,7 @@ module module_mp_thompson
             1.e-2/)
 
 !> Lookup tables for cloud ice content (kg/m**3).
-   real(kind_phys), dimension(ntb_i), parameter, private :: &
+   real(wp), dimension(ntb_i), parameter, private :: &
    r_i = (/1.e-10,2.e-10,3.e-10,4.e-10, &
             5.e-10,6.e-10,7.e-10,8.e-10,9.e-10, &
             1.e-9,2.e-9,3.e-9,4.e-9,5.e-9,6.e-9,7.e-9,8.e-9,9.e-9, &
@@ -283,7 +283,7 @@ module module_mp_thompson
             1.e-3/)
 
 !> Lookup tables for rain content (kg/m**3).
-   real(kind_phys), dimension(ntb_r), parameter, private :: &
+   real(wp), dimension(ntb_r), parameter, private :: &
    r_r = (/1.e-6,2.e-6,3.e-6,4.e-6,5.e-6,6.e-6,7.e-6,8.e-6,9.e-6, &
             1.e-5,2.e-5,3.e-5,4.e-5,5.e-5,6.e-5,7.e-5,8.e-5,9.e-5, &
             1.e-4,2.e-4,3.e-4,4.e-4,5.e-4,6.e-4,7.e-4,8.e-4,9.e-4, &
@@ -291,21 +291,21 @@ module module_mp_thompson
             1.e-2/)
 
 !> Lookup tables for graupel content (kg/m**3).
-   real(kind_phys), dimension(ntb_g), parameter, private :: &
+   real(wp), dimension(ntb_g), parameter, private :: &
    r_g = (/1.e-5,2.e-5,3.e-5,4.e-5,5.e-5,6.e-5,7.e-5,8.e-5,9.e-5, &
             1.e-4,2.e-4,3.e-4,4.e-4,5.e-4,6.e-4,7.e-4,8.e-4,9.e-4, &
             1.e-3,2.e-3,3.e-3,4.e-3,5.e-3,6.e-3,7.e-3,8.e-3,9.e-3, &
             1.e-2/)
 
 !> Lookup tables for snow content (kg/m**3).
-   real(kind_phys), dimension(ntb_s), parameter, private :: &
+   real(wp), dimension(ntb_s), parameter, private :: &
    r_s = (/1.e-5,2.e-5,3.e-5,4.e-5,5.e-5,6.e-5,7.e-5,8.e-5,9.e-5, &
             1.e-4,2.e-4,3.e-4,4.e-4,5.e-4,6.e-4,7.e-4,8.e-4,9.e-4, &
             1.e-3,2.e-3,3.e-3,4.e-3,5.e-3,6.e-3,7.e-3,8.e-3,9.e-3, &
             1.e-2/)
 
 !> Lookup tables for rain y-intercept parameter (/m**4).
-   real(kind_phys), dimension(ntb_r1), parameter, private :: &
+   real(wp), dimension(ntb_r1), parameter, private :: &
    N0r_exp = (/1.e6,2.e6,3.e6,4.e6,5.e6,6.e6,7.e6,8.e6,9.e6, &
                1.e7,2.e7,3.e7,4.e7,5.e7,6.e7,7.e7,8.e7,9.e7, &
                1.e8,2.e8,3.e8,4.e8,5.e8,6.e8,7.e8,8.e8,9.e8, &
@@ -313,7 +313,7 @@ module module_mp_thompson
                1.e10/)
 
 !> Lookup tables for graupel y-intercept parameter (/m**4).
-   real(kind_phys), dimension(ntb_g1), parameter, private :: &
+   real(wp), dimension(ntb_g1), parameter, private :: &
    N0g_exp = (/1.e2,2.e2,3.e2,4.e2,5.e2,6.e2,7.e2,8.e2,9.e2, &
                1.e3,2.e3,3.e3,4.e3,5.e3,6.e3,7.e3,8.e3,9.e3, &
                1.e4,2.e4,3.e4,4.e4,5.e4,6.e4,7.e4,8.e4,9.e4, &
@@ -321,7 +321,7 @@ module module_mp_thompson
                1.e6/)
 
 !> Lookup tables for ice number concentration (/m**3).
-   real(kind_phys), dimension(ntb_i1), parameter, private :: &
+   real(wp), dimension(ntb_i1), parameter, private :: &
    Nt_i = (/1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0, &
             1.e1,2.e1,3.e1,4.e1,5.e1,6.e1,7.e1,8.e1,9.e1, &
             1.e2,2.e2,3.e2,4.e2,5.e2,6.e2,7.e2,8.e2,9.e2, &
@@ -332,19 +332,19 @@ module module_mp_thompson
 
 !..Aerosol table parameter: Number of available aerosols, vertical
 !.. velocity, temperature, aerosol mean radius, and hygroscopicity.
-   real(kind_phys), dimension(ntb_arc), parameter, private :: &
+   real(wp), dimension(ntb_arc), parameter, private :: &
    ta_Na = (/10.0, 31.6, 100.0, 316.0, 1000.0, 3160.0, 10000.0/)
-   real(kind_phys), dimension(ntb_arw), parameter, private :: &
+   real(wp), dimension(ntb_arw), parameter, private :: &
    ta_Ww = (/0.01, 0.0316, 0.1, 0.316, 1.0, 3.16, 10.0, 31.6, 100.0/)
-   real(kind_phys), dimension(ntb_art), parameter, private :: &
+   real(wp), dimension(ntb_art), parameter, private :: &
    ta_Tk = (/243.15, 253.15, 263.15, 273.15, 283.15, 293.15, 303.15/)
-   real(kind_phys), dimension(ntb_arr), parameter, private :: &
+   real(wp), dimension(ntb_arr), parameter, private :: &
    ta_Ra = (/0.01, 0.02, 0.04, 0.08, 0.16/)
-   real(kind_phys), dimension(ntb_ark), parameter, private :: &
+   real(wp), dimension(ntb_ark), parameter, private :: &
    ta_Ka = (/0.2, 0.4, 0.6, 0.8/)
 
 !> Lookup tables for IN concentration (/m**3) from 0.001 to 1000/Liter.
-   real(kind_phys), dimension(ntb_IN), parameter, private :: &
+   real(wp), dimension(ntb_IN), parameter, private :: &
    Nt_IN = (/1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0, &
             1.e1,2.e1,3.e1,4.e1,5.e1,6.e1,7.e1,8.e1,9.e1, &
             1.e2,2.e2,3.e2,4.e2,5.e2,6.e2,7.e2,8.e2,9.e2, &
@@ -354,15 +354,15 @@ module module_mp_thompson
             1.e6/)
 
 !> For snow moments conversions (from Field et al. 2005)
-   real(kind_phys), dimension(10), parameter, private :: &
+   real(wp), dimension(10), parameter, private :: &
    sa = (/ 5.065339, -0.062659, -3.032362, 0.029469, -0.000285, &
             0.31255,   0.000204,  0.003199, 0.0,      -0.015952/)
-   real(kind_phys), dimension(10), parameter, private :: &
+   real(wp), dimension(10), parameter, private :: &
    sb = (/ 0.476221, -0.015896,  0.165977, 0.007468, -0.000141, &
             0.060366,  0.000079,  0.000594, 0.0,      -0.003577/)
 
 !> Temperatures (5 C interval 0 to -40) used in lookup tables.
-   real(kind_phys), dimension(ntb_t), parameter, private :: &
+   real(wp), dimension(ntb_t), parameter, private :: &
    Tc = (/-0.01, -5., -10., -15., -20., -25., -30., -35., -40./)
 
 !..Lookup tables for various accretion/collection terms.
@@ -379,44 +379,44 @@ module module_mp_thompson
    character(len=*), parameter :: qr_acr_qs_file = 'qr_acr_qsV2.dat'
    character(len=*), parameter :: freeze_h2o_file = 'freezeH2O.dat'
 
-   real (kind_dbl_prec), allocatable, dimension(:,:,:,:) ::             &
+   real (dp), allocatable, dimension(:,:,:,:) ::             &
                tcg_racg, tmr_racg, tcr_gacr, tmg_gacr,                  &
                tnr_racg, tnr_gacr
-   real (kind_dbl_prec), allocatable, dimension(:,:,:,:) ::             &
+   real (dp), allocatable, dimension(:,:,:,:) ::             &
                tcs_racs1, tmr_racs1, tcs_racs2, tmr_racs2,              &
                tcr_sacr1, tms_sacr1, tcr_sacr2, tms_sacr2,              &
                tnr_racs1, tnr_racs2, tnr_sacr1, tnr_sacr2
-   real (kind_dbl_prec), allocatable, dimension(:,:,:,:) ::             &
+   real (dp), allocatable, dimension(:,:,:,:) ::             &
                tpi_qcfz, tni_qcfz
-   real (kind_dbl_prec), allocatable, dimension(:,:,:,:) ::             &
+   real (dp), allocatable, dimension(:,:,:,:) ::             &
                tpi_qrfz, tpg_qrfz, tni_qrfz, tnr_qrfz
-   real (kind_dbl_prec), allocatable, dimension(:,:) ::                 &
+   real (dp), allocatable, dimension(:,:) ::                 &
                tps_iaus, tni_iaus, tpi_ide
-   real (kind_dbl_prec), allocatable, dimension(:,:) :: t_Efrw
-   real (kind_dbl_prec), allocatable, dimension(:,:) :: t_Efsw
-   real (kind_dbl_prec), allocatable, dimension(:,:,:) :: tnr_rev
-   real (kind_dbl_prec), allocatable, dimension(:,:,:) ::               &
+   real (dp), allocatable, dimension(:,:) :: t_Efrw
+   real (dp), allocatable, dimension(:,:) :: t_Efsw
+   real (dp), allocatable, dimension(:,:,:) :: tnr_rev
+   real (dp), allocatable, dimension(:,:,:) ::               &
                tpc_wev, tnc_wev
-   real (kind_sngl_prec), allocatable, dimension(:,:,:,:,:) :: tnccn_act
+   real (sp), allocatable, dimension(:,:,:,:,:) :: tnccn_act
 
 !..Variables holding a bunch of exponents and gamma values (cloud water,
 !.. cloud ice, rain, snow, then graupel).
-   real(kind_phys), dimension(5,15), private :: cce, ccg
-   real(kind_phys), dimension(15), private ::  ocg1, ocg2
-   real(kind_phys), dimension(7), private :: cie, cig
-   real(kind_phys), private :: oig1, oig2, obmi
-   real(kind_phys), dimension(13), private :: cre, crg
-   real(kind_phys), private :: ore1, org1, org2, org3, obmr
-   real(kind_phys), dimension(18), private :: cse, csg
-   real(kind_phys), private :: oams, obms, ocms
-   real(kind_phys), dimension(12), private :: cge, cgg
-   real(kind_phys), private :: oge1, ogg1, ogg2, ogg3, oamg, obmg, ocmg
+   real(wp), dimension(5,15), private :: cce, ccg
+   real(wp), dimension(15), private ::  ocg1, ocg2
+   real(wp), dimension(7), private :: cie, cig
+   real(wp), private :: oig1, oig2, obmi
+   real(wp), dimension(13), private :: cre, crg
+   real(wp), private :: ore1, org1, org2, org3, obmr
+   real(wp), dimension(18), private :: cse, csg
+   real(wp), private :: oams, obms, ocms
+   real(wp), dimension(12), private :: cge, cgg
+   real(wp), private :: oge1, ogg1, ogg2, ogg3, oamg, obmg, ocmg
 
 !..Declaration of precomputed constants in various rate eqns.
-   real(kind_phys) :: t1_qr_qc, t1_qr_qi, t2_qr_qi, t1_qg_qc, t1_qs_qc, t1_qs_qi
-   real(kind_phys) :: t1_qr_ev, t2_qr_ev
-   real(kind_phys) :: t1_qs_sd, t2_qs_sd, t1_qg_sd, t2_qg_sd
-   real(kind_phys) :: t1_qs_me, t2_qs_me, t1_qg_me, t2_qg_me
+   real(wp) :: t1_qr_qc, t1_qr_qi, t2_qr_qi, t1_qg_qc, t1_qs_qc, t1_qs_qi
+   real(wp) :: t1_qr_ev, t2_qr_ev
+   real(wp) :: t1_qs_sd, t2_qs_sd, t1_qg_sd, t2_qg_sd
+   real(wp) :: t1_qs_me, t2_qs_me, t1_qg_me, t2_qg_me
 
 !..MPI communicator
    integer :: mpi_communicator
@@ -453,7 +453,7 @@ module module_mp_thompson
 
          integer:: i, j, k, l, m, n
          logical:: micro_init
-         real(kind_phys) :: stime, etime
+         real(wp) :: stime, etime
          logical, parameter :: precomputed_tables = .FALSE.
 
 ! Set module variable is_aerosol_aware/merra2_aerosol_aware
@@ -1029,44 +1029,44 @@ module module_mp_thompson
          integer, intent(in):: ids,ide, jds,jde, kds,kde, &
                               ims,ime, jms,jme, kms,kme, &
                               its,ite, jts,jte, kts,kte
-         real(kind_phys), dimension(ims:ime, kms:kme, jms:jme), intent(inout):: &
+         real(wp), dimension(ims:ime, kms:kme, jms:jme), intent(inout):: &
                            qv, qc, qr, qi, qs, qg, ni, nr
-         real(kind_phys), dimension(ims:ime, kms:kme, jms:jme), optional, intent(inout):: &
+         real(wp), dimension(ims:ime, kms:kme, jms:jme), optional, intent(inout):: &
                            tt, th
-         real(kind_phys), dimension(ims:ime, kms:kme, jms:jme), optional, intent(in):: &
+         real(wp), dimension(ims:ime, kms:kme, jms:jme), optional, intent(in):: &
                            pii
-         real(kind_phys), dimension(ims:ime, kms:kme, jms:jme), optional, intent(inout):: &
+         real(wp), dimension(ims:ime, kms:kme, jms:jme), optional, intent(inout):: &
                            nc, nwfa, nifa
-         real(kind_phys), dimension(ims:ime, jms:jme), optional, intent(in):: nwfa2d, nifa2d
+         real(wp), dimension(ims:ime, jms:jme), optional, intent(in):: nwfa2d, nifa2d
          integer, dimension(ims:ime, jms:jme), intent(in):: lsm
-         real(kind_phys), dimension(ims:ime, kms:kme, jms:jme), optional, intent(inout):: &
+         real(wp), dimension(ims:ime, kms:kme, jms:jme), optional, intent(inout):: &
                            re_cloud, re_ice, re_snow
-         real(kind_phys), dimension(ims:ime, kms:kme, jms:jme), intent(inout):: pfils, pflls
+         real(wp), dimension(ims:ime, kms:kme, jms:jme), intent(inout):: pfils, pflls
          integer, intent(in) :: rand_perturb_on, kme_stoch, n_var_spp
-         real(kind_phys), dimension(:,:), intent(in) :: rand_pert
-         real(kind_phys), dimension(:), intent(in) :: spp_prt_list, spp_stddev_cutoff
+         real(wp), dimension(:,:), intent(in) :: rand_pert
+         real(wp), dimension(:), intent(in) :: spp_prt_list, spp_stddev_cutoff
          character(len=10), dimension(:), intent(in) :: spp_var_list
          integer, intent(in):: has_reqc, has_reqi, has_reqs
 #if ( WRF_CHEM == 1 )
-         real(kind_phys), dimension(ims:ime, kms:kme, jms:jme), intent(inout):: &
+         real(wp), dimension(ims:ime, kms:kme, jms:jme), intent(inout):: &
                            rainprod, evapprod
 #endif
-         real(kind_phys), dimension(ims:ime, kms:kme, jms:jme), intent(in):: &
+         real(wp), dimension(ims:ime, kms:kme, jms:jme), intent(in):: &
                            p, w, dz
-         real(kind_phys), dimension(ims:ime, jms:jme), intent(inout):: &
+         real(wp), dimension(ims:ime, jms:jme), intent(inout):: &
                            RAINNC, RAINNCV, SR
-         real(kind_phys), dimension(ims:ime, jms:jme), optional, intent(inout)::      &
+         real(wp), dimension(ims:ime, jms:jme), optional, intent(inout)::      &
                            SNOWNC, SNOWNCV,                              &
                            ICENC, ICENCV,                                &
                            GRAUPELNC, GRAUPELNCV
-         real(kind_phys), dimension(ims:ime, kms:kme, jms:jme), intent(inout)::       &
+         real(wp), dimension(ims:ime, kms:kme, jms:jme), intent(inout)::       &
                            refl_10cm
-         real(kind_phys), dimension(ims:ime, jms:jme), intent(inout)::       &
+         real(wp), dimension(ims:ime, jms:jme), intent(inout)::       &
                            max_hail_diam_sfc
-         real(kind_phys), dimension(ims:ime, kms:kme, jms:jme), optional, intent(inout):: &
+         real(wp), dimension(ims:ime, kms:kme, jms:jme), optional, intent(inout):: &
                            vt_dbz_wt
          logical, intent(in) :: first_time_step
-         real(kind_phys), intent(in):: dt_in, dt_inner
+         real(wp), intent(in):: dt_in, dt_inner
          logical, intent(in) :: sedi_semi
          integer, intent(in) :: decfl
          ! To support subcycling: current step and maximum number of steps
@@ -1075,7 +1075,7 @@ module module_mp_thompson
          ! Extended diagnostics, array pointers only associated if ext_diag flag is .true.
          logical, intent (in) :: ext_diag
          logical, optional, intent(in):: aero_ind_fdb
-         real(kind_phys), dimension(:,:,:), intent(inout)::                     &
+         real(wp), dimension(:,:,:), intent(inout)::                     &
                            !vts1, txri, txrc,                       &
                            prw_vcdc,                               &
                            prw_vcde, tpri_inu, tpri_ide_d,         &
@@ -1092,12 +1092,12 @@ module module_mp_thompson
                            nrten3, ncten3, qcten3
 
    !..Local variables
-         real(kind_phys), dimension(kts:kte):: &
+         real(wp), dimension(kts:kte):: &
                            qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d,     &
                            nr1d, nc1d, nwfa1d, nifa1d,                   &
                            t1d, p1d, w1d, dz1d, rho, dBZ, pfil1, pfll1
    !..Extended diagnostics, single column arrays
-         real(kind_phys), dimension(:), allocatable::                              &
+         real(wp), dimension(:), allocatable::                              &
                            !vtsk1, txri1, txrc1,                       &
                            prw_vcdc1,                                 &
                            prw_vcde1, tpri_inu1, tpri_ide1_d,         &
@@ -1113,16 +1113,16 @@ module module_mp_thompson
                            qrten1, qsten1, qgten1, qiten1, niten1,    &
                            nrten1, ncten1, qcten1
 
-         real(kind_phys), dimension(kts:kte):: re_qc1d, re_qi1d, re_qs1d
+         real(wp), dimension(kts:kte):: re_qc1d, re_qi1d, re_qs1d
 #if ( WRF_CHEM == 1 )
-      real(kind_phys), dimension(kts:kte):: &
+      real(wp), dimension(kts:kte):: &
                         rainprod1d, evapprod1d
 #endif
-         real(kind_phys), dimension(its:ite, jts:jte):: pcp_ra, pcp_sn, pcp_gr, pcp_ic
-         real(kind_phys) :: dt, pptrain, pptsnow, pptgraul, pptice
-         real(kind_phys) :: qc_max, qr_max, qs_max, qi_max, qg_max, ni_max, nr_max
+         real(wp), dimension(its:ite, jts:jte):: pcp_ra, pcp_sn, pcp_gr, pcp_ic
+         real(wp) :: dt, pptrain, pptsnow, pptgraul, pptice
+         real(wp) :: qc_max, qr_max, qs_max, qi_max, qg_max, ni_max, nr_max
          integer:: lsml
-         real(kind_phys) :: rand1, rand2, rand3, rand_pert_max
+         real(wp) :: rand1, rand2, rand3, rand_pert_max
          integer:: i, j, k, m
          integer:: imax_qc,imax_qr,imax_qi,imax_qs,imax_qg,imax_ni,imax_nr
          integer:: jmax_qc,jmax_qr,jmax_qi,jmax_qs,jmax_qg,jmax_ni,jmax_nr
@@ -1889,20 +1889,20 @@ module module_mp_thompson
 
 !..Sub arguments
       integer, intent(in):: kts, kte, ii, jj
-      real(kind_phys), dimension(kts:kte), intent(inout) :: &
+      real(wp), dimension(kts:kte), intent(inout) :: &
                           qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d, &
                           nr1d, nc1d, nwfa1d, nifa1d, t1d
-      real(kind_phys), dimension(kts:kte), intent(out) :: pfil1, pfll1
-      real(kind_phys), dimension(kts:kte), intent(in) :: p1d, w1d, dzq
-      real(kind_phys), intent(inout) :: pptrain, pptsnow, pptgraul, pptice
-      real(kind_phys), intent(in) :: dt
+      real(wp), dimension(kts:kte), intent(out) :: pfil1, pfll1
+      real(wp), dimension(kts:kte), intent(in) :: p1d, w1d, dzq
+      real(wp), intent(inout) :: pptrain, pptsnow, pptgraul, pptice
+      real(wp), intent(in) :: dt
       integer, intent(in) :: lsml
-      real(kind_phys), intent(in) :: rand1, rand2, rand3
+      real(wp), intent(in) :: rand1, rand2, rand3
       ! Extended diagnostics, most arrays only allocated if ext_diag is true
       logical, intent(in) :: ext_diag
       logical, intent(in) :: sedi_semi
       integer, intent(in) :: decfl
-      real(kind_phys), dimension(:), intent(out) :: &
+      real(wp), dimension(:), intent(out) :: &
                           !vtsk1, txri1, txrc1,                       &
                           prw_vcdc1,                                 &
                           prw_vcde1, tpri_inu1, tpri_ide1_d,         &
@@ -1919,88 +1919,88 @@ module module_mp_thompson
                           nrten1, ncten1, qcten1
 
 #if ( WRF_CHEM == 1 )
-      real(kind_phys), dimension(kts:kte), intent(inout) :: &
+      real(wp), dimension(kts:kte), intent(inout) :: &
                           rainprod, evapprod
 #endif
 
 !..Local variables
-      real(kind_phys), dimension(kts:kte) :: tten, qvten, qcten, qiten, &
+      real(wp), dimension(kts:kte) :: tten, qvten, qcten, qiten, &
            qrten, qsten, qgten, niten, nrten, ncten, nwfaten, nifaten
 
-      real(kind_dbl_prec), dimension(kts:kte) :: prw_vcd
+      real(dp), dimension(kts:kte) :: prw_vcd
 
-      real(kind_dbl_prec), dimension(kts:kte) :: pnc_wcd, pnc_wau, pnc_rcw, &
+      real(dp), dimension(kts:kte) :: pnc_wcd, pnc_wau, pnc_rcw, &
            pnc_scw, pnc_gcw
 
-      real(kind_dbl_prec), dimension(kts:kte) :: pna_rca, pna_sca, pna_gca, &
+      real(dp), dimension(kts:kte) :: pna_rca, pna_sca, pna_gca, &
            pnd_rcd, pnd_scd, pnd_gcd
 
-      real(kind_dbl_prec), dimension(kts:kte) :: prr_wau, prr_rcw, prr_rcs, &
+      real(dp), dimension(kts:kte) :: prr_wau, prr_rcw, prr_rcs, &
            prr_rcg, prr_sml, prr_gml, &
            prr_rci, prv_rev,          &
            pnr_wau, pnr_rcs, pnr_rcg, &
            pnr_rci, pnr_sml, pnr_gml, &
            pnr_rev, pnr_rcr, pnr_rfz
 
-      real(kind_dbl_prec), dimension(kts:kte) :: pri_inu, pni_inu, pri_ihm, &
+      real(dp), dimension(kts:kte) :: pri_inu, pni_inu, pri_ihm, &
            pni_ihm, pri_wfz, pni_wfz, &
            pri_rfz, pni_rfz, pri_ide, &
            pni_ide, pri_rci, pni_rci, &
            pni_sci, pni_iau, pri_iha, pni_iha
 
-      real(kind_dbl_prec), dimension(kts:kte) :: prs_iau, prs_sci, prs_rcs, &
+      real(dp), dimension(kts:kte) :: prs_iau, prs_sci, prs_rcs, &
            prs_scw, prs_sde, prs_ihm, &
            prs_ide
 
-      real(kind_dbl_prec), dimension(kts:kte) :: prg_scw, prg_rfz, prg_gde, &
+      real(dp), dimension(kts:kte) :: prg_scw, prg_rfz, prg_gde, &
            prg_gcw, prg_rci, prg_rcs, &
            prg_rcg, prg_ihm
 
-      real(kind_dbl_prec), parameter:: zeroD0 = 0.0
-      real(kind_phys) :: dtcfl, rainsfc, graulsfc
+      real(dp), parameter:: zeroD0 = 0.0
+      real(wp) :: dtcfl, rainsfc, graulsfc
       integer :: niter 
 
-      real(kind_phys), dimension(kts:kte) :: temp, pres, qv, pfll, pfil, pdummy
-      real(kind_phys), dimension(kts:kte) :: rc, ri, rr, rs, rg, ni, nr, nc, nwfa, nifa
-      real(kind_phys), dimension(kts:kte) :: rr_tmp, nr_tmp, rg_tmp
-      real(kind_phys), dimension(kts:kte) :: rho, rhof, rhof2
-      real(kind_phys), dimension(kts:kte) :: qvs, qvsi, delQvs
-      real(kind_phys), dimension(kts:kte) :: satw, sati, ssatw, ssati
-      real(kind_phys), dimension(kts:kte) :: diffu, visco, vsc2, &
+      real(wp), dimension(kts:kte) :: temp, pres, qv, pfll, pfil, pdummy
+      real(wp), dimension(kts:kte) :: rc, ri, rr, rs, rg, ni, nr, nc, nwfa, nifa
+      real(wp), dimension(kts:kte) :: rr_tmp, nr_tmp, rg_tmp
+      real(wp), dimension(kts:kte) :: rho, rhof, rhof2
+      real(wp), dimension(kts:kte) :: qvs, qvsi, delQvs
+      real(wp), dimension(kts:kte) :: satw, sati, ssatw, ssati
+      real(wp), dimension(kts:kte) :: diffu, visco, vsc2, &
            tcond, lvap, ocp, lvt2
 
-      real(kind_dbl_prec), dimension(kts:kte) :: ilamr, ilamg, N0_r, N0_g
-      real(kind_phys), dimension(kts:kte) :: mvd_r, mvd_c
-      real(kind_phys), dimension(kts:kte) :: smob, smo2, smo1, smo0, &
+      real(dp), dimension(kts:kte) :: ilamr, ilamg, N0_r, N0_g
+      real(wp), dimension(kts:kte) :: mvd_r, mvd_c
+      real(wp), dimension(kts:kte) :: smob, smo2, smo1, smo0, &
            smoc, smod, smoe, smof
 
-      real(kind_phys), dimension(kts:kte) :: sed_r, sed_s, sed_g, sed_i, sed_n,sed_c
+      real(wp), dimension(kts:kte) :: sed_r, sed_s, sed_g, sed_i, sed_n,sed_c
 
-      real(kind_phys) :: rgvm, delta_tp, orho, lfus2, orhodt 
-      real(kind_phys), dimension(5):: onstep
-      real(kind_dbl_prec) :: N0_exp, N0_min, lam_exp, lamc, lamr, lamg
-      real(kind_dbl_prec) :: lami, ilami, ilamc
-      real(kind_phys) :: xDc, Dc_b, Dc_g, xDi, xDr, xDs, xDg, Ds_m, Dg_m
-      real(kind_dbl_prec) :: Dr_star, Dc_star
-      real(kind_phys) :: zeta1, zeta, taud, tau
-      real(kind_phys) :: stoke_r, stoke_s, stoke_g, stoke_i
-      real(kind_phys) :: vti, vtr, vts, vtg, vtc
-      real(kind_phys), dimension(kts:kte+1):: vtik, vtnik, vtrk, vtnrk, vtsk, vtgk,  &
+      real(wp) :: rgvm, delta_tp, orho, lfus2, orhodt 
+      real(wp), dimension(5):: onstep
+      real(dp) :: N0_exp, N0_min, lam_exp, lamc, lamr, lamg
+      real(dp) :: lami, ilami, ilamc
+      real(wp) :: xDc, Dc_b, Dc_g, xDi, xDr, xDs, xDg, Ds_m, Dg_m
+      real(dp) :: Dr_star, Dc_star
+      real(wp) :: zeta1, zeta, taud, tau
+      real(wp) :: stoke_r, stoke_s, stoke_g, stoke_i
+      real(wp) :: vti, vtr, vts, vtg, vtc
+      real(wp), dimension(kts:kte+1):: vtik, vtnik, vtrk, vtnrk, vtsk, vtgk,  &
            vtck, vtnck
-      real(kind_phys), dimension(kts:kte):: vts_boost
-      real(kind_phys) :: Mrat, ils1, ils2, t1_vts, t2_vts, t3_vts, t4_vts, C_snow
-      real(kind_phys) :: a_, b_, loga_, A1, A2, tf
-      real(kind_phys) :: tempc, tc0, r_mvd1, r_mvd2, xkrat
-      real(kind_phys) :: xnc, xri, xni, xmi, oxmi, xrc, xrr, xnr
-      real(kind_phys) :: xsat, rate_max, sump, ratio
-      real(kind_phys) :: clap, fcd, dfcd
-      real(kind_phys) :: otemp, rvs, rvs_p, rvs_pp, gamsc, alphsc, t1_evap, t1_subl
-      real(kind_phys) :: r_frac, g_frac
-      real(kind_phys) :: Ef_rw, Ef_sw, Ef_gw, Ef_rr
-      real(kind_phys) :: Ef_ra, Ef_sa, Ef_ga
-      real(kind_phys) :: dtsave, odts, odt, odzq, hgt_agl, SR
-      real(kind_phys) :: xslw1, ygra1, zans1, eva_factor
-      real(kind_phys) av_i
+      real(wp), dimension(kts:kte):: vts_boost
+      real(wp) :: Mrat, ils1, ils2, t1_vts, t2_vts, t3_vts, t4_vts, C_snow
+      real(wp) :: a_, b_, loga_, A1, A2, tf
+      real(wp) :: tempc, tc0, r_mvd1, r_mvd2, xkrat
+      real(wp) :: xnc, xri, xni, xmi, oxmi, xrc, xrr, xnr
+      real(wp) :: xsat, rate_max, sump, ratio
+      real(wp) :: clap, fcd, dfcd
+      real(wp) :: otemp, rvs, rvs_p, rvs_pp, gamsc, alphsc, t1_evap, t1_subl
+      real(wp) :: r_frac, g_frac
+      real(wp) :: Ef_rw, Ef_sw, Ef_gw, Ef_rr
+      real(wp) :: Ef_ra, Ef_sa, Ef_ga
+      real(wp) :: dtsave, odts, odt, odzq, hgt_agl, SR
+      real(wp) :: xslw1, ygra1, zans1, eva_factor
+      real(wp) av_i
       integer :: i, k, k2, n, nn, nstep, k_0, kbot, IT, iexfrq
       integer, dimension(5) :: ksed1
       integer :: nir, nis, nig, nii, nic, niin
@@ -4368,10 +4368,10 @@ module module_mp_thompson
 !..Local variables
       integer:: i, j, k, m, n, n2
       integer:: km, km_s, km_e
-      real(kind_dbl_prec), dimension(nbg):: vg, N_g
-      real(kind_dbl_prec), dimension(nbr):: vr, N_r
-      real(kind_dbl_prec) :: N0_r, N0_g, lam_exp, lamg, lamr
-      real(kind_dbl_prec) :: massg, massr, dvg, dvr, t1, t2, z1, z2, y1, y2
+      real(dp), dimension(nbg):: vg, N_g
+      real(dp), dimension(nbr):: vr, N_r
+      real(dp) :: N0_r, N0_g, lam_exp, lamg, lamr
+      real(dp) :: massg, massr, dvg, dvr, t1, t2, z1, z2, y1, y2
       logical force_read_thompson, write_thompson_tables
       logical lexist,lopen
       integer good,ierr
@@ -4540,13 +4540,13 @@ module module_mp_thompson
 !..Local variables
       integer:: i, j, k, m, n, n2
       integer:: km, km_s, km_e
-      real(kind_dbl_prec), dimension(nbr):: vr, D1, N_r
-      real(kind_dbl_prec), dimension(nbs):: vs, N_s
-      real(kind_dbl_prec) :: loga_, a_, b_, second, M0, M2, M3, Mrat, oM3
-      real(kind_dbl_prec) :: N0_r, lam_exp, lamr, slam1, slam2
-      real(kind_dbl_prec) :: dvs, dvr, masss, massr
-      real(kind_dbl_prec) :: t1, t2, t3, t4, z1, z2, z3, z4
-      real(kind_dbl_prec) :: y1, y2, y3, y4
+      real(dp), dimension(nbr):: vr, D1, N_r
+      real(dp), dimension(nbs):: vs, N_s
+      real(dp) :: loga_, a_, b_, second, M0, M2, M3, Mrat, oM3
+      real(dp) :: N0_r, lam_exp, lamr, slam1, slam2
+      real(dp) :: dvs, dvr, masss, massr
+      real(dp) :: t1, t2, t3, t4, z1, z2, z3, z4
+      real(dp) :: y1, y2, y3, y4
       logical force_read_thompson, write_thompson_tables
       logical lexist,lopen
       integer good,ierr
@@ -4801,14 +4801,14 @@ module module_mp_thompson
 
 !..Local variables
       integer:: i, j, k, m, n, n2
-      real(kind_dbl_prec) :: N_r, N_c
-      real(kind_dbl_prec), dimension(nbr):: massr
-      real(kind_dbl_prec), dimension(nbc):: massc
-      real(kind_dbl_prec) :: sum1, sum2, sumn1, sumn2, &
+      real(dp) :: N_r, N_c
+      real(dp), dimension(nbr):: massr
+      real(dp), dimension(nbc):: massc
+      real(dp) :: sum1, sum2, sumn1, sumn2, &
                          prob, vol, Texp, orho_w, &
                          lam_exp, lamr, N0_r, lamc, N0_c, y
       integer :: nu_c
-      real(kind_phys) :: T_adjust
+      real(wp) :: T_adjust
       logical force_read_thompson, write_thompson_tables
       logical lexist,lopen
       integer good,ierr
@@ -4977,9 +4977,9 @@ module module_mp_thompson
 
 !..Local variables
       integer:: i, j, n2
-      real(kind_dbl_prec), dimension(nbi):: N_i
-      real(kind_dbl_prec) :: N0_i, lami, Di_mean, t1, t2
-      real(kind_phys) :: xlimit_intg
+      real(dp), dimension(nbi):: N_i
+      real(dp) :: N0_i, lami, Di_mean, t1, t2
+      real(wp) :: xlimit_intg
 
 !+---+
 
@@ -5026,8 +5026,8 @@ module module_mp_thompson
       implicit none
 
 !..Local variables
-      real(kind_dbl_prec) :: vtr, stokes, reynolds, Ef_rw
-      real(kind_dbl_prec) :: p, yc0, F, G, H, z, K0, X
+      real(dp) :: vtr, stokes, reynolds, Ef_rw
+      real(dp) :: p, yc0, F, G, H, z, K0, X
       integer:: i, j
 
       do j = 1, nbc
@@ -5089,8 +5089,8 @@ module module_mp_thompson
       implicit none
 
 !..Local variables
-      real(kind_dbl_prec) :: Ds_m, vts, vtc, stokes, reynolds, Ef_sw
-      real(kind_dbl_prec) :: p, yc0, F, G, H, z, K0
+      real(dp) :: Ds_m, vts, vtc, stokes, reynolds, Ef_sw
+      real(dp) :: p, yc0, F, G, H, z, K0
       integer:: i, j
 
       do j = 1, nbc
@@ -5133,8 +5133,8 @@ module module_mp_thompson
       real:: D, Da, visc, rhoa, Temp
       character(LEN=1):: species
       real:: aval, Cc, diff, Re, Sc, St, St2, vt, Eff
-      real(kind_phys), parameter:: boltzman = 1.3806503E-23
-      real(kind_phys), parameter:: meanPath = 0.0256E-6
+      real(wp), parameter:: boltzman = 1.3806503E-23
+      real(wp), parameter:: meanPath = 0.0256E-6
 
       vt = 1.
       if (species .eq. 'r') then
@@ -5178,11 +5178,11 @@ module module_mp_thompson
 
 !..Local variables
       integer:: i, j, k, n
-      real(kind_dbl_prec), dimension(nbc):: N_c, massc
-      real(kind_dbl_prec) :: summ, summ2, lamc, N0_c
+      real(dp), dimension(nbc):: N_c, massc
+      real(dp) :: summ, summ2, lamc, N0_c
       integer:: nu_c
-!      real(kind_dbl_prec) :: Nt_r, N0, lam_exp, lam
-!      real(kind_phys) :: xlimit_intg
+!      real(dp) :: Nt_r, N0, lam_exp, lam
+!      real(wp) :: xlimit_intg
 
       do n = 1, nbc
          massc(n) = am_r*Dc(n)**bm_r
@@ -5230,7 +5230,7 @@ module module_mp_thompson
 !..Rain lookup table indexes.
 !         Dr_star = sqrt(-2.0_dp*DT * t1_evap/(2.*PI) &
 !                 * 0.78*4.*diffu(k)*xsat*rvs/rho_w)
-!         idx_d = nint(1.0 + real(nbr, kind=kind_phys) * log(real(Dr_star/D0r, kind=dp))             &
+!         idx_d = nint(1.0 + real(nbr, kind=wp) * log(real(Dr_star/D0r, kind=dp))             &
 !               / log(real(Dr(nbr)/D0r, kind=dp)))
 !         idx_d = max(1, min(idx_d, nbr))
 !
@@ -5329,12 +5329,12 @@ module module_mp_thompson
    real function activ_ncloud(Tt, Ww, NCCN, lsm_in)
 
       implicit none
-      real(kind_phys), intent(in):: Tt, Ww, NCCN
+      real(wp), intent(in):: Tt, Ww, NCCN
       integer, intent(in):: lsm_in
-      real(kind_phys):: n_local, w_local
+      real(wp):: n_local, w_local
       integer:: i, j, k, l, m, n
-      real(kind_phys):: A, B, C, D, t, u, x1, x2, y1, y2, nx, wy, fraction
-      real(kind_phys):: lower_lim_nuc_frac
+      real(wp):: A, B, C, D, t, u, x1, x2, y1, y2, nx, wy, fraction
+      real(wp):: lower_lim_nuc_frac
 
 !     ta_Na = (/10.0, 31.6, 100.0, 316.0, 1000.0, 3160.0, 10000.0/)  ntb_arc
 !     ta_Ww = (/0.01, 0.0316, 0.1, 0.316, 1.0, 3.16, 10.0, 31.6, 100.0/)  ntb_arw
@@ -5426,12 +5426,12 @@ module module_mp_thompson
 !     --- USES GAMMLN
       IMPLICIT NONE
       integer, parameter:: ITMAX=100
-      real(kind_phys), parameter:: gEPS=3.E-7
-      real(kind_phys), parameter:: FPMIN=1.E-30
-      real(kind_phys), intent(in):: A, X
-      real(kind_phys):: GAMMCF,GLN
+      real(wp), parameter:: gEPS=3.E-7
+      real(wp), parameter:: FPMIN=1.E-30
+      real(wp), intent(in):: A, X
+      real(wp):: GAMMCF,GLN
       integer:: I
-      real(kind_phys):: AN,B,C,D,DEL,H
+      real(wp):: AN,B,C,D,DEL,H
       GLN=GAMMLN(A)
       B=X+1.-A
       C=1./FPMIN
@@ -5464,11 +5464,11 @@ module module_mp_thompson
 !     --- USES GAMMLN
       IMPLICIT NONE
       integer, parameter:: ITMAX=100
-      real(kind_phys), parameter:: gEPS=3.E-7
-      real(kind_phys), intent(in):: A, X
-      real(kind_phys):: GAMSER,GLN
+      real(wp), parameter:: gEPS=3.E-7
+      real(wp), intent(in):: A, X
+      real(wp):: GAMSER,GLN
       integer:: N
-      real(kind_phys):: AP,DEL,SUM
+      real(wp):: AP,DEL,SUM
       GLN=GAMMLN(A)
       IF(X.LE.0.)THEN
         IF(X.LT.0.) PRINT *, 'X < 0 IN GSER'
@@ -5494,13 +5494,13 @@ module module_mp_thompson
    REAL FUNCTION GAMMLN(XX)
 !     --- RETURNS THE VALUE LN(GAMMA(XX)) FOR XX > 0.
       IMPLICIT NONE
-      real(kind_phys), intent(in):: XX
-      real(kind_dbl_prec), parameter:: STP = 2.5066282746310005D0
-      real(kind_dbl_prec), dimension(6), parameter:: &
+      real(wp), intent(in):: XX
+      real(dp), parameter:: STP = 2.5066282746310005D0
+      real(dp), dimension(6), parameter:: &
                COF = (/76.18009172947146D0, -86.50532032941677D0, &
                        24.01409824083091D0, -1.231739572450155D0, &
                       .1208650973866179D-2, -.5395239384953D-5/)
-      real(kind_dbl_prec) :: SER,TMP,X,Y
+      real(dp) :: SER,TMP,X,Y
       integer:: J
 
       X=XX
@@ -5522,8 +5522,8 @@ module module_mp_thompson
 !     --- SEE ABRAMOWITZ AND STEGUN 6.5.1
 !     --- USES GCF,GSER
       IMPLICIT NONE
-      real(kind_phys), intent(in):: A,X
-      real(kind_phys):: GAMMCF,GAMSER,GLN
+      real(wp), intent(in):: A,X
+      real(wp):: GAMMCF,GAMSER,GLN
       GAMMP = 0.
       IF((X.LT.0.) .OR. (A.LE.0.)) THEN
         PRINT *, 'BAD ARGUMENTS IN GAMMP'
@@ -5542,7 +5542,7 @@ module module_mp_thompson
    REAL FUNCTION WGAMMA(y)
 
       IMPLICIT NONE
-      real(kind_phys), intent(in):: y
+      real(wp), intent(in):: y
 
       WGAMMA = EXP(GAMMLN(y))
 
@@ -5554,17 +5554,17 @@ module module_mp_thompson
    REAL FUNCTION RSLF(P,T)
 
       IMPLICIT NONE
-      real(kind_phys), intent(in):: P, T
-      real(kind_phys):: ESL,X
-      real(kind_phys), parameter:: C0= .611583699E03
-      real(kind_phys), parameter:: C1= .444606896E02
-      real(kind_phys), parameter:: C2= .143177157E01
-      real(kind_phys), parameter:: C3= .264224321E-1
-      real(kind_phys), parameter:: C4= .299291081E-3
-      real(kind_phys), parameter:: C5= .203154182E-5
-      real(kind_phys), parameter:: C6= .702620698E-8
-      real(kind_phys), parameter:: C7= .379534310E-11
-      real(kind_phys), parameter:: C8=-.321582393E-13
+      real(wp), intent(in):: P, T
+      real(wp):: ESL,X
+      real(wp), parameter:: C0= .611583699E03
+      real(wp), parameter:: C1= .444606896E02
+      real(wp), parameter:: C2= .143177157E01
+      real(wp), parameter:: C3= .264224321E-1
+      real(wp), parameter:: C4= .299291081E-3
+      real(wp), parameter:: C5= .203154182E-5
+      real(wp), parameter:: C6= .702620698E-8
+      real(wp), parameter:: C7= .379534310E-11
+      real(wp), parameter:: C8=-.321582393E-13
 
       X=max(-80.,T-273.16)
 
@@ -5589,17 +5589,17 @@ module module_mp_thompson
    REAL FUNCTION RSIF(P,T)
 
       IMPLICIT NONE
-      real(kind_phys), intent(in):: P, T
-      real(kind_phys):: ESI,X
-      real(kind_phys), parameter:: C0= .609868993E03
-      real(kind_phys), parameter:: C1= .499320233E02
-      real(kind_phys), parameter:: C2= .184672631E01
-      real(kind_phys), parameter:: C3= .402737184E-1
-      real(kind_phys), parameter:: C4= .565392987E-3
-      real(kind_phys), parameter:: C5= .521693933E-5
-      real(kind_phys), parameter:: C6= .307839583E-7
-      real(kind_phys), parameter:: C7= .105785160E-9
-      real(kind_phys), parameter:: C8= .161444444E-12
+      real(wp), intent(in):: P, T
+      real(wp):: ESI,X
+      real(wp), parameter:: C0= .609868993E03
+      real(wp), parameter:: C1= .499320233E02
+      real(wp), parameter:: C2= .184672631E01
+      real(wp), parameter:: C3= .402737184E-1
+      real(wp), parameter:: C4= .565392987E-3
+      real(wp), parameter:: C5= .521693933E-5
+      real(wp), parameter:: C6= .307839583E-7
+      real(wp), parameter:: C7= .105785160E-9
+      real(wp), parameter:: C8= .161444444E-12
 
       X=max(-80.,T-273.16)
       ESI=C0+X*(C1+X*(C2+X*(C3+X*(C4+X*(C5+X*(C6+X*(C7+X*C8)))))))
@@ -5619,26 +5619,26 @@ module module_mp_thompson
    real function iceDeMott(tempc, qv, qvs, qvsi, rho, nifa)
       implicit none
 
-      real(kind_phys), intent(in):: tempc, qv, qvs, qvsi, rho, nifa
+      real(wp), intent(in):: tempc, qv, qvs, qvsi, rho, nifa
 
 !..Local vars
-      real(kind_phys):: satw, sati, siw, p_x, si0x, dtt, dsi, dsw, dab, fc, hx
-      real(kind_phys):: ntilde, n_in, nmax, nhat, mux, xni, nifa_cc
-      real(kind_phys), parameter:: p_c1    = 1000.
-      real(kind_phys), parameter:: p_rho_c = 0.76
-      real(kind_phys), parameter:: p_alpha = 1.0
-      real(kind_phys), parameter:: p_gam   = 2.
-      real(kind_phys), parameter:: delT    = 5.
-      real(kind_phys), parameter:: T0x     = -40.
-      real(kind_phys), parameter:: Sw0x    = 0.97
-      real(kind_phys), parameter:: delSi   = 0.1
-      real(kind_phys), parameter:: hdm     = 0.15
-      real(kind_phys), parameter:: p_psi   = 0.058707*p_gam/p_rho_c
-      real(kind_phys), parameter:: aap     = 1.
-      real(kind_phys), parameter:: bbp     = 0.
-      real(kind_phys), parameter:: y1p     = -35.
-      real(kind_phys), parameter:: y2p     = -25.
-      real(kind_phys), parameter:: rho_not0 = 101325./(287.05*273.15)
+      real(wp):: satw, sati, siw, p_x, si0x, dtt, dsi, dsw, dab, fc, hx
+      real(wp):: ntilde, n_in, nmax, nhat, mux, xni, nifa_cc
+      real(wp), parameter:: p_c1    = 1000.
+      real(wp), parameter:: p_rho_c = 0.76
+      real(wp), parameter:: p_alpha = 1.0
+      real(wp), parameter:: p_gam   = 2.
+      real(wp), parameter:: delT    = 5.
+      real(wp), parameter:: T0x     = -40.
+      real(wp), parameter:: Sw0x    = 0.97
+      real(wp), parameter:: delSi   = 0.1
+      real(wp), parameter:: hdm     = 0.15
+      real(wp), parameter:: p_psi   = 0.058707*p_gam/p_rho_c
+      real(wp), parameter:: aap     = 1.
+      real(wp), parameter:: bbp     = 0.
+      real(wp), parameter:: y1p     = -35.
+      real(wp), parameter:: y2p     = -25.
+      real(wp), parameter:: rho_not0 = 101325./(287.05*273.15)
 
 !+---+
 
@@ -5693,9 +5693,9 @@ module module_mp_thompson
    real function iceKoop(temp, qv, qvs, naero, dt)
       implicit none
 
-      real(kind_phys), intent(in):: temp, qv, qvs, naero, DT
-      real(kind_phys):: mu_diff, a_w_i, delta_aw, log_J_rate, J_rate, prob_h, satw
-      real(kind_phys):: xni
+      real(wp), intent(in):: temp, qv, qvs, naero, DT
+      real(wp):: mu_diff, a_w_i, delta_aw, log_J_rate, J_rate, prob_h, satw
+      real(wp):: xni
 
       xni = 0.0
       satw = qv/qvs
@@ -5723,8 +5723,8 @@ module module_mp_thompson
    REAL FUNCTION delta_p (yy, y1, y2, aa, bb)
       IMPLICIT NONE
 
-      real(kind_phys), intent(in):: yy, y1, y2, aa, bb
-      real(kind_phys):: dab, A, B, a0, a1, a2, a3
+      real(wp), intent(in):: yy, y1, y2, aa, bb
+      real(wp):: dab, A, B, a0, a1, a2, a3
 
       A   = 6.*(aa-bb)/((y2-y1)*(y2-y1)*(y2-y1))
       B   = aa+(A*y1*y1*y1/6.)-(A*y1*y1*y2*0.5)
@@ -5770,19 +5770,19 @@ module module_mp_thompson
 
 !..Sub arguments
       integer, intent(in):: kts, kte
-      real(kind_phys), dimension(kts:kte), intent(in)::                            &
+      real(wp), dimension(kts:kte), intent(in)::                            &
      &                    t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d
-      real(kind_phys), dimension(kts:kte), intent(out):: re_qc1d, re_qi1d, re_qs1d
+      real(wp), dimension(kts:kte), intent(out):: re_qc1d, re_qi1d, re_qs1d
 !..Local variables
       integer:: k
-      real(kind_phys), dimension(kts:kte):: rho, rc, nc, ri, ni, rs
-      real(kind_phys):: smo2, smob, smoc
-      real(kind_phys):: tc0, loga_, a_, b_
-      real(kind_dbl_prec) :: lamc, lami
+      real(wp), dimension(kts:kte):: rho, rc, nc, ri, ni, rs
+      real(wp):: smo2, smob, smoc
+      real(wp):: tc0, loga_, a_, b_
+      real(dp) :: lamc, lami
       logical:: has_qc, has_qi, has_qs
       integer:: inu_c
       integer:: lsml
-      real(kind_phys), dimension(15), parameter:: g_ratio = (/24,60,120,210,336,   &
+      real(wp), dimension(15), parameter:: g_ratio = (/24,60,120,210,336,   &
      &                504,720,990,1320,1716,2184,2730,3360,4080,4896/)
 
       has_qc = .false.
@@ -5894,39 +5894,39 @@ module module_mp_thompson
 
 !..Sub arguments
       integer, intent(in):: kts, kte, ii, jj
-      real(kind_phys), intent(in):: rand1
-      real(kind_phys), dimension(kts:kte), intent(in)::                            &
+      real(wp), intent(in):: rand1
+      real(wp), dimension(kts:kte), intent(in)::                            &
                           qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, t1d, p1d
-      real(kind_phys), dimension(kts:kte), intent(inout):: dBZ
-      real(kind_phys), dimension(kts:kte), optional, intent(inout):: vt_dBZ
+      real(wp), dimension(kts:kte), intent(inout):: dBZ
+      real(wp), dimension(kts:kte), optional, intent(inout):: vt_dBZ
       logical, optional, intent(in) :: first_time_step
 
 !..Local variables
       logical :: do_vt_dBZ
       logical :: allow_wet_graupel
       logical :: allow_wet_snow
-      real(kind_phys), dimension(kts:kte):: temp, pres, qv, rho, rhof
-      real(kind_phys), dimension(kts:kte):: rc, rr, nr, rs, rg
+      real(wp), dimension(kts:kte):: temp, pres, qv, rho, rhof
+      real(wp), dimension(kts:kte):: rc, rr, nr, rs, rg
 
-      real(kind_dbl_prec), dimension(kts:kte):: ilamr, ilamg, N0_r, N0_g
-      real(kind_phys), dimension(kts:kte):: mvd_r
-      real(kind_phys), dimension(kts:kte):: smob, smo2, smoc, smoz
-      real(kind_phys):: oM3, M0, Mrat, slam1, slam2, xDs
-      real(kind_phys):: ils1, ils2, t1_vts, t2_vts, t3_vts, t4_vts
-      real(kind_phys):: vtr_dbz_wt, vts_dbz_wt, vtg_dbz_wt
+      real(dp), dimension(kts:kte):: ilamr, ilamg, N0_r, N0_g
+      real(wp), dimension(kts:kte):: mvd_r
+      real(wp), dimension(kts:kte):: smob, smo2, smoc, smoz
+      real(wp):: oM3, M0, Mrat, slam1, slam2, xDs
+      real(wp):: ils1, ils2, t1_vts, t2_vts, t3_vts, t4_vts
+      real(wp):: vtr_dbz_wt, vts_dbz_wt, vtg_dbz_wt
 
-      real(kind_phys), dimension(kts:kte):: ze_rain, ze_snow, ze_graupel
+      real(wp), dimension(kts:kte):: ze_rain, ze_snow, ze_graupel
 
-      real(kind_dbl_prec) :: N0_exp, N0_min, lam_exp, lamr, lamg
-      real(kind_phys):: a_, b_, loga_, tc0, SR
-      real(kind_dbl_prec) :: fmelt_s, fmelt_g
+      real(dp) :: N0_exp, N0_min, lam_exp, lamr, lamg
+      real(wp):: a_, b_, loga_, tc0, SR
+      real(dp) :: fmelt_s, fmelt_g
 
       integer:: i, k, k_0, kbot, n
       logical, intent(in):: melti
       logical, dimension(kts:kte):: L_qr, L_qs, L_qg
 
-      real(kind_dbl_prec) :: cback, x, eta, f_d
-      real(kind_phys):: xslw1, ygra1, zans1
+      real(dp) :: cback, x, eta, f_d
+      real(wp):: xslw1, ygra1, zans1
 
 !+---+
       if (present(vt_dBZ) .and. present(first_time_step)) then
@@ -6222,21 +6222,21 @@ module module_mp_thompson
       implicit none
 
       integer, intent(in) :: km
-      real(kind_phys), intent(in) ::  dt, R1
-      real(kind_phys), intent(in) :: dzl(km),wwl(km)
-      real(kind_phys), intent(out) :: precip
-      real(kind_phys), intent(inout) :: rql(km)
-      real(kind_phys), intent(out)  :: pfsan(km)
+      real(wp), intent(in) ::  dt, R1
+      real(wp), intent(in) :: dzl(km),wwl(km)
+      real(wp), intent(out) :: precip
+      real(wp), intent(inout) :: rql(km)
+      real(wp), intent(out)  :: pfsan(km)
       integer ::  k,m,kk,kb,kt
-      real(kind_phys) :: tl,tl2,qql,dql,qqd
-      real(kind_phys) :: th,th2,qqh,dqh
-      real(kind_phys) :: zsum,qsum,dim,dip,con1,fa1,fa2
-      real(kind_phys) :: allold, decfl
-      real(kind_phys) :: dz(km), ww(km), qq(km)
-      real(kind_phys) :: wi(km+1), zi(km+1), za(km+2)
-      real(kind_phys) :: qn(km)
-      real(kind_phys) :: dza(km+1), qa(km+1), qmi(km+1), qpi(km+1)
-      real(kind_phys) :: net_flx(km)
+      real(wp) :: tl,tl2,qql,dql,qqd
+      real(wp) :: th,th2,qqh,dqh
+      real(wp) :: zsum,qsum,dim,dip,con1,fa1,fa2
+      real(wp) :: allold, decfl
+      real(wp) :: dz(km), ww(km), qq(km)
+      real(wp) :: wi(km+1), zi(km+1), za(km+2)
+      real(wp) :: qn(km)
+      real(wp) :: dza(km+1), qa(km+1), qmi(km+1), qpi(km+1)
+      real(wp) :: net_flx(km)
 !
       precip = 0.0
       qa(:) = 0.0
@@ -6449,13 +6449,13 @@ module module_mp_thompson
       implicit none
 
       integer, intent(in) :: kts, kte
-      real(kind_phys), intent(in) :: rand1
-      real(kind_phys), intent(in) :: rg(:)
-      real(kind_dbl_prec), intent(out) :: ilamg(:), N0_g(:)
+      real(wp), intent(in) :: rand1
+      real(wp), intent(in) :: rg(:)
+      real(dp), intent(out) :: ilamg(:), N0_g(:)
 
       integer :: k
-      real(kind_phys) :: ygra1, zans1
-      real(kind_dbl_prec) :: N0_exp, lam_exp, lamg
+      real(wp) :: ygra1, zans1
+      real(dp) :: N0_exp, lam_exp, lamg
 
       do k = kte, kts, -1
          ygra1 = alog10(max(1.e-9, rg(k)))
@@ -6488,13 +6488,13 @@ module module_mp_thompson
       implicit none
       
       integer, intent(in) :: kts, kte
-      real(kind_phys), intent(in) :: qg(:), temperature(:), pressure(:), qv(:)
-      real(kind_phys) :: max_hail_diam
+      real(wp), intent(in) :: qg(:), temperature(:), pressure(:), qv(:)
+      real(wp) :: max_hail_diam
 
       integer :: k
-      real(kind_phys) :: rho(kts:kte), rg(kts:kte), max_hail_column(kts:kte)
-      real(kind_dbl_prec) :: ilamg(kts:kte), N0_g(kts:kte)
-      real(kind_phys), parameter :: random_number = 0.
+      real(wp) :: rho(kts:kte), rg(kts:kte), max_hail_column(kts:kte)
+      real(dp) :: ilamg(kts:kte), N0_g(kts:kte)
+      real(wp), parameter :: random_number = 0.
 
       max_hail_column = 0.
       rg = 0.
