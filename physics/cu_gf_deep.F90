@@ -216,11 +216,11 @@ contains
         ,intent (inout   )                ::                           &
         mconv,ccn
 !$acc declare copy(mconv,ccn)
-     real(kind=kind_phys), dimension (its:ite,kts:kte,nchem)           &
+     real(kind=kind_phys), dimension (:,:,:)                           &
         ,intent (inout)                   ::                           &
         chem3d
      logical, intent (in) :: do_smoke_transport
-     real(kind=kind_phys), dimension (its:ite,nchem)                   &
+     real(kind=kind_phys), dimension (:,:)                             &
          , intent (out) :: wetdpc_deep
      real(kind=kind_phys), intent (in) :: fscav(:)
 !$acc declare copy(chem3d) copyout(wetdpc_deep) copyin(fscav)

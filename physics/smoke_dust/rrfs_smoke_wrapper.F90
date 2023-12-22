@@ -875,7 +875,7 @@ contains
     ! RAR: here we need to initialize various arrays in order to apply HWP to
     ! diurnal cycle
     ! if ebb_dcycle/=2 then those arrays=0, we need to read in temporal 
-    if (ebb_dcycle == 2 .and. ktau == 1) then
+    if (ebb_dcycle == 2) then
       do i=its, ite
        do j=jts, jte 
          ebu_in      (i,j) = smoke2d_RRFS(i,1)!/86400.
