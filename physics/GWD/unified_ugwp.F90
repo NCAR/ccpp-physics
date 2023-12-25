@@ -377,6 +377,10 @@ contains
     errmsg = ''
     errflg = 0
 
+    ! Initialize variables not being used
+    zmtb(:) = 0.0
+    zlwb(:) = 0.0
+    zogb(:) = 0.0
 
     ! 1) ORO stationary GWs
     !    ------------------
