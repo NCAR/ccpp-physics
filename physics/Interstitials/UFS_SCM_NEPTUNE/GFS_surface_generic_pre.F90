@@ -87,8 +87,8 @@
         real(kind=kind_phys), dimension(:), intent(inout) :: sigmaf, work3, zlvl
 
         ! Stochastic physics / surface perturbations
-        real(kind=kind_phys), dimension(:),   intent(out) :: drain_cpl
-        real(kind=kind_phys), dimension(:),   intent(out) :: dsnow_cpl
+        real(kind=kind_phys), dimension(:),   intent(in) :: drain_cpl
+        real(kind=kind_phys), dimension(:),   intent(in) :: dsnow_cpl
         real(kind=kind_phys), dimension(:),   intent(in)  :: rain_cpl
         real(kind=kind_phys), dimension(:),   intent(in)  :: snow_cpl
         integer,                              intent(in)  :: lndp_type, n_var_lndp
