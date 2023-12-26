@@ -95,13 +95,18 @@ contains
     integer,          intent(in)    :: fileID
     character(len=*), intent(in)    :: file
     character(len=128)              :: err_message
-    integer :: i1, i2, i3
+    integer :: i1, i2, i3, ierr
     real(kind=4), dimension(:), allocatable :: lat4, pres4, time4, tempin
     real(kind=4) :: blatc4
 
+    ! initialize error message
+    err_message = ""
+
     ! Get dimensions from data file
-    open(unit=fileID,file=trim(file), form='unformatted', convert='big_endian')
-    read (fileID) this%ncf, this%nlat, this%nlev, this%ntime
+    open(unit=fileID,file=trim(file), form='unformatted', convert='big_endian', iostat=ierr, iomsg=err_message)
+    if (ierr /= 0 ) return
+    read (fileID, iostat=ierr, iomsg=err_message) this%ncf, this%nlat, this%nlev, this%ntime
+    if (ierr /= 0 ) return
     rewind(fileID)
     
     allocate (this%lat(this%nlat))
@@ -111,7 +116,8 @@ contains
     allocate (this%data(this%nlat,this%nlev,this%ncf,this%ntime))
     
     allocate(lat4(this%nlat), pres4(this%nlev), time4(this%ntime+1))
-    read (fileID) this%ncf, this%nlat, this%nlev, this%ntime, lat4, pres4, time4
+    read (fileID, iostat=ierr, iomsg=err_message) this%ncf, this%nlat, this%nlev, this%ntime, lat4, pres4, time4
+    if (ierr /= 0 ) return
     
     ! Store 
     this%pres(:) = pres4(:)
@@ -124,7 +130,8 @@ contains
     do i1=1,this%ntime
        do i2=1,this%ncf
           do i3=1,this%nlev
-             read(fileID) tempin
+             read(fileID, iostat=ierr, iomsg=err_message) tempin
+             if (ierr /= 0 ) return
              this%data(:,i3,i2,i1) = tempin(:)
           enddo
        enddo
@@ -520,12 +527,18 @@ contains
 
     ! Locals
     real(kind=4) :: blatc4
-    integer :: iLev, iLat, imo
+    integer :: iLev, iLat, imo, ierr
     real(kind=4), allocatable :: o3clim4(:,:,:), pstr4(:)
     integer, allocatable      :: imond(:), ilatt(:,:)
 
-    open(unit=fileID,file=trim(file), form='unformatted', convert='big_endian')
-    read (fileID,end=101) this%nlatc, this%nlevc, this%ntimec, blatc4
+    ! initialize error message
+    err_message = ""
+
+    open(unit=fileID,file=trim(file),form='unformatted',convert='big_endian', iostat=ierr, iomsg=err_message)
+    if (ierr /= 0 ) return
+    read (fileID,end=101,iostat=ierr,iomsg=err_message) this%nlatc, this%nlevc, this%ntimec, blatc4
+    if (ierr /= 0 ) return
+
 101 if (this%nlevc  < 10 .or. this%nlevc > 100) then
        rewind (fileID)
        this%nlevc = 17
@@ -545,15 +558,18 @@ contains
     allocate (this%pkstr(this%nlevc), this%pstr(this%nlevc), this%datac(this%nlatc,this%nlevc,12))
     if ( this%nlevc == 17 ) then ! For the operational ozone climatology
        do iLev = 1, this%nlevc
-          read (fileID,15) pstr4(iLev)
+          read (fileID,15,iostat=ierr,iomsg=err_message) pstr4(iLev)
+          if (ierr /= 0 ) return
 15        format(f10.3)
        enddo
 
        do imo = 1, 12
           do iLat = 1, this%nlatc
-             read (fileID,16) imond(imo), ilatt(iLat,imo), (o3clim4(iLat,iLev,imo),iLev=1,10)
+             read (fileID,16,iostat=ierr,iomsg=err_message) imond(imo), ilatt(iLat,imo), (o3clim4(iLat,iLev,imo),iLev=1,10)
+             if (ierr /= 0 ) return
 16           format(i2,i4,10f6.2)
-             read (fileID,20) (o3clim4(iLat,iLev,imo),iLev=11,this%nlevc)
+             read (fileID,20,iostat=ierr,iomsg=err_message) (o3clim4(iLat,iLev,imo),iLev=11,this%nlevc)
+             if (ierr /= 0 ) return
 20           format(6x,10f6.2)
           enddo
        enddo
@@ -565,7 +581,8 @@ contains
        
        do imo = 1, 12
           do iLev = 1, this%nlevc
-              read (fileID) (o3clim4(iLat,iLev,imo),iLat=1,this%nlatc)
+              read (fileID,iostat=ierr,iomsg=err_message) (o3clim4(iLat,iLev,imo),iLat=1,this%nlatc)
+              if (ierr /= 0 ) return
            enddo
         enddo
      endif   ! end if_this%nlevc_block
