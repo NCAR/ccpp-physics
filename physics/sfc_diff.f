@@ -126,6 +126,8 @@
       integer,          intent(out) :: errflg
 !
 !     locals
+      real(kind=kind_phys) :: ssumax, ssvmax
+      logical :: check_ssu_ssv
 !
       integer   i
       real(kind=kind_phys)  :: windrel
@@ -169,6 +171,18 @@
 !  ps is in pascals, wind is wind speed,
 !  surface roughness length is converted to m from cm
 !
+       
+        check_ssu_ssv=.false.
+        if(check_ssu_ssv) then
+          ssumax=0.0
+          ssvmax=0.0
+          do i=1,im
+          if(ssu(i) .gt. ssumax) ssumax=ssu(i)
+          if(ssv(i) .gt. ssvmax) ssvmax=ssv(i)
+          enddo
+          print*, 'in sfc_diff ssumax,ssvmax im =',ssumax,ssvmax,im
+          print*, 'in sfc_diff wind(1),u1(1),v1(1) =',wind(1),u1(1),v1(1)
+        endif
 
       do i=1,im
         if(flag_iter(i)) then
