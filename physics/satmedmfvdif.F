@@ -63,7 +63,7 @@
 !> @{
       subroutine satmedmfvdif_run(im,km,ntrac,ntcw,ntiw,ntke,           &
      &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
-     &     dv,du,tdt,rtg,u1,v1,ssu,ssv,t1,q1,swh,hlw,xmu,garea,         &
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
@@ -95,7 +95,6 @@
      &                     tdt(:,:),    rtg(:,:,:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(:,:),     v1(:,:),                        &
-     &                     ssu(:),      ssv(:),                         &
      &                     t1(:,:),     q1(:,:,:),                      &
      &                     swh(:,:),    hlw(:,:),                       &
      &                     xmu(:),       garea(:),                      &
@@ -218,9 +217,6 @@
 !
       real(kind=kind_phys) h1 
       integer :: idtend
-      integer   ii
-      real(kind=kind_phys) :: ssumax, ssvmax
-      logical        :: check_ssu_ssv
 !!
       parameter(wfac=7.0,cfac=4.5)
       parameter(gamcrt=3.,gamcrq=0.,sfcfrac=0.1)
@@ -254,17 +250,6 @@
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-!
-      check_ssu_ssv=.false.
-      if(check_ssu_ssv) then
-        ssumax=0.0
-        ssvmax=0.0
-        do ii=1,im
-        if(ssu(ii) .gt. ssumax) ssumax=ssu(ii)
-        if(ssv(ii) .gt. ssvmax) ssvmax=ssv(ii)
-        enddo
-        print*, 'in satmedmfvdif.F ssumax,ssvmax =',ssumax,ssvmax
-      endif
 
 !> -# Compute preliminary variables from input arguments
       dt2  = delt

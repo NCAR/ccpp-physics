@@ -317,11 +317,11 @@ contains
 
           !  --- ...  rcp = rho cp ch v
 
-          if(icplocn2atm ==0) then
+          if (icplocn2atm ==0) then
             rch(i)     = rho_a(i) * cp * ch(i) * wind(i)
             cmm(i)     = cm (i)   * wind(i)
             chh(i)     = rho_a(i) * ch(i) * wind(i)
-          else
+          else if (icplocn2atm ==1) then
             windrel= sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
             rch(i)     = rho_a(i) * cp * ch(i) * windrel
             cmm(i)     = cm (i)   * windrel

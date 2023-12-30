@@ -92,10 +92,10 @@
 
       do i = 1, im
         f10m(i) = fm10(i) / fm(i)
-        if(icplocn2atm ==0) then
+        if (icplocn2atm ==0) then
           u10m(i) = f10m(i) * u1(i)
           v10m(i) = f10m(i) * v1(i)
-        else
+        else if (icplocn2atm ==1) then
           u10m(i) = ssu(i)+f10m(i) * (u1(i)-ssu(i))
           v10m(i) = ssv(i)+f10m(i) * (v1(i)-ssv(i))
         endif

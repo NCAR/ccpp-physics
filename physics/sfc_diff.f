@@ -167,11 +167,13 @@
       errmsg = ''
       errflg = 0
 
+
 !  initialize variables. all units are supposedly m.k.s. unless specified
 !  ps is in pascals, wind is wind speed,
 !  surface roughness length is converted to m from cm
 !
-       
+!       write(0,*)'in sfc_diff, sfc_z0_type=',sfc_z0_type
+
         check_ssu_ssv=.false.
         if(check_ssu_ssv) then
           ssumax=0.0
@@ -289,24 +291,13 @@
             tem2 = max(sigmaf(i), 0.1_kp)
             zvfun(i) = sqrt(tem1 * tem2)
 !
-            if(icplocn2atm == 0) then
-              call stability
+            call stability
 !  ---  inputs:
      &         (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
      &         z0max, ztmax_lnd(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &         rb_lnd(i), fm_lnd(i), fh_lnd(i), fm10_lnd(i), fh2_lnd(i),
      &         cm_lnd(i), ch_lnd(i), stress_lnd(i), ustar_lnd(i))
-            else
-              windrel=sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
-              call stability
-!  ---  inputs:
-     &         (z1(i), zvfun(i), gdx, tv1, thv1, windrel,
-     &         z0max, ztmax_lnd(i), tvs, grav, thsfc_loc,
-!  ---  outputs:
-     &         rb_lnd(i), fm_lnd(i), fh_lnd(i), fm10_lnd(i), fh2_lnd(i),
-     &         cm_lnd(i), ch_lnd(i), stress_lnd(i), ustar_lnd(i))
-              endif
           endif ! Dry points
 
           if (icy(i)) then ! Some ice
@@ -354,23 +345,13 @@
 !
             ztmax_ice(i) = max(ztmax_ice(i), 1.0e-6)
 !
-            if(icplocn2atm == 0) then
-              call stability
+            call stability
 !  ---  inputs:
      &       (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
      &        z0max, ztmax_ice(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &        rb_ice(i), fm_ice(i), fh_ice(i), fm10_ice(i), fh2_ice(i),
      &        cm_ice(i), ch_ice(i), stress_ice(i), ustar_ice(i))
-            else
-              call stability
-!  ---  inputs:
-     &        (z1(i), zvfun(i), gdx, tv1, thv1, windrel,
-     &        z0max, ztmax_ice(i), tvs, grav, thsfc_loc,
-!  ---  outputs:
-     &        rb_ice(i), fm_ice(i), fh_ice(i), fm10_ice(i), fh2_ice(i),
-     &        cm_ice(i), ch_ice(i), stress_ice(i), ustar_ice(i))
-            endif
       endif ! Icy points
 
 ! BWG: Everything from here to end of subroutine was after
@@ -390,10 +371,12 @@
             z0           = 0.01_kp * z0rl_wat(i)
             z0max        = max(zmin, min(z0,z1(i)))
 !           ustar_wat(i) = sqrt(grav * z0 / charnock)
-            if(icplocn2atm == 0) then 
+            if (icplocn2atm == 0) then 
               wind10m=sqrt(u10m(i)*u10m(i) + v10m(i)*v10m(i))
-            else
+              windrel=wind(i)
+            else if (icplocn2atm ==1) then
               wind10m=sqrt((u10m(i)-ssu(i))**2 + (v10m(i)-ssv(i))**2)
+              windrel=sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
             endif
 
 !**  test xubin's new z0
@@ -425,8 +408,7 @@
 !
             call stability
 !  ---  inputs:
-!     &       (z1(i), zvfun(i), gdx, tv1, thv1, windrel(i),
-     &       (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
+     &       (z1(i), zvfun(i), gdx, tv1, thv1, windrel,
      &        z0max, ztmax_wat(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
      &        rb_wat(i), fm_wat(i), fh_wat(i), fm10_wat(i), fh2_wat(i),

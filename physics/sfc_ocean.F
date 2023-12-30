@@ -177,9 +177,6 @@
 !           rho is density, qss is sat. hum. at surface
 
         if ( flag(i) ) then
-          if (icplocn2atm == 1) then
-          windrel(i)=sqrt( (u1(i)-ssu(i))**2+(v1(i)-ssv(i))**2 )
-          endif
           
           if (use_med_flux) then
             q0(i)    = max( q1(i), qmin )
@@ -188,7 +185,8 @@
             if (icplocn2atm == 0) then
               tem      = ch(i) * wind(i)
               cmm(i)   = cm(i) * wind(i)
-            else
+            else if (icplocn2atm ==1) then
+              windrel(i)=sqrt( (u1(i)-ssu(i))**2+(v1(i)-ssv(i))**2 )
               tem      = ch(i) * windrel(i)
               cmm(i)   = cm(i) * windrel(i)
             endif
@@ -212,7 +210,8 @@
               rch      = rho(i) * cp * ch(i) * wind(i)
               tem      = ch(i) * wind(i)
               cmm(i)   = cm(i) * wind(i)
-            else
+            else if (icplocn2atm ==1) then
+              windrel(i)=sqrt( (u1(i)-ssu(i))**2+(v1(i)-ssv(i))**2 )
               rch      = rho(i) * cp * ch(i) * windrel(i)
               tem      = ch(i) * windrel(i)
               cmm(i)   = cm(i) * windrel(i)

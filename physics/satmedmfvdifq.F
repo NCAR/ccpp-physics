@@ -2382,7 +2382,7 @@ c
         if(icplocn2atm == 0) then
           dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
           dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
-        else
+        else if (icplocn2atm ==1) then
           spd1_m=sqrt( (u1(i,1)-ssu(i))**2+(v1(i,1)-ssv(i))**2 )
           dusfc(i) = -1.*rho_a(i)*stress(i)*(u1(i,1)-ssu(i))/spd1_m
           dvsfc(i) = -1.*rho_a(i)*stress(i)*(v1(i,1)-ssv(i))/spd1_m
