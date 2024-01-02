@@ -241,8 +241,10 @@ contains
         !mjz
           tsfcl(i) = huge
         endif
+        if (icy(i) .or. wet(i)) then ! init uustar_ice for all water/ice grids 
+           uustar_ice(i) = uustar(i)
+        endif
         if (icy(i)) then                   ! Ice
-          uustar_ice(i) = uustar(i)
           is_clm = lkm>0 .and. iopt_lake==iopt_lake_clm .and. use_lake_model(i)>0
           if(lsm /= lsm_ruc .and. .not.is_clm) then
             weasd_ice(i) = weasd(i)

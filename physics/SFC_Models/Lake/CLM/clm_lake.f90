@@ -238,7 +238,10 @@ MODULE clm_lake
       real(kind_lake) :: dz_lake(nlevlake) ! layer thickness for lake (m)
       real(kind_lake) :: depthratio
 
-      if (input_lakedepth(i) == spval) then
+      if (input_lakedepth(i) == spval .or. input_lakedepth(i) < 0.1) then
+        ! This is a safeguard against:
+        ! 1. missing in the lakedepth database (== spval)
+        ! 2. errors in model cycling or unexpected changes in the orography database (< 0.1)
         clm_lakedepth(i) = zlak(nlevlake) + 0.5_kind_lake*dzlak(nlevlake)
         z_lake(1:nlevlake) = zlak(1:nlevlake)
         dz_lake(1:nlevlake) = dzlak(1:nlevlake)
@@ -267,8 +270,8 @@ MODULE clm_lake
 
          ! Atmospheric model state inputs:
          tg3, pgr, zlvl, gt0, prsi, phii, qvcurr, gu0, gv0, xlat_d, xlon_d,       &
-         ch, cm, dlwsfci, dswsfci, oro_lakedepth, wind, rho0, tsfc,               &
-         flag_iter, ISLTYP, rainncprv, raincprv,                                  &
+         ch, cm, dlwsfci, dswsfci, oro_lakedepth, wind, tsfc,                     &
+         flag_iter, flag_lakefreeze, ISLTYP, rainncprv, raincprv,                 &
 
          ! Feedback to atmosphere:
          evap_wat,     evap_ice,   hflx_wat,    hflx_ice,  gflx_wat, gflx_ice,    &
@@ -283,7 +286,7 @@ MODULE clm_lake
 
          salty, savedtke12d, snowdp2d, h2osno2d, snl2d, t_grnd2d, t_lake3d,       &
          lake_icefrac3d, t_soisno3d, h2osoi_ice3d, h2osoi_liq3d, h2osoi_vol3d,    &
-         z3d, dz3d, zi3d,                                                         &
+         z3d, dz3d, zi3d, t1, qv1, prsl1,                                         &
                    input_lakedepth, clm_lakedepth, cannot_freeze,                 &
 
          ! Error reporting:
@@ -321,10 +324,12 @@ MODULE clm_lake
     !
     REAL(KIND_PHYS), DIMENSION(:), INTENT(IN):: &
          tg3, pgr, zlvl, qvcurr, xlat_d, xlon_d, ch, cm, &
-         dlwsfci, dswsfci, oro_lakedepth, wind, rho0, &
-         rainncprv, raincprv
+         dlwsfci, dswsfci, oro_lakedepth, wind, &
+         rainncprv, raincprv, t1, qv1, prsl1
     REAL(KIND_PHYS), DIMENSION(:,:), INTENT(in) :: gu0, gv0, prsi, gt0, phii
     LOGICAL, DIMENSION(:), INTENT(IN) :: flag_iter
+    LOGICAL, DIMENSION(:), INTENT(INOUT) :: flag_lakefreeze
+
     INTEGER, DIMENSION(:), INTENT(IN) :: ISLTYP
 
     !
@@ -450,6 +455,7 @@ MODULE clm_lake
       logical, parameter :: feedback_to_atmosphere = .true. ! FIXME: REMOVE
 
       real(kind_lake) :: to_radians, lat_d, lon_d, qss, tkm, bd
+      real(kind_lake) :: rho0                    ! lowest model level air density
 
       integer :: month,num1,num2,day_of_month,isl
       real(kind_lake) :: wght1,wght2,Tclim,depthratio
@@ -693,12 +699,13 @@ MODULE clm_lake
 
                 !-- The CLM output is combined for fractional ice and water
                 if( t_grnd(c) >= tfrz ) then
-                  qfx         = eflx_lh_tot(c)*invhvap
+                  qfx           = eflx_lh_tot(c)*invhvap
                 else
-                  qfx         = eflx_lh_tot(c)*invhsub      ! heat flux (W/m^2)=>mass flux(kg/(sm^2))
+                  qfx           = eflx_lh_tot(c)*invhsub      ! heat flux (W/m^2)=>mass flux(kg/(sm^2))
                 endif
-                evap_wat(i) = qfx/rho0(i)                   ! kinematic_surface_upward_latent_heat_flux_over_water
-                hflx_wat(i)=eflx_sh_tot(c)/(rho0(i)*cpair)  ! kinematic_surface_upward_sensible_heat_flux_over_water
+                rho0            = prsl1(i) / (rair*t1(i)*(1.0 + con_fvirt*qv1(i)))
+                evap_wat(i)     = qfx/rho0                    ! kinematic_surface_upward_latent_heat_flux_over_water
+                hflx_wat(i)     = eflx_sh_tot(c)/(rho0*cpair) ! kinematic_surface_upward_sensible_heat_flux_over_water
                 gflx_wat(I)     = eflx_gnet(c)              ![W/m/m]   upward_heat_flux_in_soil_over_water
                 ep1d_water(i)   = eflx_lh_tot(c)            ![W/m/m]   surface_upward_potential_latent_heat_flux_over_water
                 tsurf_water(I)  = t_grnd(c)                 ![K]       surface skin temperature after iteration over water
@@ -753,6 +760,11 @@ MODULE clm_lake
                   snodi(i)      = snowdp(c)*1.e3            ! surface_snow_thickness_water_equivalent_over_ice
                   weasd(i)      = weasdi(i)
                   snowd(i)      = snodi(c)                  ! surface_snow_thickness_water_equivalent_over_ice
+
+
+                  if (.not. icy(i)) then
+                     flag_lakefreeze(i)=.true.
+                  end if
 
                   ! Ice points are icy:
                   icy(i)=.true.                             ! flag_nonzero_sea_ice_surface_fraction

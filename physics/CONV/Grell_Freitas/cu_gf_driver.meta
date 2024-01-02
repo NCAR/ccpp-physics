@@ -613,6 +613,44 @@
   dimensions = ()
   type = integer
   intent = in
+[nchem]
+  standard_name = number_of_chemical_species_vertically_mixed
+  long_name = number of chemical species vertically mixed
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[chem3d]
+  standard_name = chem3d_mynn_pbl_transport
+  long_name = mynn pbl transport of smoke and dust
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_chemical_species_vertically_mixed)
+  type = real
+  kind = kind_phys
+  intent = inout
+[fscav]
+  standard_name = smoke_dust_conv_wet_coef
+  long_name = smoke dust convetive wet scavanging coefficents
+  units = none
+  dimensions = (3)
+  type = real
+  kind = kind_phys
+  intent = in
+[do_smoke_transport]
+  standard_name = do_smoke_conv_transport
+  long_name = flag for rrfs smoke convective transport
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[wetdpc_deep]
+  standard_name = conv_wet_deposition_smoke_dust
+  long_name = convective wet removal of smoke and dust
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,number_of_chemical_species_vertically_mixed)
+  type = real
+  kind = kind_phys
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
