@@ -1,0 +1,285 @@
+[ccpp-table-properties]
+  name = GFS_rrtmg_post
+  type = scheme
+  relative_path = ../../
+  dependencies = hooks/machine.F
+  dependencies = Radiation/radiation_aerosols.f,Radiation/RRTMG/radlw_param.f,Radiation/RRTMG/radsw_param.f
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_rrtmg_post_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[km]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[kmp1]
+  standard_name = vertical_interface_dimension
+  long_name = number of vertical levels plus one
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[lm]
+  standard_name = vertical_dimension_for_radiation
+  long_name = number of vertical layers for radiation calculation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ltp]
+  standard_name = extra_top_layer
+  long_name = extra top layers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[kt]
+  standard_name = vertical_index_difference_between_layer_and_upper_bound
+  long_name = vertical index difference between layer and upper bound
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[kb]
+  standard_name = vertical_index_difference_between_layer_and_lower_bound
+  long_name = vertical index difference between layer and lower bound
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[kd]
+  standard_name = vertical_index_difference_between_inout_and_local
+  long_name = vertical index difference between in/out and local
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nspc1]
+  standard_name = number_of_species_for_aerosol_optical_depth
+  long_name = number of species for output aerosol optical depth plus total
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[nfxr]
+  standard_name = number_of_diagnostics_variables_for_radiation
+  long_name = number of variables stored in the fluxr array
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[nday]
+  standard_name = daytime_points_dimension
+  long_name = daytime points dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[lsswr]
+  standard_name = flag_for_calling_shortwave_radiation
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lslwr]
+  standard_name = flag_for_calling_longwave_radiation
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lssav]
+  standard_name = flag_for_diagnostics
+  long_name = logical flag for storing diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[fhlwr]
+  standard_name = period_of_longwave_radiation_calls
+  long_name = frequency for longwave radiation
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[fhswr]
+  standard_name = period_of_shortwave_radiation_calls
+  long_name = frequency for shortwave radiation
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[raddt]
+  standard_name = time_step_for_radiation
+  long_name = radiation time step
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[coszen]
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
+  long_name = mean cos of zenith angle over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[coszdg]
+  standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
+  long_name = daytime mean cosz over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[prsi]
+  standard_name = air_pressure_at_interface
+  long_name = air pressure at model layer interfaces
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[tgrs]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[aerodp]
+  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
+  long_name = vertical integrated optical depth for various aerosol species
+  units = none
+  dimensions = (horizontal_loop_extent,number_of_species_for_aerosol_optical_depth)
+  type = real
+  kind = kind_phys
+  intent = in
+[cldsa]
+  standard_name = cloud_area_fraction_for_radiation
+  long_name = fraction of clouds for low, middle, high, total and BL
+  units = frac
+  dimensions = (horizontal_loop_extent,5)
+  type = real
+  kind = kind_phys
+  intent = in
+[mtopa]
+  standard_name = model_layer_number_at_cloud_top
+  long_name = vertical indices for low, middle and high cloud tops
+  units = index
+  dimensions = (horizontal_loop_extent,3)
+  type = integer
+  intent = in
+[mbota]
+  standard_name = model_layer_number_at_cloud_base
+  long_name = vertical indices for low, middle and high cloud bases
+  units = index
+  dimensions = (horizontal_loop_extent,3)
+  type = integer
+  intent = in
+[clouds1]
+  standard_name = total_cloud_fraction
+  long_name = layer total cloud fraction
+  units = frac
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[cldtaulw]
+  standard_name = cloud_optical_depth_layers_at_10mu_band
+  long_name = approx 10mu band layer cloud optical depth
+  units = none
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[cldtausw]
+  standard_name = cloud_optical_depth_layers_at_0p55mu_band
+  long_name = approx .55mu band layer cloud optical depth
+  units = none
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfcflw]
+  standard_name = surface_lw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
+  long_name = lw radiation fluxes at sfc
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = sfcflw_type
+  intent = in
+[sfcfsw]
+  standard_name = surface_sw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
+  long_name = sw radiation fluxes at sfc
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = sfcfsw_type
+  intent = in
+[topflw]
+  standard_name = lw_fluxes_top_atmosphere
+  long_name = lw radiation fluxes at top
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = topflw_type
+  intent = in
+[topfsw]
+  standard_name = sw_fluxes_top_atmosphere
+  long_name = sw radiation fluxes at toa
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = topfsw_type
+  intent = in
+[scmpsw]
+  standard_name = components_of_surface_downward_shortwave_fluxes
+  long_name = derived type for special components of surface downward shortwave fluxes
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = cmpfsw_type
+  intent = in
+[fluxr]
+  standard_name = cumulative_radiation_diagnostic
+  long_name = time-accumulated 2D radiation-related diagnostic fields
+  units = mixed
+  dimensions = (horizontal_loop_extent,number_of_diagnostics_variables_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = inout
+[total_albedo]
+  standard_name = total_sky_albedo
+  long_name = total sky albedo at toa
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
