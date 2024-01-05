@@ -25,7 +25,7 @@
 !  ---  inputs:
      &     ( im, hvap, cp, rd, eps, epsm1, rvrdm1, ps, u1, v1, t1, q1,  &
      &       tskin, cm, ch, lseaspray, fm, fm10,                        &
-     &       ssu, ssv, icplocn2atm,                                     &
+     &       usfco, vsfco, icplocn2atm,                                 &
      &       prsl1, prslki, wet, use_lake_model, wind,                  &,  ! --- inputs
      &       flag_iter, use_med_flux, dqsfc_med, dtsfc_med,             &
      &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &   ! --- outputs
@@ -40,7 +40,7 @@
 !    call sfc_ocean                                                     !
 !       inputs:                                                         !
 !        ( im, ps, u1, v1, t1, q1, tskin, cm, ch, lseaspray, fm, fm10,  !
-!             ssu, ssv, icplocn2atm,                                    !
+!             usfco, vsfco, icplocn2atm,                                !
 !            prsl1, prslki, wet, use_lake_model, wind, flag_iter,       !
 !            use_med_flux,                                              !
 !       outputs:                                                        !
@@ -68,8 +68,9 @@
 !     im       - integer, horizontal dimension                     1    !
 !     ps       - real, surface pressure                            im   !
 !     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
-!     ssu,ssv - real, u/v component of surface ocean current (m/s) im   !
-!     icplocn2atm - integrt, =1 if ssu and ssv are used in the     1    !
+!     usfco    - real, u component of surface ocean current (m/s)  im   !
+!     vsfco    - real, v component of surface ocean current (m/s)  im   !
+!     icplocn2atm - integer, =1 if usfco and vsfco are used in the 1    !
 !                computation of air-sea fluxes                          !
 !     t1       - real, surface layer mean temperature ( k )        im   !
 !     q1       - real, surface layer mean specific humidity        im   !
@@ -114,7 +115,8 @@
      &                 eps, epsm1, rvrdm1
 
       real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,    &
-     &    t1, q1, tskin, cm, ch, fm, fm10, prsl1, prslki, wind, ssu,ssv
+     &    t1, q1, tskin, cm, ch, fm, fm10, prsl1, prslki, wind,         &
+     &    usfco, vsfco
 
 ! For sea spray effect
       logical, intent(in) :: lseaspray
@@ -186,7 +188,7 @@
               tem      = ch(i) * wind(i)
               cmm(i)   = cm(i) * wind(i)
             else if (icplocn2atm ==1) then
-              windrel(i)=sqrt( (u1(i)-ssu(i))**2+(v1(i)-ssv(i))**2 )
+              windrel(i)=sqrt( (u1(i)-usfco(i))**2+(v1(i)-vsfco(i))**2 )
               tem      = ch(i) * windrel(i)
               cmm(i)   = cm(i) * windrel(i)
             endif
@@ -211,7 +213,7 @@
               tem      = ch(i) * wind(i)
               cmm(i)   = cm(i) * wind(i)
             else if (icplocn2atm ==1) then
-              windrel(i)=sqrt( (u1(i)-ssu(i))**2+(v1(i)-ssv(i))**2 )
+              windrel(i)=sqrt( (u1(i)-usfco(i))**2+(v1(i)-vsfco(i))**2 )
               rch      = rho(i) * cp * ch(i) * windrel(i)
               tem      = ch(i) * windrel(i)
               cmm(i)   = cm(i) * windrel(i)

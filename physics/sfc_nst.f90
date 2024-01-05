@@ -26,7 +26,7 @@ contains
   !> \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
   subroutine sfc_nst_run                                          &
        ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,  &  ! --- inputs:
-       pi, tgice, sbc, ps, u1, v1, ssu, ssv, icplocn2atm, t1,     &
+       pi, tgice, sbc, ps, u1, v1, usfco, vsfco, icplocn2atm, t1, &
        q1, tref, cm, ch, lseaspray, fm, fm10,                                       &
        prsl1, prslki, prsik1, prslk1, wet, use_lake_model, xlon,  &
        sinlat, stress,                                            &
@@ -84,7 +84,7 @@ contains
     !     im       - integer, horiz dimension                          1    !
     !     ps       - real, surface pressure (pa)                       im   !
     !     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
-    !     ssu, ssv - real, u/v component of surface current (m/s)      im   !
+    !     usfco, vsfco - real, u/v component of surface current (m/s)  im   !
     !     icplocn2atm - integer, option to include ocean surface       1    !
     !                       current in the computation of flux              ! 
     !     t1       - real, surface layer mean temperature ( k )        im   !
@@ -175,7 +175,7 @@ contains
     real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps, &
          epsm1, rvrdm1, rd, rhw0, sbc, pi, tgice
     real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,  &
-         ssu, ssv, t1, q1, tref, cm, ch, fm, fm10,                  &
+         usfco, vsfco, t1, q1, tref, cm, ch, fm, fm10,              &
          prsl1, prslki, prsik1, prslk1, xlon, xcosz,                &
          sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, wind
     real (kind=kind_phys), intent(in) :: timestep
@@ -322,7 +322,7 @@ contains
             cmm(i)     = cm (i)   * wind(i)
             chh(i)     = rho_a(i) * ch(i) * wind(i)
           else if (icplocn2atm ==1) then
-            windrel= sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
+            windrel= sqrt( (u1(i)-usfco(i))**2 + (v1(i)-vsfco(i))**2 )
             rch(i)     = rho_a(i) * cp * ch(i) * windrel
             cmm(i)     = cm (i)   * windrel
             chh(i)     = rho_a(i) * ch(i) * windrel

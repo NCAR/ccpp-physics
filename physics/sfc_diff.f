@@ -61,7 +61,7 @@
      &                    z0pert,ztpert,                                &  ! mg, sfc-perts !intent(in)
      &                    flag_iter,redrag,                             &  !intent(in)
      &                    u10m,v10m,sfc_z0_type,                        &  !hafs,z0 type !intent(in)
-     &                    u1,v1,ssu,ssv,icplocn2atm,                    &  
+     &                    u1,v1,usfco,vsfco,icplocn2atm,                &  
      &                    wet,dry,icy,                                  &  !intent(in)
      &                    thsfc_loc,                                    &  !intent(in)
      &                    tskin_wat, tskin_lnd, tskin_ice,              &  !intent(in)
@@ -97,7 +97,8 @@
       logical, intent(in) :: thsfc_loc ! Flag for reference pressure in theta calculation
 
       real(kind=kind_phys), dimension(:), intent(in)    :: u10m,v10m
-      real(kind=kind_phys), dimension(:), intent(in)    :: u1,v1,ssu,ssv
+      real(kind=kind_phys), dimension(:), intent(in)    :: u1,v1
+      real(kind=kind_phys), dimension(:), intent(in)    :: usfco,vsfco
       real(kind=kind_phys), intent(in) :: rvrdm1, eps, epsm1, grav
       real(kind=kind_phys), dimension(:), intent(in)    ::              &
      &                    ps,t1,q1,z1,garea,prsl1,prslki,prsik1,prslk1, &
@@ -361,8 +362,8 @@
               wind10m=sqrt(u10m(i)*u10m(i) + v10m(i)*v10m(i))
               windrel=wind(i)
             else if (icplocn2atm ==1) then
-              wind10m=sqrt((u10m(i)-ssu(i))**2 + (v10m(i)-ssv(i))**2)
-              windrel=sqrt( (u1(i)-ssu(i))**2 + (v1(i)-ssv(i))**2 )
+              wind10m=sqrt((u10m(i)-usfco(i))**2 + (v10m(i)-vsfco(i))**2)
+              windrel=sqrt( (u1(i)-usfco(i))**2 + (v1(i)-vsfco(i))**2 )
             endif
 
 !**  test xubin's new z0

@@ -75,7 +75,7 @@
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
       subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,               &
      &     ntiw,ntke,grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,ssu,ssv,icplocn2atm,               &
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,usfco,vsfco,icplocn2atm,           &
      &     swh,hlw,xmu,garea,zvfun,sigmaf,                              &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
@@ -110,7 +110,7 @@
      &                     tdt(:,:),    rtg(:,:,:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(:,:),     v1(:,:),                        &
-     &                     ssu(:),      ssv(:),                         &
+     &                     usfco(:),    vsfco(:),                       &
      &                     t1(:,:),     q1(:,:,:),                      &
      &                     swh(:,:),    hlw(:,:),                       &
      &                     xmu(:),       garea(:),                      &
@@ -2383,9 +2383,9 @@ c
           dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
           dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
         else if (icplocn2atm ==1) then
-          spd1_m=sqrt( (u1(i,1)-ssu(i))**2+(v1(i,1)-ssv(i))**2 )
-          dusfc(i) = -1.*rho_a(i)*stress(i)*(u1(i,1)-ssu(i))/spd1_m
-          dvsfc(i) = -1.*rho_a(i)*stress(i)*(v1(i,1)-ssv(i))/spd1_m
+          spd1_m=sqrt( (u1(i,1)-usfco(i))**2+(v1(i,1)-vsfco(i))**2 )
+          dusfc(i) = -1.*rho_a(i)*stress(i)*(u1(i,1)-usfco(i))/spd1_m
+          dvsfc(i) = -1.*rho_a(i)*stress(i)*(v1(i,1)-vsfco(i))/spd1_m
         endif
       enddo
 !

@@ -123,7 +123,7 @@
   type = real
   kind = kind_phys
   intent = in
-[ssu]
+[usfco]
   standard_name = ocn_current_zonal
   long_name = ocn_current_zonal
   units = m s-1
@@ -131,7 +131,7 @@
   type = real
   kind = kind_phys
   intent = in
-[ssv]
+[vsfco]
   standard_name = ocn_current_merid
   long_name = ocn_current_merid
   units = m s-1
