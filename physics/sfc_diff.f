@@ -359,11 +359,11 @@
             z0max        = max(zmin, min(z0,z1(i)))
 !           ustar_wat(i) = sqrt(grav * z0 / charnock)
             if (icplocn2atm == 0) then 
-              wind10m=sqrt(u10m(i)*u10m(i) + v10m(i)*v10m(i))
+              wind10m=sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
               windrel=wind(i)
             else if (icplocn2atm ==1) then
-              wind10m=sqrt((u10m(i)-usfco(i))**2 + (v10m(i)-vsfco(i))**2)
-              windrel=sqrt( (u1(i)-usfco(i))**2 + (v1(i)-vsfco(i))**2 )
+              wind10m=sqrt((u10m(i)-usfco(i))**2+(v10m(i)-vsfco(i))**2)
+              windrel=sqrt((u1(i)-usfco(i))**2+(v1(i)-vsfco(i))**2) 
             endif
 
 !**  test xubin's new z0
