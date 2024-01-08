@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = sfc_land
   type = scheme
-  dependencies = machine.F
+  dependencies = ../../hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]
