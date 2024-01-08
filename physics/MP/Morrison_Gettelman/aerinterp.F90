@@ -426,7 +426,7 @@ contains
               ENDDO
            else
              DO  k=1, levsaer-1      !! from sfc to toa
-              IF(prsl(j,L) < aerpres(j,k) .and. prsl(j,L)>aerpres(j,k+1)) then
+              IF(prsl(j,L) <= aerpres(j,k) .and. prsl(j,L)>aerpres(j,k+1)) then
                  i1 = k
                  i2 = min(k+1,levsaer)
                  exit
