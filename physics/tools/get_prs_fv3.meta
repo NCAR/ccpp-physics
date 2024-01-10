@@ -1,0 +1,94 @@
+[ccpp-table-properties]
+  name = get_prs_fv3
+  type = scheme
+  dependencies = ../hooks/machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = get_prs_fv3_run
+  type = scheme
+[ix]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical layers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[con_fvirt]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = rv/rd - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[phii]
+  standard_name = geopotential_at_interface
+  long_name = interface geopotential
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[prsi]
+  standard_name = air_pressure_at_interface
+  long_name = interface pressure
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[tgrs]
+  standard_name = air_temperature
+  long_name = mid-layer temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[qgrs1]
+  standard_name = specific_humidity
+  long_name = mid-layer specific humidity of water vapor
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[del]
+  standard_name = air_pressure_difference_between_midlayers
+  long_name = difference between mid-layer pressures
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[del_gz]
+  standard_name = geopotential_difference_between_midlayers_divided_by_midlayer_virtual_temperature
+  long_name = difference between mid-layer geopotentials divided by mid-layer virtual temperature
+  units = m2 s-2 K-1
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
