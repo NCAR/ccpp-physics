@@ -23,7 +23,7 @@ contains
       integer, intent(in) :: me
       integer, intent(in) :: master
 !--- locals
-      integer :: i, n, k, ncid, varid,j,it
+      integer :: i, n, k, ncid, varid, j, it, stat
       real(kind=kind_phys), allocatable, dimension(:) :: hyam,hybm
       real(kind=4), allocatable, dimension(:,:,:) :: ci_ps
 
@@ -31,29 +31,29 @@ contains
       allocate (ciplin(lonscip,latscip,kcipl,timeci))
       allocate (ccnin(lonscip,latscip,kcipl,timeci))
       allocate (ci_pres(lonscip,latscip,kcipl,timeci))
-      call nf_open("cam5_4_143_NAAI_monclimo2.nc", NF90_NOWRITE, ncid)
-      call nf_inq_varid(ncid, "lat", varid)
-      call nf_get_var(ncid, varid, ci_lat)
-      call nf_inq_varid(ncid, "lon", varid)
-      call nf_get_var(ncid, varid, ci_lon)
-      call nf_inq_varid(ncid, "PS", varid)
-      call nf_get_var(ncid, varid, ci_ps)
-      call nf_inq_varid(ncid, "hyam", varid)
-      call nf_get_var(ncid, varid, hyam)
-      call nf_inq_varid(ncid, "hybm", varid)
-      call nf_get_var(ncid, varid, hybm)
-      call nf_inq_varid(ncid, "NAAI", varid)
-      call nf_get_var(ncid, varid, ciplin)
+      stat = nf90_open("cam5_4_143_NAAI_monclimo2.nc", NF90_NOWRITE, ncid)
+      stat = nf90_inq_varid(ncid, "lat", varid)
+      stat = nf90_get_var(ncid, varid, ci_lat)
+      stat = nf90_inq_varid(ncid, "lon", varid)
+      stat = nf90_get_var(ncid, varid, ci_lon)
+      stat = nf90_inq_varid(ncid, "PS", varid)
+      stat = nf90_get_var(ncid, varid, ci_ps)
+      stat = nf90_inq_varid(ncid, "hyam", varid)
+      stat = nf90_get_var(ncid, varid, hyam)
+      stat = nf90_inq_varid(ncid, "hybm", varid)
+      stat = nf90_get_var(ncid, varid, hybm)
+      stat = nf90_inq_varid(ncid, "NAAI", varid)
+      stat = nf90_get_var(ncid, varid, ciplin)
       do it = 1,timeci
         do k=1, kcipl
           ci_pres(:,:,k,it)=hyam(k)*1.e5+hybm(k)*ci_ps(:,:,it)
         end do
       end do
-      call nf_close(ncid)
-      call nf_open("cam5_4_143_NPCCN_monclimo2.nc", NF90_NOWRITE, ncid)
-      call nf_inq_varid(ncid, "NPCCN", varid)
-      call nf_get_var(ncid, varid, ccnin)
-      call nf_close(ncid)
+      stat = nf90_close(ncid)
+      stat = nf90_open("cam5_4_143_NPCCN_monclimo2.nc", NF90_NOWRITE, ncid)
+      stat = nf90_inq_varid(ncid, "NPCCN", varid)
+      stat = nf90_get_var(ncid, varid, ccnin)
+      stat = nf90_close(ncid)
 !---
       deallocate (hyam, hybm, ci_ps)
       if (me == master) then
