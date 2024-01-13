@@ -72,6 +72,7 @@ module scm_sfc_flux_spec
     integer,          intent(out) :: errflg
 
     integer :: i
+    integer, parameter :: true = 1, false = 0 ! to match type of use_lake_model
 
     real(kind=kind_phys) :: rho, q1_non_neg, w_thv1, rho_cp_inverse, rho_hvap_inverse, Obukhov_length, thv1, tvs, &
       dtv, adtv, wind10m, u_fraction, roughness_length_m
