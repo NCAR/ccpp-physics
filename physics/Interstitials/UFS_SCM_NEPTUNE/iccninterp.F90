@@ -134,6 +134,7 @@ contains
 !
       USE MACHINE,  ONLY : kind_phys, kind_dbl_prec
       use iccn_def
+      use w3emc, only: w3movdat
       implicit none
       integer   i1,i2, iday,j,j1,j2,l,npts,nc,n1,n2,lev,k,i
       real(kind=kind_phys) fhour,temj, tx1, tx2,temi
