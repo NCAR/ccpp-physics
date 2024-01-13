@@ -1,0 +1,137 @@
+[ccpp-table-properties]
+  name = rrtmg_lw_post
+  type = scheme
+  dependencies = ../../hooks/machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = rrtmg_lw_post_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ltp]
+  standard_name = extra_top_layer
+  long_name = extra top layers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[lm]
+  standard_name = vertical_dimension_for_radiation
+  long_name = number of vertical layers for radiation calculation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[kd]
+  standard_name = vertical_index_difference_between_inout_and_local
+  long_name = vertical index difference between in/out and local
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[lslwr]
+  standard_name = flag_for_calling_longwave_radiation
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lwhtr]
+  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep_assuming_clear_sky
+  long_name = flag to output lw heating rate (Radtend%lwhc)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[tsfa]
+  standard_name = surface_air_temperature_for_radiation
+  long_name = lowest model layer air temperature for radiation
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[htlwc]
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step_and_radiation_levels
+  long_name = total sky heating rate due to longwave radiation
+  units = K s-1
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[htlw0]
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step_and_radiation_levels
+  long_name = clear sky heating rate due to longwave radiation
+  units = K s-1
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfcflw]
+  standard_name = surface_lw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
+  long_name = lw radiation fluxes at sfc
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = sfcflw_type
+  intent = in
+[tsflw]
+  standard_name = air_temperature_at_surface_adjacent_layer_on_radiation_timestep
+  long_name = surface air temp during lw calculation
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[sfcdlw]
+  standard_name = surface_downwelling_longwave_flux_on_radiation_timestep
+  long_name = total sky sfc downward lw flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[htrlw]
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
+  long_name = total sky lw heating rate
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[lwhc]
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_timestep
+  long_name = clear sky lw heating rates
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+
