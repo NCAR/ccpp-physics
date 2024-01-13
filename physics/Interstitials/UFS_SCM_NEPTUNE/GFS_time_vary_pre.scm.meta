@@ -3,6 +3,7 @@
   type = scheme
   relative_path = ../../
   dependencies = tools/funcphys.f90,hooks/machine.F
+ay to get rid of all the warnings.):physics/GFS_time_vary_pre.scm.meta
 
 ########################################################################
 [ccpp-arg-table]
@@ -73,14 +74,14 @@
 [nsswr]
   standard_name = number_of_timesteps_between_shortwave_radiation_calls
   long_name = number of timesteps between shortwave radiation calls
-  units = 
+  units =
   dimensions = ()
   type = integer
   intent = in
 [nslwr]
   standard_name = number_of_timesteps_between_longwave_radiation_calls
   long_name = number of timesteps between longwave radiation calls
-  units = 
+  units =
   dimensions = ()
   type = integer
   intent = in
@@ -176,7 +177,7 @@
 [ipt]
   standard_name = index_of_horizontal_gridpoint_for_debug_output
   long_name = horizontal index for point used for diagnostic printout
-  units = index 
+  units = index
   dimensions = ()
   type = integer
   intent = out
