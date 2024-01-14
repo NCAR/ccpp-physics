@@ -5534,7 +5534,7 @@ endif
                                    ,itf,ktf,its,ite, kts,kte, cumulus          )
      implicit none
      character *(*), intent (in)                          :: cumulus
-     integer  ,intent (in   )	                          :: itf,ktf, its,ite, kts,kte
+     integer  ,intent (in   )                             :: itf,ktf, its,ite, kts,kte
      real(kind=kind_phys),     intent (in   ), dimension(its:ite,kts:kte) :: tn,po_cup
      real(kind=kind_phys),     intent (inout), dimension(its:ite,kts:kte) :: p_liq_ice,melting_layer
 !$acc declare copyin(tn,po_cup) copy(p_liq_ice,melting_layer)

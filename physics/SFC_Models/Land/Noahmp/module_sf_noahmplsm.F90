@@ -424,7 +424,7 @@ contains
                    sfctmp  , sfcprs  , psfc    , uu      , vv , q2, garea1   , & ! in : forcing
                    qc      , soldn   , lwdn,thsfc_loc, prslkix,prsik1x,prslk1x,& ! in : forcing
                    pblhx   , iz0tlnd , itime         ,psi_opt                 ,&
-	           prcpconv, prcpnonc, prcpshcv, prcpsnow, prcpgrpl, prcphail, & ! in : forcing
+                   prcpconv, prcpnonc, prcpshcv, prcpsnow, prcpgrpl, prcphail, & ! in : forcing
                    tbot    , co2air  , o2air   , foln    , ficeold , zlvl    , & ! in : forcing
                    ep_1    , ep_2    , epsm1   , cp                          , & ! in : constants
                    albold  , sneqvo  ,                                         & ! in/out : 
@@ -436,7 +436,7 @@ contains
                    cm      , ch      , tauss   ,                               & ! in/out : 
                    grain   , gdd     , pgs     ,                               & ! in/out 
                    smcwtd  ,deeprech , rech    , ustarx  ,                     & ! in/out :
-		   z0wrf   , z0hwrf  , ts      ,                               & ! out :
+                   z0wrf   , z0hwrf  , ts      ,                               & ! out :
                    fsa     , fsr     , fira    , fsh     , ssoil   , fcev    , & ! out : 
                    fgev    , fctr    , ecan    , etran   , edir    , trad    , & ! out :
                    tgb     , tgv     , t2mv    , t2mb    , q2v     , q2b     , & ! out :
@@ -445,9 +445,9 @@ contains
                    qsnbot  , ponding , ponding1, ponding2, rssun   , rssha   , & ! out :
                    albd    , albi    , albsnd  , albsni                      , & ! out :
                    bgap    , wgap    , chv     , chb     , emissi  ,           & ! out :
-		   shg     , shc     , shb     , evg     , evb     , ghv     , & ! out :
-		   ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
-		   chleaf  , chuc    , chv2    , chb2    , fpice   , pahv    , &
+                   shg     , shc     , shb     , evg     , evb     , ghv     , & ! out :
+                   ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
+                   chleaf  , chuc    , chv2    , chb2    , fpice   , pahv    , &
                    pahg    , pahb    , pah     , esnow   , canhs   , laisun  , &
                    laisha  , rb      , qsfcveg , qsfcbare                      &
 #ifdef CCPP
@@ -819,7 +819,7 @@ contains
                      canliq ,canice ,tv     ,sfctmp ,tg     ,         & !in
                      qintr  ,qdripr ,qthror ,qints  ,qdrips ,qthros , & !out
                      pahv   ,pahg   ,pahb   ,qrain  ,qsnow  ,snowhin, & !out
-	             fwet   ,cmc                                    )   !out
+                     fwet   ,cmc                                    )   !out
 
 ! compute energy budget (momentum & energy fluxes and phase changes) 
 
@@ -833,7 +833,7 @@ contains
                  qsnow  ,dzsnso ,lat    ,canliq ,canice ,iloc, jloc , & !in
                  thsfc_loc, prslkix,prsik1x,prslk1x,garea1,       & !in
                  pblhx  ,iz0tlnd, itime ,psi_opt, ep_1, ep_2, epsm1,cp, &
-		 z0wrf  ,z0hwrf ,                                 & !out
+                 z0wrf  ,z0hwrf ,                                 & !out
                  imelt  ,snicev ,snliqv ,epore  ,t2m    ,fsno   , & !out
                  sav    ,sag    ,qmelt  ,fsa    ,fsr    ,taux   , & !out
                  tauy   ,fira   ,fsh    ,fcev   ,fgev   ,fctr   , & !out
@@ -854,7 +854,7 @@ contains
                  fsrg   ,rssun   ,rssha ,albd  ,albi ,albsnd,albsni, bgap  ,wgap, tgv,tgb,&
                  q1     ,q2v    ,q2b    ,q2e    ,chv   ,chb     , & !out
                  emissi ,pah    ,canhs,                           &
-		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )                                            !out
+                 shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )                                            !out
 
     qsfcveg  = eah*ep_2/(sfcprs + epsm1*eah)
     qsfcbare = qsfc
@@ -877,7 +877,7 @@ contains
                  esai   ,sfctmp ,qvap   ,qdew   ,zsoil  ,btrani , & !in
                  ficeold,ponding,tg     ,ist    ,fveg   ,iloc,jloc , smceq , & !in
                  bdfall ,fp     ,rain   ,snow   ,                 & !in  mb/an: v3.7
-		 qsnow  ,qrain  ,snowhin,latheav,latheag,frozen_canopy,frozen_ground,  & !in  mb
+                 qsnow  ,qrain  ,snowhin,latheav,latheag,frozen_canopy,frozen_ground,  & !in  mb
                  isnow  ,canliq ,canice ,tv     ,snowh  ,sneqv  , & !inout
                  snice  ,snliq  ,stc    ,zsnso  ,sh2o   ,smc    , & !inout
                  sice   ,zwt    ,wa     ,wt     ,dzsnso ,wslake , & !inout
@@ -911,9 +911,9 @@ contains
    if (opt_crop == 1 .and. crop_active) then
     call carbon_crop (parameters,nsnow  ,nsoil  ,vegtyp ,dt     ,zsoil  ,julian , & !in 
                          dzsnso ,stc    ,smc    ,tv     ,psn    ,foln   ,btran  , & !in
-			 soldn  ,t2m    ,                                         & !in
+                         soldn  ,t2m    ,                                         & !in
                          lfmass ,rtmass ,stmass ,wood   ,stblcp ,fastcp ,grain  , & !inout
-			 lai    ,sai    ,gdd    ,                                 & !inout
+                         lai    ,sai    ,gdd    ,                                 & !inout
                          gpp    ,npp    ,nee    ,autors ,heters ,totsc  ,totlb, pgs    ) !out
    end if
    
@@ -964,7 +964,7 @@ contains
                   prcpconv,prcpnonc ,prcpshcv,prcpsnow,prcpgrpl,prcphail , &
                   soldn   ,cosz     ,thair   ,qair    ,                    & 
                   eair    ,rhoair   ,qprecc  ,qprecl  ,solad   , solai   , &
-		  swdown  ,bdfall   ,rain    ,snow    ,fp      , fpice   ,prcp )     
+                  swdown  ,bdfall   ,rain    ,snow    ,fp      , fpice   ,prcp )     
 ! --------------------------------------------------------------------------------------------------
 ! re-process atmospheric forcing
 ! ----------------------------------------------------------------------
@@ -1037,7 +1037,7 @@ contains
 
        if(opt_snf == 4) then
          qprecc = prcpconv + prcpshcv
-	 qprecl = prcpnonc
+         qprecl = prcpnonc
        else
          qprecc = 0.10 * prcp          ! should be from the atmospheric model
          qprecl = 0.90 * prcp          ! should be from the atmospheric model
@@ -1090,13 +1090,13 @@ contains
      if(opt_snf == 4 .or. opt_snf == 5) then
         prcp_frozen = prcpsnow + prcpgrpl + prcphail
         if(prcpnonc > 0. .and. prcp_frozen > 0.) then
-	  fpice = min(1.0,prcp_frozen/prcpnonc)
-	  fpice = max(0.0,fpice)
+          fpice = min(1.0,prcp_frozen/prcpnonc)
+          fpice = max(0.0,fpice)
           if(opt_snf==4) bdfall = bdfall*(prcpsnow/prcp_frozen) + rho_grpl*(prcpgrpl/prcp_frozen) + &
                      rho_hail*(prcphail/prcp_frozen)
           if(opt_snf==5) bdfall = parameters%prcpiceden
-	else
-	  fpice = 0.0
+        else
+          fpice = 0.0
         endif
 	
      endif
@@ -1233,8 +1233,8 @@ endif   ! croptype == 0
                           bdfall ,rain   ,snow   ,fp     ,                 & !in
                           canliq ,canice ,tv     ,sfctmp ,tg     ,         & !in
                           qintr  ,qdripr ,qthror ,qints  ,qdrips ,qthros , & !out
-			  pahv   ,pahg   ,pahb   ,qrain  ,qsnow  ,snowhin, & !out
-			  fwet   ,cmc                                    )   !out
+                          pahv   ,pahg   ,pahb   ,qrain  ,qsnow  ,snowhin, & !out
+                          fwet   ,cmc                                    )   !out
 
 ! ------------------------ code history ------------------------------
 ! michael barlage: oct 2013 - split canwater to calculate precip movement for 
@@ -1336,10 +1336,10 @@ endif   ! croptype == 0
          qintr  = 0.
          qdripr = 0.
          qthror = rain
-	 if(canliq > 0.) then             ! for case of canopy getting buried
-	   qdripr = qdripr + canliq/dt
-	   canliq = 0.0
-	 end if
+         if(canliq > 0.) then             ! for case of canopy getting buried
+           qdripr = qdripr + canliq/dt
+           canliq = 0.0
+         end if
       end if
       
 ! heat transported by liquid water
@@ -1363,7 +1363,7 @@ endif   ! croptype == 0
          ft = max(0.0,(tv - 270.15) / 1.87e5)
          fv = sqrt(uu*uu + vv*vv) / 1.56e5
 	 ! mb: changed below to reflect the rain assumption that all precip gets intercepted 
-	 icedrip = max(0.,canice) * (fv+ft)    !mb: removed /dt
+         icedrip = max(0.,canice) * (fv+ft)    !mb: removed /dt
          qdrips = (fveg * snow - qints) + icedrip
          qthros = (1.0-fveg) * snow
          canice= max(0.,canice + (qints - icedrip)*dt)
@@ -1371,10 +1371,10 @@ endif   ! croptype == 0
          qints  = 0.
          qdrips = 0.
          qthros = snow
-	 if(canice > 0.) then             ! for case of canopy getting buried
-	   qdrips = qdrips + canice/dt
-	   canice = 0.0
-	 end if
+         if(canice > 0.) then             ! for case of canopy getting buried
+           qdrips = qdrips + canice/dt
+           canice = 0.0
+         end if
       endif
 !      print*, "precip_heat canopy through:",3600.0*(fveg * snow - qints)
 !      print*, "precip_heat canopy drip:",3600.0*max(0.,canice) * (fv+ft)
@@ -1404,13 +1404,13 @@ endif   ! croptype == 0
       
       if (fveg > 0.0 .and. fveg < 1.0) then
         pahg = pahg / fveg         ! these will be multiplied by fraction later
-	pahb = pahb / (1.0-fveg)
+        pahb = pahb / (1.0-fveg)
       elseif (fveg <= 0.0) then
         pahb = pahg + pahb         ! for case of canopy getting buried
         pahg = 0.0
-	pahv = 0.0
+        pahv = 0.0
       elseif (fveg >= 1.0) then
-	pahb = 0.0
+        pahb = 0.0
       end if
       
       pahv = max(pahv,-20.0)       ! put some artificial limits here for stability
@@ -1677,7 +1677,7 @@ endif   ! croptype == 0
                      qsnow  ,dzsnso ,lat    ,canliq ,canice ,iloc   , jloc, & !in
                      thsfc_loc, prslkix,prsik1x,prslk1x,garea1,       & !in
                      pblhx  , iz0tlnd, itime,psi_opt,ep_1, ep_2, epsm1, cp,  &
-		     z0wrf  ,z0hwrf ,                                 & !out
+                     z0wrf  ,z0hwrf ,                                 & !out
                      imelt  ,snicev ,snliqv ,epore  ,t2m    ,fsno   , & !out
                      sav    ,sag    ,qmelt  ,fsa    ,fsr    ,taux   , & !out
                      tauy   ,fira   ,fsh    ,fcev   ,fgev   ,fctr   , & !out
@@ -1697,7 +1697,7 @@ endif   ! croptype == 0
                      t2mv   ,t2mb   ,fsrv   , &
                      fsrg   ,rssun  ,rssha  ,albd  ,albi,albsnd  ,albsni,bgap   ,wgap,tgv,tgb,&
                      q1     ,q2v    ,q2b    ,q2e    ,chv  ,chb, emissi,pah,canhs,&
-		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )   !out 
+                     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )   !out 
 !jref:end                            
 
 ! --------------------------------------------------------------------------------------------------
@@ -2211,19 +2211,19 @@ endif   ! croptype == 0
 
      if (tv .gt. tfrz) then           ! barlage: add distinction between ground and 
         latheav = hvap                ! vegetation in v3.6
-	frozen_canopy = .false.
+        frozen_canopy = .false.
      else
         latheav = hsub
-	frozen_canopy = .true.
+        frozen_canopy = .true.
      end if
      gammav = cpair*sfcprs/(ep_2*latheav)
 
      if (tg .gt. tfrz) then
         latheag = hvap
-	frozen_ground = .false.
+        frozen_ground = .false.
      else
         latheag = hsub
-	frozen_ground = .true.
+        frozen_ground = .true.
      end if
      gammag = cpair*sfcprs/(ep_2*latheag)
 
@@ -2334,7 +2334,7 @@ endif   ! croptype == 0
         ssoil = fveg * ghv       + (1.0 - fveg) * ghb
         fcev  = evc
         fctr  = tr
-	pah   = fveg * pahg      + (1.0 - fveg) * pahb   + pahv
+        pah   = fveg * pahg      + (1.0 - fveg) * pahb   + pahv
         tg    = fveg * tgv       + (1.0 - fveg) * tgb
         t2m   = fveg * t2mv      + (1.0 - fveg) * t2mb
         ts    = fveg * tah       + (1.0 - fveg) * tgb
@@ -2364,7 +2364,7 @@ endif   ! croptype == 0
         t2m   = t2mb
         fcev  = 0.
         fctr  = 0.
-	pah   = pahb
+        pah   = pahb
         ts    = tg
         cm    = cmb
         ch    = chb
@@ -3535,7 +3535,7 @@ endif   ! croptype == 0
          kopen   = 1.0
      else
          if(opt_rad == 1) then
-	   denfveg = -log(max(1.0-fveg,0.01))/(pai*parameters%rc**2)
+           denfveg = -log(max(1.0-fveg,0.01))/(pai*parameters%rc**2)
            hd      = parameters%hvt - parameters%hvb
            bb      = 0.5 * hd           
            thetap  = atan(bb/parameters%rc * tan(acos(max(0.01,cosz))) )
@@ -4247,11 +4247,11 @@ endif   ! croptype == 0
         shc = fveg*rhoair*cpair*cvh * (  tv-tah)
         evc = fveg*rhoair*cpair*cew * (estv-eah) / gammav ! barlage: change to v in v3.6
         tr  = fveg*rhoair*cpair*ctw * (estv-eah) / gammav
-	if (tv > tfrz) then
+        if (tv > tfrz) then
           evc = min(canliq*latheav/dt,evc)    ! barlage: add if block for canice in v3.6
-	else
+        else
           evc = min(canice*latheav/dt,evc)
-	end if
+        end if
 
 ! canopy heat capacity
         hcv = fveg*(parameters%cbiom*vaie*cwat + canliq*cwat/denh2o + canice*cice/denice) !j/m2/k
@@ -7018,7 +7018,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
                     esai   ,sfctmp ,qvap   ,qdew   ,zsoil  ,btrani , & !in
                     ficeold,ponding,tg     ,ist    ,fveg   ,iloc   ,jloc ,smceq , & !in
                     bdfall ,fp     ,rain   ,snow,                    & !in  mb/an: v3.7
-		    qsnow  ,qrain  ,snowhin,latheav,latheag,frozen_canopy,frozen_ground,    & !in  mb
+                    qsnow  ,qrain  ,snowhin,latheav,latheag,frozen_canopy,frozen_ground,    & !in  mb
                     isnow  ,canliq ,canice ,tv     ,snowh  ,sneqv  , & !inout
                     snice  ,snliq  ,stc    ,zsnso  ,sh2o   ,smc    , & !inout
                     sice   ,zwt    ,wa     ,wt     ,dzsnso ,wslake , & !inout
@@ -7647,19 +7647,19 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
                 snice(j-1) = snice(j-1) + snice(j)
                 dzsnso(j-1) = dzsnso(j-1) + dzsnso(j)
                else
-	         if(snice(j) >= 0.) then
+                 if(snice(j) >= 0.) then
                   ponding1 = snliq(j)    ! isnow will get set to zero below; ponding1 will get 
                   sneqv = snice(j)       ! added to ponding from phasechange ponding should be
                   snowh = dzsnso(j)      ! zero here because it was calculated for thin snow
-		 else   ! snice over-sublimated earlier
-		  ponding1 = snliq(j) + snice(j)
-		  if(ponding1 < 0.) then  ! if snice and snliq sublimates remove from soil
-		   sice(1) = max(0.0,sice(1)+ponding1/(dzsnso(1)*1000.))
+                 else   ! snice over-sublimated earlier
+                  ponding1 = snliq(j) + snice(j)
+                  if(ponding1 < 0.) then  ! if snice and snliq sublimates remove from soil
+                   sice(1) = max(0.0,sice(1)+ponding1/(dzsnso(1)*1000.))
                    ponding1 = 0.0
-		  end if
+                  end if
                   sneqv = 0.0
                   snowh = 0.0
-		 end if
+                 end if
                  snliq(j) = 0.0
                  snice(j) = 0.0
                  dzsnso(j) = 0.0
@@ -9748,7 +9748,7 @@ end  subroutine shallowwatertable
                             dzsnso ,stc    ,smc    ,tv     ,psn    ,foln   ,btran  , & !in
                             soldn  ,t2m    ,                                         & !in
                             lfmass ,rtmass ,stmass ,wood   ,stblcp ,fastcp ,grain  , & !inout
-			    xlai   ,xsai   ,gdd    ,                                 & !inout
+                            xlai   ,xsai   ,gdd    ,                                 & !inout
                             gpp    ,npp    ,nee    ,autors ,heters ,totsc  ,totlb, pgs    ) !out
 ! ------------------------------------------------------------------------------------------
 ! initial crop version created by xing liu
@@ -10427,7 +10427,7 @@ end subroutine psn_crop
 !!
   subroutine noahmp_options(idveg    , iopt_crs , iopt_btr , iopt_run , iopt_sfc , iopt_frz , & 
                              iopt_inf, iopt_rad , iopt_alb , iopt_snf , iopt_tbot, iopt_stc , &
-			     iopt_rsf, iopt_soil, iopt_pedo, iopt_crop, iopt_trs , iopt_diag, &
+                             iopt_rsf, iopt_soil, iopt_pedo, iopt_crop, iopt_trs , iopt_diag, &
                              iopt_z0m )
 
   implicit none
