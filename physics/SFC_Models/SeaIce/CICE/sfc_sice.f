@@ -137,7 +137,8 @@
 !
 ! - Define constant parameters
       integer,              parameter :: kmi   = 2                  !< 2-layer of ice
-      real(kind=kind_phys), parameter :: zero  = 0.0_kind_phys, one = 1.0_kind_phys
+      real(kind=kind_phys), parameter :: zero  = 0.0_kind_phys
+      real(kind=kind_phys), parameter :: one   = 1.0_kind_phys
       real(kind=kind_phys), parameter :: himax = 8.0_kind_phys      !< maximum ice thickness allowed
       real(kind=kind_phys), parameter :: himin = 0.1_kind_phys      !< minimum ice thickness required
       real(kind=kind_phys), parameter :: hsmax = 2.0_kind_phys      !< maximum snow depth allowed
@@ -541,8 +542,8 @@
       real (kind=kind_phys), parameter :: dili = di*li
       real (kind=kind_phys), parameter :: dsli = ds*li
       real (kind=kind_phys), parameter :: ki4  = ki*4.0_kind_phys
-      real (kind=kind_phys), parameter :: zero = 0.0_kind_phys, one  = 1.0_kind_phys
-
+      real (kind=kind_phys), parameter :: zero = 0.0_kind_phys
+      real (kind=kind_phys), parameter :: one  = 1.0_kind_phys
 !  ---  inputs:
       integer, intent(in) :: im, kmi, ipr
       logical             :: lprnt
