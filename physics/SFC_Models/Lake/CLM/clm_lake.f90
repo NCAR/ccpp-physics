@@ -2305,7 +2305,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                     ! unlike eflx_gnet
           if(abs(errsoi(c)) > .001_kind_lake) then ! 1.e-5_kind_lake) then
              WRITE( message,* )'Primary soil energy conservation error in shlake &
-                                column during Tridiagonal Solution,', 'error (W/m^2):', c, errsoi(c) 
+                                &column during Tridiagonal Solution,', 'error (W/m^2):', c, errsoi(c) 
              errmsg=trim(message)
              errflg=1
              return
