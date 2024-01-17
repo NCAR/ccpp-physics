@@ -179,7 +179,6 @@
 !           rho is density, qss is sat. hum. at surface
 
         if ( flag(i) ) then
-          
           if (use_med_flux) then
             q0(i)    = max( q1(i), qmin )
             rho(i)   = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0(i)))

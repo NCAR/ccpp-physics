@@ -27,7 +27,7 @@ contains
   subroutine sfc_nst_run                                          &
        ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,  &  ! --- inputs:
        pi, tgice, sbc, ps, u1, v1, usfco, vsfco, icplocn2atm, t1, &
-       q1, tref, cm, ch, lseaspray, fm, fm10,                                       &
+       q1, tref, cm, ch, lseaspray, fm, fm10,                     &
        prsl1, prslki, prsik1, prslk1, wet, use_lake_model, xlon,  &
        sinlat, stress,                                            &
        sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &

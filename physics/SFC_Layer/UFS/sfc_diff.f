@@ -168,7 +168,6 @@
       errmsg = ''
       errflg = 0
 
-
 !  initialize variables. all units are supposedly m.k.s. unless specified
 !  ps is in pascals, wind is wind speed,
 !  surface roughness length is converted to m from cm
@@ -282,11 +281,11 @@
 !
             call stability
 !  ---  inputs:
-     &         (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
-     &         z0max, ztmax_lnd(i), tvs, grav, thsfc_loc,
+     &       (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
+     &        z0max, ztmax_lnd(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
-     &         rb_lnd(i), fm_lnd(i), fh_lnd(i), fm10_lnd(i), fh2_lnd(i),
-     &         cm_lnd(i), ch_lnd(i), stress_lnd(i), ustar_lnd(i))
+     &        rb_lnd(i), fm_lnd(i), fh_lnd(i), fm10_lnd(i), fh2_lnd(i),
+     &        cm_lnd(i), ch_lnd(i), stress_lnd(i), ustar_lnd(i))
           endif ! Dry points
 
           if (icy(i)) then ! Some ice
@@ -336,11 +335,11 @@
 !
             call stability
 !  ---  inputs:
-     &       (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
-     &        z0max, ztmax_ice(i), tvs, grav, thsfc_loc,
+     &     (z1(i), zvfun(i), gdx, tv1, thv1, wind(i),
+     &      z0max, ztmax_ice(i), tvs, grav, thsfc_loc,
 !  ---  outputs:
-     &        rb_ice(i), fm_ice(i), fh_ice(i), fm10_ice(i), fh2_ice(i),
-     &        cm_ice(i), ch_ice(i), stress_ice(i), ustar_ice(i))
+     &      rb_ice(i), fm_ice(i), fh_ice(i), fm10_ice(i), fh2_ice(i),
+     &      cm_ice(i), ch_ice(i), stress_ice(i), ustar_ice(i))
       endif ! Icy points
 
 ! BWG: Everything from here to end of subroutine was after
