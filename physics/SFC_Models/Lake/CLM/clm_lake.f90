@@ -5626,7 +5626,7 @@ if_pergro: if (PERGRO) then
      ! initial t_soisno3d
      ! in snow
      if(snowdp2d(i) > 0.) then
-       do k = snl2d(i)+1, 0
+       do k = nint(snl2d(i))+1, 0
          t_soisno3d(i,k) =min(tfrz,tsfc(i))
        enddo
      endif
