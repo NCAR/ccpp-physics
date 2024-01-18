@@ -72,7 +72,7 @@ module scm_sfc_flux_spec
     integer,          intent(out) :: errflg
 
     integer :: i
-    integer, parameter :: true = 1, false = 0 ! to match type of use_lake_model
+    integer, parameter :: lake_model_on = 1, lake_model_off = 0 ! to match type of use_lake_model
 
     real(kind=kind_phys) :: rho, q1_non_neg, w_thv1, rho_cp_inverse, rho_hvap_inverse, Obukhov_length, thv1, tvs, &
       dtv, adtv, wind10m, u_fraction, roughness_length_m
@@ -212,12 +212,12 @@ module scm_sfc_flux_spec
   do i = 1, im
     if ((wet(i) .or. icy(i)) .and. lakefrac(i) > 0.0_kind_phys) then
       if (lkm == 1 .and. lakefrac(i) >= 0.15 .and. lakedepth(i) > 1.0_kind_phys) then
-        use_lake_model(i) = 1
+        use_lake_model(i) = lake_model_on
       else
-        use_lake_model(i) = 0
+        use_lake_model(i) = lake_model_off
       endif
     else
-      use_lake_model(i) = 0
+      use_lake_model(i) = lake_model_off
     endif
   enddo
 !
