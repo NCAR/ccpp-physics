@@ -1,4 +1,4 @@
-!> \file scm_kinds.f90
+!> \file w3emc_wrapper.f90
 !! Wrapper with generic interfaces for w3emc library to reduce warnings
 !  Modules wrap w3emc routines:
 !    - w3difdat: https://www.nco.ncep.noaa.gov/pmb/docs/libs/w3lib/w3difdat.html
