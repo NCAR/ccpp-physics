@@ -24,6 +24,7 @@ module rrfs_smoke_config
   integer :: addsmoke_flag = 1
   integer :: smoke_forecast = 1
   integer :: plumerisefire_frq=60
+  integer :: n_dbg_lines = 3
   integer :: wetdep_ls_opt = 1
   integer :: drydep_opt  = 1
   integer :: pm_settling = 1
@@ -39,7 +40,7 @@ module rrfs_smoke_config
 
   ! --
   integer, parameter :: CHEM_OPT_GOCART= 1
-  integer, parameter :: num_moist=2, num_chem=20, num_emis_seas=5, num_emis_dust=5
+  integer, parameter :: num_moist=3, num_chem=20, num_emis_seas=5, num_emis_dust=5
 
   ! -- hydrometeors
   integer, parameter :: p_qv=1

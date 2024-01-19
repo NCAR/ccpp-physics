@@ -142,13 +142,13 @@ contains
                                 !! betwee -1 and +1
               ,do_capsuppress,cap_suppress_j    &    !         
               ,k22                              &    !
-              ,jmin,tropics)                         !
+              ,jmin,kdt,tropics)                         !
 
    implicit none
 
      integer                                                &
         ,intent (in   )                   ::                &
-        nranflag,itf,ktf,its,ite, kts,kte,ipr,imid
+        nranflag,itf,ktf,its,ite, kts,kte,ipr,imid,kdt
      integer, intent (in   )              ::                &
         ichoice,nchem
      real(kind=kind_phys),  dimension (its:ite,4)                 &
@@ -591,6 +591,7 @@ contains
          sig(i)=(1.-frh)**2
          !frh_out(i) = frh
          if(forcing(i,7).eq.0.)sig(i)=1.
+         if(kdt.le.(3600./dtime))sig(i)=1.
          frh_out(i) = frh*sig(i)
       enddo
 !$acc end kernels
