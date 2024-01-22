@@ -1,4 +1,7 @@
 [submodule "physics/rte-rrtmgp"]
-  path = physics/rte-rrtmgp
+  path = physics/Radiation/RRTMGP/rte-rrtmgp
   url = https://github.com/earth-system-radiation/rte-rrtmgp
   branch = main
+[submodule "physics/Radiation/RRTMGP/rte-rrtmgp"]
+	path = physics/Radiation/RRTMGP/rte-rrtmgp
+	url = https://github.com/earth-system-radiation/rte-rrtmgp
