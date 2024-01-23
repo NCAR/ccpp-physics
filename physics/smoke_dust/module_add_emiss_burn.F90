@@ -47,7 +47,7 @@ CONTAINS
    
    INTEGER, PARAMETER :: kfire_max=51    ! max vertical level for BB plume rise
     
-    real(kind_phys) :: timeq, fire_age, age_hr,  dt1,dt2,dtm         ! For BB emis. diurnal cycle calculation
+    real(kind_phys) :: timeq, fire_age, age_hr, dt1,dt2,dtm, coef_con         ! For BB emis. diurnal cycle calculation
 
 ! For Gaussian diurnal cycle
    real(kind_phys), PARAMETER :: sc_factor=1.  ! to scale up the wildfire emissions, TBD later
@@ -89,6 +89,8 @@ CONTAINS
     if (ebb_dcycle==2) then
 
     ! Constants for the fire diurnal cycle calculation
+     coef_con = 1._kind_phys/((2._kind_phys*pi)**0.5_kind_phys * sigma_fire_dur(1) *fire_age) * &
+                exp(- ( log(fire_age) - avg_fire_dur(1))**2 /(2._kind_phys*sigma_fire_dur(1)**2 ))
      do j=jts,jte
        do i=its,ite
         fire_age= time_int + (fire_end_hr(i,j)-1._kind_phys)*3600._kind_phys  !One hour delay is due to the latency of the RAVE files
@@ -97,13 +99,12 @@ CONTAINS
           SELECT CASE ( fire_type(i,j) )   !Ag, urban fires, bare land etc.
           CASE (1)
              ! these fires will have exponentially decreasing diurnal cycle,
-             coef_bb_dc(i,j) = 1._kind_phys/((2._kind_phys*pi)**0.5_kind_phys * sigma_fire_dur(1) *fire_age) * &
-                           exp(- ( log(fire_age) - avg_fire_dur(1))**2 /(2._kind_phys*sigma_fire_dur(1)**2 ))
+             coef_bb_dc(i,j) = coef_con
 
-            ! IF ( dbg_opt .AND. time_int<5000.) then
-            !   WRITE(6,*) 'i,j,peak_hr(i,j) ',i,j,peak_hr(i,j)
-            !   WRITE(6,*) 'coef_bb_dc(i,j) ',coef_bb_dc(i,j)
-            ! END IF
+             IF ( dbg_opt .AND. time_int<5000.) then
+               WRITE(6,*) 'i,j,peak_hr(i,j) ',i,j,peak_hr(i,j)
+               WRITE(6,*) 'coef_bb_dc(i,j) ',coef_bb_dc(i,j)
+             END IF
 
           CASE (3)
              age_hr= fire_age/3600._kind_phys
@@ -123,9 +124,6 @@ CONTAINS
              dc_hwp= MAX(0._kind_phys,dc_hwp)
              dc_hwp= MIN(25._kind_phys,dc_hwp)
    
-             !coef_bb_dc(i,j)=  sc_factor* fire_hist(i,j)* rate_ebb2(i,j)* (1. + log(
-             !hwp_(i,j)/ hwp_day_avg(i,j))) 
-   
              ! RAR: Gaussian profile for wildfires
              dt1= abs(timeq - peak_hr(i,j))
              dt2= timeq_max - peak_hr(i,j) + timeq   ! peak hour is always <86400.
@@ -134,13 +132,12 @@ CONTAINS
              dc_gp = MAX(0._kind_phys,dc_gp)
    
              dc_fn = MIN(dc_hwp/dc_gp,3._kind_phys)
-             !coef_bb_dc(i,j) = fire_hist(i,j)* dc_fn
               coef_bb_dc(i,j) = fire_hist(i,j)* dc_hwp
 
-            ! IF ( dbg_opt .AND. time_int<5000.) then
-            !   WRITE(6,*) 'i,j,fire_hist(i,j),peak_hr(i,j) ', i,j,fire_hist(i,j),peak_hr(i,j)
-            !   WRITE(6,*) 'dc_gp,dc_hwp,dc_fn,coef_bb_dc(i,j) ',dc_gp,dc_hwp,dc_fn,coef_bb_dc(i,j)
-            ! END IF
+             IF ( dbg_opt .AND. time_int<5000.) then
+               WRITE(6,*) 'i,j,fire_hist(i,j),peak_hr(i,j) ', i,j,fire_hist(i,j),peak_hr(i,j)
+               WRITE(6,*) 'dc_gp,dc_hwp,dc_fn,coef_bb_dc(i,j) ',dc_gp,dc_hwp,dc_fn,coef_bb_dc(i,j)
+             END IF
 
           CASE DEFAULT
           END SELECT

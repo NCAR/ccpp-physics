@@ -731,9 +731,9 @@
   kind = kind_phys
   intent = inout
 [fire_type_out]
-  standard_name = fire_type_out
+  standard_name = fire_type
   long_name = type of fire
-  units = none
+  units = 1
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
@@ -791,17 +791,17 @@
   type = integer
   intent = in
 [uspdavg]
-  standard_name = bl_averaged_wind_speed
+  standard_name = mean_wind_speed_in_boundary_layer
   long_name = average wind speed within the boundary layer
-  units = none
+  units = m s-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
 [hpbl_thetav]
-  standard_name = pbl_height_thetav
+  standard_name = atmosphere_boundary_layer_thickness_from_modified_parcel
   long_name = pbl height based on modified parcel method
-  units = none
+  units = m
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -861,24 +861,16 @@
   type = real
   kind = kind_phys
   intent = inout
-[fire_in]
-  standard_name = smoke_fire_auxiliary_input
-  long_name = smoke fire auxiliary input variables
-  units = various
-  dimensions = (horizontal_loop_extent,fire_auxiliary_data_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
 [peak_hr_out]
  standard_name = peak_hr_fire
- long_name = hour of peak fire emissions
- units = none
+ long_name = time_of_peak_fire_emissions
+ units = s
  dimensions = (horizontal_loop_extent)
  type = real
  kind = kind_phys
  intent = out
 [lu_nofire_out]
- standard_name = lu_nofire_out
+ standard_name = sum_of_land_use_fractions_for_no_fire_pixels
  long_name = land use of no fire pixels for type
  units = frac
  dimensions = (horizontal_loop_extent)
@@ -886,7 +878,7 @@
  kind = kind_phys
  intent = out
 [lu_qfire_out]
- standard_name = lu_qfire_out
+ standard_name = sum_of_land_use_fractions_for_cropland_fire_pixels
  long_name = land use of fire pixels for type
  units = frac
  dimensions = (horizontal_loop_extent)

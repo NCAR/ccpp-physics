@@ -121,7 +121,7 @@ contains
                    nwfa, nifa, emanoc, emdust, emseas, drydep_flux_out, wetdpr,            &
                    ebb_smoke_in, frp_output, coef_bb, fire_type_out,                       &
                    ebu_smoke,fhist,min_fplume,                                             &
-                   max_fplume, hwp, hwp_ave, wetness, ndvel, ddvel_inout,fire_in,          &
+                   max_fplume, hwp, hwp_ave, wetness, ndvel, ddvel_inout,                  &
                    peak_hr_out,lu_nofire_out,lu_qfire_out,                                 &
                    fire_heat_flux_out, frac_grid_burned_out, kpbl,oro,                     &
                    uspdavg, hpbl_thetav, mpicomm, mpirank, mpiroot, errmsg,errflg          )
@@ -154,8 +154,7 @@ contains
     real(kind_phys), dimension(:),     intent(inout) :: emdust, emseas, emanoc
     real(kind_phys), dimension(:),     intent(inout) :: ebb_smoke_in,coef_bb, frp_output, fhist
     real(kind_phys), dimension(:,:),   intent(inout) :: ebu_smoke
-    real(kind_phys), dimension(:,:),   intent(inout) :: fire_in
-    real(kind_phys), dimension(:),     intent(out) :: fire_heat_flux_out, frac_grid_burned_out
+    real(kind_phys), dimension(:),     intent(out  ) :: fire_heat_flux_out, frac_grid_burned_out
     real(kind_phys), dimension(:),     intent(inout) :: max_fplume, min_fplume, uspdavg, hpbl_thetav
     real(kind_phys), dimension(:),     intent(inout) :: hwp, peak_hr_out
     real(kind_phys), dimension(:),     intent(inout) :: hwp_ave
@@ -816,13 +815,8 @@ contains
           vvel(i,k,j)=-w(i,kkp)*rri(i,k,j)/g 
           moist(i,k,j,:)=0.
           moist(i,k,j,1)=gq0(i,kkp,1)
-          !if (t_phy(i,k,j) > 265.) then
-            moist(i,k,j,2)=gq0(i,kkp,2)
-            if (moist(i,k,j,2) < 1.e-8) moist(i,k,j,2)=0.
-          !else
-          !  moist(i,k,j,2)=0.
-            if(moist(i,k,j,3) < 1.e-8)moist(i,k,j,3)=0.
-          !endif
+          moist(i,k,j,2)=gq0(i,kkp,2)
+          if (moist(i,k,j,2) < 1.e-8) moist(i,k,j,2)=0.
           !--
           zmid(i,k,j)=phl3d(i,kkp)/g
         enddo

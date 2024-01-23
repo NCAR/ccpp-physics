@@ -179,10 +179,6 @@ contains
                          eps0 = eps0_grs
                       end if
                       ! Set if snow greater than 1 cm
-!                      if ( snowh(i,j) .gt. 0.01 ) then ! snow
-!                         A = A_wat
-!                         eps0 = eps0_wat
-!                      endif
                       ! Interception
                       Ein = Cin * ( dp / A )**vv
                       ! Surface resistance
@@ -234,25 +230,15 @@ contains
                IF (ndt_settl(nv) > 12) ndt_settl(nv) = 12 
                dt_settl(nv) = REAL(ntdt,kind=kind_phys) /REAL(ndt_settl(nv),kind=kind_phys)
              enddo
-             !do nv = 1, ndvel
-             !  chem_before(nv) = 0._kind_phys
-             !  do k = kts, kte
-             !   chem_before(nv) = chem_before(nv) + (cblk_col(k,nv) * rho_phy(i,k,j) * delz(i,k,j) ) ! ug/m2
-             ! enddo
-             !enddo
              ! Perform gravitational settling if desired
              if ( settling_flag == 1 ) then
                 call particle_settling(cblk_col,rho_col,delz_col,vg_col,dt_settl,ndt_settl,ndvel,kts,kte)
              endif
              ! Put cblk back into chem array
              do nv= 1, ndvel
-                !chem_after(nv) = 0._kind_phys
-                !settling_flux(i,j,nv) = 0._kind_phys
                 do k = kts, kte
                    chem(i,k,j,chem_pointers(nv)) = cblk_col(k,nv)
-                   !chem_after(nv) = chem_after(nv) + (cblk_col(k,nv) * rho_phy(i,k,j) * delz(i,k,j) ) ! ug/m2
                 enddo ! k
-                !settling_flux(i,j,nv) = settling_flux(i,j,nv) + (chem_before(nv) - chem_after(nv))    ! ug/m2
              enddo ! nv
         end do ! j
         end do ! i

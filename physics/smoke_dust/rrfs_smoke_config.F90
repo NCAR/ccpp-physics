@@ -40,7 +40,7 @@ module rrfs_smoke_config
 
   ! --
   integer, parameter :: CHEM_OPT_GOCART= 1
-  integer, parameter :: num_moist=3, num_chem=20, num_emis_seas=5, num_emis_dust=5
+  integer, parameter :: num_moist=2, num_chem=20, num_emis_seas=5, num_emis_dust=5
 
   ! -- hydrometeors
   integer, parameter :: p_qv=1
