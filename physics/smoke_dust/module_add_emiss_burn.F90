@@ -89,8 +89,7 @@ CONTAINS
     if (ebb_dcycle==2) then
 
     ! Constants for the fire diurnal cycle calculation
-     coef_con = 1._kind_phys/((2._kind_phys*pi)**0.5_kind_phys * sigma_fire_dur(1) *fire_age) * &
-                exp(- ( log(fire_age) - avg_fire_dur(1))**2 /(2._kind_phys*sigma_fire_dur(1)**2 ))
+     coef_con=1._kind_phys/((2._kind_phys*pi)**0.5_kind_phys)
      do j=jts,jte
        do i=its,ite
         fire_age= time_int + (fire_end_hr(i,j)-1._kind_phys)*3600._kind_phys  !One hour delay is due to the latency of the RAVE files
@@ -99,7 +98,8 @@ CONTAINS
           SELECT CASE ( fire_type(i,j) )   !Ag, urban fires, bare land etc.
           CASE (1)
              ! these fires will have exponentially decreasing diurnal cycle,
-             coef_bb_dc(i,j) = coef_con
+             coef_bb_dc(i,j) = coef_con*1._kind_phys/(sigma_fire_dur(1) *fire_age) *                          &
+                             exp(- ( log(fire_age) - avg_fire_dur(1))**2 /(2._kind_phys*sigma_fire_dur(1)**2 ))
 
              IF ( dbg_opt .AND. time_int<5000.) then
                WRITE(6,*) 'i,j,peak_hr(i,j) ',i,j,peak_hr(i,j)
