@@ -4708,11 +4708,10 @@ endif
  if(draft == 1) then
    lev_start=min(.9,.1+csum*.013)
    kb_adj=max(kb,2)
-   tunning=max(p(kklev+1),.5*(p(kpbli)+p(kt)))
-   tunning=p(kklev)
-!   tunning=p(kklev+1) !p(kpbli+1) !p(kklev) !p(kt)+(p(kpbli)-p(kt))*lev_start
-!   tunning=.5*(p(kb_adj)+p(kt)) !p(kpbli+1) !p(kklev) !p(kt)+(p(kpbli)-p(kt))*lev_start
+! trash is the depth of the cloud
    trash=-p(kt)+p(kb_adj)
+   tunning=p(kklev)
+   if(rand_vmas.ne.0.) tunning=p(kklev-1)+.1*rand_vmas*trash
    beta_deep=1.3 +(1.-trash/1200.)
    tunning =min(0.95, (tunning-p(kb_adj))/(p(kt)-p(kb_adj))) !=.6
    tunning =max(0.02, tunning)
