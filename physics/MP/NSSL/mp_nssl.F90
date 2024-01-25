@@ -77,7 +77,7 @@ module mp_nssl
 
          ! Local variables: dimensions used in nssl_init
          integer               :: ims,ime, jms,jme, kms,kme, nx, nz, i,k
-         real :: nssl_params(20)
+         real(kind_phys) :: nssl_params(20)
          integer :: ihailv,ipc
          real(kind_phys), parameter :: qmin = 1.e-12
          integer :: ierr
@@ -351,7 +351,7 @@ module mp_nssl
          real(kind_phys)    :: dtptmp
          integer, parameter :: ndebug = 0
          logical :: invertccn
-         real :: cwmas
+         real(kind_phys) :: cwmas
          
          real(kind_phys), allocatable :: an(:,:,:,:) ! temporary scalar array
          
