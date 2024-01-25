@@ -79,7 +79,7 @@ module mp_nssl
          integer               :: ims,ime, jms,jme, kms,kme, nx, nz, i,k
          real :: nssl_params(20)
          integer :: ihailv,ipc
-         real, parameter :: qmin = 1.e-12
+         real(kind_phys), parameter :: qmin = 1.e-12
          integer :: ierr
          logical :: missing_vars = .False.
          
@@ -347,7 +347,7 @@ module mp_nssl
                             its,ite, jts,jte, kts,kte, i,j,k
          integer :: itimestep ! timestep counter
          integer :: ntmul, n
-         real, parameter    :: dtpmax = 60. ! allow up to dt=75 (1.25*60)
+         real(kind_phys), parameter    :: dtpmax = 60. ! allow up to dt=75 (1.25*60)
          real(kind_phys)    :: dtptmp
          integer, parameter :: ndebug = 0
          logical :: invertccn
