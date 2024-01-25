@@ -258,9 +258,9 @@
   type = integer
   intent = in
 [icplocn2atm]
-  standard_name = flag_for_air_sea_flux_computation_over_water
+  standard_name = control_for_air_sea_flux_computation_over_water
   long_name = air-sea flux option
-  units = flag
+  units = 1
   dimensions = ()
   type = integer
   intent = in
