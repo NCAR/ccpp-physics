@@ -711,10 +711,10 @@ module module_mp_thompson
          xDx(nbi+1) = D0s*2.0_dp
          do n = 2, nbi
             xDx(n) = exp(real(n-1, kind=dp)/real(nbi, kind=dp) &
-                     *log(real(xDx(nbi+1)/xDx(1), kind=dp)) + log(real(xDx(1), kind=dp)))
+                     *log(xDx(nbi+1)/xDx(1)) + log(xDx(1)))
          enddo
          do n = 1, nbi
-            Di(n) = sqrt(real(xDx(n)*xDx(n+1), kind=dp))
+            Di(n) = sqrt(xDx(n)*xDx(n+1))
             dti(n) = xDx(n+1) - xDx(n)
          enddo
 
@@ -723,10 +723,10 @@ module module_mp_thompson
          xDx(nbr+1) = 0.005_dp
          do n = 2, nbr
             xDx(n) = exp(real(n-1, kind=dp)/real(nbr, kind=dp) &
-                     *log(real(xDx(nbr+1)/xDx(1), kind=dp)) + log(real(xDx(1), kind=dp)))
+                     *log(xDx(nbr+1)/xDx(1)) + log(xDx(1)))
          enddo
          do n = 1, nbr
-            Dr(n) = sqrt(real(xDx(n)*xDx(n+1), kind=dp))
+            Dr(n) = sqrt(xDx(n)*xDx(n+1))
             dtr(n) = xDx(n+1) - xDx(n)
          enddo
 
@@ -735,10 +735,10 @@ module module_mp_thompson
          xDx(nbs+1) = 0.02_dp
          do n = 2, nbs
             xDx(n) = exp(real(n-1, kind=dp)/real(nbs, kind=dp) &
-                     *log(real(xDx(nbs+1)/xDx(1), kind=dp)) + log(real(xDx(1), kind=dp)))
+                     *log(xDx(nbs+1)/xDx(1)) + log(xDx(1)))
          enddo
          do n = 1, nbs
-            Ds(n) = sqrt(real(xDx(n)*xDx(n+1), kind=dp))
+            Ds(n) = sqrt(xDx(n)*xDx(n+1))
             dts(n) = xDx(n+1) - xDx(n)
          enddo
 
@@ -747,10 +747,10 @@ module module_mp_thompson
          xDx(nbg+1) = 0.05_dp
          do n = 2, nbg
             xDx(n) = exp(real(n-1, kind=dp)/real(nbg, kind=dp) &
-                     *log(real(xDx(nbg+1)/xDx(1), kind=dp)) + log(real(xDx(1), kind=dp)))
+                     *log(xDx(nbg+1)/xDx(1)) + log(xDx(1)))
          enddo
          do n = 1, nbg
-            Dg(n) = sqrt(real(xDx(n)*xDx(n+1), kind=dp))
+            Dg(n) = sqrt(xDx(n)*xDx(n+1))
             dtg(n) = xDx(n+1) - xDx(n)
          enddo
 
@@ -759,12 +759,12 @@ module module_mp_thompson
          xDx(nbc+1) = 3000.0_dp
          do n = 2, nbc
             xDx(n) = exp(real(n-1, kind=dp)/real(nbc, kind=dp)                          &
-                     *log(real(xDx(nbc+1)/xDx(1), kind=dp)) + log(real(xDx(1), kind=dp)))
+                     *log(xDx(nbc+1)/xDx(1)) + log(xDx(1)))
          enddo
          do n = 1, nbc
-            t_Nc(n) = sqrt(real(xDx(n)*xDx(n+1), kind=dp)) * 1.e6_dp
+            t_Nc(n) = sqrt(xDx(n)*xDx(n+1)) * 1.e6_dp
          enddo
-         nic1 = log(real(t_Nc(nbc)/t_Nc(1), kind=dp))
+         nic1 = log(t_Nc(nbc)/t_Nc(1))
 
 !+---+-----------------------------------------------------------------+
 !> - Create lookup tables for most costly calculations
@@ -2525,7 +2525,7 @@ module module_mp_thompson
 !>  - Rain collecting cloud water.  In CE, assume Dc<<Dr and vtc=~0.
          if (L_qr(k) .and. mvd_r(k).gt. D0r .and. mvd_c(k).gt. D0c) then
             lamr = 1./ilamr(k)
-            idx = 1 + int(nbr*log(real(mvd_r(k)/Dr(1), kind=dp)) / log(real(Dr(nbr)/Dr(1), kind=dp)))
+            idx = 1 + int(nbr*log(real(mvd_r(k)/Dr(1), kind=dp)) / log(Dr(nbr)/Dr(1)))
             idx = min(idx, nbr)
             Ef_rw = t_Efrw(idx, int(mvd_c(k)*1.E6))
             prr_rcw(k) = rhof(k)*t1_qr_qc*Ef_rw*rc(k)*N0_r(k) &
@@ -2624,7 +2624,7 @@ module module_mp_thompson
                lamr = 1./ilamr(k)
                lam_exp = lamr * (crg(3)*org2*org1)**bm_r
                N0_exp = org1*rr(k)/am_r * lam_exp**cre(1)
-               nir = nint(log10(real(N0_exp, kind=dp)))
+               nir = nint(log10(N0_exp))
                do_loop_nr: do nn = nir-1, nir+1
                   n = nn
                   if ( (N0_exp/10.**nn).ge.1.0 .and. (N0_exp/10.**nn).lt.10.0 ) exit do_loop_nr
@@ -2696,7 +2696,7 @@ module module_mp_thompson
 !>  - Snow collecting cloud water.  In CE, assume Dc<<Ds and vtc=~0.
             if (L_qc(k) .and. mvd_c(k).gt. D0c) then
                if (xDs .gt. D0s) then
-                  idx = 1 + int(nbs*log(real(xDs/Ds(1), kind=dp)) / log(real(Ds(nbs)/Ds(1), kind=dp)))
+                  idx = 1 + int(nbs*log(real(xDs/Ds(1), kind=dp)) / log(Ds(nbs)/Ds(1)))
                   idx = min(idx, nbs)
                   Ef_sw = t_Efsw(idx, int(mvd_c(k)*1.E6))
                   prs_scw(k) = rhof(k)*t1_qs_qc*Ef_sw*rc(k)*smoe(k)
@@ -4458,7 +4458,7 @@ module module_mp_thompson
          lamr = lam_exp * (crg(3)*org2*org1)**obmr
          N0_r = N0r_exp(k)/(crg(2)*lam_exp) * lamr**cre(2)
          do n2 = 1, nbr
-            N_r(n2) = N0_r*Dr(n2)**mu_r *exp(real(-lamr*Dr(n2), kind=dp))*dtr(n2)
+            N_r(n2) = N0_r*Dr(n2)**mu_r *exp(-lamr*Dr(n2))*dtr(n2)
          enddo
 
          do j = 1, ntb_g
@@ -4467,7 +4467,7 @@ module module_mp_thompson
             lamg = lam_exp * (cgg(3)*ogg2*ogg1)**obmg
             N0_g = N0g_exp(i)/(cgg(2)*lam_exp) * lamg**cge(2)
             do n = 1, nbg
-               N_g(n) = N0_g*Dg(n)**mu_g * exp(real(-lamg*Dg(n), kind=dp))*dtg(n)
+               N_g(n) = N0_g*Dg(n)**mu_g * exp(-lamg*Dg(n))*dtg(n)
             enddo
 
             t1 = 0.0_dp
@@ -4641,7 +4641,7 @@ module module_mp_thompson
          lamr = lam_exp * (crg(3)*org2*org1)**obmr
          N0_r = N0r_exp(k)/(crg(2)*lam_exp) * lamr**cre(2)
          do n2 = 1, nbr
-            N_r(n2) = N0_r*Dr(n2)**mu_r * exp(real(-lamr*Dr(n2), kind=dp))*dtr(n2)
+            N_r(n2) = N0_r*Dr(n2)**mu_r * exp(-lamr*Dr(n2))*dtr(n2)
          enddo
 
          do j = 1, ntb_t
@@ -4688,8 +4688,8 @@ module module_mp_thompson
                slam2 = M2 * oM3 * Lam1
 
                do n = 1, nbs
-                  N_s(n) = Mrat*(Kap0*exp(real(-slam1*Ds(n), kind=dp)) &
-                      + Kap1*M0*Ds(n)**mu_s * exp(real(-slam2*Ds(n), kind=dp)))*dts(n)
+                  N_s(n) = Mrat*(Kap0*exp(-slam1*Ds(n)) &
+                      + Kap1*M0*Ds(n)**mu_s * exp(-slam2*Ds(n)))*dts(n)
                enddo
 
                t1 = 0.0_dp
@@ -4895,7 +4895,7 @@ module module_mp_thompson
                sumn1 = 0.0_dp
                sumn2 = 0.0_dp
                do n2 = nbr, 1, -1
-                  N_r = N0_r*Dr(n2)**mu_r*exp(real(-lamr*Dr(n2), kind=dp))*dtr(n2)
+                  N_r = N0_r*Dr(n2)**mu_r*exp(-lamr*Dr(n2))*dtr(n2)
                   vol = massr(n2)*orho_w
                   prob = max(0.0_dp, 1.0_dp - exp(-120.0_dp*vol*5.2e-4_dp * Texp))
                   if (massr(n2) .lt. xm0g) then
@@ -5002,7 +5002,7 @@ module module_mp_thompson
              xlimit_intg = lami*D0s
              tpi_ide(i,j) = GAMMP(mu_i+2.0, xlimit_intg) * 1.0_dp
              do n2 = 1, nbi
-               N_i(n2) = N0_i*Di(n2)**mu_i * exp(real(-lami*Di(n2), kind=dp))*dti(n2)
+               N_i(n2) = N0_i*Di(n2)**mu_i * exp(-lami*Di(n2))*dti(n2)
                if (Di(n2).ge.D0s) then
                   t1 = t1 + N_i(n2) * am_i*Di(n2)**bm_i
                   t2 = t2 + N_i(n2)
