@@ -135,16 +135,16 @@
   kind = kind_phys
   intent = in
 [usfco]
-  standard_name = ocn_current_zonal
-  long_name = ocn_current_zonal
+  standard_name = x_ocean_current
+  long_name = zonal current at ocean surface
   units = m s-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
 [vsfco]
-  standard_name = ocn_current_merid
-  long_name = ocn_current_merid
+  standard_name = y_ocean_current
+  long_name = meridional current at ocean surface
   units = m s-1
   dimensions = (horizontal_loop_extent)
   type = real
