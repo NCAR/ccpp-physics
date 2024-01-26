@@ -24,10 +24,11 @@ subroutine ebu_driver (      flam_frac,ebu_in,ebu,                   &
                              kpbl_thetav,                            &   ! SRB: added kpbl_thetav
                              ids,ide, jds,jde, kds,kde,              &
                              ims,ime, jms,jme, kms,kme,              &
-                             its,ite, jts,jte, kts,kte, errmsg, errflg)
+                             its,ite, jts,jte, kts,kte, errmsg, errflg,curr_secs, &
+                             xlat, xlong , uspdavg2, hpbl_thetav2, mpiid)
 
   use rrfs_smoke_config
-  use plume_data_mod
+  !use plume_data_mod
   USE module_zero_plumegen_coms
   USE module_smoke_plumerise
   IMPLICIT NONE
@@ -40,6 +41,8 @@ subroutine ebu_driver (      flam_frac,ebu_in,ebu,                   &
     
    real(kind=kind_phys), DIMENSION( ims:ime, jms:jme), INTENT(IN ) :: frp_inst         ! RAR: FRP array
 
+   real(kind_phys), DIMENSION(ims:ime,jms:jme), INTENT(IN) ::  xlat,xlong ! SRB
+
    real(kind_phys), DIMENSION(ims:ime, jms:jme),  INTENT(IN)  ::     kpbl_thetav ! SRB  
 
    character(*), intent(inout) :: errmsg
@@ -47,6 +50,7 @@ subroutine ebu_driver (      flam_frac,ebu_in,ebu,                   &
    INTEGER,      INTENT(IN   ) :: ids,ide, jds,jde, kds,kde,               &
                                   ims,ime, jms,jme, kms,kme,               &
                                   its,ite, jts,jte, kts,kte
+   real(kind_phys) :: curr_secs
    INTEGER,      INTENT(IN   ) :: wind_eff_opt
    real(kind=kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(INOUT ) ::  ebu
    real(kind=kind_phys), INTENT(IN )  :: g, con_cp, con_rd
@@ -57,23 +61,32 @@ subroutine ebu_driver (      flam_frac,ebu_in,ebu,                   &
 
 ! Local variables...
       INTEGER :: nv, i, j, k,  kp1, kp2
+      INTEGER :: icall=0
       INTEGER, DIMENSION(ims:ime, jms:jme), INTENT (OUT) :: k_min, k_max      ! Min and max ver. levels for BB injection spread
+      REAL, DIMENSION(ims:ime, jms:jme), INTENT (OUT) :: uspdavg2, hpbl_thetav2 ! SRB
       real(kind_phys), dimension (kte) :: u_in ,v_in ,w_in ,theta_in ,pi_in, rho_phyin ,qv_in ,zmid, z_lev, uspd ! SRB
       real(kind=kind_phys) :: dz_plume, cpor, con_rocp, uspdavg ! SRB
+
+! MPI variables
+      INTEGER, INTENT(IN) :: mpiid
 
         cpor    =con_cp/con_rd
         con_rocp=con_rd/con_cp
 
-        IF ( dbg_opt ) then
-           WRITE(*,*) 'module_plumerise: its,ite,jts,jte ', its,ite,jts,jte
-           WRITE(*,*) 'module_plumerise: ims,ime,jms,jme ', ims,ime,jms,jme
-           WRITE(*,*) 'module_plumerise: maxval(ebu(:,kts,:)) ', maxval(ebu(:,kts,:))
+        if (mod(int(curr_secs),1800) .eq. 0) then
+            icall = 0
+        endif
+
+        IF ( dbg_opt .and. icall .le. n_dbg_lines) then
+           WRITE(1000+mpiid,*) 'module_plumerise: its,ite,jts,jte ', its,ite,jts,jte
+           WRITE(1000+mpiid,*) 'module_plumerise: ims,ime,jms,jme ', ims,ime,jms,jme
+           WRITE(1000+mpiid,*) 'module_plumerise: maxval(ebu(:,kts,:)) ', maxval(ebu(:,kts,:))
         END IF
 
 ! RAR: setting to zero the ebu emissions at the levels k>1, this is necessary when the plumerise is called, so the emissions at k>1 are updated
        !do nv=1,num_ebu
           do j=jts,jte
-            do k=kts+1,kte
+            do k=kts,kte
                do i=its,ite
                  ebu(i,k,j)=0.
                enddo
@@ -112,12 +125,10 @@ check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumeri
                   uspd(k)= wind_phy(i,k,j) ! SRB
                enddo
 
-             IF (dbg_opt) then
-               WRITE(*,*) 'module_plumerise: i,j ',i,j
-               WRITE(*,*) 'module_plumerise: frp_inst(i,j) ',frp_inst(i,j)
-               WRITE(*,*) 'module_plumerise: ebu(i,kts,j) ',ebu(i,kts,j)
-               WRITE(*,*) 'module_plumerise: u_in(10),v_in(10),w_in(kte),qv_in(10),pi_in(10) ',u_in(10),v_in(10),w_in(kte),qv_in(10),pi_in(10)
-               WRITE(*,*) 'module_plumerise: zmid(kte),z_lev(kte),rho_phyin(kte),theta_in(kte) ',zmid(kte),z_lev(kte),rho_phyin(kte),theta_in(kte)
+
+             IF (dbg_opt .and. (icall .le. n_dbg_lines) .and. (frp_inst(i,j) .ge. frp_threshold) ) then
+               WRITE(1000+mpiid,*) 'module_plumerise_before:xlat,xlong,curr_secs,ebu(kts),frp_inst',xlat(i,j), xlong(i,j), int(curr_secs),ebu(i,kts,j),frp_inst(i,j)
+               WRITE(1000+mpiid,*) 'module_plumerise_before:xlat,xlong,curr_secs,u(10),v(10),w(10),qv(10)',xlat(i,j), xlong(i,j),int(curr_secs), u_in(10),v_in(10),w_in(kte),qv_in(10)
              END IF
 
 ! RAR: the plume rise calculation step:
@@ -127,7 +138,8 @@ check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumeri
                               wind_eff_opt,                         &
                               frp_inst(i,j), k_min(i,j),            & 
                               k_max(i,j), dbg_opt, g, con_cp,       &
-                              con_rd, cpor, errmsg, errflg )
+                              con_rd, cpor, errmsg, errflg,         &
+                              icall, mpiid, xlat(i,j), xlong(i,j), curr_secs )
                if(errflg/=0) return
 
                kp1= k_min(i,j)
@@ -136,9 +148,13 @@ check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumeri
 
 ! SRB: Adding condition for overwriting plumerise levels               
                uspdavg=SUM(uspd(kts:kpbl_thetav(i,j)))/kpbl_thetav(i,j) !Average wind speed within the boundary layer
+
+! SRB: Adding output
+               uspdavg2(i,j) = uspdavg
+               hpbl_thetav2(i,j) = z_lev(kpbl_thetav(i,j))
                 
                IF ((frp_inst(i,j) .gt. frp_threshold) .AND. (frp_inst(i,j) .le. frp_threshold500) .AND. & 
-                  (z_at_w(i,kpbl_thetav(i,j),j) .gt. zpbl_threshold) .AND. (wind_eff_opt .eq. 1)) THEN
+                  (z_lev(kpbl_thetav(i,j)) .gt. zpbl_threshold) .AND. (wind_eff_opt .eq. 1)) THEN
                   kp1=1
                   IF (uspdavg .ge. uspd_threshold) THEN ! Too windy 
                      kp2=kpbl_thetav(i,j)/3 
@@ -157,11 +173,18 @@ check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumeri
                END IF
 ! SRB: End modification 
 
-               IF ( dbg_opt ) then
-                   WRITE(*,*) 'module_plumerise: i,j ',i,j
-                   WRITE(*,*) 'module_plumerise: k_min(i,j), k_max(i,j) ',kp1, kp2   ! SRB: replaced k_min, k_max with kp1, kp2
+               IF ( dbg_opt .and. (icall .le. n_dbg_lines)  .and. (frp_inst(i,j) .ge. frp_threshold) ) then
+                   WRITE(1000+mpiid,*) 'mod_plumerise_after:xlat,xlong,curr_secs,k_min(i,j), k_max(i,j) ',xlat(i,j),xlong(i,j),int(curr_secs),kp1,kp2
+                   WRITE(1000+mpiid,*) 'mod_plumerise_after:xlat,xlong,curr_secs,ebu(kts),frp_inst',xlat(i,j),xlong(i,j),int(curr_secs),ebu(i,kts,j),frp_inst(i,j)
+                   WRITE(1000+mpiid,*) 'mod_plumerise_after:xlat,xlong,curr_secs,u(10),v(10),w(10),qv(10)',xlat(i,j),xlong(i,j),int(curr_secs),u_in(10),v_in(10),w_in(kte),qv_in(10)
+                   WRITE(1000+mpiid,*) 'mod_plumerise_after:xlat,xlong,curr_secs,uspdavg,kpbl_thetav',xlat(i,j),xlong(i,j),int(curr_secs),uspdavg,kpbl_thetav(i,j)
+                 IF ( frp_inst(i,j) .ge. 3.e+9 ) then
+                   WRITE(1000+mpiid,*) 'mod_plumerise_after:High FRP at : xlat,xlong,curr_secs,frp_inst',xlat(i,j),xlong(i,j),int(curr_secs),frp_inst(i,j)
+                 END IF
+                 icall = icall + 1
                END IF
-!              endif check_frp  
+!              endif check_frp
+!              icall = icall + 1
             enddo
           enddo
 

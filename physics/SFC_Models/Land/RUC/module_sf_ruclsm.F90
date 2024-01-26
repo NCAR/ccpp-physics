@@ -1687,7 +1687,7 @@ CONTAINS
       endif
 
        if(newsn > zero ) then
-         SNOWFRACnewsn=MIN(one,SNHEI/SNHEI_CRIT_newsn)
+         SNOWFRACnewsn=MIN(one,snowfallac*1.e-3_kind_phys/SNHEI_CRIT_newsn)
        endif
 
        !-- due to steep slopes and blown snow, limit snow fraction in the
@@ -1700,7 +1700,7 @@ CONTAINS
        if(snowfrac < 0.75_kind_phys) snow_mosaic = one
 
        KEEP_SNOW_ALBEDO = zero
-       IF (NEWSN > zero .and. snowfracnewsn > 0.99_kind_phys .and. rhosnfall < 450._kind_phys) THEN
+       IF (snowfracnewsn > 0.99_kind_phys .and. rhosnfall < 450._kind_phys) THEN
        ! new snow
              KEEP_SNOW_ALBEDO = one
              ! turn off separate treatment of snow covered and snow-free portions of the grid cell
@@ -1735,7 +1735,7 @@ CONTAINS
 ! hwlps with these biases.. 
      if( snow_mosaic == one) then
          ALBsn=alb_snow
-         if(newsn > zero .and. KEEP_SNOW_ALBEDO > 0.9_kind_phys .and. albsn < 0.4_kind_phys) then
+         if(KEEP_SNOW_ALBEDO > 0.9_kind_phys .and. albsn < 0.4_kind_phys) then
          !-- Albedo correction with fresh snow and deep snow pack
          !-- will reduce warm bias in western Canada
          !-- and US West coast, where max snow albedo is low (0.3-0.5).
