@@ -97,7 +97,7 @@
 !! \htmlinclude gfdl_sfc_layer_run.html
 !!
       subroutine gfdl_sfc_layer_run (im, nsoil, km, xlat, xlon, flag_iter, lsm, &
-        lsm_noah, lsm_noahmp, lsm_ruc, icoef_sf, cplwav, karman,                &
+        ilsm_noah, ilsm_noahmp, ilsm_ruc, icoef_sf, cplwav, karman,             &
         cplwav2atm, lcurr_sf, pert_Cd, ntsflg, sfenth, z1, shdmax, ivegsrc,     &
         vegtype, sigmaf, dt, wet, dry, icy, isltyp, rd, grav, ep1, ep2, smois,  &
         psfc, prsl1, q1, t1, u1, v1, wspd, u10, v10, gsw, glw, tsurf_wat,       &
@@ -120,8 +120,8 @@
         implicit none
 
         integer,                intent(in) :: im, nsoil, km, ivegsrc
-        integer,                intent(in) :: lsm, lsm_noah, lsm_noahmp,        &
-                                              lsm_ruc, icoef_sf, ntsflg
+        integer,                intent(in) :: lsm, ilsm_noah, ilsm_noahmp,      &
+                                              ilsm_ruc, icoef_sf, ntsflg
         logical,                intent(in) :: cplwav, cplwav2atm !GJF: this scheme has not been tested with these on
         logical,                intent(in) :: lcurr_sf           !GJF: this scheme has not been tested with this option turned on; the variables scurx and scury need to be input in order to use this
         logical,                intent(in) :: pert_Cd            !GJF: this scheme has not been tested with this option turned on; the variables ens_random_seed and ens_Cdamp need to be input in order to use this
@@ -181,13 +181,13 @@
             cd_high_limit, ch_low_limit, ch_high_limit, fh2_fh_ratio
 
         !#### This block will become unnecessary when maxsmc and drysmc come through the CCPP ####
-        if (lsm == lsm_noah) then
+        if (lsm == ilsm_noah) then
           maxsmc = maxsmc_noah
           drysmc = drysmc_noah
-        else if (lsm == lsm_noahmp) then
+        else if (lsm == ilsm_noahmp) then
           maxsmc = maxsmc_noahmp
           drysmc = drysmc_noahmp
-        else if (lsm == lsm_ruc) then
+        else if (lsm == ilsm_ruc) then
           maxsmc = maxsmc_ruc
           drysmc = drysmc_ruc
         else

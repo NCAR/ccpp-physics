@@ -2,7 +2,7 @@
 [ccpp-table-properties]
   name = get_phi_fv3
   type = scheme
-  dependencies = machine.F,physcons.F90
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]

@@ -66,7 +66,7 @@
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
               do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
-              isot, ivegsrc, nlunit, sncovr, sncovr_ice, lsm, lsm_noahmp, lsm_ruc, min_seaice,     &
+              isot, ivegsrc, nlunit, sncovr, sncovr_ice, lsm, ilsm_noahmp, ilsm_ruc, min_seaice,   &
               fice, landfrac, vtype, weasd, lsoil, zs, dzs, lsnow_lsm_lbound, lsnow_lsm_ubound,    &
               tvxy, tgxy, tahxy, canicexy, canliqxy, eahxy, cmxy, chxy, fwetxy, sneqvoxy, alboldxy,&
               qsnowxy, wslakexy, albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd, albdvis_ice,  &
@@ -100,7 +100,7 @@
 
          integer,              intent(in)    :: isot, ivegsrc, nlunit
          real(kind_phys),      intent(inout) :: sncovr(:), sncovr_ice(:)
-         integer,              intent(in)    :: lsm, lsm_noahmp, lsm_ruc, vtype(:)
+         integer,              intent(in)    :: lsm, ilsm_noahmp, ilsm_ruc, vtype(:)
          real(kind_phys),      intent(in)    :: min_seaice, fice(:)
          real(kind_phys),      intent(in)    :: landfrac(:)
          real(kind_phys),      intent(inout) :: weasd(:)
@@ -332,7 +332,7 @@
          endif
 
          !--- For RUC LSM: create sncovr_ice from sncovr
-         if (lsm == lsm_ruc) then
+         if (lsm == ilsm_ruc) then
            if (all(sncovr_ice < zero)) then
              if (me == master ) write(*,'(a)') 'GFS_phys_time_vary_init: fill sncovr_ice with sncovr for RUC LSM'
              sncovr_ice(:) = sncovr(:)
@@ -349,7 +349,7 @@
          !--- For Noah MP or RUC LSMs: initialize four components of albedo for
          !--- land and ice - not for restart runs
          lsm_init: if (lsm_cold_start) then
-           if (lsm == lsm_noahmp .or. lsm == lsm_ruc) then
+           if (lsm == ilsm_noahmp .or. lsm == ilsm_ruc) then
              if (me == master ) write(*,'(a)') 'GFS_phys_time_vary_init: initialize albedo for land and ice'
              do ix=1,im
                albdvis_lnd(ix)  = 0.2_kind_phys
@@ -359,7 +359,7 @@
                emiss_lnd(ix)    = 0.95_kind_phys
              enddo
            endif
-           if (lsm == lsm_ruc) then
+           if (lsm == ilsm_ruc) then
              do ix=1,im
                albdvis_ice(ix)  = 0.6_kind_phys
                albdnir_ice(ix)  = 0.6_kind_phys
@@ -369,7 +369,7 @@
              enddo
            endif
 
-           noahmp_init: if (lsm == lsm_noahmp) then
+           noahmp_init: if (lsm == ilsm_noahmp) then
              allocate(dzsno (lsnow_lsm_lbound:lsnow_lsm_ubound))
              allocate(dzsnso(lsnow_lsm_lbound:lsoil)           )
              dzsno(:)    = missing_value

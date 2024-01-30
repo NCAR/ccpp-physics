@@ -21,12 +21,12 @@
 !! \section arg_table_lsm_noah_init Argument Table
 !! \htmlinclude lsm_noah_init.html
 !!
-      subroutine lsm_noah_init(lsm, lsm_noah, me, isot, ivegsrc, nlunit,
+      subroutine lsm_noah_init(lsm,ilsm_noah, me, isot, ivegsrc, nlunit,
      &                         pores, resid, errmsg, errflg)
 
       implicit none
       integer,              intent(in) :: lsm
-      integer,              intent(in) :: lsm_noah      
+      integer,              intent(in) :: ilsm_noah      
 
       integer,              intent(in)  :: me, isot, ivegsrc, nlunit
 
@@ -40,7 +40,7 @@
       errflg = 0
       
       ! Consistency checks
-      if (lsm/=lsm_noah) then
+      if (lsm/=ilsm_noah) then
         write(errmsg,'(*(a))') 'Logic error: namelist choice of ',
      &       'LSM is different from Noah'
         errflg = 1

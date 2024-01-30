@@ -35,7 +35,7 @@ module lsm_ruc
       subroutine lsm_ruc_init (me, master, isot, ivegsrc, nlunit,               &
                                lsm_cold_start, flag_init, con_fvirt, con_rd,    &
                                im, lsoil_ruc, lsoil, kice, nlev,                & ! in
-                               lsm_ruc, lsm, slmsk, stype, vtype, landfrac,     & ! in 
+                               ilsm_ruc, lsm, slmsk, stype, vtype, landfrac,    & ! in 
                                q1, prsl1, tsfc_lnd, tsfc_ice, tsfc_wat,         & ! in
                                tg3, smc, slc, stc, fice, min_seaice,            & ! in
                                sncovr_lnd, sncovr_ice, snoalb,                  & ! in
@@ -58,7 +58,7 @@ module lsm_ruc
       integer,              intent(in)  :: lsoil
       integer,              intent(in)  :: kice
       integer,              intent(in)  :: nlev
-      integer,              intent(in)  :: lsm_ruc, lsm
+      integer,              intent(in)  :: ilsm_ruc, lsm
       real (kind_phys),intent(in)  :: con_fvirt
       real (kind_phys),intent(in)  :: con_rd
 
@@ -121,7 +121,7 @@ module lsm_ruc
       errflg = 0 
 
       ! Consistency checks
-      if (lsm/=lsm_ruc) then
+      if (lsm/=ilsm_ruc) then
         write(errmsg,'(*(a))') 'Logic error: namelist choice of ',     &
      &       'LSM is different from RUC'
         errflg = 1
@@ -205,7 +205,7 @@ module lsm_ruc
       call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
 
       call rucinit (lsm_cold_start, im, lsoil_ruc, lsoil, nlev, & ! in
-                    me, master, lsm_ruc, lsm, slmsk,            & ! in
+                    me, master, ilsm_ruc, lsm, slmsk,           & ! in
                     stype, vtype, landfrac, fice,               & ! in
                     min_seaice, tsfc_lnd, tsfc_wat, tg3,        & ! in
                     zs, dzs, smc, slc, stc,                     & ! in
@@ -323,7 +323,7 @@ module lsm_ruc
 !!
 !>\section gen_lsmruc RUC LSM General Algorithm
       subroutine lsm_ruc_run                                            & ! inputs
-     &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
+     &     ( iter, me, master, delt, kdt, im, nlev, ilsm_ruc, lsm,      &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
      &       imp_physics_nssl, do_mynnsfclay,                           &
      &       exticeden, lsoil_ruc, lsoil, mosaic_lu, mosaic_soil,       &
@@ -374,7 +374,7 @@ module lsm_ruc
       integer, intent(in) :: im, nlev, iter, lsoil_ruc, lsoil, kdt, isot, ivegsrc
       integer, intent(in) :: mosaic_lu, mosaic_soil, isncond_opt, isncovr_opt
       integer, intent(in) :: nlcat, nscat
-      integer, intent(in) :: lsm_ruc, lsm
+      integer, intent(in) :: ilsm_ruc, lsm
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, &
                              imp_physics_nssl
       real (kind_phys), dimension(:), intent(in) :: xlat_d, xlon_d
@@ -1587,7 +1587,7 @@ module lsm_ruc
 !>\ingroup lsm_ruc_group
 !! This subroutine contains RUC LSM initialization.
       subroutine rucinit        (lsm_cold_start, im, lsoil_ruc, lsoil,  & ! in
-                                 nlev, me, master, lsm_ruc, lsm, slmsk, & ! in
+                                 nlev, me, master, ilsm_ruc, lsm, slmsk,& ! in
                                  stype, vtype, landfrac, fice,          & ! in
                                  min_seaice, tskin_lnd, tskin_wat, tg3, & ! in 
                                  zs, dzs, smc, slc, stc,                & ! in
@@ -1598,7 +1598,7 @@ module lsm_ruc
 
       logical,                                   intent(in   ) :: lsm_cold_start
       integer,                                   intent(in   ) :: lsm
-      integer,                                   intent(in   ) :: lsm_ruc
+      integer,                                   intent(in   ) :: ilsm_ruc
       integer,                                   intent(in   ) :: im, nlev
       integer,                                   intent(in   ) :: lsoil_ruc
       integer,                                   intent(in   ) :: lsoil
@@ -1670,10 +1670,10 @@ module lsm_ruc
 
       debug_print = .false.
 
-      if (lsm/=lsm_ruc) then
+      if (lsm/=ilsm_ruc) then
         write(errmsg,'(a,i0,a,i0)')                                &
               'ERROR in lsm_ruc_init: namelist variable lsm=',     &
-              lsm, ' incompatible with RUC LSM, please set to ', lsm_ruc
+              lsm, ' incompatible with RUC LSM, please set to ', ilsm_ruc
         errflg = 1
         return
       else if (debug_print) then

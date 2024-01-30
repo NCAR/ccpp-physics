@@ -54,7 +54,7 @@
 SUBROUTINE mynnsfc_wrapper_run(            &
      &  im,levs,                           &
      &  itimestep,iter,flag_iter,          &
-     &  flag_init,flag_restart,lsm,lsm_ruc,&
+     &  flag_init,flag_restart,lsm,ilsm_ruc,&
      &  sigmaf,vegtype,shdmax,ivegsrc,     &  !intent(in)
      &  z0pert,ztpert,                     &  !intent(in)
      &  redrag,sfc_z0_type,                &  !intent(in)
@@ -121,7 +121,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       logical, intent(in) :: sfclay_compute_flux,sfclay_compute_diag
       integer, intent(in) :: isftcflx,iz0tlnd
       integer, intent(in) :: im, levs
-      integer, intent(in) :: iter, itimestep, lsm, lsm_ruc
+      integer, intent(in) :: iter, itimestep, lsm, ilsm_ruc
       logical, dimension(:), intent(in) :: flag_iter
       logical, intent(in) :: flag_init,flag_restart,lprnt
       integer, intent(in) :: ivegsrc
@@ -241,7 +241,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       where (icy) znt_ice=znt_ice*0.01
 
       ! qsfc ruc
-      if (lsm==lsm_ruc) then
+      if (lsm==ilsm_ruc) then
         where (dry) qsfc_lnd = qsfc_lnd_ruc/(1.+qsfc_lnd_ruc) ! spec. hum
         where (icy) qsfc_ice = qsfc_ice_ruc/(1.+qsfc_ice_ruc) ! spec. hum.
       end if
@@ -279,7 +279,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              u3d=u,v3d=v,t3d=t3d,qv3d=qv,p3d=prsl,dz8w=dz,                    &
              th3d=th,pi3d=exner,qc3d=qc,                                      &
              PSFCPA=ps,PBLH=pblh,MAVAIL=mavail,XLAND=xland,DX=dx,             &
-             ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,LSM_RUC=lsm_ruc,         &
+             ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,LSM_RUC=ilsm_ruc,        &
              iz0tlnd=iz0tlnd,psi_opt=psi_opt,                                 &
              compute_flux=sfclay_compute_flux,compute_diag=sfclay_compute_diag,&
              sigmaf=sigmaf,vegtype=vegtype,shdmax=shdmax,ivegsrc=ivegsrc,     & !intent(in)
