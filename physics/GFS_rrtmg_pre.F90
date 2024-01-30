@@ -976,7 +976,7 @@
      &       imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,   &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
      &       idcor_hogan, idcor_oreopoulos, lcrick, lcnorm,             &
-     &       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_gf, do_mynnedmf,     &
+     &       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_c3, do_mynnedmf,     &
      &       lgfdlmprad,                                                &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &

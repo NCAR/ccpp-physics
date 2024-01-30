@@ -159,12 +159,12 @@ contains
         nranflag,itf,ktf,its,ite, kts,kte,ipr,imid
      integer, intent (in   )              ::                &
         ichoice
-     real(kind=kind_phys),  dimension (its:ite,4)                 &
+     real(kind=kind_phys),  dimension (its:,:)                 &
         ,intent (in  )                   ::  rand_clos
-     real(kind=kind_phys),  dimension (its:ite)                   &
+     real(kind=kind_phys),  dimension (its:)                   &
         ,intent (in  )                   ::  rand_mom,rand_vmas
 !$acc declare copyin(rand_clos,rand_mom,rand_vmas)
-     real(kind=kind_phys), intent(in), dimension (its:ite) :: ca_deep(:)
+     real(kind=kind_phys), intent(in), dimension (its:) :: ca_deep(:)
      integer, intent(in) :: do_capsuppress
      real(kind=kind_phys), intent(in), dimension(:) :: cap_suppress_j
 !$acc declare create(cap_suppress_j)
@@ -177,28 +177,28 @@ contains
   ! outq   = output q tendency (per s)
   ! outqc  = output qc tendency (per s)
   ! pre    = output precip
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (inout  )                   ::                         &
         cnvwt,outu,outv,outt,outq,outqc,cupclw
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (out    )                   ::                         &
         frh_out,rainevap
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (in  )                      ::                         &
         tmf, qmicro, sigmain, forceqv_spechum
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (inout  )                   ::                         &
         pre,xmb_out
 !$acc declare copy(cnvwt,outu,outv,outt,outq,outqc,cupclw,frh_out,pre,xmb_out)
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (in  )                   ::                            &
         hfx,qfx,xmbm_in,xmbs_in
 !$acc declare copyin(hfx,qfx,xmbm_in,xmbs_in)
-     integer,    dimension (its:ite)                                   &
+     integer,    dimension (its:)                                   &
         ,intent (inout  )                ::                            &
         kbcon,ktop
 !$acc declare copy(kbcon,ktop)
-     integer,    dimension (its:ite)                                   &
+     integer,    dimension (its:)                                   &
         ,intent (in  )                   ::                            &
         kpbl,tropics
 !$acc declare copyin(kpbl,tropics)
@@ -207,26 +207,26 @@ contains
   ! omega (omeg), windspeed (us,vs), and a flag (ierr) to turn off
   ! convection for this call only and at that particular gridpoint
   !
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (in   )                   ::                           &
         dhdt,rho,t,po,us,vs,tn,delp
 !$acc declare copyin(dhdt,rho,t,po,us,vs,tn)
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (inout   )                ::                           &
         omeg
 !$acc declare copy(omeg)
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (inout)                   ::                           &
          q,qo,zuo,zdo,zdm
 !$acc declare sigmaout                                                                                                                                                      
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (out)                     ::                           &
          sigmaout
-     real(kind=kind_phys), dimension (its:ite)                                         &
+     real(kind=kind_phys), dimension (its:)                                         &
         ,intent (in   )                   ::                           &
         dx,z1,psur,xland
 !$acc declare copyin(dx,z1,psur,xland)
-     real(kind=kind_phys), dimension (its:ite)                                         &
+     real(kind=kind_phys), dimension (its:)                                         &
         ,intent (inout   )                ::                           &
         mconv,ccn
 !$acc declare copy(mconv,ccn)
@@ -372,8 +372,8 @@ contains
 !$acc       kzdown,kdet,k22,jmin,kstabi,kstabm,k22x,xland1,              &
 !$acc       ktopdby,kbconx,ierr2,ierr3,kbmax)
 
-     integer,  dimension (its:ite), intent(inout) :: ierr
-     integer,  dimension (its:ite), intent(in) :: csum
+     integer,  dimension (its:), intent(inout) :: ierr
+     integer,  dimension (its:), intent(in) :: csum
      logical, intent(in) :: do_ca, progsigma
      logical, intent(in) :: flag_init, flag_restart
 !$acc declare copy(ierr) copyin(csum)
@@ -421,7 +421,7 @@ contains
 !$acc                tn_bl, qo_bl, qeso_bl, heo_bl, heso_bl,            &
 !$acc                qeso_cup_bl,qo_cup_bl, heo_cup_bl,heso_cup_bl,     &
 !$acc                gammao_cup_bl,tn_cup_bl,hco_bl,dbyo_bl,xf_dicycle)
-     real(kind=kind_phys), intent(inout), dimension(its:ite,10) :: forcing
+     real(kind=kind_phys), intent(inout), dimension(its:,:) :: forcing
 !$acc declare copy(forcing)
      integer :: turn,pmin_lev(its:ite),start_level(its:ite),ktopkeep(its:ite)
      real(kind=kind_phys),    dimension (its:ite,kts:kte) :: dtempdz
@@ -2078,10 +2078,6 @@ contains
 
 !> - Call rain_evap_below_cloudbase() to calculate evaporation below cloud base
 
-      call rain_evap_below_cloudbase(itf,ktf,its,ite,                    &
-           kts,kte,ierr,kbcon,xmb,psur,xland,qo_cup,                     &
-           po_cup,qes_cup,pwavo,edto,pwevo,pre,outt,outq)      !,outbuoy)
-
       k=1
 !$acc kernels
       do i=its,itf
@@ -2137,7 +2133,7 @@ contains
          do k = ktop(i), 1, -1
               rain =  pwo(i,k) + edto(i) * pwdo(i,k)
               rn(i) = rn(i) + rain * xmb(i) * .001 * dtime
-            !if(po(i,k).gt.400.)then
+              if(k.gt.jmin(i))then
               if(flg(i))then
               q1=qo(i,k)+(outq(i,k))*dtime
               t1=tn(i,k)+(outt(i,k))*dtime
@@ -2162,7 +2158,7 @@ contains
                 pre(i)=max(pre(i),0.)
                 delqev(i) = delqev(i) + .001*dp*qevap(i)/g
               endif
-            !endif ! 400mb
+            endif 
           endif
         enddo
 !       pre(i)=1000.*rn(i)/dtime
@@ -2418,16 +2414,16 @@ contains
 
 
    integer                           ,intent(in)    :: itf,ktf, its,ite, kts,kte
-   integer, dimension(its:ite)       ,intent(in)    :: ierr,kbcon
-   real(kind=kind_phys), dimension(its:ite)        ,intent(in)    ::psur,xland,pwavo,edto,pwevo,xmb
-   real(kind=kind_phys), dimension(its:ite,kts:kte),intent(in)    :: po_cup,qo_cup,qes_cup
-   real(kind=kind_phys), dimension(its:ite)        ,intent(inout) :: pre
-   real(kind=kind_phys), dimension(its:ite,kts:kte),intent(inout) :: outt,outq  !,outbuoy
+   integer, dimension(its:)       ,intent(in)    :: ierr,kbcon
+   real(kind=kind_phys), dimension(its:)        ,intent(in)    ::psur,xland,pwavo,edto,pwevo,xmb
+   real(kind=kind_phys), dimension(its:,kts:),intent(in)    :: po_cup,qo_cup,qes_cup
+   real(kind=kind_phys), dimension(its:)        ,intent(inout) :: pre
+   real(kind=kind_phys), dimension(its:,kts:),intent(inout) :: outt,outq  !,outbuoy
 !$acc declare copyin(ierr,kbcon,psur,xland,pwavo,edto,pwevo,xmb,po_cup,qo_cup,qes_cup)
 !$acc declare copy(pre,outt,outq)
 
-  !real,    dimension(its:ite)        ,intent(out)      :: tot_evap_bcb
-  !real,    dimension(its:ite,kts:kte),intent(out) :: evap_bcb,net_prec_bcb
+  !real,    dimension(its:)        ,intent(out)      :: tot_evap_bcb
+  !real,    dimension(its:,kts:),intent(out) :: evap_bcb,net_prec_bcb
 
   !-- locals
    integer :: i,k
@@ -2511,30 +2507,30 @@ contains
   !
   ! ierr error value, maybe modified in this routine
   !
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                    &
+     real(kind=kind_phys),    dimension (its:,kts:)                    &
         ,intent (in   )                   ::                 &
         rho,us,vs,z,p,pw
-     real(kind=kind_phys),    dimension (its:ite,1)                          &
+     real(kind=kind_phys),    dimension (its:,: )                          &
         ,intent (out  )                   ::                 &
         edtc
-     real(kind=kind_phys),    dimension (its:ite)                            &
+     real(kind=kind_phys),    dimension (its:)                            &
         ,intent (out )                    ::                 &
         pefc
-     real(kind=kind_phys),    dimension (its:ite)                            &
+     real(kind=kind_phys),    dimension (its:)                            &
         ,intent (out  )                   ::                 &
         edt
-     real(kind=kind_phys),    dimension (its:ite)                            &
+     real(kind=kind_phys),    dimension (its:)                            &
         ,intent (in   )                   ::                 &
         pwav,pwev,psum2,psumh,edtmax,edtmin
-     integer, dimension (its:ite)                            &
+     integer, dimension (its:)                            &
         ,intent (in   )                   ::                 &
         ktop,kbcon,xland1
      real(kind=kind_phys),    intent (in  ) ::               &                 !HCB
         ccnclean
-     real(kind=kind_phys),    dimension (its:ite)            &
+     real(kind=kind_phys),    dimension (its:)            &
         ,intent (inout )                   ::                &
         ccn
-     integer, dimension (its:ite)                            &
+     integer, dimension (its:)                            &
         ,intent (inout)                   ::                 &
         ierr
 !$acc declare copyin(rho,us,vs,z,p,pw,pwav,pwev,psum2,psumh,edtmax,edtmin,ktop,kbcon)
@@ -2671,7 +2667,7 @@ contains
   ! pwev = total normalized integrated evaoprate (i2)
   ! entr= entrainment rate 
   !
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)               &
+     real(kind=kind_phys),    dimension (its:,kts:)               &
         ,intent (in   )                   ::            &
         zd,hes_cup,hcd,qes_cup,q_cup,z_cup,             &
         dd_massentr,dd_massdetr,gamma_cup,q,he,p_cup
@@ -2679,18 +2675,18 @@ contains
      integer                                            &
         ,intent (in   )                   ::            &
         iloop
-     integer, dimension (its:ite)                       &
+     integer, dimension (its:)                       &
         ,intent (in   )                   ::            &
         jmin
 !$acc declare copyin(jmin)
-     integer, dimension (its:ite)                       &
+     integer, dimension (its:)                       &
         ,intent (inout)                   ::            &
         ierr
 !$acc declare copy(ierr)
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)&
+     real(kind=kind_phys),    dimension (its:,kts:)&
         ,intent (out  )                   ::            &
         qcd,qrcd,pwd
-     real(kind=kind_phys),    dimension (its:ite)&
+     real(kind=kind_phys),    dimension (its:)&
         ,intent (out  )                   ::            &
         pwev,bu
 !$acc declare copyout(qcd,qrcd,pwd,pwev,bu)
@@ -2812,23 +2808,23 @@ contains
         its,ite, kts,kte
   !
   !
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                &
+     real(kind=kind_phys),    dimension (its:,kts:)                &
         ,intent (in   )                   ::             &
         p,t,q
 !$acc declare copyin(p,t,q)
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                &
+     real(kind=kind_phys),    dimension (its:,kts:)                &
         ,intent (out  )                   ::             &
         hes,qes
 !$acc declare copyout(hes,qes)
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                &
+     real(kind=kind_phys),    dimension (its:,kts:)                &
         ,intent (inout)                   ::             &
         he,z
 !$acc declare copy(he,z)
-     real(kind=kind_phys),    dimension (its:ite)                        &
+     real(kind=kind_phys),    dimension (its:)                        &
         ,intent (in   )                   ::             &
         psur,z1
 !$acc declare copyin(psur,z1)
-     integer, dimension (its:ite)                        &
+     integer, dimension (its:)                        &
         ,intent (inout)                   ::             &
         ierr
 !$acc declare copy(ierr)
@@ -2966,19 +2962,19 @@ contains
         itf,ktf,                                                    &
         its,ite, kts,kte
   !
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                        &
+     real(kind=kind_phys),    dimension (its:,kts:)                        &
         ,intent (in   )                   ::                     &
         qes,q,he,hes,z,p,t
 !$acc declare copyin(qes,q,he,hes,z,p,t)
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                        &
+     real(kind=kind_phys),    dimension (its:,kts:)                        &
         ,intent (out  )                   ::                     &
         qes_cup,q_cup,he_cup,hes_cup,z_cup,p_cup,gamma_cup,t_cup
 !$acc declare copyout(qes_cup,q_cup,he_cup,hes_cup,z_cup,p_cup,gamma_cup,t_cup)
-     real(kind=kind_phys),    dimension (its:ite)                                &
+     real(kind=kind_phys),    dimension (its:)                                &
         ,intent (in   )                   ::                     &
         psur,z1
 !$acc declare copyin(psur,z1)
-     integer, dimension (its:ite)                                &
+     integer, dimension (its:)                                &
         ,intent (inout)                   ::                     &
         ierr
 !$acc declare copy(ierr)
@@ -3077,33 +3073,33 @@ contains
   ! k22         = updraft originating level
   ! ichoice       = flag if only want one closure (usually set to zero!)
   !
-     real(kind=kind_phys),    dimension (its:ite,1:maxens3)                            &
+     real(kind=kind_phys),    dimension (its:,1:)                            &
         ,intent (inout)                   ::                           &
         pr_ens
-     real(kind=kind_phys),    dimension (its:ite,1:maxens3)                            &
+     real(kind=kind_phys),    dimension (its:,1:)                            &
         ,intent (inout  )                 ::                           &
         xf_ens
 !$acc declare copy(pr_ens,xf_ens)
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (in   )                   ::                           &
         zd,zu,p_cup,zdm
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (in   )                   ::                           &
         omeg
-     real(kind=kind_phys),    dimension (its:ite,1)                                    &
+     real(kind=kind_phys),    dimension (its:,:)                                    &
         ,intent (in   )                   ::                           &
         xaa0
-     real(kind=kind_phys),    dimension (its:ite,4)                                    &
+     real(kind=kind_phys),    dimension (its:,:)                                    &
         ,intent (in   )                   ::                           &
        rand_clos 
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (in   )                   ::                           &
         aa1,edt,edtm,omegac,sigmab
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (in   )                   ::                           &
         mconv,axx
 !$acc declare copyin(zd,zu,p_cup,zdm,omeg,xaa0,rand_clos,aa1,edt,edtm,mconv,axx)
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (inout)                   ::                           &
         aa0,closure_n
 !$acc declare copy(aa0,closure_n)
@@ -3113,13 +3109,13 @@ contains
      real(kind=kind_phys)                                                              &
         ,intent (in   )                   ::                           &
         dtime
-     integer, dimension (its:ite)                                      &
+     integer, dimension (its:)                                      &
         ,intent (inout   )                ::                           &
         k22,kbcon,ktop
-     integer, dimension (its:ite)                                      &
+     integer, dimension (its:)                                      &
         ,intent (in      )                ::                           &
         xland
-     integer, dimension (its:ite)                                      &
+     integer, dimension (its:)                                      &
         ,intent (inout)                   ::                           &
         ierr,ierr2,ierr3
 !$acc declare copy(k22,kbcon,ktop,ierr,ierr2,ierr3) copyin(xland)
@@ -3129,10 +3125,10 @@ contains
       integer, intent(in)  :: dicycle
       logical, intent (in) :: progsigma
 
-      real(kind=kind_phys),    intent(in)   , dimension (its:ite) :: aa1_bl,tau_ecmwf
-      real(kind=kind_phys),    intent(inout), dimension (its:ite) :: xf_dicycle
-      real(kind=kind_phys),    intent(out),   dimension (its:ite) :: xf_progsigma
-      real(kind=kind_phys),    intent(inout), dimension (its:ite,10) :: forcing
+      real(kind=kind_phys),    intent(in)   , dimension (its:) :: aa1_bl,tau_ecmwf
+      real(kind=kind_phys),    intent(inout), dimension (its:) :: xf_dicycle
+      real(kind=kind_phys),    intent(out),   dimension (its:) :: xf_progsigma
+      real(kind=kind_phys),    intent(inout), dimension (its:,:) :: forcing
 !$acc declare copyin(aa1_bl,tau_ecmwf) copy(xf_dicycle,forcing)
       !- local var
       real(kind=kind_phys)  :: xff_dicycle
@@ -3487,31 +3483,31 @@ endif
   ! 
   ! ierr error value, maybe modified in this routine
   !
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (in   )                   ::                           &
         he_cup,hes_cup,p_cup
 !$acc declare copyin(he_cup,hes_cup,p_cup)
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (in   )                   ::                           &
         entr_rate,ztexec,zqexec,cap_inc,cap_max
 !$acc declare copyin(entr_rate,ztexec,zqexec,cap_inc,cap_max)
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (inout   )                   ::                        &
         hkb !,cap_max
 !$acc declare copy(hkb)
-     integer, dimension (its:ite)                                      &
+     integer, dimension (its:)                                      &
         ,intent (in   )                   ::                           &
         kbmax
 !$acc declare copyin(kbmax)
-     integer, dimension (its:ite)                                      &
+     integer, dimension (its:)                                      &
         ,intent (inout)                   ::                           &
         kbcon,k22,ierr
 !$acc declare copy(kbcon,k22,ierr)
      integer                                                           &
         ,intent (in   )                   ::                           &
         iloop_in
-     character*50 :: ierrc(its:ite)
-     real(kind=kind_phys), dimension (its:ite,kts:kte),intent (in) :: z_cup,heo
+     character*50 :: ierrc(its:)
+     real(kind=kind_phys), dimension (its:,kts:),intent (in) :: z_cup,heo
 !$acc declare copyin(z_cup,heo)
      integer, dimension (its:ite)      ::     iloop,start_level
 !$acc declare create(iloop,start_level)
@@ -3645,18 +3641,18 @@ endif
   ! x output array with return values
   ! kt output array of levels
   ! ks,kend  check-range
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (in   )                   ::                           &
          array
 !$acc declare copyin(array)
-     integer, dimension (its:ite)                                      &
+     integer, dimension (its:)                                      &
         ,intent (in   )                   ::                           &
          ierr,ke
 !$acc declare copyin(ierr,ke)
      integer                                                           &
         ,intent (in   )                   ::                           &
          ks
-     integer, dimension (its:ite)                                      &
+     integer, dimension (its:)                                      &
         ,intent (out  )                   ::                           &
          maxx
 !$acc declare copyout(maxx)
@@ -3708,15 +3704,15 @@ endif
   ! x output array with return values
   ! kt output array of levels
   ! ks,kend  check-range
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                    &
+     real(kind=kind_phys),    dimension (its:,kts:)                    &
         ,intent (in   )                   ::                 &
          array
 !$acc declare copyin(array)
-     integer, dimension (its:ite)                            &
+     integer, dimension (its:)                            &
         ,intent (in   )                   ::                 &
          ierr,ks,kend
 !$acc declare copyin(ierr,ks,kend)
-     integer, dimension (its:ite)                            &
+     integer, dimension (its:)                            &
         ,intent (out  )                   ::                 &
          kt
 !$acc declare copyout(kt)
@@ -3771,10 +3767,10 @@ endif
   ! z = heights of model levels 
   ! ierr error value, maybe modified in this routine
   !
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                     &
+     real(kind=kind_phys),    dimension (its:,kts:)                     &
         ,intent (in   )                   ::                  &
         z,zu,gamma_cup,t_cup,dby
-     integer, dimension (its:ite)                             &
+     integer, dimension (its:)                             &
         ,intent (in   )                   ::                  &
         kbcon,ktop
 !$acc declare copyin(z,zu,gamma_cup,t_cup,dby,kbcon,ktop)
@@ -3783,11 +3779,11 @@ endif
 !
 
 
-     integer, dimension (its:ite)                             &
+     integer, dimension (its:)                             &
         ,intent (inout)                   ::                  &
         ierr
 !$acc declare copy(ierr)
-     real(kind=kind_phys),    dimension (its:ite)                             &
+     real(kind=kind_phys),    dimension (its:)                             &
         ,intent (out  )                   ::                  &
         aa0
 !$acc declare copyout(aa0)
@@ -3830,15 +3826,15 @@ endif
                         outqc,pret,its,ite,kts,kte,itf,ktf,ktop)
 
    integer,      intent(in   ) ::            j,its,ite,kts,kte,itf,ktf
-   integer, dimension (its:ite  ),   intent(in   ) ::  ktop
+   integer, dimension (its:  ),   intent(in   ) ::  ktop
 
-     real(kind=kind_phys), dimension (its:ite,kts:kte  )                    ,                 &
+     real(kind=kind_phys), dimension (its:,kts:  )                    ,                 &
       intent(inout   ) ::                                                     &
        outq,outt,outqc,outu,outv
-     real(kind=kind_phys), dimension (its:ite,kts:kte  )                    ,                 &
+     real(kind=kind_phys), dimension (its:,kts:  )                    ,                 &
       intent(inout   ) ::                                                     &
        q
-     real(kind=kind_phys), dimension (its:ite  )                            ,                 &
+     real(kind=kind_phys), dimension (its:  )                            ,                 &
       intent(inout   ) ::                                                     &
        pret
 !$acc declare copy(outq,outt,outqc,outu,outv,q,pret)
@@ -3979,38 +3975,38 @@ endif
   ! pw = pw -epsilon*pd (ensemble dependent)
   ! ierr error value, maybe modified in this routine
   !
-     real(kind=kind_phys),    dimension (its:ite,1:maxens3)                            &
+     real(kind=kind_phys),    dimension (its:,:)                            &
         ,intent (inout)                   ::                           &
        xf_ens,pr_ens
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (inout  )                 ::                           &
         outtem,outq,outqc
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (in  )                    ::                           &
         zu,pwd,p_cup
-     real(kind=kind_phys),   dimension (its:ite)                                       &
+     real(kind=kind_phys),   dimension (its:)                                       &
          ,intent (in  )                   ::                           &
         sig,xmbm_in,xmbs_in,edt,sigmab,dx
-     real(kind=kind_phys),   dimension (its:ite,2)                                     &
+     real(kind=kind_phys),   dimension (its:,:)                                     &
          ,intent (in  )                   ::                           &
         xff_mid
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (inout  )                 ::                           &
         pre,xmb
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (inout  )                 ::                           &
         closure_n
-     real(kind=kind_phys),    dimension (its:ite,kts:kte,1)                            &
+     real(kind=kind_phys),    dimension (its:,kts:,:)                            &
         ,intent (in   )                   ::                           &
        dellat,dellaqc,dellaq,pw
-     integer, dimension (its:ite)                                      &
+     integer, dimension (its:)                                      &
         ,intent (in   )                   ::                           &
         ktop,xland1
-     integer, dimension (its:ite)                                      &
+     integer, dimension (its:)                                      &
         ,intent (inout)                   ::                           &
         ierr,ierr2,ierr3
      integer, intent(in) :: dicycle
-     real(kind=kind_phys),    intent(in), dimension (its:ite) :: xf_dicycle, xf_progsigma
+     real(kind=kind_phys),    intent(in), dimension (its:) :: xf_dicycle, xf_progsigma
 !$acc declare copyin(zu,pwd,p_cup,sig,xmbm_in,xmbs_in,edt,xff_mid,dellat,dellaqc,dellaq,pw,ktop,xland1,xf_dicycle)
 !$acc declare copy(xf_ens,pr_ens,outtem,outq,outqc,pre,xmb,closure_n,ierr,ierr2,ierr3)
 !
@@ -4248,15 +4244,15 @@ endif
   ! zu = normalized updraft mass flux
   ! gamma_cup = gamma on model cloud levels
   !
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                         &
+     real(kind=kind_phys),    dimension (its:,kts:)                         &
         ,intent (in   )                   ::                      &
         p_cup,rho,q,zu,gamma_cup,qe_cup,                          &
         up_massentr,up_massdetr,dby,qes_cup,z_cup
-     real(kind=kind_phys),    dimension (its:ite)                                 &
+     real(kind=kind_phys),    dimension (its:)                                 &
         ,intent (in   )                   ::                      &
         zqexec,c0
   ! entr= entrainment rate 
-     integer, dimension (its:ite)                                 &
+     integer, dimension (its:)                                 &
         ,intent (in   )                   ::                      &
         kbcon,ktop,k22,xland1
 !$acc declare copyin(p_cup,rho,q,zu,gamma_cup,qe_cup,up_massentr,up_massdetr,dby,qes_cup,z_cup,zqexec,c0,kbcon,ktop,k22,xland1)
@@ -4268,7 +4264,7 @@ endif
 
    ! ierr error value, maybe modified in this routine
 
-     integer, dimension (its:ite)                                  &
+     integer, dimension (its:)                                  &
         ,intent (inout)                   ::                       &
         ierr
 !$acc declare copy(ierr)
@@ -4281,11 +4277,11 @@ endif
    ! pwav = totan normalized integrated condensate (i1)
    ! c0 = conversion rate (cloud to rain)
 
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                          &
+     real(kind=kind_phys),    dimension (its:,kts:)                          &
         ,intent (out  )                   ::                       &
         qc,qrc,pw,clw_all
 !$acc declare copy(qc,qrc,pw,clw_all)
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                          &
+     real(kind=kind_phys),    dimension (its:,kts:)                          &
         ,intent (inout)                   ::                       &
         c1d
 !$acc declare copy(c1d)
@@ -4295,11 +4291,11 @@ endif
      real(kind=kind_phys),    dimension (its:ite)         ::                       &
         pwavh
 !$acc declare create(pwavh)
-     real(kind=kind_phys),    dimension (its:ite)                                  &
+     real(kind=kind_phys),    dimension (its:)                                  &
         ,intent (out  )                   ::                       &
         pwav,psum,psumh
 !$acc declare copyout(pwav,psum,psumh)
-     real(kind=kind_phys),    dimension (its:ite)                                  &
+     real(kind=kind_phys),    dimension (its:)                                  &
         ,intent (in  )                    ::                       &
         ccn
 !$acc declare copyin(ccn)
@@ -4329,7 +4325,7 @@ endif
         is_deep = (name == 'deep')
 
 !$acc kernels
-        prop_b(kts:kte)=0
+        prop_b(kts:)=0
 !$acc end kernels
         iall=0
         clwdet=0.1 !0.02
@@ -4429,7 +4425,7 @@ endif
 !
 !now do the rest
 !
-            kklev(i)=maxloc(zu(i,:),1)
+            kklev(i)=maxloc(zu(i,2:ktop(i)),1)
 !$acc loop seq
             do k=kbcon(i)+1,ktop(i)
                if(t(i,k) > 273.16) then
@@ -4489,6 +4485,8 @@ endif
                endif
                if(k.gt.kbcon(i)+1)c1d(i,k)=clwdet*up_massdetr(i,k-1)
                if(k.gt.kbcon(i)+1)c1d_b(i,k)=clwdet*up_massdetr(i,k-1)
+                c1d(i,k)=0.005
+                c1d_b(i,k)=0.005
 
                if(autoconv.eq.2) then
 ! 
@@ -4646,11 +4644,11 @@ endif
      implicit none
      character *(*), intent (in)       :: name
      integer, intent(in) :: ipr,its,ite,itf,kts,kte,ktf
-     real(kind=kind_phys), dimension (its:ite,kts:kte),intent (inout) :: entr_rate_2d,zuo
-     real(kind=kind_phys), dimension (its:ite,kts:kte),intent (in) ::p_cup, heo,heso_cup,z_cup
-     real(kind=kind_phys), dimension (its:ite),intent (in) :: hkbo,rand_vmas
-     integer, dimension (its:ite),intent (in) :: kstabi,k22,kpbl,csum,xland,pmin_lev
-     integer, dimension (its:ite),intent (inout) :: kbcon,ierr,ktop,ktopdby
+     real(kind=kind_phys), dimension (its:,kts:),intent (inout) :: entr_rate_2d,zuo
+     real(kind=kind_phys), dimension (its:,kts:),intent (in) ::p_cup, heo,heso_cup,z_cup
+     real(kind=kind_phys), dimension (its:),intent (in) :: hkbo,rand_vmas
+     integer, dimension (its:),intent (in) :: kstabi,k22,kpbl,csum,xland,pmin_lev
+     integer, dimension (its:),intent (inout) :: kbcon,ierr,ktop,ktopdby
 !$acc declare copy(entr_rate_2d,zuo,kbcon,ierr,ktop,ktopdby) &
 !$acc         copyin(p_cup, heo,heso_cup,z_cup,hkbo,rand_vmas,kstabi,k22,kpbl,csum,xland,pmin_lev)
 
@@ -4737,7 +4735,7 @@ endif
               ktop(i)= 0
         else
            call get_zu_zd_pdf_fim(kklev,p_cup(i,:),rand_vmas(i),zubeg,ipr,xland(i),zuh2,1,ierr(i),k22(i), &
-            kfinalzu+1,zuo(i,kts:kte),kts,kte,ktf,beta_u,kbcon(i),csum(i),pmin_lev(i))
+            kfinalzu+1,zuo(i,kts:),kts,kte,ktf,beta_u,kbcon(i),csum(i),pmin_lev(i))
         endif
       endif ! end deep
       if ( is_mid ) then
@@ -4748,7 +4746,7 @@ endif
            kfinalzu=ktop(i)
            ktopdby(i)=ktop(i)+1
           call get_zu_zd_pdf_fim(kklev,p_cup(i,:),rand_vmas(i),zubeg,ipr,xland(i),zuh2,3, &
-            ierr(i),k22(i),ktopdby(i)+1,zuo(i,kts:kte),kts,kte,ktf,beta_u,kbcon(i),csum(i),pmin_lev(i))
+            ierr(i),k22(i),ktopdby(i)+1,zuo(i,kts:),kts,kte,ktf,beta_u,kbcon(i),csum(i),pmin_lev(i))
        endif
       endif ! mid
       if ( is_shallow ) then
@@ -4759,7 +4757,7 @@ endif
            kfinalzu=ktop(i)
            ktopdby(i)=ktop(i)+1
            call get_zu_zd_pdf_fim(kbcon(i),p_cup(i,:),rand_vmas(i),zubeg,ipr,xland(i),zuh2,2,ierr(i),k22(i), &
-             ktopdby(i)+1,zuo(i,kts:kte),kts,kte,ktf,beta_u,kbcon(i),csum(i),pmin_lev(i))
+             ktopdby(i)+1,zuo(i,kts:),kts,kte,ktf,beta_u,kbcon(i),csum(i),pmin_lev(i))
 
          endif
          endif ! shal
@@ -4782,8 +4780,8 @@ endif
  real(kind=kind_phys), parameter :: beta_dd=4.0,g_beta_dd=6.
  integer, intent(in) ::ipr,xland,kb,kklev,kt,kts,kte,ktf,kpbli,csum,pmin_lev
  real(kind=kind_phys), intent(in) ::max_mass,zubeg
- real(kind=kind_phys), intent(inout) :: zu(kts:kte)
- real(kind=kind_phys), intent(in) :: p(kts:kte)
+ real(kind=kind_phys), intent(inout) :: zu(kts:)
+ real(kind=kind_phys), intent(in) :: p(kts:)
  real(kind=kind_phys)  :: trash,beta_deep,zuh(kts:kte),zuh2(1:40)
  integer, intent(inout) :: ierr
  integer, intent(in) ::draft
@@ -5057,20 +5055,20 @@ endif
   ! z = heights of model levels 
   ! ierr error value, maybe modified in this routine
   !
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (in   )                   ::                           &
         z_cup,zu,gamma_cup,t_cup,dby,t,tn,q,qo
-     integer, dimension (its:ite)                                      &
+     integer, dimension (its:)                                      &
         ,intent (in   )                   ::                           &
         kbcon,ktop
      real(kind=kind_phys), intent(in) :: dtime
 !
 ! input and output
 !
-     integer, dimension (its:ite)                                      &
+     integer, dimension (its:)                                      &
         ,intent (inout)                   ::                           &
         ierr
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (out  )                   ::                           &
         aa0
 !
@@ -5107,14 +5105,14 @@ endif
                                     
         implicit none
         integer                      ,intent (in ) :: itf,ktf,its,ite,kts,kte
-        integer, dimension (its:ite) ,intent (in ) :: ierr,kstart,kend
+        integer, dimension (its:) ,intent (in ) :: ierr,kstart,kend
 !$acc declare copyin(ierr,kstart,kend)
         integer, dimension (its:ite) :: kend_p3
 !$acc declare create(kend_p3)
                     
-        real(kind=kind_phys),    dimension (its:ite,kts:kte), intent (in ) :: p_cup,t_cup,z_cup,qo_cup,qeso_cup                            
-        real(kind=kind_phys),    dimension (its:ite,kts:kte), intent (out) :: dtempdz                    
-        integer, dimension (its:ite,kts:kte), intent (out) :: k_inv_layers
+        real(kind=kind_phys),    dimension (its:,kts:), intent (in ) :: p_cup,t_cup,z_cup,qo_cup,qeso_cup                            
+        real(kind=kind_phys),    dimension (its:,kts:), intent (out) :: dtempdz                    
+        integer, dimension (its:,kts:), intent (out) :: k_inv_layers
 !$acc declare copyin(p_cup,t_cup,z_cup,qo_cup,qeso_cup)
 !$acc declare copyout(dtempdz,k_inv_layers)
         !-local vars
@@ -5308,15 +5306,15 @@ endif
      implicit none
      integer, intent (in) :: draft
      integer, intent(in):: itf,ktf, its,ite, kts,kte
-     integer, intent(in)   , dimension(its:ite)         :: ierr,ktop,kbcon,k22
+     integer, intent(in)   , dimension(its:)         :: ierr,ktop,kbcon,k22
 !$acc declare copyin(ierr,ktop,kbcon,k22)
-    !real(kind=kind_phys),    intent(in),  optional , dimension(its:ite):: lambau
-     real(kind=kind_phys),    intent(inout),  optional , dimension(its:ite):: lambau
-     real(kind=kind_phys),    intent(in)   , dimension(its:ite,kts:kte) :: zo_cup,zuo
-     real(kind=kind_phys),    intent(inout), dimension(its:ite,kts:kte) :: cd,entr_rate_2d   
-     real(kind=kind_phys),    intent(  out), dimension(its:ite,kts:kte) :: up_massentro, up_massdetro  &
+    !real(kind=kind_phys),    intent(in),  optional , dimension(its:):: lambau
+     real(kind=kind_phys),    intent(inout),  optional , dimension(its:):: lambau
+     real(kind=kind_phys),    intent(in)   , dimension(its:,kts:) :: zo_cup,zuo
+     real(kind=kind_phys),    intent(inout), dimension(its:,kts:) :: cd,entr_rate_2d   
+     real(kind=kind_phys),    intent(  out), dimension(its:,kts:) :: up_massentro, up_massdetro  &
                                                           ,up_massentr,  up_massdetr
-     real(kind=kind_phys),    intent(  out), dimension(its:ite,kts:kte),  optional ::                  &
+     real(kind=kind_phys),    intent(  out), dimension(its:,kts:),  optional ::                  &
                                                           up_massentru,up_massdetru
 !$acc declare copy(lambau,cd,entr_rate_2d) copyin(zo_cup,zuo) copyout(up_massentro, up_massdetro,up_massentr,  up_massdetr)
 !$acc declare copyout(up_massentro, up_massdetro,up_massentr,  up_massdetr, up_massentru,up_massdetru)
@@ -5437,10 +5435,10 @@ endif
      implicit none
      character *(*), intent (in)                          :: cumulus
      integer  ,intent (in   )	                          :: itf,ktf, its,ite, kts,kte
-     real(kind=kind_phys),     intent (in   ), dimension(its:ite,kts:kte) :: tn,po_cup
-     real(kind=kind_phys),     intent (inout), dimension(its:ite,kts:kte) :: p_liq_ice,melting_layer
+     real(kind=kind_phys),     intent (in   ), dimension(its:,kts:) :: tn,po_cup
+     real(kind=kind_phys),     intent (inout), dimension(its:,kts:) :: p_liq_ice,melting_layer
 !$acc declare copyin(tn,po_cup) copy(p_liq_ice,melting_layer)
-     integer  , intent (in  ), dimension(its:ite) :: ierr
+     integer  , intent (in  ), dimension(its:) :: ierr
 !$acc declare copyin(ierr)
      integer :: i,k
      real(kind=kind_phys)    :: dp     
@@ -5539,11 +5537,11 @@ endif
      implicit none
      character *(*), intent (in)                          :: cumulus
      integer  ,intent (in   )                                  :: itf,ktf, its,ite, kts,kte
-     integer  ,intent (in   ), dimension(its:ite)         :: ierr
-     real(kind=kind_phys)     ,intent (in   ), dimension(its:ite)         :: edto
-     real(kind=kind_phys)     ,intent (in   ), dimension(its:ite,kts:kte) :: tn_cup,po_cup,qrco,pwo &
+     integer  ,intent (in   ), dimension(its:)         :: ierr
+     real(kind=kind_phys)     ,intent (in   ), dimension(its:)         :: edto
+     real(kind=kind_phys)     ,intent (in   ), dimension(its:,kts:) :: tn_cup,po_cup,qrco,pwo &
                                                             ,pwdo,p_liq_ice,melting_layer
-     real(kind=kind_phys)     ,intent (inout), dimension(its:ite,kts:kte) :: melting
+     real(kind=kind_phys)     ,intent (inout), dimension(its:,kts:) :: melting
 !$acc declare copyin(ierr,edto,tn_cup,po_cup,qrco,pwo,pwdo,p_liq_ice,melting_layer,melting)
      integer :: i,k
      real(kind=kind_phys)    :: dp     
@@ -5615,13 +5613,13 @@ endif
                          kstabi,k22,kbcon,its,ite,itf,kts,kte,ktf,zuo,kpbl,klcl,hcot)
      implicit none
      integer, intent(in) :: its,ite,itf,kts,kte,ktf
-     real(kind=kind_phys), dimension (its:ite,kts:kte),intent (inout) :: entr_rate_2d,zuo
-     real(kind=kind_phys), dimension (its:ite,kts:kte),intent (in) ::p_cup, heo,heso_cup,z_cup
-     real(kind=kind_phys), dimension (its:ite),intent (in) :: hkbo
-     integer, dimension (its:ite),intent (in) :: kstabi,k22,kbcon,kpbl,klcl
-     integer, dimension (its:ite),intent (inout) :: ierr,ktop
+     real(kind=kind_phys), dimension (its:,kts:),intent (inout) :: entr_rate_2d,zuo
+     real(kind=kind_phys), dimension (its:,kts:),intent (in) ::p_cup, heo,heso_cup,z_cup
+     real(kind=kind_phys), dimension (its:),intent (in) :: hkbo
+     integer, dimension (its:),intent (in) :: kstabi,k22,kbcon,kpbl,klcl
+     integer, dimension (its:),intent (inout) :: ierr,ktop
 !$acc declare copy(entr_rate_2d,zuo,ierr,ktop) copyin(p_cup, heo,heso_cup,z_cup,hkbo,kstabi,k22,kbcon,kpbl,klcl)
-     real(kind=kind_phys), dimension (its:ite,kts:kte) :: hcot
+     real(kind=kind_phys), dimension (its:,kts:) :: hcot
 !$acc declare create(hcot)
      character *(*), intent (in) ::    name
      real(kind=kind_phys) :: dz,dh, dbythresh
@@ -5644,7 +5642,7 @@ endif
        kfinalzu=ktf-2
        ktop(i)=kfinalzu
        if(ierr(i).eq.0)then
-       dby (kts:kte)=0.0
+       dby (kts:)=0.0
 
        start_level(i)=kbcon(i)
        !-- hcot below kbcon
@@ -5704,16 +5702,16 @@ endif
     implicit none
     logical, intent(in) :: progsigma
     integer, intent(in) :: itf,its,ktf,ite,kts,kte
-    integer, dimension (its:ite), intent(inout) :: ierr
-    real(kind=kind_phys), dimension (its:ite,kts:kte),intent (in) :: zo,entr_rate_2d,   &
+    integer, dimension (its:), intent(inout) :: ierr
+    real(kind=kind_phys), dimension (its:,kts:),intent (in) :: zo,entr_rate_2d,   &
          cd,po,qeso,to,qo,dbyo,clw_all,qlk,delp,zu
-    integer, dimension (its:ite),intent(in) :: k22,kbcon,ktcon
+    integer, dimension (its:),intent(in) :: k22,kbcon,ktcon
     real(kind=kind_phys), dimension (its:ite) :: sumx
     real(kind=kind_phys) ,intent (in) :: fv,rd,el2orc 
     real(kind=kind_phys), dimension (its:ite,kts:kte) :: drag, buo, zi, del
-    real(kind=kind_phys), dimension (its:ite,kts:kte),intent (out) :: wu2,omega_u,      &
+    real(kind=kind_phys), dimension (its:,kts:),intent (out) :: wu2,omega_u,      &
          zeta,zdqca
-    real(kind=kind_phys), dimension (its:ite),intent(out) :: wc,omegac
+    real(kind=kind_phys), dimension (its:),intent(out) :: wc,omegac
     real(kind=kind_phys) :: rho,bb1,bb2,dz,dp,ptem,tem1,ptem1,tem,rfact,gamma,val
     integer :: i,k    
 
