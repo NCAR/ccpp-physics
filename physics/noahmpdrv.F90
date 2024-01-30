@@ -29,7 +29,7 @@
 !! \section arg_table_noahmpdrv_init Argument Table
 !! \htmlinclude noahmpdrv_init.html
 !!
-      subroutine noahmpdrv_init(lsm, lsm_noahmp, me, isot, ivegsrc, &
+      subroutine noahmpdrv_init(lsm, ilsm_noahmp, me, isot, ivegsrc,&
                                 nlunit, pores, resid,               &
                                 do_mynnsfclay,do_mynnedmf,          &
                                 errmsg, errflg)
@@ -41,7 +41,7 @@
 
         implicit none
         integer,              intent(in) :: lsm
-        integer,              intent(in) :: lsm_noahmp    
+        integer,              intent(in) :: ilsm_noahmp    
         integer,              intent(in)  :: me, isot, ivegsrc, nlunit
 
         real (kind=kind_phys), dimension(:), intent(out) :: pores, resid
@@ -58,7 +58,7 @@
         errflg = 0
 
         ! Consistency checks
-        if (lsm/=lsm_noahmp) then
+        if (lsm/=ilsm_noahmp) then
           write(errmsg,'(*(a))') 'Logic error: namelist choice of ',   &
        &       'LSM is different from Noah'
           errflg = 1

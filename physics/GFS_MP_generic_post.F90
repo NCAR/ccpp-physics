@@ -25,7 +25,7 @@
         rain0, ice0, snow0, graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp,&
         totprcp, totice, totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl,    &
         pwat, frzr, frzrb, frozr, frozrb, tsnowp, tsnowpb, rhonewsn1, exticeden,                                          & 
-        drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,                             &
+        drain_cpl, dsnow_cpl, lsm, ilsm_ruc, ilsm_noahmp, raincprv, rainncprv, iceprv, snowprv,                           &
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, dfi_radar_max_intervals,                  &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d,dqdt_qmicro, lssav, num_dfi_radar,       &
         fh_dfi_radar,index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour, prevsq,      &
@@ -72,7 +72,7 @@
       real(kind=kind_phys), dimension(:),      intent(inout) :: drain_cpl, dsnow_cpl
 
       ! Rainfall variables previous time step
-      integer, intent(in) :: lsm, lsm_ruc, lsm_noahmp
+      integer, intent(in) :: lsm, ilsm_ruc, ilsm_noahmp
       real(kind=kind_phys), dimension(:),      intent(inout) :: raincprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: rainncprv
       real(kind=kind_phys), dimension(:),      intent(inout) :: iceprv
@@ -212,7 +212,7 @@
         ice     = frain*rain1*sr                  ! time-step ice
       end if
       
-      if (lsm==lsm_ruc .or. lsm==lsm_noahmp) then
+      if (lsm==ilsm_ruc .or. lsm==ilsm_noahmp) then
         raincprv(:)   = rainc(:)
         rainncprv(:)  = frain * rain1(:)
         iceprv(:)     = ice(:)
@@ -221,7 +221,7 @@
         !for NoahMP, calculate precipitation rates from liquid water equivalent thickness for use in next time step
         !Note (GJF): Precipitation LWE thicknesses are multiplied by the frain factor, and are thus on the dynamics time step, but the conversion as written
         !            (with dtp in the denominator) assumes the rate is calculated on the physics time step. This only works as expected when dtf=dtp (i.e. when frain=1).
-        if (lsm == lsm_noahmp) then
+        if (lsm == ilsm_noahmp) then
           tem = one / (dtp*con_p001) !GJF: This conversion was taken from GFS_physics_driver.F90, but should denominator also have the frain factor?
           draincprv(:)   = tem * raincprv(:)
           drainncprv(:)  = tem * rainncprv(:)
@@ -341,7 +341,7 @@
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
        
-        if (lsm /= lsm_ruc) then
+        if (lsm /= ilsm_ruc) then
           do i = 1, im
             !tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp ! DH now lines 245-250
             srflag(i) = zero                     ! clu: default srflag as 'rain' (i.e. 0)
@@ -366,7 +366,7 @@
           do i=1,im
             srflag(i) = sr(i)
           enddo
-        endif ! lsm==lsm_ruc
+        endif ! lsm==ilsm_ruc
       elseif( .not. cal_pre) then
         if (imp_physics == imp_physics_mg) then          ! MG microphysics
           do i=1,im

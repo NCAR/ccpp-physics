@@ -13,7 +13,7 @@
 !! \htmlinclude sfc_diag_post_run.html
 !!
 #endif
-      subroutine sfc_diag_post_run (im, lsm, lsm_noahmp, opt_diag, dry, lssav, dtf, con_eps, con_epsm1, pgr,&
+      subroutine sfc_diag_post_run (im, lsm, ilsm_noahmp, opt_diag, dry, lssav, dtf, con_eps, con_epsm1, pgr,&
                  t2mmp,q2mp, t2m, q2m, u10m, v10m, tmpmin, tmpmax, spfhmin, spfhmax,                  &
                          wind10mmax, u10mmax, v10mmax, dpt2m, errmsg, errflg)
 
@@ -21,7 +21,7 @@
 
         implicit none
 
-        integer,                              intent(in) :: im, lsm, lsm_noahmp,opt_diag
+        integer,                              intent(in) :: im, lsm, ilsm_noahmp,opt_diag
         logical,                              intent(in) :: lssav
         real(kind=kind_phys),                 intent(in) :: dtf, con_eps, con_epsm1
         logical             , dimension(:),  intent(in) :: dry
@@ -40,7 +40,7 @@
         errmsg = ''
         errflg = 0
 
-        if (lsm == lsm_noahmp) then
+        if (lsm == ilsm_noahmp) then
          if (opt_diag == 2 .or. opt_diag == 3)then
           do i=1,im
             if(dry(i)) then
