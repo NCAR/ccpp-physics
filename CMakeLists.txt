@@ -51,6 +51,16 @@ foreach(typedef_module ${TYPEDEFS})
 endforeach()
 
 #------------------------------------------------------------------------------
+# Set the sources: kinds file
+set(KINDS $ENV{CCPP_KINDS})
+if(KINDS)
+  message(STATUS "Got CCPP KINDS from environment variable")
+else(KIDNS)
+  include(${CMAKE_CURRENT_BINARY_DIR}/CCPP_KINDS.cmake)
+  message(STATUS "Got CCPP KINDS from cmakefile include file")
+endif(KINDS)
+list(REMOVE_DUPLICATES KINDS)
+
 # Set the sources: physics schemes
 set(SCHEMES $ENV{CCPP_SCHEMES})
 if(SCHEMES)
@@ -161,7 +171,7 @@ endif()
 
 #------------------------------------------------------------------------------
 
-add_library(ccpp_physics STATIC ${SCHEMES} ${SCHEMES_OPENMP_OFF} ${SCHEMES_DYNAMICS} ${CAPS})
+add_library(ccpp_physics STATIC ${KINDS} ${SCHEMES} ${SCHEMES_OPENMP_OFF} ${SCHEMES_DYNAMICS} ${CAPS})
 # Generate list of Fortran modules from defined sources
 foreach(source_f90 ${CAPS})
     get_filename_component(tmp_source_f90 ${source_f90} NAME)
