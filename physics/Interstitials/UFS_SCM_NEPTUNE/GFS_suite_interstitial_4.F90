@@ -8,9 +8,9 @@
 !> \section arg_table_GFS_suite_interstitial_4_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_4_run.html
 !!
-    subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
-      ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
-      imp_physics_nssl, nssl_invertccn, nssl_ccn_on,                                                  &
+    subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, tracers_total, ntrac, ntcw, ntiw, ntclamt,         &
+      ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl,                 &
+      imp_physics_gfdl_v3, imp_physics_thompson, imp_physics_nssl, nssl_invertccn, nssl_ccn_on,                      &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,&
       index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nssl_cccn, nwfa, spechum, ldiag3d,     &
       qdiag3d, save_lnc, save_inc, ntk, ntke, otsptflag, errmsg, errflg)
@@ -24,8 +24,8 @@
 
       logical, intent(in)     :: otsptflag(:)! on/off switch for tracer transport by updraft and
       integer,              intent(in   )                   :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw, &
-        ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,    &
-        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_nssl
+        ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl, imp_physics_gfdl_v3,     &
+        imp_physics_thompson, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_nssl
 
       logical,                                  intent(in) :: ltaerosol, convert_dry_rho
       logical,                                  intent(in) :: nssl_ccn_on, nssl_invertccn
@@ -89,9 +89,10 @@
             endif
          endif
          if(ntcw>0) then
-            if (imp_physics == imp_physics_zhao_carr     .or. &
+            if (imp_physics == imp_physics_zhao_carr      .or. &
                  imp_physics == imp_physics_zhao_carr_pdf .or. &
-                 imp_physics == imp_physics_gfdl) then
+                 imp_physics == imp_physics_gfdl          .or. &
+                 imp_physics == imp_physics_gfdl_v3 ) then
                idtend=dtidx(100+ntcw,index_of_process_conv_trans)
                if(idtend>=1) then
                   dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,1)+clw(:,:,2) - gq0(:,:,ntcw)
@@ -150,7 +151,8 @@
 !  for microphysics
         if (imp_physics == imp_physics_zhao_carr     .or. &
             imp_physics == imp_physics_zhao_carr_pdf .or. &
-            imp_physics == imp_physics_gfdl) then
+            imp_physics == imp_physics_gfdl          .or. &
+            imp_physics == imp_physics_gfdl_v3 ) then
            gq0(1:im,:,ntcw) = clw(1:im,:,1) + clw(1:im,:,2)
 
         elseif (ntiw > 0) then

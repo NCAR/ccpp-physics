@@ -153,7 +153,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  bl_mynn_cloudmix,      bl_mynn_mixqt,              &
      &  bl_mynn_output,        bl_mynn_closure,            &
      &  icloud_bl, do_mynnsfclay,                          &
-     &  imp_physics, imp_physics_gfdl,                     &
+     &  imp_physics, imp_physics_gfdl, imp_physics_gfdl_v3,&
      &  imp_physics_thompson, imp_physics_wsm6,            &
      &  imp_physics_fa,                                    &
      &  chem3d, frp, mix_chem, rrfs_sd, enh_mix,           &
@@ -204,7 +204,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &       bl_mynn_mixqt,                                 &
      &       bl_mynn_output,                                &
      &       imp_physics, imp_physics_wsm6,                 &
-     &       imp_physics_thompson, imp_physics_gfdl,        &
+     &       imp_physics_thompson,                          &
+     &       imp_physics_gfdl, imp_physics_gfdl_v3,         &
      &       imp_physics_nssl, imp_physics_fa,              &
      &       spp_pbl,                                       &
      &       tke_budget
@@ -487,7 +488,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_gfdl) then
+        elseif (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_gfdl_v3) then
   ! GFDL MP
           FLAG_QI = .true.
           FLAG_QNI= .false.
@@ -927,7 +928,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                enddo
              enddo
 
-        elseif (imp_physics == imp_physics_gfdl) then
+        elseif (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_gfdl_v3) then
            ! GFDL MP
            do k=1,levs
              do i=1,im

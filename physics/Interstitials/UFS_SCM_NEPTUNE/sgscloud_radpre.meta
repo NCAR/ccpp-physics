@@ -468,6 +468,13 @@
   dimensions = ()
   type = integer
   intent = in
+[imp_physics_gfdl_v3]
+  standard_name = identifier_for_gfdl_microphysics_v3_scheme
+  long_name = choice of GFDL microphysics v3 scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [imp_physics_fa]
   standard_name = identifier_for_fer_hires_microphysics_scheme
   long_name = choice of Ferrier-Aligo microphysics scheme

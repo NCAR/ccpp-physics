@@ -26,7 +26,8 @@
         ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2,                       &
         ntss3, ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl, ntchm,          &
         imp_physics,imp_physics_nssl, nssl_ccn_on, nssl_invertccn,             &
-        imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
+        imp_physics_thompson, imp_physics_gfdl, imp_physics_gfdl_v3,           &
+        imp_physics_zhao_carr,                                                 &
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
         imp_physics_fer_hires, iovr, iovr_rand, iovr_maxrand, iovr_max,        &
         iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con, idcor_hogan,     &
@@ -99,6 +100,7 @@
                                            kdt, imp_physics,                   &
                                            imp_physics_thompson,               &
                                            imp_physics_gfdl,                   &
+                                           imp_physics_gfdl_v3,                &
                                            imp_physics_zhao_carr,              &
                                            imp_physics_zhao_carr_pdf,          &
                                            imp_physics_mg, imp_physics_wsm6,   &
@@ -778,7 +780,7 @@
             enddo
           enddo
         enddo
-        if (imp_physics == imp_physics_gfdl ) then
+        if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_gfdl_v3) then
           if (.not. lgfdlmprad) then
 
 
@@ -822,7 +824,7 @@
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_gfdl) then            ! GFDL MP
+        elseif (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_gfdl_v3) then            ! GFDL MP
           if ((imfdeepcnv==imfdeepcnv_gf .or. imfdeepcnv==imfdeepcnv_c3) .and. kdt>1) then
               do k=1,lm
                 k1 = k + kd
@@ -975,7 +977,8 @@
      &       deltaq, sup, dcorr_con, me, icloud, kdt,                   &
      &       ntrac, ntcw, ntiw, ntrw, ntsw, ntgl, ntclamt,              &
      &       imp_physics, imp_physics_nssl, imp_physics_fer_hires,      &
-     &       imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,  &
+     &       imp_physics_gfdl, imp_physics_gfdl_v3,                     &
+     &       imp_physics_thompson, imp_physics_wsm6,                    &
      &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
      &       imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,   &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &

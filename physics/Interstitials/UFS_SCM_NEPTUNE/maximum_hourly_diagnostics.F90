@@ -23,7 +23,8 @@ contains
 !!
 #endif
    subroutine maximum_hourly_diagnostics_run(im, levs, reset, lradar, imp_physics,                 &
-                                             imp_physics_gfdl, imp_physics_thompson,               &
+                                             imp_physics_gfdl, imp_physics_gfdl_v3,                &
+                                             imp_physics_thompson,                                 &
                                              imp_physics_fer_hires, imp_physics_nssl,              &
                                              con_g, phil,                                          &
                                              gt0, refl_10cm, refdmax, refdmax263k, u10m, v10m,     &
@@ -36,8 +37,8 @@ contains
        ! Interface variables
        integer, intent(in) :: im, levs, kdt
        logical, intent(in) :: reset, lradar, lightning_threat
-       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_fer_hires, &
-                              imp_physics_nssl
+       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_gfdl_v3,                   &
+                              imp_physics_thompson, imp_physics_fer_hires, imp_physics_nssl
        real(kind_phys), intent(in   ) :: con_g
        real(kind_phys), intent(in   ) :: con_rd
        real(kind_phys), intent(in   ) :: phil(:,:)
@@ -84,6 +85,7 @@ contains
 
 !Calculate hourly max 1-km agl and -10C reflectivity
        if (lradar .and. (imp_physics == imp_physics_gfdl .or. &
+          imp_physics == imp_physics_gfdl_v3 .or.     &
           imp_physics == imp_physics_thompson .or.    &
           imp_physics == imp_physics_fer_hires .or.   &
           imp_physics == imp_physics_nssl )) then

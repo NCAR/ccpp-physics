@@ -18,7 +18,8 @@
                xlon, xlat, gt0, gq0, sigmain,sigmaout,qmicro,           &
                imp_physics, imp_physics_mg,                             &
                imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,        &
-               imp_physics_gfdl, imp_physics_thompson, dtidx, ntlnc,    &
+               imp_physics_gfdl, imp_physics_gfdl_v3,                   &
+               imp_physics_thompson, dtidx, ntlnc,                      &
                imp_physics_wsm6, imp_physics_fer_hires, prsi, ntinc,    &
                imp_physics_nssl,                                        &
                prsl, prslk, rhcbot,rhcpbl, rhctop, rhcmax, islmsk,      &
@@ -34,7 +35,7 @@
       logical, intent(in)     :: otsptflag(:)!  on/off switch for tracer transport (size ntrac)
       integer,              intent(in   )                   :: im, levs, nn, ntrac, ntcw, ntiw, ntclamt, ntrw, ntsw,&
         ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,   &
-        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires,  &
+        imp_physics_gfdl, imp_physics_gfdl_v3, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires,  &
         imp_physics_nssl, me, index_of_process_conv_trans
       integer,              intent(in   ), dimension(:)     :: islmsk, kpbl, kinver
       logical,              intent(in   )                   :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras, progsigma
@@ -185,7 +186,7 @@
             clw(i,k,1) = gq0(i,k,ntcw)
           enddo
         enddo
-      elseif (imp_physics == imp_physics_gfdl) then
+      elseif (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_gfdl_v3) then
         clw(1:im,:,1) = gq0(1:im,:,ntcw)
       elseif (imp_physics == imp_physics_thompson) then
         do k=1,levs
