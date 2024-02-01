@@ -108,8 +108,12 @@ set(SCHEMES_OPENMP_OFF ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-
 # List of files that need to be compiled with different precision
 set(SCHEMES_DYNAMICS)
 
-if(${LOCAL_CURRENT_SOURCE_DIR}/physics/MP/GFDL/v1/fv_sat_adj.F90 IN_LIST SCHEMES)
-  list(APPEND SCHEMES_DYNAMICS ${LOCAL_CURRENT_SOURCE_DIR}/physics/MP/GFDL/v1/fv_sat_adj.F90)
+if(${LOCAL_CURRENT_SOURCE_DIR}/physics/MP/GFDL_2019_v1/fv_sat_adj.F90 IN_LIST SCHEMES)
+  list(APPEND SCHEMES_DYNAMICS ${LOCAL_CURRENT_SOURCE_DIR}/physics/MP/GFDL_2019_v1/fv_sat_adj.F90)
+endif()
+
+if(${LOCAL_CURRENT_SOURCE_DIR}/physics/MP/GFDL_2022_v3/fv_sat_adj_v3.F90 IN_LIST SCHEMES)
+  list(APPEND SCHEMES_DYNAMICS ${LOCAL_CURRENT_SOURCE_DIR}/physics/MP/GFDL_2022_v3/fv_sat_adj_v3.F90)
 endif()
 
 # Remove files that need to be compiled with different precision
