@@ -1,9 +1,9 @@
 [ccpp-table-properties]
   name = fv_sat_adj
   type = scheme
-  dependencies = ../../../hooks/machine.F,../../../hooks/physcons.F90
+  dependencies = ../../hooks/machine.F,../../hooks/physcons.F90
   dependencies = module_gfdl_cloud_microphys.F90,../multi_gases.F90
-  dependencies = ../../module_mp_radar.F90
+  dependencies = ../module_mp_radar.F90
 
 ########################################################################
 [ccpp-arg-table]
