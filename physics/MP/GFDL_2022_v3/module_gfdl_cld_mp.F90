@@ -4459,10 +4459,6 @@ subroutine pidep_pisub (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, d
             tmp = dq / (1. + tcpk (k) * dqdt)
 
             if (qi (k) .gt. qcmin) then
-
-!rsun added for ice number associated with prog_ccn 
-                cin (k) = 5.38e7 * exp (0.75 * log (qi (k) * den (k)))
-
                 if (.not. prog_ccn) then
                     if (inflag .eq. 1) &
                         cin (k) = 5.38e7 * exp (0.75 * log (qi (k) * den (k)))
