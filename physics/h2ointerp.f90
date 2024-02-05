@@ -133,6 +133,7 @@ contains
 !
       use machine , only : kind_phys
       use h2o_def
+      use w3emc, only: w3movdat
       implicit none
       integer             j,j1,j2,l,npts,nc,n1,n2
       real(kind=kind_phys) fhour,tem, tx1, tx2

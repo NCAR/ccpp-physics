@@ -164,8 +164,9 @@ contains
     end subroutine tau_amf_interp  
     
     subroutine gfs_idate_calendar(idate, fhour, ddd, fddd) 
-    
+
     use machine, only: kind_phys    		 
+    use w3emc, only: w3movdat
     implicit none  
 ! input     
     integer, intent(in)                 :: idate(4)

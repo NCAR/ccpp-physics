@@ -137,6 +137,7 @@ contains
 !
       USE MACHINE,  ONLY : kind_phys
       USE OZNE_DEF
+      USE W3EMC, ONLY: W3MOVDAT
       implicit none
       integer             iday,j,j1,j2,l,npts,nc,n1,n2
       real(kind=kind_phys) fhour,tem, tx1, tx2

@@ -6,7 +6,7 @@
 !! This module contain subroutines of reading and interpolating
 !! aerosol data for MG microphysics.
 module aerinterp
-
+    use w3emc, only: w3movdat
     implicit none
 
     private read_netfaer

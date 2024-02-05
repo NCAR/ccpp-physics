@@ -7082,6 +7082,7 @@ cjfe
      &,                tile_num_ch, i_index, j_index)
 !
       use machine , only : kind_io8,kind_io4
+      use w3emc, only: w3movdat
       implicit none
       character(len=*), intent(in) :: tile_num_ch
       integer, intent(in) :: i_index(len), j_index(len)
@@ -8614,6 +8615,7 @@ cjfe
      &,                 outlat, outlon, me)
       use machine      , only : kind_io8,kind_dbl_prec,kind_sngl_prec
       use sfccyc_module, only : mdata
+      use w3emc, only: w3movdat
       implicit none
       integer nrepmx,nvalid,imo,iyr,idy,jret,ihr,nrept,lskip,lugi,      &
      &        lgrib,j,ndata,i,inttyp,jmax,imax,ijmax,ij,jday,len,iret,  &
