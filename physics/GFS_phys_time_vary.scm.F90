@@ -2,17 +2,16 @@
 !!  Contains code related to GFS physics suite setup (physics part of time_vary_step)
 
 !>\defgroup mod_GFS_phys_time_vary GFS Physics Time Update
-!! This module contains GFS physics time vary subroutines including ozone, stratospheric water vapor,
+!! This module contains GFS physics time vary subroutines including stratospheric water vapor,
 !! aerosol, IN&CCN and surface properties updates.
 !> @{
    module GFS_phys_time_vary
 
-      use machine, only : kind_phys
+      use machine, only : kind_phys, kind_dbl_prec, kind_sngl_prec
 
       use mersenne_twister, only: random_setseed, random_number
 
-      use ozne_def, only : levozp, oz_coeff, oz_lat, oz_pres, oz_time, ozplin
-      use ozinterp, only : read_o3data, setindxoz, ozinterpol
+      use module_ozphys, only: ty_ozphys
 
       use h2o_def,   only : levh2o, h2o_coeff, h2o_lat, h2o_pres, h2o_time, h2oplin
       use h2ointerp, only : read_h2odata, setindxh2o, h2ointerpol
@@ -62,7 +61,7 @@
 !! @{
       subroutine GFS_phys_time_vary_init (                                                         &
               me, master, ntoz, h2o_phys, iaerclm, iccn, iflip, im, nx, ny, idate, xlat_d, xlon_d, &
-              jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,          &
+              jindx1_o3, jindx2_o3, ddy_o3, ozphys, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,        &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
               do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
@@ -87,7 +86,7 @@
 
          integer,              intent(inout) :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
          real(kind_phys),      intent(inout) :: ddy_o3(:),  ddy_h(:)
-         real(kind_phys),      intent(in)    :: ozpl(:,:,:), h2opl(:,:,:)
+         real(kind_phys),      intent(in)    :: h2opl(:,:,:)
          integer,              intent(inout) :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
          real(kind_phys),      intent(inout) :: ddy_aer(:), ddx_aer(:)
          real(kind_phys),      intent(in)    :: aer_nm(:,:,:)
@@ -104,6 +103,7 @@
          real(kind_phys),      intent(in)    :: min_seaice, fice(:)
          real(kind_phys),      intent(in)    :: landfrac(:)
          real(kind_phys),      intent(inout) :: weasd(:)
+         type(ty_ozphys),      intent(in)    :: ozphys
 
          ! NoahMP - only allocated when NoahMP is used
          integer, intent(in) :: lsoil, lsnow_lsm_lbound, lsnow_lsm_ubound
@@ -189,30 +189,11 @@
          jamin=999
          jamax=-999
 
-!> - Call read_o3data() to read ozone data 
-         call read_o3data (ntoz, me, master)
-
-         ! Consistency check that the hardcoded values for levozp and
-         ! oz_coeff in GFS_typedefs.F90 match what is set by read_o3data
-         ! in GFS_typedefs.F90: allocate (Tbd%ozpl (IM,levozp,oz_coeff))
-         if (size(ozpl, dim=2).ne.levozp) then
-            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",    &
-                  "levozp from read_o3data does not match value in GFS_typedefs.F90: ", &
-                  levozp, " /= ", size(ozpl, dim=2)
-            errflg = 1
-         end if
-         if (size(ozpl, dim=3).ne.oz_coeff) then
-            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",      &
-                  "oz_coeff from read_o3data does not match value in GFS_typedefs.F90: ", &
-                  oz_coeff, " /= ", size(ozpl, dim=3)
-            errflg = 1
-         end if
-
 !> - Call read_h2odata() to read stratospheric water vapor data
          call read_h2odata (h2o_phys, me, master)
 
          ! Consistency check that the hardcoded values for levh2o and
-         ! h2o_coeff in GFS_typedefs.F90 match what is set by read_o3data
+         ! h2o_coeff in GFS_typedefs.F90 match what is set by read_h2odata
          ! in GFS_typedefs.F90: allocate (Tbd%h2opl (IM,levh2o,h2o_coeff))
          if (size(h2opl, dim=2).ne.levh2o) then
             write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
@@ -266,9 +247,9 @@
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
          call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
-!> - Call setindxoz() to initialize ozone data
+!> - Setup spatial interpolation indices for ozone physics.
          if (ntoz > 0) then
-           call setindxoz (im, xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
+            call ozphys%setup_o3prog(xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
          endif
 
 !> - Call setindxh2o() to initialize stratospheric water vapor data
@@ -652,7 +633,7 @@
 !! @{
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
             me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, nsswr, fhswr, lsswr, fhour, &
-            imfdeepcnv, cal_pre, random_clds,        ntoz, h2o_phys, iaerclm, iccn, clstp,          &
+            imfdeepcnv, cal_pre, random_clds, ozphys, ntoz, h2o_phys, iaerclm, iccn, clstp,         &
             jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm,              &
@@ -686,15 +667,19 @@
          integer,              intent(in)    :: jindx1_tau(:), jindx2_tau(:)
          real(kind_phys),      intent(in)    :: ddy_j1tau(:), ddy_j2tau(:)
          real(kind_phys),      intent(inout) :: tau_amf(:)
+         type(ty_ozphys),      intent(in)    :: ozphys
          integer,              intent(in)    :: nthrds
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
 
          ! Local variables
-         integer :: i, j, k, iseed, iskip, ix
-         real(kind=kind_phys) :: wrk(1)
-         real(kind=kind_phys) :: rannie(cny)
-         real(kind=kind_phys) :: rndval(cnx*cny*nrcm)
+         integer :: i, j, k, iseed, iskip, ix, idat(8), jdat(8), iday, j1, j2, nc, n1, n2, jdow,     &
+              jdoy, jday, w3kindreal, w3kindint
+         real(kind_phys) :: wrk(1), tem, tx1, tx2, rjday
+         real(kind_phys) :: rannie(cny)
+         real(kind_phys) :: rndval(cnx*cny*nrcm)
+         real(kind_dbl_prec)  :: rinc(5)
+         real(kind_sngl_prec) :: rinc4(5)
 
          ! Initialize CCPP error handling variables
          errmsg = ''
@@ -748,11 +733,41 @@
 
          endif  ! imfdeepcnv, cal_re, random_clds
 
-!> - Call ozinterpol() to make ozone interpolation
+        !> - Compute temporal interpolation indices for updating gas concentrations.
+         idat=0
+         idat(1)=idate(4)
+         idat(2)=idate(2)
+         idat(3)=idate(3)
+         idat(5)=idate(1)
+         rinc=0.
+         rinc(2)=fhour
+         call w3kind(w3kindreal,w3kindint)
+         if(w3kindreal==4) then
+            rinc4=rinc
+            CALL w3movdat(rinc4,idat,jdat)
+         else
+            CALL w3movdat(rinc,idat,jdat)
+         endif
+         jdow = 0
+         jdoy = 0
+         jday = 0
+         call w3doxdat(jdat,jdow,jdoy,jday)
+         rjday = jdoy + jdat(5) / 24.
+         if (rjday < ozphys%time(1)) rjday = rjday + 365.
+
+         n2 = ozphys%ntime + 1
+         do j=2,ozphys%ntime
+            if (rjday < ozphys%time(j)) then
+               n2 = j
+                      exit
+            endif
+         enddo
+         n1 = n2 - 1
+         if (n2 > ozphys%ntime) n2 = n2 - ozphys%ntime
+
+!> - Update ozone concentration.
          if (ntoz > 0) then
-           call ozinterpol (me, im, idate, fhour, &
-                            jindx1_o3, jindx2_o3, &
-                            ozpl, ddy_o3)
+            call ozphys%update_o3prog(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
          endif
 
 !> - Call h2ointerpol() to make stratospheric water vapor data interpolation
@@ -846,12 +861,6 @@
          errflg = 0
 
          if (.not.is_initialized) return
-
-         ! Deallocate ozone arrays
-         if (allocated(oz_lat)  ) deallocate(oz_lat)
-         if (allocated(oz_pres) ) deallocate(oz_pres)
-         if (allocated(oz_time) ) deallocate(oz_time)
-         if (allocated(ozplin)  ) deallocate(ozplin)
 
          ! Deallocate h2o arrays
          if (allocated(h2o_lat) ) deallocate(h2o_lat)

@@ -19,10 +19,10 @@
 !! This subroutine computes a prognostic updraft area fracftion
 !! used in the closure computations in the samfshalcnv. scheme
 !!\section gen_progsigma progsigma_calc General Algorithm 
-      subroutine progsigma_calc (im,km,flag_init,flag_restart,           &
-           flag_shallow,del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,    &
-           delt,qadv,kbcon1,ktcon,cnvflg,sigmain,sigmaout,           &
-           sigmab)
+      subroutine progsigma_calc (im,km,flag_init,flag_restart,flag_shallow,&
+           flag_mid,del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,          &
+           delt,qadv,kbcon1,ktcon,cnvflg,betascu,betamcu,betadcu,          &
+           sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)
 !                                                           
 !                                                                                                                                             
       use machine,  only : kind_phys
@@ -32,11 +32,12 @@
 
 !     intent in
       integer, intent(in)  :: im,km,kbcon1(im),ktcon(im)
-      real(kind=kind_phys), intent(in)  :: hvap,delt
+      real(kind=kind_phys), intent(in)  :: hvap,delt,betascu,betamcu,betadcu, &
+                                           sigmind,sigminm,sigmins
       real(kind=kind_phys), intent(in)  :: qadv(im,km),del(im,km),    &
            qmicro(im,km),tmf(im,km),dbyo1(im,km),zdqca(im,km),           &
            omega_u(im,km),zeta(im,km)
-      logical, intent(in)  :: flag_init,flag_restart,cnvflg(im),flag_shallow
+      logical, intent(in)  :: flag_init,flag_restart,cnvflg(im),flag_shallow,flag_mid
       real(kind=kind_phys), intent(in) :: sigmain(im,km)
 
 !     intent out
@@ -53,15 +54,13 @@
 
       real(kind=kind_phys) :: gcvalmx,epsilon,ZZ,cvg,mcon,buy2,   &
                           fdqb,dtdyn,dxlim,rmulacvg,tem,     &
-                          DEN,betascu,betadcu,dp1,invdelt
+                          DEN,dp1,invdelt
 
      !Parameters
       gcvalmx = 0.1
       rmulacvg=10.
       epsilon=1.E-11
       km1=km-1
-      betadcu = 2.0
-      betascu = 8.0
       invdelt = 1./delt
 
      !Initialization 2D
@@ -206,17 +205,27 @@
          do i= 1, im
             if(cnvflg(i)) then
                sigmab(i)=sigmab(i)/betascu
-               sigmab(i)=MAX(0.03,sigmab(i))
+               sigmab(i)=MAX(sigmins,sigmab(i))
+            endif
+         enddo
+      elseif(flag_mid)then
+         do i= 1, im
+            if(cnvflg(i)) then
+               sigmab(i)=sigmab(i)/betamcu
+               sigmab(i)=MAX(sigminm,sigmab(i))
             endif
          enddo
       else
          do i= 1, im
             if(cnvflg(i)) then
                sigmab(i)=sigmab(i)/betadcu
-               sigmab(i)=MAX(0.01,sigmab(i))
+               sigmab(i)=MAX(sigmind,sigmab(i))
             endif
          enddo
       endif
+      do i= 1, im
+        sigmab(i) = MIN(0.95,sigmab(i))
+      enddo
 
      end subroutine progsigma_calc
 
