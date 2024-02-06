@@ -1,0 +1,127 @@
+[ccpp-table-properties]
+  name = h2ophys
+  type = scheme
+  dependencies = ../hooks/machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = h2ophys_init
+  type = scheme
+[h2o_phys]
+  standard_name = flag_for_stratospheric_water_vapor_physics
+  long_name = flag for stratospheric water vapor physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+
+########################################################################
+[ccpp-arg-table]
+  name = h2ophys_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical layers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[kh2o]
+  standard_name = vertical_dimension_of_h2o_forcing_data
+  long_name = number of vertical layers in h2o forcing data
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[dt]
+  standard_name = timestep_for_physics
+  long_name = physics time step
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[h2o]
+  standard_name = specific_humidity_of_new_state
+  long_name = water vapor specific humidity updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[ph2o]
+  standard_name = natural_log_of_h2o_forcing_data_pressure_levels
+  long_name = natural log of h2o forcing data pressure levels
+  units = 1
+  dimensions = (vertical_dimension_of_h2o_forcing_data)
+  type = real
+  kind = kind_phys
+  intent = in
+[prsl]
+  standard_name = air_pressure
+  long_name = mid-layer pressure
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[h2opltc]
+  standard_name = stratospheric_water_vapor_forcing
+  long_name = water forcing data
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_h2o_forcing_data,number_of_coefficients_in_h2o_forcing_data)
+  type = real
+  kind = kind_phys
+  intent = in
+[h2o_coeff]
+  standard_name = number_of_coefficients_in_h2o_forcing_data
+  long_name = number of coefficients in h2o forcing data
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[me]
+  standard_name = mpi_rank
+  long_name = rank of the current MPI task
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+
