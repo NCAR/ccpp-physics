@@ -30,7 +30,8 @@ contains
 !! \htmlinclude cu_c3_driver_init.html
 !!
       subroutine cu_c3_driver_init(imfshalcnv, imfshalcnv_c3, imfdeepcnv, &
-                          imfdeepcnv_c3,mpirank, mpiroot, errmsg, errflg)
+                          imfdeepcnv_c3,progsigma, cnx, mpirank, mpiroot, &
+                          errmsg, errflg)
 
          implicit none
 
@@ -38,12 +39,21 @@ contains
          integer,                   intent(in) :: imfdeepcnv, imfdeepcnv_c3
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
+         integer,                   intent(in)    :: cnx
+         logical,                   intent(inout) :: progsigma
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
 
          ! initialize ccpp error handling variables
          errmsg = ''
          errflg = 0
+
+         if(progsigma)then
+            if(cnx < 384)then
+               progsigma=.false.
+               write(*,*)'Forcing prognostic closure to .false. due to coarse resolution'
+            endif
+         endif
 
       end subroutine cu_c3_driver_init
 
@@ -60,7 +70,8 @@ contains
       subroutine cu_c3_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
                do_ca,progsigma,cactiv,cactiv_m,g,cp,fv,r_d,xlv,r_v,forcet,      &
                forceqv_spechum,phil,delp,raincv,tmf,qmicro,sigmain,             &
-               qv_spechum,t,cld1d,us,vs,t2di,w,qv2di_spechum,p2di,psuri,        &
+               betascu,betamcu,betadcu,qv_spechum,t,cld1d,us,vs,t2di,w,         &
+               qv2di_spechum,p2di,psuri,                                        &
                hbot,htop,kcnv,xland,hfx2,qfx2,aod_gf,cliw,clcw,ca_deep,rainevap,&
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
                flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
@@ -96,10 +107,10 @@ contains
    integer, intent(in   ) :: ichoice_in,ichoicem_in,ichoice_s_in
    logical, intent(in   ) :: flag_init, flag_restart, do_mynnedmf
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend, &
-        do_ca,progsigma
-   real (kind=kind_phys), intent(in) :: g,cp,fv,r_d,xlv,r_v
+        do_ca
+   real (kind=kind_phys), intent(in) :: g,cp,fv,r_d,xlv,r_v,betascu,betamcu,betadcu
    logical, intent(in   ) :: ldiag3d
-
+   logical, intent(in   ) :: progsigma
    real(kind=kind_phys), intent(inout)                      :: dtend(:,:,:)
 !$acc declare copy(dtend)
    integer, intent(in)                                      :: dtidx(:,:), &
@@ -587,7 +598,7 @@ contains
       hfx(i)=hfx2(i)*cp*rhoi(i,1)
       qfx(i)=qfx2(i)*xlv*rhoi(i,1)
       dx(i) = sqrt(garea(i))
-     enddo
+     enddo    
 
      do i=its,itf
       do k=kts,kpbli(i)
@@ -669,7 +680,8 @@ contains
                          zus,xmbs,kbcons,ktops,k22s,ierrs,ierrcs,                &
 ! Prog closure
                          flag_init, flag_restart,fv,r_d,delp,tmfq,qmicro,        &
-                         forceqv_spechum,sigmain,sigmaout,progsigma,dx,          &
+                         forceqv_spechum,betascu,betamcu,betadcu,sigmain,        &
+                         sigmaout,progsigma,dx,                                  &
 ! output tendencies
                          outts,outqs,outqcs,outus,outvs,cnvwt,prets,cupclws,     &
 ! dimesnional variables
@@ -714,6 +726,9 @@ contains
               ,tmfq          &
               ,qmicro        &
               ,forceqv_spechum &
+              ,betascu       &
+              ,betamcu       &
+              ,betadcu       &
               ,sigmain       &
               ,sigmaout      &
               ,ter11         &
@@ -805,6 +820,9 @@ contains
               ,tmfq          &
               ,qmicro        &
               ,forceqv_spechum &
+              ,betascu       &
+              ,betamcu       &
+              ,betadcu       &
               ,sigmain       &
               ,sigmaout      &
               ,ter11         &
