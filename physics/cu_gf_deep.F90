@@ -3,6 +3,7 @@
 
 module cu_gf_deep
      use machine , only : kind_phys
+     use physcons, only : qamin
      real(kind=kind_phys), parameter::g=9.81
      real(kind=kind_phys), parameter:: cp=1004.
      real(kind=kind_phys), parameter:: xlv=2.5e6
@@ -124,6 +125,11 @@ contains
               ,frh_out       &  ! fractional coverage
               ,ierr          &  ! ierr flags are error flags, used for debugging
               ,ierrc         &  ! the following should be set to zero if not available
+              ,nchem         &
+              ,fscav         &
+              ,chem3d        &
+              ,wetdpc_deep   &
+              ,do_smoke_transport   &
               ,rand_mom      &  ! for stochastics mom, if temporal and spatial patterns exist
               ,rand_vmas     &  ! for stochastics vertmass, if temporal and spatial patterns exist
               ,rand_clos     &  ! for stochastics closures, if temporal and spatial patterns exist
@@ -144,7 +150,7 @@ contains
         ,intent (in   )                   ::                &
         nranflag,itf,ktf,its,ite, kts,kte,ipr,imid
      integer, intent (in   )              ::                &
-        ichoice
+        ichoice,nchem
      real(kind=kind_phys),  dimension (its:ite,4)                 &
         ,intent (in  )                   ::  rand_clos
      real(kind=kind_phys),  dimension (its:ite)                   &
@@ -163,17 +169,17 @@ contains
   ! outq   = output q tendency (per s)
   ! outqc  = output qc tendency (per s)
   ! pre    = output precip
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:ite,kts:kte)              &
         ,intent (inout  )                   ::                         &
         cnvwt,outu,outv,outt,outq,outqc,cupclw
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:ite)                      &
         ,intent (out    )                   ::                         &
         frh_out
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:ite)                      &
         ,intent (inout  )                   ::                         &
         pre,xmb_out
 !$acc declare copy(cnvwt,outu,outv,outt,outq,outqc,cupclw,frh_out,pre,xmb_out)
-     real(kind=kind_phys),    dimension (its:ite)                                      &
+     real(kind=kind_phys),    dimension (its:ite)                      &
         ,intent (in  )                   ::                            &
         hfx,qfx,xmbm_in,xmbs_in
 !$acc declare copyin(hfx,qfx,xmbm_in,xmbs_in)
@@ -190,29 +196,36 @@ contains
   ! omega (omeg), windspeed (us,vs), and a flag (ierr) to turn off
   ! convection for this call only and at that particular gridpoint
   !
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:ite,kts:kte)              &
         ,intent (in   )                   ::                           &
         dhdt,rho,t,po,us,vs,tn
 !$acc declare copyin(dhdt,rho,t,po,us,vs,tn)
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:ite,kts:kte)              &
         ,intent (inout   )                ::                           &
         omeg
 !$acc declare copy(omeg)
-     real(kind=kind_phys),    dimension (its:ite,kts:kte)                              &
+     real(kind=kind_phys),    dimension (its:ite,kts:kte)              &
         ,intent (inout)                   ::                           &
          q,qo,zuo,zdo,zdm
 !$acc declare copy(q,qo,zuo,zdo,zdm)
-     real(kind=kind_phys), dimension (its:ite)                                         &
+     real(kind=kind_phys), dimension (its:ite)                         &
         ,intent (in   )                   ::                           &
         dx,z1,psur,xland
 !$acc declare copyin(dx,z1,psur,xland)
-     real(kind=kind_phys), dimension (its:ite)                                         &
+     real(kind=kind_phys), dimension (its:ite)                         &
         ,intent (inout   )                ::                           &
         mconv,ccn
 !$acc declare copy(mconv,ccn)
+     real(kind=kind_phys), dimension (:,:,:)                           &
+        ,intent (inout)                   ::                           &
+        chem3d
+     logical, intent (in) :: do_smoke_transport
+     real(kind=kind_phys), dimension (:,:)                             &
+         , intent (out) :: wetdpc_deep
+     real(kind=kind_phys), intent (in) :: fscav(:)
+!$acc declare copy(chem3d) copyout(wetdpc_deep) copyin(fscav)
 
-       
-       real(kind=kind_phys)                                                            &
+     real(kind=kind_phys)                                              &
         ,intent (in   )                   ::                           &
         dtime,ccnclean
 
@@ -220,11 +233,11 @@ contains
 !
 !  local ensemble dependent variables in this routine
 !
-     real(kind=kind_phys),    dimension (its:ite,1)  ::                                &
+     real(kind=kind_phys),    dimension (its:ite,1)  ::                 &
         xaa0_ens
-     real(kind=kind_phys),    dimension (its:ite,1)  ::                                &
+     real(kind=kind_phys),    dimension (its:ite,1)  ::                 &
         edtc
-     real(kind=kind_phys),    dimension (its:ite,kts:kte,1) ::                         &
+     real(kind=kind_phys),    dimension (its:ite,kts:kte,1) ::          &
         dellat_ens,dellaqc_ens,dellaq_ens,pwo_ens
 !$acc declare create(xaa0_ens,edtc,dellat_ens,dellaqc_ens,dellaq_ens,pwo_ens)
 !
@@ -292,8 +305,20 @@ contains
   ! xmb    = total base mass flux
   ! hc = cloud moist static energy
   ! hkb = moist static energy at originating level
+     real(kind=kind_phys), dimension (its:ite,kts:kte,nchem) ::           &
+         chem
+     real(kind=kind_phys), dimension (its:ite,kts:kte,nchem) ::           &
+         chem_cup,chem_up,chem_down,dellac,dellac2,chem_c,chem_pw,chem_pwd
+     real(kind=kind_phys), dimension (its:ite,nchem)   ::                 &
+         chem_pwav,chem_psum
+     real(kind=kind_phys):: dtime_max,sum1,sum2
+     real(kind=kind_phys), dimension (kts:kte) :: trac,trcflx_in,trcflx_out,trc,trco
+     real(kind=kind_phys), dimension (its:ite,kts:kte) :: pwdper, massflx
+     integer :: nv
+!$acc declare create(chem,chem_cup,chem_up,chem_down,dellac,dellac2,chem_c,chem_pw,chem_pwd,   &
+!$acc                         chem_pwav,chem_psum,pwdper,massflux)
 
-     real(kind=kind_phys),    dimension (its:ite,kts:kte) ::                            &
+     real(kind=kind_phys),    dimension (its:ite,kts:kte) ::            &
         entr_rate_2d,mentrd_rate_2d,he,hes,qes,z, heo,heso,qeso,zo,     &                    
         xhe,xhes,xqes,xz,xt,xq,qes_cup,q_cup,he_cup,hes_cup,z_cup,      &
         p_cup,gamma_cup,t_cup, qeso_cup,qo_cup,heo_cup,heso_cup,        &
@@ -330,13 +355,13 @@ contains
   ! xaa0    = cloud work function with cloud effects (ensemble dependent)
   ! edt     = epsilon
 
-     real(kind=kind_phys),    dimension (its:ite) ::                                     &
-       edt,edto,edtm,aa1,aa0,xaa0,hkb,                                        &
+     real(kind=kind_phys),    dimension (its:ite) ::                     &
+       edt,edto,edtm,aa1,aa0,xaa0,hkb,                                   &
        hkbo,xhkb,                                                        &
        xmb,pwavo,ccnloss,                                                &
        pwevo,bu,bud,cap_max,                                             &
        cap_max_increment,closure_n,psum,psumh,sig,sigd
-     real(kind=kind_phys),    dimension (its:ite) ::                                     &
+     real(kind=kind_phys),    dimension (its:ite) ::                     &
         axx,edtmax,edtmin,entr_rate
      integer,    dimension (its:ite) ::                                  &
        kzdown,kdet,k22,jmin,kstabi,kstabm,k22x,xland1,                   &
@@ -372,10 +397,10 @@ contains
      
      character*50 :: ierrc(its:ite)
      character*4  :: cumulus
-     real(kind=kind_phys),    dimension (its:ite,kts:kte) ::                              &
+     real(kind=kind_phys),    dimension (its:ite,kts:kte) ::              &
        up_massentr,up_massdetr,c1d                                        &
       ,up_massentro,up_massdetro,dd_massentro,dd_massdetro
-     real(kind=kind_phys),    dimension (its:ite,kts:kte) ::                              &
+     real(kind=kind_phys),    dimension (its:ite,kts:kte) ::              &
        up_massentru,up_massdetru,dd_massentru,dd_massdetru
 !$acc declare create(up_massentr,up_massdetr,c1d,up_massentro,up_massdetro,dd_massentro,dd_massdetro, &
 !$acc                up_massentru,up_massdetru,dd_massentru,dd_massdetru)
@@ -401,7 +426,8 @@ contains
      real(kind=kind_phys),    dimension (its:ite,kts:kte) :: dtempdz
      integer, dimension (its:ite,kts:kte) ::  k_inv_layers 
      real(kind=kind_phys),    dimension (its:ite) :: c0    ! HCB
-!$acc declare create(pmin_lev,start_level,ktopkeep,dtempdz,k_inv_layers,c0)
+     real(kind=kind_phys),    dimension (its:ite,kts:kte) :: c0t3d    ! hli for smoke/dust wet scavenging
+!$acc declare create(pmin_lev,start_level,ktopkeep,dtempdz,k_inv_layers,c0,c0t3d)
  
 ! rainevap from sas
      real(kind=kind_phys) zuh2(40)
@@ -1058,14 +1084,14 @@ contains
       if(imid.eq.1)then
         call cup_up_moisture('mid',ierr,zo_cup,qco,qrco,pwo,pwavo,               &
              p_cup,kbcon,ktop,dbyo,clw_all,xland1,                               &
-             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,                           &
+             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,c0t3d,                     &
              zqexec,ccn,ccnclean,rho,c1d,tn_cup,autoconv,up_massentr,up_massdetr,psum,psumh,       &
              1,itf,ktf,                                                          &
              its,ite, kts,kte)
       else
          call cup_up_moisture('deep',ierr,zo_cup,qco,qrco,pwo,pwavo,             &
              p_cup,kbcon,ktop,dbyo,clw_all,xland1,                               &
-             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,                           &
+             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,c0t3d,                     &
              zqexec,ccn,ccnclean,rho,c1d,tn_cup,autoconv,up_massentr,up_massdetr,psum,psumh,       &
              1,itf,ktf,                                                          &
              its,ite, kts,kte)
@@ -2012,6 +2038,186 @@ contains
       call rain_evap_below_cloudbase(itf,ktf,its,ite,                    &
            kts,kte,ierr,kbcon,xmb,psur,xland,qo_cup,                     &
            po_cup,qes_cup,pwavo,edto,pwevo,pre,outt,outq)      !,outbuoy)
+
+!
+!
+!>- atmospheric composition tracers
+!
+!>  ## Determine whether to perform aerosol transport
+        if (do_smoke_transport .and. nchem > 0) then
+!
+! initialize tracers if they exist
+!
+         chem (:,:,:) = 0.
+!$acc kernels
+         do nv = 1,nchem
+          do k = 1, ktf
+           do i = 1, itf
+            chem(i,k,nv) = max(qamin, chem3d(i,k,nv))
+           enddo
+          enddo
+         enddo
+
+         wetdpc_deep = 0.
+
+         chem_pwav(:,:)   = 0.
+         chem_psum(:,:)   = 0.
+         chem_pw  (:,:,:) = 0.
+         chem_pwd (:,:,:) = 0.
+         pwdper   (:,:)   = 0.
+         chem_down(:,:,:) = 0.
+         chem_up  (:,:,:) = 0.
+         chem_c   (:,:,:) = 0.
+         chem_cup (:,:,:) = 0.
+
+         do i=its,itf
+           if(ierr(i).eq.0)then
+           do k=kts,jmin(i)
+             if(pwavo(i).ne.0.) pwdper(i,k)=-edtc(i,1)*pwdo(i,k)/pwavo(i)
+           enddo
+           pwdper(i,:)=0.
+           do nv=1,nchem
+             do k=kts+1,ktf
+                chem_cup(i,k,nv)=.5*(chem(i,k-1,nv)+chem(i,k,nv))
+             enddo
+             chem_cup(i,kts,nv)=chem(i,kts,nv)
+!
+! in updraft
+!
+             do k=1,k22(i)
+                chem_up(i,k,nv)=chem_cup(i,k,nv)
+             enddo
+             do k=k22(i)+1,ktop(i)
+                chem_up(i,k,nv)=(chem_up(i,k-1,nv)*zuo(i,k-1)                  &
+                         -.5*up_massdetr(i,k-1)*chem_up(i,k-1,nv)+             &
+                         up_massentr(i,k-1)*chem(i,k-1,nv))   /                &
+                         (zuo(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1))
+                chem_c(i,k,nv)=fscav(nv)*chem_up(i,k,nv)
+                dz=zo_cup(i,K)-zo_cup(i,K-1)
+                trash2=chem_up(i,k,nv)-chem_c(i,k,nv)
+                trash=chem_c(i,k,nv)/(1.+c0t3d(i,k)*dz)
+                chem_pw=c0t3d(i,k)*dz*trash*zuo(i,k)
+                chem_up(i,k,nv)=trash2+trash
+                chem_pwav(i,nv)=chem_pwav(i,nv)+chem_pw(i,k,nv)! *g/dp
+              enddo
+              do k=ktop(i)+1,ktf
+                 chem_up(i,k,nv)=chem_cup(i,k,nv)
+              enddo
+!
+! in downdraft
+!
+               chem_down(i,jmin(i)+1,nv)=chem_cup(i,jmin(i)+1,nv)
+               chem_psum(i,nv)=0.
+               do ki=jmin(i),2,-1
+                 dp=100.*(po_cup(i,ki)-po_cup(i,ki+1))
+                 chem_down(i,ki,nv)=(chem_down(i,ki+1,nv)*zdo(i,ki+1)          &
+                       -.5_kind_phys*dd_massdetro(i,ki)*chem_down(i,ki+1,nv)+            &
+                       dd_massentro(i,ki)*chem(i,ki,nv))   /                   &
+                       (zdo(i,ki+1)-.5_kind_phys*dd_massdetro(i,ki)+dd_massentro(i,ki))
+                 chem_down(i,ki,nv)=chem_down(i,ki,nv)+pwdper(i,ki)*chem_pwav(i,nv)
+                 chem_pwd(i,ki,nv)=max(0._kind_phys,pwdper(i,ki)*chem_pwav(i,nv))
+               enddo
+!   total wet deposition
+               do k=1,ktf-1
+                  dp=100.*(po_cup(i,k)-po_cup(i,k+1))
+                  chem_psum(i,nv)=chem_psum(i,nv)+chem_pw(i,k,nv)*g !/dp
+               enddo
+               chem_psum(i,nv)=chem_psum(i,nv)*xmb(i)*dtime
+!
+              enddo ! nchem
+            endif ! ierr=0
+          enddo ! i
+
+      dellac(:,:,:)=0.
+
+      do nv=1,nchem
+      do i=its,itf
+        if(ierr(i).eq.0)then
+          dp=100.*(po_cup(i,1)-po_cup(i,2))
+          dellac(i,1,nv)=dellac(i,1,nv)+(edto(i)*zdo(i,2)*chem_down(i,2,nv))*g/dp*xmb(i)
+          if(k22(i).eq.2)then
+             entupk=zuo(i,2)
+             dellac(i,1,nv)=dellac(i,1,nv)-entupk*chem_cup(i,2,nv)*g/dp*xmb(i)
+          endif
+          do k=kts+1,ktop(i)-1
+               detup=0.
+               detdo=0.
+               entup=0.
+               entdo=0.
+               entdoj=0.
+               dp=100.*(po_cup(i,k)-po_cup(i,k+1))
+            !  entrainment/detrainment for updraft
+               entdo=edto(i)*dd_massentro(i,k)*chem(i,k,nv)
+               detdo=edto(i)*dd_massdetro(i,k)*.5*(chem_down(i,k+1,nv)+chem_down(i,k,nv))
+               entup=up_massentro(i,k)*chem(i,k,nv)
+               detup=up_massdetro(i,k)*.5*(chem_up(i,k+1,nv)+chem_up(i,k,nv))
+            !  special levels
+               if(k == k22(i)-1) then
+                  entup=zuo(i,k+1)*chem_cup(i,k+1,nv)
+                  detup=0.
+               endif
+               if(k.eq.jmin(i))entdoj=edto(i)*zdo(i,k)*chem_cup(i,k,nv)
+! mass budget
+               dellac(i,k,nv) =dellac(i,k,nv) + (detup+detdo-entdo-entup-entdoj)*g/dp*xmb(i)
+          enddo
+               dellac(i,ktop(i),nv)=zuo(i,ktop(i))*chem_up(i,ktop(i),nv)*g/dp*xmb(i)
+         endif ! ierr
+       enddo ! i
+       enddo ! nchem loop
+
+! fct for subsidence
+      dellac2(:,:,:)=0.
+      massflx(:,:)=0.
+      do nv=1,nchem
+!$acc loop private(trcflx_in)
+      do i=its,itf
+        if(ierr(i).eq.0)then
+         trcflx_in(:)=0.
+         dtime_max=dtime
+
+! initialize fct routine
+         do k=kts,ktop(i)
+            dp=100._kind_phys*(po_cup(i,k)-po_cup(i,k+1))
+            dtime_max=min(dtime_max,.5_kind_phys*dp)
+            massflx(i,k)=-xmb(i)*(zuo(i,k)-edto(i)*zdo(i,k))
+            trcflx_in(k)=massflx(i,k)*chem_cup(i,k,nv)
+         enddo
+         trcflx_in(1)=0.
+         massflx(i,1)=0.
+         call fct1d3(ktop(i),kte,dtime_max,po_cup(i,:),chem(i,:,nv),massflx(i,:),   &
+                     trcflx_in,dellac2(i,:,nv),g)
+         do k=kts,ktop(i)
+             trash=chem (i,k,nv)
+             chem (i,k,nv)=chem (i,k,nv) + (dellac(i,k,nv)+dellac2(i,k,nv))*dtime
+             if(chem(i,k,nv).lt.qamin)then
+               dp=100.*(po_cup(i,k)-po_cup(i,k+1))
+               wetdpc_deep(i,nv)=wetdpc_deep(i,nv)+(qamin-chem(i,k,nv))*dp/g/dtime
+               chem(i,k,nv)=qamin
+             endif
+         enddo
+        endif
+
+       enddo ! i
+       enddo ! nchem loop
+
+!> - Store aerosol concentrations if present
+       do nv = 1, nchem
+        do i = 1, itf
+         do k = 1, ktf
+          if(ierr(i).eq.0) then
+            if (k <= ktop(i)) then
+             dp=100.*(po_cup(i,k)-po_cup(i,k+1))
+             wetdpc_deep(i,nv)=wetdpc_deep(i,nv) + ((chem3d(i,k,nv)-chem(i,k,nv))*dp/(g*dtime))
+             chem3d(i,k,nv) = chem(i,k,nv)
+            endif
+           endif
+          enddo
+          wetdpc_deep(i,nv)=max(wetdpc_deep(i,nv),qamin)
+         enddo
+        enddo
+!$acc end kernels
+
+      endif ! nchem > 0
 
       k=1
 !$acc kernels
@@ -4101,7 +4307,7 @@ endif
 !> Calculates moisture properties of the updraft.
    subroutine cup_up_moisture(name,ierr,z_cup,qc,qrc,pw,pwav,     &
               p_cup,kbcon,ktop,dby,clw_all,xland1,                &
-              q,gamma_cup,zu,qes_cup,k22,qe_cup,c0,               &
+              q,gamma_cup,zu,qes_cup,k22,qe_cup,c0,c0t3d,         &
               zqexec,ccn,ccnclean,rho,c1d,t,autoconv,             &
               up_massentr,up_massdetr,psum,psumh,                 &
               itest,itf,ktf,                                      &
@@ -4137,11 +4343,13 @@ endif
      real(kind=kind_phys),    dimension (its:ite)                                 &
         ,intent (in   )                   ::                      &
         zqexec,c0
+     real(kind=kind_phys),    dimension (its:ite,kts:kte), intent (out) :: c0t3d
   ! entr= entrainment rate 
      integer, dimension (its:ite)                                 &
         ,intent (in   )                   ::                      &
         kbcon,ktop,k22,xland1
 !$acc declare copyin(p_cup,rho,q,zu,gamma_cup,qe_cup,up_massentr,up_massdetr,dby,qes_cup,z_cup,zqexec,c0,kbcon,ktop,k22,xland1)
+!$acc declare copy(c0t3d)
      real(kind=kind_phys),    intent (in  ) ::                    & ! HCB
         ccnclean
 !
@@ -4218,6 +4426,9 @@ endif
         c0_iceconv=0.01
         c1d_b=c1d
         bdsp(:)=bdispm
+!$acc kernels
+        c0t3d = 0.
+!$acc end kernels
 
 !
 !--- no precip for small clouds
@@ -4288,6 +4499,7 @@ endif
               else
                c0t = c0(i) * exp(c0_iceconv * (t(i,k) - 273.16))
               endif
+              c0t3d(i,k)=c0t
               qc(i,k)=   (qc(i,k-1)*zu(i,k-1)-.5*up_massdetr(i,k-1)* qc(i,k-1)+ &
                          up_massentr(i,k-1)*q(i,k-1))   /                       &
                          (zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1))
@@ -4320,6 +4532,7 @@ endif
                   c0t = c0(i) * exp(c0_iceconv * (t(i,k) - 273.16))
                endif
                if(is_mid)c0t=0.004
+               c0t3d(i,k)=c0t
 
                if(autoconv .gt.1) c0t=c0(i)
                denom=zu(i,k-1)-.5*up_massdetr(i,k-1)+up_massentr(i,k-1)

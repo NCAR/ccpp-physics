@@ -67,8 +67,8 @@ contains
                fhour,fh_dfi_radar,ix_dfi_radar,num_dfi_radar,cap_suppress,      &
                dfi_radar_max_intervals,ldiag3d,qci_conv,do_cap_suppress,        &
                maxupmf,maxMF,do_mynnedmf,ichoice_in,ichoicem_in,ichoice_s_in,   &
-               spp_cu_deep,spp_wts_cu_deep,                                     &
-               errmsg,errflg)
+               spp_cu_deep,spp_wts_cu_deep,nchem,chem3d,fscav,wetdpc_deep,      &
+               do_smoke_transport,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -86,7 +86,7 @@ contains
      &                    spp_wts_cu_deep
       real(kind=kind_phys) :: spp_wts_cu_deep_tmp
 
-      logical, intent(in) :: do_cap_suppress
+      logical, intent(in) :: do_cap_suppress, do_smoke_transport
       real(kind=kind_phys), parameter :: aodc0=0.14
       real(kind=kind_phys), parameter :: aodreturn=30.
       real(kind=kind_phys) :: dts,fpi,fp
@@ -95,7 +95,7 @@ contains
       integer            :: ishallow_g3 ! depend on imfshalcnv
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte
-   integer, intent(in   ) :: im,km,ntracer
+   integer, intent(in   ) :: im,km,ntracer, nchem
    integer, intent(in   ) :: ichoice_in,ichoicem_in,ichoice_s_in
    logical, intent(in   ) :: flag_init, flag_restart, do_mynnedmf
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
@@ -154,7 +154,11 @@ contains
 
    integer, intent(in   ) :: imfshalcnv
    integer, dimension(:), intent(inout) :: cactiv,cactiv_m
-!$acc declare copy(cactiv,cactiv_m)
+   real(kind_phys), dimension(:), intent(in) :: fscav
+!$acc declare copyin(fscav)
+   real(kind_phys), dimension(:,:,:), intent(inout) :: chem3d
+   real(kind_phys), dimension(:,:), intent(inout) :: wetdpc_deep
+!$acc declare copy(cactiv,cactiv_m,chem3d,wetdpc_deep)
 
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
@@ -179,19 +183,20 @@ contains
    real(kind=kind_phys), dimension (im)    :: tau_ecmwf,edt,edtm,edtd,ter11,aa0,xlandi
    real(kind=kind_phys), dimension (im)    :: pret,prets,pretm,hexec
    real(kind=kind_phys), dimension (im,10) :: forcing,forcing2
+   real(kind=kind_phys), dimension (im,nchem) :: wetdpc_mid
 
    integer, dimension (im) :: kbcon, ktop,ierr,ierrs,ierrm,kpbli
    integer, dimension (im) :: k22s,kbcons,ktops,k22,jmin,jminm
    integer, dimension (im) :: kbconm,ktopm,k22m
 !$acc declare create(k22_shallow,kbcon_shallow,ktop_shallow,rand_mom,rand_vmas,        &
-!$acc                rand_clos,gdc,gdc2,ht,ccn_gf,ccn_m,dx,frhm,frhd, &
+!$acc                rand_clos,gdc,gdc2,ht,ccn_gf,ccn_m,dx,frhm,frhd,wetdpc_mid, &
 !$acc                outt,outq,outqc,phh,subm,cupclw,cupclws, &
 !$acc                dhdt,zu,zus,zd,phf,zum,zdm,outum,outvm,   &
 !$acc                outts,outqs,outqcs,outu,outv,outus,outvs, &
 !$acc                outtm,outqm,outqcm,submm,cupclwm,         &
 !$acc                cnvwt,cnvwts,cnvwtm,hco,hcdo,zdo,zdd,hcom,hcdom,zdom, &
 !$acc                tau_ecmwf,edt,edtm,edtd,ter11,aa0,xlandi, &
-!$acc                pret,prets,pretm,hexec,forcing,forcing2,  &
+!$acc                pret,prets,pretm,hexec,forcing,forcing2,wetdpc_mid,  &
 !$acc                kbcon, ktop,ierr,ierrs,ierrm,kpbli, &
 !$acc                k22s,kbcons,ktops,k22,jmin,jminm,kbconm,ktopm,k22m)
 
@@ -743,6 +748,11 @@ contains
               ,frhm          &
               ,ierrm         &
               ,ierrcm        &
+              ,nchem         &
+              ,fscav         &
+              ,chem3d        &
+              ,wetdpc_mid    &
+              ,do_smoke_transport   &
 !    the following should be set to zero if not available
               ,rand_mom      & ! for stochastics mom, if temporal and spatial patterns exist
               ,rand_vmas     & ! for stochastics vertmass, if temporal and spatial patterns exist
@@ -825,6 +835,11 @@ contains
               ,frhd         &
               ,ierr         &
               ,ierrc        &
+              ,nchem        &
+              ,fscav        &
+              ,chem3d       &
+              ,wetdpc_deep  &
+              ,do_smoke_transport     &
 !    the following should be set to zero if not available
               ,rand_mom      & ! for stochastics mom, if temporal and spatial patterns exist
               ,rand_vmas     & ! for stochastics vertmass, if temporal and spatial patterns exist
