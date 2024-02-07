@@ -2,7 +2,7 @@
   name = GFS_rrtmg_pre
   type = scheme
   dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,module_mp_radar.F90,module_mp_thompson.F90
-  dependencies = module_mp_thompson_make_number_concentrations.F90,radcons.f90,radiation_aerosols.f
+  dependencies = module_mp_thompson_make_number_concentrations.F90,radcons.f90,radiation_aerosols.f,module_ozphys.F90
   dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radlw_param.f,radsw_param.f,surface_perturbation.F90,radiation_cloud_overlap.F90
 
 ########################################################################
@@ -246,6 +246,13 @@
   units = index
   dimensions = ()
   type = integer
+  intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
   intent = in
 [iaermdl]
   standard_name = control_for_aerosol_radiation_scheme

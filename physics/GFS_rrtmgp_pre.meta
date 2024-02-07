@@ -2,7 +2,7 @@
   name = GFS_rrtmgp_pre
   type = scheme
   dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,radcons.f90,radiation_aerosols.f
-  dependencies = radiation_astronomy.f,radiation_gases.f,radiation_tools.F90,rrtmg_lw_cloud_optics.F90
+  dependencies = radiation_astronomy.f,radiation_gases.f,radiation_tools.F90,rrtmg_lw_cloud_optics.F90,module_ozphys.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -503,6 +503,13 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
