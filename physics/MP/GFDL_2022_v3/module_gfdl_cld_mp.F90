@@ -391,8 +391,7 @@ module module_gfdl_cld_mp
     real :: tau_v2l = 150.0 ! water vapor to cloud water condensation time scale (s)
     real :: tau_l2v = 300.0 ! cloud water to water vapor evaporation time scale (s)
     real :: tau_revp = 0.0 ! rain evaporation time scale (s)
-    !rsun real :: tau_imlt = 1200.0 ! cloud ice melting time scale (s) ! ori in v3 
-    real :: tau_imlt = 600.0 ! cloud ice melting time scale (s) ! 600.0 is the origin in v1 
+    real :: tau_imlt = 1200.0 ! cloud ice melting time scale (s) 
     real :: tau_smlt = 900.0 ! snow melting time scale (s)
     real :: tau_gmlt = 600.0 ! graupel melting time scale (s)
     real :: tau_wbf = 300.0 ! graupel melting time scale (s)
@@ -1367,8 +1366,6 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
 
         enddo
 
-!rsun ke is sufface 
-
         do k = ks, ke
             denfac (k) = sqrt (den (ke) / den (k))
         enddo
@@ -1608,10 +1605,6 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
             qg (i, k) = qgz (k)
             qa (i, k) = qaz (k)
    
-!rsun 
-            !if(qaz(k) > 0.0) print*,'qa(i,k):',i,k, qaz(k)
-            
-
             ! -----------------------------------------------------------------------
             ! calculate some more variables needed outside
             ! -----------------------------------------------------------------------
@@ -6065,11 +6058,6 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
         enddo
     endif
 
-
-    !print*,'cld_eff_rad: radius option:',rewflag, reiflag, resflag, rerflag, regflag: 1  2 1   1  1
-    !print*,'in cld_eff_rad:ccn_o, ccn_l:',ccn_o, ccn_l
-
-
     do i = is, ie
 
         do k = ks, ke
@@ -6481,7 +6469,6 @@ subroutine rad_ref (is, ie, js, je, qv, qr, qs, qg, pt, delp, &
             ! -----------------------------------------------------------------------
 
             do k = 1, npz
-                ! rsun: find more about this 
                 !if (hydrostatic) then
                 !    den (k) = delp (i, j, k) / ((peln (i, k + 1, j) - peln (i, k, j)) * &
                 !        rdgas * pt (i, j, k) * (1. + zvir * qv (i, j, k)))
