@@ -4,7 +4,7 @@
 
  module rrfs_smoke_wrapper
 
-   use mpi_f90
+   use mpi_f08
    use machine ,              only : kind_phys
    use rrfs_smoke_config,     only : kemit, dust_opt, seas_opt, do_plumerise,           &
                                      addsmoke_flag, plumerisefire_frq, wetdep_ls_opt,   &
