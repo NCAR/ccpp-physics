@@ -24,6 +24,7 @@ module rrfs_smoke_config
   integer :: addsmoke_flag = 1
   integer :: smoke_forecast = 1
   integer :: plumerisefire_frq=60
+  integer :: n_dbg_lines = 3
   integer :: wetdep_ls_opt = 1
   integer :: drydep_opt  = 1
   integer :: pm_settling = 1
