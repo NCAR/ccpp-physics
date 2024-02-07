@@ -74,8 +74,6 @@ contains
     ! Initialize the CCPP error handling variables
     errmsg = ''
     errflg = 0
-    
-    if (is_initialized) return
 
     ! Consistency checks
     if (.not. do_RRTMGP) then
@@ -124,6 +122,8 @@ contains
     month0 = 0
     iyear0 = 0
     monthd = 0
+
+    if (is_initialized) return
 
     ! Call initialization routines..
     call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002, con_pi )
