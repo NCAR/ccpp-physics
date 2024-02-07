@@ -4,6 +4,7 @@
 
  module rrfs_smoke_wrapper
 
+   use mpi_f90
    use machine ,              only : kind_phys
    use rrfs_smoke_config,     only : kemit, dust_opt, seas_opt, do_plumerise,           &
                                      addsmoke_flag, plumerisefire_frq, wetdep_ls_opt,   &
@@ -225,7 +226,7 @@ contains
     integer :: i, j, k, kp, n
 ! MPI variables
     integer :: mpiid
-    integer, intent(in) :: mpicomm
+    type(MPI_comm), intent(in) :: mpicomm
     integer, intent(in) :: mpirank
     integer, intent(in) :: mpiroot
 
