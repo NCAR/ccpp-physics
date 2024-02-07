@@ -183,7 +183,7 @@ contains
       real(kind=kind_phys), dimension(1:im,1,1:levs) :: pfils, pflls
       real(kind=kind_phys), dimension(1:im,1,1:levs) :: adj_vmr, te
       real(kind=kind_phys), dimension(1:im,1:levs) :: prefluxw, prefluxr, prefluxi, prefluxs, prefluxg
-      real(kind=kind_phys), dimension(1:im) :: dte, hs 
+      real(kind=kind_phys), dimension(1:im) :: dte, hs, gsize  
       !real(kind=kind_phys), dimension(:,:), allocatable :: den
       real(kind=kind_phys), dimension(1:im) :: water0
       real(kind=kind_phys) :: onebg
@@ -262,9 +262,10 @@ contains
         last_step = .false.
         do_inline_mp = .false. 
         hs = oro(:) * con_g 
+        gsize = sqrt(garea(:)) 
 
         call  module_gfdl_cld_mp_driver( qv1, ql1, qr1, qi1, qs1, qg1, qa1, qnl, qni, pt, w,&
-                  uin, vin, dz, delp, garea, dtp, hs, water0, rain0,                        &
+                  uin, vin, dz, delp, gsize, dtp, hs, water0, rain0,                        &
                   ice0, snow0, graupel0, hydrostatic, iis, iie, kks, kke, q_con, cappa,     &
                   fast_mp_consv, adj_vmr, te, dte, prefluxw, prefluxr, prefluxi, prefluxs,  &
                   prefluxg, last_step, do_inline_mp ) 
