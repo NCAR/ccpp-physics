@@ -12,7 +12,7 @@
                                      ebb_dcycle, extended_sd_diags,add_fire_heat_flux,  &
                                      num_moist, num_chem, num_emis_seas, num_emis_dust, &
                                      p_qv, p_atm_shum, p_atm_cldq,                      &
-                                     p_smoke, p_dust_1, p_coarse_pm, epsilc
+                                     p_smoke, p_dust_1, p_coarse_pm, epsilc, n_dbg_lines
    use dust_data_mod,         only : dust_alpha, dust_gamma, dust_moist_opt,            &
                                      dust_moist_correction, dust_drylimit_factor
    use seas_mod,              only : gocart_seasalt_driver
@@ -52,7 +52,7 @@ contains
                               dust_moist_correction_in, dust_drylimit_factor_in,  & ! Dust namelist                        
                               aero_ind_fdb_in,                                    & ! Feedback namelist
                               extended_sd_diags_in,dbg_opt_in,                    & ! Other namelist
-                              errmsg, errflg                                      )
+                              errmsg, errflg, n_dbg_lines_in                      )
                              
 
 !>-- Namelist
@@ -62,7 +62,7 @@ contains
   integer,         intent(in) :: dust_opt_in,dust_moist_opt_in, wetdep_ls_opt_in, pm_settling_in, seas_opt_in
   integer,         intent(in) :: drydep_opt_in
   logical,         intent(in) :: aero_ind_fdb_in,dbg_opt_in, extended_sd_diags_in, add_fire_heat_flux_in
-  integer,         intent(in) :: smoke_forecast_in, plume_wind_eff_in, plumerisefire_frq_in
+  integer,         intent(in) :: smoke_forecast_in, plume_wind_eff_in, plumerisefire_frq_in, n_dbg_lines_in
   integer,         intent(in) :: addsmoke_flag_in, ebb_dcycle_in
   logical,         intent(in) :: do_plumerise_in, rrfs_sd
   character(len=*),intent(out):: errmsg
@@ -100,6 +100,7 @@ contains
   !>-Other
      extended_sd_diags     = extended_sd_diags_in
      dbg_opt               = dbg_opt_in
+     n_dbg_lines           = n_dbg_lines_in
 
   end subroutine rrfs_smoke_wrapper_init
 
@@ -111,17 +112,19 @@ contains
     subroutine rrfs_smoke_wrapper_run(im, kte, kme, ktau, dt, garea, land, jdate,          &
                    u10m, v10m, ustar, rlat, rlon, tskin, pb2d, t2m, dpt2m,                 &
                    pr3d, ph3d,phl3d, prl3d, tk3d, us3d, vs3d, spechum, w,                  &
-                   nsoil, smc, vegtype_dom, vegtype_frac, soiltyp, nlcat,                  &
+                   nsoil, smc, tslb, vegtype_dom, vegtype_frac, soiltyp, nlcat,            &
                    dswsfc, zorl, snow, julian,recmol,                                      &
                    idat, rain_cpl, rainc_cpl, hf2d, g, pi, con_cp, con_rd, con_fv,         &
                    dust12m_in, emi_ant_in, smoke_RRFS, smoke2d_RRFS,                       &
                    ntrac, qgrs, gq0, chem3d, tile_num,                                     &
                    ntsmoke, ntdust, ntcoarsepm, imp_physics, imp_physics_thompson,         &
                    nwfa, nifa, emanoc, emdust, emseas, drydep_flux_out, wetdpr,            &
-                   ebb_smoke_in, frp_output, coef_bb, ebu_smoke,fhist,min_fplume,          &
-                   max_fplume, hwp, hwp_ave, wetness, ndvel, ddvel_inout,fire_in,          &
+                   ebb_smoke_in, frp_output, coef_bb, fire_type_out,                       &
+                   ebu_smoke,fhist,min_fplume,                                             &
+                   max_fplume, hwp, hwp_ave, wetness, ndvel, ddvel_inout,                  &
+                   peak_hr_out,lu_nofire_out,lu_qfire_out,                                 &
                    fire_heat_flux_out, frac_grid_burned_out, kpbl,oro,                     &
-                   errmsg,errflg                                                           )
+                   uspdavg, hpbl_thetav, mpicomm, mpirank, mpiroot, errmsg,errflg          )
         
     implicit none
 
@@ -135,7 +138,7 @@ contains
     integer, parameter :: its=1,jts=1,jte=1, kts=1
 
     integer,         dimension(:),     intent(in)    :: land, vegtype_dom, soiltyp
-    real(kind_phys), dimension(:,:),   intent(in)    :: smc
+    real(kind_phys), dimension(:,:),   intent(in)    :: smc, tslb
     real(kind_phys), dimension(:,:,:), intent(in)    :: dust12m_in
     real(kind_phys), dimension(:,:,:), intent(in)    :: smoke_RRFS
     real(kind_phys), dimension(:,:),   intent(in)    :: smoke2d_RRFS
@@ -151,16 +154,17 @@ contains
     real(kind_phys), dimension(:),     intent(inout) :: emdust, emseas, emanoc
     real(kind_phys), dimension(:),     intent(inout) :: ebb_smoke_in,coef_bb, frp_output, fhist
     real(kind_phys), dimension(:,:),   intent(inout) :: ebu_smoke
-    real(kind_phys), dimension(:,:),   intent(inout) :: fire_in
-    real(kind_phys), dimension(:),     intent(out) :: fire_heat_flux_out, frac_grid_burned_out
-    real(kind_phys), dimension(:),     intent(inout) :: max_fplume, min_fplume       
-    real(kind_phys), dimension(:),     intent(  out) :: hwp
+    real(kind_phys), dimension(:),     intent(out  ) :: fire_heat_flux_out, frac_grid_burned_out
+    real(kind_phys), dimension(:),     intent(inout) :: max_fplume, min_fplume, uspdavg, hpbl_thetav
+    real(kind_phys), dimension(:),     intent(inout) :: hwp, peak_hr_out
     real(kind_phys), dimension(:),     intent(inout) :: hwp_ave
     real(kind_phys), dimension(:,:),   intent(inout) :: nwfa, nifa
     real(kind_phys), dimension(:,:),   intent(inout) :: ddvel_inout
     real(kind_phys), dimension(:,:),   intent(inout) :: drydep_flux_out
     real(kind_phys), dimension(:,:),   intent(inout) :: wetdpr
     real(kind_phys), dimension(:),     intent(in)    :: wetness
+    real(kind_phys), dimension(:),     intent(out)   :: lu_nofire_out,lu_qfire_out
+    integer,         dimension(:),     intent(out)   :: fire_type_out
     integer,                           intent(in)    :: imp_physics, imp_physics_thompson
     integer,         dimension(:),     intent(in)    :: kpbl
     real(kind_phys), dimension(:),     intent(in)    :: oro
@@ -187,16 +191,17 @@ contains
     real(kind_phys), dimension(ims:im, jms:jme) :: ssm, rdrag, uthr, snowh  ! fengsha dust
     real(kind_phys), dimension(ims:im, jms:jme) :: rmol, swdown, znt, clayf, sandf
     real(kind_phys), dimension(ims:im, nlcat, jms:jme) :: vegfrac
-    real(kind_phys), dimension(ims:im, nsoil, jms:jme) :: smois
+    real(kind_phys), dimension(ims:im, nsoil, jms:jme) :: smois, stemp
     real(kind_phys), dimension(ims:im, 1:1, jms:jme, 1:num_emis_dust) :: emis_dust
     integer,         dimension(ims:im, jms:jme) :: isltyp, ivgtyp
 !>- plume variables
     ! -- buffers
     real(kind_phys), dimension(ims:im, jms:jme )  :: coef_bb_dc, flam_frac, frp_in,        &
                                           fire_hist, peak_hr, lu_nofire, lu_qfire, ebu_in, &
-                                                     fire_end_hr, hwp_day_avg, kpbl_thetav
+                                                     fire_end_hr, hwp_day_avg, kpbl_thetav,&
+                                                     uspdavg2, hpbl_thetav2
     integer,         dimension(ims:im, jms:jme )  :: min_fplume2, max_fplume2, fire_type
-    logical :: call_plume, reset_hwp_ave
+    logical :: call_plume, reset_hwp_ave, avg_hwp_ave
 !>- optical variables
     real(kind_phys), dimension(ims:im, jms:jme, ndvel) :: ddvel, settling_flux, drydep_flux_local
     real(kind_phys), dimension(ims:im, kms:kme, jms:jme, ndvel) :: vgrav
@@ -218,6 +223,13 @@ contains
     real(kind_phys) :: factor, factor2, factor3
     integer :: nbegin, nv
     integer :: i, j, k, kp, n
+! MPI variables
+    integer :: mpiid
+    integer, intent(in) :: mpicomm
+    integer, intent(in) :: mpirank
+    integer, intent(in) :: mpiroot
+
+    mpiid = mpirank
 
     errmsg = ''
     errflg = 0
@@ -232,6 +244,8 @@ contains
 
     min_fplume2 = 0
     max_fplume2 = 0
+    uspdavg2 = 0.
+    hpbl_thetav2 = 0.
     emis_seas   = 0.
     emis_dust   = 0.
     peak_hr     = 0.
@@ -260,12 +274,17 @@ contains
     ! -- compute incremental convective and large-scale rainfall
     do i=its,ite
      rnav(i,1)=max((rain_cpl(i)-rainc_cpl(i))*1000., 0.) ! meter to mm
+! coef_bb initializes as clear_val (from GFS_typedefs.F90)
+! at ktau = 1, coef_bb_dc is set = 1.0
      coef_bb_dc(i,1) = coef_bb(i)
+! fhist   initializes as 1.        (from GFS_typedefs.F90)
      fire_hist (i,1) = fhist  (i)
+     peak_hr   (i,1) = peak_hr_out(i)
     enddo
 
     ! Is this a reset timestep (00:00 + dt)?
     reset_hwp_ave = mod(int(curr_secs-dt),3600) == 0
+    avg_hwp_ave   = mod(int(curr_secs),3600) == 0
 
     ! plumerise frequency in minutes set up by the namelist input
     call_plume       = (do_plumerise .and. (plumerisefire_frq > 0))
@@ -276,7 +295,8 @@ contains
         ktau,current_month, current_hour, gmt, con_rd, con_fv, con_cp,  &
         u10m,v10m,ustar,land,garea,rlat,rlon,tskin,                     &
         pr3d,ph3d,phl3d,tk3d,prl3d,us3d,vs3d,spechum,w,                 &
-        nsoil,smc,vegtype_dom,soiltyp,nlcat,vegtype_frac,dswsfc,zorl,   &
+        nsoil,smc,tslb,vegtype_dom,soiltyp,                             &
+        nlcat,vegtype_frac,dswsfc,zorl,                                 &
         snow,dust12m_in,emi_ant_in,smoke_RRFS,smoke2d_RRFS,coef_bb_dc,  &
         hf2d, pb2d, g, pi, hour_int, peak_hr,                           &
         u10,v10,ust,tsk,xland,xlat,xlong,dxy,                           &
@@ -287,19 +307,13 @@ contains
         num_chem,num_moist,                                             &
         ntsmoke, ntdust,ntcoarsepm,                                     &
         moist,chem,ebu_in,kpbl_thetav,ebb_smoke_in,                     &
-        fhist,frp_in, hwp_day_avg, fire_end_hr,                         &
-        emis_anoc,smois,ivgtyp,isltyp,vegfrac,rmol,swdown,znt,hfx,pbl,  &
-        snowh,clayf,rdrag,sandf,ssm,uthr,oro, hwp_local,                &
+        fire_hist,frp_in, hwp_day_avg, fire_end_hr,                     &
+        emis_anoc,smois,stemp,ivgtyp,isltyp,vegfrac,rmol,swdown,znt,    &
+        hfx,pbl,snowh,clayf,rdrag,sandf,ssm,uthr,oro, hwp_local,        &
         t2m,dpt2m,wetness,kpbl,                                         &
         ids,ide, jds,jde, kds,kde,                                      &
         ims,ime, jms,jme, kms,kme,                                      &
         its,ite, jts,jte, kts,kte                                       )
-
-    do j=jts,jte
-      do i=its,ite
-        peak_hr(i,j)= fire_in(i,1)
-      enddo
-    enddo
 
     IF (ktau==1) THEN
       ebu = 0.
@@ -311,6 +325,13 @@ contains
         enddo
       enddo
       enddo
+    ELSE
+      do k=kts,kte
+      do i=its,ite
+      ! ebu is divided by coef_bb_dc since it is applied in the output
+         ebu(i,k,1)=ebu_smoke(i,k) / coef_bb_dc(i,1)
+      enddo
+      enddo
     ENDIF
 
 !RAR: change this to the fractional LU type; fire_type: 0- no fires, 1- Ag
@@ -320,6 +341,7 @@ contains
       do i=its,ite
         if (ebu_in(i,j)<0.01) then
            fire_type(i,j) = 0
+           lu_nofire(i,j) = 1.0
         else
           ! Permanent wetlands, snow/ice, water, barren tundra 
           lu_nofire(i,j) = vegfrac(i,11,j) + vegfrac(i,15,j) + vegfrac(i,17,j) + vegfrac(i,20,j)
@@ -350,9 +372,10 @@ contains
     endif
 
     !-- compute dust (opt=5)
-    if (dust_opt==5) then
-       call gocart_dust_fengsha_driver(dt,chem,rho_phy,smois,p8w,ssm,   &
-            isltyp,snowh,xland,dxy,g,emis_dust,ust,znt,    &
+    if (dust_opt==1) then
+       call gocart_dust_fengsha_driver(dt,chem,rho_phy,                 &
+            smois,stemp,p8w,ssm,                                        &
+            isltyp,snowh,xland,dxy,g,emis_dust,ust,znt,                 &
             clayf,sandf,rdrag,uthr,                                     &
             num_emis_dust,num_chem,nsoil,                               &
             ids,ide, jds,jde, kds,kde,                                  &
@@ -367,6 +390,7 @@ contains
     ! Every hour (per namelist) the ebu_driver is called to calculate ebu, but
     ! the plumerise is controlled by the namelist option of plumerise_flag
     if (add_fire_heat_flux) then
+     WRITE(1000+mpiid,*) 'Entered add_fire_heat_flux at timestep:',ktau
      do i = its,ite
        if ( coef_bb_dc(i,1)*frp_in(i,1) .ge. 1.E7 ) then
           fire_heat_flux_out(i) = min(max(0.,0.88*coef_bb_dc(i,1)*frp_in(i,1) / &
@@ -396,7 +420,8 @@ contains
                    kpbl_thetav,                                        &
                    ids,ide, jds,jde, kds,kde,                          &
                    ims,ime, jms,jme, kms,kme,                          &
-                   its,ite, jts,jte, kts,kte, errmsg, errflg           )
+                   its,ite, jts,jte, kts,kte, errmsg, errflg, curr_secs, &
+                   xlat, xlong, uspdavg2, hpbl_thetav2, mpiid  )
         if(errflg/=0) return
     end if
 
@@ -409,7 +434,7 @@ contains
                        swdown,ebb_dcycle,ebu_in,ebu,fire_type,       &
                        ids,ide, jds,jde, kds,kde,                    &
                        ims,ime, jms,jme, kms,kme,                    &
-                       its,ite, jts,jte, kts,kte                     )
+                       its,ite, jts,jte, kts,kte , mpiid             )
     endif
 
     !>-- compute coarsepm setting if using simple dry dep option and
@@ -431,7 +456,7 @@ contains
        pm_settling,drydep_flux_local,settling_flux,dbg_opt,          &
        ids,ide, jds,jde, kds,kde,                                    &
        ims,ime, jms,jme, kms,kme,                                    &
-       its,ite, jts,jte, kts,kte                                     )
+       its,ite, jts,jte, kts,kte, curr_secs, mpiid, xlat, xlong      )
        do nv=1,ndvel
           do i=its,ite
              ddvel_inout(i,nv)=ddvel(i,1,nv)
@@ -470,10 +495,12 @@ contains
        endif
     endif
 
-! Smoke emisisons diagnostic
+! Smoke emisisons diagnostic, RAR: let's multiply by coef_bb_dc before output
+! Since ebu_smoke includes coef_bb_dc, we need to divide by coef_bb_dc when it
+! comes back into the wrapper.
     do k=kts,kte
      do i=its,ite
-       ebu_smoke(i,k)=ebu(i,k,1)
+       ebu_smoke(i,k)=ebu(i,k,1) * coef_bb_dc(i,1)
      enddo
     enddo
 
@@ -485,15 +512,21 @@ contains
     do i=its,ite
       hwp(i)=hwp_local(i,1)
       hwp_ave(i) = hwp_ave(i) + hwp(i)*dt
+      if ( ktau == 1) then
+         hwp_ave(i) = hwp_ave(i) / dt
+      elseif ( avg_hwp_ave ) then
+         hwp_ave(i) = hwp_ave(i) / 3600._kind_phys
+      endif
     enddo
-   
+
+
 !---- diagnostic output of dry deposition & gravitational settling fluxes
     if ( drydep_opt == 1 .and. (extended_sd_diags .or. dbg_opt) ) then
       do nv = 1, ndvel
        do i=its,ite
           drydep_flux_out(i,nv) = drydep_flux_out(i,nv)     +  &
-                                  drydep_flux_local(i,1,nv) +  &
-                                  settling_flux(i,1,nv) 
+                                  drydep_flux_local(i,1,nv) !+  &
+                                  !settling_flux(i,1,nv)
        enddo
       enddo
     endif
@@ -520,6 +553,7 @@ contains
 !-------------------------------------
 !-- to output for diagnostics
     do i = 1, im
+! RAR: let's remove the seas and ant. OC
      emseas     (i) = emis_seas(i,1,1,1)*1.e+9   ! size bin 1 sea salt emission: ug/m2/s
      emanoc     (i) = emis_anoc (i)              ! anthropogenic organic carbon: ug/m2/s
      emdust     (i) = emis_dust(i,1,1,1) + emis_dust(i,1,1,2) +   &
@@ -529,10 +563,13 @@ contains
      fhist      (i) = fire_hist (i,1)
      min_fplume (i) = real(min_fplume2(i,1))
      max_fplume (i) = real(max_fplume2(i,1))
+     fire_type_out(i)=fire_type(i,1)
+     lu_nofire_out(i)=lu_nofire(i,1)
+     lu_qfire_out (i)=lu_qfire(i,1)
     enddo
 
     do i = 1, im
-      fire_in(i,1) =  peak_hr(i,1)
+      peak_hr_out(i) =  peak_hr(i,1)
     enddo
 
 !-- to provide real aerosol emission for Thompson MP
@@ -568,7 +605,7 @@ contains
         ktau,current_month,current_hour,gmt,con_rd,con_fv,con_cp,          &
         u10m,v10m,ustar,land,garea,rlat,rlon,ts2d,                         &
         pr3d,ph3d,phl3d,tk3d,prl3d,us3d,vs3d,spechum,w,                    &
-        nsoil,smc,vegtype_dom,soiltyp,nlcat,vegtype_frac,dswsfc,zorl,      &
+        nsoil,smc,tslb,vegtype_dom,soiltyp,nlcat,vegtype_frac,dswsfc,zorl, &
         snow_cpl,dust12m_in,emi_ant_in,smoke_RRFS,smoke2d_RRFS,coef_bb_dc, &
         hf2d, pb2d, g, pi, hour_int, peak_hr,                              &
         u10,v10,ust,tsk,xland,xlat,xlong,dxy,                              &
@@ -579,9 +616,9 @@ contains
         num_chem, num_moist,                                               &
         ntsmoke, ntdust, ntcoarsepm,                                       &
         moist,chem,ebu_in,kpbl_thetav,ebb_smoke_in,                        &
-        fhist,frp_in, hwp_day_avg, fire_end_hr,                            &
-        emis_anoc,smois,ivgtyp,isltyp,vegfrac,rmol,swdown,znt,hfx,pbl,     &
-        snowh,clayf,rdrag,sandf,ssm,uthr,oro,hwp_local,                    &
+        fire_hist,frp_in, hwp_day_avg, fire_end_hr,                        &
+        emis_anoc,smois,stemp,ivgtyp,isltyp,vegfrac,rmol,swdown,           &
+        znt,hfx,pbl,snowh,clayf,rdrag,sandf,ssm,uthr,oro,hwp_local,        &
         t2m,dpt2m,wetness,kpbl,                                            &
         ids,ide, jds,jde, kds,kde,                                         &
         ims,ime, jms,jme, kms,kme,                                         &
@@ -599,7 +636,7 @@ contains
          u10m, v10m, ustar, garea, rlat, rlon, ts2d, dswsfc,       &
          zorl, snow_cpl, pb2d, hf2d, oro, t2m, dpt2m, wetness, recmol
     real(kind=kind_phys), dimension(ims:ime, nlcat),   intent(in) :: vegtype_frac
-    real(kind=kind_phys), dimension(ims:ime, nsoil),   intent(in) :: smc 
+    real(kind=kind_phys), dimension(ims:ime, nsoil),   intent(in) :: smc,tslb
     real(kind=kind_phys), dimension(ims:ime, 12, 5),   intent(in) :: dust12m_in
     real(kind=kind_phys), dimension(ims:ime, 24, 2),   intent(in) :: smoke_RRFS
 ! This is a place holder for ebb_dcycle == 2, currently set to hold a single
@@ -633,8 +670,8 @@ contains
     real(kind_phys), dimension(ims:ime, kms:kme, jms:jme, num_chem),  intent(out) :: chem
 
     real(kind_phys), dimension(ims:ime, kms:kme, jms:jme), intent(out) :: z_at_w
-    real(kind_phys), dimension(ims:ime, nsoil, jms:jme), intent(out) :: smois
-    real(kind_phys), dimension(ims:ime,jms:jme), intent(inout) :: frp_in, fire_end_hr, fhist, coef_bb_dc
+    real(kind_phys), dimension(ims:ime, nsoil, jms:jme), intent(out) :: smois,stemp
+    real(kind_phys), dimension(ims:ime,jms:jme), intent(inout) :: frp_in, fire_end_hr, fire_hist, coef_bb_dc
     real(kind_phys), dimension(ims:ime,jms:jme), intent(inout) :: hwp_day_avg, peak_hr
     real(kind_phys), dimension(ims:ime), intent(inout) :: emis_anoc,ebb_smoke_in
     real(kind_phys), parameter :: conv_frp = 1.e+06_kind_phys  ! FRP conversion factor, MW to W
@@ -730,6 +767,7 @@ contains
      do j=jts,jte
       do i=its,ite
        smois(i,k,j)=smc(i,k)
+       stemp(i,k,j)=tslb(i,k)
       enddo
      enddo
     enddo
@@ -776,13 +814,9 @@ contains
           rri(i,k,j)=1./rho_phy(i,k,j)
           vvel(i,k,j)=-w(i,kkp)*rri(i,k,j)/g 
           moist(i,k,j,:)=0.
-          moist(i,k,j,1)=gq0(i,kkp,p_atm_shum)
-          if (t_phy(i,k,j) > 265.) then
-            moist(i,k,j,2)=gq0(i,kkp,p_atm_cldq)
-            if (moist(i,k,j,2) < 1.e-8) moist(i,k,j,2)=0.
-          else
-            moist(i,k,j,2)=0.
-          endif
+          moist(i,k,j,1)=gq0(i,kkp,1)
+          moist(i,k,j,2)=gq0(i,kkp,2)
+          if (moist(i,k,j,2) < 1.e-8) moist(i,k,j,2)=0.
           !--
           zmid(i,k,j)=phl3d(i,kkp)/g
         enddo
@@ -862,11 +896,11 @@ contains
       if (hour_int .le. 24) then
           do j=jts,jte
            do i=its,ite
-
             ebu_in     (i,j) = smoke_RRFS(i,hour_int+1,1) ! smoke
             frp_in     (i,j) = smoke_RRFS(i,hour_int+1,2)*conv_frp ! frp
-            fire_end_hr(i,j) = 0.0
-            hwp_day_avg(i,j) = 0.0
+          ! These 2 arrays aren't needed for this option
+          !  fire_end_hr(i,j) = 0.0
+          !  hwp_day_avg(i,j) = 0.0
             ebb_smoke_in (i) = ebu_in(i,j)
            enddo
           enddo
@@ -890,7 +924,8 @@ contains
     if (ktau==1) then
      do j=jts,jte
        do i=its,ite
-          fhist       (i,j) = 1.
+    ! GFS_typedefs.F90 initializes this = 1, but should be OK to duplicate, RAR??
+          fire_hist   (i,j) = 1.
           coef_bb_dc  (i,j) = 1.
           if (xlong(i,j)<230.) then
               peak_hr(i,j)= 0.0* 3600.    ! peak at 24 UTC, fires in Alaska
@@ -909,7 +944,7 @@ contains
      enddo
     endif
 
-    ! We will add a namelist variable, real :: flam_frac_global
+    ! We will add a namelist variable, real :: flam_frac_global, RAR??
     do k=kms,kte
      do i=ims,ime
        chem(i,k,jts,p_smoke    )=max(epsilc,gq0(i,k,ntsmoke   ))
