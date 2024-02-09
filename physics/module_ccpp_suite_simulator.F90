@@ -128,7 +128,7 @@ contains
           this%tend1d%q = this%tend2d%q(:,1)
        endif
     end select
-
+    err_message = ""
   end function linterp_1D
 
   ! ####################################################################################
@@ -163,6 +163,7 @@ contains
     case("q")
        this%tend1d%q = w1*this%tend3d%q(iNearest,:,ti(1)) + w2*this%tend3d%q(iNearest,:,tf(1))
     end select
+    err_message = ""
   end function linterp_2D
 
   ! ####################################################################################
