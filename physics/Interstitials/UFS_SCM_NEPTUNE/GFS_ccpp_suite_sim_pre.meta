@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_ccpp_suite_sim_pre
   type = scheme
-  dependencies = machine.F,module_ccpp_suite_simulator.F90
+  dependencies = ../../hooks/machine.F,module_ccpp_suite_simulator.F90
 
 ########################################################################
 [ccpp-arg-table]

@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = ccpp_suite_simulator
   type = scheme
-  dependencies = machine.F,module_ccpp_suite_simulator.F90
+  dependencies = ../../hooks/machine.F,module_ccpp_suite_simulator.F90
 
 [ccpp-arg-table]
   name = ccpp_suite_simulator_run
