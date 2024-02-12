@@ -40,7 +40,6 @@ module cs_conv_pre
   ! Initialize CCPP error handling variables
   errmsg = ''
   errflg = 0
-
   do i =1,im
    wcbmax(i) = cs_parm1 * work1(i) + cs_parm2 * work2(i)
   enddo

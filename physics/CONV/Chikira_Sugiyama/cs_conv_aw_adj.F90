@@ -70,7 +70,6 @@ module cs_conv_aw_adj
 
 !  adjust sfc rainrate for conservation
 !  vertically integrate reduction of water increments, reduce precip by that amount
-
       temrain1(:) = 0.0
       do k = 1,levs
         do i = 1,im
