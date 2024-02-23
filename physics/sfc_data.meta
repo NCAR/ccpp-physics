@@ -15,7 +15,7 @@
   dimensions = ()
   type = integer
   intent = in
-[use_inline]
+[use_data]
   standard_name = do_cdeps_inline
   long_name = flag for using data provided by CDEPS inline (default false)
   units = flag
@@ -30,3 +30,49 @@
   type = real
   kind = kind_phys
   intent = in
+[mask_dat]
+  standard_name = land_sea_mask_from_data
+  long_name = landmask
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[tsfc_wat]
+  standard_name = surface_skin_temperature_over_water
+  long_name = surface skin temperature over water
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+[naux2d]
+  standard_name = number_of_xy_dimensioned_auxiliary_arrays
+  long_name = number of 2d auxiliary arrays to output (for debugging)
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[aux2d]
+  standard_name = auxiliary_2d_arrays
+  long_name = auxiliary 2d arrays to output (for debugging)
+  units = none
+  dimensions = (horizontal_loop_extent,number_of_xy_dimensioned_auxiliary_arrays)
+  type = real
+  kind = kind_phys
+  intent = out
