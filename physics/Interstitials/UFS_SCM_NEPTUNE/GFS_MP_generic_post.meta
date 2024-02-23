@@ -277,6 +277,21 @@
   type = real
   kind = kind_phys
   intent = inout
+[maxupmf]
+  standard_name = maximum_convective_updraft_mass_flux
+  long_name = maximum convective updraft mass flux within a column
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[xland]
+  standard_name = sea_land_ice_mask
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
 [imfshalcnv]
   standard_name = control_for_shallow_convection_scheme
   long_name = flag for mass-flux shallow convection scheme
