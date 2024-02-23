@@ -916,6 +916,14 @@
   type = real
   kind = kind_phys
   intent = in
+[totprcp]
+  standard_name = accumulated_lwe_thickness_of_precipitation_amount
+  long_name = accumulated total precipitation
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
