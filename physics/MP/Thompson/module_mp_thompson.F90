@@ -75,8 +75,8 @@ module module_mp_thompson
    logical, parameter, private :: homogIce = .true.
 
    integer, parameter, private :: IFDRY = 0
-   real(wp), parameter, private :: T_0 = 273.15
-   real(wp), parameter, private :: PI = 3.1415926536
+   real(wp)                     :: T_0 !set in mp_thompson_init from host model
+   real(wp)                     :: PI  !set in mp_thompson_init from host model
 
 !..Densities of rain, snow, graupel, and cloud ice.
    real(wp), parameter, private :: rho_w = 1000.0
@@ -131,13 +131,13 @@ module module_mp_thompson
 
 !..Mass power law relations:  mass = am*D**bm
 !.. Snow from Field et al. (2005), others assume spherical form.
-   real(wp), parameter, private :: am_r = PI*rho_w/6.0
+   real(wp),            private :: am_r   !set in thompson_init
    real(wp), parameter, private :: bm_r = 3.0
    real(wp), parameter, private :: am_s = 0.069
    real(wp), parameter, private :: bm_s = 2.0
-   real(wp), parameter, private :: am_g = PI*rho_g/6.0
+   real(wp),            private :: am_g   !set in thompson_init
    real(wp), parameter, private :: bm_g = 3.0
-   real(wp), parameter, private :: am_i = PI*rho_i/6.0
+   real(wp),            private :: am_i   !set in thompson_init
    real(wp), parameter, private :: bm_i = 3.0
 
 !..Fallspeed power laws relations:  v = (av*D**bv)*exp(-fv*D)
@@ -181,7 +181,7 @@ module module_mp_thompson
    real(wp), parameter, private :: ATO = 0.304
 
 !..Rho_not used in fallspeed relations (rho_not/rho)**.5 adjustment.
-   real(wp), parameter, private :: rho_not = 101325.0 / (287.05*298.0)
+   real(wp)                     :: rho_not   !set in thompson_init
 
 !..Schmidt number
    real(wp), parameter, private :: Sc = 0.632
@@ -191,25 +191,25 @@ module module_mp_thompson
    real(wp), parameter, private:: HGFR = 235.16
 
 !..Water vapor and air gas constants at constant pressure
-   real(wp), parameter, private :: Rv = 461.5
-   real(wp), parameter, private :: oRv = 1./Rv
-   real(wp), parameter, private :: R = 287.04
-   real(wp), parameter, private :: RoverRv = R*oRv
-   real(wp), parameter, private :: Cp = 1004.0
-   real(wp), parameter, private :: R_uni = 8.314                           !< J (mol K)-1
+   real(wp)                     :: Rv           !set in mp_thompson_init from host model
+   real(wp),            private :: oRv          !set in thompson_init
+   real(wp)                     :: R            !set in mp_thompson_init from host model
+   real(wp)                     :: RoverRv      !set in mp_thompson_init from host model
+   real(wp)                     :: Cp           !set in mp_thompson_init from host model
+   real(wp)                     :: R_uni        !set in mp_thompson_init from host model
 
-   real(dp), parameter, private :: k_b = 1.38065e-23           !< Boltzmann constant [J/K]
-   real(dp), parameter, private :: M_w = 18.01528e-3           !< molecular mass of water [kg/mol]
-   real(dp), parameter, private :: M_a = 28.96e-3              !< molecular mass of air [kg/mol]
-   real(dp), parameter, private :: N_avo = 6.022e23            !< Avogadro number [1/mol]
-   real(dp), parameter, private :: ma_w = M_w / N_avo          !< mass of water molecule [kg]
-   real(wp), parameter, private :: ar_volume = 4./3.*PI*(2.5e-6)**3        !< assume radius of 0.025 micrometer, 2.5e-6 cm
+   real(dp)                     :: k_b          !set in mp_thompson_init from host model !< Boltzmann constant [J/K]
+   real(dp)                     :: M_w          !set in mp_thompson_init from host model   !< molecular mass of water [kg/mol]
+   real(dp)                     :: M_a          !set in mp_thompson_init from host model   !< molecular mass of air [kg/mol]
+   real(dp)                     :: N_avo        !set in mp_thompson_init from host model   !< Avogadro number [1/mol]
+   real(dp),            private :: ma_w         !set in thompson_init  !< mass of water molecule [kg]
+   real(wp),            private :: ar_volume    !set in thompson_init
 
 !..Enthalpy of sublimation, vaporization, and fusion at 0C.
-   real(wp), parameter, private :: lsub = 2.834e6
-   real(wp), parameter, private :: lvap0 = 2.5e6
-   real(wp), parameter, private :: lfus = lsub - lvap0
-   real(wp), parameter, private :: olfus = 1./lfus
+   real(wp),            private :: lsub         !set in thompson_init
+   real(wp)                     :: lvap0        !set in mp_thompson_init from host model
+   real(wp)                     :: lfus         !set in mp_thompson_init from host model
+   real(wp),            private :: olfus        !set in thompson_init
 
 !..Ice initiates with this mass (kg), corresponding diameter calc.
 !..Min diameters and mass of cloud, rain, snow, and graupel (m, kg).
@@ -455,6 +455,22 @@ module module_mp_thompson
          logical:: micro_init
          real(wp) :: stime, etime
          logical, parameter :: precomputed_tables = .FALSE.
+
+! Set module derived constants
+         am_r = PI*rho_w/6.0
+         am_g = PI*rho_g/6.0
+         am_i = PI*rho_i/6.0
+         
+         ar_volume = 4./3.*PI*(2.5e-6)**3  !< assume radius of 0.025 micrometer, 2.5e-6 cm
+         
+         rho_not = 101325.0 / (R*298.0)
+         
+         oRv = 1./Rv
+         
+         ma_w = M_w / N_avo
+         
+         lsub = lvap0 + lfus
+         olfus = 1./lfus
 
 ! Set module variable is_aerosol_aware/merra2_aerosol_aware
          is_aerosol_aware = is_aerosol_aware_in

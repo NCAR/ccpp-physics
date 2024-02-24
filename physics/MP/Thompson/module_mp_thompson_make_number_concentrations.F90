@@ -4,7 +4,7 @@
 !>\ingroup aathompson
 module module_mp_thompson_make_number_concentrations
 
-      use physcons, only: PI => con_pi
+      use module_mp_thompson, only: PI
 
       implicit none
 

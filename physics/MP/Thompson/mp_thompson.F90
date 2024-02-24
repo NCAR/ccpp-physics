@@ -7,7 +7,7 @@
 module mp_thompson
 
       use machine, only : kind_phys
-
+ 
       use module_mp_thompson, only : thompson_init, mp_gt_driver, thompson_finalize, calc_effectRad
       use module_mp_thompson, only : naIN0, naIN1, naCCN0, naCCN1, eps, Nt_c_l, Nt_c_o
       use module_mp_thompson, only : re_qc_min, re_qc_max, re_qi_min, re_qi_max, re_qs_min, re_qs_max
@@ -30,7 +30,10 @@ module mp_thompson
 !! \section arg_table_mp_thompson_init Argument Table
 !! \htmlinclude mp_thompson_init.html
 !!
-      subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, con_eps,      &
+      subroutine mp_thompson_init(ncol, nlev, con_pi, con_t0c, con_rv,     &
+                                  con_cp, con_rgas, con_boltz, con_amd,    &
+                                  con_amw, con_avgd, con_hvap, con_hfus,   &
+                                  con_g, con_rd, con_eps,                  &
                                   restart, imp_physics,                    &
                                   imp_physics_thompson, convert_dry_rho,   &
                                   spechum, qc, qr, qi, qs, qg, ni, nr,     &
@@ -40,13 +43,17 @@ module mp_thompson
                                   aerfld, mpicomm, mpirank, mpiroot,       &
                                   threads, ext_diag, diag3d,               &
                                   errmsg, errflg)
-
+         use module_mp_thompson, only : PI, T_0, Rv, R, RoverRv, Cp
+         use module_mp_thompson, only : R_uni, k_b, M_w, M_a, N_avo, lvap0, lfus
+         
          implicit none
 
          ! Interface variables
          integer,                   intent(in   ) :: ncol
          integer,                   intent(in   ) :: nlev
-         real(kind_phys),           intent(in   ) :: con_g, con_rd, con_eps
+         real(kind_phys),           intent(in   ) :: con_pi, con_t0c, con_rv, con_cp, con_rgas, &
+                                                     con_boltz, con_amd, con_amw, con_avgd,     &
+                                                     con_hvap, con_hfus, con_g, con_rd, con_eps
          logical,                   intent(in   ) :: restart
          integer,                   intent(in   ) :: imp_physics
          integer,                   intent(in   ) :: imp_physics_thompson
@@ -103,6 +110,21 @@ module mp_thompson
 
          if (is_initialized) return
 
+         ! Set local Thompson MP module constants from host model
+         PI = con_pi
+         T_0 = con_t0c
+         Rv = con_Rv
+         R = con_rd
+         RoverRv = con_eps
+         Cp = con_cp
+         R_uni = con_rgas
+         k_b = con_boltz
+         M_w = con_amw*1.0E-3 !module_mp_thompson expects kg/mol
+         M_a = con_amd*1.0E-3 !module_mp_thompson expects kg/mol
+         N_avo = con_avgd
+         lvap0 = con_hvap
+         lfus = con_hfus
+         
          ! Consistency checks
          if (imp_physics/=imp_physics_thompson) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Thompson MP"
