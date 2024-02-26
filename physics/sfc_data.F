@@ -83,14 +83,16 @@
       ! Check coupling from component land to atmosphere
       if (.not. use_data) return
 
-      aux2d(:,1) = tsfco_dat(:)
-      aux2d(:,2) = mask_dat(:)
-      aux2d(:,3) = tsfc_wat(:)
-
       ! Fill variables
-      !do i = 1, im
-      !   if (tsfco_dat(i)
-      !end do
+      do i = 1, im
+         aux2d(i,1) = tsfco_dat(i) 
+         aux2d(i,2) = mask_dat(i)
+         aux2d(i,3) = tsfc_wat(i)
+         if (mask_dat(i) > 0.0) then
+            tsfc_wat(i) = tsfco_dat(i)
+         end if
+         aux2d(i,4) = tsfc_wat(i)
+      end do
 !
       return
 !...................................
