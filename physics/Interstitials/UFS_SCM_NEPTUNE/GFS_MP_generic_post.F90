@@ -21,7 +21,7 @@
       subroutine GFS_MP_generic_post_run(                                                                                 &
         im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl,    &
         imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, cpllnd, progsigma, con_g, rhowater, rainmin, dtf, &
-        frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, phil, htop, refl_10cm,maxupmf,xland,&
+        frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, phil, htop, refl_10cm,              &
         imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf, con_t0c, snow, graupel, save_t, save_q,        &
         rain0, ice0, snow0, graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp,&
         totprcp, totice, totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl,    &
@@ -42,7 +42,7 @@
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, cpllnd, progsigma, exticeden
       integer, intent(in) :: index_of_temperature,index_of_process_mp,use_lake_model(:)
       integer, intent(in) :: imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf
-      integer, dimension (:), intent(in) :: htop, xland
+      integer, dimension (:), intent(in) :: htop
       integer                                                :: dfi_radar_max_intervals
       real(kind=kind_phys),                    intent(in)    :: fh_dfi_radar(:), fhour, con_t0c
       real(kind=kind_phys),                    intent(in)    :: radar_tten_limits(:)
@@ -50,7 +50,7 @@
       real(kind=kind_phys), dimension(:,:),    intent(inout) :: gt0,refl_10cm
 
       real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g, rainmin, rhowater
-      real(kind=kind_phys), dimension(:),      intent(in)    :: rain1, xlat, xlon, tsfc, maxupmf
+      real(kind=kind_phys), dimension(:),      intent(in)    :: rain1, xlat, xlon, tsfc
       real(kind=kind_phys), dimension(:),      intent(inout) :: ice, snow, graupel, rainc
       real(kind=kind_phys), dimension(:),      intent(in)    :: rain0, ice0, snow0, graupel0
       real(kind=kind_phys), dimension(:,:),    intent(in)    :: rann
@@ -171,9 +171,6 @@
                  fctz = 10.**(factor(i)*delz)
                endif
                cuprate = rainc(i) * 3.6e6 / dtp  ! cu precip rate (mm/h)
-               if (imfdeepcnv==imfdeepcnv_gf .and. xland(i)==0)then
-                 if( maxupmf(i).lt.0.1 .or. cuprate.lt.0.05) cuprate=0.
-               endif
                ze_conv = 300.0 * cuprate**1.4
                ze_conv = fctz * ze_conv
                ze_mp = 10._kind_phys ** (0.1 * refl_10cm(i,k))
