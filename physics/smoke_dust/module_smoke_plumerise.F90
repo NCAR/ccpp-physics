@@ -109,12 +109,6 @@ CONTAINS
 ! print *,' Plumerise_scalar 1',ncall
   coms => get_thread_coms()
 
-IF (frp_inst<frp_threshold) THEN
-   k1=1
-   k2=2
-   !return
-END IF
-    
 ! print *,' Plumerise_scalar 2',m1
   j=1
   i=1
