@@ -18,7 +18,7 @@ contains
   subroutine GFS_suite_stateout_update_run (im, levs, ntrac, dtp, tgrs, ugrs, vgrs, qgrs, &
        dudt, dvdt, dtdt, dqdt, gt0, gu0, gv0, gq0, oz0, ntiw, nqrimef, imp_physics,       &
        imp_physics_fer_hires, epsq, ozphys, oz_phys_2015, oz_phys_2006, con_1ovg, prsl,   &
-       dp, ozpl, do3_dt_prd, do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz, errmsg, errflg)
+       dp, ozpl, qdiag3d, do3_dt_prd, do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz, errmsg, errflg)
 
     ! Inputs
     integer,              intent(in )                   :: im
@@ -31,12 +31,13 @@ contains
     real(kind=kind_phys), intent(in ), dimension(:,:,:) :: qgrs, ozpl
     real(kind=kind_phys), intent(in ), dimension(:,:)   :: dudt, dvdt, dtdt
     real(kind=kind_phys), intent(in ), dimension(:,:,:) :: dqdt
+    logical,              intent(in)                    :: qdiag3d
     logical,              intent(in)                    :: oz_phys_2015
     logical,              intent(in)                    :: oz_phys_2006
     type(ty_ozphys),      intent(in)                    :: ozphys
 
     ! Outputs (optional)
-    real(kind=kind_phys), intent(inout), dimension(:,:), pointer, optional :: &
+    real(kind=kind_phys), intent(inout), dimension(:,:) :: &
          do3_dt_prd,  & ! Physics tendency: production and loss effect
          do3_dt_ozmx, & ! Physics tendency: ozone mixing ratio effect
          do3_dt_temp, & ! Physics tendency: temperature effect
@@ -50,7 +51,7 @@ contains
 
     ! Locals
     integer :: i, k
-    
+
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
@@ -65,12 +66,12 @@ contains
     ! If using photolysis physics schemes, update (prognostic) gas concentrations using 
     ! updated state.
     if (oz_phys_2015) then
-       call ozphys%run_o3prog_2015(con_1ovg, dtp, prsl, gt0, dp, ozpl, oz0, do3_dt_prd,    &
-            do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
+       call ozphys%run_o3prog_2015(con_1ovg, dtp, prsl, gt0, dp, ozpl, oz0, qdiag3d, &
+            do3_dt_prd, do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
     endif
     if (oz_phys_2006) then
-       call ozphys%run_o3prog_2006(con_1ovg, dtp, prsl, gt0, dp, ozpl, oz0, do3_dt_prd,    &
-            do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
+       call ozphys%run_o3prog_2006(con_1ovg, dtp, prsl, gt0, dp, ozpl, oz0, qdiag3d, &
+            do3_dt_prd, do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
     endif
 
     ! If using Ferrier-Aligo microphysics, set bounds on the mass-weighted rime factor.
