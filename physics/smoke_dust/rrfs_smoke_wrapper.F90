@@ -123,7 +123,7 @@ contains
                    ebu_smoke,fhist,min_fplume,                                             &
                    max_fplume, hwp, hwp_ave, wetness, ndvel, ddvel_inout,                  &
                    peak_hr_out,lu_nofire_out,lu_qfire_out,                                 &
-                   fire_heat_flux_out, frac_grid_burned_out, kpbl,oro, totprcp,            &
+                   fire_heat_flux_out, frac_grid_burned_out, kpbl,oro,                     &
                    uspdavg, hpbl_thetav, mpicomm, mpirank, mpiroot, errmsg,errflg          )
         
     implicit none
@@ -145,7 +145,7 @@ contains
     real(kind_phys), dimension(:,:),   intent(in)    :: emi_ant_in
     real(kind_phys), dimension(:),     intent(in)    :: u10m, v10m, ustar, dswsfc,         &
                            recmol, garea, rlat,rlon, tskin, pb2d, zorl, snow,              &
-                           rain_cpl, rainc_cpl, hf2d, t2m, dpt2m, totprcp
+                           rain_cpl, rainc_cpl, hf2d, t2m, dpt2m
     real(kind_phys), dimension(:,:),   intent(in)    :: vegtype_frac
     real(kind_phys), dimension(:,:),   intent(in)    :: ph3d, pr3d
     real(kind_phys), dimension(:,:),   intent(in)    :: phl3d, prl3d, tk3d, us3d, vs3d, spechum, w
