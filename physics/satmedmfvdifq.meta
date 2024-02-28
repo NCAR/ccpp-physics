@@ -598,38 +598,38 @@
   intent = in
 #IVAI
 [claie]
-  standard_name = leaf_area_index_eccc
-  long_name = Leaf area index ECCC
+  standard_name = canopy_leaf_area_index
+  long_name = canopy leaf area index
   units = none
-  dimensions = (horizontal_loop_extent,number_of_3d_auxiliary_arrays)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
 [cfch]
-  standard_name = forest_canopy_height
-  long_name = Forest Canopy Height
+  standard_name = canopy_forest_height
+  long_name = canopy forest height
   units = none
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_3d_auxiliary_arrays)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
 [cfrt]
-  standard_name = forest_fraction
-  long_name = Forest Fraction for canopy correction
+  standard_name = canopy_forest_fraction
+  long_name = canopy forest fraction
   units = none
-  dimensions = (horizontal_loop_extent,number_of_3d_auxiliary_arrays)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
 [cclu]
-  standard_name = clumping_index
-  long_name = Clumping Index for canopy correction
+  standard_name = canopy_clumping_index
+  long_name = canopy clumping index
   units = none
-  dimensions = (horizontal_loop_extent,number_of_3d_auxiliary_arrays)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
 [cpopu]
-  standard_name = population_density
-  long_name = Population dencity for canopy correction
+  standard_name = canopy_population_density
+  long_name = population density used for canopy correction
   units = none
-  dimensions = (horizontal_loop_extent,number_of_3d_auxiliary_arrays)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
 #IVAI
