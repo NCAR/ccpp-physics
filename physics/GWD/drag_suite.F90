@@ -1363,7 +1363,8 @@ IF ( do_gsl_drag_tofd ) THEN
             DO k=kts,km
                wsp=SQRT(uwnd1(i,k)**2 + vwnd1(i,k)**2)
                ! alpha*beta*Cmd*Ccorr*2.109 = 12.*1.*0.005*0.6*2.109 = 0.0759
-               var_temp = 0.0759*EXP(-(zl(i,k)/H_efold)**1.5)*a2*          &
+               ! Change alpha to 35 -- 0.0759 becomes 0.2214
+               var_temp = 0.2214*EXP(-(zl(i,k)/H_efold)**1.5)*a2*          &
                                  zl(i,k)**(-1.2)*ss_taper(i) ! this is greater than zero
                !  Note:  This is a semi-implicit treatment of the time differencing
                !  per Beljaars et al. (2004, QJRMS)
