@@ -425,9 +425,9 @@ contains
      integer :: turn,pmin_lev(its:ite),start_level(its:ite),ktopkeep(its:ite)
      real(kind=kind_phys),    dimension (its:ite,kts:kte) :: dtempdz
      integer, dimension (its:ite,kts:kte) ::  k_inv_layers 
-     real(kind=kind_phys),    dimension (its:ite) :: c0    ! HCB
+     real(kind=kind_phys),    dimension (its:ite) :: c0, rrfs_factor  ! HCB
      real(kind=kind_phys),    dimension (its:ite,kts:kte) :: c0t3d    ! hli for smoke/dust wet scavenging
-!$acc declare create(pmin_lev,start_level,ktopkeep,dtempdz,k_inv_layers,c0,c0t3d)
+!$acc declare create(pmin_lev,start_level,ktopkeep,dtempdz,k_inv_layers,c0,rrfs_factor,c0t3d)
  
 ! rainevap from sas
      real(kind=kind_phys) zuh2(40)
@@ -486,6 +486,7 @@ contains
 ! Set cloud water to rain water conversion rate (c0)
 !$acc kernels
       c0(:)=0.004
+      rrfs_factor(:)=1.
       do i=its,itf
          xland1(i)=int(xland(i)+.0001) ! 1.
          if(xland(i).gt.1.5 .or. xland(i).lt.0.5)then
@@ -495,6 +496,7 @@ contains
          if(imid.eq.1)then
            c0(i)=0.002
          endif
+         if(kdt.le.(4500./dtime))rrfs_factor(i)=1.-(float(kdt)/(4500./dtime)-1.)**2
       enddo
 !$acc end kernels
 
@@ -591,7 +593,6 @@ contains
          sig(i)=(1.-frh)**2
          !frh_out(i) = frh
          if(forcing(i,7).eq.0.)sig(i)=1.
-         if(kdt.le.(3600./dtime))sig(i)=1.
          frh_out(i) = frh*sig(i)
       enddo
 !$acc end kernels
@@ -2029,7 +2030,7 @@ contains
             zuo,pre,pwo_ens,xmb,ktop,                                    &
             edto,pwdo,'deep',ierr2,ierr3,                                &
             po_cup,pr_ens,maxens3,                                       &
-            sig,closure_n,xland1,xmbm_in,xmbs_in,                        &
+            sig,closure_n,xland1,xmbm_in,xmbs_in,rrfs_factor,            &
             ichoice,imid,ipr,itf,ktf,                                    &
             its,ite, kts,kte,                                            &
             dicycle,xf_dicycle )
@@ -4056,7 +4057,7 @@ endif
               zu,pre,pw,xmb,ktop,                                           &
               edt,pwd,name,ierr2,ierr3,p_cup,pr_ens,                        &
               maxens3,                                                      &
-              sig,closure_n,xland1,xmbm_in,xmbs_in,                         &
+              sig,closure_n,xland1,xmbm_in,xmbs_in,rrfs_factor,             &
               ichoice,imid,ipr,itf,ktf,                                     &
               its,ite, kts,kte,                                             &
               dicycle,xf_dicycle )
@@ -4118,7 +4119,7 @@ endif
         ,intent (inout)                   ::                           &
         ierr,ierr2,ierr3
      integer, intent(in) :: dicycle
-     real(kind=kind_phys),    intent(in), dimension (its:ite) :: xf_dicycle
+     real(kind=kind_phys),    intent(in), dimension (its:ite) :: xf_dicycle, rrfs_factor
 !$acc declare copyin(zu,pwd,p_cup,sig,xmbm_in,xmbs_in,edt,xff_mid,dellat,dellaqc,dellaq,pw,ktop,xland1,xf_dicycle)
 !$acc declare copy(xf_ens,pr_ens,outtem,outq,outqc,pre,xmb,closure_n,ierr,ierr2,ierr3)
 !
@@ -4198,6 +4199,7 @@ endif
          clos_wei=16./max(1.,closure_n(i))
          xmb_ave(i)=min(xmb_ave(i),100.)
          xmb(i)=clos_wei*sig(i)*xmb_ave(i)
+         if(dx(i)<dx_thresh) xmb(i)=rrfs_factor(i)*xmb(i)
 
            if(xmb(i) < 1.e-16)then
               ierr(i)=19
