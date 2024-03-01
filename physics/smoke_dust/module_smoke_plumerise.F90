@@ -109,12 +109,6 @@ CONTAINS
 ! print *,' Plumerise_scalar 1',ncall
   coms => get_thread_coms()
 
-IF (frp_inst<frp_threshold) THEN
-   k1=1
-   k2=2
-   !return
-END IF
-    
 ! print *,' Plumerise_scalar 2',m1
   j=1
   i=1
@@ -169,12 +163,20 @@ END IF
             WRITE(1000+mpiid,*) 'inside plumerise: xlat,xlong,curr_secs,imm,FRP,burnt_area ', lat, long, int(curr_secs), imm, FRP,burnt_area
         END IF
 
+       IF (frp_inst<frp_threshold) THEN
+         k1=1
+         k2=2
+         !exit
+         return
+       END IF
+
        !- get fire properties (burned area, plume radius, heating rates ...)
        call get_fire_properties(coms,imm,iveg_ag,burnt_area,FRP,errmsg,errflg)
        if(errflg/=0) return
 
+
        !------  generates the plume rise    ------
-       call makeplume (coms,kmt,ztopmax(imm),ixx,imm)
+       call makeplume (coms,kmt,ztopmax(imm),ixx,imm,mpiid)
 
        IF ( dbg_opt .and.  (icall .le. n_dbg_lines) .and. (frp_inst .ge. frp_threshold) ) then
             WRITE(1000+mpiid,*) 'inside plumerise after makeplume:xlat,xlong,curr_secs,imm,kmt,ztopmax(imm) ', lat, long, int(curr_secs), imm,kmt, ztopmax(imm)
@@ -562,7 +564,7 @@ return
 end subroutine get_fire_properties
 !-------------------------------------------------------------------------------
 !
-SUBROUTINE MAKEPLUME (coms,kmt,ztopmax,ixx,imm)  
+SUBROUTINE MAKEPLUME (coms,kmt,ztopmax,ixx,imm,mpiid)
 !
 ! *********************************************************************
 !
@@ -621,10 +623,10 @@ SUBROUTINE MAKEPLUME (coms,kmt,ztopmax,ixx,imm)
 !
 !
 !**********************************************************************
-!**********************************************************************               
-!use module_zero_plumegen_coms 
-implicit none 
-!logical :: endspace  
+!**********************************************************************
+!use module_zero_plumegen_coms
+implicit none
+!logical :: endspace
 type(plumegen_coms), pointer :: coms
 character (len=10) :: varn
 integer ::  izprint, iconv,  itime, k, kk, kkmax, deltak,ilastprint,kmt &
@@ -632,11 +634,12 @@ integer ::  izprint, iconv,  itime, k, kk, kkmax, deltak,ilastprint,kmt &
 real(kind=kind_phys) ::  vc, g,  r,  cp,  eps,  &
          tmelt,  heatsubl,  heatfus,  heatcond, tfreeze, &
          ztopmax, wmax, rmaxtime, es, esat, heat,dt_save !ESAT_PR,
-character (len=2) :: cixx 
+character (len=2) :: cixx
+integer, intent(in) :: mpiid
 ! Set threshold to be the same as dz=100., the constant grid spacing of plume grid model(meters) found in set_grid()
     REAL(kind=kind_phys) :: DELZ_THRESOLD = 100. 
 
-    INTEGER     :: imm
+    INTEGER     :: imm, dtknt
 
 !  real(kind=kind_phys), external:: esat_pr!
 !
@@ -654,6 +657,7 @@ coms%tstpf = 2.0  !- timestep factor
 coms%viscosity = 500.!- coms%viscosity constant (original value: 0.001)
 
 nrectotal=150
+dtknt = 0
 !
 !*************** PROBLEM SETUP AND INITIAL CONDITIONS *****************
 coms%mintime = 1  
@@ -697,9 +701,13 @@ rmaxtime = float(coms%maxtime)
 !sam 81  format('nm1=',I0,' from kmt=',I0,' kkmax=',I0,' deltak=',I0)
 !sam     write(0,81) coms%nm1,kmt,kkmax,deltak
 !-- set timestep
-    !coms%dt = (coms%zm(2)-coms%zm(1)) / (coms%tstpf * wmax)  
-    coms%dt = min(5.,(coms%zm(2)-coms%zm(1)) / (coms%tstpf * wmax))
-                                
+    !coms%dt = (coms%zm(2)-coms%zm(1)) / (coms%tstpf * wmax) i
+    coms%dt = max(0.01,min(5.,(coms%zm(2)-coms%zm(1)) / (coms%tstpf * wmax)))
+    dtknt = dtknt + 1
+!    if (coms%dt .ne. 5.)then
+!    WRITE(1000+mpiid,*) 'dtknt,zm(2),zm(1) ', dtknt,coms%zm(2),coms%zm(1)
+!    WRITE(1000+mpiid,*) 'coms%tstpf,wmax,dt =', coms%tstpf,wmax,coms%dt
+!    endif
 !-- elapsed time, sec
     coms%time = coms%time+coms%dt 
 !-- elapsed time, minutes                                      
