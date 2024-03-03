@@ -733,14 +733,14 @@
   intent = out
 #IVAI
 [naux2d]
-  standard_name = number_of_2d_auxiliary_arrays
+  standard_name = number_of_xy_dimensioned_auxiliary_arrays
   long_name = number of 2d auxiliary arrays to output (for debugging)
   units = count
   dimensions = ()
   type = integer
   intent = out
 [naux3d]
-  standard_name = number_of_3d_auxiliary_arrays
+  standard_name  = number_of_xyz_dimensioned_auxiliary_arrays
   long_name = number of 3d auxiliary arrays to output (for debugging)
   units = count
   dimensions = ()
