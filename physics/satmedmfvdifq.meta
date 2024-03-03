@@ -608,7 +608,7 @@
 [cfch]
   standard_name = canopy_forest_height
   long_name = canopy forest height
-  units = none
+  units = m
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -632,7 +632,7 @@
 [cpopu]
   standard_name = canopy_population_density
   long_name = population density used for canopy correction
-  units = none
+  units = 10000people 10km-2
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
