@@ -302,7 +302,7 @@ MODULE module_bl_mynn
 ! Note that the following mixing-length constants are now specified in mym_length
 !      &cns=3.5, alp1=0.23, alp2=0.3, alp3=3.0, alp4=10.0, alp5=0.2
 
-  real(kind_phys), parameter :: gpw=5./3., qcgmin=1.e-8, qkemin=1.e-12
+  real(kind_phys), parameter :: qkemin=1.e-4
   real(kind_phys), parameter :: tliq = 269. !all hydrometeors are liquid when T > tliq
 
 ! Constants for cloud PDF (mym_condensation)
@@ -1932,11 +1932,11 @@ CONTAINS
         h1=MIN(h1,maxdz)         ! 1/2 transition layer depth
         h2=h1/2.0                ! 1/4 transition layer depth
 
-        qkw(kts) = SQRT(MAX(qke(kts),1.0e-10))
+        qkw(kts) = SQRT(MAX(qke(kts), qkemin))
         DO k = kts+1,kte
            afk = dz(k)/( dz(k)+dz(k-1) )
            abk = 1.0 -afk
-           qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk,1.0e-3))
+           qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk, qkemin))
         END DO
 
         elt = 1.0e-5
@@ -1956,7 +1956,7 @@ CONTAINS
 
         elt =  alp1*elt/vsc
         vflx = ( vt(kts)+1.0 )*flt +( vq(kts)+tv0 )*flq
-        vsc = ( gtr*elt*MAX( vflx, 0.0 ) )**(1.0/3.0)
+        vsc = ( gtr*elt*MAX( vflx, 0.0 ) )**onethird
 
         !   **  Strictly, el(i,k=1) is not zero.  **
         el(kts) = 0.0
@@ -2014,14 +2014,14 @@ CONTAINS
         h1=MIN(h1,600.)          ! 1/2 transition layer depth
         h2=h1/2.0                ! 1/4 transition layer depth
 
-        qtke(kts)=MAX(0.5*qke(kts), 0.01) !tke at full sigma levels
+        qtke(kts)=MAX(0.5*qke(kts), 0.5*qkemin) !tke at full sigma levels
         thetaw(kts)=theta(kts)            !theta at full-sigma levels
-        qkw(kts) = SQRT(MAX(qke(kts),1.0e-10))
+        qkw(kts) = SQRT(MAX(qke(kts), qkemin))
 
         DO k = kts+1,kte
            afk = dz(k)/( dz(k)+dz(k-1) )
            abk = 1.0 -afk
-           qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk,1.0e-3))
+           qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk, qkemin))
            qtke(k) = 0.5*(qkw(k)**2)     ! q -> TKE
            thetaw(k)= theta(k)*abk + theta(k-1)*afk
         END DO
@@ -2034,14 +2034,14 @@ CONTAINS
         zwk = zw(k)
         DO WHILE (zwk .LE. zi2+h1)
            dzk = 0.5*( dz(k)+dz(k-1) )
-           qdz = min(max( qkw(k)-qmin, 0.02 ), 30.0)*dzk
+           qdz = min(max( qkw(k)-qmin, 0.01 ), 30.0)*dzk
            elt = elt +qdz*zwk
            vsc = vsc +qdz
            k   = k+1
            zwk = zw(k)
         END DO
 
-        elt = MIN( MAX( alp1*elt/vsc, 10.), 400.)
+        elt = MIN( MAX( alp1*elt/vsc, 8.), 400.)
         !avoid use of buoyancy flux functions which are ill-defined at the surface
         !vflx = ( vt(kts)+1.0 )*flt + ( vq(kts)+tv0 )*flq
         vflx = fltv
@@ -2117,13 +2117,13 @@ CONTAINS
         h1=MIN(h1,600.)
         h2=h1*0.5                ! 1/4 transition layer depth
 
-        qtke(kts)=MAX(0.5*qke(kts),0.01) !tke at full sigma levels
-        qkw(kts) = SQRT(MAX(qke(kts),1.0e-4))
+        qtke(kts)=MAX(0.5*qke(kts), 0.5*qkemin) !tke at full sigma levels
+        qkw(kts) = SQRT(MAX(qke(kts), qkemin))
 
         DO k = kts+1,kte
            afk = dz(k)/( dz(k)+dz(k-1) )
            abk = 1.0 -afk
-           qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk,1.0e-3))
+           qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk, qkemin))
            qtke(k) = 0.5*qkw(k)**2  ! qkw -> TKE
         END DO
 
@@ -3356,8 +3356,8 @@ CONTAINS
     CALL tridiag2(kte,a,b,c,d,x)
 
     DO k=kts,kte
-!       qke(k)=max(d(k-kts+1), 1.e-4)
-       qke(k)=max(x(k), 1.e-4)
+!       qke(k)=max(d(k-kts+1), qkemin)
+       qke(k)=max(x(k), qkemin)
        qke(k)=min(qke(k), 150.)
     ENDDO
       
@@ -6504,11 +6504,11 @@ IF (nup2 > 0) THEN
    do k=kts,kte-1
       do I=1,nup
          edmf_a(K)  =edmf_a(K)  +UPA(K,i)
-         edmf_w(K)  =edmf_w(K)  +rhoz(k)*UPA(K,i)*UPW(K,i)
-         edmf_qt(K) =edmf_qt(K) +rhoz(k)*UPA(K,i)*UPQT(K,i)
-         edmf_thl(K)=edmf_thl(K)+rhoz(k)*UPA(K,i)*UPTHL(K,i)
-         edmf_ent(K)=edmf_ent(K)+rhoz(k)*UPA(K,i)*ENT(K,i)
-         edmf_qc(K) =edmf_qc(K) +rhoz(k)*UPA(K,i)*UPQC(K,i)
+         edmf_w(K)  =edmf_w(K)  +UPA(K,i)*UPW(K,i)
+         edmf_qt(K) =edmf_qt(K) +UPA(K,i)*UPQT(K,i)
+         edmf_thl(K)=edmf_thl(K)+UPA(K,i)*UPTHL(K,i)
+         edmf_ent(K)=edmf_ent(K)+UPA(K,i)*ENT(K,i)
+         edmf_qc(K) =edmf_qc(K) +UPA(K,i)*UPQC(K,i)
       enddo
    enddo
    do k=kts,kte-1
