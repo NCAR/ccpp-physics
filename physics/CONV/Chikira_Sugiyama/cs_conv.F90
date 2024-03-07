@@ -3139,7 +3139,7 @@ module cs_conv
 !>\ingroup cs_scheme
 !! This subroution calculates freeze, melt and evaporation in cumulus downdraft.
       SUBROUTINE CUMDWN                            & ! Freeze & Melt & Evaporation
-               ( IM    , IJSDIM, KMAX  , NTR   ,  ntrq, & !DD dimensions
+               ( IM    , IJSDIM, KMAX  , NTR,ntrq,nctp, & !DD dimensions
                  GTT   , GTQ   , GTU   , GTV   ,        & ! modified
                          GMFLX ,                        & ! modified
                  GPRCP , GSNWP , GTEVP , GMDD  ,        & ! output
@@ -3905,7 +3905,7 @@ module cs_conv
       INTEGER, INTENT(IN) :: IM, IJSDIM, KMAX, NTR             !! DD, for GFS, pass in
 !
 !   [MODIFY]
-      REAL(kind_phys)     GTR   (IJSDIM, KMAX)      ! tracer tendency
+      REAL(kind_phys)     GTR   (IJSDIM, KMAX, NTR)   ! tracer tendency
 !
 !   [INPUT]
       REAL(kind_phys)     GDR   (IJSDIM, KMAX, NTR)   ! tracer
