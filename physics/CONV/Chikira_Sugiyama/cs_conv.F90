@@ -663,96 +663,96 @@ module cs_conv
 !
 !  [INTERNAL WORK]
    REAL(kind_phys), allocatable :: GPRCC (:, :)  ! rainfall
-   REAL(kind_phys)     GSNWC ( IJSDIM            ) !! snowfall
-   REAL(kind_phys)     CUMCLW( IJSDIM, KMAX      ) !! cloud water in cumulus
-   REAL(kind_phys)     CUMFRC( IJSDIM            ) !! cumulus cloud fraction
+   REAL(kind_phys)     GSNWC ( IJSDIM            ) ! snowfall
+   REAL(kind_phys)     CUMCLW( IJSDIM, KMAX      ) ! cloud water in cumulus
+   REAL(kind_phys)     CUMFRC( IJSDIM            ) ! cumulus cloud fraction
 !COSP
-   REAL(kind_phys)     QLIQC ( IJSDIM, KMAX   )    !! cumulus cloud liquid water [kg/kg]
-   REAL(kind_phys)     QICEC ( IJSDIM, KMAX   )    !! cumulus cloud ice [kg/kg]
-   REAL(kind_phys)     GPRCPF( IJSDIM, KMAX   )    !! rainfall flux at full level
-   REAL(kind_phys)     GSNWPF( IJSDIM, KMAX   )    !! snowfall flux at full level
+   REAL(kind_phys)     QLIQC ( IJSDIM, KMAX   )    ! cumulus cloud liquid water [kg/kg]
+   REAL(kind_phys)     QICEC ( IJSDIM, KMAX   )    ! cumulus cloud ice [kg/kg]
+   REAL(kind_phys)     GPRCPF( IJSDIM, KMAX   )    ! rainfall flux at full level
+   REAL(kind_phys)     GSNWPF( IJSDIM, KMAX   )    ! snowfall flux at full level
 !
-   REAL(kind_phys)     GTCFRC( IJSDIM, KMAX      ) !! change in cloud fraction
-   REAL(kind_phys)     FLIQC ( IJSDIM, KMAX      ) !! liquid ratio in cumulus
+   REAL(kind_phys)     GTCFRC( IJSDIM, KMAX      ) ! change in cloud fraction
+   REAL(kind_phys)     FLIQC ( IJSDIM, KMAX      ) ! liquid ratio in cumulus
 !
 !#ifdef OPT_CHASER
-!      REAL(kind_phys)     RFXC  ( IJSDIM, KMAX+1    ) !! precipi. flx [kg/m2/s]
-!      REAL(kind_phys)     SFXC  ( IJSDIM, KMAX+1    ) !! ice/snow flx [kg/m2/s]
-!      INTEGER      LEVCUM( IJSDIM, KMAX      ) !! flag for cum. cloud top
-!      REAL(kind_phys)     LNFRC ( IJSDIM, KMAX      ) !! areal rates of clouds
-!      REAL(kind_phys)     REVC  ( IJSDIM, KMAX      ) !! evaporation rates
+!      REAL(kind_phys)     RFXC  ( IJSDIM, KMAX+1    ) ! precipi. flx [kg/m2/s]
+!      REAL(kind_phys)     SFXC  ( IJSDIM, KMAX+1    ) ! ice/snow flx [kg/m2/s]
+!      INTEGER      LEVCUM( IJSDIM, KMAX      ) ! flag for cum. cloud top
+!      REAL(kind_phys)     LNFRC ( IJSDIM, KMAX      ) ! areal rates of clouds
+!      REAL(kind_phys)     REVC  ( IJSDIM, KMAX      ) ! evaporation rates
 !#endif
 !
-   REAL(kind_phys)     GDCFRC( IJSDIM, KMAX      ) !! cloud fraction
+   REAL(kind_phys)     GDCFRC( IJSDIM, KMAX      ) ! cloud fraction
 !
-!   REAL(kind_phys)     GTQL  ( IJSDIM, KMAX )      !! tendency of cloud liquid
+!   REAL(kind_phys)     GTQL  ( IJSDIM, KMAX )      ! tendency of cloud liquid
 !
-   REAL(kind_phys)     GDW   ( IJSDIM, KMAX )      !! total water
-   REAL(kind_phys)     GDQS  ( IJSDIM, KMAX )      !! saturate moisture
+   REAL(kind_phys)     GDW   ( IJSDIM, KMAX )      ! total water
+   REAL(kind_phys)     GDQS  ( IJSDIM, KMAX )      ! saturate moisture
    REAL(kind_phys)     FDQS  ( IJSDIM, KMAX )
    REAL(kind_phys)     GAM   ( IJSDIM, KMAX )
-   REAL(kind_phys)     GDS   ( IJSDIM, KMAX )      !! dry static energy
-   REAL(kind_phys)     GDH   ( IJSDIM, KMAX )      !! moist static energy
-   REAL(kind_phys)     GDHS  ( IJSDIM, KMAX )      !! saturate MSE
+   REAL(kind_phys)     GDS   ( IJSDIM, KMAX )      ! dry static energy
+   REAL(kind_phys)     GDH   ( IJSDIM, KMAX )      ! moist static energy
+   REAL(kind_phys)     GDHS  ( IJSDIM, KMAX )      ! saturate MSE
 !
-   REAL(kind_phys)     GCYM  ( IJSDIM, KMAX, NCTP )      !! norm. mass flux (half lev)
-   REAL(kind_phys)     GCHB  ( IJSDIM )            !! cloud base MSE-Li*Qi
-   REAL(kind_phys)     GCWB  ( IJSDIM )            !! cloud base total water
-   REAL(kind_phys)     GCtrB  ( IJSDIM, ntrq:ntr )            !! cloud base water vapor tracer
-   REAL(kind_phys)     GCUB  ( IJSDIM )            !! cloud base U
-   REAL(kind_phys)     GCVB  ( IJSDIM )            !! cloud base V
-   REAL(kind_phys)     GCIB  ( IJSDIM )            !! cloud base ice
-   REAL(kind_phys)     ELAM  ( IJSDIM, KMAX, NCTP )   !! entrainment (rate*massflux)
-   REAL(kind_phys)     GCYT  ( IJSDIM, NCTP )      !! norm. mass flux @top
-   REAL(kind_phys)     GCHT  ( IJSDIM, NCTP )      !! cloud top MSE
-   REAL(kind_phys)     GCQT  ( IJSDIM, NCTP )      !! cloud top q
-   REAL(kind_phys)     GCwT  ( IJSDIM )      !! cloud top total water
-   REAL(kind_phys)     GCUT  ( IJSDIM, NCTP )      !! cloud top U
-   REAL(kind_phys)     GCVT  ( IJSDIM, NCTP )      !! cloud top V
-   REAL(kind_phys)     GCLT  ( IJSDIM, NCTP )      !! cloud top cloud water
-   REAL(kind_phys)     GCIT  ( IJSDIM, NCTP )      !! cloud top cloud ice
+   REAL(kind_phys)     GCYM  ( IJSDIM, KMAX, NCTP )      ! norm. mass flux (half lev)
+   REAL(kind_phys)     GCHB  ( IJSDIM )            ! cloud base MSE-Li*Qi
+   REAL(kind_phys)     GCWB  ( IJSDIM )            ! cloud base total water
+   REAL(kind_phys)     GCtrB  ( IJSDIM, ntrq:ntr )            ! cloud base water vapor tracer
+   REAL(kind_phys)     GCUB  ( IJSDIM )            ! cloud base U
+   REAL(kind_phys)     GCVB  ( IJSDIM )            ! cloud base V
+   REAL(kind_phys)     GCIB  ( IJSDIM )            ! cloud base ice
+   REAL(kind_phys)     ELAM  ( IJSDIM, KMAX, NCTP )   ! entrainment (rate*massflux)
+   REAL(kind_phys)     GCYT  ( IJSDIM, NCTP )      ! norm. mass flux @top
+   REAL(kind_phys)     GCHT  ( IJSDIM, NCTP )      ! cloud top MSE
+   REAL(kind_phys)     GCQT  ( IJSDIM, NCTP )      ! cloud top q
+   REAL(kind_phys)     GCwT  ( IJSDIM )      ! cloud top total water
+   REAL(kind_phys)     GCUT  ( IJSDIM, NCTP )      ! cloud top U
+   REAL(kind_phys)     GCVT  ( IJSDIM, NCTP )      ! cloud top V
+   REAL(kind_phys)     GCLT  ( IJSDIM, NCTP )      ! cloud top cloud water
+   REAL(kind_phys)     GCIT  ( IJSDIM, NCTP )      ! cloud top cloud ice
    REAL(kind_phys)     GCtrT (IJSDIM, ntrq:ntr, NCTP) ! cloud top tracer
-   REAL(kind_phys)     GTPRT ( IJSDIM, NCTP )      !! precipitation/M
-   REAL(kind_phys)     GCLZ  ( IJSDIM, KMAX )      !! cloud liquid for each CTP
-   REAL(kind_phys)     GCIZ  ( IJSDIM, KMAX )      !! cloud ice for each CTP
+   REAL(kind_phys)     GTPRT ( IJSDIM, NCTP )      ! precipitation/M
+   REAL(kind_phys)     GCLZ  ( IJSDIM, KMAX )      ! cloud liquid for each CTP
+   REAL(kind_phys)     GCIZ  ( IJSDIM, KMAX )      ! cloud ice for each CTP
 
-   REAL(kind_phys)     ACWF  ( IJSDIM       )      !! cloud work function
-   REAL(kind_phys)     GPRCIZ( IJSDIM, KMAX+1, NCTP )    !! precipitation
-   REAL(kind_phys)     GSNWIZ( IJSDIM, KMAX+1, NCTP )    !! snowfall
-   REAL(kind_phys)     GTPRC0( IJSDIM       )      !! precip. before evap.
+   REAL(kind_phys)     ACWF  ( IJSDIM       )      ! cloud work function
+   REAL(kind_phys)     GPRCIZ( IJSDIM, KMAX+1, NCTP )    ! precipitation
+   REAL(kind_phys)     GSNWIZ( IJSDIM, KMAX+1, NCTP )    ! snowfall
+   REAL(kind_phys)     GTPRC0( IJSDIM       )      ! precip. before evap.
 
-   REAL(kind_phys)     GMFLX ( IJSDIM, KMAX+1 )    !! mass flux (updraft+downdraft)
-   REAL(kind_phys)     QLIQ  ( IJSDIM, KMAX   )    !! total cloud liquid
-   REAL(kind_phys)     QICE  ( IJSDIM, KMAX   )    !! total cloud ice
-   REAL(kind_phys)     GPRCI ( IJSDIM, KMAX   )    !! rainfall generation
-   REAL(kind_phys)     GSNWI ( IJSDIM, KMAX   )    !! snowfall generation
+   REAL(kind_phys)     GMFLX ( IJSDIM, KMAX+1 )    ! mass flux (updraft+downdraft)
+   REAL(kind_phys)     QLIQ  ( IJSDIM, KMAX   )    ! total cloud liquid
+   REAL(kind_phys)     QICE  ( IJSDIM, KMAX   )    ! total cloud ice
+   REAL(kind_phys)     GPRCI ( IJSDIM, KMAX   )    ! rainfall generation
+   REAL(kind_phys)     GSNWI ( IJSDIM, KMAX   )    ! snowfall generation
 
-   REAL(kind_phys)     GPRCP ( IJSDIM, KMAX+1 )    !! rainfall flux
+   REAL(kind_phys)     GPRCP ( IJSDIM, KMAX+1 )    ! rainfall flux
 !
-   REAL(kind_phys)     GTEVP ( IJSDIM, KMAX   )    !! evaporation+sublimation
-   REAL(kind_phys)     GMDD  ( IJSDIM, KMAX+1 )    !! downdraft mass flux
+   REAL(kind_phys)     GTEVP ( IJSDIM, KMAX   )    ! evaporation+sublimation
+   REAL(kind_phys)     GMDD  ( IJSDIM, KMAX+1 )    ! downdraft mass flux
 
-   REAL(kind_phys)     CUMHGT( IJSDIM, NCTP   )    !! cloud top height
-   REAL(kind_phys)     CTOPP ( IJSDIM         )    !! cloud top pressure
+   REAL(kind_phys)     CUMHGT( IJSDIM, NCTP   )    ! cloud top height
+   REAL(kind_phys)     CTOPP ( IJSDIM         )    ! cloud top pressure
 
-   REAL(kind_phys)     GDZTR ( IJSDIM         )   !! tropopause height
-   REAL(kind_phys)     FLIQOU( IJSDIM, KMAX   )   !! liquid ratio in cumulus
+   REAL(kind_phys)     GDZTR ( IJSDIM         )   ! tropopause height
+   REAL(kind_phys)     FLIQOU( IJSDIM, KMAX   )   ! liquid ratio in cumulus
 !#ifdef OPT_CHASER
 !      REAL(kind_phys)     TOPFLX( IJSDIM, NCTP   )    !! flux at each cloud top
 !#endif
    INTEGER    KB    ( IJSDIM )
-   INTEGER    KSTRT ( IJSDIM ) !! tropopause level
+   INTEGER    KSTRT ( IJSDIM ) ! tropopause level
    REAL(kind_phys)   GAMX
    REAL(kind_phys)   CIN   ( IJSDIM )
    INTEGER    JBUOY ( IJSDIM )
    REAL(kind_phys)   DELZ, BUOY, DELWC, DELER
-!M REAL(kind_phys)   WCB   ( NCTP )                !! updraft velocity**2 @base
+!M REAL(kind_phys)   WCB   ( NCTP )                ! updraft velocity**2 @base
 !M SAVE       WCB
    REAL(kind_phys)   WCBX (IJSDIM)
-!   REAL(kind_phys)   ERMR  ( NCTP )                !! entrainment rate (ASMODE)
+!   REAL(kind_phys)   ERMR  ( NCTP )                ! entrainment rate (ASMODE)
 !   SAVE       ERMR
-   INTEGER    KTMX  ( NCTP )                !! max of cloud top
-   INTEGER    KTMXT                         !! max of cloud top
+   INTEGER    KTMX  ( NCTP )                ! max of cloud top
+   INTEGER    KTMXT                         ! max of cloud top
    REAL(kind_phys)   TIMED
    REAL(kind_phys)   GDCLDX, GDMU2X, GDMU3X
 !
@@ -760,26 +760,26 @@ module cs_conv
    INTEGER    KBMX, I, K, CTP, ierr, n, kp1, l, l1, kk, kbi, kmi, km1
    real(kind_phys) tem1, tem2, tem3, cbmfl, mflx_e, teme, tems
 
-   REAL(kind_phys)     HBGT ( IJSDIM )     !! imbalance in column heat
-   REAL(kind_phys)     WBGT ( IJSDIM )     !! imbalance in column water
+   REAL(kind_phys)     HBGT ( IJSDIM )     ! imbalance in column heat
+   REAL(kind_phys)     WBGT ( IJSDIM )     ! imbalance in column water
    
    !DDsigma begin local work variables - all on model interfaces (sfc=1)
-   REAL(kind_phys)     lamdai( IJSDIM, KMAX+1, nctp )         !! lamda for cloud type ctp
-   REAL(kind_phys)     lamdaprod( IJSDIM, KMAX+1   )   !! product of (1+lamda) through cloud type ctp
-   REAL(kind_phys)     gdrhom         !!  density
-   REAL(kind_phys)     gdtvm          !!  virtual temperature
-   REAL(kind_phys)     gdqm, gdwm,gdlm, gdim   !!  water vaper
+   REAL(kind_phys)     lamdai( IJSDIM, KMAX+1, nctp )         ! lamda for cloud type ctp
+   REAL(kind_phys)     lamdaprod( IJSDIM, KMAX+1   )   ! product of (1+lamda) through cloud type ctp
+   REAL(kind_phys)     gdrhom         !  density
+   REAL(kind_phys)     gdtvm          !  virtual temperature
+   REAL(kind_phys)     gdqm, gdwm,gdlm, gdim   !  water vaper
    REAL(kind_phys)     gdtrm(ntrq:ntr)           ! tracer
    character(len=4) :: cproc  !DDsigmadiag
 
    ! the following are new arguments to cumup to get them out 
-   REAL(kind_phys)     wcv( IJSDIM, KMAX+1, nctp)        !! in-cloud vertical velocity
-   REAL(kind_phys)     GCTM  ( IJSDIM, KMAX+1 )   !! cloud T (half lev)   !DDsigmadiag make output
-   REAL(kind_phys)     GCQM  ( IJSDIM, KMAX+1, nctp )   !! cloud q (half lev)   !DDsigmadiag make output
-   REAL(kind_phys)     GCwM  ( IJSDIM, KMAX+1, nctp )   !! cloud q (half lev)   !DDsigmadiag make output
-   REAL(kind_phys)     GCiM  ( IJSDIM, KMAX+1 )   !! cloud q (half lev)   !DDsigmadiag make output
-   REAL(kind_phys)     GClM  ( IJSDIM, KMAX+1 )   !! cloud q (half lev)   !DDsigmadiag make output
-   REAL(kind_phys)     GChM  ( IJSDIM, KMAX+1, nctp )   !! cloud q (half lev)   !DDsigmadiag make output
+   REAL(kind_phys)     wcv( IJSDIM, KMAX+1, nctp)        ! in-cloud vertical velocity
+   REAL(kind_phys)     GCTM  ( IJSDIM, KMAX+1 )   ! cloud T (half lev)   !DDsigmadiag make output
+   REAL(kind_phys)     GCQM  ( IJSDIM, KMAX+1, nctp )   ! cloud q (half lev)   !DDsigmadiag make output
+   REAL(kind_phys)     GCwM  ( IJSDIM, KMAX+1, nctp )   ! cloud q (half lev)   !DDsigmadiag make output
+   REAL(kind_phys)     GCiM  ( IJSDIM, KMAX+1 )   ! cloud q (half lev)   !DDsigmadiag make output
+   REAL(kind_phys)     GClM  ( IJSDIM, KMAX+1 )   ! cloud q (half lev)   !DDsigmadiag make output
+   REAL(kind_phys)     GChM  ( IJSDIM, KMAX+1, nctp )   ! cloud q (half lev)   !DDsigmadiag make output
    REAL(kind_phys)   GCtrM (IJSDIM, KMAX, ntrq:ntr) ! cloud tracer (half lev) !DDsigmadiag make output
       
 ! these are the fluxes at the interfaces - AW will operate on them
@@ -800,30 +800,30 @@ module cs_conv
 !DDsigma end local work variables
 !
 !  [INTERNAL PARM]
-   REAL(kind_phys) :: WCBMIN = 0._kind_phys       !! min. of updraft velocity at cloud base
-!M REAL(kind_phys) :: WCBMAX = 1.4_kind_phys      !! max. of updraft velocity at cloud base
+   REAL(kind_phys) :: WCBMIN = 0._kind_phys       ! min. of updraft velocity at cloud base
+!M REAL(kind_phys) :: WCBMAX = 1.4_kind_phys      ! max. of updraft velocity at cloud base
 !M wcbas commented by Moorthi since it is not used
-!M REAL(kind_phys) :: WCBAS  = 2._kind_phys       !! updraft velocity**2 at cloud base (ASMODE)
-!M REAL(kind_phys) :: ERAMIN = 1.e-5_kind_phys    !! min. of entrainment rate
-                                    !! used only in OPT_ASMODE
-!M REAL(kind_phys) :: ERAMAX = 2.e-3_kind_phys    !! max. of entrainment rate
-                                    !! used only in OPT_ASMODE
+!M REAL(kind_phys) :: WCBAS  = 2._kind_phys       ! updraft velocity**2 at cloud base (ASMODE)
+!M REAL(kind_phys) :: ERAMIN = 1.e-5_kind_phys    ! min. of entrainment rate
+                                    ! used only in OPT_ASMODE
+!M REAL(kind_phys) :: ERAMAX = 2.e-3_kind_phys    ! max. of entrainment rate
+                                    ! used only in OPT_ASMODE
 ! downdraft mass flux terms now slot nctp+1 in the *fluxterm arrays
-    REAL(kind_phys)     dtdwn ( IJSDIM, KMAX   ) !! t tendency downdraft detrainment
-    REAL(kind_phys)     dqvdwn ( IJSDIM, KMAX   ) !! qv tendency downdraft detrainment
-    REAL(kind_phys)     dqldwn ( IJSDIM, KMAX   ) !! ql tendency downdraft detrainment
-    REAL(kind_phys)     dqidwn ( IJSDIM, KMAX   ) !! qi tendency downdraft detrainment
+    REAL(kind_phys)     dtdwn ( IJSDIM, KMAX   ) ! t tendency downdraft detrainment
+    REAL(kind_phys)     dqvdwn ( IJSDIM, KMAX   ) ! qv tendency downdraft detrainment
+    REAL(kind_phys)     dqldwn ( IJSDIM, KMAX   ) ! ql tendency downdraft detrainment
+    REAL(kind_phys)     dqidwn ( IJSDIM, KMAX   ) ! qi tendency downdraft detrainment
     REAL(kind_phys), dimension(ijsdim,kmax,ntrq:ntr) :: dtrdwn    ! tracer tendency downdraft detrainment
 
-    LOGICAL  :: OINICB = .false.     !! set 0.d0 to CBMFX
+    LOGICAL  :: OINICB = .false.     ! set 0.d0 to CBMFX
 
-    REAL(kind_phys) :: VARMIN = 1.e-13_kind_phys   !! minimum of PDF variance
-    REAL(kind_phys) :: VARMAX = 5.e-7_kind_phys    !! maximum of PDF variance
-    REAL(kind_phys) :: SKWMAX = 0.566_kind_phys    !! maximum of PDF skewness
+    REAL(kind_phys) :: VARMIN = 1.e-13_kind_phys   ! minimum of PDF variance
+    REAL(kind_phys) :: VARMAX = 5.e-7_kind_phys    ! maximum of PDF variance
+    REAL(kind_phys) :: SKWMAX = 0.566_kind_phys    ! maximum of PDF skewness
 
-    REAL(kind_phys) :: PSTRMX = 400.e2_kind_phys   !! max P of tropopause
-    REAL(kind_phys) :: PSTRMN = 50.e2_kind_phys    !! min P of tropopause
-    REAL(kind_phys) :: GCRSTR = 1.e-4_kind_phys    !! crit. dT/dz tropopause
+    REAL(kind_phys) :: PSTRMX = 400.e2_kind_phys   ! max P of tropopause
+    REAL(kind_phys) :: PSTRMN = 50.e2_kind_phys    ! min P of tropopause
+    REAL(kind_phys) :: GCRSTR = 1.e-4_kind_phys    ! crit. dT/dz tropopause
 
         ! 0: mass fixer is not applied
         !    tracers which may become negative values
@@ -835,10 +835,9 @@ module cs_conv
     real(kind=kind_phys), parameter  :: zero=0.0, one=1.0
     real(kind=kind_phys)             :: tem, esat
 !
-    LOGICAL, SAVE :: OFIRST = .TRUE.   !! called first time?
+    LOGICAL, SAVE :: OFIRST = .TRUE.   ! called first time?
 !
-   IF ( OFIRST ) THEN
-
+   IF (OFIRST) THEN
      OFIRST = .FALSE.
      IF (OINICB) THEN
        CBMFX = zero
