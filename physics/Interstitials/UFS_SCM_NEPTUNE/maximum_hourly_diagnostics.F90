@@ -80,6 +80,12 @@ contains
 !Lightning threat indices
        if (lightning_threat) then
          call lightning_threat_indices
+         ! Lightning threat indices are calculated as flashes per 5 minutes.
+         ! In order to scale that to flashes per minute (standard units),
+         ! we must divide the indices by a factor of 5 / multiply by 0.2
+         ltg1_max = 0.2_kind_phys * ltg1_max
+         ltg2_max = 0.2_kind_phys * ltg2_max
+         ltg3_max = 0.2_kind_phys * ltg3_max
        endif
 
 !Calculate hourly max 1-km agl and -10C reflectivity
