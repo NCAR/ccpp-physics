@@ -222,24 +222,6 @@
          jamin=999
          jamax=-999
 
-!$OMP parallel num_threads(nthrds) default(none)                                    &
-!$OMP          shared (me,master,ntoz,h2o_phys,im,nx,ny,levs,idate)                 &
-!$OMP          shared (xlat_d,xlon_d,imap,jmap,errmsg,errflg)                       &
-!$OMP          shared (levh2o,h2o_coeff,h2o_pres,h2opl)                             &
-!$OMP          shared (iamin, iamax, jamin, jamax, lsm_noahmp)                      &
-!$OMP          shared (iaerclm,iaermdl,ntrcaer,aer_nm,iflip,iccn)                   &
-!$OMP          shared (jindx1_o3,jindx2_o3,ddy_o3,jindx1_h,jindx2_h,ddy_h)          &
-!$OMP          shared (jindx1_aer,jindx2_aer,ddy_aer,iindx1_aer,iindx2_aer,ddx_aer) &
-!$OMP          shared (jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci,ddx_ci)       &
-!$OMP          shared (do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau,ddy_j2tau)        &
-!$OMP          shared (isot,ivegsrc,nlunit,sncovr,sncovr_ice,lsm,lsm_ruc)           &
-!$OMP          shared (min_seaice,fice,landfrac,vtype,weasd,snupx,salp_data)        &
-!$OMP          shared (ozphys)                                                      &
-!$OMP          private (ix,i,j,rsnow,vegtyp,myerrmsg,myerrflg)
-
-!$OMP sections
-
-!$OMP section
 !> - Call read_h2odata() to read stratospheric water vapor data
        need_h2odata: if(h2o_phys) then
          call read_h2odata (h2o_phys, me, master)
@@ -263,7 +245,6 @@
          end if
        endif need_h2odata
 
-!$OMP section
 !> - Call read_aerdata() to read aerosol climatology, Anning added coupled
 !>  added coupled gocart and radiation option to initializing aer_nm
          if (iaerclm) then
@@ -285,7 +266,6 @@
            ntrcaer = 1
          endif
 
-!$OMP section
 !> - Call read_cidata() to read IN and CCN data
          if (iccn == 1) then
            call read_cidata (me,master)
@@ -293,7 +273,6 @@
            ! hardcoded in module iccn_def.F and GFS_typedefs.F90
          endif
 
-!$OMP section
 !> - Call tau_amf dats for  ugwp_v1
          if (do_ugwp_v1) then
             myerrflg = 0
@@ -302,14 +281,12 @@
             call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          endif
 
-!$OMP section
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
          myerrflg = 0
          myerrmsg = 'set_soilveg failed without a message'
          call set_soilveg(me, isot, ivegsrc, nlunit, myerrmsg, myerrflg)
          call copy_error(myerrmsg, myerrflg, errmsg, errflg)
 
-!$OMP section
 !> - read in NoahMP table (needed for NoahMP init)
          if(lsm == lsm_noahmp) then
            myerrflg = 0
@@ -318,25 +295,19 @@
            call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          endif
 
-!$OMP end sections
 
 ! Need an OpenMP barrier here (implicit in "end sections")
 
-!$OMP sections
-
-!$OMP section
 !> - Setup spatial interpolation indices for ozone physics.
          if (ntoz > 0) then
            call ozphys%setup_o3prog(xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
          endif
 
-!$OMP section
 !> - Call setindxh2o() to initialize stratospheric water vapor data
          if (h2o_phys) then
            call setindxh2o (im, xlat_d, jindx1_h, jindx2_h, ddy_h)
          endif
 
-!$OMP section
 !> - Call setindxaer() to initialize aerosols data
          if (iaerclm) then
            call setindxaer (im, xlat_d, jindx1_aer,          &
@@ -349,7 +320,6 @@
            jamax = max(maxval(jindx2_aer), jamax)
          endif
 
-!$OMP section
 !> - Call setindxci() to initialize IN and CCN data
          if (iccn == 1) then
            call setindxci (im, xlat_d, jindx1_ci,      &
@@ -357,14 +327,12 @@
                            iindx1_ci, iindx2_ci, ddx_ci)
          endif
 
-!$OMP section
 !> - Call  cires_indx_ugwp to read monthly-mean GW-tau diagnosed from FV3GFS-runs that can resolve GWs
          if (do_ugwp_v1) then
             call cires_indx_ugwp (im, me, master, xlat_d, jindx1_tau, jindx2_tau,  &
                                   ddy_j1tau, ddy_j2tau)
          endif
 
-!$OMP section
          !--- initial calculation of maps local ix -> global i and j
          ix = 0
          do j = 1,ny
@@ -375,7 +343,6 @@
            enddo
          enddo
 
-!$OMP section
          !--- if sncovr does not exist in the restart, need to create it
          if (all(sncovr < zero)) then
            if (me == master ) write(*,'(a)') 'GFS_phys_time_vary_init: compute sncovr from weasd and soil vegetation parameters'
@@ -403,10 +370,6 @@
              sncovr_ice(:) = sncovr(:)
            endif
          endif
-
-!$OMP end sections
-
-!$OMP end parallel
 
          if (errflg/=0) return
 
