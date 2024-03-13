@@ -1,4 +1,4 @@
-!>\file rrfs_smoke_wrapper.F90hwp_method
+!>\file rrfs_smoke_wrapper.F90
 !! This file is CCPP driver of RRFS Smoke and Dust
 !! Haiqin.Li@noaa.gov 03/2024
 
