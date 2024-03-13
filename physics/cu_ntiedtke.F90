@@ -14,27 +14,29 @@ module cu_ntiedtke
      ! this also requires redefining derived constants in the
      ! parameter section below
      use physcons, only:rd=>con_rd, rv=>con_rv, g=>con_g, &
-   &       cpd=>con_cp, alv=>con_hvap, alf=>con_hfus              
+   &       cpd=>con_cp, alv=>con_hvap, alf=>con_hfus
 
      implicit none
-     real(kind=kind_phys),private :: rcpd,vtmpc1,tmelt,als,t13,                &
-             c1es,c2es,c3les,c3ies,c4les,c4ies,c5les,c5ies,zrg
+     real(kind=kind_phys),private :: rcpd,vtmpc1,als,                &
+             c2es,c5les,c5ies,zrg
 
-     real(kind=kind_phys),private :: rovcp,r5alvcp,r5alscp,ralvdcp,ralsdcp,ralfdcp,rtwat,rtber,rtice 
-     real(kind=kind_phys),private :: entrdd,cmfcmax,cmfcmin,cmfdeps,zdnoprc,cprcon
-     integer,private :: momtrans,p650
+     real(kind=kind_phys),private :: rovcp,r5alvcp,r5alscp,ralvdcp,ralsdcp,ralfdcp
 
+      real(kind=kind_phys),parameter:: t13   = 0.333333333
+      real(kind=kind_phys),parameter:: tmelt = 273.16
+      real(kind=kind_phys),parameter:: c1es  = 610.78
+      real(kind=kind_phys),parameter:: c3les = 17.2693882
+      real(kind=kind_phys),parameter:: c3ies = 21.875
+      real(kind=kind_phys),parameter:: c4les = 35.86
+      real(kind=kind_phys),parameter:: c4ies = 7.66
+
+      real(kind=kind_phys),parameter:: rtwat = tmelt
+      real(kind=kind_phys),parameter:: rtber = tmelt-5.
+      real(kind=kind_phys),parameter:: rtice = tmelt-23.
      parameter(         &
-      t13 = 0.333333333,&
       rcpd=1.0/cpd,     &
-      tmelt=273.16,     &
       zrg=1.0/g,        &
-      c1es=610.78,      &
       c2es=c1es*rd/rv,  &
-      c3les=17.2693882, &
-      c3ies=21.875,     &
-      c4les=35.86,      &
-      c4ies=7.66,       &
       als  = alv+alf,   &
       c5les=c3les*(tmelt-c4les),  &
       c5ies=c3ies*(tmelt-c4ies),  &
@@ -43,62 +45,73 @@ module cu_ntiedtke
       ralvdcp=alv*rcpd,           &
       ralsdcp=als*rcpd,           &
       ralfdcp=alf*rcpd,           &
-      rtwat=tmelt,                &
-      rtber=tmelt-5.,             &
-      rtice=tmelt-23.,            &
       vtmpc1=rv/rd-1.0,           &
       rovcp = rd*rcpd )
+
+!     momtrans: momentum transport method ( 1 = IFS40r1 method; 2 = new method )
+!     -------
+!
+      integer,parameter:: momtrans = 2
+!     -------
 !
 !     entrdd: average entrainment & detrainment rate for downdrafts
 !     ------
 !
-      parameter(entrdd = 2.0e-4)
+      real(kind=kind_phys),parameter:: entrdd  = 2.0e-4
 !
 !     cmfcmax:   maximum massflux value allowed for updrafts etc
 !     -------
 !
-      parameter(cmfcmax = 1.0)
+      real(kind=kind_phys),parameter:: cmfcmax = 1.0
 !
 !     cmfcmin:   minimum massflux value (for safety)
 !     -------
 !
-      parameter(cmfcmin = 1.e-10)
+      real(kind=kind_phys),parameter:: cmfcmin = 1.e-10
 !
 !     cmfdeps:   fractional massflux for downdrafts at lfs
 !     -------
 !
-      parameter(cmfdeps = 0.30)
-
+      real(kind=kind_phys),parameter:: cmfdeps = 0.30
+!
 !     zdnoprc:   deep cloud is thicker than this height (Unit:Pa)
-!
-      parameter(zdnoprc = 2.0e4)
 !     -------
-!   
+!
+      real(kind=kind_phys),parameter:: zdnoprc = 2.0e4
+!
 !     cprcon:    coefficient from cloud water to rain water
-!   
-      parameter(cprcon = 1.4e-3)
 !     -------
 !
-!     momtrans: momentum transport method
-!     ( 1 = IFS40r1 method; 2 = new method )
+      real(kind=kind_phys),parameter:: cprcon  = 1.4e-3
 !
-      parameter(momtrans = 2 )
+!     pgcoef:   0.7 to 1.0 is good depends on the basin
 !     -------
 !
-      logical :: isequil
+      real(kind=kind_phys),parameter:: pgcoef  = 0.7
+
+
 !     isequil: representing equilibrium and nonequilibrium convection
 !     ( .false. [default]; .true. [experimental]. Ref. Bechtold et al. 2014 JAS )
-! 
-      parameter(isequil = .false. )
+!     Note for the diurnal simulation of precipitaton
+!     When isequil = .true., the CAPE is relaxed toward to a value from PBL
+!     It can improve the diurnal precipitation over land.
+!     -------
+!
+      logical,parameter:: isequil = .false.
 !
 !--------------------
 !     switches for deep, mid, shallow convections, downdraft, and momemtum transport
 !     ------------------
-      logical :: lmfpen,lmfmid,lmfscv,lmfdd,lmfdudv
-      parameter(lmfpen=.true.,lmfmid=.true.,lmfscv=.true.,lmfdd=.true.,lmfdudv=.true.)
-!--------------------
+      logical,parameter:: lmfpen   = .true.
+      logical,parameter:: lmfmid   = .true.
+      logical,parameter:: lmfscv   = .true.
+      logical,parameter:: lmfdd    = .true.
+      logical,parameter:: lmfdudv  = .true.
+
+
+!=================================================================================================================
 !#################### end of variables definition##########################
-!-----------------------------------------------------------------------
+!=================================================================================================================
 !
 contains
 !> \brief Brief description of the subroutine
@@ -112,16 +125,16 @@ contains
          implicit none
 
          integer,                   intent(in) :: imfshalcnv, imfshalcnv_ntiedtke
-         integer,                   intent(in) :: imfdeepcnv, imfdeepcnv_ntiedtke           
+         integer,                   intent(in) :: imfdeepcnv, imfdeepcnv_ntiedtke
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
-         
+
          ! initialize ccpp error handling variables
          errmsg = ''
          errflg = 0
-         
+
          ! DH* temporary
          if (mpirank==mpiroot) then
             write(0,*) ' -----------------------------------------------------------------------------------------------------------------------------'
@@ -144,64 +157,92 @@ contains
            errflg = 1
            return
          end if
-         
+
       end subroutine cu_ntiedtke_init
 
-! Tiedtke cumulus scheme from WRF with small modifications
-! This scheme includes both deep and shallow convections
 !===================
 !
 !> \section arg_table_cu_ntiedtke_run Argument Table
 !! \htmlinclude cu_ntiedtke_run.html
 !!
-!-----------------------------------------------------------------------
-!          level 1 subroutine 'tiecnvn'
-!-----------------------------------------------------------------
+!=================================================================================================================
+!     level 1 subroutine 'cu_ntiedkte_run'
       subroutine cu_ntiedtke_run(pu,pv,pt,pqv,tdi,qvdi,pqvf,ptf,clw,poz,pzz,prsl,prsi,pomg, &
                                  evap,hfx,zprecc,lmask,lq,km,dt,dx,kbot,ktop,kcnv, &
                                  ktrac,ud_mf,dd_mf,dt_mf,cnvw,cnvc,errmsg,errflg)
-!-----------------------------------------------------------------
-!  this is the interface between the model and the mass 
-!  flux convection module
-!-----------------------------------------------------------------
+!=================================================================================================================
+!  this is the interface between the model and the mass flux convection module
+!     m.tiedtke      e.c.m.w.f.      1989
+!     j.morcrette                    1992
+!--------------------------------------------
+!     modifications
+!     C. zhang & Yuqing Wang         2011-2017
+!
+!     modified from IPRC IRAM - yuqing wang, university of hawaii (ICTP REGCM4.4).
+!
+!     The current version is stable.  There are many updates to the old Tiedtke scheme (cu_physics=6)
+!     update notes:
+!     the new Tiedtke scheme is similar to the Tiedtke scheme used in REGCM4 and ECMWF cy40r1.
+!     the major differences to the old Tiedtke (cu_physics=6) scheme are,
+!        (a) New trigger functions for deep and shallow convections (Jakob and Siebesma 2003;
+!            Bechtold et al. 2004, 2008, 2014).
+!        (b) Non-equilibrium situations are considered in the closure for deep convection
+!            (Bechtold et al. 2014).
+!        (c) New convection time scale for the deep convection closure (Bechtold et al. 2008).
+!        (d) New entrainment and detrainment rates for all convection types (Bechtold et al. 2008).
+!        (e) New formula for the conversion from cloud water/ice to rain/snow (Sundqvist 1978).
+!        (f) Different way to include cloud scale pressure gradients (Gregory et al. 1997;
+!            Wu and Yanai 1994)
+!
+!     other reference: tiedtke (1989, mwr, 117, 1779-1800)
+!                      IFS documentation - cy33r1, cy37r2, cy38r1, cy40r1
+!
       implicit none
-! in&out variables
-      integer, intent(in)  ::  lq, km, ktrac
-      real(kind=kind_phys),     intent(in ) :: dt
-      integer, dimension( : ),   intent(in)  :: lmask
-      real(kind=kind_phys), dimension( : ),     intent(in ) :: evap, hfx, dx
-      real(kind=kind_phys), dimension( :, : ),     intent(inout) :: pu, pv, pt, pqv
-      real(kind=kind_phys), dimension( :, :),     intent(in )   :: tdi, qvdi, poz, prsl, pomg, pqvf, ptf
-      real(kind=kind_phys), dimension( :, : ),   intent(in )   :: pzz, prsi
+!--- input arguments:
+      integer, intent(in):: lq,km,ktrac
+      integer,intent(in),dimension(lq):: lmask
+
+      real(kind=kind_phys),intent(in):: dt
+      real(kind=kind_phys),intent(in),dimension(lq):: dx
+      real(kind=kind_phys),intent(in),dimension(lq):: evap,hfx
+      real(kind=kind_phys),intent(in),dimension(lq,km):: pqvf,ptf
+      real(kind=kind_phys),intent(in),dimension(lq,km):: poz,pomg
+      real(kind=kind_phys),intent(in),dimension(lq,km+1):: pzz
+      real(kind=kind_phys), dimension( :, :),     intent(in )   :: tdi, qvdi, prsl
+      real(kind=kind_phys), dimension( :, : ),   intent(in )   :: prsi
       real(kind=kind_phys), dimension( :, :, : ),    intent(inout ) ::  clw
 
+!--- inout arguments:
+      real(kind=kind_phys),intent(inout),dimension(lq):: zprecc
+      real(kind=kind_phys),intent(inout),dimension(lq,km):: pu,pv,pt,pqv
       integer, dimension( : ),   intent(out)  :: kbot, ktop, kcnv
-      real(kind=kind_phys), dimension( : ),   intent(out)  :: zprecc
       real(kind=kind_phys), dimension (:, :), intent(out)  :: ud_mf, dd_mf, dt_mf, cnvw, cnvc
- 
-! error messages
-      character(len=*), intent(out)    ::                                 errmsg
-      integer,          intent(out)    ::                                 errflg
- 
-! local variables
-      real(kind=kind_phys) pum1(lq,km),  pvm1(lq,km),  ztt(lq,km),                &
-     &     ptte(lq,km),    pqte(lq,km),  pvom(lq,km),  pvol(lq,km),               &
-     &     pverv(lq,km),   pgeo(lq,km),  pap(lq,km),   paph(lq,km+1)
-      real(kind=kind_phys) pqhfl(lq),      zqq(lq,km),                            &
-     &     prsfc(lq),      pssfc(lq),    pcte(lq,km),                             &
-     &     phhfl(lq),      pgeoh(lq,km+1)
-      real(kind=kind_phys) ztp1(lq,km),    zqp1(lq,km),  ztu(lq,km),   zqu(lq,km),&
-     &     zlu(lq,km),     zlude(lq,km), zmfu(lq,km),  zmfd(lq,km),  zmfude_rate(lq,km),&
-     &     zqsat(lq,km),   zrain(lq)
-      real(kind=kind_phys),allocatable ::  pcen(:,:,:),ptenc(:,:,:) 
 
-      integer icbot(lq),   ictop(lq),     ktype(lq),   lndj(lq)
-      logical locum(lq)
-!
-      real(kind=kind_phys) ztmst,fliq,fice,ztc,zalf,tt
-      integer i,j,k,k1,n,km1,ktracer
-      real(kind=kind_phys) ztpp1
-      real(kind=kind_phys) zew,zqs,zcor
+!--- output arguments:
+      character(len=*),intent(out):: errmsg
+      integer,intent(out):: errflg
+
+!--- local variables and arrays:
+      real(kind=kind_phys),allocatable ::  pcen(:,:,:),ptenc(:,:,:)
+      integer,dimension(lq):: lndj
+      logical,dimension(lq):: locum
+      integer:: i,j,k
+      integer:: k1,n,km1,ktracer
+      integer,dimension(lq):: icbot,ictop,ktype
+
+      real(kind=kind_phys):: ztmst,fliq,fice,ztc,zalf,tt
+      real(kind=kind_phys):: ztpp1,zew,zqs,zcor
+      real(kind=kind_phys):: dxref
+
+      real(kind=kind_phys),dimension(lq):: pqhfl,prsfc,pssfc,phhfl,zrain
+      real(kind=kind_phys),dimension(lq):: scale_fac,scale_fac2
+
+      real(kind=kind_phys),dimension(lq,km):: pum1,pvm1,ztt,ptte,pqte,pvom,pvol,pverv,pgeo
+      real(kind=kind_phys),dimension(lq,km):: zqq,pcte
+      real(kind=kind_phys),dimension(lq,km):: ztp1,zqp1,ztu,zqu,zlu,zlude,zmfu,zmfd,zqsat,zmfude_rate,pap
+      real(kind=kind_phys),dimension(lq,km+1):: pgeoh,paph
+
+!-----------------------------------------------------------------------------------------------------------------
 !
 ! Initialize CCPP error handling variables
    errmsg = ''
@@ -209,6 +250,19 @@ contains
 
       km1 = km + 1
       ztmst=dt
+!
+!  set scale-dependency factor when dx is < 15 km
+!
+      dxref = 15000.
+      do j=1,lq
+      if (dx(j).lt.dxref) then
+          scale_fac(j) = (1.06133+log(dxref/dx(j)))**3
+          scale_fac2(j) = scale_fac(j)**0.5
+      else
+          scale_fac(j) = 1.+1.33e-5*dx(j)
+          scale_fac2(j) = 1.
+      end if
+      end do
 !
 !  masv flux diagnostics.
 !
@@ -220,7 +274,7 @@ contains
         pqhfl(j)=evap(j)
         phhfl(j)=hfx(j)
         pgeoh(j,km1)=pzz(j,1)
-         paph(j,km1)=prsi(j,1)
+        paph(j,km1)=prsi(j,1)
         if(lmask(j).eq.1) then
            lndj(j)=1
         else
@@ -246,12 +300,12 @@ contains
           pap(j,k1)=prsl(j,k)
           paph(j,k1)=prsi(j,k+1)
           tt=ztp1(j,k1)
-          zew  = foeewm(tt)                                      
-          zqs  = zew/pap(j,k1)                                      
-          zqs  = min(0.5,zqs)                                         
-          zcor = 1./(1.-vtmpc1*zqs)                                    
-          zqsat(j,k1)=zqs*zcor      
-          pqte(j,k1)=pqvf(j,k)+(pqv(j,k)-qvdi(j,k))/ztmst 
+          zew  = foeewm(tt)
+          zqs  = zew/pap(j,k1)
+          zqs  = min(0.5,zqs)
+          zcor = 1./(1.-vtmpc1*zqs)
+          zqsat(j,k1)=zqs*zcor
+          pqte(j,k1)=pqvf(j,k)+(pqv(j,k)-qvdi(j,k))/ztmst
           zqq(j,k1) =pqte(j,k1)
           ptte(j,k1)=ptf(j,k)+(pt(j,k)-tdi(j,k))/ztmst
           ztt(j,k1) =ptte(j,k1)
@@ -289,13 +343,13 @@ contains
           end do
         end do
       end if
-      
+
 !      print *, "pgeo=",pgeo(1,:)
 !      print *, "pgeoh=",pgeoh(1,:)
 !      print *, "pap=",pap(1,:)
 !      print *, "paph=",paph(1,:)
 !      print *, "ztp1=",ztp1(1,:)
-!      print *, "zqp1=",zqp1(1,:) 
+!      print *, "zqp1=",zqp1(1,:)
 !      print *, "pum1=",pum1(1,:)
 !      print *, "pvm1=",pvm1(1,:)
 !      print *, "pverv=",pverv(1,:)
@@ -307,14 +361,15 @@ contains
 !*    2.     call 'cumastrn'(master-routine for cumulus parameterization)
 !
       call cumastrn        &
-     &    (lq,       km,       km1,      km-1,    ztp1, &
-     &     zqp1,     pum1,     pvm1,     pverv,   zqsat,&
-     &     pqhfl,    ztmst,    pap,      paph,    pgeo, &
-     &     ptte,     pqte,     pvom,     pvol,    prsfc,&
-     &     pssfc,    locum,    ktracer,  pcen,    ptenc,&
-     &     ktype,    icbot,    ictop,    ztu,     zqu,  &
-     &     zlu,      zlude,    zmfu,     zmfd,    zrain,&
-     &     pcte,     phhfl,    lndj,     pgeoh,   zmfude_rate, dx)
+     &    (lq,       km,       km1,      km-1,    ztp1,  &
+     &     zqp1,     pum1,     pvm1,     pverv,   zqsat, &
+     &     pqhfl,    ztmst,    pap,      paph,    pgeo,  &
+     &     ptte,     pqte,     pvom,     pvol,    prsfc, &
+     &     pssfc,    locum,    ktracer,  pcen,    ptenc, &
+     &     ktype,    icbot,    ictop,    ztu,     zqu,   &
+     &     zlu,      zlude,    zmfu,     zmfd,    zrain, &
+     &     pcte,     phhfl,    lndj,     pgeoh,   zmfude_rate, dx, &
+     &     scale_fac, scale_fac2)
 !
 !     to include the cloud water and cloud ice detrained from convection
 !
@@ -350,7 +405,7 @@ contains
         kbot(j) = km-icbot(j)+1
         ktop(j) = km-ictop(j)+1
         if(ktype(j).eq.1 .or. ktype(j).eq.3) then
-           kcnv(j)=1 
+           kcnv(j)=1
         else
            kcnv(j)=0
         end if
@@ -365,21 +420,9 @@ contains
           end do
         end do
       endif
-
 !
-! Currently, vertical mixing of tracers are turned off
-!      if(ktrac > 2) then
-!        do n=1,ktrac-2
-!          do k=1,km
-!            k1=km-k+1
-!            do j=1,lq
-!              clw(j,k,n+2)=pcen(j,k,n)+ptenc(j,k1,n)*ztmst
-!            end do
-!          end do
-!        end do
-!      end if
-      deallocate(pcen)
-      deallocate(ptenc)
+      errmsg = 'cu_ntiedtke_run OK'
+      errflg = 0
 !
       return
       end subroutine cu_ntiedtke_run
@@ -393,14 +436,15 @@ contains
 !           subroutine cumastrn
 !***********************************************************
       subroutine cumastrn  &
-     &    (klon,     klev,     klevp1,   klevm1,   pten, &
-     &     pqen,     puen,     pven,     pverv,    pqsen,&
-     &     pqhfl,    ztmst,    pap,      paph,     pgeo, &
-     &     ptte,     pqte,     pvom,     pvol,     prsfc,& 
-     &     pssfc,    ldcum,    ktrac,    pcen,     ptenc,&
-     &     ktype,    kcbot,    kctop,    ptu,      pqu,&
-     &     plu,      plude,    pmfu,     pmfd,     prain,&
-     &     pcte,     phhfl,    lndj,     zgeoh,    pmfude_rate, dx)
+     &    (klon,     klev,     klevp1,   klevm1,   pten,  &
+     &     pqen,     puen,     pven,     pverv,    pqsen, &
+     &     pqhfl,    ztmst,    pap,      paph,     pgeo,  &
+     &     ptte,     pqte,     pvom,     pvol,     prsfc, &
+     &     pssfc,    ldcum,    ktrac,    pcen,     ptenc, &
+     &     ktype,    kcbot,    kctop,    ptu,      pqu,   &
+     &     plu,      plude,    pmfu,     pmfd,     prain, &
+     &     pcte,     phhfl,    lndj,     zgeoh,    pmfude_rate, dx, &
+     &     scale_fac,  scale_fac2)
       implicit none
 !
 !***cumastrn*  master routine for cumulus massflux-scheme
@@ -460,92 +504,81 @@ contains
 !   ----------
 !          paper on massflux scheme (tiedtke,1989)
 !-----------------------------------------------------------------
-      integer  klev,klon,ktrac,klevp1,klevm1
-      real(kind=kind_phys)     pten(klon,klev),        pqen(klon,klev),& 
-     &         puen(klon,klev),        pven(klon,klev),&
-     &         ptte(klon,klev),        pqte(klon,klev),&
-     &         pvom(klon,klev),        pvol(klon,klev),&
-     &         pqsen(klon,klev),       pgeo(klon,klev),&
-     &         pap(klon,klev),         paph(klon,klevp1),&
-     &         pverv(klon,klev),       pqhfl(klon),&
-     &         phhfl(klon)            
-      real(kind=kind_phys)     ptu(klon,klev),         pqu(klon,klev),&
-     &         plu(klon,klev),         plude(klon,klev),&
-     &         pmfu(klon,klev),        pmfd(klon,klev),&
-     &         prain(klon),&
-     &         prsfc(klon),            pssfc(klon)
-      real(kind=kind_phys)     ztenh(klon,klev),       zqenh(klon,klev),&
-     &         zgeoh(klon,klevp1),     zqsenh(klon,klev),&
-     &         ztd(klon,klev),         zqd(klon,klev),&
-     &         zmfus(klon,klev),       zmfds(klon,klev),&
-     &         zmfuq(klon,klev),       zmfdq(klon,klev),&
-     &         zdmfup(klon,klev),      zdmfdp(klon,klev),&
-     &         zmful(klon,klev),       zrfl(klon),&
-     &         zuu(klon,klev),         zvu(klon,klev),&
-     &         zud(klon,klev),         zvd(klon,klev),&
-     &         zlglac(klon,klev)
-      real(kind=kind_phys)     pmflxr(klon,klevp1),    pmflxs(klon,klevp1)
-      real(kind=kind_phys)     zhcbase(klon),& 
-     &         zmfub(klon),            zmfub1(klon),&
-     &         zdhpbl(klon)          
-      real(kind=kind_phys)     zsfl(klon),             zdpmel(klon,klev),&
-     &         pcte(klon,klev),        zcape(klon),&
-     &         zcape1(klon),           zcape2(klon),&
-     &         ztauc(klon),            ztaubl(klon),&
-     &         zheat(klon)
-      real(kind=kind_phys)     pcen(klon,klev,ktrac), ptenc(klon,klev,ktrac) 
-      real(kind=kind_phys)     wup(klon),              zdqcv(klon)            
-      real(kind=kind_phys)     wbase(klon),            zmfuub(klon)
-      real(kind=kind_phys)     upbl(klon)
-      real(kind=kind_phys)     dx(klon)
-      real(kind=kind_phys)     pmfude_rate(klon,klev), pmfdde_rate(klon,klev)
-      real(kind=kind_phys)     zmfuus(klon,klev),      zmfdus(klon,klev)
-      real(kind=kind_phys)     zmfudr(klon,klev),      zmfddr(klon,klev) 
-      real(kind=kind_phys)     zuv2(klon,klev),ztenu(klon,klev),ztenv(klon,klev)
-      real(kind=kind_phys)     zmfuvb(klon),zsum12(klon),zsum22(klon)
-      integer  ilab(klon,klev),        idtop(klon),&
-     &         ictop0(klon),           ilwmin(klon)
-      integer  kdpl(klon)
-      integer  kcbot(klon),            kctop(klon),&
-     &         ktype(klon),            lndj(klon)
-      logical  ldcum(klon),            lldcum(klon)
-      logical  loddraf(klon),          llddraf3(klon), llo1,   llo2(klon)
 
-!  local varaiables
-      real(kind=kind_phys)     zcons,zcons2,zqumqe,zdqmin,zdh,zmfmax
-      real(kind=kind_phys)     zalfaw,zalv,zqalv,zc5ldcp,zc4les,zhsat,zgam,zzz,zhhat
-      real(kind=kind_phys)     zpbmpt,zro,zdz,zdp,zeps,zfac,wspeed
-      integer  jl,jk,ik
-      integer  ikb,ikt,icum,itopm2
-      real(kind=kind_phys)     ztmst,ztau,zerate,zderate,zmfa
-      real(kind=kind_phys)     zmfs(klon),pmean(klev),zlon
-      real(kind=kind_phys)     zduten,zdvten,ztdis,pgf_u,pgf_v
+!--- input arguments:
+      integer,intent(in):: klev,klon,klevp1,klevm1
+      integer,intent(in):: ktrac
+      integer,intent(in),dimension(klon):: lndj
+
+      real(kind=kind_phys),intent(in):: ztmst
+      real(kind=kind_phys),intent(in),dimension(klon):: dx
+      real(kind=kind_phys),intent(in),dimension(klon):: pqhfl,phhfl
+      real(kind=kind_phys),intent(in),dimension(klon):: scale_fac,scale_fac2
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pten,pqen,puen,pven,pverv
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pap,pgeo
+      real(kind=kind_phys),intent(in),dimension(klon,klevp1):: paph,zgeoh
+
+!--- inout arguments:
+      integer,intent(inout),dimension(klon):: ktype,kcbot,kctop
+      logical,intent(inout),dimension(klon):: ldcum
+
+      real(kind=kind_phys),intent(inout),dimension(klon):: pqsen
+      real(kind=kind_phys),intent(inout),dimension(klon):: prsfc,pssfc,prain
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: pcte,ptte,pqte,pvom,pvol
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: ptu,pqu,plu,plude,pmfu,pmfd
+
+!--- local variables and arrays:
+      logical:: llo1
+      logical,dimension(klon):: loddraf,llo2
+      logical,dimension(klon):: lldcum,llddraf3
+
+      integer:: jl,jk,ik
+      integer:: ikb,ikt,icum,itopm2
+      integer,dimension(klon):: kdpl,idtop,ictop0,ilwmin
+      integer,dimension(klon,klev):: ilab
+
+      real(kind=kind_phys):: zcons,zcons2,zqumqe,zdqmin,zdh,zmfmax
+      real(kind=kind_phys):: zalfaw,zalv,zqalv,zc5ldcp,zc4les,zhsat,zgam,zzz,zhhat
+      real(kind=kind_phys):: zpbmpt,zro,zdz,zdp,zeps,zfac,wspeed
+      real(kind=kind_phys):: zduten,zdvten,ztdis,pgf_u,pgf_v
+      real(kind=kind_phys):: zlon
+      real(kind=kind_phys):: ztau,zerate,zderate,zmfa
+      real(kind=kind_phys),dimension(klon):: zmfs
+      real(kind=kind_phys),dimension(klon):: zsfl,zcape,zcape1,zcape2,ztauc,ztaubl,zheat
+      real(kind=kind_phys),dimension(klon):: wup,zdqcv
+      real(kind=kind_phys),dimension(klon):: wbase,zmfuub
+      real(kind=kind_phys),dimension(klon):: upbl
+      real(kind=kind_phys),dimension(klon):: zhcbase,zmfub,zmfub1,zdhpbl
+      real(kind=kind_phys),dimension(klon):: zmfuvb,zsum12,zsum22
+      real(kind=kind_phys),dimension(klon):: zrfl
+      real(kind=kind_phys),dimension(klev):: pmean
+      real(kind=kind_phys),dimension(klon,klev):: pmfude_rate,pmfdde_rate
+      real(kind=kind_phys),dimension(klon,klev,ktrac):: pcen, ptenc
+      real(kind=kind_phys),dimension(klon,klev):: zdpmel
+      real(kind=kind_phys),dimension(klon,klev):: zmfuus,zmfdus,zuv2,ztenu,ztenv
+      real(kind=kind_phys),dimension(klon,klev):: zmfudr,zmfddr
+      real(kind=kind_phys),dimension(klon,klev):: ztenh,zqenh,zqsenh,ztd,zqd
+      real(kind=kind_phys),dimension(klon,klev):: zmfus,zmfds,zmfuq,zmfdq,zdmfup,zdmfdp,zmful
+      real(kind=kind_phys),dimension(klon,klev):: zuu,zvu,zud,zvd,zlglac
+      real(kind=kind_phys),dimension(klon,klevp1):: pmflxr,pmflxs
+
 !-------------------------------------------
 !     1.    specify constants and parameters
 !-------------------------------------------
       zcons=1./(g*ztmst)
       zcons2=3./(g*ztmst)
 
-      zlon = real(klon)
-      do jk = klev , 1 , -1
-        pmean(jk) = sum(pap(:,jk))/zlon
-      end do
-      p650 = klev-2
-      do jk = klev , 3 , -1
-        if ( pmean(jk)/pmean(klev)*1.013250e5 >  650.e2 ) p650 = jk
-      end do
-
 !--------------------------------------------------------------
 !*    2.    initialize values at vertical grid points in 'cuini'
 !--------------------------------------------------------------
       call cuinin &
-     &    (klon,     klev,     klevp1,   klevm1,   pten, &
-     &     pqen,     pqsen,    puen,     pven,     pverv,&
-     &     pgeo,     paph,     zgeoh,    ztenh,    zqenh,&
-     &     zqsenh,   ilwmin,   ptu,      pqu,      ztd,  &
-     &     zqd,      zuu,      zvu,      zud,      zvd,  &
-     &     pmfu,     pmfd,     zmfus,    zmfds,    zmfuq,&
-     &     zmfdq,    zdmfup,   zdmfdp,   zdpmel,   plu,  &
+     &    (klon,     klev,     klevp1,   klevm1,   pten,  &
+     &     pqen,     pqsen,    puen,     pven,     pverv, &
+     &     pgeo,     paph,     zgeoh,    ztenh,    zqenh, &
+     &     zqsenh,   ilwmin,   ptu,      pqu,      ztd,   &
+     &     zqd,      zuu,      zvu,      zud,      zvd,   &
+     &     pmfu,     pmfd,     zmfus,    zmfds,    zmfuq, &
+     &     zmfdq,    zdmfup,   zdmfdp,   zdpmel,   plu,   &
      &     plude,    ilab)
 
 !----------------------------------
@@ -555,11 +588,12 @@ contains
 !              and the cumulus type 1 or 2
 !          -------------------------------------------
        call cutypen &
-     &     ( klon,     klev,     klevp1,   klevm1,     pqen,&
-     &      ztenh,    zqenh,     zqsenh,    zgeoh,     paph,&
-     &      phhfl,    pqhfl,       pgeo,    pqsen,      pap,&
-     &       pten,     lndj,        ptu,      pqu,     ilab,&
-     &      ldcum,    kcbot,     ictop0,    ktype,    wbase,    plu,   kdpl)
+     &     ( klon,     klev,     klevp1,   klevm1,     pqen, &
+     &      ztenh,    zqenh,     zqsenh,    zgeoh,     paph, &
+     &      phhfl,    pqhfl,       pgeo,    pqsen,      pap, &
+     &       pten,     lndj,        ptu,      pqu,     ilab, &
+     &      ldcum,    kcbot,     ictop0,    ktype,    wbase, &
+     &        plu,    kdpl)
 
 !*         (b) assign the first guess mass flux at cloud base
 !              ------------------------------------------
@@ -575,7 +609,7 @@ contains
             zdhpbl(jl)=zdhpbl(jl)+(alv*pqte(jl,jk)+cpd*ptte(jl,jk))&
      &                 *(paph(jl,jk+1)-paph(jl,jk))
             if(lndj(jl) .eq. 0) then
-              wspeed = sqrt(puen(jl,jk)**2 + pven(jl,jk)**2) 
+              wspeed = sqrt(puen(jl,jk)**2 + pven(jl,jk)**2)
               upbl(jl) = upbl(jl) + wspeed*(paph(jl,jk+1)-paph(jl,jk))
             end if
          end if
@@ -600,7 +634,7 @@ contains
                zmfub(jl) = 0.1*zmfmax
                ldcum(jl) = .false.
              end if
-            end if  
+            end if
         else
            zmfub(jl) = 0.
         end if
@@ -611,15 +645,16 @@ contains
 !*    (a) do ascent in 'cuasc'in absence of downdrafts
 !----------------------------------------------------------
       call cuascn &
-     &    (klon,     klev,     klevp1,   klevm1,   ztenh,&
-     &     zqenh,    puen,     pven,     pten,     pqen,&
-     &     pqsen,    pgeo,     zgeoh,    pap,      paph,&
-     &     pqte,     pverv,    ilwmin,   ldcum,    zhcbase,&
-     &     ktype,    ilab,     ptu,      pqu,      plu,&
-     &     zuu,      zvu,      pmfu,     zmfub,&
-     &     zmfus,    zmfuq,    zmful,    plude,    zdmfup,&
-     &     kcbot,    kctop,    ictop0,   icum,     ztmst,&
-     &     zqsenh,   zlglac,   lndj,     wup,      wbase,   kdpl,  pmfude_rate )
+     &    (klon,     klev,     klevp1,   klevm1,   ztenh,   &
+     &     zqenh,    puen,     pven,     pten,     pqen,    &
+     &     pqsen,    pgeo,     zgeoh,    pap,      paph,    &
+     &     pqte,     pverv,    ilwmin,   ldcum,    zhcbase, &
+     &     ktype,    ilab,     ptu,      pqu,      plu,     &
+     &     zuu,      zvu,      pmfu,     zmfub,             &
+     &     zmfus,    zmfuq,    zmful,    plude,    zdmfup,  &
+     &     kcbot,    kctop,    ictop0,   icum,     ztmst,   &
+     &     zqsenh,   zlglac,   lndj,     wup,      wbase,   &
+     &     kdpl,     pmfude_rate)
 
 !*     (b) check cloud depth and change entrainment rate accordingly
 !          calculate precipitation rate (for downdraft calculation)
@@ -658,24 +693,24 @@ contains
       if(lmfdd) then
 !*      (a) determine lfs in 'cudlfsn'
 !--------------------------------------
-        call cudlfsn    &
+        call cudlfsn &
      &    (klon,     klev,&
-     &     kcbot,    kctop,    lndj,   ldcum,   &
-     &     ztenh,    zqenh,    puen,     pven,   &
-     &     pten,     pqsen,    pgeo,              &
-     &     zgeoh,    paph,     ptu,      pqu,      plu,   &
-     &     zuu,      zvu,      zmfub,    zrfl,             &
-     &     ztd,      zqd,      zud,      zvd,               &
-     &     pmfd,     zmfds,    zmfdq,    zdmfdp,             &
+     &     kcbot,    kctop,    lndj,   ldcum,  &
+     &     ztenh,    zqenh,    puen,   pven,   &
+     &     pten,     pqsen,    pgeo,           &
+     &     zgeoh,    paph,     ptu,    pqu,   plu, &
+     &     zuu,      zvu,      zmfub,  zrfl,   &
+     &     ztd,      zqd,      zud,    zvd,    &
+     &     pmfd,     zmfds,    zmfdq,  zdmfdp, &
      &     idtop,    loddraf)
 !*     (b)  determine downdraft t,q and fluxes in 'cuddrafn'
 !------------------------------------------------------------
-        call cuddrafn                                         &
-     &   ( klon,     klev,     loddraf,                      &
-     &     ztenh,    zqenh,    puen,     pven,                 &
-     &     pgeo,     zgeoh,    paph,     zrfl,                  &
-     &     ztd,      zqd,      zud,      zvd,      pmfu,         &
-     &     pmfd,     zmfds,    zmfdq,    zdmfdp,   pmfdde_rate      )
+        call cuddrafn &
+     &    (klon,     klev,     loddraf,                  &
+     &     ztenh,    zqenh,    puen,     pven,           &
+     &     pgeo,     zgeoh,    paph,     zrfl,           &
+     &     ztd,      zqd,      zud,      zvd,      pmfu, &
+     &     pmfd,     zmfds,    zmfdq,    zdmfdp,   pmfdde_rate)
 !-----------------------------------------------------------
       end if
 !
@@ -683,7 +718,7 @@ contains
 !* 6.0          closure and clean work
 ! ------
 !-- 6.1 recalculate cloud base massflux from a cape closure
-!       for deep convection (ktype=1) 
+!       for deep convection (ktype=1)
 !
       do jl=1,klon
       if(ldcum(jl) .and. ktype(jl) .eq. 1) then
@@ -694,17 +729,17 @@ contains
         zcape1(jl)=0.0
         zcape2(jl)=0.0
         zmfub1(jl)=zmfub(jl)
-    
+
         ztauc(jl)  = (zgeoh(jl,ikt)-zgeoh(jl,ikb)) / &
                    ((2.+ min(15.0,wup(jl)))*g)
-        if(lndj(jl) .eq. 0) then 
+        if(lndj(jl) .eq. 0) then
           upbl(jl) = 2.+ upbl(jl)/(paph(jl,klev+1)-paph(jl,ikb))
           ztaubl(jl) = (zgeoh(jl,ikb)-zgeoh(jl,klev+1))/(g*upbl(jl))
           ztaubl(jl) = min(300., ztaubl(jl))
         else
           ztaubl(jl) = ztauc(jl)
         end if
-      end if    
+      end if
       end do
 !
       do jk = 1 , klev
@@ -725,7 +760,7 @@ contains
         if((paph(jl,klev+1)-paph(jl,kdpl(jl)))<50.e2) then
           zdp = paph(jl,jk+1)-paph(jl,jk)
           zcape2(jl) = zcape2(jl) + ztaubl(jl)* &
-                     ((1.+vtmpc1*pqen(jl,jk))*ptte(jl,jk)+vtmpc1*pten(jl,jk)*pqte(jl,jk))*zdp 
+                     ((1.+vtmpc1*pqen(jl,jk))*ptte(jl,jk)+vtmpc1*pten(jl,jk)*pqte(jl,jk))*zdp
         end if
         end if
       end do
@@ -735,10 +770,10 @@ contains
        if(ldcum(jl).and.ktype(jl).eq.1) then
            ikb = kcbot(jl)
            ikt = kctop(jl)
-           ztau = ztauc(jl) * (1.+1.33e-5*dx(jl))
-           ztau = max(ztmst,ztau)
-           ztau = max(720.,ztau)
-           ztau = min(10800.,ztau)
+           ztauc(jl) = max(ztmst,ztauc(jl))
+           ztauc(jl) = max(360.,ztauc(jl))
+           ztauc(jl) = min(10800.,ztauc(jl))
+           ztau = ztauc(jl) * scale_fac(jl)
            if(isequil) then
              zcape2(jl)= max(0.,zcape2(jl))
              zcape(jl) = max(0.,min(zcape1(jl)-zcape2(jl),5000.))
@@ -777,6 +812,7 @@ contains
            else
              zmfub1(jl) = zmfub(jl)
            end if
+           zmfub1(jl) = zmfub1(jl)/scale_fac2(jl)
            zmfub1(jl) = min(zmfub1(jl),zmfmax)
          end if
 
@@ -880,21 +916,19 @@ contains
         end if
       end do
     end do
-
-    itopm2 = 2
 !----------------------------------------------------------
 !*    7.0      determine final convective fluxes in 'cuflx'
 !----------------------------------------------------------
-       call cuflxn                                        &                  
-     &  (  klon,     klev,     ztmst                       &                                       
-     &  ,  pten,     pqen,     pqsen,    ztenh,   zqenh     &                  
-     &  ,  paph,     pap,      zgeoh,    lndj,    ldcum      &                 
-     &  ,  kcbot,    kctop,    idtop,    itopm2               &                 
-     &  ,  ktype,    loddraf                                   &                 
-     &  ,  pmfu,     pmfd,     zmfus,    zmfds                  &               
-     &  ,  zmfuq,    zmfdq,    zmful,    plude                   &              
-     &  ,  zdmfup,   zdmfdp,   zdpmel,   zlglac                   &             
-     &  ,  prain,    pmfdde_rate, pmflxr, pmflxs )     
+       call cuflxn                                      &
+     &  (  klon,     klev,     ztmst                    &
+     &  ,  pten,     pqen,     pqsen,    ztenh,   zqenh &
+     &  ,  paph,     pap,      zgeoh,    lndj,    ldcum &
+     &  ,  kcbot,    kctop,    idtop,    itopm2         &
+     &  ,  ktype,    loddraf                            &
+     &  ,  pmfu,     pmfd,     zmfus,    zmfds          &
+     &  ,  zmfuq,    zmfdq,    zmful,    plude          &
+     &  ,  zdmfup,   zdmfdp,   zdpmel,   zlglac         &
+     &  ,  prain,    pmfdde_rate, pmflxr, pmflxs )
 
 ! some adjustments needed
     do jl=1,klon
@@ -985,9 +1019,9 @@ contains
 !----------------------------------------------------------------
 !*    8.0      update tendencies for t and q in subroutine cudtdq
 !----------------------------------------------------------------
-      call cudtdqn(klon,klev,itopm2,kctop,idtop,ldcum,loddraf, &
-                 ztmst,paph,zgeoh,pgeo,pten,ztenh,pqen,zqenh,pqsen,     &
-                 zlglac,plude,pmfu,pmfd,zmfus,zmfds,zmfuq,zmfdq,zmful,   &
+      call cudtdqn(klon,klev,itopm2,kctop,idtop,ldcum,loddraf,         &
+                 ztmst,paph,zgeoh,pgeo,pten,ztenh,pqen,zqenh,pqsen,    &
+                 zlglac,plude,pmfu,pmfd,zmfus,zmfds,zmfuq,zmfdq,zmful, &
                  zdmfup,zdmfdp,zdpmel,ptte,pqte,pcte)
 !----------------------------------------------------------------
 !*    9.0      update tendencies for u and u in subroutine cududv
@@ -1019,15 +1053,10 @@ contains
               zvu(jl,jk) = (zvu(jl,ik)*pmfu(jl,ik) + &
                 zerate*pven(jl,jk)-zderate*zvu(jl,ik))*zmfa
             else
-              if(ktype(jl) == 1 .or. ktype(jl) == 3) then
-                pgf_u   =  -0.7*0.5*(pmfu(jl,ik)*(puen(jl,ik)-puen(jl,jk))+&
+              pgf_u = -pgcoef*0.5*(pmfu(jl,ik)*(puen(jl,ik)-puen(jl,jk))+&
                                    pmfu(jl,jk)*(puen(jl,jk)-puen(jl,jk-1)))
-                pgf_v   =  -0.7*0.5*(pmfu(jl,ik)*(pven(jl,ik)-pven(jl,jk))+&
+              pgf_v = -pgcoef*0.5*(pmfu(jl,ik)*(pven(jl,ik)-pven(jl,jk))+&
                                    pmfu(jl,jk)*(pven(jl,jk)-pven(jl,jk-1)))
-              else
-                pgf_u   = 0.
-                pgf_v   = 0.
-              end if
               zerate = pmfu(jl,jk) - pmfu(jl,ik) + pmfude_rate(jl,jk)
               zderate = pmfude_rate(jl,jk)
               zmfa = 1./max(cmfcmin,pmfu(jl,jk))
@@ -1213,13 +1242,13 @@ contains
 !**********************************************
 !
       subroutine cuinin &
-     &    (klon,     klev,     klevp1,   klevm1,   pten,&
-     &     pqen,     pqsen,    puen,     pven,     pverv,&
-     &     pgeo,     paph,     pgeoh,    ptenh,    pqenh,&
-     &     pqsenh,   klwmin,   ptu,      pqu,      ptd,&
-     &     pqd,      puu,      pvu,      pud,      pvd,&
-     &     pmfu,     pmfd,     pmfus,    pmfds,    pmfuq,&
-     &     pmfdq,    pdmfup,   pdmfdp,   pdpmel,   plu,&
+     &    (klon,     klev,     klevp1,   klevm1,   pten,  &
+     &     pqen,     pqsen,    puen,     pven,     pverv, &
+     &     pgeo,     paph,     pgeoh,    ptenh,    pqenh, &
+     &     pqsenh,   klwmin,   ptu,      pqu,      ptd,   &
+     &     pqd,      puu,      pvu,      pud,      pvd,   &
+     &     pmfu,     pmfd,     pmfus,    pmfds,    pmfuq, &
+     &     pmfdq,    pdmfup,   pdmfdp,   pdpmel,   plu,   &
      &     plude,    klab)
       implicit none
 !      m.tiedtke         e.c.m.w.f.     12/89
@@ -1238,30 +1267,33 @@ contains
 !   ---------
 !          *cuadjtq* to specify qs at half levels
 ! ----------------------------------------------------------------
-      integer  klon,klev,klevp1,klevm1
-      real(kind=kind_phys)     pten(klon,klev),        pqen(klon,klev),&
-     &         puen(klon,klev),        pven(klon,klev),&
-     &         pqsen(klon,klev),       pverv(klon,klev),&
-     &         pgeo(klon,klev),        pgeoh(klon,klevp1),&
-     &         paph(klon,klevp1),      ptenh(klon,klev),&
-     &         pqenh(klon,klev),       pqsenh(klon,klev)
-      real(kind=kind_phys)     ptu(klon,klev),         pqu(klon,klev),&
-     &         ptd(klon,klev),         pqd(klon,klev),&
-     &         puu(klon,klev),         pud(klon,klev),&
-     &         pvu(klon,klev),         pvd(klon,klev),&
-     &         pmfu(klon,klev),        pmfd(klon,klev),&
-     &         pmfus(klon,klev),       pmfds(klon,klev),&
-     &         pmfuq(klon,klev),       pmfdq(klon,klev),&
-     &         pdmfup(klon,klev),      pdmfdp(klon,klev),&
-     &         plu(klon,klev),         plude(klon,klev)
-      real(kind=kind_phys)     zwmax(klon),            zph(klon), &
-     &         pdpmel(klon,klev)
-      integer  klab(klon,klev),        klwmin(klon)
-      logical  loflag(klon)
-!  local variables
-      integer  jl,jk
-      integer  icall,ik
-      real(kind=kind_phys)     zzs
+
+!--- input arguments:
+      integer,intent(in):: klon,klev,klevp1,klevm1
+
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pten,pqen,pqsen,puen,pven
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pgeo,pverv
+      real(kind=kind_phys),intent(in),dimension(klon,klev+1):: paph,pgeoh
+
+!--- output arguments:
+      integer,intent(out),dimension(klon):: klwmin
+      integer,intent(out),dimension(klon,klev):: klab
+
+      real(kind=kind_phys),intent(out),dimension(klon,klev):: ptenh,pqenh,pqsenh
+      real(kind=kind_phys),intent(out),dimension(klon,klev):: ptu,ptd,pqu,pqd,plu
+      real(kind=kind_phys),intent(out),dimension(klon,klev):: puu,pud,pvu,pvd
+
+!--- inout arguments:
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: pmfu,pmfd,pmfus,pmfds,pmfuq,pmfdq
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: pdmfup,pdmfdp,plude,pdpmel
+
+!--- local variables and arrays:
+      logical,dimension(klon):: loflag
+      integer::  jl,jk
+      integer::  icall,ik
+      real(kind=kind_phys):: zzs
+      real(kind=kind_phys),dimension(klon):: zph,zwmax
+
 !------------------------------------------------------------
 !*    1.       specify large scale parameters at half levels
 !*             adjust temperature fields if staticly unstable
@@ -1337,14 +1369,15 @@ contains
       end subroutine cuinin
 
 !---------------------------------------------------------
-!  level 3 souroutines
+!  level 3 subroutines
 !--------------------------------------------------------
-      subroutine cutypen & 
-     &   (  klon,    klev,     klevp1,   klevm1,     pqen,&
-     &     ptenh,   pqenh,     pqsenh,    pgeoh,     paph,& 
-     &       hfx,     qfx,       pgeo,    pqsen,      pap,&
-     &      pten,    lndj,       cutu,     cuqu,    culab,&
-     &     ldcum,   cubot,      cutop,    ktype,    wbase,    culu,   kdpl  )
+      subroutine cutypen &
+     &   (  klon,    klev,     klevp1,   klevm1,     pqen, &
+     &     ptenh,   pqenh,     pqsenh,    pgeoh,     paph, &
+     &       hfx,     qfx,       pgeo,    pqsen,      pap, &
+     &      pten,    lndj,       cutu,     cuqu,    culab, &
+     &     ldcum,   cubot,      cutop,    ktype,    wbase, &
+     &      culu,    kdpl)
 !      zhang & wang      iprc           2011-2013
 !***purpose.
 !   --------
@@ -1370,7 +1403,7 @@ contains
 !                        climate, mon.wea.rev.
 !                        131, 2765-2778
 !            and
-!                        ifs documentation - cy36r1,cy38r1 
+!                        ifs documentation - cy36r1,cy38r1
 !***input variables:
 !       ptenh [ztenh] - environment temperature on half levels. (cuini)
 !       pqenh [zqenh] - env. specific humidity on half levels. (cuini)
@@ -1388,51 +1421,52 @@ contains
 !-------------------------------------------------------------------
       implicit none
 !-------------------------------------------------------------------
-      integer  klon, klev, klevp1, klevm1
-      real(kind=kind_phys)     ptenh(klon,klev),       pqenh(klon,klev),& 
-     &         pqsen(klon,klev),       pqsenh(klon,klev),&
-     &         pgeoh(klon,klevp1),     paph(klon,klevp1),&
-     &         pap(klon,klev),         pqen(klon,klev)
-      real(kind=kind_phys)     pten(klon,klev)
-      real(kind=kind_phys)     ptu(klon,klev),pqu(klon,klev),plu(klon,klev)
-      real(kind=kind_phys)     pgeo(klon,klev)
-      integer  klab(klon,klev)
-      integer  kctop(klon),kcbot(klon)
 
-      real(kind=kind_phys)     qfx(klon),hfx(klon)
-      real(kind=kind_phys)     zph(klon)
-      integer  lndj(klon)
-      logical  loflag(klon), deepflag(klon), resetflag(klon)
+!--- input arguments:
+      integer,intent(in):: klon,klev,klevp1,klevm1
+      integer,intent(in),dimension(klon):: lndj
 
-! output variables
-      real(kind=kind_phys)     cutu(klon,klev), cuqu(klon,klev), culu(klon,klev)
-      integer  culab(klon,klev)
-      real(kind=kind_phys)     wbase(klon)
-      integer  ktype(klon),cubot(klon),cutop(klon),kdpl(klon)
-      logical  ldcum(klon)
+      real(kind=kind_phys),dimension(klon):: qfx,hfx
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pap,pgeo
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pten,pqen,pqsen
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: ptenh,pqenh,pqsenh
+      real(kind=kind_phys),intent(in),dimension(klon,klevp1):: paph,pgeoh
 
-! local variables
-      real(kind=kind_phys)     zqold(klon)
-      real(kind=kind_phys)     rho, part1, part2, root, conw, deltt, deltq
-      real(kind=kind_phys)     eta(klon),dz(klon),coef(klon)
-      real(kind=kind_phys)     dhen(klon,klev), dh(klon,klev)
-      real(kind=kind_phys)     plude(klon,klev)
-      real(kind=kind_phys)     kup(klon,klev)
-      real(kind=kind_phys)     vptu(klon,klev),vten(klon,klev)
-      real(kind=kind_phys)     zbuo(klon,klev),abuoy(klon,klev)
-  
-      real(kind=kind_phys)     zz,zdken,zdq
-      real(kind=kind_phys)     fscale,crirh1,pp
-      real(kind=kind_phys)     atop1,atop2,abot
-      real(kind=kind_phys)     tmix,zmix,qmix,pmix
-      real(kind=kind_phys)     zlglac,dp
-      integer  nk,is,ikb,ikt
+!--- output arguments:
+      logical,intent(out),dimension(klon):: ldcum
 
-      real(kind=kind_phys)     zqsu,zcor,zdp,zesdp,zalfaw,zfacw,zfaci,zfac,zdsdp,zdqsdt,zdtdp
-      real(kind=kind_phys)     zpdifftop, zpdiffbot
-      integer  zcbase(klon), itoppacel(klon)
-      integer  jl,jk,ik,icall,levels
-      logical  needreset, lldcum(klon)
+      integer,intent(out),dimension(klon):: ktype
+      integer,intent(out),dimension(klon):: cubot,cutop,kdpl
+      integer,intent(out),dimension(klon,klev):: culab
+
+      real(kind=kind_phys),intent(out),dimension(klon):: wbase
+      real(kind=kind_phys),intent(out),dimension(klon,klev):: cutu,cuqu,culu
+
+!--- local variables and arrays:
+      logical:: needreset
+      logical,dimension(klon):: lldcum
+      logical,dimension(klon):: loflag,deepflag,resetflag
+
+      integer:: jl,jk,ik,icall,levels
+      integer:: nk,is,ikb,ikt
+      integer,dimension(klon):: kctop,kcbot
+      integer,dimension(klon):: zcbase,itoppacel
+      integer,dimension(klon,klev):: klab
+
+      real(kind=kind_phys):: rho,part1,part2,root,conw,deltt,deltq
+      real(kind=kind_phys):: zz,zdken,zdq
+      real(kind=kind_phys):: fscale,crirh1,pp
+      real(kind=kind_phys):: atop1,atop2,abot
+      real(kind=kind_phys):: tmix,zmix,qmix,pmix
+      real(kind=kind_phys):: zlglac,dp
+      real(kind=kind_phys):: zqsu,zcor,zdp,zesdp,zalfaw,zfacw,zfaci,zfac,zdsdp,zdqsdt,zdtdp
+      real(kind=kind_phys):: zpdifftop, zpdiffbot
+
+      real(kind=kind_phys),dimension(klon):: eta,dz,coef,zqold,zph
+      real(kind=kind_phys),dimension(klon,klev):: dh,dhen,kup,vptu,vten
+      real(kind=kind_phys),dimension(klon,klev):: ptu,pqu,plu
+      real(kind=kind_phys),dimension(klon,klev):: zbuo,abuoy,plude
+
 !--------------------------------------------------------------
       do jl=1,klon
         kcbot(jl)=klev
@@ -1473,7 +1507,7 @@ contains
 ! check the levels from lowest level to second top level
       do jk=klevm1,2,-1
 
-! define the variables at the first level      
+! define the variables at the first level
       if(jk .eq. klevm1) then
       do jl=1,klon
         rho=pap(jl,klev)/ &
@@ -1492,7 +1526,7 @@ contains
            pqu(jl,klev)= pqenh(jl,klev) + deltq
           dhen(jl,klev)= pgeoh(jl,klev) + ptenh(jl,klev)*cpd
            dh(jl,klev) = dhen(jl,klev)  + deltt*cpd
-          ptu(jl,klev) = (dh(jl,klev)-pgeoh(jl,klev))*rcpd 
+          ptu(jl,klev) = (dh(jl,klev)-pgeoh(jl,klev))*rcpd
           vptu(jl,klev)=ptu(jl,klev)*(1.+vtmpc1*pqu(jl,klev))
           vten(jl,klev)=ptenh(jl,klev)*(1.+vtmpc1*pqenh(jl,klev))
           zbuo(jl,klev)=(vptu(jl,klev)-vten(jl,klev))/vten(jl,klev)
@@ -1502,7 +1536,7 @@ contains
         end if
       end do
       end if
- 
+
       is=0
       do jl=1,klon
          if(loflag(jl))then
@@ -1514,7 +1548,7 @@ contains
 ! the next levels, we use the variables at the first level as initial values
       do jl=1,klon
       if(loflag(jl)) then
-        eta(jl) = 0.55/(pgeo(jl,jk)*zrg)+1.e-4
+        eta(jl) = 0.8/(pgeo(jl,jk)*zrg)+2.e-4
         dz(jl)  = (pgeoh(jl,jk)-pgeoh(jl,jk+1))*zrg
         coef(jl)= 0.5*eta(jl)*dz(jl)
         dhen(jl,jk) = pgeoh(jl,jk) + cpd*ptenh(jl,jk)
@@ -1591,7 +1625,7 @@ contains
             else
               lldcum(jl) = .false.
             end if
-          else 
+          else
             if(plu(jl,jk) .gt. 0.)then
               klab(jl,jk)=2
             else
@@ -1634,7 +1668,7 @@ contains
            end if
        end do
       end do
-      
+
 !-----------------------------------------------------------
 ! next, let's check the deep convection
 ! the first level is klevm1-1
@@ -1654,7 +1688,7 @@ contains
        end do
       end do
 
-      do levels=klevm1-1,klevm1-20,-1 ! loop starts
+      do levels=klevm1-1,klev/2+1,-1 ! loop starts
         do jk=1,klev
           do jl=1,klon
              plu(jl,jk)=0.0  ! parcel liquid water
@@ -1690,7 +1724,7 @@ contains
         enddo
         if(is.eq.0) exit
 
-! define the variables at the departure level 
+! define the variables at the departure level
         if(jk .eq. levels) then
           do jl=1,klon
           if(loflag(jl)) then
@@ -1752,7 +1786,7 @@ contains
         ik=jk
         icall=1
         call cuadjtqn(klon,klev,ik,zph,ptu,pqu,loflag,icall)
- 
+
       do jl=1,klon
         if( loflag(jl) ) then
           zdq = max((zqold(jl) - pqu(jl,jk)),0.)
@@ -1812,7 +1846,7 @@ contains
             else
               lldcum(jl) = .false.
             end if
-          else 
+          else
             if(plu(jl,jk) .gt. 0.)then
               klab(jl,jk)=2
             else
@@ -1829,7 +1863,7 @@ contains
         ikb = kcbot(jl)
         ikt = kctop(jl)
         if(paph(jl,ikb) - paph(jl,ikt) < zdnoprc) lldcum(jl) = .false.
-        if(lldcum(jl)) then      
+        if(lldcum(jl)) then
          ktype(jl)    = 1
          ldcum(jl)    = .true.
          deepflag(jl) = .true.
@@ -1874,15 +1908,17 @@ contains
 !    level 3 subroutines 'cuascn'
 !-----------------------------------------------------------------
       subroutine cuascn &
-     &    (klon,     klev,     klevp1,   klevm1,   ptenh,&
-     &     pqenh,    puen,     pven,     pten,     pqen,&
-     &     pqsen,    pgeo,     pgeoh,    pap,      paph,&
-     &     pqte,     pverv,    klwmin,   ldcum,    phcbase,&
-     &     ktype,    klab,     ptu,      pqu,      plu,&
-     &     puu,      pvu,      pmfu,     pmfub,    &
-     &     pmfus,    pmfuq,    pmful,    plude,    pdmfup,&
-     &     kcbot,    kctop,    kctop0,   kcum,     ztmst,&
-     &     pqsenh,   plglac,   lndj,     wup,      wbase,   kdpl, pmfude_rate)
+     &    (klon,     klev,     klevp1,   klevm1,   ptenh,   &
+     &     pqenh,    puen,     pven,     pten,     pqen,    &
+     &     pqsen,    pgeo,     pgeoh,    pap,      paph,    &
+     &     pqte,     pverv,    klwmin,   ldcum,    phcbase, &
+     &     ktype,    klab,     ptu,      pqu,      plu,     &
+     &     puu,      pvu,      pmfu,     pmfub,             &
+     &     pmfus,    pmfuq,    pmful,    plude,    pdmfup,  &
+     &     kcbot,    kctop,    kctop0,   kcum,     ztmst,   &
+     &     pqsenh,   plglac,   lndj,     wup,      wbase,   &
+     &     kdpl,     pmfude_rate)
+
       implicit none
 !     this routine does the calculations for cloud ascents
 !     for cumulus parameterization
@@ -1954,55 +1990,58 @@ contains
 !       kctop0 [ictop0] - estimate of cloud top. (cumastr)
 !       kcum [icum] - flag to control the call
 
-      integer  klev,klon,klevp1,klevm1
-      real(kind=kind_phys)     ptenh(klon,klev),       pqenh(klon,klev), &
-     &         puen(klon,klev),        pven(klon,klev),&
-     &         pten(klon,klev),        pqen(klon,klev),&
-     &         pgeo(klon,klev),        pgeoh(klon,klevp1),&
-     &         pap(klon,klev),         paph(klon,klevp1),&
-     &         pqsen(klon,klev),       pqte(klon,klev),&
-     &         pverv(klon,klev),       pqsenh(klon,klev)
-      real(kind=kind_phys)     ptu(klon,klev),         pqu(klon,klev),&
-     &         puu(klon,klev),         pvu(klon,klev),&
-     &         pmfu(klon,klev),        zph(klon),&
-     &         pmfub(klon),            &
-     &         pmfus(klon,klev),       pmfuq(klon,klev),&
-     &         plu(klon,klev),         plude(klon,klev),&
-     &         pmful(klon,klev),       pdmfup(klon,klev)
-      real(kind=kind_phys)     zdmfen(klon),           zdmfde(klon),&
-     &         zmfuu(klon),            zmfuv(klon),&
-     &         zpbase(klon),           zqold(klon)              
-      real(kind=kind_phys)     phcbase(klon),          zluold(klon)
-      real(kind=kind_phys)     zprecip(klon),          zlrain(klon,klev)
-      real(kind=kind_phys)     zbuo(klon,klev),        kup(klon,klev)
-      real(kind=kind_phys)     wup(klon)
-      real(kind=kind_phys)     wbase(klon),            zodetr(klon,klev)
-      real(kind=kind_phys)     plglac(klon,klev)
+!--- input arguments:
+      integer,intent(in):: klev,klon,klevp1,klevm1
+      integer,intent(in),dimension(klon):: lndj
+      integer,intent(in),dimension(klon):: klwmin
+      integer,intent(in),dimension(klon):: kdpl
 
-      real(kind=kind_phys)     eta(klon),dz(klon)
+      real(kind=kind_phys),intent(in):: ztmst
+      real(kind=kind_phys),intent(in),dimension(klon):: wbase
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pten,pqen,pqsen,puen,pven,pqte,pverv
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pap,pgeo
+      real(kind=kind_phys),intent(in),dimension(klon,klevp1):: paph,pgeoh
 
-      integer  klwmin(klon),           ktype(klon),&
-     &         klab(klon,klev),        kcbot(klon),&
-     &         kctop(klon),            kctop0(klon)
-      integer  lndj(klon)
-      logical  ldcum(klon),            loflag(klon)
-      logical  llo2,llo3,              llo1(klon)
+!--- inout arguments:
+      logical,intent(inout),dimension(klon):: ldcum
 
-      integer  kdpl(klon)
-      real(kind=kind_phys)     zoentr(klon),           zdpmean(klon)
-      real(kind=kind_phys)     pdmfen(klon,klev),      pmfude_rate(klon,klev)
-! local variables
-      integer  jl,jk
-      integer  ikb,icum,itopm2,ik,icall,is,kcum,jlm,jll
-      integer  jlx(klon)
-      real(kind=kind_phys)     ztmst,zcons2,zfacbuo,zprcdgw,z_cwdrag,z_cldmax,z_cwifrac,z_cprc2
-      real(kind=kind_phys)     zmftest,zmfmax,zqeen,zseen,zscde,zqude
-      real(kind=kind_phys)     zmfusk,zmfuqk,zmfulk
-      real(kind=kind_phys)     zbc,zbe,zkedke,zmfun,zwu,zprcon,zdt,zcbf,zzco
-      real(kind=kind_phys)     zlcrit,zdfi,zc,zd,zint,zlnew,zvw,zvi,zalfaw,zrold
-      real(kind=kind_phys)     zrnew,zz,zdmfeu,zdmfdu,dp
-      real(kind=kind_phys)     zfac,zbuoc,zdkbuo,zdken,zvv,zarg,zchange,zxe,zxs,zdshrd
-      real(kind=kind_phys)     atop1,atop2,abot
+      integer,intent(inout):: kcum
+      integer,intent(inout),dimension(klon):: kcbot,kctop,kctop0
+      integer,intent(inout),dimension(klon,klev):: klab
+
+      real(kind=kind_phys),intent(inout),dimension(klon):: phcbase
+      real(kind=kind_phys),intent(inout),dimension(klon):: pmfub
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: ptenh,pqenh,pqsenh
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: ptu,pqu,plu,puu,pvu
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: pmfu,pmfus,pmfuq,pmful,plude,pdmfup
+
+!--- output arguments:
+      integer,intent(out),dimension(klon):: ktype
+
+      real(kind=kind_phys),intent(out),dimension(klon):: wup
+      real(kind=kind_phys),intent(out),dimension(klon,klev):: plglac,pmfude_rate
+
+!--- local variables and arrays:
+      logical:: llo2,llo3
+      logical,dimension(klon):: loflag,llo1
+
+      integer:: jl,jk
+      integer::ikb,icum,itopm2,ik,icall,is,jlm,jll
+      integer,dimension(klon):: jlx
+
+      real(kind=kind_phys):: zcons2,zfacbuo,zprcdgw,z_cwdrag,z_cldmax,z_cwifrac,z_cprc2
+      real(kind=kind_phys):: zmftest,zmfmax,zqeen,zseen,zscde,zqude
+      real(kind=kind_phys):: zmfusk,zmfuqk,zmfulk
+      real(kind=kind_phys):: zbc,zbe,zkedke,zmfun,zwu,zprcon,zdt,zcbf,zzco
+      real(kind=kind_phys):: zlcrit,zdfi,zc,zd,zint,zlnew,zvw,zvi,zalfaw,zrold
+      real(kind=kind_phys):: zrnew,zz,zdmfeu,zdmfdu,dp
+      real(kind=kind_phys):: zfac,zbuoc,zdkbuo,zdken,zvv,zarg,zchange,zxe,zxs,zdshrd
+      real(kind=kind_phys):: atop1,atop2,abot
+
+      real(kind=kind_phys),dimension(klon):: eta,dz,zoentr,zdpmean
+      real(kind=kind_phys),dimension(klon):: zph,zdmfen,zdmfde,zmfuu,zmfuv,zpbase,zqold,zluold,zprecip
+      real(kind=kind_phys),dimension(klon,klev):: zlrain,zbuo,kup,zodetr,pdmfen
+
 !--------------------------------
 !*    1.       specify parameters
 !--------------------------------
@@ -2030,7 +2069,7 @@ contains
         end if
       end do
 
- ! initialize variout quantities     
+ ! initialize variout quantities
       do jk=1,klev
       do jl=1,klon
           if(jk.ne.kcbot(jl)) plu(jl,jk)=0.
@@ -2082,11 +2121,11 @@ contains
 ! ---------------------------------------------------------------------
       ik=jk
       call cubasmcn&
-     &    (klon,     klev,     klevm1,   ik,      pten,&
-     &     pqen,     pqsen,    puen,     pven,    pverv,&
-     &     pgeo,     pgeoh,    ldcum,   ktype,   klab,  zlrain,&
-     &     pmfu,     pmfub,    kcbot,   ptu,&
-     &     pqu,      plu,      puu,     pvu,      pmfus,&
+     &    (klon,     klev,     klevm1,   ik,      pten,          &
+     &     pqen,     pqsen,    puen,     pven,    pverv,         &
+     &     pgeo,     pgeoh,    ldcum,    ktype,   klab,  zlrain, &
+     &     pmfu,     pmfub,    kcbot,    ptu,                    &
+     &     pqu,      plu,      puu,      pvu,      pmfus,        &
      &     pmfuq,    pmful,    pdmfup)
       is = 0
       jlm = 0
@@ -2252,8 +2291,7 @@ contains
               if ( zbuo(jl,jk) < 0. ) then
                 zkedke = kup(jl,jk)/max(1.e-10,kup(jl,jk+1))
                 zkedke = max(0.,min(1.,zkedke))
-                zmfun = sqrt(zkedke)*pmfu(jl,jk+1) !* (1.6-min(1.,pqen(jl,jk) /    &
-                      !  pqsen(jl,jk)))
+                zmfun = sqrt(zkedke)*pmfu(jl,jk+1)
                 zdmfde(jl) = max(zdmfde(jl),pmfu(jl,jk+1)-zmfun)
                 plude(jl,jk) = plu(jl,jk+1)*zdmfde(jl)
                 pmfu(jl,jk) = pmfu(jl,jk+1) + zdmfen(jl) - zdmfde(jl)
@@ -2307,7 +2345,6 @@ contains
             end if
             ikb=kcbot(jl)
             if ( plu(jl,jk) > zdshrd )then
-!             if ((paph(jl,ikb)-paph(jl,jk))>zdnoprc) then
               zwu = min(15.0,sqrt(2.*max(0.1,kup(jl,jk+1))))
               zprcon = zprcdgw/(0.75*zwu)
 ! PARAMETERS FOR BERGERON-FINDEISEN PROCESS (T < -5C)
@@ -2375,164 +2412,168 @@ contains
       return
       end subroutine cuascn
 !---------------------------------------------------------
-!  level 3 souroutines  
+!  level 3 souroutines
 !--------------------------------------------------------
-      subroutine cudlfsn   &                                                      
-     &    (klon,     klev,  &                       
-     &     kcbot,    kctop,    lndj,   ldcum,   &                               
-     &     ptenh,    pqenh,    puen,     pven,     &                              
-     &     pten,     pqsen,    pgeo,                &                             
-     &     pgeoh,    paph,     ptu,      pqu,      plu,&                          
-     &     puu,      pvu,      pmfub,    prfl,          &                         
-     &     ptd,      pqd,      pud,      pvd,            &                        
-     &     pmfd,     pmfds,    pmfdq,    pdmfdp,          &                       
-     &     kdtop,    lddraf)                                                     
-                                                                                 
-!          this routine calculates level of free sinking for                     
-!          cumulus downdrafts and specifies t,q,u and v values                   
-                                                                                 
-!          m.tiedtke         e.c.m.w.f.    12/86 modif. 12/89                    
-                                                                                 
-!          purpose.                                                              
-!          --------                                                              
-!          to produce lfs-values for cumulus downdrafts                          
-!          for massflux cumulus parameterization                                 
-                                                                                 
-!          interface                                                             
-!          ---------                                                             
-!          this routine is called from *cumastr*.                                
-!          input are environmental values of t,q,u,v,p,phi                       
-!          and updraft values t,q,u and v and also                               
-!          cloud base massflux and cu-precipitation rate.                        
-!          it returns t,q,u and v values and massflux at lfs.                    
-                                                                                 
-!          method.                                                               
-                                                                                 
-!          check for negative buoyancy of air of equal parts of                  
-!          moist environmental air and cloud air.                                
-                                                                                 
-!     parameter     description                                   units          
-!     ---------     -----------                                   -----          
-!     input parameters (integer):                                                
-                                                                                 
-!    *klon*         number of grid points per packet                             
-!    *klev*         number of levels                                             
-!    *kcbot*        cloud base level                                             
-!    *kctop*        cloud top level                                              
-                                                                                 
-!    input parameters (logical):                                                 
-                                                                                 
-!    *lndj*       land sea mask (1 for land)                              
-!    *ldcum*        flag: .true. for convective points                           
-                                                                                 
-!    input parameters (real(kind=kind_phys)):                                                    
-                                                                                 
-!    *ptenh*        env. temperature (t+1) on half levels          k             
-!    *pqenh*        env. spec. humidity (t+1) on half levels     kg/kg           
-!    *puen*         provisional environment u-velocity (t+1)      m/s            
-!    *pven*         provisional environment v-velocity (t+1)      m/s            
-!    *pten*         provisional environment temperature (t+1)       k            
-!    *pqsen*        environment spec. saturation humidity (t+1)   kg/kg          
-!    *pgeo*         geopotential                                  m2/s2          
-!    *pgeoh*        geopotential on half levels                  m2/s2           
-!    *paph*         provisional pressure on half levels           pa             
-!    *ptu*          temperature in updrafts                        k             
-!    *pqu*          spec. humidity in updrafts                   kg/kg           
-!    *plu*          liquid water content in updrafts             kg/kg           
-!    *puu*          u-velocity in updrafts                        m/s            
-!    *pvu*          v-velocity in updrafts                        m/s            
-!    *pmfub*        massflux in updrafts at cloud base           kg/(m2*s)       
-                                                                                 
-!    updated parameters (real(kind=kind_phys)):                                                  
-                                                                                 
-!    *prfl*         precipitation rate                           kg/(m2*s)       
-                                                                                 
-!    output parameters (real(kind=kind_phys)):                                                   
-                                                                                 
-!    *ptd*          temperature in downdrafts                      k             
-!    *pqd*          spec. humidity in downdrafts                 kg/kg           
-!    *pud*          u-velocity in downdrafts                      m/s            
-!    *pvd*          v-velocity in downdrafts                      m/s            
-!    *pmfd*         massflux in downdrafts                       kg/(m2*s)       
-!    *pmfds*        flux of dry static energy in downdrafts       j/(m2*s)       
-!    *pmfdq*        flux of spec. humidity in downdrafts         kg/(m2*s)       
-!    *pdmfdp*       flux difference of precip. in downdrafts     kg/(m2*s)       
-                                                                                 
-!    output parameters (integer):                                                
-                                                                                 
-!    *kdtop*        top level of downdrafts                                      
-                                                                                 
-!    output parameters (logical):                                                
-                                                                                 
-!    *lddraf*       .true. if downdrafts exist                                   
-                                                                                 
-!          externals                                                             
-!          ---------                                                             
-!          *cuadjtq* for calculating wet bulb t and q at lfs                     
-!----------------------------------------------------------------------          
-      implicit none                                                       
-                   
-      integer  klev,klon                                                            
-      real(kind=kind_phys)     ptenh(klon,klev),       pqenh(klon,klev), &                        
-     &         puen(klon,klev),        pven(klon,klev),  &                        
-     &         pten(klon,klev),        pqsen(klon,klev),  &                       
-     &         pgeo(klon,klev),                       &                           
-     &         pgeoh(klon,klev+1),     paph(klon,klev+1),&                        
-     &         ptu(klon,klev),         pqu(klon,klev),   &                        
-     &         puu(klon,klev),         pvu(klon,klev),   &                        
-     &         plu(klon,klev),                          &                         
-     &         pmfub(klon),            prfl(klon)                                
-                                                                                 
-      real(kind=kind_phys)     ptd(klon,klev),         pqd(klon,klev),   &                        
-     &         pud(klon,klev),         pvd(klon,klev),    &                       
-     &         pmfd(klon,klev),        pmfds(klon,klev),  &                       
-     &         pmfdq(klon,klev),       pdmfdp(klon,klev)                         
-      integer  kcbot(klon),            kctop(klon),       &                       
-     &         kdtop(klon),            ikhsmin(klon)                             
-      logical  ldcum(klon),                              &
-     &         lddraf(klon)   
-      integer  lndj(klon)                                                   
-                                                                                 
-      real(kind=kind_phys)     ztenwb(klon,klev),      zqenwb(klon,klev), &                       
-     &         zcond(klon),            zph(klon),         &                       
-     &         zhsmin(klon)                                                      
-      logical  llo2(klon)                                                        
-! local variables
-      integer  jl,jk
-      integer  is,ik,icall,ike
-      real(kind=kind_phys)     zhsk,zttest,zqtest,zbuo,zmftop
-                                                                                   
-!----------------------------------------------------------------------          
-                                                                                 
-!     1.           set default values for downdrafts                             
-!                  ---------------------------------                             
-      do jl=1,klon                                                          
-        lddraf(jl)=.false.                                                       
-        kdtop(jl)=klev+1      
+      subroutine cudlfsn   &
+     &    (klon,     klev,                              &
+     &     kcbot,    kctop,    lndj,   ldcum,           &
+     &     ptenh,    pqenh,    puen,     pven,          &
+     &     pten,     pqsen,    pgeo,                    &
+     &     pgeoh,    paph,     ptu,      pqu,      plu, &
+     &     puu,      pvu,      pmfub,    prfl,          &
+     &     ptd,      pqd,      pud,      pvd,           &
+     &     pmfd,     pmfds,    pmfdq,    pdmfdp,        &
+     &     kdtop,    lddraf)
+
+!          this routine calculates level of free sinking for
+!          cumulus downdrafts and specifies t,q,u and v values
+
+!          m.tiedtke         e.c.m.w.f.    12/86 modif. 12/89
+
+!          purpose.
+!          --------
+!          to produce lfs-values for cumulus downdrafts
+!          for massflux cumulus parameterization
+
+!          interface
+!          ---------
+!          this routine is called from *cumastr*.
+!          input are environmental values of t,q,u,v,p,phi
+!          and updraft values t,q,u and v and also
+!          cloud base massflux and cu-precipitation rate.
+!          it returns t,q,u and v values and massflux at lfs.
+!          method.
+
+!          check for negative buoyancy of air of equal parts of
+!          moist environmental air and cloud air.
+
+!     parameter     description                                   units
+!     ---------     -----------                                   -----
+!     input parameters (integer):
+
+!    *klon*         number of grid points per packet
+!    *klev*         number of levels
+!    *kcbot*        cloud base level
+!    *kctop*        cloud top level
+
+!    input parameters (logical):
+
+!    *lndj*       land sea mask (1 for land)
+!    *ldcum*        flag: .true. for convective points
+
+!    input parameters (real):
+
+!    *ptenh*        env. temperature (t+1) on half levels          k
+!    *pqenh*        env. spec. humidity (t+1) on half levels     kg/kg
+!    *puen*         provisional environment u-velocity (t+1)      m/s
+!    *pven*         provisional environment v-velocity (t+1)      m/s
+!    *pten*         provisional environment temperature (t+1)       k
+!    *pqsen*        environment spec. saturation humidity (t+1)   kg/kg
+!    *pgeo*         geopotential                                  m2/s2
+!    *pgeoh*        geopotential on half levels                  m2/s2
+!    *paph*         provisional pressure on half levels           pa
+!    *ptu*          temperature in updrafts                        k
+!    *pqu*          spec. humidity in updrafts                   kg/kg
+!    *plu*          liquid water content in updrafts             kg/kg
+!    *puu*          u-velocity in updrafts                        m/s
+!    *pvu*          v-velocity in updrafts                        m/s
+!    *pmfub*        massflux in updrafts at cloud base           kg/(m2*s)
+
+!    updated parameters (real):
+
+!    *prfl*         precipitation rate                           kg/(m2*s)
+
+!    output parameters (real):
+
+!    *ptd*          temperature in downdrafts                      k
+!    *pqd*          spec. humidity in downdrafts                 kg/kg
+!    *pud*          u-velocity in downdrafts                      m/s
+!    *pvd*          v-velocity in downdrafts                      m/s
+!    *pmfd*         massflux in downdrafts                       kg/(m2*s)
+!    *pmfds*        flux of dry static energy in downdrafts       j/(m2*s)
+!    *pmfdq*        flux of spec. humidity in downdrafts         kg/(m2*s)
+!    *pdmfdp*       flux difference of precip. in downdrafts     kg/(m2*s)
+
+!    output parameters (integer):
+
+!    *kdtop*        top level of downdrafts
+
+!    output parameters (logical):
+
+!    *lddraf*       .true. if downdrafts exist
+
+!          externals
+!          ---------
+!          *cuadjtq* for calculating wet bulb t and q at lfs
+!----------------------------------------------------------------------
+
+      implicit none
+
+!--- input arguments:
+      integer,intent(in):: klon
+      logical,intent(in),dimension(klon):: ldcum
+
+      integer,intent(in):: klev
+      integer,intent(in),dimension(klon):: lndj
+      integer,intent(in),dimension(klon):: kcbot,kctop
+
+      real(kind=kind_phys),intent(in),dimension(klon):: pmfub
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pten,pqsen,pgeo,puen,pven
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: ptenh,pqenh
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: ptu,pqu,puu,pvu,plu
+      real(kind=kind_phys),intent(in),dimension(klon,klev+1):: pgeoh,paph
+
+!--- inout arguments:
+      real(kind=kind_phys),intent(inout),dimension(klon):: prfl
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: pud,pvd
+
+!--- output arguments:
+      logical,intent(out),dimension(klon):: lddraf
+      integer,intent(out),dimension(klon):: kdtop
+
+      real(kind=kind_phys),intent(out),dimension(klon,klev):: ptd,pqd,pmfd,pmfds,pmfdq,pdmfdp
+
+!--- local variables and arrays:
+      logical,dimension(klon):: llo2
+      integer:: jl,jk
+      integer:: is,ik,icall,ike
+      integer,dimension(klon):: ikhsmin
+
+      real(kind=kind_phys):: zhsk,zttest,zqtest,zbuo,zmftop
+      real(kind=kind_phys),dimension(klon):: zcond,zph,zhsmin
+      real(kind=kind_phys),dimension(klon,klev):: ztenwb,zqenwb
+
+!----------------------------------------------------------------------
+
+!     1.           set default values for downdrafts
+!                  ---------------------------------
+      do jl=1,klon
+        lddraf(jl)=.false.
+        kdtop(jl)=klev+1
         ikhsmin(jl)=klev+1
-        zhsmin(jl)=1.e8                                                  
-      enddo                                                                      
-!----------------------------------------------------------------------          
-                                                                                 
-!     2.           determine level of free sinking:                              
-!                  downdrafts shall start at model level of minimum              
-!                  of saturation moist static energy or below                    
-!                  respectively                                                  
-                                                                                 
-!                  for every point and proceed as follows:                       
-                                                                                 
-!                    (1) determine level of minimum of hs                        
-!                    (2) determine wet bulb environmental t and q                
-!                    (3) do mixing with cumulus cloud air                        
-!                    (4) check for negative buoyancy                             
-!                    (5) if buoyancy>0 repeat (2) to (4) for next                
-!                        level below                                             
-                                                                                 
-!                  the assumption is that air of downdrafts is mixture           
-!                  of 50% cloud air + 50% environmental air at wet bulb          
-!                  temperature (i.e. which became saturated due to               
-!                  evaporation of rain and cloud water)                          
-!                  ----------------------------------------------------          
+        zhsmin(jl)=1.e8
+      enddo
+!----------------------------------------------------------------------
+
+!     2.           determine level of free sinking:
+!                  downdrafts shall start at model level of minimum
+!                  of saturation moist static energy or below
+!                  respectively
+
+!                  for every point and proceed as follows:
+
+!                    (1) determine level of minimum of hs
+!                    (2) determine wet bulb environmental t and q
+!                    (3) do mixing with cumulus cloud air
+!                    (4) check for negative buoyancy
+!                    (5) if buoyancy>0 repeat (2) to (4) for next
+!                        level below
+
+!                  the assumption is that air of downdrafts is mixture
+!                  of 50% cloud air + 50% environmental air at wet bulb
+!                  temperature (i.e. which became saturated due to
+!                  evaporation of rain and cloud water)
+!                  ----------------------------------------------------
       do jk=3,klev-2
          do jl=1,klon
            zhsk=cpd*pten(jl,jk)+pgeo(jl,jk) +  &
@@ -2545,211 +2586,215 @@ contains
       end do
 
 
-      ike=klev-3                                                                 
-      do jk=3,ike                                                                
-                                                                                 
-!     2.1          calculate wet-bulb temperature and moisture                   
-!                  for environmental air in *cuadjtq*                            
-!                  -------------------------------------------                   
-        is=0                                                                     
-        do jl=1,klon                                                        
-          ztenwb(jl,jk)=ptenh(jl,jk)                                             
-          zqenwb(jl,jk)=pqenh(jl,jk)                                             
-          zph(jl)=paph(jl,jk)                                                    
-          llo2(jl)=ldcum(jl).and.prfl(jl).gt.0..and..not.lddraf(jl).and.   &      
-     &     (jk.lt.kcbot(jl).and.jk.gt.kctop(jl)).and. jk.ge.ikhsmin(jl)                            
-          if(llo2(jl))then                                                       
-            is=is+1                                                              
-          endif                                                                  
-        enddo                                                                    
-        if(is.eq.0) cycle                                                        
-                                                                                 
-        ik=jk                                                                    
-        icall=2                                                                  
-        call cuadjtqn                                           &                  
-     &   ( klon, klev, ik, zph, ztenwb, zqenwb, llo2, icall)                        
-                                                                                 
-!     2.2          do mixing of cumulus and environmental air                    
-!                  and check for negative buoyancy.                              
-!                  then set values for downdraft at lfs.                         
-!                  ----------------------------------------                      
-        do jl=1,klon                                                        
-          if(llo2(jl)) then                                                      
-            zttest=0.5*(ptu(jl,jk)+ztenwb(jl,jk))                                
-            zqtest=0.5*(pqu(jl,jk)+zqenwb(jl,jk))                                
-            zbuo=zttest*(1.+vtmpc1  *zqtest)-                    &                  
-     &       ptenh(jl,jk)*(1.+vtmpc1  *pqenh(jl,jk))                               
-            zcond(jl)=pqenh(jl,jk)-zqenwb(jl,jk)                                 
-            zmftop=-cmfdeps*pmfub(jl)                                            
-            if(zbuo.lt.0..and.prfl(jl).gt.10.*zmftop*zcond(jl)) then             
-              kdtop(jl)=jk                                                       
-              lddraf(jl)=.true.                                                  
-              ptd(jl,jk)=zttest                                                  
-              pqd(jl,jk)=zqtest                                                  
-              pmfd(jl,jk)=zmftop                                                 
-              pmfds(jl,jk)=pmfd(jl,jk)*(cpd*ptd(jl,jk)+pgeoh(jl,jk))            
-              pmfdq(jl,jk)=pmfd(jl,jk)*pqd(jl,jk)                                
-              pdmfdp(jl,jk-1)=-0.5*pmfd(jl,jk)*zcond(jl)                         
-              prfl(jl)=prfl(jl)+pdmfdp(jl,jk-1)                                  
-            endif                                                                
-          endif                                                                  
-        enddo                                                                    
-                                                                                 
-      enddo                                                                      
-                                                                                 
-      return                                                                     
-      end subroutine cudlfsn  
+      ike=klev-3
+      do jk=3,ike
+
+!     2.1          calculate wet-bulb temperature and moisture
+!                  for environmental air in *cuadjtq*
+!                  -------------------------------------------
+        is=0
+        do jl=1,klon
+          ztenwb(jl,jk)=ptenh(jl,jk)
+          zqenwb(jl,jk)=pqenh(jl,jk)
+          zph(jl)=paph(jl,jk)
+          llo2(jl)=ldcum(jl).and.prfl(jl).gt.0..and..not.lddraf(jl).and.   &
+     &     (jk.lt.kcbot(jl).and.jk.gt.kctop(jl)).and. jk.ge.ikhsmin(jl)
+          if(llo2(jl))then
+            is=is+1
+          endif
+        enddo
+        if(is.eq.0) cycle
+
+        ik=jk
+        icall=2
+        call cuadjtqn                                           &
+     &   ( klon, klev, ik, zph, ztenwb, zqenwb, llo2, icall)
+
+!     2.2          do mixing of cumulus and environmental air
+!                  and check for negative buoyancy.
+!                  then set values for downdraft at lfs.
+!                  ----------------------------------------
+        do jl=1,klon
+          if(llo2(jl)) then
+            zttest=0.5*(ptu(jl,jk)+ztenwb(jl,jk))
+            zqtest=0.5*(pqu(jl,jk)+zqenwb(jl,jk))
+            zbuo=zttest*(1.+vtmpc1  *zqtest)-                    &
+     &       ptenh(jl,jk)*(1.+vtmpc1  *pqenh(jl,jk))
+            zcond(jl)=pqenh(jl,jk)-zqenwb(jl,jk)
+            zmftop=-cmfdeps*pmfub(jl)
+            if(zbuo.lt.0..and.prfl(jl).gt.10.*zmftop*zcond(jl)) then
+              kdtop(jl)=jk
+              lddraf(jl)=.true.
+              ptd(jl,jk)=zttest
+              pqd(jl,jk)=zqtest
+              pmfd(jl,jk)=zmftop
+              pmfds(jl,jk)=pmfd(jl,jk)*(cpd*ptd(jl,jk)+pgeoh(jl,jk))
+              pmfdq(jl,jk)=pmfd(jl,jk)*pqd(jl,jk)
+              pdmfdp(jl,jk-1)=-0.5*pmfd(jl,jk)*zcond(jl)
+              prfl(jl)=prfl(jl)+pdmfdp(jl,jk-1)
+            endif
+          endif
+        enddo
+
+      enddo
+
+      return
+      end subroutine cudlfsn
 
 !---------------------------------------------------------
-!  level 3 souroutines  
+!  level 3 souroutines
 !--------------------------------------------------------
 !**********************************************
 !       subroutine cuddrafn
 !**********************************************
-       subroutine cuddrafn                                 &                
-     &   ( klon,     klev,    lddraf                      &                                   
-     &   , ptenh,    pqenh,    puen,     pven             &                
-     &   , pgeo,     pgeoh,    paph,     prfl             &                
-     &   , ptd,      pqd,      pud,      pvd,      pmfu   &                
-     &   , pmfd,     pmfds,    pmfdq,    pdmfdp,   pmfdde_rate     )                          
-                                                                          
-!          this routine calculates cumulus downdraft descent              
-                                                                          
-!          m.tiedtke         e.c.m.w.f.    12/86 modif. 12/89             
-                                                                          
-!          purpose.                                                       
-!          --------                                                       
-!          to produce the vertical profiles for cumulus downdrafts        
-!          (i.e. t,q,u and v and fluxes)                                  
-                                                                          
-!          interface                                                      
-!          ---------                                                      
-                                                                          
-!          this routine is called from *cumastr*.                         
-!          input is t,q,p,phi,u,v at half levels.                         
-!          it returns fluxes of s,q and evaporation rate                  
-!          and u,v at levels where downdraft occurs                       
-                                                                          
-!          method.                                                        
-!          --------                                                       
-!          calculate moist descent for entraining/detraining plume by     
-!          a) moving air dry-adiabatically to next level below and        
-!          b) correcting for evaporation to obtain saturated state.       
-                                                                          
-!     parameter     description                                   units   
-!     ---------     -----------                                   -----   
-!     input parameters (integer):                                         
-                                                                          
-!    *klon*         number of grid points per packet                      
-!    *klev*         number of levels                                      
-                                                                          
-!    input parameters (logical):                                          
-                                                                          
-!    *lddraf*       .true. if downdrafts exist                            
-                                                                          
-!    input parameters (real(kind=kind_phys)):                                             
-                                                                          
-!    *ptenh*        env. temperature (t+1) on half levels          k      
-!    *pqenh*        env. spec. humidity (t+1) on half levels     kg/kg    
-!    *puen*         provisional environment u-velocity (t+1)      m/s     
-!    *pven*         provisional environment v-velocity (t+1)      m/s     
-!    *pgeo*         geopotential                                  m2/s2   
-!    *pgeoh*        geopotential on half levels                  m2/s2    
-!    *paph*         provisional pressure on half levels           pa      
-!    *pmfu*         massflux updrafts                           kg/(m2*s) 
-                                                                          
-!    updated parameters (real(kind=kind_phys)):                                           
-                                                                          
+       subroutine cuddrafn                               &
+     &   ( klon,     klev,    lddraf                     &
+     &   , ptenh,    pqenh,    puen,     pven            &
+     &   , pgeo,     pgeoh,    paph,     prfl            &
+     &   , ptd,      pqd,      pud,      pvd,      pmfu  &
+     &   , pmfd,     pmfds,    pmfdq,    pdmfdp,   pmfdde_rate )
+
+!          this routine calculates cumulus downdraft descent
+
+!          m.tiedtke         e.c.m.w.f.    12/86 modif. 12/89
+
+!          purpose.
+!          --------
+!          to produce the vertical profiles for cumulus downdrafts
+!          (i.e. t,q,u and v and fluxes)
+
+!          interface
+!          ---------
+
+!          this routine is called from *cumastr*.
+!          input is t,q,p,phi,u,v at half levels.
+!          it returns fluxes of s,q and evaporation rate
+!          and u,v at levels where downdraft occurs
+
+!          method.
+!          --------
+!          calculate moist descent for entraining/detraining plume by
+!          a) moving air dry-adiabatically to next level below and
+!          b) correcting for evaporation to obtain saturated state.
+
+!     parameter     description                                   units
+!     ---------     -----------                                   -----
+!     input parameters (integer):
+
+!    *klon*         number of grid points per packet
+!    *klev*         number of levels
+
+!    input parameters (logical):
+
+!    *lddraf*       .true. if downdrafts exist
+
+!    input parameters (real):
+
+!    *ptenh*        env. temperature (t+1) on half levels          k
+!    *pqenh*        env. spec. humidity (t+1) on half levels     kg/kg
+!    *puen*         provisional environment u-velocity (t+1)      m/s
+!    *pven*         provisional environment v-velocity (t+1)      m/s
+!    *pgeo*         geopotential                                  m2/s2
+!    *pgeoh*        geopotential on half levels                  m2/s2
+!    *paph*         provisional pressure on half levels           pa
+!    *pmfu*         massflux updrafts                           kg/(m2*s)
+
+!    updated parameters (real):
+
 !    *prfl*         precipitation rate                           kg/(m2*s)
-                                                                          
-!    output parameters (real(kind=kind_phys)):                                            
-                                                                          
-!    *ptd*          temperature in downdrafts                      k      
-!    *pqd*          spec. humidity in downdrafts                 kg/kg    
-!    *pud*          u-velocity in downdrafts                      m/s     
-!    *pvd*          v-velocity in downdrafts                      m/s     
+
+!    output parameters (real):
+
+!    *ptd*          temperature in downdrafts                      k
+!    *pqd*          spec. humidity in downdrafts                 kg/kg
+!    *pud*          u-velocity in downdrafts                      m/s
+!    *pvd*          v-velocity in downdrafts                      m/s
 !    *pmfd*         massflux in downdrafts                       kg/(m2*s)
 !    *pmfds*        flux of dry static energy in downdrafts       j/(m2*s)
 !    *pmfdq*        flux of spec. humidity in downdrafts         kg/(m2*s)
 !    *pdmfdp*       flux difference of precip. in downdrafts     kg/(m2*s)
-                                                                          
-!          externals                                                      
-!          ---------                                                      
-!          *cuadjtq* for adjusting t and q due to evaporation in          
-!          saturated descent                                              
-!----------------------------------------------------------------------   
+
+!          externals
+!          ---------
+!          *cuadjtq* for adjusting t and q due to evaporation in
+!          saturated descent
+!----------------------------------------------------------------------
       implicit none
-      
-      integer  klev,klon                                                             
-      real(kind=kind_phys)     ptenh(klon,klev),       pqenh(klon,klev),   &               
-     &         puen(klon,klev),        pven(klon,klev),    &               
-     &         pgeoh(klon,klev+1),     paph(klon,klev+1),  &               
-     &         pgeo(klon,klev),        pmfu(klon,klev)                    
-                                                                          
-      real(kind=kind_phys)     ptd(klon,klev),         pqd(klon,klev),     &               
-     &         pud(klon,klev),         pvd(klon,klev),     &               
-     &         pmfd(klon,klev),        pmfds(klon,klev),   &               
-     &         pmfdq(klon,klev),       pdmfdp(klon,klev),  &               
-     &         prfl(klon)     
-      real(kind=kind_phys)     pmfdde_rate(klon,klev)                                            
-      logical  lddraf(klon)                                               
-                                                                          
-      real(kind=kind_phys)     zdmfen(klon),           zdmfde(klon),       &               
-     &         zcond(klon),            zoentr(klon),       &               
-     &         zbuoy(klon)                                                
-      real(kind=kind_phys)     zph(klon)                         
-      logical  llo2(klon)                                   
-      logical  llo1
-! local variables
-      integer  jl,jk
-      integer  is,ik,icall,ike, itopde(klon)
-      real(kind=kind_phys)     zentr,zdz,zzentr,zseen,zqeen,zsdde,zqdde,zdmfdp
-      real(kind=kind_phys)     zmfdsk,zmfdqk,zbuo,zrain,zbuoyz,zmfduk,zmfdvk
-                                                                
-!----------------------------------------------------------------------   
-!     1.           calculate moist descent for cumulus downdraft by       
-!                     (a) calculating entrainment/detrainment rates,      
-!                         including organized entrainment dependent on    
-!                         negative buoyancy and assuming                  
-!                         linear decrease of massflux in pbl              
-!                     (b) doing moist descent - evaporative cooling       
-!                         and moistening is calculated in *cuadjtq*       
-!                     (c) checking for negative buoyancy and              
-!                         specifying final t,q,u,v and downward fluxes    
-!                    -------------------------------------------------    
-      do jl=1,klon                                                   
-        zoentr(jl)=0.                                                     
-        zbuoy(jl)=0.                                                      
-        zdmfen(jl)=0.                                                     
+
+!--- input arguments:
+      integer,intent(in)::klon
+      logical,intent(in),dimension(klon):: lddraf
+
+      integer,intent(in)::klev
+
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: ptenh,pqenh,puen,pven
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pgeo,pmfu
+      real(kind=kind_phys),intent(in),dimension(klon,klev+1):: pgeoh,paph
+
+!--- inout arguments:
+      real(kind=kind_phys),intent(inout),dimension(klon):: prfl
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: ptd,pqd,pud,pvd
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: pmfd,pmfds,pmfdq,pdmfdp
+
+!--- output arguments:
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: pmfdde_rate
+
+!--- local variables and arrays:
+      logical:: llo1
+      logical,dimension(klon):: llo2
+
+      integer::  jl,jk
+      integer::  is,ik,icall,ike
+      integer,dimension(klon):: itopde
+
+      real(kind=kind_phys):: zentr,zdz,zzentr,zseen,zqeen,zsdde,zqdde,zdmfdp
+      real(kind=kind_phys):: zmfdsk,zmfdqk,zbuo,zrain,zbuoyz,zmfduk,zmfdvk
+      real(kind=kind_phys),dimension(klon):: zdmfen,zdmfde,zcond,zoentr,zbuoy,zph
+
+!----------------------------------------------------------------------
+!     1.           calculate moist descent for cumulus downdraft by
+!                     (a) calculating entrainment/detrainment rates,
+!                         including organized entrainment dependent on
+!                         negative buoyancy and assuming
+!                         linear decrease of massflux in pbl
+!                     (b) doing moist descent - evaporative cooling
+!                         and moistening is calculated in *cuadjtq*
+!                     (c) checking for negative buoyancy and
+!                         specifying final t,q,u,v and downward fluxes
+!                    -------------------------------------------------
+      do jl=1,klon
+        zoentr(jl)=0.
+        zbuoy(jl)=0.
+        zdmfen(jl)=0.
         zdmfde(jl)=0.
-      enddo 
+      enddo
 
       do jk=klev,1,-1
        do jl=1,klon
          pmfdde_rate(jl,jk) = 0.
          if((paph(jl,klev+1)-paph(jl,jk)).lt. 60.e2) itopde(jl) = jk
        end do
-      end do                                                              
-                                                                 
-      do jk=3,klev                                                        
-        is=0                                                              
-        do jl=1,klon                                                 
-          zph(jl)=paph(jl,jk)                                             
-          llo2(jl)=lddraf(jl).and.pmfd(jl,jk-1).lt.0.                     
-          if(llo2(jl)) then                                               
-            is=is+1                                                       
-          endif                                                           
-        enddo                                                             
-        if(is.eq.0) cycle                                                 
-                                                                          
-        do jl=1,klon                                                 
-          if(llo2(jl)) then    
+      end do
+
+      do jk=3,klev
+        is=0
+        do jl=1,klon
+          zph(jl)=paph(jl,jk)
+          llo2(jl)=lddraf(jl).and.pmfd(jl,jk-1).lt.0.
+          if(llo2(jl)) then
+            is=is+1
+          endif
+        enddo
+        if(is.eq.0) cycle
+
+        do jl=1,klon
+          if(llo2(jl)) then
             zentr = entrdd*pmfd(jl,jk-1)*(pgeoh(jl,jk-1)-pgeoh(jl,jk))*zrg
-            zdmfen(jl)=zentr                                              
-            zdmfde(jl)=zentr                                              
-          endif                                                           
-        enddo 
-                                                            
+            zdmfen(jl)=zentr
+            zdmfde(jl)=zentr
+          endif
+        enddo
+
         do jl=1,klon
           if(llo2(jl)) then
           if(jk.gt.itopde(jl)) then
@@ -2775,182 +2820,195 @@ contains
           endif
         enddo
 
-        do jl=1,klon                                                 
-          if(llo2(jl)) then                                               
+        do jl=1,klon
+          if(llo2(jl)) then
             pmfd(jl,jk)=pmfd(jl,jk-1)+zdmfen(jl)-zdmfde(jl)
-            zseen=(cpd*ptenh(jl,jk-1)+pgeoh(jl,jk-1))*zdmfen(jl)         
-            zqeen=pqenh(jl,jk-1)*zdmfen(jl)                               
-            zsdde=(cpd*ptd(jl,jk-1)+pgeoh(jl,jk-1))*zdmfde(jl)           
-            zqdde=pqd(jl,jk-1)*zdmfde(jl)                                 
-            zmfdsk=pmfds(jl,jk-1)+zseen-zsdde                             
-            zmfdqk=pmfdq(jl,jk-1)+zqeen-zqdde                             
-            pqd(jl,jk)=zmfdqk*(1./min(-cmfcmin,pmfd(jl,jk)))              
-            ptd(jl,jk)=(zmfdsk*(1./min(-cmfcmin,pmfd(jl,jk)))-&            
-     &                  pgeoh(jl,jk))*rcpd                                
-            ptd(jl,jk)=min(400.,ptd(jl,jk))                               
-            ptd(jl,jk)=max(100.,ptd(jl,jk))                               
-            zcond(jl)=pqd(jl,jk)                                          
-          endif                                                           
-        enddo                                                             
-                                                                          
-        ik=jk                                                             
-        icall=2                                                           
-        call cuadjtqn(klon, klev, ik, zph, ptd, pqd, llo2, icall )                
-                                                                          
-        do jl=1,klon                                                 
-          if(llo2(jl)) then                                               
+            zseen=(cpd*ptenh(jl,jk-1)+pgeoh(jl,jk-1))*zdmfen(jl)
+            zqeen=pqenh(jl,jk-1)*zdmfen(jl)
+            zsdde=(cpd*ptd(jl,jk-1)+pgeoh(jl,jk-1))*zdmfde(jl)
+            zqdde=pqd(jl,jk-1)*zdmfde(jl)
+            zmfdsk=pmfds(jl,jk-1)+zseen-zsdde
+            zmfdqk=pmfdq(jl,jk-1)+zqeen-zqdde
+            pqd(jl,jk)=zmfdqk*(1./min(-cmfcmin,pmfd(jl,jk)))
+            ptd(jl,jk)=(zmfdsk*(1./min(-cmfcmin,pmfd(jl,jk)))-&
+     &                  pgeoh(jl,jk))*rcpd
+            ptd(jl,jk)=min(400.,ptd(jl,jk))
+            ptd(jl,jk)=max(100.,ptd(jl,jk))
+            zcond(jl)=pqd(jl,jk)
+          endif
+        enddo
+
+        ik=jk
+        icall=2
+        call cuadjtqn(klon, klev, ik, zph, ptd, pqd, llo2, icall )
+
+        do jl=1,klon
+          if(llo2(jl)) then
             zcond(jl)=zcond(jl)-pqd(jl,jk)
-            zbuo=ptd(jl,jk)*(1.+vtmpc1  *pqd(jl,jk))-          &             
-     &      ptenh(jl,jk)*(1.+vtmpc1  *pqenh(jl,jk))                         
-            if(prfl(jl).gt.0..and.pmfu(jl,jk).gt.0.) then                 
-              zrain=prfl(jl)/pmfu(jl,jk)                                  
+            zbuo=ptd(jl,jk)*(1.+vtmpc1  *pqd(jl,jk))-          &
+     &      ptenh(jl,jk)*(1.+vtmpc1  *pqenh(jl,jk))
+            if(prfl(jl).gt.0..and.pmfu(jl,jk).gt.0.) then
+              zrain=prfl(jl)/pmfu(jl,jk)
               zbuo=zbuo-ptd(jl,jk)*zrain
-            endif                                                         
-            if(zbuo.ge.0 .or. prfl(jl).le.(pmfd(jl,jk)*zcond(jl))) then    
-              pmfd(jl,jk)=0.
-              zbuo=0.                                              
             endif
-            pmfds(jl,jk)=(cpd*ptd(jl,jk)+pgeoh(jl,jk))*pmfd(jl,jk)       
-            pmfdq(jl,jk)=pqd(jl,jk)*pmfd(jl,jk)                           
-            zdmfdp=-pmfd(jl,jk)*zcond(jl)                                 
-            pdmfdp(jl,jk-1)=zdmfdp                                        
-            prfl(jl)=prfl(jl)+zdmfdp                                      
-                                                                          
-! compute organized entrainment for use at next level                     
-            zbuoyz=zbuo/ptenh(jl,jk)                                      
-            zbuoyz=min(zbuoyz,0.0)                                        
+            if(zbuo.ge.0 .or. prfl(jl).le.(pmfd(jl,jk)*zcond(jl))) then
+              pmfd(jl,jk)=0.
+              zbuo=0.
+            endif
+            pmfds(jl,jk)=(cpd*ptd(jl,jk)+pgeoh(jl,jk))*pmfd(jl,jk)
+            pmfdq(jl,jk)=pqd(jl,jk)*pmfd(jl,jk)
+            zdmfdp=-pmfd(jl,jk)*zcond(jl)
+            pdmfdp(jl,jk-1)=zdmfdp
+            prfl(jl)=prfl(jl)+zdmfdp
+
+! compute organized entrainment for use at next level
+            zbuoyz=zbuo/ptenh(jl,jk)
+            zbuoyz=min(zbuoyz,0.0)
             zdz=-(pgeo(jl,jk-1)-pgeo(jl,jk))
             zbuoy(jl)=zbuoy(jl)+zbuoyz*zdz
-            zoentr(jl)=g*zbuoyz*0.5/(1.+zbuoy(jl)) 
+            zoentr(jl)=g*zbuoyz*0.5/(1.+zbuoy(jl))
             pmfdde_rate(jl,jk) = -zdmfde(jl)
-          endif                                                           
+          endif
         enddo
-                                                             
-      enddo                                                               
-                                                                          
-      return                                                              
+
+      enddo
+
+      return
       end subroutine cuddrafn
 !---------------------------------------------------------
-!  level 3 souroutines  
+!  level 3 souroutines
 !--------------------------------------------------------
-       subroutine cuflxn         &                                                 
-     &  (  klon,     klev,     ztmst &                                                             
-     &  ,  pten,     pqen,     pqsen,    ptenh,    pqenh   &                    
-     &  ,  paph,     pap,      pgeoh,    lndj,   ldcum   &                    
-     &  ,  kcbot,    kctop,    kdtop,    ktopm2            &                    
-     &  ,  ktype,    lddraf                                &                    
-     &  ,  pmfu,     pmfd,     pmfus,    pmfds             &                    
-     &  ,  pmfuq,    pmfdq,    pmful,    plude             &                    
-     &  ,  pdmfup,   pdmfdp,   pdpmel,   plglac            &                    
-     &  ,  prain,    pmfdde_rate, pmflxr, pmflxs )                                         
-                                                                               
-!          m.tiedtke         e.c.m.w.f.     7/86 modif. 12/89                  
-                                                                               
-!          purpose                                                             
-!          -------                                                             
-                                                                               
-!          this routine does the final calculation of convective               
-!          fluxes in the cloud layer and in the subcloud layer                 
-                                                                               
-!          interface                                                           
-!          ---------                                                           
-!          this routine is called from *cumastr*.                              
-                                                                               
-                                                                               
-!     parameter     description                                   units        
-!     ---------     -----------                                   -----        
-!     input parameters (integer):                                              
-                                                                               
-!    *klon*         number of grid points per packet                           
-!    *klev*         number of levels                                           
-!    *kcbot*        cloud base level                                           
-!    *kctop*        cloud top level                                            
-!    *kdtop*        top level of downdrafts                                    
-                                                                               
-!    input parameters (logical):                                               
-                                                                               
-!    *lndj*       land sea mask (1 for land)                            
-!    *ldcum*        flag: .true. for convective points                         
-                                                                               
-!    input parameters (real(kind=kind_phys)):                                                  
-                                                                               
-!    *ztmst*        time step for the physics                       s          
-!    *pten*         provisional environment temperature (t+1)       k          
-!    *pqen*         provisional environment spec. humidity (t+1)  kg/kg        
-!    *pqsen*        environment spec. saturation humidity (t+1)   kg/kg        
-!    *ptenh*        env. temperature (t+1) on half levels           k          
-!    *pqenh*        env. spec. humidity (t+1) on half levels      kg/kg        
-!    *paph*         provisional pressure on half levels            pa          
-!    *pap*          provisional pressure on full levels            pa          
-!    *pgeoh*        geopotential on half levels                   m2/s2        
-                                                                               
-!    updated parameters (integer):                                             
-                                                                               
-!    *ktype*        set to zero if ldcum=.false.                               
-                                                                               
-!    updated parameters (logical):                                             
-                                                                               
-!    *lddraf*       set to .false. if ldcum=.false. or kdtop<kctop             
-                                                                               
-!    updated parameters (real(kind=kind_phys)):                                                
-                                                                               
-!    *pmfu*         massflux in updrafts                          kg/(m2*s)    
-!    *pmfd*         massflux in downdrafts                        kg/(m2*s)    
-!    *pmfus*        flux of dry static energy in updrafts          j/(m2*s)    
-!    *pmfds*        flux of dry static energy in downdrafts        j/(m2*s)    
-!    *pmfuq*        flux of spec. humidity in updrafts            kg/(m2*s)    
-!    *pmfdq*        flux of spec. humidity in downdrafts          kg/(m2*s)    
-!    *pmful*        flux of liquid water in updrafts              kg/(m2*s)    
-!    *plude*        detrained liquid water                        kg/(m3*s)    
-!    *pdmfup*       flux difference of precip. in updrafts        kg/(m2*s)    
-!    *pdmfdp*       flux difference of precip. in downdrafts      kg/(m2*s)    
-                                                                               
-!    output parameters (real(kind=kind_phys)):                                                 
-                                                                               
-!    *pdpmel*       change in precip.-fluxes due to melting       kg/(m2*s)    
-!    *plglac*       flux of frozen cloud water in updrafts        kg/(m2*s)    
-!    *pmflxr*       convective rain flux                          kg/(m2*s)    
-!    *pmflxs*       convective snow flux                          kg/(m2*s)    
-!    *prain*        total precip. produced in conv. updrafts      kg/(m2*s)    
-!                   (no evaporation in downdrafts)                             
-                                                                               
-!          externals                                                           
-!          ---------                                                           
-!          none                                                                
-!----------------------------------------------------------------------        
-      implicit none                                                     
+       subroutine cuflxn &
+     &  (  klon,     klev,     ztmst &
+     &  ,  pten,     pqen,     pqsen,    ptenh,    pqenh &
+     &  ,  paph,     pap,      pgeoh,    lndj,   ldcum   &
+     &  ,  kcbot,    kctop,    kdtop,    ktopm2          &
+     &  ,  ktype,    lddraf                              &
+     &  ,  pmfu,     pmfd,     pmfus,    pmfds           &
+     &  ,  pmfuq,    pmfdq,    pmful,    plude           &
+     &  ,  pdmfup,   pdmfdp,   pdpmel,   plglac          &
+     &  ,  prain,    pmfdde_rate, pmflxr, pmflxs )
 
-      integer  klev,klon,ktopm2                                                                         
-      real(kind=kind_phys)     pten(klon,klev),        ptenh(klon,klev),          &             
-     &         pqen(klon,klev),        pqsen(klon,klev),          &             
-     &         pqenh(klon,klev),       pap(klon,klev),            &             
-     &         paph(klon,klev+1),      pgeoh(klon,klev+1),        &             
-     &         plglac(klon,klev)                                               
-                                                                               
-      real(kind=kind_phys)     pmfu(klon,klev),        pmfd(klon,klev),           &             
-     &         pmfus(klon,klev),       pmfds(klon,klev),          &             
-     &         pmfuq(klon,klev),       pmfdq(klon,klev),          &             
-     &         pdmfup(klon,klev),      pdmfdp(klon,klev),         &             
-     &         pdpmel(klon,klev),      prain(klon),               &             
-     &         pmful(klon,klev),       plude(klon,klev),          &             
-     &         pmflxr(klon,klev+1),    pmflxs(klon,klev+1)  
-      real(kind=kind_phys)     pmfdde_rate(klon,klev)               
-      integer  kcbot(klon),            kctop(klon),               &             
-     &         kdtop(klon),            ktype(klon)                             
-      logical  lddraf(klon),                                &
-     &         ldcum(klon)  
-      integer  lndj(klon)
-! local variables
-      integer  jl,jk
-      integer  is,ik,icall,ike,ikb
-      real(kind=kind_phys)     ztmst,ztaumel,zcons1a,zcons1,zcons2,zcucov,zcpecons
-      real(kind=kind_phys)     zalfaw,zrfl,zdrfl1,zrnew,zrmin,zrfln,zdrfl,zdenom
-      real(kind=kind_phys)     zpdr,zpds,zzp,zfac,zsnmlt
-      real(kind=kind_phys)     rhevap(klon)
-      integer  idbas(klon)
-      logical  llddraf
-!--------------------------------------------------------------------          
-!*             specify constants  
+!          m.tiedtke         e.c.m.w.f.     7/86 modif. 12/89
+
+!          purpose
+!          -------
+
+!          this routine does the final calculation of convective
+!          fluxes in the cloud layer and in the subcloud layer
+
+!          interface
+!          ---------
+!          this routine is called from *cumastr*.
+
+
+!     parameter     description                                   units
+!     ---------     -----------                                   -----
+!     input parameters (integer):
+
+!    *klon*         number of grid points per packet
+!    *klev*         number of levels
+!    *kcbot*        cloud base level
+!    *kctop*        cloud top level
+!    *kdtop*        top level of downdrafts
+
+!    input parameters (logical):
+
+!    *lndj*       land sea mask (1 for land)
+!    *ldcum*        flag: .true. for convective points
+
+!    input parameters (real):                                                  
+
+!    *ztmst*        time step for the physics                       s
+!    *pten*         provisional environment temperature (t+1)       k
+!    *pqen*         provisional environment spec. humidity (t+1)  kg/kg
+!    *pqsen*        environment spec. saturation humidity (t+1)   kg/kg
+!    *ptenh*        env. temperature (t+1) on half levels           k
+!    *pqenh*        env. spec. humidity (t+1) on half levels      kg/kg
+!    *paph*         provisional pressure on half levels            pa
+!    *pap*          provisional pressure on full levels            pa
+!    *pgeoh*        geopotential on half levels                   m2/s2
+
+!    updated parameters (integer):
+
+!    *ktype*        set to zero if ldcum=.false.
+
+!    updated parameters (logical):
+
+!    *lddraf*       set to .false. if ldcum=.false. or kdtop<kctop
+
+!    updated parameters (real):                                                
+
+!    *pmfu*         massflux in updrafts                          kg/(m2*s)
+!    *pmfd*         massflux in downdrafts                        kg/(m2*s)
+!    *pmfus*        flux of dry static energy in updrafts          j/(m2*s)
+!    *pmfds*        flux of dry static energy in downdrafts        j/(m2*s)
+!    *pmfuq*        flux of spec. humidity in updrafts            kg/(m2*s)
+!    *pmfdq*        flux of spec. humidity in downdrafts          kg/(m2*s)
+!    *pmful*        flux of liquid water in updrafts              kg/(m2*s)
+!    *plude*        detrained liquid water                        kg/(m3*s)
+!    *pdmfup*       flux difference of precip. in updrafts        kg/(m2*s)
+!    *pdmfdp*       flux difference of precip. in downdrafts      kg/(m2*s)
+
+!    output parameters (real):                                                 
+
+!    *pdpmel*       change in precip.-fluxes due to melting       kg/(m2*s)
+!    *plglac*       flux of frozen cloud water in updrafts        kg/(m2*s)
+!    *pmflxr*       convective rain flux                          kg/(m2*s)
+!    *pmflxs*       convective snow flux                          kg/(m2*s)
+!    *prain*        total precip. produced in conv. updrafts      kg/(m2*s)
+!                   (no evaporation in downdrafts)
+
+!          externals
+!          ---------
+!          none
+!----------------------------------------------------------------------
+      implicit none
+
+!--- input arguments:
+      integer,intent(in):: klon
+      logical,intent(in),dimension(klon):: ldcum
+
+      integer,intent(in):: klev
+      integer,intent(in),dimension(klon):: lndj
+      integer,intent(in),dimension(klon):: kcbot,kctop,kdtop
+
+      real(kind=kind_phys),intent(in):: ztmst
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pten,ptenh,pqen,pqenh
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pap
+      real(kind=kind_phys),intent(in),dimension(klon,klev+1):: paph,pgeoh
+
+!--- inout arguments:
+      logical,intent(inout),dimension(klon):: lddraf
+
+      integer,intent(inout):: ktopm2
+      integer,intent(inout),dimension(klon):: ktype
+
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: pmfu,pmfd,pmfus,pmfds
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: pmfuq,pmfdq,pmful,plude
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: pdmfup,pdmfdp
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: pqsen
+
+!--- output arguments:
+      real(kind=kind_phys),dimension(klon):: prain
+      real(kind=kind_phys),dimension(klon,klev):: pdpmel,plglac
+      real(kind=kind_phys),dimension(klon,klev):: pmfdde_rate
+      real(kind=kind_phys),dimension(klon,klev+1):: pmflxr,pmflxs
+
+!--- local variables and arrays:
+      logical:: llddraf
+
+      integer::  jl,jk
+      integer::  is,ik,icall,ike,ikb
+      integer,dimension(klon):: idbas
+
+      real(kind=kind_phys):: ztaumel,zcons1a,zcons1,zcons2,zcucov,zcpecons
+      real(kind=kind_phys):: zalfaw,zrfl,zdrfl1,zrnew,zrmin,zrfln,zdrfl,zdenom
+      real(kind=kind_phys):: zpdr,zpds,zzp,zfac,zsnmlt
+      real(kind=kind_phys),dimension(klon):: rhevap
+
+!--------------------------------------------------------------------
+!*             specify constants
 
       ztaumel=18000.
       zcons1a=cpd/(alf*g*ztaumel)
@@ -2958,8 +3016,8 @@ contains
       zcucov=0.05
       zcpecons=5.44e-4/g
 
-!*    1.0          determine final convective fluxes                           
-!                  ---------------------------------                           
+!*    1.0          determine final convective fluxes
+!                  ---------------------------------
       do jl=1,klon
         prain(jl)=0.
         if(.not.ldcum(jl).or.kdtop(jl).lt.kctop(jl)) lddraf(jl)=.false.
@@ -2972,6 +3030,7 @@ contains
         end if
       enddo
 
+      ktopm2= 2
       do jk=ktopm2,klev
         ikb = min(jk+1,klev)
         do jl=1,klon
@@ -3063,10 +3122,10 @@ contains
            end if
         enddo
       enddo
-!*    2.            calculate rain/snow fall rates                             
-!*                  calculate melting of snow                                  
-!*                  calculate evaporation of precip                            
-!                   -------------------------------                            
+!*    2.            calculate rain/snow fall rates
+!*                  calculate melting of snow
+!*                  calculate evaporation of precip
+!                   -------------------------------
 
         do jk=ktopm2,klev
         do jl=1,klon
@@ -3152,38 +3211,43 @@ contains
           endif
         enddo
       enddo
-                                      
+
       return
-      end subroutine cuflxn 
+      end subroutine cuflxn
 !---------------------------------------------------------
-!  level 3 souroutines  
+!  level 3 subroutines
 !--------------------------------------------------------
-     subroutine cudtdqn(klon,klev,ktopm2,kctop,kdtop,ldcum, &
-                     lddraf,ztmst,paph,pgeoh,pgeo,pten,ptenh,pqen,  &
+     subroutine cudtdqn(klon,klev,ktopm2,kctop,kdtop,ldcum,          &
+                     lddraf,ztmst,paph,pgeoh,pgeo,pten,ptenh,pqen,   &
                      pqenh,pqsen,plglac,plude,pmfu,pmfd,pmfus,pmfds, &
                      pmfuq,pmfdq,pmful,pdmfup,pdmfdp,pdpmel,ptent,ptenq,pcte)
     implicit none
-    integer  klon,klev,ktopm2
-    integer  kctop(klon),  kdtop(klon)
-    logical  ldcum(klon),  lddraf(klon)
-    real(kind=kind_phys)     ztmst
-    real(kind=kind_phys)     paph(klon,klev+1), pgeoh(klon,klev+1)
-    real(kind=kind_phys)     pgeo(klon,klev),   pten(klon,klev), &
-             pqen(klon,klev),   ptenh(klon,klev),&
-             pqenh(klon,klev),  pqsen(klon,klev),&
-             plglac(klon,klev), plude(klon,klev)
-    real(kind=kind_phys)     pmfu(klon,klev),   pmfd(klon,klev),&
-             pmfus(klon,klev),  pmfds(klon,klev),&
-             pmfuq(klon,klev),  pmfdq(klon,klev),&
-             pmful(klon,klev),  pdmfup(klon,klev),&
-             pdpmel(klon,klev), pdmfdp(klon,klev)
-    real(kind=kind_phys)     ptent(klon,klev),  ptenq(klon,klev)
-    real(kind=kind_phys)     pcte(klon,klev)
 
-! local variables
-    integer  jk , ik , jl
-    real(kind=kind_phys)     zalv , zzp
-    real(kind=kind_phys)     zdtdt(klon,klev) , zdqdt(klon,klev) , zdp(klon,klev)
+!--- input arguments:
+    integer,intent(in):: klon
+    logical,intent(in),dimension(klon):: ldcum,lddraf
+
+    integer,intent(in):: klev,ktopm2
+    integer,intent(in),dimension(klon):: kctop,kdtop
+
+    real(kind=kind_phys),intent(in):: ztmst
+    real(kind=kind_phys),intent(in),dimension(klon,klev):: pgeo
+    real(kind=kind_phys),intent(in),dimension(klon,klev):: pten
+    real(kind=kind_phys),intent(in),dimension(klon,klev):: pmfu,pmfus,pmfd,pmfds
+    real(kind=kind_phys),intent(in),dimension(klon,klev):: pmfuq,pmfdq,pmful
+    real(kind=kind_phys),intent(in),dimension(klon,klev):: plglac,plude,pdpmel
+    real(kind=kind_phys),intent(in),dimension(klon,klev):: pdmfup,pdmfdp
+    real(kind=kind_phys),intent(in),dimension(klon,klev):: pqen, ptenh,pqenh,pqsen
+    real(kind=kind_phys),intent(in),dimension(klon,klev+1):: paph,pgeoh
+
+!--- inout arguments:
+    real(kind=kind_phys),intent(inout),dimension(klon,klev):: ptent,ptenq,pcte
+
+!--- local variables and arrays:
+    integer::  jk ,ik ,jl
+    real(kind=kind_phys):: zalv ,zzp
+    real(kind=kind_phys),dimension(klon,klev):: zdtdt,zdqdt,zdp
+
     !*    1.0          SETUP AND INITIALIZATIONS
     ! -------------------------
     do jk = 1 , klev
@@ -3193,7 +3257,6 @@ contains
         end if
       end do
     end do
-
     !-----------------------------------------------------------------------
     !*    2.0          COMPUTE TENDENCIES
     ! ------------------
@@ -3240,31 +3303,34 @@ contains
     return
   end subroutine cudtdqn
 !---------------------------------------------------------
-!  level 3 souroutines  
+!  level 3 subroutines
 !--------------------------------------------------------
     subroutine cududvn(klon,klev,ktopm2,ktype,kcbot,kctop,ldcum,  &
                     ztmst,paph,puen,pven,pmfu,pmfd,puu,pud,pvu,pvd,ptenu, &
                     ptenv)
     implicit none
-    integer  klon,klev,ktopm2
-    integer  ktype(klon), kcbot(klon), kctop(klon)
-    logical  ldcum(klon)
-    real(kind=kind_phys)     ztmst
-    real(kind=kind_phys)     paph(klon,klev+1)
-    real(kind=kind_phys)     puen(klon,klev),  pven(klon,klev),&
-             pmfu(klon,klev),  pmfd(klon,klev),&
-             puu(klon,klev),   pud(klon,klev),&
-             pvu(klon,klev),   pvd(klon,klev)
-    real(kind=kind_phys)     ptenu(klon,klev), ptenv(klon,klev)
 
-!local variables
-    real(kind=kind_phys)     zuen(klon,klev) , zven(klon,klev) , zmfuu(klon,klev), &
-             zmfdu(klon,klev), zmfuv(klon,klev), zmfdv(klon,klev)
+!--- input arguments:
+    integer,intent(in):: klon
+    logical,intent(in),dimension(klon):: ldcum
+    integer,intent(in):: klev,ktopm2
+    integer,intent(in),dimension(klon):: ktype,kcbot,kctop
 
-    integer  ik , ikb , jk , jl
-    real(kind=kind_phys)     zzp, zdtdt
-   
-    real(kind=kind_phys)     zdudt(klon,klev), zdvdt(klon,klev), zdp(klon,klev)
+    real(kind=kind_phys),intent(in):: ztmst
+    real(kind=kind_phys),intent(in),dimension(klon,klev):: pmfu,pmfd,puen,pven
+    real(kind=kind_phys),intent(in),dimension(klon,klev):: puu,pud,pvu,pvd
+    real(kind=kind_phys),intent(in),dimension(klon,klev+1):: paph
+
+!--- inout arguments:
+    real(kind=kind_phys),intent(inout),dimension(klon,klev):: ptenu,ptenv
+
+!--- local variables and arrays:
+    integer:: ik,ikb,jk,jl
+
+    real(kind=kind_phys):: zzp,zdtdt
+    real(kind=kind_Phys),dimension(klon,klev):: zdudt,zdvdt,zdp
+    real(kind=kind_phys),dimension(klon,klev):: zuen,zven,zmfuu,zmfdu,zmfuv,zmfdv
+
 !
     do jk = 1 , klev
       do jl = 1, klon
@@ -3340,9 +3406,8 @@ contains
 !----------------------------------------------------------------------
     return
     end subroutine cududvn
-
 !---------------------------------------------------------
-!  level 3 souroutines
+!  level 3 subroutines
 !--------------------------------------------------------
     subroutine cuctracer(klon,klev,ktrac,kctop,kdtop,           &
                        ldcum,lddraf,ztmst,paph,pmfu,pmfd,       &
@@ -3503,69 +3568,77 @@ contains
     end subroutine cuctracer
 
 !---------------------------------------------------------
-!  level 4 souroutines  
+!  level 3 subroutines
 !--------------------------------------------------------
-      subroutine cuadjtqn                 &                                           
-     &    (klon, klev, kk, psp, pt, pq, ldflag,  kcall)                           
-!          m.tiedtke         e.c.m.w.f.     12/89     
-!          purpose.                                                                 
-!          --------                                                                 
-!          to produce t,q and l values for cloud ascent                             
-                                                                                    
-!          interface                                                                
-!          ---------                                                                
-!          this routine is called from subroutines:                                 
-!              *cond*     (t and q at condensation level)                           
-!              *cubase*   (t and q at condensation level)                           
-!              *cuasc*    (t and q at cloud levels)                                 
-!              *cuini*    (environmental t and qs values at half levels)            
-!          input are unadjusted t and q values,                                     
-!          it returns adjusted values of t and q                                    
-                                                                                    
-!     parameter     description                                   units             
-!     ---------     -----------                                   -----             
-!     input parameters (integer):                                                   
-                                                                                    
-!    *klon*         number of grid points per packet                                
-!    *klev*         number of levels                                                
-!    *kk*           level                                                           
-!    *kcall*        defines calculation as                                          
-!                      kcall=0  env. t and qs in*cuini*                             
-!                      kcall=1  condensation in updrafts  (e.g. cubase, cuasc)      
-!                      kcall=2  evaporation in downdrafts (e.g. cudlfs,cuddraf)     
-!     input parameters (real(kind=kind_phys)):                                                      
-                                                                                    
-!    *psp*          pressure                                        pa              
-                                                                                    
-!     updated parameters (real(kind=kind_phys)):                                                    
-                                                                                    
-!    *pt*           temperature                                     k               
-!    *pq*           specific humidity                             kg/kg             
-!          externals                                                                
-!          ---------                                                                
-!          for condensation calculations.                                           
-!          the tables are initialised in *suphec*.                                  
-                                                                                    
-!----------------------------------------------------------------------             
-                                                                                    
-      implicit none   
-                 
-      integer  klev,klon                                                                   
-      real(kind=kind_phys)     pt(klon,klev),          pq(klon,klev),  &                             
-     &         psp(klon)                                                            
-      logical  ldflag(klon)                                                         
-! local variables
-      integer  jl,jk
-      integer  isum,kcall,kk
-      real(kind=kind_phys)     zqmax,zqsat,zcor,zqp,zcond,zcond1,zl,zi,zf
-!----------------------------------------------------------------------             
-!     1.           define constants                                                 
-!                  ----------------                                                 
-      zqmax=0.5  
-                                                                                    
-!     2.           calculate condensation and adjust t and q accordingly            
-!                  -----------------------------------------------------            
-                                                                                    
+      subroutine cuadjtqn &
+     &    (klon, klev, kk, psp, pt, pq, ldflag,  kcall)
+!          m.tiedtke         e.c.m.w.f.     12/89
+!          purpose.
+!          --------
+!          to produce t,q and l values for cloud ascent
+
+!          interface
+!          ---------
+!          this routine is called from subroutines:
+!              *cond*     (t and q at condensation level)
+!              *cubase*   (t and q at condensation level)
+!              *cuasc*    (t and q at cloud levels)
+!              *cuini*    (environmental t and qs values at half levels)
+!          input are unadjusted t and q values,
+!          it returns adjusted values of t and q
+
+!     parameter     description                                   units
+!     ---------     -----------                                   -----
+!     input parameters (integer):
+
+!    *klon*         number of grid points per packet
+!    *klev*         number of levels
+!    *kk*           level
+!    *kcall*        defines calculation as
+!                      kcall=0  env. t and qs in*cuini*
+!                      kcall=1  condensation in updrafts  (e.g. cubase, cuasc)
+!                      kcall=2  evaporation in downdrafts (e.g. cudlfs,cuddraf)
+!     input parameters (real):
+
+!    *psp*          pressure                                        pa
+
+!     updated parameters (real):
+
+!    *pt*           temperature                                     k
+!    *pq*           specific humidity                             kg/kg
+!          externals
+!          ---------
+!          for condensation calculations.
+!          the tables are initialised in *suphec*.
+
+!----------------------------------------------------------------------
+
+      implicit none
+
+!--- input arguments:
+      integer,intent(in):: klon
+      logical,intent(in),dimension(klon):: ldflag
+      integer,intent(in):: kcall,kk,klev
+
+      real(kind=kind_phys),intent(in),dimension(klon):: psp
+
+!--- inout arguments:
+      real(kind=kind_phys),intent(inout),dimension(klon,klev):: pt,pq
+
+!--- local variables and arrays:
+      integer:: jl,jk
+      integer:: isum
+
+      real(kind=kind_phys)::zqmax,zqsat,zcor,zqp,zcond,zcond1,zl,zi,zf
+
+!----------------------------------------------------------------------
+!     1.           define constants
+!                  ----------------
+      zqmax=0.5
+
+!     2.           calculate condensation and adjust t and q accordingly
+!                  -----------------------------------------------------
+
       if ( kcall == 1 ) then
       do jl = 1,klon
         if ( ldflag(jl) ) then
@@ -3645,14 +3718,14 @@ contains
       return
       end subroutine cuadjtqn
 !---------------------------------------------------------
-!  level 4 souroutines  
+!  level 4 subroutines
 !--------------------------------------------------------
       subroutine cubasmcn &
-     &    (klon,     klev,     klevm1,  kk,     pten,&
-     &     pqen,     pqsen,    puen,    pven,   pverv,&
-     &     pgeo,     pgeoh,    ldcum,   ktype,  klab,  plrain,&
-     &     pmfu,     pmfub,    kcbot,   ptu,&
-     &     pqu,      plu,      puu,     pvu,    pmfus,&
+     &    (klon,     klev,     klevm1,  kk,     pten,          &
+     &     pqen,     pqsen,    puen,    pven,   pverv,         &
+     &     pgeo,     pgeoh,    ldcum,   ktype,  klab,  plrain, &
+     &     pmfu,     pmfub,    kcbot,   ptu,                   &
+     &     pqu,      plu,      puu,     pvu,    pmfus,         &
      &     pmfuq,    pmful,    pdmfup)
       implicit none
 !      m.tiedtke         e.c.m.w.f.     12/89
@@ -3673,23 +3746,31 @@ contains
 !   ---------
 !          none
 ! ----------------------------------------------------------------
-      real(kind=kind_phys)     pten(klon,klev),        pqen(klon,klev),&
-     &         puen(klon,klev),        pven(klon,klev),&
-     &         pqsen(klon,klev),       pverv(klon,klev),&
-     &         pgeo(klon,klev),        pgeoh(klon,klev+1)
-      real(kind=kind_phys)     ptu(klon,klev),         pqu(klon,klev),&
-     &         puu(klon,klev),         pvu(klon,klev),&
-     &         plu(klon,klev),         pmfu(klon,klev),&
-     &         pmfub(klon),   &         
-     &         pmfus(klon,klev),       pmfuq(klon,klev),&
-     &         pmful(klon,klev),       pdmfup(klon,klev),&
-     &         plrain(klon,klev)
-      integer  ktype(klon),            kcbot(klon),&
-     &         klab(klon,klev)
-      logical  ldcum(klon)
-! local variabels
-      integer  jl,kk,klev,klon,klevp1,klevm1
-      real(kind=kind_phys)     zzzmb
+
+!--- input arguments:
+      integer,intent(in):: klon
+      logical,intent(in),dimension(klon):: ldcum
+      integer,intent(in):: kk,klev,klevm1
+
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: pten,pqen,pqsen,pgeo,pverv
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: puen,pven ! not used.
+      real(kind=kind_phys),intent(in),dimension(klon,klev):: puu,pvu   ! not used.
+      real(kind=kind_phys),intent(in),dimension(klon,klev+1):: pgeoh
+
+!--- output arguments:
+      integer,intent(out),dimension(klon):: ktype,kcbot
+      integer,intent(out),dimension(klon,klev):: klab
+
+      real(kind=kind_phys),intent(out),dimension(klon):: pmfub
+      real(kind=kind_phys),intent(out),dimension(klon,klev):: plrain
+      real(kind=kind_phys),intent(out),dimension(klon,klev):: ptu,pqu,plu
+      real(kind=kind_phys),intent(out),dimension(klon,klev):: pmfu,pmfus,pmfuq,pmful
+      real(kind=kind_phys),intent(out),dimension(klon,klev):: pdmfup
+
+!--- local variables and arrays:
+      integer:: jl,klevp1
+      real(kind=kind_phys):: zzzmb
+
 !--------------------------------------------------------
 !*    1.      calculate entrainment and detrainment rates
 ! -------------------------------------------------------
@@ -3719,25 +3800,34 @@ contains
         end do
       return
       end subroutine cubasmcn
-!
 !---------------------------------------------------------
-!  level 4 souroutines  
+!  level 4 subroutines
 !---------------------------------------------------------
       subroutine cuentrn(klon,klev,kk,kcbot,ldcum,ldwork, &
                     pgeoh,pmfu,pdmfen,pdmfde)
        implicit none
-       integer  klon,klev,kk
-       integer  kcbot(klon)
-       logical  ldcum(klon)
-       logical  ldwork
-       real(kind=kind_phys)  pgeoh(klon,klev+1)
-       real(kind=kind_phys)  pmfu(klon,klev) 
-       real(kind=kind_phys)  pdmfen(klon) 
-       real(kind=kind_phys)  pdmfde(klon) 
-       logical  llo1
-       integer  jl
-       real(kind=kind_phys)  zdz , zmf
-       real(kind=kind_phys)  zentr(klon)
+
+!--- input arguments:
+       logical,intent(in):: ldwork
+       integer,intent(in):: klon
+       logical,intent(in),dimension(klon):: ldcum
+
+       integer,intent(in):: klev,kk
+       integer,intent(in),dimension(klon):: kcbot
+
+       real(kind=kind_phys),intent(in),dimension(klon,klev):: pmfu
+       real(kind=kind_phys),intent(in),dimension(klon,klev+1):: pgeoh
+
+!--- output arguments:
+       real(kind=kind_phys),intent(out),dimension(klon):: pdmfen
+       real(kind=kind_phys),intent(out),dimension(klon):: pdmfde
+
+!--- local variables and arrays:
+       logical:: llo1
+       integer:: jl
+       real(kind=kind_phys):: zdz ,zmf
+       real(kind=kind_phys),dimension(klon):: zentr
+
     !
     !* 1. CALCULATE ENTRAINMENT AND DETRAINMENT RATES
     ! -------------------------------------------
@@ -3763,7 +3853,6 @@ contains
       end do
     end if
     end subroutine cuentrn
-!
 !--------------------------------------------------------
 ! external functions
 !------------------------------------------------------
@@ -3777,7 +3866,7 @@ contains
 !               input : tt = temperature
 !
         implicit none
-        real(kind=kind_phys) tt
+        real(kind=kind_phys),intent(in):: tt
          foealfa = min(1.,((max(rtice,min(rtwat,tt))-rtice) &
      &  /(rtwat-rtice))**2)
 
@@ -3786,14 +3875,14 @@ contains
 
       real(kind=kind_phys) function foelhm(tt)
         implicit none
-        real(kind=kind_phys) tt
+        real(kind=kind_phys),intent(in):: tt
         foelhm = foealfa(tt)*alv + (1.-foealfa(tt))*als
       return
       end function foelhm
 
       real(kind=kind_phys) function foeewm(tt)
         implicit none
-        real(kind=kind_phys) tt
+        real(kind=kind_phys),intent(in):: tt
         foeewm  = c2es * &
      &     (foealfa(tt)*exp(c3les*(tt-tmelt)/(tt-c4les))+ &
      &     (1.-foealfa(tt))*exp(c3ies*(tt-tmelt)/(tt-c4ies)))
@@ -3802,7 +3891,7 @@ contains
 
       real(kind=kind_phys) function foedem(tt)
         implicit none
-        real(kind=kind_phys) tt
+        real(kind=kind_phys),intent(in):: tt
         foedem  = foealfa(tt)*r5alvcp*(1./(tt-c4les)**2)+ &
      &              (1.-foealfa(tt))*r5alscp*(1./(tt-c4ies)**2)
       return
@@ -3810,23 +3899,13 @@ contains
 
       real(kind=kind_phys) function foeldcpm(tt)
         implicit none
-        real(kind=kind_phys) tt
+        real(kind=kind_phys),intent(in):: tt
         foeldcpm = foealfa(tt)*ralvdcp+ &
      &        (1.-foealfa(tt))*ralsdcp
       return
       end function  foeldcpm
 
-      real(kind=kind_phys) function foeldcp(tt)
-        implicit none
-        real(kind=kind_phys) tt
-        foeldcp = foedelta(tt)*ralvdcp + (1.-foedelta(tt))*ralsdcp
-      end function foeldcp
+!=================================================================================================================
+ end module cu_ntiedtke
+!=================================================================================================================
 
-      real(kind=kind_phys) function foedelta(tt)
-        implicit none
-        real(kind=kind_phys) tt
-        foedelta = max(0.,sign(1.,tt-tmelt))
-      end function foedelta
-
-end module cu_ntiedtke
-                                                                                         
