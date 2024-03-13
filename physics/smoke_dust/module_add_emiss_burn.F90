@@ -44,7 +44,7 @@ CONTAINS
 !>--local 
    logical, intent(in)  :: add_fire_moist_flux
    integer :: i,j,k,n,m
-   integer :: icall  !=0
+   integer :: icall=0
    real(kind_phys) :: conv_rho, conv, dm_smoke, dc_hwp, dc_gp, dc_fn !daero_num_wfa, daero_num_ifa !, lu_sum1_5, lu_sum12_14
    
    INTEGER, PARAMETER :: kfire_max=51    ! max vertical level for BB plume rise
