@@ -75,8 +75,8 @@
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
       subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,               &
      &     ntiw,ntke,grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,                       &
-     &     garea,zvfun,sigmaf,                                          &
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,usfco,vsfco,icplocn2atm,           &
+     &     swh,hlw,xmu,garea,zvfun,sigmaf,                              &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
@@ -110,6 +110,7 @@
      &                     tdt(:,:),    rtg(:,:,:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(:,:),     v1(:,:),                        &
+     &                     usfco(:),    vsfco(:),                       &
      &                     t1(:,:),     q1(:,:,:),                      &
      &                     swh(:,:),    hlw(:,:),                       &
      &                     xmu(:),       garea(:),                      &
@@ -126,6 +127,7 @@
       real(kind=kind_phys), intent(inout), dimension(:,:,:) :: dtend
       integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
      &       index_of_x_wind, index_of_y_wind, index_of_process_pbl
+      integer, intent(in) :: icplocn2atm
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(:),     dvsfc(:),                      &
      &                     dtsfc(:),     dqsfc(:),                      &
@@ -142,6 +144,7 @@
 !----------------------------------------------------------------------
 !***
 !***  local variables
+      real(kind=kind_phys) spd1_m
 !***
       integer i,is,k,n,ndt,km1,kmpbl,kmscu,ntrac1,idtend
       integer kps,kbx,kmx
@@ -271,7 +274,7 @@
       parameter(elmfac=1.0,elefac=1.0,cql=100.)
       parameter(dw2min=1.e-4,dkmax=1000.,xkgdx=1000.)
       parameter(qlcr=3.5e-5,zstblmax=2500.)
-      parameter(xkinv1=0.15,xkinv2=0.3)
+      parameter(xkinv1=0.4,xkinv2=0.3)
       parameter(h1=0.33333333,hcrinv=250.)
       parameter(vegflo=0.1,vegfup=1.0,z0lo=0.1,z0up=1.0)
       parameter(vc0=1.0,zc0=1.0)
@@ -2376,8 +2379,14 @@ c
          enddo
       enddo
       do i = 1,im
-        dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
-        dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
+        if(icplocn2atm == 0) then
+          dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
+          dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
+        else if (icplocn2atm ==1) then
+          spd1_m=sqrt( (u1(i,1)-usfco(i))**2+(v1(i,1)-vsfco(i))**2 )
+          dusfc(i) = -1.*rho_a(i)*stress(i)*(u1(i,1)-usfco(i))/spd1_m
+          dvsfc(i) = -1.*rho_a(i)*stress(i)*(v1(i,1)-vsfco(i))/spd1_m
+        endif
       enddo
 !
       if(ldiag3d .and. .not. gen_tend) then
