@@ -290,38 +290,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[drain_cpl]
-  standard_name = tendency_of_lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
-  long_name = change in rain_cpl (coupling_type)
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-[dsnow_cpl]
-  standard_name = tendency_of_lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
-  long_name = change in show_cpl (coupling_type)
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-[rain_cpl]
-  standard_name = cumulative_lwe_thickness_of_precipitation_amount_for_coupling
-  long_name = total rain precipitation
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[snow_cpl]
-  standard_name = cumulative_lwe_thickness_of_snow_amount_for_coupling
-  long_name = total snow precipitation
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [lndp_type]
   standard_name = control_for_stochastic_land_surface_perturbation
   long_name = index for stochastic land surface perturbations type

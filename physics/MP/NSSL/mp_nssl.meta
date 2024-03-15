@@ -63,6 +63,101 @@
   dimensions = ()
   type = integer
   intent = in
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[qc]
+  standard_name = cloud_liquid_water_mixing_ratio
+  long_name = cloud water mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_dimension ,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[qr]
+  standard_name = rain_mixing_ratio
+  long_name = rain water mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[qi]
+  standard_name = cloud_ice_mixing_ratio
+  long_name = ice water mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[qs]
+  standard_name = snow_mixing_ratio
+  long_name = snow water mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[qh]
+  standard_name = graupel_mixing_ratio
+  long_name = graupel mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[ccw]
+  standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air
+  long_name = cloud droplet number concentration
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[crw]
+  standard_name = mass_number_concentration_of_rain_water_in_air
+  long_name = rain number concentration
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[cci]
+  standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air
+  long_name = ice number concentration
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[csw]
+  standard_name = mass_number_concentration_of_snow_in_air
+  long_name = snow number concentration
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[chw]
+  standard_name = mass_number_concentration_of_graupel_in_air
+  long_name = graupel number concentration
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[vh]
+  standard_name = graupel_volume
+  long_name = graupel particle volume
+  units = m3 kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration

@@ -15,6 +15,7 @@ module mp_nssl
 
     private
     logical :: is_initialized = .False.
+    logical :: missing_vars_global = .False.
     real :: nssl_qccn
 
     contains
@@ -26,7 +27,9 @@ module mp_nssl
 !! \htmlinclude mp_nssl_init.html
 !!
     subroutine mp_nssl_init(ncol, nlev, errflg, errmsg, threads, restart, &
-                              mpirank, mpiroot,                           &
+                              mpirank, mpiroot,mpicomm,                   &
+                              qc, qr, qi, qs, qh,                         &
+                              ccw, crw, cci, csw, chw, vh,                &
                               con_g, con_rd, con_cp, con_rv,              &
                               con_t0c, con_cliq, con_csol, con_eps,       &
                               imp_physics, imp_physics_nssl,              &
@@ -36,6 +39,9 @@ module mp_nssl
                               
 
         use module_mp_nssl_2mom, only: nssl_2mom_init, nssl_2mom_init_const
+#ifdef MPI 
+        use mpi
+#endif
 
         implicit none
 
@@ -50,16 +56,32 @@ module mp_nssl
 
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
+         integer,                   intent(in)    :: mpicomm
          integer,                   intent(in)    :: imp_physics
          integer,                   intent(in)    :: imp_physics_nssl
          real(kind_phys),           intent(in)    :: nssl_cccn, nssl_alphah, nssl_alphahl
          real(kind_phys),           intent(in)    :: nssl_alphar, nssl_ehw0, nssl_ehlw0
          logical,                   intent(in)    :: nssl_ccn_on, nssl_hail_on, nssl_invertccn, nssl_3moment
 
+         real(kind_phys),           intent(inout) :: qc (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qr (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qi (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qs (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qh (:,:) !(1:ncol,1:nlev) graupel
+         real(kind_phys),           intent(inout) :: ccw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: crw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: cci(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: csw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: chw(:,:) !(1:ncol,1:nlev) graupel number 
+         real(kind_phys),           intent(inout) :: vh (:,:) !(1:ncol,1:nlev) graupel volume 
+
          ! Local variables: dimensions used in nssl_init
          integer               :: ims,ime, jms,jme, kms,kme, nx, nz, i,k
-         real :: nssl_params(20)
+         real(kind_phys) :: nssl_params(20)
          integer :: ihailv,ipc
+         real(kind_phys), parameter :: qmin = 1.e-12
+         integer :: ierr
+         logical :: missing_vars = .False.
          
 
  ! Initialize the CCPP error handling variables
@@ -143,6 +165,19 @@ module mp_nssl
 
          ! For restart runs, the init is done here
          if (restart) then
+
+          ! For restart, check if the IC is from a different scheme that does not have all the needed variables
+          missing_vars = .False.
+          IF ( Any( qc > qmin .and. ccw == 0.0 ) ) missing_vars = .true.
+          IF ( .not. missing_vars .and. Any( qi > qmin .and. cci == 0.0 ) ) missing_vars = .true.
+          IF ( .not. missing_vars .and. Any( qs > qmin .and. csw == 0.0 ) ) missing_vars = .true.
+          IF ( .not. missing_vars .and. Any( qr > qmin .and. crw == 0.0 ) ) missing_vars = .true.
+          IF ( .not. missing_vars .and. Any( qh > qmin .and. (chw == 0.0 .or. vh == 0.0) ) ) missing_vars = .true.
+          
+#ifdef MPI 
+          call MPI_Allreduce(missing_vars, missing_vars_global, 1, MPI_LOGICAL, MPI_LOR, mpicomm, ierr)
+#endif
+
            is_initialized = .true.
            return
          end if
@@ -312,13 +347,14 @@ module mp_nssl
                             its,ite, jts,jte, kts,kte, i,j,k
          integer :: itimestep ! timestep counter
          integer :: ntmul, n
-         real, parameter    :: dtpmax = 60. ! allow up to dt=75 (1.25*60)
+         real(kind_phys), parameter    :: dtpmax = 60. ! allow up to dt=75 (1.25*60)
          real(kind_phys)    :: dtptmp
          integer, parameter :: ndebug = 0
          logical :: invertccn
-         real :: cwmas
+         real(kind_phys) :: cwmas
          
          real(kind_phys), allocatable :: an(:,:,:,:) ! temporary scalar array
+         
 
 
         errflg = 0
@@ -529,8 +565,8 @@ module mp_nssl
            dtptmp = dtp
            ntmul = 1
         ENDIF
-        
-        IF ( first_time_step .and. .not. restart ) THEN
+
+        IF ( first_time_step .and. ( .not. restart .or. missing_vars_global ) ) THEN
           itimestep = 0 ! gets incremented to 1 in call loop
           IF ( nssl_ccn_on ) THEN
             IF ( invertccn ) THEN

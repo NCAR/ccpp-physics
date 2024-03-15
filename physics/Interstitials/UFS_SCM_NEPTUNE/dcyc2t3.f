@@ -44,7 +44,7 @@
 !      input/output:                                                    !
 !            dtdt,dtdtnp,                                               !
 !      outputs:                                                         !
-!            adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,                   !
+!            adjsfcdsw,adjsfcnsw,adjsfcdlw,                             !
 !            adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       !
 !            adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   !
 !            adjdnnbmd,adjdnndfd,adjdnvbmd,adjdnvdfd)                   !
@@ -181,7 +181,7 @@
 !  ---  input/output:
      &       dtdt,dtdtnp,htrlw,                                         &
 !  ---  outputs:
-     &       adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,                   &
+     &       adjsfcdsw,adjsfcnsw,adjsfcdlw,                             &
      &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
      &       adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   &
      &       adjnirbmd,adjnirdfd,adjvisbmd,adjvisdfd,                   &
@@ -242,7 +242,7 @@
 
 !  ---  outputs:
       real(kind=kind_phys), dimension(:), intent(out) ::                &
-     &      adjsfcdsw, adjsfcnsw, adjsfcdlw, adjsfculw, xmu, xcosz,     &
+     &      adjsfcdsw, adjsfcnsw, adjsfcdlw, xmu, xcosz,                &
      &      adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                 &
      &      adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd
 
@@ -352,7 +352,7 @@
 
 !     if (lprnt .and. i == ipr) write(0,*)' in dcyc3: dry==',dry(i)
 !    &,' wet=',wet(i),' icy=',icy(i),' tsfc3=',tsfc3(i,:)
-!    &,' sfcemis=',sfcemis(i,:),' adjsfculw=',adjsfculw(i,:)
+!    &,' sfcemis=',sfcemis(i,:)
 !
 
 !>  - normalize by average value over radiation period for daytime.

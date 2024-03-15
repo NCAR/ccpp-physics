@@ -61,8 +61,7 @@
 !!
       subroutine GFS_surface_generic_pre_run (nthreads, im, levs, vfrac, islmsk, isot, ivegsrc, stype, scolor,vtype, slope, &
                           prsik_1, prslk_1, tsfc, phil, con_g, sigmaf, work3, zlvl,                        &
-                          drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, lndp_type, n_var_lndp, sfc_wts,        &
-                          lndp_var_list, lndp_prt_list,                                                    &
+                          lndp_type, n_var_lndp, sfc_wts, lndp_var_list, lndp_prt_list,                    &
                           z01d, zt1d, bexp1d, xlai1d, vegf1d, lndp_vgf,                                    &
                           cplflx, flag_cice, islmsk_cice, slimskin_cpl,                                    &
                           wind, u1, v1, cnvwind, smcwlt2, smcref2, vtype_save, stype_save,scolor_save, slope_save,     &
@@ -87,10 +86,6 @@
         real(kind=kind_phys), dimension(:), intent(inout) :: sigmaf, work3, zlvl
 
         ! Stochastic physics / surface perturbations
-        real(kind=kind_phys), dimension(:),   intent(out) :: drain_cpl
-        real(kind=kind_phys), dimension(:),   intent(out) :: dsnow_cpl
-        real(kind=kind_phys), dimension(:),   intent(in)  :: rain_cpl
-        real(kind=kind_phys), dimension(:),   intent(in)  :: snow_cpl
         integer,                              intent(in)  :: lndp_type, n_var_lndp
         character(len=3),     dimension(:),   intent(in)  :: lndp_var_list
         real(kind=kind_phys), dimension(:),   intent(in)  :: lndp_prt_list

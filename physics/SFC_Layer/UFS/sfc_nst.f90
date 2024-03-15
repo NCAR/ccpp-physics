@@ -26,8 +26,8 @@ contains
   !> \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
   subroutine sfc_nst_run                                          &
        ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,  &  ! --- inputs:
-       pi, tgice, sbc, ps, u1, v1, t1, q1, tref, cm, ch,          &
-       lseaspray, fm, fm10,                                       &
+       pi, tgice, sbc, ps, u1, v1, usfco, vsfco, icplocn2atm, t1, &
+       q1, tref, cm, ch, lseaspray, fm, fm10,                     &
        prsl1, prslki, prsik1, prslk1, wet, use_lake_model, xlon,  &
        sinlat, stress,                                            &
        sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
@@ -84,6 +84,9 @@ contains
     !     im       - integer, horiz dimension                          1    !
     !     ps       - real, surface pressure (pa)                       im   !
     !     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
+    !     usfco, vsfco - real, u/v component of surface current (m/s)  im   !
+    !     icplocn2atm - integer, option to include ocean surface       1    !
+    !                       current in the computation of flux              ! 
     !     t1       - real, surface layer mean temperature ( k )        im   !
     !     q1       - real, surface layer mean specific humidity        im   !
     !     tref     - real, reference/foundation temperature ( k )      im   !
@@ -167,10 +170,12 @@ contains
 
     !  ---  inputs:
     integer, intent(in) :: im, kdt, ipr, nstf_name1, nstf_name4, nstf_name5
+    integer, intent(in) :: icplocn2atm
+  
     real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps, &
          epsm1, rvrdm1, rd, rhw0, sbc, pi, tgice
     real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,  &
-         t1, q1, tref, cm, ch, fm, fm10,                            &
+         usfco, vsfco, t1, q1, tref, cm, ch, fm, fm10,              &
          prsl1, prslki, prsik1, prslk1, xlon, xcosz,                &
          sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, wind
     real (kind=kind_phys), intent(in) :: timestep
@@ -235,6 +240,7 @@ contains
     !     real (kind=kind_phys), parameter :: alps=1.0, bets=1.0, gams=0.2,
     real (kind=kind_phys), parameter :: alps=0.75,bets=0.75,gams=0.15, &
          ws10cr=30., conlf=7.2e-9, consf=6.4e-8
+    real (kind=kind_phys) :: windrel
     !
     !======================================================================================================
     ! Initialize CCPP error handling variables
@@ -311,9 +317,16 @@ contains
 
           !  --- ...  rcp = rho cp ch v
 
-          rch(i)     = rho_a(i) * cp * ch(i) * wind(i)
-          cmm(i)     = cm (i)   * wind(i)
-          chh(i)     = rho_a(i) * ch(i) * wind(i)
+          if (icplocn2atm ==0) then
+            rch(i)     = rho_a(i) * cp * ch(i) * wind(i)
+            cmm(i)     = cm (i)   * wind(i)
+            chh(i)     = rho_a(i) * ch(i) * wind(i)
+          else if (icplocn2atm ==1) then
+            windrel= sqrt( (u1(i)-usfco(i))**2 + (v1(i)-vsfco(i))**2 )
+            rch(i)     = rho_a(i) * cp * ch(i) * windrel
+            cmm(i)     = cm (i)   * windrel
+            chh(i)     = rho_a(i) * ch(i) * windrel
+          endif
 
           !> - Calculate latent and sensible heat flux over open water with tskin.
           !           at previous time step

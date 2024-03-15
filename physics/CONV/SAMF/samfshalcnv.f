@@ -191,7 +191,7 @@ c  physical parameters
       parameter(cinacrmx=-120.,shevf=2.0)
       parameter(dtmax=10800.,dtmin=600.)
       parameter(bb1=4.0,bb2=0.8,csmf=0.2)
-      parameter(tkcrt=2.,cmxfac=15.)
+      parameter(tkcrt=2.,cmxfac=10.)
 !      parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
       parameter(betaw=.03,dxcrtc0=9.e3)
       parameter(h1=0.33333333)

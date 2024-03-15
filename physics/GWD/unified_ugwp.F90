@@ -253,7 +253,7 @@ contains
          cdmbgwd, jdat, xlat, xlat_d, sinlat, coslat, area,                            &
          ugrs, vgrs, tgrs, q1, prsi, prsl, prslk, phii, phil,                          &
          del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis,                &
-         tau_tofd, tau_mtb, tau_ogw, tau_ngw, zmtb, zlwb, zogw,                        &
+         tau_tofd, tau_mtb, tau_ogw, tau_ngw,                                          &
          dudt_mtb, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,                          &
          dudt, dvdt, dtdt, rdxzb, con_g, con_omega, con_pi, con_cp, con_rd, con_rv,    &
          con_rerth, con_fvirt, rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                &
@@ -309,7 +309,7 @@ contains
       &                                     slmsk(:)
 
     real(kind=kind_phys),    intent(out), dimension(:)          :: dusfcg, dvsfcg
-    real(kind=kind_phys),    intent(out), dimension(:)          :: zmtb, zlwb, zogw, rdxzb
+    real(kind=kind_phys),    intent(out), dimension(:)          :: rdxzb
     real(kind=kind_phys),    intent(out), dimension(:)          :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: gw_dudt, gw_dvdt, gw_dtdt, gw_kdis
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: dudt_mtb, dudt_tms

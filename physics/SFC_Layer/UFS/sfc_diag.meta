@@ -124,6 +124,29 @@
   type = real
   kind = kind_phys
   intent = in
+[usfco]
+  standard_name = x_ocean_current
+  long_name = zonal current at ocean surface
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[vsfco]
+  standard_name = y_ocean_current
+  long_name = meridional current at ocean surface
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[icplocn2atm]
+  standard_name = control_for_air_sea_flux_computation_over_water
+  long_name = air-sea flux option
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
 [t1]
   standard_name = air_temperature_at_surface_adjacent_layer
   long_name = 1st model layer air temperature
