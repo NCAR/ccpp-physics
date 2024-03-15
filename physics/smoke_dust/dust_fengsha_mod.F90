@@ -21,8 +21,8 @@ module dust_fengsha_mod
 contains
 
   subroutine gocart_dust_fengsha_driver(dt,              &
-       chem,rho_phy,smois,p8w,ssm,                       &
-       isltyp,snowh,xland,area,g,emis_dust, &
+       chem,rho_phy,smois,stemp,p8w,ssm,                 &
+       isltyp,snowh,xland,area,g,emis_dust,              &
        ust,znt,clay,sand,rdrag,uthr,                     &
        num_emis_dust,num_chem,num_soil_layers,           &
        ids,ide, jds,jde, kds,kde,                        &
@@ -54,7 +54,7 @@ contains
     REAL(kind_phys), DIMENSION( ims:ime , kms:kme , jms:jme ), INTENT(IN) :: rho_phy
     REAL(kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme, num_chem ), INTENT(INOUT) :: chem
     REAL(kind_phys), DIMENSION( ims:ime, 1, jms:jme,num_emis_dust),OPTIONAL, INTENT(INOUT) :: emis_dust
-    REAL(kind_phys), DIMENSION( ims:ime, num_soil_layers, jms:jme ), INTENT(IN) :: smois
+    REAL(kind_phys), DIMENSION( ims:ime, num_soil_layers, jms:jme ), INTENT(IN) :: smois, stemp
 
     !0d input variables 
     REAL(kind_phys), INTENT(IN) :: dt ! time step
@@ -143,6 +143,11 @@ contains
 
              ! limit where there is snow on the ground
              if (snowh(i,j) .gt. 0) then
+                ilwi = 0
+             endif
+
+             ! Don't emit over frozen soil
+             if (stemp(i,1,j) < 268.0) then ! -5C
                 ilwi = 0
              endif
 

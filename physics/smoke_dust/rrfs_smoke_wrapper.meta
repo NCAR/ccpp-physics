@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrfs_smoke_wrapper
   type = scheme
-  dependencies =  ../hooks/machine.F,dep_dry_simple_mod.F90,module_wetdep_ls.F90,dust_data_mod.F90,dust_fengsha_mod.F90,module_add_emiss_burn.F90,module_plumerise.F90,module_smoke_plumerise.F90,module_zero_plumegen_coms.F90,plume_data_mod.F90,rrfs_smoke_config.F90,seas_data_mod.F90,seas_mod.F90,seas_ngac_mod.F90,coarsepm_settling_mod.F90, dep_dry_mod_emerson.F90,dep_data_mod.F90
+  dependencies = dep_dry_simple_mod.F90,module_wetdep_ls.F90,dust_data_mod.F90,dust_fengsha_mod.F90,module_add_emiss_burn.F90,module_plumerise.F90,module_smoke_plumerise.F90,module_zero_plumegen_coms.F90,rrfs_smoke_config.F90,seas_data_mod.F90,seas_mod.F90,seas_ngac_mod.F90,coarsepm_settling_mod.F90, dep_dry_mod_emerson.F90,dep_data_mod.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -68,6 +68,13 @@
   standard_name = smoke_plumerise_frequency
   long_name = rrfs smoke add smoke option
   units = min
+  dimensions = ()
+  type = integer
+  intent = in
+[n_dbg_lines_in]
+  standard_name = smoke_debug_lines
+  long_name = rrfs smoke add smoke option
+  units = index
   dimensions = ()
   type = integer
   intent = in
@@ -406,6 +413,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[tslb]
+  standard_name = soil_temperature_for_land_surface_model
+  long_name = soil temperature for land surface model
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil_internal_to_land_surface_scheme)
+  type = real
+  kind = kind_phys
+  intent = in
 [vegtype_dom]
   standard_name = vegetation_type_classification
   long_name = vegetation type at each grid cell
@@ -715,6 +730,13 @@
   type = real
   kind = kind_phys
   intent = inout
+[fire_type_out]
+  standard_name = fire_type
+  long_name = type of fire
+  units = 1
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
 [ebu_smoke]
   standard_name = ebu_smoke
   long_name = buffer of vertical fire emission
@@ -743,6 +765,43 @@
   standard_name = maximum_fire_plume_sigma_pressure_level
   long_name = maximum model level of fire plumerise
   units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpirank]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[uspdavg]
+  standard_name = mean_wind_speed_in_boundary_layer
+  long_name = average wind speed within the boundary layer
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[hpbl_thetav]
+  standard_name = atmosphere_boundary_layer_thickness_from_modified_parcel
+  long_name = pbl height based on modified parcel method
+  units = m
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -802,14 +861,30 @@
   type = real
   kind = kind_phys
   intent = inout
-[fire_in]
-  standard_name = smoke_fire_auxiliary_input
-  long_name = smoke fire auxiliary input variables
-  units = various
-  dimensions = (horizontal_loop_extent,fire_auxiliary_data_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
+[peak_hr_out]
+ standard_name = peak_hr_fire
+ long_name = time_of_peak_fire_emissions
+ units = s
+ dimensions = (horizontal_loop_extent)
+ type = real
+ kind = kind_phys
+ intent = out
+[lu_nofire_out]
+ standard_name = sum_of_land_use_fractions_for_no_fire_pixels
+ long_name = land use of no fire pixels for type
+ units = 1
+ dimensions = (horizontal_loop_extent)
+ type = real
+ kind = kind_phys
+ intent = out
+[lu_qfire_out]
+ standard_name = sum_of_land_use_fractions_for_cropland_fire_pixels
+ long_name = land use of fire pixels for type
+ units = 1
+ dimensions = (horizontal_loop_extent)
+ type = real
+ kind = kind_phys
+ intent = out
 [fire_heat_flux_out]
   standard_name = surface_fire_heat_flux
   long_name = heat flux of fire at the surface

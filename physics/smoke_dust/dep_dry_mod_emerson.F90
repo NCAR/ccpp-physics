@@ -9,7 +9,7 @@ module dep_dry_emerson_mod
 
   use machine ,        only : kind_phys
   use dep_data_mod     ! JLS
-  use rrfs_smoke_config, only : num_chem, p_smoke, p_dust_1, p_coarse_pm
+  use rrfs_smoke_config, only : num_chem, p_smoke, p_dust_1, p_coarse_pm, n_dbg_lines
 
   implicit none
 
@@ -23,7 +23,7 @@ contains
                settling_flag,drydep_flux,settling_flux,dbg_opt,           &
                ids,ide, jds,jde, kds,kde,                                 &
                ims,ime, jms,jme, kms,kme,                                 &
-               its,ite, jts,jte, kts,kte                                  )
+               its,ite, jts,jte, kts,kte, curr_secs, mpiid, xlat, xlong   )
 !
 ! compute dry deposition velocity for aerosol particles
 ! Based on Emerson et al. (2020), PNAS,
@@ -37,6 +37,9 @@ contains
                                    ids,ide, jds,jde, kds,kde,              &
                                    ims,ime, jms,jme, kms,kme,              &
                                    its,ite, jts,jte, kts,kte
+
+       REAL(kind_phys) :: curr_secs
+
        REAL(kind_phys), DIMENSION( ims:ime , jms:jme )        ,            &
            INTENT(IN) :: ustar, rmol, znt, snowh
        REAL(kind_phys), DIMENSION( ims:ime , kms:kme , jms:jme ),          &
@@ -80,6 +83,9 @@ contains
        real(kind_phys), dimension( kts:kte, ndvel ) :: cblk_col, vg_col
        integer, dimension(ndvel) :: ndt_settl
        integer :: i, j, k, ntdt, nv
+       integer :: icall=0
+       integer, INTENT(IN) :: mpiid
+       real(kind_phys), DIMENSION(ims:ime,jms:jme), INTENT(IN) ::  xlat,xlong
  ! chem pointers (p_*) are not sequentially numbered, need to define so nv loops work
        integer, dimension(ndvel) :: chem_pointers
 !> -- Gas constant
@@ -87,11 +93,15 @@ contains
        chem_pointers(1) = p_smoke
        chem_pointers(2) = p_dust_1
        chem_pointers(3) = p_coarse_pm
-  
+
        growth_fac = 1.0
        conver=1.e-9
        converi=1.e9
  
+       if (mod(int(curr_secs),1800) .eq. 0) then
+           icall = 0
+       endif
+
        do j = jts, jte
           do i = its, ite
              aer_res(i,j) = 0.0
@@ -116,7 +126,7 @@ contains
                 aer_res(i,j) = max(aer_res(i,j)/100._kind_phys,0._kind_phys) 
                 ! Air kinematic viscosity (cm^2/s)
                 airkinvisc = ( 1.8325e-4 * ( 416.16 / ( t_phy(i,k,j) + 120.0 ) ) *   &
-                             ( ( t_phy(i,k,j) / 296.16 )**1.5 ) ) / ( rho_phy(i,k,j) / 28.966e3 ) ! Convert density to mol/cm^3
+                             ( ( t_phy(i,k,j) / 296.16 )**1.5 ) ) / ( rho_phy(i,k,j) / 1.e3 ) ! Convert density to mol/cm^3
                 ! Air molecular freepath (cm)  ! Check against XLM from above
                 freepath = 7.39758e-4 * airkinvisc / sqrt( t_phy(i,k,j) )
                 do nv = 1, ndvel
@@ -141,11 +151,11 @@ contains
                    amu_corrected = amu / Cc
                    ! Gravitational Settling
                    vg = aerodens * dp * dp * gravity * 100. * Cc / &       ! Convert gravity to cm/s^2
-                          ( 18. * airkinvisc * ( rho_phy(i,k,j) / 28.966e3 ) ) ! Convert density to mol/cm^3
+                          ( 18. * airkinvisc * ( rho_phy(i,k,j) / 1.e3 ) ) ! Convert density to mol/cm^3
                    ! -- Rest of loop for the surface when deposition velocity needs to be cacluated
                    if ( k == kts ) then
                       ! Brownian Diffusion
-                      DDp = ( boltzmann * t_phy(i,k,j) ) * Cc / (3. * pi * airkinvisc * ( rho_phy(i,k,j) / 28.966e3 )  * dp) ! Convert density to mol/cm^3
+                      DDp = ( boltzmann * t_phy(i,k,j) ) * Cc / (3. * pi * airkinvisc * ( rho_phy(i,k,j) / 1.e3 )  * dp) ! Convert density to mol/cm^3
                       ! Schmit number
                       Sc = airkinvisc / DDp
                       ! Brownian Diffusion
@@ -169,23 +179,23 @@ contains
                          eps0 = eps0_grs
                       end if
                       ! Set if snow greater than 1 cm
-!                      if ( snowh(i,j) .gt. 0.01 ) then ! snow
-!                         A = A_wat
-!                         eps0 = eps0_wat
-!                      endif
                       ! Interception
                       Ein = Cin * ( dp / A )**vv
                       ! Surface resistance
                       Rs = 1. / ( ( ustar(i,j) * 100.) * ( Eb + Eim + Ein) * eps0 ) ! Convert ustar to cm/s
                       ! Compute final ddvel = aer_res + RS, set max at max_dep_vel in dep_data_mod.F[ m/s]
                       ! The /100. term converts from cm/s to m/s, required for MYNN.
-                      ddvel(i,j,nv) = min( (1. / (aer_res(i,j) + Rs ))/100., max_dep_vel)
-                      if ( dbg_opt ) then
-                         WRITE(6,*) 'dry_dep_mod_emerson: i,j,nv',i,j,nv
-                         WRITE(6,*) 'dry_dep_mod_emerson: deposition velocity (m/s) ',ddvel(i,j,nv)
+                      if ( settling_flag == 1 ) then
+                         ddvel(i,j,nv) = max(min( ( vg + 1./(aer_res(i,j)+Rs) )/100., max_dep_vel),0._kind_phys)
+                      else
+                         ddvel(i,j,nv) = max(min( ( 1./(aer_res(i,j)+Rs) )/100., max_dep_vel),0._kind_phys)
                       endif
-                      drydep_flux(i,j,nv) = chem(i,kts,j,chem_pointers(nv))*p_phy(i,kts,j) / &
-                                            (RSI*t_phy(i,kts,j))*ddvel(i,j,nv)*dt*1.E-6 
+                      if ( dbg_opt .and. (icall .le. n_dbg_lines) ) then
+                         WRITE(1000+mpiid,*) 'dry_dep_mod_emer:xlat,xlong,curr_secs,nv',xlat(i,j),xlong(i,j),int(curr_secs),nv
+                         WRITE(1000+mpiid,*) 'dry_dep_mod_emer:xlat,xlong,curr_secs,deposition velocity (m/s)',xlat(i,j),xlong(i,j),int(curr_secs),ddvel(i,j,nv)
+                         icall = icall + 1
+                      endif
+                      drydep_flux(i,j,nv) = chem(i,kts,j,chem_pointers(nv))*rho_phy(i,k,j)*ddvel(i,j,nv)/100.0*dt
                    endif ! k == kts
                    vgrav(i,k,j,nv) = vg
                    ! Fill column variables
@@ -220,25 +230,15 @@ contains
                IF (ndt_settl(nv) > 12) ndt_settl(nv) = 12 
                dt_settl(nv) = REAL(ntdt,kind=kind_phys) /REAL(ndt_settl(nv),kind=kind_phys)
              enddo
-             do nv = 1, ndvel
-               chem_before(nv) = 0._kind_phys
-               do k = kts, kte
-                chem_before(nv) = chem_before(nv) + (cblk_col(k,nv) * rho_phy(i,k,j) * delz(i,k,j) ) ! ug/m2
-              enddo
-             enddo
              ! Perform gravitational settling if desired
              if ( settling_flag == 1 ) then
                 call particle_settling(cblk_col,rho_col,delz_col,vg_col,dt_settl,ndt_settl,ndvel,kts,kte)
              endif
              ! Put cblk back into chem array
              do nv= 1, ndvel
-                chem_after(nv) = 0._kind_phys
-                settling_flux(i,j,nv) = 0._kind_phys
                 do k = kts, kte
                    chem(i,k,j,chem_pointers(nv)) = cblk_col(k,nv)
-                   chem_after(nv) = chem_after(nv) + (cblk_col(k,nv) * rho_phy(i,k,j) * delz(i,k,j) ) ! ug/m2
                 enddo ! k
-                settling_flux(i,j,nv) = settling_flux(i,j,nv) + (chem_before(nv) - chem_after(nv))    ! ug/m2
              enddo ! nv
         end do ! j
         end do ! i
