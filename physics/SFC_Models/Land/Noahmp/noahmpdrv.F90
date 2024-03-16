@@ -12,6 +12,9 @@
       module noahmpdrv
 
       use module_sf_noahmplsm
+      ! 3.5.24 for use in IAU
+      use lnd_iau_mod,  only: lnd_iau_control_type, lnd_iau_external_data_type,&
+                              lnd_iau_mod_set_control, lnd_iau_mod_init,lnd_iau_mod_getiauforcing 
 
       implicit none
 
@@ -20,6 +23,10 @@
       private
 
       public :: noahmpdrv_init, noahmpdrv_run
+ 
+      ! IAU data and control
+      type (lnd_iau_control_type)                  :: LND_IAU_Control
+      type (lnd_iau_external_data_type)            :: LND_IAU_Data      !(number of blocks):each proc holds nblks
 
       contains
 
@@ -29,29 +36,46 @@
 !! \section arg_table_noahmpdrv_init Argument Table
 !! \htmlinclude noahmpdrv_init.html
 !!
-      subroutine noahmpdrv_init(lsm, lsm_noahmp, me, isot, ivegsrc, &
-                                nlunit, pores, resid,               &
-                                do_mynnsfclay,do_mynnedmf,          &
-                                errmsg, errflg)
+      subroutine noahmpdrv_init(lsm, lsm_noahmp, me,               & 
+                                isot, ivegsrc,                     &
+                                nlunit, pores, resid,              &
+                                do_mynnsfclay,do_mynnedmf,         &
+                                errmsg, errflg,                    &
+                                mpi_root,                                &
+                                fn_nml, input_nml_file, isc, jsc, ncols, nx, ny, nblks,     &
+                                blksz, xlon, xlat,                             &     
+                                lsoil, lsnow_lsm, dtp, fhour)
 
         use machine,          only: kind_phys
         use set_soilveg_mod,  only: set_soilveg
         use namelist_soilveg
         use noahmp_tables
+        !use GFS_typedefs, only: GFS_control_type
+        ! use GFS_typedefs, only: GFS_data_type
 
         implicit none
+
         integer,              intent(in) :: lsm
         integer,              intent(in) :: lsm_noahmp    
-        integer,              intent(in)  :: me, isot, ivegsrc, nlunit
-
+        integer,              intent(in) :: me         !  mpi_rank
+        integer,              intent(in) :: isot, ivegsrc, nlunit
         real (kind=kind_phys), dimension(:), intent(out) :: pores, resid
-
         logical,              intent(in) :: do_mynnsfclay
         logical,              intent(in) :: do_mynnedmf
-
-
         character(len=*),     intent(out) :: errmsg
         integer,              intent(out) :: errflg
+        ! land iau mod
+        integer,                       intent(in) :: mpi_root   ! = GFS_Control%master        
+        character(*),                  intent(in) :: fn_nml
+        character(len=:), intent(in), dimension(:), pointer :: input_nml_file 
+        integer,                       intent(in) :: isc, jsc, ncols, nx, ny, nblks      !=GFS_Control%ncols, %nx, %ny, nblks
+        integer, dimension(:),         intent(in) :: blksz   !(one:) !GFS_Control%blksz
+        real(kind_phys), dimension(:), intent(in) :: xlon    ! longitude !GFS_Data(cdata%blk_no)%Grid%xlon
+        real(kind_phys), dimension(:), intent(in) :: xlat    ! latitude
+        integer,                       intent(in) :: lsoil, lsnow_lsm
+        real(kind=kind_phys),          intent(in) :: dtp, fhour
+        ! type(gfs_data_type), dimension(:), intent(inout)          :: GFS_Data ! !(one:)
+        !type(gfs_control_type), intent(in)          :: GFS_Control
 
         ! Initialize CCPP error handling variables
         errmsg = ''
@@ -85,7 +109,6 @@
           return
         end if
 
-
         !--- initialize soil vegetation
         call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
@@ -100,6 +123,18 @@
 
         pores (:) = maxsmc (:)
         resid (:) = drysmc (:)
+
+        ! 3.7.24 init iau for land
+        call lnd_iau_mod_set_control(LND_IAU_Control, fn_nml, input_nml_file, me, mpi_root, isc,jsc, nx, ny, nblks, blksz,  &
+                                     lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)
+!        print*, 'proc errmsg, errflg after set control', me, errmsg, errflg
+!        print*, 'proc iau_control isc, nx, dtp fhour', me, LND_IAU_Control%isc, LND_IAU_Control%nx, &
+!                LND_IAU_Control%dtp, LND_IAU_Control%fhour
+!        print*, 'proc iau_control incfiles(1)', me, LND_IAU_Control%iau_inc_files(1)
+!        stop
+        call lnd_iau_mod_init (LND_IAU_Control, LND_IAU_Data, xlon, xlat, errmsg, errflg)
+       !print*, 'proc errmsg, errflg interval after lnd_iau_init ', me,trim(errmsg), errflg, LND_IAU_Data%in_interval
+        print*, 'proc nblks blksize(1) after set init', me,LND_IAU_Control%nblks, LND_IAU_Control%blksz(1)  
 
       end subroutine noahmpdrv_init
 
@@ -127,7 +162,7 @@
   subroutine noahmpdrv_run                                       &
 !...................................
 !  ---  inputs:
-    ( im, km, lsnowl, itime, ps, u1, v1, t1, q1, soiltyp,soilcol,&
+    (nb, im, km, lsnowl, itime, fhour,  ps, u1, v1, t1, q1, soiltyp,soilcol,&
       vegtype, sigmaf, dlwflx, dswsfc, snet, delt, tg3, cm, ch,  &
       prsl1, prslk1, prslki, prsik1, zf,pblh, dry, wind, slopetyp,&
       shdmin, shdmax, snoalb, sfalb, flag_iter,con_g,            &
@@ -136,7 +171,7 @@
       iopt_trs,iopt_diag,xlatin, xcoszin, iyrlen, julian, garea, &
       rainn_mp, rainc_mp, snow_mp, graupel_mp, ice_mp, rhonewsn1,&
       con_hvap, con_cp, con_jcal, rhoh2o, con_eps, con_epsm1,    &
-      con_fvirt, con_rd, con_hfus, thsfc_loc, cpllnd, cpllnd2atm,&
+      con_fvirt, con_rd, con_hfus, thsfc_loc,                    &
 
 !  ---  in/outs:
       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
@@ -229,10 +264,12 @@
 !  ---  CCPP interface fields (in call order)
 !
 
+  integer                                , intent(in)    :: nb         !=cdata%blk_no, 
   integer                                , intent(in)    :: im         ! horiz dimension and num of used pts
   integer                                , intent(in)    :: km         ! vertical soil layer dimension
   integer                                , intent(in)    :: lsnowl     ! lower bound for snow level arrays
-  integer                                , intent(in)    :: itime      ! NOT USED
+  integer                                , intent(in)    :: itime      ! NOT USED current forecast iteration
+  real(kind=kind_phys)                   , intent(in)    :: fhour      ! currentforecast time (hr)
   real(kind=kind_phys), dimension(:)     , intent(in)    :: ps         ! surface pressure [Pa]
   real(kind=kind_phys), dimension(:)     , intent(in)    :: u1         ! u-component of wind [m/s]
   real(kind=kind_phys), dimension(:)     , intent(in)    :: v1         ! u-component of wind [m/s]
@@ -309,9 +346,6 @@
   real(kind=kind_phys)                   , intent(in)    :: con_hfus   ! lat heat H2O fusion  [J/kg]
 
   logical                                , intent(in)    :: thsfc_loc  ! Flag for reference pressure in theta calculation
-
-  logical                                , intent(in)    :: cpllnd     ! Flag for land coupling (atm->lnd)
-  logical                                , intent(in)    :: cpllnd2atm ! Flag for land coupling (lnd->atm)
 
   real(kind=kind_phys), dimension(:)     , intent(inout) :: weasd      ! water equivalent accumulated snow depth [mm]
   real(kind=kind_phys), dimension(:)     , intent(inout) :: snwdph     ! snow depth [mm]
@@ -670,6 +704,13 @@
   logical               :: is_snowing             ! used for penman calculation
   logical               :: is_freeze_rain         ! used for penman calculation
   integer :: i, k
+  
+  ! IAU update
+  real,allocatable :: stc_inc_flat(:,:)   
+  real,allocatable :: slc_inc_flat(:,:) 
+  real,allocatable :: tmp2m_inc_flat(:) 
+  real,allocatable :: spfh2m_inc_flat(:)  
+  integer :: j, ix, ib
       
 !
 !  --- local derived constants:
@@ -686,13 +727,62 @@
 !
   errmsg = ''
   errflg = 0
+  if(LND_IAU_Control%me == LND_IAU_Control%mpi_root) then 
+    print*,"nb ",nb," itime ",itime," GFScont%fhour ",fhour," iauCon%fhour",LND_IAU_Control%fhour," delt ",delt," iauCont%dtp",LND_IAU_Control%dtp
+  endif
+  ! 3.7.24 read iau increments 
+  call lnd_iau_mod_getiauforcing(LND_IAU_Control, LND_IAU_Data, errmsg, errflg) 
+  if (errflg .ne. 0) return
+  ! update with iau increments
+  if (LND_IAU_Data%in_interval) then
+    if (LND_IAU_Control%lsoil .ne. km) then
+      write(errmsg, *)'in noahmpdrv_run, lnd_iau_mod update increments:LND_IAU_Control%lsoil ',LND_IAU_Control%lsoil,' not equal to km ',km
+      errflg = 1
+      return
+    endif
+    ! LND_IAU_Data%stc_inc(is:ie, js:je, km))  size of (nx, ny)
+    ! xlatin(im) stc(im,km) slc() t2mmp(:) q2mp(im) km=n_soill, im =
+    ! GFS_Control%blksz(cdata%blk_no)
+    ! >> need to get (cdata%blk_no from function call 
 
-!
-!  --- Just return if external land component is activated for two-way interaction
-!
-  if (cpllnd .and. cpllnd2atm) return
+    ! local variable to copy blocked data LND_IAU_Data%stc_inc
+    allocate(stc_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny, km))  !GFS_Control%ncols
+    allocate(slc_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny, km))  !GFS_Control%ncols
+    allocate(tmp2m_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny))  !GFS_Control%ncols
+    allocate(spfh2m_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny))  !GFS_Control%ncols
+    ib = 1
+    do j = 1, LND_IAU_Control%ny  !ny 
+      do k = 1, km    
+        stc_inc_flat(ib:ib+LND_IAU_Control%nx-1, k) = LND_IAU_Data%stc_inc(:,j,k)  
+        slc_inc_flat(ib:ib+LND_IAU_Control%nx-1, k) = LND_IAU_Data%slc_inc(:,j,k) 
+      enddo
+    ! ib = 1
+    ! do j = 1, LND_IAU_Control%ny  !ny
+      tmp2m_inc_flat(ib:ib+LND_IAU_Control%nx-1) = LND_IAU_Data%tmp2m_inc(:,j,1)  
+      spfh2m_inc_flat(ib:ib+LND_IAU_Control%nx-1) = LND_IAU_Data%spfh2m_inc(:,j,1) 
+      ib = ib + LND_IAU_Control%nx  !nlon    
+    enddo
 
-  do i = 1, im
+    !IAU increments are in units of 1/sec     !LND_IAU_Control%dtp
+    ! delt=GFS_Control%dtf
+    if ((LND_IAU_Control%dtp - delt) > 0.0001) then 
+      if(LND_IAU_Control%me == LND_IAU_Control%mpi_root) then 
+        print*, "Warning time step used in noahmpdrv_run delt ",delt," different from LND_IAU_Control%dtp ",LND_IAU_Control%dtp
+      endif
+    endif
+    do k = 1, km 
+    stc(:,k)=stc(:,k)+stc_inc_flat(LND_IAU_Control%blk_strt_indx(nb):LND_IAU_Control%blk_strt_indx(nb)+im-1, k)*delt !LND_IAU_Control%dtp
+    slc(:,k)=slc(:,k)+slc_inc_flat(LND_IAU_Control%blk_strt_indx(nb):LND_IAU_Control%blk_strt_indx(nb)+im-1, k)*delt !LND_IAU_Control%dtp    
+    enddo
+    t2mmp = t2mmp+tmp2m_inc_flat(LND_IAU_Control%blk_strt_indx(nb):LND_IAU_Control%blk_strt_indx(nb)+im-1)*delt !LND_IAU_Control%dtp   
+    q2mp = q2mp +spfh2m_inc_flat(LND_IAU_Control%blk_strt_indx(nb):LND_IAU_Control%blk_strt_indx(nb)+im-1)*delt !LND_IAU_Control%dtp 
+
+    deallocate(stc_inc_flat, slc_inc_flat, tmp2m_inc_flat, spfh2m_inc_flat)
+  
+  end if  
+
+
+do i = 1, im
 
     if (flag_iter(i) .and. dry(i)) then
 
