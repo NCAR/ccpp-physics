@@ -15,6 +15,9 @@ module maximum_hourly_diagnostics
    real(kind=kind_phys), parameter ::PQ0=379.90516E0, A2A=17.2693882, A3=273.16, A4=35.86, RHmin=1.0E-6
    ! *DH
 
+   ! Conversion from flashes per five minutes to flashes per minute.
+   real(kind=kind_phys), parameter :: scaling_factor = 0.2
+
 contains
 
 #if 0
@@ -195,7 +198,10 @@ contains
                       endif
                       
                       IF ( ltg1 .LT. clim1 ) ltg1 = 0.
-                      
+
+                      ! Scale to flashes per minue
+                      ltg1 = ltg1 * scaling_factor
+
                       IF ( ltg1 .GT. ltg1_max(i) ) THEN
                          ltg1_max(i) = ltg1
                       ENDIF
@@ -208,14 +214,19 @@ contains
              ltg2 = coef2 * totice_colint(i)
 
              IF ( ltg2 .LT. clim2 ) ltg2 = 0.
+
+             ! Scale to flashes per minute
+             ltg2 = ltg2 * scaling_factor
              
              IF ( ltg2 .GT. ltg2_max(i) ) THEN
                 ltg2_max(i) = ltg2
              ENDIF
 
+             ! This calculation is already in flashes per minute.
              ltg3_max(i) = 0.95 * ltg1_max(i) + 0.05 * ltg2_max(i)
 
-             IF ( ltg3_max(i) .LT. clim3 ) ltg3_max(i) = 0.
+             ! Thus, we must scale clim3. The compiler will optimize this away.
+             IF ( ltg3_max(i) .LT. clim3 * scaling_factor ) ltg3_max(i) = 0.
           enddo
 
        end subroutine lightning_threat_indices
