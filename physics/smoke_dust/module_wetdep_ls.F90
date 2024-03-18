@@ -31,10 +31,17 @@ subroutine wetdep_ls(dt,var,rain,moist,                                         
    real(kind_phys) :: dvar,factor,clsum
    integer :: nv,i,j,k,km,kb,kbeg
   !real(kind_phys), parameter :: alpha = .5 ! scavenging factor
+   integer, save :: print_alpha = 0
 
     wetdpr_smoke   =0.
     wetdpr_dust    =0.
     wetdpr_coarsepm=0.
+
+    !if ( print_alpha == 0 ) then
+    !   write(*,*) 'wetdep_ls, alpha = ',alpha
+    !   print_alpha = print_alpha + 1
+    !endif
+
 
     do nv=1,nchem
       do i=its,ite
@@ -76,11 +83,11 @@ subroutine wetdep_ls(dt,var,rain,moist,                                         
             dvar=alpha*factor/(1+factor)*var(i,k,j,nv)
 ! Accumulate diags
             if (nv .eq. p_smoke ) then
-               wetdpr_smoke(i,j) = wetdpr_smoke(i,j) + dvar * rho(i,k,j) * dt * 1.E-6 
+               wetdpr_smoke(i,j) = wetdpr_smoke(i,j) + dvar * rho(i,k,j) / dt
             elseif (nv .eq. p_dust_1 ) then
-               wetdpr_dust(i,j) = wetdpr_dust(i,j) + dvar * rho(i,k,j) * dt * 1.E-6
+               wetdpr_dust(i,j) = wetdpr_dust(i,j) + dvar * rho(i,k,j) / dt
             elseif (nv .eq. p_coarse_pm ) then
-               wetdpr_coarsepm(i,j) = wetdpr_coarsepm(i,j) + dvar * rho(i,k,j) * dt * 1.E-6
+               wetdpr_coarsepm(i,j) = wetdpr_coarsepm(i,j) + dvar * rho(i,k,j) / dt
             endif
             var(i,k,j,nv)=max(1.e-16,var(i,k,j,nv)-dvar)
           endif

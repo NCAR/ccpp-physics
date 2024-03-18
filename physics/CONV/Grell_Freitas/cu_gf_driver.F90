@@ -68,7 +68,7 @@ contains
                dfi_radar_max_intervals,ldiag3d,qci_conv,do_cap_suppress,        &
                maxupmf,maxMF,do_mynnedmf,ichoice_in,ichoicem_in,ichoice_s_in,   &
                spp_cu_deep,spp_wts_cu_deep,nchem,chem3d,fscav,wetdpc_deep,      &
-               do_smoke_transport,errmsg,errflg)
+               do_smoke_transport,kdt,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -95,7 +95,7 @@ contains
       integer            :: ishallow_g3 ! depend on imfshalcnv
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte
-   integer, intent(in   ) :: im,km,ntracer, nchem
+   integer, intent(in   ) :: im,km,ntracer,nchem,kdt
    integer, intent(in   ) :: ichoice_in,ichoicem_in,ichoice_s_in
    logical, intent(in   ) :: flag_init, flag_restart, do_mynnedmf
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
@@ -766,7 +766,7 @@ contains
                                ! betwee -1 and +1
               ,do_cap_suppress_here,cap_suppress_j &
               ,k22m          &
-              ,jminm,tropics)
+              ,jminm,kdt,tropics)
 !$acc kernels
             do i=its,itf
              do k=kts,ktf
@@ -853,7 +853,7 @@ contains
                                ! betwee -1 and +1
               ,do_cap_suppress_here,cap_suppress_j &
               ,k22          &
-              ,jmin,tropics)
+              ,jmin,kdt,tropics)
           jpr=0
           ipr=0
 !$acc kernels

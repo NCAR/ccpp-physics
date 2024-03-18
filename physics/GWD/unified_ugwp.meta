@@ -900,30 +900,6 @@
   type = real
   kind = kind_phys
   intent = out
-[zmtb]
-  standard_name = height_of_mountain_blocking
-  long_name = height of mountain blocking drag
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-[zlwb]
-  standard_name = height_of_low_level_wave_breaking
-  long_name = height of low level wave breaking
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-[zogw]
-  standard_name = height_of_launch_level_of_orographic_gravity_wave
-  long_name = height of launch level of orographic gravity wave
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
 [dudt_mtb]
   standard_name = instantaneous_change_in_x_wind_due_to_mountain_blocking_drag
   long_name = instantaneous change in x wind due to mountain blocking drag
