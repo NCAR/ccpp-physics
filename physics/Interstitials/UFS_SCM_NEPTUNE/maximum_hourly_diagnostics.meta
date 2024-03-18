@@ -296,7 +296,7 @@
 [ltg1_max]
   standard_name = lightning_threat_index_1
   long_name = lightning threat index 1
-  units = flashes 5 min-1
+  units = flashes min-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -304,7 +304,7 @@
 [ltg2_max]
   standard_name = lightning_threat_index_2
   long_name = lightning threat index 2
-  units = flashes 5 min-1
+  units = flashes min-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -312,7 +312,7 @@
 [ltg3_max]
   standard_name = lightning_threat_index_3
   long_name = lightning threat index 3
-  units = flashes 5 min-1
+  units = flashes min-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
