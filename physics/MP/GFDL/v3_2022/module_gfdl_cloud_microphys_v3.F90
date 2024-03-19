@@ -1,4 +1,4 @@
-!>\file module_gfdl_cld_mp.F90
+!>\file module_gfdl_cloud_microphys_v3.F90
 !! This file contains the entity of GFDL MP scheme Version 3.
 
 !***********************************************************************
@@ -35,8 +35,8 @@
 ! Version 3: Zhou et al. (2022 doi: 10.1029/2021MS002971)
 ! =======================================================================
 
-module module_gfdl_cld_mp
-
+module module_gfdl_cloud_microphys_v3
+  use module_gfdlmp_param, only: cfg
     implicit none
 
     private
@@ -78,9 +78,9 @@ module module_gfdl_cld_mp
     ! public subroutines, functions, and variables
     ! -----------------------------------------------------------------------
 
-    public :: module_gfdl_cld_mp_init
-    public :: module_gfdl_cld_mp_driver
-    public :: module_gfdl_cld_mp_end
+    public :: module_gfdl_cloud_microphys_v3_init
+    public :: module_gfdl_cloud_microphys_v3_driver
+    public :: module_gfdl_cloud_microphys_v3_end
     public :: cld_sat_adj, cld_eff_rad, rad_ref
     public :: qs_init, wqs, mqs, mqs3d
     public :: c_liq, c_ice, rhow, wet_bulb
@@ -522,7 +522,6 @@ module module_gfdl_cld_mp
     ! -----------------------------------------------------------------------
     ! namelist
     ! -----------------------------------------------------------------------
-
     namelist / gfdl_mp_nml / &
         t_min, t_sub, tau_r2g, tau_smlt, tau_gmlt, dw_land, dw_ocean, vw_fac, vi_fac, &
         vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vw_max, vi_max, vs_max, &
@@ -561,7 +560,7 @@ contains
 ! GFDL cloud microphysics initialization
 ! =======================================================================
 
-subroutine module_gfdl_cld_mp_init (me, master, nlunit, input_nml_file, logunit, &
+subroutine module_gfdl_cloud_microphys_v3_init (me, master, nlunit, input_nml_file, logunit, &
         fn_nml, hydrostatic, errmsg, errflg)
 
     implicit none
@@ -600,7 +599,7 @@ subroutine module_gfdl_cld_mp_init (me, master, nlunit, input_nml_file, logunit,
     if (.not. exists) then
         write (6, *) 'gfdl - mp :: namelist file: ', trim (fn_nml), ' does not exist'
         errflg = 1
-        errmsg = 'ERROR(module_gfdl_cld_mp_init): namelist file '//trim (fn_nml)//' does not exist'
+        errmsg = 'ERROR(module_gfdl_cloud_microphys_v3_init): namelist file '//trim (fn_nml)//' does not exist'
         return
     else
         open (unit = nlunit, file = fn_nml, action = 'read' , status = 'old', iostat = ios)
@@ -609,6 +608,178 @@ subroutine module_gfdl_cld_mp_init (me, master, nlunit, input_nml_file, logunit,
     read (nlunit, nml = gfdl_mp_nml)
     close (nlunit)
 #endif
+
+    cfg%t_min                = t_min
+    cfg%t_sub                = t_sub
+    cfg%tau_r2g              = tau_r2g
+    cfg%tau_smlt             = tau_smlt
+    cfg%tau_gmlt             = tau_gmlt
+    cfg%dw_land              = dw_land
+    cfg%dw_ocean             = dw_ocean
+    cfg%vw_fac               = vw_fac
+    cfg%vi_fac               = vi_fac
+    cfg%vr_fac               = vr_fac
+    cfg%vs_fac               = vs_fac
+    cfg%vg_fac               = vg_fac
+    cfg%ql_mlt               = ql_mlt
+    cfg%do_qa                = do_qa
+    cfg%fix_negative         = fix_negative
+    cfg%vw_max               = vw_max
+    cfg%vi_max               = vi_max
+    cfg%vs_max               = vs_max
+    cfg%vg_max               = vg_max
+    cfg%vr_max               = vr_max
+    cfg%qs_mlt               = qs_mlt
+    cfg%qs0_crt              = qs0_crt
+    cfg%ql0_max              = ql0_max
+    cfg%qi0_max              = qi0_max
+    cfg%qi0_crt              = qi0_crt
+    cfg%ifflag               = ifflag
+    cfg%rh_inc               = rh_inc
+    cfg%rh_ins               = rh_ins
+    cfg%rh_inr               = rh_inr
+    cfg%const_vw             = const_vw
+    cfg%const_vi             = const_vi
+    cfg%const_vs             = const_vs
+    cfg%const_vg             = const_vg
+    cfg%const_vr             = const_vr
+    cfg%rthresh              = rthresh
+    cfg%ccn_l                = ccn_l
+    cfg%ccn_o                = ccn_o
+    cfg%igflag               = igflag
+    cfg%c_paut               = c_paut
+    cfg%tau_imlt             = tau_imlt
+    cfg%tau_v2l              = tau_v2l
+    cfg%tau_l2v              = tau_l2v
+    cfg%tau_i2s              = tau_i2s
+    cfg%tau_l2r              = tau_l2r
+    cfg%qi_lim               = qi_lim
+    cfg%ql_gen               = ql_gen
+    cfg%do_hail              = do_hail
+    cfg%inflag               = inflag
+    cfg%c_psacw              = c_psacw
+    cfg%c_psaci              = c_psaci
+    cfg%c_pracs              = c_pracs
+    cfg%c_psacr              = c_psacr
+    cfg%c_pgacr              = c_pgacr
+    cfg%c_pgacs              = c_pgacs
+    cfg%c_pgacw              = c_pgacw
+    cfg%c_pgaci              = c_pgaci
+    cfg%z_slope_liq          = z_slope_liq
+    cfg%z_slope_ice          = z_slope_ice
+    cfg%prog_ccn             = prog_ccn
+    cfg%c_pracw              = c_pracw
+    cfg%c_praci              = c_praci
+    cfg%rad_snow             = rad_snow
+    cfg%rad_graupel          = rad_graupel
+    cfg%rad_rain             = rad_rain
+    cfg%cld_min              = cld_min
+    cfg%sedflag              = sedflag
+    cfg%sed_fac              = sed_fac
+    cfg%do_sedi_uv           = do_sedi_uv
+    cfg%do_sedi_w            = do_sedi_w
+    cfg%do_sedi_heat         = do_sedi_heat
+    cfg%icloud_f             = icloud_f
+    cfg%irain_f              = irain_f
+    cfg%xr_a                 = xr_a
+    cfg%xr_b                 = xr_b
+    cfg%xr_c                 = xr_c
+    cfg%ntimes               = ntimes
+    cfg%tau_revp             = tau_revp
+    cfg%tice_mlt             = tice_mlt
+    cfg%do_cond_timescale    = do_cond_timescale
+    cfg%mp_time              = mp_time
+    cfg%consv_checker        = consv_checker
+    cfg%te_err               = te_err
+    cfg%tw_err               = tw_err
+    cfg%use_rhc_cevap        = use_rhc_cevap
+    cfg%use_rhc_revap        = use_rhc_revap
+    cfg%tau_wbf              = tau_wbf
+    cfg%do_warm_rain_mp      = do_warm_rain_mp
+    cfg%rh_thres             = rh_thres
+    cfg%f_dq_p               = f_dq_p
+    cfg%f_dq_m               = f_dq_m
+    cfg%do_cld_adj           = do_cld_adj
+    cfg%rhc_cevap            = rhc_cevap
+    cfg%rhc_revap            = rhc_revap
+    cfg%beta                 = beta
+    cfg%liq_ice_combine      = liq_ice_combine
+    cfg%rewflag              = rewflag
+    cfg%reiflag              = reiflag
+    cfg%rerflag              = rerflag
+    cfg%resflag              = resflag
+    cfg%regflag              = regflag
+    cfg%rewmin               = rewmin
+    cfg%rewmax               = rewmax
+    cfg%reimin               = reimin
+    cfg%reimax               = reimax
+    cfg%rermin               = rermin
+    cfg%rermax               = rermax
+    cfg%resmin               = resmin
+    cfg%resmax               = resmax
+    cfg%regmin               = regmin
+    cfg%regmax               = regmax
+    cfg%fs2g_fac             = fs2g_fac
+    cfg%fi2s_fac             = fi2s_fac
+    cfg%fi2g_fac             = fi2g_fac
+    cfg%do_sedi_melt         = do_sedi_melt
+    cfg%radr_flag            = radr_flag
+    cfg%rads_flag            = rads_flag
+    cfg%radg_flag            = radg_flag
+    cfg%do_wbf               = do_wbf
+    cfg%do_psd_water_fall    = do_psd_water_fall
+    cfg%do_psd_ice_fall      = do_psd_ice_fall
+    cfg%n0w_sig              = n0w_sig
+    cfg%n0i_sig              = n0i_sig
+    cfg%n0r_sig              = n0r_sig
+    cfg%n0s_sig              = n0s_sig
+    cfg%n0g_sig              = n0g_sig
+    cfg%n0h_sig              = n0h_sig
+    cfg%n0w_exp              = n0w_exp
+    cfg%n0i_exp              = n0i_exp
+    cfg%n0r_exp              = n0r_exp
+    cfg%n0s_exp              = n0s_exp
+    cfg%n0g_exp              = n0g_exp
+    cfg%n0h_exp              = n0h_exp
+    cfg%muw                  = muw
+    cfg%mui                  = mui
+    cfg%mur                  = mur
+    cfg%mus                  = mus
+    cfg%mug                  = mug
+    cfg%muh                  = muh
+    cfg%alinw                = alinw
+    cfg%alini                = alini
+    cfg%alinr                = alinr
+    cfg%alins                = alins
+    cfg%aling                = aling
+    cfg%alinh                = alinh
+    cfg%blinw                = blinw
+    cfg%blini                = blini
+    cfg%blinr                = blinr
+    cfg%blins                = blins
+    cfg%bling                = bling
+    cfg%blinh                = blinh
+    cfg%do_new_acc_water     = do_new_acc_water
+    cfg%do_new_acc_ice       = do_new_acc_ice
+    cfg%is_fac               = is_fac
+    cfg%ss_fac               = ss_fac
+    cfg%gs_fac               = gs_fac
+    cfg%rh_fac_evap          = rh_fac_evap
+    cfg%rh_fac_cond          = rh_fac_cond
+    cfg%snow_grauple_combine = snow_grauple_combine
+    cfg%do_psd_water_num     = do_psd_water_num
+    cfg%do_psd_ice_num       = do_psd_ice_num
+    cfg%vdiffflag            = vdiffflag
+    cfg%rewfac               = rewfac
+    cfg%reifac               = reifac
+    cfg%cp_heating           = cp_heating
+    cfg%nconds               = nconds
+    cfg%do_evap_timescale    = do_evap_timescale
+    cfg%delay_cond_evap      = delay_cond_evap
+    cfg%do_subgrid_proc      = do_subgrid_proc
+    cfg%fast_fr_mlt          = fast_fr_mlt
+    cfg%fast_dep_sub         = fast_dep_sub
+
 
     ! -----------------------------------------------------------------------
     ! write version number and namelist to log file
@@ -633,13 +804,13 @@ subroutine module_gfdl_cld_mp_init (me, master, nlunit, input_nml_file, logunit,
 
     call setup_mhc_lhc (hydrostatic)
 
-end subroutine module_gfdl_cld_mp_init
+end subroutine module_gfdl_cloud_microphys_v3_init
 
 ! =======================================================================
 ! GFDL cloud microphysics driver
 ! =======================================================================
 
-subroutine module_gfdl_cld_mp_driver (qv, ql, qr, qi, qs, qg, qa, qnl, qni, pt, wa, &
+subroutine module_gfdl_cloud_microphys_v3_driver (qv, ql, qr, qi, qs, qg, qa, qnl, qni, pt, wa, &
         ua, va, delz, delp, gsize, dtm, hs, water, rain, ice, snow, graupel, &
         hydrostatic, is, ie, ks, ke, q_con, cappa, consv_te, adj_vmr, te, dte, &
         prefluxw, prefluxr, prefluxi, prefluxs, prefluxg, last_step, do_inline_mp)
@@ -681,13 +852,13 @@ subroutine module_gfdl_cld_mp_driver (qv, ql, qr, qi, qs, qg, qa, qnl, qni, pt, 
         gsize, hs, q_con, cappa, consv_te, adj_vmr, te, dte, prefluxw, prefluxr, &
         prefluxi, prefluxs, prefluxg, last_step, do_inline_mp, .false., .true.)
 
-end subroutine module_gfdl_cld_mp_driver
+end subroutine module_gfdl_cloud_microphys_v3_driver
 
 ! =======================================================================
 ! GFDL cloud microphysics end
 ! =======================================================================
 
-subroutine module_gfdl_cld_mp_end
+subroutine module_gfdl_cloud_microphys_v3_end
 
     implicit none
 
@@ -708,7 +879,7 @@ subroutine module_gfdl_cld_mp_end
 
     tables_are_initialized = .false.
 
-end subroutine module_gfdl_cld_mp_end
+end subroutine module_gfdl_cloud_microphys_v3_end
 
 ! =======================================================================
 ! setup cloud microphysics parameters
@@ -726,8 +897,8 @@ subroutine setup_mp
     ! complete freezing temperature
     ! -----------------------------------------------------------------------
 
-    if (do_warm_rain_mp) then
-        t_wfr = t_min
+    if (cfg%do_warm_rain_mp) then
+        t_wfr = cfg%t_min
     else
         t_wfr = tice - 40.0
     endif
@@ -736,10 +907,10 @@ subroutine setup_mp
     ! cloud water autoconversion, Hong et al. (2004)
     ! -----------------------------------------------------------------------
 
-    fac_rc = (4. / 3.) * pi * rhow * rthresh ** 3
+    fac_rc = (4. / 3.) * pi * rhow * cfg%rthresh ** 3
 
     aone = 2. / 9. * (3. / 4.) ** (4. / 3.) / pi ** (1. / 3.)
-    cpaut = c_paut * aone * grav / visd
+    cpaut = cfg%c_paut * aone * grav / visd
 
     ! -----------------------------------------------------------------------
     ! terminal velocities parameters, Lin et al. (1983)
@@ -752,19 +923,19 @@ subroutine setup_mp
     ! part of the slope parameters
     ! -----------------------------------------------------------------------
 
-    normw = pi * rhow * n0w_sig * gamma (muw + 3)
-    normi = pi * rhoi * n0i_sig * gamma (mui + 3)
-    normr = pi * rhor * n0r_sig * gamma (mur + 3)
-    norms = pi * rhos * n0s_sig * gamma (mus + 3)
-    normg = pi * rhog * n0g_sig * gamma (mug + 3)
-    normh = pi * rhoh * n0h_sig * gamma (muh + 3)
+    normw = pi * rhow * cfg%n0w_sig * gamma (cfg%muw + 3)
+    normi = pi * rhoi * cfg%n0i_sig * gamma (cfg%mui + 3)
+    normr = pi * rhor * cfg%n0r_sig * gamma (cfg%mur + 3)
+    norms = pi * rhos * cfg%n0s_sig * gamma (cfg%mus + 3)
+    normg = pi * rhog * cfg%n0g_sig * gamma (cfg%mug + 3)
+    normh = pi * rhoh * cfg%n0h_sig * gamma (cfg%muh + 3)
 
-    expow = exp (n0w_exp / (muw + 3) * log (10.))
-    expoi = exp (n0i_exp / (mui + 3) * log (10.))
-    expor = exp (n0r_exp / (mur + 3) * log (10.))
-    expos = exp (n0s_exp / (mus + 3) * log (10.))
-    expog = exp (n0g_exp / (mug + 3) * log (10.))
-    expoh = exp (n0h_exp / (muh + 3) * log (10.))
+    expow = exp (cfg%n0w_exp / (cfg%muw + 3) * log (10.))
+    expoi = exp (cfg%n0i_exp / (cfg%mui + 3) * log (10.))
+    expor = exp (cfg%n0r_exp / (cfg%mur + 3) * log (10.))
+    expos = exp (cfg%n0s_exp / (cfg%mus + 3) * log (10.))
+    expog = exp (cfg%n0g_exp / (cfg%mug + 3) * log (10.))
+    expoh = exp (cfg%n0h_exp / (cfg%muh + 3) * log (10.))
 
     ! -----------------------------------------------------------------------
     ! parameters for particle concentration (pc), effective diameter (ed),
@@ -772,93 +943,93 @@ subroutine setup_mp
     ! mass-weighted terminal velocity (tv)
     ! -----------------------------------------------------------------------
 
-    pcaw = exp (3 / (muw + 3) * log (n0w_sig)) * gamma (muw) * exp (3 * n0w_exp / (muw + 3) * log (10.))
-    pcai = exp (3 / (mui + 3) * log (n0i_sig)) * gamma (mui) * exp (3 * n0i_exp / (mui + 3) * log (10.))
-    pcar = exp (3 / (mur + 3) * log (n0r_sig)) * gamma (mur) * exp (3 * n0r_exp / (mur + 3) * log (10.))
-    pcas = exp (3 / (mus + 3) * log (n0s_sig)) * gamma (mus) * exp (3 * n0s_exp / (mus + 3) * log (10.))
-    pcag = exp (3 / (mug + 3) * log (n0g_sig)) * gamma (mug) * exp (3 * n0g_exp / (mug + 3) * log (10.))
-    pcah = exp (3 / (muh + 3) * log (n0h_sig)) * gamma (muh) * exp (3 * n0h_exp / (muh + 3) * log (10.))
+    pcaw = exp (3 / (cfg%muw + 3) * log (cfg%n0w_sig)) * gamma (cfg%muw) * exp (3 * cfg%n0w_exp / (cfg%muw + 3) * log (10.))
+    pcai = exp (3 / (cfg%mui + 3) * log (cfg%n0i_sig)) * gamma (cfg%mui) * exp (3 * cfg%n0i_exp / (cfg%mui + 3) * log (10.))
+    pcar = exp (3 / (cfg%mur + 3) * log (cfg%n0r_sig)) * gamma (cfg%mur) * exp (3 * cfg%n0r_exp / (cfg%mur + 3) * log (10.))
+    pcas = exp (3 / (cfg%mus + 3) * log (cfg%n0s_sig)) * gamma (cfg%mus) * exp (3 * cfg%n0s_exp / (cfg%mus + 3) * log (10.))
+    pcag = exp (3 / (cfg%mug + 3) * log (cfg%n0g_sig)) * gamma (cfg%mug) * exp (3 * cfg%n0g_exp / (cfg%mug + 3) * log (10.))
+    pcah = exp (3 / (cfg%muh + 3) * log (cfg%n0h_sig)) * gamma (cfg%muh) * exp (3 * cfg%n0h_exp / (cfg%muh + 3) * log (10.))
 
-    pcbw = exp (muw / (muw + 3) * log (pi * rhow * gamma (muw + 3)))
-    pcbi = exp (mui / (mui + 3) * log (pi * rhoi * gamma (mui + 3)))
-    pcbr = exp (mur / (mur + 3) * log (pi * rhor * gamma (mur + 3)))
-    pcbs = exp (mus / (mus + 3) * log (pi * rhos * gamma (mus + 3)))
-    pcbg = exp (mug / (mug + 3) * log (pi * rhog * gamma (mug + 3)))
-    pcbh = exp (muh / (muh + 3) * log (pi * rhoh * gamma (muh + 3)))
+    pcbw = exp (cfg%muw / (cfg%muw + 3) * log (pi * rhow * gamma (cfg%muw + 3)))
+    pcbi = exp (cfg%mui / (cfg%mui + 3) * log (pi * rhoi * gamma (cfg%mui + 3)))
+    pcbr = exp (cfg%mur / (cfg%mur + 3) * log (pi * rhor * gamma (cfg%mur + 3)))
+    pcbs = exp (cfg%mus / (cfg%mus + 3) * log (pi * rhos * gamma (cfg%mus + 3)))
+    pcbg = exp (cfg%mug / (cfg%mug + 3) * log (pi * rhog * gamma (cfg%mug + 3)))
+    pcbh = exp (cfg%muh / (cfg%muh + 3) * log (pi * rhoh * gamma (cfg%muh + 3)))
 
-    edaw = exp (- 1. / (muw + 3) * log (n0w_sig)) * (muw + 2) * exp (- n0w_exp / (muw + 3) * log (10.))
-    edai = exp (- 1. / (mui + 3) * log (n0i_sig)) * (mui + 2) * exp (- n0i_exp / (mui + 3) * log (10.))
-    edar = exp (- 1. / (mur + 3) * log (n0r_sig)) * (mur + 2) * exp (- n0r_exp / (mur + 3) * log (10.))
-    edas = exp (- 1. / (mus + 3) * log (n0s_sig)) * (mus + 2) * exp (- n0s_exp / (mus + 3) * log (10.))
-    edag = exp (- 1. / (mug + 3) * log (n0g_sig)) * (mug + 2) * exp (- n0g_exp / (mug + 3) * log (10.))
-    edah = exp (- 1. / (muh + 3) * log (n0h_sig)) * (muh + 2) * exp (- n0h_exp / (muh + 3) * log (10.))
+    edaw = exp (- 1. / (cfg%muw + 3) * log (cfg%n0w_sig)) * (cfg%muw + 2) * exp (- cfg%n0w_exp / (cfg%muw + 3) * log (10.))
+    edai = exp (- 1. / (cfg%mui + 3) * log (cfg%n0i_sig)) * (cfg%mui + 2) * exp (- cfg%n0i_exp / (cfg%mui + 3) * log (10.))
+    edar = exp (- 1. / (cfg%mur + 3) * log (cfg%n0r_sig)) * (cfg%mur + 2) * exp (- cfg%n0r_exp / (cfg%mur + 3) * log (10.))
+    edas = exp (- 1. / (cfg%mus + 3) * log (cfg%n0s_sig)) * (cfg%mus + 2) * exp (- cfg%n0s_exp / (cfg%mus + 3) * log (10.))
+    edag = exp (- 1. / (cfg%mug + 3) * log (cfg%n0g_sig)) * (cfg%mug + 2) * exp (- cfg%n0g_exp / (cfg%mug + 3) * log (10.))
+    edah = exp (- 1. / (cfg%muh + 3) * log (cfg%n0h_sig)) * (cfg%muh + 2) * exp (- cfg%n0h_exp / (cfg%muh + 3) * log (10.))
 
-    edbw = exp (1. / (muw + 3) * log (pi * rhow * gamma (muw + 3)))
-    edbi = exp (1. / (mui + 3) * log (pi * rhoi * gamma (mui + 3)))
-    edbr = exp (1. / (mur + 3) * log (pi * rhor * gamma (mur + 3)))
-    edbs = exp (1. / (mus + 3) * log (pi * rhos * gamma (mus + 3)))
-    edbg = exp (1. / (mug + 3) * log (pi * rhog * gamma (mug + 3)))
-    edbh = exp (1. / (muh + 3) * log (pi * rhoh * gamma (muh + 3)))
+    edbw = exp (1. / (cfg%muw + 3) * log (pi * rhow * gamma (cfg%muw + 3)))
+    edbi = exp (1. / (cfg%mui + 3) * log (pi * rhoi * gamma (cfg%mui + 3)))
+    edbr = exp (1. / (cfg%mur + 3) * log (pi * rhor * gamma (cfg%mur + 3)))
+    edbs = exp (1. / (cfg%mus + 3) * log (pi * rhos * gamma (cfg%mus + 3)))
+    edbg = exp (1. / (cfg%mug + 3) * log (pi * rhog * gamma (cfg%mug + 3)))
+    edbh = exp (1. / (cfg%muh + 3) * log (pi * rhoh * gamma (cfg%muh + 3)))
 
-    oeaw = exp (1. / (muw + 3) * log (n0w_sig)) * pi * gamma (muw + 2) * &
-        exp (n0w_exp / (muw + 3) * log (10.))
-    oeai = exp (1. / (mui + 3) * log (n0i_sig)) * pi * gamma (mui + 2) * &
-        exp (n0i_exp / (mui + 3) * log (10.))
-    oear = exp (1. / (mur + 3) * log (n0r_sig)) * pi * gamma (mur + 2) * &
-        exp (n0r_exp / (mur + 3) * log (10.))
-    oeas = exp (1. / (mus + 3) * log (n0s_sig)) * pi * gamma (mus + 2) * &
-        exp (n0s_exp / (mus + 3) * log (10.))
-    oeag = exp (1. / (mug + 3) * log (n0g_sig)) * pi * gamma (mug + 2) * &
-        exp (n0g_exp / (mug + 3) * log (10.))
-    oeah = exp (1. / (muh + 3) * log (n0h_sig)) * pi * gamma (muh + 2) * &
-        exp (n0h_exp / (muh + 3) * log (10.))
+    oeaw = exp (1. / (cfg%muw + 3) * log (cfg%n0w_sig)) * pi * gamma (cfg%muw + 2) * &
+        exp (cfg%n0w_exp / (cfg%muw + 3) * log (10.))
+    oeai = exp (1. / (cfg%mui + 3) * log (cfg%n0i_sig)) * pi * gamma (cfg%mui + 2) * &
+        exp (cfg%n0i_exp / (cfg%mui + 3) * log (10.))
+    oear = exp (1. / (cfg%mur + 3) * log (cfg%n0r_sig)) * pi * gamma (cfg%mur + 2) * &
+        exp (cfg%n0r_exp / (cfg%mur + 3) * log (10.))
+    oeas = exp (1. / (cfg%mus + 3) * log (cfg%n0s_sig)) * pi * gamma (cfg%mus + 2) * &
+        exp (cfg%n0s_exp / (cfg%mus + 3) * log (10.))
+    oeag = exp (1. / (cfg%mug + 3) * log (cfg%n0g_sig)) * pi * gamma (cfg%mug + 2) * &
+        exp (cfg%n0g_exp / (cfg%mug + 3) * log (10.))
+    oeah = exp (1. / (cfg%muh + 3) * log (cfg%n0h_sig)) * pi * gamma (cfg%muh + 2) * &
+        exp (cfg%n0h_exp / (cfg%muh + 3) * log (10.))
 
-    oebw = 2 * exp ((muw + 2) / (muw + 3) * log (pi * rhow * gamma (muw + 3)))
-    oebi = 2 * exp ((mui + 2) / (mui + 3) * log (pi * rhoi * gamma (mui + 3)))
-    oebr = 2 * exp ((mur + 2) / (mur + 3) * log (pi * rhor * gamma (mur + 3)))
-    oebs = 2 * exp ((mus + 2) / (mus + 3) * log (pi * rhos * gamma (mus + 3)))
-    oebg = 2 * exp ((mug + 2) / (mug + 3) * log (pi * rhog * gamma (mug + 3)))
-    oebh = 2 * exp ((muh + 2) / (muh + 3) * log (pi * rhoh * gamma (muh + 3)))
+    oebw = 2 * exp ((cfg%muw + 2) / (cfg%muw + 3) * log (pi * rhow * gamma (cfg%muw + 3)))
+    oebi = 2 * exp ((cfg%mui + 2) / (cfg%mui + 3) * log (pi * rhoi * gamma (cfg%mui + 3)))
+    oebr = 2 * exp ((cfg%mur + 2) / (cfg%mur + 3) * log (pi * rhor * gamma (cfg%mur + 3)))
+    oebs = 2 * exp ((cfg%mus + 2) / (cfg%mus + 3) * log (pi * rhos * gamma (cfg%mus + 3)))
+    oebg = 2 * exp ((cfg%mug + 2) / (cfg%mug + 3) * log (pi * rhog * gamma (cfg%mug + 3)))
+    oebh = 2 * exp ((cfg%muh + 2) / (cfg%muh + 3) * log (pi * rhoh * gamma (cfg%muh + 3)))
 
-    rraw = exp (- 3 / (muw + 3) * log (n0w_sig)) * gamma (muw + 6) * &
-        exp (- 3 * n0w_exp / (muw + 3) * log (10.))
-    rrai = exp (- 3 / (mui + 3) * log (n0i_sig)) * gamma (mui + 6) * &
-        exp (- 3 * n0i_exp / (mui + 3) * log (10.))
-    rrar = exp (- 3 / (mur + 3) * log (n0r_sig)) * gamma (mur + 6) * &
-        exp (- 3 * n0r_exp / (mur + 3) * log (10.))
-    rras = exp (- 3 / (mus + 3) * log (n0s_sig)) * gamma (mus + 6) * &
-        exp (- 3 * n0s_exp / (mus + 3) * log (10.))
-    rrag = exp (- 3 / (mug + 3) * log (n0g_sig)) * gamma (mug + 6) * &
-        exp (- 3 * n0g_exp / (mug + 3) * log (10.))
-    rrah = exp (- 3 / (muh + 3) * log (n0h_sig)) * gamma (muh + 6) * &
-        exp (- 3 * n0h_exp / (muh + 3) * log (10.))
+    rraw = exp (- 3 / (cfg%muw + 3) * log (cfg%n0w_sig)) * gamma (cfg%muw + 6) * &
+        exp (- 3 * cfg%n0w_exp / (cfg%muw + 3) * log (10.))
+    rrai = exp (- 3 / (cfg%mui + 3) * log (cfg%n0i_sig)) * gamma (cfg%mui + 6) * &
+        exp (- 3 * cfg%n0i_exp / (cfg%mui + 3) * log (10.))
+    rrar = exp (- 3 / (cfg%mur + 3) * log (cfg%n0r_sig)) * gamma (cfg%mur + 6) * &
+        exp (- 3 * cfg%n0r_exp / (cfg%mur + 3) * log (10.))
+    rras = exp (- 3 / (cfg%mus + 3) * log (cfg%n0s_sig)) * gamma (cfg%mus + 6) * &
+        exp (- 3 * cfg%n0s_exp / (cfg%mus + 3) * log (10.))
+    rrag = exp (- 3 / (cfg%mug + 3) * log (cfg%n0g_sig)) * gamma (cfg%mug + 6) * &
+        exp (- 3 * cfg%n0g_exp / (cfg%mug + 3) * log (10.))
+    rrah = exp (- 3 / (cfg%muh + 3) * log (cfg%n0h_sig)) * gamma (cfg%muh + 6) * &
+        exp (- 3 * cfg%n0h_exp / (cfg%muh + 3) * log (10.))
 
-    rrbw = exp ((muw + 6) / (muw + 3) * log (pi * rhow * gamma (muw + 3)))
-    rrbi = exp ((mui + 6) / (mui + 3) * log (pi * rhoi * gamma (mui + 3)))
-    rrbr = exp ((mur + 6) / (mur + 3) * log (pi * rhor * gamma (mur + 3)))
-    rrbs = exp ((mus + 6) / (mus + 3) * log (pi * rhos * gamma (mus + 3)))
-    rrbg = exp ((mug + 6) / (mug + 3) * log (pi * rhog * gamma (mug + 3)))
-    rrbh = exp ((muh + 6) / (muh + 3) * log (pi * rhoh * gamma (muh + 3)))
+    rrbw = exp ((cfg%muw + 6) / (cfg%muw + 3) * log (pi * rhow * gamma (cfg%muw + 3)))
+    rrbi = exp ((cfg%mui + 6) / (cfg%mui + 3) * log (pi * rhoi * gamma (cfg%mui + 3)))
+    rrbr = exp ((cfg%mur + 6) / (cfg%mur + 3) * log (pi * rhor * gamma (cfg%mur + 3)))
+    rrbs = exp ((cfg%mus + 6) / (cfg%mus + 3) * log (pi * rhos * gamma (cfg%mus + 3)))
+    rrbg = exp ((cfg%mug + 6) / (cfg%mug + 3) * log (pi * rhog * gamma (cfg%mug + 3)))
+    rrbh = exp ((cfg%muh + 6) / (cfg%muh + 3) * log (pi * rhoh * gamma (cfg%muh + 3)))
 
-    tvaw = exp (- blinw / (muw + 3) * log (n0w_sig)) * alinw * gamma (muw + blinw + 3) * &
-        exp (- blinw * n0w_exp / (muw + 3) * log (10.))
-    tvai = exp (- blini / (mui + 3) * log (n0i_sig)) * alini * gamma (mui + blini + 3) * &
-        exp (- blini * n0i_exp / (mui + 3) * log (10.))
-    tvar = exp (- blinr / (mur + 3) * log (n0r_sig)) * alinr * gamma (mur + blinr + 3) * &
-        exp (- blinr * n0r_exp / (mur + 3) * log (10.))
-    tvas = exp (- blins / (mus + 3) * log (n0s_sig)) * alins * gamma (mus + blins + 3) * &
-        exp (- blins * n0s_exp / (mus + 3) * log (10.))
-    tvag = exp (- bling / (mug + 3) * log (n0g_sig)) * aling * gamma (mug + bling + 3) * &
-        exp (- bling * n0g_exp / (mug + 3) * log (10.)) * gcon
-    tvah = exp (- blinh / (muh + 3) * log (n0h_sig)) * alinh * gamma (muh + blinh + 3) * &
-        exp (- blinh * n0h_exp / (muh + 3) * log (10.)) * hcon
+    tvaw = exp (- cfg%blinw / (cfg%muw + 3) * log (cfg%n0w_sig)) * cfg%alinw * gamma (cfg%muw + cfg%blinw + 3) * &
+        exp (- cfg%blinw * cfg%n0w_exp / (cfg%muw + 3) * log (10.))
+    tvai = exp (- cfg%blini / (cfg%mui + 3) * log (cfg%n0i_sig)) * cfg%alini * gamma (cfg%mui + cfg%blini + 3) * &
+        exp (- cfg%blini * cfg%n0i_exp / (cfg%mui + 3) * log (10.))
+    tvar = exp (- cfg%blinr / (cfg%mur + 3) * log (cfg%n0r_sig)) * cfg%alinr * gamma (cfg%mur + cfg%blinr + 3) * &
+        exp (- cfg%blinr * cfg%n0r_exp / (cfg%mur + 3) * log (10.))
+    tvas = exp (- cfg%blins / (cfg%mus + 3) * log (cfg%n0s_sig)) * cfg%alins * gamma (cfg%mus + cfg%blins + 3) * &
+        exp (- cfg%blins * cfg%n0s_exp / (cfg%mus + 3) * log (10.))
+    tvag = exp (- cfg%bling / (cfg%mug + 3) * log (cfg%n0g_sig)) * cfg%aling * gamma (cfg%mug + cfg%bling + 3) * &
+        exp (- cfg%bling * cfg%n0g_exp / (cfg%mug + 3) * log (10.)) * gcon
+    tvah = exp (- cfg%blinh / (cfg%muh + 3) * log (cfg%n0h_sig)) * cfg%alinh * gamma (cfg%muh + cfg%blinh + 3) * &
+        exp (- cfg%blinh * cfg%n0h_exp / (cfg%muh + 3) * log (10.)) * hcon
 
-    tvbw = exp (blinw / (muw + 3) * log (pi * rhow * gamma (muw + 3))) * gamma (muw + 3)
-    tvbi = exp (blini / (mui + 3) * log (pi * rhoi * gamma (mui + 3))) * gamma (mui + 3)
-    tvbr = exp (blinr / (mur + 3) * log (pi * rhor * gamma (mur + 3))) * gamma (mur + 3)
-    tvbs = exp (blins / (mus + 3) * log (pi * rhos * gamma (mus + 3))) * gamma (mus + 3)
-    tvbg = exp (bling / (mug + 3) * log (pi * rhog * gamma (mug + 3))) * gamma (mug + 3)
-    tvbh = exp (blinh / (muh + 3) * log (pi * rhoh * gamma (muh + 3))) * gamma (muh + 3)
+    tvbw = exp (cfg%blinw / (cfg%muw + 3) * log (pi * rhow * gamma (cfg%muw + 3))) * gamma (cfg%muw + 3)
+    tvbi = exp (cfg%blini / (cfg%mui + 3) * log (pi * rhoi * gamma (cfg%mui + 3))) * gamma (cfg%mui + 3)
+    tvbr = exp (cfg%blinr / (cfg%mur + 3) * log (pi * rhor * gamma (cfg%mur + 3))) * gamma (cfg%mur + 3)
+    tvbs = exp (cfg%blins / (cfg%mus + 3) * log (pi * rhos * gamma (cfg%mus + 3))) * gamma (cfg%mus + 3)
+    tvbg = exp (cfg%bling / (cfg%mug + 3) * log (pi * rhog * gamma (cfg%mug + 3))) * gamma (cfg%mug + 3)
+    tvbh = exp (cfg%blinh / (cfg%muh + 3) * log (pi * rhoh * gamma (cfg%muh + 3))) * gamma (cfg%muh + 3)
 
     ! -----------------------------------------------------------------------
     ! Schmidt number, Sc ** (1 / 3) in Lin et al. (1983)
@@ -872,83 +1043,83 @@ subroutine setup_mp
     ! accretion between cloud water, cloud ice, rain, snow, and graupel or hail, Lin et al. (1983)
     ! -----------------------------------------------------------------------
 
-    cracw = pi * n0r_sig * alinr * gamma (2 + mur + blinr) / &
-         (4. * exp ((2 + mur + blinr) / (mur + 3) * log (normr))) * &
-         exp ((1 - blinr) * log (expor))
-    craci = pi * n0r_sig * alinr * gamma (2 + mur + blinr) / &
-         (4. * exp ((2 + mur + blinr) / (mur + 3) * log (normr))) * &
-         exp ((1 - blinr) * log (expor))
-    csacw = pi * n0s_sig * alins * gamma (2 + mus + blins) / &
-         (4. * exp ((2 + mus + blins) / (mus + 3) * log (norms))) * &
-         exp ((1 - blins) * log (expos))
-    csaci = pi * n0s_sig * alins * gamma (2 + mus + blins) / &
-         (4. * exp ((2 + mus + blins) / (mus + 3) * log (norms))) * &
-         exp ((1 - blins) * log (expos))
-    if (do_hail) then
-        cgacw = pi * n0h_sig * alinh * gamma (2 + muh + blinh) * hcon / &
-             (4. * exp ((2 + muh + blinh) / (muh + 3) * log (normh))) * &
-             exp ((1 - blinh) * log (expoh))
-        cgaci = pi * n0h_sig * alinh * gamma (2 + muh + blinh) * hcon / &
-             (4. * exp ((2 + muh + blinh) / (muh + 3) * log (normh))) * &
-             exp ((1 - blinh) * log (expoh))
+    cracw = pi * cfg%n0r_sig * cfg%alinr * gamma (2 + cfg%mur + cfg%blinr) / &
+         (4. * exp ((2 + cfg%mur + cfg%blinr) / (cfg%mur + 3) * log (normr))) * &
+         exp ((1 - cfg%blinr) * log (expor))
+    craci = pi * cfg%n0r_sig * cfg%alinr * gamma (2 + cfg%mur + cfg%blinr) / &
+         (4. * exp ((2 + cfg%mur + cfg%blinr) / (cfg%mur + 3) * log (normr))) * &
+         exp ((1 - cfg%blinr) * log (expor))
+    csacw = pi * cfg%n0s_sig * cfg%alins * gamma (2 + cfg%mus + cfg%blins) / &
+         (4. * exp ((2 + cfg%mus + cfg%blins) / (cfg%mus + 3) * log (norms))) * &
+         exp ((1 - cfg%blins) * log (expos))
+    csaci = pi * cfg%n0s_sig * cfg%alins * gamma (2 + cfg%mus + cfg%blins) / &
+         (4. * exp ((2 + cfg%mus + cfg%blins) / (cfg%mus + 3) * log (norms))) * &
+         exp ((1 - cfg%blins) * log (expos))
+    if (cfg%do_hail) then
+        cgacw = pi * cfg%n0h_sig * cfg%alinh * gamma (2 + cfg%muh + cfg%blinh) * hcon / &
+             (4. * exp ((2 + cfg%muh + cfg%blinh) / (cfg%muh + 3) * log (normh))) * &
+             exp ((1 - cfg%blinh) * log (expoh))
+        cgaci = pi * cfg%n0h_sig * cfg%alinh * gamma (2 + cfg%muh + cfg%blinh) * hcon / &
+             (4. * exp ((2 + cfg%muh + cfg%blinh) / (cfg%muh + 3) * log (normh))) * &
+             exp ((1 - cfg%blinh) * log (expoh))
     else
-        cgacw = pi * n0g_sig * aling * gamma (2 + mug + bling) * gcon / &
-             (4. * exp ((2 + mug + bling) / (mug + 3) * log (normg))) * &
-             exp ((1 - bling) * log (expog))
-        cgaci = pi * n0g_sig * aling * gamma (2 + mug + bling) * gcon / &
-             (4. * exp ((2 + mug + bling) / (mug + 3) * log (normg))) * &
-             exp ((1 - bling) * log (expog))
+        cgacw = pi * cfg%n0g_sig * cfg%aling * gamma (2 + cfg%mug + cfg%bling) * gcon / &
+             (4. * exp ((2 + cfg%mug + cfg%bling) / (cfg%mug + 3) * log (normg))) * &
+             exp ((1 - cfg%bling) * log (expog))
+        cgaci = pi * cfg%n0g_sig * cfg%aling * gamma (2 + cfg%mug + cfg%bling) * gcon / &
+             (4. * exp ((2 + cfg%mug + cfg%bling) / (cfg%mug + 3) * log (normg))) * &
+             exp ((1 - cfg%bling) * log (expog))
     endif
 
-    if (do_new_acc_water) then
+    if (cfg%do_new_acc_water) then
 
-        cracw = pisq * n0r_sig * n0w_sig * rhow / 24.
-        csacw = pisq * n0s_sig * n0w_sig * rhow / 24.
-        if (do_hail) then
-            cgacw = pisq * n0h_sig * n0w_sig * rhow / 24.
+        cracw = pisq * cfg%n0r_sig * cfg%n0w_sig * rhow / 24.
+        csacw = pisq * cfg%n0s_sig * cfg%n0w_sig * rhow / 24.
+        if (cfg%do_hail) then
+            cgacw = pisq * cfg%n0h_sig * cfg%n0w_sig * rhow / 24.
         else
-            cgacw = pisq * n0g_sig * n0w_sig * rhow / 24.
+            cgacw = pisq * cfg%n0g_sig * cfg%n0w_sig * rhow / 24.
         endif
 
     endif
 
-    if (do_new_acc_ice) then
+    if (cfg%do_new_acc_ice) then
 
-        craci = pisq * n0r_sig * n0i_sig * rhoi / 24.
-        csaci = pisq * n0s_sig * n0i_sig * rhoi / 24.
-        if (do_hail) then
-            cgaci = pisq * n0h_sig * n0i_sig * rhoi / 24.
+        craci = pisq * cfg%n0r_sig * cfg%n0i_sig * rhoi / 24.
+        csaci = pisq * cfg%n0s_sig * cfg%n0i_sig * rhoi / 24.
+        if (cfg%do_hail) then
+            cgaci = pisq * cfg%n0h_sig * cfg%n0i_sig * rhoi / 24.
         else
-            cgaci = pisq * n0g_sig * n0i_sig * rhoi / 24.
+            cgaci = pisq * cfg%n0g_sig * cfg%n0i_sig * rhoi / 24.
         endif
 
     endif
 
-    cracw = cracw * c_pracw
-    craci = craci * c_praci
-    csacw = csacw * c_psacw
-    csaci = csaci * c_psaci
-    cgacw = cgacw * c_pgacw
-    cgaci = cgaci * c_pgaci
+    cracw = cracw * cfg%c_pracw
+    craci = craci * cfg%c_praci
+    csacw = csacw * cfg%c_psacw
+    csaci = csaci * cfg%c_psaci
+    cgacw = cgacw * cfg%c_pgacw
+    cgaci = cgaci * cfg%c_pgaci
 
     ! -----------------------------------------------------------------------
     ! accretion between cloud water, cloud ice, rain, snow, and graupel or hail, Lin et al. (1983)
     ! -----------------------------------------------------------------------
 
-    cracs = pisq * n0r_sig * n0s_sig * rhos / 24.
-    csacr = pisq * n0s_sig * n0r_sig * rhor / 24.
-    if (do_hail) then
-        cgacr = pisq * n0h_sig * n0r_sig * rhor / 24.
-        cgacs = pisq * n0h_sig * n0s_sig * rhos / 24.
+    cracs = pisq * cfg%n0r_sig * cfg%n0s_sig * rhos / 24.
+    csacr = pisq * cfg%n0s_sig * cfg%n0r_sig * rhor / 24.
+    if (cfg%do_hail) then
+        cgacr = pisq * cfg%n0h_sig * cfg%n0r_sig * rhor / 24.
+        cgacs = pisq * cfg%n0h_sig * cfg%n0s_sig * rhos / 24.
     else
-        cgacr = pisq * n0g_sig * n0r_sig * rhor / 24.
-        cgacs = pisq * n0g_sig * n0s_sig * rhos / 24.
+        cgacr = pisq * cfg%n0g_sig * cfg%n0r_sig * rhor / 24.
+        cgacs = pisq * cfg%n0g_sig * cfg%n0s_sig * rhos / 24.
     endif
 
-    cracs = cracs * c_pracs
-    csacr = csacr * c_psacr
-    cgacr = cgacr * c_pgacr
-    cgacs = cgacs * c_pgacs
+    cracs = cracs * cfg%c_pracs
+    csacr = csacr * cfg%c_psacr
+    cgacr = cgacr * cfg%c_pgacr
+    cgacs = cgacs * cfg%c_pgacs
 
     ! act / ace / acc:
     !  1 -  2: racs (s - r)
@@ -967,7 +1138,7 @@ subroutine setup_mp
     act (3) = act (2)
     act (4) = act (1)
     act (5) = act (2)
-    if (do_hail) then
+    if (cfg%do_hail) then
         act (6) = normh
     else
         act (6) = normg
@@ -992,7 +1163,7 @@ subroutine setup_mp
     ace (3) = ace (2)
     ace (4) = ace (1)
     ace (5) = ace (2)
-    if (do_hail) then
+    if (cfg%do_hail) then
         ace (6) = expoh
     else
         ace (6) = expog
@@ -1012,21 +1183,21 @@ subroutine setup_mp
     ace (19) = ace (11)
     ace (20) = ace (6)
 
-    acc (1) = mus
-    acc (2) = mur
+    acc (1) = cfg%mus
+    acc (2) = cfg%mur
     acc (3) = acc (2)
     acc (4) = acc (1)
     acc (5) = acc (2)
-    if (do_hail) then
-        acc (6) = muh
+    if (cfg%do_hail) then
+        acc (6) = cfg%muh
     else
-        acc (6) = mug
+        acc (6) = cfg%mug
     endif
     acc (7) = acc (1)
     acc (8) = acc (6)
-    acc (9) = muw
+    acc (9) = cfg%muw
     acc (10) = acc (2)
-    acc (11) = mui
+    acc (11) = cfg%mui
     acc (12) = acc (2)
     acc (13) = acc (9)
     acc (14) = acc (1)
@@ -1054,42 +1225,42 @@ subroutine setup_mp
     ! rain evaporation, snow sublimation, and graupel or hail sublimation, Lin et al. (1983)
     ! -----------------------------------------------------------------------
 
-    crevp (1) = 2. * pi * vdifu * tcond * rvgas * n0r_sig * gamma (1 + mur) / &
-        exp ((1 + mur) / (mur + 3) * log (normr)) * exp (2.0 * log (expor))
+    crevp (1) = 2. * pi * vdifu * tcond * rvgas * cfg%n0r_sig * gamma (1 + cfg%mur) / &
+        exp ((1 + cfg%mur) / (cfg%mur + 3) * log (normr)) * exp (2.0 * log (expor))
     crevp (2) = 0.78
-    crevp (3) = 0.31 * scm3 * sqrt (alinr / visk) * gamma ((3 + 2 * mur + blinr) / 2) / &
-        exp ((3 + 2 * mur + blinr) / (mur + 3) / 2 * log (normr)) * &
-        exp ((1 + mur) / (mur + 3) * log (normr)) / gamma (1 + mur) * &
-        exp ((- 1 - blinr) / 2. * log (expor))
+    crevp (3) = 0.31 * scm3 * sqrt (cfg%alinr / visk) * gamma ((3 + 2 * cfg%mur + cfg%blinr) / 2) / &
+        exp ((3 + 2 * cfg%mur + cfg%blinr) / (cfg%mur + 3) / 2 * log (normr)) * &
+        exp ((1 + cfg%mur) / (cfg%mur + 3) * log (normr)) / gamma (1 + cfg%mur) * &
+        exp ((- 1 - cfg%blinr) / 2. * log (expor))
     crevp (4) = tcond * rvgas
     crevp (5) = vdifu
 
-    cssub (1) = 2. * pi * vdifu * tcond * rvgas * n0s_sig * gamma (1 + mus) / &
-        exp ((1 + mus) / (mus + 3) * log (norms)) * exp (2.0 * log (expos))
+    cssub (1) = 2. * pi * vdifu * tcond * rvgas * cfg%n0s_sig * gamma (1 + cfg%mus) / &
+        exp ((1 + cfg%mus) / (cfg%mus + 3) * log (norms)) * exp (2.0 * log (expos))
     cssub (2) = 0.78
-    cssub (3) = 0.31 * scm3 * sqrt (alins / visk) * gamma ((3 + 2 * mus + blins) / 2) / &
-        exp ((3 + 2 * mus + blins) / (mus + 3) / 2 * log (norms)) * &
-        exp ((1 + mus) / (mus + 3) * log (norms)) / gamma (1 + mus) * &
-        exp ((- 1 - blins) / 2. * log (expos))
+    cssub (3) = 0.31 * scm3 * sqrt (cfg%alins / visk) * gamma ((3 + 2 * cfg%mus + cfg%blins) / 2) / &
+        exp ((3 + 2 * cfg%mus + cfg%blins) / (cfg%mus + 3) / 2 * log (norms)) * &
+        exp ((1 + cfg%mus) / (cfg%mus + 3) * log (norms)) / gamma (1 + cfg%mus) * &
+        exp ((- 1 - cfg%blins) / 2. * log (expos))
     cssub (4) = tcond * rvgas
     cssub (5) = vdifu
 
-    if (do_hail) then
-        cgsub (1) = 2. * pi * vdifu * tcond * rvgas * n0h_sig * gamma (1 + muh) / &
-            exp ((1 + muh) / (muh + 3) * log (normh)) * exp (2.0 * log (expoh))
+    if (cfg%do_hail) then
+        cgsub (1) = 2. * pi * vdifu * tcond * rvgas * cfg%n0h_sig * gamma (1 + cfg%muh) / &
+            exp ((1 + cfg%muh) / (cfg%muh + 3) * log (normh)) * exp (2.0 * log (expoh))
         cgsub (2) = 0.78
-        cgsub (3) = 0.31 * scm3 * sqrt (alinh * hcon / visk) * gamma ((3 + 2 * muh + blinh) / 2) / &
-            exp (1. / (muh + 3) * (3 + 2 * muh + blinh) / 2 * log (normh)) * &
-            exp (1. / (muh + 3) * (1 + muh) * log (normh)) / gamma (1 + muh) * &
-            exp ((- 1 - blinh) / 2. * log (expoh))
+        cgsub (3) = 0.31 * scm3 * sqrt (cfg%alinh * hcon / visk) * gamma ((3 + 2 * cfg%muh + cfg%blinh) / 2) / &
+            exp (1. / (cfg%muh + 3) * (3 + 2 * cfg%muh + cfg%blinh) / 2 * log (normh)) * &
+            exp (1. / (cfg%muh + 3) * (1 + cfg%muh) * log (normh)) / gamma (1 + cfg%muh) * &
+            exp ((- 1 - cfg%blinh) / 2. * log (expoh))
     else
-        cgsub (1) = 2. * pi * vdifu * tcond * rvgas * n0g_sig * gamma (1 + mug) / &
-            exp ((1 + mug) / (mug + 3) * log (normg)) * exp (2.0 * log (expog))
+        cgsub (1) = 2. * pi * vdifu * tcond * rvgas * cfg%n0g_sig * gamma (1 + cfg%mug) / &
+            exp ((1 + cfg%mug) / (cfg%mug + 3) * log (normg)) * exp (2.0 * log (expog))
         cgsub (2) = 0.78
-        cgsub (3) = 0.31 * scm3 * sqrt (aling * gcon / visk) * gamma ((3 + 2 * mug + bling) / 2) / &
-            exp ((3 + 2 * mug + bling) / (mug + 3) / 2 * log (normg)) * &
-            exp ((1 + mug) / (mug + 3) * log (normg)) / gamma (1 + mug) * &
-            exp ((- 1 - bling) / 2. * log (expog))
+        cgsub (3) = 0.31 * scm3 * sqrt (cfg%aling * gcon / visk) * gamma ((3 + 2 * cfg%mug + cfg%bling) / 2) / &
+            exp ((3 + 2 * cfg%mug + cfg%bling) / (cfg%mug + 3) / 2 * log (normg)) * &
+            exp ((1 + cfg%mug) / (cfg%mug + 3) * log (normg)) / gamma (1 + cfg%mug) * &
+            exp ((- 1 - cfg%bling) / 2. * log (expog))
     endif
     cgsub (4) = tcond * rvgas
     cgsub (5) = vdifu
@@ -1098,10 +1269,10 @@ subroutine setup_mp
     ! snow melting, Lin et al. (1983)
     ! -----------------------------------------------------------------------
 
-    csmlt (1) = 2. * pi * tcond * n0s_sig * gamma (1 + mus) / &
-        exp ((1 + mus) / (mus + 3) * log (norms)) * exp (2.0 * log (expos))
-    csmlt (2) = 2. * pi * vdifu * n0s_sig * gamma (1 + mus) / &
-        exp ((1 + mus) / (mus + 3) * log (norms)) * exp (2.0 * log (expos))
+    csmlt (1) = 2. * pi * tcond * cfg%n0s_sig * gamma (1 + cfg%mus) / &
+        exp ((1 + cfg%mus) / (cfg%mus + 3) * log (norms)) * exp (2.0 * log (expos))
+    csmlt (2) = 2. * pi * vdifu * cfg%n0s_sig * gamma (1 + cfg%mus) / &
+        exp ((1 + cfg%mus) / (cfg%mus + 3) * log (norms)) * exp (2.0 * log (expos))
     csmlt (3) = cssub (2)
     csmlt (4) = cssub (3)
 
@@ -1109,16 +1280,16 @@ subroutine setup_mp
     ! graupel or hail melting, Lin et al. (1983)
     ! -----------------------------------------------------------------------
 
-    if (do_hail) then
-        cgmlt (1) = 2. * pi * tcond * n0h_sig * gamma (1 + muh) / &
-            exp ((1 + muh) / (muh + 3) * log (normh)) * exp (2.0 * log (expoh))
-        cgmlt (2) = 2. * pi * vdifu * n0h_sig * gamma (1 + muh) / &
-            exp ((1 + muh) / (muh + 3) * log (normh)) * exp (2.0 * log (expoh))
+    if (cfg%do_hail) then
+        cgmlt (1) = 2. * pi * tcond * cfg%n0h_sig * gamma (1 + cfg%muh) / &
+            exp ((1 + cfg%muh) / (cfg%muh + 3) * log (normh)) * exp (2.0 * log (expoh))
+        cgmlt (2) = 2. * pi * vdifu * cfg%n0h_sig * gamma (1 + cfg%muh) / &
+            exp ((1 + cfg%muh) / (cfg%muh + 3) * log (normh)) * exp (2.0 * log (expoh))
     else
-        cgmlt (1) = 2. * pi * tcond * n0g_sig * gamma (1 + mug) / &
-            exp ((1 + mug) / (mug + 3) * log (normg)) * exp (2.0 * log (expog))
-        cgmlt (2) = 2. * pi * vdifu * n0g_sig * gamma (1 + mug) / &
-            exp ((1 + mug) / (mug + 3) * log (normg)) * exp (2.0 * log (expog))
+        cgmlt (1) = 2. * pi * tcond * cfg%n0g_sig * gamma (1 + cfg%mug) / &
+            exp ((1 + cfg%mug) / (cfg%mug + 3) * log (normg)) * exp (2.0 * log (expog))
+        cgmlt (2) = 2. * pi * vdifu * cfg%n0g_sig * gamma (1 + cfg%mug) / &
+            exp ((1 + cfg%mug) / (cfg%mug + 3) * log (normg)) * exp (2.0 * log (expog))
     endif
     cgmlt (3) = cgsub (2)
     cgmlt (4) = cgsub (3)
@@ -1127,8 +1298,8 @@ subroutine setup_mp
     ! rain freezing, Lin et al. (1983)
     ! -----------------------------------------------------------------------
 
-    cgfr (1) = 1.e2 / 36 * pisq * n0r_sig * rhor * gamma (6 + mur) / &
-        exp ((6 + mur) / (mur + 3) * log (normr)) * exp (- 3.0 * log (expor))
+    cgfr (1) = 1.e2 / 36 * pisq * cfg%n0r_sig * rhor * gamma (6 + cfg%mur) / &
+        exp ((6 + cfg%mur) / (cfg%mur + 3) * log (normr)) * exp (- 3.0 * log (expor))
     cgfr (2) = 0.66
 
 end subroutine setup_mp
@@ -1150,7 +1321,7 @@ subroutine setup_mhc_lhc (hydrostatic)
     if (hydrostatic) then
         c_air = cp_air
         c_vap = cp_vap
-        do_sedi_w = .false.
+        cfg%do_sedi_w = .false.
     else
         c_air = cv_air
         c_vap = cv_vap
@@ -1247,8 +1418,8 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
     ! time steps
     ! -----------------------------------------------------------------------
 
-    ntimes = max (ntimes, int (dtm / min (dtm, mp_time)))
-    dts = dtm / real (ntimes)
+    cfg%ntimes = max (cfg%ntimes, int (dtm / min (dtm, cfg%mp_time)))
+    dts = dtm / real (cfg%ntimes)
 
     ! -----------------------------------------------------------------------
     ! initialization of total energy difference and condensation diag
@@ -1307,7 +1478,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         ! total energy checker
         ! -----------------------------------------------------------------------
 
-        if (consv_checker) then
+        if (cfg%consv_checker) then
             call mtetw (ks, ke, qv (i, :), ql (i, :), qr (i, :), qi (i, :), &
                 qs (i, :), qg (i, :), tz, ua (i, :), va (i, :), wa (i, :), &
                 delp (i, :), dte (i), 0.0, water (i), rain (i), ice (i), &
@@ -1374,7 +1545,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         ! total energy checker
         ! -----------------------------------------------------------------------
 
-        if (consv_checker) then
+        if (cfg%consv_checker) then
             call mtetw (ks, ke, qvz, qlz, qrz, qiz, qsz, qgz, tz, u, v, w, &
                 dp, dte (i), 0.0, water (i), rain (i), ice (i), snow (i), &
                 graupel (i), 0.0, 0.0, dtm, te_beg_d (i, :), tw_beg_d (i, :), &
@@ -1385,7 +1556,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         ! cloud condensation nuclei (CCN), cloud ice nuclei (CIN)
         ! -----------------------------------------------------------------------
 
-        if (prog_ccn) then
+        if (cfg%prog_ccn) then
             do k = ks, ke
                 ! boucher and lohmann (1995)
                 nl = min (1., abs (hs (i)) / (10. * grav)) * &
@@ -1399,8 +1570,8 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
                 cin (k) = cin (k) / den (k)
             enddo
         else
-            ccn0 = (ccn_l * min (1., abs (hs (i)) / (10. * grav)) + &
-                ccn_o * (1. - min (1., abs (hs (i)) / (10. * grav)))) * 1.e6
+            ccn0 = (cfg%ccn_l * min (1., abs (hs (i)) / (10. * grav)) + &
+                cfg%ccn_o * (1. - min (1., abs (hs (i)) / (10. * grav)))) * 1.e6
             cin0 = 0.0
             do k = ks, ke
                 ccn (k) = ccn0 / den (k)
@@ -1413,8 +1584,8 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         ! default area dependent form: use dx ~ 100 km as the base
         ! -----------------------------------------------------------------------
 
-        t_lnd = dw_land * sqrt (gsize (i) / 1.e5)
-        t_ocn = dw_ocean * sqrt (gsize (i) / 1.e5)
+        t_lnd = cfg%dw_land * sqrt (gsize (i) / 1.e5)
+        t_ocn = cfg%dw_ocean * sqrt (gsize (i) / 1.e5)
         tmp = min (1., abs (hs (i)) / (10. * grav))
         h_var = t_lnd * tmp + t_ocn * (1. - tmp)
         h_var = min (0.20, max (0.01, h_var))
@@ -1423,17 +1594,17 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         ! relative humidity thresholds
         ! -----------------------------------------------------------------------
 
-        rh_adj = 1. - h_var - rh_inc
-        rh_rain = max (0.35, rh_adj - rh_inr)
+        rh_adj = 1. - h_var - cfg%rh_inc
+        rh_rain = max (0.35, rh_adj - cfg%rh_inr)
 
         ! -----------------------------------------------------------------------
         ! fix negative water species from outside
         ! -----------------------------------------------------------------------
 
-        if (fix_negative) &
+        if (cfg%fix_negative) &
             call neg_adj (ks, ke, tz, dp, qvz, qlz, qrz, qiz, qsz, qgz, cond)
 
-        condensation (i) = condensation (i) + cond * convt * ntimes
+        condensation (i) = condensation (i) + cond * convt * cfg%ntimes
 
         ! -----------------------------------------------------------------------
         ! fast microphysics loop
@@ -1453,7 +1624,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
 
         if (do_mp_full) then
 
-            call mp_full (ks, ke, ntimes, tz, qvz, qlz, qrz, qiz, qsz, qgz, dp, dz, &
+            call mp_full (ks, ke, cfg%ntimes, tz, qvz, qlz, qrz, qiz, qsz, qgz, dp, dz, &
                 u, v, w, den, denfac, ccn, cin, dts, rh_adj, rh_rain, h_var, dte (i), &
                 water (i), rain (i), ice (i), snow (i), graupel (i), prefluxw (i, :), &
                 prefluxr (i, :), prefluxi (i, :), prefluxs (i, :), prefluxg (i, :), &
@@ -1466,7 +1637,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         ! cloud fraction diagnostic
         ! -----------------------------------------------------------------------
 
-        if (do_qa .and. last_step) then
+        if (cfg%do_qa .and. last_step) then
             call cloud_fraction (ks, ke, pz, den, qvz, qlz, qrz, qiz, qsz, qgz, qaz, &
                 tz, h_var, gsize (i))
         endif
@@ -1505,34 +1676,34 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
 
         do k = ks, ke
             if (qlz (k) .gt. qcmin) then
-                call cal_pc_ed_oe_rr_tv (qlz (k), den (k), blinw, muw, pcaw, pcbw, pcw (i, k), &
+                call cal_pc_ed_oe_rr_tv (qlz (k), den (k), cfg%blinw, cfg%muw, pcaw, pcbw, pcw (i, k), &
                     edaw, edbw, edw (i, k), oeaw, oebw, oew (i, k), rraw, rrbw, rrw (i, k), &
                     tvaw, tvbw, tvw (i, k))
             endif
             if (qiz (k) .gt. qcmin) then
-                call cal_pc_ed_oe_rr_tv (qiz (k), den (k), blini, mui, pcai, pcbi, pci (i, k), &
+                call cal_pc_ed_oe_rr_tv (qiz (k), den (k), cfg%blini, cfg%mui, pcai, pcbi, pci (i, k), &
                     edai, edbi, edi (i, k), oeai, oebi, oei (i, k), rrai, rrbi, rri (i, k), &
                     tvai, tvbi, tvi (i, k))
             endif
             if (qrz (k) .gt. qcmin) then
-                call cal_pc_ed_oe_rr_tv (qrz (k), den (k), blinr, mur, pcar, pcbr, pcr (i, k), &
+                call cal_pc_ed_oe_rr_tv (qrz (k), den (k), cfg%blinr, cfg%mur, pcar, pcbr, pcr (i, k), &
                     edar, edbr, edr (i, k), oear, oebr, oer (i, k), rrar, rrbr, rrr (i, k), &
                     tvar, tvbr, tvr (i, k))
             endif
             if (qsz (k) .gt. qcmin) then
-                call cal_pc_ed_oe_rr_tv (qsz (k), den (k), blins, mus, pcas, pcbs, pcs (i, k), &
+                call cal_pc_ed_oe_rr_tv (qsz (k), den (k), cfg%blins, cfg%mus, pcas, pcbs, pcs (i, k), &
                     edas, edbs, eds (i, k), oeas, oebs, oes (i, k), rras, rrbs, rrs (i, k), &
                     tvas, tvbs, tvs (i, k))
             endif
-            if (do_hail) then
+            if (cfg%do_hail) then
                 if (qgz (k) .gt. qcmin) then
-                    call cal_pc_ed_oe_rr_tv (qgz (k), den (k), blinh, muh, pcah, pcbh, pcg (i, k), &
+                    call cal_pc_ed_oe_rr_tv (qgz (k), den (k), cfg%blinh, cfg%muh, pcah, pcbh, pcg (i, k), &
                         edah, edbh, edg (i, k), oeah, oebh, oeg (i, k), rrah, rrbh, rrg (i, k), &
                         tvah, tvbh, tvg (i, k))
                 endif
             else
                 if (qgz (k) .gt. qcmin) then
-                    call cal_pc_ed_oe_rr_tv (qgz (k), den (k), bling, mug, pcag, pcbg, pcg (i, k), &
+                    call cal_pc_ed_oe_rr_tv (qgz (k), den (k), cfg%bling, cfg%mug, pcag, pcbg, pcg (i, k), &
                         edag, edbg, edg (i, k), oeag, oebg, oeg (i, k), rrag, rrbg, rrg (i, k), &
                         tvag, tvbg, tvg (i, k))
                 endif
@@ -1544,7 +1715,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         ! update temperature before delp and q update
         ! -----------------------------------------------------------------------
 
-        if (do_sedi_uv) then
+        if (cfg%do_sedi_uv) then
             do k = ks, ke
                 c8 = mhc (qvz (k), qlz (k), qrz (k), qiz (k), qsz (k), qgz (k)) * c_air
                 tzuv (k) = 0.5 * (ua (i, k) ** 2 + va (i, k) ** 2 - (u (k) ** 2 + v (k) ** 2)) / c8
@@ -1552,7 +1723,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
             enddo
         endif
 
-        if (do_sedi_w) then
+        if (cfg%do_sedi_w) then
             do k = ks, ke
                 c8 = mhc (qvz (k), qlz (k), qrz (k), qiz (k), qsz (k), qgz (k)) * c_air
                 tzw (k) = 0.5 * (wa (i, k) ** 2 - w (k) ** 2) / c8
@@ -1564,7 +1735,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         ! total energy checker
         ! -----------------------------------------------------------------------
 
-        if (consv_checker) then
+        if (cfg%consv_checker) then
             call mtetw (ks, ke, qvz, qlz, qrz, qiz, qsz, qgz, tz, u, v, w, &
                 dp, dte (i), 0.0, water (i), rain (i), ice (i), snow (i), &
                 graupel (i), 0.0, 0.0, dtm, te_end_d (i, :), tw_end_d (i, :), &
@@ -1630,7 +1801,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         ! update temperature after delp and q update
         ! -----------------------------------------------------------------------
 
-        if (do_sedi_uv) then
+        if (cfg%do_sedi_uv) then
             do k = ks, ke
                 tz (k) = tz (k) - tzuv (k)
                 q_liq (k) = qlz (k) + qrz (k)
@@ -1648,7 +1819,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
             enddo
         endif
 
-        if (do_sedi_w) then
+        if (cfg%do_sedi_w) then
             do k = ks, ke
                 tz (k) = tz (k) - tzw (k)
                 q_liq (k) = qlz (k) + qrz (k)
@@ -1669,7 +1840,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         ! total energy checker
         ! -----------------------------------------------------------------------
 
-        if (consv_checker) then
+        if (cfg%consv_checker) then
             call mtetw (ks, ke, qv (i, :), ql (i, :), qr (i, :), qi (i, :), &
                 qs (i, :), qg (i, :), tz, ua (i, :), va (i, :), wa (i, :), &
                 delp (i, :), dte (i), 0.0, water (i), rain (i), ice (i), &
@@ -1701,7 +1872,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         if (do_inline_mp) then
             do k = ks, ke
                 q_cond = qlz (k) + qrz (k) + qiz (k) + qsz (k) + qgz (k)
-                if (cp_heating) then
+                if (cfg%cp_heating) then
                     con_r8 = one_r8 - (qvz (k) + q_cond)
                     c8 = mhc (con_r8, qvz (k), q_liq (k), q_sol (k)) * c_air
                     cp8 = con_r8 * cp_air + qvz (k) * cp_vap + q_liq (k) * c_liq + q_sol (k) * c_ice
@@ -1727,9 +1898,9 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         ! total energy checker
         ! -----------------------------------------------------------------------
 
-        if (consv_checker) then
+        if (cfg%consv_checker) then
             if (abs (sum (te_end_d (i, :)) + te_b_end_d (i) - sum (te_beg_d (i, :)) - te_b_beg_d (i)) / &
-                 (sum (te_beg_d (i, :)) + te_b_beg_d (i)) .gt. te_err) then
+                 (sum (te_beg_d (i, :)) + te_b_beg_d (i)) .gt. cfg%te_err) then
                 print*, "GFDL-MP-DRY TE: ", &
                     !(sum (te_beg_d (i, :)) + te_b_beg_d (i)), &
                     !(sum (te_end_d (i, :)) + te_b_end_d (i)), &
@@ -1737,7 +1908,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
                     (sum (te_beg_d (i, :)) + te_b_beg_d (i))
             endif
             if (abs (sum (tw_end_d (i, :)) + tw_b_end_d (i) - sum (tw_beg_d (i, :)) - tw_b_beg_d (i)) / &
-                 (sum (tw_beg_d (i, :)) + tw_b_beg_d (i)) .gt. tw_err) then
+                 (sum (tw_beg_d (i, :)) + tw_b_beg_d (i)) .gt. cfg%tw_err) then
                 print*, "GFDL-MP-DRY TW: ", &
                     !(sum (tw_beg_d (i, :)) + tw_b_beg_d (i)), &
                     !(sum (tw_end_d (i, :)) + tw_b_end_d (i)), &
@@ -1746,7 +1917,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
             endif
             !print*, "GFDL MP TE DRY LOSS (%) : ", te_loss (i) / (sum (te_beg_d (i, :)) + te_b_beg_d (i)) * 100.0
             if (abs (sum (te_end_m (i, :)) + te_b_end_m (i) - sum (te_beg_m (i, :)) - te_b_beg_m (i)) / &
-                 (sum (te_beg_m (i, :)) + te_b_beg_m (i)) .gt. te_err) then
+                 (sum (te_beg_m (i, :)) + te_b_beg_m (i)) .gt. cfg%te_err) then
                 print*, "GFDL-MP-WET TE: ", &
                     !(sum (te_beg_m (i, :)) + te_b_beg_m (i)), &
                     !(sum (te_end_m (i, :)) + te_b_end_m (i)), &
@@ -1754,7 +1925,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
                     (sum (te_beg_m (i, :)) + te_b_beg_m (i))
             endif
             if (abs (sum (tw_end_m (i, :)) + tw_b_end_m (i) - sum (tw_beg_m (i, :)) - tw_b_beg_m (i)) / &
-                 (sum (tw_beg_m (i, :)) + tw_b_beg_m (i)) .gt. tw_err) then
+                 (sum (tw_beg_m (i, :)) + tw_b_beg_m (i)) .gt. cfg%tw_err) then
                 print*, "GFDL-MP-WET TW: ", &
                     !(sum (tw_beg_m (i, :)) + tw_b_beg_m (i)), &
                     !(sum (tw_end_m (i, :)) + tw_b_end_m (i)), &
@@ -1973,7 +2144,7 @@ subroutine mp_full (ks, ke, ntimes, tz, qv, ql, qr, qi, qs, qg, dp, dz, u, v, w,
         call ice_cloud (ks, ke, tz, qv, ql, qr, qi, qs, qg, den, &
             denfac, vtw, vtr, vti, vts, vtg, dts, h_var)
 
-        if (do_subgrid_proc) then
+        if (cfg%do_subgrid_proc) then
 
             ! -----------------------------------------------------------------------
             ! temperature sentive high vertical resolution processes
@@ -2052,7 +2223,7 @@ subroutine mp_fast (ks, ke, tz, qv, ql, qr, qi, qs, qg, dtm, dp, den, &
     call cal_mhc_lhc (ks, ke, qv, ql, qr, qi, qs, qg, q_liq, q_sol, cvm, te8, tz, &
         lcpk, icpk, tcpk, tcp3)
 
-    if (.not. do_warm_rain_mp .and. fast_fr_mlt) then
+    if (.not. cfg%do_warm_rain_mp .and. cfg%fast_fr_mlt) then
 
         ! -----------------------------------------------------------------------
         ! cloud ice melting to form cloud water and rain
@@ -2074,14 +2245,14 @@ subroutine mp_fast (ks, ke, tz, qv, ql, qr, qi, qs, qg, dtm, dp, den, &
     ! cloud water condensation and evaporation
     ! -----------------------------------------------------------------------
 
-    if (delay_cond_evap) then
+    if (cfg%delay_cond_evap) then
         cond_evap = last_step
     else
         cond_evap = .true.
     endif
 
     if (cond_evap) then
-        do n = 1, nconds
+        do n = 1, cfg%nconds
             call pcond_pevap (ks, ke, dtm, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, den, &
                 lcpk, icpk, tcpk, tcp3, cond, reevap)
         enddo
@@ -2090,7 +2261,7 @@ subroutine mp_fast (ks, ke, tz, qv, ql, qr, qi, qs, qg, dtm, dp, den, &
     condensation = condensation + cond * convt
     evaporation = evaporation + reevap * convt
 
-    if (.not. do_warm_rain_mp .and. fast_fr_mlt) then
+    if (.not. cfg%do_warm_rain_mp .and. cfg%fast_fr_mlt) then
 
         ! -----------------------------------------------------------------------
         ! cloud water freezing to form cloud ice and snow
@@ -2135,7 +2306,7 @@ subroutine mp_fast (ks, ke, tz, qv, ql, qr, qi, qs, qg, dtm, dp, den, &
 
     call praut_simp (ks, ke, dtm, tz, qv, ql, qr, qi, qs, qg)
 
-    if (.not. do_warm_rain_mp .and. fast_dep_sub) then
+    if (.not. cfg%do_warm_rain_mp .and. cfg%fast_dep_sub) then
 
         ! -----------------------------------------------------------------------
         ! cloud ice deposition and sublimation
@@ -2240,15 +2411,15 @@ subroutine sedimentation (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
     ! terminal fall and melting of falling cloud ice into rain
     ! -----------------------------------------------------------------------
 
-    if (do_psd_ice_fall) then
-        call term_rsg (ks, ke, qi, den, denfac, vi_fac, blini, mui, tvai, tvbi, vi_max, const_vi, vti)
+    if (cfg%do_psd_ice_fall) then
+        call term_rsg (ks, ke, qi, den, denfac, cfg%vi_fac, cfg%blini, cfg%mui, tvai, tvbi, cfg%vi_max, cfg%const_vi, vti)
     else
-        call term_ice (ks, ke, tz, qi, den, vi_fac, vi_max, const_vi, vti)
+        call term_ice (ks, ke, tz, qi, den, cfg%vi_fac, cfg%vi_max, cfg%const_vi, vti)
     endif
 
-    if (do_sedi_melt) then
+    if (cfg%do_sedi_melt) then
         call sedi_melt (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
-            vti, r1, tau_imlt, icpk, "qi")
+            vti, r1, cfg%tau_imlt, icpk, "qi")
     endif
 
     call terminal_fall (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
@@ -2263,11 +2434,11 @@ subroutine sedimentation (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
     ! terminal fall and melting of falling snow into rain
     ! -----------------------------------------------------------------------
 
-    call term_rsg (ks, ke, qs, den, denfac, vs_fac, blins, mus, tvas, tvbs, vs_max, const_vs, vts)
+    call term_rsg (ks, ke, qs, den, denfac, cfg%vs_fac, cfg%blins, cfg%mus, tvas, tvbs, cfg%vs_max, cfg%const_vs, vts)
 
-    if (do_sedi_melt) then
+    if (cfg%do_sedi_melt) then
         call sedi_melt (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
-            vts, r1, tau_smlt, icpk, "qs")
+            vts, r1, cfg%tau_smlt, icpk, "qs")
     endif
 
     call terminal_fall (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
@@ -2282,15 +2453,15 @@ subroutine sedimentation (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
     ! terminal fall and melting of falling graupel into rain
     ! -----------------------------------------------------------------------
 
-    if (do_hail) then
-        call term_rsg (ks, ke, qg, den, denfac, vg_fac, blinh, muh, tvah, tvbh, vg_max, const_vg, vtg)
+    if (cfg%do_hail) then
+        call term_rsg (ks, ke, qg, den, denfac, cfg%vg_fac, cfg%blinh, cfg%muh, tvah, tvbh, cfg%vg_max, cfg%const_vg, vtg)
     else
-        call term_rsg (ks, ke, qg, den, denfac, vg_fac, bling, mug, tvag, tvbg, vg_max, const_vg, vtg)
+        call term_rsg (ks, ke, qg, den, denfac, cfg%vg_fac, cfg%bling, cfg%mug, tvag, tvbg, cfg%vg_max, cfg%const_vg, vtg)
     endif
 
-    if (do_sedi_melt) then
+    if (cfg%do_sedi_melt) then
         call sedi_melt (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
-            vtg, r1, tau_gmlt, icpk, "qg")
+            vtg, r1, cfg%tau_gmlt, icpk, "qg")
     endif
 
     call terminal_fall (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
@@ -2305,9 +2476,9 @@ subroutine sedimentation (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
     ! terminal fall of cloud water
     ! -----------------------------------------------------------------------
 
-    if (do_psd_water_fall) then
+    if (cfg%do_psd_water_fall) then
 
-        call term_rsg (ks, ke, ql, den, denfac, vw_fac, blinw, muw, tvaw, tvbw, vw_max, const_vw, vtw)
+        call term_rsg (ks, ke, ql, den, denfac, cfg%vw_fac, cfg%blinw, cfg%muw, tvaw, tvbw, cfg%vw_max, cfg%const_vw, vtw)
 
         call terminal_fall (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
             vtw, w1, pfw, u, v, w, dte, "ql")
@@ -2323,7 +2494,7 @@ subroutine sedimentation (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
     ! terminal fall of rain
     ! -----------------------------------------------------------------------
 
-    call term_rsg (ks, ke, qr, den, denfac, vr_fac, blinr, mur, tvar, tvbr, vr_max, const_vr, vtr)
+    call term_rsg (ks, ke, qr, den, denfac, cfg%vr_fac, cfg%blinr, cfg%mur, tvar, tvbr, cfg%vr_max, cfg%const_vr, vtr)
 
     call terminal_fall (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
         vtr, r1, pfr, u, v, w, dte, "qr")
@@ -2384,12 +2555,12 @@ subroutine term_ice (ks, ke, tz, q, den, v_fac, v_max, const_v, vt)
                 vt (k) = 0.0
             else
                 tc (k) = tz (k) - tice
-                if (ifflag .eq. 1) then
+                if (cfg%ifflag .eq. 1) then
                     vt (k) = (3. + log10 (qden)) * (tc (k) * (aa * tc (k) + bb) + cc) + &
                         dd * tc (k) + ee
                     vt (k) = 0.01 * v_fac * exp (vt (k) * log (10.))
                 endif
-                if (ifflag .eq. 2) &
+                if (cfg%ifflag .eq. 2) &
                     vt (k) = v_fac * 3.29 * exp (0.16 * log (qden))
                 vt (k) = min (v_max, max (0.0, vt (k)))
             endif
@@ -2616,7 +2787,7 @@ subroutine terminal_fall (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
     ! momentum transportation during sedimentation
     ! -----------------------------------------------------------------------
 
-    if (do_sedi_w) then
+    if (cfg%do_sedi_w) then
         do k = ks, ke
             dm (k) = dp (k) * (1. + qv (k) + ql (k) + qr (k) + qi (k) + qs (k) + qg (k))
         enddo
@@ -2649,15 +2820,15 @@ subroutine terminal_fall (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
             print *, "gfdl_mp: qflag error!"
     end select
 
-    if (sedflag .eq. 1) &
+    if (cfg%sedflag .eq. 1) &
         call implicit_fall (dts, ks, ke, ze, vt, dp, q, x1, m1)
-    if (sedflag .eq. 2) &
+    if (cfg%sedflag .eq. 2) &
         call explicit_fall (dts, ks, ke, ze, vt, dp, q, x1, m1)
-    if (sedflag .eq. 3) &
+    if (cfg%sedflag .eq. 3) &
         call lagrangian_fall (ks, ke, zs, ze, zt, dp, q, x1, m1)
-    if (sedflag .eq. 4) &
+    if (cfg%sedflag .eq. 4) &
         call implicit_lagrangian_fall (dts, ks, ke, zs, ze, zt, vt, dp, q, &
-            x1, m1, sed_fac)
+            x1, m1, cfg%sed_fac)
 
     select case (qflag)
         case ("ql")
@@ -2687,11 +2858,11 @@ subroutine terminal_fall (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
     ! momentum transportation during sedimentation
     ! -----------------------------------------------------------------------
 
-    if (do_sedi_uv) then
+    if (cfg%do_sedi_uv) then
         call sedi_uv (ks, ke, m1, dp, u, v)
     endif
 
-    if (do_sedi_w) then
+    if (cfg%do_sedi_w) then
         call sedi_w (ks, ke, m1, w, vt, dm)
     endif
 
@@ -2707,7 +2878,7 @@ subroutine terminal_fall (dts, ks, ke, tz, qv, ql, qr, qi, qs, qg, dz, dp, &
     ! heat exchanges during sedimentation
     ! -----------------------------------------------------------------------
 
-    if (do_sedi_heat) then
+    if (cfg%do_sedi_heat) then
         call sedi_heat (ks, ke, dp, m1, dz, tz, qv, ql, qr, qi, qs, qg, c_ice)
     endif
 
@@ -2903,8 +3074,8 @@ subroutine prevp (ks, ke, dts, tz, qv, ql, qr, qi, qs, qg, den, denfac, rh_rain,
     ! -----------------------------------------------------------------------
 
     fac_revp = 1.
-    if (tau_revp .gt. 1.e-6) then
-        fac_revp = 1. - exp (- dts / tau_revp)
+    if (cfg%tau_revp .gt. 1.e-6) then
+        fac_revp = 1. - exp (- dts / cfg%tau_revp)
     endif
 
     ! -----------------------------------------------------------------------
@@ -2946,9 +3117,9 @@ subroutine prevp (ks, ke, dts, tz, qv, ql, qr, qi, qs, qg, den, denfac, rh_rain,
             endif
             qden = qr (k) * den (k)
             t2 = tin * tin
-            sink = psub (t2, dq, qden, qsat, crevp, den (k), denfac (k), blinr, mur, lcpk (k), cvm (k))
+            sink = psub (t2, dq, qden, qsat, crevp, den (k), denfac (k), cfg%blinr, cfg%mur, lcpk (k), cvm (k))
             sink = min (qr (k), dts * fac_revp * sink, dqv / (1. + lcpk (k) * dqdt))
-            if (use_rhc_revap .and. rh_tem .ge. rhc_revap) then
+            if (cfg%use_rhc_revap .and. rh_tem .ge. cfg%rhc_revap) then
                 sink = 0.0
             endif
 
@@ -3005,11 +3176,11 @@ subroutine pracw (ks, ke, dts, tz, qv, ql, qr, qi, qs, qg, den, denfac, vtw, vtr
         if (tz (k) .gt. t_wfr .and. qr (k) .gt. qcmin .and. ql (k) .gt. qcmin) then
 
             qden = qr (k) * den (k)
-            if (do_new_acc_water) then
+            if (cfg%do_new_acc_water) then
                 sink = dts * acr3d (vtr (k), vtw (k), ql (k), qr (k), cracw, acco (:, 5), &
                     acc (9), acc (10), den (k))
             else
-                sink = dts * acr2d (qden, cracw, denfac (k), blinr, mur)
+                sink = dts * acr2d (qden, cracw, denfac (k), cfg%blinr, cfg%mur)
                 sink = sink / (1. + sink) * ql (k)
             endif
 
@@ -3057,16 +3228,16 @@ subroutine praut (ks, ke, dts, tz, qv, ql, qr, qi, qs, qg, den, ccn, h_var)
 
     real, dimension (ks:ke) :: dl, c_praut
 
-    if (irain_f .eq. 0) then
+    if (cfg%irain_f .eq. 0) then
 
-        call linear_prof (ke - ks + 1, ql (ks), dl (ks), z_slope_liq, h_var)
+        call linear_prof (ke - ks + 1, ql (ks), dl (ks), cfg%z_slope_liq, h_var)
 
         do k = ks, ke
 
             if (tz (k) .gt. t_wfr .and. ql (k) .gt. qcmin) then
 
-                if (do_psd_water_num) then
-                    call cal_pc_ed_oe_rr_tv (ql (k), den (k), blinw, muw, &
+                if (cfg%do_psd_water_num) then
+                    call cal_pc_ed_oe_rr_tv (ql (k), den (k), cfg%blinw, cfg%muw, &
                         pca = pcaw, pcb = pcbw, pc = ccn (k))
                     ccn (k) = ccn (k) / den (k)
                 endif
@@ -3093,14 +3264,14 @@ subroutine praut (ks, ke, dts, tz, qv, ql, qr, qi, qs, qg, den, ccn, h_var)
 
     endif
 
-    if (irain_f .eq. 1) then
+    if (cfg%irain_f .eq. 1) then
 
         do k = ks, ke
 
             if (tz (k) .gt. t_wfr .and. ql (k) .gt. qcmin) then
 
-                if (do_psd_water_num) then
-                    call cal_pc_ed_oe_rr_tv (ql (k), den (k), blinw, muw, &
+                if (cfg%do_psd_water_num) then
+                    call cal_pc_ed_oe_rr_tv (ql (k), den (k), cfg%blinw, cfg%muw, &
                         pca = pcaw, pcb = pcbw, pc = ccn (k))
                     ccn (k) = ccn (k) / den (k)
                 endif
@@ -3165,7 +3336,7 @@ subroutine ice_cloud (ks, ke, tz, qv, ql, qr, qi, qs, qg, den, &
     call cal_mhc_lhc (ks, ke, qv, ql, qr, qi, qs, qg, q_liq, q_sol, cvm, te8, tz, &
         lcpk, icpk, tcpk, tcp3)
 
-    if (.not. do_warm_rain_mp) then
+    if (.not. cfg%do_warm_rain_mp) then
 
         ! -----------------------------------------------------------------------
         ! cloud ice melting to form cloud water and rain
@@ -3183,7 +3354,7 @@ subroutine ice_cloud (ks, ke, tz, qv, ql, qr, qi, qs, qg, den, &
         ! vertical subgrid variability
         ! -----------------------------------------------------------------------
 
-        call linear_prof (ke - ks + 1, qi, di, z_slope_ice, h_var)
+        call linear_prof (ke - ks + 1, qi, di, cfg%z_slope_ice, h_var)
 
         ! -----------------------------------------------------------------------
         ! snow melting (includes snow accretion with cloud water and rain) to form cloud water and rain
@@ -3278,17 +3449,17 @@ subroutine pimlt (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, lcpk, icpk,
 
     real :: tc, tmp, sink, fac_imlt
 
-    fac_imlt = 1. - exp (- dts / tau_imlt)
+    fac_imlt = 1. - exp (- dts / cfg%tau_imlt)
 
     do k = ks, ke
 
-        tc = tz (k) - tice_mlt
+        tc = tz (k) - cfg%tice_mlt
 
         if (tc .gt. 0 .and. qi (k) .gt. qcmin) then
 
             sink = fac_imlt * tc / icpk (k)
             sink = min (qi (k), sink)
-            tmp = min (sink, dim (ql_mlt, ql (k)))
+            tmp = min (sink, dim (cfg%ql_mlt, ql (k)))
 
             call update_qt (qv (k), ql (k), qr (k), qi (k), qs (k), qg (k), &
                 0., tmp, sink - tmp, - sink, 0., 0., te8 (k), cvm (k), tz (k), &
@@ -3339,7 +3510,7 @@ subroutine pifr (ks, ke, qv, ql, qr, qi, qs, qg, tz, cvm, te8, den, lcpk, icpk, 
 
             sink = ql (k) * tc / dt_fr
             sink = min (ql (k), sink, tc / icpk (k))
-            qim = qi0_crt / den (k)
+            qim = cfg%qi0_crt / den (k)
             tmp = min (sink, dim (qim, qi (k)))
 
             call update_qt (qv (k), ql (k), qr (k), qi (k), qs (k), qg (k), &
@@ -3397,11 +3568,11 @@ subroutine psmlt (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, den, denfac
             psacw = 0.
             qden = qs (k) * den (k)
             if (ql (k) .gt. qcmin) then
-                if (do_new_acc_water) then
+                if (cfg%do_new_acc_water) then
                     psacw = acr3d (vts (k), vtw (k), ql (k), qs (k), csacw, acco (:, 7), &
                         acc (13), acc (14), den (k))
                 else
-                    factor = acr2d (qden, csacw, denfac (k), blins, mus)
+                    factor = acr2d (qden, csacw, denfac (k), cfg%blins, cfg%mus)
                     psacw = factor / (1. + dts * factor) * ql (k)
                 endif
             endif
@@ -3418,11 +3589,11 @@ subroutine psmlt (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, den, denfac
             tin = tz (k)
             qsi = iqs (tin, den (k), dqdt)
             dq = qsi - qv (k)
-            sink = max (0., pmlt (tc, dq, qden, psacw, psacr, csmlt, den (k), denfac (k), blins, mus, &
+            sink = max (0., pmlt (tc, dq, qden, psacw, psacr, csmlt, den (k), denfac (k), cfg%blins, cfg%mus, &
                 lcpk (k), icpk (k), cvm (k)))
 
             sink = min (qs (k), (sink + pracs) * dts, tc / icpk (k))
-            tmp = min (sink, dim (qs_mlt, ql (k)))
+            tmp = min (sink, dim (cfg%qs_mlt, ql (k)))
 
             call update_qt (qv (k), ql (k), qr (k), qi (k), qs (k), qg (k), &
                 0., tmp, sink - tmp, 0., - sink, 0., te8 (k), cvm (k), tz (k), &
@@ -3479,14 +3650,14 @@ subroutine pgmlt (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, den, denfac
             pgacw = 0.
             qden = qg (k) * den (k)
             if (ql (k) .gt. qcmin) then
-                if (do_new_acc_water) then
+                if (cfg%do_new_acc_water) then
                     pgacw = acr3d (vtg (k), vtw (k), ql (k), qg (k), cgacw, acco (:, 9), &
                         acc (17), acc (18), den (k))
                 else
-                    if (do_hail) then
-                        factor = acr2d (qden, cgacw, denfac (k), blinh, muh)
+                    if (cfg%do_hail) then
+                        factor = acr2d (qden, cgacw, denfac (k), cfg%blinh, cfg%muh)
                     else
-                        factor = acr2d (qden, cgacw, denfac (k), bling, mug)
+                        factor = acr2d (qden, cgacw, denfac (k), cfg%bling, cfg%mug)
                     endif
                     pgacw = factor / (1. + dts * factor) * ql (k)
                 endif
@@ -3501,12 +3672,12 @@ subroutine pgmlt (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, den, denfac
             tin = tz (k)
             qsi = iqs (tin, den (k), dqdt)
             dq = qsi - qv (k)
-            if (do_hail) then
+            if (cfg%do_hail) then
                 sink = max (0., pmlt (tc, dq, qden, pgacw, pgacr, cgmlt, den (k), denfac (k), &
-                    blinh, muh, lcpk (k), icpk (k), cvm (k)))
+                    cfg%blinh, cfg%muh, lcpk (k), icpk (k), cvm (k)))
             else
                 sink = max (0., pmlt (tc, dq, qden, pgacw, pgacr, cgmlt, den (k), denfac (k), &
-                    bling, mug, lcpk (k), icpk (k), cvm (k)))
+                    cfg%bling, cfg%mug, lcpk (k), icpk (k), cvm (k)))
             endif
 
             sink = min (qg (k), sink * dts, tc / icpk (k))
@@ -3560,16 +3731,16 @@ subroutine psaci (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, den, denfac, vti, vts
             sink = 0.
             qden = qs (k) * den (k)
             if (qs (k) .gt. qcmin) then
-                if (do_new_acc_ice) then
+                if (cfg%do_new_acc_ice) then
                     sink = dts * acr3d (vts (k), vti (k), qi (k), qs (k), csaci, acco (:, 8), &
                         acc (15), acc (16), den (k))
                 else
-                    factor = dts * acr2d (qden, csaci, denfac (k), blins, mus)
+                    factor = dts * acr2d (qden, csaci, denfac (k), cfg%blins, cfg%mus)
                     sink = factor / (1. + factor) * qi (k)
                 endif
             endif
 
-            sink = min (fi2s_fac * qi (k), sink)
+            sink = min (cfg%fi2s_fac * qi (k), sink)
 
             call update_qq (qv (k), ql (k), qr (k), qi (k), qs (k), qg (k), &
                 0., 0., 0., - sink, sink, 0.)
@@ -3610,7 +3781,7 @@ subroutine psaut (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, den, di)
 
     real :: tc, sink, fac_i2s, q_plus, qim, dq, tmp
 
-    fac_i2s = 1. - exp (- dts / tau_i2s)
+    fac_i2s = 1. - exp (- dts / cfg%tau_i2s)
 
     do k = ks, ke
 
@@ -3622,7 +3793,7 @@ subroutine psaut (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, den, di)
             tmp = fac_i2s * exp (0.025 * tc)
             di (k) = max (di (k), qcmin)
             q_plus = qi (k) + di (k)
-            qim = qi0_crt / den (k)
+            qim = cfg%qi0_crt / den (k)
             if (q_plus .gt. (qim + qcmin)) then
                 if (qim .gt. (qi (k) - di (k))) then
                     dq = (0.25 * (q_plus - qim) ** 2) / di (k)
@@ -3632,7 +3803,7 @@ subroutine psaut (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, den, di)
                 sink = tmp * dq
             endif
 
-            sink = min (fi2s_fac * qi (k), sink)
+            sink = min (cfg%fi2s_fac * qi (k), sink)
 
             call update_qq (qv (k), ql (k), qr (k), qi (k), qs (k), qg (k), &
                 0., 0., 0., - sink, sink, 0.)
@@ -3682,20 +3853,20 @@ subroutine pgaci (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, den, denfac, vti, vtg
             sink = 0.
             qden = qg (k) * den (k)
             if (qg (k) .gt. qcmin) then
-                if (do_new_acc_ice) then
+                if (cfg%do_new_acc_ice) then
                     sink = dts * acr3d (vtg (k), vti (k), qi (k), qg (k), cgaci, acco (:, 10), &
                         acc (19), acc (20), den (k))
                 else
-                    if (do_hail) then
-                        factor = dts * acr2d (qden, cgaci, denfac (k), blinh, muh)
+                    if (cfg%do_hail) then
+                        factor = dts * acr2d (qden, cgaci, denfac (k), cfg%blinh, cfg%muh)
                     else
-                        factor = dts * acr2d (qden, cgaci, denfac (k), bling, mug)
+                        factor = dts * acr2d (qden, cgaci, denfac (k), cfg%bling, cfg%mug)
                     endif
                     sink = factor / (1. + factor) * qi (k)
                 endif
             endif
 
-            sink = min (fi2g_fac * qi (k), sink)
+            sink = min (cfg%fi2g_fac * qi (k), sink)
 
             call update_qq (qv (k), ql (k), qr (k), qi (k), qs (k), qg (k), &
                 0., 0., 0., - sink, 0., sink)
@@ -3754,7 +3925,7 @@ subroutine psacr_pgfr (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, den, d
             endif
 
             pgfr = dts * cgfr (1) / den (k) * (exp (- cgfr (2) * tc) - 1.) * &
-                exp ((6 + mur) / (mur + 3) * log (6 * qr (k) * den (k)))
+                exp ((6 + cfg%mur) / (cfg%mur + 3) * log (6 * qr (k) * den (k)))
 
             sink = psacr + pgfr
             factor = min (sink, qr (k), - tc / icpk (k)) / max (sink, qcmin)
@@ -3809,7 +3980,7 @@ subroutine pgacs (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, den, vts, vtg)
 
             sink = dts * acr3d (vtg (k), vts (k), qs (k), qg (k), cgacs, acco (:, 4), &
                 acc (7), acc (8), den (k))
-            sink = min (fs2g_fac * qs (k), sink)
+            sink = min (cfg%fs2g_fac * qs (k), sink)
 
             call update_qq (qv (k), ql (k), qr (k), qi (k), qs (k), qg (k), &
                 0., 0., 0., 0., - sink, sink)
@@ -3857,13 +4028,13 @@ subroutine pgaut (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, den)
         if (tc .lt. 0. .and. qs (k) .gt. qcmin) then
 
             sink = 0
-            qsm = qs0_crt / den (k)
+            qsm = cfg%qs0_crt / den (k)
             if (qs (k) .gt. qsm) then
                 factor = dts * 1.e-3 * exp (0.09 * (tz (k) - tice))
                 sink = factor / (1. + factor) * (qs (k) - qsm)
             endif
 
-            sink = min (fs2g_fac * qs (k), sink)
+            sink = min (cfg%fs2g_fac * qs (k), sink)
 
             call update_qq (qv (k), ql (k), qr (k), qi (k), qs (k), qg (k), &
                 0., 0., 0., 0., - sink, sink)
@@ -3918,10 +4089,10 @@ subroutine pgacw_pgacr (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, den, 
             pgacw = 0.
             if (ql (k) .gt. qcmin) then
                 qden = qg (k) * den (k)
-                if (do_hail) then
-                    factor = dts * acr2d (qden, cgacw, denfac (k), blinh, muh)
+                if (cfg%do_hail) then
+                    factor = dts * acr2d (qden, cgacw, denfac (k), cfg%blinh, cfg%muh)
                 else
-                    factor = dts * acr2d (qden, cgacw, denfac (k), bling, mug)
+                    factor = dts * acr2d (qden, cgacw, denfac (k), cfg%bling, cfg%mug)
                 endif
                 pgacw = factor / (1. + factor) * ql (k)
             endif
@@ -4008,7 +4179,7 @@ subroutine subgrid_z_proc (ks, ke, den, denfac, dts, rh_adj, tz, qv, ql, qr, &
     ! instant processes (include deposition, evaporation, and sublimation)
     ! -----------------------------------------------------------------------
 
-    if (.not. do_warm_rain_mp) then
+    if (.not. cfg%do_warm_rain_mp) then
 
         call pinst (ks, ke, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, den, &
             lcpk, icpk, tcpk, tcp3, rh_adj, dep, sub, reevap)
@@ -4019,20 +4190,20 @@ subroutine subgrid_z_proc (ks, ke, den, denfac, dts, rh_adj, tz, qv, ql, qr, &
     ! cloud water condensation and evaporation
     ! -----------------------------------------------------------------------
 
-    if (delay_cond_evap) then
+    if (cfg%delay_cond_evap) then
         cond_evap = last_step
     else
         cond_evap = .true.
     endif
 
     if (cond_evap) then
-        do n = 1, nconds
+        do n = 1, cfg%nconds
             call pcond_pevap (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, den, &
                 lcpk, icpk, tcpk, tcp3, cond, reevap)
         enddo
     endif
 
-    if (.not. do_warm_rain_mp) then
+    if (.not. cfg%do_warm_rain_mp) then
 
         ! -----------------------------------------------------------------------
         ! enforce complete freezing below t_wfr
@@ -4119,7 +4290,7 @@ subroutine pinst (ks, ke, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, den, &
         ! instant deposit all water vapor to cloud ice when temperature is super low
         ! -----------------------------------------------------------------------
 
-        if (tz (k) .lt. t_min) then
+        if (tz (k) .lt. cfg%t_min) then
 
             sink = dim (qv (k), qcmin)
             dep = dep + sink * dp (k)
@@ -4138,7 +4309,7 @@ subroutine pinst (ks, ke, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, den, &
         tin = (te8 (k) - lv00 * qpz + li00 * (qs (k) + qg (k))) / &
             mhc (qpz, qr (k), qs (k) + qg (k))
 
-        if (tin .gt. t_sub + 6.) then
+        if (tin .gt. cfg%t_sub + 6.) then
 
             qsi = iqs (tin, den (k), dqdt)
             rh = qpz / qsi
@@ -4198,8 +4369,8 @@ subroutine pcond_pevap (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, d
 
     real :: sink, tin, qpz, dqdt, qsw, rh_tem, dq, factor, fac_l2v, fac_v2l
 
-    fac_l2v = 1. - exp (- dts / tau_l2v)
-    fac_v2l = 1. - exp (- dts / tau_v2l)
+    fac_l2v = 1. - exp (- dts / cfg%tau_l2v)
+    fac_v2l = 1. - exp (- dts / cfg%tau_v2l)
 
     do k = ks, ke
 
@@ -4209,19 +4380,19 @@ subroutine pcond_pevap (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, d
         rh_tem = qpz / qsw
         dq = qsw - qv (k)
         if (dq .gt. 0.) then
-            if (do_evap_timescale) then
-                factor = min (1., fac_l2v * (rh_fac_evap * dq / qsw))
+            if (cfg%do_evap_timescale) then
+                factor = min (1., fac_l2v * (cfg%rh_fac_evap * dq / qsw))
             else
                 factor = 1.
             endif
             sink = min (ql (k), factor * dq / (1. + tcp3 (k) * dqdt))
-            if (use_rhc_cevap .and. rh_tem .ge. rhc_cevap) then
+            if (cfg%use_rhc_cevap .and. rh_tem .ge. cfg%rhc_cevap) then
                 sink = 0.
             endif
             reevap = reevap + sink * dp (k)
         else
-            if (do_cond_timescale) then
-                factor = min (1., fac_v2l * (rh_fac_cond * (- dq) / qsw))
+            if (cfg%do_cond_timescale) then
+                factor = min (1., fac_v2l * (cfg%rh_fac_cond * (- dq) / qsw))
             else
                 factor = 1.
             endif
@@ -4318,9 +4489,9 @@ subroutine pwbf (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, den, lcpk, i
 
     real :: tc, tin, sink, dqdt, qsw, qsi, qim, tmp, fac_wbf
 
-    if (.not. do_wbf) return
+    if (.not. cfg%do_wbf) return
 
-    fac_wbf = 1. - exp (- dts / tau_wbf)
+    fac_wbf = 1. - exp (- dts / cfg%tau_wbf)
 
     do k = ks, ke
 
@@ -4334,7 +4505,7 @@ subroutine pwbf (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, den, lcpk, i
             qv (k) .gt. qsi .and. qv (k) .lt. qsw) then
 
             sink = min (fac_wbf * ql (k), tc / icpk (k))
-            qim = qi0_crt / den (k)
+            qim = cfg%qi0_crt / den (k)
             tmp = min (sink, dim (qim, qi (k)))
 
             call update_qt (qv (k), ql (k), qr (k), qi (k), qs (k), qg (k), &
@@ -4386,8 +4557,8 @@ subroutine pbigg (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, den, ccn, l
 
         if (tc .gt. 0 .and. ql (k) .gt. qcmin) then
 
-            if (do_psd_water_num) then
-                call cal_pc_ed_oe_rr_tv (ql (k), den (k), blinw, muw, &
+            if (cfg%do_psd_water_num) then
+                call cal_pc_ed_oe_rr_tv (ql (k), den (k), cfg%blinw, cfg%muw, &
                     pca = pcaw, pcb = pcbw, pc = ccn (k))
                 ccn (k) = ccn (k) / den (k)
             endif
@@ -4452,20 +4623,20 @@ subroutine pidep_pisub (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, d
             tmp = dq / (1. + tcpk (k) * dqdt)
 
             if (qi (k) .gt. qcmin) then
-                if (.not. prog_ccn) then
-                    if (inflag .eq. 1) &
+                if (.not. cfg%prog_ccn) then
+                    if (cfg%inflag .eq. 1) &
                         cin (k) = 5.38e7 * exp (0.75 * log (qi (k) * den (k)))
-                    if (inflag .eq. 2) &
+                    if (cfg%inflag .eq. 2) &
                         cin (k) = exp (- 2.80 + 0.262 * (tice - tz (k))) * 1000.0
-                    if (inflag .eq. 3) &
+                    if (cfg%inflag .eq. 3) &
                         cin (k) = exp (- 0.639 + 12.96 * (qv (k) / qsi - 1.0)) * 1000.0
-                    if (inflag .eq. 4) &
+                    if (cfg%inflag .eq. 4) &
                         cin (k) = 5.e-3 * exp (0.304 * (tice - tz (k))) * 1000.0
-                    if (inflag .eq. 5) &
+                    if (cfg%inflag .eq. 5) &
                         cin (k) = 1.e-5 * exp (0.5 * (tice - tz (k))) * 1000.0
                 endif
-                if (do_psd_ice_num) then
-                    call cal_pc_ed_oe_rr_tv (qi (k), den (k), blini, mui, &
+                if (cfg%do_psd_ice_num) then
+                    call cal_pc_ed_oe_rr_tv (qi (k), den (k), cfg%blini, cfg%mui, &
                         pca = pcai, pcb = pcbi, pc = cin (k))
                     cin (k) = cin (k) / den (k)
                 endif
@@ -4477,18 +4648,18 @@ subroutine pidep_pisub (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, d
             if (dq .gt. 0.) then
                 tc = tice - tz (k)
                 qi_gen = 4.92e-11 * exp (1.33 * log (1.e3 * exp (0.1 * tc)))
-                if (igflag .eq. 1) &
+                if (cfg%igflag .eq. 1) &
                     qi_crt = qi_gen / den (k)
-                if (igflag .eq. 2) &
-                    qi_crt = qi_gen * min (qi_lim, 0.1 * tc) / den (k)
-                if (igflag .eq. 3) &
-                    qi_crt = 1.82e-6 * min (qi_lim, 0.1 * tc) / den (k)
-                if (igflag .eq. 4) &
-                    qi_crt = max (qi_gen, 1.82e-6) * min (qi_lim, 0.1 * tc) / den (k)
+                if (cfg%igflag .eq. 2) &
+                    qi_crt = qi_gen * min (cfg%qi_lim, 0.1 * tc) / den (k)
+                if (cfg%igflag .eq. 3) &
+                    qi_crt = 1.82e-6 * min (cfg%qi_lim, 0.1 * tc) / den (k)
+                if (cfg%igflag .eq. 4) &
+                    qi_crt = max (qi_gen, 1.82e-6) * min (cfg%qi_lim, 0.1 * tc) / den (k)
                 sink = min (tmp, max (qi_crt - qi (k), pidep), tc / tcpk (k))
                 dep = dep + sink * dp (k)
             else
-                pidep = pidep * min (1., dim (tz (k), t_sub) * is_fac)
+                pidep = pidep * min (1., dim (tz (k), cfg%t_sub) * cfg%is_fac)
                 sink = max (pidep, tmp, - qi (k))
                 sub = sub - sink * dp (k)
             endif
@@ -4548,11 +4719,11 @@ subroutine psdep_pssub (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, d
             qden = qs (k) * den (k)
             t2 = tz (k) * tz (k)
             dq = qsi - qv (k)
-            pssub = psub (t2, dq, qden, qsi, cssub, den (k), denfac (k), blins, mus, tcpk (k), cvm (k))
+            pssub = psub (t2, dq, qden, qsi, cssub, den (k), denfac (k), cfg%blins, cfg%mus, tcpk (k), cvm (k))
             pssub = dts * pssub
             dq = dq / (1. + tcpk (k) * dqdt)
             if (pssub .gt. 0.) then
-                sink = min (pssub * min (1., dim (tz (k), t_sub) * ss_fac), qs (k))
+                sink = min (pssub * min (1., dim (tz (k), cfg%t_sub) * cfg%ss_fac), qs (k))
                 sub = sub + sink * dp (k)
             else
                 sink = 0.
@@ -4617,17 +4788,17 @@ subroutine pgdep_pgsub (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, d
             qden = qg (k) * den (k)
             t2 = tz (k) * tz (k)
             dq = qsi - qv (k)
-            if (do_hail) then
+            if (cfg%do_hail) then
                 pgsub = psub (t2, dq, qden, qsi, cgsub, den (k), denfac (k), &
-                    blinh, muh, tcpk (k), cvm (k))
+                    cfg%blinh, cfg%muh, tcpk (k), cvm (k))
             else
                 pgsub = psub (t2, dq, qden, qsi, cgsub, den (k), denfac (k), &
-                    bling, mug, tcpk (k), cvm (k))
+                    cfg%bling, cfg%mug, tcpk (k), cvm (k))
             endif
             pgsub = dts * pgsub
             dq = dq / (1. + tcpk (k) * dqdt)
             if (pgsub .gt. 0.) then
-                sink = min (pgsub * min (1., dim (tz (k), t_sub) * gs_fac), qg (k))
+                sink = min (pgsub * min (1., dim (tz (k), cfg%t_sub) * cfg%gs_fac), qg (k))
                 sub = sub + sink * dp (k)
             else
                 sink = 0.
@@ -4697,16 +4868,16 @@ subroutine cloud_fraction (ks, ke, pz, den, qv, ql, qr, qi, qs, qg, qa, tz, h_va
 
         ice = q_sol (k)
         q_sol (k) = qi (k)
-        if (rad_snow) then
+        if (cfg%rad_snow) then
             q_sol (k) = qi (k) + qs (k)
-            if (rad_graupel) then
+            if (cfg%rad_graupel) then
                 q_sol (k) = qi (k) + qs (k) + qg (k)
             endif
         endif
 
         liq = q_liq (k)
         q_liq (k) = ql (k)
-        if (rad_rain) then
+        if (cfg%rad_rain) then
             q_liq (k) = ql (k) + qr (k)
         endif
 
@@ -4741,34 +4912,34 @@ subroutine cloud_fraction (ks, ke, pz, den, qv, ql, qr, qi, qs, qg, qa, tz, h_va
         rh = qpz / qstar
 
         if (cfflag .eq. 1) then
-            if (rh .gt. rh_thres .and. qpz .gt. qcmin) then
+            if (rh .gt. cfg%rh_thres .and. qpz .gt. qcmin) then
 
                 dq = h_var * qpz
-                if (do_cld_adj) then
-                    q_plus = qpz + dq * f_dq_p * min (1.0, max (0.0, (pz (k) - 200.e2) / &
+                if (cfg%do_cld_adj) then
+                    q_plus = qpz + dq * cfg%f_dq_p * min (1.0, max (0.0, (pz (k) - 200.e2) / &
                          (1000.e2 - 200.e2)))
                 else
-                    q_plus = qpz + dq * f_dq_p
+                    q_plus = qpz + dq * cfg%f_dq_p
                 endif
-                q_minus = qpz - dq * f_dq_m
+                q_minus = qpz - dq * cfg%f_dq_m
 
-                if (icloud_f .eq. 2) then
+                if (cfg%icloud_f .eq. 2) then
                     if (qstar .lt. qpz) then
                         qa (k) = 1.
                     else
                         qa (k) = 0.
                     endif
-                elseif (icloud_f .eq. 3) then
+                elseif (cfg%icloud_f .eq. 3) then
                     if (qstar .lt. qpz) then
                         qa (k) = 1.
                     else
                         if (qstar .lt. q_plus) then
-                            qa (k) = (q_plus - qstar) / (dq * f_dq_p)
+                            qa (k) = (q_plus - qstar) / (dq * cfg%f_dq_p)
                         else
                             qa (k) = 0.
                         endif
                         if (q_cond (k) .gt. qcmin) then
-                            qa (k) = max (cld_min, qa (k))
+                            qa (k) = max (cfg%cld_min, qa (k))
                         endif
                         qa (k) = min (1., qa (k))
                     endif
@@ -4777,17 +4948,17 @@ subroutine cloud_fraction (ks, ke, pz, den, qv, ql, qr, qi, qs, qg, qa, tz, h_va
                         qa (k) = 1.
                     else
                         if (qstar .lt. q_plus) then
-                            if (icloud_f .eq. 0) then
-                                qa (k) = (q_plus - qstar) / (dq * f_dq_p + dq * f_dq_m)
+                            if (cfg%icloud_f .eq. 0) then
+                                qa (k) = (q_plus - qstar) / (dq * cfg%f_dq_p + dq * cfg%f_dq_m)
                             else
-                                qa (k) = (q_plus - qstar) / ((dq * f_dq_p + dq * f_dq_m) * &
+                                qa (k) = (q_plus - qstar) / ((dq * cfg%f_dq_p + dq * cfg%f_dq_m) * &
                                      (1. - q_cond (k)))
                             endif
                         else
                             qa (k) = 0.
                         endif
                         if (q_cond (k) .gt. qcmin) then
-                            qa (k) = max (cld_min, qa (k))
+                            qa (k) = max (cfg%cld_min, qa (k))
                         endif
                         qa (k) = min (1., qa (k))
                     endif
@@ -4800,9 +4971,9 @@ subroutine cloud_fraction (ks, ke, pz, den, qv, ql, qr, qi, qs, qg, qa, tz, h_va
         if (cfflag .eq. 2) then
             if (rh .ge. 1.0) then
                 qa (k) = 1.0
-            elseif (rh .gt. rh_thres .and. q_cond (k) .gt. qcmin) then
-                qa (k) = exp (xr_a * log (rh)) * (1.0 - exp (- xr_b * max (0.0, q_cond (k)) / &
-                    max (1.e-5, exp (xr_c * log (max (1.e-10, 1.0 - rh) * qstar)))))
+            elseif (rh .gt. cfg%rh_thres .and. q_cond (k) .gt. qcmin) then
+                qa (k) = exp (cfg%xr_a * log (rh)) * (1.0 - exp (- cfg%xr_b * max (0.0, q_cond (k)) / &
+                    max (1.e-5, exp (cfg%xr_c * log (max (1.e-10, 1.0 - rh) * qstar)))))
                 qa (k) = max (0.0, min (1., qa (k)))
             else
                 qa (k) = 0.0
@@ -5485,9 +5656,9 @@ function acr3d (v1, v2, q1, q2, c, acco, acc1, acc2, den)
     t1 = exp (1. / (acc1 + 3) * log (6 * q1 * den))
     t2 = exp (1. / (acc2 + 3) * log (6 * q2 * den))
 
-    if (vdiffflag .eq. 1) vdiff = abs (v1 - v2)
-    if (vdiffflag .eq. 2) vdiff = sqrt ((1.20 * v1 - 0.95 * v2) ** 2. + 0.08 * v1 * v2)
-    if (vdiffflag .eq. 3) vdiff = sqrt ((1.00 * v1 - 1.00 * v2) ** 2. + 0.04 * v1 * v2)
+    if (cfg%vdiffflag .eq. 1) vdiff = abs (v1 - v2)
+    if (cfg%vdiffflag .eq. 2) vdiff = sqrt ((1.20 * v1 - 0.95 * v2) ** 2. + 0.08 * v1 * v2)
+    if (cfg%vdiffflag .eq. 3) vdiff = sqrt ((1.00 * v1 - 1.00 * v2) ** 2. + 0.04 * v1 * v2)
 
     acr3d = c * vdiff / den
 
@@ -5778,7 +5949,7 @@ subroutine pgfr_simp (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, &
 
     real :: tc, sink, fac_r2g
 
-    fac_r2g = 1. - exp (- dts / tau_r2g)
+    fac_r2g = 1. - exp (- dts / cfg%tau_r2g)
 
     do k = ks, ke
 
@@ -5831,7 +6002,7 @@ subroutine psmlt_simp (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, &
 
     real :: tc, tmp, sink, fac_smlt
 
-    fac_smlt = 1. - exp (- dts / tau_smlt)
+    fac_smlt = 1. - exp (- dts / cfg%tau_smlt)
 
     do k = ks, ke
 
@@ -5841,7 +6012,7 @@ subroutine psmlt_simp (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, cvm, te8, &
 
             sink = (tc * 0.1) ** 2 * qs (k)
             sink = min (qs (k), sink, fac_smlt * tc / icpk (k))
-            tmp = min (sink, dim (qs_mlt, ql (k)))
+            tmp = min (sink, dim (cfg%qs_mlt, ql (k)))
 
             call update_qt (qv (k), ql (k), qr (k), qi (k), qs (k), qg (k), &
                 0., tmp, sink - tmp, 0., - sink, 0., te8 (k), cvm (k), tz (k), &
@@ -5881,15 +6052,15 @@ subroutine praut_simp (ks, ke, dts, tz, qv, ql, qr, qi, qs, qg)
 
     real :: tc, sink, fac_l2r
 
-    fac_l2r = 1. - exp (- dts / tau_l2r)
+    fac_l2r = 1. - exp (- dts / cfg%tau_l2r)
 
     do k = ks, ke
 
         tc = tz (k) - t_wfr
 
-        if (tc .gt. 0 .and. ql (k) .gt. ql0_max) then
+        if (tc .gt. 0 .and. ql (k) .gt. cfg%ql0_max) then
 
-            sink = fac_l2r * (ql (k) - ql0_max)
+            sink = fac_l2r * (ql (k) - cfg%ql0_max)
 
             call update_qq (qv (k), ql (k), qr (k), qi (k), qs (k), qg (k), &
                 0., - sink, sink, 0., 0., 0.)
@@ -5930,13 +6101,13 @@ subroutine psaut_simp (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, den)
 
     real :: tc, sink, fac_i2s, qim
 
-    fac_i2s = 1. - exp (- dts / tau_i2s)
+    fac_i2s = 1. - exp (- dts / cfg%tau_i2s)
 
     do k = ks, ke
 
         tc = tz (k) - tice
 
-        qim = qi0_max / den (k)
+        qim = cfg%qi0_max / den (k)
 
         if (tc .lt. 0. .and. qi (k) .gt. qim) then
 
@@ -6033,7 +6204,7 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
     ! combine liquid and solid phases
     ! -----------------------------------------------------------------------
 
-    if (liq_ice_combine) then
+    if (cfg%liq_ice_combine) then
         do i = is, ie
             do k = ks, ke
                 qmw (i, k) = qmw (i, k) + qmr (i, k)
@@ -6049,7 +6220,7 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
     ! combine snow and graupel
     ! -----------------------------------------------------------------------
 
-    if (snow_grauple_combine) then
+    if (cfg%snow_grauple_combine) then
         do i = is, ie
             do k = ks, ke
                 qms (i, k) = qms (i, k) + qmg (i, k)
@@ -6076,63 +6247,63 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
 
             tc = t (i, k) - tice
 
-            if (rewflag .eq. 1) then
+            if (cfg%rewflag .eq. 1) then
 
                 ! -----------------------------------------------------------------------
                 ! cloud water (Martin et al. 1994)
                 ! -----------------------------------------------------------------------
 
-                if (prog_ccn) then
+                if (cfg%prog_ccn) then
                     ! boucher and lohmann (1995)
                     ccnw = (1.0 - abs (mask - 1.0)) * &
                          (10. ** 2.24 * (qa (i, k) * rho * 1.e9) ** 0.257) + &
                         abs (mask - 1.0) * &
                          (10. ** 2.06 * (qa (i, k) * rho * 1.e9) ** 0.48)
                 else
-                    ccnw = ccn_o * abs (mask - 1.0) + ccn_l * (1.0 - abs (mask - 1.0))
+                    ccnw = cfg%ccn_o * abs (mask - 1.0) + cfg%ccn_l * (1.0 - abs (mask - 1.0))
                 endif
 
                 if (qmw (i, k) .gt. qcmin) then
                     qcw (i, k) = dpg * qmw (i, k) * 1.0e3
                     rew (i, k) = exp (1.0 / 3.0 * log ((3.0 * qmw (i, k) * rho) / &
                          (4.0 * pi * rhow * ccnw))) * 1.0e4
-                    rew (i, k) = max (rewmin, min (rewmax, rew (i, k)))
+                    rew (i, k) = max (cfg%rewmin, min (cfg%rewmax, rew (i, k)))
                 else
                     qcw (i, k) = 0.0
-                    rew (i, k) = rewmin
+                    rew (i, k) = cfg%rewmin
                 endif
 
             endif
 
-            if (rewflag .eq. 2) then
+            if (cfg%rewflag .eq. 2) then
 
                 ! -----------------------------------------------------------------------
                 ! cloud water (Martin et al. 1994, gfdl revision)
                 ! -----------------------------------------------------------------------
 
-                if (prog_ccn) then
+                if (cfg%prog_ccn) then
                     ! boucher and lohmann (1995)
                     ccnw = (1.0 - abs (mask - 1.0)) * &
                          (10. ** 2.24 * (qa (i, k) * rho * 1.e9) ** 0.257) + &
                         abs (mask - 1.0) * &
                          (10. ** 2.06 * (qa (i, k) * rho * 1.e9) ** 0.48)
                 else
-                    ccnw = 1.077 * ccn_o * abs (mask - 1.0) + 1.143 * ccn_l * (1.0 - abs (mask - 1.0))
+                    ccnw = 1.077 * cfg%ccn_o * abs (mask - 1.0) + 1.143 * cfg%ccn_l * (1.0 - abs (mask - 1.0))
                 endif
 
                 if (qmw (i, k) .gt. qcmin) then
                     qcw (i, k) = dpg * qmw (i, k) * 1.0e3
                     rew (i, k) = exp (1.0 / 3.0 * log ((3.0 * qmw (i, k) * rho) / &
                          (4.0 * pi * rhow * ccnw))) * 1.0e4
-                    rew (i, k) = max (rewmin, min (rewmax, rew (i, k)))
+                    rew (i, k) = max (cfg%rewmin, min (cfg%rewmax, rew (i, k)))
                 else
                     qcw (i, k) = 0.0
-                    rew (i, k) = rewmin
+                    rew (i, k) = cfg%rewmin
                 endif
 
             endif
 
-            if (rewflag .eq. 3) then
+            if (cfg%rewflag .eq. 3) then
 
                 ! -----------------------------------------------------------------------
                 ! cloud water (Kiehl et al. 1994)
@@ -6145,15 +6316,15 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
                          (1.0 - abs (mask - 1.0))
                     rew (i, k) = rew (i, k) + (14.0 - rew (i, k)) * &
                         min (1.0, max (0.0, snowd (i) / 1000.0)) ! snowd is in mm 
-                    rew (i, k) = max (rewmin, min (rewmax, rew (i, k)))
+                    rew (i, k) = max (cfg%rewmin, min (cfg%rewmax, rew (i, k)))
                 else
                     qcw (i, k) = 0.0
-                    rew (i, k) = rewmin
+                    rew (i, k) = cfg%rewmin
                 endif
 
             endif
 
-            if (rewflag .eq. 4) then
+            if (cfg%rewflag .eq. 4) then
 
                 ! -----------------------------------------------------------------------
                 ! cloud water derived from PSD
@@ -6161,18 +6332,18 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
 
                 if (qmw (i, k) .gt. qcmin) then
                     qcw (i, k) = dpg * qmw (i, k) * 1.0e3
-                    call cal_pc_ed_oe_rr_tv (qmw (i, k), rho, blinw, muw, &
+                    call cal_pc_ed_oe_rr_tv (qmw (i, k), rho, cfg%blinw, cfg%muw, &
                         eda = edaw, edb = edbw, ed = rew (i, k))
-                    rew (i, k) = rewfac * 0.5 * rew (i, k) * 1.0e6
-                    rew (i, k) = max (rewmin, min (rewmax, rew (i, k)))
+                    rew (i, k) = cfg%rewfac * 0.5 * rew (i, k) * 1.0e6
+                    rew (i, k) = max (cfg%rewmin, min (cfg%rewmax, rew (i, k)))
                 else
                     qcw (i, k) = 0.0
-                    rew (i, k) = rewmin
+                    rew (i, k) = cfg%rewmin
                 endif
 
             endif
 
-            if (reiflag .eq. 1) then
+            if (cfg%reiflag .eq. 1) then
 
                 ! -----------------------------------------------------------------------
                 ! cloud ice (Heymsfield and Mcfarquhar 1996)
@@ -6182,23 +6353,23 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
                     qci (i, k) = dpg * qmi (i, k) * 1.0e3
                     rei_fac = log (1.0e3 * qmi (i, k) * rho)
                     if (tc .lt. - 50) then
-                        rei (i, k) = beta / 9.917 * exp (0.109 * rei_fac) * 1.0e3
+                        rei (i, k) = cfg%beta / 9.917 * exp (0.109 * rei_fac) * 1.0e3
                     elseif (tc .lt. - 40) then
-                        rei (i, k) = beta / 9.337 * exp (0.080 * rei_fac) * 1.0e3
+                        rei (i, k) = cfg%beta / 9.337 * exp (0.080 * rei_fac) * 1.0e3
                     elseif (tc .lt. - 30) then
-                        rei (i, k) = beta / 9.208 * exp (0.055 * rei_fac) * 1.0e3
+                        rei (i, k) = cfg%beta / 9.208 * exp (0.055 * rei_fac) * 1.0e3
                     else
-                        rei (i, k) = beta / 9.387 * exp (0.031 * rei_fac) * 1.0e3
+                        rei (i, k) = cfg%beta / 9.387 * exp (0.031 * rei_fac) * 1.0e3
                     endif
-                    rei (i, k) = max (reimin, min (reimax, rei (i, k)))
+                    rei (i, k) = max (cfg%reimin, min (cfg%reimax, rei (i, k)))
                 else
                     qci (i, k) = 0.0
-                    rei (i, k) = reimin
+                    rei (i, k) = cfg%reimin
                 endif
 
             endif
 
-            if (reiflag .eq. 2) then
+            if (cfg%reiflag .eq. 2) then
 
                 ! -----------------------------------------------------------------------
                 ! cloud ice (Donner et al. 1997)
@@ -6223,15 +6394,15 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
                     else
                         rei (i, k) = 92.46298
                     endif
-                    rei (i, k) = max (reimin, min (reimax, rei (i, k)))
+                    rei (i, k) = max (cfg%reimin, min (cfg%reimax, rei (i, k)))
                 else
                     qci (i, k) = 0.0
-                    rei (i, k) = reimin
+                    rei (i, k) = cfg%reimin
                 endif
 
             endif
 
-            if (reiflag .eq. 3) then
+            if (cfg%reiflag .eq. 3) then
 
                 ! -----------------------------------------------------------------------
                 ! cloud ice (Fu 2007)
@@ -6240,15 +6411,15 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
                 if (qmi (i, k) .gt. qcmin) then
                     qci (i, k) = dpg * qmi (i, k) * 1.0e3
                     rei (i, k) = 47.05 + tc * (0.6624 + 0.001741 * tc)
-                    rei (i, k) = max (reimin, min (reimax, rei (i, k)))
+                    rei (i, k) = max (cfg%reimin, min (cfg%reimax, rei (i, k)))
                 else
                     qci (i, k) = 0.0
-                    rei (i, k) = reimin
+                    rei (i, k) = cfg%reimin
                 endif
 
             endif
 
-            if (reiflag .eq. 4) then
+            if (cfg%reiflag .eq. 4) then
 
                 ! -----------------------------------------------------------------------
                 ! cloud ice (Kristjansson et al. 2000)
@@ -6259,15 +6430,15 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
                     ind = min (max (int (t (i, k) - 136.0), 44), 138 - 1)
                     cor = t (i, k) - int (t (i, k))
                     rei (i, k) = retab (ind) * (1. - cor) + retab (ind + 1) * cor
-                    rei (i, k) = max (reimin, min (reimax, rei (i, k)))
+                    rei (i, k) = max (cfg%reimin, min (cfg%reimax, rei (i, k)))
                 else
                     qci (i, k) = 0.0
-                    rei (i, k) = reimin
+                    rei (i, k) = cfg%reimin
                 endif
 
             endif
 
-            if (reiflag .eq. 5) then
+            if (cfg%reiflag .eq. 5) then
 
                 ! -----------------------------------------------------------------------
                 ! cloud ice (Wyser 1998)
@@ -6278,15 +6449,15 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
                     bw = - 2. + 1.e-3 * log10 (rho * qmi (i, k) / 50.e-3) * &
                         exp (1.5 * log (max (1.e-10, - tc)))
                     rei (i, k) = 377.4 + bw * (203.3 + bw * (37.91 + 2.3696 * bw))
-                    rei (i, k) = max (reimin, min (reimax, rei (i, k)))
+                    rei (i, k) = max (cfg%reimin, min (cfg%reimax, rei (i, k)))
                 else
                     qci (i, k) = 0.0
-                    rei (i, k) = reimin
+                    rei (i, k) = cfg%reimin
                 endif
 
             endif
 
-            if (reiflag .eq. 6) then
+            if (cfg%reiflag .eq. 6) then
 
                 ! -----------------------------------------------------------------------
                 ! cloud ice (Sun and Rikus 1999, Sun 2001)
@@ -6298,15 +6469,15 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
                     rei (i, k) = 45.8966 * exp (0.2214 * rei_fac) + &
                         0.7957 * exp (0.2535 * rei_fac) * (tc + 190.0)
                     rei (i, k) = (1.2351 + 0.0105 * tc) * rei (i, k)
-                    rei (i, k) = max (reimin, min (reimax, rei (i, k)))
+                    rei (i, k) = max (cfg%reimin, min (cfg%reimax, rei (i, k)))
                 else
                     qci (i, k) = 0.0
-                    rei (i, k) = reimin
+                    rei (i, k) = cfg%reimin
                 endif
 
             endif
 
-            if (reiflag .eq. 7) then
+            if (cfg%reiflag .eq. 7) then
 
                 ! -----------------------------------------------------------------------
                 ! cloud ice derived from PSD
@@ -6314,18 +6485,18 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
 
                 if (qmi (i, k) .gt. qcmin) then
                     qci (i, k) = dpg * qmi (i, k) * 1.0e3
-                    call cal_pc_ed_oe_rr_tv (qmi (i, k), rho, blini, mui, &
+                    call cal_pc_ed_oe_rr_tv (qmi (i, k), rho, cfg%blini, cfg%mui, &
                         eda = edai, edb = edbi, ed = rei (i, k))
-                    rei (i, k) = reifac * 0.5 * rei (i, k) * 1.0e6
-                    rei (i, k) = max (reimin, min (reimax, rei (i, k)))
+                    rei (i, k) = cfg%reifac * 0.5 * rei (i, k) * 1.0e6
+                    rei (i, k) = max (cfg%reimin, min (cfg%reimax, rei (i, k)))
                 else
                     qci (i, k) = 0.0
-                    rei (i, k) = reimin
+                    rei (i, k) = cfg%reimin
                 endif
 
             endif
 
-            if (rerflag .eq. 1) then
+            if (cfg%rerflag .eq. 1) then
 
                 ! -----------------------------------------------------------------------
                 ! rain derived from PSD
@@ -6333,18 +6504,18 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
 
                 if (qmr (i, k) .gt. qcmin) then
                     qcr (i, k) = dpg * qmr (i, k) * 1.0e3
-                    call cal_pc_ed_oe_rr_tv (qmr (i, k), rho, blinr, mur, &
+                    call cal_pc_ed_oe_rr_tv (qmr (i, k), rho, cfg%blinr, cfg%mur, &
                         eda = edar, edb = edbr, ed = rer (i, k))
                     rer (i, k) = 0.5 * rer (i, k) * 1.0e6
-                    rer (i, k) = max (rermin, min (rermax, rer (i, k)))
+                    rer (i, k) = max (cfg%rermin, min (cfg%rermax, rer (i, k)))
                 else
                     qcr (i, k) = 0.0
-                    rer (i, k) = rermin
+                    rer (i, k) = cfg%rermin
                 endif
 
             endif
 
-            if (resflag .eq. 1) then
+            if (cfg%resflag .eq. 1) then
 
                 ! -----------------------------------------------------------------------
                 ! snow derived from PSD
@@ -6352,18 +6523,18 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
 
                 if (qms (i, k) .gt. qcmin) then
                     qcs (i, k) = dpg * qms (i, k) * 1.0e3
-                    call cal_pc_ed_oe_rr_tv (qms (i, k), rho, blins, mus, &
+                    call cal_pc_ed_oe_rr_tv (qms (i, k), rho, cfg%blins, cfg%mus, &
                         eda = edas, edb = edbs, ed = res (i, k))
                     res (i, k) = 0.5 * res (i, k) * 1.0e6
-                    res (i, k) = max (resmin, min (resmax, res (i, k)))
+                    res (i, k) = max (cfg%resmin, min (cfg%resmax, res (i, k)))
                 else
                     qcs (i, k) = 0.0
-                    res (i, k) = resmin
+                    res (i, k) = cfg%resmin
                 endif
 
             endif
 
-            if (regflag .eq. 1) then
+            if (cfg%regflag .eq. 1) then
 
                 ! -----------------------------------------------------------------------
                 ! graupel derived from PSD
@@ -6371,18 +6542,18 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
 
                 if (qmg (i, k) .gt. qcmin) then
                     qcg (i, k) = dpg * qmg (i, k) * 1.0e3
-                    if (do_hail) then
-                        call cal_pc_ed_oe_rr_tv (qmg (i, k), rho, blinh, muh, &
+                    if (cfg%do_hail) then
+                        call cal_pc_ed_oe_rr_tv (qmg (i, k), rho, cfg%blinh, cfg%muh, &
                             eda = edah, edb = edbh, ed = reg (i, k))
                     else
-                        call cal_pc_ed_oe_rr_tv (qmg (i, k), rho, bling, mug, &
+                        call cal_pc_ed_oe_rr_tv (qmg (i, k), rho, cfg%bling, cfg%mug, &
                             eda = edag, edb = edbg, ed = reg (i, k))
                     endif
                     reg (i, k) = 0.5 * reg (i, k) * 1.0e6
-                    reg (i, k) = max (regmin, min (regmax, reg (i, k)))
+                    reg (i, k) = max (cfg%regmin, min (cfg%regmax, reg (i, k)))
                 else
                     qcg (i, k) = 0.0
-                    reg (i, k) = regmin
+                    reg (i, k) = cfg%regmin
                 endif
 
             endif
@@ -6490,26 +6661,26 @@ subroutine rad_ref (is, ie, js, je, qv, qr, qs, qg, pt, delp, &
             ! fall speed
             ! -----------------------------------------------------------------------
 
-            if (radr_flag .eq. 3) then
-                call term_rsg (1, npz, qmr, den, denfac, vr_fac, blinr, &
-                    mur, tvar, tvbr, vr_max, const_vr, vtr)
+            if (cfg%radr_flag .eq. 3) then
+                call term_rsg (1, npz, qmr, den, denfac, cfg%vr_fac, cfg%blinr, &
+                    cfg%mur, tvar, tvbr, cfg%vr_max, cfg%const_vr, vtr)
                 vtr = vtr / rhor
             endif
 
-            if (rads_flag .eq. 3) then
-                call term_rsg (1, npz, qms, den, denfac, vs_fac, blins, &
-                    mus, tvas, tvbs, vs_max, const_vs, vts)
+            if (cfg%rads_flag .eq. 3) then
+                call term_rsg (1, npz, qms, den, denfac, cfg%vs_fac, cfg%blins, &
+                    cfg%mus, tvas, tvbs, cfg%vs_max, cfg%const_vs, vts)
                 vts = vts / rhos
             endif
 
-            if (radg_flag .eq. 3) then
-                if (do_hail .and. .not. do_inline_mp) then
-                    call term_rsg (1, npz, qmg, den, denfac, vg_fac, blinh, &
-                        muh, tvah, tvbh, vg_max, const_vg, vtg)
+            if (cfg%radg_flag .eq. 3) then
+                if (cfg%do_hail .and. .not. do_inline_mp) then
+                    call term_rsg (1, npz, qmg, den, denfac, cfg%vg_fac, cfg%blinh, &
+                        cfg%muh, tvah, tvbh, cfg%vg_max, cfg%const_vg, vtg)
                     vtg = vtg / rhoh
                 else
-                    call term_rsg (1, npz, qmg, den, denfac, vg_fac, bling, &
-                        mug, tvag, tvbg, vg_max, const_vg, vtg)
+                    call term_rsg (1, npz, qmg, den, denfac, cfg%vg_fac, cfg%bling, &
+                        cfg%mug, tvag, tvbg, cfg%vg_max, cfg%const_vg, vtg)
                     vtg = vtg / rhog
                 endif
             endif
@@ -6524,15 +6695,15 @@ subroutine rad_ref (is, ie, js, je, qv, qr, qs, qg, pt, delp, &
                 !if (rainwat .gt. 0) then
                     qden = den (k) * qmr (k)
                     if (qmr (k) .gt. qcmin) then
-                        call cal_pc_ed_oe_rr_tv (qmr (k), den (k), blinr, mur, &
+                        call cal_pc_ed_oe_rr_tv (qmr (k), den (k), cfg%blinr, cfg%mur, &
                             rra = rrar, rrb = rrbr, rr = fac_r)
                     else
                         fac_r = 0.0
                     endif
-                    if (radr_flag .eq. 1 .or. radr_flag .eq. 2) then
+                    if (cfg%radr_flag .eq. 1 .or. cfg%radr_flag .eq. 2) then
                         z_e = z_e + fac_r * 1.e18
                     endif
-                    if (radr_flag .eq. 3) then
+                    if (cfg%radr_flag .eq. 3) then
                         z_e = z_e + mp_const * exp (1.6 * log (qden * vtr (k)))
                     endif
                 !endif
@@ -6540,68 +6711,68 @@ subroutine rad_ref (is, ie, js, je, qv, qr, qs, qg, pt, delp, &
                 !if (snowwat .gt. 0) then
                     qden = den (k) * qms (k)
                     if (qms (k) .gt. qcmin) then
-                        call cal_pc_ed_oe_rr_tv (qms (k), den (k), blins, mus, &
+                        call cal_pc_ed_oe_rr_tv (qms (k), den (k), cfg%blins, cfg%mus, &
                             rra = rras, rrb = rrbs, rr = fac_s)
                     else
                         fac_s = 0.0
                     endif
-                    if (rads_flag .eq. 1) then
+                    if (cfg%rads_flag .eq. 1) then
                         if (pt (i, j, k) .lt. tice) then
                             z_e = z_e + fac_s * 1.e18 * alpha * (rhos / rhor) ** 2
                         else
                             z_e = z_e + fac_s * 1.e18 * alpha * (rhos / rhor) ** 2 / alpha
                         endif
                     endif
-                    if (rads_flag .eq. 2) then
+                    if (cfg%rads_flag .eq. 2) then
                         if (pt (i, j, k) .lt. tice) then
                             z_e = z_e + fac_s * 1.e18 * alpha * (rhos / rhoi) ** 2
                         else
                             z_e = z_e + fac_s * 1.e18
                         endif
                     endif
-                    if (rads_flag .eq. 3) then
+                    if (cfg%rads_flag .eq. 3) then
                         z_e = z_e + mp_const * exp (1.6 * log (qden * vts (k)))
                     endif
                 !endif
 
                 !if (graupel .gt. 0) then
                     qden = den (k) * qmg (k)
-                    if (do_hail .and. .not. do_inline_mp) then
+                    if (cfg%do_hail .and. .not. do_inline_mp) then
                         if (qmg (k) .gt. qcmin) then
-                            call cal_pc_ed_oe_rr_tv (qmg (k), den (k), blinh, muh, &
+                            call cal_pc_ed_oe_rr_tv (qmg (k), den (k), cfg%blinh, cfg%muh, &
                                 rra = rrah, rrb = rrbh, rr = fac_g)
                         else
                             fac_g = 0.0
                         endif
-                        if (radg_flag .eq. 1) then
+                        if (cfg%radg_flag .eq. 1) then
                             if (pt (i, j, k) .lt. tice) then
                                 z_e = z_e + fac_g * 1.e18 * alpha * (rhoh / rhor) ** 2
                             else
                                 z_e = z_e + fac_g * 1.e18 * alpha * (rhoh / rhor) ** 2 / alpha
                             endif
                         endif
-                        if (radg_flag .eq. 2) then
+                        if (cfg%radg_flag .eq. 2) then
                             z_e = z_e + fac_g * 1.e18
                         endif
                     else
                         if (qmg (k) .gt. qcmin) then
-                            call cal_pc_ed_oe_rr_tv (qmg (k), den (k), bling, mug, &
+                            call cal_pc_ed_oe_rr_tv (qmg (k), den (k), cfg%bling, cfg%mug, &
                                 rra = rrag, rrb = rrbg, rr = fac_g)
                         else
                             fac_g = 0.0
                         endif
-                        if (radg_flag .eq. 1) then
+                        if (cfg%radg_flag .eq. 1) then
                             if (pt (i, j, k) .lt. tice) then
                                 z_e = z_e + fac_g * 1.e18 * alpha * (rhog / rhor) ** 2
                             else
                                 z_e = z_e + fac_g * 1.e18 * alpha * (rhog / rhor) ** 2 / alpha
                             endif
                         endif
-                        if (radg_flag .eq. 2) then
+                        if (cfg%radg_flag .eq. 2) then
                             z_e = z_e + fac_g * 1.e18
                         endif
                     endif
-                    if (radg_flag .eq. 3) then
+                    if (cfg%radg_flag .eq. 3) then
                         z_e = z_e + mp_const * exp (1.6 * log (qden * vtg (k)))
                     endif
                 !endif
@@ -7697,4 +7868,4 @@ function wet_bulb_moist (qv, ql, qi, qr, qs, qg, tk, den)
 
 end function wet_bulb_moist
 
-end module module_gfdl_cld_mp
+end module module_gfdl_cloud_microphys_v3

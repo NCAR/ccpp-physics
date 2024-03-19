@@ -3,10 +3,10 @@
 !! \cite chen_and_lin_2013 ).
 module gfdl_cloud_microphys
 
-   use gfdl_cloud_microphys_mod, only: gfdl_cloud_microphys_mod_init,   &
-                                       gfdl_cloud_microphys_mod_driver, &
-                                       gfdl_cloud_microphys_mod_end,    &
-                                       cloud_diagnosis
+   use module_gfdl_cloud_microphys, only: gfdl_cloud_microphys_mod_init,   &
+                                          gfdl_cloud_microphys_mod_driver, &
+                                          gfdl_cloud_microphys_mod_end,    &
+                                          cloud_diagnosis
 
    implicit none
 

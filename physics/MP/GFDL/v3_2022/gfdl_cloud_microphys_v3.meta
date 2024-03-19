@@ -1,13 +1,12 @@
 [ccpp-table-properties]
-  name = gfdl_cloud_microphys
+  name = gfdl_cloud_microphys_v3
   type = scheme
-  dependencies = ../../hooks/machine.F
-  dependencies = ../module_mp_radar.F90
-  dependencies = module_gfdl_cloud_microphys.F90
+  dependencies = ../../../hooks/machine.F
+  dependencies = module_gfdl_cloud_microphys_v3.F90
 
 ########################################################################
 [ccpp-arg-table]
-  name = gfdl_cloud_microphys_init
+  name = gfdl_cloud_microphys_v3_init
   type = scheme
 [me]
   standard_name = mpi_rank
@@ -60,9 +59,9 @@
   dimensions = ()
   type = integer
   intent = in
-[imp_physics_gfdl]
-  standard_name = identifier_for_gfdl_microphysics_scheme
-  long_name = choice of GFDL microphysics scheme
+[imp_physics_gfdl_v3]
+  standard_name = identifier_for_gfdl_microphysics_v3_scheme
+  long_name = choice of GFDL microphysics v3 scheme 
   units = flag
   dimensions = ()
   type = integer
@@ -70,6 +69,13 @@
 [do_shoc]
   standard_name = flag_for_shoc
   long_name = flag to indicate use of SHOC
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[hydrostatic]
+  standard_name = flag_for_hydrostatic_solver
+  long_name = flag indicating hydrostatic solver
   units = flag
   dimensions = ()
   type = logical
@@ -92,7 +98,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = gfdl_cloud_microphys_finalize
+  name = gfdl_cloud_microphys_v3_finalize
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message
@@ -112,8 +118,29 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = gfdl_cloud_microphys_run
+  name = gfdl_cloud_microphys_v3_run
   type = scheme
+[imp_physics]
+  standard_name = control_for_microphysics_scheme
+  long_name = choice of microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imp_physics_gfdl_v3]
+  standard_name = identifier_for_gfdl_microphysics_v3_scheme
+  long_name = choice of GFDL microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[fast_mp_consv]
+  standard_name = flag_for_fast_microphysics_energy_conservation
+  long_name = flag for fast microphysics energy conservation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -168,14 +195,6 @@
   type = real
   kind = kind_phys
   intent = in
-[frland]
-  standard_name = land_area_fraction_for_microphysics
-  long_name = land area fraction used in microphysics schemes
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [garea]
   standard_name = cell_area
   long_name = area of grid cell
@@ -184,12 +203,21 @@
   type = real
   kind = kind_phys
   intent = in
-[islmsk]
-  standard_name = sea_land_ice_mask
-  long_name = sea/land/ice mask (=0/1/2)
+[slmsk]
+  standard_name = area_type
+  long_name = landmask: sea/land/ice=0/1/2
   units = flag
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[snowd]
+  standard_name = lwe_surface_snow
+  long_name = water equivalent snow depth
+  units = mm
   dimensions = (horizontal_loop_extent)
-  type = integer
+  type = real
+  kind = kind_phys
   intent = in
 [gq0]
   standard_name = specific_humidity_of_new_state
@@ -247,6 +275,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[aerfld]
+  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
+  long_name = mass mixing ratio of aerosol from gocart or merra2
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_tracers_MG)
+  type = real
+  kind = kind_phys
+  intent = in
 [gt0]
   standard_name = air_temperature_of_new_state
   long_name = air temperature updated by physics
@@ -351,6 +387,14 @@
   type = real
   kind = kind_phys
   intent = out
+[oro]
+  standard_name = height_above_mean_sea_level
+  long_name = height_above_mean_sea_level
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep
@@ -362,13 +406,6 @@
 [hydrostatic]
   standard_name = flag_for_hydrostatic_solver
   long_name = flag indicating hydrostatic solver
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[phys_hydrostatic]
-  standard_name = flag_for_hydrostatic_heating_from_physics
-  long_name = flag indicating hydrostatic heating from physics
   units = flag
   dimensions = ()
   type = logical

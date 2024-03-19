@@ -1,18 +1,18 @@
-!> \file gfdl_cld_mp_v3.F90
+!> \file gfdl_cloud_microphys_v3.F90
 !! This file contains the CCPP entry point for the column GFDL cloud microphysics version 3 ( Chen and Lin (2013)
 !! \cite chen_and_lin_2013 ).
-module gfdl_cld_mp_v3
+module gfdl_cloud_microphys_v3
 
-   use module_gfdl_cld_mp, only:       module_gfdl_cld_mp_init,         &
-                                       module_gfdl_cld_mp_driver,       &
-                                       module_gfdl_cld_mp_end,          &
-                                       rad_ref, cld_eff_rad    
+   use module_gfdl_cloud_microphys_v3, only: module_gfdl_cld_mp_init,         &
+                                             module_gfdl_cld_mp_driver,       &
+                                             module_gfdl_cld_mp_end,          &
+                                             rad_ref, cld_eff_rad    
 
    implicit none
 
    private
 
-   public gfdl_cld_mp_v3_run, gfdl_cld_mp_v3_init, gfdl_cld_mp_v3_finalize
+   public gfdl_cloud_microphys_v3_run, gfdl_cloud_microphys_v3_init, gfdl_cloud_microphys_v3_finalize
 
    logical :: is_initialized = .false.
 
@@ -25,11 +25,11 @@ contains
 !>\brief The subroutine initializes the GFDL
 !! cloud microphysics.
 !!
-!> \section arg_table_gfdl_cld_mp_v3_init Argument Table
-!! \htmlinclude gfdl_cld_mp_v3_init.html
+!> \section arg_table_gfdl_cloud_microphys_v3_init Argument Table
+!! \htmlinclude gfdl_cloud_microphys_v3_init.html
 !!
 
-   subroutine gfdl_cld_mp_v3_init (me, master, nlunit, input_nml_file, logunit, &
+   subroutine gfdl_cloud_microphys_v3_init (me, master, nlunit, input_nml_file, logunit, &
                             fn_nml, imp_physics, imp_physics_gfdl_v3, do_shoc,  &
                             hydrostatic, errmsg, errflg)
 
@@ -70,17 +70,17 @@ contains
 
        is_initialized = .true.
 
-   end subroutine gfdl_cld_mp_v3_init
+   end subroutine gfdl_cloud_microphys_v3_init
 
 
 ! =======================================================================
-!>\brief The subroutine 'gfdl_cld_mp_v3_finalize' terminates the GFDL
+!>\brief The subroutine 'gfdl_cloud_microphys_v3_finalize' terminates the GFDL
 !! cloud microphysics.
 !!
-!! \section arg_table_gfdl_cld_mp_v3_finalize  Argument Table
-!! \htmlinclude gfdl_cld_mp_v3_finalize.html
+!! \section arg_table_gfdl_cloud_microphys_v3_finalize  Argument Table
+!! \htmlinclude gfdl_cloud_microphys_v3_finalize.html
 !!
-   subroutine gfdl_cld_mp_v3_finalize(errmsg, errflg)
+   subroutine gfdl_cloud_microphys_v3_finalize(errmsg, errflg)
 
        implicit none
 
@@ -97,7 +97,7 @@ contains
 
        is_initialized = .false.
 
-   end subroutine gfdl_cld_mp_v3_finalize
+   end subroutine gfdl_cloud_microphys_v3_finalize
 
 !>\defgroup gfdlmp  GFDL Cloud Microphysics Module
 !! This is cloud microphysics package for GFDL global cloud resolving model.
@@ -112,10 +112,10 @@ contains
 !! processes.
 !!
 !>\brief The subroutine executes the full GFDL cloud microphysics.
-!! \section arg_table_gfdl_cld_mp_v3_run Argument Table
-!! \htmlinclude gfdl_cld_mp_v3_run.html
+!! \section arg_table_gfdl_cloud_microphys_v3_run Argument Table
+!! \htmlinclude gfdl_cloud_microphys_v3_run.html
 !!
-   subroutine gfdl_cld_mp_v3_run(                                                  &
+   subroutine gfdl_cloud_microphys_v3_run(                                                  &
       imp_physics, imp_physics_gfdl_v3, fast_mp_consv,                             &
       levs, im, rainmin, con_g, con_fvirt, con_rd, con_eps, garea, slmsk, snowd,   &
       gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt, aerfld,  &
@@ -386,6 +386,6 @@ contains
          enddo 
       endif 
 
-   end subroutine gfdl_cld_mp_v3_run
+   end subroutine gfdl_cloud_microphys_v3_run
 
-end module gfdl_cld_mp_v3
+end module gfdl_cloud_microphys_v3

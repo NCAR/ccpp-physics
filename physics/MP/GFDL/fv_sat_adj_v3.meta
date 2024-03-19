@@ -2,7 +2,8 @@
   name = fv_sat_adj_v3
   type = scheme
   dependencies = ../../hooks/machine.F,../../hooks/physcons.F90
-  dependencies = module_gfdl_cld_mp.F90,../multi_gases.F90
+  dependencies = v3_2022/module_gfdl_cloud_microphys_v3.F90,../multi_gases.F90
+  dependencies = module_gfdlmp_param.F90
 
 ########################################################################
 [ccpp-arg-table]
