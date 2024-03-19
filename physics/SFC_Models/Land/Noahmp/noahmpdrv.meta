@@ -215,71 +215,71 @@
   intent = in
 
 ########################################################################
-[ccpp-arg-table]
-  name = noahmpdrv_timestep_init
-  type = scheme
-[itime]
-  standard_name = index_of_timestep
-  long_name = current forecast iteration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[fhour]
-  standard_name = forecast_time
-  long_name = current forecast time
-  units = h
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[delt]
-  standard_name = timestep_for_dynamics
-  long_name = dynamics timestep
-  units = s
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[km]
-  standard_name = vertical_dimension_of_soil
-  long_name = soil vertical layer dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[stc]
-  standard_name = soil_temperature
-  long_name = soil temperature
-  units = K
-  dimensions = (horizontal_dimension,vertical_dimension_of_soil)
-  type = real
-  kind = kind_phys
-  intent = inout
-[slc]
-  standard_name = volume_fraction_of_unfrozen_water_in_soil
-  long_name = liquid soil moisture
-  units = frac
-  dimensions = (horizontal_dimension,vertical_dimension_of_soil)
-  type = real
-  kind = kind_phys
-  intent = inout
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-[errflg]
-  standard_name = ccpp_error_code
-  long_name = error code for error handling in CCPP
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = out
-
+#[ccpp-arg-table]
+#  name = noahmpdrv_timestep_init
+#  type = scheme
+#[itime]
+#  standard_name = index_of_timestep
+#  long_name = current forecast iteration
+#  units = index
+#  dimensions = ()
+#  type = integer
+#  intent = in
+#[fhour]
+#  standard_name = forecast_time
+#  long_name = current forecast time
+#  units = h
+#  dimensions = ()
+#  type = real
+#  kind = kind_phys
+#  intent = in
+#[delt]
+#  standard_name = timestep_for_dynamics
+#  long_name = dynamics timestep
+#  units = s
+#  dimensions = ()
+#  type = real
+#  kind = kind_phys
+#  intent = in
+#[km]
+#  standard_name = vertical_dimension_of_soil
+#  long_name = soil vertical layer dimension
+#  units = count
+#  dimensions = ()
+#  type = integer
+#  intent = in
+#[stc]
+#  standard_name = soil_temperature
+#  long_name = soil temperature
+#  units = K
+#  dimensions = (horizontal_dimension,vertical_dimension_of_soil)
+#  type = real
+#  kind = kind_phys
+#  intent = inout
+#[slc]
+#  standard_name = volume_fraction_of_unfrozen_water_in_soil
+#  long_name = liquid soil moisture
+#  units = frac
+#  dimensions = (horizontal_dimension,vertical_dimension_of_soil)
+#  type = real
+#  kind = kind_phys
+#  intent = inout
+#[errmsg]
+#  standard_name = ccpp_error_message
+#  long_name = error message for error handling in CCPP
+#  units = none
+#  dimensions = ()
+#  type = character
+#  kind = len=*
+#  intent = out
+#[errflg]
+#  standard_name = ccpp_error_code
+#  long_name = error code for error handling in CCPP
+#  units = 1
+#  dimensions = ()
+#  type = integer
+#  intent = out
+#
 ########################################################################
 [ccpp-arg-table]
   name = noahmpdrv_run
