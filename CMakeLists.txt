@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.10)
 
 project(ccpp_physics
         VERSION 5.0.0
@@ -7,6 +7,13 @@ project(ccpp_physics
 #------------------------------------------------------------------------------
 set(PACKAGE "ccpp-physics")
 set(AUTHORS "Grant Firl" "Dustin Swales" "Man Zhang" "Mike Kavulich" )
+
+#------------------------------------------------------------------------------
+# Set MPI flags for Fortran with MPI F08 interface
+find_package(MPI REQUIRED Fortran)
+if(NOT MPI_Fortran_HAVE_F08_MODULE)
+  message(FATAL_ERROR "MPI implementation does not support the Fortran 2008 mpi_f08 interface")
+endif()
 
 #------------------------------------------------------------------------------
 # Set OpenMP flags for C/C++/Fortran
