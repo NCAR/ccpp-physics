@@ -61,7 +61,7 @@ module fv_sat_adj
                          cp_air => con_cp_dyn
     ! *DH
     use machine,              only: kind_grid, kind_dyn
-    use module_gfdlmp_param,  only: cfg => gfdlmp_cfg
+    use module_gfdlmp_param,  only: cfg
 #ifdef MULTI_GASES
     use ccpp_multi_gases_mod, only: multi_gases_init,     &
                                     multi_gases_finalize, &

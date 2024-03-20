@@ -1,92 +1,97 @@
+! #########################################################################################
+! #########################################################################################
 module module_gfdlmp_param
   use machine, only: kind_phys
   implicit none
 
+  ! #######################################################################################
+  ! Data container for GFDL MP runtime configurations information (i.e. Namelist)
+  ! #######################################################################################
   type ty_gfdlmp_config
      !
-     real(kind_phys) :: cld_min       !< minimum cloud fraction
-     real(kind_phys) :: tice          !< set tice = 165. to trun off ice - phase phys (kessler emulator)
-     real(kind_phys) :: t_min         !< min temp to freeze - dry all water vapor
-     real(kind_phys) :: t_sub         !< min temp for sublimation of cloud ice
-     real(kind_phys) :: tice_mlt      !< can set ice melting temperature to 268 based on observation (Kay et al. 2016) (K) 
-     real(kind_phys) :: mp_time       !< maximum micro - physics time step (sec)
+     real :: cld_min       !< minimum cloud fraction
+     real :: tice          !< set tice = 165. to trun off ice - phase phys (kessler emulator)
+     real :: t_min         !< min temp to freeze - dry all water vapor
+     real :: t_sub         !< min temp for sublimation of cloud ice
+     real :: tice_mlt      !< can set ice melting temperature to 268 based on observation (Kay et al. 2016) (K) 
+     real :: mp_time       !< maximum micro - physics time step (sec)
 
      !
-     real(kind_phys) :: rh_inc        !< rh increment for complete evaporation of cloud water and cloud ice
-     real(kind_phys) :: rh_inr        !< rh increment for minimum evaporation of rain
-     real(kind_phys) :: rh_ins        !< rh increment for sublimation of snow
+     real :: rh_inc        !< rh increment for complete evaporation of cloud water and cloud ice
+     real :: rh_inr        !< rh increment for minimum evaporation of rain
+     real :: rh_ins        !< rh increment for sublimation of snow
 
      !
-     real(kind_phys) :: tau_r2g       !< rain freezing during fast_sat
-     real(kind_phys) :: tau_smlt      !< snow melting
-     real(kind_phys) :: tau_g2r       !< graupel melting to rain
-     real(kind_phys) :: tau_imlt      !< cloud ice melting
-     real(kind_phys) :: tau_i2s       !< cloud ice to snow auto-conversion
-     real(kind_phys) :: tau_l2r       !< cloud water to rain auto-conversion
-     real(kind_phys) :: tau_v2l       !< water vapor to cloud water (condensation)
-     real(kind_phys) :: tau_l2v       !< cloud water to water vapor (evaporation)
-     real(kind_phys) :: tau_g2v       !< graupel sublimation
-     real(kind_phys) :: tau_v2g       !< graupel deposition -- make it a slow process
-     real(kind_phys) :: tau_gmlt      !< graupel melting time scale (s)
-     real(kind_phys) :: tau_wbf       !< graupel melting time scale (s)
-     real(kind_phys) :: tau_revp      !< rain evaporation time scale (s)
+     real :: tau_r2g       !< rain freezing during fast_sat
+     real :: tau_smlt      !< snow melting
+     real :: tau_g2r       !< graupel melting to rain
+     real :: tau_imlt      !< cloud ice melting
+     real :: tau_i2s       !< cloud ice to snow auto-conversion
+     real :: tau_l2r       !< cloud water to rain auto-conversion
+     real :: tau_v2l       !< water vapor to cloud water (condensation)
+     real :: tau_l2v       !< cloud water to water vapor (evaporation)
+     real :: tau_g2v       !< graupel sublimation
+     real :: tau_v2g       !< graupel deposition -- make it a slow process
+     real :: tau_gmlt      !< graupel melting time scale (s)
+     real :: tau_wbf       !< graupel melting time scale (s)
+     real :: tau_revp      !< rain evaporation time scale (s)
 
      ! horizontal subgrid variability
-     real(kind_phys) :: dw_land       !< value for subgrid deviation / variability over land
-     real(kind_phys) :: dw_ocean      !< base value for ocean
+     real :: dw_land       !< value for subgrid deviation / variability over land
+     real :: dw_ocean      !< base value for ocean
 
      ! prescribed ccn
-     real(kind_phys) :: ccn_o         !< ccn over ocean (cm^ - 3)
-     real(kind_phys) :: ccn_l         !< ccn over land (cm^ - 3)
+     real :: ccn_o         !< ccn over ocean (cm^ - 3)
+     real :: ccn_l         !< ccn over land (cm^ - 3)
 
      !
-     real(kind_phys) :: rthresh       !< critical cloud drop radius (micro m)
-     real(kind_phys) :: sat_adj0      !< adjustment factor (0: no, 1: full) during fast_sat_adj
-     real(kind_phys) :: qc_crt        !< mini condensate mixing ratio to allow partial cloudiness
-     real(kind_phys) :: qi_lim        !< cloud ice limiter to prevent large ice build up
-     real(kind_phys) :: ql_mlt        !< max value of cloud water allowed from melted cloud ice
-     real(kind_phys) :: qs_mlt        !< max cloud water due to snow melt
-     real(kind_phys) :: ql_gen        !< max cloud water generation during remapping step if fast_sat_adj = .t.
-     real(kind_phys) :: qi_gen        !< max cloud ice generation during remapping step (V1 ONLY. Computed internally in V3)
+     real :: rthresh       !< critical cloud drop radius (micro m)
+     real :: sat_adj0      !< adjustment factor (0: no, 1: full) during fast_sat_adj
+     real :: qc_crt        !< mini condensate mixing ratio to allow partial cloudiness
+     real :: qi_lim        !< cloud ice limiter to prevent large ice build up
+     real :: ql_mlt        !< max value of cloud water allowed from melted cloud ice
+     real :: qs_mlt        !< max cloud water due to snow melt
+     real :: ql_gen        !< max cloud water generation during remapping step if fast_sat_adj = .t.
+     real :: qi_gen        !< max cloud ice generation during remapping step (V1 ONLY. Computed internally in V3)
 
      ! cloud condensate upper bounds: "safety valves" for ql & qi
-     real(kind_phys) :: ql0_max       !< max cloud water value (auto converted to rain)
-     real(kind_phys) :: qi0_max       !< max cloud ice value (by other sources)
+     real :: ql0_max       !< max cloud water value (auto converted to rain)
+     real :: qi0_max       !< max cloud ice value (by other sources)
 
      !
-     real(kind_phys) :: qi0_crt       !< cloud ice to snow autoconversion threshold (was 1.e-4);
+     real :: qi0_crt       !< cloud ice to snow autoconversion threshold (was 1.e-4);
                                       !< qi0_crt is highly dependent on horizontal resolution
-     real(kind_phys) :: qr0_crt       !< rain to snow or graupel/hail threshold
+     real :: qr0_crt       !< rain to snow or graupel/hail threshold
                                       !< lfo used * mixing ratio * = 1.e-4 (hail in lfo)
-     real(kind_phys) :: qs0_crt       !< snow to graupel density threshold (0.6e-3 in purdue lin scheme)
+     real :: qs0_crt       !< snow to graupel density threshold (0.6e-3 in purdue lin scheme)
 
      !
-     real(kind_phys) :: c_paut        !< autoconversion cloud water to rain (use 0.5 to reduce autoconversion)
-     real(kind_phys) :: c_psacw       !< cloud water to snow accretion efficiency 
-     real(kind_phys) :: c_psaci       !< accretion: cloud ice to snow (was 0.1 in zetac)
-     real(kind_phys) :: c_pracw       !< cloud water to rain accretion efficiency
-     real(kind_phys) :: c_praci       !< cloud ice to rain accretion efficiency 
-     real(kind_phys) :: c_pracs       !< snow to rain accretion efficiency
-     real(kind_phys) :: c_piacr       !< accretion: rain to ice:
-     real(kind_phys) :: c_cracw       !< rain accretion efficiency
-     real(kind_phys) :: c_pgacs       !< snow to graupel "accretion" eff. (was 0.1 in zetac)
-     real(kind_phys) :: c_pgacw       !< cloud water to graupel accretion efficiency 
-     real(kind_phys) :: c_psacr       !< rain to snow accretion efficiency
-     real(kind_phys) :: c_pgaci       !< cloud ice to graupel accretion efficiency (was 0.1 in ZETAC)
-     real(kind_phys) :: c_pgacr       !< rain to graupel accretion efficiency 
+     real :: c_paut        !< autoconversion cloud water to rain (use 0.5 to reduce autoconversion)
+     real :: c_psacw       !< cloud water to snow accretion efficiency 
+     real :: c_psaci       !< accretion: cloud ice to snow (was 0.1 in zetac)
+     real :: c_pracw       !< cloud water to rain accretion efficiency
+     real :: c_praci       !< cloud ice to rain accretion efficiency 
+     real :: c_pracs       !< snow to rain accretion efficiency
+     real :: c_piacr       !< accretion: rain to ice:
+     real :: c_cracw       !< rain accretion efficiency
+     real :: c_pgacs       !< snow to graupel "accretion" eff. (was 0.1 in zetac)
+     real :: c_pgacw       !< cloud water to graupel accretion efficiency 
+     real :: c_psacr       !< rain to snow accretion efficiency
+     real :: c_pgaci       !< cloud ice to graupel accretion efficiency (was 0.1 in ZETAC)
+     real :: c_pgacr       !< rain to graupel accretion efficiency 
 
      !
-     real(kind_phys) :: is_fac        !< cloud ice sublimation temperature factor
-     real(kind_phys) :: ss_fac        !< snow sublimation temperature factor
-     real(kind_phys) :: gs_fac        !< graupel sublimation temperature factor
+     real :: is_fac        !< cloud ice sublimation temperature factor
+     real :: ss_fac        !< snow sublimation temperature factor
+     real :: gs_fac        !< graupel sublimation temperature factor
      
      !
-     real(kind_phys) :: rh_fac_evap   !< cloud water evaporation relative humidity factor
-     real(kind_phys) :: rh_fac_cond   !< cloud water condensation relative humidity factor
+     real :: rh_fac_evap   !< cloud water evaporation relative humidity factor
+     real :: rh_fac_cond   !< cloud water condensation relative humidity factor
 
      ! decreasing clin to reduce csacw (so as to reduce cloud water --- > snow)
-     real(kind_phys) :: alin          !< "a" in lin1983
-     real(kind_phys) :: clin          !< "c" in lin 1983, 4.8 -- > 6. (to ehance ql -- > qs)
+     real :: alin          !< "a" in lin1983
+     real :: clin          !< "c" in lin 1983, 4.8 -- > 6. (to ehance ql -- > qs)
 
      ! fall velocity tuning constants:
      logical :: const_vi              !< if .t. the constants are specified by v * _fac
@@ -100,34 +105,34 @@ module module_gfdlmp_param
      logical :: use_rhc_cevap         !< cap of rh for cloud water evaporation (V3)
      logical :: use_rhc_revap         !< cap of rh for rain evaporation (V3)
      !
-     real(kind_phys) :: sed_fac       !< coefficient for sedimentation fall, scale from 1.0 (implicit) to 0.0 (lagrangian) 
-     real(kind_phys) :: vw_fac        !<
-     real(kind_phys) :: vi_fac        !< if const_vi: 1 / 3
-     real(kind_phys) :: vs_fac        !< if const_vs: 1.
-     real(kind_phys) :: vg_fac        !< if const_vg: 2.
-     real(kind_phys) :: vr_fac        !< if const_vr: 4.
+     real :: sed_fac       !< coefficient for sedimentation fall, scale from 1.0 (implicit) to 0.0 (lagrangian) 
+     real :: vw_fac        !<
+     real :: vi_fac        !< if const_vi: 1 / 3
+     real :: vs_fac        !< if const_vs: 1.
+     real :: vg_fac        !< if const_vg: 2.
+     real :: vr_fac        !< if const_vr: 4.
 
      ! upper bounds of fall speed (with variable speed option)
-     real(kind_phys) :: vw_max        !< maximum fall speed for cloud water (m/s) (V3)
-     real(kind_phys) :: vi_max        !< max fall speed for ice
-     real(kind_phys) :: vs_max        !< max fall speed for snow
-     real(kind_phys) :: vg_max        !< max fall speed for graupel
-     real(kind_phys) :: vr_max        !< max fall speed for rain
+     real :: vw_max        !< maximum fall speed for cloud water (m/s) (V3)
+     real :: vi_max        !< max fall speed for ice
+     real :: vs_max        !< max fall speed for snow
+     real :: vg_max        !< max fall speed for graupel
+     real :: vr_max        !< max fall speed for rain
      !
-     real(kind_phys) :: xr_a          !< p value in Xu and Randall (1996)
-     real(kind_phys) :: xr_b          !< alpha_0 value in Xu and Randall (1996)
-     real(kind_phys) :: xr_c          !< gamma value in Xu and Randall (1996)
+     real :: xr_a          !< p value in Xu and Randall (1996)
+     real :: xr_b          !< alpha_0 value in Xu and Randall (1996)
+     real :: xr_c          !< gamma value in Xu and Randall (1996)
      !
-     real(kind_phys) :: te_err        !< 64bit: 1.e-14, 32bit: 1.e-7; turn off to save computer time
-     real(kind_phys) :: tw_err        !< 64bit: 1.e-14, 32bit: 1.e-7; turn off to save computer time
-     real(kind_phys) :: rh_thres      !< minimum relative humidity for cloud fraction
-     real(kind_phys) :: rhc_cevap     !< maximum relative humidity for cloud water evaporation
-     real(kind_phys) :: rhc_revap     !< maximum relative humidity for rain evaporation 
-     real(kind_phys) :: f_dq_p        !< cloud fraction adjustment for supersaturation
-     real(kind_phys) :: f_dq_m        !< cloud fraction adjustment for undersaturation
-     real(kind_phys) :: fi2s_fac      !< maximum sink of cloud ice to form snow: 0-1
-     real(kind_phys) :: fi2g_fac      !< maximum sink of cloud ice to form graupel: 0-1
-     real(kind_phys) :: fs2g_fac      !< maximum sink of snow to form graupel: 0-1
+     real :: te_err        !< 64bit: 1.e-14, 32bit: 1.e-7; turn off to save computer time
+     real :: tw_err        !< 64bit: 1.e-14, 32bit: 1.e-7; turn off to save computer time
+     real :: rh_thres      !< minimum relative humidity for cloud fraction
+     real :: rhc_cevap     !< maximum relative humidity for cloud water evaporation
+     real :: rhc_revap     !< maximum relative humidity for rain evaporation 
+     real :: f_dq_p        !< cloud fraction adjustment for supersaturation
+     real :: f_dq_m        !< cloud fraction adjustment for undersaturation
+     real :: fi2s_fac      !< maximum sink of cloud ice to form snow: 0-1
+     real :: fi2g_fac      !< maximum sink of cloud ice to form graupel: 0-1
+     real :: fs2g_fac      !< maximum sink of snow to form graupel: 0-1
 
      ! cloud microphysics switchers
      logical :: fast_sat_adj          !< has fast saturation adjustments
@@ -239,40 +244,40 @@ module module_gfdlmp_param
                                       !< 2: Mizuno (1990)
                                       !< 3: Murakami (1990)
      !
-     real(kind_phys) :: n0w_sig       !< intercept parameter (significand) of cloud water (Lin et al. 1983) (1/m^4) (Martin et al. 1994)
-     real(kind_phys) :: n0i_sig       !< intercept parameter (significand) of cloud ice (Lin et al. 1983) (1/m^4) (McFarquhar et al. 2015)
-     real(kind_phys) :: n0r_sig       !< intercept parameter (significand) of rain (Lin et al. 1983) (1/m^4) (Marshall and Palmer 1948)
-     real(kind_phys) :: n0s_sig       !< intercept parameter (significand) of snow (Lin et al. 1983) (1/m^4) (Gunn and Marshall 1958)
-     real(kind_phys) :: n0g_sig       !< intercept parameter (significand) of graupel (Rutledge and Hobbs 1984) (1/m^4) (Houze et al. 1979)
-     real(kind_phys) :: n0h_sig       !< intercept parameter (significand) of hail (Lin et al. 1983) (1/m^4) (Federer and Waldvogel 1975)
+     real :: n0w_sig       !< intercept parameter (significand) of cloud water (Lin et al. 1983) (1/m^4) (Martin et al. 1994)
+     real :: n0i_sig       !< intercept parameter (significand) of cloud ice (Lin et al. 1983) (1/m^4) (McFarquhar et al. 2015)
+     real :: n0r_sig       !< intercept parameter (significand) of rain (Lin et al. 1983) (1/m^4) (Marshall and Palmer 1948)
+     real :: n0s_sig       !< intercept parameter (significand) of snow (Lin et al. 1983) (1/m^4) (Gunn and Marshall 1958)
+     real :: n0g_sig       !< intercept parameter (significand) of graupel (Rutledge and Hobbs 1984) (1/m^4) (Houze et al. 1979)
+     real :: n0h_sig       !< intercept parameter (significand) of hail (Lin et al. 1983) (1/m^4) (Federer and Waldvogel 1975)
      !
-     real(kind_phys) :: n0w_exp       !< intercept parameter (exponent) of cloud water (Lin et al. 1983) (1/m^4) (Martin et al. 1994)
-     real(kind_phys) :: n0i_exp       !< intercept parameter (exponent) of cloud ice (Lin et al. 1983) (1/m^4) (McFarquhar et al. 2015)
-     real(kind_phys) :: n0r_exp       !< intercept parameter (exponent) of rain (Lin et al. 1983) (1/m^4) (Marshall and Palmer 1948)
-     real(kind_phys) :: n0s_exp       !< intercept parameter (exponent) of snow (Lin et al. 1983) (1/m^4) (Gunn and Marshall 1958)
-     real(kind_phys) :: n0g_exp       !< intercept parameter (exponent) of graupel (Rutledge and Hobbs 1984) (1/m^4) (Houze et al. 1979)
-     real(kind_phys) :: n0h_exp       !< intercept parameter (exponent) of hail (Lin et al. 1983) (1/m^4) (Federer and Waldvogel 1975)
+     real :: n0w_exp       !< intercept parameter (exponent) of cloud water (Lin et al. 1983) (1/m^4) (Martin et al. 1994)
+     real :: n0i_exp       !< intercept parameter (exponent) of cloud ice (Lin et al. 1983) (1/m^4) (McFarquhar et al. 2015)
+     real :: n0r_exp       !< intercept parameter (exponent) of rain (Lin et al. 1983) (1/m^4) (Marshall and Palmer 1948)
+     real :: n0s_exp       !< intercept parameter (exponent) of snow (Lin et al. 1983) (1/m^4) (Gunn and Marshall 1958)
+     real :: n0g_exp       !< intercept parameter (exponent) of graupel (Rutledge and Hobbs 1984) (1/m^4) (Houze et al. 1979)
+     real :: n0h_exp       !< intercept parameter (exponent) of hail (Lin et al. 1983) (1/m^4) (Federer and Waldvogel 1975)
      !
-     real(kind_phys) :: muw           !< shape parameter of cloud water in Gamma distribution (Martin et al. 1994)
-     real(kind_phys) :: mui           !< shape parameter of cloud ice in Gamma distribution (McFarquhar et al. 2015)
-     real(kind_phys) :: mur           !< shape parameter of rain in Gamma distribution (Marshall and Palmer 1948)
-     real(kind_phys) :: mus           !< shape parameter of snow in Gamma distribution (Gunn and Marshall 1958)
-     real(kind_phys) :: mug           !< shape parameter of graupel in Gamma distribution (Houze et al. 1979)
-     real(kind_phys) :: muh           !< shape parameter of hail in Gamma distribution (Federer and Waldvogel 1975)
+     real :: muw           !< shape parameter of cloud water in Gamma distribution (Martin et al. 1994)
+     real :: mui           !< shape parameter of cloud ice in Gamma distribution (McFarquhar et al. 2015)
+     real :: mur           !< shape parameter of rain in Gamma distribution (Marshall and Palmer 1948)
+     real :: mus           !< shape parameter of snow in Gamma distribution (Gunn and Marshall 1958)
+     real :: mug           !< shape parameter of graupel in Gamma distribution (Houze et al. 1979)
+     real :: muh           !< shape parameter of hail in Gamma distribution (Federer and Waldvogel 1975)
      !
-     real(kind_phys) :: alinw         !< "a" in Lin et al. (1983) for cloud water (Ikawa and Saito 1990)
-     real(kind_phys) :: alini         !< "a" in Lin et al. (1983) for cloud ice (Ikawa and Saita 1990)
-     real(kind_phys) :: alinr         !< "a" in Lin et al. (1983) for rain (Liu and Orville 1969)
-     real(kind_phys) :: alins         !< "a" in Lin et al. (1983) for snow (straka 2009)
-     real(kind_phys) :: aling         !< "a" in Lin et al. (1983), similar to a, but for graupel (Pruppacher and Klett 2010)
-     real(kind_phys) :: alinh         !< "a" in Lin et al. (1983), similar to a, but for hail (Pruppacher and Klett 2010)
+     real :: alinw         !< "a" in Lin et al. (1983) for cloud water (Ikawa and Saito 1990)
+     real :: alini         !< "a" in Lin et al. (1983) for cloud ice (Ikawa and Saita 1990)
+     real :: alinr         !< "a" in Lin et al. (1983) for rain (Liu and Orville 1969)
+     real :: alins         !< "a" in Lin et al. (1983) for snow (straka 2009)
+     real :: aling         !< "a" in Lin et al. (1983), similar to a, but for graupel (Pruppacher and Klett 2010)
+     real :: alinh         !< "a" in Lin et al. (1983), similar to a, but for hail (Pruppacher and Klett 2010)
      !
-     real(kind_phys) :: blinw         !< "b" in Lin et al. (1983) for cloud water (Ikawa and Saito 1990)
-     real(kind_phys) :: blini         !< "b" in Lin et al. (1983) for cloud ice (Ikawa and Saita 1990)
-     real(kind_phys) :: blinr         !< "b" in Lin et al. (1983) for rain (Liu and Orville 1969)
-     real(kind_phys) :: blins         !< "b" in Lin et al. (1983) for snow (straka 2009)
-     real(kind_phys) :: bling         !< "b" in Lin et al. (1983), similar to b, but for graupel (Pruppacher and Klett 2010)
-     real(kind_phys) :: blinh         !< "b" in Lin et al. (1983), similar to b, but for hail (Pruppacher and Klett 2010)
+     real :: blinw         !< "b" in Lin et al. (1983) for cloud water (Ikawa and Saito 1990)
+     real :: blini         !< "b" in Lin et al. (1983) for cloud ice (Ikawa and Saita 1990)
+     real :: blinr         !< "b" in Lin et al. (1983) for rain (Liu and Orville 1969)
+     real :: blins         !< "b" in Lin et al. (1983) for snow (straka 2009)
+     real :: bling         !< "b" in Lin et al. (1983), similar to b, but for graupel (Pruppacher and Klett 2010)
+     real :: blinh         !< "b" in Lin et al. (1983), similar to b, but for hail (Pruppacher and Klett 2010)
      !
      logical :: de_ice                !< to prevent excessive build - up of cloud ice from external sources
      logical :: sedi_transport        !< transport of momentum in sedimentation
@@ -284,61 +289,69 @@ module module_gfdlmp_param
      logical :: fix_negative          !< fix negative water species
      logical :: tintqs                !<
      !
-     real(kind_phys) :: beta          !< defined in Heymsfield and Mcfarquhar (1996)
+     real :: beta          !< defined in Heymsfield and Mcfarquhar (1996)
 
-     real(kind_phys) :: rewmin        !< minimum effective radii (liquid)
-     real(kind_phys) :: rewmax        !< maximum effective radii (liquid)
-     real(kind_phys) :: reimin        !< minimum effective radii (ice)
-     real(kind_phys) :: reimax        !< maximum effective radii (ice)
-     real(kind_phys) :: rermin        !< minimum effective radii (rain)
-     real(kind_phys) :: rermax        !< maximum effective radii (rain)
-     real(kind_phys) :: resmin        !< minimum effective radii (snow)
-     real(kind_phys) :: resmax        !< maximum effective radii (snow)
-     real(kind_phys) :: regmin        !< minimum effective radii (graupel)
-     real(kind_phys) :: regmax        !< maximum effective radii (graupel)
+     real :: rewmin        !< minimum effective radii (liquid)
+     real :: rewmax        !< maximum effective radii (liquid)
+     real :: reimin        !< minimum effective radii (ice)
+     real :: reimax        !< maximum effective radii (ice)
+     real :: rermin        !< minimum effective radii (rain)
+     real :: rermax        !< maximum effective radii (rain)
+     real :: resmin        !< minimum effective radii (snow)
+     real :: resmax        !< maximum effective radii (snow)
+     real :: regmin        !< minimum effective radii (graupel)
+     real :: regmax        !< maximum effective radii (graupel)
      !
-     real(kind_phys) :: rewfac        !< this is a tuning parameter to compromise the inconsistency between
+     real :: rewfac        !< this is a tuning parameter to compromise the inconsistency between
                                       !< GFDL MP's PSD and cloud water radiative property's PSD assumption.
                                       !< after the cloud water radiative property's PSD is rebuilt,
                                       !< this parameter should be 1.0.
-     real(kind_phys) :: reifac        !< this is a tuning parameter to compromise the inconsistency between
+     real :: reifac        !< this is a tuning parameter to compromise the inconsistency between
                                       !< GFDL MP's PSD and cloud ice radiative property's PSD assumption.
                                       !< after the cloud ice radiative property's PSD is rebuilt,
                                       !< this parameter should be 1.0.
+   contains
+     generic,   public :: setup => setup_v1, setup_v3
+     procedure, private :: setup_v1
+     procedure, private :: setup_v3
   end type ty_gfdlmp_config
   !
   type(ty_gfdlmp_config) :: cfg
   
 contains
-  
-  subroutine setup_v3(cfg, mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land, dw_ocean, &
-                      vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vi_max,  &
-                      vs_max, vg_max, vr_max, qs_mlt, qs0_crt, qi_gen, ql0_max, qi0_max,    &
-                      qi0_crt, qr0_crt, fast_sat_adj, rh_inc, rh_ins, rh_inr, const_vi,     &
-                      const_vs, const_vg, const_vr, use_ccn, rthresh, ccn_l, ccn_o, qc_crt, &
-                      tau_g2v, tau_v2g, sat_adj0, c_piacr, tau_imlt, tau_v2l, tau_l2v,      &
-                      tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci, c_pgacs,           &
-                      z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,        &
-                      rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
-                      do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
-                      mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
-                      resmin, resmax, regmin, regmax, tintqs, do_hail)
+  ! #######################################################################################
+  !
+  ! #######################################################################################
+  function setup_v1(cfg, mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land,      &
+                    dw_ocean,vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, &
+                    vi_max, vs_max, vg_max, vr_max, qs_mlt, qs0_crt, qi_gen, ql0_max,     &
+                    qi0_max, qi0_crt, qr0_crt, fast_sat_adj, rh_inc, rh_ins, rh_inr,      &
+                    const_vi, const_vs, const_vg, const_vr, use_ccn, rthresh, ccn_l,      &
+                    ccn_o, qc_crt, tau_g2v, tau_v2g, sat_adj0, c_piacr, tau_imlt, tau_v2l,&
+                    tau_l2v, tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci, c_pgacs,  &
+                    z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,        &
+                    rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
+                    do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
+                    mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
+                    resmin, resmax, regmin, regmax, tintqs, do_hail) result(err_message)
     !
-    class(ty_gfdlmp_config), intent(in)  :: cfg
-    logical, intent(in) :: do_qa, fix_negative, fast_sat_adj, const_vi,      &
-         const_vs, const_vg, const_vr, use_ccn, z_slope_liq, z_slope_ice,    &
-         prog_ccn, rad_snow, rad_graupel, rad_rain, use_ppm, mono_prof,      &
-         mp_print, do_hail, tintqs
-    real(kind_phys), intent(in) :: mp_time, t_min, t_sub, tau_r2g, tau_smlt, &
-         tau_g2r, tau_g2v, tau_v2g, tau_imlt, tau_v2l, tau_l2v, tau_i2s,     &
-         tau_l2r, dw_land, dw_ocean,  vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt,&
-         vi_max, vs_max, vg_max, vr_max, ql0_max, qi0_max, qs0_crt, qi0_crt, &
-         qr0_crt,qc_crt, qs_mlt, qi_gen, rh_inc, rh_ins, rh_inr, rthresh,    &
-         ccn_l, ccn_o, sat_adj0, c_piacr, qi_lim, ql_gen, c_paut, c_psaci,   &
-         c_pgacs, c_cracw, alin, clin, tice, cld_min, do_sedi_heat,          &
-         do_sedi_w, sedi_transport, de_ice, rewmin, rewmax, reimin, reimax,  &
-         rermin, rermax, resmin, resmax, regmin, regmax
+    class(ty_gfdlmp_config), intent(inout)  :: cfg
+    character(len=128) :: err_message
+    logical, intent(in) :: do_qa, fix_negative, fast_sat_adj, const_vi, const_vs,         &
+         const_vg, const_vr, use_ccn, z_slope_liq, z_slope_ice, prog_ccn, rad_snow,       &
+         rad_graupel, rad_rain, use_ppm, mono_prof, mp_print, do_hail, tintqs,            &
+         do_sedi_heat, do_sedi_w, sedi_transport, de_ice
+    real, intent(in) :: mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r,     &
+         tau_g2v, tau_v2g, tau_imlt, tau_v2l, tau_l2v, tau_i2s, tau_l2r, dw_land,         &
+         dw_ocean,  vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, vi_max, vs_max, vg_max,       &
+         vr_max, ql0_max, qi0_max, qs0_crt, qi0_crt, qr0_crt,qc_crt, qs_mlt, qi_gen,      &
+         rh_inc, rh_ins, rh_inr, rthresh, ccn_l, ccn_o, sat_adj0, c_piacr, qi_lim, ql_gen,&
+         c_paut, c_psaci, c_pgacs, c_cracw, alin, clin, tice, cld_min, rewmin, rewmax,    &
+         reimin, reimax, rermin, rermax, resmin, resmax, regmin, regmax
     integer, intent(in) :: icloud_f, irain_f, reiflag
+
+    ! initialize error message
+    err_message = ""
   
     cfg%mp_time        = mp_time
     cfg%t_min          = t_min
@@ -427,6 +440,18 @@ contains
     cfg%tintqs         = tintqs
     cfg%do_hail        = do_hail
 
-  end subroutine setup_v3
+  end function setup_v1
+  
+  ! #######################################################################################
+  !
+  ! #######################################################################################
+  function setup_v3(cfg) result(err_message)
+    class(ty_gfdlmp_config), intent(inout)  :: cfg
+    character(len=128) :: err_message
+
+    ! initialize error message
+    err_message = ""
+    
+  end function setup_v3
 
 end module module_gfdlmp_param
