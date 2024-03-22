@@ -901,7 +901,6 @@
   units = flag
   dimensions = ()
   type = logical
-  active = (control_for_lake_model_selection == 3)
   intent = in
 [clm_debug_print]
   standard_name = flag_for_printing_in_clm_lake_model

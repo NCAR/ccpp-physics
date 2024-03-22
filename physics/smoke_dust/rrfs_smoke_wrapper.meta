@@ -135,7 +135,6 @@
   units = index
   dimensions = ()
   type = integer
-  active = (do_smoke_coupling)
   intent = in
 [dust_moist_correction_in]
   standard_name = dust_moist_correction_fengsha_dust_scheme
@@ -144,7 +143,6 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  active = (do_smoke_coupling)
   intent = in
 [dust_drylimit_factor_in]
   standard_name = dust_drylimit_factor_fengsha_dust_scheme
@@ -153,7 +151,6 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  active = (do_smoke_coupling)
   intent = in
 [aero_ind_fdb_in]
   standard_name = do_smoke_aerosol_indirect_feedback
