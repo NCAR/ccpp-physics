@@ -13,8 +13,9 @@ module noahmpdrv
 
     use module_sf_noahmplsm
     ! 3.5.24 for use in IAU
-    use lnd_iau_mod,  only: lnd_iau_control_type, lnd_iau_external_data_type,&
-                            lnd_iau_mod_set_control, lnd_iau_mod_init, lnd_iau_mod_getiauforcing   !,  &    lnd_iau_mod_finalize
+    use lnd_iau_mod,  only: lnd_iau_control_type, lnd_iau_external_data_type,   &
+                            lnd_iau_mod_set_control, lnd_iau_mod_init, lnd_iau_mod_getiauforcing,  &    
+                            lnd_iau_mod_finalize
 
     implicit none
 
@@ -291,7 +292,7 @@ module noahmpdrv
     !   endif
     ! endif
     
-    ! call lnd_iau_mod_finalize()     !LND_IAU_Control%finalize()
+    call lnd_iau_mod_finalize()     !LND_IAU_Control%finalize()
 
   end subroutine noahmpdrv_timestep_finalize
 
