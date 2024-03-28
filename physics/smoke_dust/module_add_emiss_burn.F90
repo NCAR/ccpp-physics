@@ -76,15 +76,6 @@ CONTAINS
 !                   the eastern US,   max_ti= 20.041288* 3600.
 !                   else   max_ti= 18.041288* 3600.
 !                   endif
-! RAR: for option #1 ebb and frp are ingested for 24 hours. No modification is
-! applied! 
-    if (ebb_dcycle==1) then
-      do k=kts,kte
-        do i=its,ite
-         ebu(i,k,1)=ebu_in(i,1)   ! RAR:          
-        enddo
-      enddo
-     endif
 
     if (ebb_dcycle==2) then
 
