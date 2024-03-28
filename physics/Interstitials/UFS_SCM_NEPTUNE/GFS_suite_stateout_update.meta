@@ -44,6 +44,13 @@
   dimensions = ()
   type = ty_ozphys
   intent = in
+[qdiag3d]
+  standard_name = flag_for_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [oz_phys_2015]
   standard_name = flag_for_nrl_2015_ozone_scheme
   long_name = flag for new (2015) ozone physics

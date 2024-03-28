@@ -42,9 +42,9 @@ contains
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
-      real(kind=kind_phys), dimension(:), intent(in   )  :: snowd, tprcp, uustar, weasd, qss
+      real(kind=kind_phys), dimension(:), intent(in   )  :: snowd, tprcp, uustar, weasd, qss, tisfc
 
-      real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl, tisfc
+      real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl
       real(kind=kind_phys), dimension(:), intent(inout)  :: snowd_lnd, snowd_ice, tprcp_wat,            &
                     tprcp_lnd, tprcp_ice, tsfc_wat, tsurf_wat,tsurf_lnd, tsurf_ice,                     &
                     uustar_wat, uustar_lnd, uustar_ice, weasd_lnd, weasd_ice,                           &
@@ -86,7 +86,6 @@ contains
             if (oceanfrac(i) > zero) then
               if (cice(i) >= min_seaice) then
                 icy(i)  = .true.
-                tisfc(i) = max(timin, min(tisfc(i), tgice))
                 if (cplflx)  then
                   islmsk_cice(i) = 4
                   flag_cice(i)   = .true.
@@ -111,7 +110,6 @@ contains
               if (cice(i) >= min_lakeice) then
                 icy(i)    = .true.
                 islmsk(i) = 2
-                tisfc(i)  = max(timin, min(tisfc(i), tgice))
               else
                 cice(i)   = zero
                 hice(i)   = zero
@@ -151,7 +149,6 @@ contains
             if (oceanfrac(i) > zero) then
               if (cice(i) >= min_seaice) then
                 icy(i)   = .true.
-                tisfc(i) = max(timin, min(tisfc(i), tgice))
                 ! This cplice namelist option was added to deal with the
                 ! situation of the FV3ATM-HYCOM coupling without an active sea
                 ! ice (e.g., CICE6) component. By default, the cplice is true
@@ -187,9 +184,6 @@ contains
               is_clm = lkm>0 .and. iopt_lake==iopt_lake_clm .and. use_lake_model(i)>0
               if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
-                if(.not.is_clm) then
-                  tisfc(i) = max(timin, min(tisfc(i), tgice))
-                endif
                 islmsk(i) = 2
               else
                 cice(i)   = zero
