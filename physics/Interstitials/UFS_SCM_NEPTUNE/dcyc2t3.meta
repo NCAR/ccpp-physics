@@ -524,14 +524,6 @@
   type = real
   kind = kind_phys
   intent = out
-[adjsfculw]
-  standard_name = surface_upwelling_longwave_flux
-  long_name = surface upwelling longwave flux at current time
-  units = W m-2
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
 [adjsfculw_lnd]
   standard_name = surface_upwelling_longwave_flux_over_land
   long_name = surface upwelling longwave flux at current time over land
