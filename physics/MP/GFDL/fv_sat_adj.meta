@@ -340,6 +340,7 @@
   type = real
   kind = kind_dyn
   intent = inout
+  optional = True
 [pkz]
   standard_name = finite_volume_mean_edge_pressure_raised_to_the_power_of_kappa
   long_name = finite-volume mean edge pressure in Pa raised to the power of kappa

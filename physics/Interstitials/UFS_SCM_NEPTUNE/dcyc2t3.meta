@@ -399,6 +399,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [fluxlwUP_jac]
   standard_name = RRTMGP_jacobian_of_lw_flux_upward
   long_name = RRTMGP Jacobian upward longwave flux profile
@@ -476,6 +477,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dtdt]
   standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = total radiative heating rate at current time
@@ -492,6 +494,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [htrlw]
   standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_timestep
   long_name = total sky longwave heating rate on physics time step
@@ -500,6 +503,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [adjsfcdsw]
   standard_name = surface_downwelling_shortwave_flux
   long_name = surface downwelling shortwave flux at current time

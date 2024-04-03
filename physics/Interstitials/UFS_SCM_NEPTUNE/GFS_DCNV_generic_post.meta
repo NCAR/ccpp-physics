@@ -138,6 +138,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dd_mf]
   standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux
   long_name = (downdraft mass flux) * delt
@@ -162,6 +163,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -169,6 +171,7 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
+  optional = True
 [index_of_process_dcnv]
   standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
   long_name = index of deep convection process in second dimension of array cumulative change index
@@ -280,6 +283,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dwn_mf]
   standard_name = cumulative_atmosphere_downdraft_convective_mass_flux
   long_name = cumulative downdraft mass flux
@@ -288,6 +292,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [det_mf]
   standard_name = cumulative_atmosphere_detrainment_convective_mass_flux
   long_name = cumulative detrainment mass flux
@@ -296,6 +301,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cnvw]
   standard_name = convective_cloud_water_mixing_ratio
   long_name = moist convective cloud water mixing ratio
@@ -320,6 +326,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cnvc_phy_f3d]
   standard_name = convective_cloud_area_fraction
   long_name = convective cloud cover in the phy_f3d array
@@ -328,6 +335,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [flag_for_dcnv_generic_tend]
   standard_name = flag_for_generic_tendency_due_to_deep_convection
   long_name = true if GFS_DCNV_generic should calculate tendencies
@@ -447,6 +455,7 @@
   dimensions = ()
   type = integer
   intent = in
+  optional = True
 [nthv]
   standard_name = index_of_hail_volume_in_tracer_concentration_array
   long_name = tracer index for hail particle volume

@@ -336,6 +336,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snow]
   standard_name = lwe_thickness_of_snow_amount_on_dynamics_timestep
   long_name = snow fall at this time step
@@ -344,6 +345,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [graupel]
   standard_name = lwe_thickness_of_graupel_amount_on_dynamics_timestep
   long_name = graupel fall at this time step
@@ -352,6 +354,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [frzr]
   standard_name = cumulative_lwe_thickness_of_surface_freezing_rain_amount
   long_name = accumulated surface freezing rain
@@ -439,6 +442,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ice0]
   standard_name = lwe_thickness_of_ice_amount
   long_name = ice fall on physics timestep
@@ -447,6 +451,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [snow0]
   standard_name = lwe_thickness_of_snow_amount
   long_name = snow fall on physics timestep
@@ -455,6 +460,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [graupel0]
   standard_name = lwe_thickness_of_graupel_amount
   long_name = graupel fall on physics timestep
@@ -463,6 +469,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [del]
   standard_name = air_pressure_difference_between_midlayers
   long_name = air pressure difference between midlayers
@@ -559,6 +566,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [totsnw]
   standard_name = accumulated_lwe_thickness_of_snow_amount
   long_name = accumulated snow precipitation
@@ -567,6 +575,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [totgrp]
   standard_name = accumulated_lwe_thickness_of_graupel_amount
   long_name = accumulated graupel precipitation
@@ -575,6 +584,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cnvprcpb]
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket
   long_name = cumulative convective precipitation in bucket
@@ -599,6 +609,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [totsnwb]
   standard_name = accumulated_lwe_thickness_of_snow_amount_in_bucket
   long_name = accumulated snow precipitation in bucket
@@ -607,6 +618,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [totgrpb]
   standard_name = accumulated_lwe_thickness_of_graupel_amount_in_bucket
   long_name = accumulated graupel precipitation in bucket
@@ -615,6 +627,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [rain_cpl]
   standard_name = cumulative_lwe_thickness_of_precipitation_amount_for_coupling
   long_name = total rain precipitation
@@ -623,6 +636,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [rainc_cpl]
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_for_coupling
   long_name = total convective precipitation
@@ -631,6 +645,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snow_cpl]
   standard_name = cumulative_lwe_thickness_of_snow_amount_for_coupling
   long_name = total snow precipitation
@@ -639,6 +654,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [pwat]
   standard_name = column_precipitable_water
   long_name = precipitable water
@@ -655,6 +671,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dsnow_cpl]
   standard_name = tendency_of_lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
   long_name = change in show_cpl (coupling_type)
@@ -663,6 +680,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [lsm]
   standard_name = control_for_land_surface_scheme
   long_name = flag for land surface model
@@ -692,6 +710,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [rainncprv]
   standard_name = lwe_thickness_of_explicit_precipitation_amount_on_previous_timestep
   long_name = explicit rainfall from previous timestep
@@ -700,6 +719,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [iceprv]
   standard_name = lwe_thickness_of_ice_precipitation_amount_on_previous_timestep
   long_name = ice amount from previous timestep
@@ -708,6 +728,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snowprv]
   standard_name = snow_mass_on_previous_timestep
   long_name = snow amount from previous timestep
@@ -716,6 +737,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [graupelprv]
   standard_name = lwe_thickness_of_graupel_amount_on_previous_timestep
   long_name = graupel amount from previous timestep
@@ -724,6 +746,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [draincprv]
   standard_name = convective_precipitation_rate_on_previous_timestep
   long_name = convective precipitation rate from previous timestep
@@ -732,6 +755,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [drainncprv]
   standard_name = explicit_precipitation_rate_on_previous_timestep
   long_name = explicit rainfall rate previous timestep
@@ -740,6 +764,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [diceprv]
   standard_name = ice_precipitation_rate_on_previous_timestep
   long_name = ice precipitation rate from previous timestep
@@ -748,6 +773,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dsnowprv]
   standard_name = snowfall_rate_on_previous_timestep
   long_name = snow precipitation rate from previous timestep
@@ -756,6 +782,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dgraupelprv]
   standard_name = graupel_precipitation_rate_on_previous_timestep
   long_name = graupel precipitation rate from previous timestep
@@ -764,6 +791,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep
@@ -809,6 +837,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [fhour]
   standard_name = forecast_time
   long_name = current forecast time
@@ -840,6 +869,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -847,6 +877,7 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
+  optional = True
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index
@@ -883,6 +914,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [prevsq]
   standard_name = specific_humidity_on_previous_timestep
   long_name = specific_humidity_on_previous_timestep
@@ -891,6 +923,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics

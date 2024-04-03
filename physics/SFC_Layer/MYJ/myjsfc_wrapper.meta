@@ -325,6 +325,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [slmsk]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2

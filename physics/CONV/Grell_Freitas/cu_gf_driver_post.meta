@@ -53,6 +53,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [cactiv]
   standard_name = counter_for_grell_freitas_convection
   long_name = convective activity memory
@@ -127,6 +128,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [gq0]
   standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics

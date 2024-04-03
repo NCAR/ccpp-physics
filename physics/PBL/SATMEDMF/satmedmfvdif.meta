@@ -457,6 +457,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [hpbl]
   standard_name = atmosphere_boundary_layer_thickness
   long_name = PBL thickness
@@ -465,6 +466,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [kinver]
   standard_name = index_of_highest_temperature_inversion
   long_name = index of highest temperature inversion
@@ -504,6 +506,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -511,6 +514,7 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
+  optional = True
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index

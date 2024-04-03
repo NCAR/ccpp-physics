@@ -118,6 +118,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [crw]
   standard_name = mass_number_concentration_of_rain_water_in_air
   long_name = rain number concentration
@@ -158,6 +159,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -409,6 +411,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cccn]
   standard_name = cloud_condensation_nuclei_number_concentration_of_new_state
   long_name = number concentration of cloud condensation nuclei updated by physics
@@ -417,6 +420,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cccna]
   standard_name = activated_cloud_condensation_nuclei_number_concentration_of_new_state
   long_name = number concentration of activated cloud condensation nuclei updated by physics
@@ -425,6 +429,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ccw]
   standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air_of_new_state
   long_name = cloud droplet number concentration
@@ -433,6 +438,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [crw]
   standard_name = mass_number_concentration_of_rain_of_new_state
   long_name = rain number concentration
@@ -473,6 +479,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [vh]
   standard_name = graupel_volume_of_new_state
   long_name = graupel particle volume
@@ -481,6 +488,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [vhl]
   standard_name = hail_volume_of_new_state
   long_name = hail particle volume
@@ -489,6 +497,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zrw]
   standard_name = reflectivity_of_rain_of_new_state
   long_name = rain reflectivity
@@ -497,6 +506,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zhw]
   standard_name = reflectivity_of_graupel_of_new_state
   long_name = graupel reflectivity
@@ -505,6 +515,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zhl]
   standard_name = reflectivity_of_hail_of_new_state
   long_name = hail reflectivity
@@ -513,6 +524,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tgrs]
   standard_name = air_temperature_of_new_state
   long_name = model layer mean temperature
@@ -577,6 +589,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [graupel]
   standard_name = lwe_thickness_of_graupel_amount
   long_name = graupel fall on physics timestep
@@ -585,6 +598,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ice]
   standard_name = lwe_thickness_of_ice_amount
   long_name = ice fall on physics timestep
@@ -593,6 +607,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snow]
   standard_name = lwe_thickness_of_snow_amount
   long_name = snow fall on physics timestep
@@ -601,6 +616,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sr]
   standard_name = ratio_of_snowfall_to_rainfall
   long_name = ratio of snowfall to large-scale rainfall
@@ -646,6 +662,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [re_ice]
   standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = eff. radius of cloud ice water particle in micrometer
@@ -654,6 +671,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [re_snow]
   standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in micrometer
@@ -662,6 +680,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [re_rain]
   standard_name = effective_radius_of_stratiform_cloud_rain_particle
   long_name = effective radius of cloud rain particle in micrometers
@@ -670,6 +689,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nleffr]
   standard_name = index_of_cloud_liquid_water_effective_radius_in_xyz_dimensioned_restart_array
   long_name = the index of cloud liquid water effective radius in phy_f3d
@@ -754,6 +774,7 @@
   dimensions = ()
   type = integer
   intent = in
+  optional = True
 [ntccna]
   standard_name = index_of_activated_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
   long_name = tracer index for activated cloud condensation nuclei number concentration
@@ -761,6 +782,7 @@
   dimensions = ()
   type = integer
   intent = in
+  optional = True
 [errflg]
   standard_name = ccpp_error_code
   long_name = error code for error handling in CCPP

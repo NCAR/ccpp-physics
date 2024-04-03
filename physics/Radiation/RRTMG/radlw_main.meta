@@ -134,6 +134,7 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
+  optional = True
 [aeraod]
   standard_name = aerosol_optical_depth_for_longwave_bands_01_16
   long_name = aerosol optical depth for longwave bands 01-16
@@ -166,6 +167,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dzlyr]
   standard_name = layer_thickness_for_radiation
   long_name = layer thickness
@@ -174,6 +176,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [delpin]
   standard_name = layer_pressure_thickness_for_radiation
   long_name = layer pressure thickness

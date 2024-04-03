@@ -85,6 +85,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [itc]
   standard_name = index_of_first_chemical_tracer_for_convection
   long_name = index of first chemical tracer transported/scavenged by convection
@@ -257,6 +258,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [q]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -372,6 +374,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ud_mf]
   standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
   long_name = (updraft mass flux) * delt
@@ -380,6 +383,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [dt_mf]
   standard_name = instantaneous_atmosphere_detrainment_convective_mass_flux
   long_name = (detrainment mass flux) * delt
@@ -474,6 +478,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [sigmaout]
   standard_name = updraft_area_fraction_updated_by_physics
   long_name = convective updraft area fraction updated by physics
@@ -482,6 +487,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [betascu]
   standard_name = tuning_param_for_shallow_cu
   long_name = tuning param for shallow cu in case prognostic closure is used

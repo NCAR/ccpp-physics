@@ -407,6 +407,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [vegfpert]
   standard_name = perturbation_of_vegetation_fraction
   long_name = perturbation of vegetation fraction
@@ -638,6 +639,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [hflx]
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_land
   long_name = kinematic surface upward sensible heat flux over land
@@ -750,6 +752,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [lai]
   standard_name = leaf_area_index
   long_name = leaf area index
@@ -758,6 +761,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [rca]
   standard_name = aerodynamic_resistance_in_canopy
   long_name = canopy resistance

@@ -136,6 +136,7 @@
   dimensions = ()
   type = integer
   intent = in
+  optional = True
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -311,6 +312,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [spechum]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -326,6 +328,7 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
+  optional = True
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
@@ -334,6 +337,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ntk]
   standard_name = index_for_turbulent_kinetic_energy_convective_transport_tracer
   long_name = index for turbulent kinetic energy in the convectively transported tracer array

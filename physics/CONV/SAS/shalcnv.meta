@@ -311,6 +311,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [heat]
   standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness_and_vegetation
   long_name = kinematic surface upward sensible heat flux reduced by surface roughness and vegetation
@@ -335,6 +336,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [dt_mf]
   standard_name = instantaneous_atmosphere_detrainment_convective_mass_flux
   long_name = (detrainment mass flux) * delt

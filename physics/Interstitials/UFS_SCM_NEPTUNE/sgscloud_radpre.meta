@@ -221,6 +221,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [qci_conv]
   standard_name = convective_cloud_condesate_after_rainout
   long_name = convective cloud condesate after rainout
@@ -229,6 +230,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qlc]
   standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -305,6 +307,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [QI_BL]
   standard_name = subgrid_scale_cloud_ice_mixing_ratio
   long_name = subgrid cloud ice mixing ratio from PBL scheme
@@ -313,6 +316,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [CLDFRA_BL]
   standard_name = subgrid_scale_cloud_area_fraction_in_atmosphere_layer
   long_name = subgrid cloud fraction from PBL scheme
@@ -321,6 +325,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [delp]
   standard_name = layer_pressure_thickness_for_radiation
   long_name = layer pressure thickness on radiation levels
@@ -424,6 +429,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [de_lgth]
   standard_name = cloud_decorrelation_length
   long_name = cloud decorrelation length

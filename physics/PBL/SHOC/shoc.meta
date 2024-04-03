@@ -208,6 +208,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [supice]
   standard_name = tunable_parameter_for_ice_supersaturation
   long_name = ice supersaturation parameter for PDF clouds

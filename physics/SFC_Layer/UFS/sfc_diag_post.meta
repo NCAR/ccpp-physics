@@ -97,6 +97,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [q2mp]
   standard_name = specific_humidity_at_2m_from_noahmp
   long_name = 2 meter specific humidity from noahmp
@@ -105,6 +106,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [t2m]
   standard_name = air_temperature_at_2m
   long_name = 2 meter temperature

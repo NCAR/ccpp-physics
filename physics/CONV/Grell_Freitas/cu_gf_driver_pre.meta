@@ -76,6 +76,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [forcet]
   standard_name = tendency_of_air_temperature_due_to_nonphysics
   long_name = temperature tendency due to dynamics only
@@ -158,6 +159,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [gq0]
   standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics

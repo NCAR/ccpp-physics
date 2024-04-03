@@ -148,6 +148,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [lwhd]
   standard_name = tendency_of_air_temperature_due_to_integrated_dynamics_through_earths_atmosphere
   long_name = idea sky lw heating rates
@@ -291,6 +292,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [adjsfculw]
   standard_name = surface_upwelling_longwave_flux
   long_name = surface upwelling longwave flux at current time
@@ -362,6 +364,7 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
+  optional = True
 [index_of_process_longwave]
   standard_name = index_of_longwave_heating_process_in_cumulative_change_index
   long_name = index of longwave heating process in second dimension of array cumulative change index

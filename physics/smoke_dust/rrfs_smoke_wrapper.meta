@@ -307,6 +307,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [t2m]
   standard_name = air_temperature_at_2m
   long_name = 2 meter temperature
@@ -410,6 +411,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tslb]
   standard_name = soil_temperature_for_land_surface_model
   long_name = soil temperature for land surface model
@@ -418,6 +420,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [vegtype_dom]
   standard_name = vegetation_type_classification
   long_name = vegetation type at each grid cell
@@ -487,6 +490,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [idat]
   standard_name = date_and_time_at_model_initialization_in_iso_order
   long_name = initialization date and time
@@ -621,6 +625,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tile_num]
   standard_name = index_of_cubed_sphere_tile
   long_name = tile number
@@ -671,6 +676,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nifa]
   standard_name = mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols_of_new_state
   long_name = number concentration of ice-friendly aerosols
@@ -679,6 +685,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [emanoc]
   standard_name = emission_of_anothropogenic_for_mp_indir_fdb
   long_name = emission of anothropogenic for mp indirect feedabck
@@ -719,6 +726,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [coef_bb]
   standard_name = coef_bb_dc
   long_name = coef to estimate the fire emission
@@ -803,6 +811,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [drydep_flux_out]
   standard_name = dry_deposition_flux
   long_name = rrfs dry deposition flux
@@ -843,6 +852,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ndvel]
   standard_name = number_of_chemical_species_deposited
   long_name = number of chemical pbl deposited
@@ -858,6 +868,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [peak_hr_out]
  standard_name = peak_hr_fire
  long_name = time_of_peak_fire_emissions

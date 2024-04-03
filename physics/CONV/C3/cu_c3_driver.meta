@@ -243,6 +243,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [sigmain]
   standard_name = prognostic_updraft_area_fraction_in_convection
   long_name = convective updraft area fraction
@@ -251,6 +252,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [sigmaout]
   standard_name = updraft_area_fraction_updated_by_physics
   long_name = convective updraft area fraction updated by physics
@@ -259,6 +261,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [betascu]
   standard_name = tuning_param_for_shallow_cu
   long_name = tuning param for shallow cu in case prognostic closure is used
@@ -462,6 +465,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ud_mf]
   standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
   long_name = (updraft mass flux) * delt
@@ -470,6 +474,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [dd_mf]
   standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux
   long_name = (downdraft mass flux) * delt
@@ -531,6 +536,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -538,6 +544,7 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
+  optional = True
 [ntqv]
   standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)
@@ -616,6 +623,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fhour]
   standard_name = forecast_time
   long_name = current forecast time
@@ -669,6 +677,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [rainevap]
   standard_name = physics_field_for_coupling
   long_name = physics_field_for_coupling
@@ -693,6 +702,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [do_mynnedmf]
   standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate MYNN-EDMF
