@@ -822,7 +822,7 @@
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_gfdl) then            ! GFDL MP
+        elseif (imp_physics == imp_physics_gfdl ) then            ! GFDL MP
           if ((imfdeepcnv==imfdeepcnv_gf .or. imfdeepcnv==imfdeepcnv_c3) .and. kdt>1) then
               do k=1,lm
                 k1 = k + kd

@@ -79,7 +79,7 @@ contains
          kdt,                       & ! Current forecast iteration
          imp_physics,               & ! Choice of microphysics scheme
          imp_physics_thompson,      & ! Choice of Thompson
-         imp_physics_gfdl,          & ! Choice of GFDL MP
+         imp_physics_gfdl,          & ! Choice of GFDL
          icloud                       ! Control for cloud are fraction option
     logical, intent(in) :: &
          doSWrad,                   & ! Call SW radiation?

@@ -27,8 +27,7 @@
 !            deltaq, sup, me, icloud, kdt,                             !
 !            ntrac, ntcw, ntiw, ntrw, ntsw, ntgl, ntclamt,             !
 !            imp_physics, imp_physics_nssl, imp_physics_fer_hires,     !
-!            imp_physics_gfdl, imp_physics_gfdl_v3,                    !
-!            imp_physics_thompson, imp_physics_wsm6,                   !
+!            imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, !
 !            imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,         !
 !            imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,  !
 !            iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,     !
@@ -308,8 +307,6 @@
             print *,'   --- zhao/carr/sundqvist + pdf cloud'
          elseif (imp_physics == 11) then
             print *,'   --- GFDL Lin cloud microphysics'
-         elseif (imp_physics == 13) then
-            print *,'   --- GFDL Lin cloud microphysics V3'
          elseif (imp_physics == 8) then
             print *,'   --- Thompson cloud microphysics'
          elseif (imp_physics == 6) then
@@ -345,8 +342,7 @@
      &       deltaq, sup, dcorr_con, me, icloud, kdt,                   &
      &       ntrac, ntcw, ntiw, ntrw, ntsw, ntgl, ntclamt,              &
      &       imp_physics, imp_physics_nssl, imp_physics_fer_hires,      &
-     &       imp_physics_gfdl, imp_physics_gfdl_v3,                     &
-     &       imp_physics_thompson, imp_physics_wsm6,                    &
+     &       imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,  &
      &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
      &       imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,   &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
@@ -436,7 +432,6 @@
 !   imp_physics_nssl          : NSSL microphysics                       !
 !   imp_physics_fer_hires     : Ferrier-Aligo microphysics scheme       !
 !   imp_physics_gfdl          : GFDL microphysics scheme                !
-!   imp_physics_gfdl_v3       : GFDL microphysics scheme v3             !
 !   imp_physics_thompson      : Thompson microphysics scheme            !
 !   imp_physics_wsm6          : WSMG     microphysics scheme            !
 !   imp_physics_zhao_carr     : Zhao-Carr microphysics scheme           !
@@ -522,7 +517,6 @@
      &     imp_physics_nssl,            ! Flag for NSSL scheme
      &     imp_physics_fer_hires,       ! Flag for fer-hires scheme
      &     imp_physics_gfdl,            ! Flag for gfdl scheme
-     &     imp_physics_gfdl_v3,         ! Flag for gfdl scheme v3 
      &     imp_physics_thompson,        ! Flag for thompsonscheme
      &     imp_physics_wsm6,            ! Flag for wsm6 scheme
      &     imp_physics_zhao_carr,       ! Flag for zhao-carr scheme
@@ -662,11 +656,10 @@
      &                 cld_reice,cld_rwp, cld_rerain,cld_swp,           & 
      &                 cld_resnow)
 
-      elseif (imp_physics == imp_physics_gfdl .or.                      &
-     &        imp_physics == imp_physics_gfdl_v3) then                     ! GFDL cloud scheme
+      elseif (imp_physics == imp_physics_gfdl) then                     ! GFDL cloud scheme
 
         if (.not. lgfdlmprad) then
-          call progcld_gfdl_lin (plyr, plvl, tlyr, tvly, qlyr,          &  !  ---  inputs
+          call progcld_gfdl_lin (plyr, plvl, tlyr, tvly, qlyr,          &    !  ---  inputs
      &                    qstl, rhly, ccnd(1:IX,1:NLAY,1), cnvw, cnvc,  &
      &                    xlat, xlon, slmsk, cldcov, dz, delp,          &
      &                    IX, NLAY, NLP1, dzlay,                        &
@@ -674,9 +667,6 @@
      &                    cld_frac, cld_lwp, cld_reliq, cld_iwp,        &  !  ---  outputs
      &                    cld_reice,cld_rwp, cld_rerain,cld_swp,        &
      &                    cld_resnow)
-!
-! rsun add an option for gfdlmp when do_sat_adj = .false. and do_qa =.false. 
-!
         else
 
           call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl, xlat,   &    !  ---  inputs

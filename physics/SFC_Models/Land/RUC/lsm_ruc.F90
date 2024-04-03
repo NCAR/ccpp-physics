@@ -324,8 +324,8 @@ module lsm_ruc
 !>\section gen_lsmruc RUC LSM General Algorithm
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
-     &       imp_physics, imp_physics_gfdl, imp_physics_gfdl_v3,        &
-     &       imp_physics_thompson, imp_physics_nssl, do_mynnsfclay,     &
+     &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
+     &       imp_physics_nssl, do_mynnsfclay,                           &
      &       exticeden, lsoil_ruc, lsoil, mosaic_lu, mosaic_soil,       &
      &       isncond_opt, isncovr_opt, nlcat, nscat,                    &
      &       rdlai, xlat_d, xlon_d,                                     &
@@ -377,8 +377,8 @@ module lsm_ruc
       integer, intent(in) :: mosaic_lu, mosaic_soil, isncond_opt, isncovr_opt
       integer, intent(in) :: nlcat, nscat
       integer, intent(in) :: lsm_ruc, lsm
-      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_gfdl_v3,&
-                             imp_physics_thompson, imp_physics_nssl
+      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, &
+                             imp_physics_nssl
       real (kind_phys), dimension(:), intent(in) :: xlat_d, xlon_d
       real (kind_phys), dimension(:), intent(in) :: oro, sigma
 
@@ -800,8 +800,8 @@ module lsm_ruc
 
       ! Set flag for mixed phase precipitation depending on microphysics scheme.
       ! For GFDL and Thompson, srflag is fraction of frozen precip for convective+explicit precip.
-      if (imp_physics==imp_physics_gfdl .or. imp_physics==imp_physics_gfdl_v3 .or. &
-          imp_physics==imp_physics_thompson .or. imp_physics == imp_physics_nssl) then
+      if (imp_physics==imp_physics_gfdl .or. imp_physics==imp_physics_thompson .or. &
+          imp_physics == imp_physics_nssl) then
         frpcpn = .true.
       else
         frpcpn = .false.
