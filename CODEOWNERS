@@ -196,6 +196,8 @@ physics/ysuvdif.*                              @Qingfu-Liu @WeiguoWang-NOAA     
 physics/zhaocarr_gscond.*                      @RuiyuSun                            @grantfirl @Qingfu-Liu @dustinswales
 physics/zhaocarr_precpd.*                      @RuiyuSun                            @grantfirl @Qingfu-Liu @dustinswales
 
+physics/sfc_land.*                             @uturuncoglu @barlage
+
 ########################################################################
 
 # Lines starting with '#' are comments.

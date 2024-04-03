@@ -8,7 +8,7 @@ module coarsepm_settling_mod
 CONTAINS
 
 
-SUBROUTINE coarsepm_settling_driver(dt,t_phy,rel_hum,                 &
+SUBROUTINE coarsepm_settling_driver(dt,t_phy,                         &
                                   chem,rho_phy,dz8w,p8w,p_phy,sedim,  &
                                   area,g,num_chem,                    &
                                   ids,ide, jds,jde, kds,kde,          &
@@ -24,7 +24,7 @@ SUBROUTINE coarsepm_settling_driver(dt,t_phy,rel_hum,                 &
                                   its,ite, jts,jte, kts,kte
   REAL(kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme, num_chem ),INTENT(INOUT ) :: chem
   REAL(kind_phys), DIMENSION( ims:ime , kms:kme , jms:jme ),                        &
-          INTENT(IN   ) ::  t_phy,p_phy,dz8w,p8w,rho_phy,rel_hum
+          INTENT(IN   ) ::  t_phy,p_phy,dz8w,p8w,rho_phy
   REAL(kind_phys), DIMENSION( ims:ime ,  jms:jme ),INTENT(IN   ) ::  area
   REAL(kind_phys), INTENT(IN   ) :: dt,g
 
@@ -64,7 +64,6 @@ SUBROUTINE coarsepm_settling_driver(dt,t_phy,rel_hum,                 &
           airmas(1,1,kk)=-(p8w(i,k+1,j)-p8w(i,k,j))*area(i,j)/g
           airden(1,1,kk)=rho_phy(i,k,j)
           tmp(1,1,kk)=t_phy(i,k,j)
-          rh(1,1,kk) = rel_hum(i,k,j) ! hli
           do nv = 1, num_chem
             chem_before(i,j,k,nv) =  chem(i,k,j,nv)  
           enddo
@@ -82,7 +81,7 @@ SUBROUTINE coarsepm_settling_driver(dt,t_phy,rel_hum,                 &
 
           call settling(1, 1, lmx, 1,g,dyn_visc, &
                     dust, tmp, p_mid, delz, airmas, &
-                    den_dust, reff_dust, dt, bstl_dust, rh, idust, airden)
+                    den_dust, reff_dust, dt, bstl_dust, idust, airden)
 
            kk = 0
           do k = kts,kte
@@ -111,7 +110,7 @@ END SUBROUTINE coarsepm_settling_driver
 
           subroutine settling(imx,jmx, lmx, nmx,g0,dyn_visc, &
                     tc, tmp, p_mid, delz, airmas, &
-                    den, reff, dt, bstl, rh, idust, airden)
+                    den, reff, dt, bstl, idust, airden)
 ! ****************************************************************************
 ! *                                                                          *
 ! *  Calculate the loss by settling, using an implicit method                *
@@ -131,7 +130,7 @@ END SUBROUTINE coarsepm_settling_driver
   INTEGER :: ntdt
   REAL(kind_phys), INTENT(IN) :: dt,g0,dyn_visc
   REAL(kind_phys),    INTENT(IN) :: tmp(imx,jmx,lmx), delz(imx,jmx,lmx),  &
-                         airmas(imx,jmx,lmx), rh(imx,jmx,lmx), &
+                         airmas(imx,jmx,lmx), &
                          den(nmx), reff(nmx),p_mid(imx,jmx,lmx),&
                          airden(imx,jmx,lmx)
   REAL(kind_phys), INTENT(INOUT) :: tc(imx,jmx,lmx,nmx)
