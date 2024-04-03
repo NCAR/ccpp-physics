@@ -56,6 +56,13 @@
   dimensions = ()
   type = logical
   intent = in
+[xr_cnvcld]
+  standard_name = flag_for_suspended_convective_clouds_in_Xu_Randall
+  long_name = flag for using suspended convective clouds in Xu Randall
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ltp]
   standard_name = extra_top_layer
   long_name = extra top layer for radiation

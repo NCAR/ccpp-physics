@@ -352,7 +352,7 @@
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
      &       idcor_hogan, idcor_oreopoulos, lcrick, lcnorm,             &
      &       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_c3,                  &
-     &       do_mynnedmf, lgfdlmprad,                                   &
+     &       do_mynnedmf, lgfdlmprad, xr_cnvcld,                        &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &
      &       effrl_inout, effri_inout, effrs_inout,                     &
@@ -544,7 +544,8 @@
 
 
       logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, effr_in,      &
-     &     do_mynnedmf, lgfdlmprad, top_at_1, lcrick, lcnorm
+     &     do_mynnedmf, lgfdlmprad, top_at_1, lcrick, lcnorm,           &
+     &     xr_cnvcld
 
       real (kind=kind_phys), dimension(:,:,:), intent(in) :: ccnd,      &
      &                                                       tracer1
@@ -737,7 +738,7 @@
               call progcld_thompson_wsm6 (plyr,plvl,tlyr,qlyr,qstl,     & !  --- inputs
      &                   rhly,tracer1,xlat,xlon,slmsk,dz,delp,          &
      &                   ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
-     &                   ntsw-1,ntgl-1,con_ttp,                         &
+     &                   ntsw-1,ntgl-1,con_ttp,xr_cnvcld,               &
      &                   IX, NLAY, NLP1, uni_cld, lmfshal, lmfdeep2,    &
      &                   cldcov(:,1:NLAY), cnvw, effrl_inout,           &
      &                   effri_inout, effrs_inout,                      &
@@ -811,7 +812,7 @@
               call progcld_thompson_wsm6 (plyr,plvl,tlyr,qlyr,qstl,     & !  --- inputs
      &                   rhly,tracer1,xlat,xlon,slmsk,dz,delp,          &
      &                   ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
-     &                   ntsw-1,ntgl-1,con_ttp,                         &
+     &                   ntsw-1,ntgl-1,con_ttp,xr_cnvcld,               &
      &                   IX, NLAY, NLP1, uni_cld, lmfshal, lmfdeep2,    &
      &                   cldcov(:,1:NLAY), cnvw, effrl, effri, effrs,   &
      &                   lwp_ex, iwp_ex, lwp_fc, iwp_fc,                &
@@ -1974,7 +1975,7 @@
      &     ( plyr,plvl,tlyr,qlyr,qstl,rhly,clw,                         &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &
      &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,con_ttp,                    &
-     &       IX, NLAY, NLP1,                                            &
+     &       xr_cnvcld, IX, NLAY, NLP1,                                 &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, cnvw,                  &
      &       re_cloud,re_ice,re_snow,                                   &
      &       lwp_ex, iwp_ex, lwp_fc, iwp_fc,                            &
@@ -2061,7 +2062,8 @@
       integer,  intent(in) :: IX, NLAY, NLP1
       integer,  intent(in) :: ntrac, ntcw, ntiw, ntrw, ntsw, ntgl
 
-      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, lcnorm
+      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, lcnorm,       &
+     &       xr_cnvcld
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, qlyr, qstl, rhly, cldcov, delp, dz, dzlay,           &
@@ -2132,23 +2134,43 @@
 !        enddo
 !      endif
 
+!> - Include grid-mean suspended cloud condensate in Xu-Randall cloud fraction
+!>   if xr_cnvcld is true:
+
+      if(xr_cnvcld)then
         do k = 1, NLAY
           do i = 1, IX
             clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)
      &      + clw(i,k,ntrw) + cnvw(i,k)
           enddo
         enddo
+      else
+         do k = 1, NLAY
+          do i = 1, IX
+            clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)
+     &      + clw(i,k,ntrw)
+          enddo
+        enddo
+      endif
 
 !> - Compute total-cloud liquid/ice condensate path in \f$ g/m^2 \f$.
 !>   The total condensate includes convective condensate.
         do k = 1, NLAY-1
           do i = 1, IX
-            tem1 = cnvw(i,k)*(1.-tem2d(i,k))
+            if(xr_cnvcld)then
+               tem1 = cnvw(i,k)*(1.-tem2d(i,k))
+            else
+               tem1 = 0.
+            endif
             cwp(i,k) = max(0.0, (clw(i,k,ntcw)+tem1) *
      &                 gfac * delp(i,k))
             if(tem1 > 1.e-12 .and.  clw(i,k,ntcw) < 1.e-12)
      &                 rew(i,k)=reliq_def
-            tem2 = cnvw(i,k)*tem2d(i,k)
+            if(xr_cnvcld)then
+               tem2 = cnvw(i,k)*tem2d(i,k)
+            else
+               tem2 = 0.
+            endif
             cip(i,k) = max(0.0, (clw(i,k,ntiw) +
      &             snow2ice*clw(i,k,ntsw) + tem2) *
      &             gfac * delp(i,k))
