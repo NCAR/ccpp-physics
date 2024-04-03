@@ -656,7 +656,7 @@
      &                 cld_reice,cld_rwp, cld_rerain,cld_swp,           & 
      &                 cld_resnow)
 
-      elseif (imp_physics == imp_physics_gfdl) then                     ! GFDL cloud scheme
+      elseif (imp_physics == imp_physics_gfdl) then           ! GFDL cloud scheme
 
         if (.not. lgfdlmprad) then
           call progcld_gfdl_lin (plyr, plvl, tlyr, tvly, qlyr,          &    !  ---  inputs
