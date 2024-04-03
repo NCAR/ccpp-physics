@@ -12,8 +12,8 @@
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac, rtg_ozone_index,      &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
         ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,          &
-        ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz, imp_physics,                   &
-        imp_physics_gfdl, imp_physics_gfdl_v3, imp_physics_thompson, imp_physics_wsm6,   &
+        ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz,                                &
+        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
         imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, imp_physics_nssl,  &
         ltaerosol, mraerosol, nssl_ccn_on, nssl_hail_on, nssl_3moment,                   &
         hybedmf, do_shoc, satmedmf, qgrs, vdftra, save_u, save_v, save_t, save_q,        &
@@ -31,8 +31,7 @@
       integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,ntchs, ntchm
       integer, intent(in) :: ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz
       logical, intent(in) :: trans_aero, ldiag3d, qdiag3d, lssav
-      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_gfdl_v3 
-      integer, intent(in) :: imp_physics_thompson, imp_physics_wsm6
+      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: ltaerosol, hybedmf, do_shoc, satmedmf, flag_for_pbl_generic_tend, mraerosol
       integer, intent(in) :: imp_physics_nssl
@@ -178,7 +177,7 @@
             enddo
             rtg_ozone_index = 10
           endif
-        elseif (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_gfdl_v3) then
+        elseif (imp_physics == imp_physics_gfdl) then
   ! GFDL MP
           do k=1,levs
             do i=1,im
@@ -276,7 +275,6 @@
           call set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
                                         imp_physics_thompson, ltaerosol,mraerosol, &
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                        imp_physics_gfdl_v3,                    &
                                         imp_physics_zhao_carr, imp_physics_nssl,&
                                         nssl_hail_on, nssl_ccn_on, kk,          &
                                         errmsg, errflg)

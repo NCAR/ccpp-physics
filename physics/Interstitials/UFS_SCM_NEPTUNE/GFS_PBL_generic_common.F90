@@ -14,7 +14,6 @@
       subroutine set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
                                           imp_physics_thompson, ltaerosol,mraerosol,   &
                                           imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                          imp_physics_gfdl_v3,                    &
                                           imp_physics_zhao_carr, imp_physics_nssl,&
                                           nssl_hail_on, nssl_ccn_on, kk,          &
                                           errmsg, errflg)
@@ -23,7 +22,6 @@
       integer, intent(in )          :: imp_physics, imp_physics_wsm6,          &
                                        imp_physics_thompson,                   &
                                        imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                       imp_physics_gfdl_v3,                    &
                                        imp_physics_zhao_carr,imp_physics_nssl
       logical, intent(in )          :: ltaerosol, mraerosol, nssl_hail_on, nssl_ccn_on
       integer, intent(out)          :: kk
@@ -52,7 +50,7 @@
         else
           kk = 10
         endif
-      elseif (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_gfdl_v3) then
+      elseif (imp_physics == imp_physics_gfdl) then
 ! GFDL MP
         kk = 7
       elseif (imp_physics == imp_physics_zhao_carr) then

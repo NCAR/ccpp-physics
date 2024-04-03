@@ -55,7 +55,6 @@
            nlay, plyr, xlat, dz,de_lgth, &
            cldsa,mtopa,mbota,            &
            imp_physics, imp_physics_gfdl,&
-           imp_physics_gfdl_v3,          &
            imp_physics_fa,               &
            iovr,                         &
            errmsg, errflg                )
@@ -76,7 +75,7 @@
       real(kind=kind_phys)             :: gfac
       integer,             intent(in)  :: im, levs, imfdeepcnv, imfdeepcnv_gf, &
            &  nlay, imfdeepcnv_sas, imfdeepcnv_c3, imp_physics, & 
-           &  imp_physics_gfdl, imp_physics_gfdl_v3, imp_physics_fa
+           &  imp_physics_gfdl, imp_physics_fa
       logical,             intent(in)  :: flag_init, flag_restart, do_mynnedmf
 
       real(kind=kind_phys), dimension(:,:), intent(inout) :: qc, qi
@@ -238,7 +237,7 @@
             enddo
           enddo
 
-        elseif (imp_physics /= imp_physics_gfdl .and. imp_physics /= imp_physics_gfdl_v3) then 
+        elseif (imp_physics /= imp_physics_gfdl) then 
 
           ! Non-MYNN cloud fraction AND non-GFDL microphysics, since both
           ! have their own cloud fractions. In this case, we resort to

@@ -157,13 +157,6 @@
   dimensions = ()
   type = integer
   intent = in
-[imp_physics_gfdl_v3]
-  standard_name = identifier_for_gfdl_microphysics_v3_scheme
-  long_name = choice of GFDL microphysics v3 scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [do_mynnedmf]
   standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate MYNN-EDMF

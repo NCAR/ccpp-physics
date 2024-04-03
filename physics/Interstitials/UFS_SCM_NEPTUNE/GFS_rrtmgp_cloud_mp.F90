@@ -45,8 +45,7 @@ contains
   subroutine GFS_rrtmgp_cloud_mp_run(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,     &
        i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc, i_cldice_nc, i_twa, kdt,  &
        imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, doSWrad, doLWrad, effr_in, lmfshal,   &
-       ltaerosol,mraerosol, icloud, imp_physics, imp_physics_thompson,                   &
-       imp_physics_gfdl, imp_physics_gfdl_v3,                                            &
+       ltaerosol,mraerosol, icloud, imp_physics, imp_physics_thompson, imp_physics_gfdl, &
        lgfdlmprad, do_mynnedmf, uni_cld, lmfdeep2, p_lev, p_lay, t_lay, qs_lay, q_lay,   &
        relhum, lsmask, xlon, xlat, dx, tv_lay, effrin_cldliq, effrin_cldice,             &
        effrin_cldrain, effrin_cldsnow, tracer, cnv_mixratio, cld_cnv_frac, qci_conv,     &
@@ -80,8 +79,7 @@ contains
          kdt,                       & ! Current forecast iteration
          imp_physics,               & ! Choice of microphysics scheme
          imp_physics_thompson,      & ! Choice of Thompson
-         imp_physics_gfdl,          & ! Choice of GFDL v1
-         imp_physics_gfdl_v3,       & ! Choice of GFDL v3
+         imp_physics_gfdl,          & ! Choice of GFDL MP
          icloud                       ! Control for cloud are fraction option
     logical, intent(in) :: &
          doSWrad,                   & ! Call SW radiation?
@@ -181,7 +179,7 @@ contains
     ! GFDL Microphysics
     ! ("Implicit" SGS cloud-coupling to the radiation)
     ! ###################################################################################
-    if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_gfdl_v3) then
+    if (imp_physics == imp_physics_gfdl) then
        ! GFDL-Lin
        if (.not. lgfdlmprad) then
           errflg = 1

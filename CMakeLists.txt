@@ -119,10 +119,6 @@ if(${LOCAL_CURRENT_SOURCE_DIR}/physics/MP/GFDL/fv_sat_adj.F90 IN_LIST SCHEMES)
   list(APPEND SCHEMES_DYNAMICS ${LOCAL_CURRENT_SOURCE_DIR}/physics/MP/GFDL/fv_sat_adj.F90)
 endif()
 
-if(${LOCAL_CURRENT_SOURCE_DIR}/physics/MP/GFDL/fv_sat_adj_v3.F90 IN_LIST SCHEMES)
-  list(APPEND SCHEMES_DYNAMICS ${LOCAL_CURRENT_SOURCE_DIR}/physics/MP/GFDL/fv_sat_adj_v3.F90)
-endif()
-
 # Remove files that need to be compiled with different precision
 # of files with standard compiler flags, and assign OpenMP flags
 if(SCHEMES_DYNAMICS)

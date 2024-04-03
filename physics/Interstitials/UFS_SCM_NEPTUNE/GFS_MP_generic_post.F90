@@ -19,8 +19,7 @@
 !> \section gfs_mp_gen GFS MP Generic Post General Algorithm
 !> @{
       subroutine GFS_MP_generic_post_run(                                                                                 &
-        im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_gfdl_v3,                       &
-        imp_physics_thompson,  imp_physics_nssl,                                                                          &
+        im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl,    &
         imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, cpllnd, progsigma, con_g, rhowater, rainmin, dtf, &
         frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, phil, htop, refl_10cm,              & 
         imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf, con_t0c, snow, graupel, save_t, save_q,        &
@@ -38,8 +37,7 @@
       implicit none
 
       integer, intent(in) :: im, levs, kdt, nrcm, nncl, ntcw, ntrac, num_dfi_radar, index_of_process_dfi_radar
-      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_gfdl_v3
-      integer, intent(in) :: imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
+      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       integer, intent(in) :: imp_physics_nssl, iopt_lake_clm, iopt_lake, lkm
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, cpllnd, progsigma, exticeden
       integer, intent(in) :: index_of_temperature,index_of_process_mp,use_lake_model(:)
@@ -184,8 +182,7 @@
       endif
 
 ! compute surface snowfall, graupel/sleet, freezing rain and precip ice density
-      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_gfdl_v3           &
-          .or. imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_nssl) then
+      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_nssl ) then
          do i = 1, im
             if (gt0(i,1) .le. 273) then
                frzr(i) = frzr(i) + rain0(i)
@@ -254,7 +251,7 @@
       ! GFS_physics_driver is written, Diag%{graupel,ice,snow} are on the
       ! physics timestep, while Diag%{rain,rainc} and all totprecip etc
       ! are on the dynamics timestep. Confusing, but works if frain=1. *DH
-      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_gfdl_v3) then
+      if (imp_physics == imp_physics_gfdl) then
         tprcp   = max(zero, rain)               ! clu: rain -> tprcp
         !graupel = frain*graupel0
         !ice     = frain*ice0
@@ -309,8 +306,7 @@
 !
 !       HCHUANG: use new precipitation type to decide snow flag for LSM snow accumulation
 
-        if (imp_physics /= imp_physics_gfdl .and. imp_physics /= imp_physics_gfdl_v3         & 
-            .and. imp_physics /= imp_physics_thompson .and. imp_physics /= imp_physics_nssl) then
+        if (imp_physics /= imp_physics_gfdl .and. imp_physics /= imp_physics_thompson .and. imp_physics /= imp_physics_nssl) then
           do i=1,im
             tprcp(i)  = max(zero, rain(i) )
             if(doms(i) > zero .or. domip(i) > zero) then
@@ -397,9 +393,8 @@
 !! and convective rainfall from the cumulus scheme if the surface temperature is below
 !! \f$0^oC\f$.
 
-      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_gfdl_v3 &
-          .or. imp_physics == imp_physics_thompson                                & 
-          .or. imp_physics == imp_physics_nssl ) then
+      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson .or. &
+          imp_physics == imp_physics_nssl ) then
 
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
