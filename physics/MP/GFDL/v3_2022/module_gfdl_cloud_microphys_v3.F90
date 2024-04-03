@@ -407,6 +407,10 @@ module module_gfdl_cloud_microphys_v3
     !real :: rthresh = 10.0e-6 ! critical cloud drop radius (micron) for autoconversion
     real :: rthresh = 20.0e-6 ! critical cloud drop radius (micron) for autoconversion
 
+    real :: qi_gen =  1.82e-6 ! max cloud ice generation during remapping step
+
+    real :: sat_adj0 = 0.90  ! adjustment factor (0: no, 1: full) during fast_sat_adj
+
     real :: cld_min = 0.05 ! minimum cloud fraction
 
     real :: qi_lim = 1.0 ! cloud ice limiter (0: no, 1: full, >1: extra) to prevent large ice build up
@@ -779,7 +783,8 @@ subroutine module_gfdl_cloud_microphys_v3_init (me, master, nlunit, input_nml_fi
     cfg%do_subgrid_proc      = do_subgrid_proc
     cfg%fast_fr_mlt          = fast_fr_mlt
     cfg%fast_dep_sub         = fast_dep_sub
-
+    cfg%qi_gen               = qi_gen
+    cfg%sat_adj0             = sat_adj0
 
     ! -----------------------------------------------------------------------
     ! write version number and namelist to log file
@@ -4610,7 +4615,7 @@ subroutine pidep_pisub (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, d
 
     integer :: k
 
-    real :: sink, tin, dqdt, qsi, dq, pidep, tmp, tc, qi_gen, qi_crt
+    real :: sink, tin, dqdt, qsi, dq, pidep, tmp, tc, qi_crt!,qi_gen
 
     do k = ks, ke
 
@@ -4647,15 +4652,15 @@ subroutine pidep_pisub (ks, ke, dts, qv, ql, qr, qi, qs, qg, tz, dp, cvm, te8, d
 
             if (dq .gt. 0.) then
                 tc = tice - tz (k)
-                qi_gen = 4.92e-11 * exp (1.33 * log (1.e3 * exp (0.1 * tc)))
+                !qi_gen = 4.92e-11 * exp (1.33 * log (1.e3 * exp (0.1 * tc)))
                 if (cfg%igflag .eq. 1) &
-                    qi_crt = qi_gen / den (k)
+                    qi_crt = cfg%qi_gen / den (k)
                 if (cfg%igflag .eq. 2) &
-                    qi_crt = qi_gen * min (cfg%qi_lim, 0.1 * tc) / den (k)
+                    qi_crt = cfg%qi_gen * min (cfg%qi_lim, 0.1 * tc) / den (k)
                 if (cfg%igflag .eq. 3) &
                     qi_crt = 1.82e-6 * min (cfg%qi_lim, 0.1 * tc) / den (k)
                 if (cfg%igflag .eq. 4) &
-                    qi_crt = max (qi_gen, 1.82e-6) * min (cfg%qi_lim, 0.1 * tc) / den (k)
+                    qi_crt = max (cfg%qi_gen, 1.82e-6) * min (cfg%qi_lim, 0.1 * tc) / den (k)
                 sink = min (tmp, max (qi_crt - qi (k), pidep), tc / tcpk (k))
                 dep = dep + sink * dp (k)
             else
