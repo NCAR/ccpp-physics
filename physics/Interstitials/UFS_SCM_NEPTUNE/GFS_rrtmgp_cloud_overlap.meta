@@ -68,6 +68,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP
   long_name = air pressure at vertical layer for radiation calculation
@@ -76,6 +77,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [tv_lay]
   standard_name = virtual_temperature
   long_name = layer virtual temperature
@@ -213,6 +215,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [top_at_1]
   standard_name = flag_for_vertical_ordering_in_radiation
   long_name = flag for vertical ordering in radiation

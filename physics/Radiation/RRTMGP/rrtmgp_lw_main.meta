@@ -115,6 +115,7 @@
   type = character
   kind = len=*
   intent = in
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -315,6 +316,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure at vertical interface for radiation calculation
@@ -323,6 +325,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [t_lay]
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature at vertical layer for radiation calculation
@@ -331,6 +334,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [t_lev]
   standard_name = air_temperature_at_interface_for_RRTMGP
   long_name = air temperature  at vertical interface for radiation calculation
@@ -339,6 +343,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [vmr_o2]
   standard_name = volume_mixing_ratio_for_o2
   long_name = molar mixing ratio of o2 in with respect to dry air
@@ -518,6 +523,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_pbl_iwp]
   standard_name = MYNN_SGS_cloud_ice_water_path
   long_name = layer convective cloud ice water path
@@ -526,6 +532,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_pbl_reliq]
   standard_name = mean_effective_radius_for_liquid_MYNN_SGS_cloud
   long_name = mean effective radius for liquid MYNN_SGS cloud
@@ -534,6 +541,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_pbl_reice]
   standard_name = mean_effective_radius_for_ice_MYNN_SGS_cloud
   long_name = mean effective radius for ice MYNN_SGS cloud
@@ -542,6 +550,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cloud_overlap_param]
   standard_name = cloud_overlap_param
   long_name = cloud overlap parameter
@@ -559,6 +568,7 @@
   type = character
   kind = len=*
   intent = in
+  optional = True
 [aerlw_tau]
   standard_name = aerosol_optical_depth_for_longwave_bands_01_16
   long_name = aerosol optical depth for longwave bands 01-16
@@ -591,6 +601,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fluxlwDOWN_radtime]
   standard_name = RRTMGP_lw_flux_profile_downward_allsky_on_radiation_timestep
   long_name = RRTMGP downward longwave all-sky flux profile
@@ -599,6 +610,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fluxlwUP_allsky]
   standard_name = RRTMGP_lw_flux_profile_upward_allsky
   long_name = RRTMGP upward longwave all-sky flux profile
@@ -607,6 +619,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fluxlwDOWN_allsky]
   standard_name = RRTMGP_lw_flux_profile_downward_allsky
   long_name = RRTMGP downward longwave all-sky flux profile
@@ -615,6 +628,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fluxlwUP_clrsky]
   standard_name = RRTMGP_lw_flux_profile_upward_clrsky
   long_name = RRTMGP upward longwave clr-sky flux profile
@@ -623,6 +637,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fluxlwDOWN_clrsky]
   standard_name = RRTMGP_lw_flux_profile_downward_clrsky
   long_name = RRTMGP downward longwave clr-sky flux profile
@@ -631,6 +646,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fluxlwUP_jac]
   standard_name = RRTMGP_jacobian_of_lw_flux_upward
   long_name = RRTMGP Jacobian upward longwave flux profile
@@ -639,6 +655,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -789,6 +789,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albivis_ice]
   standard_name = surface_albedo_diffuse_visible_over_ice
   long_name = diffuse surface albedo visible band over ice
@@ -806,6 +807,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [emiss_lnd]
   standard_name = surface_longwave_emissivity_over_land
   long_name = surface lw emissivity in fraction over land

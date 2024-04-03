@@ -922,6 +922,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [effrr_in]
   standard_name = effective_radius_of_stratiform_cloud_rain_particle
   long_name = effective radius of cloud rain particle in micrometers

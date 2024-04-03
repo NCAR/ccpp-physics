@@ -32,6 +32,7 @@
   type = character
   kind = len=128
   intent = out
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -277,6 +278,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure at vertical interface for radiation calculation
@@ -285,6 +287,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t_lay]
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature at vertical layer for radiation calculation
@@ -293,6 +296,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t_lev]
   standard_name = air_temperature_at_interface_for_RRTMGP
   long_name = air temperature  at vertical interface for radiation calculation
@@ -301,6 +305,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [deltaZ]
   standard_name = layer_thickness
   long_name = layer_thickness
@@ -473,6 +478,7 @@
   type = character
   kind = len=*
   intent = in
+  optional = True
 [coszdg]
   standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
   long_name = daytime mean cosz over rad call period
@@ -505,6 +511,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nday]
   standard_name = daytime_points_dimension
   long_name = daytime points dimension

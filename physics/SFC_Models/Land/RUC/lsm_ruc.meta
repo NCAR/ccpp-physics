@@ -412,6 +412,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albivis_ice]
   standard_name = surface_albedo_diffuse_visible_over_ice
   long_name = diffuse surface albedo visible band over ice
@@ -429,6 +430,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zs]
   standard_name = depth_of_soil_layers
   long_name = depth of soil levels for land surface model
@@ -1670,6 +1672,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [albivis_ice]
   standard_name = surface_albedo_diffuse_visible_over_ice
   long_name = diffuse surface albedo visible band over ice
@@ -1687,6 +1690,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [rhosnf]
   standard_name = lsm_internal_surface_frozen_precipitation_density
   long_name = density of frozen precipitation

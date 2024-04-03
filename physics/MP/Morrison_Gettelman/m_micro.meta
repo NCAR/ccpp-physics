@@ -695,6 +695,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [kcbl]
   standard_name = vertical_index_at_cloud_base
   long_name = vertical index at cloud base

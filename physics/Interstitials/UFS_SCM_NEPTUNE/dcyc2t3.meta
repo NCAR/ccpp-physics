@@ -408,6 +408,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [t_lay]
   standard_name = air_temperature_of_new_state
   long_name = model layer mean temperature updated by physics
@@ -440,6 +441,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [flux2D_lwDOWN]
   standard_name = RRTMGP_lw_flux_profile_downward_allsky_on_radiation_timestep
   long_name = RRTMGP downward longwave all-sky flux profile
@@ -448,6 +450,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [pert_radtend]
   standard_name = flag_for_stochastic_radiative_heating_perturbations
   long_name = flag for stochastic radiative heating perturbations

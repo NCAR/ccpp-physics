@@ -268,6 +268,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP
   long_name = air pressure at vertical layer for radiation calculation
@@ -276,6 +277,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [tv_lay]
   standard_name = virtual_temperature
   long_name = layer virtual temperature
@@ -293,6 +295,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [qs_lay]
   standard_name = saturation_vapor_pressure
   long_name = saturation vapor pressure
@@ -380,6 +383,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qci_conv]
   standard_name = convective_cloud_condesate_after_rainout
   long_name = convective cloud condesate after rainout
@@ -621,6 +625,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cld_pbl_iwp]
   standard_name = MYNN_SGS_cloud_ice_water_path
   long_name = layer convective cloud ice water path
@@ -629,6 +634,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cld_pbl_reliq]
   standard_name = mean_effective_radius_for_liquid_MYNN_SGS_cloud
   long_name = mean effective radius for liquid MYNN_SGS cloud
@@ -637,6 +643,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cld_pbl_reice]
   standard_name = mean_effective_radius_for_ice_MYNN_SGS_cloud
   long_name = mean effective radius for ice MYNN_SGS cloud
@@ -645,6 +652,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [lwp_ex]
   standard_name = liq_water_path_from_microphysics
   long_name = total liquid water path from explicit microphysics

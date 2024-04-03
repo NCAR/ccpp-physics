@@ -109,6 +109,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -125,6 +126,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [deltaZ]
   standard_name = layer_thickness
   long_name = layer_thickness
