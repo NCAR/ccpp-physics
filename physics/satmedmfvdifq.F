@@ -1542,7 +1542,7 @@
                  ZCAN = ZCAN-0.5  !step down in-canopy resolution of 0.5m
               END DO !end loop on canopy layers
               EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)
-     &                                /FCH),EDDYVESTX(COUNTCAN:1:-1))
+     &                                ),EDDYVESTX(COUNTCAN:1:-1)) / ZFL
               dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
               dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
               dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
