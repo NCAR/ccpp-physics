@@ -4052,11 +4052,6 @@ endif   ! croptype == 0
           
         end if
 
-! prepare for longwave rad.
-
-        air = -emv*(1.+(1.-emv)*(1.-emg))*lwdn - emv*emg*sb*tg**4  
-        cir = (2.-emv*(1.-emg))*emv*sb
-!
        if(opt_sfc == 4) then
 
         gdx  = sqrt(garea1)
@@ -4203,6 +4198,11 @@ endif   ! croptype == 0
         end if
      end if
 
+! prepare for longwave rad.
+
+        air = -emv*(1.+(1.-emv)*(1.-emg))*lwdn - emv*emg*sb*tg**4  
+        cir = (2.-emv*(1.-emg))*emv*sb
+
 ! prepare for sensible heat flux above veg.
 
         cah  = 1./rahc
@@ -4265,7 +4265,7 @@ endif   ! croptype == 0
 
 ! update vegetation surface temperature
         tv  = tv + dtv
-!        tah = ata + bta*tv               ! canopy air t; update here for consistency
+        tah = ata + bta*tv               ! canopy air t; update here for consistency
 
 ! for computing m-o length in the next iteration
         h  = rhoair*cpair*(tah - sfctmp) /rahc        
@@ -4278,15 +4278,7 @@ endif   ! croptype == 0
            qfx = (qsfc-qair)*rhoair*caw
         endif
 
-
-        if (liter == 1) then
-           exit loop1 
-        endif
-        if (iter >= 5 .and. abs(dtv) <= 0.01 .and. liter == 0) then
-           liter = 1
-        endif
-
-     end do loop1 ! end stability iteration
+! after canopy balance, do the under-canopy ground balance
 
 ! under-canopy fluxes and tg
 
@@ -4295,8 +4287,6 @@ endif   ! croptype == 0
         csh = rhoair*cpair/rahg
         cev = rhoair*cpair / (gammag*(rawg+rsurf))  ! barlage: change to ground v3.6
         cgh = 2.*df(isnow+1)/dzsnso(isnow+1)
-
-     loop2: do iter = 1, niterg
 
         t = tdc(tg)
         call esat(t, esatw, esati, dsatw, dsati)
@@ -4323,7 +4313,14 @@ endif   ! croptype == 0
         gh  = gh  + cgh*dtg
         tg  = tg  + dtg
 
-     end do loop2
+        if (liter == 1) then
+           exit loop1 
+        endif
+        if (iter >= 5 .and. abs(dtv) <= 0.01  .and. abs(dtg) <= 0.01 .and. liter == 0) then
+           liter = 1   ! if conditions are met, then do one final loop
+        endif
+
+     end do loop1
      
 !     tah = (cah*sfctmp + cvh*tv + cgh*tg)/(cah + cvh + cgh)
 
