@@ -68,6 +68,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [prevsq]
   standard_name = specific_humidity_on_previous_timestep
   long_name = moisture from previous time step
@@ -85,6 +86,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [forceq]
   standard_name = tendendy_of_specific_humidity_due_to_nonphysics
   long_name = moisture tendency due to dynamics only
@@ -93,6 +95,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [cactiv]
   standard_name = counter_for_grell_freitas_convection
   long_name = convective activity memory
@@ -100,6 +103,7 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
+  optional = True
 [cactiv_m]
   standard_name = counter_for_grell_freitas_mid_level_convection
   long_name = midlevel convective activity memory
@@ -107,6 +111,7 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
+  optional = True
 [conv_act]
   standard_name = consecutive_calls_for_grell_freitas_convection
   long_name = Memory counter for GF
@@ -115,6 +120,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [conv_act_m]
   standard_name = consecutive_calls_for_grell_freitas_mid_level_convection
   long_name = Memory counter for GF midlevel
@@ -123,6 +129,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

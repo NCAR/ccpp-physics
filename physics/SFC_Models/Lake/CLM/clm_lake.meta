@@ -101,6 +101,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = True
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep
@@ -124,6 +125,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [frac_grid]
   standard_name = flag_for_fractional_landmask
   long_name = flag for fractional grid
@@ -299,6 +301,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
@@ -539,6 +542,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zorlw]
   standard_name = surface_roughness_length_over_water
   long_name = surface roughness length over water
@@ -611,6 +615,7 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
+  optional = True
 [cannot_freeze]
   standard_name = clm_lake_cannot_freeze
   long_name = lake at this point is so salty it cannot freeze
@@ -618,6 +623,7 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
+  optional = True
 [savedtke12d]
   standard_name = top_level_eddy_conductivity_from_previous_timestep_in_clm_lake_model
   long_name = top level eddy conductivity from previous timestep in clm lake model
@@ -626,6 +632,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snowdp2d]
   standard_name = actual_snow_depth_in_clm_lake_model
   long_name = actual acc snow depth over lake in clm lake model
@@ -634,6 +641,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [h2osno2d]
   standard_name = water_equivalent_accumulated_snow_depth_in_clm_lake_model
   long_name = water equiv of acc snow depth over lake in clm lake model
@@ -642,6 +650,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snl2d]
   standard_name = snow_layers_in_clm_lake_model
   long_name = snow layers in clm lake model (treated as integer)
@@ -650,6 +659,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t_grnd2d]
   standard_name = skin_temperature_from_lake_model
   long_name = skin_temperature_from_lake_model
@@ -658,6 +668,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t_lake3d]
   standard_name = lake_layer_temperature_from_clm_lake_model
   long_name = lake layer temperature from clm lake model
@@ -666,6 +677,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [lake_icefrac3d]
   standard_name = lake_fractional_ice_cover_on_clm_lake_levels
   long_name = lake fractional ice cover on clm lake levels
@@ -674,6 +686,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t_soisno3d]
   standard_name = soil_or_snow_layer_temperature_from_clm_lake_model
   long_name = soil or snow layer temperature from clm lake model
@@ -682,6 +695,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [h2osoi_ice3d]
   standard_name = soil_ice_water_content_in_clm_lake_model
   long_name = soil ice water content in clm lake model
@@ -690,6 +704,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [h2osoi_liq3d]
   standard_name = soil_liquid_water_content_in_clm_lake_model
   long_name = soil liquid water content in clm lake model
@@ -698,6 +713,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [h2osoi_vol3d]
   standard_name = volumetric_soil_water_in_clm_lake_model
   long_name = volumetric soil water in clm lake model
@@ -706,6 +722,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [z3d]
   standard_name = snow_level_depth_in_clm_lake_model
   long_name = snow level depth in clm lake model
@@ -714,6 +731,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dz3d]
   standard_name = snow_level_thickness_in_clm_lake_model
   long_name = snow level thickness in clm lake model
@@ -722,6 +740,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zi3d]
   standard_name = snow_interface_depth_in_clm_lake_model
   long_name = snow interface_depth in clm lake model
@@ -730,6 +749,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [clm_lakedepth]
   standard_name = clm_lake_depth
   long_name = clm internal copy of lake depth with 10.0 replaced by default lake depth
@@ -738,6 +758,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [t1]
   standard_name = air_temperature_at_surface_adjacent_layer
   long_name = mean temperature at lowest model layer

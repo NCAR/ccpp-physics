@@ -216,6 +216,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [mype]
   standard_name = mpi_rank
   long_name = current MPI rank

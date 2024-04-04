@@ -339,6 +339,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [semisbase]
   standard_name = baseline_surface_longwave_emissivity
   long_name = baseline surface lw emissivity in fraction
@@ -456,6 +457,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tslb]
   standard_name = soil_temperature_for_land_surface_model
   long_name = soil temperature for land surface model
@@ -982,6 +984,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [snoalb]
   standard_name = upper_bound_of_max_albedo_assuming_deep_snow
   long_name = maximum snow albedo
@@ -1172,6 +1175,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sfalb_ice]
   standard_name = surface_diffused_shortwave_albedo_over_ice
   long_name = mean surface diffused sw albedo over ice
@@ -1180,6 +1184,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sncovr1_lnd]
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction over land
@@ -1288,6 +1293,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [smfrkeep]
   standard_name = volume_fraction_of_frozen_soil_moisture_for_land_surface_model
   long_name = volume fraction of frozen soil moisture for lsm
@@ -1296,6 +1302,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [canopy]
   standard_name = canopy_water_amount
   long_name = canopy water amount
@@ -1345,6 +1352,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sfcqv_lnd]
   standard_name = water_vapor_mixing_ratio_at_surface_over_land
   long_name = water vapor mixing ratio at surface over land
@@ -1476,6 +1484,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [acsnow_lnd]
   standard_name = surface_snow_lwe_thickness_amount_over_land
   long_name = run-total snowfall water equivalent over land
@@ -1540,6 +1549,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sfcqv_ice]
   standard_name = water_vapor_mixing_ratio_at_surface_over_ice
   long_name = water vapor mixing ratio at surface over ice
@@ -1639,6 +1649,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [acsnow_ice]
   standard_name = surface_snow_lwe_thickness_amount_over_ice
   long_name = run-total snowfall water equivalent over ice
@@ -1699,6 +1710,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sbsno]
   standard_name = snow_deposition_sublimation_upward_latent_heat_flux
   long_name = latent heat flux from snow depo/subl
@@ -1796,6 +1808,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [frac_grid_burned_out]
   standard_name = fraction_of_grid_cell_burning
   long_name = ration of the burnt area to the grid cell area
@@ -1804,6 +1817,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
