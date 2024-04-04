@@ -59,9 +59,9 @@
   dimensions = ()
   type = integer
   intent = in
-[imp_physics_gfdl_v3]
-  standard_name = identifier_for_gfdl_microphysics_v3_scheme
-  long_name = choice of GFDL microphysics v3 scheme 
+[imp_physics_gfdl]
+  standard_name = identifier_for_gfdl_microphysics_scheme
+  long_name = choice of GFDL microphysics scheme
   units = flag
   dimensions = ()
   type = integer

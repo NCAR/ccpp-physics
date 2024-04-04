@@ -30,7 +30,7 @@ contains
 !!
 
    subroutine gfdl_cloud_microphys_v3_init (me, master, nlunit, input_nml_file, logunit, &
-                            fn_nml, imp_physics, imp_physics_gfdl_v3, do_shoc,  &
+                            fn_nml, imp_physics, imp_physics_gfdl, do_shoc,  &
                             hydrostatic, errmsg, errflg)
 
        implicit none
@@ -42,7 +42,7 @@ contains
        character(len=*), intent (in) :: fn_nml
        character(len=*), intent (in) :: input_nml_file(:)
        integer,          intent( in) :: imp_physics
-       integer,          intent( in) :: imp_physics_gfdl_v3
+       integer,          intent( in) :: imp_physics_gfdl
        logical,          intent( in) :: do_shoc
        logical,          intent( in) :: hydrostatic
        character(len=*), intent(out) :: errmsg
@@ -54,7 +54,7 @@ contains
 
        if (is_initialized) return
 
-       if (imp_physics/=imp_physics_gfdl_v3) then
+       if (imp_physics/=imp_physics_gfdl) then
           write(errmsg,'(*(a))') 'Namelist option for microphysics does not match choice in suite definition file'
           errflg = 1
           return
@@ -115,8 +115,8 @@ contains
 !! \section arg_table_gfdl_cloud_microphys_v3_run Argument Table
 !! \htmlinclude gfdl_cloud_microphys_v3_run.html
 !!
-   subroutine gfdl_cloud_microphys_v3_run(                                                  &
-      imp_physics, imp_physics_gfdl_v3, fast_mp_consv,                             &
+   subroutine gfdl_cloud_microphys_v3_run(                                         &
+      imp_physics, imp_physics_gfdl, fast_mp_consv,                                &
       levs, im, rainmin, con_g, con_fvirt, con_rd, con_eps, garea, slmsk, snowd,   &
       gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt, aerfld,  &
       gt0, gu0, gv0, vvl, prsl, phii, del,                                         &
@@ -139,7 +139,7 @@ contains
 
       ! interface variables
       integer,              intent(in   ) :: imp_physics
-      integer,              intent(in   ) :: imp_physics_gfdl_v3
+      integer,              intent(in   ) :: imp_physics_gfdl
       integer,              intent(in   ) :: levs, im
       real(kind=kind_phys), intent(in   ) :: con_g, con_fvirt, con_rd, con_eps, rainmin
       real(kind=kind_phys), intent(in   ), dimension(:)     :: garea, slmsk, snowd, oro 
@@ -257,7 +257,7 @@ contains
       snow0     = 0
       graupel0  = 0
  
-      if(imp_physics == imp_physics_gfdl_v3) then 
+      if(imp_physics == imp_physics_gfdl) then 
 
         last_step = .false.
         do_inline_mp = .false. 
@@ -324,7 +324,7 @@ contains
         kk = levs-k+1
         do i=1,im
 
-          if (imp_physics == imp_physics_gfdl_v3) then 
+          if (imp_physics == imp_physics_gfdl) then 
             gq0(i,k)         = qv1(i,kk)
             gq0_ntcw(i,k)    = ql1(i,kk) 
             gq0_ntrw(i,k)    = qr1(i,kk)
@@ -349,7 +349,7 @@ contains
         do k=1,levs
           kk = levs-k+1
           do i=1,im
-            if (imp_physics==imp_physics_gfdl_v3) then 
+            if (imp_physics==imp_physics_gfdl) then 
               pfi_lsan(i,k) = prefluxi (i,kk) + prefluxs (i,kk) + prefluxg (i,kk)
               pfl_lsan(i,k) = prefluxr (i,kk) 
             else 
