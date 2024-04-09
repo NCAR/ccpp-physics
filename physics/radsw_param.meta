@@ -36,3 +36,13 @@
 [ccpp-arg-table]
   name = profsw_type
   type = ddt
+
+########################################################################
+[ccpp-table-properties]
+  name = module_radsw_parameters
+  type = module
+  dependencies =
+
+[ccpp-arg-table]
+  name = module_radsw_parameters
+  type = module

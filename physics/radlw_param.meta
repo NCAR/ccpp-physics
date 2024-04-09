@@ -26,3 +26,13 @@
 [ccpp-arg-table]
   name = proflw_type
   type = ddt
+
+########################################################################
+[ccpp-table-properties]
+  name = module_radlw_parameters
+  type = module
+  dependencies = 
+
+[ccpp-arg-table]
+  name = module_radlw_parameters
+  type = module
