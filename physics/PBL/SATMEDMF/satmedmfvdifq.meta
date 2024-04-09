@@ -217,6 +217,22 @@
   type = real
   kind = kind_phys
   intent = in
+[t1]
+  standard_name = air_temperature
+  long_name = layer mean air temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[q1]
+  standard_name = vertically_diffused_tracer_concentration
+  long_name = tracer concentration diffused by PBL scheme
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
 [usfco]
   standard_name = x_ocean_current
   long_name = zonal current at ocean surface
@@ -239,22 +255,6 @@
   units = 1
   dimensions = ()
   type = integer
-  intent = in
-[t1]
-  standard_name = air_temperature
-  long_name = layer mean air temperature
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[q1]
-  standard_name = vertically_diffused_tracer_concentration
-  long_name = tracer concentration diffused by PBL scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
-  type = real
-  kind = kind_phys
   intent = in
 [swh]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep

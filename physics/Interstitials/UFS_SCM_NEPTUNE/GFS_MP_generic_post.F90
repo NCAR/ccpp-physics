@@ -41,6 +41,8 @@
       integer, intent(in) :: imp_physics_nssl, iopt_lake_clm, iopt_lake, lkm
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, cpllnd, progsigma, exticeden
       integer, intent(in) :: index_of_temperature,index_of_process_mp,use_lake_model(:)
+      integer, intent(in) :: imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf
+      integer, dimension (:), intent(in) :: htop
       integer,                                 intent(in)    :: dfi_radar_max_intervals
       real(kind=kind_phys),                    intent(in)    :: fhour, con_t0c
       real(kind=kind_phys),                    intent(in)    :: fh_dfi_radar(:)

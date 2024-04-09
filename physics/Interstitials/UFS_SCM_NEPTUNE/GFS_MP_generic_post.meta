@@ -254,6 +254,22 @@
   type = real
   kind = kind_phys
   intent = in
+[tsfc]
+  standard_name = surface_skin_temperature
+  long_name = surface skin temperature
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[ice]
+  standard_name = lwe_thickness_of_ice_amount_on_dynamics_timestep
+  long_name = ice fall at this time step
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [phil]
   standard_name = geopotential
   long_name = layer geopotential
@@ -320,22 +336,6 @@
   type = real
   kind = kind_phys
   intent = in
-[tsfc]
-  standard_name = surface_skin_temperature
-  long_name = surface skin temperature
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[ice]
-  standard_name = lwe_thickness_of_ice_amount_on_dynamics_timestep
-  long_name = ice fall at this time step
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
 [snow]
   standard_name = lwe_thickness_of_snow_amount_on_dynamics_timestep
   long_name = snow fall at this time step

@@ -15,7 +15,6 @@
 [ccpp-arg-table]
   name = GFS_phys_time_vary_init
   type = scheme
-
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -1062,6 +1061,13 @@
   dimensions = ()
   type = logical
   intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
 [ntoz]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
@@ -1359,13 +1365,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[ozphys]
-  standard_name = dataset_for_ozone_physics
-  long_name = dataset for NRL ozone physics
-  units = mixed
-  dimensions = ()
-  type = ty_ozphys
-  intent = in
 [nthrds]
   standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads available for physics schemes

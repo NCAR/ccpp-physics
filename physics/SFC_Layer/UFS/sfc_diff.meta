@@ -210,6 +210,13 @@
   type = real
   kind = kind_phys
   intent = in
+[sfc_z0_type]
+  standard_name = flag_for_surface_roughness_option_over_water
+  long_name = surface roughness options over water
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [u1]
   standard_name = x_wind_at_surface_adjacent_layer
   long_name = x component of surface layer wind
@@ -242,13 +249,7 @@
   type = real
   kind = kind_phys
   intent = in
-[sfc_z0_type]
-  standard_name = flag_for_surface_roughness_option_over_water
-  long_name = surface roughness options over water
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
+
 [icplocn2atm]
   standard_name = control_for_air_sea_flux_computation_over_water
   long_name = air-sea flux option

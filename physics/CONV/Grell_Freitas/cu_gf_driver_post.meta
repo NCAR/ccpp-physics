@@ -111,14 +111,6 @@
   dimensions = ()
   type = integer
   intent = in
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
 [chem3d]
   standard_name = chem3d_mynn_pbl_transport
   long_name = mynn pbl transport of smoke and dust
@@ -135,6 +127,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
 [errflg]
   standard_name = ccpp_error_code
   long_name = error code for error handling in CCPP

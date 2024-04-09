@@ -36,20 +36,6 @@
   dimensions = ()
   type = integer
   intent = in
-[mpirank]
-  standard_name = mpi_rank
-  long_name = current MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[mpiroot]
-  standard_name = mpi_root
-  long_name = master MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
 [progsigma]
   standard_name = do_prognostic_updraft_area_fraction
   long_name = flag for prognostic sigma in cumuls scheme
@@ -61,6 +47,20 @@
   standard_name = number_of_x_points_for_current_cubed_sphere_tile
   long_name = number of points in x direction for this cubed sphere face
   units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[mpirank]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
   dimensions = ()
   type = integer
   intent = in
@@ -227,61 +227,6 @@
   type = real
   kind = kind_phys
   intent = in
-[tmf]
-  standard_name = tendency_of_vertically_diffused_tracer_concentration
-  long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
-  units = kg kg-1 s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
-  type = real
-  kind = kind_phys
-  intent = in
-[qmicro]
-  standard_name = instantaneous_tendency_of_specific_humidity_due_to_microphysics
-  long_name = moisture tendency due to microphysics
-  units = kg kg-1 s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[sigmain]
-  standard_name = prognostic_updraft_area_fraction_in_convection
-  long_name = convective updraft area fraction
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[sigmaout]
-  standard_name = updraft_area_fraction_updated_by_physics
-  long_name = convective updraft area fraction updated by physics
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[betascu]
-  standard_name = tuning_param_for_shallow_cu
-  long_name = tuning param for shallow cu in case prognostic closure is used
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[betamcu]
-  standard_name = tuning_param_for_midlevel_cu
-  long_name = tuning param for midlevel cu in case prognostic closure is used
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[betadcu]
-  standard_name = tuning_param_for_deep_cu
-  long_name = tuning param for deep cu in case prognostic closure is used
-  units = none
-  dimensions = ()
-  type = real
-  intent = in
 [phil]
   standard_name = geopotential
   long_name = layer geopotential
@@ -329,6 +274,29 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
+  intent = in
+[betascu]
+  standard_name = tuning_param_for_shallow_cu
+  long_name = tuning param for shallow cu in case prognostic closure is used
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[betamcu]
+  standard_name = tuning_param_for_midlevel_cu
+  long_name = tuning param for midlevel cu in case prognostic closure is used
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[betadcu]
+  standard_name = tuning_param_for_deep_cu
+  long_name = tuning param for deep cu in case prognostic closure is used
+  units = none
+  dimensions = ()
+  type = real
   intent = in
 [qv_spechum]
   standard_name = specific_humidity_of_new_state

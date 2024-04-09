@@ -144,6 +144,14 @@
   type = real
   kind = kind_phys
   intent = in
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
+  type = real
+  kind = kind_phys
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

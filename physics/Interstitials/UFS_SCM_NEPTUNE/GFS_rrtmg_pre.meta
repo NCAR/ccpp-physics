@@ -259,41 +259,6 @@
   dimensions = ()
   type = integer
   intent = in
-[ozphys]
-  standard_name = dataset_for_ozone_physics
-  long_name = dataset for NRL ozone physics
-  units = mixed
-  dimensions = ()
-  type = ty_ozphys
-  intent = in
-[iaermdl]
-  standard_name = control_for_aerosol_radiation_scheme
-  long_name = control of aerosol scheme in radiation
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = in
-[iaerflg]
-  standard_name = control_for_aerosol_effects_in_radiation
-  long_name = control of aerosol effects in radiation
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = in
-[nssl_ccn_on]
-  standard_name = nssl_ccn_on
-  long_name = CCN activation flag in NSSL micro
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[nssl_invertccn]
-  standard_name = nssl_invertccn
-  long_name = flag to invert CCN in NSSL micro
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [ntclamt]
   standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
   long_name = tracer index for cloud amount integer
@@ -1542,6 +1507,13 @@
   units = flag
   dimensions = ()
   type = integer
+  intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
   intent = in
 [errmsg]
   standard_name = ccpp_error_message

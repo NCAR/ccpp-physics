@@ -411,7 +411,8 @@
 [ccpp-table-properties]
   name = flake_driver_post
   type = scheme
-  dependencies = machine.F
+  dependencies = ../../../hooks/machine.F
+  
 ########################################################################
 [ccpp-arg-table]
   name = flake_driver_post_run

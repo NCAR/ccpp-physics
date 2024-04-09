@@ -598,6 +598,13 @@
   dimensions = ()
   type = integer
   intent = in
+[spp_cu_deep]
+  standard_name = control_for_deep_convection_spp_perturbations
+  long_name = control for deep convection spp perturbations
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [spp_wts_cu_deep]
   standard_name = spp_weights_for_cu_deep_scheme
   long_name = spp weights for cu deep scheme
@@ -605,13 +612,6 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
-[spp_cu_deep]
-  standard_name = control_for_deep_convection_spp_perturbations
-  long_name = control for deep convection spp perturbations
-  units = count
-  dimensions = ()
-  type = integer
   intent = in
 [nchem]
   standard_name = number_of_chemical_species_vertically_mixed
@@ -636,13 +636,6 @@
   type = real
   kind = kind_phys
   intent = in
-[do_smoke_transport]
-  standard_name = do_smoke_conv_transport
-  long_name = flag for rrfs smoke convective transport
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [wetdpc_deep]
   standard_name = conv_wet_deposition_smoke_dust
   long_name = convective wet removal of smoke and dust
@@ -651,6 +644,13 @@
   type = real
   kind = kind_phys
   intent = inout
+[do_smoke_transport]
+  standard_name = do_smoke_conv_transport
+  long_name = flag for rrfs smoke convective transport
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration

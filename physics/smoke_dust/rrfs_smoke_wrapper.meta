@@ -50,13 +50,6 @@
   dimensions = ()
   type = logical
   intent = in
-[add_fire_heat_flux_in]
-  standard_name = flag_for_fire_heat_flux
-  long_name = flag to add fire heat flux to LSM
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [do_plumerise_in]
   standard_name = do_smoke_plumerise
   long_name = rrfs smoke plumerise option
@@ -71,19 +64,19 @@
   dimensions = ()
   type = integer
   intent = in
-[n_dbg_lines_in]
-  standard_name = smoke_debug_lines
-  long_name = rrfs smoke add smoke option
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
 [plume_wind_eff_in]
   standard_name = option_for_wind_effects_on_smoke_plumerise
   long_name = wind effect plumerise option
   units = index
   dimensions = ()
   type = integer
+  intent = in
+[add_fire_heat_flux_in]
+  standard_name = flag_for_fire_heat_flux
+  long_name = flag to add fire heat flux to LSM
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [addsmoke_flag_in]
   standard_name = control_for_smoke_biomass_burning_emissions
@@ -191,7 +184,14 @@
   dimensions = ()
   type = integer
   intent = out
-
+[n_dbg_lines_in]
+  standard_name = smoke_debug_lines
+  long_name = rrfs smoke add smoke option
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  
 #####################################################################
 [ccpp-arg-table]
   name = rrfs_smoke_wrapper_run
@@ -428,6 +428,14 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
+[vegtype_frac]
+  standard_name = fraction_of_vegetation_category
+  long_name = fraction of horizontal grid area occupied by given vegetation category
+  units = frac
+  dimensions = (horizontal_loop_extent,number_of_vegetation_categories)
+  type = real
+  kind = kind_phys
+  intent = in
 [soiltyp]
   standard_name = soil_type_classification
   long_name = soil type at each grid cell
@@ -441,14 +449,6 @@
   units = count
   dimensions = ()
   type = integer
-  intent = in
-[vegtype_frac]
-  standard_name = fraction_of_vegetation_category
-  long_name = fraction of horizontal grid area occupied by given vegetation category
-  units = frac
-  dimensions = (horizontal_loop_extent,number_of_vegetation_categories)
-  type = real
-  kind = kind_phys
   intent = in
 [dswsfc]
   standard_name = surface_downwelling_shortwave_flux
@@ -706,6 +706,22 @@
   type = real
   kind = kind_phys
   intent = inout
+[drydep_flux_out]
+  standard_name = dry_deposition_flux
+  long_name = rrfs dry deposition flux
+  units = ug m-2
+  dimensions = (horizontal_loop_extent,number_of_chemical_species_deposited)
+  type = real
+  kind = kind_phys
+  intent = inout
+[wetdpr]
+  standard_name = mp_wet_deposition_smoke_dust
+  long_name = large scale wet deposition of smoke and dust
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,number_of_chemical_species_vertically_mixed)
+  type = real
+  kind = kind_phys
+  intent = inout
 [ebb_smoke_in]
   standard_name = surface_smoke_emission
   long_name = emission of surface smoke
@@ -776,7 +792,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [hwp_ave]
   standard_name = hourly_wildfire_potential_average
   long_name = rrfs hourly fire weather potential average
@@ -809,29 +825,29 @@
   kind = kind_phys
   intent = inout
 [peak_hr_out]
- standard_name = peak_hr_fire
- long_name = time_of_peak_fire_emissions
- units = s
- dimensions = (horizontal_loop_extent)
- type = real
- kind = kind_phys
- intent = out
+  standard_name = peak_hr_fire
+  long_name = time_of_peak_fire_emissions
+  units = s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [lu_nofire_out]
- standard_name = sum_of_land_use_fractions_for_no_fire_pixels
- long_name = land use of no fire pixels for type
- units = 1
- dimensions = (horizontal_loop_extent)
- type = real
- kind = kind_phys
- intent = out
+  standard_name = sum_of_land_use_fractions_for_no_fire_pixels
+  long_name = land use of no fire pixels for type
+  units = 1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [lu_qfire_out]
- standard_name = sum_of_land_use_fractions_for_cropland_fire_pixels
- long_name = land use of fire pixels for type
- units = 1
- dimensions = (horizontal_loop_extent)
- type = real
- kind = kind_phys
- intent = out
+  standard_name = sum_of_land_use_fractions_for_cropland_fire_pixels
+  long_name = land use of fire pixels for type
+  units = 1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [fire_heat_flux_out]
   standard_name = surface_fire_heat_flux
   long_name = heat flux of fire at the surface

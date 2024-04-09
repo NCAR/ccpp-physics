@@ -433,13 +433,6 @@
   dimensions = ()
   type = integer
   intent = in
-[ntsigma]
-  standard_name = index_of_updraft_area_fraction_in_tracer_concentration_array
-  long_name = tracer index of updraft_area_fraction
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
 [ntrz]
   standard_name = index_of_reflectivity_of_rain_in_tracer_concentration_array
   long_name = tracer index for rain reflectivity
@@ -458,6 +451,20 @@
   standard_name = index_of_reflectivity_of_hail_in_tracer_concentration_array
   long_name = tracer index for hail reflectivity
   units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntsigma]
+  standard_name = index_of_updraft_area_fraction_in_tracer_concentration_array
+  long_name = tracer index of updraft_area_fraction
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntrac]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
   dimensions = ()
   type = integer
   intent = in
