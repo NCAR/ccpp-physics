@@ -180,7 +180,6 @@ contains
       integer              :: jdow, jdoy, jday
       real(8)              :: rinc(5)
       real(4)              :: rinc4(5)
-      integer              :: w3kindreal, w3kindint
       
       integer ::  iw3jdn
       integer :: jd1, jddd
@@ -196,13 +195,7 @@ contains
       rinc(1:5)    = 0.
       rinc(2) = fhour
 !    
-      call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal==4) then
-        rinc4 = rinc
-        call w3movdat(rinc4, idat,jdat)
-      else
-        call w3movdat(rinc,  idat,jdat)
-      endif           
+      call w3movdat(rinc,  idat,jdat)
 !     jdate(8)- date and time (yr, mo, day, [tz], hr, min, sec)
       jdow = 0
       jdoy = 0

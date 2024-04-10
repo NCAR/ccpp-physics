@@ -15,7 +15,7 @@ module rrtmgp_lw_gas_optics
   use radiation_tools,       only: check_error_msg
   use netcdf
 #ifdef MPI
-  use mpi
+  use mpi_f08
 #endif
 
   implicit none
@@ -87,8 +87,9 @@ contains
          rrtmgp_lw_file_gas  ! RRTMGP file containing K-distribution data
     character(len=*), dimension(:), intent(in) :: &
          active_gases_array  ! List of active gases from namelist as array   
+    type(MPI_Comm),intent(in) :: &
+         mpicomm             ! MPI communicator
     integer,intent(in) :: &
-         mpicomm,          & ! MPI communicator
          mpirank,          & ! Current MPI rank
          mpiroot             ! Master MPI rank
  

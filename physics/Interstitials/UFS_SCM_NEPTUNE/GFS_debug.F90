@@ -399,7 +399,7 @@
                                        nthreads, blkno, errmsg, errflg)
 
 #ifdef MPI
-         use mpi
+         use mpi_f08
 #endif
 #ifdef _OPENMP
          use omp_lib
@@ -1078,7 +1078,7 @@
                                            nthreads, blkno, errmsg, errflg)
 
 #ifdef MPI
-         use mpi
+         use mpi_f08
 #endif
 #ifdef _OPENMP
          use omp_lib
