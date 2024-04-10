@@ -23,7 +23,7 @@ module noahmpdrv
 
     private
 
-    public :: noahmpdrv_init, noahmpdrv_run  !, noahmpdrv_timestep_init
+    public :: noahmpdrv_init, noahmpdrv_run, noahmpdrv_timestep_init, noahmpdrv_timestep_finalize
 
     ! IAU data and control
     type (lnd_iau_control_type)                  :: LND_IAU_Control
@@ -292,7 +292,7 @@ module noahmpdrv
     !   endif
     ! endif
     
-    call lnd_iau_mod_finalize()     !LND_IAU_Control%finalize()
+    call lnd_iau_mod_finalize(LND_IAU_Control, LND_IAU_Data, errmsg, errflg)     !LND_IAU_Control%finalize()
 
   end subroutine noahmpdrv_timestep_finalize
 
