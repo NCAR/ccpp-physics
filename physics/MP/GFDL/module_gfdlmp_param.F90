@@ -270,7 +270,8 @@ module module_gfdlmp_param
   end type ty_gfdlmp_config
   !
   type(ty_gfdlmp_config) :: cfg
-  
+
+  public :: cfg
 contains
   ! #######################################################################################
   !
@@ -294,13 +295,13 @@ contains
          const_vg, const_vr, use_ccn, z_slope_liq, z_slope_ice, prog_ccn, rad_snow,       &
          rad_graupel, rad_rain, use_ppm, mono_prof, mp_print, do_hail, tintqs,            &
          do_sedi_heat, do_sedi_w, sedi_transport, de_ice
-    real, intent(in) :: mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r,     &
+    real, intent(in) :: mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r,                &
          tau_g2v, tau_v2g, tau_imlt, tau_v2l, tau_l2v, tau_i2s, tau_l2r, dw_land,         &
-         dw_ocean,  vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, vi_max, vs_max, vg_max,       &
+         dw_ocean, vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, vi_max, vs_max, vg_max,        &
          vr_max, ql0_max, qi0_max, qs0_crt, qi0_crt, qr0_crt,qc_crt, qs_mlt, qi_gen,      &
-         rh_inc, rh_ins, rh_inr, rthresh, ccn_l, ccn_o, sat_adj0, c_piacr, qi_lim, ql_gen,&
-         c_paut, c_psaci, c_pgacs, c_cracw, alin, clin, tice, cld_min, rewmin, rewmax,    &
-         reimin, reimax, rermin, rermax, resmin, resmax, regmin, regmax
+         rh_inc, rh_ins, rh_inr, rthresh, ccn_l, ccn_o, sat_adj0, c_piacr, qi_lim,        &
+         ql_gen, c_paut, c_psaci, c_pgacs, c_cracw, alin, clin, tice, cld_min, rewmin,    &
+         rewmax, reimin, reimax, rermin, rermax, resmin, resmax, regmin, regmax
     integer, intent(in) :: icloud_f, irain_f, reiflag
 
     ! initialize error message
