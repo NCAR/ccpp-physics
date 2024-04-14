@@ -161,6 +161,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nwfa2d]
   standard_name = tendency_of_hygroscopic_aerosols_at_surface_adjacent_layer
   long_name = instantaneous fake water-friendly surface aerosol source
@@ -169,6 +170,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nifa2d]
   standard_name = tendency_of_nonhygroscopic_ice_nucleating_aerosols_at_surface_adjacent_layer
   long_name = instantaneous fake ice-friendly surface aerosol source
@@ -177,6 +179,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nwfa]
   standard_name = mass_number_concentration_of_hygroscopic_aerosols
   long_name = number concentration of water-friendly aerosols
@@ -185,6 +188,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nifa]
   standard_name = mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols
   long_name = number concentration of ice-friendly aerosols
@@ -193,6 +197,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tgrs]
   standard_name = air_temperature
   long_name = model layer mean temperature
