@@ -1,39 +1,27 @@
 !***********************************************************************
-!*                   GNU Lesser General Public License
-!*
-!* This file is part of the FV3 dynamical core.
-!*
-!* The FV3 dynamical core is free software: you can redistribute it
-!* and/or modify it under the terms of the
-!* GNU Lesser General Public License as published by the
-!* Free Software Foundation, either version 3 of the License, or
-!* (at your option) any later version.
-!*
-!* The FV3 dynamical core is distributed in the hope that it will be
-!* useful, but WITHOUT ANYWARRANTY; without even the implied warranty
-!* of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-!* See the GNU General Public License for more details.
-!*
-!* You should have received a copy of the GNU Lesser General Public
-!* License along with the FV3 dynamical core.
-!* If not, see <http://www.gnu.org/licenses/>.
+!> TODO: replace with appropriate licence for CCPP
+!*   GNU Lesser General Public License
+!*   <http://www.gnu.org/licenses/>.
 !***********************************************************************
 
-!> The routine 'remapcoeff is copied from 'fv_treat_da_inc.F90 by Xi.Chen <xi.chen@noaa.gov> 
-! and put at the end of this module because, due to the compile order in CCPP framework it wasn't possible to 'include' 
-! the original module when the land iau mod is called through CCPP frameowrk
+!> @brief Land IAU (Incremental Analysis Update) module, 
+!> adopted from the FV3 IAU mode for the dyamical core
+!> to be able to do IAU updates for NoahMP states, soil/snow temperature
+! 
+!>  REVISION HISTORY:
+!> March, 2024: Tseganeh Z. Gichamo (EMC ): Modify for land
 !
-
-
-!-------------------------------------------------------------------------------
-!> @brief incremental analysis update module
+!> FV3 IAU mod
+!> @date 09/13/2017
 !> @author Xi.Chen - author of fv_treat_da_inc.F90
 !> @author Philip Pegion <philip.pegion@noaa.gov>
-!> @date 09/13/2017
-!
-!>  REVISION HISTORY:
 !>  09/13/2017 - Initial Version based on fv_treat_da_inc.F90
 !-------------------------------------------------------------------------------
+
+!* Note: The routine 'remapcoeff is copied from 'fv_treat_da_inc.F90 by Xi.Chen <xi.chen@noaa.gov> 
+!* and put at the end of this module because, due to the compile order in CCPP framework it wasn't possible to 'include' 
+!* the original module when the land iau mod is called through CCPP frameowrk
+
 
 #ifdef OVERLOAD_R4
 #define _GET_VAR1 get_var1_real
@@ -43,35 +31,12 @@
 
 module lnd_iau_mod
 
-!   use fms_mod,             only: file_exist
-!   use mpp_mod,             only: mpp_error, FATAL, NOTE, mpp_pe
-!   use mpp_domains_mod,     only: domain2d
-!   use constants_mod,       only: pi=>pi_8
-!   use fv_arrays_mod,       only: R_GRID         !, &
-                                 ! fv_atmos_type,       &
-                                 ! fv_grid_type,        &
-                                 ! fv_grid_bounds_type, &                                 
-!   use fv_mp_mod,           only: is_master
   use sim_nc_mod_lnd,          only: open_ncfile,         &
                                  close_ncfile,        &
                                  get_ncdim1,          &
                                  get_var1_double,     &
                                  get_var3_r4,         &
                                  get_var1_real, check_var_exists
-! #ifdef GFS_TYPES
-!   use GFS_typedefs,        only: IPD_init_type => GFS_init_type, &
-!                                  LND_IAU_Control_type => GFS_control_type, &
-!                                  kind_phys, &
-!                                  IPD_Data_type => GFS_data_type
-! #else
-!   use IPD_typedefs,        only: IPD_init_type, LND_IAU_Control_type, &
-!                                  kind_phys => IPD_kind_phys
-! #endif
-
-!   use block_control_mod,   only: block_control_type
-!   use fv_treat_da_inc_mod, only: remap_coef
-!   use tracer_manager_mod,  only: get_tracer_names,get_tracer_index, get_number_tracers
-!   use field_manager_mod,   only: MODEL_ATMOS
   
   use machine,                  only: kind_phys, kind_dyn
   use physcons,                 only: pi => con_pi
@@ -81,9 +46,7 @@ module lnd_iau_mod
   private
 
   real,allocatable::s2c(:,:,:)
-!  real:: s2c(Atm(1)%bd%is:Atm(1)%bd%ie,Atm(1)%bd%js:Atm(1)%bd%je,4)
-!  integer, dimension(Atm(1)%bd%is:Atm(1)%bd%ie,Atm(1)%bd%js:Atm(1)%bd%je):: &
-!      id1, id2, jdc
+
   integer,allocatable,dimension(:,:) :: id1,id2,jdc
 
   real :: deg2rad,dt,rdt
@@ -91,24 +54,17 @@ module lnd_iau_mod
   integer:: jbeg, jend
 
   integer :: n_soill, n_snowl              !1.27.24 soil and snow layers
-  logical :: do_lnd_iau   !do_lnd_iau_inc
+  logical :: do_lnd_iau 
 
   integer :: is,  ie,  js,  je
   integer :: npz     !, ntracers
-!   character(len=32), allocatable :: tracer_names(:)
-!   integer, allocatable :: tracer_indicies(:)
 
 !   real(kind=4), allocatable:: wk3(:, :,:,:)
-  real(kind=4), allocatable:: wk3_stc(:, :, :, :), wk3_slc(:, :, :, :), wk3_t2m(:, :, :, :), wk3_q2m(:, :, :, :)
+  real(kind=4), allocatable:: wk3_stc(:, :, :, :), wk3_slc(:, :, :, :), &
+                              wk3_t2m(:, :, :, :), wk3_q2m(:, :, :, :)
 
   type iau_internal_data_type
-      ! real,allocatable :: ua_inc(:,:,:)
-      ! real,allocatable :: va_inc(:,:,:)
-      ! real,allocatable :: temp_inc(:,:,:)
-      ! real,allocatable :: delp_inc(:,:,:)
-      ! real,allocatable :: delz_inc(:,:,:)
-      ! real,allocatable :: tracer_inc(:,:,:,:)
-      real,allocatable :: stc_inc(:,:,:)   
+      real,allocatable :: stc_inc(:,:,:)
       real,allocatable :: slc_inc(:,:,:) 
       real,allocatable :: tmp2m_inc(:,:, :) 
       real,allocatable :: spfh2m_inc(:,:, :) 
@@ -120,7 +76,6 @@ module lnd_iau_mod
       real,allocatable :: tmp2m_inc(:,:,:) 
       real,allocatable :: spfh2m_inc(:,:,:)    
       logical          :: in_interval = .false.
-      ! logical          :: drymassfixer = .false.
   end type lnd_iau_external_data_type
 
   type iau_state_type
@@ -159,39 +114,17 @@ module lnd_iau_mod
       character(len=:), pointer, dimension(:) :: input_nml_file => null() !<character string containing full namelist
                                                                           !< for use with internal file reads
       integer              :: input_nml_file_length    !<length (number of lines) in namelist for internal reads
- 
 
-      ! Additional GFS_Control vars (not used currently)      
-      ! integer              :: iau_offset
-      ! integer              :: tile_num
-      ! integer              :: nblks           !< for explicit data blocking: number of blocks
-      ! integer,     pointer :: blksz(:)        !< for explicit data blocking: block sizes of all blocks
-      ! integer              :: ncols           !< total number of columns for all blocks   
-      ! integer              :: communicator    !< MPI communicator
-      ! integer              :: ntasks          !< MPI size in communicator
-      ! integer              :: nthreads        !< OpenMP threads available for physics
-      ! integer              :: nlunit          !< unit for namelist
-      !  character(len=:), pointer, dimension(:) :: input_nml_file => null() !< character string containing full namelist
-      !  integer              :: logunit
-      !--- calendars and time parameters and activation triggers      
-      ! real(kind=kind_phys) :: dtf             !< dynamics timestep in seconds    
-      ! integer              :: idat(1:8)       !< initialization date and time
-      !                                        !< (yr, mon, day, t-zone, hr, min, sec, mil-sec)
-      ! integer              :: jdat(1:8)       !< current forecast date and time
-      !                                        !< (yr, mon, day, t-zone, hr, min, sec, mil-sec)
-      ! real(kind=kind_phys)          :: sec    !< seconds since model initialization
-      ! real(kind=kind_phys) :: phour           !< previous forecast hour      
-      ! real(kind=kind_phys) :: zhour           !< previous hour diagnostic buckets emptied
-      ! integer              :: kdt             !< current forecast iteration
-      ! logical              :: first_time_step !< flag signaling first time step for time integration routine
   end type lnd_iau_control_type
 
   type(iau_state_type) :: IAU_state
-  public lnd_iau_control_type, lnd_iau_external_data_type, lnd_iau_mod_set_control, lnd_iau_mod_init, lnd_iau_mod_getiauforcing, lnd_iau_mod_finalize
+  public lnd_iau_control_type, lnd_iau_external_data_type, lnd_iau_mod_set_control, &
+         lnd_iau_mod_init, lnd_iau_mod_getiauforcing, lnd_iau_mod_finalize
 
 contains
 
-subroutine lnd_iau_mod_set_control(LND_IAU_Control,fn_nml,input_nml_file_i,me, mpi_root, isc, jsc, nx, ny, nblks, blksz, &
+subroutine lnd_iau_mod_set_control(LND_IAU_Control,fn_nml,input_nml_file_i,me, mpi_root, &
+                                   isc, jsc, nx, ny, nblks, blksz, &
                                    lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)          !nlunit
 
    type (lnd_iau_control_type), intent(inout) :: LND_IAU_Control
@@ -215,7 +148,7 @@ subroutine lnd_iau_mod_set_control(LND_IAU_Control,fn_nml,input_nml_file_i,me, m
    integer                    :: input_nml_file_length    !< length(number of lines) in namelist for internal reads
 
 
-   !> 3.9.24 these are not available through the CCPP interface so need to read them from namelist file
+   !> 3.9.24 these are not available through the CCPP interface so need to read from namelist file
    !> vars to read from namelist
    logical               :: do_lnd_iau               = .false.
    real(kind=kind_phys)  :: lnd_iau_delthrs              = 0           !< iau time interval (to scale increments)
@@ -308,10 +241,7 @@ end subroutine lnd_iau_mod_set_control
 subroutine lnd_iau_mod_init (LND_IAU_Control, LND_IAU_Data, xlon, xlat, errmsg, errflg)     !nlunit, ncols, IPD_Data,,Init_parm)
    ! integer,                              intent(in) :: me, mpi_root
    type (lnd_iau_control_type),          intent(in) :: LND_IAU_Control
-   type (lnd_iau_external_data_type), intent(inout) :: LND_IAU_Data
-   ! type (IPD_init_type),    intent(in) :: Init_parm
-   ! type (IPD_Data_type), dimension(:),    intent(in) :: IPD_Data
-   ! integer, intent(in)                          :: ncols   
+   type (lnd_iau_external_data_type), intent(inout) :: LND_IAU_Data  
    real(kind_phys), dimension(:), intent(in)  :: xlon    ! longitude  !GFS_Data(cdata%blk_no)%Grid%xlon
    real(kind_phys), dimension(:), intent(in)  :: xlat    ! latitude
    character(len=*),              intent(out) :: errmsg
@@ -319,17 +249,13 @@ subroutine lnd_iau_mod_init (LND_IAU_Control, LND_IAU_Data, xlon, xlat, errmsg, 
 
    ! local
    character(len=128) :: fname
-   ! real, dimension(:,:,:), allocatable:: u_inc, v_inc
    real(kind=kind_dyn), allocatable:: lat(:), lon(:),agrid(:,:,:)
    real(kind=kind_phys) sx,wx,wt,normfact,dtp
-
    integer:: ib, i, j, k, nstep, kstep
    integer:: i1, i2, j1
-
    logical:: found
    integer nfilesall
    integer, allocatable :: idt(:)
-
    real (kind=kind_phys), allocatable :: Init_parm_xlon (:, :)   
    real (kind=kind_phys), allocatable :: Init_parm_xlat (:, :)   
    integer :: nlon, nlat
@@ -363,20 +289,14 @@ subroutine lnd_iau_mod_init (LND_IAU_Control, LND_IAU_Data, xlon, xlat, errmsg, 
          ib = ib+nlon
       ! enddo
    enddo
-   !  call get_number_tracers(MODEL_ATMOS, num_tracers=ntracers)
-   !  allocate (tracer_names(ntracers))
-   !  allocate (tracer_indicies(ntracers))
-   !  do i = 1, ntracers
-   !     call get_tracer_names(MODEL_ATMOS, i, tracer_names(i))
-   !     tracer_indicies(i)  = get_tracer_index(MODEL_ATMOS,tracer_names(i))
-   !  enddo
+ 
    allocate(s2c(is:ie,js:je,4))
    allocate(id1(is:ie,js:je))
    allocate(id2(is:ie,js:je))
    allocate(jdc(is:ie,js:je))
    allocate(agrid(is:ie,js:je,2))
-! determine number of increment files to read, and the valid forecast hours
 
+! determine number of increment files to read, and the valid forecast hours
    nfilesall = size(LND_IAU_Control%iau_inc_files)
    nfiles = 0
    if (LND_IAU_Control%me == LND_IAU_Control%mpi_root) print*,'in lnd_iau_init incfile1 iaufhr1 ', &
@@ -474,12 +394,6 @@ subroutine lnd_iau_mod_init (LND_IAU_Control, LND_IAU_Data, xlon, xlat, errmsg, 
    if (allocated(Init_parm_xlon)) deallocate(Init_parm_xlon)
    if (allocated(Init_parm_xlat)) deallocate(Init_parm_xlat)
 
-   !  allocate(LND_IAU_Data%ua_inc(is:ie, js:je, km))
-   !  allocate(LND_IAU_Data%va_inc(is:ie, js:je, km))
-   !  allocate(LND_IAU_Data%temp_inc(is:ie, js:je, km))
-   !  allocate(LND_IAU_Data%delp_inc(is:ie, js:je, km))
-   !  allocate(LND_IAU_Data%delz_inc(is:ie, js:je, km))
-   !  allocate(LND_IAU_Data%tracer_inc(is:ie, js:je, km,ntracers))
    allocate(LND_IAU_Data%stc_inc(is:ie, js:je, km))
    allocate(LND_IAU_Data%slc_inc(is:ie, js:je, km))
    allocate(LND_IAU_Data%tmp2m_inc(is:ie, js:je, 1))
@@ -513,7 +427,7 @@ subroutine lnd_iau_mod_init (LND_IAU_Control, LND_IAU_Data, xlon, xlat, errmsg, 
       iau_state%wt_normfact = (2*nstep+1)/normfact
    endif
 
-!3.22.24 MB wants to read all increments files at iau init 
+!3.22.24 Mike B wants to read all increments files at iau init time
    ! Find bounding latitudes:
    jbeg = jm-1
    jend = 2
@@ -710,7 +624,6 @@ subroutine updateiauforcing(LND_IAU_Control, LND_IAU_Data, wt)
    enddo
  end subroutine updateiauforcing
 
-
  subroutine setiauforcing(LND_IAU_Control, LND_IAU_Data, wt)
 
    implicit none
@@ -846,123 +759,11 @@ subroutine interp_inc_at_timestep(LND_IAU_Control, km_in, wk3_in, var, errmsg, e
    enddo
 end subroutine interp_inc_at_timestep
 
-!subroutine read_iau_forcing(LND_IAU_Control, increments, fname, errmsg, errflg)   !, fname_sfc)
-!   type (LND_IAU_Control_type), intent(in) :: LND_IAU_Control
-!   type(iau_internal_data_type), intent(inout):: increments
-!   character(len=*),  intent(in) :: fname
-!!  character(len=*),  intent(in), optional :: fname_sfc
-!   character(len=*),              intent(out) :: errmsg
-!   integer,                       intent(out) :: errflg
-!!locals
-!!  real, dimension(:,:,:), allocatable:: u_inc, v_inc
-!
-!   integer:: i, j, k, l, npz
-!   integer:: i1, i2, j1
-!   integer:: jbeg, jend
-!!  real(kind=R_GRID), dimension(2):: p1, p2, p3
-!!  real(kind=R_GRID), dimension(3):: e1, e2, ex, ey
-!
-!!  logical  :: found
-!   integer  :: is,  ie,  js,  je, km_store
-!   logical  :: exists
-!
-!   !Errors messages handled through CCPP error handling variables
-!   errmsg = ''
-!   errflg = 0
-!
-!   is  = LND_IAU_Control%isc
-!   ie  = is + LND_IAU_Control%nx-1
-!   js  = LND_IAU_Control%jsc
-!   je  = js + LND_IAU_Control%ny-1
-!
-!   deg2rad = pi/180.
-!
-!   npz = LND_IAU_Control%lsoil
-!   
-!   inquire (file=trim(fname), exist=exists)    
-!   if (exists) then
-!!  if( file_exist(fname) ) then
-!   call open_ncfile( fname, ncid )        ! open the file
-!   else
-!   ! call mpp_error(FATAL,'==> Error in read_iau_forcing: Expected file '&
-!   !     //trim(fname)//' for DA increment does not exist')
-!   errmsg = 'FATAL Error in read_iau_forcing: Expected file '//trim(fname)//' for DA increment does not exist'
-!   errflg = 1
-!   return
-!   endif
-!
-!   ! Find bounding latitudes:
-!   jbeg = jm-1;         jend = 2
-!   do j=js,je
-!   do i=is,ie
-!         j1 = jdc(i,j)
-!      jbeg = min(jbeg, j1)
-!      jend = max(jend, j1+1)
-!   enddo
-!   enddo
-!
-!   km_store = km
-!   km = 1     ! n_soill Currently each soil layer increment is saved separately
-!   allocate ( wk3(1:im,jbeg:jend, 1:km) )
-!   ! call interp_inc('stc_inc',increments%stc_inc(:,:,:),jbeg,jend)    !TODO check var name
-!   call interp_inc(LND_IAU_Control, 'soilt1_inc',increments%stc_inc(:,:,1),jbeg,jend)
-!   call interp_inc(LND_IAU_Control, 'soilt2_inc',increments%stc_inc(:,:,2),jbeg,jend)
-!   call interp_inc(LND_IAU_Control, 'soilt3_inc',increments%stc_inc(:,:,3),jbeg,jend)
-!   call interp_inc(LND_IAU_Control, 'soilt4_inc',increments%stc_inc(:,:,4),jbeg,jend)
-!
-!   call interp_inc(LND_IAU_Control, 'slc1_inc',increments%slc_inc(:,:,1),jbeg,jend)
-!   call interp_inc(LND_IAU_Control, 'slc2_inc',increments%slc_inc(:,:,2),jbeg,jend)
-!   call interp_inc(LND_IAU_Control, 'slc3_inc',increments%slc_inc(:,:,3),jbeg,jend)
-!   call interp_inc(LND_IAU_Control, 'slc4_inc',increments%slc_inc(:,:,4),jbeg,jend)
-!
-!   call interp_inc(LND_IAU_Control, 'tmp2m_inc',increments%tmp2m_inc(:,:,1),jbeg,jend)
-!   call interp_inc(LND_IAU_Control, 'spfh2m_inc',increments%spfh2m_inc(:,:,1),jbeg,jend)
-!!  call interp_inc_sfc('stc_inc',increments%stc_inc(:,:,:),jbeg,jend, n_soill)    
-!   call close_ncfile(ncid)
-!   deallocate (wk3)
-!   km = km_store
-!
-!end subroutine read_iau_forcing
-!
-!subroutine interp_inc(LND_IAU_Control, field_name, var, jbeg, jend)
-!! interpolate increment from GSI gaussian grid to cubed sphere
-!! everying is on the A-grid, earth relative
-! type (LND_IAU_Control_type), intent(in) :: LND_IAU_Control
-! character(len=*), intent(in) :: field_name
-! real, dimension(is:ie,js:je,1:km), intent(inout) :: var
-! integer, intent(in) :: jbeg,jend
-! integer:: i1, i2, j1, k,j,i,ierr
-! call check_var_exists(ncid, field_name, ierr)
-! if (ierr == 0) then
-!    call get_var3_r4( ncid, field_name, 1,im, jbeg,jend, 1,km, wk3 )
-! else
-!    if (LND_IAU_Control%me == LND_IAU_Control%mpi_root) print *,'warning: no increment for ',trim(field_name),' found, assuming zero'
-!    wk3 = 0.
-! endif
-! do k=1,km
-!    do j=js,je
-!       do i=is,ie
-!          i1 = id1(i,j)
-!          i2 = id2(i,j)
-!          j1 = jdc(i,j)
-!          var(i,j,k) = s2c(i,j,1)*wk3(i1,j1  ,k) + s2c(i,j,2)*wk3(i2,j1  ,k)+&
-!                       s2c(i,j,3)*wk3(i2,j1+1,k) + s2c(i,j,4)*wk3(i1,j1+1,k)
-!       enddo
-!    enddo
-! enddo
-!end subroutine interp_inc
-
-!> This routine is copied from 'fv_treat_da_inc.F90 by Xi.Chen <xi.chen@noaa.gov>
+!> This subroutine is copied from 'fv_treat_da_inc.F90 by Xi.Chen <xi.chen@noaa.gov>
 ! copying it here, due to inability to 'include' from the original module when the land iau mod is called through CCPP frameowrk
-!
-!> @author Xi.Chen <xi.chen@noaa.gov>
-!> @date 02/12/2016
-!
-!  REVISION HISTORY:
-!  02/12/2016 - Initial Version
+!> @author Xi.Chen <xi.chen@noaa.gov> !> @date 02/12/2016
   !=============================================================================
   !>@brief The subroutine 'remap_coef' calculates the coefficients for horizonal regridding.
-
   subroutine remap_coef( is, ie, js, je, isd, ied, jsd, jed, &
       im, jm, lon, lat, id1, id2, jdc, s2c, agrid )
 
@@ -1040,42 +841,6 @@ end subroutine interp_inc_at_timestep
 5000 continue   ! j-loop
 
   end subroutine remap_coef
-
-! subroutine interp_inc_sfc(LND_IAU_Control, field_name,var,jbeg,jend, k_lv)  !is_land_in)
-! ! interpolate increment from GSI gaussian grid to cubed sphere
-! ! everying is on the A-grid, earth relative
-!  type (LND_IAU_Control_type), intent(in) :: LND_IAU_Control
-!  character(len=*), intent(in) :: field_name
-!  integer, intent(in) :: jbeg, jend, k_lv
-!  real, dimension(is:ie,js:je,1:k_lv), intent(inout) :: var
-! !  logical, intent(in), optional :: is_land_in
-! !  logical :: is_land
-!  integer:: i1, i2, j1, k,j,i,ierr 
-! !  k_lv = km
-! !  is_land = .false.
-! !  if ( present(is_land_in) ) is_land = is_land_in
-! !  if (is_land) k_lv = n_soill 
-!  call check_var_exists(ncid, field_name, ierr)
-!  if (ierr == 0) then
-!     call get_var3_r4( ncid, field_name, 1,im, jbeg,jend, 1,k_lv, wk3 )   !k, wk3 )
-!  else
-!     if (LND_IAU_Control%me == LND_IAU_Control%mpi_root) print *,'warning: no increment for ',trim(field_name),' found, assuming zero'
-!     wk3 = 0.
-!  endif
- 
-!  do k=1,k_lv       !km
-!     do j=js,je
-!        do i=is,ie
-!           i1 = id1(i,j)
-!           i2 = id2(i,j)
-!           j1 = jdc(i,j)
-!           var(i,j,k) = s2c(i,j,1)*wk3(i1,j1  ,k) + s2c(i,j,2)*wk3(i2,j1  ,k)+&
-!                        s2c(i,j,3)*wk3(i2,j1+1,k) + s2c(i,j,4)*wk3(i1,j1+1,k)
-!        enddo
-!     enddo
-!  enddo
- 
-! end subroutine interp_inc_sfc
   
 end module lnd_iau_mod
 

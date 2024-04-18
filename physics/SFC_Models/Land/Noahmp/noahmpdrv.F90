@@ -12,6 +12,7 @@
 module noahmpdrv
 
     use module_sf_noahmplsm
+    
     ! 3.5.24 for use in IAU
     use lnd_iau_mod,  only: lnd_iau_control_type, lnd_iau_external_data_type,   &
                             lnd_iau_mod_set_control, lnd_iau_mod_init, lnd_iau_mod_getiauforcing,  &    
@@ -23,7 +24,8 @@ module noahmpdrv
 
     private
 
-    public :: noahmpdrv_init, noahmpdrv_run, noahmpdrv_timestep_init, noahmpdrv_timestep_finalize
+    public :: noahmpdrv_init, noahmpdrv_run, &
+              noahmpdrv_timestep_init, noahmpdrv_timestep_finalize, noahmpdrv_finalize
 
     ! IAU data and control
     type (lnd_iau_control_type)                  :: LND_IAU_Control
@@ -147,13 +149,6 @@ module noahmpdrv
 !!
   subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_root,
                                      stc, slc, errmsg, errflg)       ! smc, t2mmp, q2mp,    
-                                     ! lsnow_lsm, lsnowl,                  &
-                                     ! ncols, isc, jsc, nx, ny, nblks,
-                                     ! &
-                                     ! blksz, xlon, xlat,
-                                     ! &      !&  garea, iyrlen, julian,
-                                     ! vegtype, idveg, &                                        
- !  ---  in/outs: weasd, snwdph, tskin, tprcp, srflag, 
    
     use machine,          only: kind_phys
  
@@ -170,19 +165,9 @@ module noahmpdrv
     character(len=*),                          intent(out) :: errmsg
     integer,                                   intent(out) :: errflg
 
-    ! integer,                       intent(in) :: lsnow_lsm    
-    ! integer                      , intent(in) :: lsnowl     ! lower bound for snow level arrays    
-    ! integer,                       intent(in) :: ncols, isc, jsc, nx, ny, nblks      !=GFS_Control%ncols, %nx, %ny, nblks
-    ! integer, dimension(:),         intent(in) :: blksz   !(one:) !GFS_Control%blksz
-    ! real(kind_phys), dimension(:), intent(in) :: xlon    ! longitude !GFS_Data(cdata%blk_no)%Grid%xlon
-    ! real(kind_phys), dimension(:), intent(in) :: xlat    ! latitude
-
-    !  ---  local variable
-    ! integer :: nb, im        ! vertical soil layer dimension
-
     ! IAU update
     real,allocatable :: stc_inc_flat(:,:)   
-    real,allocatable :: slc_inc_flat(:,:) 
+    ! real,allocatable :: slc_inc_flat(:,:) 
     ! real,allocatable :: tmp2m_inc_flat(:) 
     ! real,allocatable :: spfh2m_inc_flat(:)  
     integer :: j, k, ib
@@ -225,20 +210,19 @@ module noahmpdrv
 
       ! local variable to copy blocked data LND_IAU_Data%stc_inc
       allocate(stc_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny, km))  !GFS_Control%ncols
-      allocate(slc_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny, km))  !GFS_Control%ncols
+      ! allocate(slc_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny, km))  !GFS_Control%ncols
       ! allocate(tmp2m_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny))  !GFS_Control%ncols
       ! allocate(spfh2m_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny))  !GFS_Control%ncols
       ib = 1
       do j = 1, LND_IAU_Control%ny  !ny 
         do k = 1, km    
           stc_inc_flat(ib:ib+LND_IAU_Control%nx-1, k) =LND_IAU_Data%stc_inc(:,j, k)  
-          slc_inc_flat(ib:ib+LND_IAU_Control%nx-1, k) = LND_IAU_Data%slc_inc(:,j, k) 
+          ! slc_inc_flat(ib:ib+LND_IAU_Control%nx-1, k) = LND_IAU_Data%slc_inc(:,j, k) 
         enddo
       ! ib = 1
       ! do j = 1, LND_IAU_Control%ny  !ny
         ! tmp2m_inc_flat(ib:ib+LND_IAU_Control%nx-1) =LND_IAU_Data%tmp2m_inc(:,j, 1)  
         ! spfh2m_inc_flat(ib:ib+LND_IAU_Control%nx-1)=LND_IAU_Data%spfh2m_inc(:,j, 1) 
-
         ib = ib + LND_IAU_Control%nx  !nlon    
       enddo
 
@@ -249,16 +233,17 @@ module noahmpdrv
         endif
       endif
       !IAU increments are in units of 1/sec     !LND_IAU_Control%dtp
+!* only updating soil temp
       do k = 1, km 
         stc(:,k) = stc(:,k) + stc_inc_flat(:,k)*delt !LND_IAU_Control%dtp
-        slc(:,k) = slc(:,k) + slc_inc_flat(:,k)*delt !LND_IAU_Control%dtp    
+        ! slc(:,k) = slc(:,k) + slc_inc_flat(:,k)*delt !LND_IAU_Control%dtp    
       enddo
       ! t2mmp = t2mmp +  &
       ! tmp2m_inc_flat(LND_IAU_Control%blk_strt_indx(nb):LND_IAU_Control%blk_strt_indx(nb) + im-1)*delt !LND_IAU_Control%dtp
       ! q2mp = q2mp +   &
       ! spfh2m_inc_flat(LND_IAU_Control%blk_strt_indx(nb):LND_IAU_Control%blk_strt_indx(nb)+ im-1)*delt !LND_IAU_Control%dtp 
 
-      deallocate(stc_inc_flat, slc_inc_flat)   !, tmp2m_inc_flat,spfh2m_inc_flat)
+      deallocate(stc_inc_flat)  !, slc_inc_flat)   !, tmp2m_inc_flat,spfh2m_inc_flat)
 
     endif
 
@@ -268,7 +253,7 @@ module noahmpdrv
 !! \brief This subroutine is called after noahmpdrv_run 
 !!  to free up allocated memory  
 !! \section arg_table_noahmpdrv_timestep_finalize Argument Table
-!! \htmlinclude noahmpdrv_timestep_init.html
+!! \htmlinclude noahmpdrv_timestep_finalize.html
 !!
   subroutine noahmpdrv_timestep_finalize (errmsg, errflg)       ! smc, t2mmp, q2mp,    
    
@@ -284,17 +269,35 @@ module noahmpdrv
     !  --- Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
+    
+    !> note the IAU deallocate happens at the noahmpdrv_finalize
 
-    ! ! delt=GFS_Control%dtf
-    ! if ((LND_IAU_Control%dtp - delt) > 0.0001) then 
-    !   if(LND_IAU_Control%me == LND_IAU_Control%mpi_root) then 
-    !     print*, "Warning noahmpdrv_run delt ",delt,"different from LND_IAU_Control%dtp ",LND_IAU_Control%dtp
-    !   endif
-    ! endif
+  end subroutine noahmpdrv_timestep_finalize
+
+    !> \ingroup NoahMP_LSM
+!! \brief This subroutine mirrors noahmpdrv_init  
+!!  to free up allocated memory in IAU_init (noahmdrv_init)  
+!! \section arg_table_noahmpdrv_finalize Argument Table
+!! \htmlinclude noahmpdrv_finalize.html
+!!
+  subroutine noahmpdrv_finalize (errmsg, errflg)       ! smc, t2mmp, q2mp,    
+   
+    use machine,          only: kind_phys
+ 
+    implicit none
+
+    character(len=*),                          intent(out) :: errmsg
+    integer,                                   intent(out) :: errflg
+
+    integer :: j, k, ib
+
+    !  --- Initialize CCPP error handling variables
+    errmsg = ''
+    errflg = 0
     
     call lnd_iau_mod_finalize(LND_IAU_Control, LND_IAU_Data, errmsg, errflg)     !LND_IAU_Control%finalize()
 
-  end subroutine noahmpdrv_timestep_finalize
+  end subroutine noahmpdrv_finalize
 
 !> \ingroup NoahMP_LSM
 !! \brief This subroutine is the main CCPP entry point for the NoahMP LSM.
