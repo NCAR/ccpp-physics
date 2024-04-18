@@ -230,7 +230,7 @@ end subroutine fv_sat_adj_finalize
 !! \section arg_table_fv_sat_adj_run Argument Table
 !! \htmlinclude fv_sat_adj_run.html
 !!
-subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, jsd, jed, &
+subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, isc, iec, kmp, km, kmdelz, js, je, jsd, jed, jsc, jec, &
                  ng, hydrostatic, fast_mp_consv, te0_2d, te0, ngas, qvi, qv, ql, qi, qr,  &
                  qs, qg, hs, peln, delz, delp, pt, pkz, q_con, akap, cappa, area, dtdt,   &
                  out_dt, last_step, do_qa, qa,                                            &
@@ -245,6 +245,8 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     integer,             intent(in)    :: ie
     integer,             intent(in)    :: isd
     integer,             intent(in)    :: ied
+    integer,             intent(in)    :: isc
+    integer,             intent(in)    :: iec
     integer,             intent(in)    :: kmp
     integer,             intent(in)    :: km
     integer,             intent(in)    :: kmdelz
@@ -252,6 +254,8 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     integer,             intent(in)    :: je
     integer,             intent(in)    :: jsd
     integer,             intent(in)    :: jed
+    integer,             intent(in)    :: jsc
+    integer,             intent(in)    :: jec
     integer,             intent(in)    :: ng
     logical,             intent(in)    :: hydrostatic
     logical,             intent(in)    :: fast_mp_consv
