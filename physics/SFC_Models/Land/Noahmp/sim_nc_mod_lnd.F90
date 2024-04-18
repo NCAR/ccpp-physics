@@ -19,6 +19,9 @@
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
 
+!> March 2024: This is a copy of S-J Lin's sim_nc_mod
+!> renamed it sim_nc_mod_lnd to faciliate compilaton 
+
 !>@brief The module 'sim_nc' is a netcdf file reader.
 !>@details The code is necessary to circumvent issues with the FMS
 !! 'read_data' utility, which opens too many files and uses excessive
