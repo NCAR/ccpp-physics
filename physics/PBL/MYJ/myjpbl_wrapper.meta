@@ -342,7 +342,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [kpbl]
   standard_name = vertical_index_at_top_of_atmosphere_boundary_layer
   long_name = PBL top model level index
@@ -501,7 +500,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [dkt]
   standard_name = atmosphere_heat_diffusivity
   long_name = atmospheric heat diffusivity
@@ -604,7 +602,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index

@@ -768,7 +768,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [evap_lnd]
   standard_name = kinematic_surface_upward_latent_heat_flux_over_land
   long_name = kinematic surface upward latent heat flux over land
@@ -777,7 +776,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [evap_ice]
   standard_name = kinematic_surface_upward_latent_heat_flux_over_ice
   long_name = kinematic surface upward latent heat flux over ice
@@ -786,7 +784,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [hflx]
   standard_name = surface_upward_temperature_flux
   long_name = kinematic surface upward sensible heat flux

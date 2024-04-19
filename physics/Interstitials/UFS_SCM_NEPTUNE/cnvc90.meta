@@ -91,7 +91,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [cvb]
   standard_name = pressure_at_convective_cloud_base_between_sw_radiation_calls_from_cnvc90
   long_name = pressure at bottom of convective cloud

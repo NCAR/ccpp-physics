@@ -119,7 +119,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [ntia]
   standard_name = index_of_mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols_in_tracer_concentration_array
   long_name = tracer index for ice friendly aerosol
@@ -127,7 +126,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [ntgl]
   standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for graupel
@@ -191,7 +189,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [nthl]
   standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for hail
@@ -213,7 +210,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [nthv]
   standard_name = index_of_hail_volume_in_tracer_concentration_array
   long_name = tracer index for hail particle volume

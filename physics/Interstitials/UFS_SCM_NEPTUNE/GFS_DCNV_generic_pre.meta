@@ -134,7 +134,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [index_of_process_dcnv]
   standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
   long_name = index of deep convection process in second dimension of array cumulative change index
@@ -261,7 +260,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [nthv]
   standard_name = index_of_hail_volume_in_tracer_concentration_array
   long_name = tracer index for hail particle volume

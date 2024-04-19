@@ -371,7 +371,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [tsfa]
   standard_name = surface_air_temperature_for_radiation
   long_name = lowest model layer air temperature for radiation

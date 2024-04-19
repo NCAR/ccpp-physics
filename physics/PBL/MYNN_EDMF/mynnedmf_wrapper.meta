@@ -484,7 +484,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [dusfc1]
   standard_name = instantaneous_surface_x_momentum_flux
   long_name = surface momentum flux in the x-direction valid for current call
@@ -533,7 +532,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [dusfc_diag]
   standard_name = cumulative_surface_x_momentum_flux_for_diag_multiplied_by_timestep
   long_name = cumulative sfc x momentum flux multiplied by timestep
@@ -566,7 +564,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [dusfc_cice]
   standard_name = surface_x_momentum_flux_from_coupled_process
   long_name = sfc x momentum flux for coupling
@@ -619,7 +616,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [stress_wat]
   standard_name = surface_wind_stress_over_water
   long_name = surface wind stress over water
@@ -745,7 +741,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [qke]
   standard_name = nonadvected_turbulent_kinetic_energy_multiplied_by_2
   long_name = 2 x tke at mass points
@@ -888,7 +883,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [kpbl]
   standard_name = vertical_index_at_top_of_atmosphere_boundary_layer
   long_name = PBL top model level index
@@ -1179,7 +1173,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index
@@ -1264,7 +1257,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [ntia]
   standard_name = index_of_mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols_in_tracer_concentration_array
   long_name = tracer index for ice friendly aerosol
@@ -1272,7 +1264,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [index_of_process_pbl]
   standard_name = index_of_subgrid_scale_vertical_mixing_process_in_cumulative_change_index
   long_name = index of subgrid scale vertical mixing process in second dimension of array cumulative change index

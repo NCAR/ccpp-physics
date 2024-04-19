@@ -396,7 +396,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [ud_mf]
   standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
   long_name = (updraft mass flux) * delt

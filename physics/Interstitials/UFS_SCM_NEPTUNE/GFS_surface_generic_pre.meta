@@ -363,7 +363,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [vegf1d]
   standard_name = perturbation_of_vegetation_fraction
   long_name = perturbation of vegetation fraction

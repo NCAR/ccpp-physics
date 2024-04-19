@@ -199,7 +199,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [delpin]
   standard_name = layer_pressure_thickness_for_radiation
   long_name = layer pressure thickness

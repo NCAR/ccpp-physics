@@ -113,7 +113,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [ntia]
   standard_name = index_of_mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols_in_tracer_concentration_array
   long_name = tracer index for ice friendly aerosol
@@ -121,7 +120,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [ntgl]
   standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for graupel
@@ -185,7 +183,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [nthl]
   standard_name = index_of_hail_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for hail
@@ -207,7 +204,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [nthv]
   standard_name = index_of_hail_volume_in_tracer_concentration_array
   long_name = tracer index for hail particle volume
@@ -459,7 +455,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index
@@ -496,7 +491,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [dtf]
   standard_name = timestep_for_dynamics
   long_name = dynamics timestep
@@ -665,7 +659,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [dusfci_diag]
   standard_name = instantaneous_surface_x_momentum_flux_for_diag
   long_name = instantaneous sfc x momentum flux multiplied by timestep
@@ -698,7 +691,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [rd]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
@@ -919,7 +911,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [ugrs1]
   standard_name = x_wind_at_surface_adjacent_layer
   long_name = zonal wind at lowest model layer

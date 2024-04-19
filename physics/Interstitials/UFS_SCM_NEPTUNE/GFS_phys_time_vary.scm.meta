@@ -375,7 +375,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [lsm]
   standard_name = control_for_land_surface_scheme
   long_name = flag for land surface model

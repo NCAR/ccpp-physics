@@ -281,7 +281,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [slmsk]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
@@ -671,7 +670,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [qflx_lnd]
   standard_name = kinematic_surface_upward_latent_heat_flux_over_land
   long_name = kinematic surface upward latent heat flux over land
@@ -680,7 +678,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [qflx_ice]
   standard_name = kinematic_surface_upward_latent_heat_flux_over_ice
   long_name = kinematic surface upward latent heat flux over ice
@@ -689,7 +686,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [qsfc]
   standard_name = surface_specific_humidity
   long_name = surface air saturation specific humidity
@@ -751,7 +747,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [wspd]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
@@ -801,7 +796,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [flqc]
   standard_name = surface_exchange_coefficient_for_moisture
   long_name = surface exchange coefficient for moisture
@@ -810,7 +804,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [u10]
   standard_name = x_wind_at_10m
   long_name = 10 meter u wind speed

@@ -154,7 +154,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [snow]
   standard_name = lwe_thickness_of_snow_amount_on_dynamics_timestep
   long_name = snow fall at this time step
@@ -163,7 +162,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [graupel]
   standard_name = lwe_thickness_of_graupel_amount_on_dynamics_timestep
   long_name = graupel fall at this time step
@@ -172,7 +170,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep

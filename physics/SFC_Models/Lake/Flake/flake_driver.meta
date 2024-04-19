@@ -93,7 +93,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [xlat]
   standard_name = latitude
   long_name = latitude
@@ -240,7 +239,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [lflx]
   standard_name = surface_upward_potential_latent_heat_flux_over_water
   long_name = surface upward potential latent heat flux over water

@@ -774,7 +774,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [ntccna]
   standard_name = index_of_activated_cloud_condensation_nuclei_number_concentration_in_tracer_concentration_array
   long_name = tracer index for activated cloud condensation nuclei number concentration
@@ -782,7 +781,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [errflg]
   standard_name = ccpp_error_code
   long_name = error code for error handling in CCPP

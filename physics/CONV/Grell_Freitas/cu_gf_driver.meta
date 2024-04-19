@@ -360,7 +360,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [ud_mf]
   standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
   long_name = (updraft mass flux) * delt
@@ -439,7 +438,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [ntqv]
   standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)
@@ -534,7 +532,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = True
 [fh_dfi_radar]
   standard_name = forecast_lead_times_bounding_radar_derived_temperature_or_convection_suppression_intervals
   long_name = forecast lead times bounding radar derived temperature or convection suppression intervals

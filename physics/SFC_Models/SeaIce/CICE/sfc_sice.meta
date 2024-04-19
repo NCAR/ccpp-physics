@@ -393,7 +393,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [evapw]
   standard_name = kinematic_surface_upward_latent_heat_flux_over_water
   long_name = kinematic surface upward latent heat flux over water
@@ -402,7 +401,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [hflxi]
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_ice
   long_name = kinematic surface upward sensible heat flux over ice

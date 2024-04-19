@@ -206,7 +206,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [rh02min]
   standard_name = minimum_relative_humidity_at_2m_over_maximum_hourly_time_interval
   long_name = minumum relative humidity at 2m over maximum hourly time interval
@@ -215,7 +214,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep

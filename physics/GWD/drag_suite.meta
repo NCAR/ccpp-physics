@@ -458,7 +458,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -610,7 +609,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [index_of_process_orographic_gwd]
   standard_name = index_of_orographic_gravity_wave_drag_process_in_cumulative_change_index
   long_name = index of orographic gravity wave drag process in second dimension of array cumulative change index

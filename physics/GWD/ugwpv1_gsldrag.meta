@@ -37,7 +37,6 @@
   type = character
   kind = len=*
   intent = in
-  optional = True
 [logunit]
   standard_name = iounit_of_log
   long_name = fortran unit number for writing logfile
@@ -646,7 +645,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [kpbl]
   standard_name = vertical_index_at_top_of_atmosphere_boundary_layer
   long_name = vertical index at top atmospheric boundary layer
@@ -1083,7 +1081,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [index_of_x_wind]
   standard_name = index_of_x_wind_in_cumulative_change_index
   long_name = index of x-wind in first dimension of array cumulative change index

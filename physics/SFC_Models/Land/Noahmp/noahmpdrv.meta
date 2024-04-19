@@ -302,7 +302,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [dry]
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
@@ -815,7 +814,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [flhc1]
   standard_name = surface_exchange_coefficient_for_heat
   long_name = surface exchange coefficient for heat
@@ -824,7 +822,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [flqc1]
   standard_name = surface_exchange_coefficient_for_moisture
   long_name = surface exchange coefficient for moisture
@@ -833,7 +830,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [do_mynnsfclay]
   standard_name = flag_for_mellor_yamada_nakanishi_niino_surface_layer_scheme
   long_name = flag to activate MYNN surface layer
@@ -1227,7 +1223,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [hflx]
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_land
   long_name = kinematic surface upward sensible heat flux over land

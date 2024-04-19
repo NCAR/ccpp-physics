@@ -358,7 +358,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [rhcpbl]
   standard_name = critical_relative_humidity_at_PBL_top
   long_name = critical relative humidity at the PBL top
@@ -367,7 +366,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [rhctop]
   standard_name = critical_relative_humidity_at_toa
   long_name = critical relative humidity at the top of atmosphere
@@ -376,7 +374,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [rhcmax]
   standard_name = max_critical_relative_humidity
   long_name = maximum critical relative humidity
@@ -385,7 +382,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [islmsk]
   standard_name = sea_land_ice_mask
   long_name = sea/land/ice mask (=0/1/2)
@@ -453,7 +449,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [save_qc]
   standard_name = cloud_condensed_water_mixing_ratio_save
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) before entering a physics scheme
@@ -536,7 +531,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

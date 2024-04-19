@@ -336,7 +336,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [snow]
   standard_name = lwe_thickness_of_snow_amount_on_dynamics_timestep
   long_name = snow fall at this time step
@@ -345,7 +344,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [graupel]
   standard_name = lwe_thickness_of_graupel_amount_on_dynamics_timestep
   long_name = graupel fall at this time step
@@ -354,7 +352,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [frzr]
   standard_name = cumulative_lwe_thickness_of_surface_freezing_rain_amount
   long_name = accumulated surface freezing rain
@@ -566,7 +563,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [totsnw]
   standard_name = accumulated_lwe_thickness_of_snow_amount
   long_name = accumulated snow precipitation
@@ -575,7 +571,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [totgrp]
   standard_name = accumulated_lwe_thickness_of_graupel_amount
   long_name = accumulated graupel precipitation
@@ -584,7 +579,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [cnvprcpb]
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket
   long_name = cumulative convective precipitation in bucket
@@ -609,7 +603,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [totsnwb]
   standard_name = accumulated_lwe_thickness_of_snow_amount_in_bucket
   long_name = accumulated snow precipitation in bucket
@@ -618,7 +611,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [totgrpb]
   standard_name = accumulated_lwe_thickness_of_graupel_amount_in_bucket
   long_name = accumulated graupel precipitation in bucket
@@ -627,7 +619,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [rain_cpl]
   standard_name = cumulative_lwe_thickness_of_precipitation_amount_for_coupling
   long_name = total rain precipitation
@@ -877,7 +868,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index

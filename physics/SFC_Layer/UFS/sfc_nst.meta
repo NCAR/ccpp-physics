@@ -627,7 +627,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [hflx]
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_water
   long_name = kinematic surface upward sensible heat flux over water

@@ -307,7 +307,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [t2m]
   standard_name = air_temperature_at_2m
   long_name = 2 meter temperature
@@ -490,7 +489,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [idat]
   standard_name = date_and_time_at_model_initialization_in_iso_order
   long_name = initialization date and time

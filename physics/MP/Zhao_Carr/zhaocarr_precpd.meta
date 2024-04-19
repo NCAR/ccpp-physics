@@ -198,7 +198,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [psautco]
   standard_name = autoconversion_to_snow_coefficient
   long_name = conversion coefficient from cloud ice to snow

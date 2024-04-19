@@ -429,7 +429,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [de_lgth]
   standard_name = cloud_decorrelation_length
   long_name = cloud decorrelation length

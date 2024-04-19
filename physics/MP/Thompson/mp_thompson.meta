@@ -730,7 +730,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [spp_prt_list]
   standard_name = magnitude_of_spp_perturbations
   long_name = magnitude of spp perturbations

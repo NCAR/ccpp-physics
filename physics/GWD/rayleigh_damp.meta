@@ -146,7 +146,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [index_of_process_rayleigh_damping]
   standard_name = index_of_rayleigh_damping_process_in_cumulative_change_index
   long_name = index of rayleigh damping process in second dimension of array cumulative change index

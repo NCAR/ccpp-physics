@@ -108,7 +108,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [doSWrad]
   standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls

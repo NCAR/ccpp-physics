@@ -356,7 +356,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [hpbl]
   standard_name = atmosphere_boundary_layer_thickness
   long_name = PBL thickness
@@ -365,7 +364,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [hgamt]
   standard_name = countergradient_mixing_term_for_temperature
   long_name = countergradient mixing term for temperature
@@ -541,7 +539,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [index_of_process_pbl]
   standard_name = index_of_subgrid_scale_vertical_mixing_process_in_cumulative_change_index
   long_name = index of subgrid scale vertical mixing process in second dimension of array cumulative change index

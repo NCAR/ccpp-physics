@@ -275,7 +275,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [lprnt]
   standard_name = flag_print
   long_name = flag for printing diagnostics to output

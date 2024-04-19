@@ -224,7 +224,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [ntwa]
   standard_name = index_of_mass_number_concentration_of_hygroscopic_aerosols_in_tracer_concentration_array
   long_name = tracer index for water friendly aerosol
@@ -232,7 +231,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [ntoz]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
@@ -1148,7 +1146,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [tsfa]
   standard_name = surface_air_temperature_for_radiation
   long_name = lowest model layer air temperature for radiation
@@ -1189,7 +1186,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [plvl]
   standard_name = air_pressure_at_interface_for_radiation_in_hPa
   long_name = air pressure at vertical interface for radiation calculation

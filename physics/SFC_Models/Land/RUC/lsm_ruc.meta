@@ -256,7 +256,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [snoalb]
   standard_name = upper_bound_of_max_albedo_assuming_deep_snow
   long_name = maximum snow albedo
@@ -718,7 +717,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = True
 [xlat_d]
   standard_name = latitude_in_degree
   long_name = latitude in degree north
@@ -1225,7 +1223,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [weasd_ice]
   standard_name = water_equivalent_accumulated_snow_depth_over_ice
   long_name = water equiv of acc snow depth over ice
@@ -1386,7 +1383,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [hflx_lnd]
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_land
   long_name = kinematic surface upward sensible heat flux over land
@@ -1608,7 +1604,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [ep1d_ice]
   standard_name = surface_upward_potential_latent_heat_flux_over_ice
   long_name = surface upward potential latent heat flux over ice

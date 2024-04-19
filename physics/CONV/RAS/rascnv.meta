@@ -334,7 +334,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [tin]
   standard_name = air_temperature_of_new_state
   long_name = updated temperature
