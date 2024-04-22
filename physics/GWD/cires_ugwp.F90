@@ -236,7 +236,7 @@ contains
     real(kind=kind_phys),    intent(out), dimension(:, :), optional :: dtaux2d_bl, dtauy2d_bl
 
     ! dtend is only allocated if ldiag=.true.
-    real(kind=kind_phys), optional, intent(inout), optional  :: dtend(:,:,:)
+    real(kind=kind_phys), optional, intent(inout) :: dtend(:,:,:)
     integer, intent(in)                                      :: dtidx(:,:), &
          index_of_x_wind, index_of_y_wind, index_of_temperature,         &
          index_of_process_orographic_gwd, index_of_process_nonorographic_gwd

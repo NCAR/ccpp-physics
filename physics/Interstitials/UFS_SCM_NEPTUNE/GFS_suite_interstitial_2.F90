@@ -42,7 +42,7 @@
       real(kind=kind_phys), intent(inout), dimension(:)     :: adjsfculw
 
       ! dtend is only allocated if ldiag3d is .true.
-      real(kind=kind_phys), optional, intent(inout), dimension(:,:,:), optional :: dtend
+      real(kind=kind_phys), optional, intent(inout), dimension(:,:,:) :: dtend
       integer,              intent(in),    dimension(:,:) :: dtidx
       integer, intent(in) :: index_of_process_longwave, index_of_process_shortwave, &
            index_of_process_pbl, index_of_process_dcnv, index_of_process_scnv,       &
