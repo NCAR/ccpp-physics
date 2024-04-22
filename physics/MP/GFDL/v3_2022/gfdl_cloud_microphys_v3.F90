@@ -3,9 +3,9 @@
 !! \cite chen_and_lin_2013 ).
 module gfdl_cloud_microphys_v3
 
-   use module_gfdl_cloud_microphys_v3, only: module_gfdl_cld_mp_init,         &
-                                             module_gfdl_cld_mp_driver,       &
-                                             module_gfdl_cld_mp_end,          &
+   use module_gfdl_cloud_microphys_v3, only: module_gfdl_cloud_microphys_v3_init,         &
+                                             module_gfdl_cloud_microphys_v3_driver,       &
+                                             module_gfdl_cloud_microphys_v3_end,          &
                                              rad_ref, cld_eff_rad    
 
    implicit none
@@ -66,7 +66,7 @@ contains
            return
        endif
 
-       call module_gfdl_cld_mp_init(me, master, nlunit, input_nml_file, logunit, fn_nml, hydrostatic, errmsg, errflg)
+!       call module_gfdl_cloud_microphys_v3_init(me, master, nlunit, input_nml_file, logunit, fn_nml, hydrostatic, errmsg, errflg)
 
        is_initialized = .true.
 
@@ -93,7 +93,7 @@ contains
 
        if (.not.is_initialized) return
 
-       call module_gfdl_cld_mp_end()
+       call module_gfdl_cloud_microphys_v3_end()
 
        is_initialized = .false.
 
@@ -264,7 +264,7 @@ contains
         hs = oro(:) * con_g 
         gsize = sqrt(garea(:)) 
 
-        call  module_gfdl_cld_mp_driver( qv1, ql1, qr1, qi1, qs1, qg1, qa1, qnl, qni, pt, w,&
+        call module_gfdl_cloud_microphys_v3_driver( qv1, ql1, qr1, qi1, qs1, qg1, qa1, qnl, qni, pt, w,&
                   uin, vin, dz, delp, gsize, dtp, hs, water0, rain0,                        &
                   ice0, snow0, graupel0, hydrostatic, iis, iie, kks, kke, q_con, cappa,     &
                   fast_mp_consv, adj_vmr, te, dte, prefluxw, prefluxr, prefluxi, prefluxs,  &

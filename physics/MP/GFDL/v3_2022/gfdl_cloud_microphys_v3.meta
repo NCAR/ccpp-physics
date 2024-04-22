@@ -127,8 +127,8 @@
   dimensions = ()
   type = integer
   intent = in
-[imp_physics_gfdl_v3]
-  standard_name = identifier_for_gfdl_microphysics_v3_scheme
+[imp_physics_gfdl]
+  standard_name = identifier_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
   units = flag
   dimensions = ()
@@ -207,7 +207,7 @@
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -391,7 +391,7 @@
   standard_name = height_above_mean_sea_level
   long_name = height_above_mean_sea_level
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout

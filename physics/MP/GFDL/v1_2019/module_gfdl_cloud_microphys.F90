@@ -46,8 +46,8 @@ module module_gfdl_cloud_microphys
 
    private
 
-   public gfdl_cloud_microphys_mod_driver, gfdl_cloud_microphys_mod_init, &
-          gfdl_cloud_microphys_mod_end, cloud_diagnosis
+   public module_gfdl_cloud_microphys_driver, module_gfdl_cloud_microphys_init, &
+          module_gfdl_cloud_microphys_end, cloud_diagnosis
 !   public wqs1, wqs2, qs_blend, wqsat_moist, wqsat2_moist
 !   public qsmith_init, qsmith, es2_table1d, es3_table1d, esw_table1d
 !   public setup_con, wet_bulb
@@ -342,7 +342,7 @@ contains
 
 !>\ingroup mod_gfdl_cloud_mp
 !! This subroutine is the driver of the GFDL cloud microphysics
-subroutine gfdl_cloud_microphys_mod_driver (                                    &
+subroutine module_gfdl_cloud_microphys_driver (                                 &
             iis, iie, jjs, jje, kks, kke, ktop, kbot,                           &
             qv, ql, qr, qi, qs, qg, qa, qn,                                     &
             qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,      &
@@ -652,7 +652,7 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
        enddo
     endif
 
-end subroutine gfdl_cloud_microphys_mod_driver
+end subroutine module_gfdl_cloud_microphys_driver
 
 ! -----------------------------------------------------------------------
 !>\ingroup mod_gfdl_cloud_mp
@@ -3550,7 +3550,7 @@ end subroutine setupm
 !>\ingroup mod_gfdl_cloud_mp
 !! The subroutine 'gfdl_cloud_microphys_init' initializes the GFDL
 !! cloud microphysics.
-subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, logunit, &
+subroutine module_gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file, logunit, &
      fn_nml, errmsg, errflg)
 
     implicit none
@@ -3589,7 +3589,7 @@ subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, lo
     if (.not. exists) then
         write (6, *) 'gfdl - mp :: namelist file: ', trim (fn_nml), ' does not exist'
         errflg = 1
-        errmsg = 'ERROR(gfdl_cloud_microphys_mod_init): namelist file '//trim (fn_nml)//' does not exist'
+        errmsg = 'ERROR(module_gfdl_cloud_microphys_init): namelist file '//trim (fn_nml)//' does not exist'
         return
     else
         open (unit = nlunit, file = fn_nml, action = 'read' , status = 'old', iostat = ios)
@@ -3602,7 +3602,7 @@ subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, lo
     ! write version number and namelist to log file
     if (me == master) then
         write (logunit, *) " ================================================================== "
-        write (logunit, *) "gfdl_cloud_microphys_mod"
+        write (logunit, *) "module_gfdl_cloud_microphys"
         write (logunit, nml = gfdl_cloud_microphysics_nml)
     endif
 
@@ -3700,14 +3700,14 @@ subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, lo
 
    call radar_init
 
-end subroutine gfdl_cloud_microphys_mod_init
+end subroutine module_gfdl_cloud_microphys_init
 
 ! =======================================================================
 ! end of gfdl cloud microphysics
 !>\ingroup mod_gfdl_cloud_mp
 !! The subroutine 'gfdl_cloud_microphys_init' terminates the GFDL
 !! cloud microphysics.
-subroutine gfdl_cloud_microphys_mod_end()
+subroutine module_gfdl_cloud_microphys_end()
 
     implicit none
 
@@ -3722,7 +3722,7 @@ subroutine gfdl_cloud_microphys_mod_end()
 
     tables_are_initialized = .false.
 
-end subroutine gfdl_cloud_microphys_mod_end
+end subroutine module_gfdl_cloud_microphys_end
 
 ! =======================================================================
 ! qsmith table initialization

@@ -8,287 +8,333 @@ module module_gfdlmp_param
   ! Data container for GFDL MP runtime configurations information (i.e. Namelist)
   ! #######################################################################################
   type ty_gfdlmp_config
-     ! V3 configuration
-     integer :: ntimes    = 1  !< cloud microphysics sub cycles (v3)
-     integer :: nconds    = 1  !< condensation sub cycles (v3)
-     integer :: inflag    = 1  !< ice nucleation scheme (v3)
-                               !< 1: Hong et al. (2004)
-                               !< 2: Meyers et al. (1992)
-                               !< 3: Meyers et al. (1992)
-                               !< 4: Cooper (1986)
-                               !< 5: Fletcher (1962)
-     integer :: igflag    = 3  !< ice generation scheme (v3)
-                               !< 1: WSM6
-                               !< 2: WSM6 with 0 at 0 C
-                               !< 3: WSM6 with 0 at 0 C and fixed value at - 10 C
-                               !< 4: combination of 1 and 3
-     integer :: ifflag    = 1  !< ice fall scheme (v3)
-                               !< 1: Deng and Mace (2008)
-                               !< 2: Heymsfield and Donner (1990)
-     integer :: rewflag   = 1  !< cloud water effective radius scheme (v3)
-                               !< 1: Martin et al. (1994)
-                               !< 2: Martin et al. (1994), GFDL revision
-                               !< 3: Kiehl et al. (1994)
-                               !< 4: effective radius
-     integer :: rerflag   = 1  !< rain effective radius scheme (v3)
-                               !< 1: effective radius
-     integer :: resflag   = 1  !< snow effective radius scheme (v3)
-                               !< 1: effective radius
-     integer :: regflag   = 1  !< graupel effective radius scheme (v3)
-                               !< 1: effective radius
-     integer :: radr_flag = 1  !< radar reflectivity for rain (v3)
-                               !< 1: Mark Stoelinga (2005)
-                               !< 2: Smith et al. (1975), Tong and Xue (2005)
-                               !< 3: Marshall-Palmer formula (https://en.wikipedia.org/wiki/DBZ_(meteorology))
-     integer :: rads_flag = 1  !< radar reflectivity for snow (v3)
-                               !< 1: Mark Stoelinga (2005)
-                               !< 2: Smith et al. (1975), Tong and Xue (2005)
-                               !< 3: Marshall-Palmer formula (https://en.wikipedia.org/wiki/DBZ_(meteorology))
-     integer :: radg_flag = 1  !< radar reflectivity for graupel (v3)
-                               !< 1: Mark Stoelinga (2005)
-                               !< 2: Smith et al. (1975), Tong and Xue (2005)
-                               !< 3: Marshall-Palmer formula (https://en.wikipedia.org/wiki/DBZ_(meteorology))
-     integer :: sedflag   = 1  !< sedimentation scheme (v3)
-                               !< 1: implicit scheme
-                               !< 2: explicit scheme
-                               !< 3: lagrangian scheme
-                               !< 4: combined implicit and lagrangian scheme
-     integer :: vdiffflag = 1  !< wind difference scheme in accretion (v3)
-                               !< 1: Wisner et al. (1972)
-                               !< 2: Mizuno (1990)
-                               !< 3: Murakami (1990)     
      !
-     real :: tice_mlt    = 273.16  !< can set ice melting temperature to 268 based on observation (Kay et al. 2016) (K) (v3)
-     real :: tau_gmlt    = 600.0   !< graupel melting time scale (s) (v3)
-     real :: tau_wbf     = 300.0   !< graupel melting time scale (s) (v3)
-     real :: c_pracw     = 0.8     !< cloud water to rain accretion efficiency (v3)
-     real :: c_praci     = 1.0     !< cloud ice to rain accretion efficiency (v3)
-     real :: c_pracs     = 1.0     !< snow to rain accretion efficiency (v3)
-     real :: c_psacw     = 1.0     !< cloud water to snow accretion efficiency (v3)
-     real :: c_pgacw     = 1.0     !< cloud water to graupel accretion efficiency  (v3)
-     real :: c_psacr     = 1.0     !< rain to snow accretion efficiency  (v3)
-     real :: c_pgaci     = 0.05    !< cloud ice to graupel accretion efficiency (was 0.1 in ZETAC) (v3)
-     real :: c_pgacr     = 1.0     !< rain to graupel accretion efficiency  (v3)
-     real :: is_fac      = 0.2     !< cloud ice sublimation temperature factor (v3)
-     real :: ss_fac      = 0.2     !< snow sublimation temperature factor (v3)
-     real :: gs_fac      = 0.2     !< graupel sublimation temperature factor (v3)
-     real :: rh_fac_evap = 10.0    !< cloud water evaporation relative humidity factor (v3)
-     real :: rh_fac_cond = 10.0    !< cloud water condensation relative humidity factor (v3)
-     real :: sed_fac     = 1.0     !< coefficient for sedimentation fall, scale from 1.0 (implicit) to 0.0 (lagrangian)  (v3)
-     real :: vw_fac      = 1.0     !< (v3)
-     real :: vw_max      = 0.01    !< maximum fall speed for cloud water (m/s) (V3)
-     real :: xr_a        = 0.25    !< p value in Xu and Randall (1996) (v3)
-     real :: xr_b        = 100.0   !< alpha_0 value in Xu and Randall (1996) (v3)
-     real :: xr_c        = 0.49    !< gamma value in Xu and Randall (1996) (v3)
-     real :: te_err      = 1.e-5   !< 64bit: 1.e-14, 32bit: 1.e-7; turn off to save computer time (v3)
-     real :: tw_err      = 1.e-8   !< 64bit: 1.e-14, 32bit: 1.e-7; turn off to save computer time (v3)
-     real :: rh_thres    = 0.75    !< minimum relative humidity for cloud fraction (v3)
-     real :: rhc_cevap   = 0.85    !< maximum relative humidity for cloud water evaporation (v3)
-     real :: rhc_revap   = 0.85    !< maximum relative humidity for rain evaporation (v3)
-     real :: f_dq_p      = 1.0     !< cloud fraction adjustment for supersaturation (v3)
-     real :: f_dq_m      = 1.0     !< cloud fraction adjustment for undersaturation (v3)
-     real :: fi2s_fac    = 1.0     !< maximum sink of cloud ice to form snow: 0-1 (v3)
-     real :: fi2g_fac    = 1.0     !< maximum sink of cloud ice to form graupel: 0-1 (v3)
-     real :: fs2g_fac    = 1.0     !< maximum sink of snow to form graupel: 0-1 (v3)
-     real :: beta        = 1.22    !< defined in Heymsfield and Mcfarquhar (1996) (v3)
-     real :: n0w_exp     = 41      !< intercept parameter (exponent) of cloud water (Lin et al. 1983) (1/m^4) (Martin et al. 1994) (v3)
-     real :: n0i_exp     = 18      !< intercept parameter (exponent) of cloud ice (Lin et al. 1983) (1/m^4) (McFarquhar et al. 2015) (v3)
-     real :: n0r_exp     = 6       !< intercept parameter (exponent) of rain (Lin et al. 1983) (1/m^4) (Marshall and Palmer 1948) (v3)
-     real :: n0s_exp     = 6       !< intercept parameter (exponent) of snow (Lin et al. 1983) (1/m^4) (Gunn and Marshall 1958) (v3)
-     real :: n0g_exp     = 6       !< intercept parameter (exponent) of graupel (Rutledge and Hobbs 1984) (1/m^4) (Houze et al. 1979) (v3)
-     real :: n0h_exp     = 4       !< intercept parameter (exponent) of hail (Lin et al. 1983) (1/m^4) (Federer and Waldvogel 1975) (v3)
-     real :: muw         = 6.0     !< shape parameter of cloud water in Gamma distribution (Martin et al. 1994) (v3)
-     real :: mui         = 3.35    !< shape parameter of cloud ice in Gamma distribution (McFarquhar et al. 2015) (v3)
-     real :: mur         = 1.0     !< shape parameter of rain in Gamma distribution (Marshall and Palmer 1948) (v3)
-     real :: mus         = 1.0     !< shape parameter of snow in Gamma distribution (Gunn and Marshall 1958) (v3)
-     real :: mug         = 1.0     !< shape parameter of graupel in Gamma distribution (Houze et al. 1979) (v3)
-     real :: muh         = 1.0     !< shape parameter of hail in Gamma distribution (Federer and Waldvogel 1975) (v3)
-     real :: alinw       = 3.e7    !< "a" in Lin et al. (1983) for cloud water (Ikawa and Saito 1990) (v3)
-     real :: alini       = 7.e2    !< "a" in Lin et al. (1983) for cloud ice (Ikawa and Saita 1990) (v3)
-     real :: alinr       = 842.0   !< "a" in Lin et al. (1983) for rain (Liu and Orville 1969) (v3)
-     real :: alins       = 4.8     !< "a" in Lin et al. (1983) for snow (straka 2009) (v3)
-     real :: aling       = 1.0     !< "a" in Lin et al. (1983), similar to a, but for graupel (Pruppacher and Klett 2010) (v3)
-     real :: alinh       = 1.0     !< "a" in Lin et al. (1983), similar to a, but for hail (Pruppacher and Klett 2010) (v3)
-     real :: blinw       = 2.0     !< "b" in Lin et al. (1983) for cloud water (Ikawa and Saito 1990) (v3)
-     real :: blini       = 1.0     !< "b" in Lin et al. (1983) for cloud ice (Ikawa and Saita 1990) (v3)
-     real :: blinr       = 0.8     !< "b" in Lin et al. (1983) for rain (Liu and Orville 1969) (v3)
-     real :: blins       = 0.25    !< "b" in Lin et al. (1983) for snow (straka 2009) (v3)
-     real :: bling       = 0.5     !< "b" in Lin et al. (1983), similar to b, but for graupel (Pruppacher and Klett 2010) (v3)
-     real :: blinh       = 0.5     !< "b" in Lin et al. (1983), similar to b, but for hail (Pruppacher and Klett 2010) (v3)
-     real :: rewfac      = 1.0     !< this is a tuning parameter to compromise the inconsistency between (v3)
-                                   !< GFDL MP's PSD and cloud water radiative property's PSD assumption.
-                                   !< after the cloud water radiative property's PSD is rebuilt,
-                                   !< this parameter should be 1.0.
-     real :: reifac      = 1.0     !< this is a tuning parameter to compromise the inconsistency between (v3)
-                                   !< GFDL MP's PSD and cloud ice radiative property's PSD assumption.
-                                   !< after the cloud ice radiative property's PSD is rebuilt,
-                                   !< this parameter should be 1.0.
-     real :: n0w_sig     = 1.1     !< intercept parameter (significand) of cloud water (Lin et al. 1983) (1/m^4) (Martin et al. 1994) (v3)
-     real :: n0i_sig     = 1.3     !< intercept parameter (significand) of cloud ice (Lin et al. 1983) (1/m^4) (McFarquhar et al. 2015) (v3)
-     real :: n0r_sig     = 8.0     !< intercept parameter (significand) of rain (Lin et al. 1983) (1/m^4) (Marshall and Palmer 1948) (v3)
-     real :: n0s_sig     = 3.0     !< intercept parameter (significand) of snow (Lin et al. 1983) (1/m^4) (Gunn and Marshall 1958) (v3)
-     real :: n0g_sig     = 4.0     !< intercept parameter (significand) of graupel (Rutledge and Hobbs 1984) (1/m^4) (Houze et al. 1979)(v3)
-     real :: n0h_sig     = 4.0     !< intercept parameter (significand) of hail (Lin et al. 1983) (1/m^4) (Federer and Waldvogel 1975) (v3)
-     
-     ! v3 cloud microphysics switches
-     logical :: const_vw             = .false. !< if .true., the constants are specified by v * _fac (v3)
-     logical :: liq_ice_combine      = .false. !< combine all liquid water, combine all solid water (v3)
-     logical :: snow_grauple_combine = .true.  !< combine snow and graupel (v3)
-     logical :: use_rhc_cevap        = .false. !< cap of rh for cloud water evaporation (V3)
-     logical :: use_rhc_revap        = .false. !< cap of rh for rain evaporation (V3)
-     logical :: do_cld_adj           = .false. !< do cloud fraction adjustment  (v3)
-     logical :: do_evap_timescale    = .true.  !< whether to apply a timescale to evaporation (v3)
-     logical :: do_cond_timescale    = .false. !< whether to apply a timescale to condensation (v3)
-     logical :: consv_checker        = .false. !< turn on energy and water conservation checker (v3)
-     logical :: do_warm_rain_mp      = .false. !< do warm rain cloud microphysics only (v3)
-     logical :: do_wbf               = .false. !< do Wegener Bergeron Findeisen process (v3)
-     logical :: do_psd_water_fall    = .false. !< calculate cloud water terminal velocity based on PSD (v3)
-     logical :: do_psd_ice_fall      = .false. !< calculate cloud ice terminal velocity based on PSD (v3)
-     logical :: do_psd_water_num     = .false. !< calculate cloud water number concentration based on PSD (v3)
-     logical :: do_psd_ice_num       = .false. !< calculate cloud ice number concentration based on PSD (v3)
-     logical :: do_new_acc_water     = .false. !< perform the new accretion for cloud water (v3)
-     logical :: do_new_acc_ice       = .false. !< perform the new accretion for cloud ice (v3)
-     logical :: cp_heating           = .false. !< update temperature based on constant pressure (v3)
-     logical :: delay_cond_evap      = .false. !< do condensation evaporation only at the last time step (v3)
-     logical :: do_subgrid_proc      = .true.  !< do temperature sentive high vertical resolution processes (v3)
-     logical :: fast_fr_mlt          = .true.  !< do freezing and melting in fast microphysics (v3)
-     logical :: fast_dep_sub         = .true.  !< do deposition and sublimation in fast microphysics (v3)
-     logical :: do_sedi_uv           = .true.  !< transport of horizontal momentum in sedimentation (v3)
-     logical :: do_sedi_melt         = .true.  !< melt cloud ice, snow, and graupel during sedimentation (v3)
-     
-     ! v1/v3 configuration
-     real :: cld_min     = 0.05    !< minimum cloud fraction (v1/v3)
-     real :: tice        = 273.16  !< set tice = 165. to trun off ice - phase phys (kessler emulator) (v3=273.15)
-     real :: t_min       = 178.    !< min temp to freeze - dry all water vapor (v1/v3)
-     real :: t_sub       = 184.    !< min temp for sublimation of cloud ice (v1/v3)
-     real :: mp_time     = 150.0   !< maximum micro - physics time step (sec) (v1/v3)
-     real :: rh_inc      = 0.25    !< rh increment for complete evaporation of cloud water and cloud ice (v1/v3)
-     real :: rh_inr      = 0.25    !< rh increment for minimum evaporation of rain (v1/v3)
-     real :: rh_ins      = 0.25    !< rh increment for sublimation of snow (v1/v3)
-     real :: tau_r2g     = 900.    !< rain freezing during fast_sat (v1/v3)
-     real :: tau_smlt    = 900.    !< snow melting (v1/v3)
-     real :: tau_g2r     = 600.    !< graupel melting to rain (v1/v3)
-     real :: tau_imlt    = 600.    !< cloud ice melting (v1/v3)
-     real :: tau_i2s     = 1000.   !< cloud ice to snow auto-conversion (v1/v3)
-     real :: tau_l2r     = 900.    !< cloud water to rain auto-conversion (v1/v3)
-     real :: tau_v2l     = 150.    !< water vapor to cloud water (condensation) (v1/v3)
-     real :: tau_l2v     = 300.    !< cloud water to water vapor (evaporation) (v1/v3)
-     real :: tau_g2v     = 900.    !< graupel sublimation  (v1/v3)
-     real :: tau_v2g     = 21600.  !< graupel deposition -- make it a slow process (v1)
-     real :: dw_land     = 0.20    !< base value for subgrid deviation / variability over land (v1/v3)
-     real :: dw_ocean    = 0.10    !< base value for subgrid deviation / variability over ocean (v1/v3)
-     real :: ccn_o       = 90.     !< prescribed ccn over ocean (cm^ - 3) (v1/v3)
-     real :: ccn_l       = 270.    !< prescribed ccn over land (cm^ - 3) (v1/v3)
-     real :: rthresh     = 10.0e-6 !< critical cloud drop radius (micro m) (v3=20.0e-6)
-     real :: sat_adj0    = 0.90    !< adjustment factor (0: no, 1: full) during fast_sat_adj (v1/v3)
-     real :: qc_crt      = 5.0e-8  !< mini condensate mixing ratio to allow partial cloudiness (v1)
-     real :: qi_lim      = 1.      !< cloud ice limiter to prevent large ice build up (v1/v3)
-     real :: ql_mlt      = 2.0e-3  !< max value of cloud water allowed from melted cloud ice (v1/v3)
-     real :: qs_mlt      = 1.0e-6  !< max cloud water due to snow melt (v1/v3)
-     real :: ql_gen      = 1.0e-3  !< max cloud water generation during remapping step if fast_sat_adj = .t.  (v1/v3)
-     real :: qi_gen      = 1.82e-6 !< max cloud ice generation during remapping step (V1. Computed internally in V3) (v1/v3)
-     real :: ql0_max     = 2.0e-3  !< max cloud water condensate value (auto converted to rain) (v1/v3)
-     real :: qi0_max     = 1.0e-4  !< max cloud ice condensatevalue (by other sources) (v1/v3)
-     real :: qi0_crt     = 1.0e-4  !< cloud ice to snow autoconversion threshold (was 1.e-4);
-                                   !< qi0_crt is highly dependent on horizontal resolution (v1/v3)
-     real :: qr0_crt     = 1.0e-4  !< rain to snow or graupel/hail threshold (v1)
-                                   !< lfo used * mixing ratio * = 1.e-4 (hail in lfo)
-     real :: qs0_crt     = 1.0e-3  !< snow to graupel density threshold (0.6e-3 in purdue lin scheme) (v1/v3)
-     real :: c_paut      = 0.55    !< autoconversion cloud water to rain (use 0.5 to reduce autoconversion) (v1/v3)
-     real :: c_psaci     = 0.02    !< accretion: cloud ice to snow (was 0.1 in zetac) (v3 = 0.05)
-     real :: c_piacr     = 5.0     !< accretion: rain to ice: (v1)
-     real :: c_cracw     = 0.9     !< rain accretion efficiency (v1)
-     real :: c_pgacs     = 2.0e-3  !< snow to graupel "accretion" eff. (was 0.1 in zetac) (v3 = 0.01)
-     real :: alin        = 842.0   !< "a" in lin1983 (v1)
-     real :: clin        = 4.8     !< "c" in lin 1983, 4.8 -- > 6. (to ehance ql -- > qs) (v1)
-     real :: vi_fac      = 1.0     !< if const_vi: 1 / 3 (v1/v3)
-     real :: vs_fac      = 1.0     !< if const_vs: 1. (v1/v3)
-     real :: vg_fac      = 1.0     !< if const_vg: 2. (v1/v3)
-     real :: vr_fac      = 1.0     !< if const_vr: 4. (v1/v3)
-     real :: vi_max      = 0.5     !< max fall speed for ice (v1/v3)
-     real :: vs_max      = 5.0     !< max fall speed for snow (v1/v3)
-     real :: vg_max      = 8.0     !< max fall speed for graupel (v1/v3)
-     real :: vr_max      = 12.     !< max fall speed for rain (v1/v3)
-     real :: rewmin      = 5.0     !< minimum effective radii (liquid) (v1/v3)
-     real :: rewmax      = 10.0    !< maximum effective radii (liquid) (v3= = 15.0)
-     real :: reimin      = 10.0    !< minimum effective radii (ice) (v1/v3)
-     real :: reimax      = 150.0   !< maximum effective radii (ice) (v1/v3)
-     real :: rermin      = 10.0    !< minimum effective radii (rain) (v3=15.0)
-     real :: rermax      = 10000.0 !< maximum effective radii (rain) (v1/v3)
-     real :: resmin      = 150.0   !< minimum effective radii (snow) (v1.v3)
-     real :: resmax      = 10000.0 !< maximum effective radii (snow) (v1/v3)
-     real :: regmin      = 300.0   !< minimum effective radii (graupel) (v3=150.)
-     real :: regmax      = 10000.0 !< maximum effective radii (graupel) (v1/v3)
-     
-     ! v1/v3 cloud microphysics switches
-     logical :: const_vi             = .false. !< if .true., the constants are specified by v * _fac (v1/v3)
-     logical :: const_vs             = .false. !< if .true., the constants are specified by v * _fac (v1/v3)
-     logical :: const_vg             = .false. !< if .true., the constants are specified by v * _fac (v1/v3)
-     logical :: const_vr             = .false. !< if .true., the constants are specified by v * _fac (v1/v3)
-     logical :: fast_sat_adj         = .false. !< has fast saturation adjustments (v1)
-     logical :: z_slope_liq          = .true.  !< use linear mono slope for autocconversions (v1/v3)
-     logical :: z_slope_ice          = .false. !< use linear mono slope for autocconversions (v3 = .true.)
-     logical :: use_ccn              = .false. !< must be true when prog_ccn is false (v1)
-     logical :: use_ppm              = .false. !< use ppm fall scheme (v1)
-     logical :: mono_prof            = .true.  !< perform terminal fall with mono ppm scheme (v1)
-     logical :: mp_print             = .false. !< cloud microphysics debugging printout (v1)
-     logical :: do_hail              = .false. !< use hail parameters instead of graupel (v1/v3)
-     logical :: do_qa                = .true.  !< do inline cloud fraction (v1/v3)
-     logical :: rad_snow             = .true.  !< consider snow in cloud fraciton calculation (v1/v3)
-     logical :: rad_graupel          = .true.  !< consider graupel in cloud fraction calculation (v1/v3)
-     logical :: rad_rain             = .true.  !< consider rain in cloud fraction calculation (v1/v3)
-     logical :: de_ice               = .false. !< to prevent excessive build - up of cloud ice from external sources (v1)
-     logical :: sedi_transport       = .true.  !< transport of momentum in sedimentation (v1)
-     logical :: do_sedi_w            = .false. !< transport of vertical motion in sedimentation (v3 = .true.)
-     logical :: do_sedi_heat         = .true.  !< transport of heat in sedimentation (v1/v3)
-     logical :: prog_ccn             = .false. !< do prognostic ccn (yi ming's method) (v1/v3)
-     logical :: fix_negative         = .false. !< fix negative water species (v3 = .true.)
-     logical :: tintqs               = .false. !< (v1)
+     real :: cld_min       !< minimum cloud fraction
+     real :: tice          !< set tice = 165. to trun off ice - phase phys (kessler emulator)
+     real :: t_min         !< min temp to freeze - dry all water vapor
+     real :: t_sub         !< min temp for sublimation of cloud ice
+     real :: tice_mlt      !< can set ice melting temperature to 268 based on observation (Kay et al. 2016) (K) 
+     real :: mp_time       !< maximum micro - physics time step (sec)
 
-     ! v1/v3 integers
-     integer :: icloud_f  = 0  !< GFDL cloud scheme (v1/v3)
-                               !< 0: subgrid variability based scheme
-                               !< 1: same as 0, but for old fvgfs implementation
-                               !< 2: binary cloud scheme
-                               !< 3: extension of 0
-     integer :: irain_f   = 0  !< cloud water to rain auto conversion scheme (v1/v3)
-                               !< 0: subgrid variability based scheme
-                               !< 1: no subgrid varaibility
-     integer :: reiflag   = 1  !< cloud ice effective radius scheme
-                               !< 1: Heymsfield and Mcfarquhar (1996) (v3 = 5)
-                               !< 2: Donner et al. (1997)
-                               !< 3: Fu (2007)
-                               !< 4: Kristjansson et al. (2000)
-                               !< 5: Wyser (1998)
-                               !< 6: Sun and Rikus (1999), Sun (2001)
-                               !< 7: effective radius
+     !
+     real :: rh_inc        !< rh increment for complete evaporation of cloud water and cloud ice
+     real :: rh_inr        !< rh increment for minimum evaporation of rain
+     real :: rh_ins        !< rh increment for sublimation of snow
+
+     !
+     real :: tau_r2g       !< rain freezing during fast_sat
+     real :: tau_smlt      !< snow melting
+     real :: tau_g2r       !< graupel melting to rain
+     real :: tau_imlt      !< cloud ice melting
+     real :: tau_i2s       !< cloud ice to snow auto-conversion
+     real :: tau_l2r       !< cloud water to rain auto-conversion
+     real :: tau_v2l       !< water vapor to cloud water (condensation)
+     real :: tau_l2v       !< cloud water to water vapor (evaporation)
+     real :: tau_g2v       !< graupel sublimation
+     real :: tau_v2g       !< graupel deposition -- make it a slow process
+     real :: tau_gmlt      !< graupel melting time scale (s)
+     real :: tau_wbf       !< graupel melting time scale (s)
+     real :: tau_revp      !< rain evaporation time scale (s)
+
+     ! horizontal subgrid variability
+     real :: dw_land       !< value for subgrid deviation / variability over land
+     real :: dw_ocean      !< base value for ocean
+
+     ! prescribed ccn
+     real :: ccn_o         !< ccn over ocean (cm^ - 3)
+     real :: ccn_l         !< ccn over land (cm^ - 3)
+
+     !
+     real :: rthresh       !< critical cloud drop radius (micro m)
+     real :: sat_adj0      !< adjustment factor (0: no, 1: full) during fast_sat_adj
+     real :: qc_crt        !< mini condensate mixing ratio to allow partial cloudiness
+     real :: qi_lim        !< cloud ice limiter to prevent large ice build up
+     real :: ql_mlt        !< max value of cloud water allowed from melted cloud ice
+     real :: qs_mlt        !< max cloud water due to snow melt
+     real :: ql_gen        !< max cloud water generation during remapping step if fast_sat_adj = .t.
+     real :: qi_gen        !< max cloud ice generation during remapping step (V1 ONLY. Computed internally in V3)
+
+     ! cloud condensate upper bounds: "safety valves" for ql & qi
+     real :: ql0_max       !< max cloud water value (auto converted to rain)
+     real :: qi0_max       !< max cloud ice value (by other sources)
+
+     !
+     real :: qi0_crt       !< cloud ice to snow autoconversion threshold (was 1.e-4);
+                                      !< qi0_crt is highly dependent on horizontal resolution
+     real :: qr0_crt       !< rain to snow or graupel/hail threshold
+                                      !< lfo used * mixing ratio * = 1.e-4 (hail in lfo)
+     real :: qs0_crt       !< snow to graupel density threshold (0.6e-3 in purdue lin scheme)
+
+     !
+     real :: c_paut        !< autoconversion cloud water to rain (use 0.5 to reduce autoconversion)
+     real :: c_psacw       !< cloud water to snow accretion efficiency 
+     real :: c_psaci       !< accretion: cloud ice to snow (was 0.1 in zetac)
+     real :: c_pracw       !< cloud water to rain accretion efficiency
+     real :: c_praci       !< cloud ice to rain accretion efficiency 
+     real :: c_pracs       !< snow to rain accretion efficiency
+     real :: c_piacr       !< accretion: rain to ice:
+     real :: c_cracw       !< rain accretion efficiency
+     real :: c_pgacs       !< snow to graupel "accretion" eff. (was 0.1 in zetac)
+     real :: c_pgacw       !< cloud water to graupel accretion efficiency 
+     real :: c_psacr       !< rain to snow accretion efficiency
+     real :: c_pgaci       !< cloud ice to graupel accretion efficiency (was 0.1 in ZETAC)
+     real :: c_pgacr       !< rain to graupel accretion efficiency 
+
+     !
+     real :: is_fac        !< cloud ice sublimation temperature factor
+     real :: ss_fac        !< snow sublimation temperature factor
+     real :: gs_fac        !< graupel sublimation temperature factor
+     
+     !
+     real :: rh_fac_evap   !< cloud water evaporation relative humidity factor
+     real :: rh_fac_cond   !< cloud water condensation relative humidity factor
+
+     ! decreasing clin to reduce csacw (so as to reduce cloud water --- > snow)
+     real :: alin          !< "a" in lin1983
+     real :: clin          !< "c" in lin 1983, 4.8 -- > 6. (to ehance ql -- > qs)
+
+     ! fall velocity tuning constants:
+     logical :: const_vw              ! if .ture., the constants are specified by v * _fac
+     logical :: const_vi              !< if .t. the constants are specified by v * _fac
+     logical :: const_vs              !< if .t. the constants are specified by v * _fac
+     logical :: const_vg              !< if .t. the constants are specified by v * _fac
+     logical :: const_vr              !< if .t. the constants are specified by v * _fac
+
+     !
+     logical :: liq_ice_combine       !< combine all liquid water, combine all solid water
+     logical :: snow_grauple_combine  !< combine snow and graupel
+     logical :: use_rhc_cevap         !< cap of rh for cloud water evaporation (V3)
+     logical :: use_rhc_revap         !< cap of rh for rain evaporation (V3)
+     !
+     real :: sed_fac       !< coefficient for sedimentation fall, scale from 1.0 (implicit) to 0.0 (lagrangian) 
+     real :: vw_fac        !<
+     real :: vi_fac        !< if const_vi: 1 / 3
+     real :: vs_fac        !< if const_vs: 1.
+     real :: vg_fac        !< if const_vg: 2.
+     real :: vr_fac        !< if const_vr: 4.
+
+     ! upper bounds of fall speed (with variable speed option)
+     real :: vw_max        !< maximum fall speed for cloud water (m/s) (V3)
+     real :: vi_max        !< max fall speed for ice
+     real :: vs_max        !< max fall speed for snow
+     real :: vg_max        !< max fall speed for graupel
+     real :: vr_max        !< max fall speed for rain
+     !
+     real :: xr_a          !< p value in Xu and Randall (1996)
+     real :: xr_b          !< alpha_0 value in Xu and Randall (1996)
+     real :: xr_c          !< gamma value in Xu and Randall (1996)
+     !
+     real :: te_err        !< 64bit: 1.e-14, 32bit: 1.e-7; turn off to save computer time
+     real :: tw_err        !< 64bit: 1.e-14, 32bit: 1.e-7; turn off to save computer time
+     real :: rh_thres      !< minimum relative humidity for cloud fraction
+     real :: rhc_cevap     !< maximum relative humidity for cloud water evaporation
+     real :: rhc_revap     !< maximum relative humidity for rain evaporation 
+     real :: f_dq_p        !< cloud fraction adjustment for supersaturation
+     real :: f_dq_m        !< cloud fraction adjustment for undersaturation
+     real :: fi2s_fac      !< maximum sink of cloud ice to form snow: 0-1
+     real :: fi2g_fac      !< maximum sink of cloud ice to form graupel: 0-1
+     real :: fs2g_fac      !< maximum sink of snow to form graupel: 0-1
+
+     ! cloud microphysics switchers
+     logical :: fast_sat_adj          !< has fast saturation adjustments
+     logical :: z_slope_liq           !< use linear mono slope for autocconversions
+     logical :: z_slope_ice           !< use linear mono slope for autocconversions
+     logical :: use_ccn               !< must be true when prog_ccn is false
+     logical :: use_ppm               !< use ppm fall scheme
+     logical :: mono_prof             !< perform terminal fall with mono ppm scheme
+     logical :: mp_print              !< cloud microphysics debugging printout
+     logical :: do_hail               !< use hail parameters instead of graupel
+     logical :: do_qa                 !< do inline cloud fraction
+     logical :: rad_snow              !< consider snow in cloud fraciton calculation
+     logical :: rad_graupel           !< consider graupel in cloud fraction calculation
+     logical :: rad_rain              !< consider rain in cloud fraction calculation
+     logical :: do_cld_adj            !< do cloud fraction adjustment 
+     logical :: do_evap_timescale     !< whether to apply a timescale to evaporation 
+     logical :: do_cond_timescale     !< whether to apply a timescale to condensation 
+     logical :: consv_checker         !< turn on energy and water conservation checker  
+     logical :: do_warm_rain_mp       !< do warm rain cloud microphysics only
+     logical :: do_wbf                !< do Wegener Bergeron Findeisen process 
+     logical :: do_psd_water_fall     !< calculate cloud water terminal velocity based on PSD
+     logical :: do_psd_ice_fall       !< calculate cloud ice terminal velocity based on PSD
+     logical :: do_psd_water_num      !< calculate cloud water number concentration based on PSD
+     logical :: do_psd_ice_num        !< calculate cloud ice number concentration based on PSD
+     logical :: do_new_acc_water      !< perform the new accretion for cloud water
+     logical :: do_new_acc_ice        !< perform the new accretion for cloud ice
+     logical :: cp_heating            !< update temperature based on constant pressure
+     logical :: delay_cond_evap       !< do condensation evaporation only at the last time step
+     logical :: do_subgrid_proc       !< do temperature sentive high vertical resolution processes
+     logical :: fast_fr_mlt           !< do freezing and melting in fast microphysics
+     logical :: fast_dep_sub          !< do deposition and sublimation in fast microphysics
+     integer :: ntimes                !< cloud microphysics sub cycles
+     integer :: nconds                !< condensation sub cycles
+     !
+     integer :: icloud_f              !< GFDL cloud scheme
+                                      !< 0: subgrid variability based scheme
+                                      !< 1: same as 0, but for old fvgfs implementation
+                                      !< 2: binary cloud scheme
+                                      !< 3: extension of 0
+     !
+     integer :: irain_f               !< cloud water to rain auto conversion scheme
+                                      !< 0: subgrid variability based scheme
+                                      !< 1: no subgrid varaibility
+     !
+     integer :: inflag                !< ice nucleation scheme
+                                      !< 1: Hong et al. (2004)
+                                      !< 2: Meyers et al. (1992)
+                                      !< 3: Meyers et al. (1992)
+                                      !< 4: Cooper (1986)
+                                      !, 5: Fletcher (1962)
+     !
+     integer :: igflag                !< ice generation scheme
+                                      !< 1: WSM6
+                                      !< 2: WSM6 with 0 at 0 C
+                                      !< 3: WSM6 with 0 at 0 C and fixed value at - 10 C
+                                      !< 4: combination of 1 and 3
+     !
+     integer :: ifflag                !< ice fall scheme
+                                      !< 1: Deng and Mace (2008)
+                                      !< 2: Heymsfield and Donner (1990)
+     !
+     integer :: rewflag               !< cloud water effective radius scheme
+                                      !< 1: Martin et al. (1994)
+                                      !< 2: Martin et al. (1994), GFDL revision
+                                      !< 3: Kiehl et al. (1994)
+                                      !< 4: effective radius
+     !
+     integer :: reiflag               !< cloud ice effective radius scheme
+                                      !< 1: Heymsfield and Mcfarquhar (1996)
+                                      !< 2: Donner et al. (1997)
+                                      !< 3: Fu (2007)
+                                      !< 4: Kristjansson et al. (2000)
+                                      !< 5: Wyser (1998)
+                                      !< 6: Sun and Rikus (1999), Sun (2001)
+                                      !< 7: effective radius
+     !
+     integer :: rerflag               !< rain effective radius scheme
+                                      !< 1: effective radius
+     !
+     integer :: resflag               !< snow effective radius scheme
+                                      !< 1: effective radius
+     !
+     integer :: regflag               !< graupel effective radius scheme
+                                      !< 1: effective radius
+     !
+     integer :: radr_flag             !< radar reflectivity for rain
+                                      !< 1: Mark Stoelinga (2005)
+                                      !< 2: Smith et al. (1975), Tong and Xue (2005)
+                                      !< 3: Marshall-Palmer formula (https://en.wikipedia.org/wiki/DBZ_(meteorology))
+     !
+     integer :: rads_flag             !< radar reflectivity for snow
+                                      !< 1: Mark Stoelinga (2005)
+                                      !< 2: Smith et al. (1975), Tong and Xue (2005)
+                                      !< 3: Marshall-Palmer formula (https://en.wikipedia.org/wiki/DBZ_(meteorology))
+     !
+     integer :: radg_flag             !< radar reflectivity for graupel
+                                      !< 1: Mark Stoelinga (2005)
+                                      !< 2: Smith et al. (1975), Tong and Xue (2005)
+                                      !< 3: Marshall-Palmer formula (https://en.wikipedia.org/wiki/DBZ_(meteorology))
+     !
+     integer :: sedflag               !< sedimentation scheme
+                                      !< 1: implicit scheme
+                                      !< 2: explicit scheme
+                                      !< 3: lagrangian scheme
+                                      !< 4: combined implicit and lagrangian scheme
+     !
+     integer :: vdiffflag             !< wind difference scheme in accretion
+                                      !< 1: Wisner et al. (1972)
+                                      !< 2: Mizuno (1990)
+                                      !< 3: Murakami (1990)
+     !
+     real :: n0w_sig       !< intercept parameter (significand) of cloud water (Lin et al. 1983) (1/m^4) (Martin et al. 1994)
+     real :: n0i_sig       !< intercept parameter (significand) of cloud ice (Lin et al. 1983) (1/m^4) (McFarquhar et al. 2015)
+     real :: n0r_sig       !< intercept parameter (significand) of rain (Lin et al. 1983) (1/m^4) (Marshall and Palmer 1948)
+     real :: n0s_sig       !< intercept parameter (significand) of snow (Lin et al. 1983) (1/m^4) (Gunn and Marshall 1958)
+     real :: n0g_sig       !< intercept parameter (significand) of graupel (Rutledge and Hobbs 1984) (1/m^4) (Houze et al. 1979)
+     real :: n0h_sig       !< intercept parameter (significand) of hail (Lin et al. 1983) (1/m^4) (Federer and Waldvogel 1975)
+     !
+     real :: n0w_exp       !< intercept parameter (exponent) of cloud water (Lin et al. 1983) (1/m^4) (Martin et al. 1994)
+     real :: n0i_exp       !< intercept parameter (exponent) of cloud ice (Lin et al. 1983) (1/m^4) (McFarquhar et al. 2015)
+     real :: n0r_exp       !< intercept parameter (exponent) of rain (Lin et al. 1983) (1/m^4) (Marshall and Palmer 1948)
+     real :: n0s_exp       !< intercept parameter (exponent) of snow (Lin et al. 1983) (1/m^4) (Gunn and Marshall 1958)
+     real :: n0g_exp       !< intercept parameter (exponent) of graupel (Rutledge and Hobbs 1984) (1/m^4) (Houze et al. 1979)
+     real :: n0h_exp       !< intercept parameter (exponent) of hail (Lin et al. 1983) (1/m^4) (Federer and Waldvogel 1975)
+     !
+     real :: muw           !< shape parameter of cloud water in Gamma distribution (Martin et al. 1994)
+     real :: mui           !< shape parameter of cloud ice in Gamma distribution (McFarquhar et al. 2015)
+     real :: mur           !< shape parameter of rain in Gamma distribution (Marshall and Palmer 1948)
+     real :: mus           !< shape parameter of snow in Gamma distribution (Gunn and Marshall 1958)
+     real :: mug           !< shape parameter of graupel in Gamma distribution (Houze et al. 1979)
+     real :: muh           !< shape parameter of hail in Gamma distribution (Federer and Waldvogel 1975)
+     !
+     real :: alinw         !< "a" in Lin et al. (1983) for cloud water (Ikawa and Saito 1990)
+     real :: alini         !< "a" in Lin et al. (1983) for cloud ice (Ikawa and Saita 1990)
+     real :: alinr         !< "a" in Lin et al. (1983) for rain (Liu and Orville 1969)
+     real :: alins         !< "a" in Lin et al. (1983) for snow (straka 2009)
+     real :: aling         !< "a" in Lin et al. (1983), similar to a, but for graupel (Pruppacher and Klett 2010)
+     real :: alinh         !< "a" in Lin et al. (1983), similar to a, but for hail (Pruppacher and Klett 2010)
+     !
+     real :: blinw         !< "b" in Lin et al. (1983) for cloud water (Ikawa and Saito 1990)
+     real :: blini         !< "b" in Lin et al. (1983) for cloud ice (Ikawa and Saita 1990)
+     real :: blinr         !< "b" in Lin et al. (1983) for rain (Liu and Orville 1969)
+     real :: blins         !< "b" in Lin et al. (1983) for snow (straka 2009)
+     real :: bling         !< "b" in Lin et al. (1983), similar to b, but for graupel (Pruppacher and Klett 2010)
+     real :: blinh         !< "b" in Lin et al. (1983), similar to b, but for hail (Pruppacher and Klett 2010)
+     !
+     logical :: de_ice                !< to prevent excessive build - up of cloud ice from external sources
+     logical :: sedi_transport        !< transport of momentum in sedimentation
+     logical :: do_sedi_uv            !< transport of horizontal momentum in sedimentation
+     logical :: do_sedi_w             !< transport of vertical motion in sedimentation
+     logical :: do_sedi_heat          !< transport of heat in sedimentation
+     logical :: do_sedi_melt          !< melt cloud ice, snow, and graupel during sedimentation
+     logical :: prog_ccn              !< do prognostic ccn (yi ming's method)
+     logical :: fix_negative          !< fix negative water species
+     logical :: tintqs                !<
+     !
+     real :: beta          !< defined in Heymsfield and Mcfarquhar (1996)
+
+     real :: rewmin        !< minimum effective radii (liquid)
+     real :: rewmax        !< maximum effective radii (liquid)
+     real :: reimin        !< minimum effective radii (ice)
+     real :: reimax        !< maximum effective radii (ice)
+     real :: rermin        !< minimum effective radii (rain)
+     real :: rermax        !< maximum effective radii (rain)
+     real :: resmin        !< minimum effective radii (snow)
+     real :: resmax        !< maximum effective radii (snow)
+     real :: regmin        !< minimum effective radii (graupel)
+     real :: regmax        !< maximum effective radii (graupel)
+     !
+     real :: rewfac        !< this is a tuning parameter to compromise the inconsistency between
+                           !< GFDL MP's PSD and cloud water radiative property's PSD assumption.
+                           !< after the cloud water radiative property's PSD is rebuilt,
+                           !< this parameter should be 1.0.
+     real :: reifac        !< this is a tuning parameter to compromise the inconsistency between
+                           !< GFDL MP's PSD and cloud ice radiative property's PSD assumption.
+                           !< after the cloud ice radiative property's PSD is rebuilt,
+                           !< this parameter should be 1.0.
    contains
      generic,   public :: setup => setup_v1, setup_v3
      procedure, private :: setup_v1
      procedure, private :: setup_v3
-     
   end type ty_gfdlmp_config
   !
   type(ty_gfdlmp_config) :: cfg
-
-  public :: cfg
+  
 contains
   ! #######################################################################################
   !
   ! #######################################################################################
   function setup_v1(cfg, mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land,      &
-                    dw_ocean,vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, &
-                    vi_max, vs_max, vg_max, vr_max, qs_mlt, qs0_crt, qi_gen, ql0_max,     &
-                    qi0_max, qi0_crt, qr0_crt, fast_sat_adj, rh_inc, rh_ins, rh_inr,      &
-                    const_vi, const_vs, const_vg, const_vr, use_ccn, rthresh, ccn_l,      &
-                    ccn_o, qc_crt, tau_g2v, tau_v2g, sat_adj0, c_piacr, tau_imlt, tau_v2l,&
-                    tau_l2v, tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci, c_pgacs,  &
-                    z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,        &
-                    rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
-                    do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
-                    mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
-                    resmin, resmax, regmin, regmax, tintqs, do_hail) result(err_message)
-    !
+       dw_ocean,vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vi_max,      &
+       vs_max, vg_max, vr_max, qs_mlt, qs0_crt, qi_gen, ql0_max, qi0_max, qi0_crt,        &
+       qr0_crt, fast_sat_adj, rh_inc, rh_ins, rh_inr, const_vi, const_vs, const_vg,       &
+       const_vr, use_ccn, rthresh, ccn_l, ccn_o, qc_crt, tau_g2v, tau_v2g, sat_adj0,      &
+       c_piacr, tau_imlt, tau_v2l, tau_l2v, tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut,     &
+       c_psaci, c_pgacs, z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,   &
+       rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof, do_sedi_heat,        &
+       sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f, mp_print, reiflag, rewmin,   &
+       rewmax, reimin, reimax, rermin, rermax, resmin, resmax, regmin, regmax, tintqs,    &
+       do_hail) result(err_message)
+    
     class(ty_gfdlmp_config), intent(inout)  :: cfg
     character(len=128) :: err_message
     logical, intent(in) :: do_qa, fix_negative, fast_sat_adj, const_vi, const_vs,         &
@@ -297,11 +343,11 @@ contains
          do_sedi_heat, do_sedi_w, sedi_transport, de_ice
     real, intent(in) :: mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r,                &
          tau_g2v, tau_v2g, tau_imlt, tau_v2l, tau_l2v, tau_i2s, tau_l2r, dw_land,         &
-         dw_ocean, vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, vi_max, vs_max, vg_max,        &
+         dw_ocean,  vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, vi_max, vs_max, vg_max,       &
          vr_max, ql0_max, qi0_max, qs0_crt, qi0_crt, qr0_crt,qc_crt, qs_mlt, qi_gen,      &
-         rh_inc, rh_ins, rh_inr, rthresh, ccn_l, ccn_o, sat_adj0, c_piacr, qi_lim,        &
-         ql_gen, c_paut, c_psaci, c_pgacs, c_cracw, alin, clin, tice, cld_min, rewmin,    &
-         rewmax, reimin, reimax, rermin, rermax, resmin, resmax, regmin, regmax
+         rh_inc, rh_ins, rh_inr, rthresh, ccn_l, ccn_o, sat_adj0, c_piacr, qi_lim, ql_gen,&
+         c_paut, c_psaci, c_pgacs, c_cracw, alin, clin, tice, cld_min, rewmin, rewmax,    &
+         reimin, reimax, rermin, rermax, resmin, resmax, regmin, regmax
     integer, intent(in) :: icloud_f, irain_f, reiflag
 
     ! initialize error message
@@ -399,12 +445,231 @@ contains
   ! #######################################################################################
   !
   ! #######################################################################################
-  function setup_v3(cfg) result(err_message)
+  function setup_v3(cfg, t_min, t_sub, tau_r2g, tau_smlt, tau_gmlt, dw_land, dw_ocean,    &
+       vw_fac, vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vw_max,       &
+       vi_max, vs_max, vg_max, vr_max, qs_mlt, qs0_crt, ql0_max, qi0_max, qi0_crt, ifflag,&
+       rh_inc, rh_ins, rh_inr, const_vw, const_vi, const_vs, const_vg, const_vr, rthresh, &
+       ccn_l, ccn_o, igflag, c_paut, tau_imlt, tau_v2l, tau_l2v, tau_i2s, tau_l2r, qi_lim,&
+       ql_gen, do_hail, inflag, c_psacw, c_psaci, c_pracs, c_psacr, c_pgacr, c_pgacs,     &
+       c_pgacw, c_pgaci, z_slope_liq, z_slope_ice, prog_ccn, c_pracw, c_praci, rad_snow,  &
+       rad_graupel, rad_rain, cld_min, sedflag, sed_fac, do_sedi_uv, do_sedi_w,           &
+       do_sedi_heat, icloud_f, irain_f, xr_a, xr_b, xr_c, ntimes, tau_revp, tice_mlt,     &
+       do_cond_timescale, mp_time, consv_checker, te_err, tw_err, use_rhc_cevap,          &
+       use_rhc_revap, tau_wbf, do_warm_rain_mp, rh_thres, f_dq_p, f_dq_m, do_cld_adj,     &
+       rhc_cevap, rhc_revap, beta, liq_ice_combine, rewflag, reiflag, rerflag, resflag,   &
+       regflag, rewmin, rewmax, reimin, reimax, rermin, rermax, resmin, resmax, regmin,   &
+       regmax, fs2g_fac, fi2s_fac, fi2g_fac, do_sedi_melt, radr_flag, rads_flag,          &
+       radg_flag, do_wbf, do_psd_water_fall, do_psd_ice_fall, n0w_sig, n0i_sig, n0r_sig,  &
+       n0s_sig, n0g_sig, n0h_sig, n0w_exp, n0i_exp, n0r_exp, n0s_exp, n0g_exp, n0h_exp,   &
+       muw, mui, mur, mus, mug, muh, alinw, alini, alinr, alins, aling, alinh, blinw,     &
+       blini, blinr, blins, bling, blinh, do_new_acc_water, do_new_acc_ice, is_fac,       &
+       ss_fac, gs_fac, rh_fac_evap, rh_fac_cond, snow_grauple_combine, do_psd_water_num,  &
+       do_psd_ice_num, vdiffflag, rewfac, reifac, cp_heating, nconds, do_evap_timescale,  &
+       delay_cond_evap, do_subgrid_proc, fast_fr_mlt, fast_dep_sub, qi_gen, sat_adj0)     &
+       result(err_message)
+    
     class(ty_gfdlmp_config), intent(inout)  :: cfg
     character(len=128) :: err_message
-
+    logical, intent(in) :: do_qa, fix_negative, const_vw, const_vi, const_vs, const_vg,   &
+         const_vr,  z_slope_liq, z_slope_ice, prog_ccn, rad_snow, rad_graupel, rad_rain,  &
+         do_hail, do_sedi_heat, do_sedi_w, do_sedi_uv, do_sedi_melt,                      &
+         do_cond_timescale, consv_checker, use_rhc_cevap, use_rhc_revap, do_warm_rain_mp, &
+         do_cld_adj, liq_ice_combine, do_wbf, do_psd_water_fall, do_psd_ice_fall,         &
+         do_psd_water_num, do_psd_ice_num, do_new_acc_water, do_new_acc_ice,              &
+         snow_grauple_combine, cp_heating, do_evap_timescale, delay_cond_evap,            &
+         do_subgrid_proc, fast_fr_mlt, fast_dep_sub
+    real, intent(in) :: mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_gmlt, tau_imlt,     &
+         tau_v2l, tau_l2v, tau_i2s, tau_l2r, dw_land, dw_ocean, vw_fac,  vi_fac, vr_fac,  &
+         vs_fac, vg_fac, ql_mlt, vw_max, vi_max, vs_max, vg_max, vr_max, ql0_max, qi0_max,&
+         qs0_crt, qi0_crt, qs_mlt, qi_gen, rh_inc, rh_ins, rh_inr, rthresh, ccn_l, ccn_o, &
+         sat_adj0, qi_lim, ql_gen, sed_fac, c_paut, c_psaci, c_psacw, c_psacr, c_pracs,   &
+         c_pgacs, c_pgacr, c_pgacw, c_pgaci, c_pracw, c_praci, cld_min,                   &
+         rewmin, rewmax, reimin, reimax, rermin, rermax, resmin, resmax, regmin, regmax,  &
+         xr_a, xr_b, xr_c, tau_revp, tice_mlt, te_err, tw_err, tau_wbf, rh_thres, f_dq_p, &
+         f_dq_m, rhc_cevap, rhc_revap, beta, fs2g_fac, fi2s_fac, fi2g_fac, n0w_sig,       &
+         n0i_sig, n0r_sig, n0s_sig, n0g_sig, n0h_sig, n0w_exp, n0i_exp, n0r_exp, n0s_exp, &
+         n0g_exp, n0h_exp, muw, mui, mur, mus, mug, muh, alinw, alini, alinr, alins,      &
+         aling, alinh, blinw, blini, blinr, blins, bling, blinh, is_fac, ss_fac, gs_fac,  &
+         rh_fac_evap, rh_fac_cond, rewfac, reifac
+    integer, intent(in) :: icloud_f, irain_f, reiflag, ifflag, igflag, inflag, sedflag,   &
+         ntimes, rewflag, rerflag, resflag, regflag, radr_flag, rads_flag, radg_flag,     &
+         vdiffflag, nconds
+    
     ! initialize error message
     err_message = ""
+
+    cfg%t_min                = t_min
+    cfg%t_sub                = t_sub
+    cfg%tau_r2g              = tau_r2g
+    cfg%tau_smlt             = tau_smlt
+    cfg%tau_gmlt             = tau_gmlt
+    cfg%dw_land              = dw_land
+    cfg%dw_ocean             = dw_ocean
+    cfg%vw_fac               = vw_fac
+    cfg%vi_fac               = vi_fac
+    cfg%vr_fac               = vr_fac
+    cfg%vs_fac               = vs_fac
+    cfg%vg_fac               = vg_fac
+    cfg%ql_mlt               = ql_mlt
+    cfg%do_qa                = do_qa
+    cfg%fix_negative         = fix_negative
+    cfg%vw_max               = vw_max
+    cfg%vi_max               = vi_max
+    cfg%vs_max               = vs_max
+    cfg%vg_max               = vg_max
+    cfg%vr_max               = vr_max
+    cfg%qs_mlt               = qs_mlt
+    cfg%qs0_crt              = qs0_crt
+    cfg%ql0_max              = ql0_max
+    cfg%qi0_max              = qi0_max
+    cfg%qi0_crt              = qi0_crt
+    cfg%ifflag               = ifflag
+    cfg%rh_inc               = rh_inc
+    cfg%rh_ins               = rh_ins
+    cfg%rh_inr               = rh_inr
+    cfg%const_vw             = const_vw
+    cfg%const_vi             = const_vi
+    cfg%const_vs             = const_vs
+    cfg%const_vg             = const_vg
+    cfg%const_vr             = const_vr
+    cfg%rthresh              = rthresh
+    cfg%ccn_l                = ccn_l
+    cfg%ccn_o                = ccn_o
+    cfg%igflag               = igflag
+    cfg%c_paut               = c_paut
+    cfg%tau_imlt             = tau_imlt
+    cfg%tau_v2l              = tau_v2l
+    cfg%tau_l2v              = tau_l2v
+    cfg%tau_i2s              = tau_i2s
+    cfg%tau_l2r              = tau_l2r
+    cfg%qi_lim               = qi_lim
+    cfg%ql_gen               = ql_gen
+    cfg%do_hail              = do_hail
+    cfg%inflag               = inflag
+    cfg%c_psacw              = c_psacw
+    cfg%c_psaci              = c_psaci
+    cfg%c_pracs              = c_pracs
+    cfg%c_psacr              = c_psacr
+    cfg%c_pgacr              = c_pgacr
+    cfg%c_pgacs              = c_pgacs
+    cfg%c_pgacw              = c_pgacw
+    cfg%c_pgaci              = c_pgaci
+    cfg%z_slope_liq          = z_slope_liq
+    cfg%z_slope_ice          = z_slope_ice
+    cfg%prog_ccn             = prog_ccn
+    cfg%c_pracw              = c_pracw
+    cfg%c_praci              = c_praci
+    cfg%rad_snow             = rad_snow
+    cfg%rad_graupel          = rad_graupel
+    cfg%rad_rain             = rad_rain
+    cfg%cld_min              = cld_min
+    cfg%sedflag              = sedflag
+    cfg%sed_fac              = sed_fac
+    cfg%do_sedi_uv           = do_sedi_uv
+    cfg%do_sedi_w            = do_sedi_w
+    cfg%do_sedi_heat         = do_sedi_heat
+    cfg%icloud_f             = icloud_f
+    cfg%irain_f              = irain_f
+    cfg%xr_a                 = xr_a
+    cfg%xr_b                 = xr_b
+    cfg%xr_c                 = xr_c
+    cfg%ntimes               = ntimes
+    cfg%tau_revp             = tau_revp
+    cfg%tice_mlt             = tice_mlt
+    cfg%do_cond_timescale    = do_cond_timescale
+    cfg%mp_time              = mp_time
+    cfg%consv_checker        = consv_checker
+    cfg%te_err               = te_err
+    cfg%tw_err               = tw_err
+    cfg%use_rhc_cevap        = use_rhc_cevap
+    cfg%use_rhc_revap        = use_rhc_revap
+    cfg%tau_wbf              = tau_wbf
+    cfg%do_warm_rain_mp      = do_warm_rain_mp
+    cfg%rh_thres             = rh_thres
+    cfg%f_dq_p               = f_dq_p
+    cfg%f_dq_m               = f_dq_m
+    cfg%do_cld_adj           = do_cld_adj
+    cfg%rhc_cevap            = rhc_cevap
+    cfg%rhc_revap            = rhc_revap
+    cfg%beta                 = beta
+    cfg%liq_ice_combine      = liq_ice_combine
+    cfg%rewflag              = rewflag
+    cfg%reiflag              = reiflag
+    cfg%rerflag              = rerflag
+    cfg%resflag              = resflag
+    cfg%regflag              = regflag
+    cfg%rewmin               = rewmin
+    cfg%rewmax               = rewmax
+    cfg%reimin               = reimin
+    cfg%reimax               = reimax
+    cfg%rermin               = rermin
+    cfg%rermax               = rermax
+    cfg%resmin               = resmin
+    cfg%resmax               = resmax
+    cfg%regmin               = regmin
+    cfg%regmax               = regmax
+    cfg%fs2g_fac             = fs2g_fac
+    cfg%fi2s_fac             = fi2s_fac
+    cfg%fi2g_fac             = fi2g_fac
+    cfg%do_sedi_melt         = do_sedi_melt
+    cfg%radr_flag            = radr_flag
+    cfg%rads_flag            = rads_flag
+    cfg%radg_flag            = radg_flag
+    cfg%do_wbf               = do_wbf
+    cfg%do_psd_water_fall    = do_psd_water_fall
+    cfg%do_psd_ice_fall      = do_psd_ice_fall
+    cfg%n0w_sig              = n0w_sig
+    cfg%n0i_sig              = n0i_sig
+    cfg%n0r_sig              = n0r_sig
+    cfg%n0s_sig              = n0s_sig
+    cfg%n0g_sig              = n0g_sig
+    cfg%n0h_sig              = n0h_sig
+    cfg%n0w_exp              = n0w_exp
+    cfg%n0i_exp              = n0i_exp
+    cfg%n0r_exp              = n0r_exp
+    cfg%n0s_exp              = n0s_exp
+    cfg%n0g_exp              = n0g_exp
+    cfg%n0h_exp              = n0h_exp
+    cfg%muw                  = muw
+    cfg%mui                  = mui
+    cfg%mur                  = mur
+    cfg%mus                  = mus
+    cfg%mug                  = mug
+    cfg%muh                  = muh
+    cfg%alinw                = alinw
+    cfg%alini                = alini
+    cfg%alinr                = alinr
+    cfg%alins                = alins
+    cfg%aling                = aling
+    cfg%alinh                = alinh
+    cfg%blinw                = blinw
+    cfg%blini                = blini
+    cfg%blinr                = blinr
+    cfg%blins                = blins
+    cfg%bling                = bling
+    cfg%blinh                = blinh
+    cfg%do_new_acc_water     = do_new_acc_water
+    cfg%do_new_acc_ice       = do_new_acc_ice
+    cfg%is_fac               = is_fac
+    cfg%ss_fac               = ss_fac
+    cfg%gs_fac               = gs_fac
+    cfg%rh_fac_evap          = rh_fac_evap
+    cfg%rh_fac_cond          = rh_fac_cond
+    cfg%snow_grauple_combine = snow_grauple_combine
+    cfg%do_psd_water_num     = do_psd_water_num
+    cfg%do_psd_ice_num       = do_psd_ice_num
+    cfg%vdiffflag            = vdiffflag
+    cfg%rewfac               = rewfac
+    cfg%reifac               = reifac
+    cfg%cp_heating           = cp_heating
+    cfg%nconds               = nconds
+    cfg%do_evap_timescale    = do_evap_timescale
+    cfg%delay_cond_evap      = delay_cond_evap
+    cfg%do_subgrid_proc      = do_subgrid_proc
+    cfg%fast_fr_mlt          = fast_fr_mlt
+    cfg%fast_dep_sub         = fast_dep_sub
+    cfg%qi_gen               = qi_gen
+    cfg%sat_adj0             = sat_adj0
     
   end function setup_v3
 

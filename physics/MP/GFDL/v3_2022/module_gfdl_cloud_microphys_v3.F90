@@ -551,13 +551,6 @@ module module_gfdl_cloud_microphys_v3
         cp_heating, nconds, do_evap_timescale, delay_cond_evap, do_subgrid_proc, &
         fast_fr_mlt, fast_dep_sub
 
-    ! fast physics 
-    public                                                                    &
-        ql_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt, icloud_f, t_sub,    &
-        cld_min, tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt,      &
-        tau_l2r, rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land
-
-
 contains
 
 ! =======================================================================
@@ -613,179 +606,28 @@ subroutine module_gfdl_cloud_microphys_v3_init (me, master, nlunit, input_nml_fi
     close (nlunit)
 #endif
 
-    cfg%t_min                = t_min
-    cfg%t_sub                = t_sub
-    cfg%tau_r2g              = tau_r2g
-    cfg%tau_smlt             = tau_smlt
-    cfg%tau_gmlt             = tau_gmlt
-    cfg%dw_land              = dw_land
-    cfg%dw_ocean             = dw_ocean
-    cfg%vw_fac               = vw_fac
-    cfg%vi_fac               = vi_fac
-    cfg%vr_fac               = vr_fac
-    cfg%vs_fac               = vs_fac
-    cfg%vg_fac               = vg_fac
-    cfg%ql_mlt               = ql_mlt
-    cfg%do_qa                = do_qa
-    cfg%fix_negative         = fix_negative
-    cfg%vw_max               = vw_max
-    cfg%vi_max               = vi_max
-    cfg%vs_max               = vs_max
-    cfg%vg_max               = vg_max
-    cfg%vr_max               = vr_max
-    cfg%qs_mlt               = qs_mlt
-    cfg%qs0_crt              = qs0_crt
-    cfg%ql0_max              = ql0_max
-    cfg%qi0_max              = qi0_max
-    cfg%qi0_crt              = qi0_crt
-    cfg%ifflag               = ifflag
-    cfg%rh_inc               = rh_inc
-    cfg%rh_ins               = rh_ins
-    cfg%rh_inr               = rh_inr
-    cfg%const_vw             = const_vw
-    cfg%const_vi             = const_vi
-    cfg%const_vs             = const_vs
-    cfg%const_vg             = const_vg
-    cfg%const_vr             = const_vr
-    cfg%rthresh              = rthresh
-    cfg%ccn_l                = ccn_l
-    cfg%ccn_o                = ccn_o
-    cfg%igflag               = igflag
-    cfg%c_paut               = c_paut
-    cfg%tau_imlt             = tau_imlt
-    cfg%tau_v2l              = tau_v2l
-    cfg%tau_l2v              = tau_l2v
-    cfg%tau_i2s              = tau_i2s
-    cfg%tau_l2r              = tau_l2r
-    cfg%qi_lim               = qi_lim
-    cfg%ql_gen               = ql_gen
-    cfg%do_hail              = do_hail
-    cfg%inflag               = inflag
-    cfg%c_psacw              = c_psacw
-    cfg%c_psaci              = c_psaci
-    cfg%c_pracs              = c_pracs
-    cfg%c_psacr              = c_psacr
-    cfg%c_pgacr              = c_pgacr
-    cfg%c_pgacs              = c_pgacs
-    cfg%c_pgacw              = c_pgacw
-    cfg%c_pgaci              = c_pgaci
-    cfg%z_slope_liq          = z_slope_liq
-    cfg%z_slope_ice          = z_slope_ice
-    cfg%prog_ccn             = prog_ccn
-    cfg%c_pracw              = c_pracw
-    cfg%c_praci              = c_praci
-    cfg%rad_snow             = rad_snow
-    cfg%rad_graupel          = rad_graupel
-    cfg%rad_rain             = rad_rain
-    cfg%cld_min              = cld_min
-    cfg%sedflag              = sedflag
-    cfg%sed_fac              = sed_fac
-    cfg%do_sedi_uv           = do_sedi_uv
-    cfg%do_sedi_w            = do_sedi_w
-    cfg%do_sedi_heat         = do_sedi_heat
-    cfg%icloud_f             = icloud_f
-    cfg%irain_f              = irain_f
-    cfg%xr_a                 = xr_a
-    cfg%xr_b                 = xr_b
-    cfg%xr_c                 = xr_c
-    cfg%ntimes               = ntimes
-    cfg%tau_revp             = tau_revp
-    cfg%tice_mlt             = tice_mlt
-    cfg%do_cond_timescale    = do_cond_timescale
-    cfg%mp_time              = mp_time
-    cfg%consv_checker        = consv_checker
-    cfg%te_err               = te_err
-    cfg%tw_err               = tw_err
-    cfg%use_rhc_cevap        = use_rhc_cevap
-    cfg%use_rhc_revap        = use_rhc_revap
-    cfg%tau_wbf              = tau_wbf
-    cfg%do_warm_rain_mp      = do_warm_rain_mp
-    cfg%rh_thres             = rh_thres
-    cfg%f_dq_p               = f_dq_p
-    cfg%f_dq_m               = f_dq_m
-    cfg%do_cld_adj           = do_cld_adj
-    cfg%rhc_cevap            = rhc_cevap
-    cfg%rhc_revap            = rhc_revap
-    cfg%beta                 = beta
-    cfg%liq_ice_combine      = liq_ice_combine
-    cfg%rewflag              = rewflag
-    cfg%reiflag              = reiflag
-    cfg%rerflag              = rerflag
-    cfg%resflag              = resflag
-    cfg%regflag              = regflag
-    cfg%rewmin               = rewmin
-    cfg%rewmax               = rewmax
-    cfg%reimin               = reimin
-    cfg%reimax               = reimax
-    cfg%rermin               = rermin
-    cfg%rermax               = rermax
-    cfg%resmin               = resmin
-    cfg%resmax               = resmax
-    cfg%regmin               = regmin
-    cfg%regmax               = regmax
-    cfg%fs2g_fac             = fs2g_fac
-    cfg%fi2s_fac             = fi2s_fac
-    cfg%fi2g_fac             = fi2g_fac
-    cfg%do_sedi_melt         = do_sedi_melt
-    cfg%radr_flag            = radr_flag
-    cfg%rads_flag            = rads_flag
-    cfg%radg_flag            = radg_flag
-    cfg%do_wbf               = do_wbf
-    cfg%do_psd_water_fall    = do_psd_water_fall
-    cfg%do_psd_ice_fall      = do_psd_ice_fall
-    cfg%n0w_sig              = n0w_sig
-    cfg%n0i_sig              = n0i_sig
-    cfg%n0r_sig              = n0r_sig
-    cfg%n0s_sig              = n0s_sig
-    cfg%n0g_sig              = n0g_sig
-    cfg%n0h_sig              = n0h_sig
-    cfg%n0w_exp              = n0w_exp
-    cfg%n0i_exp              = n0i_exp
-    cfg%n0r_exp              = n0r_exp
-    cfg%n0s_exp              = n0s_exp
-    cfg%n0g_exp              = n0g_exp
-    cfg%n0h_exp              = n0h_exp
-    cfg%muw                  = muw
-    cfg%mui                  = mui
-    cfg%mur                  = mur
-    cfg%mus                  = mus
-    cfg%mug                  = mug
-    cfg%muh                  = muh
-    cfg%alinw                = alinw
-    cfg%alini                = alini
-    cfg%alinr                = alinr
-    cfg%alins                = alins
-    cfg%aling                = aling
-    cfg%alinh                = alinh
-    cfg%blinw                = blinw
-    cfg%blini                = blini
-    cfg%blinr                = blinr
-    cfg%blins                = blins
-    cfg%bling                = bling
-    cfg%blinh                = blinh
-    cfg%do_new_acc_water     = do_new_acc_water
-    cfg%do_new_acc_ice       = do_new_acc_ice
-    cfg%is_fac               = is_fac
-    cfg%ss_fac               = ss_fac
-    cfg%gs_fac               = gs_fac
-    cfg%rh_fac_evap          = rh_fac_evap
-    cfg%rh_fac_cond          = rh_fac_cond
-    cfg%snow_grauple_combine = snow_grauple_combine
-    cfg%do_psd_water_num     = do_psd_water_num
-    cfg%do_psd_ice_num       = do_psd_ice_num
-    cfg%vdiffflag            = vdiffflag
-    cfg%rewfac               = rewfac
-    cfg%reifac               = reifac
-    cfg%cp_heating           = cp_heating
-    cfg%nconds               = nconds
-    cfg%do_evap_timescale    = do_evap_timescale
-    cfg%delay_cond_evap      = delay_cond_evap
-    cfg%do_subgrid_proc      = do_subgrid_proc
-    cfg%fast_fr_mlt          = fast_fr_mlt
-    cfg%fast_dep_sub         = fast_dep_sub
-    cfg%qi_gen               = qi_gen
-    cfg%sat_adj0             = sat_adj0
-
+    errmsg = cfg%setup(t_min, t_sub, tau_r2g, tau_smlt, tau_gmlt, dw_land, dw_ocean,        &
+         vw_fac, vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vw_max,       &
+         vi_max, vs_max, vg_max, vr_max, qs_mlt, qs0_crt, ql0_max, qi0_max, qi0_crt, ifflag,&
+         rh_inc, rh_ins, rh_inr, const_vw, const_vi, const_vs, const_vg, const_vr, rthresh, &
+         ccn_l, ccn_o, igflag, c_paut, tau_imlt, tau_v2l, tau_l2v, tau_i2s, tau_l2r, qi_lim,&
+         ql_gen, do_hail, inflag, c_psacw, c_psaci, c_pracs, c_psacr, c_pgacr, c_pgacs,     &
+         c_pgacw, c_pgaci, z_slope_liq, z_slope_ice, prog_ccn, c_pracw, c_praci, rad_snow,  &
+         rad_graupel, rad_rain, cld_min, sedflag, sed_fac, do_sedi_uv, do_sedi_w,           &
+         do_sedi_heat, icloud_f, irain_f, xr_a, xr_b, xr_c, ntimes, tau_revp, tice_mlt,     &
+         do_cond_timescale, mp_time, consv_checker, te_err, tw_err, use_rhc_cevap,          &
+         use_rhc_revap, tau_wbf, do_warm_rain_mp, rh_thres, f_dq_p, f_dq_m, do_cld_adj,     &
+         rhc_cevap, rhc_revap, beta, liq_ice_combine, rewflag, reiflag, rerflag, resflag,   &
+         regflag, rewmin, rewmax, reimin, reimax, rermin, rermax, resmin, resmax, regmin,   &
+         regmax, fs2g_fac, fi2s_fac, fi2g_fac, do_sedi_melt, radr_flag, rads_flag,          &
+         radg_flag, do_wbf, do_psd_water_fall, do_psd_ice_fall, n0w_sig, n0i_sig, n0r_sig,  &
+         n0s_sig, n0g_sig, n0h_sig, n0w_exp, n0i_exp, n0r_exp, n0s_exp, n0g_exp, n0h_exp,   &
+         muw, mui, mur, mus, mug, muh, alinw, alini, alinr, alins, aling, alinh, blinw,     &
+         blini, blinr, blins, bling, blinh, do_new_acc_water, do_new_acc_ice, is_fac,       &
+         ss_fac, gs_fac, rh_fac_evap, rh_fac_cond, snow_grauple_combine, do_psd_water_num,  &
+         do_psd_ice_num, vdiffflag, rewfac, reifac, cp_heating, nconds, do_evap_timescale,  &
+         delay_cond_evap, do_subgrid_proc, fast_fr_mlt, fast_dep_sub, qi_gen, sat_adj0)
+    
     ! -----------------------------------------------------------------------
     ! write version number and namelist to log file
     ! -----------------------------------------------------------------------
