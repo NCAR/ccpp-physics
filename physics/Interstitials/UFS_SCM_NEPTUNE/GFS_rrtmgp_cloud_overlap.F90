@@ -68,7 +68,7 @@ contains
     real(kind_phys), dimension(:), intent(in) :: &
          lat                     ! Latitude             
     real(kind_phys), dimension(:,:), intent(in) :: &
-         cld_frac,               ! Total cloud fraction
+         cld_frac                ! Total cloud fraction
     real(kind_phys), dimension(:,:), intent(in), optional :: &
          cld_cnv_frac            ! Convective cloud-fraction
     real(kind_phys), dimension(:,:), intent(in), optional :: &

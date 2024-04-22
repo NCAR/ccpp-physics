@@ -120,7 +120,7 @@ contains
          deltaZc,                   & ! Layer-thickness, from layer centers (m)
          deltaP,                    & ! Layer-thickness (Pa)
          qc_mynn,                   & !
-         qi_mynn,                     !
+         qi_mynn                      !
     real(kind_phys), dimension(:,:), intent(in), optional :: &
          cld_pbl_frac                 !
     real(kind_phys), dimension(:,:), intent(inout), optional :: &
@@ -151,7 +151,7 @@ contains
          cld_swp,                   & ! Water path for                    snow   hydrometeors
          cld_resnow,                & ! Effective radius for              snow   hydrometeors
          cld_rwp,                   & ! Water path for                    rain   hydrometeors
-         cld_rerain,                & ! Effective radius for              rain   hydrometeors
+         cld_rerain                   ! Effective radius for              rain   hydrometeors
     real(kind_phys), dimension(:,:),intent(inout), optional :: &
          precip_frac,               & ! Precipitation fraction
          cld_cnv_frac,              & ! Cloud-fraction for   convective clouds
@@ -573,7 +573,7 @@ contains
          effrin_cldliq,        & ! Effective radius for liquid cloud-particles (microns)
          effrin_cldice,        & ! Effective radius for ice cloud-particles (microns)
          effrin_cldsnow          ! Effective radius for snow cloud-particles (microns)
-    real(kind_phys), dimension(:,:), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in), optional :: &
          effrin_cldrain          ! Effective radius for rain cloud-particles (microns) 
     real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev                   ! Pressure at model-level interfaces (Pa)
