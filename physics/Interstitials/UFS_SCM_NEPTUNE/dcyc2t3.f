@@ -44,7 +44,7 @@
 !      input/output:                                                    !
 !            dtdt,dtdtnp,                                               !
 !      outputs:                                                         !
-!            adjsfcdsw,adjsfcnsw,adjsfcdlw,                             !
+!            adjsfcdsw,adjsfcdswc,adjsfcnsw,adjsfcdlw,                  !
 !            adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       !
 !            adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   !
 !            adjdnnbmd,adjdnndfd,adjdnvbmd,adjdnvdfd)                   !
