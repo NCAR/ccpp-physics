@@ -44,9 +44,9 @@
      &                      qsurf, prslki, evap, fm, fh, fm10, fh2,     &
      &                      shflx, cdq, wind, xlat_d, xlon_d
       real(kind=kind_phys), dimension(:), intent(out) ::                &
-     &                       f10m, u10m, v10m, t2m, q2m, dpt2m
-      real(kind=kind_phys), dimension(:), intent(in) :: lake_t2m,       &
-     &                       lake_q2m
+     &                      f10m, u10m, v10m, t2m, q2m, dpt2m
+      real(kind=kind_phys), dimension(:), intent(in), optional ::       &
+     &                      lake_t2m, lake_q2m
       integer, dimension(:), intent(in) :: use_lake_model
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
