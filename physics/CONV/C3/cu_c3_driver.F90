@@ -111,18 +111,19 @@ contains
    real (kind=kind_phys), intent(in) :: g,cp,fv,r_d,xlv,r_v,betascu,betamcu,betadcu
    logical, intent(in   ) :: ldiag3d
    logical, intent(in   ) :: progsigma
-   real(kind=kind_phys), intent(inout)                      :: dtend(:,:,:)
+   real(kind=kind_phys), intent(inout), optional            :: dtend(:,:,:)
 !$acc declare copy(dtend)
    integer, intent(in)                                      :: dtidx(:,:), &
         index_of_x_wind, index_of_y_wind, index_of_temperature,            &
         index_of_process_scnv, index_of_process_dcnv, ntqv, ntcw, ntiw
 !$acc declare copyin(dtidx)
-   real(kind=kind_phys),  dimension( : , : ), intent(in    ) :: forcet,forceqv_spechum,w,phil,delp
-   real(kind=kind_phys), dimension ( : , : ), intent(in    ) :: sigmain,qmicro
+   real(kind=kind_phys),  dimension( : , : ), intent(in    ), optional :: forcet,forceqv_spechum
+   real(kind=kind_phys),  dimension( : , : ), intent(in    ) :: w,phil,delp
+   real(kind=kind_phys), dimension ( : , : ), intent(in    ), optional :: sigmain,qmicro
    real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: t,us,vs
-   real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: qci_conv
+   real(kind=kind_phys),  dimension( : , : ), intent(inout ), optional :: qci_conv
    real(kind=kind_phys),  dimension( : , : ), intent(out   ) :: cnvw_moist,cnvc
-   real(kind=kind_phys), dimension ( : , : ), intent(out   ) :: sigmaout
+   real(kind=kind_phys), dimension ( : , : ), intent(out   ), optional :: sigmaout
    real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: cliw, clcw
    real(kind=kind_phys), dimension ( : , : , :), intent(in    ) :: tmf
 !$acc declare copyin(forcet,forceqv_spechum,w,phil)
@@ -134,27 +135,31 @@ contains
    integer, intent(in) :: dfi_radar_max_intervals
    real(kind=kind_phys), intent(in) :: fhour, fh_dfi_radar(:)
    integer, intent(in) :: num_dfi_radar, ix_dfi_radar(:)
-   real(kind=kind_phys), intent(in) :: cap_suppress(:,:)
+   real(kind=kind_phys), intent(in), optional :: cap_suppress(:,:)
 !$acc declare copyin(fh_dfi_radar,ix_dfi_radar,cap_suppress)
 
    integer, dimension (:), intent(out) :: hbot,htop,kcnv
    integer, dimension (:), intent(in)  :: xland
-   real(kind=kind_phys),    dimension (:), intent(in) :: pbl,maxMF
+   real(kind=kind_phys),    dimension (:), intent(in) :: pbl
+   real(kind=kind_phys),    dimension (:), intent(in), optional :: maxMF
 !$acc declare copyout(hbot,htop,kcnv)
 !$acc declare copyin(xland,pbl)
    integer, dimension (im) :: tropics
 !$acc declare create(tropics)
 !  ruc variable
-   real(kind=kind_phys), dimension (:),   intent(in)  :: hfx2,qfx2,psuri,ca_deep
-   real(kind=kind_phys), dimension (:,:), intent(out) :: ud_mf,dd_mf,dt_mf
-   real(kind=kind_phys), dimension (:),   intent(out) :: raincv,cld1d,maxupmf,rainevap
+   real(kind=kind_phys), dimension (:),   intent(in)  :: hfx2,qfx2,psuri
+   real(kind=kind_phys), dimension (:),   intent(in),  optional :: ca_deep
+   real(kind=kind_phys), dimension (:,:), intent(out), optional :: ud_mf
+   real(kind=kind_phys), dimension (:,:), intent(out) :: dd_mf,dt_mf
+   real(kind=kind_phys), dimension (:),   intent(out) :: raincv,cld1d,rainevap
+   real(kind=kind_phys), dimension (:),   intent(out), optional :: maxupmf
    real(kind=kind_phys), dimension (:,:), intent(in)  :: t2di,p2di
 !$acc declare copyin(hfx2,qfx2,psuri,t2di,p2di)
 !$acc declare copyout(ud_mf,dd_mf,dt_mf,raincv,cld1d)
    ! Specific humidity from FV3
    real(kind=kind_phys), dimension (:,:), intent(in) :: qv2di_spechum
    real(kind=kind_phys), dimension (:,:), intent(inout) :: qv_spechum
-   real(kind=kind_phys), dimension (:), intent(inout) :: aod_gf
+   real(kind=kind_phys), dimension (:), intent(inout), optional :: aod_gf
 !$acc declare copyin(qv2di_spechum) copy(qv_spechum,aod_gf)
    ! Local water vapor mixing ratios and cloud water mixing ratios
    real(kind=kind_phys), dimension (im,km) :: qv2di, qv, forceqv, cnvw
@@ -165,7 +170,7 @@ contains
    real(kind=kind_phys), intent(in   ) :: dt
 
    integer, intent(in   ) :: imfshalcnv
-   integer, dimension(:), intent(inout) :: cactiv,cactiv_m
+   integer, dimension(:), intent(inout), optional :: cactiv,cactiv_m
 !$acc declare copy(cactiv,cactiv_m)
 
    character(len=*), intent(out) :: errmsg

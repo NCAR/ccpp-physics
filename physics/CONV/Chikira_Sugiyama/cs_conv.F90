@@ -195,18 +195,19 @@ module cs_conv
 !
 ! modified arguments
 !
-   real(kind_phys), intent(inout) :: CBMFX(:,:)      ! cloud base mass flux (kg/m2/s)
+   real(kind_phys), intent(inout), optional :: CBMFX(:,:)      ! cloud base mass flux (kg/m2/s)
 !
 ! output arguments
 !
 !  updraft, downdraft, and detrainment mass flux (kg/m2/s)
-   real(kind_phys), intent(inout), dimension(:,:) :: ud_mf, dd_mf, dt_mf
+   real(kind_phys), intent(inout), dimension(:,:), optional :: ud_mf
+   real(kind_phys), intent(inout), dimension(:,:) :: dd_mf, dt_mf
    
    real(kind_phys), intent(out)   :: rain1(:)        ! lwe thickness of deep convective precipitation amount (m)
 ! GJF* These variables are conditionally allocated depending on whether the
 !     Morrison-Gettelman microphysics is used, so they must be declared 
 !     using assumed shape.
-   real(kind_phys), intent(out), dimension(:,:) :: qlcn, qicn, w_upi,cnv_mfd, &
+   real(kind_phys), intent(out), dimension(:,:), optional :: qlcn, qicn, w_upi,cnv_mfd, &
                                                    cnv_dqldt, clcn, cnv_fice, &
                                                    cnv_ndrop, cnv_nice, cf_upi
 ! *GJF
