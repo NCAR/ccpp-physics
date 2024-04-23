@@ -65,9 +65,9 @@
 
       real (kind=kind_phys),dimension(:),intent(inout) ::                     &
      &           snwdph, hice, tsurf, t_sfc, hflx, evap, fice, ustar, qsfc,    &
-     &           ch, cm, chh, cmm, h_ML, t_wML, t_mnw, H_B, T_B,              &
-     &           t_bot1, t_bot2, c_t, T_snow, T_ice, tsurf_ice, lflx, gflx
-
+     &           ch, cm, chh, cmm, tsurf_ice, lflx, gflx
+      real (kind=kind_phys),dimension(:),intent(inout), optional :: &
+     &           h_ML, t_wML, t_mnw, H_B, T_B, t_bot1, t_bot2, c_t, T_snow
       real (kind=kind_phys),  intent(in) :: julian
 
       logical, dimension(:), intent(in) :: flag_iter, wet
@@ -442,10 +442,13 @@ subroutine flake_driver_post_run (im, use_lake_model, h_ML, T_wML,  &
 !     integer, dimension(im), intent(in) :: islmsk
 
       real (kind=kind_phys), dimension(:), intent(in) ::               &
-     &           lakedepth, tsurf, h_ML, t_wML
+     &           lakedepth, tsurf
+      real (kind=kind_phys), dimension(:), intent(in), optional ::     &
+     &           h_ML, t_wML
 
-      real (kind=kind_phys),dimension(:),intent(inout) ::              &
-     &           xz, zm, tref, tsfco   
+      real (kind=kind_phys),dimension(:),intent(inout), optional ::    &
+     &           xz, zm, tref
+      real (kind=kind_phys),dimension(:),intent(inout) :: tsfco   
 
       integer, dimension(:), intent(in) :: use_lake_model
 
