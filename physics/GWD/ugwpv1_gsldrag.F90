@@ -82,7 +82,7 @@ contains
     integer,              intent (in) :: me
     integer,              intent (in) :: master
     integer,              intent (in) :: nlunit
-    character(len=*),     intent (in) :: input_nml_file(:)
+    character(len=*),     intent (in), optional :: input_nml_file(:)
     integer,              intent (in) :: logunit
     integer,              intent (in) :: jdat(:)
     integer,              intent (in) :: lonr
@@ -378,8 +378,9 @@ contains
     real(kind=kind_phys),    intent(in), dimension(:)       :: elvmax
     real(kind=kind_phys),    intent(in), dimension(:,:)     :: clx, oa4
 
-    real(kind=kind_phys),    intent(in), dimension(:)       :: varss,oc1ss,dx
-    real(kind=kind_phys),    intent(in), dimension(:,:)     :: oa4ss,ol4ss
+    real(kind=kind_phys),    intent(in), dimension(:)       :: dx
+    real(kind=kind_phys),    intent(in), dimension(:), optional       :: varss,oc1ss
+    real(kind=kind_phys),    intent(in), dimension(:,:), optional     :: oa4ss,ol4ss
 
 !=====
 !ccpp-style passing constants, I prefer to take them out from the "call-subr" list
@@ -398,7 +399,8 @@ contains
     integer,                 intent(in), dimension(:)     :: kpbl
 
     real(kind=kind_phys),    intent(in), dimension(:) :: rain
-    real(kind=kind_phys),    intent(in), dimension(:) :: br1, hpbl,  slmsk
+    real(kind=kind_phys),    intent(in), dimension(:) :: br1,  slmsk
+    real(kind=kind_phys),    intent(in), dimension(:), optional :: hpbl
 !
 ! moved to GFS_phys_time_vary
 !    real(kind=kind_phys),    intent(in), dimension(:) :: ddy_j1tau, ddy_j2tau
@@ -407,7 +409,7 @@ contains
 
 !Output (optional):
 
-    real(kind=kind_phys), intent(out), dimension(:)  ::                   &
+    real(kind=kind_phys), intent(out), dimension(:), optional  ::         &
                             du_ogwcol,  dv_ogwcol,  du_oblcol, dv_oblcol, &
                             du_osscol,  dv_osscol,  du_ofdcol, dv_ofdcol
 !
@@ -417,11 +419,11 @@ contains
     real(kind=kind_phys), intent(out), dimension(:)  :: dusfcg, dvsfcg
     real(kind=kind_phys), intent(out), dimension(:)  :: tau_ogw, tau_ngw, tau_oss
 
-    real(kind=kind_phys), intent(out) , dimension(:,:) ::         &
+    real(kind=kind_phys), intent(out) , dimension(:,:), optional ::         &
                           dudt_ogw, dvdt_ogw, dudt_obl, dvdt_obl, &
                           dudt_oss, dvdt_oss, dudt_ofd, dvdt_ofd
 
-    real(kind=kind_phys), intent(out) , dimension(:,:) :: dudt_ngw, dvdt_ngw, kdis_ngw
+    real(kind=kind_phys), intent(out) , dimension(:,:), optional :: dudt_ngw, dvdt_ngw, kdis_ngw
     real(kind=kind_phys), intent(out) , dimension(:,:) :: dudt_gw,  dvdt_gw,  kdis_gw
 
     real(kind=kind_phys), intent(out) , dimension(:,:) :: dtdt_ngw, dtdt_gw
@@ -431,14 +433,15 @@ contains
 !
     real(kind=kind_phys), intent(inout), dimension(:,:) :: dudt, dvdt, dtdt
 
-    real(kind=kind_phys), intent(inout)                      :: dtend(:,:,:)
-    integer, intent(in)                                      :: dtidx(:,:),   &
+    real(kind=kind_phys), intent(inout), optional            :: dtend(:,:,:)
+    integer, intent(in)                                      :: dtidx(:,:)
+    integer, intent(in)                                 :: & 
          index_of_x_wind, index_of_y_wind, index_of_temperature,              &
          index_of_process_orographic_gwd, index_of_process_nonorographic_gwd
 
     real(kind=kind_phys),    intent(out), dimension(:)      :: rdxzb     ! for stoch phys. mtb-level
 
-    real(kind=kind_phys), intent(in) :: spp_wts_gwd(:,:)
+    real(kind=kind_phys), intent(in), optional :: spp_wts_gwd(:,:)
     integer, intent(in) :: spp_gwd
 
     character(len=*),        intent(out) :: errmsg
