@@ -64,11 +64,11 @@ module mp_thompson
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
          logical,                   intent(in   ) :: merra2_aerosol_aware
-         real(kind_phys),           intent(inout) :: nc(:,:)
-         real(kind_phys),           intent(inout) :: nwfa(:,:)
-         real(kind_phys),           intent(inout) :: nifa(:,:)
-         real(kind_phys),           intent(inout) :: nwfa2d(:)
-         real(kind_phys),           intent(inout) :: nifa2d(:)
+         real(kind_phys),           intent(inout), optional :: nc(:,:)
+         real(kind_phys),           intent(inout), optional :: nwfa(:,:)
+         real(kind_phys),           intent(inout), optional :: nifa(:,:)
+         real(kind_phys),           intent(inout), optional :: nwfa2d(:)
+         real(kind_phys),           intent(inout), optional :: nifa2d(:)
          real(kind_phys),           intent(in)    :: aerfld(:,:,:)
          ! State variables
          real(kind_phys),           intent(in   ) :: tgrs(:,:)
@@ -83,7 +83,7 @@ module mp_thompson
          integer,                   intent(in   ) :: threads
          ! Extended diagnostics
          logical,                   intent(in   ) :: ext_diag
-         real(kind_phys),           intent(in   ) :: diag3d(:,:,:)
+         real(kind_phys),           intent(in   ), optional :: diag3d(:,:,:)
          ! CCPP error handling
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
@@ -382,10 +382,10 @@ module mp_thompson
          real,                      intent(in   ) :: dt_inner
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
          real(kind_phys),           intent(inout) :: prcp(:)
-         real(kind_phys),           intent(inout) :: rain(:)
-         real(kind_phys),           intent(inout) :: graupel(:)
-         real(kind_phys),           intent(inout) :: ice(:)
-         real(kind_phys),           intent(inout) :: snow(:)
+         real(kind_phys),           intent(inout), optional :: rain(:)
+         real(kind_phys),           intent(inout), optional :: graupel(:)
+         real(kind_phys),           intent(inout), optional :: ice(:)
+         real(kind_phys),           intent(inout), optional :: snow(:)
          real(kind_phys),           intent(  out) :: sr(:)
          ! Radar reflectivity
          real(kind_phys),           intent(inout) :: refl_10cm(:,:)
@@ -400,7 +400,7 @@ module mp_thompson
          integer,                   intent(in)    :: mpiroot
          ! Extended diagnostic output
          logical,                   intent(in)    :: ext_diag
-         real(kind_phys), target,   intent(inout) :: diag3d(:,:,:)
+         real(kind_phys), target,   intent(inout), optional :: diag3d(:,:,:)
          logical,                   intent(in)    :: reset_diag3d
 
          ! CCPP error handling
@@ -410,15 +410,15 @@ module mp_thompson
          ! SPP
          integer,                   intent(in) :: spp_mp
          integer,                   intent(in) :: n_var_spp
-         real(kind_phys),           intent(in) :: spp_wts_mp(:,:)
-         real(kind_phys),           intent(in) :: spp_prt_list(:)
-         character(len=10),          intent(in) :: spp_var_list(:)
+         real(kind_phys),           intent(in), optional :: spp_wts_mp(:,:)
+         real(kind_phys),           intent(in), optional :: spp_prt_list(:)
+         character(len=10),         intent(in), optional :: spp_var_list(:)
          real(kind_phys),           intent(in) :: spp_stddev_cutoff(:)
 
          logical, intent (in) :: cplchm
          ! ice and liquid water 3d precipitation fluxes - only allocated if cplchm is .true.
-         real(kind=kind_phys), intent(inout), dimension(:,:) :: pfi_lsan
-         real(kind=kind_phys), intent(inout), dimension(:,:) :: pfl_lsan
+         real(kind=kind_phys), intent(inout), dimension(:,:), optional :: pfi_lsan
+         real(kind=kind_phys), intent(inout), dimension(:,:), optional :: pfl_lsan
 
          ! Local variables
 
