@@ -362,8 +362,8 @@
 ! added for small-scale orographic wave drag
    real(kind=kind_phys), dimension(im,km) :: utendwave,vtendwave,thx,thvx
    real(kind=kind_phys), intent(in) ::     br1(:),              &
+     &                                     hpbl(:),             &
      &                                     slmsk(:)
-   real(kind=kind_phys), intent(in), optional :: hpbl(:)
    real(kind=kind_phys), dimension(im)    :: govrth,xland
    !real(kind=kind_phys), dimension(im,km) :: dz2
    real(kind=kind_phys)                   :: tauwavex0,tauwavey0,  &

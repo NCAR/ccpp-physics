@@ -75,7 +75,7 @@ contains
     integer,              intent (in) :: me
     integer,              intent (in) :: master
     integer,              intent (in) :: nlunit
-    character(len=*),     intent (in), optional :: input_nml_file(:)
+    character(len=*),     intent (in) :: input_nml_file(:)
     integer,              intent (in) :: logunit
     integer,              intent (in) :: jdat(:)
     integer,              intent (in) :: lonr
@@ -304,8 +304,8 @@ contains
       &         dtaux2d_ss(:,:),dtauy2d_ss(:,:),                  &
       &         dtaux2d_fd(:,:),dtauy2d_fd(:,:),                  &
       &         dudt_ngw(:,:),dvdt_ngw(:,:),dtdt_ngw(:,:)
-    real(kind=kind_phys), intent(in), optional ::     hpbl(:)
-    real(kind=kind_phys), intent(in) ::     br1(:),               &
+    real(kind=kind_phys), intent(in) ::     hpbl(:),              &
+      &                                     br1(:),               &
       &                                     slmsk(:)
 
     real(kind=kind_phys),    intent(out), dimension(:)          :: dusfcg, dvsfcg

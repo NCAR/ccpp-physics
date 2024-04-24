@@ -35,7 +35,8 @@ contains
         logical,              intent(in) :: ldiag_ugwp      !< flag for CIRES UGWP Diagnostics
 
         real(kind=kind_phys), intent(in),    dimension(:)   :: zobl, zlwb, zogw
-        real(kind=kind_phys), intent(in),    dimension(:)   :: du_ofdcol, tau_ogw, du_oblcol, tau_ngw
+        real(kind=kind_phys), intent(in),    dimension(:)   :: tau_ogw, tau_ngw
+        real(kind=kind_phys), intent(in),    dimension(:),optional   :: du_ofdcol, du_oblcol
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_zmtb, tot_zlwb, tot_zogw
 	

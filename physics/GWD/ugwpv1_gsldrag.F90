@@ -82,7 +82,7 @@ contains
     integer,              intent (in) :: me
     integer,              intent (in) :: master
     integer,              intent (in) :: nlunit
-    character(len=*),     intent (in), optional :: input_nml_file(:)
+    character(len=*),     intent (in) :: input_nml_file(:)
     integer,              intent (in) :: logunit
     integer,              intent (in) :: jdat(:)
     integer,              intent (in) :: lonr
@@ -400,7 +400,7 @@ contains
 
     real(kind=kind_phys),    intent(in), dimension(:) :: rain
     real(kind=kind_phys),    intent(in), dimension(:) :: br1,  slmsk
-    real(kind=kind_phys),    intent(in), dimension(:), optional :: hpbl
+    real(kind=kind_phys),    intent(in), dimension(:) :: hpbl
 !
 ! moved to GFS_phys_time_vary
 !    real(kind=kind_phys),    intent(in), dimension(:) :: ddy_j1tau, ddy_j2tau
@@ -423,10 +423,8 @@ contains
                           dudt_ogw, dvdt_ogw, dudt_obl, dvdt_obl, &
                           dudt_oss, dvdt_oss, dudt_ofd, dvdt_ofd
 
-    real(kind=kind_phys), intent(out) , dimension(:,:), optional :: dudt_ngw, dvdt_ngw, kdis_ngw
-    real(kind=kind_phys), intent(out) , dimension(:,:) :: dudt_gw,  dvdt_gw,  kdis_gw
-
-    real(kind=kind_phys), intent(out) , dimension(:,:) :: dtdt_ngw, dtdt_gw
+    real(kind=kind_phys), intent(out) , dimension(:,:), optional :: dudt_ngw, dvdt_ngw, kdis_ngw, dtdt_ngw
+    real(kind=kind_phys), intent(out) , dimension(:,:) :: dudt_gw,  dvdt_gw, dtdt_gw, kdis_gw
 
     real(kind=kind_phys), intent(out) , dimension(:)   :: zogw, zlwb, zobl, zngw
 !
