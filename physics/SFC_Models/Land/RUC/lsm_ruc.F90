@@ -95,7 +95,7 @@ module lsm_ruc
       real (kind_phys), dimension(:),   intent(inout) :: semis_lnd
       real (kind_phys), dimension(:),   intent(inout) :: semis_ice
       real (kind_phys), dimension(:),   intent(inout) :: &
-           albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd, &
+           albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd
       real (kind_phys), dimension(:),   intent(inout), optional ::            &
                         albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice, &
                         sfcqv_lnd, sfcqv_ice
@@ -446,7 +446,7 @@ module lsm_ruc
      &      tsice
 
 !  ---  output:
-      real (kind_phys), dimension(:), intent(inout), optional ::
+      real (kind_phys), dimension(:), intent(inout), optional ::         &
      &       sfalb_lnd, sfalb_ice, wetness, snowfallac_lnd,              &
      &       snowfallac_ice, rhosnf
       real (kind_phys), dimension(:), intent(inout) ::                   &

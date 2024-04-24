@@ -65,7 +65,7 @@
 
       real (kind=kind_phys),dimension(:),intent(inout) ::                     &
      &           snwdph, hice, tsurf, t_sfc, hflx, evap, fice, ustar, qsfc,    &
-     &           ch, cm, chh, cmm, tsurf_ice, lflx, gflx
+     &           ch, cm, chh, cmm, T_ice, tsurf_ice, lflx, gflx
       real (kind=kind_phys),dimension(:),intent(inout), optional :: &
      &           h_ML, t_wML, t_mnw, H_B, T_B, t_bot1, t_bot2, c_t, T_snow
       real (kind=kind_phys),  intent(in) :: julian
