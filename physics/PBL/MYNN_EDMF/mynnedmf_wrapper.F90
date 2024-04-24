@@ -248,11 +248,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind_phys), dimension(:,:), intent(inout), optional ::        &
      &        dqdt_cloud_droplet_num_conc, dqdt_water_aer_num_conc,      &
      &        dqdt_ice_aer_num_conc
-      real(kind_phys), dimension(:,:), intent(inout) ::dqdt_cccn
       real(kind_phys), dimension(:,:), intent(inout), optional :: qke,   &
-     &        EL_PBL, Sh3D, Sm3D
-      real(kind_phys), dimension(:,:), intent(inout), optional ::        &
-     &        qke_adv, qc_bl, qi_bl, cldfra_bl
+     &        EL_PBL, Sh3D, Sm3D, qc_bl, qi_bl, cldfra_bl, dqdt_cccn
+      real(kind_phys), dimension(:,:), intent(inout) ::                  &
+     &        qke_adv
      !These 10 arrays are only allocated when bl_mynn_output > 0
       real(kind_phys), dimension(:,:), intent(inout), optional ::        &
      &        edmf_a,edmf_w,edmf_qt,                                     &
@@ -262,11 +261,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        t3d,qgrs_water_vapor,qgrs_liquid_cloud,qgrs_ice,           &
      &        qgrs_snow
       real(kind_phys), dimension(:,:), intent(in) ::                     &
+     &        qgrs_cloud_ice_num_conc,                                   &
      &        u,v,omega,                                                 &
      &        exner,prsl,prsi,                                           &
      &        qgrs_ozone
       real(kind_phys), dimension(:,:), intent(in), optional  ::          &
-     &        qgrs_cloud_ice_num_conc,                                   &
      &        qgrs_water_aer_num_conc,                                   &
      &        qgrs_cloud_droplet_num_conc,                               &
      &        qgrs_ice_aer_num_conc
