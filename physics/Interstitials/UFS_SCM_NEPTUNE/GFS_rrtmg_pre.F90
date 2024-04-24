@@ -123,7 +123,7 @@
       integer, intent(in) :: ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2, ntss3,  &
                              ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl, ntchm
 
-      character(len=3), dimension(:), intent(in) :: lndp_var_list
+      character(len=3), dimension(:), intent(in), optional :: lndp_var_list
 
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
@@ -133,7 +133,7 @@
 
       logical,              intent(in) :: nssl_ccn_on, nssl_invertccn
       integer,              intent(in) :: spp_rad
-      real(kind_phys),      intent(in) :: spp_wts_rad(:,:)
+      real(kind_phys),      intent(in), optional :: spp_wts_rad(:,:)
 
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp, dcorr_con
       real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd, con_pi, con_g, con_ttp, con_thgni
@@ -143,7 +143,8 @@
                                                         slmsk, dx, si
 
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, prsl, prslk,   &
-                                                          tgrs, sfc_wts,       &
+                                                          tgrs, sfc_wts
+      real(kind=kind_phys), dimension(:,:), intent(in), optional :: &
                                                           mg_cld, effrr_in,    &
                                                           cnvw_in, cnvc_in,    &
                                                           sppt_wts
@@ -153,13 +154,13 @@
 
       real(kind=kind_phys), dimension(:),   intent(inout) :: coszen, coszdg
 
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: effrl_inout,      &
+      real(kind=kind_phys), dimension(:,:), intent(inout), optional :: effrl_inout,      &
                                                              effri_inout,      &
                                                              effrs_inout
       real(kind=kind_phys), dimension(:,:), intent(inout) :: clouds1,          &
                                                              clouds2, clouds3, &
                                                              clouds4, clouds5
-      real(kind=kind_phys), dimension(:,:), intent(in)  :: qci_conv
+      real(kind=kind_phys), dimension(:,:), intent(in), optional  :: qci_conv
       real(kind=kind_phys), dimension(:),   intent(in)  :: fdb_coef
       real(kind=kind_phys), dimension(:),   intent(out) :: lwp_ex,iwp_ex, &
                                                            lwp_fc,iwp_fc

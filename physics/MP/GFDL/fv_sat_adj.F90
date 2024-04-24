@@ -263,7 +263,7 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, isc, iec, kmp, km, kmdelz
     real(kind=kind_dyn), intent(  out) :: te0(isd:ied, jsd:jed, 1:km)
     ! If multi-gases physics are not used, ngas is one and qvi identical to qv
     integer,             intent(in)    :: ngas
-    real(kind=kind_dyn), intent(inout) :: qvi(isd:ied, jsd:jed, 1:km, 1:ngas)
+    real(kind=kind_dyn), intent(inout), optional :: qvi(isd:ied, jsd:jed, 1:km, 1:ngas)
     real(kind=kind_dyn), intent(inout) :: qv(isd:ied, jsd:jed, 1:km)
     real(kind=kind_dyn), intent(inout) :: ql(isd:ied, jsd:jed, 1:km)
     real(kind=kind_dyn), intent(inout) :: qi(isd:ied, jsd:jed, 1:km)
