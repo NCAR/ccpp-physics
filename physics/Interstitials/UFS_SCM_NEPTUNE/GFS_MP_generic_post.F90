@@ -43,10 +43,10 @@
       integer, intent(in) :: index_of_temperature,index_of_process_mp,use_lake_model(:)
       integer, intent(in) :: imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf
       integer, dimension (:), intent(in) :: htop
-      integer                                                :: dfi_radar_max_intervals
+      integer,                                 intent(in)    :: dfi_radar_max_intervals
       real(kind=kind_phys),                    intent(in)    :: fh_dfi_radar(:), fhour, con_t0c
       real(kind=kind_phys),                    intent(in)    :: radar_tten_limits(:)
-      integer                                                :: ix_dfi_radar(:)
+      integer,                                 intent(in)    :: ix_dfi_radar(:)
       real(kind=kind_phys), dimension(:,:),    intent(inout) :: gt0,refl_10cm
 
       real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g, rainmin, rhowater

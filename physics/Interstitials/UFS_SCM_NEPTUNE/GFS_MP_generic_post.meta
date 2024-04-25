@@ -229,7 +229,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [prsl]
   standard_name = air_pressure
   long_name = layer mean pressure
@@ -430,7 +430,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [rain0]
   standard_name = lwe_thickness_of_explicit_rain_amount
   long_name = explicit rain on physics timestep
