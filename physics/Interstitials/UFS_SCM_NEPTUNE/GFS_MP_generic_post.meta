@@ -229,7 +229,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [prsl]
   standard_name = air_pressure
   long_name = layer mean pressure
