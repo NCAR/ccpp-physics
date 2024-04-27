@@ -137,15 +137,29 @@
   dimensions = ()
   type = integer
   intent = in
-[isc]
-  standard_name = starting_x_direction_index_alloc
+[isc1]
+  standard_name = starting_x_direction_index_alloc1
   long_name = starting X direction index for allocation
   units = count
   dimensions = ()
   type = integer
   intent = in
-[iec]
-  standard_name = ending_x_direction_index_alloc
+[iec1]
+  standard_name = ending_x_direction_index_alloc1
+  long_name = ending X direction index for allocation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[isc2]
+  standard_name = starting_x_direction_index_alloc2
+  long_name = starting X direction index for allocation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iec2]
+  standard_name = ending_x_direction_index_alloc2
   long_name = ending X direction index for allocation
   units = count
   dimensions = ()
@@ -214,15 +228,29 @@
   dimensions = ()
   type = integer
   intent = in
-[jsc]
-  standard_name = starting_y_direction_index_alloc
+[jsc1]
+  standard_name = starting_y_direction_index_alloc1
   long_name = starting X direction index for allocation
   units = count
   dimensions = ()
   type = integer
   intent = in
-[jec]
-  standard_name = ending_y_direction_index_alloc
+[jec1]
+  standard_name = ending_y_direction_index_alloc1
+  long_name = ending X direction index for allocation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[jsc2]
+  standard_name = starting_y_direction_index_alloc2
+  long_name = starting X direction index for allocation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[jec2]
+  standard_name = ending_y_direction_index_alloc2
   long_name = ending X direction index for allocation
   units = count
   dimensions = ()
@@ -276,7 +304,7 @@
   standard_name = gas_tracers_for_multi_gas_physics_at_Lagrangian_surface
   long_name = gas tracers for multi gas physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc,1:vertical_dimension_for_fast_physics,1:number_of_gases_for_multi_gases_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics,1:number_of_gases_for_multi_gases_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -285,7 +313,7 @@
   standard_name = water_vapor_specific_humidity_at_Lagrangian_surface
   long_name = water vapor specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc,1:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -293,7 +321,7 @@
   standard_name = cloud_liquid_water_specific_humidity_at_Lagrangian_surface
   long_name = cloud liquid water specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc,1:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -301,7 +329,7 @@
   standard_name = cloud_ice_specific_humidity_at_Lagrangian_surface
   long_name = cloud ice specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc,1:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -309,7 +337,7 @@
   standard_name = cloud_rain_specific_humidity_at_Lagrangian_surface
   long_name = cloud rain specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc,1:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -317,7 +345,7 @@
   standard_name = cloud_snow_specific_humidity_at_Lagrangian_surface
   long_name = cloud snow specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc,1:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -325,7 +353,7 @@
   standard_name = cloud_graupel_specific_humidity_at_Lagrangian_surface
   long_name = cloud graupel specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc,1:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -333,7 +361,7 @@
   standard_name = surface_geopotential_at_Lagrangian_surface
   long_name = surface geopotential  at Lagrangian surface
   units = m2 s-2
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1)
   type = real
   kind = kind_dyn
   intent = in
@@ -341,7 +369,7 @@
   standard_name = log_pressure_at_Lagrangian_surface
   long_name = logarithm of pressure at Lagrangian surface
   units = Pa
-  dimensions = (starting_x_direction_index:ending_x_direction_index,1:vertical_dimension_for_fast_physics_plus_one,starting_y_direction_index:ending_y_direction_index)
+  dimensions = (starting_x_direction_index_alloc2:ending_x_direction_index_alloc2,1:vertical_dimension_for_fast_physics_plus_one,starting_y_direction_index_alloc2:ending_y_direction_index_alloc2)
   type = real
   kind = kind_dyn
   intent = in
@@ -349,7 +377,7 @@
   standard_name = thickness_at_Lagrangian_surface
   long_name = thickness at Lagrangian_surface
   units = m
-  dimensions = (starting_x_direction_index:ending_x_direction_index,starting_y_direction_index:ending_y_direction_index,1:vertical_dimension_for_thickness_at_Lagrangian_surface)
+  dimensions = (starting_x_direction_index_alloc2:ending_x_direction_index_alloc2,starting_y_direction_index_alloc2:ending_y_direction_index_alloc2,1:vertical_dimension_for_thickness_at_Lagrangian_surface)
   type = real
   kind = kind_dyn
   intent = in
@@ -357,7 +385,7 @@
   standard_name = pressure_thickness_at_Lagrangian_surface
   long_name = pressure thickness at Lagrangian surface
   units = Pa
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc,1:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = in
@@ -365,7 +393,7 @@
   standard_name = virtual_temperature_at_Lagrangian_surface
   long_name = virtual temperature at Lagrangian surface
   units = K
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc,1:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -373,7 +401,7 @@
   standard_name = finite_volume_mean_edge_pressure_raised_to_the_power_of_kappa
   long_name = finite-volume mean edge pressure in Pa raised to the power of kappa
   units = 1
-  dimensions = (starting_x_direction_index:ending_x_direction_index,starting_y_direction_index:ending_y_direction_index,1:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc2:ending_x_direction_index_alloc2,starting_y_direction_index_alloc2:ending_y_direction_index_alloc2,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -381,7 +409,7 @@
   standard_name = cloud_condensed_water_specific_humidity_at_Lagrangian_surface
   long_name = cloud condensed water specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc,1:vertical_dimension_for_condensed_water_at_Lagrangian_surface)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_condensed_water_at_Lagrangian_surface)
   type = real
   kind = kind_dyn
   intent = inout
@@ -405,7 +433,7 @@
   standard_name = cell_area_for_fast_physics
   long_name = area of the grid cell for fast physics
   units = m2
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1)
   type = real
   kind = kind_grid
   intent = in
@@ -442,7 +470,7 @@
   standard_name = cloud_fraction_at_Lagrangian_surface
   long_name = cloud fraction at Lagrangian surface
   units = none
-  dimensions = (starting_x_direction_index_alloc:ending_x_direction_index_alloc,starting_y_direction_index_alloc:ending_y_direction_index_alloc,1:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = out

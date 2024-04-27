@@ -179,7 +179,6 @@
 
         call setalb (slmsk, lsm, lsm_noahmp, lsm_ruc, use_cice_alb, snodi, sncovr, sncovr_ice, &
                      snoalb, zorl, coszen, tsfg, tsfa, hprime, frac_grid, lakefrac,            &
-!                    snoalb, zorl, coszen, tsfg, tsfa, hprime, frac_grid, min_seaice,          &
                      alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,                    &
                      albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,                       &
                      albdvis_ice, albdnir_ice, albivis_ice, albinir_ice,                       &

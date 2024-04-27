@@ -143,11 +143,11 @@
                                                         slmsk, dx, si
 
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, prsl, prslk,   &
-                                                          tgrs, sfc_wts
+                                                          tgrs
       real(kind=kind_phys), dimension(:,:), intent(in), optional :: &
                                                           mg_cld, effrr_in,    &
                                                           cnvw_in, cnvc_in,    &
-                                                          sppt_wts
+                                                          sppt_wts, sfc_wts
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: aer_nm

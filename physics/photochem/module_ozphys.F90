@@ -221,7 +221,7 @@ contains
     real(kind_phys), intent(inout), dimension(:,:) :: &
          oz             ! Ozone concentration updated by physics
     logical, intent(in) :: do_diag
-    real(kind_phys), intent(inout), dimension(:,:) :: &
+    real(kind_phys), intent(inout), dimension(:,:), optional :: &
          do3_dt_prd,  & ! Physics tendency: production and loss effect
          do3_dt_ozmx, & ! Physics tendency: ozone mixing ratio effect
          do3_dt_temp, & ! Physics tendency: temperature effect
