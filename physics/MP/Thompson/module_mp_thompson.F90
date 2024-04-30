@@ -1046,9 +1046,10 @@ MODULE module_mp_thompson
                           re_cloud, re_ice, re_snow
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: pfils, pflls
       INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch, n_var_spp
-      REAL, DIMENSION(:,:), INTENT(IN) :: rand_pert
-      REAL, DIMENSION(:), INTENT(IN) :: spp_prt_list, spp_stddev_cutoff
-      CHARACTER(len=10), DIMENSION(:), INTENT(IN) :: spp_var_list
+      REAL, DIMENSION(:,:), INTENT(IN), OPTIONAL :: rand_pert
+      REAL, DIMENSION(:), INTENT(IN), OPTIONAL :: spp_prt_list
+      REAL, DIMENSION(:), INTENT(IN) :: spp_stddev_cutoff
+      CHARACTER(len=10), DIMENSION(:), INTENT(IN), OPTIONAL :: spp_var_list
       INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: &
