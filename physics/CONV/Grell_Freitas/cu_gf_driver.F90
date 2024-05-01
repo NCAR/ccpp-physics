@@ -816,33 +816,32 @@ contains
               ,dx            &
               ,mconv         &
               ,omeg          &
-
-              ,cactiv       &
-              ,cnvwt        &
-              ,zu           &
-              ,zd           &
-              ,zdm          & ! hli
-              ,edt          &
-              ,edtm         & ! hli
-              ,xmb          &
-              ,xmbm         &
-              ,xmbs         &
-              ,pret         &
-              ,outu         &
-              ,outv         &
-              ,outt         &
-              ,outq         &
-              ,outqc        &
-              ,kbcon        &
-              ,ktop         &
-              ,cupclw       &
-              ,frhd         &
-              ,ierr         &
-              ,ierrc        &
-              ,nchem        &
-              ,fscav        &
-              ,chem3d       &
-              ,wetdpc_deep  &
+              ,cactiv        &
+              ,cnvwt         &
+              ,zu            &
+              ,zd            &
+              ,zdm           & ! hli
+              ,edt           &
+              ,edtm          & ! hli
+              ,xmb           &
+              ,xmbm          &
+              ,xmbs          &
+              ,pret          &
+              ,outu          &
+              ,outv          &
+              ,outt          &
+              ,outq          &
+              ,outqc         &
+              ,kbcon         &
+              ,ktop          &
+              ,cupclw        &
+              ,frhd          &
+              ,ierr          &
+              ,ierrc         &
+              ,nchem         &
+              ,fscav         &
+              ,chem3d        &
+              ,wetdpc_deep   &
               ,do_smoke_transport     &
 !    the following should be set to zero if not available
               ,rand_mom      & ! for stochastics mom, if temporal and spatial patterns exist

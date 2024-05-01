@@ -158,7 +158,7 @@ contains
 !$acc declare copyin(rand_clos,rand_mom,rand_vmas)
 
      integer, intent(in) :: do_capsuppress
-     real(kind=kind_phys), intent(in), dimension(:) :: cap_suppress_j
+     real(kind=kind_phys), intent(in), dimension(:), optional :: cap_suppress_j
 !$acc declare create(cap_suppress_j)
   !
   ! 
@@ -217,11 +217,11 @@ contains
         mconv,ccn
 !$acc declare copy(mconv,ccn)
      real(kind=kind_phys), dimension (:,:,:)                           &
-        ,intent (inout)                   ::                           &
+        ,intent (inout), optional         ::                           &
         chem3d
      logical, intent (in) :: do_smoke_transport
      real(kind=kind_phys), dimension (:,:)                             &
-         , intent (out) :: wetdpc_deep
+         , intent (out), optional :: wetdpc_deep
      real(kind=kind_phys), intent (in) :: fscav(:)
 !$acc declare copy(chem3d) copyout(wetdpc_deep) copyin(fscav)
 
@@ -376,7 +376,7 @@ contains
 !$acc       ktopdby,kbconx,ierr2,ierr3,kbmax)
 
      integer,  dimension (its:ite), intent(inout) :: ierr
-     integer,  dimension (its:ite), intent(in) :: csum
+     integer,  dimension (its:ite), intent(in), optional :: csum
 !$acc declare copy(ierr) copyin(csum)
      integer                              ::                             &
        iloop,nens3,ki,kk,i,k
