@@ -8,6 +8,7 @@
 module module_nst_water_prop
   use machine ,               only : kind_phys
   use module_nst_parameters , only : t0k, zero, one, half
+  use w3emc,                  only : iw3jdn
 
   implicit none
   !
@@ -544,7 +545,6 @@ contains
     !$$$
     !
     integer :: jyr,jmnth,jday,jhr,jmn,jd
-    integer :: iw3jdn
     real (kind=kind_phys) fjd
     jd=iw3jdn(jyr,jmnth,jday)
     if(jhr.lt.12) then

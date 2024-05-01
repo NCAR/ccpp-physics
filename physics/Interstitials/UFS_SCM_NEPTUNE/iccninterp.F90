@@ -7,6 +7,8 @@
 !! IN and CCN data.
 module iccninterp
 
+    use w3emc, only: w3doxdat, w3kind, w3movdat
+
     implicit none
 
     private

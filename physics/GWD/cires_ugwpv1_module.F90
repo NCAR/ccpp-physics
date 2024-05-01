@@ -11,10 +11,11 @@ module  cires_ugwpv1_module
 !...................................................................................
 !
 !
-    use machine,            only : kind_phys
-    use  ugwp_common,       only : arad, pi, pi2, hpscale, rhp, rhp2, rh4, rhp4, khp, hpskm 
-    use  ugwp_wmsdis_init,  only : ilaunch, nslope, lhmet, lzmax, lzmin, lzstar   
-    use  ugwp_wmsdis_init,  only : tau_min, tamp_mpa   
+    use machine,           only : kind_phys
+    use ugwp_common,       only : arad, pi, pi2, hpscale, rhp, rhp2, rh4, rhp4, khp, hpskm
+    use ugwp_wmsdis_init,  only : ilaunch, nslope, lhmet, lzmax, lzmin, lzstar
+    use ugwp_wmsdis_init,  only : tau_min, tamp_mpa
+    use w3emc,             only : iw3jdn
 
     implicit none
     logical            :: module_is_initialized
@@ -436,7 +437,6 @@ module  cires_ugwpv1_module
     integer, intent(in) :: yr, mm, dd
     integer :: ddd_ugwp
     
-    integer ::  iw3jdn
     integer :: jd1, jddd
     jd1     = iw3jdn(yr,1,1)
     jddd    = iw3jdn(yr,mm,dd)

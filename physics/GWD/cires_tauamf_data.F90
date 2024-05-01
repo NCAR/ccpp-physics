@@ -1,5 +1,5 @@
 module cires_tauamf_data
-
+  use w3emc, only: w3doxdat, w3kind, w3movdat
   use machine, only: kind_phys
 !...........................................................................................
 ! tabulated GW-sources: GRACILE/Ern et al., 2018 and/or Resolved GWs from C384-Annual run
