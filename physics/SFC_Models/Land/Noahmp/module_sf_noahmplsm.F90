@@ -449,7 +449,7 @@ contains
 		   ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
 		   chleaf  , chuc    , chv2    , chb2    , fpice   , pahv    , &
                    pahg    , pahb    , pah     , esnow   , canhs   , laisun  , &
-                   laisha  , rb      , qsfcveg , qsfcbare                      &
+                   laisha  , rb      , qsfcveg , qsfcbare, rca                 &
 #ifdef CCPP
                    ,errmsg, errflg)
 #else
@@ -602,6 +602,7 @@ contains
   real (kind=kind_phys)                           , intent(out)     :: t2mb   !< 2-m air temperature over bare ground part [k]
   real (kind=kind_phys), intent(out) :: rssun        !< sunlit leaf stomatal resistance (s/m)
   real (kind=kind_phys), intent(out) :: rssha        !< shaded leaf stomatal resistance (s/m)
+  real (kind=kind_phys), intent(out) :: rca          !total canopy/stomatal resistance (s/m)
   real (kind=kind_phys), intent(out) :: bgap
   real (kind=kind_phys), intent(out) :: wgap
   real (kind=kind_phys), dimension(1:2)           , intent(out)   :: albd   !<  albedo (direct)
@@ -854,7 +855,7 @@ contains
                  fsrg   ,rssun   ,rssha ,albd  ,albi ,albsnd,albsni, bgap  ,wgap, tgv,tgb,&
                  q1     ,q2v    ,q2b    ,q2e    ,chv   ,chb     , & !out
                  emissi ,pah    ,canhs,                           &
-		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )                                            !out
+		 shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2,rca )                                            !out
 
     qsfcveg  = eah*ep_2/(sfcprs + epsm1*eah)
     qsfcbare = qsfc
@@ -1697,7 +1698,7 @@ endif   ! croptype == 0
                      t2mv   ,t2mb   ,fsrv   , &
                      fsrg   ,rssun  ,rssha  ,albd  ,albi,albsnd  ,albsni,bgap   ,wgap,tgv,tgb,&
                      q1     ,q2v    ,q2b    ,q2e    ,chv  ,chb, emissi,pah,canhs,&
-		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )   !out 
+		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2,rca )   !out 
 !jref:end                            
 
 ! --------------------------------------------------------------------------------------------------
@@ -1846,6 +1847,8 @@ endif   ! croptype == 0
   real (kind=kind_phys)                              , intent(out)   :: fsrg    !< ground reflected solar radiation (w/m2)
   real (kind=kind_phys), intent(out) :: rssun        !< sunlit leaf stomatal resistance (s/m)
   real (kind=kind_phys), intent(out) :: rssha        !< shaded leaf stomatal resistance (s/m)
+  real (kind=kind_phys), intent(out) :: rca          !total canopy/stomatal resistance (s/m)
+
 !jref:end - out for debug  
 
 !jref:start; output
@@ -2263,7 +2266,8 @@ endif   ! croptype == 0
                     csigmaf1,                                     & !out
 !jref:start
                     qc      ,qsfc    ,psfc    , & !in
-                    q2v     ,chv2, chleaf, chuc)               !inout 
+                    q2v     ,chv2, chleaf, chuc,                  & !inout 
+                    rca)                                            !out 
 
 ! new coupling code
 
@@ -3712,7 +3716,8 @@ endif   ! croptype == 0
                        t2mv    ,psnsun  ,psnsha  ,canhs   ,          & !out
                        csigmaf1,                                     & !out
                        qc      ,qsfc    ,psfc    ,                   & !in
-                       q2v     ,cah2    ,chleaf  ,chuc    )            !inout 
+                       q2v     ,cah2    ,chleaf  ,chuc,              & !inout
+                       rca)                                            !out 
 
 ! --------------------------------------------------------------------------------------------------
 ! use newton-raphson iteration to solve for vegetation (tv) and
@@ -3862,6 +3867,7 @@ endif   ! croptype == 0
 
   real (kind=kind_phys), intent(out) :: rssun        !sunlit leaf stomatal resistance (s/m)
   real (kind=kind_phys), intent(out) :: rssha        !shaded leaf stomatal resistance (s/m)
+  real (kind=kind_phys), intent(out) :: rca          !total canopy/stomatal resistance (s/m)
 
   real (kind=kind_phys) :: mol          !monin-obukhov length (m)
   real (kind=kind_phys) :: dtv          !change in tv, last iteration (k)
@@ -4202,6 +4208,15 @@ endif   ! croptype == 0
                        rssha ,psnsha,iloc  ,jloc   )          !out
         end if
      end if
+
+! total stomatal/canopy resistance Based on Bonan et al. (2011) conductance (1/Rs) equation
+        if(rssun .le. 0.0 .or. rssha .le. 0.0 .or. &
+           laisune .eq. 0.0 .or. laishae .eq. 0.0) then
+            rca = 0.0
+        else
+            rca = ((1.0/(rssun+rb)*laisune) + ((1.0/(rssha+rb))*laishae))
+            rca = 1.0/rca !resistance
+        end if
 
 ! prepare for sensible heat flux above veg.
 
