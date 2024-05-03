@@ -157,7 +157,7 @@
       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
       cmm, chh, evbs, evcw, sbsno, pah, ecan, etran, edir, snowc,&
       stm, snohf,smcwlt2, smcref2, wet1, t2mmp, q2mp,zvfun,      &
-      ztmax, errmsg, errflg,                                     &
+      ztmax, rca, errmsg, errflg,                                &
       canopy_heat_storage_ccpp,                                  &
       rainfall_ccpp,                                             &
       sw_absorbed_total_ccpp,                                    &
@@ -400,6 +400,8 @@
   real(kind=kind_phys), dimension(:)     , intent(out)   :: q2mp       ! combined q2m from tiles
   real(kind=kind_phys), dimension(:)     , intent(out)   :: zvfun      ! 
   real(kind=kind_phys), dimension(:)     , intent(out)   :: ztmax      ! thermal roughness length
+  real(kind=kind_phys), dimension(:)     , intent(out)   :: rca        ! total canopy/stomatal resistance (s/m)
+
   character(len=*)    ,                    intent(out)   :: errmsg
   integer             ,                    intent(out)   :: errflg
 
@@ -623,6 +625,8 @@
   real (kind=kind_phys)                            :: canopy_heat_storage   !   out | within-canopy heat [W/m2]
   real (kind=kind_phys)                            :: spec_humid_sfc_veg    !   out | surface specific humidty over vegetation [kg/kg]
   real (kind=kind_phys)                            :: spec_humid_sfc_bare   !   out | surface specific humidty over bare soil [kg/kg]
+  
+  real (kind=kind_phys)                            :: canopy_resistance     !   out | total canopy/stomatal resistance (s/m) 
 
   real (kind=kind_phys)                            :: ustarx                !  inout |surface friction velocity
   real (kind=kind_phys)                            :: prslkix               !  in exner function
@@ -1015,10 +1019,10 @@
           precip_adv_heat_total ,snow_sublimation      ,canopy_heat_storage   , &
           lai_sunlit            ,lai_shaded            ,leaf_air_resistance   , &
 #ifdef CCPP
-          spec_humid_sfc_veg    ,spec_humid_sfc_bare   ,                        &
+          spec_humid_sfc_veg    ,spec_humid_sfc_bare   ,canopy_resistance     , &
           errmsg                ,errflg                )
 #else
-          spec_humid_sfc_veg    ,spec_humid_sfc_bare   )
+          spec_humid_sfc_veg    ,spec_humid_sfc_bare   ,canopy_resistance     )
 #endif
         
 #ifdef CCPP
@@ -1056,7 +1060,7 @@
       chxy      (i)   = ch_noahmp
       zorl      (i)   = z0_total * 100.0  ! convert to cm
       ztmax     (i)   = z0h_total 
-
+      rca       (i)   = canopy_resistance
       smc       (i,:) = soil_moisture_vol
       slc       (i,:) = soil_liquid_vol
       snowxy    (i)   = float(snow_levels)
