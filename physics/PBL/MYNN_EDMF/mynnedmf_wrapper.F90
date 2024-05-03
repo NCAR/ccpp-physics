@@ -172,7 +172,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      implicit none
 !------------------------------------------------------------------- 
 
-     real(kind_phys)               :: huge
+     real(kind_phys),  intent(in)  :: huge
      character(len=*), intent(out) :: errmsg
      integer, intent(out)          :: errflg
 
@@ -290,7 +290,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind_phys), dimension(:), intent(inout) :: frp
       logical, intent(in) :: mix_chem, enh_mix, rrfs_sd
       real(kind_phys), dimension(:,:,:), intent(inout) :: chem3d
-      real(kind_phys), dimension(:,:  ), intent(inout) :: vdep
+      real(kind_phys), dimension(:,:  ), intent(in) :: vdep
       real(kind_phys), dimension(im)   :: emis_ant_no
 
 !MYNN-2D
