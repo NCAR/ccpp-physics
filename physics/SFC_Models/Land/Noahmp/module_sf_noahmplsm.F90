@@ -449,7 +449,7 @@ contains
 		   ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
 		   chleaf  , chuc    , chv2    , chb2    , fpice   , pahv    , &
                    pahg    , pahb    , pah     , esnow   , canhs   , laisun  , &
-                   laisha  , rb      , qsfcveg , qsfcbare, rca                 &
+                   laisha  , laisune , laishae , rb      , qsfcveg , qsfcbare  &
 #ifdef CCPP
                    ,errmsg, errflg)
 #else
@@ -594,6 +594,8 @@ contains
   real (kind=kind_phys)                           , intent(out)   :: rb        !< leaf boundary layer resistance (s/m)
   real (kind=kind_phys)                           , intent(out)   :: laisun    !< sunlit leaf area index (m2/m2)
   real (kind=kind_phys)                           , intent(out)   :: laisha    !< shaded leaf area index (m2/m2)
+  real (kind=kind_phys)                           , intent(out)   :: laisune   !< sunlit leaf area index, one-sided (m2/m2),effective
+  real (kind=kind_phys)                           , intent(out)   :: laishae   !< shaded leaf area index, one-sided (m2/m2),effective
   real (kind=kind_phys)                           , intent(out)   :: qsfcveg   !< effective spec humid over vegetation 
   real (kind=kind_phys)                           , intent(out)   :: qsfcbare  !< effective spec humid over bare soil 
 
@@ -602,7 +604,6 @@ contains
   real (kind=kind_phys)                           , intent(out)     :: t2mb   !< 2-m air temperature over bare ground part [k]
   real (kind=kind_phys), intent(out) :: rssun        !< sunlit leaf stomatal resistance (s/m)
   real (kind=kind_phys), intent(out) :: rssha        !< shaded leaf stomatal resistance (s/m)
-  real (kind=kind_phys), intent(out) :: rca          !total canopy/stomatal resistance (s/m)
   real (kind=kind_phys), intent(out) :: bgap
   real (kind=kind_phys), intent(out) :: wgap
   real (kind=kind_phys), dimension(1:2)           , intent(out)   :: albd   !<  albedo (direct)
@@ -843,11 +844,10 @@ contains
                  tv     ,tg     ,stc    ,snowh  ,eah    ,tah    , & !inout
                  sneqvo ,sneqv  ,sh2o   ,smc    ,snice  ,snliq  , & !inout
                  albold ,cm     ,ch     ,dx     ,dz8w   ,q2     , & !inout
-                 ustarx ,                                         & !inout
+                 ustarx ,tauss  ,                                 & !inout
+                 laisun ,laisha ,laisune, laishae, rb   ,         & !out
 #ifdef CCPP
-                 tauss  ,laisun ,laisha ,rb , errmsg ,errflg ,    & !inout
-#else
-                 tauss  ,laisun ,laisha ,rb ,                     & !inout
+                 errmsg ,errflg ,    & !out
 #endif
 !jref:start
                  qc     ,qsfc   ,psfc   , & !in 
@@ -855,7 +855,7 @@ contains
                  fsrg   ,rssun   ,rssha ,albd  ,albi ,albsnd,albsni, bgap  ,wgap, tgv,tgb,&
                  q1     ,q2v    ,q2b    ,q2e    ,chv   ,chb     , & !out
                  emissi ,pah    ,canhs,                           &
-		 shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2,rca )                                            !out
+		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )                                            !out
 
     qsfcveg  = eah*ep_2/(sfcprs + epsm1*eah)
     qsfcbare = qsfc
@@ -1687,18 +1687,17 @@ endif   ! croptype == 0
                      tv     ,tg     ,stc    ,snowh  ,eah    ,tah    , & !inout
                      sneqvo ,sneqv  ,sh2o   ,smc    ,snice  ,snliq  , & !inout
                      albold ,cm     ,ch     ,dx     ,dz8w   ,q2     , &   !inout
-                     ustarx ,                                         &   !inout
+                     ustarx ,tauss  ,                                 &   !inout
+                     laisun ,laisha ,laisune,laishae,rb     ,         & !out
 #ifdef CCPP
-                     tauss  ,laisun ,laisha ,rb ,errmsg ,errflg,      & !inout
-#else
-                     tauss  ,laisun ,laisha ,rb ,                     & !inout
+                     errmsg ,errflg,                                  & !out
 #endif
 !jref:start
                      qc     ,qsfc   ,psfc   , & !in 
                      t2mv   ,t2mb   ,fsrv   , &
                      fsrg   ,rssun  ,rssha  ,albd  ,albi,albsnd  ,albsni,bgap   ,wgap,tgv,tgb,&
                      q1     ,q2v    ,q2b    ,q2e    ,chv  ,chb, emissi,pah,canhs,&
-		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2,rca )   !out 
+		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )   !out 
 !jref:end                            
 
 ! --------------------------------------------------------------------------------------------------
@@ -1847,8 +1846,6 @@ endif   ! croptype == 0
   real (kind=kind_phys)                              , intent(out)   :: fsrg    !< ground reflected solar radiation (w/m2)
   real (kind=kind_phys), intent(out) :: rssun        !< sunlit leaf stomatal resistance (s/m)
   real (kind=kind_phys), intent(out) :: rssha        !< shaded leaf stomatal resistance (s/m)
-  real (kind=kind_phys), intent(out) :: rca          !total canopy/stomatal resistance (s/m)
-
 !jref:end - out for debug  
 
 !jref:start; output
@@ -1882,9 +1879,11 @@ endif   ! croptype == 0
   real (kind=kind_phys)                              , intent(inout) :: ch     !< sensible heat exchange coefficient
   real (kind=kind_phys)                              , intent(inout) :: q1     !< 
   real (kind=kind_phys)                              , intent(inout) :: ustarx !< friction velocity
-  real (kind=kind_phys)                              , intent(inout) :: rb     !< leaf boundary layer resistance (s/m)
-  real (kind=kind_phys)                              , intent(inout) :: laisun !< sunlit leaf area index (m2/m2)
-  real (kind=kind_phys)                              , intent(inout) :: laisha !< shaded leaf area index (m2/m2)
+  real (kind=kind_phys)                              , intent(  out) :: rb     !< leaf boundary layer resistance (s/m)
+  real (kind=kind_phys)                              , intent(  out) :: laisun !< sunlit leaf area index (m2/m2)
+  real (kind=kind_phys)                              , intent(  out) :: laisha !< shaded leaf area index (m2/m2)
+  real (kind=kind_phys)                              , intent(  out) :: laisune!< sunlit leaf area index, one-sided (m2/m2),effective
+  real (kind=kind_phys)                              , intent(  out) :: laishae!< shaded leaf area index, one-sided (m2/m2),effective
 #ifdef CCPP
   character(len=*)                  , intent(inout) :: errmsg
   integer                           , intent(inout) :: errflg
@@ -2016,6 +2015,10 @@ endif   ! croptype == 0
     chuc      = 0.
     chv2      = 0.
     rb        = 0.
+    laisun    = 0.
+    laisha    = 0.
+    laisune   = 0.
+    laishae   = 0.
 
     cdmnv     = 0.0
     ezpdv     = 0.0
@@ -2266,8 +2269,8 @@ endif   ! croptype == 0
                     csigmaf1,                                     & !out
 !jref:start
                     qc      ,qsfc    ,psfc    , & !in
-                    q2v     ,chv2, chleaf, chuc,                  & !inout 
-                    rca)                                            !out 
+                    q2v     ,chv2    ,chleaf  , chuc   ,          & !inout
+                    rb      ,laisune ,laishae )                     !out 
 
 ! new coupling code
 
@@ -3716,8 +3719,8 @@ endif   ! croptype == 0
                        t2mv    ,psnsun  ,psnsha  ,canhs   ,          & !out
                        csigmaf1,                                     & !out
                        qc      ,qsfc    ,psfc    ,                   & !in
-                       q2v     ,cah2    ,chleaf  ,chuc,              & !inout
-                       rca)                                            !out 
+                       q2v     ,cah2    ,chleaf  ,chuc,              & !inout   
+                       rb      ,laisune ,laishae)                      !out 
 
 ! --------------------------------------------------------------------------------------------------
 ! use newton-raphson iteration to solve for vegetation (tv) and
@@ -3841,6 +3844,9 @@ endif   ! croptype == 0
   real (kind=kind_phys),                           intent(out) :: chuc   !< under canopy exchange coefficient
   real (kind=kind_phys),                           intent(out) :: canhs  !< canopy heat storage change (w/m2)
   real (kind=kind_phys),                           intent(out) :: q2v    !< 
+  real (kind=kind_phys),                           intent(out) :: rb     !< bulk leaf boundary layer resistance (s/m)
+  real (kind=kind_phys),                           intent(out) :: laisune!< sunlit leaf area index, one-sided (m2/m2),effective
+  real (kind=kind_phys),                           intent(out) :: laishae!< shaded leaf area index, one-sided (m2/m2),effective
   real (kind=kind_phys) :: cah     !< sensible heat conductance, canopy air to zlvl air (m/s)
   real (kind=kind_phys) :: u10v    !< 10 m wind speed in eastward dir (m/s) 
   real (kind=kind_phys) :: v10v    !< 10 m wind speed in eastward dir (m/s) 
@@ -3857,7 +3863,6 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: z0mo        !roughness length for intermediate output only (m)
   real (kind=kind_phys) :: z0h          !roughness length, sensible heat (m)
   real (kind=kind_phys) :: z0hg         !roughness length, sensible heat (m)
-  real (kind=kind_phys) :: rb           !bulk leaf boundary layer resistance (s/m)
   real (kind=kind_phys) :: ramc         !aerodynamic resistance for momentum (s/m)
   real (kind=kind_phys) :: rahc         !aerodynamic resistance for sensible heat (s/m)
   real (kind=kind_phys) :: rawc         !aerodynamic resistance for water vapor (s/m)
@@ -3867,7 +3872,6 @@ endif   ! croptype == 0
 
   real (kind=kind_phys), intent(out) :: rssun        !sunlit leaf stomatal resistance (s/m)
   real (kind=kind_phys), intent(out) :: rssha        !shaded leaf stomatal resistance (s/m)
-  real (kind=kind_phys), intent(out) :: rca          !total canopy/stomatal resistance (s/m)
 
   real (kind=kind_phys) :: mol          !monin-obukhov length (m)
   real (kind=kind_phys) :: dtv          !change in tv, last iteration (k)
@@ -3938,8 +3942,6 @@ endif   ! croptype == 0
   real (kind=kind_phys) :: hcv          !canopy heat capacity j/m2/k, C.He added 
 
   real (kind=kind_phys) :: vaie         !total leaf area index + stem area index,effective
-  real (kind=kind_phys) :: laisune      !sunlit leaf area index, one-sided (m2/m2),effective
-  real (kind=kind_phys) :: laishae      !shaded leaf area index, one-sided (m2/m2),effective
 
   integer :: k         !index
   integer :: iter      !iteration index
@@ -4208,15 +4210,6 @@ endif   ! croptype == 0
                        rssha ,psnsha,iloc  ,jloc   )          !out
         end if
      end if
-
-! total stomatal/canopy resistance Based on Bonan et al. (2011) conductance (1/Rs) equation
-        if(rssun .le. 0.0 .or. rssha .le. 0.0 .or. &
-           laisune .eq. 0.0 .or. laishae .eq. 0.0) then
-            rca = 0.0
-        else
-            rca = ((1.0/(rssun+rb)*laisune) + ((1.0/(rssha+rb))*laishae))
-            rca = 1.0/rca !resistance
-        end if
 
 ! prepare for sensible heat flux above veg.
 

@@ -620,14 +620,14 @@
   real (kind=kind_phys)                            :: snow_sublimation      !   out | snow sublimation [W/m2]
   real (kind=kind_phys)                            :: lai_sunlit            !   out | sunlit leaf area index [m2/m2]
   real (kind=kind_phys)                            :: lai_shaded            !   out | shaded leaf area index [m2/m2]
+  real (kind=kind_phys)                            :: lai_sunlit_eff        !   out | sunlit leaf area index, one-sided, effective [m2/m2]
+  real (kind=kind_phys)                            :: lai_shaded_eff        !   out | shaded leaf area index, one-sided, effective [m2/m2]
   real (kind=kind_phys)                            :: leaf_air_resistance   !   out | leaf boundary layer resistance [s/m]
 
   real (kind=kind_phys)                            :: canopy_heat_storage   !   out | within-canopy heat [W/m2]
   real (kind=kind_phys)                            :: spec_humid_sfc_veg    !   out | surface specific humidty over vegetation [kg/kg]
   real (kind=kind_phys)                            :: spec_humid_sfc_bare   !   out | surface specific humidty over bare soil [kg/kg]
   
-  real (kind=kind_phys)                            :: canopy_resistance     !   out | total canopy/stomatal resistance (s/m) 
-
   real (kind=kind_phys)                            :: ustarx                !  inout |surface friction velocity
   real (kind=kind_phys)                            :: prslkix               !  in exner function
   real (kind=kind_phys)                            :: prsik1x               !  in exner function
@@ -1017,12 +1017,13 @@
           ch_vegetated_2m       ,ch_bare_ground_2m     ,precip_frozen_frac    , &
           precip_adv_heat_veg   ,precip_adv_heat_grd_v ,precip_adv_heat_grd_b , &
           precip_adv_heat_total ,snow_sublimation      ,canopy_heat_storage   , &
-          lai_sunlit            ,lai_shaded            ,leaf_air_resistance   , &
+          lai_sunlit            ,lai_shaded            ,lai_sunlit_eff        , &
+          lai_shaded_eff        ,leaf_air_resistance   ,                        &
 #ifdef CCPP
-          spec_humid_sfc_veg    ,spec_humid_sfc_bare   ,canopy_resistance     , &
+          spec_humid_sfc_veg    ,spec_humid_sfc_bare   ,                        &
           errmsg                ,errflg                )
 #else
-          spec_humid_sfc_veg    ,spec_humid_sfc_bare   ,canopy_resistance     )
+          spec_humid_sfc_veg    ,spec_humid_sfc_bare   )
 #endif
         
 #ifdef CCPP
@@ -1060,7 +1061,17 @@
       chxy      (i)   = ch_noahmp
       zorl      (i)   = z0_total * 100.0  ! convert to cm
       ztmax     (i)   = z0h_total 
-      rca       (i)   = canopy_resistance
+      
+      ! total stomatal/canopy resistance Based on Bonan et al. (2011) conductance (1/Rs) equation
+      if(rs_sunlit .le. 0.0 .or. rs_shaded .le. 0.0 .or. &
+          lai_sunlit_eff .eq. 0.0 .or. lai_shaded_eff .eq. 0.0) then
+        rca(i) = 0.0
+      else
+        rca(i) = ((1.0/(rs_sunlit+leaf_air_resistance)*lai_sunlit_eff) + &
+                 ((1.0/(rs_shaded+leaf_air_resistance))*lai_shaded_eff))
+        rca(i) = 1.0/rca(i) !resistance
+      end if
+      
       smc       (i,:) = soil_moisture_vol
       slc       (i,:) = soil_liquid_vol
       snowxy    (i)   = float(snow_levels)
