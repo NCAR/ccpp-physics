@@ -846,30 +846,29 @@ contains
               ,ca_deep       &
               ,mconv         &
               ,omeg          &
-
-              ,cactiv       &
-              ,cnvwt        &
-              ,zu           &
-              ,zd           &
-              ,zdm          & ! hli
-              ,edt          &
-              ,edtm         & ! hli
-              ,xmb          &
-              ,xmbm         &
-              ,xmbs         &
-              ,pret         &
-              ,outu         &
-              ,outv         &
-              ,outt         &
-              ,outq         &
-              ,outqc        &
-              ,kbcon        &
-              ,ktop         &
-              ,cupclw       &
-              ,frhd         &
-              ,rainevap     &
-              ,ierr         &
-              ,ierrc        &
+              ,cactiv        &
+              ,cnvwt         &
+              ,zu            &
+              ,zd            &
+              ,zdm           & ! hli
+              ,edt           &
+              ,edtm          & ! hli
+              ,xmb           &
+              ,xmbm          &
+              ,xmbs          &
+              ,pret          &
+              ,outu          &
+              ,outv          &
+              ,outt          &
+              ,outq          &
+              ,outqc         &
+              ,kbcon         &
+              ,ktop          &
+              ,cupclw        &
+              ,frhd          &
+              ,rainevap      &
+              ,ierr          &
+              ,ierrc         &
 !    the following should be set to zero if not available
               ,rand_mom      & ! for stochastics mom, if temporal and spatial patterns exist
               ,rand_vmas     & ! for stochastics vertmass, if temporal and spatial patterns exist
