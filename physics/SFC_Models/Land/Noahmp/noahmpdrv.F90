@@ -620,8 +620,6 @@
   real (kind=kind_phys)                            :: snow_sublimation      !   out | snow sublimation [W/m2]
   real (kind=kind_phys)                            :: lai_sunlit            !   out | sunlit leaf area index [m2/m2]
   real (kind=kind_phys)                            :: lai_shaded            !   out | shaded leaf area index [m2/m2]
-  real (kind=kind_phys)                            :: lai_sunlit_eff        !   out | sunlit leaf area index, one-sided, effective [m2/m2]
-  real (kind=kind_phys)                            :: lai_shaded_eff        !   out | shaded leaf area index, one-sided, effective [m2/m2]
   real (kind=kind_phys)                            :: leaf_air_resistance   !   out | leaf boundary layer resistance [s/m]
 
   real (kind=kind_phys)                            :: canopy_heat_storage   !   out | within-canopy heat [W/m2]
@@ -1017,8 +1015,7 @@
           ch_vegetated_2m       ,ch_bare_ground_2m     ,precip_frozen_frac    , &
           precip_adv_heat_veg   ,precip_adv_heat_grd_v ,precip_adv_heat_grd_b , &
           precip_adv_heat_total ,snow_sublimation      ,canopy_heat_storage   , &
-          lai_sunlit            ,lai_shaded            ,lai_sunlit_eff        , &
-          lai_shaded_eff        ,leaf_air_resistance   ,                        &
+          lai_sunlit            ,lai_shaded            ,leaf_air_resistance   , &
 #ifdef CCPP
           spec_humid_sfc_veg    ,spec_humid_sfc_bare   ,                        &
           errmsg                ,errflg                )
@@ -1064,11 +1061,11 @@
       
       ! total stomatal/canopy resistance Based on Bonan et al. (2011) conductance (1/Rs) equation
       if(rs_sunlit .le. 0.0 .or. rs_shaded .le. 0.0 .or. &
-          lai_sunlit_eff .eq. 0.0 .or. lai_shaded_eff .eq. 0.0) then
+          lai_sunlit .eq. 0.0 .or. lai_shaded .eq. 0.0) then
         rca(i) = 0.0
       else
-        rca(i) = ((1.0/(rs_sunlit+leaf_air_resistance)*lai_sunlit_eff) + &
-                 ((1.0/(rs_shaded+leaf_air_resistance))*lai_shaded_eff))
+        rca(i) = ((1.0/(rs_sunlit+leaf_air_resistance)*lai_sunlit) + &
+                 ((1.0/(rs_shaded+leaf_air_resistance))*lai_shaded))
         rca(i) = 1.0/rca(i) !resistance
       end if
       
