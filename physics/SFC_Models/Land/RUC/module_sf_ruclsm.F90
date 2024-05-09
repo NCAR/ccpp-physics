@@ -1520,7 +1520,7 @@ CONTAINS
                  GSW,GSWnew,GLW,SOILT,EMISS,ALB,ALBice,SNWE
     ENDIF
 
-	if(snhei.gt.0.0081_kind_phys*rhowater/rhosn) then
+       if(snhei.gt.0.0081_kind_phys*rhowater/rhosn) then
 !*** Update snow density for current temperature (Koren et al 1999,doi:10.1029/1999JD900232.)
         BSN=delt/3600._kind_phys*c1sn*exp(0.08_kind_phys*min(zero,tsnav)-c2sn*rhosn*1.e-3_kind_phys)
        if(bsn*snwe*100._kind_phys.lt.1.e-4_kind_phys) goto 777
