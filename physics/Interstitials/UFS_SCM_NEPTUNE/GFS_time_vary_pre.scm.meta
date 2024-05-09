@@ -3,7 +3,6 @@
   type = scheme
   relative_path = ../../
   dependencies = tools/funcphys.f90,hooks/machine.F
-ay to get rid of all the warnings.):physics/GFS_time_vary_pre.scm.meta
 
 ########################################################################
 [ccpp-arg-table]

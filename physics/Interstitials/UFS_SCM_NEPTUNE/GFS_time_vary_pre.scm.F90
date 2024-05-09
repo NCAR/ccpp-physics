@@ -70,7 +70,6 @@
         julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
 
         use machine,               only: kind_phys, kind_dbl_prec, kind_sngl_prec
-        use w3emc, only: w3difdat
 
         implicit none
         
