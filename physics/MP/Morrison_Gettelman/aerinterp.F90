@@ -6,7 +6,6 @@
 !! This module contain subroutines of reading and interpolating
 !! aerosol data for MG microphysics.
 module aerinterp
-
     implicit none
 
     private read_netfaer

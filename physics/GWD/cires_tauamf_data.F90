@@ -164,7 +164,7 @@ contains
     end subroutine tau_amf_interp  
     
     subroutine gfs_idate_calendar(idate, fhour, ddd, fddd) 
-    
+
     use machine, only: kind_phys    		 
     implicit none  
 ! input     
