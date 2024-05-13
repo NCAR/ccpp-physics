@@ -36,9 +36,16 @@ show some variables in the namelist that must match the SDF.
 <tr><td>qdiag3d         <td>see \a GFS_typedefs.F90       <td>flag for 3D tracer diagnostic fields            <td>.false.
 <tr><td>lssav           <td>see \a GFS_typedefs.F90       <td>flag for storing diagnostics            <td>.false.
 <tr><td>cplflx          <td>see \a GFS_typedefs.F90       <td>flag for using fluxes provided by an external model              <td>.false.
+<tr><td>cplice
+<tr><td>cplocn2atm
 <tr><td>cplwav          <td>see \a GFS_typedefs.F90       <td>flag for using information produced by an external ocean wave model              <td>.false.
-<tr><td>cplchm          <td>see \a GFS_typedefs.F90       <td>flag for coupled chemistry diagnostics           <td>.false.
 <tr><td>cplwav2atm      <td>see \a GFS_typedefs.F90       <td>flag for wave to atm coupling           <td>.false.
+<tr><td>cplaqm
+<tr><td>cplchm          <td>see \a GFS_typedefs.F90       <td>flag for coupled chemistry diagnostics           <td>.false.
+<tr><td>cpllnd
+<tr><td>cpllnd2atm
+<tr><td>rrfs_sd
+<tr><td>use_cice_alb
 <tr><td>oz_phys_2015    <td>ozphys_2015               <td>flag for new (2015) ozone physics               <td>.false.
 <tr><td>fhcyc           <td>gfs_phys_time_vary    <td>frequency for surface data cycling in hours     <td>0.0 
 <tr><td>use_ufo         <td>gfs_phys_time_vary          <td>flag for using unfiltered orography surface option <td>.false.
@@ -178,6 +185,36 @@ show some variables in the namelist that must match the SDF.
 <tr><td>lwhtr           <td>rrtmg_lw                  <td>flag for output of longwave heating rate       <td>.true.
 <tr><td>swhtr           <td>rrtmg_sw                  <td>flag for output of shortwave heating rate      <td>.true.
 <tr><td>nhfrad          <td>gfs_time_vary_pre         <td>number of timesteps for which to call radiation on physics timestep (coldstarts)     <td>0
+<tr><td colspan="4" align= center>\b Parameters \b related \b to \b RRTMGP \b schemes
+<tr><td>do_RRTMGP      <td>GFS_rrtmgp_setup                     <td>use RRTMGP                                     <td>.false.
+<tr><td>active_gases    <td>GFS_rrtmgp_pre,rrtmgp_lw_main,rrtmgp_lw_gas_optics,rrtmgp_sw_main,rrtmgp_sw_gas_optics     <td>character list of active gases used in RRTMGP   <td>''
+<tr><td>nGases          <td>GFS_rrtmgp_pre,rrtmgp_lw_main,rrtmgp_sw_main                    <td>number of active gases                         <td>0
+<tr><td>rrtmgp_root     <td>rrtmgp_lw_cloud_optics,rrtmgp_lw_main,rrtmgp_sw_cloud_optics,rrtmgp_lw_gas_optics,rrtmgp_sw_main                    <td>directory of rte+rrtmgp source code            <td>''
+<tr><td>lw_file_gas     <td>rrtmgp_lw_main,rrtmgp_lw_gas_optics                    <td>RRTMGP K-distribution file, coefficients to compute optics for gaseous atmosphere    <td>''
+<tr><td>lw_file_clouds  <td>                    <td>RRTMGP file containing coefficients used to compute clouds optical properties   <td>''
+<tr><td>sw_file_gas     <td>                    <td>RRTMGP K-distribution file, coefficients to compute optics for gaseous atmosphere <td>''
+<tr><td>sw_file_clouds  <td>                    <td>RRTMGP file containing coefficents used to compute clouds optical properties    <td>''
+<tr><td>rrtmgp_nBandsSW <td>                    <td>number of RRTMGP SW bands                <td>-999
+<tr><td>rrtmgp_nGptsSW  <td>                    <td>number of RRTMGP SW spectral points      <td>-999
+<tr><td>rrtmgp_nBandsLW <td>                    <td>number of RRTMGP LW bands                <td>-999
+<tr><td>rrtmgp_nGptsLW  <td>                    <td>number of RRTMGP LW spectral points      <td>-999
+<tr><td>doG_cldoptics   <td>                    <td>use legacy RRTMG cloud optics            <td>.false.
+<tr><td>doGP_cldoptics_PADE   <td>              <td>use RRTMGP cloud optics: PADE approximation   <td>.false.
+<tr><td>doGP_cldoptics_LUT    <td>              <td>use RRTMGP cloud optics: LUTs                 <td>.false.
+<tr><td>iovr_convcld    <td>                    <td>cloud-overlap assumption for convective cloud   <td>1
+<tr><td>rrtmgp_nrghice  <td>                    <td>number of ice-roughness categories       <td>3
+<tr><td>rrtmgp_nGauss_ang    <td>               <td>number of angles used in Gaussian quadrature     <td>1
+<tr><td>do_GPsw_Glw      <td>                   <td>                        <td>.false.
+<tr><td>use_LW_jacobian  <td>                   <td>use Jacobian of LW to update LW radiation tendencies  <td>.false.
+<tr><td>damp_LW_fluxadj  <td>                   <td>Damp LW Jacobian flux adjustment with height     <td>.false.
+<tr><td>lfnc_k           <td> dcyc2t3      <td>depth of transition layer in logistic function for LW flux adjustment damping                                  <td>-999
+<tr><td>lfnc_p0          <td> dcyc2t3      <td>transition pressure for LW flux adjustment damping                           <td>-999
+<tr><td>doGP_lwscat      <td>rrtmgp_lw_main     <td>if true, include scattering in longwave cloud-optics, only compatible w/ GP cloud-optics <td>.false.
+<tr><td>doGP_sgs_cnv     <td>rrtmgp_lw_main, rrtmgp_sw_main          <td>if true, include SubGrdiScale convective cloud in RRTMGP
+#<tr><td>doGP_sgs_mynn    <td>                   <td>if true, include SubGridScale MYNN-EDMF cloud in RRTMGP
+#<tr><td>rrtmgp_lw_phys_blksz   <td>             <td>number of columns for RRTMGP LW scheme to process at each instance    <td>1
+#<tr><td>rrtmgp_sw_phys_blksz   <td>             <td>number of columns for RRTMGP SW scheme to process at each instance    <td>1
+<tr><td>doGP_smearclds         <td>GFS_rrtmgp_cloud_mp             <td>if true, include implicit SubGridScale clouds in RRTMGP
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b cumulus \b schemes
 <tr><td>imfshalcnv      <td>choice of shallow convective scheme          <td>flag for mass flux shallow convective scheme:\n 
                                                       <ul>

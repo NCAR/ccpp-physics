@@ -1,5 +1,7 @@
-UGWPv1_gsldrag scheme.
+/**
+\page GFS_ugwpv1_gsldrag GFS Unified UGWP Version 1 Scheme
 
+\section des_ugwpv1 Description
 The "ugwpv1_gsldrag" combines the orographic gravity wave drag (GWD) parameterizations of the GSL drag suite with the version 1 UGWP non-stationary gravity wave drag (NGW) scheme of \cite yudin_et_al_2020.
 
 For information on the GSL drag suite, click here.
@@ -45,4 +47,4 @@ the effects of unresolved GWs in global forecast models, the representation of
 subgrid OGWs and NGWs has been implemented in the self-consistent manner using the 
 UGWP framework.
 
-
+*/

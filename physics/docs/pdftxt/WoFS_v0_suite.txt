@@ -10,7 +10,7 @@ not parameterize deep convection.
 
 The WoFS suite uses the parameterizations in the following order:
  - \ref SGSCLOUD_page
- - \ref GFS_RRTMG
+ - \ref GFS_RRTMG_page
  - \ref SFC_MYNNSFL
  - \ref GFS_NSST
  - \ref GFS_NOAH
