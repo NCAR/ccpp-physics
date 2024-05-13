@@ -31,8 +31,8 @@ physics/GWD/gwdc.*                                                           @So
 physics/GWD/gwdps.*                                                          @Songyou184                               @grantfirl @Qingfu-Liu @dustinswales
 physics/GWD/rayleigh_damp.*                                                  @yangfanglin                              @grantfirl @Qingfu-Liu @dustinswales
 physics/GWD/ugwp_driver_v0.F                                                 @mdtoyNOAA                                @grantfirl @Qingfu-Liu @dustinswales
-physics/GWD/ugwpv1_gsldrag.*                                                 @mdtoyNOAA                                @grantfirl @Qingfu-Liu @dustinswales
-physics/GWD/ugwpv1_gsldrag_post.*                                            @mdtoyNOAA                                @grantfirl @Qingfu-Liu @dustinswales
+physics/GWD/ugwpv1_gsldrag.*                                                 @mdtoyNOAA @BoYang-NOAA                   @grantfirl @Qingfu-Liu @dustinswales
+physics/GWD/ugwpv1_gsldrag_post.*                                            @mdtoyNOAA @BoYang-NOAA                   @grantfirl @Qingfu-Liu @dustinswales
 physics/GWD/unified_ugwp*                                                    @mdtoyNOAA                                @grantfirl @Qingfu-Liu @dustinswales
 physics/MP/Ferrier_Aligo/module_MP_FER_HIRES.*                               @ericaligo-NOAA                           @grantfirl @Qingfu-Liu @dustinswales
 physics/MP/Ferrier_Aligo/mp_fer_hires.*                                      @ericaligo-NOAA                           @grantfirl @Qingfu-Liu @dustinswales
