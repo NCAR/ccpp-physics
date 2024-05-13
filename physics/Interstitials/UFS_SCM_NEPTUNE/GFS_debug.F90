@@ -426,7 +426,7 @@
 
          !--- local variables
          integer :: impi, iomp, ierr, n, idtend, iprocess, itracer
-         integer :: mpirank, mpisize, mpicomm
+         integer :: mpirank, mpisize
          integer :: omprank, ompsize
 
          ! Initialize CCPP error handling variables
@@ -434,13 +434,11 @@
          errflg = 0
 
 #ifdef MPI
-         mpicomm = Model%communicator
          mpirank = Model%me
          mpisize = Model%ntasks
 #else
          mpirank = 0
          mpisize = 1
-         mpicomm = 0
 #endif
 #ifdef _OPENMP
          omprank = OMP_GET_THREAD_NUM()
@@ -454,7 +452,7 @@
 !$OMP BARRIER
 #endif
 #ifdef MPI
-!         call MPI_BARRIER(mpicomm,ierr)
+!         call MPI_BARRIER(Model%communicator,ierr)
 #endif
 
          do impi=0,mpisize-1
@@ -952,7 +950,7 @@
 #endif
              end do
 #ifdef MPI
-!             call MPI_BARRIER(mpicomm,ierr)
+!             call MPI_BARRIER(Model%communicator,ierr)
 #endif
          end do
 
@@ -960,7 +958,7 @@
 !$OMP BARRIER
 #endif
 #ifdef MPI
-!         call MPI_BARRIER(mpicomm,ierr)
+!         call MPI_BARRIER(Model%communicator,ierr)
 #endif
 
       end subroutine GFS_diagtoscreen_run
@@ -1104,7 +1102,7 @@
 
          !--- local variables
          integer :: impi, iomp, ierr
-         integer :: mpirank, mpisize, mpicomm
+         integer :: mpirank, mpisize
          integer :: omprank, ompsize
          integer :: istart, iend, kstart, kend
 
@@ -1113,13 +1111,11 @@
          errflg = 0
 
 #ifdef MPI
-         mpicomm = Model%communicator
          mpirank = Model%me
-         call MPI_COMM_SIZE(mpicomm, mpisize, ierr)
+         call MPI_COMM_SIZE(Model%communicator, mpisize, ierr)
 #else
          mpirank = 0
          mpisize = 1
-         mpicomm = 0
 #endif
 #ifdef _OPENMP
          omprank = OMP_GET_THREAD_NUM()
@@ -1133,7 +1129,7 @@
 !$OMP BARRIER
 #endif
 #ifdef MPI
-!         call MPI_BARRIER(mpicomm,ierr)
+!         call MPI_BARRIER(Model%communicator,ierr)
 #endif
 
          do impi=0,mpisize-1
@@ -1482,7 +1478,7 @@
 #endif
              end do
 #ifdef MPI
-!             call MPI_BARRIER(mpicomm,ierr)
+!             call MPI_BARRIER(Model%communicator,ierr)
 #endif
          end do
 
@@ -1490,7 +1486,7 @@
 !$OMP BARRIER
 #endif
 #ifdef MPI
-!         call MPI_BARRIER(mpicomm,ierr)
+!         call MPI_BARRIER(Model%communicator,ierr)
 #endif
 
       end subroutine GFS_interstitialtoscreen_run
