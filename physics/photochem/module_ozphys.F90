@@ -306,8 +306,8 @@ contains
 
        ! Diagnostics (optional)
        if (do_diag) then
-          do3_dt_prd(:,iLev)  = (prod(:,1)-prod(:,2)*prod(:,6))*dt
-          do3_dt_ozmx(:,iLev) = (oz(:,iLev) - ozib(:))
+          do3_dt_prd(:,iLev)  = prod(:,1) * dt
+          do3_dt_ozmx(:,iLev) = prod(:,2) * (oz(:,iLev) - prod(:,6)) * dt
           do3_dt_temp(:,iLev) = prod(:,3)*(t(:,iLev)-prod(:,5))*dt
           do3_dt_ohoz(:,iLev) = prod(:,4) * (colo3(:,iLev)-coloz(:,iLev))*dt
        endif

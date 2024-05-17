@@ -28,7 +28,7 @@
         logical             , dimension(:),  intent(in) :: dry
         real(kind=kind_phys), dimension(:),  intent(in) :: pgr, u10m, v10m
         real(kind=kind_phys), dimension(:),  intent(inout) :: t2m, q2m, tmpmin, tmpmax, spfhmin, spfhmax
-        real(kind=kind_phys), dimension(:),  intent(inout) :: t2mmp, q2mp
+        real(kind=kind_phys), dimension(:),  intent(in)    :: t2mmp, q2mp
         real(kind=kind_phys), dimension(:),  intent(inout) :: wind10mmax, u10mmax, v10mmax, dpt2m
 
         character(len=*),                     intent(out) :: errmsg
