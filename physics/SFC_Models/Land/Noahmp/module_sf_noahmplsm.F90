@@ -423,8 +423,9 @@ contains
                    smceq   ,                                                   & ! in : vegetation/soil characteristics
                    sfctmp  , sfcprs  , psfc    , uu      , vv , q2, garea1   , & ! in : forcing
                    qc      , soldn   , lwdn,thsfc_loc, prslkix,prsik1x,prslk1x,& ! in : forcing
+                   varf    , psl_gwd_z0m_factor,                               & ! in : small scale oro std
                    pblhx   , iz0tlnd , itime         ,psi_opt                 ,&
-	           prcpconv, prcpnonc, prcpshcv, prcpsnow, prcpgrpl, prcphail, & ! in : forcing
+     	           prcpconv, prcpnonc, prcpshcv, prcpsnow, prcpgrpl, prcphail, & ! in : forcing
                    tbot    , co2air  , o2air   , foln    , ficeold , zlvl    , & ! in : forcing
                    ep_1    , ep_2    , epsm1   , cp                          , & ! in : constants
                    albold  , sneqvo  ,                                         & ! in/out : 
@@ -436,7 +437,7 @@ contains
                    cm      , ch      , tauss   ,                               & ! in/out : 
                    grain   , gdd     , pgs     ,                               & ! in/out 
                    smcwtd  ,deeprech , rech    , ustarx  ,                     & ! in/out :
-		   z0wrf   , z0hwrf  , ts      ,                               & ! out :
+	          	   z0wrf   , z0hwrf  , ts      ,                               & ! out :
                    fsa     , fsr     , fira    , fsh     , ssoil   , fcev    , & ! out : 
                    fgev    , fctr    , ecan    , etran   , edir    , trad    , & ! out :
                    tgb     , tgv     , t2mv    , t2mb    , q2v     , q2b     , & ! out :
@@ -445,9 +446,9 @@ contains
                    qsnbot  , ponding , ponding1, ponding2, rssun   , rssha   , & ! out :
                    albd    , albi    , albsnd  , albsni                      , & ! out :
                    bgap    , wgap    , chv     , chb     , emissi  ,           & ! out :
-		   shg     , shc     , shb     , evg     , evb     , ghv     , & ! out :
-		   ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
-		   chleaf  , chuc    , chv2    , chb2    , fpice   , pahv    , &
+          		   shg     , shc     , shb     , evg     , evb     , ghv     , & ! out :
+		           ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
+          		   chleaf  , chuc    , chv2    , chb2    , fpice   , pahv    , &
                    pahg    , pahb    , pah     , esnow   , canhs   , laisun  , &
                    laisha  , rb      , qsfcveg , qsfcbare                      &
 #ifdef CCPP
@@ -493,6 +494,8 @@ contains
   real (kind=kind_phys)                           , intent(in)    :: prslk1x !< in exner function
   real (kind=kind_phys)                           , intent(in)    :: garea1  !< in exner function
 
+  real (kind=kind_phys)                           , intent(in)    :: varf    !< small scale oro std
+  real (kind=kind_phys)                           , intent(in)    :: psl_gwd_z0m_factor    !
   real (kind=kind_phys)                           , intent(in)    :: pblhx   !< pbl height
   integer                                         , intent(in)    :: iz0tlnd !< z0t option
   integer                                         , intent(in)    :: itime   !<
@@ -832,6 +835,7 @@ contains
                  fveg   ,shdfac, pahv   ,pahg   ,pahb   ,             & !in
                  qsnow  ,dzsnso ,lat    ,canliq ,canice ,iloc, jloc , & !in
                  thsfc_loc, prslkix,prsik1x,prslk1x,garea1,       & !in
+                 varf,psl_gwd_z0m_factor     , & !in
                  pblhx  ,iz0tlnd, itime ,psi_opt, ep_1, ep_2, epsm1,cp, &
 		 z0wrf  ,z0hwrf ,                                 & !out
                  imelt  ,snicev ,snliqv ,epore  ,t2m    ,fsno   , & !out
@@ -1676,6 +1680,7 @@ endif   ! croptype == 0
                      fveg   ,shdfac, pahv   ,pahg   ,pahb   ,               & !in
                      qsnow  ,dzsnso ,lat    ,canliq ,canice ,iloc   , jloc, & !in
                      thsfc_loc, prslkix,prsik1x,prslk1x,garea1,       & !in
+                     varf,psl_gwd_z0m_factor     , & !in
                      pblhx  , iz0tlnd, itime,psi_opt,ep_1, ep_2, epsm1, cp,  &
 		     z0wrf  ,z0hwrf ,                                 & !out
                      imelt  ,snicev ,snliqv ,epore  ,t2m    ,fsno   , & !out
@@ -1757,6 +1762,8 @@ endif   ! croptype == 0
   real (kind=kind_phys)                              , intent(in)    :: prslk1x !< in exner function
   real (kind=kind_phys)                              , intent(in)    :: garea1  !<
 
+  real (kind=kind_phys)                              , intent(in)    :: varf
+  real (kind=kind_phys)                              , intent(in)    :: psl_gwd_z0m_factor
   real (kind=kind_phys)                              , intent(in)    :: pblhx  !<  pbl height
   real (kind=kind_phys)                              , intent(in)    :: ep_1   !<
   real (kind=kind_phys)                              , intent(in)    :: ep_2   !<
@@ -2252,6 +2259,7 @@ endif   ! croptype == 0
                     foln    ,co2air  ,o2air   ,btran   ,sfcprs  , & !in
                     rhsur   ,iloc    ,jloc    ,q2      ,pahv  ,pahg  , & !in
                     thsfc_loc, prslkix,prsik1x,prslk1x, garea1,        & !in
+                    varf   , psl_gwd_z0m_factor,                       & !in
                     pblhx   ,iz0tlnd ,itime   ,psi_opt ,ep_1, ep_2, epsm1, cp, &
                     eah     ,tah     ,tv      ,tgv     ,cmv, ustarx , & !inout
 #ifdef CCPP
@@ -2266,7 +2274,7 @@ endif   ! croptype == 0
 !jref:start
                     qc      ,qsfc    ,psfc    , & !in
                     q2v     ,chv2    ,chleaf  ,chuc    ,          &
-                    rb)                                             !out 
+                    rb)                                             !out
 
 ! new coupling code
 
@@ -2290,6 +2298,7 @@ endif   ! croptype == 0
                     emg     ,stc     ,df      ,rsurf   ,latheag  , & !in
                     gammag   ,rhsur   ,iloc    ,jloc    ,q2      ,pahb  , & !in
                     thsfc_loc, prslkix,prsik1x,prslk1x,vegtyp,fveg,shdfac,garea1, & !in
+                    varf   ,psl_gwd_z0m_factor,                                  & !in
                     pblhx   ,iz0tlnd ,itime   ,psi_opt ,ep_1, ep_2, epsm1, cp, &
 #ifdef CCPP
                     tgb     ,cmb     ,chb, ustarx,errmsg  ,errflg   , & !inout
@@ -3703,6 +3712,7 @@ endif   ! croptype == 0
                        foln    ,co2air  ,o2air   ,btran   ,sfcprs  , & !in
                        rhsur   ,iloc    ,jloc    ,q2      ,pahv    ,pahg     , & !in
                        thsfc_loc, prslkix,prsik1x,prslk1x, garea1,      & !in
+                       varf   ,psl_gwd_z0m_factor,                     & !in
                        pblhx   ,iz0tlnd ,itime   ,psi_opt ,ep_1, ep_2, epsm1, cp, &
                        eah     ,tah     ,tv      ,tg      ,cm,ustarx,& !inout
 #ifdef CCPP
@@ -3716,7 +3726,7 @@ endif   ! croptype == 0
                        csigmaf1,                                     & !out
                        qc      ,qsfc    ,psfc    ,                   & !in
                        q2v     ,cah2    ,chleaf  ,chuc    ,          & !inout
-                       rb)                                             !out      
+                       rb)                                             !out
 
 ! --------------------------------------------------------------------------------------------------
 ! use newton-raphson iteration to solve for vegetation (tv) and
@@ -3753,6 +3763,8 @@ endif   ! croptype == 0
   real (kind=kind_phys),                            intent(in) :: dt     !< time step (s)
   real (kind=kind_phys),                            intent(in) :: fsno   !< snow fraction
 
+  real (kind=kind_phys)                           , intent(in)    :: varf   !
+  real (kind=kind_phys)                           , intent(in)    :: psl_gwd_z0m_factor   !
   real (kind=kind_phys)                           , intent(in)    :: pblhx  !<  pbl height
   real (kind=kind_phys)                           , intent(in)    :: ep_1   !<
   real (kind=kind_phys)                           , intent(in)    :: ep_2   !<
@@ -4125,6 +4137,7 @@ endif   ! croptype == 0
          call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                         zlvl    ,tah     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
                         z0h, zpd ,snowh ,shdfac ,garea1 ,                               & !in 
+                        varf,psl_gwd_z0m_factor,                                        & !in
                         ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                         fv      ,cm      ,ch       )                                      !out 
 
@@ -4434,6 +4447,7 @@ endif   ! croptype == 0
                         emg     ,stc     ,df      ,rsurf   ,lathea  , & !in
                         gamma   ,rhsur   ,iloc    ,jloc    ,q2      ,pahb  , & !in
                         thsfc_loc, prslkix,prsik1x,prslk1x,vegtyp,fveg,shdfac,garea1,  & !in
+                        varf,psl_gwd_z0m_factor,                                    & !in
                         pblhx  , iz0tlnd , itime  ,psi_opt,ep_1,ep_2,epsm1,cp  ,&
 #ifdef CCPP
                         tgb     ,cm      ,ch,ustarx,errmsg  ,errflg  , & !inout
@@ -4488,6 +4502,8 @@ endif   ! croptype == 0
   real (kind=kind_phys),                            intent(in) :: rhsur  !< raltive humidity in surface soil/snow air space (-)
   real (kind=kind_phys),                            intent(in) :: fsno   !< snow fraction
 
+  real (kind=kind_phys),                            intent(in) :: varf   !
+  real (kind=kind_phys),                            intent(in) :: psl_gwd_z0m_factor   !
   real (kind=kind_phys),                            intent(in) :: pblhx  !< pbl height (m)
   real (kind=kind_phys),                            intent(in) :: ep_1   !<
   real (kind=kind_phys),                            intent(in) :: ep_2   !<
@@ -4731,6 +4747,7 @@ endif   ! croptype == 0
           call sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                          zlvl    ,tgb     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
                          z0h, zpd,snowh   ,shdfac  ,garea1  ,                            & !in 
+                         varf,psl_gwd_z0m_factor,                                        & !in
                          ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                          fv      ,cm      ,ch       )                    !out 
 
@@ -5437,6 +5454,7 @@ endif   ! croptype == 0
   subroutine sfcdif3(parameters,iloc    ,jloc    ,iter    ,sfctmp  ,qair    ,ur      , & !in 
                        zlvl    ,tgb     ,thsfc_loc,prslkix,prsik1x ,prslk1x ,z0m     , & !in 
                        z0h,zpd ,snowh   ,fveg    ,garea1  ,                            & !in 
+                       varf,psl_gwd_z0m_factor,                                        & !in
                        ustarx  ,fm      ,fh      ,fm2     ,fh2     ,                   & !inout 
                        fv      ,cm      ,ch       )                    !out 
   
@@ -5466,6 +5484,8 @@ endif   ! croptype == 0
     real (kind=kind_phys), intent(in   ) :: snowh     !< snow depth [m]
     real (kind=kind_phys), intent(in   ) :: fveg      !< fractional vegetation cover
     real (kind=kind_phys), intent(in   ) :: garea1    !< grid area [km2]
+    real (kind=kind_phys), intent(in   ) :: varf      ! standard deviation org [m]
+    real (kind=kind_phys), intent(in   ) :: psl_gwd_z0m_factor   ! z0m factor  in psl tofd
     real (kind=kind_phys), intent(inout) :: ustarx    !< friction velocity [m/s]
     real (kind=kind_phys), intent(inout) :: fm        !< momentum stability correction, weighted by prior iters
     real (kind=kind_phys), intent(inout) :: fh        !< sen heat stability correction, weighted by prior iters
@@ -5520,7 +5540,7 @@ endif   ! croptype == 0
     endif
 
     call gfs_stability (zlvlb, zvfun1, gdx, tv1, thv1, ur, z0m, z0h, tvs, grav, thsfc_loc,  &
-         rb1, fm,fh,fm10,fh2,cm,ch,stress1,fv)
+         varf,psl_gwd_z0m_factor,rb1, fm,fh,fm10,fh2,cm,ch,stress1,fv)
 
   end subroutine sfcdif3
 
@@ -5530,6 +5550,7 @@ subroutine gfs_stability                                              &
 !  ---  inputs:
           ( z1, zvfun, gdx, tv1, thv1, wind, z0max, ztmax, tvs, grav,  &
             thsfc_loc,                                                 &
+            varf,psl_gwd_z0m_factor,                                   &
 !  ---  outputs:
             rb, fm, fh, fm10, fh2, cm, ch, stress, ustar)
 
@@ -5549,6 +5570,8 @@ real(kind=kind_phys), intent(in) :: z0max   ! momentum roughness length
 real(kind=kind_phys), intent(in) :: ztmax   ! thermal roughness length
 real(kind=kind_phys), intent(in) :: tvs     ! surface virtual temperature
 real(kind=kind_phys), intent(in) :: grav    ! local gravity 
+real(kind=kind_phys), intent(in) :: varf    ! turbulent scale oro std
+real(kind=kind_phys), intent(in) :: psl_gwd_z0m_factor    ! tofd factor
 logical,              intent(in) :: thsfc_loc ! use local theta reference flag
 
 real(kind=kind_phys), intent(out) :: rb     ! bulk richardson number [-]
@@ -5607,6 +5630,11 @@ real(kind=kind_phys) :: tem2
 real(kind=kind_phys) :: zolmax
 
 real(kind=kind_phys) xkzo
+!   tofd
+      real(kind=kind_phys) :: cf, zf, fri, fphim
+      real(kind=kind_phys), parameter :: varf_min = 50.0
+      real(kind=kind_phys), parameter :: varf_max = 500.0
+!!!      real(kind=kind_phys), parameter :: psl_gwd_z0m_factor  = 0.003
 
 z1i = one / z1   ! inverse of model height
 
@@ -5727,6 +5755,17 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 
           endif          ! end of if (dtv >= 0 ) then loop
 !
+! form drag coefficient
+!
+          if ( varf.gt.varf_min .and. psl_gwd_z0m_factor.gt.0.0 ) then
+            zf    = min( min(varf,varf_max)*psl_gwd_z0m_factor,z1 )
+            fri   = min( max( 1.-rb,0. ), 1.)
+            fphim    = log( ( z1 + zf) / zf )
+            cf = ca*ca / (fphim*fphim) * fri
+          else
+            cf = 0.
+          endif
+!
 !  finish the exchange coefficient computation to provide fm and fh
 !
           fm        = fm - pm                                             ! phi_m
@@ -5738,7 +5777,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
           tem1      = 0.00001_kind_phys/z1                                       ! minimum exhange coef (?)
           cm        = max(cm, tem1)
           ch        = max(ch, tem1)
-          stress    = cm * wind * wind                                    ! surface stress = Cm*U*U
+          stress    = (cm + cf)* wind * wind  ! cf for tofd  10.15) or (10.19) in Arya
           ustar     = sqrt(stress)                                        ! friction velocity
 
       return
@@ -5887,7 +5926,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
         else
           z0h_out = z0m_out * 0.01
         endif
-
+ 
       elseif (opt_trs == blumel99) then
 
         reyn = ustarx*z0m_out/viscosity                      ! Blumel99 eqn 36c

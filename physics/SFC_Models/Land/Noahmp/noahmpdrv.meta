@@ -649,6 +649,29 @@
   dimensions = ()
   type = logical
   intent = in
+[nmtvr]
+  standard_name = number_of_statistical_measures_of_subgrid_orography
+  long_name = number of statistical measures of subgrid height_above_mean_sea_level
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[mntvar]
+  standard_name = statistical_measures_of_subgrid_orography_collection_array
+  long_name = array of statistical measures of subgrid height_above_mean_sea_level
+  units = mixed
+  dimensions = (horizontal_loop_extent,number_of_statistical_measures_of_subgrid_orography)
+  type = real
+  kind = kind_phys
+  intent = in
+[psl_gwd_z0m_factor]
+  standard_name = momentum_roughness_factor_in_turbulent_form_drag
+  long_name = multiplication of Z0m in PSL turbulent form drag
+  units = count
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [weasd]
   standard_name = water_equivalent_accumulated_snow_depth_over_land
   long_name = water equiv of acc snow depth over land

@@ -438,6 +438,13 @@
   type = real
   kind = kind_phys
   intent = in
+[vtype]
+  standard_name = vegetation_type_classification
+  long_name = vegetation type for lsm
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
 [g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -572,6 +579,14 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[psl_gwd_dx_factor]
+  standard_name = effective_grid_spacing_of_psl_gwd_suite
+  long_name = multiplication of grid spacing
+  units = count
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [dtend]
   standard_name = cumulative_change_of_state_variables

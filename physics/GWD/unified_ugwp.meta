@@ -648,6 +648,13 @@
   type = real
   kind = kind_phys
   intent = in
+[vtype]
+  standard_name = vegetation_type_classification
+  long_name = vegetation type for lsm
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
 [slmsk]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
@@ -896,6 +903,30 @@
   standard_name = instantaneous_momentum_flux_due_to_nonstationary_gravity_wave
   long_name = momentum flux or stress due to nonstationary gravity waves
   units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[zmtb]
+  standard_name = height_of_mountain_blocking
+  long_name = height of mountain blocking drag
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[zlwb]
+  standard_name = height_of_low_level_wave_breaking
+  long_name = height of low level wave breaking
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[zogw]
+  standard_name = height_of_launch_level_of_orographic_gravity_wave
+  long_name = height of launch level of orographic gravity wave
+  units = m
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -1194,6 +1225,21 @@
   dimensions = ()
   type = logical
   intent = in
+[do_gwd_opt_psl]
+  standard_name = do_gsl_drag_suite_with_psl_gwd_option
+  long_name = flag to activate PSL drag suite - mesoscale GWD and blocking
+  units = flag 
+  dimensions = () 
+  type = logical
+  intent = in 
+[psl_gwd_dx_factor]
+  standard_name = effective_grid_spacing_of_psl_gwd_suite
+  long_name = multiplication of grid spacing
+  units = count
+  dimensions = () 
+  type = real 
+  kind = kind_phys
+  intent = in 
 [gwd_opt]
   standard_name = control_for_drag_suite_gravity_wave_drag
   long_name = flag to choose gwd scheme

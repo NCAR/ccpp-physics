@@ -44,7 +44,7 @@ module ugwpv1_gsldrag
     use cires_ugwpv1_solv2,    only:  cires_ugwpv1_ngw_solv2
     use cires_ugwpv1_oro,      only:  orogw_v1
 
-    use drag_suite,            only:  drag_suite_run
+    use drag_suite,            only:  drag_suite_run, drag_suite_psl
 
     implicit none
 
@@ -305,11 +305,13 @@ contains
 !! @{
      subroutine ugwpv1_gsldrag_run(me, master, im, levs, ak, bk, ntrac, lonr, dtp,      &
           fhzero, kdt, ldiag3d, lssav, flag_for_gwd_generic_tend, do_gsl_drag_ls_bl,    &
-          do_gsl_drag_ss, do_gsl_drag_tofd, do_ugwp_v1, do_ugwp_v1_orog_only,           &
+          do_gsl_drag_ss, do_gsl_drag_tofd,                                             &
+          do_gwd_opt_psl, psl_gwd_dx_factor,                                            &
+          do_ugwp_v1, do_ugwp_v1_orog_only,                                             &
           do_ugwp_v1_w_gsldrag, gwd_opt, do_tofd, ldiag_ugwp, ugwp_seq_update,          &
           cdmbgwd, jdat, nmtvr, hprime, oc, theta, sigma, gamma,                        &
           elvmax, clx, oa4, varss,oc1ss,oa4ss,ol4ss, dx,  xlat, xlat_d, sinlat, coslat, &
-          area, rain, br1, hpbl, kpbl, slmsk,                                           &
+          area, rain, br1, hpbl,vtype, kpbl, slmsk,                                     &
           ugrs, vgrs, tgrs, q1, prsi, prsl, prslk, phii, phil,  del, tau_amf,           &
           dudt_ogw, dvdt_ogw, du_ogwcol, dv_ogwcol,                                     &
           dudt_obl, dvdt_obl, du_oblcol, dv_oblcol,                                     &
@@ -367,7 +369,9 @@ contains
     real(kind=kind_phys),    intent(in) :: dtp, fhzero
     real(kind=kind_phys),    intent(in) :: ak(:), bk(:)
     integer,                 intent(in) :: kdt, jdat(:)
-
+! option  for psl gwd
+    logical, intent(in)              :: do_gwd_opt_psl      ! option for psl gravity wave drag
+    real(kind=kind_phys), intent(in) :: psl_gwd_dx_factor   !
 ! SSO parameters and variables
     integer,                 intent(in) :: gwd_opt                         !gwd_opt  and nmtvr are "redundant" controls
     integer,                 intent(in) :: nmtvr
@@ -396,6 +400,7 @@ contains
     real(kind=kind_phys),    intent(in), dimension(:,:)   :: prsi, phii
     real(kind=kind_phys),    intent(in), dimension(:,:)   :: q1
     integer,                 intent(in), dimension(:)     :: kpbl
+    integer,                 intent(in), dimension(:)     :: vtype
 
     real(kind=kind_phys),    intent(in), dimension(:) :: rain
     real(kind=kind_phys),    intent(in), dimension(:) :: br1, hpbl,  slmsk
@@ -544,6 +549,27 @@ contains
 ! dusfcg,  dvsfcg
 !
 !
+     if (do_gwd_opt_psl) then
+       call drag_suite_psl(im, levs, Pdvdt, Pdudt, Pdtdt,            &
+                 ugrs,vgrs,tgrs,q1,                                  &
+                 kpbl,prsi,del,prsl,prslk,phii,phil,dtp,             &
+                 kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &
+                 ol4ss,theta,sigma,gamma,elvmax,                     &
+                 dudt_ogw, dvdt_ogw, dudt_obl, dvdt_obl,             &
+                 dudt_oss, dvdt_oss, dudt_ofd, dvdt_ofd,             &
+                 dusfcg,  dvsfcg,                                    &
+                 du_ogwcol, dv_ogwcol, du_oblcol, dv_oblcol,         &
+                 du_osscol, dv_osscol, du_ofdcol, dv_ofdcol,         &
+                 slmsk,br1,hpbl,vtype,con_g,con_cp,con_rd,con_rv,    &
+                 con_fv, con_pi, lonr,                               &
+                 cdmbgwd(1:2),me,master,lprnt,ipr,rdxzb,dx,gwd_opt,  &
+                 do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
+                 psl_gwd_dx_factor,                                  &
+                 dtend, dtidx, index_of_process_orographic_gwd,      &
+                 index_of_temperature, index_of_x_wind,              &
+                 index_of_y_wind, ldiag3d, ldiag_ugwp,               &
+                 ugwp_seq_update, spp_wts_gwd, spp_gwd, errmsg, errflg)
+     else
        call drag_suite_run(im, levs, Pdvdt, Pdudt, Pdtdt,            &
                  ugrs,vgrs,tgrs,q1,                                  &
                  kpbl,prsi,del,prsl,prslk,phii,phil,dtp,             &
@@ -554,7 +580,7 @@ contains
                  dusfcg,  dvsfcg,                                    &
                  du_ogwcol, dv_ogwcol, du_oblcol, dv_oblcol,         &
                  du_osscol, dv_osscol, du_ofdcol, dv_ofdcol,         &
-                 slmsk,br1,hpbl, con_g,con_cp,con_rd,con_rv,         &
+                 slmsk,br1,hpbl,con_g,con_cp,con_rd,con_rv,          &
                  con_fv, con_pi, lonr,                               &
                  cdmbgwd(1:2),me,master,lprnt,ipr,rdxzb,dx,gwd_opt,  &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
@@ -562,6 +588,7 @@ contains
                  index_of_temperature, index_of_x_wind,              &
                  index_of_y_wind, ldiag3d, ldiag_ugwp,               &
                  ugwp_seq_update, spp_wts_gwd, spp_gwd, errmsg, errflg)
+     endif
 !
 ! dusfcg = du_ogwcol + du_oblcol + du_osscol + du_ofdcol
 !
