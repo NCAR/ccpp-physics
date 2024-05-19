@@ -425,7 +425,7 @@ contains
                    qc      , soldn   , lwdn,thsfc_loc, prslkix,prsik1x,prslk1x,& ! in : forcing
                    varf    , psl_gwd_z0m_factor,                               & ! in : small scale oro std
                    pblhx   , iz0tlnd , itime         ,psi_opt                 ,&
-     	           prcpconv, prcpnonc, prcpshcv, prcpsnow, prcpgrpl, prcphail, & ! in : forcing
+                   prcpconv, prcpnonc, prcpshcv, prcpsnow, prcpgrpl, prcphail, & ! in : forcing
                    tbot    , co2air  , o2air   , foln    , ficeold , zlvl    , & ! in : forcing
                    ep_1    , ep_2    , epsm1   , cp                          , & ! in : constants
                    albold  , sneqvo  ,                                         & ! in/out : 
@@ -437,7 +437,7 @@ contains
                    cm      , ch      , tauss   ,                               & ! in/out : 
                    grain   , gdd     , pgs     ,                               & ! in/out 
                    smcwtd  ,deeprech , rech    , ustarx  ,                     & ! in/out :
-	          	   z0wrf   , z0hwrf  , ts      ,                               & ! out :
+                   z0wrf   , z0hwrf  , ts      ,                               & ! out :
                    fsa     , fsr     , fira    , fsh     , ssoil   , fcev    , & ! out : 
                    fgev    , fctr    , ecan    , etran   , edir    , trad    , & ! out :
                    tgb     , tgv     , t2mv    , t2mb    , q2v     , q2b     , & ! out :
@@ -446,9 +446,9 @@ contains
                    qsnbot  , ponding , ponding1, ponding2, rssun   , rssha   , & ! out :
                    albd    , albi    , albsnd  , albsni                      , & ! out :
                    bgap    , wgap    , chv     , chb     , emissi  ,           & ! out :
-          		   shg     , shc     , shb     , evg     , evb     , ghv     , & ! out :
-		           ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
-          		   chleaf  , chuc    , chv2    , chb2    , fpice   , pahv    , &
+                   shg     , shc     , shb     , evg     , evb     , ghv     , & ! out :
+                   ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
+                   chleaf  , chuc    , chv2    , chb2    , fpice   , pahv    , &
                    pahg    , pahb    , pah     , esnow   , canhs   , laisun  , &
                    laisha  , rb      , qsfcveg , qsfcbare                      &
 #ifdef CCPP
