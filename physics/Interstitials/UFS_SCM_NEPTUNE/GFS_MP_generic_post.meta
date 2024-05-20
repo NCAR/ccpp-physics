@@ -430,7 +430,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [rain0]
   standard_name = lwe_thickness_of_explicit_rain_amount
   long_name = explicit rain on physics timestep
@@ -790,13 +790,6 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  intent = in
-[dfi_radar_max_intervals]
-  standard_name = maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals
-  long_name = maximum allowed number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
-  units = count
-  dimensions = ()
-  type = integer
   intent = in
 [num_dfi_radar]
   standard_name = number_of_radar_derived_temperature_or_convection_suppression_intervals

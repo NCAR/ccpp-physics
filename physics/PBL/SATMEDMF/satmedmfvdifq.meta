@@ -625,7 +625,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index

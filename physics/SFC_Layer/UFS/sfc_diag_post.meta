@@ -96,7 +96,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
   optional = True
 [q2mp]
   standard_name = specific_humidity_at_2m_from_noahmp
@@ -105,7 +105,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
   optional = True
 [t2m]
   standard_name = air_temperature_at_2m
