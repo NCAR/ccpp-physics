@@ -400,7 +400,7 @@
   real(kind=kind_phys), dimension(:)     , intent(out), optional :: q2mp       ! combined q2m from tiles
   real(kind=kind_phys), dimension(:)     , intent(out)   :: zvfun      ! 
   real(kind=kind_phys), dimension(:)     , intent(out)   :: ztmax      ! thermal roughness length
-  real(kind=kind_phys), dimension(:)     , intent(out)   :: rca        ! total canopy/stomatal resistance (s/m)
+  real(kind=kind_phys), dimension(:)     , intent(out), optional :: rca        ! total canopy/stomatal resistance (s/m)
 
   character(len=*)    ,                    intent(out)   :: errmsg
   integer             ,                    intent(out)   :: errflg

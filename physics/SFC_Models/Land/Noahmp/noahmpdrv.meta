@@ -1410,6 +1410,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
