@@ -271,6 +271,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [diag_flux]
   standard_name = flag_for_flux_method_in_2m_diagnostics
   long_name = flag for flux method in 2-m diagnostics
@@ -301,6 +302,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cdq]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
   long_name = surface exchange coeff heat & moisture

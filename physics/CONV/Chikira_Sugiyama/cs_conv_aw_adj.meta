@@ -134,6 +134,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [subcldfrac]
   standard_name = subgrid_scale_cloud_fraction_from_shoc
   long_name = subgrid-scale cloud fraction from the SHOC scheme
@@ -142,6 +143,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [prcp]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation (rain, ice, snow, graupel, ...) on physics timestep

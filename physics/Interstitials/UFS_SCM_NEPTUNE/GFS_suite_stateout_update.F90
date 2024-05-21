@@ -37,7 +37,7 @@ contains
     type(ty_ozphys),      intent(in)                    :: ozphys
 
     ! Outputs (optional)
-    real(kind=kind_phys), intent(inout), dimension(:,:) :: &
+    real(kind=kind_phys), intent(inout), dimension(:,:), optional :: &
          do3_dt_prd,  & ! Physics tendency: production and loss effect
          do3_dt_ozmx, & ! Physics tendency: ozone mixing ratio effect
          do3_dt_temp, & ! Physics tendency: temperature effect

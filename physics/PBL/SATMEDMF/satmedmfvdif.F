@@ -84,7 +84,8 @@
       integer, intent(out) :: kpbl(:)
 !
       logical, intent(in)  :: gen_tend, ldiag3d
-      real(kind=kind_phys), intent(inout), dimension(:,:,:) :: dtend
+      real(kind=kind_phys), intent(inout), dimension(:,:,:), optional ::&
+     &     dtend
       integer, intent(in) :: index_of_temperature,index_of_x_wind,      &
      &  index_of_y_wind, ntqv, ntoz, dtidx(:,:), index_of_process_pbl
 !
