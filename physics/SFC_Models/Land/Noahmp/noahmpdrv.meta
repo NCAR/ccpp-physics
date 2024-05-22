@@ -649,13 +649,6 @@
   dimensions = ()
   type = logical
   intent = in
-[nmtvr]
-  standard_name = number_of_statistical_measures_of_subgrid_orography
-  long_name = number of statistical measures of subgrid height_above_mean_sea_level
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [mntvar]
   standard_name = statistical_measures_of_subgrid_orography_collection_array
   long_name = array of statistical measures of subgrid height_above_mean_sea_level
@@ -664,9 +657,9 @@
   type = real
   kind = kind_phys
   intent = in
-[psl_gwd_z0m_factor]
+[gwd_z0m_factor]
   standard_name = momentum_roughness_factor_in_turbulent_form_drag
-  long_name = multiplication of Z0m in PSL turbulent form drag
+  long_name = multiplication of orograhic standard deviation 
   units = count
   dimensions = ()
   type = real
@@ -1379,14 +1372,6 @@
   standard_name = bounded_surface_roughness_length_for_heat_over_land
   long_name = bounded surface roughness length for heat over land
   units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-[rca]
-  standard_name = aerodynamic_resistance_in_canopy
-  long_name = canopy resistance
-  units = s m-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

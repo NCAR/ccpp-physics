@@ -137,7 +137,7 @@
       rainn_mp, rainc_mp, snow_mp, graupel_mp, ice_mp, rhonewsn1,&
       con_hvap, con_cp, con_jcal, rhoh2o, con_eps, con_epsm1,    &
       con_fvirt, con_rd, con_hfus, thsfc_loc, cpllnd, cpllnd2atm,&
-      nmtvr,mntvar,psl_gwd_z0m_factor,                           &
+      mntvar,gwd_z0m_factor,                                     &
 
 !  ---  in/outs:
       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
@@ -158,7 +158,7 @@
       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
       cmm, chh, evbs, evcw, sbsno, pah, ecan, etran, edir, snowc,&
       stm, snohf,smcwlt2, smcref2, wet1, t2mmp, q2mp,zvfun,      &
-      ztmax, rca, errmsg, errflg,                                &
+      ztmax, errmsg, errflg,                                     &
       canopy_heat_storage_ccpp,                                  &
       rainfall_ccpp,                                             &
       sw_absorbed_total_ccpp,                                    &
@@ -288,7 +288,6 @@
   integer                                , intent(in)    :: iopt_stc   ! option for snow/soil temperature time scheme (only layer 1)
   integer                                , intent(in)    :: iopt_trs   ! option for thermal roughness scheme
   integer                                , intent(in)    :: iopt_diag  ! option for surface diagnose approach
-  integer                                , intent(in)    :: nmtvr      ! number of subgrid scale oroghic data
   real(kind=kind_phys), dimension(:)     , intent(in)    :: xlatin     ! latitude
   real(kind=kind_phys), dimension(:)     , intent(in)    :: xcoszin    ! cosine of zenith angle
   integer                                , intent(in)    :: iyrlen     ! year length [days]
@@ -300,7 +299,7 @@
   real(kind=kind_phys), dimension(:)     , intent(in)    :: graupel_mp ! microphysics graupel [mm]
   real(kind=kind_phys), dimension(:)     , intent(in)    :: ice_mp     ! microphysics ice/hail [mm]
   real(kind=kind_phys), dimension(:,:)   , intent(in)    :: mntvar     ! subgrid orographic statistics data
-  real(kind=kind_phys)                   , intent(in)    :: psl_gwd_z0m_factor  ! psl tofd zom factor
+  real(kind=kind_phys)                   , intent(in)    :: gwd_z0m_factor  ! turbulent orographic form drag roughness length factor
   real(kind=kind_phys), dimension(:)     , intent(in)    :: rhonewsn1  ! precipitation ice density (kg/m^3)
   real(kind=kind_phys)                   , intent(in)    :: con_hvap   ! latent heat condensation [J/kg]
   real(kind=kind_phys)                   , intent(in)    :: con_cp     ! specific heat air [J/kg/K] 
@@ -404,8 +403,6 @@
   real(kind=kind_phys), dimension(:)     , intent(out)   :: q2mp       ! combined q2m from tiles
   real(kind=kind_phys), dimension(:)     , intent(out)   :: zvfun      ! 
   real(kind=kind_phys), dimension(:)     , intent(out)   :: ztmax      ! thermal roughness length
-  real(kind=kind_phys), dimension(:)     , intent(out)   :: rca        ! total canopy/stomatal resistance (s/m)
-
   character(len=*)    ,                    intent(out)   :: errmsg
   integer             ,                    intent(out)   :: errflg
 
@@ -639,7 +636,7 @@
   real (kind=kind_phys)                            :: cq2
   real (kind=kind_phys)                            :: qfx
   real (kind=kind_phys)                            :: wspd1                 !  wind speed with all components
-  real (kind=kind_phys)                            :: varf_grid             !  std deviation orography
+  real (kind=kind_phys)                            :: varf_grid             !  sub-grid orography standard deviation
   real (kind=kind_phys)                            :: pblhx                 !  height of pbl
    integer                                         :: mnice
 
@@ -956,10 +953,6 @@
         ch_vegetated           = 0.0
         ch_bare_ground         = ch_noahmp
         canopy_heat_storage    = 0.0
-        lai_sunlit             = 0.0
-        lai_shaded             = 0.0
-        rs_sunlit              = 0.0
-        rs_shaded              = 0.0
 
       else  ! not glacier
 
@@ -977,7 +970,7 @@
           spec_humidity_forcing ,area_grid             ,cloud_water_forcing   , &
           sw_radiation_forcing  ,radiation_lw_forcing  ,thsfc_loc             , &
           prslkix               ,prsik1x               ,prslk1x               , &
-          varf_grid,psl_gwd_z0m_factor                                        , &
+          varf_grid,gwd_z0m_factor                                            , &
           pblhx                 ,iz0tlnd               ,itime                 , &
           psi_opt                                                             , &
           precip_convective                                                   , &
@@ -1069,16 +1062,6 @@
       chxy      (i)   = ch_noahmp
       zorl      (i)   = z0_total * 100.0  ! convert to cm
       ztmax     (i)   = z0h_total 
-
-      !LAI-scale canopy resistance based on weighted sunlit shaded fraction
-      if(rs_sunlit .le. 0.0 .or. rs_shaded .le. 0.0 .or. &
-          lai_sunlit .eq. 0.0 .or. lai_shaded .eq. 0.0) then
-        rca(i) = parameters%rsmax
-      else !calculate LAI-scale canopy conductance (1/Rs)
-        rca(i) = ((1.0/(rs_sunlit+leaf_air_resistance)*lai_sunlit) + &
-                 ((1.0/(rs_shaded+leaf_air_resistance))*lai_shaded))
-        rca(i) = max((1.0/rca(i)),parameters%rsmin) !resistance
-      end if
 
       smc       (i,:) = soil_moisture_vol
       slc       (i,:) = soil_liquid_vol
@@ -1222,7 +1205,7 @@
       call       gfs_stability                                                               &
         (zf(i), zvfun(i), gdx, virtual_temperature, vptemp,wind(i), z0_total, z0h_total, & 
          tvs1, con_g, thsfc_loc,                                                         &
-         varf_grid, psl_gwd_z0m_factor,                                                  &
+         varf_grid, gwd_z0m_factor,                                                      &
          rb1(i), fm1(i), fh1(i), fm101(i), fh21(i), cm(i), ch(i), stress1(i), ustar1(i))
 
        rmol1(i) = undefined  !not used in GFS sfcdif -> to satsify output
