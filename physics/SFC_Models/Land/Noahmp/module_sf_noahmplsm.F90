@@ -1989,7 +1989,7 @@ endif   ! croptype == 0
 
   real (kind=kind_phys), parameter                   :: mpe    = 1.e-6
   real (kind=kind_phys), parameter                   :: psiwlt = -150.  !metric potential for wilting point (m)
-  real (kind=kind_phys), parameter                   :: z0     = 0.002  ! bare-soil roughness length (m) (i.e., under the canopy)
+  real (kind=kind_phys), parameter                   :: z0     = 0.015  ! bare-soil roughness length (m) (i.e., under the canopy)
 
 ! ---------------------------------------------------------------------------------------------------
 ! initialize fluxes from veg. fraction
@@ -2626,10 +2626,10 @@ endif   ! croptype == 0
 ! thermal conductivity of snow
 
   do iz = isnow+1, 0
-!     tksno(iz) = 3.2217e-6*bdsnoi(iz)**2.           ! stieglitz(yen,1965)
+     tksno(iz) = 3.2217e-6*bdsnoi(iz)**2.           ! stieglitz(yen,1965)
 !    tksno(iz) = 2e-2+2.5e-6*bdsnoi(iz)*bdsnoi(iz)   ! anderson, 1976
 !    tksno(iz) = 0.35                                ! constant
-    tksno(iz) = 2.576e-6*bdsnoi(iz)**2. + 0.074    ! verseghy (1991)
+!   tksno(iz) = 2.576e-6*bdsnoi(iz)**2. + 0.074    ! verseghy (1991)
 !    tksno(iz) = 2.22*(bdsnoi(iz)/1000.)**1.88      ! douvill(yen, 1981)
   enddo
 
@@ -5817,7 +5817,8 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 
       if (opt_trs == z0heqz0m) then
 
-        z0m_out = exp(fveg * log(z0m)      + (1.0 - fveg) * log(z0mg))
+!       z0m_out = exp(fveg * log(z0m)      + (1.0 - fveg) * log(z0mg))
+        z0m_out = fveg * z0m      + (1.0 - fveg) * z0mg
         z0h_out = z0m_out
 
       elseif (opt_trs == chen09) then
@@ -5834,7 +5835,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
         endif
 
         z0h_out = exp( fveg        * log(z0m * exp(-czil*0.4*258.2*sqrt(ustarx*z0m))) + &
-                      (1.0 - fveg) * log(max(z0m/exp(kb_sigma_f0),1.0e-6)) )
+                      (1.0 - fveg) * log(max(z0mg/exp(kb_sigma_f0),1.0e-6)) )
 
       elseif (opt_trs == tessel) then
 
