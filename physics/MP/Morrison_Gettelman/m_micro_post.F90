@@ -22,12 +22,12 @@
       integer, intent(in) :: im, levs, fprcp
       logical, intent(in) :: mg3_as_mg2
 
-      real(kind=kind_phys), intent(in   ) :: ncpr(:,:)
-      real(kind=kind_phys), intent(in   ) :: ncps(:,:)
-      real(kind=kind_phys), intent(in   ) :: ncgl(:,:)
-      real(kind=kind_phys), intent(inout) :: qrn(:,:)
-      real(kind=kind_phys), intent(inout) :: qsnw(:,:)
-      real(kind=kind_phys), intent(inout) :: qgl(:,:)
+      real(kind=kind_phys), intent(in   ),optional :: ncpr(:,:)
+      real(kind=kind_phys), intent(in   ),optional :: ncps(:,:)
+      real(kind=kind_phys), intent(in   ),optional :: ncgl(:,:)
+      real(kind=kind_phys), intent(inout),optional :: qrn(:,:)
+      real(kind=kind_phys), intent(inout),optional :: qsnw(:,:)
+      real(kind=kind_phys), intent(inout),optional :: qgl(:,:)
       real(kind=kind_phys), intent(in   ) :: gq0_ice(:,:)
       real(kind=kind_phys), intent(out  ) :: gq0_rain(:,:)
       real(kind=kind_phys), intent(out  ) :: gq0_snow(:,:)

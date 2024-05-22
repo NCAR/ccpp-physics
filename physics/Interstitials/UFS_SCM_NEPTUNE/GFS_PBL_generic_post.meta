@@ -447,6 +447,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -562,6 +563,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dvsfc_cpl]
   standard_name = cumulative_surface_y_momentum_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc v momentum flux multiplied by timestep
@@ -570,6 +572,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtsfc_cpl]
   standard_name = cumulative_surface_upward_sensible_heat_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc sensible heat flux multiplied by timestep
@@ -578,6 +581,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dqsfc_cpl]
   standard_name = cumulative_surface_upward_latent_heat_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc latent heat flux multiplied by timestep
@@ -586,6 +590,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dusfci_cpl]
   standard_name = surface_x_momentum_flux_for_coupling
   long_name = instantaneous sfc u momentum flux
@@ -594,6 +599,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dvsfci_cpl]
   standard_name = surface_y_momentum_flux_for_coupling
   long_name = instantaneous sfc v momentum flux
@@ -602,6 +608,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtsfci_cpl]
   standard_name = surface_upward_sensible_heat_flux_for_coupling
   long_name = instantaneous sfc sensible heat flux
@@ -610,6 +617,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dqsfci_cpl]
   standard_name = surface_upward_latent_heat_flux_for_coupling
   long_name = instantaneous sfc latent heat flux
@@ -618,6 +626,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dusfc_diag]
   standard_name = cumulative_surface_x_momentum_flux_for_diag_multiplied_by_timestep
   long_name = cumulative sfc x momentum flux multiplied by timestep
@@ -754,6 +763,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [oceanfrac]
   standard_name = sea_area_fraction
   long_name = fraction of horizontal grid area occupied by ocean
@@ -777,6 +787,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dvsfc_cice]
   standard_name = surface_y_momentum_flux_from_coupled_process
   long_name = sfc y momentum flux for coupling
@@ -785,6 +796,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dtsfc_cice]
   standard_name = surface_upward_sensible_heat_flux_from_coupled_process
   long_name = sfc sensible heat flux for coupling
@@ -793,6 +805,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dqsfc_cice]
   standard_name = surface_upward_latent_heat_flux_from_coupled_process
   long_name = sfc latent heat flux for coupling
@@ -801,6 +814,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [use_med_flux]
   standard_name = do_mediator_atmosphere_ocean_fluxes
   long_name = flag for using atmosphere-ocean fluxes from mediator
@@ -816,6 +830,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dtsfc_med]
   standard_name = surface_upward_sensible_heat_flux_over_ocean_from_mediator
   long_name = sfc sensible heat flux input over ocean for coupling
@@ -824,6 +839,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dusfc_med]
   standard_name = surface_x_momentum_flux_over_ocean_from_mediator
   long_name = sfc x momentum flux over ocean for coupling
@@ -832,6 +848,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dvsfc_med]
   standard_name = surface_y_momentum_flux_over_ocean_from_mediator
   long_name = sfc y momentum flux over ocean for coupling
@@ -840,6 +857,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction

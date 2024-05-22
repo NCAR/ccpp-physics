@@ -85,6 +85,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [itc]
   standard_name = index_of_first_chemical_tracer_for_convection
   long_name = index of first chemical tracer transported/scavenged by convection
@@ -257,6 +258,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [q]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -402,6 +404,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [dd_mf]
   standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux
   long_name = (downdraft mass flux) * delt
@@ -442,6 +445,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [sigmaout]
   standard_name = updraft_area_fraction_updated_by_physics
   long_name = convective updraft area fraction updated by physics
@@ -450,6 +454,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [betascu]
   standard_name = tuning_param_for_shallow_cu
   long_name = tuning param for shallow cu in case prognostic closure is used
@@ -481,6 +486,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [do_mynnedmf]
   standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate MYNN-EDMF
@@ -496,6 +502,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qicn]
   standard_name = mass_fraction_of_convective_cloud_ice
   long_name = mass fraction of convective cloud ice water
@@ -504,6 +511,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [w_upi]
   standard_name = vertical_velocity_for_updraft
   long_name = vertical velocity for updraft
@@ -512,6 +520,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cf_upi]
   standard_name = convective_cloud_fraction_for_microphysics
   long_name = convective cloud fraction for microphysics
@@ -520,6 +529,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cnv_mfd]
   standard_name = detrained_mass_flux
   long_name = detrained mass flux
@@ -528,6 +538,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cnv_dqldt]
   standard_name = tendency_of_cloud_water_due_to_convective_microphysics
   long_name = tendency of cloud water due to convective microphysics
@@ -536,6 +547,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [clcn]
   standard_name = convective_cloud_volume_fraction
   long_name = convective cloud volume fraction
@@ -544,6 +556,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cnv_fice]
   standard_name = ice_fraction_in_convective_tower
   long_name = ice fraction in convective tower
@@ -552,6 +565,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cnv_ndrop]
   standard_name = number_concentration_of_cloud_liquid_water_particles_for_detrainment
   long_name = droplet number concentration in convective detrainment
@@ -560,6 +574,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cnv_nice]
   standard_name = number_concentration_of_ice_crystals_for_detrainment
   long_name = crystal number concentration in convective detrainment
@@ -568,6 +583,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [mp_phys]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -690,6 +706,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [rainevap]
   standard_name = physics_field_for_coupling
   long_name = physics_field_for_coupling

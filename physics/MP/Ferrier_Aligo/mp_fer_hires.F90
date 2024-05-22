@@ -149,7 +149,7 @@ module mp_fer_hires
 
       real(kind_phys),   intent(inout) :: prec(:)
       real(kind_phys),   intent(inout) :: refl_10cm(:,:)
-      real(kind_phys),   intent(in   ) :: rhgrd
+      real(kind_phys),   intent(in   ), optional :: rhgrd
       real(kind_phys),   intent(in   ) :: dx(:)
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
