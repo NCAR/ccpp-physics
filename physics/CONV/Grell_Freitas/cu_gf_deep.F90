@@ -316,7 +316,7 @@ contains
      real(kind=kind_phys), dimension (its:ite,kts:kte) :: pwdper, massflx
      integer :: nv
 !$acc declare create(chem,chem_cup,chem_up,chem_down,dellac,dellac2,chem_c,chem_pw,chem_pwd,   &
-!$acc                         chem_pwav,chem_psum,pwdper,massflux)
+!$acc                         chem_pwav,chem_psum,pwdper,massflx)
 
      real(kind=kind_phys),    dimension (its:ite,kts:kte) ::            &
         entr_rate_2d,mentrd_rate_2d,he,hes,qes,z, heo,heso,qeso,zo,     &                    
