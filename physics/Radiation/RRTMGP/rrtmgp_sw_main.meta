@@ -105,7 +105,7 @@
   long_name = MPI communicator
   units = index
   dimensions = ()
-  type = integer
+  type = MPI_Comm
   intent = in
 [active_gases_array]
   standard_name = list_of_active_gases_used_by_RRTMGP
