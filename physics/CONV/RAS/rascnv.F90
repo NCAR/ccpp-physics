@@ -331,14 +331,16 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: tin, qin,  uin, vin
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsl, prslk, phil      &
      &,                                                   rhc
-      real(kind=kind_phys), dimension(:,:), intent(out) :: ud_mf, dd_mf, dt_mf
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: qlcn, qicn, w_upi   &
+      real(kind=kind_phys), dimension(:,:), intent(out), optional :: ud_mf
+      real(kind=kind_phys), dimension(:,:), intent(out) :: dd_mf, dt_mf
+      real(kind=kind_phys), dimension(:,:), intent(inout), optional :: qlcn, qicn, w_upi   &
      &,                                                   cnv_mfd                &
      &,                                                   cnv_dqldt, clcn        &
      &,                                                   cnv_fice, cnv_ndrop    &
      &,                                                   cnv_nice, cf_upi
       real(kind=kind_phys), dimension(:)  , intent(in)  :: area,  cdrag
-      real(kind=kind_phys), dimension(:)  , intent(out) :: rainc, ddvel
+      real(kind=kind_phys), dimension(:)  , intent(out) :: rainc
+      real(kind=kind_phys), dimension(:)  , intent(out), optional :: ddvel
       real(kind=kind_phys), dimension(:,:), intent(in)  :: rannum
       real(kind=kind_phys), intent(inout) :: ccin(:,:,:)
       real(kind=kind_phys), intent(in)    :: dt, dtf

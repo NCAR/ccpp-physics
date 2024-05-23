@@ -247,7 +247,7 @@ end subroutine fv_sat_adj_finalize
 !! \section arg_table_fv_sat_adj_run Argument Table
 !! \htmlinclude fv_sat_adj_run.html
 !!
-subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, jsd, jed, &
+subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, isc1, iec1, isc2, iec2, kmp, km, kmdelz, js, je, jsd, jed, jsc1, jec1, jsc2, jec2, &
                  ng, hydrostatic, fast_mp_consv, te0_2d, te0, ngas, qvi, qv, ql, qi, qr,  &
                  qs, qg, hs, peln, delz, delp, pt, pkz, q_con, akap, cappa, area, dtdt,   &
                  out_dt, last_step, do_qa, qa,                                            &
@@ -262,6 +262,10 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     integer,             intent(in)    :: ie
     integer,             intent(in)    :: isd
     integer,             intent(in)    :: ied
+    integer,             intent(in)    :: isc1
+    integer,             intent(in)    :: iec1
+    integer,             intent(in)    :: isc2
+    integer,             intent(in)    :: iec2
     integer,             intent(in)    :: kmp
     integer,             intent(in)    :: km
     integer,             intent(in)    :: kmdelz
@@ -269,6 +273,10 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     integer,             intent(in)    :: je
     integer,             intent(in)    :: jsd
     integer,             intent(in)    :: jed
+    integer,             intent(in)    :: jsc1
+    integer,             intent(in)    :: jec1
+    integer,             intent(in)    :: jsc2
+    integer,             intent(in)    :: jec2
     integer,             intent(in)    :: ng
     logical,             intent(in)    :: hydrostatic
     logical,             intent(in)    :: fast_mp_consv
@@ -276,7 +284,11 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     real(kind=kind_dyn), intent(  out) :: te0(isd:ied, jsd:jed, 1:km)
     ! If multi-gases physics are not used, ngas is one and qvi identical to qv
     integer,             intent(in)    :: ngas
-    real(kind=kind_dyn), intent(inout) :: qvi(isd:ied, jsd:jed, 1:km, 1:ngas)
+#ifdef MULTI_GASES
+    real(kind=kind_dyn), intent(inout), optional :: qvi(isd:ied, jsd:jed, 1:km, 1:ngas)
+#else
+    real(kind=kind_dyn), intent(inout), optional :: qvi(:,:,:,:)
+#endif
     real(kind=kind_dyn), intent(inout) :: qv(isd:ied, jsd:jed, 1:km)
     real(kind=kind_dyn), intent(inout) :: ql(isd:ied, jsd:jed, 1:km)
     real(kind=kind_dyn), intent(inout) :: qi(isd:ied, jsd:jed, 1:km)

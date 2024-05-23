@@ -30,9 +30,10 @@
       logical,              intent(in   ), dimension(:)     :: flag_cice
       real(kind=kind_phys), intent(in   ), dimension(:)     :: ctei_rm
       real(kind=kind_phys), intent(in   ), dimension(:)     :: xcosz, adjsfcdsw, adjsfcdlw, pgr, xmu, work1, work2
-      real(kind=kind_phys), intent(in   ), dimension(:)     :: ulwsfc_cice
+      real(kind=kind_phys), intent(in   ), dimension(:), optional :: ulwsfc_cice
       real(kind=kind_phys), intent(in   ), dimension(:)     :: cice
-      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: htrsw, htrlw, htrlwu, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: htrsw, htrlw, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
+      real(kind=kind_phys), intent(in   ), dimension(:,:), optional :: htrlwu
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: prsi
       real(kind=kind_phys), intent(in   ), dimension(:,:,:) :: lwhd
       integer,              intent(inout), dimension(:)     :: kinver

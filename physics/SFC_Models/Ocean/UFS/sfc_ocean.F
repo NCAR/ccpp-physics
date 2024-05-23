@@ -128,7 +128,7 @@
       logical, intent(in) :: use_med_flux
 
 ! To receive fluxes from mediator
-      real (kind=kind_phys), dimension(:), intent(in) ::                &
+      real (kind=kind_phys), dimension(:), intent(in), optional ::      &
      &       dqsfc_med, dtsfc_med
 
 !  ---  outputs:

@@ -70,7 +70,8 @@
       real(kind=kind_phys),intent(in)    :: U1(:,:), V1(:,:)
       real(kind=kind_phys),intent(inout) :: A(:,:), B(:,:), C(:,:)
       real(kind=kind_phys),optional, intent(inout) :: dtend(:,:,:)
-      integer, intent(in)                :: dtidx(:,:),                  &
+      integer, intent(in)                :: dtidx(:,:)
+      integer, intent(in)                ::                              &
      &  index_of_process_rayleigh_damping, index_of_temperature,         &
      &  index_of_x_wind, index_of_y_wind
       character(len=*),    intent(out)   :: errmsg
