@@ -347,6 +347,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [ice0]
   standard_name = lwe_thickness_of_ice_amount
   long_name = ice fall on physics timestep
@@ -355,6 +356,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [snow0]
   standard_name = lwe_thickness_of_snow_amount
   long_name = snow fall on physics timestep
@@ -363,6 +365,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [graupel0]
   standard_name = lwe_thickness_of_graupel_amount
   long_name = graupel fall on physics timestep
@@ -371,6 +374,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [prcp0]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation (rain, ice, snow, graupel) on physics timestep
@@ -447,6 +451,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [rei]
   standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = eff. radius of cloud ice water particle in micrometer
@@ -455,6 +460,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [rer]
   standard_name = effective_radius_of_stratiform_cloud_rain_particle
   long_name = effective radius of cloud rain particle in micrometers
@@ -463,6 +469,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [res]
   standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in micrometers
@@ -471,6 +478,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [reg]
   standard_name = effective_radius_of_stratiform_cloud_graupel_particle
   long_name = eff. radius of cloud graupel particle in micrometer
@@ -479,6 +487,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cplchm]
   standard_name = flag_for_chemistry_coupling
   long_name = flag controlling cplchm collection (default off)
@@ -494,6 +503,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [pfl_lsan]
   standard_name = liquid_flux_due_to_large_scale_precipitation
   long_name = instantaneous 3D flux of liquid water from nonconvective precipitation
@@ -502,6 +512,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
