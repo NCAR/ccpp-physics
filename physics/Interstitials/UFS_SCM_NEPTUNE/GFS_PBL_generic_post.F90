@@ -47,8 +47,9 @@
       real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap, huge
       real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsl
-      real(kind=kind_phys), dimension(:), intent(in) :: dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice, &
-          dtsfc_med, dqsfc_med, dusfc_med, dvsfc_med, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1
+      real(kind=kind_phys), dimension(:), intent(in), optional :: dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice, &
+           dtsfc_med, dqsfc_med, dusfc_med, dvsfc_med
+      real(kind=kind_phys), dimension(:), intent(in) :: wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1
 
       real(kind=kind_phys), dimension(:,:, :), intent(in) :: qgrs
       real(kind=kind_phys), dimension(:,:), intent(in) :: ugrs, vgrs, tgrs
@@ -63,14 +64,16 @@
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
       ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
       ! as long as these do not get used when not allocated.
-      real(kind=kind_phys), dimension(:),   intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
-        dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
+      real(kind=kind_phys), dimension(:),   intent(inout), optional :: dusfc_cpl, dvsfc_cpl, &
+           dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl
+      real(kind=kind_phys), dimension(:),   intent(inout) :: dusfc_diag, dvsfc_diag,         &
+           dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
       integer, intent(in) :: index_of_temperature, index_of_x_wind, index_of_y_wind, index_of_process_pbl
 
       logical, dimension(:),intent(in) :: wet, dry, icy
-      real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
+      real(kind=kind_phys), dimension(:), intent(out), optional ::  ushfsfci
 
       ! From canopy heat storage - reduction factors in latent/sensible heat flux due to surface roughness
       real(kind=kind_phys), dimension(:), intent(in) :: hffac

@@ -516,6 +516,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [rainc_mp]
   standard_name = convective_precipitation_rate_on_previous_timestep
   long_name = convective precipitation rate from previous timestep
@@ -524,6 +525,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [snow_mp]
   standard_name = snowfall_rate_on_previous_timestep
   long_name = snow precipitation rate from previous timestep
@@ -532,6 +534,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [graupel_mp]
   standard_name = graupel_precipitation_rate_on_previous_timestep
   long_name = graupel precipitation rate from previous timestep
@@ -540,6 +543,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ice_mp]
   standard_name = ice_precipitation_rate_on_previous_timestep
   long_name = ice precipitation rate from previous timestep
@@ -548,6 +552,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [rhonewsn1]
   standard_name = surface_frozen_precipitation_density
   long_name = density of precipitation ice
@@ -856,6 +861,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tvxy]
   standard_name = canopy_temperature
   long_name = vegetation temperature
@@ -864,6 +870,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tgxy]
   standard_name = ground_temperature
   long_name = ground temperature for noahmp
@@ -872,6 +879,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [canicexy]
   standard_name = canopy_intercepted_ice_mass
   long_name = canopy intercepted ice mass
@@ -880,6 +888,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [canliqxy]
   standard_name = canopy_intercepted_liquid_water
   long_name = canopy intercepted liquid water
@@ -888,6 +897,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [eahxy]
   standard_name = air_vapor_pressure_in_canopy
   long_name = canopy air vapor pressure
@@ -896,6 +906,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tahxy]
   standard_name = air_temperature_in_canopy
   long_name = canopy air temperature
@@ -904,6 +915,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cmxy]
   standard_name = surface_drag_coefficient_for_momentum_for_noahmp
   long_name = surface drag coefficient for momentum for noahmp
@@ -912,6 +924,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [chxy]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_for_noahmp
   long_name = surface exchange coeff heat & moisture for noahmp
@@ -920,6 +933,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fwetxy]
   standard_name = wet_canopy_area_fraction
   long_name = area fraction of canopy that is wetted/snowed
@@ -928,6 +942,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sneqvoxy]
   standard_name = lwe_thickness_of_snowfall_amount_on_previous_timestep
   long_name = snow mass at previous time step
@@ -936,6 +951,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [alboldxy]
   standard_name = surface_albedo_assuming_deep_snow_on_previous_timestep
   long_name = snow albedo at previous time step
@@ -944,6 +960,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qsnowxy]
   standard_name = lwe_snowfall_rate
   long_name = snow precipitation rate at surface
@@ -952,6 +969,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [wslakexy]
   standard_name = water_storage_in_lake
   long_name = lake water storage
@@ -960,6 +978,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zwtxy]
   standard_name = water_table_depth
   long_name = water table depth
@@ -968,6 +987,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [waxy]
   standard_name = water_storage_in_aquifer
   long_name = water storage in aquifer
@@ -976,6 +996,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [wtxy]
   standard_name = water_storage_in_aquifer_and_saturated_soil
   long_name = water storage in aquifer and saturated soil
@@ -984,6 +1005,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tsnoxy]
   standard_name = temperature_in_surface_snow
   long_name = temperature_in_surface_snow
@@ -992,6 +1014,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zsnsoxy]
   standard_name = depth_from_snow_surface_at_bottom_interface
   long_name = depth from the top of the snow surface at the bottom of the layer
@@ -1000,6 +1023,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snicexy]
   standard_name = lwe_thickness_of_ice_in_surface_snow
   long_name = lwe_thickness_of_ice_in_surface_snow
@@ -1008,6 +1032,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snliqxy]
   standard_name = lwe_thickness_of_liquid_water_in_surface_snow
   long_name = snow layer liquid water
@@ -1016,6 +1041,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [lfmassxy]
   standard_name = leaf_mass_content
   long_name = leaf mass
@@ -1024,6 +1050,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [rtmassxy]
   standard_name = fine_root_mass_content
   long_name = fine root mass
@@ -1032,6 +1059,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [stmassxy]
   standard_name = stem_mass_content
   long_name = stem mass
@@ -1040,6 +1068,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [woodxy]
   standard_name = wood_mass_content
   long_name = wood mass including woody roots
@@ -1048,6 +1077,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [stblcpxy]
   standard_name = slow_soil_pool_mass_content_of_carbon
   long_name = stable carbon in deep soil
@@ -1056,6 +1086,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fastcpxy]
   standard_name = fast_soil_pool_mass_content_of_carbon
   long_name = short-lived carbon in shallow soil
@@ -1064,6 +1095,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [xlaixy]
   standard_name = leaf_area_index
   long_name = leaf area index 
@@ -1072,6 +1104,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [xsaixy]
   standard_name = stem_area_index
   long_name = stem area index 
@@ -1080,6 +1113,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [taussxy]
   standard_name = dimensionless_age_of_surface_snow
   long_name = non-dimensional snow age
@@ -1088,6 +1122,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [smoiseq]
   standard_name = volumetric_equilibrium_soil_moisture
   long_name = equilibrium soil water content
@@ -1096,6 +1131,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [smcwtdxy]
   standard_name = volumetric_soil_moisture_between_soil_bottom_and_water_table
   long_name = soil water content between the bottom of the soil and the water table
@@ -1104,6 +1140,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [deeprechxy]
   standard_name = water_table_recharge_assuming_deep
   long_name = recharge to or from the water table when deep
@@ -1112,6 +1149,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [rechxy]
   standard_name = water_table_recharge_assuming_shallow
   long_name = recharge to or from the water table when shallow
@@ -1120,6 +1158,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albdvis]
   standard_name = surface_albedo_direct_visible_over_land
   long_name = direct surface albedo visible band over land
@@ -1344,6 +1383,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [t2mmp]
   standard_name = temperature_at_2m_from_noahmp
   long_name = 2 meter temperature from noahmp
@@ -1352,6 +1392,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [q2mp]
   standard_name = specific_humidity_at_2m_from_noahmp
   long_name = 2 meter specific humidity from noahmp
@@ -1360,6 +1401,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [zvfun]
   standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
   long_name = function of surface roughness length and green vegetation fraction
@@ -1376,6 +1418,15 @@
   type = real
   kind = kind_phys
   intent = out
+[rca]
+  standard_name = aerodynamic_resistance_in_canopy
+  long_name = canopy resistance
+  units = s m-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -367,6 +367,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tke]
   standard_name = turbulent_kinetic_energy_convective_transport_tracer
   long_name = turbulent kinetic energy in the convectively transported tracer array
