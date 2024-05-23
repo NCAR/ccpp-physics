@@ -4,8 +4,6 @@
   dependencies = ../../hooks/machine.F,../../hooks/physcons.F90
   dependencies = ../multi_gases.F90,../module_mp_radar.F90
   dependencies = module_gfdlmp_param.F90
-  dependencies = v1_2019/module_gfdl_cloud_microphys.F90
-  dependencies = v3_2022/module_gfdl_cloud_microphys_v3.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -66,64 +64,6 @@
   standard_name = mpi_root_for_fast_physics
   long_name = master MPI-rank for fast physics schemes
   units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[nlunit]
-  standard_name = iounit_of_namelist
-  long_name = fortran unit number for file opens
-  units = none
-  dimensions = ()
-  type = integer
-  intent = in
-[fn_nml]
-  standard_name = filename_of_namelist
-  long_name = namelist filename
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=64
-  intent = in
-[input_nml_file]
-  standard_name = filename_of_internal_namelist
-  long_name = character string to store full namelist contents
-  units = none
-  dimensions = (number_of_lines_in_internal_namelist)
-  type = character
-  kind = len=*
-  intent = in
-[logunit]
-  standard_name = iounit_of_log
-  long_name = fortran unit number for logfile
-  units = none
-  dimensions = ()
-  type = integer
-  intent = in
-[hydrostatic]
-  standard_name = flag_for_hydrostatic_solver
-  long_name = flag for hydrostatic solver from dynamics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[imp_physics]
-  standard_name = control_for_microphysics_scheme
-  long_name = choice of microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = inout
-[imp_physics_gfdl]
-  standard_name = identifier_for_gfdl_microphysics_scheme
-  long_name = choice of GFDL microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[imp_physics_gfdl_v3]
-  standard_name = identifier_for_gfdl_microphysics_v3_scheme
-  long_name = choice of GFDL microphysics scheme version 3
-  units = flag
   dimensions = ()
   type = integer
   intent = in

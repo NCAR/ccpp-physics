@@ -116,10 +116,8 @@ contains
 !! \htmlinclude fv_sat_adj_init.html
 !!
 subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
-     mpirank, mpiroot, nlunit, fn_nml, input_nml_file, logunit, hydrostatic, &
-     imp_physics, imp_physics_gfdl, imp_physics_gfdl_v3, errmsg, errflg)
-    use module_gfdl_cloud_microphys,    only: module_gfdl_cloud_microphys_init
-    use module_gfdl_cloud_microphys_v3, only: module_gfdl_cloud_microphys_v3_init
+                           mpirank, mpiroot, errmsg, errflg)
+
     implicit none
 
     ! Interface variables
@@ -131,13 +129,6 @@ subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
     real(kind_dyn),   intent(in   ) :: cpilist(0:ngas)
     integer,          intent(in   ) :: mpirank
     integer,          intent(in   ) :: mpiroot
-    character(len=64),intent(in   ) :: fn_nml
-    character(len=*), intent(in   ) :: input_nml_file(:)
-    integer,          intent(in   ) :: nlunit
-    integer,          intent(in   ) :: logunit
-    logical,          intent(in   ) :: hydrostatic
-    integer,          intent(in   ) :: imp_physics_gfdl, imp_physics_gfdl_v3
-    integer,          intent(inout) :: imp_physics
     character(len=*), intent(  out) :: errmsg
     integer,          intent(  out) :: errflg
 
@@ -160,17 +151,6 @@ subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
       write(errmsg,'(a)') 'Logic error: fv_sat_adj requires six water species (nwat=6)'
       errflg = 1
       return
-    end if
-
-    ! Initialize GFDLMP configuration from namelist.
-    if (imp_physics == imp_physics_gfdl) then
-       call module_gfdl_cloud_microphys_init(mpirank, mpiroot, nlunit, input_nml_file, &
-            logunit, fn_nml, errmsg, errflg)
-    end if
-    if (imp_physics == imp_physics_gfdl_v3) then
-       call module_gfdl_cloud_microphys_v3_init(mpirank, mpiroot, nlunit, input_nml_file, &
-            logunit, fn_nml, hydrostatic, errmsg, errflg)
-       imp_physics = imp_physics_gfdl !DJS2024 We only need to distinguish v1/v3 for this step.
     end if
 
     if (is_initialized) return
