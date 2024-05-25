@@ -13,10 +13,10 @@ module noahmpdrv
 
     use module_sf_noahmplsm
     
-    ! 3.5.24 for use in IAU
-    use lnd_iau_mod,  only: lnd_iau_control_type, lnd_iau_external_data_type,   &
-                            lnd_iau_mod_set_control, lnd_iau_mod_init, lnd_iau_mod_getiauforcing,  &    
-                            lnd_iau_mod_finalize
+    ! Land IAU increments for soil temperature (can also do soil moisture increments if needed)
+    use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type,   &
+                            land_iau_mod_set_control, land_iau_mod_init, 
+                            land_iau_mod_getiauforcing, land_iau_mod_finalize
 
     implicit none
 
@@ -27,9 +27,14 @@ module noahmpdrv
     public :: noahmpdrv_init, noahmpdrv_run, &
               noahmpdrv_timestep_init, noahmpdrv_timestep_finalize, noahmpdrv_finalize
 
-    ! IAU data and control
-    type (lnd_iau_control_type)                  :: LND_IAU_Control
-    type (lnd_iau_external_data_type)            :: LND_IAU_Data      !(number of blocks):each proc holds nblks
+    !> \Land IAU data and control
+    ! Land IAU Control holds settings' information, maily read from namelist (e.g., 
+              ! block of global domain that belongs to a process ,
+              ! whethrer to do IAU increment at this time step, 
+              ! time step informatoin, etc)    
+    type (land_iau_control_type)          :: Land_IAU_Control
+    ! Land IAU Data holds spatially and temporally interpolated soil temperature increments per time step
+    type (land_iau_external_data_type)    :: Land_IAU_Data   !(number of blocks):each proc holds nblks
 
     contains
 
@@ -127,23 +132,18 @@ module noahmpdrv
     pores (:) = maxsmc (:)
     resid (:) = drysmc (:)
 
-    ! 3.7.24 init iau for land
-    call lnd_iau_mod_set_control(LND_IAU_Control, fn_nml, input_nml_file, me, mpi_root, isc,jsc, nx, ny, nblks, blksz,  &
-                                lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)
-  !  print*, 'proc errmsg, errflg after set control', me, errmsg, errflg
-  !  print*, 'proc iau_control isc, nx, dtp fhour', me, LND_IAU_Control%isc, LND_IAU_Control%nx, &
-  !          LND_IAU_Control%dtp, LND_IAU_Control%fhour
-  !  print*, 'proc iau_control incfiles(1)', me, LND_IAU_Control%iau_inc_files(1)
-
-    call lnd_iau_mod_init (LND_IAU_Control, LND_IAU_Data, xlon, xlat, errmsg, errflg)
-    !print*, 'proc errmsg, errflg interval after lnd_iau_init ', me,trim(errmsg), errflg, LND_IAU_Data%in_interval
-    ! print*, 'proc nblks blksize(1) after set init', me,LND_IAU_Control%nblks, LND_IAU_Control%blksz(1)  
+    ! Read Land IAU settings 
+    call land_iau_mod_set_control(Land_IAU_Control, fn_nml, input_nml_file, &
+          me, mpi_root, isc,jsc, nx, ny, nblks, blksz,  &
+          lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)
+    ! Initialize IAU for land
+    call land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, xlon, xlat, errmsg, errflg)
 
   end subroutine noahmpdrv_init
 
 !> \ingroup NoahMP_LSM
 !! \brief This subroutine is called before noahmpdrv_run 
-!!  to update states with iau increments  
+!!  to update states with iau increments, if available 
 !! \section arg_table_noahmpdrv_timestep_init Argument Table
 !! \htmlinclude noahmpdrv_timestep_init.html
 !!
@@ -154,8 +154,6 @@ module noahmpdrv
  
     implicit none
 
-    ! integer,                                  intent(in) :: me         !mpi_rank
-    ! integer,                                  intent(in) :: mpi_root   ! = GFS_Control%master  
     integer                                   , intent(in) :: itime      !current forecast iteration      
     real(kind=kind_phys)                      , intent(in) :: fhour      !current forecast time (hr)
     real(kind=kind_phys)                      , intent(in) :: delt       ! time interval [s]       
@@ -168,8 +166,6 @@ module noahmpdrv
     ! IAU update
     real,allocatable :: stc_inc_flat(:,:)   
     ! real,allocatable :: slc_inc_flat(:,:) 
-    ! real,allocatable :: tmp2m_inc_flat(:) 
-    ! real,allocatable :: spfh2m_inc_flat(:)  
     integer :: j, k, ib
     !  --- end declaration
 
@@ -179,70 +175,59 @@ module noahmpdrv
 
     !> update current forecast hour  
     ! GFS_control%jdat(:) = jdat(:)  
-    LND_IAU_Control%fhour=fhour
+    Land_IAU_Control%fhour=fhour
 
-    if(LND_IAU_Control%me == LND_IAU_Control%mpi_root) then 
-      print*,"itime ",itime," GFScont%fhour ",fhour," IauCon%fhour",LND_IAU_Control%fhour,   &
-            " delt ",delt," IauCont%dtp",LND_IAU_Control%dtp
+    if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+      print*,"itime ",itime," GFScont%fhour ",fhour," IauCon%fhour",Land_IAU_Control%fhour,   &
+            " delt ",delt," IauCont%dtp",Land_IAU_Control%dtp
     endif  
 
-    !> 3.7.24 read iau increments 
-    call lnd_iau_mod_getiauforcing(LND_IAU_Control, LND_IAU_Data, errmsg, errflg)   !call getiauforcing(GFS_control,IAU_data)
+    !> read iau increments 
+    call land_iau_mod_getiauforcing(Land_IAU_Control, Land_IAU_Data, errmsg, errflg)   !call getiauforcing(GFS_control,IAU_data)
     if (errflg .ne. 0) then
-      if(LND_IAU_Control%me == LND_IAU_Control%mpi_root) then 
+      if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
         print*, "noahmpdrv_timestep_init: lnd_iau_mod_getiauforcing returned nonzero value"
         print*, errmsg
       endif
       return
     endif
 
-    !> update with iau increments
-    if (LND_IAU_Data%in_interval) then
-      if(LND_IAU_Control%me == LND_IAU_Control%mpi_root) then 
+    !> update land states with iau increments
+    if (Land_IAU_Data%in_interval) then
+      if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
         print*, "adding land iau increments " 
       endif
 
-      if (LND_IAU_Control%lsoil .ne. km) then
-        write(errmsg,*) 'noahmpdrv_timestep_init: LND_IAU_Data%lsoil ',LND_IAU_Control%lsoil,' not equal to km ',km
+      if (Land_IAU_Control%lsoil .ne. km) then
+        write(errmsg,*) 'noahmpdrv_timestep_init: Land_IAU_Data%lsoil ',Land_IAU_Control%lsoil,' not equal to km ',km
         errflg = 1
         return
       endif
 
-      ! local variable to copy blocked data LND_IAU_Data%stc_inc
-      allocate(stc_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny, km))  !GFS_Control%ncols
-      ! allocate(slc_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny, km))  !GFS_Control%ncols
-      ! allocate(tmp2m_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny))  !GFS_Control%ncols
-      ! allocate(spfh2m_inc_flat(LND_IAU_Control%nx * LND_IAU_Control%ny))  !GFS_Control%ncols
+      ! local variable to copy blocked data Land_IAU_Data%stc_inc
+      allocate(stc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
+      ! allocate(slc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
       ib = 1
-      do j = 1, LND_IAU_Control%ny  !ny 
+      do j = 1, Land_IAU_Control%ny  !ny 
         do k = 1, km    
-          stc_inc_flat(ib:ib+LND_IAU_Control%nx-1, k) =LND_IAU_Data%stc_inc(:,j, k)  
-          ! slc_inc_flat(ib:ib+LND_IAU_Control%nx-1, k) = LND_IAU_Data%slc_inc(:,j, k) 
+          stc_inc_flat(ib:ib+Land_IAU_Control%nx-1, k) =Land_IAU_Data%stc_inc(:,j, k)  
+          ! slc_inc_flat(ib:ib+Land_IAU_Control%nx-1, k) = Land_IAU_Data%slc_inc(:,j, k) 
         enddo
-      ! ib = 1
-      ! do j = 1, LND_IAU_Control%ny  !ny
-        ! tmp2m_inc_flat(ib:ib+LND_IAU_Control%nx-1) =LND_IAU_Data%tmp2m_inc(:,j, 1)  
-        ! spfh2m_inc_flat(ib:ib+LND_IAU_Control%nx-1)=LND_IAU_Data%spfh2m_inc(:,j, 1) 
-        ib = ib + LND_IAU_Control%nx  !nlon    
+        ib = ib + Land_IAU_Control%nx  !nlon    
       enddo
 
       ! delt=GFS_Control%dtf
-      if ((LND_IAU_Control%dtp - delt) > 0.0001) then 
-        if(LND_IAU_Control%me == LND_IAU_Control%mpi_root) then 
-          print*, "Warning noahmpdrv_run delt ",delt,"different from LND_IAU_Control%dtp ",LND_IAU_Control%dtp
+      if ((Land_IAU_Control%dtp - delt) > 0.0001) then 
+        if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+          print*, "Warning noahmpdrv_run delt ",delt,"different from Land_IAU_Control%dtp ",Land_IAU_Control%dtp
         endif
       endif
-      !IAU increments are in units of 1/sec     !LND_IAU_Control%dtp
-!* only updating soil temp
+      !IAU increments are in units of 1/sec     !Land_IAU_Control%dtp
+      !* only updating soil temp for now
       do k = 1, km 
-        stc(:,k) = stc(:,k) + stc_inc_flat(:,k)*delt !LND_IAU_Control%dtp
-        ! slc(:,k) = slc(:,k) + slc_inc_flat(:,k)*delt !LND_IAU_Control%dtp    
+        stc(:,k) = stc(:,k) + stc_inc_flat(:,k)*delt !Land_IAU_Control%dtp
+        ! slc(:,k) = slc(:,k) + slc_inc_flat(:,k)*delt !Land_IAU_Control%dtp    
       enddo
-      ! t2mmp = t2mmp +  &
-      ! tmp2m_inc_flat(LND_IAU_Control%blk_strt_indx(nb):LND_IAU_Control%blk_strt_indx(nb) + im-1)*delt !LND_IAU_Control%dtp
-      ! q2mp = q2mp +   &
-      ! spfh2m_inc_flat(LND_IAU_Control%blk_strt_indx(nb):LND_IAU_Control%blk_strt_indx(nb)+ im-1)*delt !LND_IAU_Control%dtp 
-
       deallocate(stc_inc_flat)  !, slc_inc_flat)   !, tmp2m_inc_flat,spfh2m_inc_flat)
 
     endif
@@ -251,51 +236,41 @@ module noahmpdrv
 
   !> \ingroup NoahMP_LSM
 !! \brief This subroutine is called after noahmpdrv_run 
-!!  to free up allocated memory  
+!!  to free up allocated memory, if there are any  
+!!  code to do any needed consistency check will go here
 !! \section arg_table_noahmpdrv_timestep_finalize Argument Table
 !! \htmlinclude noahmpdrv_timestep_finalize.html
 !!
   subroutine noahmpdrv_timestep_finalize (errmsg, errflg)       ! smc, t2mmp, q2mp,    
    
-    use machine,          only: kind_phys
- 
+    use machine,          only: kind_phys 
     implicit none
-
     character(len=*),                          intent(out) :: errmsg
     integer,                                   intent(out) :: errflg
-
-    integer :: j, k, ib
-
     !  --- Initialize CCPP error handling variables
     errmsg = ''
-    errflg = 0
-    
+    errflg = 0    
+
     !> note the IAU deallocate happens at the noahmpdrv_finalize
 
   end subroutine noahmpdrv_timestep_finalize
 
     !> \ingroup NoahMP_LSM
 !! \brief This subroutine mirrors noahmpdrv_init  
-!!  to free up allocated memory in IAU_init (noahmdrv_init)  
+!!  it calls land_iau_finalize which frees up allocated memory by IAU_init (in noahmdrv_init)  
 !! \section arg_table_noahmpdrv_finalize Argument Table
 !! \htmlinclude noahmpdrv_finalize.html
-!!
   subroutine noahmpdrv_finalize (errmsg, errflg)       ! smc, t2mmp, q2mp,    
    
-    use machine,          only: kind_phys
- 
+    use machine,          only: kind_phys 
     implicit none
-
     character(len=*),                          intent(out) :: errmsg
     integer,                                   intent(out) :: errflg
-
     integer :: j, k, ib
-
     !  --- Initialize CCPP error handling variables
     errmsg = ''
-    errflg = 0
-    
-    call lnd_iau_mod_finalize(LND_IAU_Control, LND_IAU_Data, errmsg, errflg)     !LND_IAU_Control%finalize()
+    errflg = 0    
+    call land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, errmsg, errflg)     !Land_IAU_Control%finalize()
 
   end subroutine noahmpdrv_finalize
 
@@ -323,7 +298,7 @@ module noahmpdrv
   subroutine noahmpdrv_run                                       &
 !...................................
 !  ---  inputs:
-    (nb, im, km, lsnowl, itime, fhour,  ps, u1, v1, t1, q1, soiltyp,soilcol,&
+    (im, km, lsnowl, itime, ps, u1, v1, t1, q1, soiltyp,soilcol,&
       vegtype, sigmaf, dlwflx, dswsfc, snet, delt, tg3, cm, ch,  &
       prsl1, prslk1, prslki, prsik1, zf,pblh, dry, wind, slopetyp,&
       shdmin, shdmax, snoalb, sfalb, flag_iter,con_g,            &
@@ -425,12 +400,10 @@ module noahmpdrv
 !  ---  CCPP interface fields (in call order)
 !
 
-  integer                                , intent(in)    :: nb         !=cdata%blk_no, 
   integer                                , intent(in)    :: im         ! horiz dimension and num of used pts
   integer                                , intent(in)    :: km         ! vertical soil layer dimension
   integer                                , intent(in)    :: lsnowl     ! lower bound for snow level arrays
   integer                                , intent(in)    :: itime      ! NOT USED current forecast iteration
-  real(kind=kind_phys)                   , intent(in)    :: fhour      ! currentforecast time (hr)
   real(kind=kind_phys), dimension(:)     , intent(in)    :: ps         ! surface pressure [Pa]
   real(kind=kind_phys), dimension(:)     , intent(in)    :: u1         ! u-component of wind [m/s]
   real(kind=kind_phys), dimension(:)     , intent(in)    :: v1         ! u-component of wind [m/s]
