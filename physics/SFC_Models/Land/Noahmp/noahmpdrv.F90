@@ -158,7 +158,7 @@
       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
       cmm, chh, evbs, evcw, sbsno, pah, ecan, etran, edir, snowc,&
       stm, snohf,smcwlt2, smcref2, wet1, t2mmp, q2mp,zvfun,      &
-      ztmax, errmsg, errflg,                                     &
+      ztmax, rca, errmsg, errflg,                                     &
       canopy_heat_storage_ccpp,                                  &
       rainfall_ccpp,                                             &
       sw_absorbed_total_ccpp,                                    &
@@ -1063,6 +1063,16 @@
       chxy      (i)   = ch_noahmp
       zorl      (i)   = z0_total * 100.0  ! convert to cm
       ztmax     (i)   = z0h_total 
+
+      !LAI-scale canopy resistance based on weighted sunlit shaded fraction
+      if(rs_sunlit .le. 0.0 .or. rs_shaded .le. 0.0 .or. &
+          lai_sunlit .eq. 0.0 .or. lai_shaded .eq. 0.0) then
+        rca(i) = parameters%rsmax
+      else !calculate LAI-scale canopy conductance (1/Rs)
+        rca(i) = ((1.0/(rs_sunlit+leaf_air_resistance)*lai_sunlit) + &
+                 ((1.0/(rs_shaded+leaf_air_resistance))*lai_shaded))
+        rca(i) = max((1.0/rca(i)),parameters%rsmin) !resistance
+      end if
 
       smc       (i,:) = soil_moisture_vol
       slc       (i,:) = soil_liquid_vol
