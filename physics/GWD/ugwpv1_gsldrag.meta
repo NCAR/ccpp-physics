@@ -412,7 +412,7 @@
 [psl_gwd_dx_factor]
   standard_name = effective_grid_spacing_of_psl_gwd_suite
   long_name = multiplication of grid spacing
-  units = count
+  units = 1
   dimensions = ()
   type = real
   kind = kind_phys
@@ -471,6 +471,14 @@
   long_name = multiplication factors for cdmb and gwd
   units = none
   dimensions = (4)
+  type = real
+  kind = kind_phys
+  intent = in
+[alpha_fd]
+  standard_name = alpha_coefficient_for_turbulent_orographic_form_drag
+  long_name = alpha coefficient for Beljaars et al turbulent orographic form drag
+  units = none
+  dimensions = ()
   type = real
   kind = kind_phys
   intent = in

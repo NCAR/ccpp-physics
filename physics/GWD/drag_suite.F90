@@ -219,8 +219,8 @@
      &           dusfc_ms,dvsfc_ms,dusfc_bl,dvsfc_bl,                   &
      &           dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                   &
      &           slmsk,br1,hpbl,                                        &
-     &           g, cp, rd, rv, fv, pi, imx, cdmbgwd, me, master,       &
-     &           lprnt, ipr, rdxzb, dx, gwd_opt,                        &
+     &           g, cp, rd, rv, fv, pi, imx, cdmbgwd, alpha_fd,         &
+     &           me, master, lprnt, ipr, rdxzb, dx, gwd_opt,            &
      &           do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,   &
      &           dtend, dtidx, index_of_process_orographic_gwd,         &
      &           index_of_temperature, index_of_x_wind,                 &
@@ -327,18 +327,18 @@
    integer, intent(in) :: gwd_opt
    logical, intent(in) :: lprnt
    integer, intent(in) :: KPBL(:)
-   real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV, cdmbgwd(:)
+   real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV,    &
+     &                                 cdmbgwd(:), alpha_fd
    real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
    logical, intent(in) :: ldiag3d
-   integer, intent(in) :: dtidx(:,:)
-   integer, intent(in) :: index_of_temperature,      &
+   integer, intent(in) :: dtidx(:,:), index_of_temperature,      &
      &  index_of_process_orographic_gwd, index_of_x_wind, index_of_y_wind
 
    integer              ::  kpblmax
    integer, parameter   ::  ims=1, kms=1, its=1, kts=1
    real(kind=kind_phys), intent(in) ::  fv, pi
    real(kind=kind_phys) ::  rcl, cdmb
-   real(kind=kind_phys) ::  g_inv
+   real(kind=kind_phys) ::  g_inv, rd_inv
 
    real(kind=kind_phys), intent(inout) ::                        &
      &                   dudt(:,:),dvdt(:,:),                &
@@ -444,6 +444,7 @@
    real(kind=kind_phys), dimension(im,km) :: utendform,vtendform
    real(kind=kind_phys)                 :: a1,a2,wsp
    real(kind=kind_phys)                 :: H_efold
+   real(kind=kind_phys), parameter      :: coeff_fd  = 6.325e-3
 
 ! critical richardson number for wave breaking : ! larger drag with larger value
    real(kind=kind_phys), parameter       ::  ric     = 0.25
@@ -708,11 +709,12 @@ enddo
    taufb(1:im,1:km+1) = 0.0
    komax(1:im) = 0
 !
+   rd_inv = 1./rd
    do k = kts,km
      do i = its,im
        vtj(i,k)  = t1(i,k)  * (1.+fv*q1(i,k))
        vtk(i,k)  = vtj(i,k) / prslk(i,k)
-       ro(i,k)   = 1./rd * prsl(i,k) / vtj(i,k) ! density kg/m**3
+       ro(i,k)   = rd_inv * prsl(i,k) / vtj(i,k) ! density kg/m**3
      enddo
    enddo
 !
@@ -1363,8 +1365,10 @@ IF ( do_gsl_drag_tofd ) THEN
             H_efold = 1500.
             DO k=kts,km
                wsp=SQRT(uwnd1(i,k)**2 + vwnd1(i,k)**2)
-               ! alpha*beta*Cmd*Ccorr*2.109 = 12.*1.*0.005*0.6*2.109 = 0.0759
-               var_temp = 0.0759*EXP(-(zl(i,k)/H_efold)**1.5)*a2*          &
+               ! Note:  In Beljaars et al. (2004):
+               ! alpha_fd*beta*Cmd*Ccorr*2.109 = 12.*1.*0.005*0.6*2.109 = 0.0759
+               ! lump beta*Cmd*Ccorr*2.109 into 1.*0.005*0.6*2.109 = coeff_fd ~ 6.325e-3_kind_phys
+               var_temp = alpha_fd*coeff_fd*EXP(-(zl(i,k)/H_efold)**1.5)*a2*       &
                                  zl(i,k)**(-1.2)*ss_taper(i) ! this is greater than zero
                !  Note:  This is a semi-implicit treatment of the time differencing
                !  per Beljaars et al. (2004, QJRMS)
@@ -1427,8 +1431,8 @@ endif
      &           dusfc_ls,dvsfc_ls,dusfc_bl,dvsfc_bl,                   &
      &           dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                   &
      &           slmsk,br1,hpbl,vtype,                                  &
-     &           g, cp, rd, rv, fv, pi, imx, cdmbgwd, me, master,       &
-     &           lprnt, ipr, rdxzb, dx, gwd_opt,                        &
+     &           g, cp, rd, rv, fv, pi, imx, cdmbgwd, alpha_fd,         &
+     &           me, master, lprnt, ipr, rdxzb, dx, gwd_opt,            &
      &           do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,   &
      &           psl_gwd_dx_factor,                                     &
      &           dtend, dtidx, index_of_process_orographic_gwd,         &
@@ -1537,7 +1541,8 @@ endif
    integer, intent(in) :: gwd_opt
    logical, intent(in) :: lprnt
    integer, intent(in) :: KPBL(:)
-   real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV, cdmbgwd(:)
+   real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV,    &
+     &                                 cdmbgwd(:), alpha_fd
    real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
    logical, intent(in) :: ldiag3d
    integer, intent(in) :: dtidx(:,:), index_of_temperature,      &
@@ -1547,7 +1552,7 @@ endif
    integer, parameter   ::  ims=1, kms=1, its=1, kts=1
    real(kind=kind_phys), intent(in) ::  fv, pi
    real(kind=kind_phys) ::  rcl, cdmb
-   real(kind=kind_phys) ::  g_inv
+   real(kind=kind_phys) ::  g_inv, g_cp
 
    real(kind=kind_phys), intent(inout) ::                        &
      &                   dudt(:,:),dvdt(:,:),                &
@@ -1649,6 +1654,7 @@ endif
    real(kind=kind_phys), dimension(im,km) :: utendform,vtendform
    real(kind=kind_phys)                 :: a1,a2,wsp
    real(kind=kind_phys)                 :: H_efold
+   real(kind=kind_phys), parameter      :: coeff_fd = 6.325e-3
 
 ! multification factor of standard deviation : ! larger drag with larger value 
 !!!   real(kind=kind_phys), parameter       :: psl_gwd_dx_factor     = 6.0
@@ -1789,18 +1795,18 @@ endif
    enddo
 
 !--- calculate scale-aware tapering factors
-do i=1,im
-   if ( dx(i) .ge. dxmax_ls ) then
-      ls_taper(i) = 1.
-   else
-      if ( dx(i) .le. dxmin_ls) then
-         ls_taper(i) = 0.
+   do i=1,im
+      if ( dx(i) .ge. dxmax_ls ) then
+         ls_taper(i) = 1.
       else
-         ls_taper(i) = 0.5 * ( SIN(pi*(dx(i)-0.5*(dxmax_ls+dxmin_ls))/  &
+         if ( dx(i) .le. dxmin_ls) then
+            ls_taper(i) = 0.
+         else
+            ls_taper(i) = 0.5 * ( SIN(pi*(dx(i)-0.5*(dxmax_ls+dxmin_ls))/  &
                                   (dxmax_ls-dxmin_ls)) + 1. )
+         endif
       endif
-   endif
-enddo
+   enddo
 
 ! Remove ss_tapering
 ss_taper(:) = 1.
@@ -2072,6 +2078,7 @@ enddo
 IF ( (do_gsl_drag_ls_bl).and.                            &
      ((gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)) ) then
 
+   g_cp = g/cp
    do i=its,im
 
       if ( ls_taper(i).GT.1.E-02 ) then
@@ -2086,7 +2093,7 @@ IF ( (do_gsl_drag_ls_bl).and.                            &
             tem2      = v1(i,k) - v1(i,k+1)
             dw2       = rcl*(tem1*tem1 + tem2*tem2)
             shr2      = max(dw2,dw2min) * rdz * rdz
-            bvf2      = g*(g/cp+rdz*(vtj(i,k+1)-vtj(i,k))) * ti
+            bvf2      = g*(g_cp+rdz*(vtj(i,k+1)-vtj(i,k))) * ti
             usqj(i,k) = max(bvf2/shr2,rimin)
             bnv2(i,k) = 2.0*g*rdz*(vtk(i,k+1)-vtk(i,k))/(vtk(i,k+1)+vtk(i,k))
             bnv2(i,k) = max( bnv2(i,k), bnv2min )
@@ -2341,8 +2348,10 @@ IF ( do_gsl_drag_tofd ) THEN
             H_efold = 1500.
             DO k=kts,km
                wsp=SQRT(u1(i,k)**2 + v1(i,k)**2)
-               ! alpha*beta*Cmd*Ccorr*2.109 = 12.*1.*0.005*0.6*2.109 = 0.0759
-               var_temp = 0.0759*EXP(-(zl(i,k)/H_efold)**1.5)*a2*          &
+               ! Note:  In Beljaars et al. (2004):
+               ! alpha_fd*beta*Cmd*Ccorr*2.109 = 12.*1.*0.005*0.6*2.109 = 0.0759
+               ! lump beta*Cmd*Ccorr*2.109 into 1.*0.005*0.6*2.109 = coeff_fd ~ 6.325e-3_kind_phys
+               var_temp = alpha_fd*coeff_fd*EXP(-(zl(i,k)/H_efold)**1.5)*a2*       &
                                  zl(i,k)**(-1.2)*ss_taper(i) ! this is greater than zero
                !  Note:  This is a semi-implicit treatment of the time differencing
                !  per Beljaars et al. (2004, QJRMS)
@@ -2465,7 +2474,7 @@ IF ( (do_gsl_drag_ls_bl) .and. (gwd_opt_bl .EQ. 1) ) THEN
             do k = km, kpblmin, -1
                if(flag(i).and. k.le.kbmax(i)) then
                           pe = pe + bnv2(i,k)*(zl(i,kbmax(i))-zl(i,k))*      &
-                            del(i,k)/g/ro(i,k)
+                            del(i,k)*g_inv/ro(i,k)
                   ke = 0.5*((rcs*u1(i,k))**2.+(rcs*v1(i,k))**2.)
 !
 !---------- apply flow-blocking drag when pe >= ke
