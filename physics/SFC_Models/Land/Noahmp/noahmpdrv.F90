@@ -954,6 +954,10 @@
         ch_vegetated           = 0.0
         ch_bare_ground         = ch_noahmp
         canopy_heat_storage    = 0.0
+        lai_sunlit             = 0.0
+        lai_shaded             = 0.0
+        rs_sunlit              = 0.0
+        rs_shaded              = 0.0
 
       else  ! not glacier
 
