@@ -2020,6 +2020,8 @@ endif   ! croptype == 0
     chuc      = 0.
     chv2      = 0.
     rb        = 0.
+    laisun    = 0.
+    laisha    = 0.
 
     cdmnv     = 0.0
     ezpdv     = 0.0
