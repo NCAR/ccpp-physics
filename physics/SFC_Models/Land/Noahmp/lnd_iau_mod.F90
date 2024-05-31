@@ -80,7 +80,8 @@ module land_iau_mod
       real(kind=kind_phys) :: iau_delthrs     ! iau time interval (to scale increments) in hours
       character(len=240)   :: iau_inc_files(7)! list of increment files
       real(kind=kind_phys) :: iaufhrs(7)      ! forecast hours associated with increment files
-      logical              :: iau_filter_increments          
+      logical              :: iau_filter_increments   
+      integer              :: lsoil_incr    ! soil layers (from top) updated by DA   
       !, iau_drymassfixer
       integer              :: me              !< MPI rank designator
       integer              :: mpi_root          !< MPI rank of master atmosphere processor
@@ -131,8 +132,12 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    character(len=240)    :: land_iau_inc_files(7)         = ''          !< list of increment files
    real(kind=kind_phys)  :: land_iaufhrs(7)               = -1          !< forecast hours associated with increment files
    logical               :: land_iau_filter_increments    = .false.     !< filter IAU increments
+
+   integer               :: lsoil_incr = 4
   
-   NAMELIST /lnd_iau_nml/ do_land_iau, land_iau_delthrs, land_iau_inc_files, land_iaufhrs, land_iau_filter_increments  !, lnd_iau_drymassfixer                                          &
+   NAMELIST /lnd_iau_nml/ do_land_iau, land_iau_delthrs, land_iau_inc_files, land_iaufhrs, &
+                        land_iau_filter_increments, &  !, lnd_iau_drymassfixer   
+                        lsoil_incr                                       
    
    !Errors messages handled through CCPP error handling variables
    errmsg = ''
@@ -185,6 +190,8 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    Land_IAU_Control%iaufhrs = land_iaufhrs   
    Land_IAU_Control%iau_filter_increments = land_iau_filter_increments
    ! Land_IAU_Control%iau_drymassfixer = lnd_iau_drymassfixer
+   Land_IAU_Control%lsoil_incr = lsoil_incr
+
    Land_IAU_Control%me = me
    Land_IAU_Control%mpi_root = mpi_root
    Land_IAU_Control%isc = isc
@@ -762,6 +769,46 @@ end subroutine interp_inc_at_timestep
 5000 continue   ! j-loop
 
   end subroutine remap_coef
+
+  !> Calculate soil mask for land on model grid.
+!! Output is 1  - soil, 2 - snow-covered, 0 - land ice, -1  not land.
+!!
+!! @param[in] lensfc  Number of land points for this tile 
+!! @param[in] veg_type_landice Value of vegetion class that indicates land-ice
+!! @param[in] stype Soil type
+!! @param[in] swe Model snow water equivalent
+!! @param[in] vtype Model vegetation type
+!! @param[out] mask Land mask for increments
+!! @author Clara Draper @date March 2021
+!! @author Yuan Xue: introduce stype to make the mask calculation more generic
+subroutine calculate_landinc_mask(swe,vtype,stype,lensfc,veg_type_landice,mask)
+ 
+   implicit none
+
+   integer, intent(in)           :: lensfc, veg_type_landice
+   real, intent(in)              :: swe(lensfc)
+   integer, intent(in)           :: vtype(lensfc),stype(lensfc)
+   integer, intent(out)          :: mask(lensfc)
+
+   integer :: i
+
+   mask = -1 ! not land
+
+   ! land (but not land-ice)
+   do i=1,lensfc
+       if (stype(i) .GT. 0) then
+         if (swe(i) .GT. 0.001) then ! snow covered land
+               mask(i) = 2
+         else                        ! non-snow covered land
+               mask(i) = 1
+         endif
+       end if ! else should work here too
+       if ( vtype(i) ==  veg_type_landice  ) then ! land-ice
+               mask(i) = 0
+       endif
+   end do
+
+end subroutine calculate_landinc_mask
 
   SUBROUTINE NETCDF_ERR(ERR, STRING, errflg, errmsg_out)
 
