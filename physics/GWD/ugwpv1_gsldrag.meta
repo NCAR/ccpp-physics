@@ -477,7 +477,7 @@
 [alpha_fd]
   standard_name = alpha_coefficient_for_turbulent_orographic_form_drag
   long_name = alpha coefficient for Beljaars et al turbulent orographic form drag
-  units = none
+  units = 1
   dimensions = ()
   type = real
   kind = kind_phys

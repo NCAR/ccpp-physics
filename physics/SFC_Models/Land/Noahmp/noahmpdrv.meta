@@ -665,7 +665,7 @@
 [gwd_z0m_factor]
   standard_name = momentum_roughness_factor_in_turbulent_form_drag
   long_name = multiplication of orograhic standard deviation 
-  units = count
+  units = 1
   dimensions = ()
   type = real
   kind = kind_phys
