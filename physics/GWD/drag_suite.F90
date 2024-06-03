@@ -513,7 +513,6 @@
    real(kind=kind_phys),parameter       :: olmin  = 1.0e-5
    real(kind=kind_phys),parameter       :: odmin  = 0.1
    real(kind=kind_phys),parameter       :: odmax  = 10.
-   real(kind=kind_phys),parameter       :: erad   = 6371.315e+3
    integer              :: komax(im)
    integer              :: kblk
    real(kind=kind_phys)                 :: cd
@@ -1552,7 +1551,7 @@ endif
    integer, parameter   ::  ims=1, kms=1, its=1, kts=1
    real(kind=kind_phys), intent(in) ::  fv, pi
    real(kind=kind_phys) ::  rcl, cdmb
-   real(kind=kind_phys) ::  g_inv, g_cp
+   real(kind=kind_phys) ::  g_inv, g_cp, rd_inv
 
    real(kind=kind_phys), intent(inout) ::                        &
      &                   dudt(:,:),dvdt(:,:),                &
@@ -1736,7 +1735,6 @@ endif
    real(kind=kind_phys),parameter       :: odmin  = 0.1
    real(kind=kind_phys),parameter       :: odmax  = 10.
    real(kind=kind_phys),parameter       :: cdmin  = 0.0
-   real(kind=kind_phys),parameter       :: erad   = 6371.315e+3
    integer              :: komax(im),kbmax(im),kblk(im)
    real(kind=kind_phys)                 :: hmax(im)
    real(kind=kind_phys)                 :: cd
@@ -1808,43 +1806,43 @@ endif
       endif
    enddo
 
-! Remove ss_tapering
-ss_taper(:) = 1.
+   ! Remove ss_tapering
+   ss_taper(:) = 1.
 
-! SPP, if spp_gwd is 0, no perturbations are applied.
-if ( spp_gwd==1 ) then
-  do i = its,im
-    var_stoch(i)   = var(i)   + var(i)*0.75*spp_wts_gwd(i,1)
-    varss_stoch(i) = varss(i) + varss(i)*0.75*spp_wts_gwd(i,1)
-    varmax_ss_stoch(i) = varmax_ss + varmax_ss*0.75*spp_wts_gwd(i,1)
-    varmax_fd_stoch(i) = varmax_fd + varmax_fd*0.75*spp_wts_gwd(i,1)
-  enddo
-else
-  do i = its,im
-    var_stoch(i)   = var(i)
-    varss_stoch(i) = varss(i)
-    varmax_ss_stoch(i) = varmax_ss
-    varmax_fd_stoch(i) = varmax_fd
-  enddo
-endif
+   ! SPP, if spp_gwd is 0, no perturbations are applied.
+   if ( spp_gwd==1 ) then
+     do i = its,im
+       var_stoch(i)   = var(i)   + var(i)*0.75*spp_wts_gwd(i,1)
+       varss_stoch(i) = varss(i) + varss(i)*0.75*spp_wts_gwd(i,1)
+       varmax_ss_stoch(i) = varmax_ss + varmax_ss*0.75*spp_wts_gwd(i,1)
+       varmax_fd_stoch(i) = varmax_fd + varmax_fd*0.75*spp_wts_gwd(i,1)
+     enddo
+   else
+     do i = its,im
+       var_stoch(i)   = var(i)
+       varss_stoch(i) = varss(i)
+       varmax_ss_stoch(i) = varmax_ss
+       varmax_fd_stoch(i) = varmax_fd
+     enddo
+   endif
 
-!--- calculate length of grid for flow-blocking drag
-!
-do i=1,im
-   delx   = dx(i)
-   dely   = dx(i)
-   dxy4(i,1)  = delx
-   dxy4(i,2)  = dely
-   dxy4(i,3)  = sqrt(delx*delx + dely*dely)
-   dxy4(i,4)  = dxy4(i,3)
-   dxy4p(i,1) = dxy4(i,2)
-   dxy4p(i,2) = dxy4(i,1)
-   dxy4p(i,3) = dxy4(i,4)
-   dxy4p(i,4) = dxy4(i,3)
-   cleff(i) = psl_gwd_dx_factor*(delx+dely)*0.5
-   cleff_ss(i) =  0.1 * max(dxmax_ss,dxy4(i,3))
-!   cleff_ss(i) =  cleff(i)                        ! consider .....
-enddo
+   !--- calculate length of grid for flow-blocking drag
+   !
+   do i=1,im
+      delx   = dx(i)
+      dely   = dx(i)
+      dxy4(i,1)  = delx
+      dxy4(i,2)  = dely
+      dxy4(i,3)  = sqrt(delx*delx + dely*dely)
+      dxy4(i,4)  = dxy4(i,3)
+      dxy4p(i,1) = dxy4(i,2)
+      dxy4p(i,2) = dxy4(i,1)
+      dxy4p(i,3) = dxy4(i,4)
+      dxy4p(i,4) = dxy4(i,3)
+      cleff(i) = psl_gwd_dx_factor*(delx+dely)*0.5
+      cleff_ss(i) =  0.1 * max(dxmax_ss,dxy4(i,3))
+   !   cleff_ss(i) =  cleff(i)                        ! consider .....
+   enddo
 !
 !-----initialize arrays
 !
@@ -1928,11 +1926,12 @@ enddo
    kbmax(1:im) = 0
    kblk(1:im) = 0
 !
+   rd_inv = 1./rd
    do k = kts,km
      do i = its,im
        vtj(i,k)  = t1(i,k)  * (1.+fv*q1(i,k))
        vtk(i,k)  = vtj(i,k) / prslk(i,k)
-       ro(i,k)   = 1./rd * prsl(i,k) / vtj(i,k) ! density kg/m**3
+       ro(i,k)   = rd_inv * prsl(i,k) / vtj(i,k) ! density kg/m**3
      enddo
    enddo
 !

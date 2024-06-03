@@ -158,7 +158,7 @@
       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
       cmm, chh, evbs, evcw, sbsno, pah, ecan, etran, edir, snowc,&
       stm, snohf,smcwlt2, smcref2, wet1, t2mmp, q2mp,zvfun,      &
-      ztmax, rca, errmsg, errflg,                                     &
+      ztmax, rca, errmsg, errflg,                                &
       canopy_heat_storage_ccpp,                                  &
       rainfall_ccpp,                                             &
       sw_absorbed_total_ccpp,                                    &
