@@ -5389,7 +5389,8 @@ if_pergro: if (PERGRO) then
 
   INTEGER, DIMENSION(IM), INTENT(IN)       :: ISLTYP
   REAL(KIND_PHYS),    DIMENSION(IM), INTENT(INOUT)    :: snowd,weasd
-  REAL(kind_phys),    DIMENSION(IM,KM), INTENT(IN)       :: gt0, prsi
+  REAL(kind_phys),    DIMENSION(IM,KM), INTENT(IN)       :: gt0
+  REAL(kind_phys),    DIMENSION(IM,KM+1), INTENT(IN)     :: prsi
   real(kind_phys),    intent(in)                                      :: lakedepth_default
 
   real(kind_phys),    dimension(IM),intent(inout)                      :: clm_lakedepth
