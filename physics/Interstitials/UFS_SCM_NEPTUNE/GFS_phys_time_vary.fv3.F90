@@ -793,7 +793,6 @@
          real(kind_phys) :: rannie(cny)
          real(kind_phys) :: rndval(cnx*cny*nrcm)
          real(kind_dbl_prec)  :: rinc(5)
-         real(kind_sngl_prec) :: rinc4(5)
 
          ! Initialize CCPP error handling variables
          errmsg = ''
@@ -813,7 +812,7 @@
 !$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,master) &
 !$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
 !$OMP          shared(ddx_ci,in_nm,ccn_nm,do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau)    &
-!$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys,rjday,n1,n2,idat,jdat,rinc,rinc4)   &
+!$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys,rjday,n1,n2,idat,jdat,rinc)         &
 !$OMP          shared(w3kindreal,w3kindint,jdow,jdoy,jday)                               &
 !$OMP          private(iseed,iskip,i,j,k)
 
@@ -873,13 +872,7 @@
          idat(5)=idate(1)
          rinc=0.
          rinc(2)=fhour
-         call w3kind(w3kindreal,w3kindint)
-         if(w3kindreal==4) then
-            rinc4=rinc
-            CALL w3movdat(rinc4,idat,jdat)
-         else
-            CALL w3movdat(rinc,idat,jdat)
-         endif
+         CALL w3movdat(rinc,idat,jdat)
          jdow = 0
          jdoy = 0
          jday = 0
