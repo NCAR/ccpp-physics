@@ -218,7 +218,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [tskin]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -314,7 +314,7 @@
   long_name = model 2m diagnostics use the temperature and humidity calculated by the lake model
   units = flag
   dimensions = ()
-  type = integer
+  type = logical
   intent = in
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
