@@ -454,8 +454,8 @@ CONTAINS
 !                        =   3;  Level 3
 
 ! SGT: Changed this to use assumed shape arrays (dimension(:,:,:)) with no "optional" arguments
-!      to prevent a crash on Cheyenne. Do not change it back without testing if the code runs
-!      on Cheyenne with the GNU compiler.
+!      to prevent a crash on Derecho. Do not change it back without testing if the code runs
+!      on Derecho with the GNU compiler.
     
     real(kind_phys), intent(in) :: delt
     real(kind_phys), dimension(:),   intent(in) :: dx
