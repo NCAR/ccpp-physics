@@ -32,7 +32,8 @@ contains
     real (kind=kind_phys), intent(in) :: rlapse, tgice
     real (kind=kind_phys), dimension(:), intent(in) :: oro, oro_uf
     integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
-    real (kind=kind_phys), dimension(:), intent(in) :: xt, xz, dt_cool, z_c, tref, xlon
+    real (kind=kind_phys), dimension(:), intent(in) :: xlon
+    real (kind=kind_phys), dimension(:), intent(in), optional :: xt, xz, dt_cool, z_c, tref
 
     !  ---  input/outputs:
     real (kind=kind_phys), dimension(:), intent(inout) :: tsurf_wat, tsfc_wat

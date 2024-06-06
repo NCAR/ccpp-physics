@@ -167,7 +167,7 @@ contains
      real(kind=kind_phys),  dimension (its:)                   &
         ,intent (in  )                   ::  rand_mom,rand_vmas
 !$acc declare copyin(rand_clos,rand_mom,rand_vmas)
-     real(kind=kind_phys), intent(in), dimension (its:) :: ca_deep(:)
+     real(kind=kind_phys), intent(in), dimension (its:), optional :: ca_deep(:)
      integer, intent(in) :: do_capsuppress
      real(kind=kind_phys), intent(in), dimension(:) :: cap_suppress_j
 !$acc declare create(cap_suppress_j)
@@ -188,7 +188,10 @@ contains
         frh_out,rainevap
      real(kind=kind_phys),    dimension (its:,kts:)                              &
         ,intent (in  )                      ::                         &
-        tmf, qmicro, sigmain, forceqv_spechum
+        tmf
+     real(kind=kind_phys),    dimension (its:,kts:)                              &
+        ,intent (in  ), optional            ::                         &
+        qmicro, sigmain, forceqv_spechum
      real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (inout  )                   ::                         &
         pre,xmb_out
@@ -223,7 +226,7 @@ contains
          q,qo,zuo,zdo,zdm
 !$acc declare sigmaout                                                                                                                                                      
      real(kind=kind_phys),    dimension (its:,kts:)                              &
-        ,intent (out)                     ::                           &
+        ,intent (out), optional           ::                           &
          sigmaout
      real(kind=kind_phys), dimension (its:)                                         &
         ,intent (in   )                   ::                           &
@@ -376,7 +379,7 @@ contains
 !$acc       ktopdby,kbconx,ierr2,ierr3,kbmax)
 
      integer,  dimension (its:), intent(inout) :: ierr
-     integer,  dimension (its:), intent(in) :: csum
+     integer,  dimension (its:), intent(in), optional :: csum
      logical, intent(in) :: do_ca, progsigma
      logical, intent(in) :: flag_init, flag_restart
 !$acc declare copy(ierr) copyin(csum)

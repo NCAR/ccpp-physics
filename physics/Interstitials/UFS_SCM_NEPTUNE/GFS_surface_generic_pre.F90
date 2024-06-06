@@ -87,9 +87,9 @@
 
         ! Stochastic physics / surface perturbations
         integer,                              intent(in)  :: lndp_type, n_var_lndp
-        character(len=3),     dimension(:),   intent(in)  :: lndp_var_list
-        real(kind=kind_phys), dimension(:),   intent(in)  :: lndp_prt_list
-        real(kind=kind_phys), dimension(:,:), intent(in)  :: sfc_wts
+        character(len=3),     dimension(:),   intent(in), optional  :: lndp_var_list
+        real(kind=kind_phys), dimension(:),   intent(in), optional  :: lndp_prt_list
+        real(kind=kind_phys), dimension(:,:), intent(in), optional  :: sfc_wts
         real(kind=kind_phys), dimension(:),   intent(out) :: z01d
         real(kind=kind_phys), dimension(:),   intent(out) :: zt1d
         real(kind=kind_phys), dimension(:),   intent(out) :: bexp1d
@@ -98,14 +98,14 @@
         real(kind=kind_phys),                 intent(out) :: lndp_vgf
 
         logical,                              intent(in)    :: cplflx
-        real(kind=kind_phys), dimension(:),   intent(in)    :: slimskin_cpl
+        real(kind=kind_phys), dimension(:),   intent(in), optional    :: slimskin_cpl
         logical,              dimension(:),   intent(inout) :: flag_cice
         integer,              dimension(:),   intent(out)   :: islmsk_cice
 
         real(kind=kind_phys), dimension(:),   intent(out) :: wind
         real(kind=kind_phys), dimension(:),   intent(in ) :: u1, v1
         ! surface wind enhancement due to convection
-        real(kind=kind_phys), dimension(:),   intent(inout ) :: cnvwind
+        real(kind=kind_phys), dimension(:),   intent(inout ), optional :: cnvwind
         !
         real(kind=kind_phys), dimension(:),   intent(out)    :: smcwlt2, smcref2
 

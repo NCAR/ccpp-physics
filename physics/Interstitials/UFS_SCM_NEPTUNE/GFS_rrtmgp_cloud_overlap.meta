@@ -60,30 +60,6 @@
   type = real
   intent = in
   kind = kind_phys 
-[p_lev]
-  standard_name = air_pressure_at_interface_for_RRTMGP
-  long_name = air pressure at vertical interface for radiation calculation
-  units = Pa
-  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[p_lay]
-  standard_name = air_pressure_at_layer_for_RRTMGP
-  long_name = air pressure at vertical layer for radiation calculation
-  units = Pa
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[tv_lay]
-  standard_name = virtual_temperature
-  long_name = layer virtual temperature
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
 [deltaZc]
   standard_name = layer_thickness_from_layer_center
   long_name = layer_thickness
@@ -92,6 +68,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -211,6 +188,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [top_at_1]
   standard_name = flag_for_vertical_ordering_in_radiation
   long_name = flag for vertical ordering in radiation
@@ -255,6 +233,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [precip_overlap_param]
   standard_name = precip_overlap_param
   long_name = precipitation overlap parameter
@@ -263,6 +242,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [cnv_cloud_overlap_param]
   standard_name = convective_cloud_overlap_param
   long_name = convective cloud overlap parameter
@@ -271,6 +251,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

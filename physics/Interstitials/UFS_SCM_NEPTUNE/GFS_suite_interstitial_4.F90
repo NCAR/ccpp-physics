@@ -37,7 +37,7 @@
 
       ! dtend and dtidx are only allocated if ldiag3d
       logical, intent(in)                                   :: ldiag3d, qdiag3d
-      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: dtend
+      real(kind=kind_phys), dimension(:,:,:), intent(inout), optional :: dtend
       integer,              dimension(:,:),   intent(in)    :: dtidx
       integer,                                intent(in)    :: index_of_process_conv_trans,ntk,ntke
 
@@ -45,7 +45,8 @@
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: clw
       real(kind=kind_phys), dimension(:,:),   intent(in) :: prsl
       real(kind=kind_phys),                   intent(in) :: con_rd, con_eps, nssl_cccn
-      real(kind=kind_phys), dimension(:,:),   intent(in) :: nwfa, save_tcp
+      real(kind=kind_phys), dimension(:,:),   intent(in), optional :: nwfa
+      real(kind=kind_phys), dimension(:,:),   intent(in) :: save_tcp
       real(kind=kind_phys), dimension(:,:),   intent(in) :: spechum
 
       character(len=*),     intent(  out)                   :: errmsg

@@ -156,6 +156,7 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
+  optional = True
 [cactiv_m]
   standard_name = counter_for_grell_freitas_mid_level_convection
   long_name = mid-level cloud convective activity memory
@@ -163,6 +164,7 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
+  optional = True
 [g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -219,6 +221,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [forceqv_spechum]
   standard_name = tendendy_of_specific_humidity_due_to_nonphysics
   long_name = moisture tendency due to dynamics only
@@ -227,6 +230,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [tmf]
   standard_name = tendency_of_vertically_diffused_tracer_concentration
   long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
@@ -243,6 +247,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [sigmain]
   standard_name = prognostic_updraft_area_fraction_in_convection
   long_name = convective updraft area fraction
@@ -251,6 +256,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [sigmaout]
   standard_name = updraft_area_fraction_updated_by_physics
   long_name = convective updraft area fraction updated by physics
@@ -259,6 +265,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [betascu]
   standard_name = tuning_param_for_shallow_cu
   long_name = tuning param for shallow cu in case prognostic closure is used
@@ -438,6 +445,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cliw]
   standard_name = ice_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -470,6 +478,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [dd_mf]
   standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux
   long_name = (downdraft mass flux) * delt
@@ -531,6 +540,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -616,6 +626,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fhour]
   standard_name = forecast_time
   long_name = current forecast time
@@ -661,6 +672,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ca_deep]
   standard_name = cellular_automata_area_fraction_for_deep_convection_from_coupled_process
   long_name = fraction of cellular automata for deep convection
@@ -669,6 +681,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [rainevap]
   standard_name = physics_field_for_coupling
   long_name = physics_field_for_coupling
@@ -685,6 +698,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [maxMF]
   standard_name = maximum_mass_flux
   long_name = maximum mass flux within a column
@@ -693,6 +707,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [do_mynnedmf]
   standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate MYNN-EDMF

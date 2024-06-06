@@ -141,6 +141,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qp]
   standard_name = specific_humidity_two_timesteps_back
   long_name = water vapor specific humidity two timesteps back
@@ -149,6 +150,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [psp]
   standard_name = surface_air_pressure_two_timesteps_back
   long_name = surface air pressure two timesteps back
@@ -157,6 +159,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [psat]
   standard_name = saturation_pressure_at_triple_point_of_water
   long_name = saturation pressure at triple point of water
@@ -245,6 +248,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qp1]
   standard_name = specific_humidity_on_previous_timestep_in_xyz_dimensioned_restart_array
   long_name = water vapor specific humidity at previous timestep
@@ -253,6 +257,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [psp1]
   standard_name = surface_air_pressure_on_previous_timestep
   long_name = surface air surface pressure at previous timestep
@@ -261,6 +266,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [u]
   standard_name = critical_relative_humidity
   long_name = critical relative humidity

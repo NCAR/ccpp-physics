@@ -53,7 +53,7 @@ contains
          do3_dt_ohoz       ! Physics tendency: overhead ozone effect
 
     ! Outputs
-    real(kind=kind_phys), intent(inout), dimension(:,:,:) :: &
+    real(kind=kind_phys), intent(inout), dimension(:,:,:), optional :: &
          dtend             ! Diagnostic tendencies for state variables
     character(len=*), intent(out) :: &
          errmsg            ! CCPP error message

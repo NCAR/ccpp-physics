@@ -235,6 +235,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtauy2d_ms]
   standard_name = tendency_of_y_wind_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = instantaneous change in y wind due to orographic gw drag
@@ -243,6 +244,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtaux2d_bl]
   standard_name = tendency_of_x_wind_due_to_blocking_drag
   long_name = x wind tendency from blocking drag
@@ -251,6 +253,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtauy2d_bl]
   standard_name = tendency_of_y_wind_due_to_blocking_drag
   long_name = y wind tendency from blocking drag
@@ -259,6 +262,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dusfc_ms]
   standard_name = vertically_integrated_x_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = integrated x momentum flux from mesoscale gwd
@@ -267,6 +271,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dvsfc_ms]
   standard_name = vertically_integrated_y_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = integrated y momentum flux from mesoscale gwd
@@ -275,6 +280,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dusfc_bl]
   standard_name = vertically_integrated_x_momentum_flux_due_to_blocking_drag
   long_name = integrated x momentum flux from blocking drag
@@ -283,6 +289,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dvsfc_bl]
   standard_name = vertically_integrated_y_momentum_flux_due_to_blocking_drag
   long_name = integrated y momentum flux from blocking drag
@@ -291,6 +298,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -373,7 +381,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [ldiag_ugwp]
   standard_name = flag_for_unified_gravity_wave_physics_diagnostics
   long_name = flag for CIRES UGWP Diagnostics

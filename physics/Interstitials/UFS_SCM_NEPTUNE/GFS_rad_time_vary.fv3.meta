@@ -22,6 +22,7 @@
   dimensions = (horizontal_dimension, number_of_host_provided_random_number_streams)
   type = integer
   intent = in
+  optional = True
 [lslwr]
   standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
@@ -57,6 +58,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [icsdlw]
   standard_name = random_number_seed_for_mcica_longwave
   long_name = random seeds for sub-column cloud generators lw
@@ -64,6 +66,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [cnx]
   standard_name = number_of_x_points_for_current_cubed_sphere_tile
   long_name = number of points in x direction for this cubed sphere face
@@ -157,6 +160,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ps_1delt]
   standard_name = surface_air_pressure_on_previous_timestep
   long_name = surface air pressure at previous timestep
@@ -165,6 +169,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t_2delt]
   standard_name = air_temperature_two_timesteps_back
   long_name = air temperature two timesteps back
@@ -173,6 +178,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t_1delt]
   standard_name = air_temperature_on_previous_timestep_in_xyz_dimensioned_restart_array
   long_name = air temperature at previous timestep
@@ -181,6 +187,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qv_2delt]
   standard_name = specific_humidity_two_timesteps_back
   long_name = water vapor specific humidity two timesteps back
@@ -189,6 +196,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qv_1delt]
   standard_name = specific_humidity_on_previous_timestep_in_xyz_dimensioned_restart_array
   long_name = water vapor specific humidity at previous timestep
@@ -197,6 +205,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t]
   standard_name = air_temperature
   long_name = model layer mean temperature

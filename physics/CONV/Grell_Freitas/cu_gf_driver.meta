@@ -128,6 +128,7 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
+  optional = True
 [cactiv_m]
   standard_name = counter_for_grell_freitas_mid_level_convection
   long_name = mid-level cloud convective activity memory
@@ -135,6 +136,7 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
+  optional = True
 [g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -175,6 +177,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [forceqv_spechum]
   standard_name = tendendy_of_specific_humidity_due_to_nonphysics
   long_name = moisture tendency due to dynamics only
@@ -183,6 +186,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [phil]
   standard_name = geopotential
   long_name = layer geopotential
@@ -331,6 +335,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cliw]
   standard_name = ice_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -363,6 +368,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [dd_mf]
   standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux
   long_name = (downdraft mass flux) * delt
@@ -424,6 +430,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -509,6 +516,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fhour]
   standard_name = forecast_time
   long_name = current forecast time
@@ -554,6 +562,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [maxupmf]
   standard_name = maximum_convective_updraft_mass_flux
   long_name = maximum convective updraft mass flux within a column
@@ -562,6 +571,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [maxMF]
   standard_name = maximum_mass_flux
   long_name = maximum mass flux within a column
@@ -570,6 +580,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [do_mynnedmf]
   standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate MYNN-EDMF
@@ -606,6 +617,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [spp_cu_deep]
   standard_name = control_for_deep_convection_spp_perturbations
   long_name = control for deep convection spp perturbations
@@ -628,6 +640,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fscav]
   standard_name = smoke_dust_conv_wet_coef
   long_name = smoke dust convetive wet scavanging coefficents
@@ -651,6 +664,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration

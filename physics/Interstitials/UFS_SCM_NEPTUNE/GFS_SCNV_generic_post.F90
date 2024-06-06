@@ -31,7 +31,7 @@
       real(kind=kind_phys), dimension(:,:,:),   intent(in) :: save_q, gq0
 
       ! dtend only allocated if ldiag3d == .true.
-      real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
+      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
       integer, intent(in) :: index_of_temperature, index_of_x_wind, index_of_y_wind, index_of_process_scnv
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: clw
@@ -46,7 +46,7 @@
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
       ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
       ! as long as these do not get used when not allocated.
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: cnvw_phy_f3d, cnvc_phy_f3d
+      real(kind=kind_phys), dimension(:,:), intent(inout), optional :: cnvw_phy_f3d, cnvc_phy_f3d
       integer, intent(in) :: imfshalcnv, imfshalcnv_sas, imfshalcnv_samf
       logical, intent(in) :: cscnv, satmedmf, trans_trac, ras
 

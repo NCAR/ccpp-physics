@@ -34,34 +34,34 @@
 !!
 !###===================================================================
  SUBROUTINE myjsfc_wrapper_run(                    &
-     &  restart,                                   &
-     &  im,levs,                                   &
-     &  kdt,ntrac,ntke,                            &
-     &  ntcw,ntiw,ntrw,ntsw,ntgl,                  &
-     &  iter,flag_iter,                            &
-     &  ugrs, vgrs, tgrs, qgrs,                    &
-     &  prsl, prsi, phii,                          &
-     &  prsik_1, prslk_1, tsfc, qsfc,              &
-     &  phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,   &
-     &  phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,  &
-     &  phy_myj_akhs, phy_myj_akms,                &
-     &  phy_myj_chkqlm, phy_myj_elflx,             &
-     &  phy_myj_a1u, phy_myj_a1t, phy_myj_a1q,     &
-     &  pblh, slmsk, zorl, ustar, rib,             &
-     &  cm,ch,stress,ffm,ffh,fm10,fh2,             &
-     &  landfrac,         oceanfrac,fice,          &
-     &  z0rl_wat,  z0rl_lnd,  z0rl_ice,            &   ! intent(inout)
-     &  ustar_wat, ustar_lnd, ustar_ice,           &   ! intent(inout)
-     &  cm_wat,    cm_lnd,    cm_ice,              &   ! intent(inout)
-     &  ch_wat,    ch_lnd,    ch_ice,              &   ! intent(inout)
-     &  rb_wat,    rb_lnd,    rb_ice,              &   ! intent(inout)
-     &  stress_wat,stress_lnd,stress_ice,          &   ! intent(inout)
-     &  fm_wat,    fm_lnd,    fm_ice,              &   ! intent(inout)
-     &  fh_wat,    fh_lnd,    fh_ice,              &   ! intent(inout)
-     &  fm10_wat,  fm10_lnd,  fm10_ice,            &   ! intent(inout)
-     &  fh2_wat,   fh2_lnd,   fh2_ice,             &   ! intent(inout)
-     &  wind,      con_cp,    con_g,    con_rd,    &
-     &  me, lprnt, errmsg, errflg )             ! intent(inout)
+        restart,                                   &
+        im,levs,                                   &
+        kdt,ntrac,ntke,                            &
+        ntcw,ntiw,ntrw,ntsw,ntgl,                  &
+        iter,flag_iter,                            &
+        ugrs, vgrs, tgrs, qgrs,                    &
+        prsl, prsi, phii,                          &
+        prsik_1, prslk_1, tsfc, qsfc,              &
+        phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,   &
+        phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,  &
+        phy_myj_akhs, phy_myj_akms,                &
+        phy_myj_chkqlm, phy_myj_elflx,             &
+        phy_myj_a1u, phy_myj_a1t, phy_myj_a1q,     &
+        pblh, slmsk, zorl, ustar, rib,             &
+        cm,ch,stress,ffm,ffh,fm10,fh2,             &
+        landfrac,         oceanfrac,fice,          &
+        z0rl_wat,  z0rl_lnd,  z0rl_ice,            &   ! intent(inout)
+        ustar_wat, ustar_lnd, ustar_ice,           &   ! intent(inout)
+        cm_wat,    cm_lnd,    cm_ice,              &   ! intent(inout)
+        ch_wat,    ch_lnd,    ch_ice,              &   ! intent(inout)
+        rb_wat,    rb_lnd,    rb_ice,              &   ! intent(inout)
+        stress_wat,stress_lnd,stress_ice,          &   ! intent(inout)
+        fm_wat,    fm_lnd,    fm_ice,              &   ! intent(inout)
+        fh_wat,    fh_lnd,    fh_ice,              &   ! intent(inout)
+        fm10_wat,  fm10_lnd,  fm10_ice,            &   ! intent(inout)
+        fh2_wat,   fh2_lnd,   fh2_ice,             &   ! intent(inout)
+        wind,      con_cp,    con_g,    con_rd,    &
+        me, lprnt, errmsg, errflg )             ! intent(inout)
 !
 
       use MODULE_SF_JSFC, only: JSFC_INIT,JSFC
@@ -106,41 +106,41 @@
 !MYJ-2D
       logical,dimension(:),intent(in) :: flag_iter
       real(kind=kind_phys),dimension(:),intent(in)      ::   &
-     &        prsik_1, prslk_1, tsfc, qsfc, slmsk
+              prsik_1, prslk_1, tsfc, qsfc, slmsk 
+      real(kind=kind_phys),dimension(:),intent(inout),optional :: &
+              phy_myj_thz0, phy_myj_z0base, phy_myj_chkqlm,  &
+              phy_myj_akhs, phy_myj_akms, phy_myj_qz0,       &
+              phy_myj_qsfc, phy_myj_elflx, phy_myj_a1u,      &
+              phy_myj_a1t, phy_myj_a1q, phy_myj_uz0,         &
+              phy_myj_vz0
       real(kind=kind_phys),dimension(:),intent(inout)   ::   &
-     &        phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,       &
-     &        phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,      &
-     &        phy_myj_akhs, phy_myj_akms,                    &
-     &        phy_myj_chkqlm, phy_myj_elflx,                 &
-     &        phy_myj_a1u, phy_myj_a1t, phy_myj_a1q
+              pblh, zorl, ustar, rib
       real(kind=kind_phys),dimension(:),intent(inout)   ::   &
-     &        pblh, zorl, ustar, rib
-      real(kind=kind_phys),dimension(:),intent(inout)   ::   &
-     &        cm, ch, stress, ffm, ffh, fm10, fh2
+              cm, ch, stress, ffm, ffh, fm10, fh2
       real(kind=kind_phys), dimension(:), intent(inout) ::   &
-     &        landfrac, oceanfrac, fice
+              landfrac, oceanfrac, fice
       real(kind=kind_phys), dimension(:), intent(inout) ::   &
-     &                    z0rl_wat,  z0rl_lnd,  z0rl_ice,    &
-     &                   ustar_wat, ustar_lnd, ustar_ice,    &
-     &                      cm_wat,    cm_lnd,    cm_ice,    &
-     &                      ch_wat,    ch_lnd,    ch_ice,    &
-     &                      rb_wat,    rb_lnd,    rb_ice,    &
-     &                  stress_wat,stress_lnd,stress_ice,    &
-     &                      fm_wat,    fm_lnd,    fm_ice,    &
-     &                      fh_wat,    fh_lnd,    fh_ice,    &
-     &                    fm10_wat,  fm10_lnd,  fm10_ice,    &
-     &                     fh2_wat,   fh2_lnd,   fh2_ice,    &
-     &                      wind
+                          z0rl_wat,  z0rl_lnd,  z0rl_ice,    &
+                         ustar_wat, ustar_lnd, ustar_ice,    &
+                            cm_wat,    cm_lnd,    cm_ice,    &
+                            ch_wat,    ch_lnd,    ch_ice,    &
+                            rb_wat,    rb_lnd,    rb_ice,    &
+                        stress_wat,stress_lnd,stress_ice,    &
+                            fm_wat,    fm_lnd,    fm_ice,    &
+                            fh_wat,    fh_lnd,    fh_ice,    &
+                          fm10_wat,  fm10_lnd,  fm10_ice,    &
+                           fh2_wat,   fh2_lnd,   fh2_ice,    &
+                            wind
 
 
 !MYJ-3D
       real(kind=kind_phys),dimension(:,:),intent(in) ::      &
               phii, prsi
       real(kind=kind_phys),dimension(:,:),intent(in) ::      &
-     &        ugrs, vgrs, tgrs, prsl
+              ugrs, vgrs, tgrs, prsl
 !MYJ-4D
       real(kind=kind_phys),dimension(:,:,:),intent(in) ::    &
-     &       qgrs
+             qgrs
 
 !LOCAL
       logical :: lprnt1, lprnt2
@@ -152,13 +152,13 @@
            sfcz,tsk,xland,mavail,rmol,                   &
            ustar1,z0,rib1,sm,pblh_myj
       real(kind=kfpt),dimension(im,13)      ::           &
-     &     phy_f2d_myj
+           phy_f2d_myj
       real(kind=kfpt), dimension(im,levs)   ::           &
-     &     u_myj, v_myj, t_myj, q_myj, th_myj,           &
-     &     cw, dz_myj, pmid, q2, exner
+           u_myj, v_myj, t_myj, q_myj, th_myj,           &
+           cw, dz_myj, pmid, q2, exner
       real(kind=kfpt), dimension(im,levs+1) :: pint
       real(kind=kfpt),dimension(im)         ::           &
-     &     cm1,ch1,stress1,ffm1,ffh1,wind1,ffm10,ffh2
+           cm1,ch1,stress1,ffm1,ffh1,wind1,ffm10,ffh2
 !      real(kind=kind_phys), dimension(im,levs,ntrac) :: &
 !     &     qgrs_myj
 
@@ -313,28 +313,28 @@
 
       if((ntsd==0.and.iter.eq.1).or.restart)then
          call JSFC_INIT(ustar1,restart                       &
-     &                 ,1,ide,1,jde,1,kde                    &
-     &                 ,1,im,1,1,1,levs                      &
-     &                 ,1,im,1,1,1,levs)
+                       ,1,ide,1,jde,1,kde                    &
+                       ,1,im,1,1,1,levs                      &
+                       ,1,im,1,1,1,levs)
       end if
 
       call JSFC(flag_iter,iter,me                            &
-     &         ,ntsd,epsq2,sfcz,dz_myj                       &
-     &         ,pmid,pint,th_myj,t_myj,q_myj,cw              &
-     &         ,u_myj,v_myj,q2,tsk                           &
-     &         ,phy_f2d_myj(1:im,1),phy_f2d_myj(1:im,2)      &
-     &         ,phy_f2d_myj(1:im,3),phy_f2d_myj(1:im,4)      &
-     &         ,phy_f2d_myj(1:im,5),xland                    &
-     &         ,ustar1,z0,phy_f2d_myj(1:im,6)                &
-     &         ,pblh_myj,mavail,rmol                         &
-     &         ,phy_f2d_myj(1:im,7),phy_f2d_myj(1:im,8)      &
-     &         ,phy_f2d_myj(1:im,9),phy_f2d_myj(1:im,10)     &
-     &         ,rib1,cm1,ch1,stress1,ffm1,ffh1,wind1,ffm10,ffh2  &
-     &         ,phy_f2d_myj(1:im,11),phy_f2d_myj(1:im,12)    &
-     &         ,phy_f2d_myj(1:im,13)                         &
-     &         ,1,im,1,1,1,levs                              &
-     &         ,1,im,1,1,1,levs                              &
-     &         ,1,im,1,1,1,levs, errmsg, errflg)
+               ,ntsd,epsq2,sfcz,dz_myj                       &
+               ,pmid,pint,th_myj,t_myj,q_myj,cw              &
+               ,u_myj,v_myj,q2,tsk                           &
+               ,phy_f2d_myj(1:im,1),phy_f2d_myj(1:im,2)      &
+               ,phy_f2d_myj(1:im,3),phy_f2d_myj(1:im,4)      &
+               ,phy_f2d_myj(1:im,5),xland                    &
+               ,ustar1,z0,phy_f2d_myj(1:im,6)                &
+               ,pblh_myj,mavail,rmol                         &
+               ,phy_f2d_myj(1:im,7),phy_f2d_myj(1:im,8)      &
+               ,phy_f2d_myj(1:im,9),phy_f2d_myj(1:im,10)     &
+               ,rib1,cm1,ch1,stress1,ffm1,ffh1,wind1,ffm10,ffh2  &
+               ,phy_f2d_myj(1:im,11),phy_f2d_myj(1:im,12)    &
+               ,phy_f2d_myj(1:im,13)                         &
+               ,1,im,1,1,1,levs                              &
+               ,1,im,1,1,1,levs                              &
+               ,1,im,1,1,1,levs, errmsg, errflg)
 
       do i = 1, im
          if(flag_iter(i))then

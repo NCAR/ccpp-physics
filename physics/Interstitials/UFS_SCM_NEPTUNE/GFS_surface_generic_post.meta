@@ -448,6 +448,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [epi]
   standard_name = instantaneous_surface_potential_evaporation
   long_name = instantaneous sfc potential evaporation
@@ -504,6 +505,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dswsfci_cpl]
   standard_name = surface_downwelling_shortwave_flux_for_coupling
   long_name = instantaneous sfc downward sw flux
@@ -512,6 +514,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dlwsfc_cpl]
   standard_name = cumulative_surface_downwelling_longwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc downward lw flux mulitplied by timestep
@@ -520,6 +523,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dswsfc_cpl]
   standard_name = cumulative_surface_downwelling_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc downward sw flux multiplied by timestep
@@ -528,6 +532,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dnirbmi_cpl]
   standard_name = surface_downwelling_direct_nir_shortwave_flux_for_coupling
   long_name = instantaneous sfc nir beam downward sw flux
@@ -536,6 +541,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dnirdfi_cpl]
   standard_name = surface_downwelling_diffuse_nir_shortwave_flux_for_coupling
   long_name = instantaneous sfc nir diff downward sw flux
@@ -544,6 +550,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dvisbmi_cpl]
   standard_name = surface_downwelling_direct_uv_and_vis_shortwave_flux_for_coupling
   long_name = instantaneous sfc uv+vis beam downward sw flux
@@ -552,6 +559,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dvisdfi_cpl]
   standard_name = surface_downwelling_diffuse_uv_and_vis_shortwave_flux_for_coupling
   long_name = instantaneous sfc uv+vis diff downward sw flux
@@ -560,6 +568,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dnirbm_cpl]
   standard_name = cumulative_surface_downwelling_direct_nir_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc nir beam downward sw flux multiplied by timestep
@@ -568,6 +577,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dnirdf_cpl]
   standard_name = cumulative_surface_downwelling_diffuse_nir_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc nir diff downward sw flux multiplied by timestep
@@ -576,6 +586,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dvisbm_cpl]
   standard_name = cumulative_surface_downwelling_direct_uv_and_vis_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc uv+vis beam dnwd sw flux multiplied by timestep
@@ -584,6 +595,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dvisdf_cpl]
   standard_name = cumulative_surface_downwelling_diffuse_uv_and_vis_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc uv+vis diff dnwd sw flux multiplied by timestep
@@ -592,6 +604,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nlwsfci_cpl]
   standard_name = surface_net_downwelling_longwave_flux_for_coupling
   long_name = instantaneous net sfc downward lw flux
@@ -600,6 +613,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nlwsfc_cpl]
   standard_name = cumulative_surface_net_downwelling_longwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net downward lw flux multiplied by timestep
@@ -608,6 +622,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t2mi_cpl]
   standard_name = temperature_at_2m_for_coupling
   long_name = instantaneous T2m
@@ -616,6 +631,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [q2mi_cpl]
   standard_name = specific_humidity_at_2m_for_coupling
   long_name = instantaneous Q2m
@@ -624,6 +640,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [u10mi_cpl]
   standard_name = x_wind_at_10m_for_coupling
   long_name = instantaneous U10m
@@ -632,6 +649,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [v10mi_cpl]
   standard_name = y_wind_at_10m_for_coupling
   long_name = instantaneous V10m
@@ -640,6 +658,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tsfci_cpl]
   standard_name = surface_skin_temperature_for_coupling
   long_name = instantaneous sfc temperature
@@ -648,6 +667,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [psurfi_cpl]
   standard_name = surface_air_pressure_for_coupling
   long_name = instantaneous sfc pressure
@@ -656,6 +676,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nnirbmi_cpl]
   standard_name = surface_net_downwelling_direct_nir_shortwave_flux_for_coupling
   long_name = instantaneous net nir beam sfc downward sw flux
@@ -664,6 +685,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nnirdfi_cpl]
   standard_name = surface_net_downwelling_diffuse_nir_shortwave_flux_for_coupling
   long_name = instantaneous net nir diff sfc downward sw flux
@@ -672,6 +694,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nvisbmi_cpl]
   standard_name = surface_net_downwelling_direct_uv_and_vis_shortwave_flux_for_coupling
   long_name = instantaneous net uv+vis beam downward sw flux
@@ -680,6 +703,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nvisdfi_cpl]
   standard_name = surface_net_downwelling_diffuse_uv_and_vis_shortwave_flux_for_coupling
   long_name = instantaneous net uv+vis diff downward sw flux
@@ -688,6 +712,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nswsfci_cpl]
   standard_name = surface_net_downwelling_shortwave_flux_for_coupling
   long_name = instantaneous net sfc downward sw flux
@@ -696,6 +721,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nswsfc_cpl]
   standard_name = cumulative_surface_net_downwelling_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net downward sw flux multiplied by timestep
@@ -704,6 +730,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nnirbm_cpl]
   standard_name = cumulative_surface_net_downwelling_direct_nir_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net nir beam downward sw flux multiplied by timestep
@@ -712,6 +739,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nnirdf_cpl]
   standard_name = cumulative_surface_net_downwellling_diffuse_nir_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net nir diff downward sw flux multiplied by timestep
@@ -720,6 +748,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nvisbm_cpl]
   standard_name = cumulative_surface_net_downwelling_direct_uv_and_vis_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net uv+vis beam downward sw rad flux multiplied by timestep
@@ -728,6 +757,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nvisdf_cpl]
   standard_name = cumulative_surface_net_downwelling_diffuse_uv_and_vis_shortwave_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative net uv+vis diff downward sw rad flux multiplied by timestep
@@ -736,6 +766,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [gflux]
   standard_name = cumulative_surface_ground_heat_flux_multiplied_by_timestep
   long_name = cumulative groud conductive heat flux multiplied by timestep
@@ -800,6 +831,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ep]
   standard_name = cumulative_surface_upward_potential_latent_heat_flux_multiplied_by_timestep
   long_name = cumulative surface upward potential latent heat flux multiplied by timestep
@@ -840,6 +872,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [runoff]
   standard_name = total_runoff
   long_name = total water runoff
@@ -904,6 +937,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [lheatstrg]
   standard_name = flag_for_canopy_heat_storage_in_land_surface_scheme
   long_name = flag for canopy heat storage parameterization

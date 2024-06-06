@@ -71,7 +71,7 @@ contains
          sfc_alb_nir_dif,   & ! Surface albedo (diffuse)
          sfc_alb_uvvis_dir, & ! Surface albedo (direct)
          sfc_alb_uvvis_dif    ! Surface albedo (diffuse)
-    real(kind_phys), dimension(:,:), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in), optional :: &
          p_lev,             & ! Pressure @ model layer-interfaces (Pa)
          fluxlwUP_allsky,   & ! RRTMGP longwave all-sky flux      (W/m2)
          fluxlwDOWN_allsky, & ! RRTMGP longwave all-sky flux      (W/m2)
@@ -118,7 +118,8 @@ contains
          sfcdsw               ! SW sfc all-sky     downward flux   (W/m2)
     real(kind_phys), dimension(:,:), intent(inout) :: &
          htrlw,             & ! LW all-sky heating rate (K/s)
-         htrsw,             & ! SW all-sky heating rate (K/s)
+         htrsw                ! SW all-sky heating rate (K/s)
+    real(kind_phys), dimension(:,:), intent(inout), optional :: &
          htrlwu               ! LW all-sky heating-rate updated in-between radiation calls.
     type(sfcflw_type), dimension(:), intent(inout) :: &
          sfcflw               ! LW radiation fluxes at sfc

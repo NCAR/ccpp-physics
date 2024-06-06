@@ -421,8 +421,9 @@
      &       lakefrac,                                                  &
      &       slmsk, snodi, zorlf, coszf, tsknf, tairf, hprif,           &
      &       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,     &
-     &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
      &       sncovr, sncovr_ice, snoalb, albPpert           ! sfc-perts, mgehne
+      real (kind=kind_phys), dimension(:), intent(in), optional ::      &
+     &       icealbdvis, icealbdnir, icealbivis, icealbinir
       real (kind=kind_phys),  intent(in) :: pertalb, con_ttp! sfc-perts, mgehne
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       fracl, fraco, fraci

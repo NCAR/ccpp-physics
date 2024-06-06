@@ -395,6 +395,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [qils_i]
   standard_name = ice_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -411,6 +412,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [lwheat_i]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
   long_name = total sky lw heating rate
@@ -435,6 +437,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cf_upi]
   standard_name = convective_cloud_fraction_for_microphysics
   long_name = convective cloud fraction for microphysics
@@ -443,6 +446,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [frland]
   standard_name = land_area_fraction_for_microphysics
   long_name = land area fraction used in microphysics schemes
@@ -467,6 +471,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cnv_dqldt_i]
   standard_name = tendency_of_cloud_water_due_to_convective_microphysics
   long_name = tendency of cloud water due to convective microphysics
@@ -475,6 +480,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [clcn_i]
   standard_name = convective_cloud_volume_fraction
   long_name = convective cloud volume fraction
@@ -483,6 +489,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [u_i]
   standard_name = x_wind_of_new_state
   long_name = zonal wind updated by physics
@@ -539,6 +546,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cnv_ndrop_i]
   standard_name = number_concentration_of_cloud_liquid_water_particles_for_detrainment
   long_name = droplet number concentration in convective detrainment
@@ -547,6 +555,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cnv_nice_i]
   standard_name = number_concentration_of_ice_crystals_for_detrainment
   long_name = crystal number concentration in convective detrainment
@@ -555,6 +564,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [q_io]
   standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
@@ -611,6 +621,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ncpi_io]
   standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air_of_new_state
   long_name = number concentration of ice updated by physics
@@ -634,6 +645,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snw_io]
   standard_name = local_snow_water_mixing_ratio
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) local to physics
@@ -642,6 +654,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qgl_io]
   standard_name = local_graupel_mixing_ratio
   long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) local to physics
@@ -650,6 +663,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ncpr_io]
   standard_name = local_rain_number_concentration
   long_name = number concentration of rain local to physics
@@ -658,6 +672,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ncps_io]
   standard_name = local_snow_number_concentration
   long_name = number concentration of snow local to physics
@@ -666,6 +681,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ncgl_io]
   standard_name = local_graupel_number_concentration
   long_name = number concentration of graupel local to physics
@@ -674,6 +690,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [clls_io]
   standard_name = cloud_fraction_for_MG
   long_name = cloud fraction used by Morrison-Gettelman MP
@@ -682,6 +699,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [kcbl]
   standard_name = vertical_index_at_cloud_base
   long_name = vertical index at cloud base
@@ -697,6 +715,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [cldreffi]
   standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = effective radius of cloud ice water particle in micrometers
@@ -705,6 +724,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [cldreffr]
   standard_name = effective_radius_of_stratiform_cloud_rain_particle
   long_name = effective radius of cloud rain particle in micrometers
@@ -713,6 +733,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [cldreffs]
   standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in micrometers
@@ -721,6 +742,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [cldreffg]
   standard_name = effective_radius_of_stratiform_cloud_graupel_particle
   long_name = effective radius of cloud graupel particle in micrometers
@@ -729,6 +751,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [ntrcaer]
   standard_name = number_of_aerosol_tracers_MG
   long_name = number of aerosol tracers for Morrison Gettelman MP

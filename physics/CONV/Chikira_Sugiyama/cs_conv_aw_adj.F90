@@ -40,8 +40,8 @@ module cs_conv_aw_adj
       real(kind_phys),  dimension(:,:),       intent(in)    :: save_t
       real(kind_phys),  dimension(:,:,:), intent(in)    :: save_q
       real(kind_phys),  dimension(:,:),     intent(in)    :: prsi
-      real(kind_phys),  dimension(:,:),       intent(inout) :: cldfrac
-      real(kind_phys),  dimension(:,:),       intent(inout) :: subcldfrac
+      real(kind_phys),  dimension(:,:),       intent(inout), optional :: cldfrac
+      real(kind_phys),  dimension(:,:),       intent(inout), optional :: subcldfrac
       real(kind_phys),  dimension(:),            intent(inout) :: prcp
       integer,                                    intent(in   ) :: imp_physics, imp_physics_mg
       character(len=*),                           intent(  out) :: errmsg

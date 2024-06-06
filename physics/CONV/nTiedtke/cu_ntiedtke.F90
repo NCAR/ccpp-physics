@@ -171,13 +171,15 @@ contains
       integer, dimension( : ),   intent(in)  :: lmask
       real(kind=kind_phys), dimension( : ),     intent(in ) :: evap, hfx, dx
       real(kind=kind_phys), dimension( :, : ),     intent(inout) :: pu, pv, pt, pqv
-      real(kind=kind_phys), dimension( :, :),     intent(in )   :: tdi, qvdi, poz, prsl, pomg, pqvf, ptf
+      real(kind=kind_phys), dimension( :, :),     intent(in )   :: tdi, qvdi, poz, prsl, pomg
+      real(kind=kind_phys), dimension( :, :), intent(in ), optional :: pqvf, ptf
       real(kind=kind_phys), dimension( :, : ),   intent(in )   :: pzz, prsi
       real(kind=kind_phys), dimension( :, :, : ),    intent(inout ) ::  clw
 
       integer, dimension( : ),   intent(out)  :: kbot, ktop, kcnv
       real(kind=kind_phys), dimension( : ),   intent(out)  :: zprecc
-      real(kind=kind_phys), dimension (:, :), intent(out)  :: ud_mf, dd_mf, dt_mf, cnvw, cnvc
+      real(kind=kind_phys), dimension (:, :), intent(out), optional :: ud_mf
+      real(kind=kind_phys), dimension (:, :), intent(out) :: dd_mf, dt_mf, cnvw, cnvc
  
 ! error messages
       character(len=*), intent(out)    ::                                 errmsg

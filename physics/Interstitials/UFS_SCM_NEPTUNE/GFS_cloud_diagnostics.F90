@@ -59,12 +59,13 @@ contains
          lat,                  & ! Latitude
          de_lgth,              & ! Decorrelation length
          si                      ! Vertical sigma coordinate
+    real(kind_phys), dimension(:,:), intent(in), optional :: &
+         p_lay                   ! Pressure at model-layer
     real(kind_phys), dimension(:,:), intent(in) :: &
-         p_lay,                & ! Pressure at model-layer
          cld_frac                ! Total cloud fraction
-    real(kind_phys), dimension(:,:), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in), optional :: &
          p_lev                   ! Pressure at model interfaces         
-    real(kind_phys), dimension(:,:), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in), optional :: &
     	 deltaZ,               & ! Layer thickness (m)
          cloud_overlap_param,  & ! Cloud-overlap parameter
          precip_overlap_param    ! Precipitation overlap parameter

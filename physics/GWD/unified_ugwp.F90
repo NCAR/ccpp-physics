@@ -272,10 +272,11 @@ contains
     integer,                 intent(in), dimension(:)       :: kpbl
     real(kind=kind_phys),    intent(in), dimension(:)       :: ak, bk
     real(kind=kind_phys),    intent(in), dimension(:)       :: oro, oro_uf, hprime, oc, theta, sigma, gamma
-    real(kind=kind_phys),    intent(in), dimension(:)       :: varss,oc1ss, dx
+    real(kind=kind_phys),    intent(in), dimension(:), optional :: varss,oc1ss
+    real(kind=kind_phys),    intent(in), dimension(:)       :: dx
 
 !vay-nov 2020
-    real(kind=kind_phys),    intent(in), dimension(:,:)     ::  oa4ss,ol4ss   
+    real(kind=kind_phys),    intent(in), dimension(:,:), optional ::  oa4ss,ol4ss   
     
     logical,                 intent(in)                     :: flag_for_gwd_generic_tend
     
@@ -292,20 +293,19 @@ contains
     logical, intent(in) :: do_tofd, ldiag_ugwp, ugwp_seq_update
 
 !Output (optional):
-    real(kind=kind_phys), intent(out) ::                          &
+    real(kind=kind_phys), intent(out), optional ::                &
       &                      dusfc_ms(:),dvsfc_ms(:),             &
       &                      dusfc_bl(:),dvsfc_bl(:),             &
       &                      dusfc_ss(:),dvsfc_ss(:),             &
       &                      dusfc_fd(:),dvsfc_fd(:)
-    real(kind=kind_phys), intent(out) ::                          &
+    real(kind=kind_phys), intent(out), optional ::                &
       &         dtaux2d_ms(:,:),dtauy2d_ms(:,:),                  &
       &         dtaux2d_bl(:,:),dtauy2d_bl(:,:),                  &
       &         dtaux2d_ss(:,:),dtauy2d_ss(:,:),                  &
       &         dtaux2d_fd(:,:),dtauy2d_fd(:,:),                  &
       &         dudt_ngw(:,:),dvdt_ngw(:,:),dtdt_ngw(:,:)
-
-    real(kind=kind_phys), intent(in) ::     br1(:),               &
-      &                                     hpbl(:),              &
+    real(kind=kind_phys), intent(in) ::     hpbl(:),              &
+      &                                     br1(:),               &
       &                                     slmsk(:)
 
     real(kind=kind_phys),    intent(out), dimension(:)          :: dusfcg, dvsfcg
@@ -314,14 +314,15 @@ contains
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: gw_dudt, gw_dvdt, gw_dtdt, gw_kdis
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: dudt_mtb, dudt_tms
 
-    real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
-    integer, intent(in) :: dtidx(:,:), index_of_temperature, index_of_x_wind, &
+    real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+    integer, intent(in) :: dtidx(:,:)
+    integer, intent(in) :: index_of_temperature, index_of_x_wind, &
          index_of_y_wind, index_of_process_nonorographic_gwd, &
          index_of_process_orographic_gwd
     logical,                 intent(in)                         :: ldiag3d, lssav
 
     ! These arrays only allocated if ldiag_ugwp = .true.
-    real(kind=kind_phys),    intent(inout), dimension(:,:) :: du3dt_mtb, du3dt_ogw, du3dt_tms
+    real(kind=kind_phys),    intent(inout), dimension(:,:), optional :: du3dt_mtb, du3dt_ogw, du3dt_tms
 
     real(kind=kind_phys),    intent(inout), dimension(:,:) :: dudt, dvdt, dtdt
 
@@ -342,7 +343,7 @@ contains
                                          do_gsl_drag_ls_bl, do_gsl_drag_ss, &
                                          do_gsl_drag_tofd
 
-    real(kind=kind_phys), intent(in) :: spp_wts_gwd(:,:)
+    real(kind=kind_phys), intent(in), optional :: spp_wts_gwd(:,:)
     integer, intent(in) :: spp_gwd
 
     character(len=*),        intent(out) :: errmsg

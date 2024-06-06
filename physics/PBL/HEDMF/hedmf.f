@@ -104,7 +104,7 @@
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
      &                     tau(:,:),    rtg(:,:,:)
       ! dtend is only allocated if ldiag3d or qdiag3d are true
-      real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
+      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
       integer, intent(in) :: index_of_x_wind, index_of_y_wind,          &
      & index_of_process_pbl, index_of_temperature, ntqv, rtg_ozone_index

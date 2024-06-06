@@ -130,6 +130,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -271,6 +272,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cnvc_phy_f3d]
   standard_name = convective_cloud_area_fraction
   long_name = convective cloud cover in the phy_f3d array
@@ -279,6 +281,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [flag_for_scnv_generic_tend]
   standard_name = flag_for_generic_tendency_due_to_shallow_convection
   long_name = true if GFS_SCNV_generic should calculate tendencies

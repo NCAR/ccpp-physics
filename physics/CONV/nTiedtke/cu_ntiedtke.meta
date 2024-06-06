@@ -125,6 +125,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ptf]
   standard_name = tendency_of_air_temperature_due_to_nonphysics
   long_name = temperature tendency due to dynamics only
@@ -133,6 +134,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [clw]
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other tracers
@@ -278,6 +280,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [dd_mf]
   standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux
   long_name = (downdraft mass flux) * delt

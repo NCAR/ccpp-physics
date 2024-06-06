@@ -132,6 +132,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dudt_tms]
   standard_name = tendency_of_x_wind_due_to_turbulent_orographic_form_drag
   long_name = instantaneous change in x wind due to TOFD
@@ -204,6 +205,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [du3dt_ogw]
   standard_name = time_integral_of_change_in_x_wind_due_to_orographic_gravity_wave_drag
   long_name = time integral of change in x wind due to orographic gw drag
@@ -212,6 +214,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [du3dt_tms]
   standard_name = time_integral_of_change_in_x_wind_due_to_turbulent_orographic_form_drag
   long_name = time integral of change in x wind due to TOFD
@@ -220,6 +223,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [du3dt_ngw]
   standard_name = time_integral_of_change_in_x_wind_due_to_nonstationary_gravity_wave
   long_name = time integral of change in x wind due to NGW
@@ -228,6 +232,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dv3dt_ngw]
   standard_name = time_integral_of_change_in_y_wind_due_to_nonstationary_gravity_wave
   long_name = time integral of change in y wind due to NGW
@@ -236,6 +241,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtdt]
   standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = air temperature tendency due to model physics

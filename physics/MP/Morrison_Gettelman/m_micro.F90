@@ -199,7 +199,7 @@ end subroutine m_micro_init
      &                prsl_i,u_i,v_i,phil,   omega_i, QLLS_i,QILS_i,    &
      &                                       lwheat_i,swheat_i
        real (kind=kind_phys), dimension(:,0:),intent(in):: prsi_i, phii
-       real (kind=kind_phys), dimension(:,:),  intent(in)  ::           &
+       real (kind=kind_phys), dimension(:,:),intent(in), optional  ::   &
      &       CNV_DQLDT_i, CLCN_i,     QLCN_i, QICN_i,                   &
      &       CNV_MFD_i,               cf_upi, CNV_FICE_i, CNV_NDROP_i,  &
      &       CNV_NICE_i,  w_upi
@@ -214,8 +214,9 @@ end subroutine m_micro_init
 !    &       CNVPRCP
 
 !   output
-       real (kind=kind_phys),dimension(:,:), intent(out) :: lwm_o, qi_o,  &
-                        cldreffl, cldreffi, cldreffr, cldreffs, cldreffg
+       real (kind=kind_phys),dimension(:,:), intent(out) :: lwm_o, qi_o
+       real (kind=kind_phys),dimension(:,:), intent(out), optional ::  &
+            cldreffl, cldreffi, cldreffr, cldreffs, cldreffg
        real (kind=kind_phys),dimension(:), intent(out) :: rn_o,  sr_o
        character(len=*),                    intent(out) :: errmsg
        integer,                             intent(out) :: errflg
@@ -224,10 +225,10 @@ end subroutine m_micro_init
 !      Anning Cheng 10/24/2016 twat for total water, diagnostic purpose
        integer, dimension(:), intent(inout):: KCBL
        real (kind=kind_phys),dimension(:,:),intent(inout):: q_io, t_io,   &
-     &                                             ncpl_io,ncpi_io,CLLS_io
-       real (kind=kind_phys),dimension(:,:),intent(inout):: rnw_io,snw_io,&
-     &                                             ncpr_io, ncps_io,        &
-     &                                             qgl_io,  ncgl_io
+     &                                             ncpi_io
+       real (kind=kind_phys),dimension(:,:),intent(inout), optional :: &
+            rnw_io, snw_io, ncpr_io, ncps_io, qgl_io,  ncgl_io, ncpl_io, &
+            CLLS_io
 ! *GJF
 !Moo   real (kind=kind_phys),dimension(im,lm),intent(inout):: CLLS_io
 

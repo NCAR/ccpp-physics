@@ -66,8 +66,9 @@ contains
        real(kind_phys), intent(in   ) :: prsl(:,:)
        real(kind_phys), intent(inout) :: pratemax(:)
 
-       real(kind_phys), intent(in), dimension(:,:) :: prsi, qgraupel, qsnowwat, qicewat, wgrs
-       real(kind_phys), intent(inout), dimension(:) :: ltg1_max, ltg2_max, ltg3_max
+       real(kind_phys), intent(in), dimension(:,:) :: prsi, qgraupel, qsnowwat, qicewat
+       real(kind_phys), intent(in), dimension(:,:), optional :: wgrs
+       real(kind_phys), intent(inout), dimension(:), optional :: ltg1_max, ltg2_max, ltg3_max
        character(len=*), intent(out)  :: errmsg
        integer, intent(out)           :: errflg
 
