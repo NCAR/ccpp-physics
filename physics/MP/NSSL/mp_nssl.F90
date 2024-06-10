@@ -40,7 +40,7 @@ module mp_nssl
 
         use module_mp_nssl_2mom, only: nssl_2mom_init, nssl_2mom_init_const
 #ifdef MPI 
-        use mpi
+        use mpi_f08
 #endif
 
         implicit none
@@ -56,7 +56,7 @@ module mp_nssl
 
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
-         integer,                   intent(in)    :: mpicomm
+         type(MPI_Comm),            intent(in)    :: mpicomm
          integer,                   intent(in)    :: imp_physics
          integer,                   intent(in)    :: imp_physics_nssl
          real(kind_phys),           intent(in)    :: nssl_cccn, nssl_alphah, nssl_alphahl
