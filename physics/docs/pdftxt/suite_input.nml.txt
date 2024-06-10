@@ -200,13 +200,13 @@ show some variables in the namelist that must match the SDF.
 <tr><td>rrtmgp_nGptsLW  <td>                    <td>number of RRTMGP LW spectral points      <td>-999
 <tr><td>doG_cldoptics   <td>                    <td>use legacy RRTMG cloud optics            <td>.false.
 <tr><td>doGP_cldoptics_PADE   <td>              <td>use RRTMGP cloud optics: PADE approximation   <td>.false.
-<tr><td>doGP_cldoptics_LUT    <td>              <td>use RRTMGP cloud optics: LUTs                 <td>.false.
-<tr><td>iovr_convcld    <td>                    <td>cloud-overlap assumption for convective cloud   <td>1
-<tr><td>rrtmgp_nrghice  <td>                    <td>number of ice-roughness categories       <td>3
-<tr><td>rrtmgp_nGauss_ang    <td>               <td>number of angles used in Gaussian quadrature     <td>1
-<tr><td>do_GPsw_Glw      <td>                   <td>                        <td>.false.
-<tr><td>use_LW_jacobian  <td>                   <td>use Jacobian of LW to update LW radiation tendencies  <td>.false.
-<tr><td>damp_LW_fluxadj  <td>                   <td>Damp LW Jacobian flux adjustment with height     <td>.false.
+<tr><td>doGP_cldoptics_LUT    <td>GFS_rrtmgp_cloud_mp,rrtmgp_lw_cloud_optics,rrtmgp_lw_main,rrtmgp_sw_cloud_optics,rrtmgp_sw_main              <td>use RRTMGP cloud optics: LUTs                 <td>.false.
+<tr><td>iovr_convcld    <td>rrtmgp_lw_main,rrtmgp_sw_main                    <td>cloud-overlap assumption for convective cloud   <td>1
+#<tr><td>rrtmgp_nrghice  <td>                    <td>number of ice-roughness categories       <td>3
+#<tr><td>rrtmgp_nGauss_ang    <td>               <td>number of angles used in Gaussian quadrature     <td>1
+#<tr><td>do_GPsw_Glw      <td>                   <td>                        <td>.false.
+<tr><td>use_LW_jacobian  <td>GFS_suite_interstitial_2, dcyc2t3,rrtmgp_lw_main              <td>use Jacobian of LW to update LW radiation tendencies  <td>.false.
+<tr><td>damp_LW_fluxadj  <td> dcyc2t3          <td>Damp LW Jacobian flux adjustment with height     <td>.false.
 <tr><td>lfnc_k           <td> dcyc2t3      <td>depth of transition layer in logistic function for LW flux adjustment damping                                  <td>-999
 <tr><td>lfnc_p0          <td> dcyc2t3      <td>transition pressure for LW flux adjustment damping                           <td>-999
 <tr><td>doGP_lwscat      <td>rrtmgp_lw_main     <td>if true, include scattering in longwave cloud-optics, only compatible w/ GP cloud-optics <td>.false.
