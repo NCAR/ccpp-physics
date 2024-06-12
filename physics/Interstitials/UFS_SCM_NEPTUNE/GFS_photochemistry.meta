@@ -1,0 +1,161 @@
+########################################################################
+[ccpp-table-properties]
+  name = GFS_photochemistry
+  type = scheme
+  dependencies = ../../hooks/machine.F,../../photochem/module_ozphys.F90
+  dependencies = ../../photochem/module_h2ophys.F90
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_photochemistry
+  type = scheme
+[dtp]
+  standard_name = timestep_for_physics
+  long_name = physics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
+[oz_phys_2015]
+  standard_name = flag_for_nrl_2015_ozone_scheme
+  long_name = flag for new (2015) ozone physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[oz_phys_2006]
+  standard_name = flag_for_nrl_2006_ozone_scheme
+  long_name = flag for new (2006) ozone physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[con_1ovg]
+  standard_name = one_divided_by_the_gravitational_acceleration
+  long_name = inverse of gravitational acceleration
+  units = s2 m-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[prsl]
+  standard_name = air_pressure
+  long_name = mid-layer pressure
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dp]
+  standard_name = air_pressure_difference_between_midlayers
+  long_name = difference between mid-layer pressures
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[ozpl]
+  standard_name = ozone_forcing
+  long_name = ozone forcing data
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_data)
+  type = real
+  kind = kind_phys
+  intent = in
+[h2o_phys]
+  standard_name = flag_for_stratospheric_water_vapor_physics
+  long_name = flag for stratospheric water vapor physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[h2ophys]
+  standard_name = dataset_for_h2o_photochemistry_physics
+  long_name = dataset for NRL h2o photochemistry physics
+  units = mixed
+  dimensions = ()
+  type = ty_h2ophys
+  intent = in
+[h2opl]
+  standard_name = stratospheric_water_vapor_forcing
+  long_name = water forcing data
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_h2o_forcing_data,number_of_coefficients_in_h2o_forcing_data)
+  type = real
+  kind = kind_phys
+  intent = in
+[h2o0]
+  standard_name = specific_humidity_of_new_state
+  long_name = water vapor specific humidity updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[oz0]
+  standard_name = ozone_concentration_of_new_state
+  long_name = ozone concentration updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[do3_dt_prd]
+  standard_name = ozone_tendency_due_to_production_and_loss_rate
+  long_name = ozone tendency due to production and loss rate
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[do3_dt_ozmx]
+  standard_name = ozone_tendency_due_to_ozone_mixing_ratio
+  long_name = ozone tendency due to ozone mixing ratio
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[do3_dt_temp]
+  standard_name = ozone_tendency_due_to_temperature
+  long_name = ozone tendency due to temperature
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[do3_dt_ohoz]
+  standard_name = ozone_tendency_due_to_overhead_ozone_column
+  long_name = ozone tendency due to overhead ozone column
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
