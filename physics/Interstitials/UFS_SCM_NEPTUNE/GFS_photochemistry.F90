@@ -70,4 +70,4 @@ contains
 
   end subroutine GFS_photochemistry_run
 
-end module GFS_photochemistry_update
+end module GFS_photochemistry
