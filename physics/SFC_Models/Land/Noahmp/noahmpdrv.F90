@@ -51,8 +51,8 @@ module noahmpdrv
                                 do_mynnsfclay,do_mynnedmf,         &
                                 errmsg, errflg,                    &
                                 mpi_root,                                &
-                                fn_nml, input_nml_file, isc, jsc, ncols, nx, ny, nblks,     &
-                                blksz, xlon, xlat,                             &     
+                                fn_nml, input_nml_file, isc, jsc, ncols, nx, ny, tile_num, &
+                                nblks, blksz, xlon, xlat,                             &     
                                 lsoil, lsnow_lsm, dtp, fhour)
 
     use machine,          only: kind_phys
@@ -78,9 +78,13 @@ module noahmpdrv
     character(*),                  intent(in) :: fn_nml
     character(len=:), intent(in), dimension(:), pointer :: input_nml_file 
     integer,                       intent(in) :: isc, jsc, ncols, nx, ny, nblks      !=GFS_Control%ncols, %nx, %ny, nblks
+    integer,                       intent(in) :: tile_num  !GFS_control_type%tile_num
     integer, dimension(:),         intent(in) :: blksz   !(one:) !GFS_Control%blksz
     real(kind_phys), dimension(:), intent(in) :: xlon    ! longitude !GFS_Data(cdata%blk_no)%Grid%xlon
     real(kind_phys), dimension(:), intent(in) :: xlat    ! latitude
+
+  
+
     integer,                       intent(in) :: lsoil, lsnow_lsm
     real(kind=kind_phys),          intent(in) :: dtp, fhour
     ! type(gfs_data_type), dimension(:), intent(inout)          :: GFS_Data ! !(one:)
@@ -135,7 +139,7 @@ module noahmpdrv
 
     ! Read Land IAU settings 
     call land_iau_mod_set_control(Land_IAU_Control, fn_nml, input_nml_file, &
-          me, mpi_root, isc,jsc, nx, ny, nblks, blksz,  &
+          me, mpi_root, isc,jsc, nx, ny, tile_num, nblks, blksz,  &
           lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)
     ! Initialize IAU for land
     call land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, xlon, xlat, errmsg, errflg)
@@ -279,6 +283,8 @@ subroutine noahmpdrv_timestep_init (isot, ivegsrc, itime, fhour, delt, km,  &   
     !IAU increments are in units of 1/sec     !Land_IAU_Control%dtp
     !* only updating soil temp for now        
     lsoil_incr = Land_IAU_Control%lsoil_incr 
+
+!---this should be ncol?? as last block may be shorter (check blksz)?
     lensfc = Land_IAU_Control%nx * Land_IAU_Control%ny   
 
     print*,'adjusting first ', lsoil_incr, ' surface layers only'

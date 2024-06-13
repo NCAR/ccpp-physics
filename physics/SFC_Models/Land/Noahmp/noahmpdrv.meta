@@ -155,6 +155,12 @@
   dimensions = ()
   type = integer
   intent = in
+  [tile_num]   
+  standard_name = index_of_cubed_sphere_tile
+  long_name = tile number
+  units = none
+  dimensions = ()
+  type = integer
 [nblks]
   standard_name = ccpp_block_count
   long_name = for explicit data blocking: number of blocks

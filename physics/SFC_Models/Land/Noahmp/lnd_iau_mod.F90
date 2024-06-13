@@ -69,6 +69,7 @@ module land_iau_mod
       integer :: jsc
       integer :: nx
       integer :: ny
+      integer :: tile_num
       integer :: nblks
       integer, allocatable :: blksz(:)    ! this could vary for the last block
       integer, allocatable :: blk_strt_indx(:)
@@ -91,6 +92,8 @@ module land_iau_mod
       character(len=:), pointer, dimension(:) :: input_nml_file => null() !<character string containing full namelist
                                                                           !< for use with internal file reads
       integer              :: input_nml_file_length    !<length (number of lines) in namelist for internal reads
+      logical              :: gaussian_inc_file   ! if true increment in gaussian grids
+                              !  else fv3
 
   end type land_iau_control_type
 
@@ -101,14 +104,14 @@ module land_iau_mod
 contains
 
 subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me, mpi_root, &
-                                   isc, jsc, nx, ny, nblks, blksz, &
+                                   isc, jsc, nx, ny, tile_num, nblks, blksz, &
                                    lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)          !nlunit
 
    type (land_iau_control_type), intent(inout) :: Land_IAU_Control
    character(*), intent(in)                   :: fn_nml          !< namelist filename for surface data cycling
    character(len=:), intent(in), dimension(:), pointer :: input_nml_file_i
    integer, intent(in)                        :: me, mpi_root          !< MPI rank of master atmosphere processor   
-   integer, intent(in)                        :: isc, jsc, nx, ny, nblks, lsoil, lsnow_lsm
+   integer, intent(in)                        :: isc, jsc, nx, ny, tile_num, nblks, lsoil, lsnow_lsm
    integer, dimension(:),          intent(in) :: blksz   !(one:) !GFS_Control%blksz
    real(kind=kind_phys), intent(in)           :: dtp             !< physics timestep in seconds
    real(kind=kind_phys), intent(in)           :: fhour           !< current forecast hour
@@ -123,7 +126,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    !character(len=32)                          :: fn_nml = "input.nml"
    character(len=:), pointer, dimension(:)    :: input_nml_file => null()
    integer                    :: input_nml_file_length    !< length(number of lines) in namelist for internal reads
-
+   
 
    !> these are not available through the CCPP interface so need to read them from namelist file
    !> vars to read from namelist
@@ -132,12 +135,12 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    character(len=240)    :: land_iau_inc_files(7)         = ''          !< list of increment files
    real(kind=kind_phys)  :: land_iaufhrs(7)               = -1          !< forecast hours associated with increment files
    logical               :: land_iau_filter_increments    = .false.     !< filter IAU increments
-
+   logical               :: gaussian_inc_file             = .false.
    integer               :: lsoil_incr = 4
   
    NAMELIST /lnd_iau_nml/ do_land_iau, land_iau_delthrs, land_iau_inc_files, land_iaufhrs, &
                         land_iau_filter_increments, &  !, lnd_iau_drymassfixer   
-                        lsoil_incr                                       
+                        lsoil_incr, gaussian_inc_file                                      
    
    !Errors messages handled through CCPP error handling variables
    errmsg = ''
@@ -198,6 +201,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    Land_IAU_Control%jsc = jsc
    Land_IAU_Control%nx = nx
    Land_IAU_Control%ny = ny
+   Land_IAU_Control%tile_num = tile_num
    Land_IAU_Control%nblks = nblks
    Land_IAU_Control%lsoil = lsoil
    Land_IAU_Control%lsnow_lsm = lsnow_lsm
@@ -206,6 +210,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
 
    Land_IAU_Control%input_nml_file = input_nml_file
    Land_IAU_Control%input_nml_file_length = input_nml_file_length
+   Land_IAU_Control%gaussian_inc_file = gaussian_inc_file
 
    allocate(Land_IAU_Control%blksz(nblks))
    allocate(Land_IAU_Control%blk_strt_indx(nblks))
@@ -316,60 +321,6 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, xlon, xlat, errms
    dt = (Land_IAU_Control%iau_delthrs*3600.)
    rdt = 1.0/dt
 
-!  set up interpolation weights to go from GSI's gaussian grid to cubed sphere
-   deg2rad = pi/180.
-
-   !  npz = Land_IAU_Control%levs
-   fname = 'INPUT/'//trim(Land_IAU_Control%iau_inc_files(1))    
-   inquire (file=trim(fname), exist=exists)    
-   if (exists) then   !  if( file_exist(fname) ) then
-      ! call open_ncfile( fname, ncid )        
-      status = nf90_open(trim(fname), NF90_NOWRITE, ncid)  ! open the file
-      call netcdf_err(status, ' opening file '//trim(fname), errflg, errmsg) 
-      if (errflg .ne. 0) return     
-      call get_nc_dimlen(ncid, "longitude", im, errflg, errmsg) 
-      if (errflg .ne. 0) return     
-      call get_nc_dimlen(ncid, "latitude", jm, errflg, errmsg) 
-      if (errflg .ne. 0) return     
-      km = n_soill
-      if(Land_IAU_Control%me == Land_IAU_Control%mpi_root)  write(*,*) fname, ' DA increment dimensions:', im,jm,km
-      allocate (lon(im) )
-      allocate (lat(jm) )
-      call get_var1d(ncid, im, "longitude", lon, errflg, errmsg) 
-      if (errflg .ne. 0) return     
-      call get_var1d(ncid, jm, "latitude", lat, errflg, errmsg) 
-      if (errflg .ne. 0) return     
-      status = nf90_close(ncid)
-      CALL netcdf_err(status, 'closing file: '//trim(fname) , errflg, errmsg) 
-      if (errflg .ne. 0) return     
-      ! Convert to radians
-      do i=1,im
-        lon(i) = lon(i) * deg2rad
-      enddo
-      do j=1,jm
-        lat(j) = lat(j) * deg2rad
-      enddo
-   else
-      errmsg = 'FATAL Error in Land_IAU_initialize: Expected file '// trim(fname)//' for DA increment does not exist'
-      errflg = 1
-      return
-   endif
-
-! Initialize lat-lon to Cubed bi-linear interpolation coeff:
-   do j = 1,size(Init_parm_xlon,2)
-      do i = 1,size(Init_parm_xlon,1)
-   !         print*,i,j,is-1+j,js-1+j
-         agrid(is-1+i,js-1+j,1)=Init_parm_xlon(i,j)
-         agrid(is-1+i,js-1+j,2)=Init_parm_xlat(i,j)
-      enddo
-   enddo
-   call remap_coef( is, ie, js, je, is, ie, js, je, &
-      im, jm, lon, lat, id1, id2, jdc, s2c, &
-      agrid)
-   deallocate ( lon, lat,agrid )
-   if (allocated(Init_parm_xlon)) deallocate(Init_parm_xlon)
-   if (allocated(Init_parm_xlat)) deallocate(Init_parm_xlat)
-
    allocate(Land_IAU_Data%stc_inc(is:ie, js:je, km))
    allocate(Land_IAU_Data%slc_inc(is:ie, js:je, km))
 ! allocate arrays that will hold iau state
@@ -410,27 +361,111 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, xlon, xlat, errms
       enddo
    enddo
    
-   ! Read all increment files at iau init time (at beginning of cycle) and interpolate to target grid
-   allocate (wk3_stc(nfiles, 1:im,jbeg:jend, 1:km))
-   allocate (wk3_slc(nfiles, 1:im,jbeg:jend, 1:km))   
-   do k=1, nfiles
-      call read_iau_forcing_all_timesteps(Land_IAU_Control, &
-      'INPUT/'//trim(Land_IAU_Control%iau_inc_files(k)), errmsg, errflg, &
-       wk3_stc(k, :, :, :), wk3_slc(k, :, :, :)) 
-   enddo
+   if (Land_IAU_Control%gaussian_inc_file) then 
+      !set up interpolation weights to go from GSI's gaussian grid to cubed sphere
+      deg2rad = pi/180.
+      !  npz = Land_IAU_Control%levs
+      fname = 'INPUT/'//trim(Land_IAU_Control%iau_inc_files(1))    
+      inquire (file=trim(fname), exist=exists)    
+      if (exists) then   !  if( file_exist(fname) ) then
+         ! call open_ncfile( fname, ncid )        
+         status = nf90_open(trim(fname), NF90_NOWRITE, ncid)  ! open the file
+         call netcdf_err(status, ' opening file '//trim(fname), errflg, errmsg) 
+         if (errflg .ne. 0) return     
+         call get_nc_dimlen(ncid, "longitude", im, errflg, errmsg) 
+         if (errflg .ne. 0) return     
+         call get_nc_dimlen(ncid, "latitude", jm, errflg, errmsg) 
+         if (errflg .ne. 0) return     
+         km = n_soill
+         if(Land_IAU_Control%me == Land_IAU_Control%mpi_root)  write(*,*) fname, ' DA increment dimensions:', im,jm,km
+         allocate (lon(im) )
+         allocate (lat(jm) )
+         call get_var1d(ncid, im, "longitude", lon, errflg, errmsg) 
+         if (errflg .ne. 0) return     
+         call get_var1d(ncid, jm, "latitude", lat, errflg, errmsg) 
+         if (errflg .ne. 0) return     
+         status = nf90_close(ncid)
+         CALL netcdf_err(status, 'closing file: '//trim(fname) , errflg, errmsg) 
+         if (errflg .ne. 0) return     
+         ! Convert to radians
+         do i=1,im
+         lon(i) = lon(i) * deg2rad
+         enddo
+         do j=1,jm
+         lat(j) = lat(j) * deg2rad
+         enddo
+      else
+         errmsg = 'FATAL Error in Land_IAU_initialize: Expected file '// trim(fname)//' for DA increment does not exist'
+         errflg = 1
+         return
+      endif
 
-   call interp_inc_at_timestep(Land_IAU_Control, km, wk3_stc(1, :, :, :), Land_IAU_state%inc1%stc_inc, errmsg, errflg)
-   call interp_inc_at_timestep(Land_IAU_Control, km, wk3_slc(1, :, :, :), Land_IAU_state%inc1%slc_inc, errmsg, errflg)
-   if (nfiles.EQ.1) then  ! only need to get incrments once since constant forcing over window
-      call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state%wt)
+      ! Initialize lat-lon to Cubed bi-linear interpolation coeff:
+      do j = 1,size(Init_parm_xlon,2)
+         do i = 1,size(Init_parm_xlon,1)
+      !         print*,i,j,is-1+j,js-1+j
+            agrid(is-1+i,js-1+j,1)=Init_parm_xlon(i,j)
+            agrid(is-1+i,js-1+j,2)=Init_parm_xlat(i,j)
+         enddo
+      enddo
+      call remap_coef( is, ie, js, je, is, ie, js, je, &
+         im, jm, lon, lat, id1, id2, jdc, s2c, &
+         agrid)
+
+      if (allocated(lon)) deallocate (lon)
+      if (allocated(lat)) deallocate (lat)
+      if (allocated(agrid)) deallocate (agrid)
+      if (allocated(Init_parm_xlon)) deallocate(Init_parm_xlon)
+      if (allocated(Init_parm_xlat)) deallocate(Init_parm_xlat)
+      
+      ! Read all increment files at iau init time (at beginning of cycle) and interpolate to target grid
+      allocate (wk3_stc(nfiles, 1:im,jbeg:jend, 1:km))
+      allocate (wk3_slc(nfiles, 1:im,jbeg:jend, 1:km))   
+      do k=1, nfiles
+         call read_iau_forcing_all_timesteps(Land_IAU_Control, &
+         'INPUT/'//trim(Land_IAU_Control%iau_inc_files(k)), errmsg, errflg, &
+            wk3_stc(k, :, :, :), wk3_slc(k, :, :, :)) 
+      enddo   
+      call interp_inc_at_timestep(Land_IAU_Control, km, wk3_stc(1, :, :, :), Land_IAU_state%inc1%stc_inc, errmsg, errflg)
+      call interp_inc_at_timestep(Land_IAU_Control, km, wk3_slc(1, :, :, :), Land_IAU_state%inc1%slc_inc, errmsg, errflg)
+      if (nfiles.EQ.1) then  ! only need to get incrments once since constant forcing over window
+         call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state%wt)
+      endif
+      if (nfiles.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them
+         allocate (Land_IAU_state%inc2%stc_inc(is:ie, js:je, km))
+         allocate (Land_IAU_state%inc2%slc_inc(is:ie, js:je, km))      
+         Land_IAU_state%hr2=Land_IAU_Control%iaufhrs(2)      
+         call interp_inc_at_timestep(Land_IAU_Control, km, wk3_stc(2, :, :, :), Land_IAU_state%inc2%stc_inc, errmsg, errflg)
+         call interp_inc_at_timestep(Land_IAU_Control, km, wk3_slc(2, :, :, :), Land_IAU_state%inc2%slc_inc, errmsg, errflg)
+      endif
+   else   ! increment files in fv3 tiles 
+      ! Read all increment files at iau init time (at beginning of cycle) and interpolate to target grid
+      ! increments already in the fv3 modele grid--no need for interpolation 
+      ! Read all increment files at iau init time (at beginning of cycle) and interpolate to target grid
+      allocate (wk3_stc(nfiles, 1:im,jbeg:jend, 1:km))
+      allocate (wk3_slc(nfiles, 1:im,jbeg:jend, 1:km))   
+      do k=1, nfiles
+         call read_iau_forcing_fv3(Land_IAU_Control, &
+         'INPUT/'//trim(Land_IAU_Control%iau_inc_files(k)), errmsg, errflg, &
+             
+            Land_IAU_state%inc1%stc_inc, Land_IAU_state%inc1%slc_inc, errmsg, errflg)
+      enddo
+      call interp_inc_at_timestep(Land_IAU_Control, km, wk3_stc(1, :, :, :), Land_IAU_state%inc1%stc_inc, errmsg, errflg)
+      call interp_inc_at_timestep(Land_IAU_Control, km, wk3_slc(1, :, :, :), Land_IAU_state%inc1%slc_inc, errmsg, errflg)
+      if (nfiles.EQ.1) then  ! only need to get incrments once since constant forcing over window
+         call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state%wt)
+      endif
+      if (nfiles.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them
+         allocate (Land_IAU_state%inc2%stc_inc(is:ie, js:je, km))
+         allocate (Land_IAU_state%inc2%slc_inc(is:ie, js:je, km))      
+         Land_IAU_state%hr2=Land_IAU_Control%iaufhrs(2)      
+         call interp_inc_at_timestep(Land_IAU_Control, km, wk3_stc(2, :, :, :), Land_IAU_state%inc2%stc_inc, errmsg, errflg)
+         call interp_inc_at_timestep(Land_IAU_Control, km, wk3_slc(2, :, :, :), Land_IAU_state%inc2%slc_inc, errmsg, errflg)
+      endif
+
    endif
-   if (nfiles.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them
-      allocate (Land_IAU_state%inc2%stc_inc(is:ie, js:je, km))
-      allocate (Land_IAU_state%inc2%slc_inc(is:ie, js:je, km))      
-      Land_IAU_state%hr2=Land_IAU_Control%iaufhrs(2)      
-      call interp_inc_at_timestep(Land_IAU_Control, km, wk3_stc(2, :, :, :), Land_IAU_state%inc2%stc_inc, errmsg, errflg)
-      call interp_inc_at_timestep(Land_IAU_Control, km, wk3_slc(2, :, :, :), Land_IAU_state%inc2%slc_inc, errmsg, errflg)
-   endif
+
+
 !   print*,'end of IAU init',dt,rdt
 
 end subroutine land_iau_mod_init
@@ -599,8 +634,8 @@ subroutine read_iau_forcing_all_timesteps(Land_IAU_Control, fname, errmsg, errfl
                                           wk3_out_stc, wk3_out_slc)   !, fname_sfc) is, ie, js, je, ks,ke, 
    type (land_iau_control_type),   intent(in) :: Land_IAU_Control
    character(len=*),              intent(in) :: fname
-   character(len=*),             intent(out) :: errmsg
-   integer,                      intent(out) :: errflg
+   character(len=*),             intent(inout) :: errmsg
+   integer,                      intent(inout) :: errflg
    real(kind=kind_phys),                 intent(out) :: wk3_out_stc(1:im, jbeg:jend, 1:km)
    real(kind=kind_phys),                 intent(out) :: wk3_out_slc(1:im, jbeg:jend, 1:km)
    
@@ -623,7 +658,7 @@ subroutine read_iau_forcing_all_timesteps(Land_IAU_Control, fname, errmsg, errfl
       call netcdf_err(status, ' opening file '//trim(fname), errflg, errmsg) 
       if (errflg .ne. 0) return
    else
-      errmsg = 'FATAL Error in land read_iau_forcing_all_timesteps: Expected file '//trim(fname)//' for DA increment does not exist'
+      errmsg = 'FATAL Error in land iau read_iau_forcing_all_timesteps: Expected file '//trim(fname)//' for DA increment does not exist'
       errflg = 1
       return
    endif
@@ -661,6 +696,80 @@ subroutine read_iau_forcing_all_timesteps(Land_IAU_Control, fname, errmsg, errfl
    
 end subroutine read_iau_forcing_all_timesteps
 
+subroutine read_iau_forcing_fv3(Land_IAU_Control, stc_inc_out, slc_inc_out, errmsg, errflg)
+
+   type (land_iau_control_type), intent(in) :: Land_IAU_Control
+   ! character(len=*),             intent(in) :: fname
+   character(len=*),          intent(inout) :: errmsg
+   integer,                   intent(inout) :: errflg
+   real(kind=kind_phys),        intent(out) :: stc_inc_out(1:im, jbeg:jend, 1:km)
+   real(kind=kind_phys),        intent(out) :: slc_inc_out(1:im, jbeg:jend, 1:km)
+
+   integer  :: i, j, k, l, npz
+   integer  :: i1, i2, j1
+   logical  :: exists
+   integer  :: ncid, status, varid
+   integer  :: ierr
+   character(len=500)  :: fname
+   character(len=2)    :: tile_str
+
+   character(len=32), dimension(4) :: stc_vars = [character(len=32) :: 'soilt1_inc', 'soilt2_inc', 'soilt3_inc', 'soilt4_inc']
+   character(len=32), dimension(4) :: slc_vars = [character(len=32) :: 'slc1_inc', 'slc2_inc', 'slc3_inc', 'slc4_inc']
+
+   !Errors messages handled through CCPP error handling variables
+   errmsg = ''
+   errflg = 0
+
+   write(tile_str, '(I0)') Land_IAU_Control%tile_num
+
+   fname = 'INPUT/'//trim(Land_IAU_Control%iau_inc_files(1))//".tile"//tile_str//".nc"
+   
+   inquire (file=trim(fname), exist=exists)    
+   if (exists) then
+      status = nf90_open(trim(fname), NF90_NOWRITE, ncid)  ! open the file
+      call netcdf_err(status, ' opening file '//trim(fname), errflg, errmsg) 
+      if (errflg .ne. 0) return
+   else
+      errmsg = 'FATAL Error in land iau read_iau_forcing_fv3: Expected file '//trim(fname)//' for DA increment does not exist'
+      errflg = 1
+      return
+   endif
+
+   do i = 1, size(stc_vars)
+      print *, trim(stc_vars(i))
+      ! call check_var_exists(ncid, trim(stc_vars(i)), ierr)
+      status = nf90_inq_varid(ncid, trim(stc_vars(i)), varid)
+      if (status == nf90_noerr) then   !if (ierr == 0) then
+         ! var stored as soilt1_inc(Time, yaxis_1, xaxis_1)
+         call get_var3d_values(ncid, varid, 1,im, jbeg,jend, 1,1, wk3_out_stc(:, :, i), status)
+         call netcdf_err(status, 'reading var: '//trim(stc_vars(i)), errflg, errmsg_out)
+         if (errflg .ne. 0) return 
+      else
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *, &
+         'warning: no increment for ',trim(stc_vars(i)),' found, assuming zero'
+         wk3_out_stc(:, :, i) = 0.
+      endif
+   enddo
+   do i = 1, size(slc_vars)
+      print *, trim(slc_vars(i))
+      status = nf90_inq_varid(ncid, trim(slc_vars(i)), varid)
+      if (status == nf90_noerr) then   !if (ierr == 0) then
+         ! call get_var3_r4( ncid, trim(slc_vars(i)), 1,im, jbeg,jend, 1,1, wk3_out_slc(:, :, i) )
+         call get_var3d_values(ncid, varid, 1,im, jbeg,jend, 1,1, wk3_out_slc(:, :, i), status)
+         call netcdf_err(status, 'reading var: '//trim(slc_vars(i)), errflg, errmsg_out)
+         if (errflg .ne. 0) return          
+      else
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,&
+         'warning: no increment for ',trim(slc_vars(i)),' found, assuming zero'
+         wk3_out_slc(:, :, i) = 0.
+      endif
+   enddo
+
+   call close_ncfile(ncid)
+
+
+end subroutine read_iau_forcing_fv3
+
 subroutine interp_inc_at_timestep(Land_IAU_Control, km_in, wk3_in, var, errmsg, errflg)   !field_name, , jbeg, jend)
    ! interpolate increment from GSI gaussian grid to cubed sphere
    ! everying is on the A-grid, earth relative
@@ -670,8 +779,8 @@ subroutine interp_inc_at_timestep(Land_IAU_Control, km_in, wk3_in, var, errmsg, 
    real(kind=kind_phys),                           intent(in) :: wk3_in(1:im,jbeg:jend, 1:km_in) 
    real(kind=kind_phys), dimension(is:ie, js:je, 1:km), intent(inout) :: var
    
-   character(len=*),              intent(out) :: errmsg
-   integer,                       intent(out) :: errflg
+   character(len=*),              intent(inout) :: errmsg
+   integer,                       intent(inout) :: errflg
    integer:: i1, i2, j1, k, j, i
    
    do k=1,km_in
