@@ -38,14 +38,6 @@
   dimensions = ()
   type = logical
   intent = in
-[con_1ovg]
-  standard_name = one_divided_by_the_gravitational_acceleration
-  long_name = inverse of gravitational acceleration
-  units = s2 m-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
 [prsl]
   standard_name = air_pressure
   long_name = mid-layer pressure
@@ -108,6 +100,14 @@
   type = real
   kind = kind_phys
   intent = out
+[gt0]
+  standard_name = air_temperature_of_new_state
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [do3_dt_prd]
   standard_name = ozone_tendency_due_to_production_and_loss_rate
   long_name = ozone tendency due to production and loss rate

@@ -17,8 +17,7 @@ contains
 ! #########################################################################################
   subroutine GFS_suite_stateout_update_run (im, levs, ntrac, dtp, tgrs, ugrs, vgrs, qgrs, &
        dudt, dvdt, dtdt, dqdt, gt0, gu0, gv0, gq0, ntiw, nqrimef, imp_physics,            &
-       imp_physics_fer_hires, epsq, ozphys, oz_phys_2015, oz_phys_2006, con_1ovg, prsl,   &
-       errmsg, errflg)
+       imp_physics_fer_hires, epsq, errmsg, errflg)
 
     ! Inputs
     integer,              intent(in )                   :: im
@@ -26,8 +25,8 @@ contains
     integer,              intent(in )                   :: ntrac
     integer,              intent(in )                   :: imp_physics,imp_physics_fer_hires
     integer,              intent(in )                   :: ntiw, nqrimef
-    real(kind=kind_phys), intent(in )                   :: dtp, epsq, con_1ovg
-    real(kind=kind_phys), intent(in ), dimension(:,:)   :: tgrs, ugrs, vgrs, prsl
+    real(kind=kind_phys), intent(in )                   :: dtp, epsq
+    real(kind=kind_phys), intent(in ), dimension(:,:)   :: tgrs, ugrs, vgrs
     real(kind=kind_phys), intent(in ), dimension(:,:,:) :: qgrs
     real(kind=kind_phys), intent(in ), dimension(:,:)   :: dudt, dvdt, dtdt
     real(kind=kind_phys), intent(in ), dimension(:,:,:) :: dqdt

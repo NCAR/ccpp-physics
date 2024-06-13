@@ -169,22 +169,6 @@
   type = real
   kind = kind_phys
   intent = in
-[con_1ovg]
-  standard_name = one_divided_by_the_gravitational_acceleration
-  long_name = inverse of gravitational acceleration
-  units = s2 m-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[prsl]
-  standard_name = air_pressure
-  long_name = mid-layer pressure
-  units = Pa
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

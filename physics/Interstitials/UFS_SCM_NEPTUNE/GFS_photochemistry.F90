@@ -14,7 +14,7 @@ contains
 !!
 ! #########################################################################################
   subroutine GFS_photochemistry_run (dtp, ozphys, oz_phys_2015, oz_phys_2006, con_1ovg,   &
-       prsl, dp, ozpl, h2o_phys, h2ophys, h2opl, h2o0, oz0, do3_dt_prd, do3_dt_ozmx,      &
+       prsl, dp, ozpl, h2o_phys, h2ophys, h2opl, h2o0, oz0, gt0, do3_dt_prd, do3_dt_ozmx, &
        do3_dt_temp, do3_dt_ohoz, errmsg, errflg)
     
     ! Inputs
@@ -47,6 +47,9 @@ contains
     real(kind=kind_phys), intent(out), dimension(:,:) :: &
          oz0,          & ! Update ozone concentration.
          h2o0            ! Updated h2o concentration.
+    real(kind=kind_phys), intent(inout), dimension(:,:) :: &
+         gt0             ! Updated temperature
+    
     character(len=*), intent(out) :: &
          errmsg          ! CCPP Error message.
     integer,  intent(out) :: &
