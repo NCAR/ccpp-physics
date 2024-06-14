@@ -45,7 +45,6 @@ contains
     character(len=128)               :: err_message
     integer :: i1, i2, i3, ierr
     real(kind=4), dimension(:), allocatable :: lat4, pres4, time4, tempin
-    real(kind=4) :: blatc4
 
     ! initialize error message
     err_message = ""
@@ -231,7 +230,7 @@ contains
        enddo
     enddo
 
-       
+
     return
   end subroutine run
 
