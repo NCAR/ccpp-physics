@@ -117,8 +117,8 @@ WARN_LOGFILE           =
 INPUT                  =  pdftxt/mainpage.txt              \
                           pdftxt/all_schemes_list.txt     \
                           pdftxt/GFS_v16_suite.txt       \
-                          pdftxt/GFS_v17_p8_suite.txt    \
-                          pdftxt/GFS_v17_p8_RRTMGP.txt    \
+                          pdftxt/GFS_v17_HR3_suite.txt    \
+                          pdftxt/GFS_v17_HR3_RRTMGP_suite.txt    \
                           pdftxt/RRFS_v1_suite.txt   \
                           pdftxt/WoFS_v0_suite.txt   \
                           pdftxt/RRFS_SGSCLOUD.txt       \
@@ -176,7 +176,7 @@ EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       =
 EXCLUDE_SYMBOLS        =
-EXAMPLE_PATH           = pdftxt/RE6 \
+EXAMPLE_PATH           = pdftxt/RE7 \
                          doc/html
 EXAMPLE_PATTERNS       = 
 EXAMPLE_RECURSIVE      = NO

@@ -26,9 +26,9 @@ The RRFS_v1beta suite uses the parameterizations in the following order:
 
 \section rrfs_nml_option Namelist 
 - General physics options
-\snippet FV3_RRFS_v1_input.nml GFS_PHYSICS_NML
+\snippet input_RRFS_v1.nml GFS_PHYSICS_NML
 - \ref GFS_UGWP_v0 related options
-\snippet FV3_RRFS_v1_input.nml CIRES_UGWP_NML
+\snippet input_RRFS_v1.nml CIRES_UGWP_NML
 
 
 

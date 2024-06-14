@@ -1,0 +1,72 @@
+/**
+\page GFS_v17_HR3_RRTMGP_page GFS_v17_RRTMGP Suite 
+
+\section gfsv_17_suite_overview Overview
+
+Version 17 of the Global Forecast System (GFS) is scheduled for operational implementation by the NOAA
+National Centers for Environmental Prediction (NCEP) in 2024. The GFS_v17 suite is a prototype of 
+the GFS_v17 suite, and is expected to evolve before the implementation. It is available for use 
+with the CCPP SCM.  The primary differences between the GFS_v16 and GFS_v17 suites are: 
+- \b Microphysics: The replacement of \ref GFDL_cloud with \ref THOMPSON 
+- PBL and Convection updates
+- \b Gravity \b Wave \b Drag: The replacement of \ref GFS_UGWP_v0 with  \ref GFS_ugwpv1_gsldrag
+- \b Land \b Surface \b Model: The replacement of \ref GFS_NOAH with \ref NoahMP
+
+The GFS_v17 suite uses the parameterizations in the following order:
+ - \ref GFS_RRTMGP_page
+ - \ref GFS_SFCLYR
+ - \ref GFS_NSST
+ - \ref NoahMP
+ - \ref GFS_SFCSICE
+ - \ref GFS_SATMEDMFVDIFQ
+ - \ref GFS_ugwpv1_gsldrag
+ - \ref GFS_OZPHYS
+ - \ref GFS_H2OPHYS
+ - \ref GFS_SAMFdeep
+ - \ref GFS_SAMFshal
+ - \ref THOMPSON
+
+
+\section sdf_gfsv17p8 Suite Definition File 
+\include suite_SCM_GFS_v17_HR3_RRTMGP.xml
+
+\section gfs17_nml_opt_des Namelist 
+- General physics options
+\snippet input_GFS_v17_HR3_RRTMGP.nml GFS_PHYSICS_NML
+- \ref GFS_UNIFIED_UGWP related options
+\snippet input_GFS_v17_HR3_RRTMGP.nml CIRES_UGWP_NML
+
+- nstf_name = \f$[2,0,0,0,0]^1 [2,1,0,0,0]^2\f$
+ - \f$^1\f$ NSST is on and coupled with spin up off
+ - \f$^2\f$ NSST is on and coupled with spin up on
+
+- Grid-spacing dependency of \p cdmbgwd
+ - \b C48:   cdmbgwd="0.071,2.1,1.0,1.0"
+ - \b C96:   cdmbgwd="0.14,1.8,1.0,1.0"
+ - \b C192:  cdmbgwd="0.23,1.5,1.0,1.0"
+ - \b C384:  cdmbgwd="1.1,0.72,1.0,1.0"
+ - \b C768:  cdmbgwd="4.0,0.15,1.0,1.0"
+ - \b C1152: cdmbgwd="4.0,0.10,1.0,1.0"
+ - \b C3072: cdmbgwd="4.0,0.05,1.0,1.0"
+
+- Grid-spacing dependency of \p cdmbgwd_gsl
+ - \b C48:   cdmbgwd_gsl="40.0,1.77,1.0,1.0"
+ - \b C96:   cdmbgwd_gsl="20.0,2.5,1.0,1.0"
+ - \b C192:  cdmbgwd_gsl="10.0,3.5,1.0,1.0"
+ - \b C384:  cdmbgwd_gsl="5.0,5.0,1.0,1.0"
+ - \b C768:  cdmbgwd_gsl="2.5,7.5,1.0,1.0"
+ - \b C1152: cdmbgwd_gsl="1.67,8.8,1.0,1.0"
+ - \b C3072: cdmbgwd_gsl="0.625,14.1,1.0,1.0"
+
+- Grid-spacing dependency of \p knob_ugwp_tauamp
+- \b C48:    knob_ugwp_tauamp=6.0e-3 
+- \b C96:    knob_ugwp_tauamp=3.0e-3
+- \b C192:   knob_ugwp_tauamp=1.5e-3
+- \b C384:   knob_ugwp_tauamp=0.8e-3
+- \b C768:   knob_ugwp_tauamp=0.5e-3
+- \b C1152:  knob_ugwp_tauamp=0.35e-3
+- \b C3072:  knob_ugwp_tauamp=0.13e-3
+
+- Grid-spacing dependency of \p xr_cnvcld
+- \b C48 and \b C96: xr_cnvcld =.false.
+*/
