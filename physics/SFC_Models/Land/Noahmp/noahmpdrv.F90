@@ -170,9 +170,9 @@ module noahmpdrv
 !! @param[inout] slc_adj Analysis liquid soil moisture states
 !! @param[in] stc_updated Integer to record whether STC in each grid cell was updated
 
-subroutine noahmpdrv_timestep_init (isot, ivegsrc, itime, fhour, delt, km,  &      !me, mpi_root,
-                                    soiltyp, vegtype, weasd, &
-                                     stc, slc, smc, errmsg, errflg)       ! smc, t2mmp, q2mp,    
+subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_root,
+                                    isot, ivegsrc, soiltyp, vegtype, weasd, &
+                                    stc, slc, smc, errmsg, errflg)       ! smc, t2mmp, q2mp,    
    
   use machine,                 only: kind_phys  
   use namelist_soilveg
@@ -295,6 +295,7 @@ subroutine noahmpdrv_timestep_init (isot, ivegsrc, itime, fhour, delt, km,  &   
     nfrozen = 0 ! not update as frozen soil
     nfrozen_upd = 0 ! not update as frozen soil
 
+!TODO---if only fv3 increment files are used, this can be read from file
     allocate(mask_tile(lensfc))
     call calculate_landinc_mask(weasd, vegtype, soiltyp, lensfc, isice_table,  & !veg_type_landice, 
                                 mask_tile)

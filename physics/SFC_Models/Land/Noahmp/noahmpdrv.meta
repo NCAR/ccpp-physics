@@ -155,7 +155,7 @@
   dimensions = ()
   type = integer
   intent = in
-  [tile_num]   
+[tile_num]   
   standard_name = index_of_cubed_sphere_tile
   long_name = tile number
   units = none
@@ -256,6 +256,42 @@
   dimensions = ()
   type = integer
   intent = in
+[isot]
+  standard_name = control_for_soil_type_dataset
+  long_name = soil type dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ivegsrc]
+  standard_name = control_for_vegetation_dataset
+  long_name = land use dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[soiltyp]
+  standard_name = soil_type_classification
+  long_name = soil type at each grid cell
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent= in
+[vegtype]
+  standard_name = vegetation_type_classification
+  long_name = vegetation type at each grid cell
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent= in
+[weasd]
+  standard_name = water_equivalent_accumulated_snow_depth_over_land
+  long_name = water equiv of acc snow depth over land
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [stc]
   standard_name = soil_temperature
   long_name = soil temperature
@@ -269,6 +305,14 @@
   long_name = liquid soil moisture
   units = frac
   dimensions = (horizontal_dimension,vertical_dimension_of_soil)
+  type = real
+  kind = kind_phys
+  intent = inout
+[smc]
+  standard_name = volume_fraction_of_condensed_water_in_soil
+  long_name = total soil moisture
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
