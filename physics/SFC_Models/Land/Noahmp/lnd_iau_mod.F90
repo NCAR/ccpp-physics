@@ -969,7 +969,7 @@ end subroutine calculate_landinc_mask
       IF (ERR == NF90_NOERR) RETURN
       ERRMSG = NF90_STRERROR(ERR)
       PRINT*,'FATAL ERROR in Land IAU ', TRIM(STRING), ': ', TRIM(ERRMSG)
-      errmsg_out = 'FATAL ERROR in Land IAU ', TRIM(STRING), ': ', TRIM(ERRMSG)
+      errmsg_out = 'FATAL ERROR in Land IAU '//TRIM(STRING), ': '//TRIM(ERRMSG)
    !  CALL MPI_ABORT(MPI_COMM_WORLD, 999)
       errflg = 1
       return
