@@ -9,35 +9,35 @@
 !! as diagnotics calculation.
 
 !> This module contains the CCPP-compliant NoahMP land surface model driver.
-module noahmpdrv
+  module noahmpdrv
 
-    use module_sf_noahmplsm
+      use module_sf_noahmplsm
     
-    ! Land IAU increments for soil temperature (can also do soil moisture increments if needed)
-    use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type,   &
+      ! Land IAU increments for soil temperature (can also do soil moisture increments if needed)
+      use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type,   &
                             land_iau_mod_set_control, land_iau_mod_init, 
                             land_iau_mod_getiauforcing, land_iau_mod_finalize, &
                             calculate_landinc_mask
 
-    implicit none
+      implicit none
 
-    integer, parameter :: psi_opt = 0 ! 0: MYNN or 1:GFS
+      integer, parameter :: psi_opt = 0 ! 0: MYNN or 1:GFS
 
-    private
+      private
 
-    public :: noahmpdrv_init, noahmpdrv_run, &
+      public :: noahmpdrv_init, noahmpdrv_run, &
               noahmpdrv_timestep_init, noahmpdrv_timestep_finalize, noahmpdrv_finalize
 
-    !> \Land IAU data and control
-    ! Land IAU Control holds settings' information, maily read from namelist (e.g., 
+      !> \Land IAU data and control
+      ! Land IAU Control holds settings' information, maily read from namelist (e.g., 
               ! block of global domain that belongs to a process ,
               ! whethrer to do IAU increment at this time step, 
               ! time step informatoin, etc)    
-    type (land_iau_control_type)          :: Land_IAU_Control
-    ! Land IAU Data holds spatially and temporally interpolated soil temperature increments per time step
-    type (land_iau_external_data_type)    :: Land_IAU_Data   !(number of blocks):each proc holds nblks
+      type (land_iau_control_type)          :: Land_IAU_Control
+      ! Land IAU Data holds spatially and temporally interpolated soil temperature increments per time step
+      type (land_iau_external_data_type)    :: Land_IAU_Data   !(number of blocks):each proc holds nblks
 
-    contains
+      contains
 
 !> \ingroup NoahMP_LSM
 !! \brief This subroutine is called during the CCPP initialization phase and calls set_soilveg() to 
