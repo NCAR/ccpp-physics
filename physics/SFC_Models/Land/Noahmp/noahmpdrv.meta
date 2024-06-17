@@ -376,13 +376,6 @@
 [ccpp-arg-table]
   name = noahmpdrv_run
   type = scheme
-[nb]
-  standard_name = ccpp_block_number
-  long_name = number of block for explicit data blocking in CCPP
-  units = index
-  dimensions = ()  
-  type = integer
-  intent = in
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -410,14 +403,6 @@
   units = index
   dimensions = ()
   type = integer
-  intent = in
-[fhour]
-  standard_name = forecast_time
-  long_name = current forecast time
-  units = h
-  dimensions = ()
-  type = real
-  kind = kind_phys
   intent = in
 [ps]
   standard_name = surface_air_pressure
