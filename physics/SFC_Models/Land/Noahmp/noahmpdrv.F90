@@ -403,11 +403,12 @@ end subroutine noahmpdrv_timestep_init
 
   end subroutine noahmpdrv_timestep_finalize
 
-    !> \ingroup NoahMP_LSM
+   !> \ingroup NoahMP_LSM
 !! \brief This subroutine mirrors noahmpdrv_init  
 !!  it calls land_iau_finalize which frees up allocated memory by IAU_init (in noahmdrv_init)  
 !! \section arg_table_noahmpdrv_finalize Argument Table
 !! \htmlinclude noahmpdrv_finalize.html
+!!
   subroutine noahmpdrv_finalize (errmsg, errflg)       ! smc, t2mmp, q2mp,    
    
     use machine,          only: kind_phys 
