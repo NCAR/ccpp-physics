@@ -690,7 +690,8 @@ subroutine read_iau_forcing_all_timesteps(Land_IAU_Control, fname, errmsg, errfl
       endif
    enddo
 
-   call close_ncfile(ncid)
+   status =nf90_close(ncid) 
+   call netcdf_err(status, 'closing file '//trim(fname), errflg, errmsg) 
    
 end subroutine read_iau_forcing_all_timesteps
 
@@ -792,7 +793,8 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, stc_inc_out, slc_inc_out, errm
       endif
    enddo
 
-   call close_ncfile(ncid)
+   status =nf90_close(ncid) 
+   call netcdf_err(status, 'closing file '//trim(fname), errflg, errmsg) 
 
 
 end subroutine read_iau_forcing_fv3
