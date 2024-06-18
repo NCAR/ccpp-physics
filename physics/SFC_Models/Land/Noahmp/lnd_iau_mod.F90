@@ -969,7 +969,7 @@ end subroutine calculate_landinc_mask
       IF (ERR == NF90_NOERR) RETURN
       ERRMSG = NF90_STRERROR(ERR)
       PRINT*,'FATAL ERROR in Land IAU ', TRIM(STRING), ': ', TRIM(ERRMSG)
-      errmsg_out = 'FATAL ERROR in Land IAU '//TRIM(STRING), ': '//TRIM(ERRMSG)
+      errmsg_out = 'FATAL ERROR in Land IAU '//TRIM(STRING)//': '//TRIM(ERRMSG)
    !  CALL MPI_ABORT(MPI_COMM_WORLD, 999)
       errflg = 1
       return
@@ -983,6 +983,7 @@ end subroutine calculate_landinc_mask
       integer :: dimid
       integer :: errflg
       character(len=*) :: errmsg_out
+      integer :: status
 
       !Errors messages handled through CCPP error handling variables
       errmsg_out = ''
@@ -1009,7 +1010,7 @@ end subroutine calculate_landinc_mask
       real(kind=kind_phys), intent(out):: var_arr(dim_len)
       integer :: errflg
       character(len=*) :: errmsg_out
-      integer :: var_id
+      integer :: varid
 
       !Errors messages handled through CCPP error handling variables
       errmsg_out = ''
@@ -1019,6 +1020,7 @@ end subroutine calculate_landinc_mask
       CALL NETCDF_ERR(status, 'getting varid: '//trim(var_name), errflg, errmsg_out)
       if (errflg .ne. 0) return
       status = nf90_get_var(ncid, varid, var_arr)
+                  ! start = (/1/), count = (/dim_len/))
       CALL NETCDF_ERR(status, 'reading var: '//trim(var_name), errflg, errmsg_out)
 
    end subroutine get_var1d
