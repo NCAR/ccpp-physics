@@ -275,21 +275,21 @@
   standard_name = soil_type_classification
   long_name = soil type at each grid cell
   units = index
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = integer
   intent= in
 [vegtype]
   standard_name = vegetation_type_classification
   long_name = vegetation type at each grid cell
   units = index
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = integer
   intent= in
 [weasd]
   standard_name = water_equivalent_accumulated_snow_depth_over_land
   long_name = water equiv of acc snow depth over land
   units = mm
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -313,7 +313,7 @@
   standard_name = volume_fraction_of_condensed_water_in_soil
   long_name = total soil moisture
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
+  dimensions = (horizontal_dimension,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = inout
