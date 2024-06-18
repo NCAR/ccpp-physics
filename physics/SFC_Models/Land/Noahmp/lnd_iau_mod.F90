@@ -766,7 +766,7 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, stc_inc_out, slc_inc_out, errm
             ! var stored as soilt1_inc(Time, yaxis_1, xaxis_1)
             call get_var3d_values(ncid, varid, Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, it, 1, stc_inc_out(it,:, :, i), status)
             ! call get_var3d_values(ncid, varid, 1,im, jbeg,jend, it, 1, stc_inc_out(it,:, :, i), status)
-            call netcdf_err(status, 'reading var: '//trim(stc_vars(i)), errflg, errmsg_out)
+            call netcdf_err(status, 'reading var: '//trim(stc_vars(i)), errflg, errmsg)
             if (errflg .ne. 0) return 
          enddo
       else
@@ -782,7 +782,7 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, stc_inc_out, slc_inc_out, errm
          do it = 1, n_t
             call get_var3d_values(ncid, varid, Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, it, 1, slc_inc_out(it, :, :, i), status)
             ! call get_var3d_values(ncid, varid, 1,im, jbeg,jend, it, 1, slc_inc_out(it, :, :, i), status)
-            call netcdf_err(status, 'reading var: '//trim(slc_vars(i)), errflg, errmsg_out)
+            call netcdf_err(status, 'reading var: '//trim(slc_vars(i)), errflg, errmsg)
             if (errflg .ne. 0) return   
          end do       
       else
