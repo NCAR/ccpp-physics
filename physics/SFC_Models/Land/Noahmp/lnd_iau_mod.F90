@@ -579,7 +579,7 @@ end subroutine land_iau_mod_finalize
                call interp_inc_at_timestep(Land_IAU_Control, km, wk3_slc(itnext, :, :, :), Land_IAU_state%inc2%slc_inc, errmsg, errflg)
             else
                Land_IAU_state%inc2%stc_inc(:, :, :) = wk3_stc(itnext, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
-         `     Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(itnext, :, :, :) 
+               Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(itnext, :, :, :) 
             endif
          endif
          call updateiauforcing(Land_IAU_Control,Land_IAU_Data,Land_IAU_state%wt)
@@ -667,7 +667,7 @@ subroutine read_iau_forcing_all_timesteps(Land_IAU_Control, fname, errmsg, errfl
       status = nf90_inq_varid(ncid, trim(stc_vars(i)), varid)
       if (status == nf90_noerr) then   !if (ierr == 0) then
          call get_var3d_values(ncid, varid, 1,im, jbeg,jend, 1,1, wk3_out_stc(:, :, i), status)
-         call netcdf_err(status, 'reading var: '//trim(stc_vars(i)), errflg, errmsg_out)
+         call netcdf_err(status, 'reading var: '//trim(stc_vars(i)), errflg, errmsg)
          if (errflg .ne. 0) return 
       else
          if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *, &
@@ -681,7 +681,7 @@ subroutine read_iau_forcing_all_timesteps(Land_IAU_Control, fname, errmsg, errfl
       if (status == nf90_noerr) then   !if (ierr == 0) then
          ! call get_var3_r4( ncid, trim(slc_vars(i)), 1,im, jbeg,jend, 1,1, wk3_out_slc(:, :, i) )
          call get_var3d_values(ncid, varid, 1,im, jbeg,jend, 1,1, wk3_out_slc(:, :, i), status)
-         call netcdf_err(status, 'reading var: '//trim(slc_vars(i)), errflg, errmsg_out)
+         call netcdf_err(status, 'reading var: '//trim(slc_vars(i)), errflg, errmsg)
          if (errflg .ne. 0) return          
       else
          if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,&
@@ -700,8 +700,8 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, stc_inc_out, slc_inc_out, errm
    ! character(len=*),             intent(in) :: fname
    character(len=*),          intent(inout) :: errmsg
    integer,                   intent(inout) :: errflg
-   real(kind=kind_phys), allocatable        intent(out) :: stc_inc_out(:, :, :, :)  !1:im, jbeg:jend, 1:km)
-   real(kind=kind_phys), allocatable        intent(out) :: slc_inc_out(:, :, :, :)  !1:im, jbeg:jend, 1:km)
+   real(kind=kind_phys), allocatable,        intent(out) :: stc_inc_out(:, :, :, :)  !1:im, jbeg:jend, 1:km)
+   real(kind=kind_phys), allocatable,        intent(out) :: slc_inc_out(:, :, :, :)  !1:im, jbeg:jend, 1:km)
 
    integer  :: i, it  !j, k, l, npz, 
    logical  :: exists
@@ -1010,7 +1010,7 @@ end subroutine calculate_landinc_mask
       real(kind=kind_phys), intent(out):: var_arr(dim_len)
       integer :: errflg
       character(len=*) :: errmsg_out
-      integer :: varid
+      integer :: varid, status
 
       !Errors messages handled through CCPP error handling variables
       errmsg_out = ''
