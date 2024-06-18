@@ -15,8 +15,8 @@
     
     ! Land IAU increments for soil temperature (can also do soil moisture increments if needed)
     use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type,   &
-                            land_iau_mod_set_control, land_iau_mod_init, 
-                            land_iau_mod_getiauforcing, land_iau_mod_finalize, &
+                            land_iau_mod_set_control, land_iau_mod_init,          &
+                            land_iau_mod_getiauforcing, land_iau_mod_finalize,    &
                             calculate_landinc_mask
 
     implicit none
@@ -212,10 +212,10 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
   integer                       :: soiltype, n_stc
   real                          :: slc_new
 
-  integer                  :: i, l, jj, k, ib
+  integer                  :: i, j, ij, l, k, ib
   integer                  :: lensfc
   
-  real (kind=kind_phys), dimension(max_soiltyp)  :: maxsmc, bb, satpsi
+  ! real (kind=kind_phys), dimension(max_soiltyp)  :: maxsmc, bb, satpsi
   ! real, dimension(30)      :: maxsmc, bb, satpsi
   real, parameter          :: tfreez=273.16 !< con_t0c  in physcons
   real, parameter          :: hfus=0.3336e06 !< latent heat of fusion(j/kg)
@@ -262,7 +262,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     ! local variable to copy blocked data Land_IAU_Data%stc_inc
     allocate(stc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
     ! allocate(slc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
-    allocate(stc_updated(Land_IAU_Control%nx * Land_IAU_Control%ny, km)) 
+    allocate(stc_updated(Land_IAU_Control%nx * Land_IAU_Control%ny)) 
     stc_updated = 0
     ib = 1
     do j = 1, Land_IAU_Control%ny  !ny 
@@ -330,13 +330,13 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     ! enddo
     deallocate(stc_inc_flat)  !, slc_inc_flat)   !, tmp2m_inc_flat,spfh2m_inc_flat)
 
-    ! add (consistency) adjustments for updated soil temp and moisture
+! (consistency) adjustments for updated soil temp and moisture
 
     ! call set_soilveg_noahmp(isot, ivegsrc, maxsmc, bb, satpsi, errflg)
     call read_mp_table_parameters(errmsg, errflg)       
-    maxsmc(1:slcats) = smcmax_table(1:slcats)  
-    bb(1:slcats) = bexp_table(1:slcats)  
-    satpsi(1:slcats) = psisat_table(1:slcats) 
+    ! maxsmc(1:slcats) = smcmax_table(1:slcats)  
+    ! bb(1:slcats) = bexp_table(1:slcats)  
+    ! satpsi(1:slcats) = psisat_table(1:slcats) 
      
     if (errflg .ne. 0) then
           print *, 'FATAL ERROR in noahmpdrv_timestep_init: problem in set_soilveg_noahmp'
@@ -367,7 +367,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     enddo    
      
     deallocate(stc_updated)  
-    allocate(mask_tile)
+    deallocate(mask_tile)
 
     write(*,'(a,i2)') ' statistics of grids with stc/smc updates for rank : ', Land_IAU_Control%me
     write(*,'(a,i8)') ' soil grid total', lensfc
