@@ -140,7 +140,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
   
    NAMELIST /lnd_iau_nml/ do_land_iau, land_iau_delthrs, land_iau_inc_files, land_iau_fhrs, land_iau_gaussian_inc_file,   &
                         land_iau_filter_increments, &  
-                        lsoil_incr,                                       
+                        lsoil_incr                                       
    
    !Errors messages handled through CCPP error handling variables
    errmsg = ''
@@ -359,6 +359,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, xlon, xlat, errms
          jend = max(jend, j1+1)
       enddo
    enddo
+   print*, "proc ", Land_IAU_Control%me, " im ", im, " jbeg jend ", jbeg, jend
    
    if (Land_IAU_Control%gaussian_inc_file) then 
       !set up interpolation weights to go from GSI's gaussian grid to cubed sphere
