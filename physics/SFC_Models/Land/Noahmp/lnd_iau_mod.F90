@@ -133,14 +133,14 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    logical               :: do_land_iau               = .false.
    real(kind=kind_phys)  :: land_iau_delthrs              = 0           !< iau time interval (to scale increments)
    character(len=240)    :: land_iau_inc_files(7)         = ''          !< list of increment files
-   real(kind=kind_phys)  :: land_iaufhrs(7)               = -1          !< forecast hours associated with increment files
+   real(kind=kind_phys)  :: land_iau_fhrs(7)               = -1          !< forecast hours associated with increment files
    logical               :: land_iau_filter_increments    = .false.     !< filter IAU increments
-   logical               :: gaussian_inc_file             = .false.
+   logical               :: land_iau_gaussian_inc_file             = .false.
    integer               :: lsoil_incr = 4
   
-   NAMELIST /lnd_iau_nml/ do_land_iau, land_iau_delthrs, land_iau_inc_files, land_iaufhrs, &
-                        land_iau_filter_increments, &  !, lnd_iau_drymassfixer   
-                        lsoil_incr, gaussian_inc_file                                      
+   NAMELIST /lnd_iau_nml/ do_land_iau, land_iau_delthrs, land_iau_inc_files, land_iau_fhrs, land_iau_gaussian_inc_file,   &
+                        land_iau_filter_increments, &  
+                        lsoil_incr,                                       
    
    !Errors messages handled through CCPP error handling variables
    errmsg = ''
@@ -190,9 +190,9 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    Land_IAU_Control%do_land_iau = do_land_iau
    Land_IAU_Control%iau_delthrs = land_iau_delthrs
    Land_IAU_Control%iau_inc_files = land_iau_inc_files
-   Land_IAU_Control%iaufhrs = land_iaufhrs   
+   Land_IAU_Control%iaufhrs = land_iau_fhrs   
    Land_IAU_Control%iau_filter_increments = land_iau_filter_increments
-   ! Land_IAU_Control%iau_drymassfixer = lnd_iau_drymassfixer
+   Land_IAU_Control%gaussian_inc_file = land_iau_gaussian_inc_file
    Land_IAU_Control%lsoil_incr = lsoil_incr
 
    Land_IAU_Control%me = me
@@ -210,7 +210,6 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
 
    Land_IAU_Control%input_nml_file = input_nml_file
    Land_IAU_Control%input_nml_file_length = input_nml_file_length
-   Land_IAU_Control%gaussian_inc_file = gaussian_inc_file
 
    allocate(Land_IAU_Control%blksz(nblks))
    allocate(Land_IAU_Control%blk_strt_indx(nblks))
