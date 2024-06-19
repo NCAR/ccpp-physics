@@ -33,7 +33,7 @@ module land_iau_mod
   integer,allocatable,dimension(:,:) :: id1,id2,jdc
 
   real(kind=kind_phys) :: deg2rad,dt,rdt
-  integer :: im,jm,km,nfiles,ncid
+  integer :: im, jm, km, nfiles, ntimes, ncid
   integer:: jbeg, jend
 
   integer :: n_soill, n_snowl              !soil and snow layers
@@ -242,7 +242,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, xlon, xlat, errms
    integer:: ib, i, j, k, nstep, kstep
    integer:: i1, i2, j1
    logical:: found
-   integer nfilesall
+   integer nfilesall, ntimesall
    integer, allocatable :: idt(:)
    real (kind=kind_phys), allocatable :: Init_parm_xlon (:, :)   
    real (kind=kind_phys), allocatable :: Init_parm_xlat (:, :)   
@@ -286,40 +286,6 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, xlon, xlat, errms
    allocate(jdc(is:ie,js:je))
    allocate(agrid(is:ie,js:je,2))
 
-! determine number of increment files to read, and the valid forecast hours
-   nfilesall = size(Land_IAU_Control%iau_inc_files)
-   nfiles = 0
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print*,'in land_iau_init incfile1 iaufhr1 ', &
-                                 trim(Land_IAU_Control%iau_inc_files(1)),Land_IAU_Control%iaufhrs(1)
-   do k=1,nfilesall
-      if (trim(Land_IAU_Control%iau_inc_files(k)) .eq. '' .or. Land_IAU_Control%iaufhrs(k) .lt. 0) exit   
-      if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then
-         print *,k, " ", trim(adjustl(Land_IAU_Control%iau_inc_files(k)))
-      endif
-      nfiles = nfiles + 1
-   enddo
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'nfiles = ',nfiles
-   if (nfiles < 1) then
-      return
-   endif
-   if (nfiles > 1) then
-      allocate(idt(nfiles-1))
-      idt = Land_IAU_Control%iaufhrs(2:nfiles)-Land_IAU_Control%iaufhrs(1:nfiles-1)
-      do k=1,nfiles-1
-         if (idt(k) .ne. Land_IAU_Control%iaufhrs(2)-Land_IAU_Control%iaufhrs(1)) then
-           print *,'in land_iau_init: forecast intervals in iaufhrs must be constant'
-         !   call mpp_error (FATAL,' forecast intervals in iaufhrs must be constant')
-           errmsg = 'Fatal error in land_iau_init. forecast intervals in iaufhrs must be constant'
-           errflg = 1
-           return
-         endif
-      enddo
-      deallocate(idt)
-   endif
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'land_iau interval = ',Land_IAU_Control%iau_delthrs,' hours'
-   dt = (Land_IAU_Control%iau_delthrs*3600.)
-   rdt = 1.0/dt
-
    allocate(Land_IAU_Data%stc_inc(is:ie, js:je, km))
    allocate(Land_IAU_Data%slc_inc(is:ie, js:je, km))
 ! allocate arrays that will hold iau state
@@ -348,20 +314,41 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, xlon, xlat, errms
       enddo
       Land_IAU_state%wt_normfact = (2*nstep+1)/normfact
    endif
-
-   ! Find bounding latitudes:
-   jbeg = jm-1
-   jend = 2
-   do j=js,je
-      do i=is,ie
-            j1 = jdc(i,j)
-         jbeg = min(jbeg, j1)
-         jend = max(jend, j1+1)
-      enddo
-   enddo
-   print*, "proc ", Land_IAU_Control%me, " im ", im, " jbeg jend ", jbeg, jend
    
-   if (Land_IAU_Control%gaussian_inc_file) then 
+   if (Land_IAU_Control%gaussian_inc_file) then
+      ! determine number of increment files to read, and the valid forecast hours
+      nfilesall = size(Land_IAU_Control%iau_inc_files)
+      nfiles = 0
+      if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print*,'in land_iau_init incfile1 iaufhr1 ', &
+                                    trim(Land_IAU_Control%iau_inc_files(1)),Land_IAU_Control%iaufhrs(1)
+      do k=1,nfilesall
+         if (trim(Land_IAU_Control%iau_inc_files(k)) .eq. '' .or. Land_IAU_Control%iaufhrs(k) .lt. 0) exit
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then
+            print *,k, " ", trim(adjustl(Land_IAU_Control%iau_inc_files(k)))
+         endif
+         nfiles = nfiles + 1
+      enddo
+      if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'nfiles = ',nfiles
+      if (nfiles < 1) then
+         return
+      endif
+      if (nfiles > 1) then
+         allocate(idt(nfiles-1))
+         idt = Land_IAU_Control%iaufhrs(2:nfiles)-Land_IAU_Control%iaufhrs(1:nfiles-1)
+         do k=1,nfiles-1
+            if (idt(k) .ne. Land_IAU_Control%iaufhrs(2)-Land_IAU_Control%iaufhrs(1)) then
+              print *,'in land_iau_init: forecast intervals in iaufhrs must be constant'
+            !   call mpp_error (FATAL,' forecast intervals in iaufhrs must be constant')
+              errmsg = 'Fatal error in land_iau_init. forecast intervals in iaufhrs must be constant'
+              errflg = 1
+              return
+            endif
+         enddo
+         deallocate(idt)
+      endif
+      if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'land_iau interval = ',Land_IAU_Control%iau_delthrs,' hours'
+      dt = (Land_IAU_Control%iau_delthrs*3600.)
+      rdt = 1.0/dt 
       !set up interpolation weights to go from GSI's gaussian grid to cubed sphere
       deg2rad = pi/180.
       !  npz = Land_IAU_Control%levs
@@ -411,6 +398,18 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, xlon, xlat, errms
       call remap_coef( is, ie, js, je, is, ie, js, je, &
          im, jm, lon, lat, id1, id2, jdc, s2c, &
          agrid)
+      
+      ! Find bounding latitudes:
+      jbeg = jm-1
+      jend = 2
+      do j=js,je
+         do i=is,ie
+               j1 = jdc(i,j)
+            jbeg = min(jbeg, j1)
+            jend = max(jend, j1+1)
+         enddo
+      enddo
+      print*, "proc ", Land_IAU_Control%me, " im ", im, " jbeg jend ", jbeg, jend
 
       if (allocated(lon)) deallocate (lon)
       if (allocated(lat)) deallocate (lat)
@@ -439,6 +438,46 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, xlon, xlat, errms
          call interp_inc_at_timestep(Land_IAU_Control, km, wk3_slc(2, :, :, :), Land_IAU_state%inc2%slc_inc, errmsg, errflg)
       endif
    else   ! increment files in fv3 tiles 
+      if (trim(Land_IAU_Control%iau_inc_files(1)) .eq. '' .or. Land_IAU_Control%iaufhrs(1) .lt. 0) then ! only 1 file expected
+         print*, "warning! in Land IAU but increment file name is empty or iaufhrs(1) is negative"
+         return   
+      endif    
+      if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then
+         print *,"increment file ", trim(adjustl(Land_IAU_Control%iau_inc_files(1)))
+      endif
+
+      ! determine number of increment files to read, and the valid forecast hours
+      ntimesall = size(Land_IAU_Control%iaufhrs)
+      ntimes = 0
+      do k=1,ntimesall
+         if (Land_IAU_Control%iaufhrs(k) .lt. 0) exit
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then
+            print *,k, " fhour ", Land_IAU_Control%iaufhrs(k)
+         endif
+         ntimes = ntimes + 1
+      enddo
+      if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'ntimes = ',ntimes
+      if (ntimes < 1) then
+         return
+      endif
+      if (ntimes > 1) then
+         allocate(idt(ntimes-1))
+         idt = Land_IAU_Control%iaufhrs(2:ntimes)-Land_IAU_Control%iaufhrs(1:ntimes-1)
+         do k=1,ntimes-1
+            if (idt(k) .ne. Land_IAU_Control%iaufhrs(2)-Land_IAU_Control%iaufhrs(1)) then
+              print *,'in land_iau_init: forecast intervals in iaufhrs must be constant'
+            !   call mpp_error (FATAL,' forecast intervals in iaufhrs must be constant')
+              errmsg = 'Fatal error in land_iau_init. forecast intervals in iaufhrs must be constant'
+              errflg = 1
+              return
+            endif
+         enddo
+         deallocate(idt)
+      endif
+      if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'land_iau interval = ',Land_IAU_Control%iau_delthrs,' hours'
+      dt = (Land_IAU_Control%iau_delthrs*3600.)
+      rdt = 1.0/dt
+
       ! Read all increment files at iau init time (at beginning of cycle) and interpolate to target grid
       ! allocate (wk3_stc(n_t, 1:im,jbeg:jend, 1:km))
       ! allocate (wk3_slc(n_t, 1:im,jbeg:jend, 1:km))   
