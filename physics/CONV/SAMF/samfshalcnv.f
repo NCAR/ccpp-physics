@@ -2405,7 +2405,10 @@ c
           if (cnvflg(i)) then
             if (k >= kbcon(i) .and. k < ktcon(i)) then
               cnvw(i,k) = cnvwt(i,k) * xmb(i) * dt2
-            endif
+              tem=max(sigmaout(i,k),0.)
+              tem1=min(tem,1.0)
+              cnvw(i,k)=cnvw(i,k)*tem1
+           endif
           endif
         enddo
       enddo
