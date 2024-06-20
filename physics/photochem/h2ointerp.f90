@@ -6,7 +6,7 @@
 !> This module contains subroutines of reading and interpolating
 !! h2o coefficients.
 module h2ointerp
-
+   use w3emc, only: w3doxdat, w3kind, w3movdat
    implicit none
 
    private

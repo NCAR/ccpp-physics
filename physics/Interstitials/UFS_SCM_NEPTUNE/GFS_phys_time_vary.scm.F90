@@ -7,6 +7,8 @@
 !> @{
    module GFS_phys_time_vary
 
+      use w3emc, only: w3doxdat, w3kind, w3movdat
+
       use machine, only : kind_phys, kind_dbl_prec, kind_sngl_prec
 
       use mersenne_twister, only: random_setseed, random_number
