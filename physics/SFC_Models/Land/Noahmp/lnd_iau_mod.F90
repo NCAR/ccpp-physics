@@ -79,8 +79,8 @@ module land_iau_mod
       character(len=:), pointer, dimension(:) :: input_nml_file => null() !<character string containing full namelist
                                                                           !< for use with internal file reads
       integer              :: input_nml_file_length    !<length (number of lines) in namelist for internal reads
-      logical              :: gaussian_inc_file   ! if true increment in gaussian grids
-                              !  else fv3
+
+      integer              :: ntimes
 
   end type land_iau_control_type
 
@@ -179,7 +179,6 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    Land_IAU_Control%iau_inc_files = land_iau_inc_files
    Land_IAU_Control%iaufhrs = land_iau_fhrs   
    Land_IAU_Control%iau_filter_increments = land_iau_filter_increments
-   Land_IAU_Control%gaussian_inc_file = land_iau_gaussian_inc_file
    Land_IAU_Control%lsoil_incr = lsoil_incr
 
    Land_IAU_Control%me = me
@@ -308,6 +307,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
       ntimes = ntimes + 1
    enddo
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'ntimes = ',ntimes
+   Land_IAU_Control%ntimes = ntimes
    if (ntimes < 1) then
       return
    endif
@@ -340,10 +340,10 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    Land_IAU_state%inc1%stc_inc(:, :, :) = wk3_stc(1, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
    Land_IAU_state%inc1%slc_inc(:, :, :) = wk3_slc(1, :, :, :) 
 
-   if (nfiles.EQ.1) then  ! only need to get incrments once since constant forcing over window
+   if (ntimes.EQ.1) then  ! only need to get incrments once since constant forcing over window
       call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state%rdt, Land_IAU_state%wt)
    endif
-   if (nfiles.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them
+   if (ntimes.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them
       allocate (Land_IAU_state%inc2%stc_inc(is:ie, js:je, km))
       allocate (Land_IAU_state%inc2%slc_inc(is:ie, js:je, km))      
       Land_IAU_state%hr2=Land_IAU_Control%iaufhrs(2)   
@@ -387,13 +387,16 @@ end subroutine land_iau_mod_finalize
    integer,                              intent(out) :: errflg
    real(kind=kind_phys) t1,t2,sx,wx,wt,dtp
    integer n,i,j,k,kstep,nstep,itnext
+   integer :: ntimes
+
+   ntimes = Land_IAU_Control%ntimes
 
    Land_IAU_Data%in_interval=.false.
-   if (nfiles.LE.0) then
+   if (ntimes.LE.0) then
        return
    endif
 
-   if (nfiles .eq. 1) then 
+   if (ntimes .eq. 1) then 
        t1 = Land_IAU_Control%iaufhrs(1)-0.5*Land_IAU_Control%iau_delthrs
        t2 = Land_IAU_Control%iaufhrs(1)+0.5*Land_IAU_Control%iau_delthrs
    else
@@ -425,7 +428,7 @@ end subroutine land_iau_mod_finalize
       endif
    endif
 
-   if (nfiles.EQ.1) then
+   if (ntimes.EQ.1) then
       !  check to see if we are in the IAU window,  
       ! no need to update the states since they are fixed over the window
       if ( Land_IAU_Control%fhour < t1 .or. Land_IAU_Control%fhour >= t2 ) then
@@ -439,7 +442,7 @@ end subroutine land_iau_mod_finalize
       return
    endif
 
-   if (nfiles > 1) then
+   if (ntimes > 1) then
       itnext=2
       if (Land_IAU_Control%fhour < t1 .or. Land_IAU_Control%fhour >= t2) then
 !         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'no iau forcing',Land_IAU_Control%iaufhrs(1),Land_IAU_Control%fhour,Land_IAU_Control%iaufhrs(nfiles)
@@ -447,7 +450,7 @@ end subroutine land_iau_mod_finalize
       else
          if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'apply lnd iau forcing t1,t,t2,filter wt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_state%wt/Land_IAU_state%wt_normfact
          Land_IAU_Data%in_interval=.true.
-         do k=nfiles, 1, -1
+         do k=ntimes, 1, -1
             if (Land_IAU_Control%iaufhrs(k) > Land_IAU_Control%fhour) then
                itnext=k
             endif
@@ -462,7 +465,6 @@ end subroutine land_iau_mod_finalize
             if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'copying next lnd iau increment ', itnext  !trim(Land_IAU_Control%iau_inc_files(itnext))
             Land_IAU_state%inc2%stc_inc(:, :, :) = wk3_stc(itnext, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
             Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(itnext, :, :, :) 
-            endif
          endif
          call updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state%rdt, Land_IAU_state%wt)
       endif
@@ -477,7 +479,7 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, rdt, wt)
    type(land_iau_external_data_type),  intent(inout) :: Land_IAU_Data
    real(kind=kind_phys) delt, rdt, wt
    integer i,j,k
-   integer :: is,  ie,  js,  je
+   integer :: is,  ie,  js,  je, npz
    
    is  = Land_IAU_Control%isc
    ie  = is + Land_IAU_Control%nx-1
@@ -504,7 +506,7 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, rdt, wt)
    type(land_iau_external_data_type),  intent(inout) :: Land_IAU_Data
    real(kind=kind_phys) delt, rdt,wt
    integer i, j, k
-   integer :: is,  ie,  js,  je
+   integer :: is,  ie,  js,  je, npz
    
    is  = Land_IAU_Control%isc
    ie  = is + Land_IAU_Control%nx-1
@@ -533,7 +535,7 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, stc_inc_out, slc_inc_out, errm
    real(kind=kind_phys), allocatable,        intent(out) :: stc_inc_out(:, :, :, :)  !1:im, jbeg:jend, 1:km)
    real(kind=kind_phys), allocatable,        intent(out) :: slc_inc_out(:, :, :, :)  !1:im, jbeg:jend, 1:km)
 
-   integer  :: i, it  !j, k, l, npz, 
+   integer  :: i, it, km  !j, k, l, npz, 
    logical  :: exists
    integer  :: ncid, status, varid
    integer  :: ierr
@@ -548,6 +550,8 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, stc_inc_out, slc_inc_out, errm
    !Errors messages handled through CCPP error handling variables
    errmsg = ''
    errflg = 0
+
+   km = Land_IAU_Control%lsoil
 
    write(tile_str, '(I0)') Land_IAU_Control%tile_num
 
