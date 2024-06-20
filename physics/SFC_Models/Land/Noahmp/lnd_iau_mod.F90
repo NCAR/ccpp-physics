@@ -214,7 +214,7 @@ end subroutine land_iau_mod_set_control
 
 subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)     !nlunit, ncols, IPD_Data,,Init_parm)
    ! integer,                              intent(in) :: me, mpi_root
-   type (land_iau_control_type),          intent(in) :: Land_IAU_Control
+   type (land_iau_control_type),          intent(inout) :: Land_IAU_Control
    type (land_iau_external_data_type), intent(inout) :: Land_IAU_Data  
    ! real(kind=kind_phys), dimension(:),   intent(in)  :: xlon    ! longitude  !GFS_Data(cdata%blk_no)%Grid%xlon
    ! real(kind=kind_phys), dimension(:),   intent(in)  :: xlat    ! latitude
@@ -401,7 +401,7 @@ end subroutine land_iau_mod_finalize
        t2 = Land_IAU_Control%iaufhrs(1)+0.5*Land_IAU_Control%iau_delthrs
    else
        t1 = Land_IAU_Control%iaufhrs(1)
-       t2 = Land_IAU_Control%iaufhrs(nfiles)
+       t2 = Land_IAU_Control%iaufhrs(ntimes)
    endif
    if (Land_IAU_Control%iau_filter_increments) then
       ! compute increment filter weight
