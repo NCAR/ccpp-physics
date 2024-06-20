@@ -12,17 +12,17 @@ The RRFS_v1beta suite uses the parameterizations in the following order:
  - \ref SGSCLOUD_page
  - \ref GFS_RRTMG_page
  - \ref SFC_MYNNSFL
- - \ref GFS_NSST
- - \ref NoahMP
- - \ref GFS_SFCSICE
+ - \ref RUCLSM
+ - \ref CLM_LAKE_model
  - \ref MYNNEDMF
- - \ref GFS_UGWP_v0
- - \ref GFS_OZPHYS
+ - smokedust
+ - \ref GFS_drag_suite
  - \ref GFS_H2OPHYS
+ - \ref CU_GF 
  - \ref THOMPSON
 
 \section sdf_rrfsv1suite Suite Definition File 
-\include suite_FV3_RRFS_v1.xml
+\include suite_SCM_RRFS_v1.xml
 
 \section rrfs_nml_option Namelist 
 - General physics options

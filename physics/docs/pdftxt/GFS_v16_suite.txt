@@ -25,7 +25,7 @@ National Centers for Environmental Prediction (NCEP) in 2021. The GFS_v16 suite 
 
 \section gfs16_nml_opt_des Namelist 
 \ref GFDL_cloud namelist options 
-\snippet RE7/input_GFS_v16.nml GFDL_CLOUD_MP_NML
+\snippet RE7/input_GFS_v16.nml GFDL_CLOUD_MICROPHYSICS_NML
 Other namelist options
 \snippet RE7/input_GFS_v16.nml GFS_PHYSICS_NML
 

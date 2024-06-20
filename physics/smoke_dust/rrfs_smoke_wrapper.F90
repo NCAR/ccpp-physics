@@ -36,7 +36,6 @@
 contains
 
 !>\defgroup rrfs_smoke_wrapper rrfs-sd emission driver Module
-!> \ingroup gsd_chem_group
 !! This is the rrfs-sd emission driver Module
 
 !> \section arg_table_rrfs_smoke_wrapper_init Argument Table

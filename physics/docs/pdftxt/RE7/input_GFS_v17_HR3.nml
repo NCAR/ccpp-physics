@@ -1,3 +1,4 @@
+!>[GFS_PHYSICS_NML]
 &gfs_physics_nml
   fhzero       = 6
   h2o_phys     = .true.
@@ -134,7 +135,9 @@
   nspinup      = 1
   iseed_ca     = 1448371824
 /
+!! [GFS_PHYSICS_NML]
 
+!>[CIRES_UGWP_NML]
 &cires_ugwp_nml
   knob_ugwp_solver   = 2
   knob_ugwp_version  = 1
@@ -157,6 +160,7 @@
   knob_ugwp_lhmet    = 200.0e3
   knob_ugwp_orosolv  = 'pss-1986'
 /
+!! [CIRES_UGWP_NML]
 
 &ccpp_suite_sim_nml
     suite_sim_file    = ''

@@ -1,3 +1,4 @@
+!> [GFS_PHYSICS_NML]
 &gfs_physics_nml
     bl_mynn_edmf = 1
     bl_mynn_edmf_mom = 1
@@ -84,7 +85,9 @@
     ttendlim = -999
     use_ufo = .true.
 /
+!! [GFS_PHYSICS_NML]
 
+!>[CIRES_UGWP_NML]
 &cires_ugwp_nml
     knob_ugwp_azdir = 2, 4, 4, 4
     knob_ugwp_doaxyz = 1
@@ -99,3 +102,4 @@
     knob_ugwp_wvspec = 1, 25, 25, 25
     launch_level = 25
 /
+!![CIRES_UGWP_NML]

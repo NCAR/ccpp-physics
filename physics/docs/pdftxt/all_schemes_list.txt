@@ -76,10 +76,9 @@ to the parameterization.
 
 \section allsuite_overview Physics Suites
 
-There are two publicly supported host models that use CCPP v7: the UFS Weather Model and the CCPP Single Column Model (SCM). 
-The UFS Weather Model is included in the UFS Short Range Weather Application (SRW App) v2.
-The forcing datasets included in the CCPP SCM v6.0.0 public release were created by averaging observations and large-eddy simulations over areas that are
-too coarse to resolve convection. Therefore, best results will be obtained with the CCPP SCM v6.0 when using suites that include parameterized
+The publicly supported host model that use CCPP v7.0.0 is the UFS Weather Model and the CCPP Single Column Model (CCPP-SCM). 
+The forcing datasets included in the CCPP-SCM v7.0.0 public release were created by averaging observations and large-eddy simulations over areas that are
+too coarse to resolve convection. Therefore, best results will be obtained with the CCPP-SCM v7.0.0 when using suites that include parameterized
 convection.
 
 Table 1.  Physics suites and primary schemes supported in CCPP v7.0.0  

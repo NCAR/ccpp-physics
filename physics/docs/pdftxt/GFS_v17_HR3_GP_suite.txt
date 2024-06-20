@@ -1,7 +1,7 @@
 /**
 \page GFS_v17_HR3_RRTMGP_page GFS_v17_RRTMGP Suite 
 
-\section gfsv_17_suite_overview Overview
+\section gfsv_17HR3_GP_suite_overview Overview
 
 Version 17 of the Global Forecast System (GFS) is scheduled for operational implementation by the NOAA
 National Centers for Environmental Prediction (NCEP) in 2024. The GFS_v17 suite is a prototype of 
@@ -27,10 +27,10 @@ The GFS_v17 suite uses the parameterizations in the following order:
  - \ref THOMPSON
 
 
-\section sdf_gfsv17p8 Suite Definition File 
+\section sdf_gfsv17HR3GP Suite Definition File 
 \include suite_SCM_GFS_v17_HR3_RRTMGP.xml
 
-\section gfs17_nml_opt_des Namelist 
+\section gfs17HR3GP_nml_opt_des Namelist 
 - General physics options
 \snippet input_GFS_v17_HR3_RRTMGP.nml GFS_PHYSICS_NML
 - \ref GFS_UNIFIED_UGWP related options
