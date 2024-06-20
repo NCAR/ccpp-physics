@@ -213,12 +213,12 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
 
 end subroutine land_iau_mod_set_control
 
-subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, xlon, xlat, errmsg, errflg)     !nlunit, ncols, IPD_Data,,Init_parm)
+subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)     !nlunit, ncols, IPD_Data,,Init_parm)
    ! integer,                              intent(in) :: me, mpi_root
    type (land_iau_control_type),          intent(in) :: Land_IAU_Control
    type (land_iau_external_data_type), intent(inout) :: Land_IAU_Data  
-   real(kind=kind_phys), dimension(:),   intent(in)  :: xlon    ! longitude  !GFS_Data(cdata%blk_no)%Grid%xlon
-   real(kind=kind_phys), dimension(:),   intent(in)  :: xlat    ! latitude
+   ! real(kind=kind_phys), dimension(:),   intent(in)  :: xlon    ! longitude  !GFS_Data(cdata%blk_no)%Grid%xlon
+   ! real(kind=kind_phys), dimension(:),   intent(in)  :: xlat    ! latitude
    character(len=*),                     intent(out) :: errmsg
    integer,                              intent(out) :: errflg
 

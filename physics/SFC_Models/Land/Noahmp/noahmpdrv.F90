@@ -142,7 +142,7 @@
           me, mpi_root, isc,jsc, nx, ny, tile_num, nblks, blksz,  &
           lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)
     ! Initialize IAU for land
-    call land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, xlon, xlat, errmsg, errflg)
+    call land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  !  xlon, xlat, errmsg, errflg)
 
   end subroutine noahmpdrv_init
 
