@@ -12,6 +12,8 @@
 
       use machine, only : kind_phys, kind_dbl_prec, kind_sngl_prec
 
+      use w3emc, only : w3movdat
+
       use mersenne_twister, only: random_setseed, random_number
 
       use module_ozphys, only: ty_ozphys
@@ -458,7 +460,7 @@
 !$OMP          shared(isbarren_table,isice_table,isurban_table)         &
 !$omp          shared(iswater_table,laim_table,sla_table,bexp_table)    &
 !$omp          shared(stc,smc,slc,tg3,snowxy,tsnoxy,snicexy,snliqxy)    &
-!$omp          shared(zsnsoxy,stype,smcmax_table,smcwlt_table,zs,dzs)   & 
+!$omp          shared(zsnsoxy,stype,smcmax_table,smcwlt_table,zs,dzs)   &
 !$omp          shared(dwsat_table,dksat_table,psisat_table,smoiseq)     &
 !$OMP          shared(smcwtdxy,deeprechxy,rechxy,errmsg,errflg)         &
 !$OMP          private(vegtyp,masslai,masssai,snd,dzsno,dzsnso,isnow)   &

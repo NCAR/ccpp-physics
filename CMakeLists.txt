@@ -167,8 +167,10 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" AND ${CMAKE_Fortran_COMPILER_ID} STREQUAL
 endif()
 
 #------------------------------------------------------------------------------
+set(LOCAL_W3EMC
+  ${LOCAL_CURRENT_SOURCE_DIR}/physics/tools/w3emc.F90)
 
-add_library(ccpp_physics STATIC ${SCHEMES} ${SCHEMES_OPENMP_OFF} ${SCHEMES_DYNAMICS} ${CAPS})
+add_library(ccpp_physics STATIC ${LOCAL_W3EMC} ${SCHEMES} ${SCHEMES_OPENMP_OFF} ${SCHEMES_DYNAMICS} ${CAPS})
 # Generate list of Fortran modules from defined sources
 foreach(source_f90 ${CAPS})
     get_filename_component(tmp_source_f90 ${source_f90} NAME)
