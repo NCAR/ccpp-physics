@@ -1,9 +1,5 @@
-! ###########################################################################################
 !> \file rrtmgp_lw_main.F90
-!!
-!> \defgroup rrtmgp_lw_main rrtmgp_lw_main.F90
-!!
-!! \brief This module contains the longwave RRTMGP radiation scheme.
+!! This file contains the longwave RRTMGP radiation scheme.
 !!
 ! ###########################################################################################
 module rrtmgp_lw_main
@@ -29,7 +25,6 @@ module rrtmgp_lw_main
 
   public rrtmgp_lw_main_init, rrtmgp_lw_main_run
 contains
-  ! #########################################################################################
 !! \section arg_table_rrtmgp_lw_main_init
 !! \htmlinclude rrtmgp_lw_main_int.html
 !!
@@ -39,7 +34,6 @@ contains
 !!
 !! \section rrtmgp_lw_main_init
 !> @{
-  ! #########################################################################################
   subroutine rrtmgp_lw_main_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, rrtmgp_lw_file_clouds,&
        active_gases_array, doGP_cldoptics_PADE, doGP_cldoptics_LUT, doGP_sgs_pbl,           &
        doGP_sgs_cnv, nrghice, mpicomm, mpirank, mpiroot, nLay, rrtmgp_phys_blksz,           &

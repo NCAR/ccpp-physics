@@ -351,11 +351,11 @@ CONTAINS
 
 ! ==================================================================
 !>\ingroup gp_mynnedmf
-!! This subroutine is the GSD MYNN-EDNF PBL driver routine,which
+!! This subroutine is the MYNN-EDNF PBL driver routine,which
 !! encompassed the majority of the subroutines that comprise the 
 !! procedures that ultimately solve for tendencies of 
 !! \f$U, V, \theta, q_v, q_c, and q_i\f$.
-!!\section gen_mynn_bl_driver GSD mynn_bl_driver General Algorithm
+!!\section gen_mynn_bl_driver  mynn_bl_driver General Algorithm
 !> @{
   SUBROUTINE mynn_bl_driver(            &
        &initflag,restart,cycling,       &
@@ -1508,7 +1508,7 @@ CONTAINS
 !>\ingroup gp_mynnedmf
 !! This subroutine initializes the mixing length, TKE, \f$\theta^{'2}\f$,
 !! \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$.
-!!\section gen_mym_ini GSD MYNN-EDMF mym_initialize General Algorithm 
+!!\section gen_mym_ini  MYNN-EDMF mym_initialize General Algorithm 
 !> @{
   SUBROUTINE  mym_initialize (                                & 
        &            kts,kte,xland,                            &
@@ -1712,7 +1712,7 @@ CONTAINS
 !!\param gh      \f$G_H\f$ divided by \f$L^{2}/q^{2}\f$ (\f$s^{-2}\f$)
 !!\param sm      stability function for momentum, at Level 2
 !!\param sh      stability function for heat, at Level 2
-!!\section gen_mym_level2 GSD MYNN-EDMF mym_level2 General Algorithm
+!!\section gen_mym_level2  MYNN-EDMF mym_level2 General Algorithm
 !! @ {
   SUBROUTINE  mym_level2 (kts,kte,                &
        &            dz,                           &
@@ -2599,7 +2599,7 @@ CONTAINS
 !>\ingroup gp_mynnedmf
 !! This subroutine calculates the vertical diffusivity coefficients and the 
 !! production terms for the turbulent quantities.      
-!>\section gen_mym_turbulence GSD mym_turbulence General Algorithm
+!>\section gen_mym_turbulence  mym_turbulence General Algorithm
 !! Two subroutines mym_level2() and mym_length() are called within this
 !!subrouine to collect variable to carry out successive calculations:
 !! - mym_level2() calculates the level 2 nondimensional wind shear \f$G_M\f$
@@ -5512,7 +5512,7 @@ ENDIF
 !!the TKE-method more during stable conditions (PBLH < 400 m).
 !!A variable tke threshold (TKEeps) is used since no hard-wired
 !!value could be found to work best in all conditions.
-!>\section gen_get_pblh  GSD get_pblh General Algorithm
+!>\section gen_get_pblh  get_pblh General Algorithm
 !> @{
   SUBROUTINE GET_PBLH(KTS,KTE,zi,thetav1D,qke1D,zw1D,dz1D,landsea,kzi)
 

@@ -9,7 +9,7 @@ This implementation of the NoahMP Land Surface Model (LSM) is adapted from the v
 - A primary reference for the NoahMP LSM is Niu et al. (2011) \cite niu_et_al_2011.
 
 \section noahmp_update CCPP Physics Updates
-\version UFS-SRW v3.0.0
+\version CCPP-SCM v7.0.0
 - As part of a larger-scale effort to unify how microphysics outputs (in particular snow) are used in the land models and outputs, an additional option for using the unified frozen precipitation fraction in NoahMP was added
 - Diagnostic 2-meter temperature and humidity are based on vegetation and bare-ground tiles
 - Bug fixes for GFS-based thermal roughness length scheme

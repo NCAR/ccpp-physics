@@ -3871,6 +3871,8 @@
 ! =================
 
 !-----------------------------
+!>   read GMAO pre-tabultaed aerosol optical data for dust, seasalt,    !
+!!   sulfate, black carbon, and organic carbon aerosols 
       subroutine rd_gocart_luts
 !.............................
 !  ---  inputs:  (in scope variables, module variables)
@@ -4073,6 +4075,10 @@
 !-----------------------------------
 
 !--------------------------------
+!>   compute mean aerosol optical properties over each sw radiation     
+!!   spectral band for each of the species components.  This program    
+!!   follows optavg routine (in turn follows gfdl's approach for thick  
+!!   cloud opertical property in sw radiation scheme (2000).           
       subroutine optavg_gocart
 !................................
 !  ---  inputs:  (in-scope variables, module variables)
@@ -4527,6 +4533,8 @@
 ! =================
 
 !--------------------------------
+!> compute aerosols optical properties in NSWLWBD bands for gocart
+!!  aerosol species
       subroutine aeropt
 !................................
 

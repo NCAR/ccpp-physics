@@ -1,3 +1,8 @@
+!>\file progsigma_calc.f90
+!! This file contains the subroutine that calculates the prognostic
+!! updraft area fraction that is used for closure computations in
+!! saSAS deep and shallow convection, based on a moisture budget
+!! as described in Bengtsson et al. 2022 \cite Bengtsson_2022.
       module progsigma
 
         implicit none
@@ -5,12 +10,6 @@
         public progsigma_calc
 
       contains
-
-!>\file progsigma_calc.f90
-!! This file contains the subroutine that calculates the prognostic
-!! updraft area fraction that is used for closure computations in 
-!! saSAS deep and shallow convection, based on a moisture budget
-!! as described in Bengtsson et al. 2022 \cite Bengtsson_2022.
 
 !>\ingroup SAMFdeep
 !>\ingroup SAMF_shal

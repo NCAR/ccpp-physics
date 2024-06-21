@@ -1,5 +1,6 @@
-! ###########################################################################################
-! ###########################################################################################
+!>\file rrtmgp_sw_main.F90
+!!
+
 module rrtmgp_sw_main
   use mpi_f08
   use machine,                only: kind_phys, kind_dbl_prec
@@ -28,7 +29,7 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_sw_main_init
   ! #########################################################################################
-!! \section arg_table_rrtmgp_sw_main_init
+!> \section arg_table_rrtmgp_sw_main_init
 !! \htmlinclude rrtmgp_sw_main_init.html
 !!
   subroutine rrtmgp_sw_main_init(rrtmgp_root_dir, rrtmgp_sw_file_gas, rrtmgp_sw_file_clouds,&
@@ -38,30 +39,30 @@ contains
 
     ! Inputs
     character(len=128),intent(in) :: &
-         rrtmgp_root_dir,       & ! RTE-RRTMGP root directory
-         rrtmgp_sw_file_clouds, & ! RRTMGP file containing K-distribution data
-         rrtmgp_sw_file_gas       ! RRTMGP file containing cloud-optics data
+         rrtmgp_root_dir,       & !< RTE-RRTMGP root directory
+         rrtmgp_sw_file_clouds, & !< RRTMGP file containing K-distribution data
+         rrtmgp_sw_file_gas       !< RRTMGP file containing cloud-optics data
     character(len=*), dimension(:), intent(in) :: &
-         active_gases_array       ! List of active gases from namelist as array)
+         active_gases_array       !< List of active gases from namelist as array)
     logical, intent(in) :: &
-         doGP_cldoptics_PADE,   & ! Use RRTMGP cloud-optics: PADE approximation?
-         doGP_cldoptics_LUT,    & ! Use RRTMGP cloud-optics: LUTs?
-         doGP_sgs_pbl,          & ! Flag to include sgs PBL clouds
-         doGP_sgs_cnv             ! Flag to include sgs convective clouds
+         doGP_cldoptics_PADE,   & !< Use RRTMGP cloud-optics: PADE approximation?
+         doGP_cldoptics_LUT,    & !< Use RRTMGP cloud-optics: LUTs?
+         doGP_sgs_pbl,          & !< Flag to include sgs PBL clouds
+         doGP_sgs_cnv             !< Flag to include sgs convective clouds
     integer, intent(inout) :: &
-         nrghice                  ! Number of ice-roughness categories
+         nrghice                  !< Number of ice-roughness categories
     type(MPI_Comm),intent(in) :: &
-         mpicomm                  ! MPI communicator
+         mpicomm                  !< MPI communicator
     integer,intent(in) :: &
-         mpirank,               & ! Current MPI rank
-         mpiroot,               & ! Master MPI rank
-         rrtmgp_phys_blksz,     & ! Number of horizontal points to process at once.
+         mpirank,               & !< Current MPI rank
+         mpiroot,               & !< Master MPI rank
+         rrtmgp_phys_blksz,     & !< Number of horizontal points to process at once.
          nLay
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg                   ! CCPP error message
+         errmsg                   !< CCPP error message
     integer,          intent(out) :: &
-         errflg                   ! CCPP error code
+         errflg                   !< CCPP error code
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -81,7 +82,7 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_sw_main_run
   ! #########################################################################################
-!! \section arg_table_rrtmgp_sw_main_run
+!> \section arg_table_rrtmgp_sw_main_run
 !! \htmlinclude rrtmgp_sw_main_run.html
 !!
   subroutine rrtmgp_sw_main_run(doSWrad, doSWclrsky, top_at_1, doGP_sgs_cnv, doGP_sgs_pbl,  &
