@@ -750,7 +750,7 @@ end subroutine calculate_landinc_mask
 
    end subroutine get_var1d
 
-   subroutine get_var3d_values(ncid, varid, is,ix, js,jx, ks,kz, var3d, status)
+   subroutine get_var3d_values(ncid, varid, is,ix, js,jy, ks,kz, var3d, status)
       integer, intent(in):: ncid, varid
       integer, intent(in):: is, ix, js, jy, ks,kz
       real(kind=kind_phys), intent(out):: var3d(ix, jy, kz)   !var3d(is:ie,js:je,ks:ke)
