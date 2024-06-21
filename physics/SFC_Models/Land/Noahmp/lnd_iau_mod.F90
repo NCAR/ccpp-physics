@@ -555,7 +555,7 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, stc_inc_out, slc_inc_out, errm
 
    write(tile_str, '(I0)') Land_IAU_Control%tile_num
 
-   fname = 'INPUT/'//trim(Land_IAU_Control%iau_inc_files(1))//".tile"//tile_str//".nc"
+   fname = 'INPUT/'//trim(Land_IAU_Control%iau_inc_files(1))//".tile"//trim(tile_str)//".nc"
    ! isc = Land_IAU_Control%isc
    ! jsc = Land_IAU_Control%jsc
    
