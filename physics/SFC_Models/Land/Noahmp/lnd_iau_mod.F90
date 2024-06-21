@@ -750,10 +750,10 @@ end subroutine calculate_landinc_mask
 
    end subroutine get_var1d
 
-   subroutine get_var3d_values(ncid, varid, is,ie, js,je, ks,ke, var3d, status)
+   subroutine get_var3d_values(ncid, varid, is,ix, js,jx, ks,kz, var3d, status)
       integer, intent(in):: ncid, varid
-      integer, intent(in):: is, ie, js, je, ks,ke
-      real(kind=kind_phys), intent(out):: var3d(is:ie,js:je,ks:ke)
+      integer, intent(in):: is, ix, js, jy, ks,kz
+      real(kind=kind_phys), intent(out):: var3d(ix, jy, kz)   !var3d(is:ie,js:je,ks:ke)
       integer, intent(out):: status 
       ! integer, dimension(3):: start, nreco
       ! start(1) = is; start(2) = js; start(3) = ks
@@ -762,7 +762,8 @@ end subroutine calculate_landinc_mask
       ! nreco(3) = ke - ks + 1
 
       status = nf90_get_var(ncid, varid, var3d, &  !start = start, count = nreco)
-               start = (/is, js, ks/), count = (/ie - is + 1, je - js + 1, ke - ks + 1/))
+               start = (/is, js, ks/), count = (/ix, jy, kz/))
+               ! start = (/is, js, ks/), count = (/ie - is + 1, je - js + 1, ke - ks + 1/))
 
    end subroutine get_var3d_values
   
