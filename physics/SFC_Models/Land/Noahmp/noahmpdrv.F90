@@ -240,6 +240,10 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
           " delt ",delt," IauCont%dtp",Land_IAU_Control%dtp
   endif  
 
+  if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+    print*, "root proc stc before update"
+    print*, stc
+  endif
   !> read iau increments 
   call land_iau_mod_getiauforcing(Land_IAU_Control, Land_IAU_Data, errmsg, errflg)   !call getiauforcing(GFS_control,IAU_data)
   if (errflg .ne. 0) then
@@ -270,7 +274,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     ib = 1
     do j = 1, Land_IAU_Control%ny  !ny 
       do k = 1, km    
-        stc_inc_flat(ib:ib+Land_IAU_Control%nx-1, k) =Land_IAU_Data%stc_inc(:,j, k)  
+        stc_inc_flat(ib:ib+Land_IAU_Control%nx-1, k) = Land_IAU_Data%stc_inc(:,j, k)  
         ! slc_inc_flat(ib:ib+Land_IAU_Control%nx-1, k) = Land_IAU_Data%slc_inc(:,j, k) 
       enddo
       ib = ib + Land_IAU_Control%nx  !nlon    
@@ -333,41 +337,41 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     ! enddo
     deallocate(stc_inc_flat)  !, slc_inc_flat)   !, tmp2m_inc_flat,spfh2m_inc_flat)
 
-! ! (consistency) adjustments for updated soil temp and moisture
+! (consistency) adjustments for updated soil temp and moisture
 
-!     ! call set_soilveg_noahmp(isot, ivegsrc, maxsmc, bb, satpsi, errflg)
-!     call read_mp_table_parameters(errmsg, errflg)       
-!     ! maxsmc(1:slcats) = smcmax_table(1:slcats)  
-!     ! bb(1:slcats) = bexp_table(1:slcats)  
-!     ! satpsi(1:slcats) = psisat_table(1:slcats) 
+    ! call set_soilveg_noahmp(isot, ivegsrc, maxsmc, bb, satpsi, errflg)
+    call read_mp_table_parameters(errmsg, errflg)       
+    ! maxsmc(1:slcats) = smcmax_table(1:slcats)  
+    ! bb(1:slcats) = bexp_table(1:slcats)  
+    ! satpsi(1:slcats) = psisat_table(1:slcats) 
      
-!     if (errflg .ne. 0) then
-!           print *, 'FATAL ERROR in noahmpdrv_timestep_init: problem in set_soilveg_noahmp'
-!           errmsg = 'FATAL ERROR in noahmpdrv_timestep_init: problem in set_soilveg_noahmp'
-!           return
-!     endif
-!     n_stc = 0
-!     do i=1,lensfc
-!       if (stc_updated(i) == 1 ) then ! soil-only location
-!           n_stc = n_stc+1
-!           soiltype = soiltyp(i)
-!           do l = 1, lsoil_incr
-!               !case 1: frz ==> frz, recalculate slc, smc remains
-!               !case 2: unfrz ==> frz, recalculate slc, smc remains
-!               !both cases are considered in the following if case
-!               if (stc(i,l) .LT. tfreez )then
-!                 !recompute supercool liquid water,smc_anl remain unchanged
-!                 smp = hfus*(tfreez-stc(i,l))/(grav*stc(i,l)) !(m)
-!                 slc_new=maxsmc(soiltype)*(smp/satpsi(soiltype))**(-1./bb(soiltype))
-!                 slc(i,l) = max( min( slc_new, smc(i,l)), 0.0 )
-!               endif
-!               !case 3: frz ==> unfrz, melt all soil ice (if any)
-!               if (stc(i,l) .GT. tfreez )then !do not rely on stc_bck
-!                 slc(i,l)=smc(i,l)
-!               endif
-!           enddo
-!       endif
-!     enddo    
+    if (errflg .ne. 0) then
+          print *, 'FATAL ERROR in noahmpdrv_timestep_init: problem in set_soilveg_noahmp'
+          errmsg = 'FATAL ERROR in noahmpdrv_timestep_init: problem in set_soilveg_noahmp'
+          return
+    endif
+    n_stc = 0
+    do i=1,lensfc
+      if (stc_updated(i) == 1 ) then ! soil-only location
+          n_stc = n_stc+1
+          soiltype = soiltyp(i)
+          do l = 1, lsoil_incr
+              !case 1: frz ==> frz, recalculate slc, smc remains
+              !case 2: unfrz ==> frz, recalculate slc, smc remains
+              !both cases are considered in the following if case
+              if (stc(i,l) .LT. tfreez )then
+                !recompute supercool liquid water,smc_anl remain unchanged
+                smp = hfus*(tfreez-stc(i,l))/(grav*stc(i,l)) !(m)
+                slc_new=maxsmc(soiltype)*(smp/satpsi(soiltype))**(-1./bb(soiltype))
+                slc(i,l) = max( min( slc_new, smc(i,l)), 0.0 )
+              endif
+              !case 3: frz ==> unfrz, melt all soil ice (if any)
+              if (stc(i,l) .GT. tfreez )then !do not rely on stc_bck
+                slc(i,l)=smc(i,l)
+              endif
+          enddo
+      endif
+    enddo    
      
     deallocate(stc_updated)  
     deallocate(mask_tile)
@@ -381,6 +385,11 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     write(*,'(a,i8)') ' grid cells, without soil or snow = ', nother 
     write(*,'(a,i8)') ' soil grid cells with stc update', n_stc 
 
+  endif
+
+  if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+    print*, "root proc stc after update"
+    print*, stc
   endif
 
 end subroutine noahmpdrv_timestep_init
