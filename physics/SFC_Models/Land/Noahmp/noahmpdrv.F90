@@ -240,10 +240,6 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
           " delt ",delt," IauCont%dtp",Land_IAU_Control%dtp
   endif  
 
-  if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-    print*, "root proc stc before update"
-    print*, stc
-  endif
   !> read iau increments 
   call land_iau_mod_getiauforcing(Land_IAU_Control, Land_IAU_Data, errmsg, errflg)   !call getiauforcing(GFS_control,IAU_data)
   if (errflg .ne. 0) then
@@ -294,7 +290,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
 !---this should be ncol?? as last block may be shorter (check blksz)?
     lensfc = Land_IAU_Control%nx * Land_IAU_Control%ny   
 
-    print*,'adjusting first ', lsoil_incr, ' surface layers only'
+    if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) print*,' adjusting first ', lsoil_incr, ' surface layers only, delt ', delt
     ! initialize variables for counts statitics to be zeros
     nother = 0 ! grid cells not land
     nsnowupd = 0  ! grid cells with snow (temperature not yet updated)
@@ -306,10 +302,11 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     allocate(mask_tile(lensfc))
     call calculate_landinc_mask(weasd, vegtype, soiltyp, lensfc, isice_table,  & !veg_type_landice, 
                                 mask_tile)
-
+     
     ij_loop : do ij = 1, lensfc
       ! mask: 1  - soil, 2 - snow, 0 - land-ice, -1 - not land
       if (mask_tile(ij) == 1) then
+        if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) print*, "root proc layer 1 stc, inc ", stc(ij,1), stc_inc_flat(ij,1)
         soil_freeze=.false.
         soil_ice=.false.
         do k = 1, lsoil_incr   ! k = 1, km
@@ -387,10 +384,10 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
 
   endif
 
-  if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-    print*, "root proc stc after update"
-    print*, stc
-  endif
+  ! if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+  !   print*, "root proc stc after update"
+  !   print*, stc
+  ! endif
 
 end subroutine noahmpdrv_timestep_init
 

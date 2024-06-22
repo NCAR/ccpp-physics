@@ -257,7 +257,8 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    nlat = Land_IAU_Control%ny
    !nblks = Land_IAU_Control%nblks
    !blksz = Land_IAU_Control%blksz(1)
-   print*, "proc tile is ie js je ",Land_IAU_Control%tile_num, Land_IAU_Control%me, is, ie, js, je 
+
+   ! print*, "proc tile is ie js je ",Land_IAU_Control%me, Land_IAU_Control%tile_num, is, ie, js, je 
 
    allocate(Land_IAU_Data%stc_inc(is:ie, js:je, km))
    allocate(Land_IAU_Data%slc_inc(is:ie, js:je, km))
@@ -490,7 +491,8 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, rdt, wt)
 
    ntimes = Land_IAU_Control%ntimes
 
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'in land_iau updateiauforcing ntimes ',ntimes,Land_IAU_Control%iaufhrs(1:ntimes)
+   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'in land_iau updateiauforcing ntimes ',ntimes,Land_IAU_Control%iaufhrs(1:ntimes), &
+                                                                  " rdt wt ", rdt, wt
    delt = (Land_IAU_state%hr2-(Land_IAU_Control%fhour))/(Land_IAU_state%hr2-Land_IAU_state%hr1)
    do j = js,je
       do i = is,ie
