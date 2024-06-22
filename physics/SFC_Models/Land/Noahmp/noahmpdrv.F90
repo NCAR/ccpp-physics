@@ -137,13 +137,12 @@
     pores (:) = maxsmc (:)
     resid (:) = drysmc (:)
 
-    if (.not. Land_IAU_Control%do_land_iau) return
-
     ! Read Land IAU settings 
     call land_iau_mod_set_control(Land_IAU_Control, fn_nml, input_nml_file, &
           me, mpi_root, isc,jsc, nx, ny, tile_num, nblks, blksz,  &
           lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)
     ! Initialize IAU for land
+    if (.not. Land_IAU_Control%do_land_iau) return
     call land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  !  xlon, xlat, errmsg, errflg)
 
   end subroutine noahmpdrv_init
