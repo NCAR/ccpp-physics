@@ -137,6 +137,8 @@
     pores (:) = maxsmc (:)
     resid (:) = drysmc (:)
 
+    if (.not. Land_IAU_Control%do_land_iau) return
+
     ! Read Land IAU settings 
     call land_iau_mod_set_control(Land_IAU_Control, fn_nml, input_nml_file, &
           me, mpi_root, isc,jsc, nx, ny, tile_num, nblks, blksz,  &
@@ -228,6 +230,8 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
   !  --- Initialize CCPP error handling variables
   errmsg = ''
   errflg = 0
+ 
+  if (.not. Land_IAU_Control%do_land_iau) return
 
   !> update current forecast hour  
   ! GFS_control%jdat(:) = jdat(:)  
@@ -419,6 +423,8 @@ end subroutine noahmpdrv_timestep_init
     !  --- Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0    
+    
+    if (.not. Land_IAU_Control%do_land_iau) return
     call land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, errmsg, errflg)     !Land_IAU_Control%finalize()
 
   end subroutine noahmpdrv_finalize
