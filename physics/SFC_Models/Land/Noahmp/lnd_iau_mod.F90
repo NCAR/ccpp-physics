@@ -257,7 +257,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    nlat = Land_IAU_Control%ny
    !nblks = Land_IAU_Control%nblks
    !blksz = Land_IAU_Control%blksz(1)
-   print*, "proc tile is ie js je ",,Land_IAU_Control%tile_num, Land_IAU_Control%me, is, ie, js, je 
+   print*, "proc tile is ie js je ",Land_IAU_Control%tile_num, Land_IAU_Control%me, is, ie, js, je 
 
    allocate(Land_IAU_Data%stc_inc(is:ie, js:je, km))
    allocate(Land_IAU_Data%slc_inc(is:ie, js:je, km))
