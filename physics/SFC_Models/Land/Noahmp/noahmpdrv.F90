@@ -280,7 +280,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     ! delt=GFS_Control%dtf
     if ((Land_IAU_Control%dtp - delt) > 0.0001) then 
       if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-        print*, "Warning noahmpdrv_run delt ",delt,"different from Land_IAU_Control%dtp ",Land_IAU_Control%dtp
+        print*, "Warning noahmpdrv_run delt ",delt," different from Land_IAU_Control%dtp ",Land_IAU_Control%dtp
       endif
     endif
 
@@ -423,7 +423,7 @@ end subroutine noahmpdrv_timestep_init
     !  --- Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0    
-    
+
     if (.not. Land_IAU_Control%do_land_iau) return
     call land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, errmsg, errflg)     !Land_IAU_Control%finalize()
 

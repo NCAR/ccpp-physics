@@ -257,6 +257,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    nlat = Land_IAU_Control%ny
    !nblks = Land_IAU_Control%nblks
    !blksz = Land_IAU_Control%blksz(1)
+   print*, "proc is ie js je ",Land_IAU_Control%me, is, ie, js, je 
 
    allocate(Land_IAU_Data%stc_inc(is:ie, js:je, km))
    allocate(Land_IAU_Data%slc_inc(is:ie, js:je, km))
@@ -331,12 +332,11 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    Land_IAU_state%rdt = rdt
 
    ! Read all increment files at iau init time (at beginning of cycle) and interpolate to target grid
-   ! allocate (wk3_stc(n_t, 1:im,jbeg:jend, 1:km))
-   ! allocate (wk3_slc(n_t, 1:im,jbeg:jend, 1:km))   
+   ! allocate (wk3_stc(n_t, 1:im,jbeg:jend, 1:km))   
    call read_iau_forcing_fv3(Land_IAU_Control, wk3_stc, wk3_slc, errmsg, errflg)
    ! call read_iau_forcing_fv3(Land_IAU_Control, Land_IAU_state%inc1%stc_inc, Land_IAU_state%inc1%slc_inc, errmsg, errflg)
    
-   ! increments already in the fv3 modele grid--no need for interpolation       
+   ! increments already in the fv3 grid--no need for interpolation       
    Land_IAU_state%inc1%stc_inc(:, :, :) = wk3_stc(1, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
    Land_IAU_state%inc1%slc_inc(:, :, :) = wk3_slc(1, :, :, :) 
 
@@ -480,14 +480,17 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, rdt, wt)
    real(kind=kind_phys) delt, rdt, wt
    integer i,j,k
    integer :: is,  ie,  js,  je, npz
+   integer :: ntimes
    
-   is  = Land_IAU_Control%isc
+   is  = 1  !Land_IAU_Control%isc
    ie  = is + Land_IAU_Control%nx-1
-   js  = Land_IAU_Control%jsc
+   js  = 1  !Land_IAU_Control%jsc
    je  = js + Land_IAU_Control%ny-1
    npz = Land_IAU_Control%lsoil
 
-!   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'in updateiauforcing',nfiles,Land_IAU_Control%iaufhrs(1:nfiles)
+   ntimes = Land_IAU_Control%ntimes
+
+   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'in land_iau updateiauforcing ',ntimes,Land_IAU_Control%iaufhrs(1:ntimes)
    delt = (Land_IAU_state%hr2-(Land_IAU_Control%fhour))/(Land_IAU_state%hr2-Land_IAU_state%hr1)
    do j = js,je
       do i = is,ie
@@ -508,9 +511,9 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, rdt, wt)
    integer i, j, k
    integer :: is,  ie,  js,  je, npz
    
-   is  = Land_IAU_Control%isc
+   is  = 1 !Land_IAU_Control%isc
    ie  = is + Land_IAU_Control%nx-1
-   js  = Land_IAU_Control%jsc
+   js  = 1 !Land_IAU_Control%jsc
    je  = js + Land_IAU_Control%ny-1
    npz = Land_IAU_Control%lsoil
    !  this is only called if using 1 increment file
@@ -592,7 +595,7 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, stc_inc_out, slc_inc_out, errm
    allocate(slc_inc_out(n_t, Land_IAU_Control%nx, Land_IAU_Control%ny, km))
 
    do i = 1, size(stc_vars)
-      print *, trim(stc_vars(i))
+      if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *, trim(stc_vars(i))
       ! call check_var_exists(ncid, trim(stc_vars(i)), ierr)
       status = nf90_inq_varid(ncid, trim(stc_vars(i)), varid)
       if (status == nf90_noerr) then   !if (ierr == 0) then
@@ -610,7 +613,7 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, stc_inc_out, slc_inc_out, errm
       endif
    enddo
    do i = 1, size(slc_vars)
-      print *, trim(slc_vars(i))
+      if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *, trim(slc_vars(i))
       status = nf90_inq_varid(ncid, trim(slc_vars(i)), varid)
       if (status == nf90_noerr) then   !if (ierr == 0) then
          do it = 1, n_t
