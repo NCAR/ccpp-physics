@@ -216,7 +216,7 @@ end subroutine land_iau_mod_set_control
 subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)     !nlunit, ncols, IPD_Data,,Init_parm)
    ! integer,                              intent(in) :: me, mpi_root
    type (land_iau_control_type),          intent(inout) :: Land_IAU_Control
-   type (land_iau_external_data_type), intent(inout) :: Land_IAU_Data  
+   type (land_iau_external_data_type), intent(inout)    :: Land_IAU_Data  
    ! real(kind=kind_phys), dimension(:),   intent(in)  :: xlon    ! longitude  !GFS_Data(cdata%blk_no)%Grid%xlon
    ! real(kind=kind_phys), dimension(:),   intent(in)  :: xlat    ! latitude
    character(len=*),                     intent(out) :: errmsg
@@ -239,7 +239,8 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    integer :: n_soill, n_snowl              !soil and snow layers
    logical :: do_land_iau 
    integer :: is,  ie,  js,  je
-   integer :: npz     
+   integer :: npz
+   integer :: i, j  
 
    !Errors messages handled through CCPP error handling variables
    errmsg = ''
@@ -338,8 +339,16 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    ! call read_iau_forcing_fv3(Land_IAU_Control, Land_IAU_state%inc1%stc_inc, Land_IAU_state%inc1%slc_inc, errmsg, errflg)
    
    ! increments already in the fv3 grid--no need for interpolation       
-   Land_IAU_state%inc1%stc_inc(:, :, :) = wk3_stc(1, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
-   Land_IAU_state%inc1%slc_inc(:, :, :) = wk3_slc(1, :, :, :) 
+   ! Land_IAU_state%inc1%stc_inc(:, :, :) = wk3_stc(1, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
+   ! Land_IAU_state%inc1%slc_inc(:, :, :) = wk3_slc(1, :, :, :) 
+   do k = 1, npz  ! do k = 1,n_soill    !  
+      do j = 1, nlat
+         do i = 1, nlon                
+            Land_IAU_state%inc1%stc_inc(i,j,k)  = wk3_stc(1, i, j, k)
+            Land_IAU_state%inc1%slc_inc(i,j,k)  = wk3_slc(1, i, j, k) 
+         end do
+       enddo
+   enddo
 
    if (ntimes.EQ.1) then  ! only need to get incrments once since constant forcing over window
       call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state%rdt, Land_IAU_state%wt)
@@ -349,8 +358,16 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
       allocate (Land_IAU_state%inc2%slc_inc(is:ie, js:je, km))      
       Land_IAU_state%hr2=Land_IAU_Control%iaufhrs(2)   
       
-      Land_IAU_state%inc2%stc_inc(:, :, :) = wk3_stc(2, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
-      Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(2, :, :, :) 
+      ! Land_IAU_state%inc2%stc_inc(:, :, :) = wk3_stc(2, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
+      ! Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(2, :, :, :) 
+      do k = 1, npz  ! do k = 1,n_soill    !  
+         do j = 1, nlat
+            do i = 1, nlon                
+               Land_IAU_state%inc2%stc_inc(i,j,k)  = wk3_stc(2, i, j, k)
+               Land_IAU_state%inc2%slc_inc(i,j,k)  = wk3_slc(2, i, j, k) 
+            end do
+          enddo
+      enddo
    endif
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
       print *,' IAU init wk3_stc min max', minval(wk3_stc), maxval(wk3_stc)
