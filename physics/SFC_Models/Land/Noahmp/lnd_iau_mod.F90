@@ -370,11 +370,11 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
           enddo
       enddo
    endif
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-      print *,' IAU init wk3_stc min max', minval(wk3_stc), maxval(wk3_stc)
-      print *,'inc1%stc_inc min max', minval(Land_IAU_state%inc1%stc_inc), maxval(Land_IAU_state%inc1%stc_inc)
-      print *,'inc2%stc_inc min max', minval(Land_IAU_state%inc2%stc_inc), maxval(Land_IAU_state%inc2%stc_inc)
-   endif
+   ! if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+   !    print *,' IAU init wk3_stc min max', minval(wk3_stc), maxval(wk3_stc)
+   !    print *,'inc1%stc_inc min max', minval(Land_IAU_state%inc1%stc_inc), maxval(Land_IAU_state%inc1%stc_inc)
+   !    print *,'inc2%stc_inc min max', minval(Land_IAU_state%inc2%stc_inc), maxval(Land_IAU_state%inc2%stc_inc)
+   ! endif
 !   print*,'end of IAU init',dt,rdt
 
 end subroutine land_iau_mod_init
@@ -415,11 +415,11 @@ end subroutine land_iau_mod_finalize
 
    ntimes = Land_IAU_Control%ntimes
 
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-      print *,'getiauforc wk3_stc min max', minval(wk3_stc), maxval(wk3_stc)
-      print *,'inc1%stc_inc min max', minval(Land_IAU_state%inc1%stc_inc), maxval(Land_IAU_state%inc1%stc_inc)
-      print *,'inc2%stc_inc min max', minval(Land_IAU_state%inc2%stc_inc), maxval(Land_IAU_state%inc2%stc_inc)
-   endif
+   ! if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+   !    print *,'getiauforc wk3_stc min max', minval(wk3_stc), maxval(wk3_stc)
+   !    print *,'inc1%stc_inc min max', minval(Land_IAU_state%inc1%stc_inc), maxval(Land_IAU_state%inc1%stc_inc)
+   !    print *,'inc2%stc_inc min max', minval(Land_IAU_state%inc2%stc_inc), maxval(Land_IAU_state%inc2%stc_inc)
+   ! endif
 
    Land_IAU_Data%in_interval=.false.
    if (ntimes.LE.0) then

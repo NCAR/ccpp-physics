@@ -306,7 +306,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     ij_loop : do ij = 1, lensfc
       ! mask: 1  - soil, 2 - snow, 0 - land-ice, -1 - not land
       if (mask_tile(ij) == 1) then
-        if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) print*, "root proc layer 1 stc, inc ", stc(ij,1), stc_inc_flat(ij,1)
+        ! if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) print*, "root proc layer 1 stc, inc ", stc(ij,1), stc_inc_flat(ij,1)
         soil_freeze=.false.
         soil_ice=.false.
         do k = 1, lsoil_incr   ! k = 1, km
