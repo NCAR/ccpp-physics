@@ -29,6 +29,7 @@ module land_iau_mod
   private
 
   real(kind=kind_phys), allocatable :: wk3_stc(:, :, :, :), wk3_slc(:, :, :, :)
+!   real(kind=kind_phys) :: rdt
 
   type land_iau_internal_data_type
       real(kind=kind_phys),allocatable :: stc_inc(:,:,:)
@@ -327,11 +328,10 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
       enddo
       deallocate(idt)
    endif
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'land_iau interval = ',Land_IAU_Control%iau_delthrs,' hours'
    dt = (Land_IAU_Control%iau_delthrs*3600.)
    rdt = 1.0/dt
    Land_IAU_state%rdt = rdt
-
+   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'land_iau interval, rdt',Land_IAU_Control%iau_delthrs,Land_IAU_state%rdt
    ! Read all increment files at iau init time (at beginning of cycle) and interpolate to target grid
    ! allocate (wk3_stc(n_t, 1:im,jbeg:jend, 1:km))   
    call read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, wk3_stc, wk3_slc
@@ -437,7 +437,7 @@ end subroutine land_iau_mod_finalize
          Land_IAU_Data%in_interval=.false.
       else
          if (Land_IAU_Control%iau_filter_increments) call setiauforcing(Land_IAU_Control,Land_IAU_Data, Land_IAU_state%rdt, Land_IAU_state%wt)
-         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'apply lnd iau forcing t1,t,t2,filter wt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_state%wt/Land_IAU_state%wt_normfact
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_state%wt/Land_IAU_state%wt_normfact,Land_IAU_state%rdt
          Land_IAU_Data%in_interval=.true.
       endif
       return
@@ -449,7 +449,7 @@ end subroutine land_iau_mod_finalize
 !         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'no iau forcing',Land_IAU_Control%iaufhrs(1),Land_IAU_Control%fhour,Land_IAU_Control%iaufhrs(nfiles)
          Land_IAU_Data%in_interval=.false.
       else
-         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'apply lnd iau forcing t1,t,t2,filter wt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_state%wt/Land_IAU_state%wt_normfact
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_state%wt/Land_IAU_state%wt_normfact,Land_IAU_state%rdt
          Land_IAU_Data%in_interval=.true.
          do k=ntimes, 1, -1
             if (Land_IAU_Control%iaufhrs(k) > Land_IAU_Control%fhour) then
