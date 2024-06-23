@@ -336,7 +336,6 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    ! allocate (wk3_stc(n_t, 1:im,jbeg:jend, 1:km))   
    call read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, wk3_stc, wk3_slc
    ! call read_iau_forcing_fv3(Land_IAU_Control, Land_IAU_state%inc1%stc_inc, Land_IAU_state%inc1%slc_inc, errmsg, errflg)
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'wk3_stc min max', minval(wk3_stc), maxval(wk3_stc)
    
    ! increments already in the fv3 grid--no need for interpolation       
    Land_IAU_state%inc1%stc_inc(:, :, :) = wk3_stc(1, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
@@ -352,6 +351,11 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
       
       Land_IAU_state%inc2%stc_inc(:, :, :) = wk3_stc(2, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
       Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(2, :, :, :) 
+   endif
+   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+      print *,' IAU init wk3_stc min max', minval(wk3_stc), maxval(wk3_stc)
+      print *,'inc1%stc_inc min max', minval(Land_IAU_state%inc1%stc_inc), maxval(Land_IAU_state%inc1%stc_inc)
+      print *,'inc2%stc_inc min max', minval(Land_IAU_state%inc2%stc_inc), maxval(Land_IAU_state%inc2%stc_inc)
    endif
 !   print*,'end of IAU init',dt,rdt
 
@@ -392,6 +396,12 @@ end subroutine land_iau_mod_finalize
    integer :: ntimes
 
    ntimes = Land_IAU_Control%ntimes
+
+   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+      print *,'getiauforc wk3_stc min max', minval(wk3_stc), maxval(wk3_stc)
+      print *,'inc1%stc_inc min max', minval(Land_IAU_state%inc1%stc_inc), maxval(Land_IAU_state%inc1%stc_inc)
+      print *,'inc2%stc_inc min max', minval(Land_IAU_state%inc2%stc_inc), maxval(Land_IAU_state%inc2%stc_inc)
+   endif
 
    Land_IAU_Data%in_interval=.false.
    if (ntimes.LE.0) then
