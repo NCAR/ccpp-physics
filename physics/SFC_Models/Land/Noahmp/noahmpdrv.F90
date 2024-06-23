@@ -30,9 +30,9 @@
 
     !> \Land IAU data and control
     ! Land IAU Control holds settings' information, maily read from namelist (e.g., 
-         ! block of global domain that belongs to a process ,
-         ! whethrer to do IAU increment at this time step, 
-         ! time step informatoin, etc)    
+    ! block of global domain that belongs to a process ,
+    ! whethrer to do IAU increment at this time step, 
+    ! time step informatoin, etc)    
     type (land_iau_control_type)          :: Land_IAU_Control
     ! Land IAU Data holds spatially and temporally interpolated soil temperature increments per time step
     type (land_iau_external_data_type)    :: Land_IAU_Data   !(number of blocks):each proc holds nblks
@@ -59,8 +59,6 @@
     use set_soilveg_mod,  only: set_soilveg
     use namelist_soilveg
     use noahmp_tables
-    !use GFS_typedefs, only: GFS_control_type
-    ! use GFS_typedefs, only: GFS_data_type
 
     implicit none
 
@@ -83,12 +81,8 @@
     real(kind_phys), dimension(:), intent(in) :: xlon    ! longitude !GFS_Data(cdata%blk_no)%Grid%xlon
     real(kind_phys), dimension(:), intent(in) :: xlat    ! latitude
 
-  
-
     integer,                       intent(in) :: lsoil, lsnow_lsm
     real(kind=kind_phys),          intent(in) :: dtp, fhour
-    ! type(gfs_data_type), dimension(:), intent(inout)          :: GFS_Data ! !(one:)
-    !type(gfs_control_type), intent(in)          :: GFS_Control
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -153,23 +147,13 @@
 !! \section arg_table_noahmpdrv_timestep_init Argument Table
 !! \htmlinclude noahmpdrv_timestep_init.html
 !!
-  !! For Noah-MP, the adjustment scheme shown below as of 11/09/2023:
+!! For Noah-MP, the adjustment scheme shown below is applied to soil moisture and temp:
 !! Case 1: frozen ==> frozen, recalculate slc following opt_frz=1, smc remains
 !! Case 2: unfrozen ==> frozen, recalculate slc following opt_frz=1, smc remains
 !! Case 3: frozen ==> unfrozen, melt all soil ice (if any)
 !! Case 4: unfrozen ==> unfrozen along with other cases, (e.g., soil temp=tfrz),do nothing
 !! Note: For Case 3, Yuan Xue thoroughly evaluated a total of four options and
 !! current option is found to be the best as of 11/09/2023
-
-!! @param[in] isot Integer code for the soil type data set
-!! @param[in] ivegsrc Integer code for the vegetation type data set
-!! @param[in] lensfc Number of land points for this tile
-
-!! @param[in] lsoil_incr Number of soil layers (from top) to apply soil increments to
-
-!! @param[inout] smc_adj Analysis soil moisture states
-!! @param[inout] slc_adj Analysis liquid soil moisture states
-!! @param[in] stc_updated Integer to record whether STC in each grid cell was updated
 
 subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_root,
                                     isot, ivegsrc, soiltyp, vegtype, weasd, &
@@ -182,13 +166,12 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
 
   implicit none
 
-  ! for soil temp/moisture consistency adjustment after DA update
-  integer, intent(in)                                    :: isot, ivegsrc
-
   integer                                   , intent(in) :: itime      !current forecast iteration      
   real(kind=kind_phys)                      , intent(in) :: fhour      !current forecast time (hr)
   real(kind=kind_phys)                      , intent(in) :: delt       ! time interval [s]       
   integer                                   , intent(in) :: km         !vertical soil layer dimension 
+  integer, intent(in)                                    :: isot
+  integer, intent(in)                                    :: ivegsrc
 
   integer             , dimension(:)     , intent(in)    :: soiltyp    ! soil type (integer index)
   integer             , dimension(:)     , intent(in)    :: vegtype    ! vegetation type (integer index)
@@ -282,12 +265,8 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
         print*, "Warning noahmpdrv_run delt ",delt," different from Land_IAU_Control%dtp ",Land_IAU_Control%dtp
       endif
     endif
-
-    !IAU increments are in units of 1/sec     !Land_IAU_Control%dtp
-    !* only updating soil temp for now        
+       
     lsoil_incr = Land_IAU_Control%lsoil_incr 
-
-!---this should be ncol?? as last block may be shorter (check blksz)?
     lensfc = Land_IAU_Control%nx * Land_IAU_Control%ny   
 
     if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) print*,' adjusting first ', lsoil_incr, ' surface layers only, delt ', delt
@@ -300,9 +279,10 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
 
 !TODO---if only fv3 increment files are used, this can be read from file
     allocate(mask_tile(lensfc))
-    call calculate_landinc_mask(weasd, vegtype, soiltyp, lensfc, isice_table,  & !veg_type_landice, 
-                                mask_tile)
-     
+    call calculate_landinc_mask(weasd, vegtype, soiltyp, lensfc, isice_table, mask_tile)  !& !veg_type_landice, 
+                                
+    !IAU increments are in units of 1/sec     !Land_IAU_Control%dtp
+    !* only updating soil temp for now 
     ij_loop : do ij = 1, lensfc
       ! mask: 1  - soil, 2 - snow, 0 - land-ice, -1 - not land
       if (mask_tile(ij) == 1) then
@@ -383,11 +363,6 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     write(*,'(a,i8)') ' soil grid cells with stc update', n_stc 
 
   endif
-
-  ! if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-  !   print*, "root proc stc after update"
-  !   print*, stc
-  ! endif
 
 end subroutine noahmpdrv_timestep_init
 

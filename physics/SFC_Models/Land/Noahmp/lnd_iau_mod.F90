@@ -29,7 +29,6 @@ module land_iau_mod
   private
 
   real(kind=kind_phys), allocatable :: wk3_stc(:, :, :, :), wk3_slc(:, :, :, :)
-!   real(kind=kind_phys) :: rdt
 
   type land_iau_internal_data_type
       real(kind=kind_phys),allocatable :: stc_inc(:,:,:)
@@ -261,8 +260,6 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    !nblks = Land_IAU_Control%nblks
    !blksz = Land_IAU_Control%blksz(1)
 
-   ! print*, "proc tile is ie js je ",Land_IAU_Control%me, Land_IAU_Control%tile_num, is, ie, js, je 
-
    allocate(Land_IAU_Data%stc_inc(is:ie, js:je, km))
    allocate(Land_IAU_Data%slc_inc(is:ie, js:je, km))
 ! allocate arrays that will hold iau state
@@ -334,14 +331,12 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    rdt = 1.0/dt
    Land_IAU_state%rdt = rdt
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'land_iau interval, rdt',Land_IAU_Control%iau_delthrs,Land_IAU_state%rdt
-   ! Read all increment files at iau init time (at beginning of cycle) and interpolate to target grid
+   ! Read all increment files at iau init time (at beginning of cycle) 
    ! allocate (wk3_stc(n_t, 1:im,jbeg:jend, 1:km))   
    call read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, wk3_stc, wk3_slc
    ! call read_iau_forcing_fv3(Land_IAU_Control, Land_IAU_state%inc1%stc_inc, Land_IAU_state%inc1%slc_inc, errmsg, errflg)
    
    ! increments already in the fv3 grid--no need for interpolation       
-   ! Land_IAU_state%inc1%stc_inc(:, :, :) = wk3_stc(1, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
-   ! Land_IAU_state%inc1%slc_inc(:, :, :) = wk3_slc(1, :, :, :) 
    do k = 1, npz  ! do k = 1,n_soill    !  
       do j = 1, nlat
          do i = 1, nlon                
@@ -358,9 +353,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
       allocate (Land_IAU_state%inc2%stc_inc(is:ie, js:je, km))
       allocate (Land_IAU_state%inc2%slc_inc(is:ie, js:je, km))      
       Land_IAU_state%hr2=Land_IAU_Control%iaufhrs(2)   
-      
-      ! Land_IAU_state%inc2%stc_inc(:, :, :) = wk3_stc(2, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
-      ! Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(2, :, :, :) 
+
       do k = 1, npz  ! do k = 1,n_soill    !  
          do j = 1, nlat
             do i = 1, nlon                
@@ -370,11 +363,6 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
           enddo
       enddo
    endif
-   ! if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-   !    print *,' IAU init wk3_stc min max', minval(wk3_stc), maxval(wk3_stc)
-   !    print *,'inc1%stc_inc min max', minval(Land_IAU_state%inc1%stc_inc), maxval(Land_IAU_state%inc1%stc_inc)
-   !    print *,'inc2%stc_inc min max', minval(Land_IAU_state%inc2%stc_inc), maxval(Land_IAU_state%inc2%stc_inc)
-   ! endif
 !   print*,'end of IAU init',dt,rdt
 
 end subroutine land_iau_mod_init
@@ -414,12 +402,6 @@ end subroutine land_iau_mod_finalize
    integer :: ntimes
 
    ntimes = Land_IAU_Control%ntimes
-
-   ! if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-   !    print *,'getiauforc wk3_stc min max', minval(wk3_stc), maxval(wk3_stc)
-   !    print *,'inc1%stc_inc min max', minval(Land_IAU_state%inc1%stc_inc), maxval(Land_IAU_state%inc1%stc_inc)
-   !    print *,'inc2%stc_inc min max', minval(Land_IAU_state%inc2%stc_inc), maxval(Land_IAU_state%inc2%stc_inc)
-   ! endif
 
    Land_IAU_Data%in_interval=.false.
    if (ntimes.LE.0) then
@@ -566,8 +548,6 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, stc_inc_ou
    ! character(len=*),             intent(in) :: fname
    character(len=*),          intent(inout) :: errmsg
    integer,                   intent(inout) :: errflg
-   ! real(kind=kind_phys), allocatable,        intent(out) :: stc_inc_out(:, :, :, :)  !1:im, jbeg:jend, 1:km)
-   ! real(kind=kind_phys), allocatable,        intent(out) :: slc_inc_out(:, :, :, :)  !1:im, jbeg:jend, 1:km)
 
    integer  :: i, it, km  !j, k, l, npz, 
    logical  :: exists
@@ -622,12 +602,9 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, stc_inc_ou
       return
    endif
 
-   ! allocate(stc_inc_out(n_t, Land_IAU_Control%nx, Land_IAU_Control%ny, km))
-   ! allocate(slc_inc_out(n_t, Land_IAU_Control%nx, Land_IAU_Control%ny, km))
    allocate(wk3_stc(n_t, Land_IAU_Control%nx, Land_IAU_Control%ny, km))
    allocate(wk3_slc(n_t, Land_IAU_Control%nx, Land_IAU_Control%ny, km))
    
-
    do i = 1, size(stc_vars)
       if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *, trim(stc_vars(i))
       ! call check_var_exists(ncid, trim(stc_vars(i)), ierr)
