@@ -250,6 +250,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    n_soill = Land_IAU_Control%lsoil     !4  for sfc updates
 !  n_snowl = Land_IAU_Control%lsnowl 
    npz = Land_IAU_Control%lsoil
+   km = Land_IAU_Control%lsoil
    
    is  = Land_IAU_Control%isc
    ie  = is + Land_IAU_Control%nx-1
