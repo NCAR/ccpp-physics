@@ -62,9 +62,6 @@ contains
 !>@brief The subroutine initializes the unified UGWP
 !> \section arg_table_ugwpv1_gsldrag_init Argument Table
 !! \htmlinclude ugwpv1_gsldrag_init.html
-!!
-! -----------------------------------------------------------------------
-!
     subroutine ugwpv1_gsldrag_init  (                                          &
                 me, master, nlunit, input_nml_file, logunit,                   &
                 fn_nml2, jdat, lonr, latr, levs, ak, bk, dtp,                  &

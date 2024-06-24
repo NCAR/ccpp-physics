@@ -20,12 +20,7 @@ module GFS_ccpp_suite_sim_pre
   public GFS_ccpp_suite_sim_pre_run, load_ccpp_suite_sim
 contains
 
-  ! ######################################################################################
-  !
-  ! SUBROUTINE GFS_ccpp_suite_sim_pre_run
-  !
-  ! ######################################################################################
-!> \section arg_table_GFS_ccpp_suite_sim_pre_run
+!> \section arg_table_GFS_ccpp_suite_sim_pre_run Argument Table
 !! \htmlinclude GFS_ccpp_suite_sim_pre_run.html
 !! 
   subroutine GFS_ccpp_suite_sim_pre_run(do_ccpp_suite_sim, dtend, ntqv, dtidx, dtp,      &

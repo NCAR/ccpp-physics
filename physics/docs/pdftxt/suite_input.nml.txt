@@ -22,6 +22,7 @@ While there is not a one-to-one correspondence between the namelist and the SDF,
 show some variables in the namelist that must match the SDF.
 
 
+<div class="full_width_table">
 <table>
 <caption id="multi_row">NML Description</caption>
 <tr><th>Option          <th>CCPP scheme or interstitial                       <th>Description                <th>Default Value
@@ -31,24 +32,6 @@ show some variables in the namelist that must match the SDF.
 <tr><td>ldiag3d         <td>see \a GFS_typedefs.F90       <td>flag for 3D diagnostic fields                   <td>.false. 
 <tr><td>qdiag3d         <td>see \a GFS_typedefs.F90       <td>flag for 3D tracer diagnostic fields            <td>.false.
 <tr><td>lssav           <td>see \a GFS_typedefs.F90       <td>flag for storing diagnostics            <td>.false.
-<tr><td colspan="4" align= center>\b Coupling \b parameters
-<tr><td>cplflx          <td>see \a GFS_typedefs.F90       <td>flag for using fluxes provided by an external model              <td>.false.
-<tr><td>cplice          <td>see \a GFS_typedefs.F90       <td>flag for ice to atm coupling (use together with cplflx)      <td>.false.
-<tr><td>cplocn2atm      <td>see \a GFS_typedefs.F90       <td>flag for turning on the feedback from ocean to atm    <td>.true.
-<tr><td>cplwav          <td>see \a GFS_typedefs.F90       <td>flag for using information produced by an external ocean wave model              <td>.false.
-<tr><td>cplwav2atm      <td>see \a GFS_typedefs.F90       <td>flag for wave to atm coupling           <td>.false.
-<tr><td>cplaqm          <td>see \a GFS_typedefs.F90       <td>flag for AQM to atm coupling            <td>.false.
-<tr><td>cplchm          <td>see \a GFS_typedefs.F90       <td>flag for coupled chemistry diagnostics           <td>.false.
-<tr><td>cpllnd          <td>see \a GFS_typedefs.F90
-<tr><td>cpllnd2atm
-<tr><td>cpl_imp_mrg
-<tr><td>cpl_imp_dbg
-<tr><td>use_cice_alb
-<tr><td>rrfs_sd
-rrfs_smoke_debug
-<tr><td>lsidea
-
-
 <tr><td>oz_phys_2015    <td>ozphys_2015               <td>flag for new (2015) ozone physics               <td>.false.
 <tr><td>fhcyc           <td>gfs_phys_time_vary    <td>frequency for surface data cycling in hours     <td>0.0 
 <tr><td>use_ufo         <td>gfs_phys_time_vary          <td>flag for using unfiltered orography surface option <td>.false.
@@ -555,7 +538,7 @@ rrfs_smoke_debug
 <tr><td>lsoil           <td> lsm_noah              <td>number of soil layers           <td>4
 lsoil_lsm
 <tr><td>rdlai           <td> lsm_ruc               <td>flag to read leaf area index from input files    <td>.false.
-<tr><td>ivegsrc         <td> lsm_noah, lsm_ruc, \ref noahmpdrv, sfc_diff          <td>flag for vegetation type dataset choice: \n 
+<tr><td>ivegsrc         <td> lsm_noah, lsm_ruc,  noahmpdrv, sfc_diff          <td>flag for vegetation type dataset choice: \n 
                                                       <ul>
                                                       <li> 0: USGS 
                                                       <li> 1: IGBP(20 category): IGBP must be selected if NoahMP is used 
@@ -565,7 +548,7 @@ lsoil_lsm
                                                       <li> 5: MODIS-RUC (21 category, NOAH WRFv4 only)
                                                       </ul>
                                                       <td>2
-<tr><td>isot            <td> lsm_noah, lsm_ruc, \ref noahmpdrv          <td>flag for soil type dataset choice:\n 
+<tr><td>isot            <td> lsm_noah, lsm_ruc,  noahmpdrv          <td>flag for soil type dataset choice:\n 
                                                       <ul> 
                                                       <li> 0: Zobler soil type (9 category) 
                                                       <li> 1: STATSGO soil type (19 category): STATSGO must be selected if NoahMP is used
@@ -573,7 +556,7 @@ lsoil_lsm
                                                       </ul>
                                                       <td>0
 <tr><td>exticeden       <td> lsm_noah,lsm_ruc     <td>flag for calculating frozen precip ice density outside of the LSM   <td>.false.
-<tr><td>iopt_dveg         <td> \ref noahmpdrv         <td>options for dynamic vegetation  \n
+<tr><td>iopt_dveg         <td> noahmpdrv         <td>options for dynamic vegetation  \n
                                                          <ul>
                                                          <li>1: off (use table LAI; use FVEG = SHDFAC from input)
                                                          <li>2: on (together with \a iopt_crs = 1)
@@ -586,20 +569,20 @@ lsoil_lsm
                                                          <li>9: off (use input LAI; use maximum vegetation fraction)
                                                          </ul>
                                                          <td>4
-<tr><td>iopt_crs        <td> \ref noahmpdrv              <td>options for canopy stomatal resistance  \n
+<tr><td>iopt_crs        <td> noahmpdrv              <td>options for canopy stomatal resistance  \n
                                                          <ul>
                                                          <li>1: Ball-Berry
                                                          <li>2: Jarvis
                                                          </ul>
                                                          <td>1
-<tr><td>iopt_btr        <td>  \ref noahmpdrv                    <td>options for soil moisture factor for stomatal resistance \n
+<tr><td>iopt_btr        <td> noahmpdrv                    <td>options for soil moisture factor for stomatal resistance \n
                                                          <ul>
                                                          <li>1: Noah (soil moisture)
                                                          <li>2: CLM (matric potential) 
                                                          <li>3: SSIB (matric potential)
                                                          </ul>
                                                          <td>1
-<tr><td>iopt_run       <td> \ref noahmpdrv                     <td>options for runoff and groundwater   \n
+<tr><td>iopt_run       <td> noahmpdrv                     <td>options for runoff and groundwater   \n
                                                          <ul>
                                                          <li>1: TOPMODEL with groundwater (Niu et al. 2007 \cite niu_et_al_2007)
                                                          <li>2: TOPMODEL with an equilibrium water table (Niu et al. 2005 \cite niu_et_al_2005)
@@ -608,39 +591,39 @@ lsoil_lsm
                                                          <li>5: Miguez-macho&Fan groundwater scheme (Miguez-Macho et al. 2007 \cite miguez_et_al_2007; Fan et al. 2007 \cite fan_et_al_2007; needs further testing for public use)
                                                          </ul>
                                                          <td>3
-<tr><td>iopt_sfc       <td> \ref noahmpdrv                     <td>options for surface layer drag coeff (CH&CM)     \n
+<tr><td>iopt_sfc       <td> noahmpdrv                     <td>options for surface layer drag coeff (CH&CM)     \n
                                                          <ul>
                                                          <li>1: m-o
                                                          <li>2: original Noah (Chen et al. 1997 \cite chen_et_al_1997)
                                                          <li>4: MYNN surface layer scheme
                                                          </ul>
                                                          <td>1
-<tr><td>iopt_frz       <td> \ref noahmpdrv                     <td>options for supercooled liquid water (or ice fraction)     \n
+<tr><td>iopt_frz       <td> noahmpdrv                     <td>options for supercooled liquid water (or ice fraction)     \n
                                                          <ul>
                                                          <li>1: no interation (Niu and Yang (2006) \cite niu_and_yang_2006 )
                                                          <li>2: Koren's iteration
                                                          </ul>
                                                          <td>1
-<tr><td>iopt_inf       <td> \ref noahmpdrv                     <td>options for frozen soil permeability       \n
+<tr><td>iopt_inf       <td> noahmpdrv                     <td>options for frozen soil permeability       \n
                                                          <ul>
                                                          <li>1: linear effects, more permeable (Niu and Yang (2006) \cite niu_and_yang_2006)
                                                          <li>2: nonlinear effects, less permeable (old)
                                                          </ul>
                                                          <td>1
-<tr><td>iopt_rad       <td> \ref noahmpdrv                     <td>options for radiation transfer        \n
+<tr><td>iopt_rad       <td> noahmpdrv                     <td>options for radiation transfer        \n
                                                          <ul>
                                                          <li>1: modified two-stream (gap = f(solar angle, 3d structure ...)<1-fveg)
                                                          <li>2: two-stream applied to grid-cell (gap = 0)
                                                          <li>3: two-stream applied to vegetated fraction (gap=1-FVEG)
                                                          </ul>
                                                          <td>3
-<tr><td>iopt_alb      <td> \ref noahmpdrv                      <td>options for ground snow surface albedo   \n
+<tr><td>iopt_alb      <td> noahmpdrv                      <td>options for ground snow surface albedo   \n
                                                          <ul>
                                                          <li>1: BATS
                                                          <li>2: CLASS
                                                          </ul>
                                                          <td>2
-<tr><td>iopt_snf      <td> \ref noahmpdrv                      <td>options for partitioning precipitation into rainfall and snowfall  \n
+<tr><td>iopt_snf      <td> noahmpdrv                      <td>options for partitioning precipitation into rainfall and snowfall  \n
                                                          <ul>
                                                          <li>1: Jordan (1991)
                                                          <li>2: BATS: when sfctmp < tfrz+2.2
@@ -648,20 +631,20 @@ lsoil_lsm
                                                          <li>4: use WRF microphysics output
                                                          </ul>
                                                          <td>1
-<tr><td>iopt_tbot     <td> \ref noahmpdrv                      <td>options for lower boundary condition of soil temperature      \n
+<tr><td>iopt_tbot     <td> noahmpdrv                      <td>options for lower boundary condition of soil temperature      \n
                                                          <ul>
                                                          <li>1: zero heat flux from bottom (zbot and tbot not used)
                                                          <li>2: tbot at zbot (8m) read from a file (original Noah)
                                                          </ul>
                                                          <td>2
-<tr><td>iopt_stc      <td> \ref noahmpdrv                      <td>options for snow/soil temperature time scheme (only layer 1)    \n
+<tr><td>iopt_stc      <td> noahmpdrv                      <td>options for snow/soil temperature time scheme (only layer 1)    \n
                                                          <ul>
                                                          <li>1: semi-implicit; flux top boundary condition
                                                          <li>2: full implicit (original Noah); temperature top boundary condition
                                                          <li>3: same as 1, but fsno for ts calculation (generally improve snow; v3.7)
                                                          </ul>
                                                          <td>1
-<tr><td>iopt_trs    <td>\ref noahmpdrv                   <td>options for thermal roughness scheme:\n 
+<tr><td>iopt_trs    <td> noahmpdrv                   <td>options for thermal roughness scheme:\n 
                                                          <ul>
                                                          <li>1: z0h=z0m  
                                                          <li>2: canopy based czil
@@ -669,30 +652,30 @@ lsoil_lsm
                                                          <li>4: kb inversed 
                                                          </ul>
                                                          <td>2
-<tr><td>iopt_diag   <td>\ref noampdrv                    <td>options for surface 2-m t/q diagnostic approach: \n
+<tr><td>iopt_diag   <td> noampdrv                    <td>options for surface 2-m t/q diagnostic approach: \n
                                                          <ul>
                                                          <li>1: external GFS sfc_diag
                                                          <li>2: original NoahMP 2-title
                                                          <li>3: NoahMP2-title + internal GFS sfc_diag
                                                          </ul>
                                                          <td>2
-<tr><td>mosaic_lu        <td>\ref lsm_ruc                <td> control for use of fractional landuse in RUC land surface model    
+<tr><td>mosaic_lu        <td> lsm_ruc                <td> control for use of fractional landuse in RUC land surface model    
                                                          <ul>
                                                          <li>1: use of fractional landuse in RUC LSM
                                                          </ul>
                                                          <td>0
-<tr><td>mosaic_soil      <td>\ref lsm_ruc                <td> control for use of fractional soil in RUC land surface model       
+<tr><td>mosaic_soil      <td> lsm_ruc                <td> control for use of fractional soil in RUC land surface model       
                                                          <ul>
                                                          <li>1: use of fractional soil in RUC LSM
                                                          </ul>
                                                          <td>0
-<tr><td>isncond_opt      <td>\ref lsm_ruc                <td> control for soil thermal conductivity option in RUC land surface model    
+<tr><td>isncond_opt      <td> lsm_ruc                <td> control for soil thermal conductivity option in RUC land surface model    
                                                          <ul>
                                                          <li>1: constant
                                                          <li>2: Sturm et al.(1997) \cite sturm_1997
                                                          </ul>
                                                          <td>1
-<tr><td>isncovr_opt      <td>\ref lsm_ruc                <td> control for snow cover fraction option in RUC land surface model 
+<tr><td>isncovr_opt      <td> lsm_ruc                <td> control for snow cover fraction option in RUC land surface model 
                                                          <ul>
                                                          <li>1: original formulation using threshold snow depth to compute snow fraction 
                                                          <li>2: Niu-Yang(2007) \cite Niu_2007
@@ -700,13 +683,13 @@ lsoil_lsm
                                                          </ul>
                                                          <td>1
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b other \b surface \b scheme \b options
-<tr><td>lkm              <td>\ref clm_lake                         <td>0: no lake; 1: lake; 2: lake&nsst             <td>0
-<tr><td>iopt_lake        <td>\ref clm_lake                         <td>1: flake; 2: CLM lake                         <td>2
-<tr><td>lakedepth_threshold     <td>\ref clm_lake                  <td> lakedepth must be greater than this value to enable a lake model    <td>1.0
-<tr><td>lakefrac_threshold      <td>\ref clm_lake                  <td> lakefrac must be greater than this value to enable a lake model     <td>0.0
-<tr><td>use_lake2m              <td>\ref clm_lake                  <td> use 2m T&Q from CLM lake model      <td>.false.
-clm_debug_print
-clm_lake_debug
+<tr><td>lkm              <td> clm_lake                         <td>0: no lake; 1: lake; 2: lake&nsst             <td>0
+<tr><td>iopt_lake        <td> clm_lake                         <td>1: flake; 2: CLM lake                         <td>2
+<tr><td>lakedepth_threshold     <td> clm_lake                  <td> lakedepth must be greater than this value to enable a lake model    <td>1.0
+<tr><td>lakefrac_threshold      <td> clm_lake                  <td> lakefrac must be greater than this value to enable a lake model     <td>0.0
+<tr><td>use_lake2m              <td> clm_lake                  <td> use 2m T&Q from CLM lake model      <td>.false.
+<tr><td>clm_debug_print       <td>           <td>enables prints in clm_lake <td>.false.
+<tr><td>clm_lake_debug        <td>           <td>verbose debugging in clm_lake   <td>.false.
 <tr><td>nstf_name(5)    <td>sfc_nst                   <td>NSST related paramters:\n                                                         
                                                       <ul>
                                                       <li> nstf_name(1): 0=NSST off, 1= NSST on but uncoupled, 2= NSST on and coupled
@@ -757,13 +740,12 @@ clm_lake_debug
 <tr><td>fscav_aero    <td>cs_conv,cs_conv_pre,samfshalcnv,samfdeepcnv, samfaerosols,cu_gf_driver                <td>aerosol scavenging factors      <td>
 <tr><td>lightning_threat       <td>maximum_hourly_diagnostics          <td>report lightning threat indices    <td>.false.
 <tr><td>do_ccpp_suite_sim      <td>GFS_ccpp_suite_sim_pre, ccpp_suite_simulator          <td>CCPP suite simulator          <td>.false.
-<tr><td>fh_dfi_radar           <td>          <td>begin&end of four timespans over which radar_tten is applied      <td>-2e10
-<tr><td>radar_tten_limits(2)      <td>          <td>radar_tten values outside this range (min,max) are discarded
-<tr><td>do_cap_suppress        <td>          <td>set .true. to turn on convection suppression in Grell-Freitas scheme during limited intervals when fh_dfi_radar is enabled <td>.true.
+<tr><td>fh_dfi_radar           <td>GFS_MP_generic_post, cu_gf_driver, cu_c3_driver          <td>begin&end of four timespans over which radar_tten is applied      <td>-2e10
+<tr><td>radar_tten_limits(2)      <td>GFS_MP_generic_post          <td>radar_tten values outside this range (min,max) are discarded
+<tr><td>do_cap_suppress        <td>cu_gf_driver, cu_c3_driver          <td>set .true. to turn on convection suppression in Grell-Freitas scheme during limited intervals when fh_dfi_radar is enabled <td>.true.
 iccn
-<tr><td>kice       <td>    <td>number of layers in ice      <td>2
-<tr><td>lrefres      <td>      <td>flag for radar reflectivity in restart file
+<tr><td>kice       <td>sfc_sice    <td>number of layers in ice      <td>2
+<tr><td>lrefres      <td>      <td>flag for radar reflectivity in restart file     <td>.false.
 </table>
-
 
 */

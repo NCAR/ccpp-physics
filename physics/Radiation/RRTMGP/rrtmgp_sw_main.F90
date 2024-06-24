@@ -26,10 +26,7 @@ module rrtmgp_sw_main
 
 contains
 
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_main_init
-  ! #########################################################################################
-!> \section arg_table_rrtmgp_sw_main_init
+!> \section arg_table_rrtmgp_sw_main_init Argument Table
 !! \htmlinclude rrtmgp_sw_main_init.html
 !!
   subroutine rrtmgp_sw_main_init(rrtmgp_root_dir, rrtmgp_sw_file_gas, rrtmgp_sw_file_clouds,&
@@ -79,10 +76,7 @@ contains
 
   end subroutine rrtmgp_sw_main_init
 
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_main_run
-  ! #########################################################################################
-!> \section arg_table_rrtmgp_sw_main_run
+!> \section arg_table_rrtmgp_sw_main_run Argument Table
 !! \htmlinclude rrtmgp_sw_main_run.html
 !!
   subroutine rrtmgp_sw_main_run(doSWrad, doSWclrsky, top_at_1, doGP_sgs_cnv, doGP_sgs_pbl,  &

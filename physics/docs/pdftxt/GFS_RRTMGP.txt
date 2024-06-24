@@ -4,11 +4,7 @@
 \section des_rrtmgp Description
 
 \section  intraphysics_rrtmgp Intraphysics Communication
- + For RRTMG-Longwave radiation parameterization (\ref arg_table_rrtmg_lw_run)
- + For RRTMG-Shortwave radiation parameterization (\ref arg_table_rrtmg_sw_run) 
 
 \section  gen_al_rrtmgp General Algorithm
- + \ref gen_lwrad
- + \ref gen_swrad
 
 */

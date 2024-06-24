@@ -24,77 +24,75 @@ module rrtmgp_lw_gas_optics
        nminor_absorber_intervals_lowerLW, nminor_absorber_intervals_upperLW,          &
        ncontributors_lowerLW, ncontributors_upperLW, nfit_coeffsLW
   integer, dimension(:), allocatable :: &
-       kminor_start_lowerLW,              & ! Starting index in the [1, nContributors] vector for a contributor
-                                            ! given by \"minor_gases_lower\" (lower atmosphere)
-       kminor_start_upperLW                 ! Starting index in the [1, nContributors] vector for a contributor
-                                            ! given by \"minor_gases_upper\" (upper atmosphere)
+       kminor_start_lowerLW,              & !< Starting index in the [1, nContributors] vector for a contributor
+                                            !< given by \"minor_gases_lower\" (lower atmosphere)
+       kminor_start_upperLW                 !< Starting index in the [1, nContributors] vector for a contributor
+                                            !< given by \"minor_gases_upper\" (upper atmosphere)
   integer, dimension(:,:), allocatable :: &
-       band2gptLW,                        & ! Beginning and ending gpoint for each band
-       minor_limits_gpt_lowerLW,          & ! Beginning and ending gpoint for each minor interval in lower atmosphere
-       minor_limits_gpt_upperLW             ! Beginning and ending gpoint for each minor interval in upper atmosphere
+       band2gptLW,                        & !< Beginning and ending gpoint for each band
+       minor_limits_gpt_lowerLW,          & !< Beginning and ending gpoint for each minor interval in lower atmosphere
+       minor_limits_gpt_upperLW             !< Beginning and ending gpoint for each minor interval in upper atmosphere
   integer, dimension(:,:,:), allocatable :: &
-       key_speciesLW                        ! Key species pair for each band
+       key_speciesLW                        !< Key species pair for each band
   real(kind_phys) :: &
-       press_ref_tropLW,                  & ! Reference pressure separating the lower and upper atmosphere [Pa]
-       temp_ref_pLW,                      & ! Standard spectroscopic reference pressure [Pa]
-       temp_ref_tLW                         ! Standard spectroscopic reference temperature [K]
+       press_ref_tropLW,                  & !< Reference pressure separating the lower and upper atmosphere [Pa]
+       temp_ref_pLW,                      & !< Standard spectroscopic reference pressure [Pa]
+       temp_ref_tLW                         !< Standard spectroscopic reference temperature [K]
   real(kind_phys), dimension(:), allocatable :: &
-       press_refLW,                       & ! Pressures for reference atmosphere; press_ref(# reference layers) [Pa]
-       temp_refLW                           ! Temperatures for reference atmosphere; temp_ref(# reference layers) [K]
+       press_refLW,                       & !< Pressures for reference atmosphere; press_ref(# reference layers) [Pa]
+       temp_refLW                           !< Temperatures for reference atmosphere; temp_ref(# reference layers) [K]
   real(kind_phys), dimension(:,:), allocatable :: &
-       band_limsLW,                       & ! Beginning and ending wavenumber [cm -1] for each band
-       totplnkLW,                         & ! Integrated Planck function by band
+       band_limsLW,                       & !< Beginning and ending wavenumber [cm -1] for each band
+       totplnkLW,                         & !< Integrated Planck function by band
        optimal_angle_fitLW
   real(kind_phys), dimension(:,:,:), allocatable :: &
-       vmr_refLW,                         & ! volume mixing ratios for reference atmospherer
-       kminor_lowerLW,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
-                                            ! [nTemp x nEta x nContributors] array)
-       kminor_upperLW,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
-                                            ! [nTemp x nEta x nContributors] array)
-       rayl_lowerLW,                      & ! Not used in LW, rather allocated(rayl_lower) is used
-       rayl_upperLW                         ! Not used in LW, rather allocated(rayl_upper) is used
+       vmr_refLW,                         & !< volume mixing ratios for reference atmospherer
+       kminor_lowerLW,                    & !< (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
+                                            !< [nTemp x nEta x nContributors] array)
+       kminor_upperLW,                    & !< (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
+                                            !< [nTemp x nEta x nContributors] array)
+       rayl_lowerLW,                      & !< Not used in LW, rather allocated(rayl_lower) is used
+       rayl_upperLW                         !< Not used in LW, rather allocated(rayl_upper) is used
   real(kind_phys), dimension(:,:,:,:), allocatable :: &
-       kmajorLW,                          & ! Stored absorption coefficients due to major absorbing gases
-       planck_fracLW                        ! Planck fractions   
+       kmajorLW,                          & !< Stored absorption coefficients due to major absorbing gases
+       planck_fracLW                        !< Planck fractions   
   character(len=32),  dimension(:), allocatable :: &
-       gas_namesLW,                       & ! Names of absorbing gases
-       gas_minorLW,                       & ! Name of absorbing minor gas
-       identifier_minorLW,                & ! Unique string identifying minor gas
-       minor_gases_lowerLW,               & ! Names of minor absorbing gases in lower atmosphere
-       minor_gases_upperLW,               & ! Names of minor absorbing gases in upper atmosphere
-       scaling_gas_lowerLW,               & ! Absorption also depends on the concentration of this gas
-       scaling_gas_upperLW                  ! Absorption also depends on the concentration of this gas
+       gas_namesLW,                       & !< Names of absorbing gases
+       gas_minorLW,                       & !< Name of absorbing minor gas
+       identifier_minorLW,                & !< Unique string identifying minor gas
+       minor_gases_lowerLW,               & !< Names of minor absorbing gases in lower atmosphere
+       minor_gases_upperLW,               & !< Names of minor absorbing gases in upper atmosphere
+       scaling_gas_lowerLW,               & !< Absorption also depends on the concentration of this gas
+       scaling_gas_upperLW                  !< Absorption also depends on the concentration of this gas
   logical(wl), dimension(:), allocatable :: &
-       minor_scales_with_density_lowerLW, & ! Density scaling is applied to minor absorption coefficients
-       minor_scales_with_density_upperLW, & ! Density scaling is applied to minor absorption coefficients
-       scale_by_complement_lowerLW,       & ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
-       scale_by_complement_upperLW          ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
+       minor_scales_with_density_lowerLW, & !< Density scaling is applied to minor absorption coefficients
+       minor_scales_with_density_upperLW, & !< Density scaling is applied to minor absorption coefficients
+       scale_by_complement_lowerLW,       & !< Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
+       scale_by_complement_upperLW          !< Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
 
 contains
 
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_gas_optics_init
-  ! #########################################################################################
+!>
   subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas,                 &
        active_gases_array, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
-         rrtmgp_root_dir,  & ! RTE-RRTMGP root directory
-         rrtmgp_lw_file_gas  ! RRTMGP file containing K-distribution data
+         rrtmgp_root_dir,  & !< RTE-RRTMGP root directory
+         rrtmgp_lw_file_gas  !< RRTMGP file containing K-distribution data
     character(len=*), dimension(:), intent(in) :: &
-         active_gases_array  ! List of active gases from namelist as array   
+         active_gases_array  !< List of active gases from namelist as array   
     type(MPI_Comm),intent(in) :: &
-         mpicomm             ! MPI communicator
+         mpicomm             !< MPI communicator
     integer,intent(in) :: &
-         mpirank,          & ! Current MPI rank
-         mpiroot             ! Master MPI rank
+         mpirank,          & !< Current MPI rank
+         mpiroot             !< Master MPI rank
  
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg              ! CCPP error message
+         errmsg              !< CCPP error message
     integer,          intent(out) :: &
-         errflg              ! CCPP error code
+         errflg              !< CCPP error code
 
     ! Local variables
     integer :: ncid, dimID, varID, status, ii, mpierr, iChar

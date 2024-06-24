@@ -1,8 +1,5 @@
 !> \file GFS_rrtmgp_post.F90
-!!
-!> \defgroup GFS_rrtmgp_post GFS_rrtmgp_post.F90
-!!
-!! \brief RRTMGP post-processing routine.
+!! RRTMGP post-processing routine.
 !!
 module GFS_rrtmgp_post
   use machine,                   only: kind_phys
@@ -15,23 +12,16 @@ module GFS_rrtmgp_post
   public GFS_rrtmgp_post_run
 
 contains
-  ! ######################################################################################## 
-!>\defgroup gfs_rrtmgp_post_mod GFS RRTMGP Post Module
-!> \section arg_table_GFS_rrtmgp_post_run
+
+!> \section arg_table_GFS_rrtmgp_post_run Argument Table
 !! \htmlinclude GFS_rrtmgp_post.html
-!!
-!! \ingroup GFS_rrtmgp_post
-!!
-!! \brief The all-sky radiation tendency is computed, the clear-sky tendency is computed 
+!!The all-sky radiation tendency is computed, the clear-sky tendency is computed 
 !! if requested.
 !!
 !! RRTMGP surface and TOA fluxes are copied to fields that persist between radiation/physics
 !! calls.
 !! 
 !! (optional) Save additional diagnostics.
-!!
-!! \section GFS_rrtmgp_post_run
-  ! ######################################################################################## 
   subroutine GFS_rrtmgp_post_run (nCol, nLev, nDay, iSFC, iTOA, idxday, doLWrad, doSWrad,  &
        do_lw_clrsky_hr, do_sw_clrsky_hr, save_diag, fhlwr, fhswr, sfc_alb_nir_dir,         &
        sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, p_lev, tsfa, coszen, coszdg, &

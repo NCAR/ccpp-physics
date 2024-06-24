@@ -1,8 +1,5 @@
 !> \file GFS_rrtmgp_cloud_mp.F90
-!!
-!> \defgroup GFS_rrtmgp_cloud_mp GFS_rrtmgp_cloud_mp.F90
-!!
-!! \brief This module contains the interface for ALL cloud microphysics assumptions and 
+!! This module contains the interface for ALL cloud microphysics assumptions and 
 !! the RRTMGP radiation scheme. Specific details below in subroutines.
 !!
 module GFS_rrtmgp_cloud_mp
@@ -31,17 +28,11 @@ module GFS_rrtmgp_cloud_mp
 
 contains  
 
-!>\defgroup gfs_rrtmgp_cloud_mp_mod GFS RRTMGP Cloud MP Module
-!! \section arg_table_GFS_rrtmgp_cloud_mp_run
+!> \section arg_table_GFS_rrtmgp_cloud_mp_run Argument Table
 !! \htmlinclude GFS_rrtmgp_cloud_mp_run_html
-!!
-!> \ingroup GFS_rrtmgp_cloud_mp
-!!
 !! Here the cloud-radiative properties (optical-path, particle-size and sometimes cloud-
 !! fraction) are computed for cloud producing physics schemes (e.g GFDL-MP, Thompson-MP,
 !! MYNN-EDMF-pbl, GF-convective, and SAMF-convective clouds).
-!!
-!! \section GFS_rrtmgp_cloud_mp_run
   subroutine GFS_rrtmgp_cloud_mp_run(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,     &
        i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc, i_cldice_nc, i_twa, kdt,  &
        imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, doSWrad, doLWrad, effr_in, lmfshal,   &
@@ -310,8 +301,7 @@ contains
 
   end subroutine GFS_rrtmgp_cloud_mp_run
 
-!> \ingroup GFS_rrtmgp_cloud_mp
-!! Compute cloud radiative properties for Grell-Freitas convective cloud scheme.
+!> Compute cloud radiative properties for Grell-Freitas convective cloud scheme.
 !!                 (Adopted from module_SGSCloud_RadPre)
 !!  
 !! - The total convective cloud condensate is partitoned by phase, using temperature, into
@@ -390,8 +380,7 @@ contains
     enddo
   end subroutine cloud_mp_GF
 
-!> \ingroup GFS_rrtmgp_cloud_mp 
-!! Compute cloud radiative properties for MYNN-EDMF PBL cloud scheme.
+!> Compute cloud radiative properties for MYNN-EDMF PBL cloud scheme.
 !!                    (Adopted from module_SGSCloud_RadPre)
 !!
 !! - Cloud-fraction, liquid, and ice condensate mixing-ratios from MYNN-EDMF cloud scheme
@@ -463,8 +452,7 @@ contains
   end subroutine cloud_mp_MYNN
 
 
-!> \ingroup GFS_rrtmgp_cloud_mp 
-!! Compute cloud radiative properties for SAMF convective cloud scheme.
+!> Compute cloud radiative properties for SAMF convective cloud scheme.
 !!
 !! - The total-cloud convective mixing-ratio is partitioned by phase into liquid/ice 
 !!   cloud properties. LWP and IWP are computed.
@@ -527,8 +515,7 @@ contains
 
   end subroutine cloud_mp_SAMF
 
-!> \ingroup GFS_rrtmgp_cloud_mp 
-!! This routine computes the cloud radiative properties for a "unified cloud".
+!> This routine computes the cloud radiative properties for a "unified cloud".
 !! - "unified cloud" implies that the cloud-fraction is PROVIDED.
 !! - The cloud water path is computed for all provided cloud mixing-ratios and hydrometeors.
 !! - If particle sizes are provided, they are used. If not, default values are assigned.
@@ -658,8 +645,8 @@ contains
     enddo       ! nLev
 
   end subroutine cloud_mp_uni
-!> \ingroup GFS_rrtmgp_cloud_mp 
-!! This routine computes the cloud radiative properties for the Thompson cloud micro-
+
+!> This routine computes the cloud radiative properties for the Thompson cloud micro-
 !! physics scheme.
 !!
 !! - The cloud water path is computed for all provided cloud mixing-ratios and hydrometeors.
@@ -791,8 +778,7 @@ contains
 
   end subroutine cloud_mp_thompson
 
-!> \ingroup GFS_rrtmgp_cloud_mp 
-!! This function computes the cloud-fraction following.
+!> This function computes the cloud-fraction following.
 !! Xu-Randall(1996) A Semiempirical Cloudiness Parameterization for Use in Climate Models
 !! https://doi.org/10.1175/1520-0469(1996)053<3084:ASCPFU>2.0.CO;2
 !!
@@ -835,11 +821,8 @@ contains
     return
   end function
 
-  ! ######################################################################################
-  ! This routine is a wrapper to update the Thompson effective particle sizes used by the
-  ! RRTMGP radiation scheme.
-  !
-  ! ######################################################################################
+  !> This routine is a wrapper to update the Thompson effective particle sizes used by the
+  !! RRTMGP radiation scheme.
   subroutine cmp_reff_Thompson(nLev, nCol, i_cldliq, i_cldice, i_cldsnow, i_cldice_nc,   &
        i_cldliq_nc, i_twa, q_lay, p_lay, t_lay, tracer, con_eps, con_rd, ltaerosol,      &
        mraerosol, lsmask, effrin_cldliq, effrin_cldice, effrin_cldsnow)
