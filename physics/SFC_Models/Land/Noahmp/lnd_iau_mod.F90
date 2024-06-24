@@ -39,7 +39,7 @@ module land_iau_mod
       real(kind=kind_phys),allocatable :: stc_inc(:,:,:)   
       real(kind=kind_phys),allocatable :: slc_inc(:,:,:)   
       logical                          :: in_interval = .false.
-      integer,allocatable              :: snow_land_mask(:, :, :)
+      ! integer,allocatable              :: snow_land_mask(:, :, :)
   end type land_iau_external_data_type
 
   type land_iau_state_type
@@ -332,28 +332,6 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    rdt = 1.0/dt
    Land_IAU_state%rdt = rdt
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'land_iau interval, rdt',Land_IAU_Control%iau_delthrs,Land_IAU_state%rdt
-
-   allocate(Land_IAU_Data%snow_land_mask(nlon, nlat, ntimes))
-   fname = 'INPUT/'//trim(Land_IAU_Control%iau_inc_files(1))    
-   inquire (file=trim(fname), exist=exists)    
-   if (exists) then   !  if( file_exist(fname) ) then
-      ! call open_ncfile( fname, ncid )        
-      status = nf90_open(trim(fname), NF90_NOWRITE, ncid)  ! open the file
-      call netcdf_err(status, ' opening file '//trim(fname), errflg, errmsg) 
-      if (errflg .ne. 0) return     
-      ! var stored as soilt1_inc(Time, yaxis_1, xaxis_1)
-      call get_var3d_values(ncid, varid, Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, 1, n_t, &
-                               Land_IAU_Data%snow_land_mask(:, :, it), status)
-      call netcdf_err(status, 'reading var: '//trim(stc_vars(i)), errflg, errmsg)
-      if (errflg .ne. 0) return            
-      status = nf90_close(ncid)
-      CALL netcdf_err(status, 'closing file: '//trim(fname) , errflg, errmsg) 
-      if (errflg .ne. 0) return     
-   else
-      errmsg = 'FATAL Error in Land_IAU_initialize: Expected file '// trim(fname)//' for DA increment does not exist'
-      errflg = 1
-      return
-   endif
 
    ! Read all increment files at iau init time (at beginning of cycle) 
    ! allocate (wk3_stc(n_t, 1:im,jbeg:jend, 1:km))   
