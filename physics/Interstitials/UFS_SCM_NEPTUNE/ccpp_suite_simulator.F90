@@ -1,20 +1,19 @@
-! ########################################################################################
-!
-! Description: This suite simulates the evolution of the internal physics state 
-!              represented by a CCPP Suite Definition File (SDF).
-!
-! To activate this suite it must be a) embedded within the SDF and b) activated through
-! the physics namelist.
-! The derived-data type "base_physics_process" contains the metadata needed to reconstruct 
-! the temporal evolution of the state. An array of base_physics_process, physics_process,
-! is populated by the host during initialization and passed to the physics. Additionally, 
-! this type holds any data, or type-bound procedures, required by the suite simulator(s).
-!
-! For this initial demonstration we are using 2-dimensional (height, time) forcing data,
-! which is on the same native vertical grid as the SCM. The dataset has a temporal 
-! resolution of 1-hour, created by averaging all local times from a Tropical Warm Pool 
-! International Cloud Experiment (TWPICE) case. This was to create a dataset with a 
-! (constant) diurnal cycle.
+!>\file ccpp_suite_simulator.F90
+!! Description: This suite simulates the evolution of the internal physics state 
+!!              represented by a CCPP Suite Definition File (SDF).
+!!
+!! To activate this suite it must be a) embedded within the SDF and b) activated through
+!! the physics namelist.
+!! The derived-data type "base_physics_process" contains the metadata needed to reconstruct 
+!! the temporal evolution of the state. An array of base_physics_process, physics_process,
+!! is populated by the host during initialization and passed to the physics. Additionally, 
+!! this type holds any data, or type-bound procedures, required by the suite simulator(s).
+!!
+!! For this initial demonstration we are using 2-dimensional (height, time) forcing data,
+!! which is on the same native vertical grid as the SCM. The dataset has a temporal 
+!! resolution of 1-hour, created by averaging all local times from a Tropical Warm Pool 
+!! International Cloud Experiment (TWPICE) case. This was to create a dataset with a 
+!! (constant) diurnal cycle.
 !
 ! ########################################################################################
 module ccpp_suite_simulator

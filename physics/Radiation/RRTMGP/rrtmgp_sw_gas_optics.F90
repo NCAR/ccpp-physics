@@ -1,10 +1,7 @@
 !> \file rrtmgp_sw_gas_optics.F90
-!!
-!> \defgroup rrtmgp_sw_gas_optics rrtmgp_sw_gas_optics.F90
-!!
-!! \brief This module contains a routine to initialize the k-distribution data used
+!! This module contains a routine to initialize the k-distribution data used
 !! by the RRTMGP shortwave radiation scheme.
-!!
+
 module rrtmgp_sw_gas_optics
   use machine,                only: kind_phys
   use mo_rte_kind,            only: wl
@@ -79,43 +76,34 @@ module rrtmgp_sw_gas_optics
        scale_by_complement_upperSW          ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
 contains
 
-  ! ######################################################################################
-!>\defgroup rrtmgp_sw_gas_optics_mod GFS RRTMGP-SW Gas Optics Module
-!> @{
-!! \section arg_table_rrtmgp_sw_gas_optics_init
+!> \section arg_table_rrtmgp_sw_gas_optics_init Argument Table
 !! \htmlinclude rrtmgp_sw_gas_optics.html
-!!
-!> \ingroup rrtmgp_sw_gas_optics
 !!
 !! RRTMGP relies heavility on derived-data-types, which contain type-bound procedures 
 !! that are referenced frequently throughout the RRTMGP shortwave scheme. The data needed
 !! for the correlated k-distribution is also contained within this type. Within this module,
 !! the full k-distribution data is read in, reduced by the "active gases" provided, and
 !! loaded into the RRTMGP DDT, ty_gas_optics_rrtmgp.
-!!
-!! \section rrtmgp_sw_gas_optics_init
-!> @{ 
-  ! ######################################################################################  
   subroutine rrtmgp_sw_gas_optics_init(rrtmgp_root_dir, rrtmgp_sw_file_gas,              &
        active_gases_array, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
-         rrtmgp_root_dir,  & ! RTE-RRTMGP root directory
-         rrtmgp_sw_file_gas  ! RRTMGP file containing K-distribution data
+         rrtmgp_root_dir,  & !< RTE-RRTMGP root directory
+         rrtmgp_sw_file_gas  !< RRTMGP file containing K-distribution data
     character(len=*), dimension(:), intent(in) :: &
-         active_gases_array  ! List of active gases from namelist as array
+         active_gases_array  !< List of active gases from namelist as array
     type(MPI_Comm),intent(in) :: &
-         mpicomm             ! MPI communicator
+         mpicomm             !< MPI communicator
     integer,intent(in) :: &
-         mpirank,          & ! Current MPI rank
-         mpiroot             ! Master MPI rank
+         mpirank,          & !< Current MPI rank
+         mpiroot             !< Master MPI rank
 
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg              ! CCPP error message
+         errmsg              !< CCPP error message
     integer,          intent(out) :: &
-         errflg              ! CCPP error code
+         errflg              !< CCPP error code
 
     ! Local variables
     integer :: status, ncid, dimid, varID, mpierr, iChar
@@ -497,6 +485,5 @@ contains
          sb_defaultSW, rayl_lowerSW, rayl_upperSW))
 
   end subroutine rrtmgp_sw_gas_optics_init
-!> @}
 end module rrtmgp_sw_gas_optics
  

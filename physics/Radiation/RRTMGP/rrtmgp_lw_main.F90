@@ -1,7 +1,6 @@
 !> \file rrtmgp_lw_main.F90
 !! This file contains the longwave RRTMGP radiation scheme.
 !!
-! ###########################################################################################
 module rrtmgp_lw_main
   use mpi_f08
   use machine,                only: kind_phys, kind_dbl_prec
@@ -25,15 +24,10 @@ module rrtmgp_lw_main
 
   public rrtmgp_lw_main_init, rrtmgp_lw_main_run
 contains
-!! \section arg_table_rrtmgp_lw_main_init
+
+!> \section arg_table_rrtmgp_lw_main_init Argument Table
 !! \htmlinclude rrtmgp_lw_main_int.html
 !!
-!> \ingroup rrtmgp_lw_main
-!!
-!! \brief 
-!!
-!! \section rrtmgp_lw_main_init
-!> @{
   subroutine rrtmgp_lw_main_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, rrtmgp_lw_file_clouds,&
        active_gases_array, doGP_cldoptics_PADE, doGP_cldoptics_LUT, doGP_sgs_pbl,           &
        doGP_sgs_cnv, nrghice, mpicomm, mpirank, mpiroot, nLay, rrtmgp_phys_blksz,           &
@@ -41,33 +35,33 @@ contains
 
     ! Inputs
     character(len=128),intent(in) :: &
-         rrtmgp_root_dir,       & ! RTE-RRTMGP root directory
-         rrtmgp_lw_file_clouds, & ! RRTMGP file containing coefficients used to compute
-                                  ! clouds optical properties
-         rrtmgp_lw_file_gas       ! RRTMGP file containing coefficients used to compute
-                                  ! gaseous optical properties
+         rrtmgp_root_dir,       & !< RTE-RRTMGP root directory
+         rrtmgp_lw_file_clouds, & !< RRTMGP file containing coefficients used to compute
+                                  !< clouds optical properties
+         rrtmgp_lw_file_gas       !< RRTMGP file containing coefficients used to compute
+                                  !! gaseous optical properties
     character(len=*), dimension(:), intent(in) :: &
-         active_gases_array ! List of active gases from namelist as array)
+         active_gases_array       !< List of active gases from namelist as array)
     logical, intent(in) :: &
-         doGP_cldoptics_PADE,   & ! Use RRTMGP cloud-optics: PADE approximation?
-         doGP_cldoptics_LUT,    & ! Use RRTMGP cloud-optics: LUTs?
-         doGP_sgs_pbl,          & ! Flag to include sgs PBL clouds
-         doGP_sgs_cnv             ! Flag to include sgs convective clouds 
+         doGP_cldoptics_PADE,   & !< Use RRTMGP cloud-optics: PADE approximation?
+         doGP_cldoptics_LUT,    & !< Use RRTMGP cloud-optics: LUTs?
+         doGP_sgs_pbl,          & !< Flag to include sgs PBL clouds
+         doGP_sgs_cnv             !< Flag to include sgs convective clouds 
     integer, intent(inout) :: &
-         nrghice                  ! Number of ice-roughness categories
+         nrghice                  !< Number of ice-roughness categories
     type(MPI_Comm),intent(in) :: &
-         mpicomm                  ! MPI communicator
+         mpicomm                  !< MPI communicator
     integer,intent(in) :: &
-         mpirank,               & ! Current MPI rank
-         mpiroot,               & ! Master MPI rank
-         rrtmgp_phys_blksz,     & ! Number of horizontal points to process at once.
+         mpirank,               & !< Current MPI rank
+         mpiroot,               & !< Master MPI rank
+         rrtmgp_phys_blksz,     & !< Number of horizontal points to process at once.
          nLay
 
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg                   ! CCPP error message
+         errmsg                   !< CCPP error message
     integer,          intent(out) :: &
-         errflg                   ! CCPP error code
+         errflg                   !< CCPP error code
 
     ! Initialize CCPP error handling variables 
     errmsg = ''
@@ -83,18 +77,10 @@ contains
          errmsg, errflg)
 
   end subroutine rrtmgp_lw_main_init
-!> @}
-  ! ######################################################################################
-!! \section arg_table_rrtmgp_lw_main_run
+
+!> \section arg_table_rrtmgp_lw_main_run Argument Table
 !! \htmlinclude rrtmgp_lw_main_run.html
 !!
-!> \ingroup rrtmgp_lw_main
-!!
-!! \brief
-!!
-!! \section rrtmgp_lw_main_run
-!> @{
-  ! ######################################################################################
   subroutine rrtmgp_lw_main_run(doLWrad, doLWclrsky, top_at_1, doGP_lwscat,              &
        use_LW_jacobian, doGP_sgs_cnv, doGP_sgs_pbl, nCol, nLay, nGases,rrtmgp_phys_blksz,&
        nGauss_angles, icseed_lw, iovr, iovr_convcld, iovr_max, iovr_maxrand, iovr_rand,  &
@@ -109,83 +95,83 @@ contains
 
     ! Inputs
     logical, intent(in) :: &
-         doLWrad,            & ! Flag to perform longwave calculation
-         doLWclrsky,         & ! Flag to compute clear-sky fluxes
-         top_at_1,           & ! Flag for vertical ordering convention
-         use_LW_jacobian,    & ! Flag to compute Jacobian of longwave surface flux
-         doGP_sgs_pbl,       & ! Flag to include sgs PBL clouds
-         doGP_sgs_cnv,       & ! Flag to include sgs convective clouds
-         doGP_lwscat           ! Flag to include scattering in clouds
+         doLWrad,            & !< Flag to perform longwave calculation
+         doLWclrsky,         & !< Flag to compute clear-sky fluxes
+         top_at_1,           & !< Flag for vertical ordering convention
+         use_LW_jacobian,    & !< Flag to compute Jacobian of longwave surface flux
+         doGP_sgs_pbl,       & !< Flag to include sgs PBL clouds
+         doGP_sgs_cnv,       & !< Flag to include sgs convective clouds
+         doGP_lwscat           !< Flag to include scattering in clouds
     integer,intent(in) :: &
-         nCol,               & ! Number of horizontal points
-         nLay,               & ! Number of vertical grid points.
-         nGases,             & ! Number of active gases
-         rrtmgp_phys_blksz,  & ! Number of horizontal points to process at once.
-         nGauss_angles,      & ! Number of gaussian quadrature angles used
-         iovr,               & ! Choice of cloud-overlap method
-         iovr_convcld,       & ! Choice of convective cloud-overlap
-         iovr_max,           & ! Flag for maximum cloud overlap method
-         iovr_maxrand,       & ! Flag for maximum-random cloud overlap method
-         iovr_rand,          & ! Flag for random cloud overlap method
-         iovr_dcorr,         & ! Flag for decorrelation-length cloud overlap method
-         iovr_exp,           & ! Flag for exponential cloud overlap method
-         iovr_exprand,       & ! Flag for exponential-random cloud overlap method
-         isubc_lw              ! Flag for cloud-seeding (rng) for cloud-sampling
+         nCol,               & !< Number of horizontal points
+         nLay,               & !< Number of vertical grid points.
+         nGases,             & !< Number of active gases
+         rrtmgp_phys_blksz,  & !< Number of horizontal points to process at once.
+         nGauss_angles,      & !< Number of gaussian quadrature angles used
+         iovr,               & !< Choice of cloud-overlap method
+         iovr_convcld,       & !< Choice of convective cloud-overlap
+         iovr_max,           & !< Flag for maximum cloud overlap method
+         iovr_maxrand,       & !< Flag for maximum-random cloud overlap method
+         iovr_rand,          & !< Flag for random cloud overlap method
+         iovr_dcorr,         & !< Flag for decorrelation-length cloud overlap method
+         iovr_exp,           & !< Flag for exponential cloud overlap method
+         iovr_exprand,       & !< Flag for exponential-random cloud overlap method
+         isubc_lw              !< Flag for cloud-seeding (rng) for cloud-sampling
     integer,intent(in),dimension(:) :: &
-         icseed_lw             ! Seed for random number generation for longwave radiation
+         icseed_lw             !< Seed for random number generation for longwave radiation
     real(kind_phys), dimension(:), intent(in) :: &
-         semis,              & ! Surface-emissivity (1)
-         tsfg                  ! Skin temperature (K)
+         semis,              & !< Surface-emissivity (1)
+         tsfg                  !< Skin temperature (K)
     real(kind_phys), dimension(:,:), intent(in) :: &
-         p_lay,               & ! Pressure @ model layer-centers (Pa)
-         t_lay,               & ! Temperature (K)
-         p_lev,               & ! Pressure @ model layer-interfaces (Pa)
-         t_lev,               & ! Temperature @ model levels (K)
-         vmr_o2,              & ! Molar-mixing ratio oxygen
-         vmr_h2o,             & ! Molar-mixing ratio water vapor
-         vmr_o3,              & ! Molar-mixing ratio ozone
-         vmr_ch4,             & ! Molar-mixing ratio methane
-         vmr_n2o,             & ! Molar-mixing ratio nitrous oxide
-         vmr_co2,             & ! Molar-mixing ratio carbon dioxide
-         cld_frac,            & ! Cloud-fraction for   stratiform   clouds
-         cld_lwp,             & ! Water path for       stratiform   liquid cloud-particles
-         cld_reliq,           & ! Effective radius for stratiform   liquid cloud-particles
-         cld_iwp,             & ! Water path for       stratiform   ice    cloud-particles
-         cld_reice,           & ! Effective radius for stratiform   ice    cloud-particles
-         cld_swp,             & ! Water path for                    snow   hydrometeors
-         cld_resnow,          & ! Effective radius for              snow   hydrometeors
-         cld_rwp,             & ! Water path for                    rain   hydrometeors
-         cld_rerain,          & ! Effective radius for              rain   hydrometeors
-         precip_frac,         & ! Precipitation fraction (not active, currently precipitation optics uses cloud-fraction)
-         cld_cnv_lwp,         & ! Water path for       convective   liquid cloud-particles
-         cld_cnv_reliq,       & ! Effective radius for convective   liquid cloud-particles
-         cld_cnv_iwp,         & ! Water path for       convective   ice    cloud-particles
-         cld_cnv_reice,       & ! Effective radius for convective   ice    cloud-particles
-         cld_pbl_lwp,         & ! Water path for       PBL          liquid cloud-particles
-         cld_pbl_reliq,       & ! Effective radius for PBL          liquid cloud-particles
-         cld_pbl_iwp,         & ! Water path for       PBL          ice    cloud-particles
-         cld_pbl_reice,       & ! Effective radius for PBL          ice    cloud-particles
-         cloud_overlap_param    ! Cloud overlap parameter
+         p_lay,               & !< Pressure @ model layer-centers (Pa)
+         t_lay,               & !< Temperature (K)
+         p_lev,               & !< Pressure @ model layer-interfaces (Pa)
+         t_lev,               & !< Temperature @ model levels (K)
+         vmr_o2,              & !< Molar-mixing ratio oxygen
+         vmr_h2o,             & !< Molar-mixing ratio water vapor
+         vmr_o3,              & !< Molar-mixing ratio ozone
+         vmr_ch4,             & !< Molar-mixing ratio methane
+         vmr_n2o,             & !< Molar-mixing ratio nitrous oxide
+         vmr_co2,             & !< Molar-mixing ratio carbon dioxide
+         cld_frac,            & !< Cloud-fraction for   stratiform   clouds
+         cld_lwp,             & !< Water path for       stratiform   liquid cloud-particles
+         cld_reliq,           & !< Effective radius for stratiform   liquid cloud-particles
+         cld_iwp,             & !< Water path for       stratiform   ice    cloud-particles
+         cld_reice,           & !< Effective radius for stratiform   ice    cloud-particles
+         cld_swp,             & !< Water path for                    snow   hydrometeors
+         cld_resnow,          & !< Effective radius for              snow   hydrometeors
+         cld_rwp,             & !< Water path for                    rain   hydrometeors
+         cld_rerain,          & !< Effective radius for              rain   hydrometeors
+         precip_frac,         & !< Precipitation fraction (not active, currently precipitation optics uses cloud-fraction)
+         cld_cnv_lwp,         & !< Water path for       convective   liquid cloud-particles
+         cld_cnv_reliq,       & !< Effective radius for convective   liquid cloud-particles
+         cld_cnv_iwp,         & !< Water path for       convective   ice    cloud-particles
+         cld_cnv_reice,       & !< Effective radius for convective   ice    cloud-particles
+         cld_pbl_lwp,         & !< Water path for       PBL          liquid cloud-particles
+         cld_pbl_reliq,       & !< Effective radius for PBL          liquid cloud-particles
+         cld_pbl_iwp,         & !< Water path for       PBL          ice    cloud-particles
+         cld_pbl_reice,       & !< Effective radius for PBL          ice    cloud-particles
+         cloud_overlap_param    !< Cloud overlap parameter
     real(kind_phys), dimension(:,:,:), intent(in) :: &
-          aerlw_tau,          & ! Aerosol optical depth
-          aerlw_ssa,          & ! Aerosol single scattering albedo
-          aerlw_g               ! Aerosol asymmetry paramter
+          aerlw_tau,          & !< Aerosol optical depth
+          aerlw_ssa,          & !< Aerosol single scattering albedo
+          aerlw_g               !< Aerosol asymmetry paramter
     character(len=*), dimension(:), intent(in) :: &
-         active_gases_array     ! List of active gases from namelist as array
+         active_gases_array     !< List of active gases from namelist as array
 
     ! Outputs
     real(kind_phys), dimension(:,:), intent(inout) :: &
-         fluxlwUP_jac,        & ! Jacobian of upwelling LW surface radiation (W/m2/K) 
-         fluxlwUP_allsky,     & ! All-sky flux (W/m2)
-         fluxlwDOWN_allsky,   & ! All-sky flux (W/m2)
-         fluxlwUP_clrsky,     & ! Clear-sky flux (W/m2)
-         fluxlwDOWN_clrsky,   & ! All-sky flux (W/m2)
-         fluxlwUP_radtime,    & ! Copy of fluxes (Used for coupling)
-         fluxlwDOWN_radtime     !
+         fluxlwUP_jac,        & !< Jacobian of upwelling LW surface radiation (W/m2/K) 
+         fluxlwUP_allsky,     & !< All-sky flux (W/m2)
+         fluxlwDOWN_allsky,   & !< All-sky flux (W/m2)
+         fluxlwUP_clrsky,     & !< Clear-sky flux (W/m2)
+         fluxlwDOWN_clrsky,   & !< All-sky flux (W/m2)
+         fluxlwUP_radtime,    & !< Copy of fluxes (Used for coupling)
+         fluxlwDOWN_radtime     !<
     character(len=*), intent(out) :: & 
-         errmsg                 ! CCPP error message
+         errmsg                 !< CCPP error message
     integer, intent(out) :: & 
-         errflg                 ! CCPP error flag
+         errflg                 !< CCPP error flag
 
     ! Local variables
     type(ty_fluxes_byband) :: flux_allsky, flux_clrsky
@@ -605,5 +591,4 @@ contains
     enddo
 
   end subroutine rrtmgp_lw_main_run
-!> @}
 end module rrtmgp_lw_main

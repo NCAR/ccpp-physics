@@ -45,6 +45,7 @@ show some variables in the namelist that must match the SDF.
 <tr><td>cpl_imp_dbg
 <tr><td>use_cice_alb
 <tr><td>rrfs_sd
+rrfs_smoke_debug
 <tr><td>lsidea
 
 
@@ -552,6 +553,7 @@ show some variables in the namelist that must match the SDF.
                                                       </ul>
                                                       <td>1
 <tr><td>lsoil           <td> lsm_noah              <td>number of soil layers           <td>4
+lsoil_lsm
 <tr><td>rdlai           <td> lsm_ruc               <td>flag to read leaf area index from input files    <td>.false.
 <tr><td>ivegsrc         <td> lsm_noah, lsm_ruc, \ref noahmpdrv, sfc_diff          <td>flag for vegetation type dataset choice: \n 
                                                       <ul>
@@ -703,6 +705,8 @@ show some variables in the namelist that must match the SDF.
 <tr><td>lakedepth_threshold     <td>\ref clm_lake                  <td> lakedepth must be greater than this value to enable a lake model    <td>1.0
 <tr><td>lakefrac_threshold      <td>\ref clm_lake                  <td> lakefrac must be greater than this value to enable a lake model     <td>0.0
 <tr><td>use_lake2m              <td>\ref clm_lake                  <td> use 2m T&Q from CLM lake model      <td>.false.
+clm_debug_print
+clm_lake_debug
 <tr><td>nstf_name(5)    <td>sfc_nst                   <td>NSST related paramters:\n                                                         
                                                       <ul>
                                                       <li> nstf_name(1): 0=NSST off, 1= NSST on but uncoupled, 2= NSST on and coupled
@@ -748,23 +752,17 @@ show some variables in the namelist that must match the SDF.
                                               <li>.false.: use reference pressure of 1000 hPa to define potential temperature. This is the alternative method proposed by GSL
                                               </ul>
                                               <td>.false.
-<tr><td>h0facu
-<tr><td>h0facs
-<tr><td>fscav_aero
-<tr><td>lightning_threat
-<tr><td>do_ccpp_suite_sim
-<tr><td>fh_dfi_radar
-<tr><td>radar_tten_limits
-<tr><td>do_cap_suppress
-<tr><td colspan="4" align= center>\b RRFS-SD \b parameters
-<tr><td>dust_drylimit_factor
-<tr><td>dust_moist_correction
-<tr><td>dust_moist_opt
-<tr><td>dust_alpha
-<tr><td>dust_gamma
-<tr><td>wetdep_ls_alpha
-<tr><td>ebb_dcycle
-<tr><td>seas_opt
+<tr><td>h0facu        <td>GFS_surface_composites_post, GFS_surface_generic_post                <td>canopy heat storage factor for sensible heat flux in unstable surface layer <td>0.25
+<tr><td>h0facs        <td>GFS_surface_composites_post, GFS_surface_generic_post                <td>canopy heat storage factor for sensible heat flux in stable surface layer  <td>1.0
+<tr><td>fscav_aero    <td>cs_conv,cs_conv_pre,samfshalcnv,samfdeepcnv, samfaerosols,cu_gf_driver                <td>aerosol scavenging factors      <td>
+<tr><td>lightning_threat       <td>maximum_hourly_diagnostics          <td>report lightning threat indices    <td>.false.
+<tr><td>do_ccpp_suite_sim      <td>GFS_ccpp_suite_sim_pre, ccpp_suite_simulator          <td>CCPP suite simulator          <td>.false.
+<tr><td>fh_dfi_radar           <td>          <td>begin&end of four timespans over which radar_tten is applied      <td>-2e10
+<tr><td>radar_tten_limits(2)      <td>          <td>radar_tten values outside this range (min,max) are discarded
+<tr><td>do_cap_suppress        <td>          <td>set .true. to turn on convection suppression in Grell-Freitas scheme during limited intervals when fh_dfi_radar is enabled <td>.true.
+iccn
+<tr><td>kice       <td>    <td>number of layers in ice      <td>2
+<tr><td>lrefres      <td>      <td>flag for radar reflectivity in restart file
 </table>
 
 

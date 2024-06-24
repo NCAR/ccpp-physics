@@ -1,3 +1,7 @@
+!>\file iounitdef.f
+!! This file defines fortran unit numbers for input/output data
+!! files for the NCEP GFS model.
+
 !!!!!  ==========================================================  !!!!!
 !!!!!             module "module_iounitdef description             !!!!!
 !!!!!  ==========================================================  !!!!!
