@@ -3431,9 +3431,13 @@ c
           if (cnvflg(i) .and. rn(i) > 0.) then
             if (k >= kbcon(i) .and. k < ktcon(i)) then
                cnvw(i,k) = cnvwt(i,k) * xmb(i) * dt2
-               tem=max(sigmaout(i,k),0.)
-               tem1=min(tem,1.0)
-               cnvw(i,k)=cnvw(i,k)*tem1
+               if(progsigma)then
+                tem=max(sigmaout(i,k),0.)
+                tem1=min(tem,1.0)
+                cnvw(i,k)=cnvw(i,k)*tem1
+               else
+                cnvw(i,k)=cnvw(i,k)*sigmagfm(i)
+               endif
             endif
           endif
         enddo
