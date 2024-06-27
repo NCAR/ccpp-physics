@@ -9,7 +9,6 @@ contains
 !> \section arg_table_GFS_GWD_generic_pre_run Argument Table
 !! \htmlinclude GFS_GWD_generic_pre_run.html
 !!
-!!  \section gfs_gwd_ge_pre_ga General Algorithm
       subroutine GFS_GWD_generic_pre_run(                               &
      &           im, levs, nmtvr, mntvar,                               &
      &           oc, oa4, clx, theta,                                   &

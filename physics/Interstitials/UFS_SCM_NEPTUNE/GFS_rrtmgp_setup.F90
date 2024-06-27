@@ -44,14 +44,14 @@ contains
     ! Inputs
     logical, intent(in) :: do_RRTMGP
     integer, intent(in) :: &
-         imp_physics,               & ! Flag for MP scheme
-         imp_physics_fer_hires,     & ! Flag for fer-hires scheme
-         imp_physics_gfdl,          & ! Flag for gfdl scheme
-         imp_physics_thompson,      & ! Flag for thompsonscheme
-         imp_physics_wsm6,          & ! Flag for wsm6 scheme
-         imp_physics_zhao_carr,     & ! Flag for zhao-carr scheme
-         imp_physics_zhao_carr_pdf, & ! Flag for zhao-carr+PDF scheme
-         imp_physics_mg               ! Flag for MG scheme
+         imp_physics,               & !< Flag for MP scheme
+         imp_physics_fer_hires,     & !< Flag for fer-hires scheme
+         imp_physics_gfdl,          & !< Flag for gfdl scheme
+         imp_physics_thompson,      & !< Flag for thompsonscheme
+         imp_physics_wsm6,          & !< Flag for wsm6 scheme
+         imp_physics_zhao_carr,     & !< Flag for zhao-carr scheme
+         imp_physics_zhao_carr_pdf, & !< Flag for zhao-carr+PDF scheme
+         imp_physics_mg               !< Flag for MG scheme
     real(kind_phys), intent(in) :: &
          con_pi, con_t0c, con_c, con_boltz, con_plnk, con_solr_2008, con_solr_2002
     real(kind_phys), dimension(:), intent(in) :: &

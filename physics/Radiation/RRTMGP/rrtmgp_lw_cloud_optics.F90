@@ -58,9 +58,9 @@ module rrtmgp_lw_cloud_optics
   
   ! Parameters used for rain and snow(+groupel) RRTMGP cloud-optics
   real(kind_phys), parameter :: &
-       absrain  = 0.33e-3, & !< Rain drop absorption coefficient \f$(m^{2}/g)\f$ .
+       absrain  = 0.33e-3, & !< Rain drop absorption coefficient m2/g .
        abssnow0 = 1.5,     & !< Snow flake absorption coefficient (micron), fu coeff
-       abssnow1 = 2.34e-3    !< Snow flake absorption coefficient \f$(m^{2}/g)\f$, ncar coef
+       abssnow1 = 2.34e-3    !< Snow flake absorption coefficient m2/g, ncar coef
   real(kind_phys) :: &
        radliq_lwrLW,         & !< Liquid particle size lower bound for LUT interpolation   
        radliq_uprLW,         & !< Liquid particle size upper bound for LUT interpolation
