@@ -49,7 +49,7 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 10: Morrison-Gettelman microphysics scheme
                                                       <li> 11: GFDL microphysics scheme
                                                       <li> 15: Ferrier-Aligo microphysics scheme
-                                                      <li> 17: NSSL microphysics scheme with background CCN
+                                                      <li> 17: NSSL microphysics multimoment scheme
                                                       <li> 18: NSSL microphysics scheme with predicted CCN (compatibility: 18 = 17 + nssl_ccn_on=.true.)
                                                       </ul>
                                                       <td>99
@@ -427,15 +427,15 @@ show some variables in the namelist that must match the SDF.
 <tr><td>xr_cnvcld       <td>GFS_rrtmg_pre              <td>flag for including suspended convective clouds in Xu-Randall cloud fraction  <td>.true.
 <tr><td>lgfdlmprad      <td>gfs_rrtmg_pre          <td>flag for GFDL mp scheme and radiation consistency     <td>.false.
 <tr><td>nssl_cccn       <td>mp_nssl          <td>CCN concentration (m^-3)                  <td>0.6e9 
-<tr><td>nssl_alphah     <td>mp_nssl          <td>graupel shape parameter                         <td>0.0
-<tr><td>nssl_alphahl    <td>mp_nssl          <td>hail shape parameter                            <td>1.0
-<tr><td>nssl_alphar     <td>mp_nssl          <td>shape paramter for rain (imurain=1 only)         <td>0.0
+<tr><td>nssl_alphah     <td>mp_nssl          <td>graupel PSD shape parameter                         <td>0.0
+<tr><td>nssl_alphahl    <td>mp_nssl          <td>hail PSD shape parameter                            <td>1.0
+<tr><td>nssl_alphar     <td>mp_nssl          <td>PSD shape parameter for rain         <td>0.0
 <tr><td>nssl_ehw0       <td>mp_nssl          <td>constant or max assumed graupel-droplet collection efficiency          <td>0.9
 <tr><td>nssl_ehlw0      <td>mp_nssl          <td>constant or max assumed hail-droplet collection efficiency          <td>0.9
 <tr><td>nssl_hail_on    <td>mp_nssl          <td>NSSL flag to activate the hail category         <td>.false.
 <tr><td>nssl_3moment    <td>mp_nssl          <td>NSSL flag to activate 3-moment for rain/graupel (and hail if activated)<td>.false.
 <tr><td>ssl_ccn_on     <td>mp_nssl          <td>NSSL flag to activate the CCN category          <td>.true.
-<tr><td>nssl_invertccn  <td>mp_nssl          <td>NSSL flag to treat CCN as activated or unactivated      <td>.true.
+<tr><td>nssl_invertccn  <td>mp_nssl          <td>NSSL flag to treat CCN as activated (.true.) or unactivated (.false.)      <td>.true.
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b gravity \b drag \b scheme \b options
 <tr><td>knob_ugwp_version <td>cires_ugwp                 <td>parameter selects a version of the UGWP implementation in FV3GFS-127L  \n       
                                                          <ul>

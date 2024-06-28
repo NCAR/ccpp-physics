@@ -1,5 +1,5 @@
 /**
-\page NSSLMICRO_page NSSL 2-moment Cloud Microphysics Scheme
+\page NSSLMICRO_page NSSL 2/3-moment Cloud Microphysics Scheme
 \section nssl2m_descrp Description
 
 The NSSL 2/3-moment bulk microphysical parameterization scheme that describes form and phase changes among a range of liquid and ice hydrometeors, as described in Mansell et al. (2010) \cite Mansell_etal_2010, Mansell and Ziegler (2013) \cite Mansell_2013, and Mansell et al. (2020) \cite Mansell_2020. The microphysical parameterization predicts the mass mixing ratio and number concentration of cloud droplets, raindrops, cloud ice crystals (columns), snow particles (including large crystals and aggregates), graupel, and (optionally) hail. Optionally, a third moment (reflectivity or 6th moment) of rain, graupel, and hail can be activated.
