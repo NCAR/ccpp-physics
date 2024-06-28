@@ -1542,7 +1542,7 @@ endif
    integer, intent(in) :: KPBL(:)
    real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV,    &
      &                                 cdmbgwd(:), alpha_fd
-   real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
+   real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
    logical, intent(in) :: ldiag3d
    integer, intent(in) :: dtidx(:,:), index_of_temperature,      &
      &  index_of_process_orographic_gwd, index_of_x_wind, index_of_y_wind
@@ -1567,7 +1567,7 @@ endif
    real(kind=kind_phys), intent(in) ::   var(:),oc1(:),        &
      &                                   oa4(:,:),ol4(:,:),    &
      &                                   dx(:)
-   real(kind=kind_phys), intent(in) ::   varss(:),oc1ss(:),    &
+   real(kind=kind_phys), intent(in), optional ::   varss(:),oc1ss(:),    &
      &                              oa4ss(:,:),ol4ss(:,:)
    real(kind=kind_phys), intent(in) :: THETA(:),SIGMA(:),      &
      &                                 GAMMA(:),ELVMAX(:)
@@ -1589,7 +1589,7 @@ endif
 !SPP
    real(kind=kind_phys), dimension(im) :: var_stoch, varss_stoch, &
                                        varmax_ss_stoch, varmax_fd_stoch
-   real(kind=kind_phys), intent(in) :: spp_wts_gwd(:,:)
+   real(kind=kind_phys), intent(in), optional :: spp_wts_gwd(:,:)
    integer, intent(in) :: spp_gwd
 
    real(kind=kind_phys), dimension(im)              :: rstoch
@@ -1598,12 +1598,12 @@ endif
    real(kind=kind_phys), intent(out) ::                          &
      &                      dusfc(:),   dvsfc(:)
 !Output (optional):
-   real(kind=kind_phys), intent(out) ::                          &
+   real(kind=kind_phys), intent(out), optional ::                          &
      &                      dusfc_ls(:),dvsfc_ls(:),             &
      &                      dusfc_bl(:),dvsfc_bl(:),             &
      &                      dusfc_ss(:),dvsfc_ss(:),             &
      &                      dusfc_fd(:),dvsfc_fd(:)
-   real(kind=kind_phys), intent(out) ::                          &
+   real(kind=kind_phys), intent(out), optional ::                          &
      &         dtaux2d_ls(:,:),dtauy2d_ls(:,:),                  &
      &         dtaux2d_bl(:,:),dtauy2d_bl(:,:),                  &
      &         dtaux2d_ss(:,:),dtauy2d_ss(:,:),                  &
@@ -2551,7 +2551,7 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
 ! apply limiter to mesosphere drag, reduce the drag by density factor 10-3
 ! prevent wind reversal...
 !
-         do k = kpblmax,km
+         do k = kpblmax,km-1
            if ((taud_ls(i,k)+taud_bl(i,k)).ne.0..and.prsl(i,k).le.pcutoff) then
                denfac = min(ro(i,k)/pcutoff_den,1.)
                dtfac(i,k) = min(dtfac(i,k),denfac*abs(velco(i,k)          &
