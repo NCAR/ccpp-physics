@@ -1712,7 +1712,7 @@
 !-----------------------------------
 
 !-----------------------------------
-!! This subroutine computes cloud related quantities using
+!> This subroutine computes cloud related quantities using
 !! Ferrier-Aligo cloud microphysics scheme.
       subroutine progcld_fer_hires                                      &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
@@ -1960,7 +1960,7 @@
 !...................................
 
 
-! This subroutine is used by Thompson/WSM6/NSSL cloud microphysics (EMC)
+!> This subroutine is used by Thompson/WSM6/NSSL cloud microphysics (EMC)
       subroutine progcld_thompson_wsm6                                  &
      &     ( plyr,plvl,tlyr,qlyr,qstl,rhly,clw,                         &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &

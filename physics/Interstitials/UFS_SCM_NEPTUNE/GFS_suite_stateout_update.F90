@@ -1,20 +1,17 @@
-! #########################################################################################
 !> \file GFS_suite_stateout_update.f90
 !!  Update the state variables due to process-split physics from accumulated tendencies 
 !!  during that phase.
 !!  Update gas concentrations, if using prognostic photolysis schemes.
 !!  Also, set bounds on the mass-weighted rime factor when using Ferrier-Aligo microphysics.
-! #########################################################################################
 module GFS_suite_stateout_update
   use machine,       only: kind_phys
   use module_ozphys, only: ty_ozphys
   implicit none
 contains
-! #########################################################################################
+
 !> \section arg_table_GFS_suite_stateout_update_run Argument Table
 !! \htmlinclude GFS_suite_stateout_update_run.html
 !!
-! #########################################################################################
   subroutine GFS_suite_stateout_update_run (im, levs, ntrac, dtp, tgrs, ugrs, vgrs, qgrs, &
        dudt, dvdt, dtdt, dqdt, gt0, gu0, gv0, gq0, oz0, ntiw, nqrimef, imp_physics,       &
        imp_physics_fer_hires, epsq, ozphys, oz_phys_2015, oz_phys_2006, con_1ovg, prsl,   &

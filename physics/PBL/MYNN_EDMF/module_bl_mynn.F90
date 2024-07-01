@@ -350,12 +350,12 @@ MODULE module_bl_mynn
 CONTAINS
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
-!! This subroutine is the GSD MYNN-EDNF PBL driver routine,which
+!>\ingroup gp_mynnedmf
+!! This subroutine is the MYNN-EDNF PBL driver routine,which
 !! encompassed the majority of the subroutines that comprise the 
 !! procedures that ultimately solve for tendencies of 
 !! \f$U, V, \theta, q_v, q_c, and q_i\f$.
-!!\section gen_mynn_bl_driver GSD mynn_bl_driver General Algorithm
+!!\section gen_mynn_bl_driver  mynn_bl_driver General Algorithm
 !> @{
   SUBROUTINE mynn_bl_driver(            &
        &initflag,restart,cycling,       &
@@ -1505,10 +1505,10 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine initializes the mixing length, TKE, \f$\theta^{'2}\f$,
 !! \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$.
-!!\section gen_mym_ini GSD MYNN-EDMF mym_initialize General Algorithm 
+!!\section gen_mym_ini  MYNN-EDMF mym_initialize General Algorithm 
 !> @{
   SUBROUTINE  mym_initialize (                                & 
        &            kts,kte,xland,                            &
@@ -1691,7 +1691,7 @@ CONTAINS
 !       These are defined on the walls of the grid boxes.
 !
 
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine calculates the level 2, non-dimensional wind shear
 !! \f$G_M\f$ and vertical temperature gradient \f$G_H\f$ as well as 
 !! the level 2 stability funcitons \f$S_h\f$ and \f$S_m\f$.
@@ -1712,7 +1712,7 @@ CONTAINS
 !!\param gh      \f$G_H\f$ divided by \f$L^{2}/q^{2}\f$ (\f$s^{-2}\f$)
 !!\param sm      stability function for momentum, at Level 2
 !!\param sh      stability function for heat, at Level 2
-!!\section gen_mym_level2 GSD MYNN-EDMF mym_level2 General Algorithm
+!!\section gen_mym_level2  MYNN-EDMF mym_level2 General Algorithm
 !! @ {
   SUBROUTINE  mym_level2 (kts,kte,                &
        &            dz,                           &
@@ -1843,7 +1843,7 @@ CONTAINS
 !     NOTE: the mixing lengths are meant to be calculated at the full-
 !           sigmal levels (or interfaces beween the model layers).
 !
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine calculates the mixing lengths.
   SUBROUTINE  mym_length (                     & 
     &            kts,kte,xland,                &
@@ -2242,7 +2242,7 @@ CONTAINS
   END SUBROUTINE mym_length
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine was taken from the BouLac scheme in WRF-ARW and modified for
 !! integration into the MYNN PBL scheme. WHILE loops were added to reduce the
 !! computational expense. This subroutine computes the length scales up and down
@@ -2405,7 +2405,7 @@ CONTAINS
   END SUBROUTINE boulac_length0
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine was taken from the BouLac scheme in WRF-ARW
 !! and modified for integration into the MYNN PBL scheme.
 !! WHILE loops were added to reduce the computational expense.
@@ -2596,10 +2596,10 @@ CONTAINS
 !     # dtl, dqw, dtv, gm and gh are allowed to share storage units with
 !       dfm, dfh, dfq, tcd and qcd, respectively, for saving memory.
 !
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine calculates the vertical diffusivity coefficients and the 
 !! production terms for the turbulent quantities.      
-!>\section gen_mym_turbulence GSD mym_turbulence General Algorithm
+!>\section gen_mym_turbulence  mym_turbulence General Algorithm
 !! Two subroutines mym_level2() and mym_length() are called within this
 !!subrouine to collect variable to carry out successive calculations:
 !! - mym_level2() calculates the level 2 nondimensional wind shear \f$G_M\f$
@@ -3190,7 +3190,7 @@ CONTAINS
 !       scheme (program).
 !
 !-------------------------------------------------------------------
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine predicts the turbulent quantities at the next step.
   SUBROUTINE  mym_predict (kts,kte,                                     &
        &            closure,                                            &
@@ -3593,7 +3593,7 @@ CONTAINS
 !       Set these values to those adopted by you.
 !
 !-------------------------------------------------------------------
-!>\ingroup gsd_mynn_edmf 
+!>\ingroup gp_mynnedmf 
 !! This subroutine calculates the nonconvective component of the 
 !! subgrid cloud fraction and mixing ratio as well as the functions used to 
 !! calculate the buoyancy flux. Different cloud PDFs can be selected by
@@ -4020,7 +4020,7 @@ CONTAINS
   END SUBROUTINE mym_condensation
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine solves for tendencies of U, V, \f$\theta\f$, qv,
 !! qc, and qi
   SUBROUTINE mynn_tendencies(kts,kte,i,       &
@@ -5354,7 +5354,7 @@ ENDIF
   END SUBROUTINE mynn_mix_chem
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
   SUBROUTINE retrieve_exchange_coeffs(kts,kte,&
        &dfm,dfh,dz,K_m,K_h)
 
@@ -5382,7 +5382,7 @@ ENDIF
   END SUBROUTINE retrieve_exchange_coeffs
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
   SUBROUTINE tridiag(n,a,b,c,d)
 
 !! to solve system of linear eqs on tridiagonal matrix n times n
@@ -5418,7 +5418,7 @@ ENDIF
   END SUBROUTINE tridiag
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
       subroutine tridiag2(n,a,b,c,d,x)
       implicit none
 !      a - sub-diagonal (means it is the diagonal below the main diagonal)
@@ -5453,7 +5453,7 @@ ENDIF
 
     end subroutine tridiag2
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
        subroutine tridiag3(kte,a,b,c,d,x)
 
 !ccccccccccccccccccccccccccccccc                                                                   
@@ -5495,7 +5495,7 @@ ENDIF
         end subroutine tridiag3
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine calculates hybrid diagnotic boundary-layer height (PBLH).
 !!
 !! NOTES ON THE PBLH FORMULATION: The 1.5-theta-increase method defines
@@ -5512,7 +5512,7 @@ ENDIF
 !!the TKE-method more during stable conditions (PBLH < 400 m).
 !!A variable tke threshold (TKEeps) is used since no hard-wired
 !!value could be found to work best in all conditions.
-!>\section gen_get_pblh  GSD get_pblh General Algorithm
+!>\section gen_get_pblh  get_pblh General Algorithm
 !> @{
   SUBROUTINE GET_PBLH(KTS,KTE,zi,thetav1D,qke1D,zw1D,dz1D,landsea,kzi)
 
@@ -5658,7 +5658,7 @@ ENDIF
 !> @}
   
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine is the Dynamic Multi-Plume (DMP) Mass-Flux Scheme.
 !! 
 !! dmp_mf() calculates the nonlocal turbulent transport from the dynamic
@@ -6824,7 +6824,7 @@ ENDIF !END Debugging
 
 END SUBROUTINE DMP_MF
 !=================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine 
 subroutine condensation_edmf(QT,THL,P,zagl,THV,QC)
 !
@@ -7384,7 +7384,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
   END SUBROUTINE SCALE_AWARE
 
 ! =====================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! \author JAYMES- added 22 Apr 2015
 !! This function calculates saturation vapor pressure.  Separate ice and liquid functions
 !! are used (identical to those in module_mp_thompson.F, v3.6). Then, the
@@ -7438,7 +7438,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 ! ====================================================================
 
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This function extends function "esat" and returns a "blended"
 !! saturation mixing ratio. Tice currently set to 240 K, t0c = 273.15 K.
 !!\author JAYMES
@@ -7495,7 +7495,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 ! ===================================================================
 
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This function interpolates the latent heats of vaporization and sublimation into
 !! a single, temperature-dependent, "blended" value, following 
 !! Chaboureau and Bechtold (2002) \cite Chaboureau_2002, Appendix.

@@ -1,3 +1,6 @@
+!>\file rrtmg_lw_cloud_optics.F90
+!!
+
 module mo_rrtmg_lw_cloud_optics
   use machine,          only: kind_phys
   use mersenne_twister, only: random_setseed, random_number, random_stat

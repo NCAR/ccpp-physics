@@ -13,21 +13,9 @@
 
    contains
 
-!> \defgroup sfc_land for coupling to land
-!! @{
-!! \section diagram Calling Hierarchy Diagram
-!! \section intraphysics Intraphysics Communication
-!!
 !> \brief Brief description of the subroutine
-!!
 !! \section arg_table_sfc_land_run Arguments
 !! \htmlinclude sfc_land_run.html
-!!
-
-!!
-!! \section general General Algorithm
-!! \section detailed Detailed Algorithm
-!! @{
    subroutine sfc_land_run(im, cpllnd, cpllnd2atm, flag_iter, dry,   &
      sncovr1_lnd, qsurf_lnd, evap_lnd, hflx_lnd,                     &
      ep_lnd, t2mmp_lnd, q2mp_lnd, gflux_lnd,                         &
@@ -104,5 +92,4 @@
  
    end subroutine sfc_land_run
 
-!> @}
    end module sfc_land

@@ -1,25 +1,25 @@
 /**
-\page GFS_v17_p8_page GFS_v17_p8 Suite 
+\page GFS_v17_page GFS_v17 Suite 
 
-\section gfsv_17_p8_suite_overview Overview
+\section gfsv_17_suite_overview Overview
 
 Version 17 of the Global Forecast System (GFS) is scheduled for operational implementation by the NOAA
-National Centers for Environmental Prediction (NCEP) in 2024. The GFS_v17_p8 suite is a prototype of 
+National Centers for Environmental Prediction (NCEP) in 2024. The GFS_v17 suite is a prototype of 
 the GFS_v17 suite, and is expected to evolve before the implementation. It is available for use 
-with the CCPP SCM.  The primary differences between the GFS_v16 and GFS_v17_p8 suites are: 
+with the CCPP SCM.  The primary differences between the GFS_v16 and GFS_v17 suites are: 
 - \b Microphysics: The replacement of \ref GFDL_cloud with \ref THOMPSON 
-- \b Deep \b Cumulus: Add \ref ca_page
-- \b Gravity \b Wave \b Drag: The replacement of \ref GFS_UGWP_v0 with \ref GFS_UNIFIED_UGWP 
+- PBL and Convection updates
+- \b Gravity \b Wave \b Drag: The replacement of \ref GFS_UGWP_v0 with  \ref GFS_ugwpv1_gsldrag
 - \b Land \b Surface \b Model: The replacement of \ref GFS_NOAH with \ref NoahMP
 
-The GFS_v17_p8 suite uses the parameterizations in the following order:
- - \ref GFS_RRTMG
+The GFS_v17 suite uses the parameterizations in the following order:
+ - \ref GFS_RRTMG_page
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
  - \ref NoahMP
  - \ref GFS_SFCSICE
  - \ref GFS_SATMEDMFVDIFQ
- - \ref GFS_UNIFIED_UGWP
+ - \ref GFS_ugwpv1_gsldrag
  - \ref GFS_OZPHYS
  - \ref GFS_H2OPHYS
  - \ref GFS_SAMFdeep

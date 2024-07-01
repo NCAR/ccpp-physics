@@ -10,12 +10,9 @@
 
       contains
 
-!>\defgroup mod_GFS_rad_time_vary GFS Radiation Time Update
-!! This module contains code related to GFS radiation setup.
-!> @{
+!> This module contains code related to GFS radiation setup.
 !> \section arg_table_GFS_rad_time_vary_timestep_init Argument Table
 !! \htmlinclude GFS_rad_time_vary_timestep_init.html
-!!
       subroutine GFS_rad_time_vary_timestep_init (lrseeds, rseeds,                     &
               lslwr, lsswr, isubc_lw, isubc_sw, icsdsw, icsdlw, cnx, cny, isc, jsc,    &
               imap, jmap, sec, kdt, imp_physics, imp_physics_zhao_carr, ipsd0, ipsdlim,&
@@ -97,6 +94,5 @@
          endif
 
       end subroutine GFS_rad_time_vary_timestep_init
-!> @}
 
    end module GFS_rad_time_vary

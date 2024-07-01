@@ -1,0 +1,32 @@
+/**
+\page GFS_v17_gp_page GFS_v17_RRTMGP Suite 
+
+\section gfsv_17_p8_gp_overview Overview
+
+
+The GFS_v17_RRTMGP suite uses the parameterizations in the following order:
+ - \ref GFS_RRTMGP_page
+ - \ref GFS_SFCLYR
+ - \ref GFS_NSST
+ - \ref NoahMP
+ - \ref GFS_SFCSICE
+ - \ref GFS_SATMEDMFVDIFQ
+ - \ref GFS_UNIFIED_UGWP
+ - \ref GFS_OZPHYS
+ - \ref GFS_H2OPHYS
+ - \ref GFS_SAMFdeep
+ - \ref GFS_SAMFshal
+ - \ref THOMPSON
+
+
+\section sdf_gfsv17p8gp Suite Definition File 
+\include suite_SCM_GFS_v17_p8_RRTMGP.xml
+
+\section gfs17_nml_opt_des Namelist 
+- General physics options
+\snippet SCM_GFS_v17_p8_gp_input.nml GFS_PHYSICS_NML
+- \ref GFS_UNIFIED_UGWP related options
+\snippet SCM_GFS_v17_p8_gp_input.nml CIRES_UGWP_NML
+
+
+*/

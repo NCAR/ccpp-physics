@@ -104,7 +104,6 @@ precipitation had a high content of sleet. There is even larger improvement in t
 totally sleet. 
 
 \section v6_updates_ruc Physics Updates
-\version UFS-SRW v3.0.0 
 - Initialization of land and ice emissivity with consideration of partial snow cover
 - Initialization of land and ice albedo with consideration of partial snow cover
 - Initialization of water vapor mixing ratio over land and ice

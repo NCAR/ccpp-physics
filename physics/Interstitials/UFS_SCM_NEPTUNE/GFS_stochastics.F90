@@ -5,9 +5,7 @@
 
       contains
 
-!>\defgroup gfs_stoch_mod GFS Stochastics Physics Module
-!> @{
-!! This is the GFS stochastics physics driver module.
+!> This is the GFS stochastics physics driver module.
 !!
 !> \section arg_table_GFS_stochastics_init Argument Table
 !! \htmlinclude GFS_stochastics_init.html
@@ -372,5 +370,4 @@
          endif
 
       end subroutine GFS_stochastics_run
-!> @}
     end module GFS_stochastics

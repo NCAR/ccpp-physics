@@ -109,7 +109,7 @@ and dynamical instability of waves described by the linear
 (Weinstock 1984 \cite weinstock_1984; Hines 1997 \cite hines_1997) saturation theories.
 
 \section ugwp_updates CCPP Physics Updates
-\version UFS-SRW v3.0.0
+\version CCPP-SCM v7.0.0
 
 We have added optional diagnostic outputs for the various tendencies supplied by the UGWP.  They can be switched on by setting the two following input namelist variables equal to “.true.”:  \p ldiag3d and \p ldiag_ugwp.
 
