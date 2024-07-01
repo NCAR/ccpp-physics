@@ -59,14 +59,14 @@ The GFS_v17 suite uses the parameterizations in the following order:
  - \b C3072: cdmbgwd_gsl="0.625,14.1,1.0,1.0"
 
 - Grid-spacing dependency of \p knob_ugwp_tauamp
-- \b C48:    knob_ugwp_tauamp=6.0e-3 
-- \b C96:    knob_ugwp_tauamp=3.0e-3
-- \b C192:   knob_ugwp_tauamp=1.5e-3
-- \b C384:   knob_ugwp_tauamp=0.8e-3
-- \b C768:   knob_ugwp_tauamp=0.5e-3
-- \b C1152:  knob_ugwp_tauamp=0.35e-3
-- \b C3072:  knob_ugwp_tauamp=0.13e-3
+ - \b C48:    knob_ugwp_tauamp=6.0e-3 
+ - \b C96:    knob_ugwp_tauamp=3.0e-3
+ - \b C192:   knob_ugwp_tauamp=1.5e-3
+ - \b C384:   knob_ugwp_tauamp=0.8e-3
+ - \b C768:   knob_ugwp_tauamp=0.5e-3
+ - \b C1152:  knob_ugwp_tauamp=0.35e-3
+ - \b C3072:  knob_ugwp_tauamp=0.13e-3
 
 - Grid-spacing dependency of \p xr_cnvcld
-- \b C48 and \b C96: xr_cnvcld =.false.
+ - \b C48 and \b C96: xr_cnvcld =.false.
 */
