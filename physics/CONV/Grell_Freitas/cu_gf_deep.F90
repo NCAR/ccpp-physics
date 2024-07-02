@@ -142,13 +142,13 @@ contains
                                 !! betwee -1 and +1
               ,do_capsuppress,cap_suppress_j    &    !         
               ,k22                              &    !
-              ,jmin,tropics)                         !
+              ,jmin,kdt,tropics)                         !
 
    implicit none
 
      integer                                                &
         ,intent (in   )                   ::                &
-        nranflag,itf,ktf,its,ite, kts,kte,ipr,imid
+        nranflag,itf,ktf,its,ite, kts,kte,ipr,imid,kdt
      integer, intent (in   )              ::                &
         ichoice,nchem
      real(kind=kind_phys),  dimension (its:ite,4)                 &
@@ -158,7 +158,7 @@ contains
 !$acc declare copyin(rand_clos,rand_mom,rand_vmas)
 
      integer, intent(in) :: do_capsuppress
-     real(kind=kind_phys), intent(in), dimension(:) :: cap_suppress_j
+     real(kind=kind_phys), intent(in), dimension(:), optional :: cap_suppress_j
 !$acc declare create(cap_suppress_j)
   !
   ! 
@@ -217,11 +217,11 @@ contains
         mconv,ccn
 !$acc declare copy(mconv,ccn)
      real(kind=kind_phys), dimension (:,:,:)                           &
-        ,intent (inout)                   ::                           &
+        ,intent (inout), optional         ::                           &
         chem3d
      logical, intent (in) :: do_smoke_transport
      real(kind=kind_phys), dimension (:,:)                             &
-         , intent (out) :: wetdpc_deep
+         , intent (out), optional :: wetdpc_deep
      real(kind=kind_phys), intent (in) :: fscav(:)
 !$acc declare copy(chem3d) copyout(wetdpc_deep) copyin(fscav)
 
@@ -316,7 +316,7 @@ contains
      real(kind=kind_phys), dimension (its:ite,kts:kte) :: pwdper, massflx
      integer :: nv
 !$acc declare create(chem,chem_cup,chem_up,chem_down,dellac,dellac2,chem_c,chem_pw,chem_pwd,   &
-!$acc                         chem_pwav,chem_psum,pwdper,massflux)
+!$acc                         chem_pwav,chem_psum,pwdper,massflx)
 
      real(kind=kind_phys),    dimension (its:ite,kts:kte) ::            &
         entr_rate_2d,mentrd_rate_2d,he,hes,qes,z, heo,heso,qeso,zo,     &                    
@@ -376,7 +376,7 @@ contains
 !$acc       ktopdby,kbconx,ierr2,ierr3,kbmax)
 
      integer,  dimension (its:ite), intent(inout) :: ierr
-     integer,  dimension (its:ite), intent(in) :: csum
+     integer,  dimension (its:ite), intent(in), optional :: csum
 !$acc declare copy(ierr) copyin(csum)
      integer                              ::                             &
        iloop,nens3,ki,kk,i,k
@@ -591,6 +591,7 @@ contains
          sig(i)=(1.-frh)**2
          !frh_out(i) = frh
          if(forcing(i,7).eq.0.)sig(i)=1.
+         if(kdt.le.(3600./dtime))sig(i)=1.
          frh_out(i) = frh*sig(i)
       enddo
 !$acc end kernels

@@ -290,38 +290,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[drain_cpl]
-  standard_name = tendency_of_lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
-  long_name = change in rain_cpl (coupling_type)
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-[dsnow_cpl]
-  standard_name = tendency_of_lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
-  long_name = change in show_cpl (coupling_type)
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-[rain_cpl]
-  standard_name = cumulative_lwe_thickness_of_precipitation_amount_for_coupling
-  long_name = total rain precipitation
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[snow_cpl]
-  standard_name = cumulative_lwe_thickness_of_snow_amount_for_coupling
-  long_name = total snow precipitation
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [lndp_type]
   standard_name = control_for_stochastic_land_surface_perturbation
   long_name = index for stochastic land surface perturbations type
@@ -344,6 +312,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [lndp_var_list]
   standard_name = land_surface_perturbation_variables
   long_name = variables to be perturbed for landperts
@@ -352,6 +321,7 @@
   type = character
   kind = len=3
   intent = in 
+  optional = True
 [lndp_prt_list]
   standard_name =land_surface_perturbation_magnitudes
   long_name = magnitude of perturbations for landperts
@@ -360,6 +330,7 @@
   type = real
   kind = kind_phys
   intent = in 
+  optional = True
 [z01d]
   standard_name = perturbation_of_momentum_roughness_length
   long_name = perturbation of momentum roughness length
@@ -437,6 +408,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
@@ -469,6 +441,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [smcwlt2]
   standard_name = volume_fraction_of_condensed_water_in_soil_at_wilting_point
   long_name = wilting point (volumetric)

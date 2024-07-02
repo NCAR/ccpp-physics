@@ -246,6 +246,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [qgraupel]
   standard_name = graupel_mixing_ratio
   long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates)
@@ -296,27 +297,30 @@
 [ltg1_max]
   standard_name = lightning_threat_index_1
   long_name = lightning threat index 1
-  units = flashes 5 min-1
+  units = flashes min-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ltg2_max]
   standard_name = lightning_threat_index_2
   long_name = lightning threat index 2
-  units = flashes 5 min-1
+  units = flashes min-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ltg3_max]
   standard_name = lightning_threat_index_3
   long_name = lightning threat index 3
-  units = flashes 5 min-1
+  units = flashes min-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces

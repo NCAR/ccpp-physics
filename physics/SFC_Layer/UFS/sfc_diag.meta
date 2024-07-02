@@ -124,6 +124,29 @@
   type = real
   kind = kind_phys
   intent = in
+[usfco]
+  standard_name = x_ocean_current
+  long_name = zonal current at ocean surface
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[vsfco]
+  standard_name = y_ocean_current
+  long_name = meridional current at ocean surface
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[icplocn2atm]
+  standard_name = control_for_air_sea_flux_computation_over_water
+  long_name = air-sea flux option
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
 [t1]
   standard_name = air_temperature_at_surface_adjacent_layer
   long_name = 1st model layer air temperature
@@ -195,7 +218,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [tskin]
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
@@ -248,6 +271,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [diag_flux]
   standard_name = flag_for_flux_method_in_2m_diagnostics
   long_name = flag for flux method in 2-m diagnostics
@@ -278,6 +302,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cdq]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
   long_name = surface exchange coeff heat & moisture
@@ -291,7 +316,7 @@
   long_name = model 2m diagnostics use the temperature and humidity calculated by the lake model
   units = flag
   dimensions = ()
-  type = integer
+  type = logical
   intent = in
 [wind]
   standard_name = wind_speed_at_lowest_model_layer

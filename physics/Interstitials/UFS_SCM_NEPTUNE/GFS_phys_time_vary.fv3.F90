@@ -112,19 +112,19 @@
          integer,              intent(inout)  :: use_lake_model(:)
          real(kind=kind_phys), intent(in   )  :: lakefrac(:), lakedepth(:)
 
-         integer,              intent(inout) :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
-         real(kind_phys),      intent(inout) :: ddy_o3(:),  ddy_h(:)
+         integer,              intent(inout), optional :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
+         real(kind_phys),      intent(inout), optional :: ddy_o3(:),  ddy_h(:)
          real(kind_phys),      intent(in)    :: h2opl(:,:,:)
 
-         integer,              intent(inout) :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
-         real(kind_phys),      intent(inout) :: ddy_aer(:), ddx_aer(:)
+         integer,              intent(inout), optional :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
+         real(kind_phys),      intent(inout), optional :: ddy_aer(:), ddx_aer(:)
          real(kind_phys),      intent(out)   :: aer_nm(:,:,:)
-         integer,              intent(inout) :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
-         real(kind_phys),      intent(inout) :: ddy_ci(:), ddx_ci(:)
+         integer,              intent(inout), optional :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
+         real(kind_phys),      intent(inout), optional :: ddy_ci(:), ddx_ci(:)
          integer,              intent(inout) :: imap(:), jmap(:)
          logical,              intent(in)    :: do_ugwp_v1
-         real(kind_phys),      intent(inout) :: ddy_j1tau(:), ddy_j2tau(:)
-         integer,              intent(inout) :: jindx1_tau(:), jindx2_tau(:)
+         real(kind_phys),      intent(inout), optional :: ddy_j1tau(:), ddy_j2tau(:)
+         integer,              intent(inout), optional :: jindx1_tau(:), jindx2_tau(:)
 
          integer,              intent(in)    :: isot, ivegsrc, nlunit
          real(kind_phys),      intent(inout) :: sncovr(:), sncovr_ice(:)
@@ -138,50 +138,50 @@
          integer, intent(in) :: lsoil, lsnow_lsm_lbound, lsnow_lsm_ubound
          real(kind_phys),      intent(in)    :: zs(:)
          real(kind_phys),      intent(in)    :: dzs(:)
-         real(kind_phys),      intent(inout) :: tvxy(:)
-         real(kind_phys),      intent(inout) :: tgxy(:)
-         real(kind_phys),      intent(inout) :: tahxy(:)
-         real(kind_phys),      intent(inout) :: canicexy(:)
-         real(kind_phys),      intent(inout) :: canliqxy(:)
-         real(kind_phys),      intent(inout) :: eahxy(:)
-         real(kind_phys),      intent(inout) :: cmxy(:)
-         real(kind_phys),      intent(inout) :: chxy(:)
-         real(kind_phys),      intent(inout) :: fwetxy(:)
-         real(kind_phys),      intent(inout) :: sneqvoxy(:)
-         real(kind_phys),      intent(inout) :: alboldxy(:)
-         real(kind_phys),      intent(inout) :: qsnowxy(:)
-         real(kind_phys),      intent(inout) :: wslakexy(:)
+         real(kind_phys),      intent(inout), optional :: tvxy(:)
+         real(kind_phys),      intent(inout), optional :: tgxy(:)
+         real(kind_phys),      intent(inout), optional :: tahxy(:)
+         real(kind_phys),      intent(inout), optional :: canicexy(:)
+         real(kind_phys),      intent(inout), optional :: canliqxy(:)
+         real(kind_phys),      intent(inout), optional :: eahxy(:)
+         real(kind_phys),      intent(inout), optional :: cmxy(:)
+         real(kind_phys),      intent(inout), optional :: chxy(:)
+         real(kind_phys),      intent(inout), optional :: fwetxy(:)
+         real(kind_phys),      intent(inout), optional :: sneqvoxy(:)
+         real(kind_phys),      intent(inout), optional :: alboldxy(:)
+         real(kind_phys),      intent(inout), optional :: qsnowxy(:)
+         real(kind_phys),      intent(inout), optional :: wslakexy(:)
          real(kind_phys),      intent(inout) :: albdvis_lnd(:)
          real(kind_phys),      intent(inout) :: albdnir_lnd(:)
          real(kind_phys),      intent(inout) :: albivis_lnd(:)
          real(kind_phys),      intent(inout) :: albinir_lnd(:)
-         real(kind_phys),      intent(inout) :: albdvis_ice(:)
-         real(kind_phys),      intent(inout) :: albdnir_ice(:)
-         real(kind_phys),      intent(inout) :: albivis_ice(:)
-         real(kind_phys),      intent(inout) :: albinir_ice(:)
+         real(kind_phys),      intent(inout), optional :: albdvis_ice(:)
+         real(kind_phys),      intent(inout), optional :: albdnir_ice(:)
+         real(kind_phys),      intent(inout), optional :: albivis_ice(:)
+         real(kind_phys),      intent(inout), optional :: albinir_ice(:)
          real(kind_phys),      intent(inout) :: emiss_lnd(:)
          real(kind_phys),      intent(inout) :: emiss_ice(:)
-         real(kind_phys),      intent(inout) :: taussxy(:)
-         real(kind_phys),      intent(inout) :: waxy(:)
-         real(kind_phys),      intent(inout) :: wtxy(:)
-         real(kind_phys),      intent(inout) :: zwtxy(:)
-         real(kind_phys),      intent(inout) :: xlaixy(:)
-         real(kind_phys),      intent(inout) :: xsaixy(:)
-         real(kind_phys),      intent(inout) :: lfmassxy(:)
-         real(kind_phys),      intent(inout) :: stmassxy(:)
-         real(kind_phys),      intent(inout) :: rtmassxy(:)
-         real(kind_phys),      intent(inout) :: woodxy(:)
-         real(kind_phys),      intent(inout) :: stblcpxy(:)
-         real(kind_phys),      intent(inout) :: fastcpxy(:)
-         real(kind_phys),      intent(inout) :: smcwtdxy(:)
-         real(kind_phys),      intent(inout) :: deeprechxy(:)
-         real(kind_phys),      intent(inout) :: rechxy(:)
-         real(kind_phys),      intent(inout) :: snowxy(:)
-         real(kind_phys),      intent(inout) :: snicexy(:,lsnow_lsm_lbound:)
-         real(kind_phys),      intent(inout) :: snliqxy(:,lsnow_lsm_lbound:)
-         real(kind_phys),      intent(inout) :: tsnoxy (:,lsnow_lsm_lbound:)
-         real(kind_phys),      intent(inout) :: smoiseq(:,:)
-         real(kind_phys),      intent(inout) :: zsnsoxy(:,lsnow_lsm_lbound:)
+         real(kind_phys),      intent(inout), optional :: taussxy(:)
+         real(kind_phys),      intent(inout), optional :: waxy(:)
+         real(kind_phys),      intent(inout), optional :: wtxy(:)
+         real(kind_phys),      intent(inout), optional :: zwtxy(:)
+         real(kind_phys),      intent(inout), optional :: xlaixy(:)
+         real(kind_phys),      intent(inout), optional :: xsaixy(:)
+         real(kind_phys),      intent(inout), optional :: lfmassxy(:)
+         real(kind_phys),      intent(inout), optional :: stmassxy(:)
+         real(kind_phys),      intent(inout), optional :: rtmassxy(:)
+         real(kind_phys),      intent(inout), optional :: woodxy(:)
+         real(kind_phys),      intent(inout), optional :: stblcpxy(:)
+         real(kind_phys),      intent(inout), optional :: fastcpxy(:)
+         real(kind_phys),      intent(inout), optional :: smcwtdxy(:)
+         real(kind_phys),      intent(inout), optional :: deeprechxy(:)
+         real(kind_phys),      intent(inout), optional :: rechxy(:)
+         real(kind_phys),      intent(inout), optional :: snowxy(:)
+         real(kind_phys),      intent(inout), optional :: snicexy(:,lsnow_lsm_lbound:)
+         real(kind_phys),      intent(inout), optional :: snliqxy(:,lsnow_lsm_lbound:)
+         real(kind_phys),      intent(inout), optional :: tsnoxy (:,lsnow_lsm_lbound:)
+         real(kind_phys),      intent(inout), optional :: smoiseq(:,:)
+         real(kind_phys),      intent(inout), optional :: zsnsoxy(:,lsnow_lsm_lbound:)
          real(kind_phys),      intent(inout) :: slc(:,:)
          real(kind_phys),      intent(inout) :: smc(:,:)
          real(kind_phys),      intent(inout) :: stc(:,:)
@@ -762,14 +762,14 @@
          real(kind_phys),      intent(in)    :: fhswr, fhour
          logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm
          real(kind_phys),      intent(out)   :: clstp
-         integer,              intent(in)    :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
-         real(kind_phys),      intent(in)    :: ddy_o3(:),  ddy_h(:)
+         integer,              intent(in), optional    :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
+         real(kind_phys),      intent(in), optional    :: ddy_o3(:),  ddy_h(:)
          real(kind_phys),      intent(inout) :: ozpl(:,:,:), h2opl(:,:,:)
-         integer,              intent(in)    :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
-         real(kind_phys),      intent(in)    :: ddy_aer(:), ddx_aer(:)
+         integer,              intent(in), optional    :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
+         real(kind_phys),      intent(in), optional    :: ddy_aer(:), ddx_aer(:)
          real(kind_phys),      intent(inout) :: aer_nm(:,:,:)
-         integer,              intent(in)    :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
-         real(kind_phys),      intent(in)    :: ddy_ci(:), ddx_ci(:)
+         integer,              intent(in), optional    :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
+         real(kind_phys),      intent(in), optional    :: ddy_ci(:), ddx_ci(:)
          real(kind_phys),      intent(inout) :: in_nm(:,:), ccn_nm(:,:)
          integer,              intent(in)    :: imap(:), jmap(:)
          real(kind_phys),      intent(in)    :: prsl(:,:)
@@ -777,8 +777,8 @@
          real(kind_phys),      intent(inout) :: rann(:,:)
 
          logical,              intent(in)    :: do_ugwp_v1
-         integer,              intent(in)    :: jindx1_tau(:), jindx2_tau(:)
-         real(kind_phys),      intent(in)    :: ddy_j1tau(:), ddy_j2tau(:)
+         integer,              intent(in), optional    :: jindx1_tau(:), jindx2_tau(:)
+         real(kind_phys),      intent(in), optional    :: ddy_j1tau(:), ddy_j2tau(:)
          real(kind_phys),      intent(inout) :: tau_amf(:)
          type(ty_ozphys),      intent(in)    :: ozphys
 
@@ -790,13 +790,13 @@
          logical,              intent(in)    :: use_ufo, nst_anl, frac_grid
          real(kind_phys),      intent(in)    :: fhcyc, phour, lakefrac(:), min_seaice, min_lakeice,  &
                                                 xlat_d(:), xlon_d(:), landfrac(:)
-         real(kind_phys),      intent(inout) :: smc(:,:), slc(:,:), stc(:,:), smois(:,:), sh2o(:,:), &
-                                      tslb(:,:), tiice(:,:), tg3(:), tref(:),                        &
+         real(kind_phys),      intent(inout) :: smc(:,:), slc(:,:), stc(:,:), tiice(:,:), tg3(:),    &
                                       tsfc(:), tsfco(:), tisfc(:), hice(:), fice(:),                 &
                                       facsf(:), facwf(:), alvsf(:), alvwf(:), alnsf(:), alnwf(:),    &
                                       zorli(:), zorll(:), zorlo(:), weasd(:), snoalb(:),             &
                                       canopy(:), vfrac(:), shdmin(:), shdmax(:),                     &
                                       snowd(:), cv(:), cvb(:), cvt(:), oro(:), oro_uf(:), slmsk(:)
+         real(kind_phys),      intent(inout), optional :: smois(:,:), sh2o(:,:), tslb(:,:), tref(:)
          integer,              intent(inout) :: vtype(:), stype(:),scolor(:), slope(:) 
 
          character(len=*),     intent(out)   :: errmsg
@@ -809,7 +809,6 @@
          real(kind_phys) :: rannie(cny)
          real(kind_phys) :: rndval(cnx*cny*nrcm)
          real(kind_dbl_prec)  :: rinc(5)
-         real(kind_sngl_prec) :: rinc4(5)
 
          ! Initialize CCPP error handling variables
          errmsg = ''
@@ -829,7 +828,7 @@
 !$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,master) &
 !$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
 !$OMP          shared(ddx_ci,in_nm,ccn_nm,do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau)    &
-!$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys,rjday,n1,n2,idat,jdat,rinc,rinc4)   &
+!$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys,rjday,n1,n2,idat,jdat,rinc)         &
 !$OMP          shared(w3kindreal,w3kindint,jdow,jdoy,jday)                               &
 !$OMP          private(iseed,iskip,i,j,k)
 
@@ -889,13 +888,7 @@
          idat(5)=idate(1)
          rinc=0.
          rinc(2)=fhour
-         call w3kind(w3kindreal,w3kindint)
-         if(w3kindreal==4) then
-            rinc4=rinc
-            CALL w3movdat(rinc4,idat,jdat)
-         else
-            CALL w3movdat(rinc,idat,jdat)
-         endif
+         CALL w3movdat(rinc,idat,jdat)
          jdow = 0
          jdoy = 0
          jday = 0

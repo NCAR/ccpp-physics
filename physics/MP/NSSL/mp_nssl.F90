@@ -15,6 +15,7 @@ module mp_nssl
 
     private
     logical :: is_initialized = .False.
+    logical :: missing_vars_global = .False.
     real :: nssl_qccn
 
     contains
@@ -26,7 +27,9 @@ module mp_nssl
 !! \htmlinclude mp_nssl_init.html
 !!
     subroutine mp_nssl_init(ncol, nlev, errflg, errmsg, threads, restart, &
-                              mpirank, mpiroot,                           &
+                              mpirank, mpiroot,mpicomm,                   &
+                              qc, qr, qi, qs, qh,                         &
+                              ccw, crw, cci, csw, chw, vh,                &
                               con_g, con_rd, con_cp, con_rv,              &
                               con_t0c, con_cliq, con_csol, con_eps,       &
                               imp_physics, imp_physics_nssl,              &
@@ -36,6 +39,9 @@ module mp_nssl
                               
 
         use module_mp_nssl_2mom, only: nssl_2mom_init, nssl_2mom_init_const
+#ifdef MPI 
+        use mpi_f08
+#endif
 
         implicit none
 
@@ -50,16 +56,32 @@ module mp_nssl
 
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
+         type(MPI_Comm),            intent(in)    :: mpicomm
          integer,                   intent(in)    :: imp_physics
          integer,                   intent(in)    :: imp_physics_nssl
          real(kind_phys),           intent(in)    :: nssl_cccn, nssl_alphah, nssl_alphahl
          real(kind_phys),           intent(in)    :: nssl_alphar, nssl_ehw0, nssl_ehlw0
          logical,                   intent(in)    :: nssl_ccn_on, nssl_hail_on, nssl_invertccn, nssl_3moment
 
+         real(kind_phys),           intent(inout) :: qc (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qr (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qi (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qs (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: qh (:,:) !(1:ncol,1:nlev) graupel
+         real(kind_phys),           intent(inout), optional :: ccw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: crw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: cci(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: csw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: chw(:,:) !(1:ncol,1:nlev) graupel number 
+         real(kind_phys),           intent(inout), optional :: vh (:,:) !(1:ncol,1:nlev) graupel volume 
+
          ! Local variables: dimensions used in nssl_init
          integer               :: ims,ime, jms,jme, kms,kme, nx, nz, i,k
-         real :: nssl_params(20)
+         real(kind_phys) :: nssl_params(20)
          integer :: ihailv,ipc
+         real(kind_phys), parameter :: qmin = 1.e-12
+         integer :: ierr
+         logical :: missing_vars = .False.
          
 
  ! Initialize the CCPP error handling variables
@@ -143,6 +165,19 @@ module mp_nssl
 
          ! For restart runs, the init is done here
          if (restart) then
+
+          ! For restart, check if the IC is from a different scheme that does not have all the needed variables
+          missing_vars = .False.
+          IF ( Any( qc > qmin .and. ccw == 0.0 ) ) missing_vars = .true.
+          IF ( .not. missing_vars .and. Any( qi > qmin .and. cci == 0.0 ) ) missing_vars = .true.
+          IF ( .not. missing_vars .and. Any( qs > qmin .and. csw == 0.0 ) ) missing_vars = .true.
+          IF ( .not. missing_vars .and. Any( qr > qmin .and. crw == 0.0 ) ) missing_vars = .true.
+          IF ( .not. missing_vars .and. Any( qh > qmin .and. (chw == 0.0 .or. vh == 0.0) ) ) missing_vars = .true.
+          
+#ifdef MPI 
+          call MPI_Allreduce(missing_vars, missing_vars_global, 1, MPI_LOGICAL, MPI_LOR, mpicomm, ierr)
+#endif
+
            is_initialized = .true.
            return
          end if
@@ -189,25 +224,25 @@ module mp_nssl
          ! Hydrometeors
          logical,                   intent(in   ) :: convert_dry_rho
          real(kind_phys),           intent(inout) :: spechum(:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: cccn(:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: cccna(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout), optional :: cccn(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout), optional :: cccna(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: qc (:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: qr (:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: qi (:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: qs (:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: qh (:,:) !(1:ncol,1:nlev) graupel
-         real(kind_phys),           intent(inout) :: qhl(:,:) !(1:ncol,1:nlev) hail
-         real(kind_phys),           intent(inout) :: ccw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout), optional :: qhl(:,:) !(1:ncol,1:nlev) hail
+         real(kind_phys),           intent(inout), optional :: ccw(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: crw(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: cci(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: csw(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: chw(:,:) !(1:ncol,1:nlev) graupel number 
-         real(kind_phys),           intent(inout) :: chl(:,:) !(1:ncol,1:nlev) hail number
-         real(kind_phys),           intent(inout) :: vh (:,:) !(1:ncol,1:nlev) graupel volume 
-         real(kind_phys),           intent(inout) :: vhl(:,:) !(1:ncol,1:nlev) hail volume
-         real(kind_phys),           intent(inout) :: zrw(:,:) !(1:ncol,1:nlev) rain reflectivity
-         real(kind_phys),           intent(inout) :: zhw(:,:) !(1:ncol,1:nlev) graupel reflectivity
-         real(kind_phys),           intent(inout) :: zhl(:,:) !(1:ncol,1:nlev) hail reflectivity
+         real(kind_phys),           intent(inout), optional :: chl(:,:) !(1:ncol,1:nlev) hail number
+         real(kind_phys),           intent(inout), optional :: vh (:,:) !(1:ncol,1:nlev) graupel volume 
+         real(kind_phys),           intent(inout), optional :: vhl(:,:) !(1:ncol,1:nlev) hail volume
+         real(kind_phys),           intent(inout), optional :: zrw(:,:) !(1:ncol,1:nlev) rain reflectivity
+         real(kind_phys),           intent(inout), optional :: zhw(:,:) !(1:ncol,1:nlev) graupel reflectivity
+         real(kind_phys),           intent(inout), optional :: zhl(:,:) !(1:ncol,1:nlev) hail reflectivity
          ! State variables and timestep information
          real(kind_phys),           intent(inout) :: tgrs (:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(in   ) :: prsl (:,:) !(1:ncol,1:nlev)
@@ -217,20 +252,20 @@ module mp_nssl
          real(kind_phys),           intent(in   ) :: dtp
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
          real(kind_phys),           intent(  out) :: prcp   (:) !(1:ncol)
-         real(kind_phys),           intent(  out) :: rain   (:) !(1:ncol)
-         real(kind_phys),           intent(  out) :: graupel(:) !(1:ncol)
-         real(kind_phys),           intent(  out) :: ice    (:) !(1:ncol)
-         real(kind_phys),           intent(  out) :: snow   (:) !(1:ncol)
+         real(kind_phys),           intent(  out), optional :: rain   (:) !(1:ncol)
+         real(kind_phys),           intent(  out), optional :: graupel(:) !(1:ncol)
+         real(kind_phys),           intent(  out), optional :: ice    (:) !(1:ncol)
+         real(kind_phys),           intent(  out), optional :: snow   (:) !(1:ncol)
          real(kind_phys),           intent(  out) :: sr     (:) !(1:ncol)
          ! Radar reflectivity
          real(kind_phys),           intent(inout) :: refl_10cm(:,:) !(1:ncol,1:nlev)
          logical,                   intent(in   ) :: do_radar_ref, first_time_step
          logical,                   intent(in)    :: restart
          ! Cloud effective radii
-         real(kind_phys),  intent(inout) :: re_cloud(:,:) ! (1:ncol,1:nlev)
-         real(kind_phys),  intent(inout) :: re_ice(:,:) ! (1:ncol,1:nlev)
-         real(kind_phys),  intent(inout) :: re_snow(:,:) ! (1:ncol,1:nlev)
-         real(kind_phys),  intent(inout) :: re_rain(:,:) ! (1:ncol,1:nlev)
+         real(kind_phys),  intent(inout), optional :: re_cloud(:,:) ! (1:ncol,1:nlev)
+         real(kind_phys),  intent(inout), optional :: re_ice(:,:) ! (1:ncol,1:nlev)
+         real(kind_phys),  intent(inout), optional :: re_snow(:,:) ! (1:ncol,1:nlev)
+         real(kind_phys),  intent(inout), optional :: re_rain(:,:) ! (1:ncol,1:nlev)
          integer, intent(in) :: nleffr, nieffr, nseffr, nreffr
          integer,                   intent(in)    :: imp_physics
          integer,                   intent(in)    :: imp_physics_nssl
@@ -312,13 +347,14 @@ module mp_nssl
                             its,ite, jts,jte, kts,kte, i,j,k
          integer :: itimestep ! timestep counter
          integer :: ntmul, n
-         real, parameter    :: dtpmax = 60. ! allow up to dt=75 (1.25*60)
+         real(kind_phys), parameter    :: dtpmax = 60. ! allow up to dt=75 (1.25*60)
          real(kind_phys)    :: dtptmp
          integer, parameter :: ndebug = 0
          logical :: invertccn
-         real :: cwmas
+         real(kind_phys) :: cwmas
          
          real(kind_phys), allocatable :: an(:,:,:,:) ! temporary scalar array
+         
 
 
         errflg = 0
@@ -529,8 +565,8 @@ module mp_nssl
            dtptmp = dtp
            ntmul = 1
         ENDIF
-        
-        IF ( first_time_step .and. .not. restart ) THEN
+
+        IF ( first_time_step .and. ( .not. restart .or. missing_vars_global ) ) THEN
           itimestep = 0 ! gets incremented to 1 in call loop
           IF ( nssl_ccn_on ) THEN
             IF ( invertccn ) THEN

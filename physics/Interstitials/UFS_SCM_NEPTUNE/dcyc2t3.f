@@ -44,7 +44,7 @@
 !      input/output:                                                    !
 !            dtdt,dtdtnp,                                               !
 !      outputs:                                                         !
-!            adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,                   !
+!            adjsfcdsw,adjsfcnsw,adjsfcdlw,                             !
 !            adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       !
 !            adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   !
 !            adjdnnbmd,adjdnndfd,adjdnvbmd,adjdnvdfd)                   !
@@ -181,7 +181,7 @@
 !  ---  input/output:
      &       dtdt,dtdtnp,htrlw,                                         &
 !  ---  outputs:
-     &       adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,                   &
+     &       adjsfcdsw,adjsfcnsw,adjsfcdlw,                             &
      &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
      &       adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   &
      &       adjnirbmd,adjnirdfd,adjvisbmd,adjvisdfd,                   &
@@ -214,8 +214,9 @@
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
-     &      sfcdsw, sfcnsw, sfculw, sfculw_med, tsfc, tsfc_radtime
-
+     &      sfcdsw, sfcnsw, sfculw, tsfc
+      real(kind=kind_phys), dimension(:), intent(in), optional ::       &
+     &      sfculw_med, tsfc_radtime
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &                         tsfc_lnd, tsfc_ice, tsfc_wat,            &
      &                         sfcemis_lnd, sfcemis_ice, sfcemis_wat
@@ -227,7 +228,8 @@
       real(kind=kind_phys), dimension(:,:), intent(in) :: swh, hlw,     &
      &                                     swhc, hlwc, p_lay, t_lay
 
-      real(kind=kind_phys), dimension(:,:), intent(in) :: p_lev,        &
+      real(kind=kind_phys), dimension(:,:), intent(in) :: p_lev
+      real(kind=kind_phys), dimension(:,:), intent(in), optional ::     &
      &     flux2D_lwUP, flux2D_lwDOWN, fluxlwUP_jac
 
       real(kind_phys),           intent(in   ) :: con_g, con_cp,        &
@@ -237,12 +239,13 @@
 
 
 !  ---  input/output:
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: dtdt, htrlw
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: dtdtnp
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dtdt
+      real(kind=kind_phys), dimension(:,:), intent(inout), optional ::  &
+     &      dtdtnp, htrlw
 
 !  ---  outputs:
       real(kind=kind_phys), dimension(:), intent(out) ::                &
-     &      adjsfcdsw, adjsfcnsw, adjsfcdlw, adjsfculw, xmu, xcosz,     &
+     &      adjsfcdsw, adjsfcnsw, adjsfcdlw, xmu, xcosz,                &
      &      adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                 &
      &      adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd
 
@@ -352,7 +355,7 @@
 
 !     if (lprnt .and. i == ipr) write(0,*)' in dcyc3: dry==',dry(i)
 !    &,' wet=',wet(i),' icy=',icy(i),' tsfc3=',tsfc3(i,:)
-!    &,' sfcemis=',sfcemis(i,:),' adjsfculw=',adjsfculw(i,:)
+!    &,' sfcemis=',sfcemis(i,:)
 !
 
 !>  - normalize by average value over radiation period for daytime.

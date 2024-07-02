@@ -64,7 +64,7 @@ MODULE module_mp_thompson
       USE module_mp_radar
 
 #ifdef MPI
-      use mpi
+      use mpi_f08
 #endif
 
       IMPLICIT NONE
@@ -421,7 +421,7 @@ MODULE module_mp_thompson
       REAL:: t1_qs_me, t2_qs_me, t1_qg_me, t2_qg_me
 
 !..MPI communicator
-      INTEGER:: mpi_communicator
+      TYPE(MPI_Comm):: mpi_communicator
 
 !..Write tables with master MPI task after computing them in thompson_init
       LOGICAL:: thompson_table_writer
@@ -448,7 +448,8 @@ MODULE module_mp_thompson
 
       LOGICAL, INTENT(IN) :: is_aerosol_aware_in
       LOGICAL, INTENT(IN) :: merra2_aerosol_aware_in
-      INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
+      TYPE(MPI_Comm), INTENT(IN) :: mpicomm
+      INTEGER, INTENT(IN) :: mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
       CHARACTER(len=*), INTENT(INOUT) :: errmsg
       INTEGER,          INTENT(INOUT) :: errflg
@@ -1045,9 +1046,10 @@ MODULE module_mp_thompson
                           re_cloud, re_ice, re_snow
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: pfils, pflls
       INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch, n_var_spp
-      REAL, DIMENSION(:,:), INTENT(IN) :: rand_pert
-      REAL, DIMENSION(:), INTENT(IN) :: spp_prt_list, spp_stddev_cutoff
-      CHARACTER(len=10), DIMENSION(:), INTENT(IN) :: spp_var_list
+      REAL, DIMENSION(:,:), INTENT(IN), OPTIONAL :: rand_pert
+      REAL, DIMENSION(:), INTENT(IN), OPTIONAL :: spp_prt_list
+      REAL, DIMENSION(:), INTENT(IN) :: spp_stddev_cutoff
+      CHARACTER(len=10), DIMENSION(:), INTENT(IN), OPTIONAL :: spp_var_list
       INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: &
@@ -1077,7 +1079,7 @@ MODULE module_mp_thompson
       ! Extended diagnostics, array pointers only associated if ext_diag flag is .true.
       LOGICAL, INTENT (IN) :: ext_diag
       LOGICAL, OPTIONAL, INTENT(IN):: aero_ind_fdb
-      REAL, DIMENSION(:,:,:), INTENT(INOUT)::                     &
+      REAL, DIMENSION(:,:,:), INTENT(INOUT), OPTIONAL ::          &
                           !vts1, txri, txrc,                       &
                           prw_vcdc,                               &
                           prw_vcde, tpri_inu, tpri_ide_d,         &
@@ -1888,7 +1890,7 @@ MODULE module_mp_thompson
                           pfil1, pfll1) 
 
 #ifdef MPI
-      use mpi
+      use mpi_f08
 #endif
       implicit none
 
@@ -1907,7 +1909,7 @@ MODULE module_mp_thompson
       LOGICAL, INTENT(IN) :: ext_diag
       LOGICAL, INTENT(IN) :: sedi_semi
       INTEGER, INTENT(IN) :: decfl
-      REAL, DIMENSION(:), INTENT(OUT):: &
+      REAL, DIMENSION(:), INTENT(OUT), OPTIONAL :: &
                           !vtsk1, txri1, txrc1,                       &
                           prw_vcdc1,                                 &
                           prw_vcde1, tpri_inu1, tpri_ide1_d,         &
@@ -3586,7 +3588,7 @@ MODULE module_mp_thompson
 
 !+---+-----------------------------------------------------------------+ !  EVAPORATION
            elseif (clap .lt. -eps .AND. ssatw(k).lt.-1.E-6 .AND.     &
-                  (is_aerosol_aware .or. merra2_aerosol_aware)) then  
+                  is_aerosol_aware) then  
             tempc = temp(k) - 273.15
             otemp = 1./temp(k)
             rvs = rho(k)*qvs(k)

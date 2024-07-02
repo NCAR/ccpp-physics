@@ -116,6 +116,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [jindx2_o3]
   standard_name = upper_latitude_index_of_ozone_forcing_for_interpolation
   long_name = interpolation high index for ozone
@@ -123,6 +124,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [ddy_o3]
   standard_name = latitude_interpolation_weight_for_ozone_forcing
   long_name = interpolation high index for ozone
@@ -131,6 +133,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [jindx1_h]
   standard_name = lower_latitude_index_of_stratospheric_water_vapor_forcing_for_interpolation
   long_name = interpolation low index for stratospheric water vapor
@@ -138,6 +141,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [jindx2_h]
   standard_name = upper_latitude_index_of_stratospheric_water_vapor_forcing_for_interpolation
   long_name = interpolation high index for stratospheric water vapor
@@ -145,6 +149,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [ddy_h]
   standard_name = latitude_interpolation_weight_for_stratospheric_water_vapor_forcing
   long_name = interpolation high index for stratospheric water vapor
@@ -153,6 +158,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [h2opl]
   standard_name = stratospheric_water_vapor_forcing
   long_name = water forcing data
@@ -176,6 +182,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [jindx2_aer]
   standard_name = upper_latitude_index_of_aerosol_forcing_for_interpolation
   long_name = interpolation high index for prescribed aerosols in the y direction
@@ -183,6 +190,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [ddy_aer]
   standard_name = latitude_interpolation_weight_for_aerosol_forcing
   long_name = interpolation high index for prescribed aerosols in the y direction
@@ -191,6 +199,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [iindx1_aer]
   standard_name = lower_longitude_index_of_aerosol_forcing_for_interpolation
   long_name = interpolation low index for prescribed aerosols in the x direction
@@ -198,6 +207,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [iindx2_aer]
   standard_name = upper_longitude_index_of_aerosol_forcing_for_interpolation
   long_name = interpolation high index for prescribed aerosols in the x direction
@@ -205,6 +215,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [ddx_aer]
   standard_name = longitude_interpolation_weight_for_aerosol_forcing
   long_name = interpolation high index for prescribed aerosols in the x direction
@@ -213,6 +224,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [aer_nm]
   standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
   long_name = mass mixing ratio of aerosol from gocart or merra2
@@ -228,6 +240,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [jindx2_ci]
   standard_name = upper_latitude_index_of_cloud_nuclei_forcing_for_interpolation
   long_name = interpolation high index for ice and cloud condensation nuclei in the y direction
@@ -235,6 +248,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [ddy_ci]
   standard_name = latitude_interpolation_weight_for_cloud_nuclei_forcing
   long_name = interpolation high index for ice and cloud condensation nuclei in the y direction
@@ -243,6 +257,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [iindx1_ci]
   standard_name = lower_longitude_index_of_cloud_nuclei_forcing_for_interpolation
   long_name = interpolation low index for ice and cloud condensation nuclei in the x direction
@@ -250,6 +265,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [iindx2_ci]
   standard_name = upper_longitude_index_of_cloud_nuclei_forcing_for_interpolation
   long_name = interpolation high index for ice and cloud condensation nuclei in the x direction
@@ -257,6 +273,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [ddx_ci]
   standard_name = longitude_interpolation_weight_for_cloud_nuclei_forcing
   long_name = interpolation high index for ice and cloud condensation nuclei in the x direction
@@ -265,6 +282,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [imap]
   standard_name = map_of_block_column_number_to_global_i_index
   long_name = map of local index ix to global index i for this block
@@ -293,6 +311,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [jindx2_tau]
   standard_name = upper_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
   long_name = index2 for weight2 for tau NGWs
@@ -300,6 +319,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = True
 [ddy_j1tau]
   standard_name = latitude_interpolation_weight_complement_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
   long_name = interpolation weight1 for tau NGWs
@@ -308,6 +328,7 @@
   type = real
   intent = inout
   kind = kind_phys
+  optional = True
 [ddy_j2tau]
   standard_name = latitude_interpolation_weight_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
   long_name = interpolation weight2 for tau NGWs
@@ -316,6 +337,7 @@
   type = real
   intent = inout
   kind = kind_phys
+  optional = True
 [isot]
   standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice
@@ -458,6 +480,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tgxy]
   standard_name = ground_temperature
   long_name = ground temperature for noahmp
@@ -466,6 +489,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tahxy]
   standard_name = air_temperature_in_canopy
   long_name = canopy air temperature
@@ -474,6 +498,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [canicexy]
   standard_name = canopy_intercepted_ice_mass
   long_name = canopy intercepted ice mass
@@ -482,6 +507,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [canliqxy]
   standard_name = canopy_intercepted_liquid_water
   long_name = canopy intercepted liquid water
@@ -490,6 +516,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [eahxy]
   standard_name = air_vapor_pressure_in_canopy
   long_name = canopy air vapor pressure
@@ -498,6 +525,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cmxy]
   standard_name = surface_drag_coefficient_for_momentum_for_noahmp
   long_name = surface drag coefficient for momentum for noahmp
@@ -506,6 +534,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [chxy]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_for_noahmp
   long_name = surface exchange coeff heat & moisture for noahmp
@@ -514,6 +543,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fwetxy]
   standard_name = wet_canopy_area_fraction
   long_name = area fraction of canopy that is wetted/snowed
@@ -522,6 +552,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sneqvoxy]
   standard_name = lwe_thickness_of_snowfall_amount_on_previous_timestep
   long_name = snow mass at previous time step
@@ -530,6 +561,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [alboldxy]
   standard_name = surface_albedo_assuming_deep_snow_on_previous_timestep
   long_name = snow albedo at previous time step
@@ -538,6 +570,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qsnowxy]
   standard_name = lwe_snowfall_rate
   long_name = snow precipitation rate at surface
@@ -546,6 +579,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [wslakexy]
   standard_name = water_storage_in_lake
   long_name = lake water storage
@@ -554,6 +588,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [taussxy]
   standard_name = dimensionless_age_of_surface_snow
   long_name = non-dimensional snow age
@@ -562,6 +597,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [waxy]
   standard_name = water_storage_in_aquifer
   long_name = water storage in aquifer
@@ -570,6 +606,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [wtxy]
   standard_name = water_storage_in_aquifer_and_saturated_soil
   long_name = water storage in aquifer and saturated soil
@@ -578,6 +615,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zwtxy]
   standard_name = water_table_depth
   long_name = water table depth
@@ -586,6 +624,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [xlaixy]
   standard_name = leaf_area_index
   long_name = leaf area index
@@ -594,6 +633,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [xsaixy]
   standard_name = stem_area_index
   long_name = stem area index
@@ -602,6 +642,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [lfmassxy]
   standard_name = leaf_mass_content
   long_name = leaf mass
@@ -610,6 +651,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [stmassxy]
   standard_name = stem_mass_content
   long_name = stem mass
@@ -618,6 +660,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [rtmassxy]
   standard_name = fine_root_mass_content
   long_name = fine root mass
@@ -626,6 +669,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [woodxy]
   standard_name = wood_mass_content
   long_name = wood mass including woody roots
@@ -634,6 +678,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [stblcpxy]
   standard_name = slow_soil_pool_mass_content_of_carbon
   long_name = stable carbon in deep soil
@@ -642,6 +687,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fastcpxy]
   standard_name = fast_soil_pool_mass_content_of_carbon
   long_name = short-lived carbon in shallow soil
@@ -650,6 +696,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [smcwtdxy]
   standard_name = volumetric_soil_moisture_between_soil_bottom_and_water_table
   long_name = soil water content between the bottom of the soil and the water table
@@ -658,6 +705,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [deeprechxy]
   standard_name = water_table_recharge_assuming_deep
   long_name = recharge to or from the water table when deep
@@ -666,6 +714,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [rechxy]
   standard_name = water_table_recharge_assuming_shallow
   long_name = recharge to or from the water table when shallow
@@ -674,6 +723,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albdvis_lnd]
   standard_name = surface_albedo_direct_visible_over_land
   long_name = direct surface albedo visible band over land
@@ -714,6 +764,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albdnir_ice]
   standard_name = surface_albedo_direct_NIR_over_ice
   long_name = direct surface albedo NIR band over ice
@@ -722,6 +773,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albivis_ice]
   standard_name = surface_albedo_diffuse_visible_over_ice
   long_name = diffuse surface albedo visible band over ice
@@ -730,6 +782,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albinir_ice]
   standard_name = surface_albedo_diffuse_NIR_over_ice
   long_name = diffuse surface albedo NIR band over ice
@@ -738,6 +791,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [emiss_lnd]
   standard_name = surface_longwave_emissivity_over_land
   long_name = surface lw emissivity in fraction over land
@@ -762,6 +816,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snicexy]
   standard_name = lwe_thickness_of_ice_in_surface_snow
   long_name = snow layer ice
@@ -770,6 +825,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snliqxy]
   standard_name = lwe_thickness_of_liquid_water_in_surface_snow
   long_name = snow layer liquid water
@@ -778,6 +834,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tsnoxy]
   standard_name = temperature_in_surface_snow
   long_name = temperature_in_surface_snow
@@ -786,6 +843,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [smoiseq]
   standard_name = volumetric_equilibrium_soil_moisture
   long_name = equilibrium soil water content
@@ -794,6 +852,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zsnsoxy]
   standard_name = depth_from_snow_surface_at_bottom_interface
   long_name = depth from the top of the snow surface at the bottom of the layer
@@ -802,6 +861,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [slc]
   standard_name = volume_fraction_of_unfrozen_water_in_soil
   long_name = liquid soil moisture
@@ -1098,6 +1158,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [jindx2_o3]
   standard_name = upper_latitude_index_of_ozone_forcing_for_interpolation
   long_name = interpolation high index for ozone
@@ -1105,6 +1166,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [ddy_o3]
   standard_name = latitude_interpolation_weight_for_ozone_forcing
   long_name = interpolation high index for ozone
@@ -1113,6 +1175,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ozpl]
   standard_name = ozone_forcing
   long_name = ozone forcing data
@@ -1128,6 +1191,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [jindx2_h]
   standard_name = upper_latitude_index_of_stratospheric_water_vapor_forcing_for_interpolation
   long_name = interpolation high index for stratospheric water vapor
@@ -1135,6 +1199,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [ddy_h]
   standard_name = latitude_interpolation_weight_for_stratospheric_water_vapor_forcing
   long_name = interpolation high index for stratospheric water vapor
@@ -1143,6 +1208,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [h2opl]
   standard_name = stratospheric_water_vapor_forcing
   long_name = water forcing data
@@ -1165,6 +1231,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [jindx2_aer]
   standard_name = upper_latitude_index_of_aerosol_forcing_for_interpolation
   long_name = interpolation high index for prescribed aerosols in the y direction
@@ -1172,6 +1239,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [ddy_aer]
   standard_name = latitude_interpolation_weight_for_aerosol_forcing
   long_name = interpolation high index for prescribed aerosols in the y direction
@@ -1180,6 +1248,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [iindx1_aer]
   standard_name = lower_longitude_index_of_aerosol_forcing_for_interpolation
   long_name = interpolation low index for prescribed aerosols in the x direction
@@ -1187,6 +1256,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [iindx2_aer]
   standard_name = upper_longitude_index_of_aerosol_forcing_for_interpolation
   long_name = interpolation high index for prescribed aerosols in the x direction
@@ -1194,6 +1264,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [ddx_aer]
   standard_name = longitude_interpolation_weight_for_aerosol_forcing
   long_name = interpolation high index for prescribed aerosols in the x direction
@@ -1202,6 +1273,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [aer_nm]
   standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
   long_name = mass mixing ratio of aerosol from gocart or merra2
@@ -1217,6 +1289,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [jindx2_ci]
   standard_name = upper_latitude_index_of_cloud_nuclei_forcing_for_interpolation
   long_name = interpolation high index for ice and cloud condensation nuclei in the y direction
@@ -1224,6 +1297,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [ddy_ci]
   standard_name = latitude_interpolation_weight_for_cloud_nuclei_forcing
   long_name = interpolation high index for ice and cloud condensation nuclei in the y direction
@@ -1232,6 +1306,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [iindx1_ci]
   standard_name = lower_longitude_index_of_cloud_nuclei_forcing_for_interpolation
   long_name = interpolation low index for ice and cloud condensation nuclei in the x direction
@@ -1239,6 +1314,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [iindx2_ci]
   standard_name = upper_longitude_index_of_cloud_nuclei_forcing_for_interpolation
   long_name = interpolation high index for ice and cloud condensation nuclei in the x direction
@@ -1246,6 +1322,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [ddx_ci]
   standard_name = longitude_interpolation_weight_for_cloud_nuclei_forcing
   long_name = interpolation high index for ice and cloud condensation nuclei in the x direction
@@ -1254,6 +1331,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [in_nm]
   standard_name = ice_nucleation_number_from_climatology
   long_name = ice nucleation number in MG MP
@@ -1321,6 +1399,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [jindx2_tau]
   standard_name = upper_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
   long_name = index2 for weight2 for tau NGWs
@@ -1328,6 +1407,7 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = True
 [ddy_j1tau]
   standard_name = latitude_interpolation_weight_complement_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
   long_name = interpolation weight1 for tau NGWs
@@ -1336,6 +1416,7 @@
   type = real
   intent = in
   kind = kind_phys
+  optional = True
 [ddy_j2tau]
   standard_name = latitude_interpolation_weight_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
   long_name = interpolation weight2 for tau NGWs
@@ -1344,6 +1425,7 @@
   type = real
   intent = in
   kind = kind_phys
+  optional = True
 [tau_amf]
   standard_name = absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
   long_name = ngw_absolute_momentum_flux
