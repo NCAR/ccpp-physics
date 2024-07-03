@@ -23,12 +23,6 @@ by the Development Testbed Center (DTC), supports suites:
 - \ref RRFS_v1_page
 - \ref WoFS_v0_page 
 
-
-New schemes and capability highlights in this release:
-- \ref GFS_ugwpv1_gsldrag
-- \ref GFS_RRTMGP_page
-- \ref CLM_LAKE_model
-
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 
 and a description of the algorithm. 

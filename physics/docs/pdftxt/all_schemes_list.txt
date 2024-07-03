@@ -24,7 +24,7 @@ which facilitates model development and code maintenance. While some individual 
 
 \b Cumulus \b Parameterizations
  - \subpage GFS_SAMFdeep 
-  - \ref ca_page 
+ - \subpage cellular_automata
  - \subpage GFS_SAMFshal 
  - \subpage CU_GF 
 

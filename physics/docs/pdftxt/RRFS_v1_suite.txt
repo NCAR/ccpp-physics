@@ -6,7 +6,7 @@
 The RRFS_v1 suite is one of the candidates for the future operational implementation of
 the Rapid Refresh Forecast System (RRFS), which can be configured using the UFS SRW App.  
 
-The RRFS_v1beta suite uses the parameterizations in the following order:
+The RRFS_v1 suite uses the parameterizations in the following order:
  - \ref SGSCLOUD_page
  - \ref GFS_RRTMG_page
  - \ref SFC_MYNNSFL
