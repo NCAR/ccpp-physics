@@ -238,6 +238,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [phy_myj_thz0]
   standard_name = air_potential_temperature_at_top_of_viscous_sublayer
   long_name = potential temperat at viscous sublayer top over water
@@ -246,6 +247,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [phy_myj_qz0]
   standard_name = specific_humidity_at_top_of_viscous_sublayer
   long_name = specific humidity at_viscous sublayer top over water
@@ -254,6 +256,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [phy_myj_uz0]
   standard_name = x_wind_at_top_of_viscous_sublayer
   long_name = u wind component at viscous sublayer top over water
@@ -262,6 +265,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [phy_myj_vz0]
   standard_name = y_wind_at_top_of_viscous_sublayer
   long_name = v wind component at viscous sublayer top over water
@@ -270,6 +274,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [phy_myj_z0base]
   standard_name = baseline_surface_roughness_length
   long_name = baseline surface roughness length for momentum in mete
@@ -278,6 +283,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [phy_myj_akhs]
   standard_name = heat_exchange_coefficient_for_MYJ_schemes
   long_name = surface heat exchange_coefficient for MYJ schemes
@@ -286,6 +292,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [phy_myj_akms]
   standard_name = momentum_exchange_coefficient_for_MYJ_schemes
   long_name = surface momentum exchange_coefficient for MYJ schemes
@@ -294,6 +301,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [phy_myj_chkqlm]
   standard_name = control_for_surface_layer_evaporation
   long_name = surface layer evaporation switch
@@ -302,6 +310,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [phy_myj_elflx]
   standard_name = surface_upward_specific_humidity_flux_for_mellor_yamada_janjic_surface_layer_scheme
   long_name = kinematic surface latent heat flux
@@ -310,6 +319,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [phy_myj_a1u]
   standard_name = weight_for_momentum_at_top_of_viscous_sublayer
   long_name = Weight for momentum at viscous layer top
@@ -318,6 +328,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [phy_myj_a1t]
   standard_name = weight_for_potental_temperature_at_top_of_viscous_sublayer
   long_name = Weight for potental temperature at viscous layer top
@@ -326,6 +337,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [phy_myj_a1q]
   standard_name = weight_for_specific_humidity_at_top_of_viscous_sublayer
   long_name = Weight for Specfic Humidity at viscous layer top
@@ -334,6 +346,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [pblh]
   standard_name = atmosphere_boundary_layer_thickness
   long_name = PBL thickness
@@ -594,6 +607,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index

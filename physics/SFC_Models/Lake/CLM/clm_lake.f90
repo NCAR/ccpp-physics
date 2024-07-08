@@ -316,7 +316,7 @@ MODULE clm_lake
     REAL(KIND_PHYS), INTENT(IN)  :: min_lakeice, lakedepth_default, dtp
     LOGICAL, INTENT(IN) :: use_lakedepth
     INTEGER, DIMENSION(:), INTENT(IN) :: use_lake_model
-    REAL(KIND_PHYS), INTENT(INOUT) :: clm_lake_initialized(:)
+    REAL(KIND_PHYS), INTENT(INOUT), OPTIONAL :: clm_lake_initialized(:)
     LOGICAL, INTENT(IN) :: frac_grid, frac_ice
 
     !
@@ -325,7 +325,9 @@ MODULE clm_lake
     REAL(KIND_PHYS), DIMENSION(:), INTENT(IN):: &
          tg3, pgr, zlvl, qvcurr, xlat_d, xlon_d, ch, cm, &
          dlwsfci, dswsfci, oro_lakedepth, wind, &
-         rainncprv, raincprv, t1, qv1, prsl1
+         t1, qv1, prsl1
+    REAL(KIND_PHYS), DIMENSION(:), INTENT(IN), OPTIONAL :: &
+         rainncprv, raincprv
     REAL(KIND_PHYS), DIMENSION(:,:), INTENT(in) :: gu0, gv0, prsi, gt0, phii
     LOGICAL, DIMENSION(:), INTENT(IN) :: flag_iter
     LOGICAL, DIMENSION(:), INTENT(INOUT) :: flag_lakefreeze
@@ -340,34 +342,35 @@ MODULE clm_lake
          ep1d_water,   ep1d_ice,   tsurf_water, tsurf_ice, tsfc_wat, tisfc, tsfc, &
          weasdi,       snodi,      hice,        qss_water, qss_ice,               &
          cmm_water,    cmm_ice,    chh_water,   chh_ice,                          &
-         uustar_water, uustar_ice, lake_t_snow, albedo,    zorlw,                 &
-         zorli,        lake_t2m,   lake_q2m,    weasd,     snowd,    fice
+         uustar_water, uustar_ice, zorlw,       zorli,     weasd,    snowd, fice
+    REAL(KIND_PHYS), DIMENSION(:), INTENT(INOUT) , OPTIONAL ::                    &
+         lake_t_snow, albedo, lake_t2m, lake_q2m
     LOGICAL, INTENT(INOUT) :: icy(:)
 
     !
     ! Lake model internal state stored by caller:
     !
-    INTEGER, DIMENSION( : ), INTENT(INOUT)    :: salty
-    INTEGER, DIMENSION( : ), INTENT(INOUT)    :: cannot_freeze
+    INTEGER, DIMENSION( : ), INTENT(INOUT), OPTIONAL :: salty
+    INTEGER, DIMENSION( : ), INTENT(INOUT), OPTIONAL :: cannot_freeze
 
-    real(kind_phys),           dimension(: )                ,intent(inout)  :: savedtke12d,    &
+    real(kind_phys),           dimension(: ), OPTIONAL      ,intent(inout)  :: savedtke12d,    &
                                                                                snowdp2d,       &    
                                                                                h2osno2d,       &    
                                                                                snl2d,          &    
                                                                                t_grnd2d
     
-    real(kind_phys),    dimension( :,: )           ,INTENT(inout)  :: t_lake3d,       &    
+    real(kind_phys),    dimension( :,: ), OPTIONAL,  INTENT(inout)  :: t_lake3d,       &    
                                                                                   lake_icefrac3d
-    real(kind_phys),    dimension( :,-nlevsnow+1: )  ,INTENT(inout)  :: t_soisno3d,     &    
+    real(kind_phys),    dimension( :,-nlevsnow+1: )  ,INTENT(inout), OPTIONAL  :: t_soisno3d,     &    
                                                                                   h2osoi_ice3d,   &    
                                                                                   h2osoi_liq3d,   &    
                                                                                   h2osoi_vol3d,   &    
                                                                                   z3d,            &    
                                                                                   dz3d 
-    real(kind_phys),    dimension( :,-nlevsnow+0: )  ,INTENT(inout)  :: zi3d    
+    real(kind_phys),    dimension( :,-nlevsnow+0: )  ,INTENT(inout), OPTIONAL  :: zi3d    
 
-    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT)  :: clm_lakedepth
-    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT)  :: input_lakedepth
+    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT), OPTIONAL :: clm_lakedepth
+    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT), OPTIONAL :: input_lakedepth
 
     !
     ! Error reporting:

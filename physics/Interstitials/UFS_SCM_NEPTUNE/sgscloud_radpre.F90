@@ -81,18 +81,18 @@
       real(kind=kind_phys), dimension(:,:), intent(inout) :: qc, qi
       real(kind=kind_phys), dimension(:,:), intent(inout) :: qr, qs, qg
       ! note: qci_conv only allocated if GF is used
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: qci_conv
+      real(kind=kind_phys), dimension(:,:), intent(inout), optional :: qci_conv
       real(kind=kind_phys), dimension(:,:), intent(inout) :: qlc, qli !for SAS
-      real(kind=kind_phys), dimension(:,:), intent(in)    :: ud_mf
+      real(kind=kind_phys), dimension(:,:), intent(in), optional    :: ud_mf
       real(kind=kind_phys), dimension(:,:), intent(in)    :: T3D,delp
       real(kind=kind_phys), dimension(:,:), intent(in)    :: qv,P3D,exner
       real(kind=kind_phys), dimension(:,:), intent(inout) ::  &
            &         clouds1,clouds2,clouds3,clouds4,clouds5, &
            &         clouds8,clouds9
       real(kind=kind_phys), dimension(:,:), intent(inout) :: qc_save, qi_save, qs_save
-      real(kind=kind_phys), dimension(:,:), intent(in)    :: qc_bl, qi_bl, cldfra_bl
+      real(kind=kind_phys), dimension(:,:), intent(in), optional :: qc_bl, qi_bl, cldfra_bl
       real(kind=kind_phys), dimension(:),   intent(in)    :: slmsk, xlat, de_lgth
-      real(kind=kind_phys), dimension(:,:), intent(in)    :: plyr, dz      
+      real(kind=kind_phys), dimension(:,:), intent(in)    :: plyr, dz
       real(kind=kind_phys), dimension(:,:), intent(inout) :: cldsa
       integer,              dimension(:,:), intent(inout) :: mbota, mtopa
       integer,                              intent(in)    :: iovr

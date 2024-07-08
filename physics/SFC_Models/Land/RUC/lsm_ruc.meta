@@ -320,6 +320,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sfcqv_ice]
   standard_name = water_vapor_mixing_ratio_at_surface_over_ice
   long_name = water vapor mixing ratio at surface over ice
@@ -328,6 +329,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sfalb_lnd_bck]
   standard_name =surface_snow_free_albedo_over_land
   long_name = surface snow-free albedo over ice
@@ -336,6 +338,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [semisbase]
   standard_name = baseline_surface_longwave_emissivity
   long_name = baseline surface lw emissivity in fraction
@@ -400,6 +403,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albdnir_ice]
   standard_name = surface_albedo_direct_NIR_over_ice
   long_name = direct surface albedo NIR band over ice
@@ -408,6 +412,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albivis_ice]
   standard_name = surface_albedo_diffuse_visible_over_ice
   long_name = diffuse surface albedo visible band over ice
@@ -416,6 +421,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albinir_ice]
   standard_name = surface_albedo_diffuse_NIR_over_ice
   long_name = diffuse surface albedo NIR band over ice
@@ -424,6 +430,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zs]
   standard_name = depth_of_soil_layers
   long_name = depth of soil levels for land surface model
@@ -440,6 +447,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [smfrkeep]
   standard_name = volume_fraction_of_frozen_soil_moisture_for_land_surface_model
   long_name = volume fraction of frozen soil moisture for lsm
@@ -448,6 +456,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tslb]
   standard_name = soil_temperature_for_land_surface_model
   long_name = soil temperature for land surface model
@@ -456,6 +465,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [smois]
   standard_name = volume_fraction_of_soil_moisture_for_land_surface_model
   long_name = volumetric fraction of soil moisture for lsm
@@ -464,6 +474,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [wetness]
   standard_name = normalized_soil_wetness_for_land_surface_model
   long_name = normalized soil wetness
@@ -472,6 +483,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tsice]
   standard_name = temperature_in_ice_layer
   long_name = sea ice internal temperature
@@ -815,6 +827,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dlwflx]
   standard_name = surface_downwelling_longwave_flux
   long_name = surface downwelling longwave flux at current time
@@ -876,6 +889,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [rainc]
   standard_name = lwe_thickness_of_convective_precipitation_amount_on_previous_timestep
   long_name = convective_precipitation_amount from previous timestep
@@ -884,6 +898,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ice]
   standard_name = lwe_thickness_of_ice_precipitation_amount_on_previous_timestep
   long_name = ice amount from previous timestep
@@ -892,6 +907,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [snow]
   standard_name = snow_mass_on_previous_timestep
   long_name = snow amount from previous timestep
@@ -900,6 +916,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [graupel]
   standard_name = lwe_thickness_of_graupel_amount_on_previous_timestep
   long_name = graupel amount from previous timestep
@@ -908,6 +925,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [prsl1]
   standard_name = air_pressure_at_surface_adjacent_layer
   long_name = mean pressure at lowest model layer
@@ -964,6 +982,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [snoalb]
   standard_name = upper_bound_of_max_albedo_assuming_deep_snow
   long_name = maximum snow albedo
@@ -1154,6 +1173,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sfalb_ice]
   standard_name = surface_diffused_shortwave_albedo_over_ice
   long_name = mean surface diffused sw albedo over ice
@@ -1162,6 +1182,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sncovr1_lnd]
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction over land
@@ -1234,6 +1255,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tsice]
   standard_name = temperature_in_ice_layer
   long_name = sea ice internal temperature
@@ -1250,6 +1272,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sh2o]
   standard_name = volume_fraction_of_unfrozen_soil_moisture_for_land_surface_model
   long_name = volume fraction of unfrozen soil moisture for lsm
@@ -1258,6 +1281,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [keepfr]
   standard_name = control_for_frozen_soil_physics
   long_name = flag for frozen soil physics (RUC)
@@ -1266,6 +1290,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [smfrkeep]
   standard_name = volume_fraction_of_frozen_soil_moisture_for_land_surface_model
   long_name = volume fraction of frozen soil moisture for lsm
@@ -1274,6 +1299,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [canopy]
   standard_name = canopy_water_amount
   long_name = canopy water amount
@@ -1306,6 +1332,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [z0rl_lnd]
   standard_name = surface_roughness_length_over_land
   long_name = surface roughness length over land  (temporary use as interstitial)
@@ -1322,6 +1349,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sfcqv_lnd]
   standard_name = water_vapor_mixing_ratio_at_surface_over_land
   long_name = water vapor mixing ratio at surface over land
@@ -1330,6 +1358,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qsurf_lnd]
   standard_name = surface_specific_humidity_over_land
   long_name = surface air saturation specific humidity over land
@@ -1442,6 +1471,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snowfallac_lnd]
   standard_name = surface_snow_amount_assuming_variable_snow_density_over_land
   long_name = run-total snow accumulation on the ground with variable snow density over land
@@ -1450,6 +1480,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [acsnow_lnd]
   standard_name = surface_snow_lwe_thickness_amount_over_land
   long_name = run-total snowfall water equivalent over land
@@ -1514,6 +1545,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sfcqv_ice]
   standard_name = water_vapor_mixing_ratio_at_surface_over_ice
   long_name = water vapor mixing ratio at surface over ice
@@ -1522,6 +1554,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tsurf_ice]
   standard_name = surface_skin_temperature_after_iteration_over_ice
   long_name = surface skin temperature after iteration over ice
@@ -1538,6 +1571,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [z0rl_ice]
   standard_name = surface_roughness_length_over_ice
   long_name = surface roughness length over ice   (temporary use as interstitial)
@@ -1610,6 +1644,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [acsnow_ice]
   standard_name = surface_snow_lwe_thickness_amount_over_ice
   long_name = run-total snowfall water equivalent over ice
@@ -1634,6 +1669,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [albdnir_ice]
   standard_name = surface_albedo_direct_NIR_over_ice
   long_name = direct surface albedo NIR band over ice
@@ -1642,6 +1678,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [albivis_ice]
   standard_name = surface_albedo_diffuse_visible_over_ice
   long_name = diffuse surface albedo visible band over ice
@@ -1650,6 +1687,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [albinir_ice]
   standard_name = surface_albedo_diffuse_NIR_over_ice
   long_name = diffuse surface albedo NIR band over ice
@@ -1658,6 +1696,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [rhosnf]
   standard_name = lsm_internal_surface_frozen_precipitation_density
   long_name = density of frozen precipitation
@@ -1666,6 +1705,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sbsno]
   standard_name = snow_deposition_sublimation_upward_latent_heat_flux
   long_name = latent heat flux from snow depo/subl
@@ -1763,6 +1803,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [frac_grid_burned_out]
   standard_name = fraction_of_grid_cell_burning
   long_name = ration of the burnt area to the grid cell area
@@ -1771,6 +1812,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
