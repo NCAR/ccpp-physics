@@ -261,6 +261,8 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    !nblks = Land_IAU_Control%nblks
    !blksz = Land_IAU_Control%blksz(1)
 
+   print*, "rank is ie js je nlon nlat", Land_IAU_Control%me, is, ie, js, je, nlon, nlat
+
    allocate(Land_IAU_Data%stc_inc(nlon, nlat, km))
    allocate(Land_IAU_Data%slc_inc(nlon, nlat, km))
 ! allocate arrays that will hold iau state
