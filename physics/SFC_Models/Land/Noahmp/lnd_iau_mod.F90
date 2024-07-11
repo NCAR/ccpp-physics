@@ -261,11 +261,14 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    !nblks = Land_IAU_Control%nblks
    !blksz = Land_IAU_Control%blksz(1)
 
-   allocate(Land_IAU_Data%stc_inc(is:ie, js:je, km))
-   allocate(Land_IAU_Data%slc_inc(is:ie, js:je, km))
+   allocate(Land_IAU_Data%stc_inc(nlon, nlat, km))
+   allocate(Land_IAU_Data%slc_inc(nlon, nlat, km))
 ! allocate arrays that will hold iau state
-   allocate (Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
-   allocate (Land_IAU_state%inc1%slc_inc(is:ie, js:je, km))
+   allocate (Land_IAU_state%inc1%stc_inc(nlon, nlat, km))
+   allocate (Land_IAU_state%inc1%slc_inc(nlon, nlat, km))
+   allocate (Land_IAU_state%inc2%stc_inc(nlon, nlat, km))
+   allocate (Land_IAU_state%inc2%slc_inc(nlon, nlat, km)) 
+
    Land_IAU_state%hr1=Land_IAU_Control%iaufhrs(1)
    Land_IAU_state%wt = 1.0 ! IAU increment filter weights (default 1.0)
    Land_IAU_state%wt_normfact = 1.0
@@ -351,9 +354,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    if (ntimes.EQ.1) then  ! only need to get incrments once since constant forcing over window
       call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state%rdt, Land_IAU_state%wt)
    endif
-   if (ntimes.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them
-      allocate (Land_IAU_state%inc2%stc_inc(is:ie, js:je, km))
-      allocate (Land_IAU_state%inc2%slc_inc(is:ie, js:je, km))      
+   if (ntimes.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them     
       Land_IAU_state%hr2=Land_IAU_Control%iaufhrs(2)   
 
       do k = 1, npz  ! do k = 1,n_soill    !  
