@@ -4,7 +4,7 @@
   dependencies = ../../../tools/funcphys.f90,../../../hooks/machine.F
   dependencies = module_sf_noahmp_glacier.F90,module_sf_noahmplsm.F90,noahmp_tables.f90
   dependencies = ../Noah/set_soilveg.f
-  dependencies = sim_nc_mod_lnd.F90,lnd_iau_mod.F90
+  dependencies = lnd_iau_mod.F90
 
 ########################################################################
 [ccpp-arg-table]
