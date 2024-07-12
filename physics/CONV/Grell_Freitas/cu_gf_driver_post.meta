@@ -1,0 +1,151 @@
+[ccpp-table-properties]
+  name = cu_gf_driver_post
+  type = scheme
+  dependencies = ../../hooks/machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = cu_gf_driver_post_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[km]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[t]
+  standard_name = air_temperature_of_new_state
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[q]
+  standard_name = specific_humidity_of_new_state
+  long_name = water vapor specific humidity updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[prevst]
+  standard_name = air_temperature_on_previous_timestep
+  long_name = temperature from previous time step
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = True
+[prevsq]
+  standard_name = specific_humidity_on_previous_timestep
+  long_name = moisture from previous time step
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = True
+[cactiv]
+  standard_name = counter_for_grell_freitas_convection
+  long_name = convective activity memory
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = True
+[cactiv_m]
+  standard_name = counter_for_grell_freitas_mid_level_convection
+  long_name = midlevel convective activity memory
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = True
+[conv_act]
+  standard_name = consecutive_calls_for_grell_freitas_convection
+  long_name = Memory counter for GF
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = True
+[conv_act_m]
+  standard_name = consecutive_calls_for_grell_freitas_mid_level_convection
+  long_name = Memory counter for GF midlevel
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = True
+[rrfs_sd]
+  standard_name = do_smoke_coupling
+  long_name = flag controlling rrfs_sd collection
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ntsmoke]
+  standard_name = index_for_smoke_in_tracer_concentration_array
+  long_name = tracer index for smoke
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntdust]
+  standard_name = index_for_dust_in_tracer_concentration_array
+  long_name = tracer index for dust
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntcoarsepm]
+  standard_name = index_for_coarse_particulate_matter_in_tracer_concentration_array
+  long_name = tracer index for coarse particulate matter
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[chem3d]
+  standard_name = chem3d_mynn_pbl_transport
+  long_name = mynn pbl transport of smoke and dust
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_chemical_species_vertically_mixed)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[gq0]
+  standard_name = tracer_concentration_of_new_state
+  long_name = tracer concentration updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = inout
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out

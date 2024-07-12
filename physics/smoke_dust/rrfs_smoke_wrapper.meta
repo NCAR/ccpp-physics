@@ -1,9 +1,195 @@
 [ccpp-table-properties]
   name = rrfs_smoke_wrapper
   type = scheme
-  dependencies = dep_dry_mod.F90,module_wetdep_ls.F90,dust_data_mod.F90,dust_fengsha_mod.F90,module_add_emiss_burn.F90,module_plumerise1.F90,module_smoke_plumerise.F90,module_zero_plumegen_coms.F90,plume_data_mod.F90,rrfs_smoke_config.F90,seas_data_mod.F90,seas_mod.F90,seas_ngac_mod.F90,coarsepm_settling_mod.F90
+  dependencies = dep_dry_simple_mod.F90,module_wetdep_ls.F90,dust_data_mod.F90,dust_fengsha_mod.F90,module_add_emiss_burn.F90,module_plumerise.F90,module_smoke_plumerise.F90,module_zero_plumegen_coms.F90,rrfs_smoke_config.F90,seas_data_mod.F90,seas_mod.F90,seas_ngac_mod.F90,coarsepm_settling_mod.F90, dep_dry_mod_emerson.F90,dep_data_mod.F90
 
 ########################################################################
+[ccpp-arg-table]
+  name = rrfs_smoke_wrapper_init
+  type = scheme
+[seas_opt_in]
+  standard_name = control_for_smoke_sea_salt
+  long_name = rrfs smoke sea salt emission option
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[drydep_opt_in]
+  standard_name = control_for_smoke_dry_deposition
+  long_name = rrfs smoke dry deposition option
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[pm_settling_in]
+  standard_name = control_for_smoke_pm_settling
+  long_name = rrfs smoke pm settling option
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[wetdep_ls_opt_in]
+  standard_name = control_for_smoke_wet_deposition
+  long_name = rrfs smoke large scale wet deposition option
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[wetdep_ls_alpha_in]
+  standard_name = alpha_for_ls_wet_depoistion
+  long_name = alpha paramter for ls wet deposition
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[rrfs_sd]
+  standard_name = do_smoke_coupling
+  long_name = flag controlling rrfs_sd collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[add_fire_heat_flux_in]
+  standard_name = flag_for_fire_heat_flux
+  long_name = flag to add fire heat flux to LSM
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[do_plumerise_in]
+  standard_name = do_smoke_plumerise
+  long_name = rrfs smoke plumerise option
+  units = index
+  dimensions = ()
+  type = logical
+  intent = in
+[plumerisefire_frq_in]
+  standard_name = smoke_plumerise_frequency
+  long_name = rrfs smoke add smoke option
+  units = min
+  dimensions = ()
+  type = integer
+  intent = in
+[n_dbg_lines_in]
+  standard_name = smoke_debug_lines
+  long_name = rrfs smoke add smoke option
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[plume_wind_eff_in]
+  standard_name = option_for_wind_effects_on_smoke_plumerise
+  long_name = wind effect plumerise option
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[addsmoke_flag_in]
+  standard_name = control_for_smoke_biomass_burning_emissions
+  long_name = rrfs smoke add smoke option
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ebb_dcycle_in]
+  standard_name = control_for_diurnal_cycle_of_biomass_burning_emissions
+  long_name = rrfs smoke diurnal cycle option
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[smoke_forecast_in]
+  standard_name = do_smoke_forecast
+  long_name = index for rrfs smoke forecast
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[dust_opt_in]
+  standard_name = control_for_smoke_dust
+  long_name = rrfs smoke dust chem option
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[dust_alpha_in]
+  standard_name = alpha_fengsha_dust_scheme
+  long_name = alpha paramter for fengsha dust scheme
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[dust_gamma_in]
+  standard_name = gamma_fengsha_dust_scheme
+  long_name = gamma paramter for fengsha dust scheme
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[dust_moist_opt_in]
+  standard_name = control_for_dust_soil_moisture_option
+  long_name = smoke dust moisture parameterization 1 - fecan 2 - shao
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[dust_moist_correction_in]
+  standard_name = dust_moist_correction_fengsha_dust_scheme
+  long_name = moisture correction term for fengsha dust emission
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[dust_drylimit_factor_in]
+  standard_name = dust_drylimit_factor_fengsha_dust_scheme
+  long_name = moisture correction term for drylimit in fengsha dust emission
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[aero_ind_fdb_in]
+  standard_name = do_smoke_aerosol_indirect_feedback
+  long_name = flag for rrfs wfa ifa emission
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[extended_sd_diags_in]
+  standard_name = flag_for_extended_smoke_dust_diagnostics
+  long_name = flag for extended smoke dust diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[dbg_opt_in]
+  standard_name = do_smoke_debug
+  long_name = flag for rrfs smoke plumerise debug
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+
+#####################################################################
 [ccpp-arg-table]
   name = rrfs_smoke_wrapper_run
   type = scheme
@@ -224,7 +410,17 @@
   type = real
   kind = kind_phys
   intent = inout
-[vegtype]
+  optional = True
+[tslb]
+  standard_name = soil_temperature_for_land_surface_model
+  long_name = soil temperature for land surface model
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil_internal_to_land_surface_scheme)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[vegtype_dom]
   standard_name = vegetation_type_classification
   long_name = vegetation type at each grid cell
   units = index
@@ -238,11 +434,18 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-[sigmaf]
-  standard_name = bounded_vegetation_area_fraction
-  long_name = areal fractional cover of green vegetation bounded on the bottom
+[nlcat]
+  standard_name = number_of_vegetation_categories
+  long_name = number of vegetation categories
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[vegtype_frac]
+  standard_name = fraction_of_vegetation_category
+  long_name = fraction of horizontal grid area occupied by given vegetation category
   units = frac
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_loop_extent,number_of_vegetation_categories)
   type = real
   kind = kind_phys
   intent = in
@@ -278,6 +481,14 @@
   type = real
   kind = kind_phys
   intent = in
+[recmol]
+  standard_name = reciprocal_of_obukhov_length
+  long_name = one over obukhov length
+  units = m-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [idat]
   standard_name = date_and_time_at_model_initialization_in_iso_order
   long_name = initialization date and time
@@ -298,14 +509,6 @@
   long_name = convective rain at this time step
   units = m
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[exch]
-  standard_name = atmosphere_heat_diffusivity
-  long_name = diffusivity for heat
-  units = m2 s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -365,7 +568,8 @@
   type = real
   kind = kind_phys
   intent = in
-[emi_in]
+  optional = True
+[emi_ant_in]
   standard_name = anthropogenic_background_input
   long_name = anthropogenic background input
   units = various
@@ -373,14 +577,25 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [smoke_RRFS]
   standard_name = emission_smoke_RRFS
   long_name = emission fire RRFS
   units = various
-  dimensions = (horizontal_loop_extent,24,3)
+  dimensions = (horizontal_loop_extent,24,2)
   type = real
   kind = kind_phys
   intent = in
+  optional = True
+[smoke2d_RRFS]
+  standard_name = emission_smoke_prvd_RRFS
+  long_name = emission fire RRFS daily
+  units = various
+  dimensions = (horizontal_loop_extent,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
 [ntrac]
   standard_name = number_of_tracers
   long_name = number of tracers
@@ -412,6 +627,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tile_num]
   standard_name = index_of_cubed_sphere_tile
   long_name = tile number
@@ -462,6 +678,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nifa]
   standard_name = mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols_of_new_state
   long_name = number concentration of ice-friendly aerosols
@@ -470,6 +687,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [emanoc]
   standard_name = emission_of_anothropogenic_for_mp_indir_fdb
   long_name = emission of anothropogenic for mp indirect feedabck
@@ -478,6 +696,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [emdust]
   standard_name = emission_of_dust_for_smoke
   long_name = emission of dust for smoke
@@ -486,6 +705,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [emseas]
   standard_name = emission_of_sea_salt_for_mp_indir_fdb
   long_name = emission of sea salt for mp indirect feedabck
@@ -494,7 +714,8 @@
   type = real
   kind = kind_phys
   intent = inout
-[ebb_smoke_hr]
+  optional = True
+[ebb_smoke_in]
   standard_name = surface_smoke_emission
   long_name = emission of surface smoke
   units = ug m-2 s-1
@@ -502,7 +723,8 @@
   type = real
   kind = kind_phys
   intent = inout
-[frp_hr]
+  optional = True
+[frp_output]
   standard_name = frp_hourly
   long_name = hourly fire radiative power
   units = MW
@@ -510,14 +732,7 @@
   type = real
   kind = kind_phys
   intent = inout
-[frp_std_hr]
-  standard_name = frp_std_hourly
-  long_name = hourly stdandard deviation of fire radiative power
-  units = MW
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
+  optional = True
 [coef_bb]
   standard_name = coef_bb_dc
   long_name = coef to estimate the fire emission
@@ -526,6 +741,15 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
+[fire_type_out]
+  standard_name = fire_type
+  long_name = type of fire
+  units = 1
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+  optional = True
 [ebu_smoke]
   standard_name = ebu_smoke
   long_name = buffer of vertical fire emission
@@ -534,6 +758,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fhist]
   standard_name = fire_hist
   long_name = coefficient to scale the fire activity depending on the fire duration
@@ -542,6 +767,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [min_fplume]
   standard_name = minimum_fire_plume_sigma_pressure_level
   long_name = minimum model level of fire plumerise
@@ -550,6 +776,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [max_fplume]
   standard_name = maximum_fire_plume_sigma_pressure_level
   long_name = maximum model level of fire plumerise
@@ -558,6 +785,64 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = MPI_Comm
+  intent = in
+[mpirank]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[uspdavg]
+  standard_name = mean_wind_speed_in_boundary_layer
+  long_name = average wind speed within the boundary layer
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[hpbl_thetav]
+  standard_name = atmosphere_boundary_layer_thickness_from_modified_parcel
+  long_name = pbl height based on modified parcel method
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[drydep_flux_out]
+  standard_name = dry_deposition_flux
+  long_name = rrfs dry deposition flux
+  units = ug m-2
+  dimensions = (horizontal_loop_extent,number_of_chemical_species_deposited)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[wetdpr]
+  standard_name = mp_wet_deposition_smoke_dust
+  long_name = large scale wet deposition of smoke and dust
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,number_of_chemical_species_vertically_mixed)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
 [hwp]
   standard_name = hourly_wildfire_potential
   long_name = rrfs hourly fire weather potential
@@ -566,6 +851,16 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
+[hwp_ave]
+  standard_name = hourly_wildfire_potential_average
+  long_name = rrfs hourly fire weather potential average
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
 [wetness]
   standard_name = normalized_soil_wetness_for_land_surface_model
   long_name = normalized soil wetness
@@ -574,22 +869,7 @@
   type = real
   kind = kind_phys
   intent = in
-[smoke_ext]
-  standard_name = extinction_coefficient_in_air_due_to_smoke
-  long_name = extinction coefficient in air due to smoke
-  units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[dust_ext]
-  standard_name = extinction_coefficient_in_air_due_to_dust
-  long_name = extinction coefficient in air due to dust
-  units = various
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
+  optional = True
 [ndvel]
   standard_name = number_of_chemical_species_deposited
   long_name = number of chemical pbl deposited
@@ -605,141 +885,34 @@
   type = real
   kind = kind_phys
   intent = inout
-[rrfs_sd]
-  standard_name = do_smoke_coupling
-  long_name = flag controlling rrfs_sd collection (default off)
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[dust_moist_opt_in]
-  standard_name = control_for_dust_soil_moisture_option
-  long_name = smoke dust moisture parameterization 1 - fecan 2 - shao
-  units = index
-  dimensions = ()
-  type = integer
-  active = (do_smoke_coupling)
-  intent = in
-[dust_moist_correction_in]
-  standard_name = dust_moist_correction_fengsha_dust_scheme
-  long_name = moisture correction term for fengsha dust emission
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  active = (do_smoke_coupling)
-  intent = in
-[dust_drylimit_factor_in]
-  standard_name = dust_drylimit_factor_fengsha_dust_scheme
-  long_name = moisture correction term for drylimit in fengsha dust emission
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  active = (do_smoke_coupling)
-  intent = in
-[dust_alpha_in]
-  standard_name = alpha_fengsha_dust_scheme
-  long_name = alpha paramter for fengsha dust scheme
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[dust_gamma_in]
-  standard_name = gamma_fengsha_dust_scheme
-  long_name = gamma paramter for fengsha dust scheme
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[fire_in]
-  standard_name = smoke_fire_auxiliary_input
-  long_name = smoke fire auxiliary input variables
-  units = various
-  dimensions = (horizontal_loop_extent,fire_auxiliary_data_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-[seas_opt_in]
-  standard_name = control_for_smoke_sea_salt
-  long_name = rrfs smoke sea salt emission option
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[dust_opt_in]
-  standard_name = control_for_smoke_dust
-  long_name = rrfs smoke dust chem option
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[drydep_opt_in]
-  standard_name = control_for_smoke_dry_deposition
-  long_name = rrfs smoke dry deposition option
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[coarsepm_settling_in]
-  standard_name = control_for_smoke_coarsepm_settling
-  long_name = rrfs smoke coarsepm settling option
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[wetdep_ls_opt_in]
-  standard_name = control_for_smoke_wet_deposition
-  long_name = rrfs smoke large scale wet deposition option
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[wetdep_ls_alpha_in]
-  standard_name = alpha_for_ls_wet_depoistion
-  long_name = alpha paramter for ls wet deposition
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[do_plumerise_in]
-  standard_name = do_smoke_plumerise
-  long_name = rrfs smoke plumerise option
-  units = index
-  dimensions = ()
-  type = logical
-  intent = in
-[plumerisefire_frq_in]
-  standard_name = smoke_plumerise_frequency
-  long_name = rrfs smoke add smoke option
-  units = min
-  dimensions = ()
-  type = integer
-  intent = in
-[addsmoke_flag_in]
-  standard_name = control_for_smoke_biomass_burning_emissions
-  long_name = rrfs smoke add smoke option
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[smoke_forecast_in]
-  standard_name = do_smoke_forecast
-  long_name = index for rrfs smoke forecast
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[aero_ind_fdb_in]
-  standard_name = do_smoke_aerosol_indirect_feedback
-  long_name = flag for rrfs wfa ifa emission
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
+  optional = True
+[peak_hr_out]
+ standard_name = peak_hr_fire
+ long_name = time_of_peak_fire_emissions
+ units = s
+ dimensions = (horizontal_loop_extent)
+ type = real
+ kind = kind_phys
+ intent = out
+  optional = True
+[lu_nofire_out]
+ standard_name = sum_of_land_use_fractions_for_no_fire_pixels
+ long_name = land use of no fire pixels for type
+ units = 1
+ dimensions = (horizontal_loop_extent)
+ type = real
+ kind = kind_phys
+ intent = out
+  optional = True
+[lu_qfire_out]
+ standard_name = sum_of_land_use_fractions_for_cropland_fire_pixels
+ long_name = land use of fire pixels for type
+ units = 1
+ dimensions = (horizontal_loop_extent)
+ type = real
+ kind = kind_phys
+ intent = out
+  optional = True
 [fire_heat_flux_out]
   standard_name = surface_fire_heat_flux
   long_name = heat flux of fire at the surface
@@ -748,6 +921,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [frac_grid_burned_out]
   standard_name = fraction_of_grid_cell_burning
   long_name = ration of the burnt area to the grid cell area
@@ -756,12 +930,21 @@
   type = real
   kind = kind_phys
   intent = out
-[dbg_opt_in]
-  standard_name = do_smoke_debug
-  long_name = flag for rrfs smoke plumerise debug
-  units = flag
-  dimensions = ()
-  type = logical
+  optional = True
+[kpbl]
+  standard_name = vertical_index_at_top_of_atmosphere_boundary_layer
+  long_name = PBL top model level index
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+[oro]
+  standard_name = height_above_mean_sea_level
+  long_name = height_above_mean_sea_level
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = in
 [errmsg]
   standard_name = ccpp_error_message

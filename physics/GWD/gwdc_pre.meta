@@ -1,0 +1,140 @@
+[ccpp-table-properties]
+  name = gwdc_pre
+  type = scheme
+  dependencies = ../hooks/machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = gwdc_pre_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[cgwf]
+  standard_name = tunable_parameters_for_convective_gravity_wave_drag
+  long_name = multiplication factors for convective gravity wave drag
+  units = none
+  dimensions = (2)
+  type = real
+  kind = kind_phys
+  intent = in
+[dx]
+  standard_name = characteristic_grid_lengthscale
+  long_name = grid size in zonal direction
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[work1]
+  standard_name = grid_size_related_coefficient_used_in_scale_sensitive_schemes
+  long_name = grid size related coefficient used in scale-sensitive schemes
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[work2]
+  standard_name = grid_size_related_coefficient_used_in_scale_sensitive_schemes_complement
+  long_name = complement to work1
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[dlength]
+  standard_name = characteristic_grid_length_scale
+  long_name = representative horizontal length scale of grid box
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[cldf]
+  standard_name = cloud_area_fraction
+  long_name = fraction of grid box area in which updrafts occur
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical layers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[kbot]
+  standard_name = vertical_index_at_cloud_base
+  long_name = vertical index at cloud base
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+[ktop]
+  standard_name = vertical_index_at_cloud_top
+  long_name = vertical index at cloud top
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+[dtp]
+  standard_name = timestep_for_physics
+  long_name = physics time step
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[gt0]
+  standard_name = air_temperature_of_new_state
+  long_name = updated air temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[gt0_init]
+  standard_name = air_temperature_save
+  long_name = air temperature before entering convection scheme
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[del]
+  standard_name = air_pressure_difference_between_midlayers
+  long_name = difference between mid-layer pressures
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[cumabs]
+  standard_name = maximum_column_heating_rate
+  long_name = maximum heating rate in column
+  units = K s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out

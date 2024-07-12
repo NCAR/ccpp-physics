@@ -1,0 +1,520 @@
+[ccpp-table-properties]
+  name = GFS_stochastics
+  type = scheme
+  dependencies = ../../hooks/machine.F
+
+[ccpp-arg-table]
+  name = GFS_stochastics_init
+  type = scheme
+[km]
+  standard_name = vertical_dimension_for_radiation
+  long_name = number of vertical levels for radiation calculations
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[do_ca]
+  standard_name = flag_for_cellular_automata
+  long_name = cellular automata main switch
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ca_global]
+  standard_name = flag_for_global_cellular_automata
+  long_name = switch for global ca
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[si]
+  standard_name = sigma_pressure_hybrid_vertical_coordinate
+  long_name = vertical sigma coordinate for radiation initialization
+  units = none
+  dimensions = (vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[vfact_ca]
+  standard_name = cellular_automata_vertical_weight
+  long_name = vertical weight for ca
+  units = frac
+  dimensions = (vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+########################################################################
+[ccpp-arg-table]
+  name = GFS_stochastics_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[km]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[kdt]
+  standard_name = index_of_timestep
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[delt]
+  standard_name = timestep_for_physics
+  long_name = physics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[do_sppt]
+  standard_name = flag_for_stochastic_physics_perturbations
+  long_name = flag for stochastic physics perturbations
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[pert_mp]
+  standard_name = flag_for_stochastic_microphysics_perturbations
+  long_name = flag for stochastic microphysics physics perturbations
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[use_zmtnblck]
+  standard_name = flag_for_mountain_blocking_for_sppt
+  long_name = flag for mountain blocking
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[do_shum]
+  standard_name = flag_for_stochastic_shum_option
+  long_name = flag for stochastic shum option
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[do_skeb]
+  standard_name = flag_for_stochastic_skeb_option
+  long_name = flag for stochastic skeb option
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[do_ca]
+  standard_name = flag_for_cellular_automata
+  long_name = cellular automata main switch
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ca_global]
+  standard_name = flag_for_global_cellular_automata
+  long_name = switch for global ca
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ca1]
+  standard_name = cellular_automata_global_pattern_from_coupled_process
+  long_name = cellular automata global pattern
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[vfact_ca]
+  standard_name = cellular_automata_vertical_weight
+  long_name = vertical weight for ca
+  units = frac
+  dimensions = (vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[zmtnblck]
+  standard_name = level_of_dividing_streamline
+  long_name = level of the dividing streamline
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sppt_wts]
+  standard_name = sppt_weights_from_coupled_process
+  long_name = weights for stochastic sppt perturbation
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[skebu_wts]
+  standard_name = skeb_x_wind_weights_from_coupled_process
+  long_name = weights for stochastic skeb perturbation of x wind
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[skebv_wts]
+  standard_name = skeb_y_wind_weights_from_coupled_process
+  long_name = weights for stochastic skeb perturbation of y wind
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[shum_wts]
+  standard_name = shum_weights_from_coupled_process
+  long_name = weights for stochastic shum perturbation
+  units = none
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[diss_est]
+  standard_name = dissipation_estimate_of_air_temperature_at_model_layers
+  long_name = dissipation estimate model layer mean temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[ugrs]
+  standard_name = x_wind
+  long_name = zonal wind
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[vgrs]
+  standard_name = y_wind
+  long_name = meridional wind
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[tgrs]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[qgrs_wv]
+  standard_name = specific_humidity
+  long_name = water vapor specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[qgrs_cw]
+  standard_name = cloud_liquid_water_mixing_ratio
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[qgrs_rw]
+  standard_name = rain_mixing_ratio
+  long_name = moist mixing ratio of rain
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[qgrs_sw]
+  standard_name = snow_mixing_ratio
+  long_name = moist mixing ratio of snow
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[qgrs_iw]
+  standard_name = cloud_ice_mixing_ratio
+  long_name = moist mixing ratio of cloud ice
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[qgrs_gl]
+  standard_name = graupel_mixing_ratio
+  long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) 
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[gu0]
+  standard_name = x_wind_of_new_state
+  long_name = zonal wind updated by physics
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gv0]
+  standard_name = y_wind_of_new_state
+  long_name = meridional wind updated by physics
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gt0]
+  standard_name = air_temperature_of_new_state
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gq0_wv]
+  standard_name = specific_humidity_of_new_state
+  long_name = water vapor specific humidity updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dtdtnp]
+  standard_name = tendency_of_air_temperature_to_withold_from_sppt
+  long_name = temp. change from physics that should not be perturbed by sppt
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[gq0_cw]
+  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
+  long_name = cloud condensed water mixing ratio updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gq0_rw]
+  standard_name = rain_mixing_ratio_of_new_state
+  long_name = moist mixing ratio of rain updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gq0_sw]
+  standard_name = snow_mixing_ratio_of_new_state
+  long_name = moist mixing ratio of snow updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gq0_iw]
+  standard_name = cloud_ice_mixing_ratio_of_new_state
+  long_name = moist mixing ratio of cloud ice updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gq0_gl]
+  standard_name = graupel_mixing_ratio_of_new_state
+  long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[rain]
+  standard_name = lwe_thickness_of_precipitation_amount_on_dynamics_timestep
+  long_name = total rain at this time step
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[rainc]
+  standard_name = lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep
+  long_name = convective rain at this time step
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[tprcp]
+  standard_name = nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep
+  long_name = total precipitation amount in each time step
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[totprcp]
+  standard_name = accumulated_lwe_thickness_of_precipitation_amount
+  long_name = accumulated total precipitation
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[cnvprcp]
+  standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount
+  long_name = cumulative convective precipitation
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[totprcpb]
+  standard_name = accumulated_lwe_thickness_of_precipitation_amount_in_bucket
+  long_name = accumulated total precipitation in bucket
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[cnvprcpb]
+  standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket
+  long_name = cumulative convective precipitation in bucket
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[cplflx]
+  standard_name = flag_for_surface_flux_coupling
+  long_name = flag controlling cplflx collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[cpllnd]
+  standard_name = flag_for_land_coupling
+  long_name = flag controlling cpllnd collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[rain_cpl]
+  standard_name = cumulative_lwe_thickness_of_precipitation_amount_for_coupling
+  long_name = total rain precipitation
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[snow_cpl]
+  standard_name = cumulative_lwe_thickness_of_snow_amount_for_coupling
+  long_name = total snow precipitation
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[drain_cpl]
+  standard_name = tendency_of_lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
+  long_name = change in rain_cpl (coupling_type)
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[dsnow_cpl]
+  standard_name = tendency_of_lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
+  long_name = change in show_cpl (coupling_type)
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[ntcw]
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for cloud condensate (or liquid water)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntrw]
+  standard_name = index_of_rain_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for rain water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntsw]
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for snow water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntiw]
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for  ice water
+  units = index
+  dimensions = ()
+  intent = in
+  type = integer
+[ntgl]
+  standard_name = index_of_graupel_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for graupel
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out

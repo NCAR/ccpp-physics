@@ -1,8 +1,7 @@
 [ccpp-table-properties]
   name = rrfs_smoke_postpbl
   type = scheme
-  dependencies = dep_dry_mod.F90,module_wetdep_ls.F90,dust_data_mod.F90,dust_fengsha_mod.F90,module_add_emiss_burn.F90,module_plumerise1.F90,module_smoke_plumerise.F90,module_zero_plumegen_coms.F90,plume_data_mod.F90,rrfs_smoke_config.F90,seas_data_mod.F90,seas_mod.F90,seas_ngac_mod.F90
-
+  dependencies = dep_dry_simple_mod.F90,module_wetdep_ls.F90,dust_data_mod.F90,dust_fengsha_mod.F90,module_add_emiss_burn.F90,module_plumerise.F90,module_smoke_plumerise.F90,module_zero_plumegen_coms.F90,rrfs_smoke_config.F90,seas_data_mod.F90,seas_mod.F90,seas_ngac_mod.F90,dep_dry_mod_emerson.F90,dep_data_mod.F90
 ########################################################################
 [ccpp-arg-table]
   name = rrfs_smoke_postpbl_run
@@ -65,6 +64,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [rrfs_sd]
   standard_name = do_smoke_coupling
   long_name = flag controlling rrfs_sd collection (default off)

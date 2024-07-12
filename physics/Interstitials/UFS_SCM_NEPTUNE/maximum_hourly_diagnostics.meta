@@ -1,0 +1,361 @@
+[ccpp-table-properties]
+  name = maximum_hourly_diagnostics
+  type = scheme
+  dependencies = ../../hooks/machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = maximum_hourly_diagnostics_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[reset]
+  standard_name = flag_reset_maximum_hourly_fields
+  long_name = flag for resetting maximum hourly fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lradar]
+  standard_name = flag_for_radar_reflectivity
+  long_name = flag for radar reflectivity
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[imp_physics]
+  standard_name = control_for_microphysics_scheme
+  long_name = choice of microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imp_physics_gfdl]
+  standard_name = identifier_for_gfdl_microphysics_scheme
+  long_name = choice of GFDL microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imp_physics_thompson]
+  standard_name = identifier_for_thompson_microphysics_scheme
+  long_name = choice of Thompson microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imp_physics_fer_hires]
+  standard_name = identifier_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imp_physics_nssl]
+  standard_name = identifier_for_nssl_microphysics_scheme
+  long_name = choice of NSSL 2-moment microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[phil]
+  standard_name = geopotential
+  long_name = geopotential at model layer centers
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[gt0]
+  standard_name = air_temperature_of_new_state
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[refl_10cm]
+  standard_name = radar_reflectivity_10cm
+  long_name = instantaneous refl_10cm
+  units = dBZ
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[refdmax]
+  standard_name = maximum_reflectivity_at_1km_agl_over_maximum_hourly_time_interval
+  long_name = maximum reflectivity at 1km agl over maximum hourly time interval
+  units = dBZ
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[refdmax263k]
+  standard_name = maximum_reflectivity_at_minus10c_over_maximum_hourly_time_interval
+  long_name = maximum reflectivity at minus10c over maximum hourly time interval
+  units = dBZ
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[u10m]
+  standard_name = x_wind_at_10m
+  long_name = 10 meter u wind speed
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[v10m]
+  standard_name = y_wind_at_10m
+  long_name = 10 meter v wind speed
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[u10max]
+  standard_name = maximum_u_wind_at_10m_over_maximum_hourly_time_interval
+  long_name = maximum u wind at 10m over maximum hourly time interval
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[v10max]
+  standard_name = maximum_v_wind_at_10m_over_maximum_hourly_time_interval
+  long_name = maximum v wind at 10m over maximum hourly time interval
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[spd10max]
+  standard_name = maximum_wind_at_10m_over_maximum_hourly_time_interval
+  long_name = maximum wind at 10m over maximum hourly time interval
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[pgr]
+  standard_name = surface_air_pressure
+  long_name = surface pressure
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[t2m]
+  standard_name = air_temperature_at_2m
+  long_name = 2 meter temperature
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[q2m]
+  standard_name = specific_humidity_at_2m
+  long_name = 2 meter specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[t02max]
+  standard_name = maximum_temperature_at_2m_over_maximum_hourly_time_interval
+  long_name = maximum temperature at 2m over maximum hourly time interval
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[t02min]
+  standard_name = minimum_temperature_at_2m_over_maximum_hourly_time_interval
+  long_name = minumum temperature at 2m over maximum hourly time interval
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[rh02max]
+  standard_name = maximum_relative_humidity_at_2m_over_maximum_hourly_time_interval
+  long_name = maximum relative humidity at 2m over maximum hourly time interval
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[rh02min]
+  standard_name = minimum_relative_humidity_at_2m_over_maximum_hourly_time_interval
+  long_name = minumum relative humidity at 2m over maximum hourly time interval
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dtp]
+  standard_name = timestep_for_physics
+  long_name = physics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[rain]
+  standard_name = lwe_thickness_of_precipitation_amount_on_dynamics_timestep
+  long_name = total rain at this time step
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[pratemax]
+  standard_name = maximum_precipitation_rate_over_maximum_hourly_time_interval
+  long_name = maximum precipitation rate over maximum hourly time interval
+  units = mm h-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[wgrs]
+  standard_name = unsmoothed_nonhydrostatic_upward_air_velocity
+  long_name = unsmoothed non-hydrostatic upward air velocity
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[qgraupel]
+  standard_name = graupel_mixing_ratio
+  long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[qsnowwat]
+  standard_name = snow_mixing_ratio
+  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[qicewat]
+  standard_name = cloud_ice_mixing_ratio
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rd]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[tgrs]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[lightning_threat]
+  standard_name = do_lightning_threat_index_calculations
+  long_name = enables the lightning threat index calculations
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ltg1_max]
+  standard_name = lightning_threat_index_1
+  long_name = lightning threat index 1
+  units = flashes min-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[ltg2_max]
+  standard_name = lightning_threat_index_2
+  long_name = lightning threat index 2
+  units = flashes min-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[ltg3_max]
+  standard_name = lightning_threat_index_3
+  long_name = lightning threat index 3
+  units = flashes min-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[prsi]
+  standard_name = air_pressure_at_interface
+  long_name = air pressure at model layer interfaces
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[prsl]
+  standard_name = air_pressure
+  long_name = mean layer pressure
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[kdt]
+  standard_name = index_of_timestep
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
