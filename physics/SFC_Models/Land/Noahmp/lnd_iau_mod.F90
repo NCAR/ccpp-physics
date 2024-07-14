@@ -29,7 +29,7 @@ module land_iau_mod
   private
 
   real(kind=kind_phys), allocatable :: wk3_stc(:, :, :, :), wk3_slc(:, :, :, :)
-  integer(kind=kind_phys), allocatable :: wk3_slmsk(:, :, :)
+  integer, allocatable :: wk3_slmsk(:, :, :)
 
   type land_iau_internal_data_type
       real(kind=kind_phys),allocatable :: stc_inc(:,:,:)
