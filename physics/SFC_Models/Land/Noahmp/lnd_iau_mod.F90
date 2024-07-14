@@ -362,7 +362,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    endif
    if (ntimes.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them     
       Land_IAU_state%hr2=Land_IAU_Control%iaufhrs(2)   
-      
+
       Land_IAU_Data%snow_land_mask(:, :)  = wk3_slmsk(1, :, :)
 
       do k = 1, npz  ! do k = 1,n_soill    !  
@@ -660,7 +660,8 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, stc_inc_ou
    status = nf90_inq_varid(ncid, trim(slsn_mask), varid)
    if (status == nf90_noerr) then   !if (ierr == 0) then
       do it = 1, n_t
-         call get_var3d_values(ncid, varid, Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, it, 1, wk3_slmsk(it, :, :), status)
+         call get_var3d_values_int(ncid, varid, Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, &
+                                   it, 1, wk3_slmsk(it, :, :), status)
          call netcdf_err(status, 'reading var: '//trim(slsn_mask), errflg, errmsg)
          if (errflg .ne. 0) return
       enddo         
@@ -810,6 +811,23 @@ end subroutine calculate_landinc_mask
                ! start = (/is, js, ks/), count = (/ie - is + 1, je - js + 1, ke - ks + 1/))
 
    end subroutine get_var3d_values
+
+   subroutine get_var3d_values_int(ncid, varid, is,ix, js,jy, ks,kz, var3d, status)
+      integer, intent(in):: ncid, varid
+      integer, intent(in):: is, ix, js, jy, ks,kz
+      integer, intent(out):: var3d(ix, jy, kz)   !var3d(is:ie,js:je,ks:ke)
+      integer, intent(out):: status 
+      ! integer, dimension(3):: start, nreco
+      ! start(1) = is; start(2) = js; start(3) = ks
+      ! nreco(1) = ie - is + 1
+      ! nreco(2) = je - js + 1
+      ! nreco(3) = ke - ks + 1
+
+      status = nf90_get_var(ncid, varid, var3d, &  !start = start, count = nreco)
+               start = (/is, js, ks/), count = (/ix, jy, kz/))
+               ! start = (/is, js, ks/), count = (/ie - is + 1, je - js + 1, ke - ks + 1/))
+
+   end subroutine get_var3d_values_int
   
 end module land_iau_mod
 
