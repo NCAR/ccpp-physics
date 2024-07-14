@@ -328,27 +328,27 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
           return
     endif
     n_stc = 0
-    do i=1,lensfc
-      if (stc_updated(i) == 1 ) then ! soil-only location
-          n_stc = n_stc+1
-          soiltype = soiltyp(i)
-          do l = 1, lsoil_incr
-              !case 1: frz ==> frz, recalculate slc, smc remains
-              !case 2: unfrz ==> frz, recalculate slc, smc remains
-              !both cases are considered in the following if case
-              if (stc(i,l) .LT. tfreez )then
-                !recompute supercool liquid water,smc_anl remain unchanged
-                smp = hfus*(tfreez-stc(i,l))/(grav*stc(i,l)) !(m)
-                slc_new=maxsmc(soiltype)*(smp/satpsi(soiltype))**(-1./bb(soiltype))
-                slc(i,l) = max( min( slc_new, smc(i,l)), 0.0 )
-              endif
-              !case 3: frz ==> unfrz, melt all soil ice (if any)
-              if (stc(i,l) .GT. tfreez )then !do not rely on stc_bck
-                slc(i,l)=smc(i,l)
-              endif
-          enddo
-      endif
-    enddo    
+    ! do i=1,lensfc
+    !   if (stc_updated(i) == 1 ) then ! soil-only location
+    !       n_stc = n_stc+1
+    !       soiltype = soiltyp(i)
+    !       do l = 1, lsoil_incr
+    !           !case 1: frz ==> frz, recalculate slc, smc remains
+    !           !case 2: unfrz ==> frz, recalculate slc, smc remains
+    !           !both cases are considered in the following if case
+    !           if (stc(i,l) .LT. tfreez )then
+    !             !recompute supercool liquid water,smc_anl remain unchanged
+    !             smp = hfus*(tfreez-stc(i,l))/(grav*stc(i,l)) !(m)
+    !             slc_new=maxsmc(soiltype)*(smp/satpsi(soiltype))**(-1./bb(soiltype))
+    !             slc(i,l) = max( min( slc_new, smc(i,l)), 0.0 )
+    !           endif
+    !           !case 3: frz ==> unfrz, melt all soil ice (if any)
+    !           if (stc(i,l) .GT. tfreez )then !do not rely on stc_bck
+    !             slc(i,l)=smc(i,l)
+    !           endif
+    !       enddo
+    !   endif
+    ! enddo    
      
     deallocate(stc_updated)  
     deallocate(mask_tile)
