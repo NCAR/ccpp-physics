@@ -29,6 +29,7 @@ module land_iau_mod
   private
 
   real(kind=kind_phys), allocatable :: wk3_stc(:, :, :, :), wk3_slc(:, :, :, :)
+  integer(kind=kind_phys), allocatable :: wk3_slmsk(:, :, :)
 
   type land_iau_internal_data_type
       real(kind=kind_phys),allocatable :: stc_inc(:,:,:)
@@ -39,7 +40,7 @@ module land_iau_mod
       real(kind=kind_phys),allocatable :: stc_inc(:,:,:)   
       real(kind=kind_phys),allocatable :: slc_inc(:,:,:)   
       logical                          :: in_interval = .false.
-      ! integer,allocatable              :: snow_land_mask(:, :, :)
+      integer,allocatable              :: snow_land_mask(:, :)
   end type land_iau_external_data_type
 
   type land_iau_state_type
@@ -265,6 +266,8 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
 
    allocate(Land_IAU_Data%stc_inc(nlon, nlat, km))
    allocate(Land_IAU_Data%slc_inc(nlon, nlat, km))
+   allocate(Land_IAU_Data%snow_land_mask(nlon, nlat)) 
+   
 ! allocate arrays that will hold iau state
    allocate (Land_IAU_state%inc1%stc_inc(nlon, nlat, km))
    allocate (Land_IAU_state%inc1%slc_inc(nlon, nlat, km))
@@ -305,6 +308,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    endif
 
    ! determine number of valid forecast hours
+!TODO: can read this from the increment file ("Time" dim)
    ntimesall = size(Land_IAU_Control%iaufhrs)
    ntimes = 0
    do k=1,ntimesall
@@ -339,7 +343,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'land_iau interval, rdt',Land_IAU_Control%iau_delthrs,Land_IAU_state%rdt
 
    ! Read all increment files at iau init time (at beginning of cycle) 
-   ! allocate (wk3_stc(n_t, 1:im,jbeg:jend, 1:km))   
+   ! allocate (wk3_stc(n_t, 1:im,jbeg:jend, 1:km))  
    call read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, wk3_stc, wk3_slc
    ! call read_iau_forcing_fv3(Land_IAU_Control, Land_IAU_state%inc1%stc_inc, Land_IAU_state%inc1%slc_inc, errmsg, errflg)
    
@@ -358,6 +362,8 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    endif
    if (ntimes.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them     
       Land_IAU_state%hr2=Land_IAU_Control%iaufhrs(2)   
+      
+      Land_IAU_Data%snow_land_mask(:, :)  = wk3_slmsk(1, :, :)
 
       do k = 1, npz  ! do k = 1,n_soill    !  
          do j = 1, nlat
@@ -383,9 +389,11 @@ subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, errmsg, errflg
 
    if (allocated (wk3_stc)) deallocate (wk3_stc)
    if (allocated (wk3_slc)) deallocate (wk3_slc)
+   if (allocated (wk3_slmsk)) deallocate (wk3_slmsk)
 
    if (allocated(Land_IAU_Data%stc_inc)) deallocate (Land_IAU_Data%stc_inc)
    if (allocated(Land_IAU_Data%slc_inc)) deallocate (Land_IAU_Data%slc_inc)
+   if (allocated(Land_IAU_Data%snow_land_mask)) deallocate (Land_IAU_Data%snow_land_mask)   
 
    if (allocated(Land_IAU_state%inc1%stc_inc)) deallocate(Land_IAU_state%inc1%stc_inc)
    if (allocated(Land_IAU_state%inc1%slc_inc)) deallocate(Land_IAU_state%inc1%slc_inc)
@@ -483,6 +491,7 @@ end subroutine land_iau_mod_finalize
             Land_IAU_state%inc2%stc_inc(:, :, :) = wk3_stc(itnext, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
             Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(itnext, :, :, :) 
          endif
+         Land_IAU_Data%snow_land_mask(:, :)  = wk3_slmsk(itnext-1, :, :)
          call updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state%rdt, Land_IAU_state%wt)
       endif
    endif
@@ -542,6 +551,7 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, rdt, wt)
             Land_IAU_Data%stc_inc(i,j,k) = wt*Land_IAU_state%inc1%stc_inc(i,j,k)*rdt
             Land_IAU_Data%slc_inc(i,j,k) = wt*Land_IAU_state%inc1%slc_inc(i,j,k)*rdt
          end do
+         Land_IAU_Data%snow_land_mask(i, j)  = wk3_slmsk(1, i, j)
       enddo
    enddo
 
@@ -565,6 +575,7 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, stc_inc_ou
 
    character(len=32), dimension(4) :: stc_vars = [character(len=32) :: 'soilt1_inc', 'soilt2_inc', 'soilt3_inc', 'soilt4_inc']
    character(len=32), dimension(4) :: slc_vars = [character(len=32) :: 'slc1_inc', 'slc2_inc', 'slc3_inc', 'slc4_inc']
+   character(len=32) :: slsn_mask = "soilsnow_mask"
 
    !Errors messages handled through CCPP error handling variables
    errmsg = ''
@@ -609,6 +620,7 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, stc_inc_ou
 
    allocate(wk3_stc(n_t, Land_IAU_Control%nx, Land_IAU_Control%ny, km))
    allocate(wk3_slc(n_t, Land_IAU_Control%nx, Land_IAU_Control%ny, km))
+   allocate(wk3_slmsk(n_t, Land_IAU_Control%nx, Land_IAU_Control%ny))
    
    do i = 1, size(stc_vars)
       if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *, trim(stc_vars(i))
@@ -644,6 +656,19 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, stc_inc_ou
          wk3_slc(:, :, :, i) = 0.
       endif
    enddo
+   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *, trim(slsn_mask)
+   status = nf90_inq_varid(ncid, trim(slsn_mask), varid)
+   if (status == nf90_noerr) then   !if (ierr == 0) then
+      do it = 1, n_t
+         call get_var3d_values(ncid, varid, Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, it, 1, wk3_slmsk(it, :, :), status)
+         call netcdf_err(status, 'reading var: '//trim(slsn_mask), errflg, errmsg)
+         if (errflg .ne. 0) return
+      enddo         
+   else
+      if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *, 'warning: no values for ',trim(slsn_mask), ' found', &
+         'assuming value of 1 for all grid cells. Please make sure the increment files have soil snow mask var'
+      wk3_slmsk(:, :, :) = 1
+   endif
 
    status =nf90_close(ncid) 
    call netcdf_err(status, 'closing file '//trim(fname), errflg, errmsg) 
