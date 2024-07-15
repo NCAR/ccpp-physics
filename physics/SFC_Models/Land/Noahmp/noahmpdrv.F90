@@ -288,9 +288,11 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
       ! enddo
       ib = 1
       do j = 1, Land_IAU_Control%ny  !ny         
-        do i = ib, ib+Land_IAU_Control%nx-1  
-          print*, stc(i, 1)
-        enddo
+        ! do i = ib, ib+Land_IAU_Control%nx-1  
+        !   print*, stc(i, 1)
+        !   WRITE(*,"(10F5.2)")
+        ! enddo
+        WRITE(*,"(48F7.3)") stc(ib:ib+Land_IAU_Control%nx-1, 1)
         ib = ib + Land_IAU_Control%nx  !nlon    
       enddo
       print*, "root proc layer 1 inc"
@@ -299,9 +301,10 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
       ! enddo
       ib = 1
       do j = 1, Land_IAU_Control%ny  !ny         
-        do i = ib, ib+Land_IAU_Control%nx-1  
-          print*, stc_inc_flat(i, 1)*delt
-        enddo
+        ! do i = ib, ib+Land_IAU_Control%nx-1  
+        !   print*, stc_inc_flat(i, 1)*delt
+        ! enddo
+        WRITE(*,"(48F7.3)") stc_inc_flat(ib:ib+Land_IAU_Control%nx-1, 1)
         ib = ib + Land_IAU_Control%nx  !nlon    
       enddo
     endif
@@ -350,7 +353,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
         ib = ib + Land_IAU_Control%nx  !nlon    
       enddo
     endif
-    
+
     deallocate(stc_inc_flat)  !, slc_inc_flat)   !, tmp2m_inc_flat,spfh2m_inc_flat)
 
 ! (consistency) adjustments for updated soil temp and moisture
