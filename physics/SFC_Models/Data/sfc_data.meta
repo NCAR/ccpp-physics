@@ -2,7 +2,7 @@
 [ccpp-table-properties]
   name = sfc_data 
   type = scheme
-  dependencies = machine.F
+  dependencies = ../../tools/funcphys.f90,../../hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -30,6 +30,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [mask_dat]
   standard_name = land_sea_mask_from_data
   long_name = landmask
@@ -38,6 +39,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [tice_dat]
   standard_name = surface_skin_temperature_over_ice_from_data
   long_name = surface skin temperature over ice
@@ -46,6 +48,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [hice_dat]
   standard_name = sea_ice_thickness_from_data
   long_name = sea-ice thickness
@@ -54,6 +57,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [fice_dat]
   standard_name = sea_ice_area_fraction_of_sea_area_fraction_from_data
   long_name = sea-ice concentration [0,1]
@@ -62,6 +66,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [hvap]
   standard_name = latent_heat_of_vaporization_of_water_at_0C
   long_name = latent heat of evaporation/sublimation
@@ -323,6 +328,7 @@
   dimensions = ()
   type = integer
   intent = in
+  optional = True
 [aux2d]
   standard_name = auxiliary_2d_arrays
   long_name = auxiliary 2d arrays to output (for debugging)
@@ -331,3 +337,4 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True

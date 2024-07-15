@@ -78,8 +78,8 @@
       integer, intent(in) :: im
       logical, intent(in) :: use_data 
       logical, intent(in) :: thsfc_loc
-      real (kind=kind_phys), dimension(:), intent(in) :: mask_dat,      &
-     & hice_dat, fice_dat, tice_dat, tsfco_dat
+      real (kind=kind_phys), dimension(:), intent(in), optional ::      &
+     & mask_dat, fice_dat, hice_dat, tsfco_dat, tice_dat
       real (kind=kind_phys), dimension(:), intent(in) :: q1, t1, prslki,&
      & prslk1, prsik1, prsl1, ps, cm, ch, wind
       real (kind=kind_phys), intent(in) :: cp, eps, epsm1, hvap, rd,    &
@@ -88,8 +88,8 @@
 !  ---  input/outputs:
       real (kind=kind_phys), dimension(:), intent(inout) :: hice, fice, &
      & tice, tsfc_wat
-      integer, intent(in) :: naux2d
-      real(kind_phys), intent(inout) :: aux2d(:,:)
+      integer, intent(in), optional :: naux2d
+      real(kind_phys), intent(inout), optional :: aux2d(:,:)
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(:), intent(inout) :: cmm, chh,   &
