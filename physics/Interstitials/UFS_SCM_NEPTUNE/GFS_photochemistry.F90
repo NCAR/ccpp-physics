@@ -29,14 +29,19 @@ contains
     errflg = 0
 
     ! If no photchemical scheme is on, but SDF has this module, report an error?
-    ! DJS2024 Asks: If everything in _run() is controlled by these logicals, we probably don't
-    !         need to kill it here, since the run phase will be harmless?
     if ((.not. oz_phys_2006) .and. (.not. oz_phys_2015) .and. (.not. h2o_phys)) then
        write (errmsg,'(*(a))') 'Logic error: One of [oz_phys_2006, oz_phys_2015, or h2o_phys] must == .true. '
        errflg = 1
        return
     endif
-
+    
+    ! Only one ozone scheme can be on. Otherwise, return and report error.
+    if (oz_phys_2006 .and. oz_phys_2015) then
+       write (errmsg,'(*(a))') 'Logic error: Only one ozone scheme can be enabled at a time'
+       errflg = 1
+       return
+    endif
+    
   end subroutine GFS_photochemistry_init
 
 ! #########################################################################################

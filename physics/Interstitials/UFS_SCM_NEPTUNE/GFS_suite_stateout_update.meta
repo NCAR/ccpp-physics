@@ -3,7 +3,7 @@
   name = GFS_suite_stateout_update
   type = scheme
   dependencies = ../../hooks/machine.F
-  
+
 ########################################################################
 [ccpp-arg-table]
   name = GFS_suite_stateout_update_run
