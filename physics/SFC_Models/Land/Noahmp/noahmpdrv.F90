@@ -280,6 +280,31 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
 !TODO---if only fv3 increment files are used, this can be read from file
     allocate(mask_tile(lensfc))
     call calculate_landinc_mask(weasd, vegtype, soiltyp, lensfc, isice_table, mask_tile)  !& !veg_type_landice, 
+
+    if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+      print*, "root proc, tile num, layer 1 stc", Land_IAU_Control%me, Land_IAU_Control%tile_num
+      ! do ij = 1, lensfc
+      !   print*, stc(ij,1)
+      ! enddo
+      ib = 1
+      do j = 1, Land_IAU_Control%ny  !ny         
+        do i = ib, ib+Land_IAU_Control%nx-1  
+          print*, stc(i, 1)
+        enddo
+        ib = ib + Land_IAU_Control%nx  !nlon    
+      enddo
+      print*, "root proc layer 1 inc"
+      ! do ij = 1, lensfc
+      !   print*, stc_inc_flat(ij,k)*delt !Land_IAU_Control%dtp
+      ! enddo
+      ib = 1
+      do j = 1, Land_IAU_Control%ny  !ny         
+        do i = ib, ib+Land_IAU_Control%nx-1  
+          print*, stc_inc_flat(i, 1)*delt
+        enddo
+        ib = ib + Land_IAU_Control%nx  !nlon    
+      enddo
+    endif
                                 
     !IAU increments are in units of 1/sec     !Land_IAU_Control%dtp
     !* only updating soil temp for now 
@@ -312,6 +337,20 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     !   stc(:,k) = stc(:,k) + stc_inc_flat(:,k)*delt !Land_IAU_Control%dtp
     !   ! slc(:,k) = slc(:,k) + slc_inc_flat(:,k)*delt !Land_IAU_Control%dtp    
     ! enddo
+    if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+      print*, "root proc layer 1 stc after adding IAU inc"
+      ! do ij = 1, lensfc
+      !   print*, stc(ij,1)
+      ! enddo
+      ib = 1
+      do j = 1, Land_IAU_Control%ny  !ny         
+        do i = ib, ib+Land_IAU_Control%nx-1  
+          print*, stc(i, 1)
+        enddo
+        ib = ib + Land_IAU_Control%nx  !nlon    
+      enddo
+    endif
+    
     deallocate(stc_inc_flat)  !, slc_inc_flat)   !, tmp2m_inc_flat,spfh2m_inc_flat)
 
 ! (consistency) adjustments for updated soil temp and moisture
