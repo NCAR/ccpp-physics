@@ -2,9 +2,7 @@
 \page GFS_ugwpv1_gsldrag GFS Unified UGWP Version 1 Scheme
 
 \section des_ugwpv1 Description
-The "ugwpv1_gsldrag" combines the orographic gravity wave drag (GWD) parameterizations of the GSL drag suite with the version 1 UGWP non-stationary gravity wave drag (NGW) scheme of \cite yudin_et_al_2020.
-
-For information on the GSL drag suite, click here.
+The GFS Unified UGWP version 1 combines the \ref GFS_drag_suite with the version 1 UGWP non-stationary gravity wave drag (NGW) scheme of  Yudin et al. (2020)\cite yudin_et_al_2020.
 
 The NGW physics scheme parameterizes the effects of non-stationary  waves 
 unresolved by dynamical cores. These non-stationary oscillations with periods 
