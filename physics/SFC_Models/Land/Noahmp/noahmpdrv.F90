@@ -184,7 +184,9 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
   integer,                                   intent(out) :: errflg
 
   ! IAU update
-  real,allocatable              :: stc_inc_flat(:,:)   
+  real(kind=kind_phys),allocatable, dimension(:,:)       :: stc_inc_flat  
+  real(kind=kind_phys),allocatable, dimension(:)         :: stc_bck, d_stc
+  integer, allocatable, dimension(:)                     :: diff_indices
   ! real,allocatable             :: slc_inc_flat(:,:) 
   integer                       :: lsoil_incr
   ! integer                       :: veg_type_landice
@@ -194,17 +196,17 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
   logical                       :: soil_freeze, soil_ice
   integer                       :: n_freeze, n_thaw
   integer                       :: soiltype, n_stc
-  real                          :: slc_new
+  real(kind=kind_phys)          :: slc_new
 
   integer                  :: i, j, ij, l, k, ib
   integer                  :: lensfc
   
   ! real (kind=kind_phys), dimension(max_soiltyp)  :: maxsmc, bb, satpsi
   ! real, dimension(30)      :: maxsmc, bb, satpsi
-  real, parameter          :: tfreez=273.16 !< con_t0c  in physcons
-  real, parameter          :: hfus=0.3336e06 !< latent heat of fusion(j/kg)
-  real, parameter          :: grav=9.80616   !< gravity accel.(m/s2)
-  real                     :: smp !< for computing supercooled water 
+  real(kind=kind_phys), parameter          :: tfreez=273.16 !< con_t0c  in physcons
+  real(kind=kind_phys), parameter          :: hfus=0.3336e06 !< latent heat of fusion(j/kg)
+  real(kind=kind_phys), parameter          :: grav=9.80616   !< gravity accel.(m/s2)
+  real(kind=kind_phys)                     :: smp !< for computing supercooled water 
 
   integer                  :: nother, nsnowupd
   integer                  :: nstcupd, nfrozen, nfrozen_upd
@@ -249,6 +251,11 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     allocate(stc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
     ! allocate(slc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
     allocate(stc_updated(Land_IAU_Control%nx * Land_IAU_Control%ny)) 
+    !copy background stc
+    allocate(stc_bck(Land_IAU_Control%nx * Land_IAU_Control%ny)) 
+    allocate(d_stc(Land_IAU_Control%nx * Land_IAU_Control%ny)) 
+    stc_bck = stc(:, 1)
+
     stc_updated = 0
     ib = 1
     do j = 1, Land_IAU_Control%ny  !ny 
@@ -258,6 +265,8 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
       enddo
       ib = ib + Land_IAU_Control%nx  !nlon    
     enddo
+
+    
 
     ! delt=GFS_Control%dtf
     if ((Land_IAU_Control%dtp - delt) > 0.0001) then 
@@ -283,27 +292,14 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
 
     if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
       print*, "root proc, tile num, layer 1 stc", Land_IAU_Control%me, Land_IAU_Control%tile_num
-      ! do ij = 1, lensfc
-      !   print*, stc(ij,1)
-      ! enddo
       ib = 1
       do j = 1, Land_IAU_Control%ny  !ny         
-        ! do i = ib, ib+Land_IAU_Control%nx-1  
-        !   print*, stc(i, 1)
-        !   WRITE(*,"(10F5.2)")
-        ! enddo
         WRITE(*,"(48F8.3)") stc(ib:ib+Land_IAU_Control%nx-1, 1)
         ib = ib + Land_IAU_Control%nx  !nlon    
       enddo
       print*, "root proc layer 1 inc"
-      ! do ij = 1, lensfc
-      !   print*, stc_inc_flat(ij,k)*delt !Land_IAU_Control%dtp
-      ! enddo
       ib = 1
       do j = 1, Land_IAU_Control%ny  !ny         
-        ! do i = ib, ib+Land_IAU_Control%nx-1  
-        !   print*, stc_inc_flat(i, 1)*delt
-        ! enddo
         WRITE(*,"(48F6.3)") stc_inc_flat(ib:ib+Land_IAU_Control%nx-1, 1)*delt
         ib = ib + Land_IAU_Control%nx  !nlon    
       enddo
@@ -342,14 +338,8 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
     ! enddo
     if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
       print*, "root proc layer 1 stc after adding IAU inc"
-      ! do ij = 1, lensfc
-      !   print*, stc(ij,1)
-      ! enddo
       ib = 1
       do j = 1, Land_IAU_Control%ny  !ny         
-        ! do i = ib, ib+Land_IAU_Control%nx-1  
-        !   print*, stc(i, 1)
-        ! enddo
         WRITE(*,"(48F8.3)") stc(ib:ib+Land_IAU_Control%nx-1, 1)
         ib = ib + Land_IAU_Control%nx  !nlon    
       enddo
@@ -392,9 +382,19 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
           enddo
       endif
     enddo    
-     
+
+    d_stc = stc(:, 1) - stc_bck
+    ! Where(d_stc .gt. 0.0001) 
+    diff_indices = pack([(i, i=1, lensfc)], d_stc > 0.0001)
+    print*, "proc ", Land_IAU_Control%me, " indices with large increment"
+    print*, diff_indices
+    print*, d_stc(diff_indices)
+    
+    deallocate(stc_bck, d_stc)
+    if(allocated(diff_indices)) deallocate(diff_indices)
     deallocate(stc_updated)  
     deallocate(mask_tile)
+    
 
     write(*,'(a,i2)') ' statistics of grids with stc/smc updates for rank : ', Land_IAU_Control%me
     write(*,'(a,i8)') ' soil grid total', lensfc
