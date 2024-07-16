@@ -87,21 +87,22 @@ module lsm_ruc
       real (kind_phys), dimension(:,:), intent(in) :: smc,slc,stc
       real (kind_phys), intent(in) :: min_seaice
 !  ---  in/out:
-      real (kind_phys), dimension(:), intent(inout) :: wetness
+      real (kind_phys), dimension(:), intent(inout), optional :: wetness
 
 !  ---  inout
-      real (kind_phys), dimension(:,:), intent(inout) :: sh2o, smfrkeep
-      real (kind_phys), dimension(:,:), intent(inout) :: tslb, smois
+      real (kind_phys), dimension(:,:), intent(inout), optional :: sh2o, smfrkeep
+      real (kind_phys), dimension(:,:), intent(inout), optional :: tslb, smois
       real (kind_phys), dimension(:),   intent(inout) :: semis_lnd
       real (kind_phys), dimension(:),   intent(inout) :: semis_ice
-      real (kind_phys), dimension(:),   intent(inout) ::                      &
-                        albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd, &
+      real (kind_phys), dimension(:),   intent(inout) :: &
+           albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd
+      real (kind_phys), dimension(:),   intent(inout), optional ::            &
                         albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice, &
                         sfcqv_lnd, sfcqv_ice
 
 !  ---  out
       real (kind_phys), dimension(:),   intent(out) :: zs
-      real (kind_phys), dimension(:),   intent(inout) :: sfalb_lnd_bck
+      real (kind_phys), dimension(:),   intent(inout), optional :: sfalb_lnd_bck
       real (kind_phys), dimension(:,:), intent(inout) :: tsice
       real (kind_phys), dimension(:),   intent(out) :: semisbase
       real (kind_phys), dimension(:),   intent(out) :: pores, resid
@@ -381,11 +382,11 @@ module lsm_ruc
                              imp_physics_nssl
       real (kind_phys), dimension(:), intent(in) :: xlat_d, xlon_d
       real (kind_phys), dimension(:), intent(in) :: oro, sigma
-
+      real (kind_phys), dimension(:), intent(in), optional :: sfalb_lnd_bck
       real (kind_phys), dimension(:), intent(in) ::               &
      &       t1, sigmaf, dlwflx, dswsfc, tg3,                     &
      &       coszen, prsl1, wind, shdmin, shdmax,                 &
-     &       sfalb_lnd_bck, snoalb, zf, qc, q1,                   &
+     &       snoalb, zf, qc, q1,                                  &
      ! for land
      &       cm_lnd, ch_lnd,                                      &
      ! for water
@@ -418,44 +419,51 @@ module lsm_ruc
 
       real (kind_phys), dimension(:), intent(in)    :: zs
       real (kind_phys), dimension(:), intent(in)    :: srflag
-      real (kind_phys), dimension(:), intent(inout) ::                   &
-     &       canopy, trans, smcwlt2, smcref2, laixy,                     & 
+      real (kind_phys), dimension(:), intent(inout), optional ::         &
+     &      laixy, tsnow_lnd, sfcqv_lnd, sfcqc_lnd, sfcqc_ice, sfcqv_ice,&
+     &      tsnow_ice
+     real (kind_phys), dimension(:), intent(inout) ::                    &
+     &       canopy, trans, smcwlt2, smcref2,                            & 
      ! for land
      &       weasd_lnd, snwdph_lnd, tskin_lnd,                           &
-     &       tsurf_lnd, z0rl_lnd, tsnow_lnd,                             &
-     &       sfcqc_lnd, sfcqv_lnd,                                       &
+     &       tsurf_lnd, z0rl_lnd,                                        &
      ! for ice
      &       weasd_ice, snwdph_ice, tskin_ice,                           &
-     &       tsurf_ice, z0rl_ice, tsnow_ice,                             &
-     &       sfcqc_ice, sfcqv_ice, fice
+     &       tsurf_ice, z0rl_ice, fice
 
 !  ---  in
-      real (kind_phys), dimension(:), intent(in) ::                      &
-     &       rainnc, rainc, ice, snow, graupel, rhonewsn1
-      real (kind_phys), dimension(:), intent(in) :: fire_heat_flux_out,  &
-                                                    frac_grid_burned_out
+      real (kind_phys), dimension(:), intent(in), optional ::            &
+     &       rainnc, rainc, ice, snow, graupel
+      real (kind_phys), dimension(:), intent(in) :: rhonewsn1
+      real (kind_phys), dimension(:), intent(in), optional ::            &
+           fire_heat_flux_out, frac_grid_burned_out
       logical, intent(in) :: add_fire_heat_flux
 !  ---  in/out:
 !  --- on RUC levels
+      real (kind_phys), dimension(:,:), intent(inout), optional ::       &
+     &       smois, tslb, sh2o, keepfr, smfrkeep
       real (kind_phys), dimension(:,:), intent(inout) ::                 &
-     &       smois, tsice, tslb, sh2o, keepfr, smfrkeep
+     &      tsice
 
 !  ---  output:
+      real (kind_phys), dimension(:), intent(inout), optional ::         &
+     &       sfalb_lnd, sfalb_ice, wetness, snowfallac_lnd,              &
+     &       snowfallac_ice, rhosnf
       real (kind_phys), dimension(:), intent(inout) ::                   &
-     &       rhosnf, runof, drain, runoff, srunoff, evbs, evcw,          &
-     &       stm, wetness, semisbase, semis_lnd, semis_ice,              &
-     &       sfalb_lnd, sfalb_ice,                                       &
+     &       runof, drain, runoff, srunoff, evbs, evcw,                  &
+     &       stm, semisbase, semis_lnd, semis_ice,                       &
      ! for land
      &       sncovr1_lnd, qsurf_lnd, gflux_lnd, evap_lnd,                &
      &       cmm_lnd, chh_lnd, hflx_lnd, sbsno,                          &
-     &       snowfallac_lnd, acsnow_lnd, snowmt_lnd, snohf,              &
+     &       acsnow_lnd, snowmt_lnd, snohf,                              &
      ! for ice
      &       sncovr1_ice, qsurf_ice, gflux_ice, evap_ice, ep1d_ice,      &
      &       cmm_ice, chh_ice, hflx_ice,                                 &
-     &       snowfallac_ice, acsnow_ice, snowmt_ice
+     &       acsnow_ice, snowmt_ice
 
       real (kind_phys), dimension(:), intent(  out) ::                   &
-     &       albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd,       &
+     &       albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd
+      real (kind_phys), dimension(:), intent(  out), optional ::         &
      &       albdvis_ice, albdnir_ice,  albivis_ice,  albinir_ice
 
       logical,          intent(in)  :: flag_init, lsm_cold_start

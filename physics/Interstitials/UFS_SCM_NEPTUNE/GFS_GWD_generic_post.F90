@@ -27,7 +27,7 @@ contains
       real(kind=kind_phys), intent(inout) :: dugwd(:), dvgwd(:)
 
       ! dtend only allocated only if ldiag3d is .true.
-      real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
+      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
      &  index_of_x_wind, index_of_y_wind, index_of_process_orographic_gwd
       
