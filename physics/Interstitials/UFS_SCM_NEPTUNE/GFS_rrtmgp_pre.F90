@@ -40,7 +40,7 @@ contains
          nGases       !< Number of active gases in RRTMGP
     character(len=*), intent(in) :: &
          active_gases !< List of active gases from namelist
-    character(len=*), dimension(:), intent(out) :: &
+    character(len=*), dimension(:), intent(out), optional :: &
          active_gases_array !< List of active gases from namelist as array
 
     ! Outputs
@@ -143,7 +143,7 @@ contains
          prsi                 !< Pressure at model-interfaces (Pa)
     real(kind_phys), dimension(:,:,:), intent(in) :: & 
          qgrs                 !< Tracer concentrations (kg/kg)
-    character(len=*), dimension(:), intent(in) :: &
+    character(len=*), dimension(:), intent(in), optional :: &
          active_gases_array   !< List of active gases from namelist as array
 
     ! Outputs
@@ -167,7 +167,7 @@ contains
          coszdg               !< Cosine of SZA, daytime
     integer, dimension(:), intent(inout) ::  &
          idxday               !< Indices for daylit points 
-    real(kind_phys), dimension(:,:), intent(inout) :: &
+    real(kind_phys), dimension(:,:), intent(inout), optional :: &
          p_lay,             & !< Pressure at model-layer
          t_lay,             & !< Temperature at model layer
          q_lay,             & !< Water-vapor mixing ratio (kg/kg)

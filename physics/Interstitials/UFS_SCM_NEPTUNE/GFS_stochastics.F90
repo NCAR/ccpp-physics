@@ -87,12 +87,12 @@
          logical,                               intent(in)    :: do_skeb
          real(kind_phys), dimension(:),         intent(in)    :: zmtnblck
          ! sppt_wts only allocated if do_sppt == .true.
-         real(kind_phys), dimension(:,:),       intent(inout) :: sppt_wts
+         real(kind_phys), dimension(:,:),       intent(inout), optional :: sppt_wts
          ! skebu_wts, skebv_wts only allocated if do_skeb == .true.
-         real(kind_phys), dimension(:,:),       intent(in)    :: skebu_wts
-         real(kind_phys), dimension(:,:),       intent(in)    :: skebv_wts
+         real(kind_phys), dimension(:,:),       intent(in), optional    :: skebu_wts
+         real(kind_phys), dimension(:,:),       intent(in), optional    :: skebv_wts
          ! shum_wts only allocated if do_shum == .true.
-         real(kind_phys), dimension(:,:),       intent(in)    :: shum_wts
+         real(kind_phys), dimension(:,:),       intent(in), optional    :: shum_wts
          real(kind_phys), dimension(:,:),       intent(in)    :: diss_est
          real(kind_phys), dimension(:,:),       intent(in)    :: ugrs
          real(kind_phys), dimension(:,:),       intent(in)    :: vgrs
@@ -117,7 +117,7 @@
          integer, intent(in) ::      ntsw
          integer, intent(in) ::      ntiw
          integer, intent(in) ::      ntgl
-         real(kind_phys), dimension(:,:),       intent(inout) :: dtdtnp
+         real(kind_phys), dimension(:,:),       intent(inout), optional :: dtdtnp
          real(kind_phys), dimension(:),         intent(in)    :: rain
          real(kind_phys), dimension(:),         intent(in)    :: rainc
          real(kind_phys), dimension(:),         intent(inout) :: tprcp
@@ -128,14 +128,14 @@
          logical,                               intent(in)    :: cplflx
          logical,                               intent(in)    :: cpllnd
          ! rain_cpl only allocated if cplflx == .true. or cplchm == .true. or cpllnd == .true.
-         real(kind_phys), dimension(:),         intent(inout) :: rain_cpl
+         real(kind_phys), dimension(:),         intent(inout), optional :: rain_cpl
          ! snow_cpl only allocated if cplflx == .true. or cplchm == .true.
-         real(kind_phys), dimension(:),         intent(inout) :: snow_cpl
+         real(kind_phys), dimension(:),         intent(inout), optional :: snow_cpl
          ! drain_cpl, dsnow_cpl only allocated if cplflx == .true. or cplchm == .true.
-         real(kind_phys), dimension(:),         intent(in)    :: drain_cpl
-         real(kind_phys), dimension(:),         intent(in)    :: dsnow_cpl
+         real(kind_phys), dimension(:),         intent(in), optional    :: drain_cpl
+         real(kind_phys), dimension(:),         intent(in), optional    :: dsnow_cpl
          real(kind_phys), dimension(:),         intent(in)    :: vfact_ca
-         real(kind_phys), dimension(:),         intent(in)    :: ca1
+         real(kind_phys), dimension(:),         intent(in), optional :: ca1
          character(len=*),                      intent(out)   :: errmsg
          integer,                               intent(out)   :: errflg
 

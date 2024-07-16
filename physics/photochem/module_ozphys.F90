@@ -209,7 +209,7 @@ contains
     real(kind_phys), intent(inout), dimension(:,:) :: &
          oz             ! Ozone concentration updated by physics
     logical, intent(in) :: do_diag
-    real(kind_phys), intent(inout), dimension(:,:) :: &
+    real(kind_phys), intent(inout), dimension(:,:), optional :: &
          do3_dt_prd,  & ! Physics tendency: production and loss effect
          do3_dt_ozmx, & ! Physics tendency: ozone mixing ratio effect
          do3_dt_temp, & ! Physics tendency: temperature effect
@@ -294,8 +294,8 @@ contains
 
        ! Diagnostics (optional)
        if (do_diag) then
-          do3_dt_prd(:,iLev)  = (prod(:,1)-prod(:,2)*prod(:,6))*dt
-          do3_dt_ozmx(:,iLev) = (oz(:,iLev) - ozib(:))
+          do3_dt_prd(:,iLev)  = prod(:,1) * dt
+          do3_dt_ozmx(:,iLev) = prod(:,2) * (oz(:,iLev) - prod(:,6)) * dt
           do3_dt_temp(:,iLev) = prod(:,3)*(t(:,iLev)-prod(:,5))*dt
           do3_dt_ohoz(:,iLev) = prod(:,4) * (colo3(:,iLev)-coloz(:,iLev))*dt
        endif

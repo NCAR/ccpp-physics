@@ -618,6 +618,7 @@
   type = character
   kind = len=3
   intent = in
+  optional = True
 [lsswr]
   standard_name = flag_for_calling_shortwave_radiation
   long_name = logical flags for sw radiation calls
@@ -910,6 +911,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [mg_cld]
   standard_name = cloud_fraction_for_MG
   long_name = cloud fraction used by Morrison-Gettelman MP
@@ -918,6 +920,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [effrr_in]
   standard_name = effective_radius_of_stratiform_cloud_rain_particle
   long_name = effective radius of cloud rain particle in micrometers
@@ -926,6 +929,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [pert_clds]
   standard_name = flag_for_stochastic_cloud_fraction_perturbations
   long_name = flag for stochastic cloud fraction physics perturbations
@@ -941,6 +945,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [sppt_amp]
   standard_name = total_amplitude_of_sppt_perturbation
   long_name = total ampltidue of stochastic sppt perturbation
@@ -957,6 +962,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cnvc_in]
   standard_name = convective_cloud_area_fraction
   long_name = convective cloud cover in the phy_f3d array
@@ -965,6 +971,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [qgrs]
   standard_name = tracer_concentration
   long_name = model layer mean tracer concentration
@@ -1020,6 +1027,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [effri_inout]
   standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = eff. radius of cloud ice water particle in micrometer
@@ -1028,6 +1036,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [effrs_inout]
   standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in micrometers
@@ -1036,6 +1045,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [clouds1]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -1084,6 +1094,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [kd]
   standard_name = vertical_index_difference_between_inout_and_local
   long_name = vertical index difference between in/out and local
@@ -1515,6 +1526,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [spp_rad]
   standard_name = control_for_radiation_spp_perturbations
   long_name = control for radiation spp perturbations

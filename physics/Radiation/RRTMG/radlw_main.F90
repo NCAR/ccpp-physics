@@ -609,7 +609,7 @@
       integer, intent(in) :: npts, nlay, nlp1, ilwcliq, ilwcice,        &
            isubclw, iovr, iovr_dcorr, iovr_exp, iovr_exprand, iovr_rand,&
            iovr_maxrand, iovr_max
-      integer, intent(in) :: icseed(npts)
+      integer, intent(in), optional :: icseed(npts)
 
       logical,  intent(in) :: lprnt, inc_minor_gas
 

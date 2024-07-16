@@ -28,7 +28,7 @@ contains
     integer, parameter :: its=1,kts=1
 
     real(kind_phys), dimension(:,:,:), intent(inout) :: qgrs
-    real(kind_phys), dimension(:,:,:), intent(inout) :: chem3d
+    real(kind_phys), dimension(:,:,:), intent(inout), optional :: chem3d
     logical, intent(in) :: rrfs_sd
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg

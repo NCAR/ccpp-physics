@@ -61,7 +61,7 @@ contains
          sfc_alb_nir_dif,   & !< Surface albedo (diffuse)
          sfc_alb_uvvis_dir, & !< Surface albedo (direct)
          sfc_alb_uvvis_dif    !< Surface albedo (diffuse)
-    real(kind_phys), dimension(:,:), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in), optional :: &
          p_lev,             & !< Pressure @ model layer-interfaces (Pa)
          fluxlwUP_allsky,   & !< RRTMGP longwave all-sky flux      (W/m2)
          fluxlwDOWN_allsky, & !< RRTMGP longwave all-sky flux      (W/m2)
@@ -93,40 +93,41 @@ contains
 
     ! Outputs (mandatory)
     real(kind_phys), dimension(:), intent(inout) :: &
-         tsflw,             & !> LW sfc air temp during calculation (K)
-         sfcdlw,            & !> LW sfc all-sky     downward flux   (W/m2)
-         sfculw,            & !> LW sfc all-sky     upward   flux   (W/m2)
-         nirbmdi,           & !> SW sfc nir    beam downward flux   (W/m2)
-         nirdfdi,           & !> SW sfc nir    diff downward flux   (W/m2)
-         visbmdi,           & !> SW sfc uv+vis beam downward flux   (W/m2)
-         visdfdi,           & !> SW sfc uv+vis diff downward flux   (W/m2)
-         nirbmui,           & !> SW sfc nir    beam upward   flux   (W/m2)
-         nirdfui,           & !> SW sfc nir    diff upward   flux   (W/m2)
-         visbmui,           & !> SW sfc uv+vis beam upward   flux   (W/m2)
-         visdfui,           & !> SW sfc uv+vis diff upward   flux   (W/m2)
-         sfcnsw,            & !> SW sfc all-sky     net      flux   (W/m2) flux into ground
-         sfcdsw               !> SW sfc all-sky     downward flux   (W/m2)
+         tsflw,             & !< LW sfc air temp during calculation (K)
+         sfcdlw,            & !< LW sfc all-sky     downward flux   (W/m2)
+         sfculw,            & !< LW sfc all-sky     upward   flux   (W/m2)
+         nirbmdi,           & !< SW sfc nir    beam downward flux   (W/m2)
+         nirdfdi,           & !< SW sfc nir    diff downward flux   (W/m2)
+         visbmdi,           & !< SW sfc uv+vis beam downward flux   (W/m2)
+         visdfdi,           & !< SW sfc uv+vis diff downward flux   (W/m2)
+         nirbmui,           & !< SW sfc nir    beam upward   flux   (W/m2)
+         nirdfui,           & !< SW sfc nir    diff upward   flux   (W/m2)
+         visbmui,           & !< SW sfc uv+vis beam upward   flux   (W/m2)
+         visdfui,           & !< SW sfc uv+vis diff upward   flux   (W/m2)
+         sfcnsw,            & !< SW sfc all-sky     net      flux   (W/m2) flux into ground
+         sfcdsw               !< SW sfc all-sky     downward flux   (W/m2)
     real(kind_phys), dimension(:,:), intent(inout) :: &
-         htrlw,             & !> LW all-sky heating rate (K/s)
-         htrsw,             & !> SW all-sky heating rate (K/s)
-         htrlwu               !> LW all-sky heating-rate updated in-between radiation calls.
+         htrlw,             & !< LW all-sky heating rate (K/s)
+         htrsw                !< SW all-sky heating rate (K/s)
+    real(kind_phys), dimension(:,:), intent(inout), optional :: &
+         htrlwu               !< LW all-sky heating-rate updated in-between radiation calls.
     type(sfcflw_type), dimension(:), intent(inout) :: &
-         sfcflw               !> LW radiation fluxes at sfc
+         sfcflw               !< LW radiation fluxes at sfc
     type(sfcfsw_type), dimension(:), intent(inout) :: &
-         sfcfsw               !> SW radiation fluxes at sfc
+         sfcfsw               !< SW radiation fluxes at sfc
     type(topfsw_type), dimension(:), intent(inout) :: &
-         topfsw               !> SW fluxes at top atmosphere
+         topfsw               !< SW fluxes at top atmosphere
     type(topflw_type), dimension(:), intent(inout) :: &
-         topflw               !> LW  fluxes at top atmosphere
+         topflw               !< LW  fluxes at top atmosphere
     character(len=*), intent(out) :: &
-         errmsg               !> CCPP error message
+         errmsg               !< CCPP error message
     integer, intent(out) :: &
-         errflg               !> CCPP error code
+         errflg               !< CCPP error code
 
     ! Outputs (optional)
     real(kind_phys),dimension(:,:),intent(inout),optional  :: &
-         htrlwc,            & !> LW clear-sky heating-rate (K/s)
-         htrswc               !> SW clear-sky heating rate (K/s)
+         htrlwc,            & !< LW clear-sky heating-rate (K/s)
+         htrswc               !< SW clear-sky heating rate (K/s)
 
     ! Local variables
     integer :: i, j, k, itop, ibtc

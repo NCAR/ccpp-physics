@@ -34,30 +34,31 @@ contains
         logical,              intent(in) :: ldiag_ugwp      !< flag for CIRES UGWP Diagnostics
 
         real(kind=kind_phys), intent(in),    dimension(:)   :: zobl, zlwb, zogw
-        real(kind=kind_phys), intent(in),    dimension(:)   :: du_ofdcol, tau_ogw, du_oblcol, tau_ngw
+        real(kind=kind_phys), intent(in),    dimension(:)   :: tau_ogw, tau_ngw
+        real(kind=kind_phys), intent(in),    dimension(:),optional   :: du_ofdcol, du_oblcol
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_zmtb, tot_zlwb, tot_zogw
 	
         real(kind=kind_phys), intent(in),    dimension(:,:) :: dtdt_gw, dudt_gw, dvdt_gw
-        real(kind=kind_phys), intent(in),    dimension(:,:) :: dudt_obl, dvdt_obl, dudt_ogw
-        real(kind=kind_phys), intent(in),    dimension(:,:) :: dvdt_ogw, dudt_ofd, dvdt_ofd
-        real(kind=kind_phys), intent(in),    dimension(:,:) :: dudt_oss, dvdt_oss
-        real(kind=kind_phys), intent(inout), dimension(:,:) :: du3dt_mtb, du3dt_ogw, du3dt_tms
-        real(kind=kind_phys), intent(inout), dimension(:,:) :: du3dt_ngw, dv3dt_ngw
-        real(kind=kind_phys), intent(in),    dimension(:,:) :: dudt_ngw, dvdt_ngw, dtdt_ngw
-        real(kind=kind_phys), intent(inout), dimension(:,:) :: ldu3dt_ngw, ldv3dt_ngw, ldt3dt_ngw
-        real(kind=kind_phys), intent(inout), dimension(:,:) :: dws3dt_ogw, dws3dt_obl
-        real(kind=kind_phys), intent(inout), dimension(:,:) :: dws3dt_oss, dws3dt_ofd
-        real(kind=kind_phys), intent(inout), dimension(:,:) :: ldu3dt_ogw, ldu3dt_obl
-        real(kind=kind_phys), intent(inout), dimension(:,:) :: ldu3dt_oss, ldu3dt_ofd
-        real(kind=kind_phys), intent(in),    dimension(:)   :: du_ogwcol, dv_ogwcol
-        real(kind=kind_phys), intent(in),    dimension(:)   :: dv_oblcol
-        real(kind=kind_phys), intent(in),    dimension(:)   :: du_osscol, dv_osscol
-        real(kind=kind_phys), intent(in),    dimension(:)   :: dv_ofdcol
-        real(kind=kind_phys), intent(inout), dimension(:)   :: du3_ogwcol, dv3_ogwcol
-        real(kind=kind_phys), intent(inout), dimension(:)   :: du3_oblcol, dv3_oblcol
-        real(kind=kind_phys), intent(inout), dimension(:)   :: du3_osscol, dv3_osscol
-        real(kind=kind_phys), intent(inout), dimension(:)   :: du3_ofdcol, dv3_ofdcol
+        real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dudt_obl, dvdt_obl, dudt_ogw
+        real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dvdt_ogw, dudt_ofd, dvdt_ofd
+        real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dudt_oss, dvdt_oss
+        real(kind=kind_phys), intent(inout), dimension(:,:), optional :: du3dt_mtb, du3dt_ogw, du3dt_tms
+        real(kind=kind_phys), intent(inout), dimension(:,:), optional :: du3dt_ngw, dv3dt_ngw
+        real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dudt_ngw, dvdt_ngw, dtdt_ngw
+        real(kind=kind_phys), intent(inout), dimension(:,:), optional :: ldu3dt_ngw, ldv3dt_ngw, ldt3dt_ngw
+        real(kind=kind_phys), intent(inout), dimension(:,:), optional :: dws3dt_ogw, dws3dt_obl
+        real(kind=kind_phys), intent(inout), dimension(:,:), optional :: dws3dt_oss, dws3dt_ofd
+        real(kind=kind_phys), intent(inout), dimension(:,:), optional :: ldu3dt_ogw, ldu3dt_obl
+        real(kind=kind_phys), intent(inout), dimension(:,:), optional :: ldu3dt_oss, ldu3dt_ofd
+        real(kind=kind_phys), intent(in),    dimension(:), optional   :: du_ogwcol, dv_ogwcol
+        real(kind=kind_phys), intent(in),    dimension(:), optional   :: dv_oblcol
+        real(kind=kind_phys), intent(in),    dimension(:), optional   :: du_osscol, dv_osscol
+        real(kind=kind_phys), intent(in),    dimension(:), optional   :: dv_ofdcol
+        real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_ogwcol, dv3_ogwcol
+        real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_oblcol, dv3_oblcol
+        real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_osscol, dv3_osscol
+        real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_ofdcol, dv3_ofdcol
 	
         real(kind=kind_phys), intent(inout), dimension(:,:) :: dtdt, dudt, dvdt
 
