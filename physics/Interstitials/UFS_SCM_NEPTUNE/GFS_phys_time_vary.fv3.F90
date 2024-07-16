@@ -594,22 +594,8 @@
                  isnow = nint(snowxy(ix))+1 ! snowxy <=0.0, dzsno >= 0.0
 
 ! using stc and tgxy to linearly interpolate the snow temp for each layer
-!Calculate the total thickness
-!                total_thickness = sum(dzsno)
-! Calculate the temperature difference
-!                temp_diff=tgxy(ix)-stc(ix,1)
-! Calculate the mid-points and interpolate temperatures for each layer
-!                 accumulated_thickness = 0.0
-!                do is = isnow, 0
-!                  accumulated_thickness = accumulated_thickness + dzsno(is)
-!                  mid_points(is) = accumulated_thickness - dzsno(is) / 2.0
-!                  layer_temp = tgxy(ix) + (mid_points(is) / total_thickness) * temp_diff
-!                  tsnoxy(ix,is) = layer_temp
-!                end do
 
                  do is = isnow,0
-!                  tsnoxy(ix,is)  = tgxy(ix)
-!                  tsnoxy(ix,is) =  tgxy(ix) + (( sum(dzsno(isnow:is)) -0.5*dzsno(is) )/snd)*(tgxy(ix)-stc(ix,1))
                    tsnoxy(ix,is) =  tgxy(ix) + (( sum(dzsno(isnow:is)) -0.5*dzsno(is) )/snd)*(stc(ix,1)-tgxy(ix))
                    snliqxy(ix,is) = zero
                    snicexy(ix,is) = one * dzsno(is) * weasd(ix)/snd
