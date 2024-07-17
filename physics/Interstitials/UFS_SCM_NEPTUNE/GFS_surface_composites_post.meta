@@ -824,6 +824,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [evap_fire]
   standard_name = surface_upward_specific_humidity_flux_of_fire
   long_name = kinematic surface upward latent heat flux of fire
@@ -832,6 +833,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cpl_fire]
   standard_name = do_fire_coupling
   long_name = flag controlling fire_behavior collection (default off)
