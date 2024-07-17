@@ -49,8 +49,9 @@ contains
         fm10_wat, fm10_lnd, fm10_ice, fh2_wat, fh2_lnd, fh2_ice, tsurf_wat, tsurf_lnd, tsurf_ice, cmm_wat, cmm_lnd, cmm_ice,    &
         chh_wat, chh_lnd, chh_ice, gflx_wat, gflx_lnd, gflx_ice, ep1d_wat, ep1d_lnd, ep1d_ice, weasd_lnd, weasd_ice,            &
         snowd_lnd, snowd_ice, tprcp_wat, tprcp_lnd, tprcp_ice, evap_wat, evap_lnd, evap_ice, hflx_wat, hflx_lnd,                &
-        hflx_ice, hflx_fire, evap_fire, qss_wat, qss_lnd, qss_ice, tsfc_wat, zorlo, zorll, zorli, garea
+        hflx_ice, qss_wat, qss_lnd, qss_ice, tsfc_wat, zorlo, zorll, zorli, garea
 
+      real(kind=kind_phys), dimension(:),   intent(in), optional :: hflx_fire, evap_fire
       real(kind=kind_phys), dimension(:),   intent(inout) :: zorl, cd, cdq, rb, stress, ffmm, ffhh, uustar, fm10,               &
         fh2, cmm, chh, gflx, ep1d, weasd, snowd, tprcp, evap, hflx, qss, tsfc, tsfco, tsfcl, tisfc
 
