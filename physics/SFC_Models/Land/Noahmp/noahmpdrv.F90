@@ -214,6 +214,8 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
   !  --- Initialize CCPP error handling variables
   errmsg = ''
   errflg = 0
+
+  return
  
   if (.not. Land_IAU_Control%do_land_iau) return
 
