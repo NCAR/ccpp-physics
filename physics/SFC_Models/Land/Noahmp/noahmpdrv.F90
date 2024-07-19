@@ -187,7 +187,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   ! IAU update
   real(kind=kind_phys),allocatable, dimension(:,:)       :: stc_inc_flat  
   ! real(kind=kind_phys),allocatable, dimension(:)         :: stc_bck, d_stc
-  real(kind=kind_phys),                                  :: stc_bck(ncols, km), d_stc(ncols, km)
+  real(kind=kind_phys)                                   :: stc_bck(ncols, km), d_stc(ncols, km)
   integer, allocatable, dimension(:)                     :: diff_indices
   ! real,allocatable             :: slc_inc_flat(:,:) 
   integer                       :: lsoil_incr
