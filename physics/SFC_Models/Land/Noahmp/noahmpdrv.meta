@@ -257,6 +257,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ncols]
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [isot]
   standard_name = control_for_soil_type_dataset
   long_name = soil type dataset choice

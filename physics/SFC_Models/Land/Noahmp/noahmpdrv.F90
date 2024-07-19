@@ -155,7 +155,7 @@
 !! Note: For Case 3, Yuan Xue thoroughly evaluated a total of four options and
 !! current option is found to be the best as of 11/09/2023
 
-subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_root,
+subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &      !me, mpi_root,
                                     isot, ivegsrc, soiltyp, vegtype, weasd, &
                                     stc, slc, smc, errmsg, errflg)       ! smc, t2mmp, q2mp,    
    
@@ -170,6 +170,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
   real(kind=kind_phys)                      , intent(in) :: fhour      !current forecast time (hr)
   real(kind=kind_phys)                      , intent(in) :: delt       ! time interval [s]       
   integer                                   , intent(in) :: km         !vertical soil layer dimension 
+  integer,                                    intent(in) :: ncols
   integer, intent(in)                                    :: isot
   integer, intent(in)                                    :: ivegsrc
 
@@ -247,12 +248,16 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  &      !me, mpi_roo
       return
     endif
 
-    do j = 33, 35 
-      do i = 40, 42
-        ib = (j - 1) *  Land_IAU_Control%nx + i
-        stc(ib, 1) = Land_IAU_Data%stc_inc(i,j,1)*delt !Land_IAU_Control%dtp  
-      enddo   
-    enddo
+    if(Land_IAU_Control%tile_num == 1) then
+      print*, "proc, tile num, layer 1 stc_inc at 33:35,40:42", Land_IAU_Control%me, Land_IAU_Control%tile_num
+      do j = 33, 35
+        WRITE(*,"(3F15.12)") Land_IAU_Data%stc_inc(40:42,j,1)
+        do i = 40, 42
+          ib = (j - 1) *  Land_IAU_Control%nx + i
+          stc(ib, 1) = stc(ib, 1) + 0.9 * 4.6296296296296296296296296296296e-5 * delt !0.05  !Land_IAU_Data%stc_inc(i,j,1)*delt !Land_IAU_Control%dtp
+        enddo
+      enddo
+    endif
 
 !     ! local variable to copy blocked data Land_IAU_Data%stc_inc
 !     allocate(stc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
