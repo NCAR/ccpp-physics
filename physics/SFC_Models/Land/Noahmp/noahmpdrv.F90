@@ -186,7 +186,8 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
 
   ! IAU update
   real(kind=kind_phys),allocatable, dimension(:,:)       :: stc_inc_flat  
-  real(kind=kind_phys),allocatable, dimension(:)         :: stc_bck, d_stc
+  ! real(kind=kind_phys),allocatable, dimension(:)         :: stc_bck, d_stc
+  real(kind=kind_phys),                                  :: stc_bck(ncols, km), d_stc(ncols, km)
   integer, allocatable, dimension(:)                     :: diff_indices
   ! real,allocatable             :: slc_inc_flat(:,:) 
   integer                       :: lsoil_incr
@@ -208,6 +209,8 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   real(kind=kind_phys), parameter          :: hfus=0.3336e06 !< latent heat of fusion(j/kg)
   real(kind=kind_phys), parameter          :: grav=9.80616   !< gravity accel.(m/s2)
   real(kind=kind_phys)                     :: smp !< for computing supercooled water 
+
+  real(kind=kind_phys)                     :: hc_incr
 
   integer                  :: nother, nsnowupd
   integer                  :: nstcupd, nfrozen, nfrozen_upd
@@ -248,13 +251,18 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
       return
     endif
 
+    stc_bck = stc
+    hc_incr = 0.9 * 4.6296296296296296296296296296296e-5 * delt !0.05  
+
     if(Land_IAU_Control%tile_num == 1) then
+      print*, "stc_bck shape, min, max ", shape(stc_bck), minval(stc_bck), maxval(stc_bck)
+      print*, " hc_incr ", hc_incr
       print*, "proc, tile num, layer 1 stc_inc at 33:35,40:42", Land_IAU_Control%me, Land_IAU_Control%tile_num
       do j = 33, 35
         WRITE(*,"(3F15.12)") Land_IAU_Data%stc_inc(40:42,j,1)
         do i = 40, 42
           ib = (j - 1) *  Land_IAU_Control%nx + i
-          stc(ib, 1) = stc(ib, 1) + 0.9 * 4.6296296296296296296296296296296e-5 * delt !0.05  !Land_IAU_Data%stc_inc(i,j,1)*delt !Land_IAU_Control%dtp
+          stc(ib, 1) = stc_bck(ib, 1) + hc_incr  !Land_IAU_Data%stc_inc(i,j,1)*delt !Land_IAU_Control%dtp
         enddo
       enddo
     endif
