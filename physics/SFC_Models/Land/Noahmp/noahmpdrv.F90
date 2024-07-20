@@ -254,18 +254,22 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
     stc_bck = stc
     hc_incr = 0.0  !0.9 * 4.6296296296296296296296296296296e-5 * delt !0.05  
 
-    if(Land_IAU_Control%tile_num == 1) then
-      print*, "stc_bck shape, min, max ", shape(stc_bck), minval(stc_bck), maxval(stc_bck)
-      print*, " hc_incr ", hc_incr
-      print*, "proc, tile num, layer 1 stc_inc at 33:35,40:42", Land_IAU_Control%me, Land_IAU_Control%tile_num
-      do j = 33, 35
-        WRITE(*,"(3F15.12)") Land_IAU_Data%stc_inc(40:42,j,1)
-        do i = 40, 42
-          ib = (j - 1) *  Land_IAU_Control%nx + i
-          stc(ib, 1) = stc_bck(ib, 1) + hc_incr  !Land_IAU_Data%stc_inc(i,j,1)*delt !Land_IAU_Control%dtp
-        enddo
-      enddo
-    endif
+    ! if(Land_IAU_Control%tile_num == 1) then
+    !   print*, "stc_bck shape, min, max ", shape(stc_bck), minval(stc_bck), maxval(stc_bck)
+    !   print*, " hc_incr ", hc_incr
+    !   print*, "proc, tile num, layer 1 stc_inc at 33:35,40:42", Land_IAU_Control%me, Land_IAU_Control%tile_num
+    !   do j = 33, 35
+    !     WRITE(*,"(3F15.12)") Land_IAU_Data%stc_inc(40:42,j,1)
+    !     do i = 40, 42
+    !       ib = (j - 1) *  Land_IAU_Control%nx + i
+    !       stc(ib, 1) = stc_bck(ib, 1) + hc_incr  !Land_IAU_Data%stc_inc(i,j,1)*delt !Land_IAU_Control%dtp
+    !     enddo
+    !   enddo
+    ! endif
+    
+    do ib = 1, ncols
+      stc(ib, 1) = stc_bck(ib, 1) + hc_incr  !Land_IAU_Data%stc_inc(i,j,1)*delt !Land_IAU_Control%dtp
+    enddo
 
 !     ! local variable to copy blocked data Land_IAU_Data%stc_inc
 !     allocate(stc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
