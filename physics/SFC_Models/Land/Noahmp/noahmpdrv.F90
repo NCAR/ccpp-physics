@@ -252,7 +252,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
     endif
 
     stc_bck = stc
-    hc_incr = 0.9 * 4.6296296296296296296296296296296e-5 * delt !0.05  
+    hc_incr = 0.0  !0.9 * 4.6296296296296296296296296296296e-5 * delt !0.05  
 
     if(Land_IAU_Control%tile_num == 1) then
       print*, "stc_bck shape, min, max ", shape(stc_bck), minval(stc_bck), maxval(stc_bck)
