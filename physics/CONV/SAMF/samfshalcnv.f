@@ -162,7 +162,7 @@ cc
 !  parameters for prognostic sigma closure
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
-     &                     sigmab(im),qadv(im,km)
+     &                     sigmab(im),qadv(im,km),sigmaoutx(im)
       real(kind=kind_phys) gravinv,dxcrtas,invdelt,sigmind,sigmins,
      &                     sigminm
       logical flag_shallow,flag_mid
@@ -2397,20 +2397,29 @@ cj
         endif
       enddo
 c
-c  convective cloud water
-c
-!> - Calculate shallow convective cloud water.
+      if(progsigma)then
+         do i = 1, im
+            sigmaoutx(i)=max(sigmaout(i,1),0.0)
+            sigmaoutx(i)=min(sigmaoutx(i),1.0)
+         enddo
+      endif
+      
+c     convective cloud water
       do k = 1, km
-        do i = 1, im
-          if (cnvflg(i)) then
-            if (k >= kbcon(i) .and. k < ktcon(i)) then
-              cnvw(i,k) = cnvwt(i,k) * xmb(i) * dt2
+         do i = 1, im
+            if (cnvflg(i)) then
+               if (k >= kbcon(i) .and. k < ktcon(i)) then
+                  cnvw(i,k) = cnvwt(i,k) * xmb(i) * dt2
+                  if (progsigma) then
+                     cnvw(i,k) = cnvw(i,k) * sigmaoutx(i)
+                  else
+                     cnvw(i,k) = cnvw(i,k) * sigmagfm(i)
+                  endif
+               endif
             endif
-          endif
-        enddo
+         enddo
       enddo
-
-c
+c     
 c  convective cloud cover
 c
 !> - Calculate convective cloud cover, which is used when pdf-based cloud fraction is used (i.e., pdfcld=.true.).

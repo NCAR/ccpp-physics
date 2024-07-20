@@ -402,6 +402,21 @@
   dimensions = ()
   type = logical
   intent = in
+[do_gwd_opt_psl]
+  standard_name = do_gsl_drag_suite_with_psl_gwd_option
+  long_name = flag to activate PSL drag suite - mesoscale GWD and blocking
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[psl_gwd_dx_factor]
+  standard_name = effective_grid_spacing_of_psl_gwd_suite
+  long_name = multiplication of grid spacing
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [do_ugwp_v1]
   standard_name = flag_for_ugwp_version_1
   long_name = flag to activate ver 1 CIRES UGWP
@@ -456,6 +471,14 @@
   long_name = multiplication factors for cdmb and gwd
   units = none
   dimensions = (4)
+  type = real
+  kind = kind_phys
+  intent = in
+[alpha_fd]
+  standard_name = alpha_coefficient_for_turbulent_orographic_form_drag
+  long_name = alpha coefficient for Beljaars et al turbulent orographic form drag
+  units = 1
+  dimensions = ()
   type = real
   kind = kind_phys
   intent = in
@@ -644,6 +667,13 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = in
+[vtype]
+  standard_name = vegetation_type_classification
+  long_name = vegetation type for lsm
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
   intent = in
 [kpbl]
   standard_name = vertical_index_at_top_of_atmosphere_boundary_layer
