@@ -267,9 +267,9 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
     !   enddo
     ! endif
     
-    do ib = 1, ncols
-      stc(ib, 1) = stc_bck(ib, 1) + hc_incr  !Land_IAU_Data%stc_inc(i,j,1)*delt !Land_IAU_Control%dtp
-    enddo
+    ! do ib = 1, ncols
+    !   stc(ib, 1) = stc_bck(ib, 1) + hc_incr  !Land_IAU_Data%stc_inc(i,j,1)*delt !Land_IAU_Control%dtp
+    ! enddo
 
 !     ! local variable to copy blocked data Land_IAU_Data%stc_inc
 !     allocate(stc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
@@ -1058,6 +1058,8 @@ end subroutine noahmpdrv_timestep_init
 !
   errmsg = ''
   errflg = 0
+
+  stc(:, 4) = stc(:, 4) + 0.000001
 
   do i = 1, im
 
