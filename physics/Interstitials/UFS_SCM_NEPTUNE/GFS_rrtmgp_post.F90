@@ -14,7 +14,7 @@ module GFS_rrtmgp_post
 contains
 
 !> \section arg_table_GFS_rrtmgp_post_run Argument Table
-!! \htmlinclude GFS_rrtmgp_post.html
+!! \htmlinclude GFS_rrtmgp_post_run.html
 !!The all-sky radiation tendency is computed, the clear-sky tendency is computed 
 !! if requested.
 !!

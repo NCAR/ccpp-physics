@@ -18,9 +18,9 @@ behavior out to about two weeks.
 The CCPP parameterizations are aggregated in suites by the host models. In this release, the CCPP Single Column Model (SCM), developed 
 by the Development Testbed Center (DTC), supports suites: 
 - \ref GFS_v16_page
-- \ref GFS_v17_HR3_page
-- \ref GFS_v17_HR3_RRTMGP_page
-- \ref RRFS_v1_page
+- \ref GFS_v16_RRTMGP_page
+- \ref GFS_v17_p8_ugwpv1_page
+- \ref HRRR_gf_page
 - \ref WoFS_v0_page 
 
 In this website you will find documentation on various aspects of each 

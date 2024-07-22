@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="SCM_GFS_v17_HR3" version="1">
+<suite name="SCM_GFS_v17_p8_ugwpv1" version="1">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">

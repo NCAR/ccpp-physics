@@ -1,0 +1,42 @@
+/**
+\page GFS_v16_RRTMGP_page GFS_v16_RRTMGP Suite 
+
+\section gfsv_16HR3_GP_suite_overview Overview
+
+This is an experimental version 16 of the Global Forecast System (GFS) with RRTMGP, which replaces RRTMG
+in operational GFS v16 physics suite.
+
+\section sdf_gfsv16GP Suite Definition File 
+\include suite_SCM_GFS_v16_RRTMGP.xml
+
+\section gfs16GP_nml_opt_des Namelist 
+- General physics options
+\snippet input_GFS_v16_RRTMGP.nml GFS_PHYSICS_NML
+- \ref GFS_UNIFIED_UGWP related options
+\snippet input_GFS_v16_RRTMGP.nml CIRES_UGWP_NML
+
+- nstf_name = \f$[2,0,0,0,0]^1 [2,1,0,0,0]^2\f$
+ - \f$^1\f$ NSST is on and coupled with spin up off
+ - \f$^2\f$ NSST is on and coupled with spin up on
+
+- Grid-spacing dependency of \p cdmbgwd
+ - \b C48:   cdmbgwd="0.071,2.1,1.0,1.0"
+ - \b C96:   cdmbgwd="0.14,1.8,1.0,1.0"
+ - \b C192:  cdmbgwd="0.23,1.5,1.0,1.0"
+ - \b C384:  cdmbgwd="1.1,0.72,1.0,1.0"
+ - \b C768:  cdmbgwd="4.0,0.15,1.0,1.0"
+ - \b C1152: cdmbgwd="4.0,0.10,1.0,1.0"
+ - \b C3072: cdmbgwd="4.0,0.05,1.0,1.0"
+
+- Grid-spacing dependency of \p knob_ugwp_tauamp
+ - \b C48:    knob_ugwp_tauamp=6.0e-3 
+ - \b C96:    knob_ugwp_tauamp=3.0e-3
+ - \b C192:   knob_ugwp_tauamp=1.5e-3
+ - \b C384:   knob_ugwp_tauamp=0.8e-3
+ - \b C768:   knob_ugwp_tauamp=0.5e-3
+ - \b C1152:  knob_ugwp_tauamp=0.35e-3
+ - \b C3072:  knob_ugwp_tauamp=0.13e-3
+
+- Grid-spacing dependency of \p xr_cnvcld
+ - \b C48 and \b C96: xr_cnvcld =.false.
+*/
