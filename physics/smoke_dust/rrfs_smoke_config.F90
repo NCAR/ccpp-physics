@@ -43,6 +43,7 @@ module rrfs_smoke_config
   logical :: extended_sd_diags = .false.
   real(kind_phys) :: wetdep_ls_alpha = .5 ! scavenging factor
   real(kind_phys) :: plume_alpha = 0.05
+  real(kind_phys) :: sc_factor = 1.0
 
   ! --
   integer, parameter :: CHEM_OPT_GOCART= 1
