@@ -82,11 +82,5 @@
  + \b GFS RRTMGP-Shortwave radiation driver: \ref arg_table_rrtmgp_sw_main_run
  + \b GFS RRTMGP post-processing, for both Longwave and Shortwave: \ref arg_table_GFS_rrtmgp_post_run
 
-\section  gen_al_rrtmgp General Algorithm
- + \ref gen_rrtmgp_lw
- + \ref gen_rrtmgp_sw
-
-\section rrtmgp_enh CCPP Physics Updates
-\version CCPP v7.0.0
 
 */

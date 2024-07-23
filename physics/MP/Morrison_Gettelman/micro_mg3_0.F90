@@ -4,7 +4,6 @@
 
 !>\ingroup mg2mg3
 !>\defgroup mg3_mp Morrison-Gettelman MP version 3.0
-!> @{
 !!---------------------------------------------------------------------------------
 !! Purpose:
 !!   MG microphysics version 3.0 - Update of MG microphysics with
@@ -4528,4 +4527,3 @@ end subroutine calc_rercld
 !========================================================================
 
 end module micro_mg3_0
-!>@}

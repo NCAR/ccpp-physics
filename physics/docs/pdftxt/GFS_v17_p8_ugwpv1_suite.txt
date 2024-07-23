@@ -3,8 +3,8 @@
 
 \section gfsv_17_suite_overview Overview
 
-Version 17 of the Global Forecast System (GFS) is scheduled for operational implementation by the NOAA
-National Centers for Environmental Prediction (NCEP) in 2024. The GFS_v17_p8_ugwpv1 suite is a prototype of 
+
+The GFS_v17_p8_ugwpv1 suite is a prototype of 
 the GFS_v17 suite, and is expected to evolve before the implementation. It is available for use 
 with the CCPP SCM.  The primary differences between the GFS_v16 and GFS_v17 suites are: 
 - \b Microphysics: The replacement of \ref GFDL_cloud with \ref THOMPSON 

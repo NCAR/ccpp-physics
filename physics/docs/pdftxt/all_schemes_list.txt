@@ -41,7 +41,6 @@ which facilitates model development and code maintenance. While some individual 
 
 \b Gravity \b Wave \b Drag
  - \subpage GFS_UGWP_v0 
- - \subpage GFS_UNIFIED_UGWP
  - \subpage GFS_drag_suite
  - \subpage GFS_ugwpv1_gsldrag
 
@@ -83,17 +82,17 @@ convection.
 
 Table 1.  Physics suites and primary schemes supported in CCPP v7.0.0  
 \tableofcontents
-| Physics suites   |     GFS_v16        |   GFS_v17            |       GFS_v17_RRTMGP        |      RRFS_v1          |      WoFS_v0     |         
+| Physics suites   |     GFS_v16        |   GFS_v17_p8_ugwpv1  |       GFS_v16_RRTMGP        |      HRRR_gf          |      WoFS_v0     |         
 |------------------|--------------------|----------------------|-----------------------------|-----------------------|------------------|
 |\b Host           | SCM \n SRWv2       |  SCM \n MWR          |    SCM                      |  SCM \n RRFS          |  SCM \n WoFS     |  
 |\b Deep \b Cu     | \ref GFS_SAMFdeep  |  \ref GFS_SAMFdeep   |   \ref GFS_SAMFdeep         |  \ref CU_GF           |   \a off         |
 |\b Shallow \b Cu  | \ref GFS_SAMFshal  |  \ref GFS_SAMFshal   |   \ref GFS_SAMFshal         | \ref CU_GF            | \ref MYNNEDMF    |
-|\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o aerosol-aware   |  \ref THOMPSON w/o aerosol-aware   | \ref THOMPSON   | \ref NSSLMICRO_page     |
+|\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o aerosol-aware   |  \ref GFDL_cloud   | \ref THOMPSON   | \ref NSSLMICRO_page     |
 |\b PBL/TURB       | \ref GFS_SATMEDMFVDIFQ    |  \ref GFS_SATMEDMFVDIFQ  |  \ref GFS_SATMEDMFVDIFQ   | \ref MYNNEDMF     |   \ref MYNNEDMF    |
 |\b Radiation      | \ref GFS_RRTMG_page     |  \ref GFS_RRTMG_page     |  \ref GFS_RRTMGP_page      | \ref GFS_RRTMG_page     |   \ref GFS_RRTMG_page    |
 |\b Surface \b Layer | \ref GFS_SFCLYR  |  \ref GFS_SFCLYR        | \ref GFS_SFCLYR | \ref SFC_MYNNSFL   |   \ref SFC_MYNNSFL  |
-|\b LSM            | \ref GFS_NOAH      |  \ref NoahMP            |  \ref NoahMP     |    \ref RUCLSM      | \ref GFS_NOAH   |
-|\b Gravity \b Wave \b Drag| \ref GFS_UGWP_v0  |  \ref GFS_ugwpv1_gsldrag |  \ref GFS_ugwpv1_gsldrag  | \ref GFS_drag_suite |    \ref GFS_UGWP_v0   |
+|\b LSM            | \ref GFS_NOAH      |  \ref NoahMP            |  \ref GFS_NOAH     |    \ref RUCLSM      | \ref GFS_NOAH   |
+|\b Gravity \b Wave \b Drag| \ref GFS_UGWP_v0  |  \ref GFS_ugwpv1_gsldrag |  \ref GFS_UGWP_v0  | \ref GFS_drag_suite |    \ref GFS_UGWP_v0   |
 |\b Sea \b Ice     | \ref GFS_SFCSICE   | \ref GFS_SFCSICE        |  \ref GFS_SFCSICE     |  \ref RUCLSM             |   \ref GFS_SFCSICE     |  
 \tableofcontents
 

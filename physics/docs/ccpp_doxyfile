@@ -962,8 +962,7 @@ INPUT                  = pdftxt/mainpage.txt \
                          pdftxt/GFS_SATMEDMFVDIFQ.txt \
                          pdftxt/GFS_NOAHMP.txt \
                          pdftxt/GFS_UGWPv0.txt \
-                         pdftxt/GFS_unified_ugwp.txt \
-                         pdftxt/GFS_ugwpv1_gsldrag.txt \
+                         pdftxt/GFS_ugwpv1.txt \
                          pdftxt/GFS_drag_suite.txt \
                          pdftxt/GFS_GWDPS.txt \
                          pdftxt/GFS_OZPHYS.txt \

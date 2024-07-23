@@ -1,8 +1,8 @@
 /**
-\page GFS_ugwpv1_gsldrag GFS Unified UGWP Version 1 Scheme
+\page GFS_ugwpv1_gsldrag GFS Unified Gravity Wave Physics (GWP) Version 1 Scheme
 
 \section des_ugwpv1 Description
-The GFS Unified UGWP version 1 combines the \ref GFS_drag_suite with the version 1 UGWP non-stationary gravity wave drag (NGW) scheme of  Yudin et al. (2020)\cite yudin_et_al_2020.
+The GFS Unified GWP version 1 combines the \ref GFS_drag_suite with the version 1 UGWP non-stationary gravity wave drag (NGW) scheme of  Yudin et al. (2020)\cite yudin_et_al_2020.
 
 The NGW physics scheme parameterizes the effects of non-stationary  waves 
 unresolved by dynamical cores. These non-stationary oscillations with periods 
@@ -44,5 +44,11 @@ model predictions in the stratosphere and upper atmosphere (Alexander et al.
 the effects of unresolved GWs in global forecast models, the representation of
 subgrid OGWs and NGWs has been implemented in the self-consistent manner using the 
 UGWP framework.
+
+\section intra_UGWPv1 Intraphysics Communication
+- \ref arg_table_ugwpv1_gsldrag_run
+
+\section gen_al_ugwpv1 General Algorithm
+- \ref gen_ugwpv1_gsldrag_run
 
 */
