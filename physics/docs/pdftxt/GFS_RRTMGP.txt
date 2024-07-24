@@ -1,5 +1,5 @@
 /**
-\page GFS_RRTMGP_page GFS RRTMGP Shortwave/Longwave Radiation Scheme
+\page GFS_RRTMGP_page RRTMGP Shortwave/Longwave Radiation Scheme
 
 \section des_rte_rrtmgp Description
 

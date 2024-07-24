@@ -28,11 +28,12 @@ module GFS_rrtmgp_cloud_mp
 
 contains  
 
-!> \section arg_table_GFS_rrtmgp_cloud_mp_run Argument Table
-!! \htmlinclude GFS_rrtmgp_cloud_mp_run_html
-!! Here the cloud-radiative properties (optical-path, particle-size and sometimes cloud-
+!> Here the cloud-radiative properties (optical-path, particle-size and sometimes cloud-
 !! fraction) are computed for cloud producing physics schemes (e.g GFDL-MP, Thompson-MP,
 !! MYNN-EDMF-pbl, GF-convective, and SAMF-convective clouds).
+!> \section arg_table_GFS_rrtmgp_cloud_mp_run Argument Table
+!! \htmlinclude GFS_rrtmgp_cloud_mp_run.html
+!!
   subroutine GFS_rrtmgp_cloud_mp_run(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,     &
        i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc, i_cldice_nc, i_twa, kdt,  &
        imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_samf, doSWrad, doLWrad, effr_in, lmfshal,   &

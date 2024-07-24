@@ -11,8 +11,9 @@ developmental schemes under consideration for upcoming operational implementatio
 applications, including the UFS Short-Range Weather (SRW) Application (available through https://github.com/ufs-community/ufs-srweather-app/), 
 which targets predictions of atmospheric behavior on a 
 limited spatial domain and on time scales from less than an hour out to several days, and the UFS Medium-Range Weather (MRW) 
-Application (available through https://github.com/ufs-community/ufs-mrweather-app/), which  targets predictions of global atmospheric 
-behavior out to about two weeks.
+Application (available through https://github.com/ufs-community/ufs-mrweather-app/)(which targets predictions of global atmospheric 
+behavior out to about two weeks), the Subseasonal-to-Seasonal (S2S) Application (which predicts the Earth System out to several months), and the
+Hurricane Application (which predicts tropical cyclones).
 
 
 The CCPP parameterizations are aggregated in suites by the host models. In this release, the CCPP Single Column Model (SCM), developed 
@@ -37,20 +38,17 @@ CCPP team would like to express our deepest gratitude for UFS physics developers
 development of CCPP-Physics. 
 \n We would also like to give special thanks to:    
 
+- \b NOAA \b NWS \b Environmental \b Modeling \b Center
 - \b NOAA \b OAR \b Global \b Systems \b Laboratory 
 - \b NOAA \b OAR \b Physical \b Sciences \b Laboratory 
 - \b NOAA \b OAR \b National \b Severe \b Storms \b Laboratory 
 - \b NOAA \b OAR \b Atlantic \b Oceanographic \b & \b Meteorological \b Laboratory
-- \b NOAA \b NWS \b Environmental \b Modeling \b Center 
 - \b NOAA \b OAR \b Atlantic \b Oceanographic \b & \b Meteorological \b Laboratory
 - \b Atmospheric \b and \b Environmental \b Research, \b Inc. 
 - \b Joint \b Center \b for \b Satellite \b Data \b Assimilation 
 - \b NASA \b Goddard \b Space \b Flight \b Center
 
 for their support and contribution for this CCPP scientific documentation (SciDoc).
-
-
-\b CCPP \b SciDoc \b Team: 
-\n Developmental Testbed Center
+\n Thanks also to the CCPP SciDoc Team at the Developmental Testbed Center.
 
 */
