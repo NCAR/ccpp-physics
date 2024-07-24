@@ -40,7 +40,7 @@ module unified_ugwp
     use gwdps, only: gwdps_run
     use cires_ugwp_triggers
     use ugwp_driver_v0
-    use drag_suite, only: drag_suite_run
+    use drag_suite, only: drag_suite_run, drag_suite_psl
 
     implicit none
 
@@ -249,8 +249,8 @@ contains
          varss,oc1ss,oa4ss,ol4ss,dx,dusfc_ms,dvsfc_ms,dusfc_bl,dvsfc_bl,dusfc_ss,      &
          dvsfc_ss,dusfc_fd,dvsfc_fd,dtaux2d_ms,dtauy2d_ms,dtaux2d_bl,dtauy2d_bl,       &
          dtaux2d_ss,dtauy2d_ss,dtaux2d_fd,dtauy2d_fd,dudt_ngw,dvdt_ngw,dtdt_ngw,       &
-         br1,hpbl,slmsk, do_tofd, ldiag_ugwp, ugwp_seq_update,                         &
-         cdmbgwd, jdat, xlat, xlat_d, sinlat, coslat, area,                            &
+         br1,hpbl,vtype,slmsk, do_tofd, ldiag_ugwp, ugwp_seq_update,                   &
+         cdmbgwd, alpha_fd, jdat, xlat, xlat_d, sinlat, coslat, area,                  &
          ugrs, vgrs, tgrs, q1, prsi, prsl, prslk, phii, phil,                          &
          del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis,                &
          tau_tofd, tau_mtb, tau_ogw, tau_ngw,                                          &
@@ -262,6 +262,7 @@ contains
          index_of_process_nonorographic_gwd,                                           &
          lssav, flag_for_gwd_generic_tend, do_ugwp_v0, do_ugwp_v0_orog_only,           &
          do_ugwp_v0_nst_only, do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,     &
+         do_gwd_opt_psl, psl_gwd_dx_factor,                                            &
          gwd_opt, spp_wts_gwd, spp_gwd, errmsg, errflg)
 
     implicit none
@@ -270,6 +271,7 @@ contains
     integer,                 intent(in) :: me, master, im, levs, ntrac, kdt, lonr, nmtvr
     integer,                 intent(in) :: gwd_opt
     integer,                 intent(in), dimension(:)       :: kpbl
+    integer,                 intent(in), dimension(:)       :: vtype
     real(kind=kind_phys),    intent(in), dimension(:)       :: ak, bk
     real(kind=kind_phys),    intent(in), dimension(:)       :: oro, oro_uf, hprime, oc, theta, sigma, gamma
     real(kind=kind_phys),    intent(in), dimension(:), optional :: varss,oc1ss
@@ -288,7 +290,7 @@ contains
     real(kind=kind_phys),    intent(in),    dimension(:,:)  :: del, ugrs, vgrs, tgrs, prsl, prslk, phil
     real(kind=kind_phys),    intent(in),    dimension(:,:)  :: prsi, phii
     real(kind=kind_phys),    intent(in),    dimension(:,:)  :: q1
-    real(kind=kind_phys),    intent(in) :: dtp, fhzero, cdmbgwd(:)
+    real(kind=kind_phys),    intent(in) :: dtp, fhzero, cdmbgwd(:), alpha_fd
     integer, intent(in) :: jdat(:)
     logical, intent(in) :: do_tofd, ldiag_ugwp, ugwp_seq_update
 
@@ -346,6 +348,10 @@ contains
     real(kind=kind_phys), intent(in), optional :: spp_wts_gwd(:,:)
     integer, intent(in) :: spp_gwd
 
+    ! option  for psl gwd
+    logical, intent(in)              :: do_gwd_opt_psl      ! option for psl gravity wave drag
+    real(kind=kind_phys), intent(in) :: psl_gwd_dx_factor   ! 
+
     character(len=*),        intent(out) :: errmsg
     integer,                 intent(out) :: errflg
 
@@ -379,6 +385,18 @@ contains
     errflg = 0
 
 
+    ! Initialize intent(out) variables in case they are not set below
+    dusfcg(:)     = 0.0
+    dvsfcg(:)     = 0.0
+    rdxzb(:)      = 0.0
+    tau_ngw(:)    = 0.0
+    gw_dudt(:,:)  = 0.0
+    gw_dvdt(:,:)  = 0.0
+    gw_dtdt(:,:)  = 0.0
+    gw_kdis(:,:)  = 0.0
+    dudt_mtb(:,:) = 0.0
+    dudt_tms(:,:) = 0.0
+    
     ! 1) ORO stationary GWs
     !    ------------------
 
@@ -488,7 +506,27 @@ contains
     ! Note:  In case of GSL drag_suite, this includes ss and tofd
 
     if ( do_gsl_drag_ls_bl.or.do_gsl_drag_ss.or.do_gsl_drag_tofd ) then
-
+!
+    if (do_gwd_opt_psl) then
+       call drag_suite_psl(im,levs,dvdt,dudt,dtdt,uwnd1,vwnd1,       &
+                 tgrs,q1,kpbl,prsi,del,prsl,prslk,phii,phil,dtp,     &
+                 kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &
+                 ol4ss,theta,sigma,gamma,elvmax,dtaux2d_ms,          &
+                 dtauy2d_ms,dtaux2d_bl,dtauy2d_bl,dtaux2d_ss,        &
+                 dtauy2d_ss,dtaux2d_fd,dtauy2d_fd,dusfcg,            &
+                 dvsfcg,dusfc_ms,dvsfc_ms,dusfc_bl,dvsfc_bl,         &
+                 dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                &
+                 slmsk,br1,hpbl,vtype,con_g,con_cp,con_rd,con_rv,    &
+                 con_fvirt,con_pi,lonr,                              &
+                 cdmbgwd,alpha_fd,me,master,                         &
+                 lprnt,ipr,rdxzb,dx,gwd_opt,                         &
+                 do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
+                 psl_gwd_dx_factor,                                  &
+                 dtend, dtidx, index_of_process_orographic_gwd,      &
+                 index_of_temperature, index_of_x_wind,              &
+                 index_of_y_wind, ldiag3d, ldiag_ugwp,               &
+                 ugwp_seq_update, spp_wts_gwd, spp_gwd, errmsg, errflg)
+    else
        call drag_suite_run(im,levs,dvdt,dudt,dtdt,uwnd1,vwnd1,       &
                  tgrs,q1,kpbl,prsi,del,prsl,prslk,phii,phil,dtp,     &
                  kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &
@@ -499,12 +537,14 @@ contains
                  dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                &
                  slmsk,br1,hpbl,con_g,con_cp,con_rd,con_rv,          &
                  con_fvirt,con_pi,lonr,                              &
-                 cdmbgwd,me,master,lprnt,ipr,rdxzb,dx,gwd_opt,       &
+                 cdmbgwd,alpha_fd,me,master,                         &
+                 lprnt,ipr,rdxzb,dx,gwd_opt,                         &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
                  dtend, dtidx, index_of_process_orographic_gwd,      &
                  index_of_temperature, index_of_x_wind,              &
                  index_of_y_wind, ldiag3d, ldiag_ugwp,               &
                  ugwp_seq_update, spp_wts_gwd, spp_gwd, errmsg, errflg)
+    endif
 !
 ! put zeros due to xy GSL-drag style: dtaux2d_bl,dtauy2d_bl,dtaux2d_ss.......dusfc_ms,dvsfc_ms
 !
