@@ -968,7 +968,6 @@ INPUT                  = pdftxt/mainpage.txt \
                          pdftxt/GFS_OZPHYS.txt \
                          pdftxt/GFS_H2OPHYS.txt \
                          pdftxt/GFS_SAMFdeep.txt \
-                         pdftxt/GFS_CAUTOMATA.txt \
                          pdftxt/GFS_SAMFshal.txt \
                          pdftxt/GFDL_cloud.txt \
                          pdftxt/NSSLMICRO.txt \
@@ -978,7 +977,6 @@ INPUT                  = pdftxt/mainpage.txt \
                          pdftxt/CLM_LAKE.txt \
                          pdftxt/THOMPSON.txt \
                          pdftxt/suite_input.nml.txt \
-                         pdftxt/GFS_SPP.txt \
                          ../MP \
                          ../CONV \
                          ../GWD \

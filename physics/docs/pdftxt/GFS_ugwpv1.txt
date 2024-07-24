@@ -1,5 +1,5 @@
 /**
-\page GFS_ugwpv1_gsldrag GFS Unified Gravity Wave Physics (GWP) Version 1 Scheme
+\page GFS_ugwpv1_gsldrag GFS Unified Gravity Wave Physics (GWP) Scheme -Version 1
 
 \section des_ugwpv1 Description
 The GFS Unified GWP version 1 combines the \ref GFS_drag_suite with the version 1 UGWP non-stationary gravity wave drag (NGW) scheme of  Yudin et al. (2020)\cite yudin_et_al_2020.

@@ -52,7 +52,7 @@ which facilitates model development and code maintenance. While some individual 
  - \subpage GFS_SFCSICE 
 
 \b Others
- - \subpage CLM_LAKE_mode
+ - \subpage CLM_LAKE_page
 
 The input information for the parameterizations includes the values of the gridbox mean prognostic variables (wind components, temperature,
 specific humidity, cloud fraction, water contents for cloud liquid, cloud ice, rain, snow, graupel, and ozone concentration), the provisional

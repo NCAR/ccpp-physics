@@ -1,5 +1,5 @@
 /**
-\page GFS_RRTMG_page GFS RRTMG Shortwave/Longwave Radiation Scheme
+\page GFS_RRTMG_page RRTMG Shortwave/Longwave Radiation Scheme
 
 \section des_rrtmg Description
  Radiative processes are among the most complex and

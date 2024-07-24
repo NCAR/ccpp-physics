@@ -43,7 +43,6 @@ development of CCPP-Physics.
 - \b NOAA \b OAR \b Physical \b Sciences \b Laboratory 
 - \b NOAA \b OAR \b National \b Severe \b Storms \b Laboratory 
 - \b NOAA \b OAR \b Atlantic \b Oceanographic \b & \b Meteorological \b Laboratory
-- \b NOAA \b OAR \b Atlantic \b Oceanographic \b & \b Meteorological \b Laboratory
 - \b Atmospheric \b and \b Environmental \b Research, \b Inc. 
 - \b Joint \b Center \b for \b Satellite \b Data \b Assimilation 
 - \b NASA \b Goddard \b Space \b Flight \b Center
