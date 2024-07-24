@@ -127,7 +127,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    !logical               :: land_iau_gaussian_inc_file             = .false.
    integer               :: lsoil_incr = 4
   
-   NAMELIST /lnd_iau_nml/ do_land_iau, land_iau_delthrs, land_iau_inc_files, land_iau_fhrs,   &  !land_iau_gaussian_inc_file,   &
+   NAMELIST /land_iau_nml/ do_land_iau, land_iau_delthrs, land_iau_inc_files, land_iau_fhrs,   &  !land_iau_gaussian_inc_file,   &
                         land_iau_filter_increments, &  
                         lsoil_incr                                       
    
@@ -141,7 +141,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
     ! https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100886
     allocate(input_nml_file, mold=input_nml_file_i)
     input_nml_file => input_nml_file_i
-    read(input_nml_file, nml=lnd_iau_nml)
+    read(input_nml_file, nml=land_iau_nml)
     ! Set length (number of lines) in namelist for internal reads
     input_nml_file_length = size(input_nml_file)
 #else
@@ -157,7 +157,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
       Land_IAU_Control%fn_nml = trim(fn_nml)   ! maynot need this
       open (unit=nlunit, file=trim(fn_nml), action='READ', status='OLD', iostat=ios, iomsg=ioerrmsg)
       rewind(nlunit)
-      read (nlunit, nml=lnd_iau_nml)
+      read (nlunit, nml=land_iau_nml)
       close (nlunit)
       if (ios /= 0) then
          ! call mpp_error(FATAL, 'lnd_iau_mod_set_control: error reading namelist file ',trim(fn_nml))
@@ -172,8 +172,8 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
 #endif
 
    if (me == mpi_root) then
-      write(6,*) "lnd_iau_nml"
-      write(6, lnd_iau_nml)
+      write(6,*) "land_iau_nml"
+      write(6, land_iau_nml)
    endif
    
    Land_IAU_Control%do_land_iau = do_land_iau
