@@ -82,7 +82,7 @@ Table 1.  Physics suites and primary schemes supported in CCPP v7.0.0
 \tableofcontents
 | Physics suites   |     GFS_v16        |   GFS_v17_p8_ugwpv1  |       GFS_v16_RRTMGP        |      HRRR_gf          |      WoFS_v0     |         
 |------------------|--------------------|----------------------|-----------------------------|-----------------------|------------------|
-|\b Host           | SCM \n SRWv2       |  SCM \n MWR          |    SCM                      |  SCM \n RRFS          |  SCM \n WoFS     |  
+|\b Host           | SCM                |  SCM                 |    SCM                      |  SCM                  |  SCM             |  
 |\b Deep \b Cu     | \ref GFS_SAMFdeep  |  \ref GFS_SAMFdeep   |   \ref GFS_SAMFdeep         |  \ref CU_GF           |   \a off         |
 |\b Shallow \b Cu  | \ref GFS_SAMFshal  |  \ref GFS_SAMFshal   |   \ref GFS_SAMFshal         | \ref CU_GF            | \ref MYNNEDMF    |
 |\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o aerosol-aware   |  \ref GFDL_cloud   | \ref THOMPSON   | \ref NSSLMICRO_page     |

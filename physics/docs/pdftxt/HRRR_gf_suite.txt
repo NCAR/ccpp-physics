@@ -11,9 +11,8 @@ The HRRR_gf suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG_page
  - \ref SFC_MYNNSFL
  - \ref RUCLSM
- - \ref CLM_LAKE_model
+ - \ref CLM_LAKE_page
  - \ref MYNNEDMF
- - smokedust
  - \ref GFS_drag_suite
  - \ref GFS_H2OPHYS
  - \ref CU_GF 
