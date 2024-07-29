@@ -963,7 +963,7 @@ INPUT                  = pdftxt/mainpage.txt \
                          pdftxt/GFS_NOAHMP.txt \
                          pdftxt/GFS_UGWPv0.txt \
                          pdftxt/GFS_ugwpv1.txt \
-                         pdftxt/GFS_drag_suite.txt \
+                         pdftxt/GFS_UGWPV1_ORO.txt \
                          pdftxt/GFS_GWDPS.txt \
                          pdftxt/GFS_OZPHYS.txt \
                          pdftxt/GFS_H2OPHYS.txt \

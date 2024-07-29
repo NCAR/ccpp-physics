@@ -1,5 +1,5 @@
 /**
-\page GFS_ugwpv1_gsldrag GFS Unified Gravity Wave Physics (GWP) Scheme -Version 1
+\page GFS_ugwpv1_gsldrag GFS Unified Gravity Wave Physics (GWP) Scheme - Version 1
 
 \section des_ugwpv1 Description
 The GFS Unified GWP version 1 combines the \ref GFS_drag_suite with the version 1 UGWP non-stationary gravity wave drag (NGW) scheme of  Yudin et al. (2020)\cite yudin_et_al_2020.
@@ -28,7 +28,7 @@ dissipation on the large-scale circulation, mixing, and transport have
 been acknowledged in the physics of global weather and climate models 
 after pioneering studies by Lindzen 1981 \cite lindzen_1981 and Holton 
 1983 \cite holton_1983. Comprehensive reviews on the physics of NGWs 
-and OGWs in climate and weather models have been discussted in Alexander 
+and OGWs in climate and weather models have been discussed in Kim et al. 2003 \cite kim_et_al_2003, Alexander 
 et al. 2010 \cite alexander_et_al_2010, Geller et al. 
 2013 \cite geller_et_al_2013, and Garcia et al. 2017 \cite garcia_et_al_2017. 
 They are formulated using different aspects of the nonlinear and linear 

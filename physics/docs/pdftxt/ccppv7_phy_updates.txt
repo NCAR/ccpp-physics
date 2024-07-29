@@ -83,7 +83,13 @@ Thompson (in HRRR_gf suite) may vary.
 - Radar reflectivity considers mass flux PDF as well as whether scale-awareness is turned on at the gird point in equation
 
 \b Unified \b Gravity \b Wave \b Physics \b Scheme:
-\todo UGWP updates for HR4 
+- Replacement of the resolution-dependent effective grid spacing (cdmbgwd) with a constant (=6dx) 
+- Removal of the planetary boundary layer height in determining the reference level
+- Weakening of the momentum stress over land ice to reduce the negative wind biases
+- Introduction of a launching level to avoid the underestimation of the blocked stress
+- Introduction of damped breaking to prevent the wind reversal in the lower troposphere
+- Suppression of gravity wave breaking in the upper atmosphere (over 7.5 hPa) to avoid numerical instability
+- Revision in sub-grid orography data considering the mathematical definition of moments
 
 \b NSSL \b Cloud \b Microphysics \b Scheme:
 - Updated with 3-moment option
