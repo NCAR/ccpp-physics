@@ -185,19 +185,23 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   integer,                                   intent(out) :: errflg
 
   ! IAU update
-  real(kind=kind_phys),allocatable, dimension(:,:)       :: stc_inc_flat  
+  real(kind=kind_phys),allocatable, dimension(:,:)       :: stc_inc_flat, slc_inc_flat
   ! real(kind=kind_phys),allocatable, dimension(:)         :: stc_bck, d_stc
   real(kind=kind_phys)                                   :: stc_bck(ncols, km), d_stc(ncols, km)
   ! integer, allocatable, dimension(:)                     :: diff_indices
+  real(kind=kind_phys), dimension(km)                    :: dz ! layer thickness
+
+!TODO: 7.31.24: This is hard-coded in noahmpdrv
+  real(kind=kind_phys)          :: zsoil(4) = (/ -0.1, -0.4, -1.0, -2.0 /)   !zsoil(km)
 
   integer                       :: lsoil_incr
   ! integer                       :: veg_type_landice
 
   integer, allocatable          :: mask_tile(:)
-  integer,allocatable           :: stc_updated(:)
+  integer,allocatable           :: stc_updated(:), slc_updated(:)
   logical                       :: soil_freeze, soil_ice
   integer                       :: n_freeze, n_thaw
-  integer                       :: soiltype, n_stc
+  integer                       :: soiltype, n_stc, n_slc
   real(kind=kind_phys)          :: slc_new
 
   integer                  :: i, j, ij, l, k, ib
@@ -213,7 +217,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   real(kind=kind_phys)                     :: hc_incr
 
   integer                  :: nother, nsnowupd
-  integer                  :: nstcupd, nfrozen, nfrozen_upd
+  integer                  :: nstcupd, nslcupd, nfrozen, nfrozen_upd
 
   !  --- Initialize CCPP error handling variables
   errmsg = ''
@@ -281,16 +285,18 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
 
   ! local variable to copy blocked data Land_IAU_Data%stc_inc
   allocate(stc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
-  ! allocate(slc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
+  allocate(slc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
   allocate(stc_updated(Land_IAU_Control%nx * Land_IAU_Control%ny)) 
+  allocate(slc_updated(Land_IAU_Control%nx * Land_IAU_Control%ny)) 
   !copy background stc
 
   stc_updated = 0
+  slc_updated = 0
   ib = 1
   do j = 1, Land_IAU_Control%ny  !ny 
     do k = 1, km    
       stc_inc_flat(ib:ib+Land_IAU_Control%nx-1, k) = Land_IAU_Data%stc_inc(:,j, k)  
-      ! slc_inc_flat(ib:ib+Land_IAU_Control%nx-1, k) = Land_IAU_Data%slc_inc(:,j, k) 
+      slc_inc_flat(ib:ib+Land_IAU_Control%nx-1, k) = Land_IAU_Data%slc_inc(:,j, k) 
     enddo
     ib = ib + Land_IAU_Control%nx  !nlon    
   enddo
@@ -309,7 +315,8 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   ! initialize variables for counts statitics to be zeros
   nother = 0 ! grid cells not land
   nsnowupd = 0  ! grid cells with snow (temperature not yet updated)
-  nstcupd = 0 ! grid cells that are updated
+  nstcupd = 0 ! grid cells that are updated stc
+  nslcupd = 0 ! grid cells that are updated slc
   nfrozen = 0 ! not update as frozen soil
   nfrozen_upd = 0 ! not update as frozen soil
 
@@ -353,21 +360,40 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
         if ( stc(ij,k) < tfreez)  soil_freeze=.true.
         if ( smc(ij,k) - slc(ij,k) > 0.001 )  soil_ice=.true.
 
-        stc(ij,k) = stc(ij,k) + stc_inc_flat(ij,k)*delt !Land_IAU_Control%dtp
+        if (Land_IAU_Control%upd_stc) then
+          stc(ij,k) = stc(ij,k) + stc_inc_flat(ij,k)*delt !Land_IAU_Control%dtp
+          if (k==1) then
+              stc_updated(ij) = 1
+              nstcupd = nstcupd + 1
+          endif
+        endif
 
-        if (k==1) then
-            stc_updated(ij) = 1
-            nstcupd = nstcupd + 1
-        endif
-        if ( (stc(ij,k) < tfreez) .and. (.not. soil_freeze) .and. (k==1) )&
-              nfrozen_upd = nfrozen_upd + 1
-        ! moisture updates not done if this layer or any above is frozen
-        if ( soil_freeze .or. soil_ice ) then
+        if ( (stc(ij,k) < tfreez) .and. (.not. soil_freeze) .and. (k==1) ) nfrozen_upd = nfrozen_upd + 1
+
+        ! do not do updates if this layer or any above is frozen
+        if ( (.not. soil_freeze ) .and. (.not. soil_ice ) ) then
+          if (Land_IAU_Control%upd_slc) then
+            if (k==1) then
+                nslcupd = nslcupd + 1
+                slc_updated(ij) = 1
+            endif
+            ! apply zero limit here (higher, model-specific limits are later)
+            slc(ij,k) = max(slc(ij,k) + slc_inc_flat(ij,k)*delt, 0.0)
+            smc(ij,k) = max(smc(ij,k) + slc_inc_flat(ij,k)*delt, 0.0)
+            ! slc_state(ij,k) = max(slc_state(ij,k) + slcinc(ij,k), 0.0)
+            ! smc_state(ij,k) = max(smc_state(ij,k) + slcinc(ij,k), 0.0)
+          endif
+        else
           if (k==1) nfrozen = nfrozen+1
-        endif
+          ! ! moisture updates not done if this layer or any above is frozen
+          ! if ( soil_freeze .or. soil_ice ) then
+          !   if (k==1) nfrozen = nfrozen+1
+          ! endif
+        endif       
       enddo
     endif ! if soil/snow point
   enddo ij_loop
+
   ! do k = 1, km 
   !   stc(:,k) = stc(:,k) + stc_inc_flat(:,k)*delt !Land_IAU_Control%dtp
   !   ! slc(:,k) = slc(:,k) + slc_inc_flat(:,k)*delt !Land_IAU_Control%dtp    
@@ -381,7 +407,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   !   enddo
   ! endif
 
-  deallocate(stc_inc_flat)  !, slc_inc_flat)   !, tmp2m_inc_flat,spfh2m_inc_flat)
+  deallocate(stc_inc_flat, slc_inc_flat)   !, tmp2m_inc_flat,spfh2m_inc_flat)
 
 ! (consistency) adjustments for updated soil temp and moisture
 
@@ -389,14 +415,16 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
     call read_mp_table_parameters(errmsg, errflg)       
     ! maxsmc(1:slcats) = smcmax_table(1:slcats)  
     ! bb(1:slcats) = bexp_table(1:slcats)  
-    ! satpsi(1:slcats) = psisat_table(1:slcats) 
-    
+    ! satpsi(1:slcats) = psisat_table(1:slcats)     
     if (errflg .ne. 0) then
           print *, 'FATAL ERROR in noahmpdrv_timestep_init: problem in set_soilveg_noahmp'
           errmsg = 'FATAL ERROR in noahmpdrv_timestep_init: problem in set_soilveg_noahmp'
           return
     endif
-    n_stc = 0
+
+  n_stc = 0
+  n_slc = 0
+  if (Land_IAU_Control%upd_stc) then
     do i=1,lensfc
       if (stc_updated(i) == 1 ) then ! soil-only location
           n_stc = n_stc+1
@@ -418,6 +446,27 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
           enddo
       endif
     enddo    
+  endif 
+
+  if (Land_IAU_Control%upd_slc) then
+    dz(1) = -zsoil(1)
+    do l = 2, km 
+        dz(l) = -zsoil(l) + zsoil(l-1) 
+    enddo 
+    ! print *, 'Applying soil moisture mins ' 
+    do i=1,lensfc
+      if (slc_updated(i) == 1 ) then 
+        n_slc = n_slc+1
+        ! apply SM bounds (later: add upper SMC limit)
+        do l = 1, lsoil_incr
+          ! noah-mp minimum is 1 mm per layer (in SMC)
+          ! no need to maintain frozen amount, would be v. small.
+          slc(i,l) = max( 0.001/dz(l), slc(i,l) )
+          smc(i,l) = max( 0.001/dz(l), smc(i,l) )
+        enddo
+      endif
+    enddo
+  endif
 
     ! d_stc = stc(:, 1) - stc_bck
     ! ! Where(d_stc .gt. 0.0001) 
@@ -428,18 +477,20 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   
     ! if(allocated(diff_indices)) deallocate(diff_indices)
 
-    deallocate(stc_updated)  
+    deallocate(stc_updated, slc_updated)
     deallocate(mask_tile)
   
 
     write(*,'(a,i2)') ' statistics of grids with stc/smc updates for rank : ', Land_IAU_Control%me
     write(*,'(a,i8)') ' soil grid total', lensfc
     write(*,'(a,i8)') ' soil grid cells stc updated = ',nstcupd
+    write(*,'(a,i8)') ' soil grid cells slc updated = ',nslcupd
     write(*,'(a,i8)') ' soil grid cells not updated, frozen = ',nfrozen
     write(*,'(a,i8)') ' soil grid cells update, became frozen = ',nfrozen_upd
     write(*,'(a,i8)') ' (not updated yet) snow grid cells = ', nsnowupd
     write(*,'(a,i8)') ' grid cells, without soil or snow = ', nother 
-    write(*,'(a,i8)') ' soil grid cells with stc update', n_stc 
+    write(*,'(a,i8)') ' soil grid cells with stc adjustment', n_stc 
+    write(*,'(a,i8)') ' soil grid cells with slc adjustment', n_slc 
 
 
 end subroutine noahmpdrv_timestep_init

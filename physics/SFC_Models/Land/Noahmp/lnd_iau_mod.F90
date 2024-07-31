@@ -72,6 +72,8 @@ module land_iau_mod
       real(kind=kind_phys) :: iaufhrs(7)      ! forecast hours associated with increment files
       logical              :: iau_filter_increments   
       integer              :: lsoil_incr    ! soil layers (from top) updated by DA   
+      logical              :: upd_stc
+      logical              :: upd_slc
       !, iau_drymassfixer
       integer              :: me              !< MPI rank designator
       integer              :: mpi_root          !< MPI rank of master atmosphere processor
@@ -126,10 +128,12 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    logical               :: land_iau_filter_increments    = .false.     !< filter IAU increments
    !logical               :: land_iau_gaussian_inc_file             = .false.
    integer               :: lsoil_incr = 4
+   logical               :: upd_stc = .false.
+   logical               :: upd_slc = .false.
   
    NAMELIST /land_iau_nml/ do_land_iau, land_iau_delthrs, land_iau_inc_files, land_iau_fhrs,   &  !land_iau_gaussian_inc_file,   &
                         land_iau_filter_increments, &  
-                        lsoil_incr                                       
+                        lsoil_incr, upd_stc, upd_slc                                    
    
    !Errors messages handled through CCPP error handling variables
    errmsg = ''
@@ -198,6 +202,9 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
 
    Land_IAU_Control%input_nml_file = input_nml_file
    Land_IAU_Control%input_nml_file_length = input_nml_file_length
+
+   Land_IAU_Control%upd_stc = upd_stc
+   Land_IAU_Control%upd_slc = upd_slc
 
    allocate(Land_IAU_Control%blksz(nblks))
    allocate(Land_IAU_Control%blk_strt_indx(nblks))
