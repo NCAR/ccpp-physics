@@ -11,8 +11,6 @@
 
       contains
 
-!>\ingroup SAMFdeep
-!>\ingroup SAMF_shal
 !> This subroutine computes a prognostic updraft area fraction
 !! used in the closure computations in the samfdeepcnv.f scheme
 !! This subroutine computes a prognostic updraft area fracftion

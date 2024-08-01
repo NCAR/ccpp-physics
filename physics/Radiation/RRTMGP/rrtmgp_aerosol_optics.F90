@@ -25,54 +25,54 @@ contains
 
     ! Inputs
     logical, intent(in) :: &
-         doSWrad,               & !< Logical flag for shortwave radiation call
-         doLWrad,               & !< Logical flag for longwave radiation call 
-         top_at_1                 !< Logical flag for vertical grid direcetion
+         doSWrad,               & ! Logical flag for shortwave radiation call
+         doLWrad,               & ! Logical flag for longwave radiation call 
+         top_at_1                 ! Logical flag for vertical grid direcetion
     integer, intent(in) :: &
-         nCol,                  & !< Number of horizontal grid points
-         nDay,                  & !< Number of daylit points
-         nLev,                  & !< Number of vertical layers
-         iaermdl,               & !< Aerosol model scheme flag
-         iaerflg                  !< Aerosol effects to include
+         nCol,                  & ! Number of horizontal grid points
+         nDay,                  & ! Number of daylit points
+         nLev,                  & ! Number of vertical layers
+         iaermdl,               & ! Aerosol model scheme flag
+         iaerflg                  ! Aerosol effects to include
     integer,intent(in),dimension(:) :: &
-         idxday                   !< Indices for daylit points.
+         idxday                   ! Indices for daylit points.
     real(kind_phys),intent(in) :: &
-         con_pi,                & !< Physical constant (pi)
-         con_rd,                & !< Physical constant (gas constant for dry-air)
-         con_g                    !< Physical constant (gravitational constant)
+         con_pi,                & ! Physical constant (pi)
+         con_rd,                & ! Physical constant (gas constant for dry-air)
+         con_g                    ! Physical constant (gravitational constant)
     real(kind_phys), dimension(:), intent(in) :: &
-         lon,                   & !< Longitude
-         lat,                   & !< Latitude
-         lsmask                   !< Land/sea/sea-ice mask
+         lon,                   & ! Longitude
+         lat,                   & ! Latitude
+         lsmask                   ! Land/sea/sea-ice mask
     real(kind_phys), dimension(:,:),intent(in), optional :: &
-         p_lay,                 & !< Pressure @ layer-centers (Pa)
-         tv_lay,                & !< Virtual-temperature @ layer-centers (K)
-         relhum                   !< Relative-humidity @ layer-centers
+         p_lay,                 & ! Pressure @ layer-centers (Pa)
+         tv_lay,                & ! Virtual-temperature @ layer-centers (K)
+         relhum                   ! Relative-humidity @ layer-centers
     real(kind_phys), dimension(:,:),intent(in) :: &
-         p_lk                     !< Exner function @ layer-centers (1)
+         p_lk                     ! Exner function @ layer-centers (1)
     real(kind_phys), dimension(:, :,:),intent(in) :: &
-         tracer                   !< trace gas concentrations
+         tracer                   ! trace gas concentrations
     real(kind_phys), dimension(:, :,:),intent(in) :: &
-         aerfld                   !< aerosol input concentrations
+         aerfld                   ! aerosol input concentrations
     real(kind_phys), dimension(:,:),intent(in), optional :: &
-         p_lev                    !< Pressure @ layer-interfaces (Pa)
+         p_lev                    ! Pressure @ layer-interfaces (Pa)
     real (kind=kind_phys), dimension(:,:), intent(out) :: &
-         ext550                   !< 3d optical extinction for total aerosol species
+         ext550                   ! 3d optical extinction for total aerosol species
 
     ! Outputs
     real(kind_phys), dimension(:,:), intent(out) :: &
-         aerodp                   !< Vertical integrated optical depth for various aerosol species 
+         aerodp                   ! Vertical integrated optical depth for various aerosol species 
     real(kind_phys), dimension(:,:,:), intent(out) :: &
-         aerlw_tau,             & !< Longwave aerosol optical depth
-         aerlw_ssa,             & !< Longwave aerosol single scattering albedo
-         aerlw_g,               & !< Longwave aerosol asymmetry parameter
-         aersw_tau,             & !< Shortwave aerosol optical depth 
-         aersw_ssa,             & !< Shortwave aerosol single scattering albedo
-         aersw_g                  !< Shortwave aerosol asymmetry parameter
+         aerlw_tau,             & ! Longwave aerosol optical depth
+         aerlw_ssa,             & ! Longwave aerosol single scattering albedo
+         aerlw_g,               & ! Longwave aerosol asymmetry parameter
+         aersw_tau,             & ! Shortwave aerosol optical depth 
+         aersw_ssa,             & ! Shortwave aerosol single scattering albedo
+         aersw_g                  ! Shortwave aerosol asymmetry parameter
     integer, intent(out) :: &
-         errflg                   !< CCPP error flag
+         errflg                   ! CCPP error flag
     character(len=*), intent(out) :: &
-         errmsg                   !< CCPP error message
+         errmsg                   ! CCPP error message
 
     ! Local variables
     real(kind_phys), dimension(nCol, nLev, lw_gas_props%get_nband(), 3) :: &

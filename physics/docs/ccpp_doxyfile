@@ -957,11 +957,11 @@ INPUT                  = pdftxt/mainpage.txt \
                          pdftxt/MYNN_SFCLAYER.txt \
                          pdftxt/GFS_NSST.txt \
                          pdftxt/GFS_OCEAN.txt \
-                         pdftxt/GFS_NOAH.txt \
+                         pdftxt/NOAH_LSM.txt \
                          pdftxt/GFS_SFCSICE.txt \
                          pdftxt/GFS_SATMEDMFVDIFQ.txt \
-                         pdftxt/GFS_NOAHMP.txt \
-                         pdftxt/GFS_UGWPv0.txt \
+                         pdftxt/NOAHMP_LSM.txt \
+                         pdftxt/UGWPv0.txt \
                          pdftxt/GFS_ugwpv1.txt \
                          pdftxt/GFS_UGWPV1_ORO.txt \
                          pdftxt/GFS_GWDPS.txt \
@@ -1047,7 +1047,7 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                =
+EXCLUDE                = ../Radiation/RRTMGP/rte-rrtmgp     
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded

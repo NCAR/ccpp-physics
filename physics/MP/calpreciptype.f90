@@ -3,8 +3,7 @@
 
 module calpreciptype_mod
 contains
-!>\ingroup gfs_calpreciptype
-!! Foure algorithms are called to calculate dominant precipitation type, and the 
+!> Foure algorithms are called to calculate dominant precipitation type, and the 
 !!tallies are sumed in calwxt_dominant().
 !!
 !>\section gen_calp GFS calpreciptype General Algorithm
@@ -215,10 +214,8 @@ contains
       deallocate (twet,rh,td)        
       return
       end
-!
-!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-!>\ingroup gfs_calpreciptype
-!! This subroutine computes precipitation type using a decision tree approach that uses 
+
+!> This subroutine computes precipitation type using a decision tree approach that uses 
 !! variables such as integrated wet bulb temperatue below freezing and lowest layer 
 !! temperature (Baldwin et al. 1994 \cite baldwin_et_al_1994)
       subroutine calwxt(lm,lp1,t,q,pmid,pint,              &
@@ -472,7 +469,6 @@ contains
 !
 !   code adapted for wrf post  24 august 2005    g manikin
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-!>\ingroup gfs_calpreciptype
 !> This subroutine is written and provided by Jim Ramer at NOAA/ESRL
 !!(Ramer (1993) \cite ramer_1993).
       subroutine calwxt_ramer(lm,lp1,t,q,pmid,rh,td,pint,ptyp)
@@ -875,7 +871,6 @@ contains
 !                                       and layer lmh = bottom
 !
 !$$$
-!>\ingroup gfs_calpreciptype
 !>this routine computes precipitation type using a decision tree 
 !! approach that uses the so-called "energy method" of Bourgouin(2000) 
 !! \cite bourgouin_2000.
@@ -1044,7 +1039,6 @@ contains
       return
       end
 !
-!>\ingroup gfs_calpreciptype
 !> This subroutine computes precipitation type using a decision tree
 !! approach that uses variables such as integrated wet bulb temperature
 !! below freezing and lowest layer temperature (Baldwin et al.1994
@@ -1307,7 +1301,6 @@ contains
       return
       end
 !
-!>\ingroup gfs_calpreciptype
 !> This subroutine takes the precipitation type solutions from 
 !! different algorithms and sums them up to give a dominant type.
 !!

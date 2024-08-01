@@ -7,7 +7,7 @@ This page provides an overview of the major updates in CCPP Physics v7.0.0.
 - New supported suites: GFS_v17_p8_ugwpv1, GFS_v16_RRTMGP, and HRRR_gf suites 
 - New \ref CLM_LAKE_page in HRRR_gf suite
 - New \ref GFS_ugwpv1_gsldrag in GFS_v17_p8_ugwpv1 suite combines the \ref GFS_drag_suite with the version 1 UGWP non-stationary gravity wave drag (NGW) scheme of  Yudin et al. (2020)\cite yudin_et_al_2020 
-- New \ref GFS_RRTMGP_page in GFS_v16_RRTMGP suite
+- New \ref GFS_RRTMGP_page (Pincus et al. 2019 \cite pincus_et_al_2019) in GFS_v16_RRTMGP suite
 - New RRFS smoke/dust scheme in HRRR_gf suite
 
 GFS_v17_p8, HRRR, RRFS_v1beta, RAP suites in CCPP v6.0.0 are no longer supported.

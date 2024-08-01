@@ -1,5 +1,5 @@
 /**
-\page NoahMP GFS NoahMP Land Surface Model
+\page NoahMP NoahMP Land Surface Model
 \section des_noahmp  Description
 
 This implementation of the NoahMP Land Surface Model (LSM) is adapted from the version implemented in WRF v3.7 with additions by NOAA EMC staff to work with the UFS Atmosphere model. Authoritative documentation of the NoahMP scheme can be accessed at the following links:

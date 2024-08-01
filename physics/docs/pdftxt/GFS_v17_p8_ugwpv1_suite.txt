@@ -4,8 +4,8 @@
 \section gfsv_17_suite_overview Overview
 
 
-The GFS_v17_p8_ugwpv1 suite is a prototype of 
-the GFS_v17 suite, and is expected to evolve before the implementation. It is available for use 
+The GFS_v17_p8_ugwpv1 suite is a prototype for 
+the GFS v17, and is expected to evolve before the operational implementation. It is supported for use 
 with the CCPP SCM.  The primary differences between the GFS_v16 and GFS_v17 suites are: 
 - \b Microphysics: The replacement of \ref GFDL_cloud with \ref THOMPSON 
 - PBL and Convection updates

@@ -232,7 +232,7 @@
             ntrcaer = size(aer_nm, dim=3)
          endif
 
-!> - Call read_cidata() to read IN and CCN data
+!> - Call iccninterp::read_cidata() to read IN and CCN data
          if (iccn == 1) then
            call read_cidata (me,master)
            ! No consistency check needed for in/ccn data, all values are
