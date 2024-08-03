@@ -13,7 +13,8 @@
                                      num_moist, num_chem, num_emis_seas, num_emis_dust, &
                                      p_qv, p_atm_shum, p_atm_cldq,plume_wind_eff,       &
                                      p_smoke, p_dust_1, p_coarse_pm, epsilc,            &
-                                     n_dbg_lines, add_fire_moist_flux, plume_alpha
+                                     n_dbg_lines, add_fire_moist_flux, plume_alpha,     &
+                                     sc_factor
    use dust_data_mod,         only : dust_alpha, dust_gamma, dust_moist_opt,            &
                                      dust_moist_correction, dust_drylimit_factor
    use seas_mod,              only : gocart_seasalt_driver
@@ -46,7 +47,8 @@ contains
                               rrfs_sd, do_plumerise_in, plumerisefire_frq_in,     & ! smoke namelist 
                               plume_wind_eff_in,add_fire_heat_flux_in,            & ! smoke namelist
                               addsmoke_flag_in, ebb_dcycle_in, hwp_method_in,     & ! smoke namelist
-                              add_fire_moist_flux_in, plume_alpha_in,             & ! smoke namelist 
+                              add_fire_moist_flux_in,                             & ! smoke namelist
+                              sc_factor_in, plume_alpha_in,                       & ! smoke namelist 
                               dust_opt_in, dust_alpha_in, dust_gamma_in,          & ! dust namelist
                               dust_moist_opt_in,                                  & ! dust namelist
                               dust_moist_correction_in, dust_drylimit_factor_in,  & ! dust namelist                        
@@ -58,6 +60,7 @@ contains
   real(kind_phys), intent(in) :: dust_alpha_in, dust_gamma_in, wetdep_ls_alpha_in, plume_alpha_in
   real(kind_phys), intent(in) :: dust_moist_correction_in
   real(kind_phys), intent(in) :: dust_drylimit_factor_in
+  real(kind_phys), intent(in) :: sc_factor_in
   integer,         intent(in) :: dust_opt_in,dust_moist_opt_in, wetdep_ls_opt_in, pm_settling_in, seas_opt_in
   integer,         intent(in) :: drydep_opt_in
   logical,         intent(in) :: aero_ind_fdb_in,dbg_opt_in, extended_sd_diags_in, add_fire_heat_flux_in, add_fire_moist_flux_in
@@ -96,6 +99,7 @@ contains
      add_fire_heat_flux    = add_fire_heat_flux_in
      add_fire_moist_flux   = add_fire_moist_flux_in  
      plume_alpha           = plume_alpha_in 
+     sc_factor             = sc_factor_in
   !>-Feedback
      aero_ind_fdb          = aero_ind_fdb_in
   !>-Other
@@ -360,17 +364,18 @@ contains
           ! cropland, urban, cropland/natural mosaic, barren and sparsely
           ! vegetated and non-vegetation areas: 
           lu_qfire(i,j) = lu_nofire(i,j) + vegfrac(i,12,j) + vegfrac(i,13,j) + vegfrac(i,14,j) + vegfrac(i,16,j)
-          ! Savannas and grassland fires, these fires last longer than the Ag
-          ! fires:
-          lu_sfire(i,j) = lu_nofire(i,j) + vegfrac(i,8,j) + vegfrac(i,9,j) + vegfrac(i,10,j)
+          ! Savannas and grassland fires, these fires last longer than the Ag fires:
+          lu_sfire(i,j) = lu_qfire(i,j) + vegfrac(i,8,j) + vegfrac(i,9,j) + vegfrac(i,10,j)
           if (lu_nofire(i,j)>0.95) then ! no fires
             fire_type(i,j) = 0
           else if (lu_qfire(i,j)>0.9) then   ! Ag. and urban fires
             fire_type(i,j) = 1
-          else if (lu_sfire(i,j)>0.9) then   ! savanna and grassland fires
-            fire_type(i,j) = 2
-          else
-            fire_type(i,j) = 3    ! wildfires, new approach is necessary for the controlled burns in the forest areas
+          else if (xlong(i,j)>260. .AND. xlat(i,j)>25. .AND. xlat(i,j)<41.) then
+            fire_type(i,j) = 2    ! slash burn and wildfires in the east, eastern temperate forest ecosystem
+          else if (lu_sfire(i,j)>0.8) then
+            fire_type(i,j) = 3    ! savanna and grassland fires
+          else 
+            fire_type(i,j) = 4    ! potential wildfires  
           end if
         end if
       end do
@@ -424,7 +429,11 @@ contains
         ! Apply the diurnal cycle coefficient to frp_inst ()
         do j=jts,jte
         do i=its,ite
-         frp_inst(i,j) = MIN(frp_in(i,j)*coef_bb_dc(i,j),frp_max)
+         IF ( fire_type(i,j) .eq. 4 ) THEN ! only apply scaling factor to wildfires
+            frp_inst(i,j) = MIN(sc_factor*frp_in(i,j)*coef_bb_dc(i,j),frp_max)
+         ELSE
+            frp_inst(i,j) = MIN(frp_in(i,j)*coef_bb_dc(i,j),frp_max)
+         ENDIF
         enddo
         enddo
 
@@ -452,7 +461,8 @@ contains
                        fire_end_hr, peak_hr,curr_secs,               &
                        coef_bb_dc,fire_hist,hwp_local,hwp_day_avg,   &
                        swdown,ebb_dcycle,ebu_in,ebu,fire_type,       &
-                       moist(:,:,:,p_qv), add_fire_moist_flux,       &    
+                       moist(:,:,:,p_qv), add_fire_moist_flux,       &
+                       sc_factor,                                    &    
                        ids,ide, jds,jde, kds,kde,                    &
                        ims,ime, jms,jme, kms,kme,                    &
                        its,ite, jts,jte, kts,kte , mpiid             )
@@ -941,7 +951,7 @@ contains
 
 !---- Calculate HWP based on selected method
     hwp_local = 0._kind_phys
-    precip_factor  = 5._kind_phys + real(hour_int)*5._kind_phys/24._kind_phys
+    precip_factor  = 2.5_kind_phys + real(hour_int, kind=kind_phys)*2.5_kind_phys/24._kind_phys
   ! total precip is only in the SMOKE_RRFS_DATA if ebb_dcycle ==  2 and should be
   ! filled here before calculating HWP
   ! !!WARNING!! IF EBB_DYCLE != 2 and HWP_METHOD = 1 | 3, HWP will not take into account totprcp_24hrs

@@ -93,9 +93,9 @@
   type = integer
   intent = in
 [hwp_method_in]
-  standard_name = do_smoke_forecast
-  long_name = index for rrfs smoke forecast
-  units = index
+  standard_name = control_for_HWP_equation
+  long_name = control for HWP equation
+  units = 1
   dimensions = ()
   type = integer
   intent = in
@@ -105,6 +105,14 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[sc_factor_in]
+  standard_name = scale_factor_for_wildfire_emissions
+  long_name = scale factor for wildfire emissions
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [plume_alpha_in]
   standard_name = alpha_for_plumerise_scheme
