@@ -74,6 +74,7 @@ module land_iau_mod
       integer              :: lsoil_incr    ! soil layers (from top) updated by DA   
       logical              :: upd_stc
       logical              :: upd_slc
+      real(kind=kind_phys) :: min_T_increment
       !, iau_drymassfixer
       integer              :: me              !< MPI rank designator
       integer              :: mpi_root          !< MPI rank of master atmosphere processor
@@ -130,10 +131,11 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    integer               :: lsoil_incr = 4
    logical               :: land_iau_upd_stc = .false.
    logical               :: land_iau_upd_slc = .false.
+   real(kind=kind_phys)  :: land_iau_min_T_increment = 0.0001
   
    NAMELIST /land_iau_nml/ do_land_iau, land_iau_delthrs, land_iau_inc_files, land_iau_fhrs,   &  !land_iau_gaussian_inc_file,   &
                         land_iau_filter_increments, &  
-                        lsoil_incr, land_iau_upd_stc, land_iau_upd_slc                                    
+                        lsoil_incr, land_iau_upd_stc, land_iau_upd_slc, land_iau_min_T_increment                                    
    
    !Errors messages handled through CCPP error handling variables
    errmsg = ''
@@ -205,6 +207,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
 
    Land_IAU_Control%upd_stc = land_iau_upd_stc
    Land_IAU_Control%upd_slc = land_iau_upd_slc
+   Land_IAU_Control%min_T_increment = land_iau_min_T_increment
 
    allocate(Land_IAU_Control%blksz(nblks))
    allocate(Land_IAU_Control%blk_strt_indx(nblks))
@@ -680,6 +683,9 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, stc_inc_ou
 
    status =nf90_close(ncid) 
    call netcdf_err(status, 'closing file '//trim(fname), errflg, errmsg) 
+
+   !8.3.24 ensure to zero out too small increments
+   where(wk3_stc < Land_IAU_Control%min_T_increment) wk3_stc = 0.0
 
 end subroutine read_iau_forcing_fv3
 
