@@ -685,7 +685,7 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, stc_inc_ou
    call netcdf_err(status, 'closing file '//trim(fname), errflg, errmsg) 
 
    !8.3.24 ensure to zero out too small increments
-   where(wk3_stc < Land_IAU_Control%min_T_increment) wk3_stc = 0.0
+   where(abs(wk3_stc) < Land_IAU_Control%min_T_increment) wk3_stc = 0.0
 
 end subroutine read_iau_forcing_fv3
 
