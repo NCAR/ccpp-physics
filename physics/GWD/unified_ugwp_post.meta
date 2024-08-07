@@ -139,6 +139,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dvdt_ogw]
   standard_name = tendency_of_y_wind_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = y momentum tendency from meso scale ogw
@@ -147,6 +148,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dudt_tms]
   standard_name = tendency_of_x_wind_due_to_turbulent_orographic_form_drag
   long_name = instantaneous change in x wind due to TOFD
@@ -219,6 +221,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [du3dt_ogw]
   standard_name = time_integral_of_change_in_x_wind_due_to_orographic_gravity_wave_drag
   long_name = time integral of change in x wind due to orographic gw drag
@@ -227,6 +230,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [du3dt_tms]
   standard_name = time_integral_of_change_in_x_wind_due_to_turbulent_orographic_form_drag
   long_name = time integral of change in x wind due to TOFD
@@ -235,6 +239,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [du3dt_ngw]
   standard_name = time_integral_of_change_in_x_wind_due_to_nonstationary_gravity_wave
   long_name = time integral of change in x wind due to NGW
@@ -243,6 +248,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dv3dt_ngw]
   standard_name = time_integral_of_change_in_y_wind_due_to_nonstationary_gravity_wave
   long_name = time integral of change in y wind due to NGW
@@ -251,6 +257,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ldu3dt_ogw]
   standard_name = cumulative_change_in_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = cumulative change in x wind due to mesoscale orographic gravity wave drag
@@ -339,6 +346,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dvdt_obl]
   standard_name = tendency_of_y_wind_due_to_blocking_drag
   long_name = y wind tendency from blocking drag
@@ -347,6 +355,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dudt_oss]
   standard_name = tendency_of_x_wind_due_to_small_scale_gravity_wave_drag
   long_name = x wind tendency from small scale gwd
@@ -419,6 +428,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dv_ogwcol]
   standard_name = vertically_integrated_y_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = integrated y momentum flux from meso scale ogw
@@ -427,6 +437,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [du_oblcol]
   standard_name = vertically_integrated_x_momentum_flux_due_to_blocking_drag
   long_name = integrated x momentum flux from blocking drag
@@ -435,6 +446,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dv_oblcol]
   standard_name = vertically_integrated_y_momentum_flux_due_to_blocking_drag
   long_name = integrated y momentum flux from blocking drag
@@ -443,6 +455,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [du_osscol]
   standard_name = vertically_integrated_x_momentum_flux_due_to_small_scale_gravity_wave_drag
   long_name = integrated x momentum flux from small scale gwd
@@ -483,6 +496,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dv3_ogwcol]
   standard_name = cumulative_vertically_integrated_y_momentum_flux_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = cumulative integrated y momentum flux from mesoscale orographic gravity wave drag
@@ -491,6 +505,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [du3_oblcol]
   standard_name = cumulative_vertically_integrated_x_momentum_flux_due_to_blocking_drag
   long_name = cumulative integrated x momentum flux from blocking drag
@@ -499,6 +514,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dv3_oblcol]
   standard_name = cumulative_vertically_integrated_y_momentum_flux_due_to_blocking_drag
   long_name = cumulative integrated y momentum flux from blocking drag
@@ -507,6 +523,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [du3_osscol]
   standard_name = cumulative_vertically_integrated_x_momentum_flux_due_to_small_scale_gravity_wave_drag
   long_name = cumulative integrated x momentum flux from small scale gravity wave drag

@@ -246,6 +246,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [index_of_process_conv_trans]
   standard_name = index_of_convective_transport_process_in_cumulative_change_index
   long_name = index of convective transport process in second dimension of array cumulative change index
@@ -317,6 +318,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [spechum]
   standard_name = specific_humidity
   long_name = water vapor specific humidity

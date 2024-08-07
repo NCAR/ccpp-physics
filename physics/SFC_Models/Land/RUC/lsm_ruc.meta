@@ -256,6 +256,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [snoalb]
   standard_name = upper_bound_of_max_albedo_assuming_deep_snow
   long_name = maximum snow albedo
@@ -400,6 +401,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albdnir_ice]
   standard_name = surface_albedo_direct_NIR_over_ice
   long_name = direct surface albedo NIR band over ice
@@ -408,6 +410,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albivis_ice]
   standard_name = surface_albedo_diffuse_visible_over_ice
   long_name = diffuse surface albedo visible band over ice
@@ -416,6 +419,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [albinir_ice]
   standard_name = surface_albedo_diffuse_NIR_over_ice
   long_name = diffuse surface albedo NIR band over ice
@@ -424,6 +428,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zs]
   standard_name = depth_of_soil_layers
   long_name = depth of soil levels for land surface model
@@ -472,6 +477,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tsice]
   standard_name = temperature_in_ice_layer
   long_name = sea ice internal temperature
@@ -705,6 +711,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = True
 [xlat_d]
   standard_name = latitude_in_degree
   long_name = latitude in degree north
@@ -815,6 +822,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dlwflx]
   standard_name = surface_downwelling_longwave_flux
   long_name = surface downwelling longwave flux at current time
@@ -876,6 +884,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [rainc]
   standard_name = lwe_thickness_of_convective_precipitation_amount_on_previous_timestep
   long_name = convective_precipitation_amount from previous timestep
@@ -884,6 +893,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ice]
   standard_name = lwe_thickness_of_ice_precipitation_amount_on_previous_timestep
   long_name = ice amount from previous timestep
@@ -892,6 +902,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [snow]
   standard_name = snow_mass_on_previous_timestep
   long_name = snow amount from previous timestep
@@ -900,6 +911,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [graupel]
   standard_name = lwe_thickness_of_graupel_amount_on_previous_timestep
   long_name = graupel amount from previous timestep
@@ -908,6 +920,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [prsl1]
   standard_name = air_pressure_at_surface_adjacent_layer
   long_name = mean pressure at lowest model layer
@@ -1202,6 +1215,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [weasd_ice]
   standard_name = water_equivalent_accumulated_snow_depth_over_ice
   long_name = water equiv of acc snow depth over ice
@@ -1306,6 +1320,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [z0rl_lnd]
   standard_name = surface_roughness_length_over_land
   long_name = surface roughness length over land  (temporary use as interstitial)
@@ -1442,6 +1457,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snowfallac_lnd]
   standard_name = surface_snow_amount_assuming_variable_snow_density_over_land
   long_name = run-total snow accumulation on the ground with variable snow density over land
@@ -1538,6 +1554,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [z0rl_ice]
   standard_name = surface_roughness_length_over_ice
   long_name = surface roughness length over ice   (temporary use as interstitial)
@@ -1634,6 +1651,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [albdnir_ice]
   standard_name = surface_albedo_direct_NIR_over_ice
   long_name = direct surface albedo NIR band over ice
@@ -1642,6 +1660,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [albivis_ice]
   standard_name = surface_albedo_diffuse_visible_over_ice
   long_name = diffuse surface albedo visible band over ice
@@ -1650,6 +1669,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [albinir_ice]
   standard_name = surface_albedo_diffuse_NIR_over_ice
   long_name = diffuse surface albedo NIR band over ice
@@ -1658,6 +1678,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [add_fire_heat_flux]
   standard_name = flag_for_fire_heat_flux
   long_name = flag to add fire heat flux to LSM

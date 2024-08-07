@@ -221,6 +221,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cnvc_phy_f3d]
   standard_name = convective_cloud_area_fraction
   long_name = convective cloud cover in the phy_f3d array
@@ -229,6 +230,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables
@@ -237,6 +239,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index

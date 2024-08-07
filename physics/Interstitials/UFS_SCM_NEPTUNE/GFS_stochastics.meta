@@ -172,6 +172,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [skebu_wts]
   standard_name = skeb_x_wind_weights_from_coupled_process
   long_name = weights for stochastic skeb perturbation of x wind
@@ -316,6 +317,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [gq0_cw]
   standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = cloud condensed water mixing ratio updated by physics
@@ -434,6 +436,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snow_cpl]
   standard_name = cumulative_lwe_thickness_of_snow_amount_for_coupling
   long_name = total snow precipitation
@@ -442,6 +445,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [drain_cpl]
   standard_name = tendency_of_lwe_thickness_of_rain_amount_on_dynamics_timestep_for_coupling
   long_name = change in rain_cpl (coupling_type)
@@ -450,6 +454,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dsnow_cpl]
   standard_name = tendency_of_lwe_thickness_of_snowfall_amount_on_dynamics_timestep_for_coupling
   long_name = change in show_cpl (coupling_type)
@@ -458,6 +463,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)

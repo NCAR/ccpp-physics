@@ -309,6 +309,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [lake_q2m]
   standard_name =  specific_humidity_at_2m_from_clm_lake
   long_name = specific humidity at 2m from clm lake
@@ -317,6 +318,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [use_lake2m]
   standard_name = use_2m_diagnostics_calculated_by_lake_model
   long_name = model 2m diagnostics use the temperature and humidity calculated by the lake model

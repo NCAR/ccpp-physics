@@ -344,6 +344,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [qgrs_ice_aer_num_conc]
   standard_name = mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols
   long_name = number concentration of ice-friendly aerosols
@@ -568,6 +569,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dvsfc_cice]
   standard_name = surface_y_momentum_flux_from_coupled_process
   long_name = sfc y momentum flux for coupling
@@ -576,6 +578,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dtsfc_cice]
   standard_name = surface_upward_sensible_heat_flux_from_coupled_process
   long_name = sfc sensible heat flux for coupling
@@ -584,6 +587,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dqsfc_cice]
   standard_name = surface_upward_latent_heat_flux_from_coupled_process
   long_name = sfc latent heat flux for coupling
@@ -592,6 +596,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [hflx_wat]
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_water
   long_name = kinematic surface upward sensible heat flux over water
@@ -661,6 +666,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dvsfci_cpl]
   standard_name = surface_y_momentum_flux_for_coupling
   long_name = instantaneous sfc v momentum flux
@@ -669,6 +675,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtsfci_cpl]
   standard_name = surface_upward_sensible_heat_flux_for_coupling
   long_name = instantaneous sfc sensible heat flux
@@ -677,6 +684,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dqsfci_cpl]
   standard_name = surface_upward_latent_heat_flux_for_coupling
   long_name = instantaneous sfc latent heat flux
@@ -685,6 +693,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dusfc_cpl]
   standard_name = cumulative_surface_x_momentum_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc u momentum flux multiplied by timestep
@@ -693,6 +702,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dvsfc_cpl]
   standard_name = cumulative_surface_y_momentum_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc v momentum flux multiplied by timestep
@@ -701,6 +711,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtsfc_cpl]
   standard_name = cumulative_surface_upward_sensible_heat_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc sensible heat flux multiplied by timestep
@@ -709,6 +720,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dqsfc_cpl]
   standard_name = cumulative_surface_upward_latent_heat_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc latent heat flux multiplied by timestep
@@ -717,6 +729,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [recmol]
   standard_name = reciprocal_of_obukhov_length
   long_name = one over obukhov length
@@ -980,6 +993,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [ztop_plume]
   standard_name = height_of_tallest_plume_in_a_column
   long_name = height of tallest plume in a column
@@ -1083,6 +1097,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dqdt_ice_aer_num_conc]
   standard_name = process_split_cumulative_tendency_of_mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols
   long_name = number conc. of ice-friendly aerosols tendency due to model physics
@@ -1114,6 +1129,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -1121,6 +1137,7 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
+  optional = True
 [index_of_temperature]
   standard_name = index_of_temperature_in_cumulative_change_index
   long_name = index of temperature in first dimension of array cumulative change index
@@ -1205,6 +1222,7 @@
   dimensions = ()
   type = integer
   intent = in
+  optional = True
 [ntia]
   standard_name = index_of_mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols_in_tracer_concentration_array
   long_name = tracer index for ice friendly aerosol

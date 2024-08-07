@@ -194,6 +194,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [q2mp]
   standard_name = specific_humidity_at_2m_from_noahmp
   long_name = 2 meter specific humidity from noahmp
@@ -202,6 +203,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [gflux]
   standard_name = upward_heat_flux_in_soil_over_land
   long_name = soil heat flux over land

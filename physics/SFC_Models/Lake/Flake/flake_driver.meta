@@ -93,6 +93,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [xlat]
   standard_name = latitude
   long_name = latitude
@@ -471,6 +472,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zm]
   standard_name = ocean_mixed_layer_thickness
   long_name = mixed layer thickness
@@ -479,6 +481,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tref]
   standard_name = reference_sea_surface_temperature
   long_name = reference/foundation temperature
@@ -487,6 +490,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tsfco]
   standard_name = sea_surface_temperature
   long_name = sea surface temperature

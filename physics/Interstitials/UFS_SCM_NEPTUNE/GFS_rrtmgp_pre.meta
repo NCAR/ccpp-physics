@@ -342,6 +342,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tsfa]
   standard_name = surface_air_temperature_for_radiation
   long_name = lowest model layer air temperature for radiation
@@ -422,6 +423,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [coszen]
   standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = mean cos of zenith angle over rad call period

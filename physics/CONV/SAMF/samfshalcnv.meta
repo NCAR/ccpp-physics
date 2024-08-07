@@ -217,6 +217,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [progsigma]
   standard_name = do_prognostic_updraft_area_fraction
   long_name = flag for prognostic sigma in cumulus scheme
@@ -264,6 +265,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [q]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -387,6 +389,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [dt_mf]
   standard_name = instantaneous_atmosphere_detrainment_convective_mass_flux
   long_name = (detrainment mass flux) * delt
@@ -474,6 +477,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [sigmaout]
   standard_name = updraft_area_fraction_updated_by_physics
   long_name = convective updraft area fraction updated by physics
@@ -482,6 +486,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [betadcu]
   standard_name = tuning_param_for_deep_cu
   long_name = tuning param for deep cu in case prognostic closure is used

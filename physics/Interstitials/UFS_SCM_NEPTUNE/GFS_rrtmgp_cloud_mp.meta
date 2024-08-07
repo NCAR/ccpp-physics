@@ -101,6 +101,7 @@
   dimensions = ()
   type = integer
   intent = in
+  optional = True
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration
@@ -323,6 +324,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [effrin_cldice]
   standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = eff. radius of cloud ice water particle in micrometer
@@ -331,6 +333,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [effrin_cldrain]
   standard_name = effective_radius_of_stratiform_cloud_rain_particle
   long_name = effective radius of cloud rain particle in micrometers
@@ -339,6 +342,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [effrin_cldsnow]
   standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in micrometers
@@ -347,6 +351,7 @@
   type = real
   kind = kind_phys  
   intent = inout
+  optional = True
 [tracer]
   standard_name = tracer_concentration
   long_name = model layer mean tracer concentration
@@ -379,6 +384,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [deltaZ]
   standard_name = layer_thickness
   long_name = layer_thickness

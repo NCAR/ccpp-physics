@@ -219,6 +219,7 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
+  optional = True
 [iovr]
   standard_name = flag_for_cloud_overlap_method_for_radiation
   long_name = max-random overlap clouds

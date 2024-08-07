@@ -29,6 +29,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
@@ -36,6 +37,7 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
+  optional = True
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep

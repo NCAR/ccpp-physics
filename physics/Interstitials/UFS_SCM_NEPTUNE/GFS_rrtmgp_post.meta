@@ -354,6 +354,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [topflw]
   standard_name = lw_fluxes_top_atmosphere
   long_name = lw radiation fluxes at top

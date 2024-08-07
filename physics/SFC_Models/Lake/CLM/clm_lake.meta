@@ -273,6 +273,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [rainncprv]
   standard_name = lwe_thickness_of_explicit_precipitation_amount_on_previous_timestep
   long_name = explicit rainfall from previous timestep
@@ -281,6 +282,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [oro_lakedepth]
   standard_name = lake_depth
   long_name = lake depth
@@ -558,6 +560,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [lake_q2m]
   standard_name =  specific_humidity_at_2m_from_clm_lake
   long_name = specific humidity at 2m from clm lake
@@ -566,6 +569,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [weasd]
   standard_name = lwe_thickness_of_surface_snow_amount
   long_name = water equiv of acc snow depth over land and sea ice

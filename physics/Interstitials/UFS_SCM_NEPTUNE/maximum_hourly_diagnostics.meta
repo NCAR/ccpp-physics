@@ -253,6 +253,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ltg2_max]
   standard_name = lightning_threat_index_2
   long_name = lightning threat index 2
@@ -261,6 +262,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ltg3_max]
   standard_name = lightning_threat_index_3
   long_name = lightning threat index 3
@@ -269,6 +271,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [wgrs]
   standard_name = unsmoothed_nonhydrostatic_upward_air_velocity
   long_name = unsmoothed non-hydrostatic upward air velocity
@@ -277,6 +280,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces

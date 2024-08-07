@@ -76,6 +76,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [ocss]
   standard_name = convexity_of_subgrid_orography_small_scale
   long_name = convexity of subgrid height_above_mean_sea_level small scale
@@ -84,6 +85,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [oa4ss]
   standard_name = asymmetry_of_subgrid_orography_small_scale
   long_name = asymmetry of subgrid height_above_mean_sea_level small scale
@@ -92,6 +94,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [clxss]
   standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height_small_scale
   long_name = horizontal fraction of grid box covered by subgrid height_above_mean_sea_level higher than critical height small scale
@@ -100,6 +103,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [sigma]
   standard_name = slope_of_subgrid_orography
   long_name = slope of subgrid height_above_mean_sea_level
@@ -146,6 +150,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtidx]
   standard_name = cumulative_change_of_state_variables_outer_index
   long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index

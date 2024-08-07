@@ -846,6 +846,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [chs2]
   standard_name = surface_exchange_coefficient_for_heat_at_2m
   long_name = exchange coefficient for heat at 2 meters
