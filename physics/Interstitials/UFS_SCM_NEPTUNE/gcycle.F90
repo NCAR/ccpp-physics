@@ -37,15 +37,16 @@ contains
     real(kind=kind_phys), intent(in)    :: fhcyc, phour, landfrac(:), lakefrac(:), &
                                            min_seaice, min_lakeice,                &
                                            xlat_d(:), xlon_d(:)
-    real(kind=kind_phys), intent(inout) :: smc(:,:),   &
-                                           slc(:,:),   &
-                                           stc(:,:),   &
+    real(kind=kind_phys), intent(inout), optional ::   &
                                            smois(:,:), &
                                            sh2o(:,:),  &
                                            tslb(:,:),  &
+                                           tref(:)
+    real(kind=kind_phys), intent(inout) :: smc(:,:),   &
+                                           slc(:,:),   &
+                                           stc(:,:),   &
                                            tiice(:,:), &
                                            tg3(:),     &
-                                           tref(:),    &
                                            tsfc(:),    &
                                            tsfco(:),   &
                                            tisfc(:),   &

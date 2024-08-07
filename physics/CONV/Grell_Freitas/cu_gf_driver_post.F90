@@ -25,15 +25,16 @@ module cu_gf_driver_post
       integer,          intent(in)  :: im, km
       real(kind_phys),  intent(in)  :: t(:,:)
       real(kind_phys),  intent(in)  :: q(:,:)
-      real(kind_phys),  intent(out) :: prevst(:,:)
-      real(kind_phys),  intent(out) :: prevsq(:,:)
-      integer,          intent(in)  :: cactiv(:)
-      integer,          intent(in)  :: cactiv_m(:)
-      real(kind_phys),  intent(out) :: conv_act(:)
-      real(kind_phys),  intent(out) :: conv_act_m(:)
+      real(kind_phys),  intent(out), optional :: prevst(:,:)
+      real(kind_phys),  intent(out), optional :: prevsq(:,:)
+      integer,          intent(in),  optional :: cactiv(:)
+      integer,          intent(in),  optional :: cactiv_m(:)
+      real(kind_phys),  intent(out), optional :: conv_act(:)
+      real(kind_phys),  intent(out), optional :: conv_act_m(:)
       logical,          intent(in)  :: rrfs_sd
       integer,          intent(in)  :: ntsmoke, ntdust, ntcoarsepm
-      real(kind_phys),  intent(inout) :: chem3d(:,:,:), gq0(:,:,:)
+      real(kind_phys),  intent(inout), optional :: chem3d(:,:,:)
+      real(kind_phys),  intent(inout) :: gq0(:,:,:)
       character(len=*), intent(out) :: errmsg
 !$acc declare copyin(t,q,cactiv,cactiv_m) copyout(prevst,prevsq,conv_act,conv_act_m,chem3d,gq0)
       integer, intent(out)          :: errflg

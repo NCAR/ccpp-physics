@@ -55,7 +55,8 @@ subroutine shoc_run (nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_
     real(kind=kind_phys), intent(in), dimension(:,:)   :: prsl, delp, phil, u, v, omega, rhc, prnum
     real(kind=kind_phys), intent(in), dimension(:,:) :: phii
    !
-    real(kind=kind_phys), intent(inout), dimension(:,:) :: gt0, cld_sgs, tke, tkh, wthv_sec
+    real(kind=kind_phys), intent(inout), dimension(:,:) :: gt0, tke, tkh, wthv_sec
+    real(kind=kind_phys), intent(inout), dimension(:,:), optional :: cld_sgs
     real(kind=kind_phys), intent(inout), dimension(:,:,:) :: gq0
 
    character(len=*), intent(out) :: errmsg

@@ -318,6 +318,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtauy2d_ss]
   standard_name = tendency_of_y_wind_due_to_small_scale_gravity_wave_drag
   long_name = y wind tendency from small scale gwd
@@ -326,6 +327,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtaux2d_fd]
   standard_name = tendency_of_x_wind_due_to_form_drag
   long_name = x wind tendency from form drag
@@ -334,6 +336,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dtauy2d_fd]
   standard_name = tendency_of_y_wind_due_to_form_drag
   long_name = y wind tendency from form drag
@@ -342,6 +345,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dusfc]
   standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
   long_name = zonal surface stress due to orographic gravity wave drag
@@ -402,6 +406,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dvsfc_ss]
   standard_name = vertically_integrated_y_momentum_flux_due_to_small_scale_gravity_wave_drag
   long_name = integrated y momentum flux from small scale gwd
@@ -410,6 +415,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dusfc_fd]
   standard_name = vertically_integrated_x_momentum_flux_due_to_form_drag
   long_name = integrated x momentum flux from form drag
@@ -418,6 +424,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [dvsfc_fd]
   standard_name = vertically_integrated_y_momentum_flux_due_to_form_drag
   long_name = integrated y momentum flux from form drag
@@ -426,6 +433,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [slmsk]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
@@ -513,6 +521,14 @@
   type = real
   kind = kind_phys
   intent = in
+[alpha_fd]
+  standard_name = alpha_coefficient_for_turbulent_orographic_form_drag
+  long_name = alpha coefficient for Beljaars et al turbulent orographic form drag
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [me]
   standard_name = mpi_rank
   long_name = rank of the current MPI task
@@ -592,7 +608,6 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
   type = real
   kind = kind_phys
-  active = (flag_for_diagnostics_3D)
   intent = inout
   optional = True
 [dtidx]
@@ -660,6 +675,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [spp_gwd]
   standard_name = control_for_gravity_wave_drag_spp_perturbations
   long_name = control for gravity wave drag spp perturbations

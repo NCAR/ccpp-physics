@@ -57,6 +57,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP
   long_name = air pressure at vertical layer for radiation calculation
@@ -65,6 +66,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [p_lk]
   standard_name = dimensionless_exner_function
   long_name = dimensionless Exner function at model layer centers
@@ -81,6 +83,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [relhum]
   standard_name = relative_humidity
   long_name = layer relative humidity
@@ -89,6 +92,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [lsmask]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2

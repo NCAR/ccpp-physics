@@ -613,6 +613,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ncpi_io]
   standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air_of_new_state
   long_name = number concentration of ice updated by physics
@@ -636,6 +637,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snw_io]
   standard_name = local_snow_water_mixing_ratio
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) local to physics
@@ -644,6 +646,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qgl_io]
   standard_name = local_graupel_mixing_ratio
   long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) local to physics
@@ -652,6 +655,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ncpr_io]
   standard_name = local_rain_number_concentration
   long_name = number concentration of rain local to physics
@@ -660,6 +664,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ncps_io]
   standard_name = local_snow_number_concentration
   long_name = number concentration of snow local to physics
@@ -668,6 +673,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ncgl_io]
   standard_name = local_graupel_number_concentration
   long_name = number concentration of graupel local to physics
@@ -676,6 +682,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [clls_io]
   standard_name = cloud_fraction_for_MG
   long_name = cloud fraction used by Morrison-Gettelman MP

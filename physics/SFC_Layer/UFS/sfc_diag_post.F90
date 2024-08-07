@@ -13,22 +13,22 @@
 !! \htmlinclude sfc_diag_post_run.html
 !!
 #endif
-      subroutine sfc_diag_post_run (im, lsm, ilsm_noahmp, opt_diag, dry, lssav, dtf, con_eps, con_epsm1, pgr,&
-                 vegtype,t2mmp,q2mp, t2m, q2m, u10m, v10m, tmpmin, tmpmax, spfhmin, spfhmax,                 &
+      subroutine sfc_diag_post_run (im, lsm, lsm_noahmp, opt_diag, dry, lssav, dtf, con_eps, con_epsm1, pgr,&
+                 vegtype,t2mmp,q2mp, t2m, q2m, u10m, v10m, tmpmin, tmpmax, spfhmin, spfhmax,                  &
                          wind10mmax, u10mmax, v10mmax, dpt2m, errmsg, errflg)
 
         use machine,               only: kind_phys, kind_dbl_prec
 
         implicit none
 
-        integer,                             intent(in) :: im, lsm, ilsm_noahmp,opt_diag
+        integer,                             intent(in) :: im, lsm, lsm_noahmp,opt_diag
         integer,              dimension(:),  intent(in) :: vegtype    !  vegetation type (integer index)
         logical,                             intent(in) :: lssav
         real(kind=kind_phys),                intent(in) :: dtf, con_eps, con_epsm1
         logical             , dimension(:),  intent(in) :: dry
         real(kind=kind_phys), dimension(:),  intent(in) :: pgr, u10m, v10m
         real(kind=kind_phys), dimension(:),  intent(inout) :: t2m, q2m, tmpmin, tmpmax, spfhmin, spfhmax
-        real(kind=kind_phys), dimension(:),  intent(in) :: t2mmp, q2mp
+        real(kind=kind_phys), dimension(:),  intent(in), optional :: t2mmp, q2mp
         real(kind=kind_phys), dimension(:),  intent(inout) :: wind10mmax, u10mmax, v10mmax, dpt2m
 
         character(len=*),                     intent(out) :: errmsg
@@ -41,7 +41,7 @@
         errmsg = ''
         errflg = 0
 
-        if (lsm == ilsm_noahmp) then
+        if (lsm == lsm_noahmp) then
 !     over shrublands use opt_diag=2
           do i=1, im
            if(dry(i)) then

@@ -106,12 +106,13 @@
      &     progsigma,do_mynnedmf
       real(kind=kind_phys), intent(in) :: nthresh,betadcu,betamcu,      &
      &                                    betascu
-      real(kind=kind_phys), intent(in) :: ca_deep(:)
-      real(kind=kind_phys), intent(in) :: sigmain(:,:),qmicro(:,:),     &
-     &     tmf(:,:,:),q(:,:), prevsq(:,:)
-      real(kind=kind_phys),    dimension (:), intent(in) :: maxMF
+      real(kind=kind_phys), intent(in), optional :: ca_deep(:)
+      real(kind=kind_phys), intent(in), optional :: sigmain(:,:),       &
+     &     qmicro(:,:),  prevsq(:,:)
+      real(kind=kind_phys), intent(in) :: tmf(:,:,:),q(:,:)
+      real(kind=kind_phys), dimension (:), intent(in), optional :: maxMF
       real(kind=kind_phys), intent(out) :: rainevap(:)
-      real(kind=kind_phys), intent(out) :: sigmaout(:,:)
+      real(kind=kind_phys), intent(out), optional :: sigmaout(:,:)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
       integer, intent(inout)  :: kcnv(:)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
@@ -122,12 +123,12 @@
       integer, intent(out) :: kbot(:), ktop(:)
       real(kind=kind_phys), intent(out) :: cldwrk(:),                   &
      &   rn(:),                                                         &
-     &   ud_mf(:,:),dd_mf(:,:), dt_mf(:,:)
-      
+     &   dd_mf(:,:), dt_mf(:,:)
+      real(kind=kind_phys), intent(out), optional :: ud_mf(:,:)
       ! GJF* These variables are conditionally allocated depending on whether the
       !     Morrison-Gettelman microphysics is used, so they must be declared 
       !     using assumed shape.
-      real(kind=kind_phys), dimension(:,:), intent(inout) ::            &
+      real(kind=kind_phys), dimension(:,:), intent(inout), optional ::  &
      &   qlcn, qicn, w_upi, cnv_mfd, cnv_dqldt, clcn                    &
      &,  cnv_fice, cnv_ndrop, cnv_nice, cf_upi
       ! *GJF

@@ -31,6 +31,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [prevsq]
   standard_name = specific_humidity_on_previous_timestep
   long_name = moisture from previous time step

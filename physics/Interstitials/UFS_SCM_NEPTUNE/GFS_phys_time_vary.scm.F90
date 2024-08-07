@@ -30,12 +30,12 @@
       use set_soilveg_mod, only: set_soilveg
 
       ! --- needed for Noah MP init
-      use noahmp_tables, only: laim_table,saim_table,sla_table,      &
+      use noahmp_tables, only: read_mp_table_parameters,             &
+                               laim_table,saim_table,sla_table,      &
                                bexp_table,smcmax_table,smcwlt_table, &
                                dwsat_table,dksat_table,psisat_table, &
                                isurban_table,isbarren_table,         &
                                isice_table,iswater_table
-
       implicit none
 
       private
@@ -73,29 +73,34 @@
               zwtxy, xlaixy, xsaixy, lfmassxy, stmassxy, rtmassxy, woodxy, stblcpxy, fastcpxy,     &
               smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, snliqxy, tsnoxy , smoiseq, zsnsoxy,   &
               slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, con_t0c, lsm_cold_start, nthrds,    &
-              ozphys, errmsg, errflg)
+              lkm, use_lake_model, lakefrac, lakedepth, iopt_lake, iopt_lake_clm, iopt_lake_flake, &
+              lakefrac_threshold, lakedepth_threshold, ozphys, errmsg, errflg)
 
          implicit none
 
          ! Interface variables
          integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny
          logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
-         integer,              intent(in)    :: idate(:)
-         real(kind_phys),      intent(in)    :: fhour
+         integer,              intent(in)    :: idate(:), iopt_lake, iopt_lake_clm, iopt_lake_flake
+         real(kind_phys),      intent(in)    :: fhour, lakefrac_threshold, lakedepth_threshold
          real(kind_phys),      intent(in)    :: xlat_d(:), xlon_d(:)
 
-         integer,              intent(inout) :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
-         real(kind_phys),      intent(inout) :: ddy_o3(:),  ddy_h(:)
+         integer,              intent(in) :: lkm
+         integer,              intent(inout)  :: use_lake_model(:)
+         real(kind=kind_phys), intent(in   )  :: lakefrac(:), lakedepth(:)
+
+         integer,              intent(inout), optional :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
+         real(kind_phys),      intent(inout), optional :: ddy_o3(:),  ddy_h(:)
          real(kind_phys),      intent(in)    :: h2opl(:,:,:)
-         integer,              intent(inout) :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
-         real(kind_phys),      intent(inout) :: ddy_aer(:), ddx_aer(:)
+         integer,              intent(inout), optional :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
+         real(kind_phys),      intent(inout), optional :: ddy_aer(:), ddx_aer(:)
          real(kind_phys),      intent(in)    :: aer_nm(:,:,:)
-         integer,              intent(inout) :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
-         real(kind_phys),      intent(inout) :: ddy_ci(:), ddx_ci(:)
+         integer,              intent(inout), optional :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
+         real(kind_phys),      intent(inout), optional :: ddy_ci(:), ddx_ci(:)
          integer,              intent(inout) :: imap(:), jmap(:)
          logical,              intent(in)    :: do_ugwp_v1
-         real(kind_phys),      intent(inout) :: ddy_j1tau(:), ddy_j2tau(:)
-         integer,              intent(inout) :: jindx1_tau(:), jindx2_tau(:)
+         real(kind_phys),      intent(inout), optional :: ddy_j1tau(:), ddy_j2tau(:)
+         integer,              intent(inout), optional :: jindx1_tau(:), jindx2_tau(:)
 
          integer,              intent(in)    :: isot, ivegsrc, nlunit
          real(kind_phys),      intent(inout) :: sncovr(:), sncovr_ice(:)
@@ -109,50 +114,50 @@
          integer, intent(in) :: lsoil, lsnow_lsm_lbound, lsnow_lsm_ubound
          real(kind_phys),      intent(in)    :: zs(:)
          real(kind_phys),      intent(in)    :: dzs(:)
-         real(kind_phys),      intent(inout) :: tvxy(:)
-         real(kind_phys),      intent(inout) :: tgxy(:)
-         real(kind_phys),      intent(inout) :: tahxy(:)
-         real(kind_phys),      intent(inout) :: canicexy(:)
-         real(kind_phys),      intent(inout) :: canliqxy(:)
-         real(kind_phys),      intent(inout) :: eahxy(:)
-         real(kind_phys),      intent(inout) :: cmxy(:)
-         real(kind_phys),      intent(inout) :: chxy(:)
-         real(kind_phys),      intent(inout) :: fwetxy(:)
-         real(kind_phys),      intent(inout) :: sneqvoxy(:)
-         real(kind_phys),      intent(inout) :: alboldxy(:)
-         real(kind_phys),      intent(inout) :: qsnowxy(:)
-         real(kind_phys),      intent(inout) :: wslakexy(:)
+         real(kind_phys),      intent(inout), optional :: tvxy(:)
+         real(kind_phys),      intent(inout), optional :: tgxy(:)
+         real(kind_phys),      intent(inout), optional :: tahxy(:)
+         real(kind_phys),      intent(inout), optional :: canicexy(:)
+         real(kind_phys),      intent(inout), optional :: canliqxy(:)
+         real(kind_phys),      intent(inout), optional :: eahxy(:)
+         real(kind_phys),      intent(inout), optional :: cmxy(:)
+         real(kind_phys),      intent(inout), optional :: chxy(:)
+         real(kind_phys),      intent(inout), optional :: fwetxy(:)
+         real(kind_phys),      intent(inout), optional :: sneqvoxy(:)
+         real(kind_phys),      intent(inout), optional :: alboldxy(:)
+         real(kind_phys),      intent(inout), optional  :: qsnowxy(:)
+         real(kind_phys),      intent(inout), optional  :: wslakexy(:)
          real(kind_phys),      intent(inout) :: albdvis_lnd(:)
          real(kind_phys),      intent(inout) :: albdnir_lnd(:)
          real(kind_phys),      intent(inout) :: albivis_lnd(:)
          real(kind_phys),      intent(inout) :: albinir_lnd(:)
-         real(kind_phys),      intent(inout) :: albdvis_ice(:)
-         real(kind_phys),      intent(inout) :: albdnir_ice(:)
-         real(kind_phys),      intent(inout) :: albivis_ice(:)
-         real(kind_phys),      intent(inout) :: albinir_ice(:)
+         real(kind_phys),      intent(inout), optional  :: albdvis_ice(:)
+         real(kind_phys),      intent(inout), optional  :: albdnir_ice(:)
+         real(kind_phys),      intent(inout), optional  :: albivis_ice(:)
+         real(kind_phys),      intent(inout), optional  :: albinir_ice(:)
          real(kind_phys),      intent(inout) :: emiss_lnd(:)
          real(kind_phys),      intent(inout) :: emiss_ice(:)
-         real(kind_phys),      intent(inout) :: taussxy(:)
-         real(kind_phys),      intent(inout) :: waxy(:)
-         real(kind_phys),      intent(inout) :: wtxy(:)
-         real(kind_phys),      intent(inout) :: zwtxy(:)
-         real(kind_phys),      intent(inout) :: xlaixy(:)
-         real(kind_phys),      intent(inout) :: xsaixy(:)
-         real(kind_phys),      intent(inout) :: lfmassxy(:)
-         real(kind_phys),      intent(inout) :: stmassxy(:)
-         real(kind_phys),      intent(inout) :: rtmassxy(:)
-         real(kind_phys),      intent(inout) :: woodxy(:)
-         real(kind_phys),      intent(inout) :: stblcpxy(:)
-         real(kind_phys),      intent(inout) :: fastcpxy(:)
-         real(kind_phys),      intent(inout) :: smcwtdxy(:)
-         real(kind_phys),      intent(inout) :: deeprechxy(:)
-         real(kind_phys),      intent(inout) :: rechxy(:)
-         real(kind_phys),      intent(inout) :: snowxy(:)
-         real(kind_phys),      intent(inout) :: snicexy(:,lsnow_lsm_lbound:)
-         real(kind_phys),      intent(inout) :: snliqxy(:,lsnow_lsm_lbound:)
-         real(kind_phys),      intent(inout) :: tsnoxy (:,lsnow_lsm_lbound:)
-         real(kind_phys),      intent(inout) :: smoiseq(:,:)
-         real(kind_phys),      intent(inout) :: zsnsoxy(:,lsnow_lsm_lbound:)
+         real(kind_phys),      intent(inout), optional  :: taussxy(:)
+         real(kind_phys),      intent(inout), optional  :: waxy(:)
+         real(kind_phys),      intent(inout), optional  :: wtxy(:)
+         real(kind_phys),      intent(inout), optional  :: zwtxy(:)
+         real(kind_phys),      intent(inout), optional  :: xlaixy(:)
+         real(kind_phys),      intent(inout), optional  :: xsaixy(:)
+         real(kind_phys),      intent(inout), optional  :: lfmassxy(:)
+         real(kind_phys),      intent(inout), optional  :: stmassxy(:)
+         real(kind_phys),      intent(inout), optional  :: rtmassxy(:)
+         real(kind_phys),      intent(inout), optional  :: woodxy(:)
+         real(kind_phys),      intent(inout), optional  :: stblcpxy(:)
+         real(kind_phys),      intent(inout), optional  :: fastcpxy(:)
+         real(kind_phys),      intent(inout), optional  :: smcwtdxy(:)
+         real(kind_phys),      intent(inout), optional  :: deeprechxy(:)
+         real(kind_phys),      intent(inout), optional  :: rechxy(:)
+         real(kind_phys),      intent(inout), optional  :: snowxy(:)
+         real(kind_phys),      intent(inout), optional  :: snicexy(:,lsnow_lsm_lbound:)
+         real(kind_phys),      intent(inout), optional  :: snliqxy(:,lsnow_lsm_lbound:)
+         real(kind_phys),      intent(inout), optional  :: tsnoxy (:,lsnow_lsm_lbound:)
+         real(kind_phys),      intent(inout), optional  :: smoiseq(:,:)
+         real(kind_phys),      intent(inout), optional  :: zsnsoxy(:,lsnow_lsm_lbound:)
          real(kind_phys),      intent(inout) :: slc(:,:)
          real(kind_phys),      intent(inout) :: smc(:,:)
          real(kind_phys),      intent(inout) :: stc(:,:)
@@ -246,6 +251,11 @@
 
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
          call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
+
+!> - read in NoahMP table (needed for NoahMP init)
+         if(lsm == lsm_noahmp) then
+            call read_mp_table_parameters(errmsg, errflg)
+         endif
 
 !> - Setup spatial interpolation indices for ozone physics.
          if (ntoz > 0) then
@@ -595,6 +605,27 @@
            endif noahmp_init
          endif lsm_init
 
+         ! Lake model
+         if(lkm>0 .and. iopt_lake>0) then
+            print*,"SWALES: In phys_time_vary",lakefrac(i),lakedepth(i)
+            ! A lake model is enabled.
+            do i = 1, im
+               !if (lakefrac(i) > 0.0 .and. lakedepth(i) > 1.0 ) then
+               ! The lake data must say there's a lake here (lakefrac) with a depth (lakedepth)
+               if (lakefrac(i) > lakefrac_threshold .and. lakedepth(i) > lakedepth_threshold ) then
+                  ! This is a lake point. Inform the other schemes to use a lake model, and possibly nsst (lkm)
+                  use_lake_model(i) = lkm
+                  cycle
+               else
+                  ! Not a valid lake point.
+                  use_lake_model(i) = 0
+               endif
+            enddo
+         else
+            ! Lake model is disabled or settings are invalid.
+            use_lake_model = 0
+         endif
+
          is_initialized = .true.
 
       contains
@@ -649,14 +680,14 @@
          real(kind_phys),      intent(in)    :: fhswr, fhour
          logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm
          real(kind_phys),      intent(out)   :: clstp
-         integer,              intent(in)    :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
-         real(kind_phys),      intent(in)    :: ddy_o3(:),  ddy_h(:)
+         integer,              intent(in), optional :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
+         real(kind_phys),      intent(in), optional :: ddy_o3(:),  ddy_h(:)
          real(kind_phys),      intent(inout) :: ozpl(:,:,:), h2opl(:,:,:)
-         integer,              intent(in)    :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
-         real(kind_phys),      intent(in)    :: ddy_aer(:), ddx_aer(:)
+         integer,              intent(in), optional :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
+         real(kind_phys),      intent(in), optional :: ddy_aer(:), ddx_aer(:)
          real(kind_phys),      intent(inout) :: aer_nm(:,:,:)
-         integer,              intent(in)    :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
-         real(kind_phys),      intent(in)    :: ddy_ci(:), ddx_ci(:)
+         integer,              intent(in), optional :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
+         real(kind_phys),      intent(in), optional :: ddy_ci(:), ddx_ci(:)
          real(kind_phys),      intent(inout) :: in_nm(:,:), ccn_nm(:,:)
          integer,              intent(in)    :: imap(:), jmap(:)
          real(kind_phys),      intent(in)    :: prsl(:,:)
@@ -664,8 +695,8 @@
          real(kind_phys),      intent(inout) :: rann(:,:)
 
          logical,              intent(in)    :: do_ugwp_v1
-         integer,              intent(in)    :: jindx1_tau(:), jindx2_tau(:)
-         real(kind_phys),      intent(in)    :: ddy_j1tau(:), ddy_j2tau(:)
+         integer,              intent(in), optional :: jindx1_tau(:), jindx2_tau(:)
+         real(kind_phys),      intent(in), optional :: ddy_j1tau(:), ddy_j2tau(:)
          real(kind_phys),      intent(inout) :: tau_amf(:)
          type(ty_ozphys),      intent(in)    :: ozphys
          integer,              intent(in)    :: nthrds

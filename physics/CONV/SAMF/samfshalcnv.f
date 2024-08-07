@@ -75,9 +75,10 @@
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
      &   prslp(:,:), garea(:), hpbl(:), dot(:,:), phil(:,:),            &
-     &   qmicro(:,:),tmf(:,:,:),prevsq(:,:),q(:,:)
-
-      real(kind=kind_phys), intent(in) :: sigmain(:,:)
+     &   tmf(:,:,:), q(:,:)
+      real(kind=kind_phys), intent(in), optional :: qmicro(:,:),        &
+     &     prevsq(:,:)
+      real(kind=kind_phys), intent(in), optional :: sigmain(:,:)
 !
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       integer, intent(inout)  :: kcnv(:)
@@ -87,8 +88,10 @@
 !
       integer, intent(out) :: kbot(:), ktop(:)
       real(kind=kind_phys), intent(out) :: rn(:),                       &
-     &   cnvw(:,:), cnvc(:,:), ud_mf(:,:), dt_mf(:,:), sigmaout(:,:)
+     &   cnvw(:,:), cnvc(:,:), dt_mf(:,:)
 !
+      real(kind=kind_phys), intent(out), optional :: ud_mf(:,:),        &
+     &     sigmaout(:,:)
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
      &                     asolfac, evef, pgcon
       logical,          intent(in)  :: hwrf_samfshal,first_time_step,   &

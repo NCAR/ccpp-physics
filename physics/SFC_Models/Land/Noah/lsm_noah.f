@@ -284,9 +284,10 @@
 !  ---  output:
       real (kind=kind_phys), dimension(:), intent(inout) :: sncovr1,    &
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
-     &       evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2,    &
+     &       evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2
+      real (kind=kind_phys), dimension(:), intent(inout), optional ::   &
      &       wet1, lai, rca
-
+      
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 

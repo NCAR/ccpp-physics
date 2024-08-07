@@ -381,7 +381,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [ldiag_ugwp]
   standard_name = flag_for_unified_gravity_wave_physics_diagnostics
   long_name = flag for CIRES UGWP Diagnostics

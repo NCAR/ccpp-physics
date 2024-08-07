@@ -19,7 +19,7 @@
 !>\section rrtmg_pre_gen General Algorithm
       subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp, lextop,&
         ltp, imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_c3, me, ncnd, ntrac,        &
-        num_p3d, npdf3d,                                                       &
+        num_p3d, npdf3d, xr_cnvcld,                                            &
         ncnvcld3d,ntqv, ntcw,ntiw, ntlnc, ntinc, ntrnc, ntsnc, ntccn, top_at_1,&
         ntrw, ntsw, ntgl, nthl, ntwa, ntoz, ntsmoke, ntdust, ntcoarsepm,       &
         ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt,                       &
@@ -123,17 +123,17 @@
       integer, intent(in) :: ntdu1, ntdu2, ntdu3, ntdu4, ntdu5, ntss1, ntss2, ntss3,  &
                              ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl, ntchm
 
-      character(len=3), dimension(:), intent(in) :: lndp_var_list
+      character(len=3), dimension(:), intent(in), optional :: lndp_var_list
 
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, pert_clds, lcrick,&
                                           lcnorm, top_at_1, lextop, mraerosol
-      logical,              intent(in) :: rrfs_sd, aero_dir_fdb
+      logical,              intent(in) :: rrfs_sd, aero_dir_fdb, xr_cnvcld
 
       logical,              intent(in) :: nssl_ccn_on, nssl_invertccn
       integer,              intent(in) :: spp_rad
-      real(kind_phys),      intent(in) :: spp_wts_rad(:,:)
+      real(kind_phys),      intent(in), optional :: spp_wts_rad(:,:)
 
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp, dcorr_con
       real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd, con_pi, con_g, con_ttp, con_thgni
@@ -143,23 +143,24 @@
                                                         slmsk, dx, si
 
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, prsl, prslk,   &
-                                                          tgrs, sfc_wts,       &
+                                                          tgrs
+      real(kind=kind_phys), dimension(:,:), intent(in), optional :: &
                                                           mg_cld, effrr_in,    &
                                                           cnvw_in, cnvc_in,    &
-                                                          sppt_wts
+                                                          sppt_wts, sfc_wts
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: aer_nm
 
       real(kind=kind_phys), dimension(:),   intent(inout) :: coszen, coszdg
 
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: effrl_inout,      &
+      real(kind=kind_phys), dimension(:,:), intent(inout), optional :: effrl_inout,      &
                                                              effri_inout,      &
                                                              effrs_inout
       real(kind=kind_phys), dimension(:,:), intent(inout) :: clouds1,          &
                                                              clouds2, clouds3, &
                                                              clouds4, clouds5
-      real(kind=kind_phys), dimension(:,:), intent(in)  :: qci_conv
+      real(kind=kind_phys), dimension(:,:), intent(in), optional  :: qci_conv
       real(kind=kind_phys), dimension(:),   intent(in)  :: fdb_coef
       real(kind=kind_phys), dimension(:),   intent(out) :: lwp_ex,iwp_ex, &
                                                            lwp_fc,iwp_fc
@@ -981,7 +982,7 @@
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
      &       idcor_hogan, idcor_oreopoulos, lcrick, lcnorm,             &
      &       imfdeepcnv, imfdeepcnv_gf, imfdeepcnv_c3, do_mynnedmf,     &
-     &       lgfdlmprad,                                                &
+     &       lgfdlmprad, xr_cnvcld,                                     &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, clouds1,               &
      &       effrl, effri, effrr, effrs, effr_in,                       &
      &       effrl_inout, effri_inout, effrs_inout,                     &

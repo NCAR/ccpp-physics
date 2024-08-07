@@ -216,6 +216,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [mype]
   standard_name = mpi_rank
   long_name = current MPI rank
@@ -259,7 +260,7 @@
   standard_name = convective_updraft_area_fraction_at_model_interfaces
   long_name = convective updraft area fraction at model interfaces
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = out

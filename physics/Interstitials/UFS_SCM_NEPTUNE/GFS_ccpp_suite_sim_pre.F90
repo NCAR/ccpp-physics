@@ -40,7 +40,7 @@ contains
          index_of_temperature, index_of_x_wind, index_of_y_wind
     integer, intent(in), dimension(:,:) :: dtidx
     real(kind_phys), intent(in) :: dtp
-    real(kind_phys), intent(in), dimension(:,:,:) :: dtend
+    real(kind_phys), intent(in), dimension(:,:,:), optional :: dtend
     type(base_physics_process),intent(in) :: physics_process(:)
     integer,         intent(in) :: iactive_T, iactive_u, iactive_v, iactive_q
 

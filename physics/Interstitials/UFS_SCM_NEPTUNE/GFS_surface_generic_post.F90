@@ -66,14 +66,16 @@
 
         real(kind=kind_phys), dimension(:),  intent(in)  :: ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, adjsfcdlw, adjsfcdsw,  &
           adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
-          t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf, pah, ecan, etran, edir,    &
+          t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf, pah, ecan, etran, edir
+        real(kind=kind_phys), dimension(:),  intent(in), optional  ::   &
           waxy
 
-        real(kind=kind_phys), dimension(:),  intent(inout) :: epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, &
+        real(kind=kind_phys), dimension(:),  intent(inout) :: epi, gfluxi, t1, q1, u1, v1,gflux, evbsa,       &
+          evcwa, transa, sbsnoa, snowca, snohfa, ep, tecan, tetran, tedir
+        real(kind=kind_phys), dimension(:),  intent(inout), optional :: pahi, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, &
           dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl, dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl,        &
           nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl, v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl,    &
-          nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl, nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa,       &
-          evcwa, transa, sbsnoa, snowca, snohfa, ep, paha, tecan, tetran, tedir, twa, pahi
+          nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl, nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, paha, twa
 
         real(kind=kind_phys), dimension(:), intent(inout) :: runoff, srunoff
         real(kind=kind_phys), dimension(:), intent(in)    :: drain, runof

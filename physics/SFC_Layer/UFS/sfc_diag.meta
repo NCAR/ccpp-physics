@@ -310,6 +310,31 @@
   kind = kind_phys
   intent = in
   optional = True
+<<<<<<< HEAD
+=======
+[diag_flux]
+  standard_name = flag_for_flux_method_in_2m_diagnostics
+  long_name = flag for flux method in 2-m diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[diag_log]
+  standard_name = flag_for_log_method_in_2m_diagnostics
+  long_name = flag for log method in 2-m diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[shflx]
+  standard_name = surface_upward_temperature_flux
+  long_name = kinematic surface upward sensible heat flux
+  units = K m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+>>>>>>> 62f7656ebdaa39d989413e5d285ed6d6723eb4de
 [lake_q2m]
   standard_name =  specific_humidity_at_2m_from_clm_lake
   long_name = specific humidity at 2m from clm lake
@@ -319,12 +344,34 @@
   kind = kind_phys
   intent = in
   optional = True
+<<<<<<< HEAD
+=======
+[cdq]
+  standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
+  long_name = surface exchange coeff heat & moisture
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+>>>>>>> 62f7656ebdaa39d989413e5d285ed6d6723eb4de
 [use_lake2m]
   standard_name = use_2m_diagnostics_calculated_by_lake_model
   long_name = model 2m diagnostics use the temperature and humidity calculated by the lake model
   units = flag
   dimensions = ()
   type = logical
+<<<<<<< HEAD
+=======
+  intent = in
+[wind]
+  standard_name = wind_speed_at_lowest_model_layer
+  long_name = wind speed at lowest model level
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+>>>>>>> 62f7656ebdaa39d989413e5d285ed6d6723eb4de
   intent = in
 [f10m]
   standard_name = ratio_of_wind_at_surface_adjacent_layer_to_wind_at_10m
