@@ -1,12 +1,11 @@
 !>\file rad_sw_pre.F90
 !! This file gathers the sunlit points for the shortwave radiation schemes.
 
+!> This module gathers the sunlit points for the shortwave radiation schemes.
 module rad_sw_pre
 contains
 
-!> \defgroup rad_sw_pre GFS Radiation-SW Pre 
-!! This module gathers the sunlit points for the shortwave radiation schemes.
-!> @{
+
 !> \section arg_table_rad_sw_pre_run Argument Table
 !! \htmlinclude rad_sw_pre_run.html
 !!
@@ -49,5 +48,4 @@ contains
     endif
     
   end subroutine rad_sw_pre_run
-!> @}
 end module rad_sw_pre

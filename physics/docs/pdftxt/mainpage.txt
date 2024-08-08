@@ -2,7 +2,7 @@
 \mainpage Introduction 
 
 Welcome to the scientific documentation for the parameterizations available in the Common 
-Community Physics Package (CCPP) v6.0.0 and the suites that can be configured using them.
+Community Physics Package (CCPP) v7.0.0 and the suites that can be configured using them.
 
 The CCPP-Physics (available through https://github.com/NCAR/ccpp-physics/) is envisioned to contain parameterizations used in the 
 <a href="https://ufscommunity.org/about/what-is-ufs/">Unified Forecast System (UFS)</a>
@@ -11,28 +11,18 @@ developmental schemes under consideration for upcoming operational implementatio
 applications, including the UFS Short-Range Weather (SRW) Application (available through https://github.com/ufs-community/ufs-srweather-app/), 
 which targets predictions of atmospheric behavior on a 
 limited spatial domain and on time scales from less than an hour out to several days, and the UFS Medium-Range Weather (MRW) 
-Application (available through https://github.com/ufs-community/ufs-mrweather-app/), which  targets predictions of global atmospheric 
-behavior out to about two weeks.
+Application (available through https://github.com/ufs-community/ufs-mrweather-app/)(which targets predictions of global atmospheric 
+behavior out to about two weeks), the Subseasonal-to-Seasonal (S2S) Application (which predicts the Earth System out to several months), and the
+Hurricane Application (which predicts tropical cyclones).
 
 
 The CCPP parameterizations are aggregated in suites by the host models. In this release, the CCPP Single Column Model (SCM), developed 
 by the Development Testbed Center (DTC), supports suites: 
 - \ref GFS_v16_page
-- \ref GFS_v17_p8_page
-- \ref HRRR_suite_page
-- \ref RRFS_v1beta_page
+- \ref GFS_v16_RRTMGP_page
+- \ref GFS_v17_p8_ugwpv1_page
+- \ref HRRR_gf_page
 - \ref WoFS_v0_page 
-- \ref rap_suite_page 
-
-while the UFS Short-Range Weather Application 2.0 supports suites \ref GFS_v16_page, \ref HRRR_suite_page, \ref RRFS_v1beta_page and 
-\ref WoFS_v0_page.
-
-New schemes and capability highlights in this release:
-- \ref NSSLMICRO_page
-- \ref GFS_UNIFIED_UGWP and \ref GFS_drag_suite
-- \ref SFC_MYNNSFL
-- \ref ca_page
-- \ref GFS_SPP
 
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 
@@ -48,18 +38,16 @@ CCPP team would like to express our deepest gratitude for UFS physics developers
 development of CCPP-Physics. 
 \n We would also like to give special thanks to:    
 
-- \b NOAA \b Global \b Systems \b Laboratory: Hannah Barnes, Jeff Beck, Georg Grell, Joseph Olson, Tanya Smirnova, Michael Toy
-- \b NOAA \b Physical \b Sciences \b Laboratory: Jian-Wen Bao, Lisa Bengtsson, Song-You Hong
-- \b NOAA \b National \b Severe \b Storms \b Laboratory: Ted Mansell
-- \b NOAA \b Environmental \b Modeling \b Center: Jongil Han, Qingfu Liu, Ruiyu Sun
-- \b Atmospheric \b and \b Environmental \b Research, \b Inc.: Michael Iacono
-- \b Joint \b Center \b for \b Satellite \b Data \b Assimilation: Greg Thompson
-- \b NASA \b Goddard \b Space \b Flight \b Center: Valery Yudin
+- \b NOAA \b NWS \b Environmental \b Modeling \b Center
+- \b NOAA \b OAR \b Global \b Systems \b Laboratory 
+- \b NOAA \b OAR \b Physical \b Sciences \b Laboratory 
+- \b NOAA \b OAR \b National \b Severe \b Storms \b Laboratory 
+- \b NOAA \b OAR \b Atlantic \b Oceanographic \b & \b Meteorological \b Laboratory
+- \b Atmospheric \b and \b Environmental \b Research, \b Inc. 
+- \b Joint \b Center \b for \b Satellite \b Data \b Assimilation 
+- \b NASA \b Goddard \b Space \b Flight \b Center
 
-as a whole for their support and contribution for this CCPP scientific documentation (SciDoc).
-
-
-\b CCPP \b SciDoc \b Team: Man Zhang, Ligia Bernardet, Grant Firl, Dom Heinzeller, and Weiwei Li
-\n Developmental Testbed Center
+for their support and contribution for this CCPP scientific documentation (SciDoc).
+\n Thanks also to the CCPP SciDoc Team at the Developmental Testbed Center: Man Zhang, Ligia Bernardet, and Mike Kavulich
 
 */

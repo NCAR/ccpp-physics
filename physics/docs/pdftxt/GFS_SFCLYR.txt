@@ -54,15 +54,12 @@ Here \f$z\f$ is the height, \f$L\f$ is the Obukhov length, \f$z_{0M}\f$ is the m
 The pertinent features of the GFS stable surface layer parameterization scheme are described in the appendix of Zheng et al. (2017) 
 \cite zheng_et_al_2017.
 
-\section version_gfsslay_enh Physics Updates
-\version CCPP v6.0.0
-
+Recently, Han et al.(2021) \cite https://doi.org/10.25923/cybh-w893 and Han et al.(2022) \cite Han_et_al_2022 introduced a few new features:
 - A new canopy heat storage algorithm was implemented. The reduction of the sensible heat flux into the PBL, as a function of surface roughness and vegetation fraction, helps to reduce nighttime cold and daytime warm 2-meter temperature biases over forested regions.
 - A sea spray effect algorithm was included to enhance sensible and latent heat fluxes, especially for strong wind conditions.
 - To better represent sub-grid scale turbulence variability in the surface layer, a new algorithm for maximum surface layer stability parameter was developed as an inverse function of the background turbulent eddy diffusivity.
 - The thermal roughness length calculation over land has been modified.
 
-\sa Han et al.(2021) \cite https://doi.org/10.25923/cybh-w893 and Han et al.(2022) \cite https://doi.org/10.25923/5051-3r70
 
 \section intra_rough Intraphysics Communication
 \ref arg_table_sfc_diff_run

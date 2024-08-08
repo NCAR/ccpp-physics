@@ -1,0 +1,36 @@
+/**
+\page HRRR_gf_page  HRRR_gf Suite 
+
+\section RRFS_v1_suite_overview Overview
+
+The HRRR_gf suite is one of the candidates for the future operational implementation of
+the Rapid Refresh Forecast System (RRFS). Simplified configurations of RRFS can be configured using
+the UFS SRW App. This suite is similar to the one used by the NOAA operational HRRR v4 (Dowell et al. 2022 \cite Dowell_2022), 
+with the addition of the Grell-Freitas deep convective parameterization.  
+
+While the parameterization for smoke and dust representation is used RRFS prototype tests and is included in the 
+HRRR_gf Suite Definition File, is not active in the CCPP Single Column Model since the smoke and dust tracers are initialized 
+with new zero values.
+
+The HRRR_gf suite uses the parameterizations in the following order:
+ - \ref SGSCLOUD_page
+ - \ref GFS_RRTMG_page
+ - \ref SFC_MYNNSFL
+ - \ref RUCLSM
+ - \ref CLM_LAKE_page
+ - \ref MYNNEDMF
+ - \ref GFS_drag_suite
+ - \ref GFS_H2OPHYS
+ - \ref CU_GF 
+ - \ref THOMPSON
+
+\section sdf_hrrrgfsuite Suite Definition File 
+\include suite_SCM_HRRR_gf.xml
+
+\section hrrr_gf_nml_option Namelist 
+- General physics options
+\snippet input_HRRR_gf.nml GFS_PHYSICS_NML
+
+
+
+*/

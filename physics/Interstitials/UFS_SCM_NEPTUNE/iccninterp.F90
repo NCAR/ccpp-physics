@@ -15,6 +15,7 @@ module iccninterp
 
 contains
 
+!>
       SUBROUTINE read_cidata (me, master)
       use machine,  only: kind_phys
       use iccn_def
@@ -65,6 +66,7 @@ contains
 !
 !**********************************************************************
 !
+!>
       SUBROUTINE setindxci(npts,dlat,jindx1,jindx2,ddy,dlon,                &
                  iindx1,iindx2,ddx)
 !
@@ -126,6 +128,7 @@ contains
 !**********************************************************************
 !**********************************************************************
 !
+!>
       SUBROUTINE ciinterpol(me,npts,IDATE,FHOUR,jindx1,jindx2,ddy, &
                  iindx1,iindx2,ddx,lev, prsl, ciplout,ccnout)
 !

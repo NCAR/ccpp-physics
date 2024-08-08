@@ -1,8 +1,6 @@
-      module machine
-
-!! \section arg_table_machine
-!! \htmlinclude machine.html
+!>\file machine.F
 !!
+      module machine
 
       implicit none
 

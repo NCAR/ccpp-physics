@@ -176,7 +176,7 @@
 
 
 !>\defgroup mod_nsslmp NSSL 2-moment microphysics modules
-!!\ingroup nsslmp testphrase one
+!!\ingroup nsslmp 
 !! Module for NSSL cloud physics
 MODULE module_mp_nssl_2mom
   IMPLICIT NONE

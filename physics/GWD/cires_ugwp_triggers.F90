@@ -5,6 +5,7 @@
       contains
 !
 
+!>
       subroutine slat_geos5_tamp_v0(im, tau_amp, xlatdeg, tau_gw)
 !=================
 ! GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch) =rho*<u'w'>
@@ -38,6 +39,7 @@
 !      
       end subroutine slat_geos5_tamp_v0
       
+!>
       subroutine slat_geos5_v0(im, xlatdeg, tau_gw)
 !=================
 ! GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch) =rho*<u'w'>
@@ -76,7 +78,8 @@
       enddo
 !      
       end subroutine slat_geos5_v0
-!      
+
+!>      
       subroutine init_nazdir_v0(naz,  xaz,  yaz)
       use ugwp_common_v0 , only : pi2
       implicit none

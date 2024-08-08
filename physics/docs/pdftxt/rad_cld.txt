@@ -1,5 +1,5 @@
 /**
-\page RAD_CLD GFS Cloud-Radiation Interaction
+\page RAD_CLD UFS Cloud-Radiation Interaction
 \section des_radcld Description
 
 The cloud-radiation interaction in the CCPP-Physics can be grouped in terms of three processes:

@@ -6,13 +6,10 @@
 
 !> \defgroup sfc_diag_mod GFS sfc_diag module
 !! This module contains the land surface diagose calculation.
-!> @{
 !! \section arg_table_sfc_diag_run Argument Table
 !! \htmlinclude sfc_diag_run.html
 !!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
-!!  @{
+!>  @{
       subroutine sfc_diag_run (im,xlat_d,xlon_d,                        &
      &                    lsm,lsm_ruc,grav,cp,eps,epsm1,con_rocp,       &
      &                    con_karman,                                   &

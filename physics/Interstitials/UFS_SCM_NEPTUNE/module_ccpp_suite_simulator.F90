@@ -1,19 +1,15 @@
-! ########################################################################################
-!
-! This module contains the type, base_physics_process, and supporting subroutines needed
-! by the ccpp suite simulator.
-!
-! ########################################################################################
+!>\file module_ccpp_suite_simulator.F90
+!! This module contains the type, base_physics_process, and supporting subroutines needed
+!! by the ccpp suite simulator.
+
 module module_ccpp_suite_simulator
-!> \section arg_table_module_ccpp_suite_simulator Argument table
-!! \htmlinclude module_ccpp_suite_simulator.html
-!!
+
   use machine, only : kind_phys
   implicit none
   
   public base_physics_process
 
-  ! Type containing 1D (time) physics tendencies. 
+!> Type containing 1D (time) physics tendencies. 
   type phys_tend_1d
      real(kind_phys), dimension(:), allocatable :: T
      real(kind_phys), dimension(:), allocatable :: u
@@ -23,7 +19,7 @@ module module_ccpp_suite_simulator
      real(kind_phys), dimension(:), allocatable :: z
   end type phys_tend_1d
 
-  ! Type containing 2D (lev,time) physics tendencies.
+!> Type containing 2D (lev,time) physics tendencies.
   type phys_tend_2d
      real(kind_phys), dimension(:),   allocatable :: time
      real(kind_phys), dimension(:,:), allocatable :: T
@@ -45,7 +41,7 @@ module module_ccpp_suite_simulator
      real(kind_phys), dimension(:,:,:), allocatable :: q
   end type phys_tend_3d
 
-  ! Type containing 4D (lon,lat,lev,time) physics tendencies.
+!> Type containing 4D (lon,lat,lev,time) physics tendencies.
   type phys_tend_4d
      real(kind_phys), dimension(:),       allocatable :: time
      real(kind_phys), dimension(:,:),     allocatable :: lon
@@ -56,24 +52,20 @@ module module_ccpp_suite_simulator
      real(kind_phys), dimension(:,:,:,:), allocatable :: q
   end type phys_tend_4d
 
-! This type contains the meta information and data for each physics process.
-
-!> \section arg_table_base_physics_process Argument Table
-!! \htmlinclude base_physics_process.html
-!!
+!> This type contains the meta information and data for each physics process.
   type base_physics_process
-     character(len=16)  :: name                 ! Physics process name
-     logical            :: time_split = .false. ! Is process time-split?
-     logical            :: use_sim    = .false. ! Is process "active"?
-     integer            :: order                ! Order of process in process-loop 
-     type(phys_tend_1d) :: tend1d               ! Instantaneous data
-     type(phys_tend_2d) :: tend2d               ! 2-dimensional data
-     type(phys_tend_3d) :: tend3d               ! Not used. Placeholder for 3-dimensional spatial data.
-     type(phys_tend_4d) :: tend4d               ! Not used. Placeholder for 4-dimensional spatio-tempo data.
-     character(len=16)  :: active_name          ! "Active" scheme: Physics process name
-     integer            :: iactive_scheme       ! "Active" scheme: Order of process in process-loop
-     logical            :: active_tsp           ! "Active" scheme: Is process time-split?
-     integer            :: nprg_active          ! "Active" scheme: Number of prognostic variables
+     character(len=16)  :: name                 !< Physics process name
+     logical            :: time_split = .false. !< Is process time-split?
+     logical            :: use_sim    = .false. !< Is process "active"?
+     integer            :: order                !< Order of process in process-loop 
+     type(phys_tend_1d) :: tend1d               !< Instantaneous data
+     type(phys_tend_2d) :: tend2d               !< 2-dimensional data
+     type(phys_tend_3d) :: tend3d               !< Not used. Placeholder for 3-dimensional spatial data.
+     type(phys_tend_4d) :: tend4d               !< Not used. Placeholder for 4-dimensional spatio-tempo data.
+     character(len=16)  :: active_name          !< "Active" scheme: Physics process name
+     integer            :: iactive_scheme       !< "Active" scheme: Order of process in process-loop
+     logical            :: active_tsp           !< "Active" scheme: Is process time-split?
+     integer            :: nprg_active          !< "Active" scheme: Number of prognostic variables
    contains
      generic,   public  :: linterp => linterp_1D, linterp_2D
      procedure, private :: linterp_1D
@@ -84,11 +76,8 @@ module module_ccpp_suite_simulator
 
 contains
 
-  ! ####################################################################################
-  ! Type-bound procedure to compute tendency profile for time-of-day.
-  !
-  ! For use with 1D data (level, time) tendencies with diurnal (24-hr) forcing.
-  ! ####################################################################################
+!> Type-bound procedure to compute tendency profile for time-of-day.
+!! For use with 1D data (level, time) tendencies with diurnal (24-hr) forcing.
   function linterp_1D(this, var_name, year, month, day, hour, min, sec) result(err_message)
     class(base_physics_process), intent(inout) :: this
     character(len=*), intent(in) :: var_name
@@ -131,13 +120,10 @@ contains
 
   end function linterp_1D
 
-  ! ####################################################################################
-  ! Type-bound procedure to compute tendency profile for time-of-day.
-  !
-  ! For use with 2D data (location, level, time) tendencies with diurnal (24-hr) forcing.
-  ! This assumes that the location dimension has a [longitude, latitude] allocated with
-  ! each location.
-  ! ####################################################################################
+!> Type-bound procedure to compute tendency profile for time-of-day.
+!! For use with 2D data (location, level, time) tendencies with diurnal (24-hr) forcing.
+!! This assumes that the location dimension has a [longitude, latitude] allocated with
+!! each location.
   function linterp_2D(this, var_name, lon, lat, year, month, day, hour, min, sec) result(err_message)
     class(base_physics_process), intent(inout) :: this
     character(len=*), intent(in) :: var_name
@@ -165,10 +151,8 @@ contains
     end select
   end function linterp_2D
 
-  ! ####################################################################################
-  ! Type-bound procedure to find nearest location.
-  ! For use with linterp_2D, NOT YET IMPLEMENTED.
-  ! ####################################################################################
+!> Type-bound procedure to find nearest location.
+!! For use with linterp_2D, NOT YET IMPLEMENTED.
   pure function find_nearest_loc_2d_1d(this, lon, lat)
     class(base_physics_process), intent(in) :: this
     real(kind_phys), intent(in) :: lon, lat
@@ -177,10 +161,8 @@ contains
     find_nearest_loc_2d_1d = 1
   end function find_nearest_loc_2d_1d
 
-  ! ####################################################################################
-  ! Type-bound procedure to compute linear interpolation weights for a diurnal (24-hour)
-  ! forcing.
-  ! ####################################################################################
+!> Type-bound procedure to compute linear interpolation weights for a diurnal (24-hour)
+!! forcing.
   subroutine cmp_time_wts(this, year, month, day, hour, minute, sec, w1, w2, ti, tf)
     ! Inputs
     class(base_physics_process), intent(in) :: this
@@ -199,8 +181,7 @@ contains
 
   end subroutine cmp_time_wts
 
-  ! ####################################################################################
-  ! ####################################################################################
+!>
   subroutine sim_LWRAD( year, month, day, hour, min, sec, process)
     type(base_physics_process), intent(inout) :: process
     integer, intent(in) :: year, month, day, hour, min, sec
@@ -212,8 +193,7 @@ contains
 
   end subroutine sim_LWRAD
 
-  ! ####################################################################################
-  ! ####################################################################################
+!>
   subroutine sim_SWRAD( year, month, day, hour, min, sec, process)
     type(base_physics_process), intent(inout) :: process
     integer, intent(in) :: year, month, day, hour, min, sec
@@ -225,8 +205,7 @@ contains
 
   end subroutine sim_SWRAD
 
-  ! ####################################################################################
-  ! ####################################################################################
+!>
   subroutine sim_GWD( year, month, day, hour, min, sec, process)
     type(base_physics_process), intent(inout) :: process
     integer, intent(in) :: year, month, day, hour, min, sec
@@ -244,8 +223,7 @@ contains
 
   end subroutine sim_GWD
 
-  ! ####################################################################################
-  ! ####################################################################################
+!>
   subroutine sim_PBL( year, month, day, hour, min, sec, process)
     type(base_physics_process), intent(inout) :: process
     integer, intent(in) :: year, month, day, hour, min, sec
@@ -266,8 +244,7 @@ contains
 
   end subroutine sim_PBL
 
-  ! ####################################################################################
-  ! ####################################################################################
+!>
   subroutine sim_DCNV( year, month, day, hour, min, sec, process)
     type(base_physics_process), intent(inout) :: process
     integer, intent(in) :: year, month, day, hour, min, sec
@@ -288,8 +265,7 @@ contains
 
   end subroutine sim_DCNV
 
-  ! ####################################################################################
-  ! ####################################################################################
+!>
   subroutine sim_SCNV( year, month, day, hour, min, sec, process)
     type(base_physics_process), intent(inout) :: process
     integer, intent(in) :: year, month, day, hour, min, sec
@@ -310,8 +286,7 @@ contains
 
   end subroutine sim_SCNV
 
-  ! ####################################################################################
-  ! ####################################################################################
+!>
   subroutine sim_cldMP( year, month, day, hour, min, sec, process)
     type(base_physics_process), intent(inout) :: process
     integer, intent(in) :: year, month, day, hour, min, sec

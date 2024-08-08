@@ -15,13 +15,7 @@ module rrtmgp_aerosol_optics
 
 contains
 
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_aerosol_optics_run()
-  ! #########################################################################################
-
-!>\defgroup rrtmgp_aerosol_optics_mod GFS RRTMGP Aerosol Optics Module
-!> @{
-!! \section arg_table_rrtmgp_aerosol_optics_run
+!> \section arg_table_rrtmgp_aerosol_optics_run Argument Table
 !! \htmlinclude rrtmgp_aerosol_optics_run.html
 !!
   subroutine rrtmgp_aerosol_optics_run(doSWrad, doLWrad, nCol, nLev, nDay, idxday, p_lev,   &
@@ -125,5 +119,4 @@ contains
     endif
 
   end subroutine rrtmgp_aerosol_optics_run
-!> @}  
 end module rrtmgp_aerosol_optics

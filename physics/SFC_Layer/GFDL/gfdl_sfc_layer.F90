@@ -1,4 +1,4 @@
-!>  \file gfdl_sfc_layer.f
+!>  \file gfdl_sfc_layer.F90
 !! This file contains ...
 
 !> This module contains the CCPP-compliant GFDL surface layer scheme.

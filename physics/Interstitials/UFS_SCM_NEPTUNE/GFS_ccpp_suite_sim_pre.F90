@@ -1,3 +1,6 @@
+!>\file GFS_ccpp_suite_sim_pre.F90
+!! Interstitial CCPP suite to couple UFS physics to CCPP suite simulator.
+
 ! ########################################################################################
 ! 
 ! Description: Interstitial CCPP suite to couple UFS physics to ccpp_suite_simulator.
@@ -17,12 +20,7 @@ module GFS_ccpp_suite_sim_pre
   public GFS_ccpp_suite_sim_pre_run, load_ccpp_suite_sim
 contains
 
-  ! ######################################################################################
-  !
-  ! SUBROUTINE GFS_ccpp_suite_sim_pre_run
-  !
-  ! ######################################################################################
-!! \section arg_table_GFS_ccpp_suite_sim_pre_run
+!> \section arg_table_GFS_ccpp_suite_sim_pre_run Argument Table
 !! \htmlinclude GFS_ccpp_suite_sim_pre_run.html
 !! 
   subroutine GFS_ccpp_suite_sim_pre_run(do_ccpp_suite_sim, dtend, ntqv, dtidx, dtp,      &
@@ -110,6 +108,7 @@ contains
   end subroutine GFS_ccpp_suite_sim_pre_run
 
   ! ######################################################################################
+!>
   subroutine load_ccpp_suite_sim(nlunit, nml_file, physics_process, iactive_T,           &
        iactive_u, iactive_v, iactive_q, errmsg, errflg)
 

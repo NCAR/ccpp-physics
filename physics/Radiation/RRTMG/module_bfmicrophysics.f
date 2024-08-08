@@ -1,5 +1,5 @@
-!>\file module_bfmicrophysics.f This file contains some subroutines used
-!! in microphysics.
+!>\file module_bfmicrophysics.f 
+!!This file contains some subroutines used in microphysics.
 
 !> This module contains some subroutines used in microphysics.
       MODULE module_microphysics

@@ -15,9 +15,6 @@ module module_radiation_cloud_overlap
   
 contains
 
-!>\defgroup rad_cld_ovr_mod Radiation Cloud Overlap Module
-!! This module contains the calculation of cloud overlap parameters for both RRTMG and RRTMGP.
-!>@{
   ! ######################################################################################
   ! Hogan et al. (2010)
   ! "Effect of improving representation of horizontal and vertical cloud structure on the 
@@ -92,9 +89,6 @@ contains
     
   end subroutine cmp_dcorr_lgth_oreopoulos
   
-  ! ######################################################################################
-  !
-  ! ######################################################################################
 !>This subroutine provides the alpha cloud overlap parameter for both RRTMG and RRTMGP
   subroutine get_alpha_exper(nCol, nLay, iovr, iovr_exprand, dzlay,    &
                              dcorr_lgth, cld_frac, alpha)
@@ -143,5 +137,4 @@ contains
     return
     
   end subroutine get_alpha_exper
-!>@}  
 end module module_radiation_cloud_overlap

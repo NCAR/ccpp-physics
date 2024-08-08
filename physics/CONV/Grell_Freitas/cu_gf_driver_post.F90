@@ -1,6 +1,7 @@
 !> \file cu_gf_driver_post.F90
 !!  Contains code related to GF convective schemes to be used within the GFS physics suite.
 
+!> This module contains code related to GF convective schemes to be used within the GFS physics suite
 module cu_gf_driver_post
 
    implicit none

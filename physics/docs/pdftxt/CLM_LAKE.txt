@@ -1,5 +1,5 @@
 /**
-\page CLM_LAKE_model CLM Lake Model 
+\page CLM_LAKE_page Community Land Model (CLM) Lake Model 
 \section des_clmlake  Description
 
 The Community Land Model (CLM) lake model is a multi-level one-dimensional lake model that has been implemented within the operational 3-km HRRR and

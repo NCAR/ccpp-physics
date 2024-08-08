@@ -1,6 +1,7 @@
 !>\file cu_gf_sh.F90
 !! This file contains Grell-Freitas shallow convection scheme.
 
+!> This module contains the Grell-Freitas shallow convection scheme
 module cu_gf_sh
     use machine , only : kind_phys
     !real(kind=kind_phys), parameter:: c1_shal=0.0015! .0005

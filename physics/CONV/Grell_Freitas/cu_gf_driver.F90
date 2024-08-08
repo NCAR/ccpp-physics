@@ -1,7 +1,7 @@
 !>\file cu_gf_driver.F90
 !! This file is scale-aware Grell-Freitas cumulus scheme driver.
 
-
+!> This module contains the scale-aware Grell-Freitas cumulus scheme driver.
 module cu_gf_driver
 
    ! DH* TODO: replace constants with arguments to cu_gf_driver_run

@@ -15,6 +15,7 @@ module h2ointerp
 
 contains
 
+!>
       subroutine read_h2odata (h2o_phys, me, master)
       use machine,  only: kind_phys
       use h2o_def
@@ -85,7 +86,7 @@ contains
       end subroutine read_h2odata
 !
 !**********************************************************************
-!
+!>
       subroutine setindxh2o(npts,dlat,jindx1,jindx2,ddy)
 !
 ! May 2015 Shrinivas Moorthi - Prepare for H2O interpolation
@@ -126,7 +127,7 @@ contains
       end subroutine setindxh2o
 !
 !**********************************************************************
-!
+!>
       subroutine h2ointerpol(me,npts,idate,fhour,jindx1,jindx2,h2oplout,ddy)
 !
 ! May 2015 Shrinivas Moorthi - Prepare for H2O interpolation
