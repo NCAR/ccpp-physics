@@ -464,9 +464,10 @@ end subroutine land_iau_mod_finalize
    endif
 
    if (ntimes.EQ.1) then
-      !  check to see if we are in the IAU window,  
-      ! no need to update the states since they are fixed over the window
-      if ( Land_IAU_Control%fhour < t1 .or. Land_IAU_Control%fhour >= t2 ) then
+      !  check to see if we are in the IAU window,  no need to update the states since they are fixed over the window
+!8.8.24 TBCL: noahmpdrv_timestep_init doesn't get visited at t1, so include t2
+      ! if ( Land_IAU_Control%fhour < t1 .or. Land_IAU_Control%fhour >= t2 ) then
+      if ( Land_IAU_Control%fhour <= t1 .or. Land_IAU_Control%fhour > t2 ) then
 !         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'no iau forcing',t1,Land_IAU_Control%fhour,t2
          Land_IAU_Data%in_interval=.false.
       else
@@ -479,7 +480,9 @@ end subroutine land_iau_mod_finalize
 
    if (ntimes > 1) then
       itnext=2
-      if (Land_IAU_Control%fhour < t1 .or. Land_IAU_Control%fhour >= t2) then
+!8.8.24 TBCL: noahmpdrv_timestep_init doesn't get visited at t1, so include t2
+      ! if ( Land_IAU_Control%fhour < t1 .or. Land_IAU_Control%fhour >= t2 ) then
+      if ( Land_IAU_Control%fhour <= t1 .or. Land_IAU_Control%fhour > t2 ) then
 !         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'no iau forcing',Land_IAU_Control%iaufhrs(1),Land_IAU_Control%fhour,Land_IAU_Control%iaufhrs(nfiles)
          Land_IAU_Data%in_interval=.false.
       else
