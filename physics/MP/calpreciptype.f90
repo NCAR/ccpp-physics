@@ -1,11 +1,11 @@
 !>\file calpreciptype.f90
 !! This file contains the subroutines that calculates dominant precipitation type.
 
+!> This module defines four algorithms that are called to calculate dominant precipitation type, and the
+!!tallies are sumed in calwxt_dominant().
 module calpreciptype_mod
 contains
-!> Foure algorithms are called to calculate dominant precipitation type, and the 
-!!tallies are sumed in calwxt_dominant().
-!!
+
 !>\section gen_calp GFS calpreciptype General Algorithm
       subroutine calpreciptype(kdt,nrcm,im,ix,lm,lp1,randomno,      &
                                xlat,xlon,                           &

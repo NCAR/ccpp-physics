@@ -1,5 +1,5 @@
 /**
-\page GFS_OZPHYS GFS Ozone Photochemistry (2015) Scheme
+\page GFS_OZPHYS Ozone Photochemistry (2015) Scheme
 \section des_ozone  Description
  In recent years, the leading NWP centers have extended the vertical range of their NWP and DA systems
  from the surface up through the stratosphere (~10-50 km altitude) and lower mesosphere (~50-65 km). Some

@@ -4,7 +4,7 @@
 \section allscheme_overview Physical Parameterizations 
 
 In the CCPP, each parameterization is in its own modern Fortran module (see rules for a scheme to be considered CCPP-compliant at 
-<a href="https://ccpp-techdoc.readthedocs.io/en/v6.0.0/CompliantPhysicsParams.html"> CCPP-Compliant Physics Parameterizations </a>),
+<a href="https://ccpp-techdoc.readthedocs.io/en/v7.0.0/CompliantPhysicsParams.html"> CCPP-Compliant Physics Parameterizations </a>),
 which facilitates model development and code maintenance. While some individual parameterization can be invoked for the SCM, most host models will assemble the parameterizations in suites. 
 
 
@@ -40,7 +40,7 @@ which facilitates model development and code maintenance. While some individual 
 \b Gravity \b Wave \b Drag
  - \subpage GFS_UGWP_v0 
  - \subpage GFS_drag_suite
- - \subpage GFS_ugwpv1_gsldrag
+ - \subpage ugwpv1_gsldrag
 
 \b Surface \b Layer 
  - \subpage GFS_SFCLYR 
@@ -51,7 +51,7 @@ which facilitates model development and code maintenance. While some individual 
  - \subpage GFS_OCEAN 
  - \subpage GFS_SFCSICE 
 
-\b Others
+\b Lakes 
  - \subpage CLM_LAKE_page
 
 The input information for the parameterizations includes the values of the gridbox mean prognostic variables (wind components, temperature,
@@ -90,7 +90,7 @@ Table 1.  Physics suites and primary schemes supported in CCPP v7.0.0
 |\b Radiation      | \ref GFS_RRTMG_page     |  \ref GFS_RRTMG_page     |  \ref GFS_RRTMGP_page      | \ref GFS_RRTMG_page     |   \ref GFS_RRTMG_page    |
 |\b Surface \b Layer | \ref GFS_SFCLYR  |  \ref GFS_SFCLYR        | \ref GFS_SFCLYR | \ref SFC_MYNNSFL   |   \ref SFC_MYNNSFL  |
 |\b LSM            | \ref GFS_NOAH      |  \ref NoahMP            |  \ref GFS_NOAH     |    \ref RUCLSM      | \ref GFS_NOAH   |
-|\b Gravity \b Wave \b Drag| \ref GFS_UGWP_v0  |  \ref GFS_ugwpv1_gsldrag |  \ref GFS_UGWP_v0  | \ref GFS_drag_suite |    \ref GFS_UGWP_v0   |
+|\b Gravity \b Wave \b Drag| \ref GFS_UGWP_v0  |  \ref ugwpv1_gsldrag |  \ref GFS_UGWP_v0  | \ref GFS_drag_suite |    \ref GFS_UGWP_v0   |
 |\b Sea \b Ice     | \ref GFS_SFCSICE   | \ref GFS_SFCSICE        |  \ref GFS_SFCSICE     |  \ref RUCLSM             |   \ref GFS_SFCSICE     |  
 \tableofcontents
 

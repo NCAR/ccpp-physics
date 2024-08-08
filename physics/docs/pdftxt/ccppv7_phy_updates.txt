@@ -6,17 +6,15 @@ This page provides an overview of the major updates in CCPP Physics v7.0.0.
 \b General \b Changes:
 - New supported suites: GFS_v17_p8_ugwpv1, GFS_v16_RRTMGP, and HRRR_gf suites 
 - New \ref CLM_LAKE_page in HRRR_gf suite
-- New \ref GFS_ugwpv1_gsldrag in GFS_v17_p8_ugwpv1 suite combines the \ref GFS_drag_suite with the version 1 UGWP non-stationary gravity wave drag (NGW) scheme of  Yudin et al. (2020)\cite yudin_et_al_2020 
+- New \ref ugwpv1_gsldrag in GFS_v17_p8_ugwpv1 suite combines the \ref GFS_drag_suite with the version 1 UGWP non-stationary gravity wave drag (NGW) scheme of  Yudin et al. (2020)\cite yudin_et_al_2020 
 - New \ref GFS_RRTMGP_page (Pincus et al. 2019 \cite pincus_et_al_2019) in GFS_v16_RRTMGP suite
-- New RRFS smoke/dust scheme in HRRR_gf suite
 
-GFS_v17_p8, HRRR, RRFS_v1beta, RAP suites in CCPP v6.0.0 are no longer supported.
+Suites GFS_v17_p8, HRRR, RRFS_v1beta, and RAP, which were supported with CCPP v6.0.0, have been phased out.
 
 
 \b GFS  \b Scale-aware \b SAS  \b Cumulus \b Schemes:
 
 The updates between GFSv16 and GFSv17 are carefully outlined in Bengtsson and Han (2024)(submitted to \a Weather \a and \a Forecasting). The main updates include:
-
 - Implementation of a positive definition mass-flux scheme and a method for removing the negative tracers (Han et al. 2022 \cite Han_et_al_2022)
 - Introduction of a new closure based on a prognostic evolution of the convective updraft area fraction in both shallow and deep convection (Bengtsson et al. 2022 \cite Bengtsson_2022)
 - Introduction of 3D effects of cold-pool dynamics and stochastic initiation using self-organizing cellular automata stochastic convective organization scheme (not supported; Bengtsson et al. 2021 \cite bengtsson_et_al_2021)
@@ -24,13 +22,29 @@ The updates between GFSv16 and GFSv17 are carefully outlined in Bengtsson and Ha
 - Introduction of stricter convective initiation criteria to allow for more CAPE to build up to address a low CAPE bias in GFSv16 (Han et al. 2021 \cite han_2021)
 - Reduction of convective rain evaporation rate to address a systematic cold bias near the surface in GFSv16 (Han et al. 2021 \cite han_2021)
 
+\b Grell-Freitas \b Scale \b and \b Aerosol \b Aware \b Convection \b Scheme:
+- Update for aerosol-awareness (experimental and not supported)
+- Scale-awareness turned off when explicit microphysics is not active anywhere in the column
+- Convection is completely suppressed at grid points where the MYNN PBL sheme produces shallow convection
+- Radar reflectivity considers mass flux PDF as well as whether scale-awareness is turned on at the gird point in equation
+
 \b GFS \b Scale-aware \b TKE-EDMF \b PBL \b Scheme:
 - Implementation of a parameterization for environmental wind shear effect in the GFS TKE-EDMF PBL and cumulus schemes to reduce 
-the negative hurricane intensity biases. In addition, the entrainment rates are enhanced
-proportionally to the sub-cloud or PBL mean TKE (turbulent kinetic energy) when TKE is larger than a threshold value
+the negative hurricane intensity biases. 
+- Entrainment rates are enhanced proportionally to the sub-cloud or PBL mean TKE (turbulent kinetic energy) when TKE is larger than a threshold value
 - Increased entrainment rate as a function of vegetation fraction and surface roughness length to enhance the underestimated CAPE forecasts in the GFS
 
 \sa Han et al.(2024) \cite Han_2024
+
+\b MYNN-EDMF \b PBL \b Scheme:
+- Small increase of buoyancy length scale in convective environment
+- Patch for ensuring non-zero cloud fractions for all grid cells where cloud mixing ratio is greater than 1e-6 or ice mixing ratio is greater than 1e-9
+
+\b Subgrid-scale (\b SGS) \b Clouds \b Scheme:
+- Bug fix for cloud condensate input into RRTMG radiation
+- New code section for use with SAS cumulus scheme
+- Cloud fraction now computed as a mix between the area-dependent form and the modified Chaboureau and Bechtold (2005) \cite Chaboureau_2005 form
+- Adjusted limit for the boundary flux functions
 
 \b Thompson \b Cloud \b Microphysics \b Scheme:
 - Ice generation supersaturation requirement reduced from 0.25 to 0.15 to generate more ice at the upper 
@@ -42,6 +56,13 @@ the downward shortwave radiative flux and reduce the negative bias off coastal r
 
 \note The above improvements were tested with the non-aerosol option (in GFS_v17_p8_ugwpv1 suite), so results with the aerosol-aware
 Thompson (in HRRR_gf suite) may vary.
+
+\b NSSL \b Cloud \b Microphysics \b Scheme:
+- Updated with 3-moment option
+
+\b Radiation
+- Coupling of GOCART aerosols with radiation (iaer=2011)
+- Convective cloud water (liquid water + ice water) added to the calculations of cloud water path and ice water path for radiation cloud properties
 
 \b NoahMP \b Land \b Surface \b Model:
 - Option for using the unified frozen precipitation fraction in NoahMP
@@ -62,25 +83,8 @@ Thompson (in HRRR_gf suite) may vary.
 - Coefficient in soil resistance formulation (Sakaguchi and Zeng, 2009 \cite sakaguchi_and_zeng_2009) raised from 0.7 to 1.0 to increase soil resistance to evaporation
 - Computation of snow cover fraction and snow thermal conductivity updated
 
-
-\b MYNN-EDMF \b PBL \b Scheme:
-- Small increase of buoyancy length scale in convective environment
-- Patch for ensuring non-zero cloud fractions for all grid cells where cloud mixing ratio is greater than 1e-6 or ice mixing ratio is greater than 1e-9
-
-\b Subgrid-scale (\b SGS) \b Clouds \b Scheme:
-- Bug fix for cloud condensate input into RRTMG radiation
-- New code section for use with SAS cumulus scheme
-- Cloud fraction now computed as a mix between the area-dependent form and the modified Chaboureau and Bechtold (2005) \cite Chaboureau_2005 form
-- Adjusted limit for the boundary flux functions
-
 \b MYNN \b Surface-layer \b Scheme
 - Reintroduce friction velocity averaging over water to reduce noise in 10-m winds in the hurricane regime
-
-\b Grell-Freitas \b Scale \b and \b Aerosol \b Aware \b Convection \b Scheme:
-- Update for aerosol-awareness (experimental and not supported)
-- Scale-awareness turned off when explicit microphysics is not active anywhere in the column
-- Convection is completely suppressed at grid points where the MYNN PBL sheme produces shallow convection
-- Radar reflectivity considers mass flux PDF as well as whether scale-awareness is turned on at the gird point in equation
 
 \b Unified \b Gravity \b Wave \b Physics \b Scheme:
 - Replacement of the resolution-dependent effective grid spacing (cdmbgwd) with a constant (=6dx) 
@@ -90,13 +94,6 @@ Thompson (in HRRR_gf suite) may vary.
 - Introduction of damped breaking to prevent the wind reversal in the lower troposphere
 - Suppression of gravity wave breaking in the upper atmosphere (over 7.5 hPa) to avoid numerical instability
 - Revision in sub-grid orography data considering the mathematical definition of moments
-
-\b NSSL \b Cloud \b Microphysics \b Scheme:
-- Updated with 3-moment option
-
-\b Radiation
-- Coupling of GOCART aerosols with radiation (iaer=2011)
-- Convective cloud water (liquid water + ice water) added to the calculations of cloud water path and ice water path for radiation cloud properties
 
 
 */

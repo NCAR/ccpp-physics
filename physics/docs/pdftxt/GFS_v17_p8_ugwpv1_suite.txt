@@ -9,7 +9,7 @@ the GFS v17, and is expected to evolve before the operational implementation. It
 with the CCPP SCM.  The primary differences between the GFS_v16 and GFS_v17 suites are: 
 - \b Microphysics: The replacement of \ref GFDL_cloud with \ref THOMPSON 
 - PBL and Convection updates
-- \b Gravity \b Wave \b Drag: The replacement of \ref GFS_UGWP_v0 with  \ref GFS_ugwpv1_gsldrag
+- \b Gravity \b Wave \b Drag: The replacement of \ref GFS_UGWP_v0 with  \ref ugwpv1_gsldrag
 - \b Land \b Surface \b Model: The replacement of \ref GFS_NOAH with \ref NoahMP
 
 The GFS_v17 suite uses the parameterizations in the following order:
@@ -19,7 +19,7 @@ The GFS_v17 suite uses the parameterizations in the following order:
  - \ref NoahMP
  - \ref GFS_SFCSICE
  - \ref GFS_SATMEDMFVDIFQ
- - \ref GFS_ugwpv1_gsldrag
+ - \ref ugwpv1_gsldrag
  - \ref GFS_OZPHYS
  - \ref GFS_H2OPHYS
  - \ref GFS_SAMFdeep

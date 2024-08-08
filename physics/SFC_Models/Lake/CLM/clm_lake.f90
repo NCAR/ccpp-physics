@@ -1,5 +1,7 @@
 !> \file clm_lake.f90
 !!  Contains code related to the CLM lake model
+
+!> This module contains the CLM Lake model.
 !!
 !! This lake scheme was taken from module_sf_lake in WRF 4.3.1, and
 !! modified for CCPP by Sam Trahan in June 2022.
@@ -17,7 +19,6 @@
 !! can be used with any land surface scheme embedded in WRF. The lake scheme 
 !! developments and evaluations were included in Subin et al. (2012) \cite Subin_2012 
 !! and Gu et al. (2015) \cite Gu2015 . 
-
 MODULE clm_lake
   
     use machine,               only: kind_phys, kind_dbl_prec

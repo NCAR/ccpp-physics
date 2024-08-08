@@ -71,10 +71,8 @@
  - CSULFtoa: Upward LW
  - CSUSFtoa: Upward SW
 
-\section rrtmg_enh CCPP Physics Updates
-\version CCPP v6.0.0
 
-Requests have been made by many physics developers and users to rewrite
+In 2022, requests have been made by many physics developers and users to rewrite
 the cloud routines (routines progcld) for radiation computation in the program
 radiation_clouds.f. Those cloud subroutines are very similar, and
 have many lines of common code. We modified the radiation_clouds.f module,
@@ -86,9 +84,8 @@ radiation_clouds_prop can connect to the calculations of the cloud
 radiation properties for all the microphysics schemes.
 
 Summary of the major changes:
-- \ref radiation_clouds.f
+- \ref radiation_clouds.f : A new subroutine module_radiation_clouds::radiation_clouds_prop was added to radiation_clouds.f. This new subroutine calculates all cloud radiation properties for all the microphysics schemes. 
 
-  A new subroutine module_radiation_clouds::radiation_clouds_prop was added to radiation_clouds.f. This new subroutine calculates all cloud radiation properties for all the microphysics schemes. 
  -    module_radiation_clouds::progcld_zhao_carr()
  -    module_radiation_clouds::progcld_zhao_carr_pdf()
  -    module_radiation_clouds::progcld_gfdl_lin()
@@ -97,13 +94,9 @@ Summary of the major changes:
  -    module_radiation_clouds::progclduni()
  -    module_radiation_clouds::progcld_thompson()
 
-- \ref GFS_rrtmg_pre.F90
+- \ref GFS_rrtmg_pre.F90 : Removed the “progcld” subroutine calls, and replaced them with a single subroutine call to module_radiation_clouds::radiation_clouds_prop.
 
-  Removed the “progcld” subroutine calls, and replaced them with a single subroutine call to module_radiation_clouds::radiation_clouds_prop.
-
-- \ref radiation_cloud_overlap.F90
-
-  Replaced subroutine “get_alpha_exp” with module_radiation_cloud_overlap::get_alpha_exper(). The new subroutine revises alpha for exponential random cloud overlap option. This new subroutine is used in programs GFS_rrtmgp_cloud_overlap_pre.F90 and GFS_rrtmgp_gfdlmp_pre.F90.
+- \ref radiation_cloud_overlap.F90 : Replaced subroutine “get_alpha_exp” with module_radiation_cloud_overlap::get_alpha_exper(). The new subroutine revises alpha for exponential random cloud overlap option. This new subroutine is used in programs GFS_rrtmgp_cloud_overlap_pre.F90 and GFS_rrtmgp_gfdlmp_pre.F90.
 
 - Subroutine module_radiation_clouds::gethml() has been modified. The subroutine computes low, mid, high, total and boundary clouds, and is used in GFS_cloud_diagnostics.F90.
 

@@ -984,10 +984,7 @@ INPUT                  = pdftxt/mainpage.txt \
                          ../PBL \
                          ../SFC_Models \
                          ../photochem \
-                         ../Radiation \
-                         ../hooks \
-                         ../tools \
-                         ../Interstitials
+                         ../Radiation 
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1047,7 +1044,38 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = ../Radiation/RRTMGP/rte-rrtmgp     
+EXCLUDE                = ../Radiation/RRTMGP/rte-rrtmgp   \     
+                         ../MP/Morrison_Gettelman   \
+                         ../MP/Ferrier_Aligo        \
+                         ../MP/Zhao_Carr            \
+                         ../PBL/MYJ                 \
+                         ../PBL/HEDMF               \
+                         ../PBL/SHOC                \
+                         ../PBL/saYSU               \
+                         ../PBL/YSU                 \
+                         ../SFC_Models/Lake/Flake   \
+                         ../smoke_dust              \
+                         ../SFC_Layer/GFDL          \
+                         ../SFC_Layer/MYJ           \
+                         ../tools             \
+                         ../CONV/C3    \
+                         ../CONV/Chikira_Sugiyama    \
+                         ../CONV/nTiedtke            \
+                         ../CONV/RAS                 \
+                         ../CONV/SAS                 \
+                         ../GWD/cires_ugwpv1_module.F90 \
+                         ../GWD/cires_ugwpv1_initialize.F90 \
+                         ../GWD/cires_ugwpv1_oro.F90    \
+                         ../GWD/cires_ugwpv1_solv2.F90   \
+                         ../GWD/cires_ugwpv1_sporo.F90   \
+                         ../GWD/cires_ugwpv1_triggers.F90  \
+                         ../GWD/cires_tauamf_data.F90   \
+                         ../GWD/unified_ugwp.F90        \
+                         ../GWD/unified_ugwp_post.F90    \
+                         ../GWD/gwdc.f                   \
+                         ../GWD/gwdc_post.f                \
+                         ../GWD/gwdc_pre.f                \
+                         ../GWD/rayleigh_damp.f
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -1181,7 +1209,7 @@ FORTRAN_COMMENT_AFTER  = 72
 # also VERBATIM_HEADERS is set to NO.
 # The default value is: NO.
 
-SOURCE_BROWSER         = NO
+SOURCE_BROWSER         = YES
 
 # Setting the INLINE_SOURCES tag to YES will include the body of functions,
 # multi-line macros, enums or list initialized variables directly into the

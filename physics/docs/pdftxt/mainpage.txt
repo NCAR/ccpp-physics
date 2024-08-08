@@ -48,6 +48,6 @@ development of CCPP-Physics.
 - \b NASA \b Goddard \b Space \b Flight \b Center
 
 for their support and contribution for this CCPP scientific documentation (SciDoc).
-\n Thanks also to the CCPP SciDoc Team at the Developmental Testbed Center.
+\n Thanks also to the CCPP SciDoc Team at the Developmental Testbed Center: Man Zhang, Ligia Bernardet, and Mike Kavulich
 
 */
