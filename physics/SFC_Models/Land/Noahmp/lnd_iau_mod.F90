@@ -314,7 +314,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
       return   
    endif    
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then
-      print *,"increment file ", trim(adjustl(Land_IAU_Control%iau_inc_files(1)))
+      print *,"land_iau_init: Increment file ", trim(adjustl(Land_IAU_Control%iau_inc_files(1)))
    endif
 
    ! determine number of valid forecast hours
@@ -328,7 +328,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
       endif
       ntimes = ntimes + 1
    enddo
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'ntimes = ',ntimes
+   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'land_iau_init: ntimes = ',ntimes
    Land_IAU_Control%ntimes = ntimes
    if (ntimes < 1) then
       return
@@ -684,7 +684,7 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, stc_inc_ou
    status =nf90_close(ncid) 
    call netcdf_err(status, 'closing file '//trim(fname), errflg, errmsg) 
 
-   !8.3.24 ensure to zero out too small increments
+   !8.3.24 set too small increments to zero
    where(abs(wk3_stc) < Land_IAU_Control%min_T_increment) wk3_stc = 0.0
 
 end subroutine read_iau_forcing_fv3
