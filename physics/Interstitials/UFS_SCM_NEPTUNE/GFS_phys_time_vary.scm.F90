@@ -230,6 +230,7 @@
                ! Read aerosol climatology
                call read_aerdata (me,master,iflip,idate,errmsg,errflg)
             endif
+            if (errflg /= 0) return
          else
             ! Update the value of ntrcaer in aerclm_def with the value defined
             ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
