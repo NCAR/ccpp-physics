@@ -155,7 +155,7 @@
 !! Note: For Case 3, Yuan Xue thoroughly evaluated a total of four options and
 !! current option is found to be the best as of 11/09/2023
 
-subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &      !me, mpi_root,
+subroutine noahmpdrv_timestep_finalize (itime, fhour, delt, km,  ncols,         &      !me, mpi_root,
                                     isot, ivegsrc, soiltyp, vegtype, weasd, &
                                     stc, slc, smc, errmsg, errflg)       ! smc, t2mmp, q2mp,    
    
@@ -493,7 +493,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
     write(*,'(a,i8)') ' soil grid cells with slc adjustment', n_slc 
 
 
-end subroutine noahmpdrv_timestep_init
+end subroutine noahmpdrv_timestep_finalize
 
   !> \ingroup NoahMP_LSM
 !! \brief This subroutine is called after noahmpdrv_run 
@@ -502,7 +502,7 @@ end subroutine noahmpdrv_timestep_init
 !! \section arg_table_noahmpdrv_timestep_finalize Argument Table
 !! \htmlinclude noahmpdrv_timestep_finalize.html
 !!
-  subroutine noahmpdrv_timestep_finalize (errmsg, errflg)       ! smc, t2mmp, q2mp,    
+  subroutine noahmpdrv_timestep_init (errmsg, errflg)       ! smc, t2mmp, q2mp,    
    
     use machine,          only: kind_phys 
     implicit none
@@ -514,7 +514,7 @@ end subroutine noahmpdrv_timestep_init
 
     !> note the IAU deallocate happens at the noahmpdrv_finalize
 
-  end subroutine noahmpdrv_timestep_finalize
+  end subroutine noahmpdrv_timestep_init
 
    !> \ingroup NoahMP_LSM
 !! \brief This subroutine mirrors noahmpdrv_init  

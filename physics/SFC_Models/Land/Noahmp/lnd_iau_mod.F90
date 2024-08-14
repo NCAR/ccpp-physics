@@ -361,8 +361,8 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    do k = 1, npz  ! do k = 1,n_soill    !  
       do j = 1, nlat
          do i = 1, nlon                
-            Land_IAU_state%inc1%stc_inc(i,j,k)  = wk3_stc(2, i, j, k)
-            Land_IAU_state%inc1%slc_inc(i,j,k)  = wk3_slc(2, i, j, k) 
+            Land_IAU_state%inc1%stc_inc(i,j,k)  = wk3_stc(1, i, j, k)
+            Land_IAU_state%inc1%slc_inc(i,j,k)  = wk3_slc(1, i, j, k) 
          end do
        enddo
    enddo

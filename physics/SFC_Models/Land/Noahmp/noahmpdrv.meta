@@ -225,7 +225,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = noahmpdrv_timestep_init
+  name = noahmpdrv_timestep_finalize
   type = scheme
 [itime]
   standard_name = index_of_timestep
@@ -342,7 +342,7 @@
 
 #######################################################################
 [ccpp-arg-table]
-  name = noahmpdrv_timestep_finalize
+  name = noahmpdrv_timestep_init
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message
