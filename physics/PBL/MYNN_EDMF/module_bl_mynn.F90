@@ -248,6 +248,7 @@
 ! Many of these changes are now documented in references listed above.
 !====================================================================
 
+!> This module contains the entity of MYNN-EDMF PBL scheme
 MODULE module_bl_mynn
 
   use bl_mynn_common,only: &

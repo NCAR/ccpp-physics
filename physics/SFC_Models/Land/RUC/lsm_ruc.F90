@@ -1,6 +1,7 @@
 !>\file lsm_ruc.F90 
 !!  This file contains the RUC land surface scheme driver.
 
+!> This module contain the RUC land surface model driver
 module lsm_ruc
 
         use machine,           only: kind_phys, kind_dbl_prec

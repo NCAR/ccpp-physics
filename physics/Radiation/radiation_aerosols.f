@@ -122,9 +122,9 @@
 !!!!!  ==========================================================  !!!!!
 
 
-!========================================!
-      module module_radiation_aerosols   !
-!........................................!
+!> This module contains climatological atmospheric aerosol schemes for
+!! radiation computations.
+      module module_radiation_aerosols
 !
       use machine,  only : kind_phys, kind_io4, kind_io8
       use module_iounitdef,        only : NIAERCM

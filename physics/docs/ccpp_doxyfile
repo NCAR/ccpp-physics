@@ -1063,6 +1063,7 @@ EXCLUDE                = ../Radiation/RRTMGP/rte-rrtmgp   \
                          ../CONV/nTiedtke            \
                          ../CONV/RAS                 \
                          ../CONV/SAS                 \
+                         ../SFC_Layer/UFS/date_def.f \
                          ../GWD/cires_ugwpv1_module.F90 \
                          ../GWD/cires_ugwpv1_initialize.F90 \
                          ../GWD/cires_ugwpv1_oro.F90    \

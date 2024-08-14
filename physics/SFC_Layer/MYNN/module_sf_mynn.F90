@@ -3,6 +3,8 @@
 !WRF:MODEL_LAYER:PHYSICS
 !
 !>\ingroup mynn_sfc
+!> This module contain routines to calculate stability parameters, kinematic siscosity
+!! in MYNN surface layer scheme
 MODULE module_sf_mynn
 
 !-------------------------------------------------------------------

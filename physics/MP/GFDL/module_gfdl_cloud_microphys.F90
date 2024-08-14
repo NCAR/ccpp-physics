@@ -27,7 +27,7 @@
 ! =======================================================================
 !>\defgroup mod_gfdl_cloud_mp GFDL Cloud MP modules
 !!\ingroup gfdlmp
-!! This module contains the column GFDL Cloud microphysics scheme.
+!> This module contains the column GFDL Cloud microphysics scheme.
 module gfdl_cloud_microphys_mod
 
     ! use mpp_mod, only: stdlog, mpp_pe, mpp_root_pe, mpp_clock_id, &

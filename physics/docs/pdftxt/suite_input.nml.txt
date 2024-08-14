@@ -536,7 +536,7 @@ show some variables in the namelist that must match the SDF.
                                                       </ul>
                                                       <td>1
 <tr><td>lsoil           <td> lsm_noah              <td>number of soil layers           <td>4
-lsoil_lsm
+<tr><td>lsoil_lsm       <td> GFS_phys_time_vary.scm.F90   <td>number of soil layers internal to land surface model; -1 use lsoil    <td>-1
 <tr><td>rdlai           <td> lsm_ruc               <td>flag to read leaf area index from input files    <td>.false.
 <tr><td>ivegsrc         <td> lsm_noah, lsm_ruc,  noahmpdrv, sfc_diff          <td>flag for vegetation type dataset choice: \n 
                                                       <ul>
@@ -723,8 +723,24 @@ lsoil_lsm
 <tr><td>lheatstrg       <td>gfs_surface_generic_post          <td>flag for canopy heat storage parameterization    <td>.false.
 <tr><td>z0fac           <td>gfs_surface_generic_post          <td>surface roughness fraction factor          <td>0.3  
 <tr><td>e0fac           <td>gfs_surface_generic_post          <td>latent heat flux fraction factor relative to sensible heat flux,e.g., e0fac=0.5 indicates that canopy heat storage for latent heat flux is 50% of that for sensible heat flux  <td>0.5
-<tr><td>isftcflx        <td>mynnsfc_wrapper          <td>flag for thermal roughness lengths over water in MYNN-SFCLAY          <td>0
-<tr><td>iz0tlnd         <td>mynnsfc_wrapper          <td>flag for thermal roughness lengths over land in MYNN-SFCLAY          <td>0
+<tr><td>isftcflx        <td>mynnsfc_wrapper          <td>flag for thermal roughness lengths over water in MYNN-SFCLAY          
+                                                     <ul>
+                                                     <li>0: z0,zt, and zq from the COARE algorithm. 
+                                                     <li>1: z0 from Davis et al.(2008), zt&zq from COARE 3.0/3.5
+                                                     <li>2: z0 from Davis et al.(2008), zt&zq from Garratt (1992)
+                                                     <li>3: z0 from Taylor and Yelland (2004), zt and zq from COARE 3.0/3.5
+                                                     <li>4: GFS -taken from sfc_diff.f, for comparison/testing
+                                                     </ul>
+                                                     <td>0
+<tr><td>iz0tlnd         <td>mynnsfc_wrapper          <td>flag for thermal roughness lengths over land in MYNN-SFCLAY          
+                                                     <ul>
+                                                     <li>0: Zilitinkevich (1995) \cite Zilitinkevich_1995; Czil now set to 0.095
+                                                     <li>1: Czil_new (modified according to Chen and Zhang (2009) \cite chen_and_zhang_2009)
+                                                     <li>2: Modified Yang et al.(2002, 2008)\cite yang_et_al_2002 \cite Yang_2008 - generalized for all landuse
+                                                     <li>3: constant zt = z0/7.4 (original form; Garratt 1992)
+                                                     <li>4: GFS - taken from sfc_diff.f, for comparison/testing
+                                                     </ul>
+                                                     <td>0
 <tr><td>sfclay_compute_flux         <td>mynnsfc_wrapper          <td>flag for computing surface scalar fluxes in MYNN-SFCLAY          <td>.false.
 <tr><td>sfclay_compute_diag         <td>mynnsfc_wrapper          <td>flag for computing surface diagnostics in MYNN-SFCLAY          <td>.false.
 <tr><td>thsfc_loc       <td>GFS_surface_composites_post, sfc_diff, sfc_diag, sfc_nst, noahmpdrv, sfc_sice   <td>flag for local .vs. standard potential temperature <td>.true.
@@ -747,5 +763,6 @@ iccn
 <tr><td>kice       <td>sfc_sice    <td>number of layers in ice      <td>2
 <tr><td>lrefres      <td>      <td>flag for radar reflectivity in restart file     <td>.false.
 </table>
+</div>
 
 */
