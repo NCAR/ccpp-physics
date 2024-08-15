@@ -143,11 +143,10 @@
 
 !> \ingroup NoahMP_LSM
 !! \brief This subroutine is called before noahmpdrv_run 
-!!  to update states with iau increments, if available 
-
+!!  to update states with iau increments, if available---
 !! \section arg_table_noahmpdrv_timestep_finalize Argument Table
 !! \htmlinclude noahmpdrv_timestep_finalize.html
-
+!!
 !! For Noah-MP, the adjustment scheme shown below is applied to soil moisture and temp:
 !! Case 1: frozen ==> frozen, recalculate slc following opt_frz=1, smc remains
 !! Case 2: unfrozen ==> frozen, recalculate slc following opt_frz=1, smc remains
@@ -499,8 +498,7 @@ end subroutine noahmpdrv_timestep_finalize
   !> \ingroup NoahMP_LSM
 !! \brief This subroutine is called after noahmpdrv_run 
 !!  to free up allocated memory, if there are any  
-!!  code to do any needed consistency check will go here
-
+!!  code to do any needed consistency check will go here--
 !! \section arg_table_noahmpdrv_timestep_init Argument Table
 !! \htmlinclude noahmpdrv_timestep_init.html
 !!
