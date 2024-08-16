@@ -1,6 +1,7 @@
 !>\file rrtmgp_sw_main.F90
 !!
 
+!> This module contain the RRTMGP-SW radiation scheme
 module rrtmgp_sw_main
   use mpi_f08
   use machine,                only: kind_phys, kind_dbl_prec

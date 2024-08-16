@@ -1,6 +1,7 @@
 !>\file rrtmgp_aerosol_optics.F90
 !!
 
+!> This module contains aerosol optics properties for RRTMGP
 module rrtmgp_aerosol_optics
   use machine,                   only: kind_phys
   use radiation_tools,           only: check_error_msg

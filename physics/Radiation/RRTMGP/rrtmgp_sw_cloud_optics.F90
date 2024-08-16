@@ -1,6 +1,7 @@
 !>\file rrtmgp_sw_cloud_optics.F90
 !!
 
+!> This module contains the cloud optics properties calculation for RRTMGP-SW
 module rrtmgp_sw_cloud_optics
   use machine,                  only: kind_phys
   use mo_rte_kind,              only: wl

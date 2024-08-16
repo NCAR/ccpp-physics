@@ -1,7 +1,8 @@
 !> \file rrtmgp_sw_gas_optics.F90
-!! This module contains a routine to initialize the k-distribution data used
-!! by the RRTMGP shortwave radiation scheme.
+!!
 
+!> This module contains a routine to initialize the k-distribution data used
+!! by the RRTMGP shortwave radiation scheme.
 module rrtmgp_sw_gas_optics
   use machine,                only: kind_phys
   use mo_rte_kind,            only: wl

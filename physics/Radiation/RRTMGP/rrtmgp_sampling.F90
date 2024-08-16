@@ -11,8 +11,8 @@
 !    BSD 3-clause license, see http://opensource.org/licenses/BSD-3-Clause
 ! -------------------------------------------------------------------------------------------------
 !
-! This module provides a simple implementation of sampling for the
-!   Monte Carlo Independent Pixel Approximation (McICA, doi:10.1029/2002jd003322)
+!> This module provides a simple implementation of sampling for the
+!!   Monte Carlo Independent Pixel Approximation (McICA, doi:10.1029/2002jd003322)
 ! Cloud optical properties, defined by band and assumed homogenous within each cell (column/layer),
 !   are randomly sampled to preserve the mean cloud fraction and one of several possible overlap assumptions
 ! Users supply random numbers with order ngpt,nlay,ncol

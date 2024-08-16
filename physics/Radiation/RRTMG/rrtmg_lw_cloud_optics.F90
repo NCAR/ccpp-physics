@@ -1,16 +1,17 @@
 !>\file rrtmg_lw_cloud_optics.F90
 !!
 
+!>This module contains the cloud optics property module for RRTMG-LW
 module mo_rrtmg_lw_cloud_optics
   use machine,          only: kind_phys
   use mersenne_twister, only: random_setseed, random_number, random_stat
 
   implicit none
 
-  !< Parameter used for RRTMG cloud-optics
+  !> Parameter used for RRTMG cloud-optics
   integer,parameter :: &
        nBandsLW_RRTMG = 16
-  !< ipat is bands index for ebert & curry ice cloud (for iflagice=1)
+  !> ipat is bands index for ebert & curry ice cloud (for iflagice=1)
   integer,dimension(nBandsLW_RRTMG),parameter :: &
        ipat = (/ 1, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5 /)
   real(kind_phys), parameter :: &
@@ -18,7 +19,7 @@ module mo_rrtmg_lw_cloud_optics
        abssnow0 = 1.5,     & !< Snow flake absorption coefficient (micron), fu coeff
        abssnow1 = 2.34e-3    !< Snow flake absorption coefficient \f$(m^{2}/g)\f$, ncar coef
 
-  !< Reset diffusivity angle for Bands 2-3 and 5-9 to vary (between 1.50
+  !> Reset diffusivity angle for Bands 2-3 and 5-9 to vary (between 1.50
   !! and 1.80) as a function of total column water vapor.  the function
   !! has been defined to minimize flux and cooling rate errors in these bands
   !! over a wide range of precipitable water values.
@@ -35,7 +36,7 @@ module mo_rrtmg_lw_cloud_optics
        diffusivityHigh  = 1.80, & !< Maximum diffusivity angle for bands 2-3 and 5-9
        diffusivityB1410 = 1.66    !< Diffusivity for bands 1, 4, and 10
 
-  !< RRTMG LW cloud property coefficients
+  !> RRTMG LW cloud property coefficients
   real(kind_phys) , dimension(58,nBandsLW_RRTMG),parameter :: &
        absliq1 = reshape(source=(/ &
        1.64047e-03, 6.90533e-02, 7.72017e-02, 7.78054e-02, 7.69523e-02, & !1

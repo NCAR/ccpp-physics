@@ -1,10 +1,11 @@
 !> \file rrtmgp_lw_cloud_optics.F90
-!! This module contains two routines: The first initializes data and functions
+!!
+
+!> This module contains two routines: The first initializes data and functions
 !! needed to compute the longwave cloud radiative properteis in RRTMGP. The second routine
 !! is a ccpp scheme within the "radiation loop", where the shortwave optical prperties
 !! (optical-depth, single-scattering albedo, asymmetry parameter) are computed for ALL
 !! cloud types visible to RRTMGP.
-!!
 module rrtmgp_lw_cloud_optics
   use machine,                  only: kind_phys
   use mo_rte_kind,              only: wl

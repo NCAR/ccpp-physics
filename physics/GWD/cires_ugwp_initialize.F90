@@ -6,7 +6,7 @@
 !  init gw-background dissipation
 !===============================    
 
-!> Define constants
+!> This module contains UGWP v0 initialization schemes 
     module ugwp_common_v0
 !
      use machine,  only: kind_phys
@@ -95,6 +95,7 @@
 !    ugwpv0_oro_init
 !
 !=========================================================================
+!> This module contains orographic wave source schemes for UGWP v0.
      module ugwpv0_oro_init
 
      use ugwp_common_v0, only : bnv2min, grav, grcp, fv, grav, cpd, grcp, pi

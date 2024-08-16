@@ -1,9 +1,10 @@
 !> \file rrtmgp_lw_gas_optics.F90 
-!! This module contains two routines: One to initialize the k-distribution data
+!!
+
+!> This module contains two routines: One to initialize the k-distribution data
 !! and functions needed to compute the longwave gaseous optical properties in RRTMGP.
 !! The second routine is a ccpp scheme within the "radiation loop", where the longwave
 !! optical prperties (optical-depth) are computed for clear-sky conditions (no aerosols).
-!!                                                
 module rrtmgp_lw_gas_optics
   use machine,               only: kind_phys
   use mo_rte_kind,           only: wl

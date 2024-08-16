@@ -1053,6 +1053,8 @@ EXCLUDE                = ../Radiation/RRTMGP/rte-rrtmgp   \
                          ../PBL/SHOC                \
                          ../PBL/saYSU               \
                          ../PBL/YSU                 \
+                         ../PBL/SATMEDMF/mfscu.f   \
+                         ../PBL/SATMEDMF/satmedmfvdif.F \
                          ../SFC_Models/Lake/Flake   \
                          ../smoke_dust              \
                          ../SFC_Layer/GFDL          \
@@ -1063,6 +1065,7 @@ EXCLUDE                = ../Radiation/RRTMGP/rte-rrtmgp   \
                          ../CONV/nTiedtke            \
                          ../CONV/RAS                 \
                          ../CONV/SAS                 \
+                         ../CONV/SAMF/samfaerosols.F \
                          ../SFC_Layer/UFS/date_def.f \
                          ../GWD/cires_ugwpv1_module.F90 \
                          ../GWD/cires_ugwpv1_initialize.F90 \

@@ -1,6 +1,7 @@
 !> \file rrtmgp_lw_main.F90
 !! This file contains the longwave RRTMGP radiation scheme.
-!!
+
+!> This module contains the RRTMGP-LW radiation scheme
 module rrtmgp_lw_main
   use mpi_f08
   use machine,                only: kind_phys, kind_dbl_prec

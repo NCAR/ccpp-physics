@@ -92,15 +92,13 @@
     lradar               = .true.
     lrefres              = .true.
     lsm                  = 3
-    lsoil                = 9
+    lsoil                = 4
     lsoil_lsm            = 9
     ltaerosol            = .true.
     lwhtr                = .true.
     min_lakeice          = 0.15
     min_seaice           = 0.15
     mix_chem             = .true.
-    mosaic_lu            = 1
-    mosaic_soil          = 1
     nsfullradar_diag     = 3600
     oz_phys              = .false.
     oz_phys_2015         = .true.

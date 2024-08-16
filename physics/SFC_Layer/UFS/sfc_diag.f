@@ -1,11 +1,11 @@
 !>  \file sfc_diag.f
 !!  This file contains the land surface diagnose calculation scheme.
 
+!> This module contains the land surface diagnose calcualtion
       module sfc_diag
       contains
 
 !> \defgroup sfc_diag_mod GFS sfc_diag module
-!! This module contains the land surface diagose calculation.
 !! \section arg_table_sfc_diag_run Argument Table
 !! \htmlinclude sfc_diag_run.html
 !!

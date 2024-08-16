@@ -1,5 +1,6 @@
 !>  \file ugwpv1_gsldrag_post.F90
-!! This file contains
+
+!> This module contains code to be executed after the UGWP v1 scheme
 module ugwpv1_gsldrag_post
 
 contains

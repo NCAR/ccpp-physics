@@ -1,6 +1,7 @@
 !>\file radiation_tools.F90
 !!
 
+!> This module contains tools for radiation
 module radiation_tools
   use machine, only: &
        kind_phys                   ! Working type
