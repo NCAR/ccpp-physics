@@ -74,6 +74,7 @@ module land_iau_mod
       integer              :: lsoil_incr    ! soil layers (from top) updated by DA   
       logical              :: upd_stc
       logical              :: upd_slc
+      logical              :: do_stcsmc_adjustment  !do moisture/temperature adjustment for consistency after increment add
       real(kind=kind_phys) :: min_T_increment
       !, iau_drymassfixer
       integer              :: me              !< MPI rank designator
@@ -131,11 +132,12 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    integer               :: lsoil_incr = 4
    logical               :: land_iau_upd_stc = .false.
    logical               :: land_iau_upd_slc = .false.
+   logical               :: land_iau_do_stcsmc_adjustment = .false.
    real(kind=kind_phys)  :: land_iau_min_T_increment = 0.0001
   
    NAMELIST /land_iau_nml/ do_land_iau, land_iau_delthrs, land_iau_inc_files, land_iau_fhrs,   &  !land_iau_gaussian_inc_file,   &
                         land_iau_filter_increments, &  
-                        lsoil_incr, land_iau_upd_stc, land_iau_upd_slc, land_iau_min_T_increment                                    
+                        lsoil_incr, land_iau_upd_stc, land_iau_upd_slc, land_iau_do_stcsmc_adjustment, land_iau_min_T_increment                                    
    
    !Errors messages handled through CCPP error handling variables
    errmsg = ''
@@ -207,6 +209,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
 
    Land_IAU_Control%upd_stc = land_iau_upd_stc
    Land_IAU_Control%upd_slc = land_iau_upd_slc
+   Land_IAU_Control%do_stcsmc_adjustment = land_iau_do_stcsmc_adjustment
    Land_IAU_Control%min_T_increment = land_iau_min_T_increment
 
    allocate(Land_IAU_Control%blksz(nblks))
