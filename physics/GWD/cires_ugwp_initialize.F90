@@ -226,6 +226,7 @@
 !  Part -3  init  wave solvers
 !===============================
 
+!> This module contains initialization of wave solvers for UGWP v0
   module ugwpv0_lsatdis_init
      implicit none
 
@@ -271,6 +272,7 @@
   end module ugwpv0_lsatdis_init
 !
 !
+!>This module contains init-solvers for "broad" non-stationary multi-wave spectra
   module ugwpv0_wmsdis_init
  
     use ugwp_common_v0, only :   pi, pi2

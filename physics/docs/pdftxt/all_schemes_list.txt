@@ -69,7 +69,6 @@ produce the tendencies.
 - The second part of the physics suite, comprised of the parameterizations of gravity wave physics, ozone, stratospheric water vapor, deep and shallow convection (if using),
  and microphysics, is computed using sequential splitting in the order listed above, in which the model state is updated between calls
 to the parameterization.
-- If the in-core saturation adjustment is used (\p do_sat_adj=.true.), it is invoked at shorter timesteps along with the dynamical solver.
 
 \section allsuite_overview Physics Suites
 

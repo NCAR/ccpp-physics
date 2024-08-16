@@ -1,5 +1,7 @@
 !>  \file ugwpv1_gsldrag.F90
-!! This introduces two gravity wave drag schemes ugwpv1/CIRES and GSL/drag_suite.F90 under "ugwpv1_gsldrag" suite:
+
+!> This module introduces two gravity wave drag schemes: UGWPv1 and orographic drag scheme 
+!!
 !!      1) The "V1 CIRES UGWP" scheme as tested in the FV3GFSv16-127L atmosphere model and workflow, which includes:
 !!            a) the orograhic gravity wave drag, flow blocking scheme and TOFD (Beljaars et al, 2004).
 !!            b) the v1 CIRE ugwp non-stationary GW scheme, new revision that generate realistic climate of FV3GFS-127L
@@ -33,7 +35,6 @@
 !!       do_ugwp_v1_w_gsldrag -- activates V1 CIRES UGWP scheme with orographic drag of GSL
 !! Note that only one "large-scale" scheme can be activated at a time.
 !!
-
 module ugwpv1_gsldrag
 
     use machine, only: kind_phys

@@ -1,6 +1,8 @@
 !>\file cires_ugwp_triggers.F90
 !!
 
+!> This module contains routines describing the the latitudinal shape of 
+!! vertical momentum flux function in UGWP v0.
       module cires_ugwp_triggers
       contains
 !
