@@ -993,6 +993,7 @@ INPUT                  = pdftxt/mainpage.txt \
                          pdftxt/CLM_LAKE.txt \
                          pdftxt/THOMPSON.txt \
                          pdftxt/suite_input.nml.txt \
+                         pdftxt/acronyms.txt     \
                          ../MP \
                          ../CONV \
                          ../GWD \

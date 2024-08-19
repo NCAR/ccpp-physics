@@ -527,6 +527,12 @@ show some variables in the namelist that must match the SDF.
 <tr><td>do_gsl_drag_ls_bl            <td>unified_ugwp, drag_suite        <td>flag for GSL drag (large-scale GWD and blocking only)       <td>.false.
 <tr><td>do_gsl_drag_ss               <td>unified_ugwp, drag_suite        <td>flag for GSL drag (small-scale GWD only)           <td>.false.
 <tr><td>do_gsl_drag_tofd             <td>unified_ugwp, drag_suite        <td>flag for GSL drag (turbulent orog form drag only)           <td>.false.
+<tr><td>do_gwd_opt_psl               <td>unified_ugwp, ugwpv1_gsldrag    <td>flag for PSL drag (mesoscale GWD and blocking only)     <td>.false.
+<tr><td>do_ugwp_v1                   <td>GFS_physics_time_vary                      <td>flag for version 1 UGWP                         <td>.false.
+<tr><td>do_ugwp_v1_orog_only         <td>ugwpv1_gsldrag                                <td>flag for version 1 UGWP (orographic drag only)   <td>.false.
+<tr><td>do_ugwp_v1_w_gsldrag         <td>ugwpv1_gsldrag                                <td>flag for version 1 UGWP (orographic drag only)   <td>.false.
+<tr><td>alpha_fd                     <td>ugwpv1_gsldrag, drag_suite, unified_ugwp                                <td>alpha coefficient for turbulent orographic form drag    <td>12.0
+<tr><td>psl_gwd_dx_factor            <td>ugwpv1_gsldrag, drag_suite, unified_ugwp                                 <td>multiplication factors for grid spacing          <td>6.0
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b LSM \b options
 <tr><td>lsm             <td>see \a GFS_typedefs.F90          <td>flag for land surface model to use    \n
                                                       <ul>
