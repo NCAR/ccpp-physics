@@ -11,7 +11,7 @@
 !> - reads settings from namelist file (which indicates if IAU increments are available or not)
 !> - reads in DA increments from GSI/JEDI DA at the start of (the DA) cycle 
 !> - maps increments to FV3 grid points belonging to mpi process
-!> - interpolates temporally (with filter, weights if required by configuration)
+!> - interpolates temporally (with filter-weights if required by configuration)
 !> - updates states with the interpolated increments
 
 !> March, 2024: Tseganeh Z. Gichamo, (EMC) based on the FV3 IAU mod 

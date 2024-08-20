@@ -144,8 +144,8 @@
 !> \ingroup NoahMP_LSM
 !! \brief This subroutine is called before noahmpdrv_run 
 !!  to update states with iau increments, if available---
-!! \section arg_table_noahmpdrv_timestep_finalize Argument Table
-!! \htmlinclude noahmpdrv_timestep_finalize.html
+!! \section arg_table_noahmpdrv_timestep_init Argument Table
+!! \htmlinclude noahmpdrv_timestep_init.html
 !!
 !! For Noah-MP, the adjustment scheme shown below is applied to soil moisture and temp:
 !! Case 1: frozen ==> frozen, recalculate slc following opt_frz=1, smc remains
@@ -155,7 +155,7 @@
 !! Note: For Case 3, Yuan Xue thoroughly evaluated a total of four options and
 !! current option is found to be the best as of 11/09/2023
 
-subroutine noahmpdrv_timestep_finalize (itime, fhour, delt, km,  ncols,         &      !me, mpi_root,
+subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &      !me, mpi_root,
                                     isot, ivegsrc, soiltyp, vegtype, weasd, &
                                     stc, slc, smc, errmsg, errflg)       ! smc, t2mmp, q2mp,    
    
@@ -186,11 +186,10 @@ subroutine noahmpdrv_timestep_finalize (itime, fhour, delt, km,  ncols,         
 
   ! IAU update
   real(kind=kind_phys),allocatable, dimension(:,:)       :: stc_inc_flat, slc_inc_flat
-  ! real(kind=kind_phys),allocatable, dimension(:)         :: stc_bck, d_stc
-  real(kind=kind_phys)                                   :: stc_bck(ncols, km), d_stc(ncols, km)
-  ! integer, allocatable, dimension(:)                     :: diff_indices
   real(kind=kind_phys), dimension(km)                    :: dz ! layer thickness
-
+  ! real(kind=kind_phys)                                   :: stc_bck(ncols, km), d_stc(ncols, km)
+  ! integer, allocatable, dimension(:)                     :: diff_indices
+  
 !TODO: 7.31.24: This is hard-coded in noahmpdrv
   real(kind=kind_phys)          :: zsoil(4) = (/ -0.1, -0.4, -1.0, -2.0 /)   !zsoil(km)
 
@@ -262,27 +261,6 @@ subroutine noahmpdrv_timestep_finalize (itime, fhour, delt, km,  ncols,         
     return
   endif
 
-  stc_bck = stc
-
-  ! hc_incr = 0.0  !0.9 * 4.6296296296296296296296296296296e-5 * delt !0.05  
-
-  ! if(Land_IAU_Control%tile_num == 1) then
-  !   print*, "stc_bck shape, min, max ", shape(stc_bck), minval(stc_bck), maxval(stc_bck)
-  !   print*, " hc_incr ", hc_incr
-  !   print*, "proc, tile num, layer 1 stc_inc at 33:35,40:42", Land_IAU_Control%me, Land_IAU_Control%tile_num
-  !   do j = 33, 35
-  !     WRITE(*,"(3F15.12)") Land_IAU_Data%stc_inc(40:42,j,1)
-  !     do i = 40, 42
-  !       ib = (j - 1) *  Land_IAU_Control%nx + i
-  !       stc(ib, 1) = stc_bck(ib, 1) + hc_incr  !Land_IAU_Data%stc_inc(i,j,1)*delt !Land_IAU_Control%dtp
-  !     enddo
-  !   enddo
-  ! endif
-  
-  ! do ib = 1, ncols
-  !   stc(ib, 1) = stc_bck(ib, 1) + hc_incr  !Land_IAU_Data%stc_inc(i,j,1)*delt !Land_IAU_Control%dtp
-  ! enddo
-
   ! local variable to copy blocked data Land_IAU_Data%stc_inc
   allocate(stc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
   allocate(slc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
@@ -323,30 +301,6 @@ subroutine noahmpdrv_timestep_finalize (itime, fhour, delt, km,  ncols,         
 !TODO---if only fv3 increment files are used, this can be read from file
   allocate(mask_tile(lensfc))
   call calculate_landinc_mask(weasd, vegtype, soiltyp, lensfc, isice_table, mask_tile)  !& !veg_type_landice, 
-
-  ! if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-  !   print*, "root proc, tile num, layer 1 stc", Land_IAU_Control%me, Land_IAU_Control%tile_num
-  !   ! ib = 1
-  !   ! do j = 1, Land_IAU_Control%ny  !ny         
-  !   !   WRITE(*,"(48F8.3)") stc(ib:ib+Land_IAU_Control%nx-1, 1)
-  !   !   ib = ib + Land_IAU_Control%nx  !nlon    
-  !   ! enddo
-  !   print*, "root proc layer 1 inc"
-  !   ! ib = 1
-  !   ! do j = 1, Land_IAU_Control%ny  !ny         
-  !   !   WRITE(*,"(48F6.3)") stc_inc_flat(ib:ib+Land_IAU_Control%nx-1, 1)*delt
-  !   !   ib = ib + Land_IAU_Control%nx  !nlon    
-  !   ! enddo
-  !   do j = 33, 35
-  !     WRITE(*,"(3F15.12)") Land_IAU_Data%stc_inc(40:42,j,1)
-  !   enddo
-  !   print*, "stc_inc_flat"
-    
-  !   do j = 33, 35 
-  !       ib = (j - 1) *  Land_IAU_Control%nx + 40    
-  !       WRITE(*,"(3F15.12)") stc_inc_flat(ib:ib+2, 1)  
-  !   enddo
-  ! endif
                               
   !IAU increments are in units of 1/sec     !Land_IAU_Control%dtp
   !* only updating soil temp for now 
@@ -393,19 +347,6 @@ subroutine noahmpdrv_timestep_finalize (itime, fhour, delt, km,  ncols,         
       enddo
     endif ! if soil/snow point
   enddo ij_loop
-
-  ! do k = 1, km 
-  !   stc(:,k) = stc(:,k) + stc_inc_flat(:,k)*delt !Land_IAU_Control%dtp
-  !   ! slc(:,k) = slc(:,k) + slc_inc_flat(:,k)*delt !Land_IAU_Control%dtp    
-  ! enddo
-  ! if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-  !   print*, "root proc layer 1 stc after adding IAU inc"
-  !   ib = 1
-  !   do j = 1, Land_IAU_Control%ny  !ny         
-  !     WRITE(*,"(48F8.3)") stc(ib:ib+Land_IAU_Control%nx-1, 1)
-  !     ib = ib + Land_IAU_Control%nx  !nlon    
-  !   enddo
-  ! endif
 
   deallocate(stc_inc_flat, slc_inc_flat)   !, tmp2m_inc_flat,spfh2m_inc_flat)
 
@@ -471,15 +412,6 @@ subroutine noahmpdrv_timestep_finalize (itime, fhour, delt, km,  ncols,         
     endif
   endif
 
-    ! d_stc = stc(:, 1) - stc_bck
-    ! ! Where(d_stc .gt. 0.0001) 
-    ! diff_indices = pack([(i, i=1, lensfc)], d_stc > 0.0001)
-    ! print*, "proc ", Land_IAU_Control%me, " indices with large increment"
-    ! print*, diff_indices
-    ! print*, d_stc(diff_indices)
-  
-    ! if(allocated(diff_indices)) deallocate(diff_indices)
-
     deallocate(stc_updated, slc_updated)
     deallocate(mask_tile)
   
@@ -496,16 +428,16 @@ subroutine noahmpdrv_timestep_finalize (itime, fhour, delt, km,  ncols,         
     write(*,'(a,i8)') ' soil grid cells with slc adjustment', n_slc 
 
 
-end subroutine noahmpdrv_timestep_finalize
+end subroutine noahmpdrv_timestep_init
 
   !> \ingroup NoahMP_LSM
 !! \brief This subroutine is called after noahmpdrv_run 
 !!  to free up allocated memory, if there are any  
 !!  code to do any needed consistency check will go here--
-!! \section arg_table_noahmpdrv_timestep_init Argument Table
-!! \htmlinclude noahmpdrv_timestep_init.html
+!! \section arg_table_noahmpdrv_timestep_finalize Argument Table
+!! \htmlinclude noahmpdrv_timestep_finalize.html
 !!
-  subroutine noahmpdrv_timestep_init (errmsg, errflg)       ! smc, t2mmp, q2mp,    
+  subroutine noahmpdrv_timestep_finalize (errmsg, errflg)       ! smc, t2mmp, q2mp,    
    
     use machine,          only: kind_phys 
     implicit none
@@ -517,7 +449,7 @@ end subroutine noahmpdrv_timestep_finalize
 
     !> note the IAU deallocate happens at the noahmpdrv_finalize
 
-  end subroutine noahmpdrv_timestep_init
+  end subroutine noahmpdrv_timestep_finalize
 
    !> \ingroup NoahMP_LSM
 !! \brief This subroutine mirrors noahmpdrv_init  
