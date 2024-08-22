@@ -56,7 +56,7 @@ contains
 !! \htmlinclude cu_gf_driver_run.html
 !!
 !>\section gen_gf_driver Grell-Freitas Cumulus Scheme Driver General Algorithm
-      subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
+      subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart, gf_coldstart, &
                cactiv,cactiv_m,g,cp,xlv,r_v,forcet,forceqv_spechum,phil,raincv, &
                qv_spechum,t,cld1d,us,vs,t2di,w,qv2di_spechum,p2di,psuri,        &
                hbot,htop,kcnv,xland,hfx2,qfx2,aod_gf,cliw,clcw,                 &
@@ -97,7 +97,7 @@ contains
    integer      :: its,ite, jts,jte, kts,kte
    integer, intent(in   ) :: im,km,ntracer,nchem,kdt
    integer, intent(in   ) :: ichoice_in,ichoicem_in,ichoice_s_in
-   logical, intent(in   ) :: flag_init, flag_restart, do_mynnedmf
+   logical, intent(in   ) :: flag_init, flag_restart, do_mynnedmf, gf_coldstart
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
    real (kind=kind_phys), intent(in) :: g,cp,xlv,r_v
    logical, intent(in   ) :: ldiag3d
@@ -427,7 +427,7 @@ contains
       ccn_m(i) = 0.
 
       ! set aod and ccn
-      if (flag_init .and. .not.flag_restart) then
+      if ((flag_init .and. .not.flag_restart) .or. gf_coldstart) then
         aod_gf(i)=aodc0
       else
         if((cactiv(i).eq.0) .and. (cactiv_m(i).eq.0))then

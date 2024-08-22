@@ -577,6 +577,13 @@
   dimensions = ()
   type = logical
   intent = in
+[gf_coldstart]
+  standard_name = flag_for_cold_start_gf
+  long_name = flag to cold start G-F 
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ichoice_in]
   standard_name = identifier_for_c3_or_gf_deep_convection_closure
   long_name = flag for C3 or GF deep convection closure
