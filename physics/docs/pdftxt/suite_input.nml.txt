@@ -388,6 +388,12 @@ show some variables in the namelist that must match the SDF.
 <tr><td>qc_crt            <td>gfdl_cloud_microphys       <td>minimum value of cloud condensate to allow partial cloudiness. Partial cloud can only exist when total cloud condensate exceeds \p qc_crt        <td>5.0e-8
 <tr><td>c_psaci           <td>gfdl_cloud_microphys       <td>accretion efficiency of cloud ice to snow (cloud ice -> snow). Increasing(decreasing) of \p c_psaci can boost(decrease) the accretion of cloud ice to snow              <td>0.02
 <tr><td>c_pgacs           <td>gfdl_cloud_microphys       <td>accretion efficiency of snow to graupel (snow -> graupel). Increasing(decreasing) of \p c_pgacs can boost(decrease) the accretion of snow to graupel             <td>2.0e-3
+<tr><td>reiflag           <td>gfdl_cloud_microphys       <td>cloud ice effective radius schme \n
+                                                         <ul>
+                                                         <li> 1: Heymsfield and Mcfarquhar (1996)
+                                                         <li> 2: Wyser (1998)
+                                                         </ul>
+                                                         <td>1
 <tr><td>rh_inc            <td>gfdl_cloud_microphys       <td>relative humidity increment for complete evaporation of cloud water and cloud ice          <td>0.25
 <tr><td>rh_inr            <td>gfdl_cloud_microphys       <td>relative humidity increment for sublimation of snow                                        <td>0.25
 <tr><td>rh_ins            <td>gfdl_cloud_microphys       <td>relative humidity increment for minimum evaporation of rain                                <td>0.25
