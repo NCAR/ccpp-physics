@@ -316,7 +316,7 @@ MODULE clm_lake
     REAL(KIND_PHYS), INTENT(IN)  :: min_lakeice, lakedepth_default, dtp
     LOGICAL, INTENT(IN) :: use_lakedepth
     INTEGER, DIMENSION(:), INTENT(IN) :: use_lake_model
-    REAL(KIND_PHYS), INTENT(INOUT), OPTIONAL :: clm_lake_initialized(:)
+    REAL(KIND_PHYS), INTENT(INOUT) :: clm_lake_initialized(:)
     LOGICAL, INTENT(IN) :: frac_grid, frac_ice
 
     !
@@ -326,7 +326,7 @@ MODULE clm_lake
          tg3, pgr, zlvl, qvcurr, xlat_d, xlon_d, ch, cm, &
          dlwsfci, dswsfci, oro_lakedepth, wind, &
          t1, qv1, prsl1
-    REAL(KIND_PHYS), DIMENSION(:), INTENT(IN), OPTIONAL :: &
+    REAL(KIND_PHYS), DIMENSION(:), INTENT(IN) :: &
          rainncprv, raincprv
     REAL(KIND_PHYS), DIMENSION(:,:), INTENT(in) :: gu0, gv0, prsi, gt0, phii
     LOGICAL, DIMENSION(:), INTENT(IN) :: flag_iter
@@ -343,34 +343,34 @@ MODULE clm_lake
          weasdi,       snodi,      hice,        qss_water, qss_ice,               &
          cmm_water,    cmm_ice,    chh_water,   chh_ice,                          &
          uustar_water, uustar_ice, zorlw,       zorli,     weasd,    snowd, fice
-    REAL(KIND_PHYS), DIMENSION(:), INTENT(INOUT) , OPTIONAL ::                    &
+    REAL(KIND_PHYS), DIMENSION(:), INTENT(INOUT)  ::                              &
          lake_t_snow, albedo, lake_t2m, lake_q2m
     LOGICAL, INTENT(INOUT) :: icy(:)
 
     !
     ! Lake model internal state stored by caller:
     !
-    INTEGER, DIMENSION( : ), INTENT(INOUT), OPTIONAL :: salty
-    INTEGER, DIMENSION( : ), INTENT(INOUT), OPTIONAL :: cannot_freeze
+    INTEGER, DIMENSION( : ), INTENT(INOUT) :: salty
+    INTEGER, DIMENSION( : ), INTENT(INOUT) :: cannot_freeze
 
-    real(kind_phys),           dimension(: ), OPTIONAL      ,intent(inout)  :: savedtke12d,    &
+    real(kind_phys),           dimension(: )      ,intent(inout)            :: savedtke12d,    &
                                                                                snowdp2d,       &    
                                                                                h2osno2d,       &    
                                                                                snl2d,          &    
                                                                                t_grnd2d
     
-    real(kind_phys),    dimension( :,: ), OPTIONAL,  INTENT(inout)  :: t_lake3d,       &    
+    real(kind_phys),    dimension( :,: ),  INTENT(inout)  :: t_lake3d,       &    
                                                                                   lake_icefrac3d
-    real(kind_phys),    dimension( :,-nlevsnow+1: )  ,INTENT(inout), OPTIONAL  :: t_soisno3d,     &    
+    real(kind_phys),    dimension( :,-nlevsnow+1: )  ,INTENT(inout)            :: t_soisno3d,     &    
                                                                                   h2osoi_ice3d,   &    
                                                                                   h2osoi_liq3d,   &    
                                                                                   h2osoi_vol3d,   &    
                                                                                   z3d,            &    
                                                                                   dz3d 
-    real(kind_phys),    dimension( :,-nlevsnow+0: )  ,INTENT(inout), OPTIONAL  :: zi3d    
+    real(kind_phys),    dimension( :,-nlevsnow+0: )  ,INTENT(inout)  :: zi3d    
 
-    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT), OPTIONAL :: clm_lakedepth
-    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT), OPTIONAL :: input_lakedepth
+    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT) :: clm_lakedepth
+    REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT) :: input_lakedepth
 
     !
     ! Error reporting:
@@ -5377,42 +5377,39 @@ if_pergro: if (PERGRO) then
 
   INTEGER , INTENT (IN)    :: im, me, master, km, kdt
   REAL(KIND_PHYS),     INTENT(IN)  :: min_lakeice, fhour
-  REAL(KIND_PHYS), DIMENSION(IM), INTENT(INOUT)::   FICE, hice
-  REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::   TG3, xlat_d, xlon_d
-  REAL(KIND_PHYS), DIMENSION(IM), INTENT(IN)::     tsfc
-  REAL(KIND_PHYS), DIMENSION(IM)  ,INTENT(INOUT)  :: clm_lake_initialized
-  integer, dimension(IM), intent(in) :: use_lake_model
-  !INTEGER , INTENT (IN) :: lakeflag
-  !INTEGER , INTENT (INOUT) :: lake_depth_flag
+  REAL(KIND_PHYS), DIMENSION(:), INTENT(INOUT)::   FICE, hice
+  REAL(KIND_PHYS), DIMENSION(:), INTENT(IN)::   TG3, xlat_d, xlon_d
+  REAL(KIND_PHYS), DIMENSION(:), INTENT(IN)::     tsfc
+  REAL(KIND_PHYS), DIMENSION(:)  ,INTENT(INOUT)  :: clm_lake_initialized
+  integer, dimension(:), intent(in) :: use_lake_model
   LOGICAL, INTENT (IN) ::   use_lakedepth
 
-  INTEGER, DIMENSION(IM), INTENT(IN)       :: ISLTYP
-  REAL(KIND_PHYS),    DIMENSION(IM), INTENT(INOUT)    :: snowd,weasd
-  REAL(kind_phys),    DIMENSION(IM,KM), INTENT(IN)       :: gt0, prsi
+  INTEGER, DIMENSION(:), INTENT(IN)       :: ISLTYP
+  REAL(KIND_PHYS),    DIMENSION(:), INTENT(INOUT)    :: snowd,weasd
+  REAL(kind_phys),    DIMENSION(:,:), INTENT(IN)       :: gt0
+  REAL(kind_phys),    DIMENSION(:,:), INTENT(IN)     :: prsi
   real(kind_phys),    intent(in)                                      :: lakedepth_default
 
-  real(kind_phys),    dimension(IM),intent(inout)                      :: clm_lakedepth
-  real(kind_phys),    dimension(IM),intent(inout)                      :: input_lakedepth
-  real(kind_phys),    dimension(IM),intent(in)                         :: oro_lakedepth
-  real(kind_phys),    dimension(IM),intent(out)                        :: savedtke12d
-  real(kind_phys),    dimension(IM),intent(out)                        :: snowdp2d,       &
+  real(kind_phys),    dimension(:),intent(inout)                          :: clm_lakedepth
+  real(kind_phys),    dimension(:),intent(inout)                          :: input_lakedepth
+  real(kind_phys),    dimension(:),intent(in)                             :: oro_lakedepth
+  real(kind_phys),    dimension(:),intent(out)                            :: savedtke12d
+  real(kind_phys),    dimension(:),intent(out)                            :: snowdp2d,       &
                                                                              h2osno2d,       &
                                                                              snl2d,          &
                                                                              t_grnd2d
                                                                               
-  real(kind_phys),    dimension(IM,nlevlake),INTENT(out)                  :: t_lake3d,       &
+  real(kind_phys),    dimension(:,:),INTENT(out)                          :: t_lake3d,       &
                                                                              lake_icefrac3d
-  real(kind_phys),    dimension(IM,-nlevsnow+1:nlevsoil ),INTENT(out)     :: t_soisno3d,     &
+  real(kind_phys),    dimension(:,-nlevsnow+1:),INTENT(out)               :: t_soisno3d,     &
                                                                              h2osoi_ice3d,   &
                                                                              h2osoi_liq3d,   &
                                                                              h2osoi_vol3d,   &
                                                                              z3d,            &
                                                                              dz3d
 
-  real(kind_phys),    dimension( IM,-nlevsnow+0:nlevsoil ),INTENT(out)   :: zi3d            
+  real(kind_phys),    dimension(:,-nlevsnow+0:),INTENT(out)   :: zi3d            
 
-  !LOGICAL, DIMENSION( : ),intent(out)                      :: lake
-  !REAL(KIND_PHYS), OPTIONAL,    DIMENSION( : ), INTENT(IN)    ::  lake_depth ! no separate variable for this in CCPP
 
   integer  :: n,i,j,k,ib,lev,bottom      ! indices
   real(kind_lake),dimension(1:im )    :: bd2d               ! bulk density of dry soil material [kg/m^3]

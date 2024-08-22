@@ -1048,7 +1048,7 @@ MODULE module_mp_thompson
       INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch, n_var_spp
       REAL, DIMENSION(:,:), INTENT(IN), OPTIONAL :: rand_pert
       REAL, DIMENSION(:), INTENT(IN), OPTIONAL :: spp_prt_list
-      REAL, DIMENSION(:), INTENT(IN) :: spp_stddev_cutoff
+      REAL, DIMENSION(:), INTENT(IN), OPTIONAL :: spp_stddev_cutoff
       CHARACTER(len=10), DIMENSION(:), INTENT(IN), OPTIONAL :: spp_var_list
       INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
 #if ( WRF_CHEM == 1 )
