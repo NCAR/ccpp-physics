@@ -286,6 +286,7 @@
   standard_name = flag_for_thompson_mp_scheme_initialization
   long_name = flag carrying scheme initialization status
   units = flag
+  dimensions = ()
   type = logical
   intent = inout
 [errmsg]
@@ -792,6 +793,7 @@
   standard_name = flag_for_thompson_mp_scheme_initialization
   long_name = flag carrying scheme initialization status
   units = flag
+  dimensions = ()
   type = logical
   intent = inout
 [errmsg]
@@ -818,6 +820,7 @@
   standard_name = flag_for_thompson_mp_scheme_initialization
   long_name = flag carrying scheme initialization status
   units = flag
+  dimensions = ()
   type = logical
   intent = inout
 [errmsg]
