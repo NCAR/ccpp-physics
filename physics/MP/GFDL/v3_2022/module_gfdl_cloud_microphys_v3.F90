@@ -36,7 +36,7 @@
 ! =======================================================================
 
 module module_gfdl_cloud_microphys_v3
-  use module_gfdlmp_param, only: cfg
+  use module_gfdlmp_param, only: cfg => cfg_v3
     implicit none
 
     private
@@ -606,7 +606,7 @@ subroutine module_gfdl_cloud_microphys_v3_init (me, master, nlunit, input_nml_fi
     close (nlunit)
 #endif
 
-    errmsg = cfg%setup(t_min, t_sub, tau_r2g, tau_smlt, tau_gmlt, dw_land, dw_ocean,        &
+    errmsg = cfg%update(t_min, t_sub, tau_r2g, tau_smlt, tau_gmlt, dw_land, dw_ocean,       &
          vw_fac, vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vw_max,       &
          vi_max, vs_max, vg_max, vr_max, qs_mlt, qs0_crt, ql0_max, qi0_max, qi0_crt, ifflag,&
          rh_inc, rh_ins, rh_inr, const_vw, const_vi, const_vs, const_vg, const_vr, rthresh, &
