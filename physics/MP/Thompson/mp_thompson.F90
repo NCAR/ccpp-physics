@@ -413,7 +413,7 @@ module mp_thompson
          real(kind_phys),           intent(in), optional :: spp_wts_mp(:,:)
          real(kind_phys),           intent(in), optional :: spp_prt_list(:)
          character(len=10),         intent(in), optional :: spp_var_list(:)
-         real(kind_phys),           intent(in) :: spp_stddev_cutoff(:)
+         real(kind_phys),           intent(in), optional :: spp_stddev_cutoff(:)
 
          logical, intent (in) :: cplchm
          ! ice and liquid water 3d precipitation fluxes - only allocated if cplchm is .true.
