@@ -33,6 +33,7 @@ contains
 
 !> \section arg_table_GFS_rrtmgp_pre_init Argument Table
 !! \htmlinclude GFS_rrtmgp_pre_init.html
+!!
 !!  Actuve gas-names are read from namelist. Set to interstitial%active_gases.
   subroutine GFS_rrtmgp_pre_init(nGases, active_gases, active_gases_array, errmsg, errflg)
     ! Inputs
@@ -95,6 +96,7 @@ contains
 
 !> \section arg_table_GFS_rrtmgp_pre_run Argument Table
 !! \htmlinclude GFS_rrtmgp_pre_run.html
+!!
 !! Sanitize inputs for use in RRTMGP.
   subroutine GFS_rrtmgp_pre_run(me, nCol, nLev, i_o3, doSWrad, doLWrad, fhswr, fhlwr,       &
        xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_g, con_rd,     &

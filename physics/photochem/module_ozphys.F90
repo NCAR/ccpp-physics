@@ -45,8 +45,14 @@ module module_ozphys
 
   public ty_ozphys
 
-!> Derived type containing data and procedures needed by ozone photochemistry parameterization
+! ######################################################################################### 
+!> \section arg_table_ty_ozphys Argument Table 
+!! \htmlinclude ty_ozphys.html
+!!
+!! Derived type containing data and procedures needed by ozone photochemistry parameterization
 !! *Note* All data field are ordered from surface-to-toa.
+!!
+! #########################################################################################
   type ty_ozphys
      ! Prognostic ozone.
      integer                      :: nlat          !< Number of latitudes.

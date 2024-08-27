@@ -52,7 +52,11 @@ module module_ccpp_suite_simulator
      real(kind_phys), dimension(:,:,:,:), allocatable :: q
   end type phys_tend_4d
 
-!> This type contains the meta information and data for each physics process.
+!> \section arg_table_base_physics_process Argument Table
+!! \htmlinclude base_physics_process.html
+!!
+!! This type contains the meta information and data for each physics process.
+!!
   type base_physics_process
      character(len=16)  :: name                 !< Physics process name
      logical            :: time_split = .false. !< Is process time-split?

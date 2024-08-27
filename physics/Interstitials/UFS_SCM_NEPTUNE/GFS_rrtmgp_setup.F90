@@ -33,6 +33,7 @@ contains
 
 !> \section arg_table_GFS_rrtmgp_setup_init Argument Table
 !! \htmlinclude GFS_rrtmgp_setup_init.html
+!!
   subroutine GFS_rrtmgp_setup_init(do_RRTMGP, imp_physics, imp_physics_fer_hires,        &
        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,  &
        imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer,     &
@@ -140,6 +141,7 @@ contains
 
 !> \section arg_table_GFS_rrtmgp_setup_timestep_init Argument Table
 !! \htmlinclude GFS_rrtmgp_setup_timestep_init.html
+!!
   subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, doSWrad, me,     &
        iaermdl, aeros_file, isol, slag, sdec, cdec, solcon, con_pi, co2dat_file,            &
        co2gbl_file, ictm, ico2, ntoz, ozphys, errmsg, errflg)
@@ -247,6 +249,7 @@ contains
 
 !> \section arg_table_GFS_rrtmgp_setup_finalize Argument Table
 !! \htmlinclude GFS_rrtmgp_setup_finalize.html
+!!
   subroutine GFS_rrtmgp_setup_finalize (errmsg, errflg)
     character(len=*),          intent(  out) :: errmsg
     integer,                   intent(  out) :: errflg
