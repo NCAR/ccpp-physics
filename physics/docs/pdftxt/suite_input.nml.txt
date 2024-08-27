@@ -495,6 +495,7 @@ show some variables in the namelist that must match the SDF.
 <tr><td>knob_ugwp_effac   <td>cires_ugwp                 <td>four-dimensional array that control efficiency of GWs triggerd by four types of physics-based sources. \n
                                                              Default values: 1.,1.,1.,1. - reflect that calculated GW-tendencies will be applied for the model state.
                                                          <td>1.,1.,1.,1.
+<tr><td>knob_ugwp_tauamp  <td>ugwpv1_gsldrag                <td>amplitude for GEOS-5/MERRA-2    <td>7.75e-3
 <tr><td>launch_level      <td>cires_ugwp                 <td>parameter has been introduced by EMC during implementation. It defines the interface model level from the surface at which NGWs are launched. \n
                                                              Default value for FV3GFS-64L, launch_level=25 and for FV3GFS-128L, launch_level=52.
                                                          <td>55 
