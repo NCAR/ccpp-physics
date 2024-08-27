@@ -17,7 +17,7 @@ Suites GFS_v17_p8, HRRR, RRFS_v1beta, and RAP, which were supported with CCPP v6
 The updates between GFSv16 and GFSv17 are carefully outlined in Bengtsson and Han (2024)(submitted to \a Weather \a and \a Forecasting). The main updates include:
 - Implementation of a positive definition mass-flux scheme and a method for removing the negative tracers (Han et al. 2022 \cite Han_et_al_2022)
 - Introduction of a new closure based on a prognostic evolution of the convective updraft area fraction in both shallow and deep convection (Bengtsson et al. 2022 \cite Bengtsson_2022)
-- Introduction of 3D effects of cold-pool dynamics and stochastic initiation using self-organizing cellular automata stochastic convective organization scheme (not supported; Bengtsson et al. 2021 \cite bengtsson_et_al_2021)
+- Introduction of 3D effects of cold-pool dynamics and stochastic initiation using self-organizing cellular automata stochastic convective organization scheme (not supported in SCM; Bengtsson et al. 2021 \cite bengtsson_et_al_2021)
 - Introduction of environmental wind shear effect and subgrid TKE dependence in convection, to seek improvements in hurricane forecast prediction (Han et al. 2024 \cite Han_2024)
 - Introduction of stricter convective initiation criteria to allow for more CAPE to build up to address a low CAPE bias in GFSv16 (Han et al. 2021 \cite han_2021)
 - Reduction of convective rain evaporation rate to address a systematic cold bias near the surface in GFSv16 (Han et al. 2021 \cite han_2021)

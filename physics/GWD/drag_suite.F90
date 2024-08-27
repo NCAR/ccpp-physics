@@ -1,14 +1,12 @@
 !> \file drag_suite.F90
-!! This file is the  parameterization of orographic gravity wave
+!! This file is the  parameterization of orographic drag
 !! drag, mountain blocking, and form drag.
 
-!> This module contains the orographic gravity wave drag scheme
+!> This module contains the orographic drag scheme
       module drag_suite
 
       contains
 
-!> \brief This subroutine initializes the orographic gravity wave drag scheme.
-!!
 !> \section arg_table_drag_suite_init Argument Table
 !! \htmlinclude drag_suite_init.html
 !!
@@ -32,7 +30,7 @@
       end if        
       end subroutine drag_suite_init
 
-!> \brief This subroutine includes orographic gravity wave drag, mountain
+!> This subroutine includes orographic drag, mountain
 !! blocking, and form drag.
 !!
 !> The time tendencies of zonal and meridional wind are altered to
@@ -43,7 +41,7 @@
 !> \section arg_table_drag_suite_run Argument Table
 !! \htmlinclude drag_suite_run.html
 !!
-!> \section gen_drag_suite GFS Orographic GWD Scheme General Algorithm
+!> \section gen_drag_suite Orographic drag Scheme General Algorithm
 !! -# Calculate subgrid mountain blocking
 !! -# Calculate orographic wave drag
 !!
