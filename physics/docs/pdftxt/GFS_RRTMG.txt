@@ -60,6 +60,7 @@
  - CSDLFsfc: Downward LW
  - CSDSFsfc: Downward SW
  - CSULFsfc: Upward LW
+ - CSDLFsfc: Downward LW
  - CSUSFsfc: Upward sw
  - CDUVBsfc: UV-B downward flux
 - At TOA total sky
