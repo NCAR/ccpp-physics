@@ -2,6 +2,10 @@
 !!
       module machine
 
+!! \section arg_table_machine
+!! \htmlinclude machine.html
+!!
+
       implicit none
 
       integer, parameter :: kind_sngl_prec = 4                          &
