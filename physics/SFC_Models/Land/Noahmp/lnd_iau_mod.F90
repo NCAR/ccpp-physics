@@ -400,6 +400,10 @@ subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, errmsg, errflg
    character(len=*),                     intent(out) :: errmsg
    integer,                              intent(out) :: errflg
 
+   ! Initialize CCPP error handling variables
+   errmsg = ''
+   errflg = 0
+
    if (allocated (wk3_stc)) deallocate (wk3_stc)
    if (allocated (wk3_slc)) deallocate (wk3_slc)
    if (allocated (wk3_slmsk)) deallocate (wk3_slmsk)
@@ -426,6 +430,10 @@ end subroutine land_iau_mod_finalize
    real(kind=kind_phys) t1,t2,sx,wx,wt,dtp
    integer n,i,j,k,kstep,nstep,itnext
    integer :: ntimes
+
+    ! Initialize CCPP error handling variables
+   errmsg = ''
+   errflg = 0
 
    ntimes = Land_IAU_Control%ntimes
 
