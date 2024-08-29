@@ -21,8 +21,6 @@ module mp_thompson
 
       private
 
-      logical :: is_initialized = .False.
-
       integer, parameter :: ext_ndiag3d = 37
 
    contains
@@ -40,7 +38,7 @@ module mp_thompson
                                   nwfa, nifa, tgrs, prsl, phil, area,      &
                                   aerfld, mpicomm, mpirank, mpiroot,       &
                                   threads, ext_diag, diag3d,               &
-                                  errmsg, errflg)
+                                  is_initialized, errmsg, errflg)
 
          implicit none
 
@@ -49,6 +47,7 @@ module mp_thompson
          integer,                   intent(in   ) :: nlev
          real(kind_phys),           intent(in   ) :: con_g, con_rd, con_eps
          logical,                   intent(in   ) :: restart
+         logical,                   intent(inout) :: is_initialized
          integer,                   intent(in   ) :: imp_physics
          integer,                   intent(in   ) :: imp_physics_thompson
          ! Hydrometeors
@@ -338,12 +337,12 @@ module mp_thompson
                               spp_prt_list, spp_var_list,          &
                               spp_stddev_cutoff,                   &
                               cplchm, pfi_lsan, pfl_lsan,          &
-                              errmsg, errflg)
+                              is_initialized, errmsg, errflg)
 
          implicit none
 
          ! Interface variables
-
+         logical,                   intent(inout) :: is_initialized
          ! Dimensions and constants
          integer,                   intent(in   ) :: ncol
          integer,                   intent(in   ) :: nlev
@@ -915,10 +914,10 @@ module mp_thompson
 !> \section arg_table_mp_thompson_finalize Argument Table
 !! \htmlinclude mp_thompson_finalize.html
 !!
-      subroutine mp_thompson_finalize(errmsg, errflg)
+      subroutine mp_thompson_finalize(is_initialized, errmsg, errflg)
 
          implicit none
-
+         logical,                   intent(inout) :: is_initialized
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
 
