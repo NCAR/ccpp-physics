@@ -128,9 +128,7 @@ physics/SFC_Models/SeaIce/CICE/sfc_cice.*                                    @wd
 physics/SFC_Models/SeaIce/CICE/sfc_sice.*                                    @wd20xw                                   @grantfirl @Qingfu-Liu @dustinswales
 physics/hooks/machine.*                                                                                                @grantfirl @Qingfu-Liu @dustinswales
 physics/hooks/physcons.F90                                                                                             @grantfirl @Qingfu-Liu @dustinswales
-physics/photochem/h2o_def.*                                                                                            @grantfirl @Qingfu-Liu @dustinswales
-physics/photochem/h2ointerp.f90                                                                                        @grantfirl @Qingfu-Liu @dustinswales
-physics/photochem/h2ophys.*                                                  @Qingfu-Liu                               @grantfirl @Qingfu-Liu @dustinswales
+physics/photochem/module_h2ophys.*                                           @Qingfu-Liu                               @grantfirl @Qingfu-Liu @dustinswales
 physics/photochem/module_ozphys.*                                            @dustinswales                             @grantfirl @Qingfu-Liu @dustinswales
 physics/smoke_dust/*                                                         @haiqinli                                 @grantfirl @Qingfu-Liu @dustinswales
 physics/tools/funcphys.f90                                                                                             @grantfirl @Qingfu-Liu @dustinswales
