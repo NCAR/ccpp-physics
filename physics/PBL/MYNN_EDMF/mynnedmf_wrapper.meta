@@ -1150,6 +1150,14 @@
   kind = kind_phys
   intent = inout
   optional = True
+[tmf]
+  standard_name = tendency_of_vertically_diffused_tracer_concentration
+  long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
 [flag_for_pbl_generic_tend]
   standard_name = flag_for_generic_tendency_due_to_planetary_boundary_layer
   long_name = true if GFS_PBL_generic should calculate tendencies
@@ -1428,6 +1436,27 @@
   dimensions = ()
   type = integer
   intent = in
+[imfdeepcnv]
+  standard_name = control_for_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imfdeepcnv_c3]
+  standard_name = identifier_for_c3_deep_convection
+  long_name = flag for C3 deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imfdeepcnv_samf]
+  standard_name = identifer_for_scale_aware_mass_flux_deep_convection
+  long_name = flag for SAMF deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in 
 [nssl_ccn_on]
   standard_name = nssl_ccn_on
   long_name = CCN activation flag in NSSL micro

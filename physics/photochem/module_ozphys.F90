@@ -205,8 +205,9 @@ contains
   ! #########################################################################################
   ! Procedure (type-bound) for NRL prognostic ozone (2015).
   ! #########################################################################################
-  subroutine run_o3prog_2015(this, con_1ovg, dt, p, t, dp, ozpl, oz, do_diag, do3_dt_prd, &
+  subroutine run_o3prog_2015(this, con_1ovg, dt, p, t, dp, ozpl, oz, do3_dt_prd,            &
        do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
+
     class(ty_ozphys), intent(in) :: this
     real(kind_phys),  intent(in) :: &
          con_1ovg       ! Physical constant: One divided by gravitational acceleration (m-1 s2)
@@ -220,7 +221,6 @@ contains
          ozpl           ! Ozone forcing data
     real(kind_phys), intent(inout), dimension(:,:) :: &
          oz             ! Ozone concentration updated by physics
-    logical, intent(in) :: do_diag
     real(kind_phys), intent(inout), dimension(:,:), optional :: &
          do3_dt_prd,  & ! Physics tendency: production and loss effect
          do3_dt_ozmx, & ! Physics tendency: ozone mixing ratio effect
@@ -305,12 +305,11 @@ contains
        enddo
 
        ! Diagnostics (optional)
-       if (do_diag) then
-          do3_dt_prd(:,iLev)  = prod(:,1) * dt
-          do3_dt_ozmx(:,iLev) = prod(:,2) * (oz(:,iLev) - prod(:,6)) * dt
-          do3_dt_temp(:,iLev) = prod(:,3)*(t(:,iLev)-prod(:,5))*dt
-          do3_dt_ohoz(:,iLev) = prod(:,4) * (colo3(:,iLev)-coloz(:,iLev))*dt
-       endif
+       if (present(do3_dt_prd))  do3_dt_prd(:,iLev)  = prod(:,1) * dt
+       if (present(do3_dt_ozmx)) do3_dt_ozmx(:,iLev) = prod(:,2) * (oz(:,iLev) - prod(:,6)) * dt
+       if (present(do3_dt_temp)) do3_dt_temp(:,iLev) = prod(:,3)*(t(:,iLev)-prod(:,5))*dt
+       if (present(do3_dt_ohoz)) do3_dt_ohoz(:,iLev) = prod(:,4) * (colo3(:,iLev)-coloz(:,iLev))*dt
+
     enddo
 
     return
@@ -319,8 +318,9 @@ contains
   ! #########################################################################################
   ! Procedure (type-bound) for NRL prognostic ozone (2006).
   ! #########################################################################################
-  subroutine run_o3prog_2006(this, con_1ovg, dt, p, t, dp, ozpl, oz, do_diag, do3_dt_prd, &
+  subroutine run_o3prog_2006(this, con_1ovg, dt, p, t, dp, ozpl, oz, do3_dt_prd,            &
        do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
+
     class(ty_ozphys), intent(in) :: this
     real(kind_phys),  intent(in) :: &
          con_1ovg       ! Physical constant: One divided by gravitational acceleration (m-1 s2)
@@ -334,8 +334,7 @@ contains
          ozpl           ! Ozone forcing data
     real(kind_phys), intent(inout), dimension(:,:) :: &
          oz             ! Ozone concentration updated by physics
-    logical, intent(in) :: do_diag
-    real(kind_phys), intent(inout), dimension(:,:) :: &
+    real(kind_phys), intent(inout), dimension(:,:), optional :: &
          do3_dt_prd,  & ! Physics tendency: production and loss effect
          do3_dt_ozmx, & ! Physics tendency: ozone mixing ratio effect
          do3_dt_temp, & ! Physics tendency: temperature effect
@@ -431,12 +430,11 @@ contains
        endif
 
        ! Diagnostics (optional)
-       if (do_diag) then
-          do3_dt_prd(:,iLev)  = prod(:,1)*dt
-          do3_dt_ozmx(:,iLev) = (oz(:,iLev) - ozib(:))
-          do3_dt_temp(:,iLev) = prod(:,3) * t(:,iLev) * dt
-          do3_dt_ohoz(:,iLev) = prod(:,4) * colo3(:,iLev) * dt
-       endif
+       if (present(do3_dt_prd))  do3_dt_prd(:,iLev)  = prod(:,1)*dt
+       if (present(do3_dt_ozmx)) do3_dt_ozmx(:,iLev) = (oz(:,iLev) - ozib(:))
+       if (present(do3_dt_temp)) do3_dt_temp(:,iLev) = prod(:,3) * t(:,iLev) * dt
+       if (present(do3_dt_ohoz)) do3_dt_ohoz(:,iLev) = prod(:,4) * colo3(:,iLev) * dt
+
     enddo
 
     return
