@@ -82,9 +82,9 @@ module land_iau_mod
       character(len=64)    :: fn_nml          !< namelist filename for surface data cycling
       real(kind=kind_phys) :: dtp             !< physics timestep in seconds
       real(kind=kind_phys) :: fhour           !< current forecast hour
-      character(len=:), pointer, dimension(:) :: input_nml_file => null() !<character string containing full namelist
+!      character(len=:), pointer, dimension(:) :: input_nml_file => null() !<character string containing full namelist
                                                                           !< for use with internal file reads
-      integer              :: input_nml_file_length    !<length (number of lines) in namelist for internal reads
+!      integer              :: input_nml_file_length    !<length (number of lines) in namelist for internal reads
 
       integer              :: ntimes
 
@@ -204,8 +204,8 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    Land_IAU_Control%dtp = dtp
    Land_IAU_Control%fhour = fhour
 
-   Land_IAU_Control%input_nml_file = input_nml_file
-   Land_IAU_Control%input_nml_file_length = input_nml_file_length
+!   Land_IAU_Control%input_nml_file = input_nml_file
+!   Land_IAU_Control%input_nml_file_length = input_nml_file_length
 
    Land_IAU_Control%upd_stc = land_iau_upd_stc
    Land_IAU_Control%upd_slc = land_iau_upd_slc
