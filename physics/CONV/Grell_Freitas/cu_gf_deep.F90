@@ -1,6 +1,7 @@
 !>\file cu_gf_deep.F90 
 !! This file is the Grell-Freitas deep convection scheme.
 
+!> This module contains the Grell_Freitas deep convection scheme
 module cu_gf_deep
      use machine , only : kind_phys
      use physcons, only : qamin

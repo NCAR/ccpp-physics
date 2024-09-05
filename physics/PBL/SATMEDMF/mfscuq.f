@@ -1,5 +1,7 @@
 !>\file mfscuq.f
-!! This file contains the mass flux and downdraft parcel preperties
+!!
+
+!> This module contains the mass flux and downdraft parcel properties
 !! parameterization for stratocumulus-top-driven turbulence (updated version).
       module mfscuq_mod
       contains

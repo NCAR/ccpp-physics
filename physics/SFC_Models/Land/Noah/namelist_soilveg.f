@@ -1,6 +1,8 @@
 !>\file namelist_soilveg.f
 
 !>\ingroup Noah_LSM
+
+!> This module contains namelist options for Noah LSM
       module namelist_soilveg
       implicit none
       save

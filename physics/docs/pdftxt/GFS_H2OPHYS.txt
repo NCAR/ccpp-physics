@@ -1,5 +1,5 @@
 /**
-\page GFS_H2OPHYS GFS Stratospheric H2O Scheme
+\page GFS_H2OPHYS Stratospheric H2O Scheme
 \section des_h2o Description
 To improve the treatment of stratospheric water vapor in the global model, NCEP implemented a parameterization of photochemical production and loss (P-L) of water vapor  through methane oxidation and photolysis of H2O in the upper mesosphere due to solar Lyman alpha absorption is implemented in GFS. 
 

@@ -1,6 +1,9 @@
 !> \file gfdl_cloud_microphys.F90
 !! This file contains the CCPP entry point for the column GFDL cloud microphysics ( Chen and Lin (2013)
 !! \cite chen_and_lin_2013 ).
+
+!> This module contains the CCPP entry point for the column GFDL cloud microphysics ( Chen and Lin (2013)
+!! \cite chen_and_lin_2013 ).
 module gfdl_cloud_microphys
 
    use gfdl_cloud_microphys_mod, only: gfdl_cloud_microphys_mod_init,   &
