@@ -1,10 +1,10 @@
-
 !>\file module_nst_water_prop.f90
 !! This file contains GFS NSST water property subroutines.
 
 !>\defgroup waterprop GFS NSST Water Property
-!!This module contains GFS NSST water property subroutines.
 !!\ingroup gfs_nst_main_mod
+
+!> This module contains GFS NSST water property subroutines.
 module module_nst_water_prop
   use machine ,               only : kind_phys
   use module_nst_parameters , only : t0k, zero, one, half

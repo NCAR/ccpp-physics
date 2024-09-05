@@ -11,22 +11,10 @@
 
       contains
 
-!> \defgroup sfc_sice for coupling to CICE
-!! @{
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
-!!
 !> \brief Brief description of the subroutine
-!!
 !! \section arg_table_sfc_cice_run Arguments
 !! \htmlinclude sfc_cice_run.html
 !!
-
-!!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
-!!  @{
-
 
 !!      use physcons, only : hvap => con_hvap,  cp => con_cp,           &
 !!    &                     rvrdm1 => con_fvirt, rd => con_rd
@@ -163,5 +151,4 @@
       end subroutine sfc_cice_run
 !-----------------------------------
 
-!> @}
       end module sfc_cice
