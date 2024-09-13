@@ -119,7 +119,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    !character(len=32)                          :: fn_nml = "input.nml"
    character(len=:), pointer, dimension(:)    :: input_nml_file => null()
    integer                                    :: input_nml_file_length    !< length(number of lines) in namelist for internal reads
-   
+   character(len=4)                           :: iosstr
 
    !> these are not available through the CCPP interface so need to read them from namelist file
    !> vars to read from namelist
@@ -149,7 +149,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
     ! https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100886
     allocate(input_nml_file, mold=input_nml_file_i)
     input_nml_file => input_nml_file_i
-    read(input_nml_file, nml=land_iau_nml)
+    read(input_nml_file, nml=land_iau_nml, ERR=888, END=999, iostat=ios)
     ! Set length (number of lines) in namelist for internal reads
     input_nml_file_length = size(input_nml_file)
 #else
@@ -165,7 +165,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
       Land_IAU_Control%fn_nml = trim(fn_nml)   ! maynot need this
       open (unit=nlunit, file=trim(fn_nml), action='READ', status='OLD', iostat=ios, iomsg=ioerrmsg)
       rewind(nlunit)
-      read (nlunit, nml=land_iau_nml)
+      read (nlunit, nml=land_iau_nml, ERR=888, END=999, iostat=ios)
       close (nlunit)
       if (ios /= 0) then
          ! call mpp_error(FATAL, 'lnd_iau_mod_set_control: error reading namelist file ',trim(fn_nml))
@@ -178,6 +178,24 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
        end if
    endif 
 #endif
+ 
+888 if (ios /= 0) then  ! .and. ios /= iostat_end) then
+         write(iosstr, '(I0)') ios
+         if (me == mpi_root) then
+           write(6,*) 'lnd_iau_mod_set_control: I/O error code '//trim(iosstr)//' at land_iau namelist read' 
+         endif         
+         errmsg = 'lnd_iau_mod_set_control: I/O error code '//trim(iosstr)//' at land_iau namelist read'  
+         errflg = 1
+         return
+    end if 
+       
+999 if (ios /= 0) then   ! ios .eq. iostat_end) then  
+        write(iosstr, '(I0)') ios
+        if (me == mpi_root) then
+          WRITE(6, * ) 'lnd_iau_mod_set_control: Warning! EoF ('//trim(iosstr)//') while reading land_iau namelist,' &
+                  // ' likely because land_iau_nml was not found in input.nml. It will be set to default.' 
+        endif
+   endif
 
    if (me == mpi_root) then
       write(6,*) "land_iau_nml"
