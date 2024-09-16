@@ -12,11 +12,10 @@
       contains
 
       subroutine samfdeepcnv_init(imfdeepcnv,imfdeepcnv_samf,            &
-     &                            sigmab_coldstart,errmsg, errflg)
+     &                            errmsg, errflg)
 
       integer,                   intent(in) :: imfdeepcnv
       integer,                   intent(in) :: imfdeepcnv_samf
-      logical,                   intent(in) :: sigmab_coldstart
       character(len=*),          intent(out) :: errmsg
       integer,                   intent(out) :: errflg
 
@@ -2916,7 +2915,8 @@ c
       if(progsigma)then
 
 !Initial computations, dynamic q-tendency                                                                                                                                               
-         if(first_time_step .and. (.not.restart .or. sigmab_coldstart))then
+         if(first_time_step .and. (.not.restart 
+     &           .or. sigmab_coldstart))then
             do k = 1,km
                do i = 1,im
                   qadv(i,k)=0.
