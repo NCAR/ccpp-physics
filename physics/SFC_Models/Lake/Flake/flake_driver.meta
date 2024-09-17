@@ -93,7 +93,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [xlat]
   standard_name = latitude
   long_name = latitude
@@ -312,6 +311,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t_wML]
   standard_name = lake_mixed_layer_temperature
   long_name = temperature of lake mixing layer
@@ -320,6 +320,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t_mnw]
   standard_name = mean_temperature_of_the_water_column
   long_name = thee  mean temperature of the water column
@@ -328,6 +329,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [H_B]
   standard_name = the_thermally_active_layer_depth_of_the_bottom_sediment
   long_name = the depth of the thermally active layer of the bottom sediment
@@ -336,6 +338,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [T_B]
   standard_name = temperature_at_the_bottom_of_the_sediment_upper_layer
   long_name = the temperature at the bottom of the sediment upper layer
@@ -344,6 +347,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t_bot1]
   standard_name = lake_bottom_temperature
   long_name = the temperature at the water-bottom sediment interface
@@ -352,6 +356,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [t_bot2]
   standard_name = temperature_for_bottom_layer_of_water
   long_name = the temperature at the lake bottom layer water
@@ -360,6 +365,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [c_t]
   standard_name = shape_factor_of_water_temperature_vertical_profile
   long_name = the shape factor of water temperature vertical profile
@@ -368,6 +374,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [T_snow]
   standard_name = temperature_of_snow_on_lake
   long_name = the temperature of snow on a lake
@@ -376,6 +383,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [T_ice]
   standard_name = surface_skin_temperature_over_ice
   long_name = surface skin temperature over ice
@@ -440,6 +448,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [t_wML]
   standard_name = lake_mixed_layer_temperature
   long_name = temperature of lake mixing layer
@@ -448,6 +457,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [tsurf]
   standard_name = surface_skin_temperature_after_iteration_over_water
   long_name = surface skin temperature after iteration over water

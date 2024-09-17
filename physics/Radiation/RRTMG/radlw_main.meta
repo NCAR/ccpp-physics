@@ -280,21 +280,21 @@
 [iovr_dcorr]
   standard_name = flag_for_decorrelation_length_cloud_overlap_method
   long_name = choice of decorrelation-length cloud overlap method
-  units         = flag
+  units = flag
   dimensions = ()
   type = integer
   intent = in
 [iovr_exp]
   standard_name = flag_for_exponential_cloud_overlap_method
   long_name = choice of exponential cloud overlap method
-  units         = flag
+  units = flag
   dimensions = ()
   type = integer
   intent = in
 [iovr_exprand]
   standard_name = flag_for_exponential_random_cloud_overlap_method
   long_name = choice of exponential-random cloud overlap method
-  units     = flag
+  units = flag
   dimensions = ()
   type = integer
   intent = in

@@ -307,6 +307,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [QI_BL]
   standard_name = subgrid_scale_cloud_ice_mixing_ratio
   long_name = subgrid cloud ice mixing ratio from PBL scheme
@@ -315,6 +316,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [CLDFRA_BL]
   standard_name = subgrid_scale_cloud_area_fraction_in_atmosphere_layer
   long_name = subgrid cloud fraction from PBL scheme
@@ -323,6 +325,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [delp]
   standard_name = layer_pressure_thickness_for_radiation
   long_name = layer pressure thickness on radiation levels

@@ -101,7 +101,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = True
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration
@@ -236,6 +235,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP
   long_name = air pressure at vertical layer for radiation calculation
@@ -244,6 +244,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [t_lay]
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature at vertical layer for radiation calculation
@@ -252,6 +253,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [qs_lay]
   standard_name = saturation_vapor_pressure
   long_name = saturation vapor pressure
@@ -260,6 +262,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [q_lay]
   standard_name = water_vapor_mixing_ratio
   long_name = water vaport mixing ratio
@@ -268,6 +271,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [relhum]
   standard_name = relative_humidity
   long_name = layer relative humidity
@@ -276,6 +280,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [lsmask]
   standard_name = area_type
   long_name = landmask: sea/land/ice=0/1/2
@@ -376,6 +381,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qci_conv]
   standard_name = convective_cloud_condesate_after_rainout
   long_name = convective cloud condesate after rainout
@@ -393,6 +399,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [deltaZc]
   standard_name = layer_thickness_from_layer_center
   long_name = layer_thickness
@@ -401,6 +408,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [deltaP]
   standard_name = layer_thickness_in_Pa
   long_name = layer_thickness_in_Pa
@@ -409,6 +417,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [qc_mynn]
   standard_name = subgrid_scale_cloud_liquid_water_mixing_ratio
   long_name = subgrid cloud water mixing ratio from PBL scheme
@@ -417,6 +426,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [qi_mynn]
   standard_name = subgrid_scale_cloud_ice_mixing_ratio
   long_name = subgrid cloud ice mixing ratio from PBL scheme
@@ -425,6 +435,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_pbl_frac]
   standard_name = subgrid_scale_cloud_area_fraction_in_atmosphere_layer
   long_name = subgrid cloud fraction from PBL scheme
@@ -433,6 +444,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -566,6 +578,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cld_cnv_lwp]
   standard_name = convective_cloud_liquid_water_path
   long_name = layer convective cloud liquid water path
@@ -574,6 +587,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cld_cnv_reliq]
   standard_name = mean_effective_radius_for_liquid_convective_cloud
   long_name = mean effective radius for liquid convective cloud
@@ -582,6 +596,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cld_cnv_iwp]
   standard_name = convective_cloud_ice_water_path
   long_name = layer convective cloud ice water path
@@ -590,6 +605,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cld_cnv_reice]
   standard_name = mean_effective_radius_for_ice_convective_cloud
   long_name = mean effective radius for ice convective cloud
@@ -598,6 +614,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cld_pbl_lwp]
   standard_name = MYNN_SGS_cloud_liquid_water_path
   long_name = layer convective cloud liquid water path
@@ -606,6 +623,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cld_pbl_reliq]
   standard_name = mean_effective_radius_for_liquid_MYNN_SGS_cloud
   long_name = mean effective radius for liquid MYNN_SGS cloud
@@ -614,6 +632,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cld_pbl_iwp]
   standard_name = MYNN_SGS_cloud_ice_water_path
   long_name = layer convective cloud ice water path
@@ -622,6 +641,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cld_pbl_reice]
   standard_name = mean_effective_radius_for_ice_MYNN_SGS_cloud
   long_name = mean effective radius for ice MYNN_SGS cloud
@@ -630,6 +650,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [lwp_ex]
   standard_name = liq_water_path_from_microphysics
   long_name = total liquid water path from explicit microphysics

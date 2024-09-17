@@ -313,13 +313,13 @@
       real(kind=kind_phys), intent(inout) :: ELVMAX(:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     THETA(:), SIGMA(:), GAMMA(:)
-      real(kind=kind_phys), intent(inout) :: DUSFC(:), DVSFC(:)
-      real(kind=kind_phys), intent(out) :: RDXZB(:)
-      real(kind=kind_phys), intent(inout) :: dtaux2d_ms(:,:),           &
+      real(kind=kind_phys), intent(inout) :: DUSFC(:), DVSFC(:),        &
+     &                     RDXZB(:)
+      real(kind=kind_phys), intent(inout), optional :: dtaux2d_ms(:,:), &
      &                     dtauy2d_ms(:,:), dtaux2d_bl(:,:),            &
      &                     dtauy2d_bl(:,:)
-      real(kind=kind_phys), intent(inout) :: dusfc_ms(:), dvsfc_ms(:),  &
-     &                     dusfc_bl(:), dvsfc_bl(:)
+      real(kind=kind_phys), intent(inout), optional :: dusfc_ms(:),     &
+     &     dvsfc_ms(:), dusfc_bl(:), dvsfc_bl(:)
       integer, intent(in) :: nmtvr
       logical, intent(in) :: lprnt
       logical, intent(in) :: ldiag_ugwp

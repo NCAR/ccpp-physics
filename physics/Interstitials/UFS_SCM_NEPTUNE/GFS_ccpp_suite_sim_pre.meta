@@ -37,7 +37,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [dtp]
   standard_name = timestep_for_physics
   long_name = physics timestep

@@ -118,6 +118,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [crw]
   standard_name = mass_number_concentration_of_rain_water_in_air
   long_name = rain number concentration
@@ -158,6 +159,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -369,6 +371,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cccna]
   standard_name = activated_cloud_condensation_nuclei_number_concentration_of_new_state
   long_name = number concentration of activated cloud condensation nuclei updated by physics
@@ -377,6 +380,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [qc]
   standard_name = cloud_liquid_water_mixing_ratio_of_new_state
   long_name = cloud water mixing ratio wrt dry+vapor (no condensates)
@@ -425,6 +429,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ccw]
   standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air_of_new_state
   long_name = cloud droplet number concentration
@@ -433,6 +438,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [crw]
   standard_name = mass_number_concentration_of_rain_of_new_state
   long_name = rain number concentration
@@ -473,6 +479,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [vh]
   standard_name = graupel_volume_of_new_state
   long_name = graupel particle volume
@@ -481,6 +488,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [vhl]
   standard_name = hail_volume_of_new_state
   long_name = hail particle volume
@@ -489,6 +497,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zrw]
   standard_name = reflectivity_of_rain_of_new_state
   long_name = rain reflectivity
@@ -497,6 +506,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zhw]
   standard_name = reflectivity_of_graupel_of_new_state
   long_name = graupel reflectivity
@@ -505,6 +515,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [zhl]
   standard_name = reflectivity_of_hail_of_new_state
   long_name = hail reflectivity
@@ -513,6 +524,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tgrs]
   standard_name = air_temperature_of_new_state
   long_name = model layer mean temperature

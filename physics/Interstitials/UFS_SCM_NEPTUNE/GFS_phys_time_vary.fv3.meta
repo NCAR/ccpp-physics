@@ -109,16 +109,16 @@
   type = integer
   intent = in
 [xlat_d]
-  standard_name = latitude
-  long_name = latitude
+  standard_name = latitude_in_degree
+  long_name = latitude in degree north
   units = degree_north
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
 [xlon_d]
-  standard_name = longitude
-  long_name = longitude
+  standard_name = longitude_in_degree
+  long_name = longitude in degree east
   units = degree_east
   dimensions = (horizontal_dimension)
   type = real
@@ -390,7 +390,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [lsm]
   standard_name = control_for_land_surface_scheme
   long_name = flag for land surface model
@@ -1582,7 +1581,6 @@
   type = character
   kind = len=256
   intent = in
-  optional = True
 [use_ufo]
   standard_name = flag_for_gcycle_surface_option
   long_name = flag for gcycle surface option
@@ -1924,7 +1922,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [cvb]
   standard_name = pressure_at_convective_cloud_base_between_sw_radiation_calls_from_cnvc90
   long_name = convective cloud bottom pressure

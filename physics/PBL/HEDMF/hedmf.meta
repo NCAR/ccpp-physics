@@ -539,7 +539,6 @@
   dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
   type = integer
   intent = in
-  optional = True
 [index_of_process_pbl]
   standard_name = index_of_subgrid_scale_vertical_mixing_process_in_cumulative_change_index
   long_name = index of subgrid scale vertical mixing process in second dimension of array cumulative change index

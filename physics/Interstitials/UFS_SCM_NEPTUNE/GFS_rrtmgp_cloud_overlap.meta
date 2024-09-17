@@ -92,6 +92,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -204,6 +205,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [iovr_convcld]
   standard_name = flag_for_convective_cloud_overlap_method_for_radiation
   long_name = flag for convective cloud overlap method
@@ -255,6 +257,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [cnv_cloud_overlap_param]
   standard_name = convective_cloud_overlap_param
   long_name = convective cloud overlap parameter
@@ -263,6 +266,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [precip_overlap_param]
   standard_name = precip_overlap_param
   long_name = precipitation overlap parameter
@@ -271,6 +275,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

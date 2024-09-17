@@ -85,7 +85,7 @@
   long_name = MPI communicator
   units = index
   dimensions = ()
-  type = integer
+  type = MPI_Comm
   intent = in
 [mpirank]
   standard_name = mpi_rank
@@ -338,6 +338,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure at vertical interface for radiation calculation
@@ -346,6 +347,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [t_lay]
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature at vertical layer for radiation calculation
@@ -354,6 +356,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [t_lev]
   standard_name = air_temperature_at_interface_for_RRTMGP
   long_name = air temperature  at vertical interface for radiation calculation
@@ -362,6 +365,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [vmr_o2]
   standard_name = volume_mixing_ratio_for_o2
   long_name = molar mixing ratio of o2 in with respect to dry air
@@ -370,6 +374,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [vmr_h2o]
   standard_name = volume_mixing_ratio_for_h2o
   long_name = molar mixing ratio of h2o in with respect to dry air
@@ -378,6 +383,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [vmr_o3]
   standard_name = volume_mixing_ratio_for_o3
   long_name = molar mixing ratio of o3 in with respect to dry air
@@ -386,6 +392,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [vmr_ch4]
   standard_name = volume_mixing_ratio_for_ch4
   long_name = molar mixing ratio of ch4 in with respect to dry air
@@ -394,6 +401,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [vmr_n2o]
   standard_name = volume_mixing_ratio_for_n2o
   long_name = molar mixing ratio of n2o in with respect to dry air
@@ -402,6 +410,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [vmr_co2]
   standard_name = volume_mixing_ratio_for_co2
   long_name = molar mixing ratio of co2 in with respect to dry air
@@ -410,6 +419,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -490,6 +500,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_cnv_lwp]
   standard_name = convective_cloud_liquid_water_path
   long_name = layer convective cloud liquid water path
@@ -498,6 +509,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_cnv_reliq]
   standard_name = mean_effective_radius_for_liquid_convective_cloud
   long_name = mean effective radius for liquid convective cloud
@@ -506,6 +518,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_cnv_iwp]
   standard_name = convective_cloud_ice_water_path
   long_name = layer convective cloud ice water path
@@ -514,6 +527,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_cnv_reice]
   standard_name = mean_effective_radius_for_ice_convective_cloud
   long_name = mean effective radius for ice convective cloud
@@ -522,6 +536,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_pbl_lwp]
   standard_name = MYNN_SGS_cloud_liquid_water_path
   long_name = layer convective cloud liquid water path
@@ -530,6 +545,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_pbl_reliq]
   standard_name = mean_effective_radius_for_liquid_MYNN_SGS_cloud
   long_name = mean effective radius for liquid MYNN_SGS cloud
@@ -538,6 +554,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_pbl_iwp]
   standard_name = MYNN_SGS_cloud_ice_water_path
   long_name = layer convective cloud ice water path
@@ -546,6 +563,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cld_pbl_reice]
   standard_name = mean_effective_radius_for_ice_MYNN_SGS_cloud
   long_name = mean effective radius for ice MYNN_SGS cloud
@@ -554,6 +572,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cloud_overlap_param]
   standard_name = cloud_overlap_param
   long_name = cloud overlap parameter
@@ -562,6 +581,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [active_gases_array]
   standard_name = list_of_active_gases_used_by_RRTMGP
   long_name = list of active gases used by RRTMGP
@@ -570,6 +590,7 @@
   type = character
   kind = len=*
   intent = in
+  optional = True
 [aersw_tau]
   standard_name = aerosol_optical_depth_for_shortwave_bands_01_16
   long_name = aerosol optical depth for shortwave bands 01-16
@@ -617,6 +638,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fluxswDOWN_allsky]
   standard_name = RRTMGP_sw_flux_profile_downward_allsky
   long_name = RRTMGP downward shortwave all-sky flux profile
@@ -625,6 +647,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fluxswUP_clrsky]
   standard_name = RRTMGP_sw_flux_profile_upward_clrsky
   long_name = RRTMGP upward shortwave clr-sky flux profile
@@ -633,6 +656,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fluxswDOWN_clrsky]
   standard_name = RRTMGP_sw_flux_profile_downward_clrsky
   long_name = RRTMGP downward shortwave clr-sky flux profile
@@ -641,6 +665,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cldtausw]
   standard_name = cloud_optical_depth_layers_at_0p55mu_band
   long_name = approx .55mu band layer cloud optical depth

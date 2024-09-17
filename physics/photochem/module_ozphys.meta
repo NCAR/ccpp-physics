@@ -16,9 +16,4 @@
 [ccpp-arg-table]
   name = module_ozphys
   type = module
-#[ty_ozphys]
-#  standard_name = ty_ozphys
-#  long_name = definition of type ty_ozphys
-#  units = DDT
-#  dimensions = ()
-#  type = ty_ozphys
+  

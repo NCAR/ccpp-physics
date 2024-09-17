@@ -161,6 +161,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nwfa2d]
   standard_name = tendency_of_hygroscopic_aerosols_at_surface_adjacent_layer
   long_name = instantaneous fake water-friendly surface aerosol source
@@ -169,6 +170,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nifa2d]
   standard_name = tendency_of_nonhygroscopic_ice_nucleating_aerosols_at_surface_adjacent_layer
   long_name = instantaneous fake ice-friendly surface aerosol source
@@ -177,6 +179,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nwfa]
   standard_name = mass_number_concentration_of_hygroscopic_aerosols
   long_name = number concentration of water-friendly aerosols
@@ -194,6 +197,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tgrs]
   standard_name = air_temperature
   long_name = model layer mean temperature
@@ -277,6 +281,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -428,6 +433,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nwfa]
   standard_name = mass_number_concentration_of_hygroscopic_aerosols_of_new_state
   long_name = number concentration of water-friendly aerosols
@@ -445,6 +451,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nwfa2d]
   standard_name = tendency_of_hygroscopic_aerosols_at_surface_adjacent_layer
   long_name = instantaneous fake water-friendly surface aerosol source
@@ -453,6 +460,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [nifa2d]
   standard_name = tendency_of_nonhygroscopic_ice_nucleating_aerosols_at_surface_adjacent_layer
   long_name = instantaneous fake ice-friendly surface aerosol source
@@ -461,6 +469,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [aero_ind_fdb]
   standard_name = do_smoke_aerosol_indirect_feedback
   long_name = flag for wfa ifa emission indirect feedback
@@ -691,6 +700,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [reset_diag3d]
   standard_name = flag_reset_extended_diagnostics_output_arrays_from_thompson_microphysics
   long_name = flag for resetting extended diagnostics output arrays from thompson microphysics
@@ -705,6 +715,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   intent = in
+  optional = True
 [spp_mp]
   standard_name = control_for_microphysics_spp_perturbations
   long_name = control for microphysics spp perturbations
@@ -735,6 +746,7 @@
   type = character
   kind = len=10
   intent = in
+  optional = True
 [spp_stddev_cutoff]
   standard_name = magnitude_of_spp_standard_deviation_cutoff
   long_name = magnitude of spp standard deviation cutoff

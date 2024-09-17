@@ -15,6 +15,7 @@
 [ccpp-arg-table]
   name = GFS_phys_time_vary_init
   type = scheme
+
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -93,17 +94,17 @@
   type = integer
   intent = in
 [xlat_d]
-  standard_name = latitude
-  long_name = latitude
-  units = radian
+  standard_name = latitude_in_degree
+  long_name = latitude in degree north
+  units = degree_north
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
 [xlon_d]
-  standard_name = longitude
-  long_name = longitude
-  units = radian
+  standard_name = longitude_in_degree
+  long_name = longitude in degree east
+  units = degree_east
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

@@ -179,7 +179,7 @@
      &       flux2D_lwDOWN,pert_radtend,do_sppt,ca_global,tsfc_radtime, &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
-     &       dtdt,dtdtnp,htrlwu,                                        &
+     &       dtdt,dtdtnp,htrlw,                                         &
 !  ---  outputs:
      &       adjsfcdsw,adjsfcnsw,adjsfcdlw,                             &
      &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
@@ -241,7 +241,7 @@
 !  ---  input/output:
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dtdt
       real(kind=kind_phys), dimension(:,:), intent(inout), optional ::  &
-     &      dtdtnp, htrlwu
+     &      dtdtnp, htrlw
 
 !  ---  outputs:
       real(kind=kind_phys), dimension(:), intent(out) ::                &
@@ -416,7 +416,7 @@
      &              (fluxlwUP_jac(i,k)/fluxlwUP_jac(i,iSFC) -           &
      &              fluxlwDOWN_jac)
                ! Adjusted LW heating rate
-               htrlwu(i,k) = fluxlwnet_adj * con_g /                    &
+               htrlw(i,k) = fluxlwnet_adj * con_g /                     &
      &              (con_cp * (p_lev(i,k+1) - p_lev(i,k)))
 
                ! Add radiative heating rates to physics heating rate. Optionally, scaled w/ height
@@ -427,7 +427,7 @@
                   lfnc = 1.
                endif
                dtdt(i,k) = dtdt(i,k) + swh(i,k)*xmu(i) +                &
-     &              htrlwu(i,k)*lfnc + (1.-lfnc)*hlw(i,k)
+     &              htrlw(i,k)*lfnc + (1.-lfnc)*hlw(i,k)
             enddo
          enddo
       else
