@@ -493,6 +493,7 @@
   units = none
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [betamcu]
   standard_name = tuning_param_for_midlevel_cu
