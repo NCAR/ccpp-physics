@@ -83,7 +83,7 @@ CONTAINS
 !>\ingroup lsm_ruc_group
 !> The RUN LSM model is described in Smirnova et al.(1997) 
 !! \cite Smirnova_1997 and Smirnova et al.(2000) \cite Smirnova_2000 
-!>\section gen_lsmruc GSD RUC LSM General Algorithm
+!>\section gen_lsmruc RUC LSM General Algorithm
 !! @{
     SUBROUTINE LSMRUC(xlat,xlon,                                 &
                    DT,init,lsm_cold_start,KTAU,iter,NSL,         &

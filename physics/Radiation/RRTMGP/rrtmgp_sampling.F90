@@ -1,4 +1,5 @@
-! This code is part of RRTM for GCM Applications - Parallel (RRTMGP)
+!>\file rrtmgp_sampling.F90
+!! This code is part of RRTM for GCM Applications - Parallel (RRTMGP)
 !
 ! Contacts: Robert Pincus and Eli Mlawer
 ! email:  rrtmgp@aer.com
@@ -10,8 +11,8 @@
 !    BSD 3-clause license, see http://opensource.org/licenses/BSD-3-Clause
 ! -------------------------------------------------------------------------------------------------
 !
-! This module provides a simple implementation of sampling for the
-!   Monte Carlo Independent Pixel Approximation (McICA, doi:10.1029/2002jd003322)
+!> This module provides a simple implementation of sampling for the
+!!   Monte Carlo Independent Pixel Approximation (McICA, doi:10.1029/2002jd003322)
 ! Cloud optical properties, defined by band and assumed homogenous within each cell (column/layer),
 !   are randomly sampled to preserve the mean cloud fraction and one of several possible overlap assumptions
 ! Users supply random numbers with order ngpt,nlay,ncol
@@ -30,12 +31,8 @@ module rrtmgp_sampling
   private
   public :: draw_samples, sampled_mask
 contains
-  ! -------------------------------------------------------------------------------------------------
-  !
-  ! Apply a T/F sampled cloud mask to cloud optical properties defined by band to produce
-  !   McICA-sampled cloud optical properties
-  !
-  ! -------------------------------------------------------------------------------------------------
+!> Apply a T/F sampled cloud mask to cloud optical properties defined by band to produce
+!!  McICA-sampled cloud optical properties
   function draw_samples(cloud_mask,do_twostream,clouds,clouds_sampled) result(error_msg)
 	! Inputs
     logical, dimension(:,:,:),      intent(in   ) :: cloud_mask     ! Dimensions ncol,nlay,ngpt
@@ -76,11 +73,8 @@ contains
       end select
     end select
   end function draw_samples
-  ! -------------------------------------------------------------------------------------------------
-  !
-  ! Generate a McICA-sampled cloud mask
-  !
-  ! -------------------------------------------------------------------------------------------------
+
+!> Generate a McICA-sampled cloud mask
   subroutine sampled_mask(randoms, cloud_frac, cloud_mask, overlap_param, randoms2)
     ! Inputs
     real(wp), dimension(:,:,:),  intent(in )           :: randoms       ! ngpt,nlay,ncol
@@ -180,12 +174,9 @@ contains
     end do		! END LOOP: Columns
     
   end subroutine sampled_mask
-  ! -------------------------------------------------------------------------------------------------
-  !
-  ! Apply a true/false cloud mask to a homogeneous field
-  !   This could be a kernel
-  !
-  ! -------------------------------------------------------------------------------------------------
+
+!> Apply a true/false cloud mask to a homogeneous field
+!!   This could be a kernel
   subroutine apply_cloud_mask(ncol,nlay,nbnd,ngpt,band_lims_gpt,cloud_mask,input_field,sampled_field)
     integer,                                intent(in ) :: ncol,nlay,nbnd,ngpt
     integer,     dimension(2,nbnd),         intent(in ) :: band_lims_gpt

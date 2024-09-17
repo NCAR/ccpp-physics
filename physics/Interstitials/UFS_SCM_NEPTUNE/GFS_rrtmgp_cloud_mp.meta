@@ -4,7 +4,7 @@
   relative_path = ../../
   dependencies = hooks/machine.F
   dependencies = Radiation/radiation_tools.F90,Radiation/radiation_clouds.f,Radiation/RRTMGP/rrtmgp_lw_cloud_optics.F90
-  dependencies = MP/Thompson/module_mp_thompson_make_number_concentrations.F90,MP/Thompson/module_mp_thompson.F90
+  dependencies = MP/module_mp_radar.F90,MP/Thompson/module_mp_thompson_make_number_concentrations.F90,MP/Thompson/module_mp_thompson.F90
 
 ########################################################################
 [ccpp-arg-table]

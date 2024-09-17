@@ -230,6 +230,7 @@
                ! Read aerosol climatology
                call read_aerdata (me,master,iflip,idate,errmsg,errflg)
             endif
+            if (errflg /= 0) return
          else
             ! Update the value of ntrcaer in aerclm_def with the value defined
             ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
@@ -237,7 +238,7 @@
             ntrcaer = size(aer_nm, dim=3)
          endif
 
-!> - Call read_cidata() to read IN and CCN data
+!> - Call iccninterp::read_cidata() to read IN and CCN data
          if (iccn == 1) then
            call read_cidata (me,master)
            ! No consistency check needed for in/ccn data, all values are
@@ -607,7 +608,6 @@
 
          ! Lake model
          if(lkm>0 .and. iopt_lake>0) then
-            print*,"SWALES: In phys_time_vary",lakefrac(i),lakedepth(i)
             ! A lake model is enabled.
             do i = 1, im
                !if (lakefrac(i) > 0.0 .and. lakedepth(i) > 1.0 ) then

@@ -649,9 +649,8 @@
 !---------------------------------
 
 
-!! add fitted z0,zt curves for hurricane application (used in HWRF/HMON)
+!> add fitted z0,zt curves for hurricane application (used in HWRF/HMON)
 !! Weiguo Wang, 2019-0425
-
       SUBROUTINE znot_m_v6(uref, znotm)
       use machine , only : kind_phys
       IMPLICIT NONE
@@ -698,18 +697,19 @@
 
       END SUBROUTINE znot_m_v6
 
+!> Calculate scalar roughness over water with input 10-m wind
+!! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
+!! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
+!!
+!! Bin Liu, NOAA/NCEP/EMC 2017
+!
+!! uref(m/s)   :   wind speed at 10-m height
+!! znott(meter):   scalar roughness scale over water
       SUBROUTINE znot_t_v6(uref, znott)
       use machine , only : kind_phys
       IMPLICIT NONE
-! Calculate scalar roughness over water with input 10-m wind
-! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
-! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
-!
-! Bin Liu, NOAA/NCEP/EMC 2017
-!
-! uref(m/s)   :   wind speed at 10-m height
-! znott(meter):   scalar roughness scale over water
-!
+
+
 
       REAL(kind=kind_phys), INTENT(IN) :: uref
       REAL(kind=kind_phys), INTENT(OUT):: znott
@@ -763,19 +763,20 @@
       END SUBROUTINE znot_t_v6
 
 
+!> Calculate areodynamical roughness over water with input 10-m wind
+!! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
+!! For high winds, try to fit available observational data
+!! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
+!
+!! Bin Liu, NOAA/NCEP/EMC 2018
+!
+!! uref(m/s)   :   wind speed at 10-m height
+!! znotm(meter):   areodynamical roughness scale over water
       SUBROUTINE znot_m_v7(uref, znotm)
       use machine , only : kind_phys
       IMPLICIT NONE
-! Calculate areodynamical roughness over water with input 10-m wind
-! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
-! For high winds, try to fit available observational data
-! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
-!
-! Bin Liu, NOAA/NCEP/EMC 2018
-!
-! uref(m/s)   :   wind speed at 10-m height
-! znotm(meter):   areodynamical roughness scale over water
-!
+
+
 
       REAL(kind=kind_phys), INTENT(IN) :: uref
       REAL(kind=kind_phys), INTENT(OUT):: znotm
@@ -809,18 +810,20 @@
       endif
 
       END SUBROUTINE znot_m_v7
+
+!> Calculate scalar roughness over water with input 10-m wind
+!! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
+!! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
+!! To be compatible with the slightly decreased Cd for higher wind speed
+!!
+!! Bin Liu, NOAA/NCEP/EMC 2018
+!!
+!! uref(m/s)   :   wind speed at 10-m height
+!! znott(meter):   scalar roughness scale over water
       SUBROUTINE znot_t_v7(uref, znott)
       use machine , only : kind_phys
       IMPLICIT NONE
-! Calculate scalar roughness over water with input 10-m wind
-! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
-! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
-! To be compatible with the slightly decreased Cd for higher wind speed
-!
-! Bin Liu, NOAA/NCEP/EMC 2018
-!
-! uref(m/s)   :   wind speed at 10-m height
-! znott(meter):   scalar roughness scale over water
+
 !
 
       REAL(kind=kind_phys), INTENT(IN) :: uref

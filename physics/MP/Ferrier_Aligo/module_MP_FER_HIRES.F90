@@ -109,7 +109,7 @@
 !-----------------------------------------------------------------------------
 
 #ifdef MPI
-     USE mpi
+     USE mpi_f08
 #endif
       USE machine
 !MZ
@@ -2466,7 +2466,7 @@ ENDIF
       REAL,             INTENT(IN) :: GSMDT
       INTEGER,          INTENT(IN) :: MPIRANK 
       INTEGER,          INTENT(IN) :: MPIROOT
-      type(MPI_Comm),   INTENT(IN) :: MPI_COMM_COMP
+      TYPE(MPI_Comm),   INTENT(IN) :: MPI_COMM_COMP
       INTEGER,          INTENT(IN) :: THREADS
       CHARACTER(LEN=*), INTENT(OUT)   :: errmsg
       INTEGER,          INTENT(OUT)   :: errflg

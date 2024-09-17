@@ -1,9 +1,7 @@
 !> \file GFS_rrtmgp_pre.F90
-!!
-!> \defgroup GFS_rrtmgp_pre GFS_rrtmgp_pre.F90
-!!
 !! \brief This module contains code to prepare model fields for use by the RRTMGP 
 !! radiation scheme.  
+
 module GFS_rrtmgp_pre
   use machine,                    only: kind_phys
   use funcphys,                   only: fpvs
@@ -33,29 +31,24 @@ module GFS_rrtmgp_pre
   public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init
 contains
 
-!>\defgroup gfs_rrtmgp_pre GFS RRTMGP Pre Module
-!! \section arg_table_GFS_rrtmgp_pre_init
+!> \section arg_table_GFS_rrtmgp_pre_init Argument Table
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
-!> \ingroup GFS_rrtmgp_pre
-!!
-!! \brief Actuve gas-names are read from namelist. Set to interstitial%active_gases.
-!!
-!! \section GFS_rrtmgp_pre_init
+!!  Actuve gas-names are read from namelist. Set to interstitial%active_gases.
   subroutine GFS_rrtmgp_pre_init(nGases, active_gases, active_gases_array, errmsg, errflg)
     ! Inputs
     integer, intent(in) :: &
-         nGases       ! Number of active gases in RRTMGP
-    character(len=128), intent(in) :: &
-         active_gases ! List of active gases from namelist
-    character(len=128), dimension(:), intent(out) :: &
-         active_gases_array ! List of active gases from namelist as array
+         nGases       !< Number of active gases in RRTMGP
+    character(len=*), intent(in) :: &
+         active_gases !< List of active gases from namelist
+    character(len=*), dimension(:), intent(out), optional :: &
+         active_gases_array !< List of active gases from namelist as array
 
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg             ! Error message
+         errmsg             !< Error message
     integer, intent(out) :: &  
-         errflg             ! Error flag
+         errflg             !< Error flag
 
     ! Local variables
     character(len=1) :: tempstr
@@ -101,16 +94,10 @@ contains
 
   end subroutine GFS_rrtmgp_pre_init
 
-  ! #########################################################################################
-!> \section arg_table_GFS_rrtmgp_pre_run
+!> \section arg_table_GFS_rrtmgp_pre_run Argument Table
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
-!> \ingroup GFS_rrtmgp_pre
-!!
-!! \brief Sanitize inputs for use in RRTMGP.
-!!
-!! \section GFS_rrtmgp_pre_run
-  ! ######################################################################################### 
+!! Sanitize inputs for use in RRTMGP.
   subroutine GFS_rrtmgp_pre_run(me, nCol, nLev, i_o3, doSWrad, doLWrad, fhswr, fhlwr,       &
        xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, coslat, sinlat, con_g, con_rd,     &
        con_eps, con_epsm1, con_fvirt, con_epsqs, solhr, raddt, p_lay, t_lay, p_lev, t_lev,  &
@@ -122,79 +109,79 @@ contains
     
     ! Inputs
     integer, intent(in)    :: &
-         me,                & ! MPI rank
-         nCol,              & ! Number of horizontal grid points
-         nLev,              & ! Number of vertical layers
-         ico2,              & ! Flag for co2 radiation scheme 
-         i_o3                 ! Index into tracer array for ozone
+         me,                & !< MPI rank
+         nCol,              & !< Number of horizontal grid points
+         nLev,              & !< Number of vertical layers
+         ico2,              & !< Flag for co2 radiation scheme 
+         i_o3                 !< Index into tracer array for ozone
     type(ty_ozphys),intent(in) :: &
          ozphys
     logical, intent(in) :: &
-    	 doSWrad,           & ! Call SW radiation?
-    	 doLWrad              ! Call LW radiation
+    	 doSWrad,           & !< Call SW radiation?
+    	 doLWrad              !< Call LW radiation
     real(kind_phys), intent(in) :: &
-         fhswr,             & ! Frequency of SW radiation call.
-         fhlwr                ! Frequency of LW radiation call.
+         fhswr,             & !< Frequency of SW radiation call.
+         fhlwr                !< Frequency of LW radiation call.
     real(kind_phys), intent(in) :: &
-         con_g,             & ! Physical constant: gravitational constant
-         con_rd,            & ! Physical constant: gas-constant for dry air
-         con_eps,           & ! Physical constant: Epsilon (Rd/Rv)
-         con_epsm1,         & ! Physical constant: Epsilon (Rd/Rv) minus one
-         con_fvirt,         & ! Physical constant: Inverse of epsilon minus one
-         con_epsqs,         & ! Physical constant: Minimum saturation mixing-ratio (kg/kg)
-         con_pi,            & ! Physical constant: Pi
-         solhr                ! Time in hours after 00z at the current timestep 
+         con_g,             & !< Physical constant: gravitational constant
+         con_rd,            & !< Physical constant: gas-constant for dry air
+         con_eps,           & !< Physical constant: Epsilon (Rd/Rv)
+         con_epsm1,         & !< Physical constant: Epsilon (Rd/Rv) minus one
+         con_fvirt,         & !< Physical constant: Inverse of epsilon minus one
+         con_epsqs,         & !< Physical constant: Minimum saturation mixing-ratio (kg/kg)
+         con_pi,            & !< Physical constant: Pi
+         solhr                !< Time in hours after 00z at the current timestep 
     real(kind_phys), dimension(:), intent(in) :: & 
-    	 xlon,              & ! Longitude
-    	 xlat,              & ! Latitude
-    	 tsfc,              & ! Surface skin temperature (K)
-         coslat,            & ! Cosine(latitude)
-         sinlat,            & ! Sine(latitude) 
+    	 xlon,              & !< Longitude
+    	 xlat,              & !< Latitude
+    	 tsfc,              & !< Surface skin temperature (K)
+         coslat,            & !< Cosine(latitude)
+         sinlat,            & !< Sine(latitude) 
          semis
     real(kind_phys), dimension(:,:), intent(in) :: & 
-         prsl,              & ! Pressure at model-layer centers (Pa)
-         tgrs,              & ! Temperature at model-layer centers (K)
-         prslk,             & ! Exner function at model layer centers (1)
-         prsi                 ! Pressure at model-interfaces (Pa)
+         prsl,              & !< Pressure at model-layer centers (Pa)
+         tgrs,              & !< Temperature at model-layer centers (K)
+         prslk,             & !< Exner function at model layer centers (1)
+         prsi                 !< Pressure at model-interfaces (Pa)
     real(kind_phys), dimension(:,:,:), intent(in) :: & 
-         qgrs                 ! Tracer concentrations (kg/kg)
-    character(len=*), dimension(:), intent(in) :: &
-         active_gases_array   ! List of active gases from namelist as array
+         qgrs                 !< Tracer concentrations (kg/kg)
+    character(len=*), dimension(:), intent(in), optional :: &
+         active_gases_array   !< List of active gases from namelist as array
 
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg               ! Error message
+         errmsg               !< Error message
     integer, intent(out) :: &  
-         errflg,            & ! Error flag
+         errflg,            & !< Error flag
          nDay
     integer, intent(inout) :: &
-         iSFC,              & ! Vertical index for surface
-         iTOA                 ! Vertical index for TOA
+         iSFC,              & !< Vertical index for surface
+         iTOA                 !< Vertical index for TOA
     logical, intent(inout) :: &
-         top_at_1             ! Vertical ordering flag
+         top_at_1             !< Vertical ordering flag
     real(kind_phys), intent(inout) :: &
-         raddt                ! Radiation time-step
+         raddt                !< Radiation time-step
     real(kind_phys), dimension(:), intent(inout) :: &
-         tsfg,              & ! Ground temperature
-         tsfa,              & ! Skin temperature    
-         tsfc_radtime,      & ! Surface temperature at radiation timestep
-         coszen,            & ! Cosine of SZA
-         coszdg               ! Cosine of SZA, daytime
+         tsfg,              & !< Ground temperature
+         tsfa,              & !< Skin temperature    
+         tsfc_radtime,      & !< Surface temperature at radiation timestep
+         coszen,            & !< Cosine of SZA
+         coszdg               !< Cosine of SZA, daytime
     integer, dimension(:), intent(inout) ::  &
-         idxday               ! Indices for daylit points 
-    real(kind_phys), dimension(:,:), intent(inout) :: &
-         p_lay,             & ! Pressure at model-layer
-         t_lay,             & ! Temperature at model layer
-         q_lay,             & ! Water-vapor mixing ratio (kg/kg)
-         tv_lay,            & ! Virtual temperature at model-layers 
-         relhum,            & ! Relative-humidity at model-layers   
-         qs_lay,            & ! Saturation vapor pressure at model-layers
-         deltaZ,            & ! Layer thickness (m)
-         deltaZc,           & ! Layer thickness (m) (between layer centers)
-         deltaP,            & ! Layer thickness (Pa)
-         p_lev,             & ! Pressure at model-interface
-         sfc_emiss_byband,  & !
-         t_lev,             & ! Temperature at model-interface
+         idxday               !< Indices for daylit points 
+    real(kind_phys), dimension(:,:), intent(inout), optional :: &
+         p_lay,             & !< Pressure at model-layer
+         t_lay,             & !< Temperature at model layer
+         q_lay,             & !< Water-vapor mixing ratio (kg/kg)
+         tv_lay,            & !< Virtual temperature at model-layers 
+         relhum,            & !< Relative-humidity at model-layers   
+         qs_lay,            & !< Saturation vapor pressure at model-layers
+         deltaZ,            & !< Layer thickness (m)
+         deltaZc,           & !< Layer thickness (m) (between layer centers)
+         deltaP,            & !< Layer thickness (Pa)
+         p_lev,             & !< Pressure at model-interface
+         sfc_emiss_byband,  & !<
+         t_lev,             & !< Temperature at model-interface
          vmr_o2, vmr_h2o, vmr_o3, vmr_ch4, vmr_n2o, vmr_co2
 
     ! Local variables

@@ -1,6 +1,7 @@
 !>\file lsm_ruc.F90 
 !!  This file contains the RUC land surface scheme driver.
 
+!> This module contain the RUC land surface model driver
 module lsm_ruc
 
         use machine,           only: kind_phys, kind_dbl_prec
@@ -322,7 +323,7 @@ module lsm_ruc
 !> \section arg_table_lsm_ruc_run Argument Table
 !! \htmlinclude lsm_ruc_run.html
 !!
-!>\section gen_lsmruc RUC LSM General Algorithm
+!>\section gen_lsm_ruc_run RUC LSM General Algorithm
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, ilsm_ruc, lsm,      &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &

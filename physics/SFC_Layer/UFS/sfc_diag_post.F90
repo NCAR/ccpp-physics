@@ -1,12 +1,12 @@
 !> \file sfc_diag_post.F90
 !!  Contains code related to the surface diagnostic scheme.
 
+!> This module contains code related to the surface diagnostic scheme.
       module sfc_diag_post
 
       contains
 
 !>\defgroup sfc_diag_post_mod GFS sfc_diag_post Module
-!! This module contains code related to the surface diagnostic scheme.
 !> @{
 #if 0
 !> \section arg_table_sfc_diag_post_run Argument Table

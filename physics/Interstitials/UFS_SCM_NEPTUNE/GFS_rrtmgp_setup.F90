@@ -31,8 +31,7 @@ module GFS_rrtmgp_setup
   
 contains
 
-!> \defgroup GFS_rrtmgp_setup_mod GFS RRTMGP Scheme Setup Module
-!! \section arg_table_GFS_rrtmgp_setup_init
+!> \section arg_table_GFS_rrtmgp_setup_init Argument Table
 !! \htmlinclude GFS_rrtmgp_setup_init.html
 !!
   subroutine GFS_rrtmgp_setup_init(do_RRTMGP, imp_physics, imp_physics_fer_hires,        &
@@ -46,14 +45,14 @@ contains
     ! Inputs
     logical, intent(in) :: do_RRTMGP
     integer, intent(in) :: &
-         imp_physics,               & ! Flag for MP scheme
-         imp_physics_fer_hires,     & ! Flag for fer-hires scheme
-         imp_physics_gfdl,          & ! Flag for gfdl scheme
-         imp_physics_thompson,      & ! Flag for thompsonscheme
-         imp_physics_wsm6,          & ! Flag for wsm6 scheme
-         imp_physics_zhao_carr,     & ! Flag for zhao-carr scheme
-         imp_physics_zhao_carr_pdf, & ! Flag for zhao-carr+PDF scheme
-         imp_physics_mg               ! Flag for MG scheme
+         imp_physics,               & !< Flag for MP scheme
+         imp_physics_fer_hires,     & !< Flag for fer-hires scheme
+         imp_physics_gfdl,          & !< Flag for gfdl scheme
+         imp_physics_thompson,      & !< Flag for thompsonscheme
+         imp_physics_wsm6,          & !< Flag for wsm6 scheme
+         imp_physics_zhao_carr,     & !< Flag for zhao-carr scheme
+         imp_physics_zhao_carr_pdf, & !< Flag for zhao-carr+PDF scheme
+         imp_physics_mg               !< Flag for MG scheme
     real(kind_phys), intent(in) :: &
          con_pi, con_t0c, con_c, con_boltz, con_plnk, con_solr_2008, con_solr_2002
     real(kind_phys), dimension(:), intent(in) :: &
@@ -140,10 +139,7 @@ contains
     return
   end subroutine GFS_rrtmgp_setup_init
 
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_setup_timestep_init
-  ! #########################################################################################
-!> \section arg_table_GFS_rrtmgp_setup_timestep_init
+!> \section arg_table_GFS_rrtmgp_setup_timestep_init Argument Table
 !! \htmlinclude GFS_rrtmgp_setup_timestep_init.html
 !!
   subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, doSWrad, me,     &
@@ -251,10 +247,7 @@ contains
     return
   end subroutine GFS_rrtmgp_setup_timestep_init
 
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_setup_finalize
-  ! ######################################################################################### 
-!> \section arg_table_GFS_rrtmgp_setup_finalize
+!> \section arg_table_GFS_rrtmgp_setup_finalize Argument Table
 !! \htmlinclude GFS_rrtmgp_setup_finalize.html
 !!
   subroutine GFS_rrtmgp_setup_finalize (errmsg, errflg)
