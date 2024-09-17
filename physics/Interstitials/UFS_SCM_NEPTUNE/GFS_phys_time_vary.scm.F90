@@ -253,7 +253,7 @@
          call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
 !> - read in NoahMP table (needed for NoahMP init)
-         if(lsm == lsm_noahmp) then
+         if(lsm == ilsm_noahmp) then
             call read_mp_table_parameters(errmsg, errflg)
          endif
 

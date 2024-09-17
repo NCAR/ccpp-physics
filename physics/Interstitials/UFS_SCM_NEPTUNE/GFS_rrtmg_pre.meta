@@ -1496,7 +1496,6 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = True
 [fdb_coef]
   standard_name = smoke_dust_direct_fdb_coef
   long_name = smoke dust direct feedback coefficents
@@ -1505,7 +1504,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [spp_wts_rad]
   standard_name = spp_weights_for_radiation_scheme
   long_name = spp weights for radiation scheme

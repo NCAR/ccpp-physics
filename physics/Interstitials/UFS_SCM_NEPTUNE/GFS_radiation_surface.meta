@@ -234,7 +234,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [fice]
   standard_name = sea_ice_area_fraction_of_sea_area_fraction
   long_name = ice fraction over open water
