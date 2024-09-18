@@ -43,12 +43,26 @@ CONTAINS
            name = 'snow_mixing_ratio'
          case ('graupel')
            name = 'graupel_mixing_ratio'
+         case ('cld_amt')
+           name = 'cloud_fraction_updated_by_physics'
+         case ('water_nc')
+           name = 'number_concentration_of_cloud_droplets'
          case ('ice_nc')
            name = 'number_concentration_of_cloud_ic'
          case ('rain_nc')
            name = 'number_concentration_of_rain'
+         case ('snow_nc')
+           name = 'number_concentration_of_snow'
+         case ('graupel_nc')
+           name = 'number_concentration_of_graupel'
          case ('sgs_tke')
            name = 'turbulent_kinetic_energy'
+         case ('liq_aero')
+           name = 'number_concentration_of_water_friendly_aerosols'
+         case ('ice_aero')
+           name = 'number_concentration_of_ice_friendly_aerosols'
+         case ('q_rimef')
+           name = 'mass_weighted_rime_factor'
          case default
            name = trim(gfdl_name)
            if (debug .and. (me == master)) then
