@@ -441,6 +441,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [coszen]
   standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = mean cos of zenith angle over rad call period

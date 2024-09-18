@@ -3,7 +3,7 @@
   name = get_phi_fv3
   type = scheme
   dependencies = ../hooks/machine.F
-  
+
 ########################################################################
 [ccpp-arg-table]
   name = get_phi_fv3_run

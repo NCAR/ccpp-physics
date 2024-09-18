@@ -45,6 +45,7 @@
   type = character
   kind = len=*
   intent = in
+  optional = True
 [doGP_cldoptics_PADE]
   standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
   long_name = logical flag to control cloud optics scheme.
@@ -202,7 +203,7 @@
   standard_name = number_of_columns_per_RRTMGP_SW_block
   long_name = number of columns to process at a time by RRTMGP SW scheme
   units = count
-  dimensions =  ()
+  dimensions = ()
   type = integer
   intent = in
 [idx]

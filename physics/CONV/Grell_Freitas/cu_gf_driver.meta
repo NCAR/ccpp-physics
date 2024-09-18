@@ -532,6 +532,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [dfi_radar_max_intervals]
   standard_name = maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals
   long_name = maximum allowed number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
