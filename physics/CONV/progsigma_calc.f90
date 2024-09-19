@@ -174,13 +174,6 @@
       enddo
 
       !sigmab
-!      if(flag_init .and. .not. flag_restart)then
-!         do i = 1,im
-!            if(cnvflg(i))then
-!               sigmab(i)=0.03
-!            endif
-!         enddo
-!      else
          do i = 1,im
             if(cnvflg(i))then
                DEN=MIN(termC(i)+termB(i),1.E8)
