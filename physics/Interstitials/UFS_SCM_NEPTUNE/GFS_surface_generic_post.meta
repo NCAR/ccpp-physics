@@ -126,6 +126,13 @@
   dimensions = ()
   type = logical
   intent = in
+[cpl_fire]
+  standard_name = do_fire_coupling
+  long_name = flag controlling fire_behavior collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics

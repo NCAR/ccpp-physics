@@ -110,28 +110,30 @@ contains
 !!
 !>\section rrfs_smoke_wrapper rrfs-sd Scheme General Algorithm
 !> @{
-    subroutine rrfs_smoke_wrapper_run(im, kte, kme, ktau, dt, garea, land, jdate,          &
+    subroutine rrfs_smoke_wrapper_run(im, flag_init, kte, kme, ktau, dt, garea, land, jdate,          &
                    u10m, v10m, ustar, rlat, rlon, tskin, pb2d, t2m, dpt2m,                 &
                    pr3d, ph3d,phl3d, prl3d, tk3d, us3d, vs3d, spechum, w,                  &
                    nsoil, smc, tslb, vegtype_dom, vegtype_frac, soiltyp, nlcat,            &
-                   dswsfc, zorl, snow, julian,recmol,                                      &
+                   dswsfc, zorl, snow, julian, recmol,                                     &
                    idat, rain_cpl, rainc_cpl, hf2d, g, pi, con_cp, con_rd, con_fv,         &
                    dust12m_in, emi_ant_in, smoke_RRFS, smoke2d_RRFS,                       &
                    ntrac, qgrs, gq0, chem3d, tile_num,                                     &
-                   ntsmoke, ntdust, ntcoarsepm, imp_physics, imp_physics_thompson,         &
+                   ntfsmoke, ntsmoke, ntdust, ntcoarsepm,                                  &
+                   imp_physics, imp_physics_thompson,                                      &
                    nwfa, nifa, emanoc, emdust, emseas, drydep_flux_out, wetdpr,            &
                    ebb_smoke_in, frp_output, coef_bb, fire_type_out,                       &
                    ebu_smoke,fhist,min_fplume,                                             &
                    max_fplume, hwp, hwp_ave, wetness, ndvel, ddvel_inout,                  &
+                   smoke_fire, cpl_fire,                                                   &
                    peak_hr_out,lu_nofire_out,lu_qfire_out,                                 &
                    fire_heat_flux_out, frac_grid_burned_out, kpbl,oro,                     &
                    uspdavg, hpbl_thetav, mpicomm, mpirank, mpiroot, errmsg,errflg          )
-        
     implicit none
 
 
     integer,        intent(in) :: im,kte,kme,ktau,nsoil,tile_num,jdate(8),idat(8)
-    integer,        intent(in) :: ntrac, ntsmoke, ntdust, ntcoarsepm, ndvel, nlcat
+    integer,        intent(in) :: ntrac, ntfsmoke, ntsmoke, ntdust, ntcoarsepm, ndvel, nlcat
+    logical,        intent(in) :: flag_init
     real(kind_phys),intent(in) :: dt, julian, g, pi, con_cp, con_rd, con_fv
 
     integer, parameter :: ids=1,jds=1,jde=1, kds=1
@@ -166,6 +168,8 @@ contains
     real(kind_phys), dimension(:),     intent(in),    optional :: wetness
     real(kind_phys), dimension(:),     intent(out),   optional :: lu_nofire_out,lu_qfire_out
     integer,         dimension(:),     intent(out),   optional :: fire_type_out
+    real(kind_phys), dimension(:),     intent(in),    optional :: smoke_fire
+    logical,                           intent(in)    :: cpl_fire
     integer,                           intent(in)    :: imp_physics, imp_physics_thompson
     integer,         dimension(:),     intent(in)    :: kpbl
     real(kind_phys), dimension(:),     intent(in)    :: oro
@@ -234,6 +238,19 @@ contains
 
     errmsg = ''
     errflg = 0
+
+    if (cpl_fire) then
+      if (flag_init) then
+        do i=1,im
+          do k=kts,kte
+            qgrs(i,k,ntfsmoke) = 0.
+          end do
+        end do
+      endif
+      do i=1,im
+        qgrs(i,kts,ntfsmoke) = qgrs(i,kts,ntfsmoke) + smoke_fire(i)
+      end do
+    endif
 
     if (.not. do_rrfs_sd) return
 
