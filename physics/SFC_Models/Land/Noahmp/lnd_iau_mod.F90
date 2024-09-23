@@ -121,8 +121,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    integer                                    :: input_nml_file_length    !< length(number of lines) in namelist for internal reads
    character(len=4)                           :: iosstr
 
-   !> these are not available through the CCPP interface so need to read them from namelist file
-   !> vars to read from namelist
+   !> land iau setting read from namelist
    logical               :: do_land_iau               = .false.
    real(kind=kind_phys)  :: land_iau_delthrs              = 0           !< iau time interval (to scale increments)
    character(len=240)    :: land_iau_inc_files(7)         = ''          !< list of increment files
