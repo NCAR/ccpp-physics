@@ -26,7 +26,7 @@
     private
 
     public :: noahmpdrv_init, noahmpdrv_run, &
-              noahmpdrv_timestep_init, noahmpdrv_timestep_finalize, noahmpdrv_finalize
+              noahmpdrv_timestep_init, noahmpdrv_finalize
 
     !> \Land IAU data and control
     ! Land IAU Control holds settings' information, maily read from namelist (e.g., 
@@ -429,27 +429,6 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
 
 
 end subroutine noahmpdrv_timestep_init
-
-  !> \ingroup NoahMP_LSM
-!! \brief This subroutine is called after noahmpdrv_run 
-!!  to free up allocated memory, if there are any  
-!!  code to do any needed consistency check will go here--
-!! \section arg_table_noahmpdrv_timestep_finalize Argument Table
-!! \htmlinclude noahmpdrv_timestep_finalize.html
-!!
-  subroutine noahmpdrv_timestep_finalize (errmsg, errflg)       ! smc, t2mmp, q2mp,    
-   
-    use machine,          only: kind_phys 
-    implicit none
-    character(len=*),                          intent(out) :: errmsg
-    integer,                                   intent(out) :: errflg
-    !  --- Initialize CCPP error handling variables
-    errmsg = ''
-    errflg = 0    
-
-    !> note the IAU deallocate happens at the noahmpdrv_finalize
-
-  end subroutine noahmpdrv_timestep_finalize
 
    !> \ingroup NoahMP_LSM
 !! \brief This subroutine mirrors noahmpdrv_init  
