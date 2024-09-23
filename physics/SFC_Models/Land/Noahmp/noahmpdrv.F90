@@ -29,10 +29,8 @@
               noahmpdrv_timestep_init, noahmpdrv_finalize
 
     !> \Land IAU data and control
-    ! Land IAU Control holds settings' information, maily read from namelist (e.g., 
-    ! block of global domain that belongs to a process ,
-    ! whethrer to do IAU increment at this time step, 
-    ! time step informatoin, etc)    
+    ! Land IAU Control holds settings' information, maily read from namelist (e.g., block of global domain that belongs to a process ,
+    ! whether to do IAU increment at this time step, time step informatoin, etc)    
     type (land_iau_control_type)          :: Land_IAU_Control
     ! Land IAU Data holds spatially and temporally interpolated soil temperature increments per time step
     type (land_iau_external_data_type)    :: Land_IAU_Data   !(number of blocks):each proc holds nblks
