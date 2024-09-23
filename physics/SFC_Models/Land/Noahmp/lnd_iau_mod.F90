@@ -76,15 +76,12 @@ module land_iau_mod
       logical              :: upd_slc
       logical              :: do_stcsmc_adjustment  !do moisture/temperature adjustment for consistency after increment add
       real(kind=kind_phys) :: min_T_increment
-      !, iau_drymassfixer
+ 
       integer              :: me              !< MPI rank designator
       integer              :: mpi_root          !< MPI rank of master atmosphere processor
       character(len=64)    :: fn_nml          !< namelist filename for surface data cycling
       real(kind=kind_phys) :: dtp             !< physics timestep in seconds
       real(kind=kind_phys) :: fhour           !< current forecast hour
-!      character(len=:), pointer, dimension(:) :: input_nml_file => null() !<character string containing full namelist
-                                                                          !< for use with internal file reads
-!      integer              :: input_nml_file_length    !<length (number of lines) in namelist for internal reads
 
       integer              :: ntimes
 
@@ -116,8 +113,8 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    integer                                    :: ios
    logical                                    :: exists
    character(len=512)                         :: ioerrmsg
-   !character(len=32)                          :: fn_nml = "input.nml"
-   character(len=:), pointer, dimension(:)    :: input_nml_file => null()
+
+   character(len=:), dimension(:)    :: input_nml_file => null()
    integer                                    :: input_nml_file_length    !< length(number of lines) in namelist for internal reads
    character(len=4)                           :: iosstr
 
@@ -127,7 +124,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    character(len=240)    :: land_iau_inc_files(7)         = ''          !< list of increment files
    real(kind=kind_phys)  :: land_iau_fhrs(7)               = -1          !< forecast hours associated with increment files
    logical               :: land_iau_filter_increments    = .false.     !< filter IAU increments
-   !logical               :: land_iau_gaussian_inc_file             = .false.
+
    integer               :: lsoil_incr = 4
    logical               :: land_iau_upd_stc = .false.
    logical               :: land_iau_upd_slc = .false.
@@ -155,7 +152,6 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    ! if (file_exist(fn_nml)) then 
    inquire (file=trim(fn_nml), exist=exists)    ! TBCL: this maybe be replaced by nlunit passed from ccpp
    if (.not. exists) then
-      ! call mpp_error(FATAL, 'lnd_iau_mod_set_control: namelist file ',trim(fn_nml),' does not exist')
       write(6,*) 'lnd_iau_mod_set_control: namelist file ',trim(fn_nml),' does not exist'      
       errmsg = 'lnd_iau_mod_set_control: namelist file '//trim(fn_nml)//' does not exist'
       errflg = 1
@@ -167,8 +163,6 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
       read (nlunit, nml=land_iau_nml, ERR=888, END=999, iostat=ios)
       close (nlunit)
       if (ios /= 0) then
-         ! call mpp_error(FATAL, 'lnd_iau_mod_set_control: error reading namelist file ',trim(fn_nml))
-         ! write(6,*) 'lnd_iau_mod_set_control: error reading namelist file ',trim(fn_nml)
          write(6,*) trim(ioerrmsg)         
          errmsg = 'lnd_iau_mod_set_control: error reading namelist file '//trim(fn_nml)  &
                   // 'the error message from file handler:' //trim(ioerrmsg) 
@@ -221,9 +215,6 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    Land_IAU_Control%dtp = dtp
    Land_IAU_Control%fhour = fhour
 
-!   Land_IAU_Control%input_nml_file = input_nml_file
-!   Land_IAU_Control%input_nml_file_length = input_nml_file_length
-
    Land_IAU_Control%upd_stc = land_iau_upd_stc
    Land_IAU_Control%upd_slc = land_iau_upd_slc
    Land_IAU_Control%do_stcsmc_adjustment = land_iau_do_stcsmc_adjustment
@@ -244,12 +235,9 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
 
 end subroutine land_iau_mod_set_control
 
-subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)     !nlunit, ncols, IPD_Data,,Init_parm)
-   ! integer,                              intent(in) :: me, mpi_root
+subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)    
    type (land_iau_control_type),          intent(inout) :: Land_IAU_Control
    type (land_iau_external_data_type), intent(inout)    :: Land_IAU_Data  
-   ! real(kind=kind_phys), dimension(:),   intent(in)  :: xlon    ! longitude  !GFS_Data(cdata%blk_no)%Grid%xlon
-   ! real(kind=kind_phys), dimension(:),   intent(in)  :: xlat    ! latitude
    character(len=*),                     intent(out) :: errmsg
    integer,                              intent(out) :: errflg
 
@@ -260,7 +248,6 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  
    integer              :: nfilesall, ntimesall
    integer, allocatable :: idt(:) 
    integer              :: nlon, nlat
-   ! integer :: nb, ix, nblks, blksz  
    logical              :: exists
    integer              :: ncid, dimid, varid, status, IDIM
    
@@ -598,10 +585,9 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, rdt, wt)
 
  end subroutine setiauforcing
 
-subroutine read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, stc_inc_out, slc_inc_out
+subroutine read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  
 
    type (land_iau_control_type), intent(in) :: Land_IAU_Control
-   ! character(len=*),             intent(in) :: fname
    character(len=*),          intent(inout) :: errmsg
    integer,                   intent(inout) :: errflg
 
@@ -784,7 +770,6 @@ end subroutine calculate_landinc_mask
       ERRMSG = NF90_STRERROR(ERR)
       PRINT*,'FATAL ERROR in Land IAU ', TRIM(STRING), ': ', TRIM(ERRMSG)
       errmsg_out = 'FATAL ERROR in Land IAU '//TRIM(STRING)//': '//TRIM(ERRMSG)
-   !  CALL MPI_ABORT(MPI_COMM_WORLD, 999)
       errflg = 1
       return
 
@@ -810,14 +795,7 @@ end subroutine calculate_landinc_mask
       CALL netcdf_err(status, 'reading dim length '//trim(dim_name), errflg, errmsg_out)
 
    end subroutine get_nc_dimlen
-      ! status = nf90_inq_dimid(ncid, "longitude", dimid)
-      ! CALL netcdf_err(status, 'reading longitude dim id')
-      ! status = nf90_inquire_dimension(ncid, dimid, len = im)
-      ! CALL netcdf_err(status, 'reading dim longitude')
-      ! status = nf90_inq_dimid(ncid, "latitude", dimid)
-      ! CALL netcdf_err(status, 'reading latitude dim id')
-      ! status = nf90_inquire_dimension(ncid, dimid, len = jm)
-      ! CALL netcdf_err(status, 'reading dim latitude')
+
    subroutine get_var1d(ncid, dim_len, var_name, var_arr, errflg, errmsg_out)
       integer, intent(in):: ncid, dim_len
       character(len=*), intent(in)::  var_name
@@ -861,11 +839,6 @@ end subroutine calculate_landinc_mask
       integer, intent(in):: is, ix, js, jy, ks,kz
       integer, intent(out):: var3d(ix, jy, kz)   !var3d(is:ie,js:je,ks:ke)
       integer, intent(out):: status 
-      ! integer, dimension(3):: start, nreco
-      ! start(1) = is; start(2) = js; start(3) = ks
-      ! nreco(1) = ie - is + 1
-      ! nreco(2) = je - js + 1
-      ! nreco(3) = ke - ks + 1
 
       status = nf90_get_var(ncid, varid, var3d, &  !start = start, count = nreco)
                start = (/is, js, ks/), count = (/ix, jy, kz/))
