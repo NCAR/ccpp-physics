@@ -189,7 +189,6 @@
                endif
             endif!cnvflg
          enddo
-!      endif
 
       do k=1,km
          do i=1,im
