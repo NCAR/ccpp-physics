@@ -1066,7 +1066,6 @@ EXCLUDE                = ../Radiation/RRTMGP/rte-rrtmgp \
                          ../MP/Ferrier_Aligo \
                          ../MP/Zhao_Carr \
                          ../PBL/MYJ \
-                         ../MP/GFDL/GFDL_parse_tracers.F90 \
                          ../PBL/HEDMF \
                          ../PBL/SHOC \
                          ../PBL/saYSU \
