@@ -21,22 +21,6 @@
   dimensions = ()
   type = integer
   intent = in
-[dtend]
-  standard_name = cumulative_change_of_state_variables
-  long_name = diagnostic tendencies for state variables
-  units = mixed
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[dtidx]
-  standard_name = cumulative_change_of_state_variables_outer_index
-  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
-  units = index
-  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
-  type = integer
-  intent = in
 [ntoz]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
@@ -65,6 +49,27 @@
   dimensions = ()
   type = integer
   intent = in
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+[is_photochem]
+  standard_name = flags_for_photochemistry_processes_to_sum
+  long_name = flags for photochemistry processes to sum as the total photochemistry process cumulative change
+  units = flag
+  dimensions = (number_of_cumulative_change_processes)
+  type = logical
+  intent = in
+[ldiag3d]
+  standard_name = flag_for_diagnostics_3D
+  long_name = flag for calculating 3-D diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ip_physics]
   standard_name = index_of_all_physics_process_in_cumulative_change_index
   long_name = index of all physics transport process in second dimension of array cumulative change index
@@ -78,20 +83,6 @@
   units = index
   dimensions = ()
   type = integer
-  intent = in
-[is_photochem]
-  standard_name = flags_for_photochemistry_processes_to_sum
-  long_name = flags for photochemistry processes to sum as the total photochemistry process cumulative change
-  units = flag
-  dimensions = (number_of_cumulative_change_processes)
-  type = logical
-  intent = in
-[ldiag3d]
-  standard_name = flag_for_diagnostics_3D
-  long_name = flag for 3d diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
   intent = in
 [ip_prod_loss]
   standard_name = index_of_production_and_loss_process_in_cumulative_change_index
@@ -156,6 +147,15 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = True
 [errmsg]
   standard_name = ccpp_error_message

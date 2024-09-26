@@ -225,7 +225,7 @@ contains
     integer :: i, j, k, kp, n
 ! MPI variables
     integer :: mpiid
-    type(MPI_comm), intent(in) :: mpicomm
+    type(MPI_Comm), intent(in) :: mpicomm
     integer, intent(in) :: mpirank
     integer, intent(in) :: mpiroot
 

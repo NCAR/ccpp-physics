@@ -37,34 +37,6 @@
   type = real
   kind = kind_phys
   intent = in
-[ozphys]
-  standard_name = dataset_for_ozone_physics
-  long_name = dataset for NRL ozone physics
-  units = mixed
-  dimensions = ()
-  type = ty_ozphys
-  intent = in
-[qdiag3d]
-  standard_name = flag_for_tracer_diagnostics_3D
-  long_name = flag for 3d tracer diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[oz_phys_2015]
-  standard_name = flag_for_nrl_2015_ozone_scheme
-  long_name = flag for new (2015) ozone physics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[oz_phys_2006]
-  standard_name = flag_for_nrl_2006_ozone_scheme
-  long_name = flag for new (2006) ozone physics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [tgrs]
   standard_name = air_temperature
   long_name = model layer mean temperature
@@ -168,7 +140,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [ntiw]
   standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for  ice water
@@ -205,6 +177,27 @@
   type = real
   kind = kind_phys
   intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
+[oz_phys_2015]
+  standard_name = flag_for_nrl_2015_ozone_scheme
+  long_name = flag for new (2015) ozone physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[oz_phys_2006]
+  standard_name = flag_for_nrl_2006_ozone_scheme
+  long_name = flag for new (2006) ozone physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [con_1ovg]
   standard_name = one_divided_by_the_gravitational_acceleration
   long_name = inverse of gravitational acceleration
@@ -221,6 +214,14 @@
   type = real
   kind = kind_phys
   intent = in
+[dp]
+  standard_name = air_pressure_difference_between_midlayers
+  long_name = difference between mid-layer pressures
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [ozpl]
   standard_name = ozone_forcing
   long_name = ozone forcing data
@@ -229,13 +230,12 @@
   type = real
   kind = kind_phys
   intent = in
-[dp]
-  standard_name = air_pressure_difference_between_midlayers
-  long_name = difference between mid-layer pressures
-  units = Pa
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
+[qdiag3d]
+  standard_name = flag_for_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [do3_dt_prd]
   standard_name = ozone_tendency_due_to_production_and_loss_rate

@@ -182,7 +182,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [snwdph]
   standard_name = surface_snow_thickness_water_equivalent_over_ice
   long_name = water equivalent snow depth over ice
@@ -207,18 +207,18 @@
   type = real
   kind = kind_phys
   intent = inout
-[fice]
-  standard_name = sea_ice_area_fraction_of_sea_area_fraction
-  long_name = ice fraction over open water
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
 [t_sfc]
   standard_name = surface_skin_temperature_after_iteration_over_water
   long_name = surface skin temperature after iteration over water
   units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[fice]
+  standard_name = sea_ice_area_fraction_of_sea_area_fraction
+  long_name = ice fraction over open water
+  units = frac
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -420,7 +420,8 @@
 [ccpp-table-properties]
   name = flake_driver_post
   type = scheme
-  dependencies = machine.F
+  dependencies = ../../../hooks/machine.F
+  
 ########################################################################
 [ccpp-arg-table]
   name = flake_driver_post_run
@@ -432,21 +433,12 @@
   dimensions = ()
   type = integer
   intent = in
-[lakedepth]
-  standard_name = lake_depth
-  long_name = lake depth
-  units = m
+[use_lake_model]
+  standard_name = flag_for_using_lake_model
+  long_name = flag indicating lake points using a lake model
+  units = flag
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[tsurf]
-  standard_name = surface_skin_temperature_after_iteration_over_water
-  long_name = surface skin temperature after iteration over water
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
 [h_ML]
   standard_name = mixed_layer_depth_of_lakes
@@ -466,6 +458,22 @@
   kind = kind_phys
   intent = in
   optional = True
+[tsurf]
+  standard_name = surface_skin_temperature_after_iteration_over_water
+  long_name = surface skin temperature after iteration over water
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[lakedepth]
+  standard_name = lake_depth
+  long_name = lake depth
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [xz]
   standard_name = diurnal_thermocline_layer_thickness
   long_name = diurnal thermocline layer thickness
@@ -473,7 +481,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = True
 [zm]
   standard_name = ocean_mixed_layer_thickness
@@ -482,7 +490,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = True
 [tref]
   standard_name = reference_sea_surface_temperature
@@ -491,16 +499,16 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = True
-[tfco]
+[tsfco]
   standard_name = sea_surface_temperature
   long_name = sea surface temperature
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

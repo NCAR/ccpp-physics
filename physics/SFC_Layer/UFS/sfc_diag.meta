@@ -92,6 +92,53 @@
   dimensions = ()
   type = real
   intent = in
+[shflx]
+  standard_name = surface_upward_temperature_flux
+  long_name = kinematic surface upward sensible heat flux
+  units = K m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[cdq]
+  standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
+  long_name = surface exchange coeff heat & moisture
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[wind]
+  standard_name = wind_speed_at_lowest_model_layer
+  long_name = wind speed at lowest model level
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[usfco]
+  standard_name = x_ocean_current
+  long_name = zonal current at ocean surface
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[vsfco]
+  standard_name = y_ocean_current
+  long_name = meridional current at ocean surface
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[icplocn2atm]
+  standard_name = control_for_air_sea_flux_computation_over_water
+  long_name = air-sea flux option
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
 [zf]
   standard_name = height_above_ground_at_lowest_model_layer
   long_name = layer 1 height above ground (not MSL)
@@ -123,29 +170,6 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
-[usfco]
-  standard_name = x_ocean_current
-  long_name = zonal current at ocean surface
-  units = m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[vsfco]
-  standard_name = y_ocean_current
-  long_name = meridional current at ocean surface
-  units = m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[icplocn2atm]
-  standard_name = control_for_air_sea_flux_computation_over_water
-  long_name = air-sea flux option
-  units = 1
-  dimensions = ()
-  type = integer
   intent = in
 [t1]
   standard_name = air_temperature_at_surface_adjacent_layer
@@ -242,6 +266,20 @@
   dimensions = ()
   type = logical
   intent = in
+[diag_flux]
+  standard_name = flag_for_flux_method_in_2m_diagnostics
+  long_name = flag for flux method in 2-m diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[diag_log]
+  standard_name = flag_for_log_method_in_2m_diagnostics
+  long_name = flag for log method in 2-m diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [use_lake_model]
   standard_name = flag_for_using_lake_model
   long_name = flag indicating lake points using a lake model
@@ -272,28 +310,6 @@
   kind = kind_phys
   intent = in
   optional = True
-[diag_flux]
-  standard_name = flag_for_flux_method_in_2m_diagnostics
-  long_name = flag for flux method in 2-m diagnostics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[diag_log]
-  standard_name = flag_for_log_method_in_2m_diagnostics
-  long_name = flag for log method in 2-m diagnostics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[shflx]
-  standard_name = surface_upward_temperature_flux
-  long_name = kinematic surface upward sensible heat flux
-  units = K m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [lake_q2m]
   standard_name =  specific_humidity_at_2m_from_clm_lake
   long_name = specific humidity at 2m from clm lake
@@ -303,28 +319,12 @@
   kind = kind_phys
   intent = in
   optional = True
-[cdq]
-  standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
-  long_name = surface exchange coeff heat & moisture
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [use_lake2m]
   standard_name = use_2m_diagnostics_calculated_by_lake_model
   long_name = model 2m diagnostics use the temperature and humidity calculated by the lake model
   units = flag
   dimensions = ()
   type = logical
-  intent = in
-[wind]
-  standard_name = wind_speed_at_lowest_model_layer
-  long_name = wind speed at lowest model level
-  units = m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
   intent = in
 [f10m]
   standard_name = ratio_of_wind_at_surface_adjacent_layer_to_wind_at_10m
