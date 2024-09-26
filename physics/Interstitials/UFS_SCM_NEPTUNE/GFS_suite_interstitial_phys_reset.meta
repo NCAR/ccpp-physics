@@ -9,14 +9,14 @@
   name = GFS_suite_interstitial_phys_reset_run
   type = scheme
 [Interstitial]
-  standard_name = GFS_interstitial_type_instance
+  standard_name = GFS_interstitial_type
   long_name = derived type GFS_interstitial_type in FV3
   units = DDT
   dimensions = ()
   type = GFS_interstitial_type
   intent = inout
 [Model]
-  standard_name = GFS_control_type_instance
+  standard_name = GFS_control_type
   long_name = Fortran DDT containing FV3-GFS model control parameters
   units = DDT
   dimensions = ()
