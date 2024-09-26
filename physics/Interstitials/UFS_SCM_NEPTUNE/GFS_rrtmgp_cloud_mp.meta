@@ -321,6 +321,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [effrin_cldliq]
   standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle
   long_name = eff. radius of cloud liquid water particle in micrometer

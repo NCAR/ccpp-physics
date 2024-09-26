@@ -243,7 +243,7 @@
   long_name = MPI communicator
   units = index
   dimensions = ()
-  type = integer
+  type = MPI_Comm
   intent = in
 [mpirank]
   standard_name = mpi_rank
@@ -662,7 +662,7 @@
   long_name = MPI communicator
   units = index
   dimensions = ()
-  type = integer
+  type = MPI_Comm
   intent = in
 [mpirank]
   standard_name = mpi_rank
@@ -738,6 +738,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [spp_var_list]
   standard_name = perturbed_spp_schemes
   long_name = perturbed spp schemes
@@ -755,6 +756,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cplchm]
   standard_name = flag_for_chemistry_coupling
   long_name = flag controlling cplchm collection (default off)
