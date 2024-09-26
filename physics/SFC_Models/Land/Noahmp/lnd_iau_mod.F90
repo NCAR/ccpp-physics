@@ -114,8 +114,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    logical                                    :: exists
    character(len=512)                         :: ioerrmsg
 
-   character(len=:), dimension(:)    :: input_nml_file => null()
-   integer                                    :: input_nml_file_length    !< length(number of lines) in namelist for internal reads
+   character(len=:), dimension(:)             :: input_nml_file => null()
    character(len=4)                           :: iosstr
 
    !> land iau setting read from namelist
@@ -146,8 +145,6 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
     allocate(input_nml_file, mold=input_nml_file_i)
     input_nml_file => input_nml_file_i
     read(input_nml_file, nml=land_iau_nml, ERR=888, END=999, iostat=ios)
-    ! Set length (number of lines) in namelist for internal reads
-    input_nml_file_length = size(input_nml_file)
 #else
    ! if (file_exist(fn_nml)) then 
    inquire (file=trim(fn_nml), exist=exists)    ! TBCL: this maybe be replaced by nlunit passed from ccpp
