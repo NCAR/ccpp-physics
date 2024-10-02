@@ -197,7 +197,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   integer, allocatable          :: mask_tile(:)
   integer,allocatable           :: stc_updated(:), slc_updated(:)
   logical                       :: soil_freeze, soil_ice
-  integer                       :: n_freeze, n_thaw
+  ! integer                       :: n_freeze, n_thaw
   integer                       :: soiltype, n_stc, n_slc
   real(kind=kind_phys)          :: slc_new
 
