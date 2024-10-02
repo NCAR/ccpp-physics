@@ -143,14 +143,14 @@
   intent = in
 [nx]
   standard_name = number_of_points_in_x_direction_for_this_mpi_rank
-  long_name = number of points in x direction for this MPI rank
+  long_name = number of points in the x direction
   units = count
   dimensions = ()
   type = integer
   intent = in
 [ny]
   standard_name = number_of_points_in_y_direction_for_this_mpi_rank
-  long_name = number of points in y direction for this MPI rank
+  long_name = number of points in the y direction
   units = count
   dimensions = ()
   type = integer
@@ -252,7 +252,7 @@
   intent = in
 [km]
   standard_name = vertical_dimension_of_soil
-  long_name = soil vertical layer dimension
+  long_name = vertical dimension of soil layers
   units = count
   dimensions = ()
   type = integer
@@ -294,7 +294,7 @@
   intent= in
 [weasd]
   standard_name = water_equivalent_accumulated_snow_depth_over_land
-  long_name = water equiv of acc snow depth over land
+  long_name = water equivalent of accumulated snow depth over land
   units = mm
   dimensions = (horizontal_dimension)
   type = real
