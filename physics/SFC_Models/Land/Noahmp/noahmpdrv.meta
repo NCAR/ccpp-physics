@@ -114,7 +114,7 @@
   intent = in
 [input_nml_file]
   standard_name = filename_of_internal_namelist
-  long_name = amelist filename for internal file reads 
+  long_name = namelist filename for internal file reads 
   units = none
   type = character
   dimensions    = (ccpp_constant_one:number_of_lines_in_internal_namelist) 
