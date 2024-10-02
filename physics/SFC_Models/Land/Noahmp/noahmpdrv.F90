@@ -280,7 +280,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   ! delt=GFS_Control%dtf
   if ((Land_IAU_Control%dtp - delt) > 0.0001) then 
     if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-      print*, "Warning noahmpdrv_run delt ",delt," different from Land_IAU_Control%dtp ",Land_IAU_Control%dtp
+      print*, "Warning noahmpdrv_timestep_init delt ",delt," different from Land_IAU_Control%dtp ",Land_IAU_Control%dtp
     endif
   endif
       
