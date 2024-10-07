@@ -80,7 +80,7 @@ list(REMOVE_DUPLICATES CAPS)
 
 # Schemes and caps from the CCPP code generator use full paths with symlinks
 # resolved, we need to do the same here for the below logic to work
-get_filename_component(FULL_PATH_TO_CMAKELISTS CMakeLists.txt REALPATH BASE_DIR ${LOCAL_CURRENT_SOURCE_DIR})
+get_filename_component(FULL_PATH_TO_CMAKELISTS CMakeLists.txt REALPATH)
 get_filename_component(LOCAL_CURRENT_SOURCE_DIR ${FULL_PATH_TO_CMAKELISTS} DIRECTORY)
 
 #------------------------------------------------------------------------------
@@ -185,8 +185,12 @@ set_target_properties(ccpp_physics PROPERTIES VERSION ${PROJECT_VERSION}
 target_include_directories(ccpp_physics PUBLIC
                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 
+if(ip_FOUND)
+  target_link_libraries(ccpp_physics PUBLIC ip::ip_d)
+else()
+  target_link_libraries(ccpp_physics PUBLIC sp::sp_d)
+endif()
 target_link_libraries(ccpp_physics PUBLIC w3emc::w3emc_d
-                                          sp::sp_d
                                           NetCDF::NetCDF_Fortran)
 
 # Define where to install the library
