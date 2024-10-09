@@ -18,6 +18,9 @@
 !> by Xi.Chen <xi.chen@noaa.gov> and Philip Pegion, PSL <philip.pegion@noaa.gov>
 !-------------------------------------------------------------------------------
 
+!> \section arg_table_land_iau_mod Argument table                               
+!! \htmlinclude land_iau_mod.html                                               
+!!
 module land_iau_mod
   
   use machine,                  only: kind_phys, kind_dyn
@@ -40,6 +43,9 @@ module land_iau_mod
       real(kind=kind_phys),allocatable :: slc_inc(:,:,:) 
   end type land_iau_internal_data_type
 
+!> \section arg_table_land_iau_external_data_type Argument Table 
+!! \htmlinclude land_iau_external_data_type.html
+!!
   type land_iau_external_data_type
       real(kind=kind_phys),allocatable :: stc_inc(:,:,:)   
       real(kind=kind_phys),allocatable :: slc_inc(:,:,:)   
@@ -47,6 +53,9 @@ module land_iau_mod
       integer,allocatable              :: snow_land_mask(:, :)
   end type land_iau_external_data_type
 
+!!> \section arg_table_land_iau_state_type Argument Table
+!! \htmlinclude land_iau_state_type.html
+!!
   type land_iau_state_type
       type(land_iau_internal_data_type) :: inc1
       type(land_iau_internal_data_type) :: inc2
@@ -57,6 +66,10 @@ module land_iau_mod
       real(kind=kind_phys)              :: rdt
   end type land_iau_state_type
 
+
+!!!> \section arg_table_land_iau_control_type Argument Table
+!! \htmlinclude land_iau_control_type.html
+!!
   type land_iau_control_type      
       integer :: isc
       integer :: jsc
