@@ -21,13 +21,17 @@
 module land_iau_mod
   
   use machine,                  only: kind_phys, kind_dyn
-  use physcons,                 only: pi => con_pi
   use netcdf
 
   implicit none
 
   private
 
+  !GJF: These variables may need to get moved to the host model and passed in, depending on their use.
+  !     They are currently allocated/initialized in the CCPP init stage and are used throughout the
+  !     simulation in the timestep_init phase. Since this module memory exists on the heap, this 
+  !     may cause issues for models that have multiple CCPP instances in one executable if the data
+  !     differs between CCPP instances. 
   real(kind=kind_phys), allocatable :: wk3_stc(:, :, :, :), wk3_slc(:, :, :, :)
   integer, allocatable :: wk3_slmsk(:, :, :)
 
@@ -87,7 +91,6 @@ module land_iau_mod
 
   end type land_iau_control_type
 
-  type(land_iau_state_type) :: Land_IAU_state
   public land_iau_control_type, land_iau_external_data_type, land_iau_mod_set_control, &
          land_iau_mod_init, land_iau_mod_getiauforcing, land_iau_mod_finalize, calculate_landinc_mask
 
@@ -232,11 +235,12 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
 
 end subroutine land_iau_mod_set_control
 
-subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)    
-   type (land_iau_control_type),          intent(inout) :: Land_IAU_Control
-   type (land_iau_external_data_type), intent(inout)    :: Land_IAU_Data  
-   character(len=*),                     intent(out) :: errmsg
-   integer,                              intent(out) :: errflg
+subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)    
+   type (land_iau_control_type),       intent(inout) :: Land_IAU_Control
+   type (land_iau_external_data_type), intent(inout) :: Land_IAU_Data
+   type(land_iau_state_type),          intent(inout) :: Land_IAU_state  
+   character(len=*),                   intent(  out) :: errmsg
+   integer,                            intent(  out) :: errflg
 
    ! local
    character(len=128)   :: fname
@@ -372,7 +376,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)
    enddo
 
    if (ntimes.EQ.1) then  ! only need to get incrments once since constant forcing over window
-      call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state%rdt, Land_IAU_state%wt)
+      call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state)
    endif
    if (ntimes.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them     
       Land_IAU_state%hr2=Land_IAU_Control%iaufhrs(2)   
@@ -392,12 +396,13 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)
 
 end subroutine land_iau_mod_init
 
-subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, errmsg, errflg)
+subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)
 
    implicit none
 
-   type (land_iau_control_type),          intent(in) :: Land_IAU_Control
+   type(land_iau_control_type),           intent(in) :: Land_IAU_Control
    type(land_iau_external_data_type),  intent(inout) :: Land_IAU_Data
+   type(land_iau_state_type),          intent(inout) :: Land_IAU_state
    character(len=*),                     intent(out) :: errmsg
    integer,                              intent(out) :: errflg
 
@@ -421,11 +426,12 @@ subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, errmsg, errflg
 
 end subroutine land_iau_mod_finalize
 
- subroutine land_iau_mod_getiauforcing(Land_IAU_Control, Land_IAU_Data, errmsg, errflg)
+ subroutine land_iau_mod_getiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)
 
    implicit none
    type (land_iau_control_type),          intent(in) :: Land_IAU_Control
    type(land_iau_external_data_type),  intent(inout) :: Land_IAU_Data
+   type(land_iau_state_type),          intent(inout) :: Land_IAU_state
    character(len=*),                     intent(out) :: errmsg
    integer,                              intent(out) :: errflg
    real(kind=kind_phys) t1,t2,sx,wx,wt,dtp
@@ -483,7 +489,7 @@ end subroutine land_iau_mod_finalize
 !         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'no iau forcing',t1,Land_IAU_Control%fhour,t2
          Land_IAU_Data%in_interval=.false.
       else
-         if (Land_IAU_Control%iau_filter_increments) call setiauforcing(Land_IAU_Control,Land_IAU_Data, Land_IAU_state%rdt, Land_IAU_state%wt)
+         if (Land_IAU_Control%iau_filter_increments) call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state)
          if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_state%wt/Land_IAU_state%wt_normfact,Land_IAU_state%rdt
          Land_IAU_Data%in_interval=.true.
       endif
@@ -517,18 +523,19 @@ end subroutine land_iau_mod_finalize
             Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(itnext, :, :, :) 
          endif
          Land_IAU_Data%snow_land_mask(:, :)  = wk3_slmsk(itnext-1, :, :)
-         call updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state%rdt, Land_IAU_state%wt)
+         call updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
       endif
    endif
 
  end subroutine land_iau_mod_getiauforcing
 
-subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, rdt, wt)
+subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
 
    implicit none
-   type (land_iau_control_type),        intent(in) :: Land_IAU_Control
+   type (land_iau_control_type),          intent(in) :: Land_IAU_Control
    type(land_iau_external_data_type),  intent(inout) :: Land_IAU_Data
-   real(kind=kind_phys) delt, rdt, wt
+   type(land_iau_state_type),          intent(inout) :: Land_IAU_state
+   real(kind=kind_phys) delt
    integer i,j,k
    integer :: is,  ie,  js,  je, npz
    integer :: ntimes
@@ -543,23 +550,24 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, rdt, wt)
 
    delt = (Land_IAU_state%hr2-(Land_IAU_Control%fhour))/(Land_IAU_state%hr2-Land_IAU_state%hr1)
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'in land_iau updateiauforcing ntimes ',ntimes,Land_IAU_Control%iaufhrs(1:ntimes), &
-                                                                  " rdt wt delt ", rdt, wt, delt
+                                                                  " rdt wt delt ", Land_IAU_state%rdt, Land_IAU_state%wt, delt
    do j = js,je
       do i = is,ie
          do k = 1,npz  ! do k = 1,n_soill    !         
-            Land_IAU_Data%stc_inc(i,j,k)  =(delt*Land_IAU_state%inc1%stc_inc(i,j,k)  + (1.-delt)* Land_IAU_state%inc2%stc_inc(i,j,k))*rdt*wt
-            Land_IAU_Data%slc_inc(i,j,k)  =(delt*Land_IAU_state%inc1%slc_inc(i,j,k)  + (1.-delt)* Land_IAU_state%inc2%slc_inc(i,j,k))*rdt*wt
+            Land_IAU_Data%stc_inc(i,j,k)  =(delt*Land_IAU_state%inc1%stc_inc(i,j,k)  + (1.-delt)* Land_IAU_state%inc2%stc_inc(i,j,k))*Land_IAU_state%rdt*Land_IAU_state%wt
+            Land_IAU_Data%slc_inc(i,j,k)  =(delt*Land_IAU_state%inc1%slc_inc(i,j,k)  + (1.-delt)* Land_IAU_state%inc2%slc_inc(i,j,k))*Land_IAU_state%rdt*Land_IAU_state%wt
          end do
        enddo
    enddo
  end subroutine updateiauforcing
 
- subroutine setiauforcing(Land_IAU_Control, Land_IAU_Data, rdt, wt)
+ subroutine setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
 
    implicit none
-   type (land_iau_control_type),        intent(in)   :: Land_IAU_Control
-   type(land_iau_external_data_type),  intent(inout) :: Land_IAU_Data
-   real(kind=kind_phys) delt, rdt,wt
+   type(land_iau_control_type),       intent(in   ) :: Land_IAU_Control
+   type(land_iau_external_data_type), intent(inout) :: Land_IAU_Data
+   type(land_iau_state_type),         intent(in   ) :: Land_IAU_state
+   real(kind=kind_phys) delt
    integer i, j, k
    integer :: is,  ie,  js,  je, npz
    
@@ -569,12 +577,12 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, rdt, wt)
    je  = js + Land_IAU_Control%ny-1
    npz = Land_IAU_Control%lsoil
    !  this is only called if using 1 increment file
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'in land_iau setiauforcing rdt = ',rdt
+   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'in land_iau setiauforcing rdt = ',Land_IAU_state%rdt
    do j = js, je
       do i = is, ie
          do k = 1, npz   !  do k = 1,n_soill    !         
-            Land_IAU_Data%stc_inc(i,j,k) = wt*Land_IAU_state%inc1%stc_inc(i,j,k)*rdt
-            Land_IAU_Data%slc_inc(i,j,k) = wt*Land_IAU_state%inc1%slc_inc(i,j,k)*rdt
+            Land_IAU_Data%stc_inc(i,j,k) = Land_IAU_state%wt*Land_IAU_state%inc1%stc_inc(i,j,k)*Land_IAU_state%rdt
+            Land_IAU_Data%slc_inc(i,j,k) = Land_IAU_state%wt*Land_IAU_state%inc1%slc_inc(i,j,k)*Land_IAU_state%rdt
          end do
          Land_IAU_Data%snow_land_mask(i, j)  = wk3_slmsk(1, i, j)
       enddo

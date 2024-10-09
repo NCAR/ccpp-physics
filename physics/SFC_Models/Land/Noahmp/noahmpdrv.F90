@@ -14,7 +14,8 @@
     use module_sf_noahmplsm
     
     ! Land IAU increments for soil temperature (can also do soil moisture increments if needed)
-    use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type,   &
+    use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type,  &
+                            land_iau_state_type,                                  &
                             land_iau_mod_set_control, land_iau_mod_init,          &
                             land_iau_mod_getiauforcing, land_iau_mod_finalize,    &
                             calculate_landinc_mask
@@ -26,14 +27,7 @@
     private
 
     public :: noahmpdrv_init, noahmpdrv_run, &
-              noahmpdrv_timestep_init, noahmpdrv_finalize
-
-    !> \Land IAU data and control
-    ! Land IAU Control holds settings' information, maily read from namelist (e.g., block of global domain that belongs to a process ,
-    ! whether to do IAU increment at this time step, time step informatoin, etc)    
-    type (land_iau_control_type)          :: Land_IAU_Control
-    ! Land IAU Data holds spatially and temporally interpolated soil temperature increments per time step
-    type (land_iau_external_data_type)    :: Land_IAU_Data   !(number of blocks):each proc holds nblks
+              noahmpdrv_timestep_init, noahmpdrv_finalize    
 
     contains
 
@@ -48,7 +42,7 @@
                                 nlunit, pores, resid,              &
                                 do_mynnsfclay,do_mynnedmf,         &
                                 errmsg, errflg,                    &
-                                mpi_root,                                &
+                                land_iau_control, land_iau_data, land_iau_state, mpi_root, &
                                 fn_nml, input_nml_file, isc, jsc, ncols, nx, ny, tile_num, &
                                 nblks, blksz, xlon, xlat,                             &     
                                 lsoil, lsnow_lsm, dtp, fhour)
@@ -70,6 +64,13 @@
     character(len=*),     intent(out) :: errmsg
     integer,              intent(out) :: errflg
     ! land iau mod
+    
+    ! Land IAU Control holds settings' information, maily read from namelist (e.g., block of global domain that belongs to a process ,
+    ! whether to do IAU increment at this time step, time step informatoin, etc)    
+    type(land_iau_control_type), intent(inout) :: Land_IAU_Control
+    ! Land IAU Data holds spatially and temporally interpolated soil temperature increments per time step
+    type(land_iau_external_data_type), intent(inout) :: Land_IAU_Data   !(number of blocks):each proc holds nblks
+    type(land_iau_state_type),  intent(inout) :: Land_IAU_state
     integer,                       intent(in) :: mpi_root   ! = GFS_Control%master        
     character(*),                  intent(in) :: fn_nml
     character(len=:), intent(in), dimension(:) :: input_nml_file 
@@ -135,7 +136,7 @@
           lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)
     ! Initialize IAU for land
     if (.not. Land_IAU_Control%do_land_iau) return
-    call land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, errmsg, errflg)  !  xlon, xlat, errmsg, errflg)
+    call land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)  !  xlon, xlat, errmsg, errflg)
 
   end subroutine noahmpdrv_init
 
@@ -155,6 +156,7 @@
 
 subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &      !me, mpi_root,
                                     isot, ivegsrc, soiltyp, vegtype, weasd, &
+                                    land_iau_control, land_iau_data, land_iau_state, &
                                     stc, slc, smc, errmsg, errflg)       ! smc, t2mmp, q2mp,    
    
   use machine,                 only: kind_phys  
@@ -175,7 +177,10 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   integer             , dimension(:)     , intent(in)    :: soiltyp    ! soil type (integer index)
   integer             , dimension(:)     , intent(in)    :: vegtype    ! vegetation type (integer index)
   real(kind=kind_phys), dimension(:)     , intent(inout) :: weasd      ! water equivalent accumulated snow depth [mm]
-
+  
+  type(land_iau_control_type)            , intent(inout) :: Land_IAU_Control
+  type(land_iau_external_data_type)      , intent(inout) :: Land_IAU_Data
+  type(land_iau_state_type)              , intent(inout) :: Land_IAU_State
   real(kind=kind_phys), dimension(:,:)   , intent(inout) :: stc        ! soiltemp [K] 
   real(kind=kind_phys), dimension(:,:)   , intent(inout) :: slc        !liquid soil moisture [m3/m3]'
   real(kind=kind_phys), dimension(:,:)   , intent(inout) :: smc        !
@@ -183,6 +188,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   integer,                                   intent(out) :: errflg
 
   ! IAU update
+  
   real(kind=kind_phys),allocatable, dimension(:,:)       :: stc_inc_flat, slc_inc_flat
   real(kind=kind_phys), dimension(km)                    :: dz ! layer thickness
   ! real(kind=kind_phys)                                   :: stc_bck(ncols, km), d_stc(ncols, km)
@@ -231,7 +237,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   endif  
 
   !> read iau increments 
-  call land_iau_mod_getiauforcing(Land_IAU_Control, Land_IAU_Data, errmsg, errflg)   !call getiauforcing(GFS_control,IAU_data)
+  call land_iau_mod_getiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state, errmsg, errflg)   !call getiauforcing(GFS_control,IAU_data)
   if (errflg .ne. 0) then
     if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
       print*, "noahmpdrv_timestep_init: lnd_iau_mod_getiauforcing returned nonzero value"
@@ -434,10 +440,13 @@ end subroutine noahmpdrv_timestep_init
 !! \section arg_table_noahmpdrv_finalize Argument Table
 !! \htmlinclude noahmpdrv_finalize.html
 !!
-  subroutine noahmpdrv_finalize (errmsg, errflg)       ! smc, t2mmp, q2mp,    
+  subroutine noahmpdrv_finalize (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)       ! smc, t2mmp, q2mp,    
    
     use machine,          only: kind_phys 
     implicit none
+    type(land_iau_control_type)            , intent(in   ) :: Land_IAU_Control
+    type(land_iau_external_data_type)      , intent(inout) :: Land_IAU_Data
+    type(land_iau_state_type)              , intent(inout) :: Land_IAU_State
     character(len=*),                          intent(out) :: errmsg
     integer,                                   intent(out) :: errflg
     integer :: j, k, ib
@@ -446,7 +455,7 @@ end subroutine noahmpdrv_timestep_init
     errflg = 0    
 
     if (.not. Land_IAU_Control%do_land_iau) return
-    call land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, errmsg, errflg)     !Land_IAU_Control%finalize()
+    call land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)     !Land_IAU_Control%finalize()
 
   end subroutine noahmpdrv_finalize
 
