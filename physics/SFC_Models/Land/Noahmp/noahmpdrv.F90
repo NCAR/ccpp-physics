@@ -73,7 +73,7 @@
     type(land_iau_state_type),  intent(inout) :: Land_IAU_state
     integer,                       intent(in) :: mpi_root   ! = GFS_Control%master        
     character(*),                  intent(in) :: fn_nml
-    character(len=:), intent(in), dimension(:) :: input_nml_file 
+    character(len=:), pointer, intent(in), dimension(:) :: input_nml_file 
     integer,                       intent(in) :: isc, jsc, ncols, nx, ny, nblks      !=GFS_Control%ncols, %nx, %ny, nblks
     integer,                       intent(in) :: tile_num  !GFS_control_type%tile_num
     integer, dimension(:),         intent(in) :: blksz   !(one:) !GFS_Control%blksz

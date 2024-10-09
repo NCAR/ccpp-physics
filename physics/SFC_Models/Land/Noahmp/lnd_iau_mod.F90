@@ -104,7 +104,7 @@ module land_iau_mod
 
   end type land_iau_control_type
 
-  public land_iau_control_type, land_iau_external_data_type, land_iau_mod_set_control, &
+  public land_iau_control_type, land_iau_external_data_type, land_iau_state_type, land_iau_mod_set_control, &
          land_iau_mod_init, land_iau_mod_getiauforcing, land_iau_mod_finalize, calculate_landinc_mask
 
 contains
@@ -130,7 +130,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    logical                                    :: exists
    character(len=512)                         :: ioerrmsg
 
-   character(len=:), dimension(:)             :: input_nml_file => null()
+   character(len=:), pointer, dimension(:)    :: input_nml_file => null()
    character(len=4)                           :: iosstr
 
    !> land iau setting read from namelist
