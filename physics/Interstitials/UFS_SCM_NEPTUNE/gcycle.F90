@@ -107,7 +107,7 @@ contains
     real (kind=kind_io8) :: min_ice(nx*ny)
     integer              :: i_indx(nx*ny), j_indx(nx*ny)
     character(len=6)     :: tile_num_ch
-    real(kind=kind_phys) :: sig1t
+    real(kind=kind_phys) :: sig1t(nx*ny)
     integer              :: npts, nb, ix, jx, ls, ios, ll
     logical              :: exists
 

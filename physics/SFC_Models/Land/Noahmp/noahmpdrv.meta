@@ -97,6 +97,27 @@
   dimensions = ()
   type = integer
   intent = out
+[land_iau_control]
+  standard_name = land_data_assimilation_control
+  long_name = land data assimilation control
+  units = mixed
+  dimensions = ()
+  type = land_iau_control_type
+  intent = inout
+[land_iau_data]
+  standard_name = land_data_assimilation_data
+  long_name = land data assimilation data
+  units = mixed
+  dimensions = ()
+  type = land_iau_external_data_type
+  intent = inout
+[land_iau_state]
+  standard_name = land_data_assimilation_interpolated_data
+  long_name = land data assimilation space- and time-interpolated
+  units = mixed
+  dimensions = ()
+  type = land_iau_state_type
+  intent = inout
 [mpi_root]
   standard_name = mpi_root
   long_name = master MPI-rank
@@ -300,6 +321,27 @@
   type = real
   kind = kind_phys
   intent = inout
+[land_iau_control]
+  standard_name = land_data_assimilation_control
+  long_name = land data assimilation control
+  units = mixed
+  dimensions = ()
+  type = land_iau_control_type
+  intent = inout
+[land_iau_data]
+  standard_name = land_data_assimilation_data
+  long_name = land data assimilation data
+  units = mixed
+  dimensions = ()
+  type = land_iau_external_data_type
+  intent = inout
+[land_iau_state]
+  standard_name = land_data_assimilation_interpolated_data
+  long_name = land data assimilation space- and time-interpolated
+  units = mixed
+  dimensions = ()
+  type = land_iau_state_type
+  intent = inout
 [stc]
   standard_name = soil_temperature
   long_name = soil temperature
@@ -344,6 +386,27 @@
 [ccpp-arg-table]
   name = noahmpdrv_finalize
   type = scheme
+[land_iau_control]
+  standard_name = land_data_assimilation_control
+  long_name = land data assimilation control
+  units = mixed
+  dimensions = ()
+  type = land_iau_control_type
+  intent = in
+[land_iau_data]
+  standard_name = land_data_assimilation_data
+  long_name = land data assimilation data
+  units = mixed
+  dimensions = ()
+  type = land_iau_external_data_type
+  intent = inout
+[land_iau_state]
+  standard_name = land_data_assimilation_interpolated_data
+  long_name = land data assimilation space- and time-interpolated
+  units = mixed
+  dimensions = ()
+  type = land_iau_state_type
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
