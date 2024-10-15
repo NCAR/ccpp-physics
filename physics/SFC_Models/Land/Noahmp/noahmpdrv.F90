@@ -15,10 +15,10 @@
     
     ! Land IAU increments for soil temperature (can also do soil moisture increments if needed)
     use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type,  &
-                            land_iau_state_type,                                  &
-                            land_iau_mod_set_control, land_iau_mod_init,          &
-                            land_iau_mod_getiauforcing, land_iau_mod_finalize,    &
-                            calculate_landinc_mask
+                             land_iau_state_type
+                            
+    use land_iau_mod,  only: land_iau_mod_init, land_iau_mod_getiauforcing, land_iau_mod_finalize,    &    
+                             calculate_landinc_mask   ! land_iau_mod_set_control, 
 
     implicit none
 
@@ -37,15 +37,16 @@
 !! \section arg_table_noahmpdrv_init Argument Table
 !! \htmlinclude noahmpdrv_init.html
 !!
-  subroutine noahmpdrv_init(lsm, lsm_noahmp, me,               & 
+  subroutine noahmpdrv_init(lsm, lsm_noahmp,                       & 
                                 isot, ivegsrc,                     &
                                 nlunit, pores, resid,              &
                                 do_mynnsfclay,do_mynnedmf,         &
                                 errmsg, errflg,                    &
-                                land_iau_control, land_iau_data, land_iau_state, mpi_root, &
-                                fn_nml, input_nml_file, isc, jsc, ncols, nx, ny, tile_num, &
-                                nblks, blksz, xlon, xlat,                             &     
-                                lsoil, lsnow_lsm, dtp, fhour)
+                                Land_IAU_Control, Land_IAU_Data, Land_IAU_state)
+                                ! , me, mpi_root, &
+                                ! fn_nml, input_nml_file, isc, jsc, ncols, nx, ny, tile_num, &
+                                ! nblks, blksz, xlon, xlat,                             &     
+                                ! lsoil, lsnow_lsm, dtp, fhour)
 
     use machine,          only: kind_phys
     use set_soilveg_mod,  only: set_soilveg
@@ -55,8 +56,7 @@
     implicit none
 
     integer,              intent(in) :: lsm
-    integer,              intent(in) :: lsm_noahmp    
-    integer,              intent(in) :: me         !  mpi_rank
+    integer,              intent(in) :: lsm_noahmp       
     integer,              intent(in) :: isot, ivegsrc, nlunit
     real (kind=kind_phys), dimension(:), intent(out) :: pores, resid
     logical,              intent(in) :: do_mynnsfclay
@@ -71,17 +71,19 @@
     ! Land IAU Data holds spatially and temporally interpolated soil temperature increments per time step
     type(land_iau_external_data_type), intent(inout) :: Land_IAU_Data   !(number of blocks):each proc holds nblks
     type(land_iau_state_type),  intent(inout) :: Land_IAU_state
-    integer,                       intent(in) :: mpi_root   ! = GFS_Control%master        
-    character(*),                  intent(in) :: fn_nml
-    character(len=:), pointer, intent(in), dimension(:) :: input_nml_file 
-    integer,                       intent(in) :: isc, jsc, ncols, nx, ny, nblks      !=GFS_Control%ncols, %nx, %ny, nblks
-    integer,                       intent(in) :: tile_num  !GFS_control_type%tile_num
-    integer, dimension(:),         intent(in) :: blksz   !(one:) !GFS_Control%blksz
-    real(kind_phys), dimension(:), intent(in) :: xlon    ! longitude !GFS_Data(cdata%blk_no)%Grid%xlon
-    real(kind_phys), dimension(:), intent(in) :: xlat    ! latitude
 
-    integer,                       intent(in) :: lsoil, lsnow_lsm
-    real(kind=kind_phys),          intent(in) :: dtp, fhour
+    ! integer,              intent(in) :: me         !  mpi_rank
+    ! integer,                       intent(in) :: mpi_root   ! = GFS_Control%master        
+    ! character(*),                  intent(in) :: fn_nml
+    ! character(len=:), pointer, intent(in), dimension(:) :: input_nml_file 
+    ! integer,                       intent(in) :: isc, jsc, ncols, nx, ny, nblks      !=GFS_Control%ncols, %nx, %ny, nblks
+    ! integer,                       intent(in) :: tile_num  !GFS_control_type%tile_num
+    ! integer, dimension(:),         intent(in) :: blksz   !(one:) !GFS_Control%blksz
+    ! real(kind_phys), dimension(:), intent(in) :: xlon    ! longitude !GFS_Data(cdata%blk_no)%Grid%xlon
+    ! real(kind_phys), dimension(:), intent(in) :: xlat    ! latitude
+
+    ! integer,                       intent(in) :: lsoil, lsnow_lsm
+    ! real(kind=kind_phys),          intent(in) :: dtp, fhour
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -130,10 +132,10 @@
     pores (:) = maxsmc (:)
     resid (:) = drysmc (:)
 
-    ! Read Land IAU settings 
-    call land_iau_mod_set_control(Land_IAU_Control, fn_nml, input_nml_file, &
-          me, mpi_root, isc,jsc, nx, ny, tile_num, nblks, blksz,  &
-          lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)
+    ! ! Read Land IAU settings 
+    ! call land_iau_mod_set_control(Land_IAU_Control, fn_nml, input_nml_file, &
+    !       me, mpi_root, isc,jsc, nx, ny, tile_num, nblks, blksz,  &
+    !       lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)
     ! Initialize IAU for land
     if (.not. Land_IAU_Control%do_land_iau) return
     call land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)  !  xlon, xlat, errmsg, errflg)

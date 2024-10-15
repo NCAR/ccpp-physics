@@ -409,7 +409,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
 
 end subroutine land_iau_mod_init
 
-subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)
+subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, Land_IAU_state, errmsg, errflg)
 
    implicit none
 
@@ -563,7 +563,7 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
 
    delt = (Land_IAU_state%hr2-(Land_IAU_Control%fhour))/(Land_IAU_state%hr2-Land_IAU_state%hr1)
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'in land_iau updateiauforcing ntimes ',ntimes,Land_IAU_Control%iaufhrs(1:ntimes), &
-                                                                  " rdt wt delt ", Land_IAU_state%rdt, Land_IAU_state%wt, delt
+                                                                  " rdt wt delt_t ", Land_IAU_state%rdt, Land_IAU_state%wt, delt
    do j = js,je
       do i = is,ie
          do k = 1,npz  ! do k = 1,n_soill    !         
