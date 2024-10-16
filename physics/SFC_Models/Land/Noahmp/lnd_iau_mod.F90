@@ -35,13 +35,13 @@ module land_iau_mod
   !     simulation in the timestep_init phase. Since this module memory exists on the heap, this 
   !     may cause issues for models that have multiple CCPP instances in one executable if the data
   !     differs between CCPP instances. 
-  real(kind=kind_phys), allocatable :: wk3_stc(:, :, :, :), wk3_slc(:, :, :, :)
+!   real(kind=kind_phys), allocatable :: wk3_stc(:, :, :, :), wk3_slc(:, :, :, :)
 !   integer, allocatable :: wk3_slmsk(:, :, :)    ! Calculate snow soil mask at runtime from (dynamic) swe
 
-  type land_iau_internal_data_type
-      real(kind=kind_phys),allocatable :: stc_inc(:,:,:)
-      real(kind=kind_phys),allocatable :: slc_inc(:,:,:) 
-  end type land_iau_internal_data_type
+!   type land_iau_internal_data_type
+!       real(kind=kind_phys),allocatable :: stc_inc(:,:,:)
+!       real(kind=kind_phys),allocatable :: slc_inc(:,:,:) 
+!   end type land_iau_internal_data_type
 
 !> \section arg_table_land_iau_external_data_type Argument Table 
 !! \htmlinclude land_iau_external_data_type.html
@@ -51,19 +51,24 @@ module land_iau_mod
       real(kind=kind_phys),allocatable :: slc_inc(:,:,:)   
       logical                          :: in_interval = .false.
       ! integer,allocatable              :: snow_land_mask(:, :)     ! Calculate snow soil mask at runtime from (dynamic) swe
+      real(kind=kind_phys)              :: hr1        ! moved from _state_type
+      real(kind=kind_phys)              :: hr2
   end type land_iau_external_data_type
 
 !!> \section arg_table_land_iau_state_type Argument Table
 !! \htmlinclude land_iau_state_type.html
 !!
+  ! land_iau_state will hold inrements, read during land_iau_mod_init
   type land_iau_state_type
-      type(land_iau_internal_data_type) :: inc1
-      type(land_iau_internal_data_type) :: inc2
-      real(kind=kind_phys)              :: hr1
-      real(kind=kind_phys)              :: hr2
-      real(kind=kind_phys)              :: wt
-      real(kind=kind_phys)              :: wt_normfact
-      real(kind=kind_phys)              :: rdt
+      ! type(land_iau_internal_data_type) :: inc1
+      ! type(land_iau_internal_data_type) :: inc2
+      real(kind=kind_phys),allocatable :: stc_inc(:,:,:,:)
+      real(kind=kind_phys),allocatable :: slc_inc(:,:,:,:) 
+      ! real(kind=kind_phys)              :: hr1            ! moved to land_iau_external_data_type because they may vary with time
+      ! real(kind=kind_phys)              :: hr2
+      ! real(kind=kind_phys)              :: wt             ! moved to _control_type because they are constant
+      ! real(kind=kind_phys)              :: wt_normfact
+      ! real(kind=kind_phys)              :: rdt
   end type land_iau_state_type
 
 
@@ -101,6 +106,11 @@ module land_iau_mod
       real(kind=kind_phys) :: fhour           !< current forecast hour
 
       integer              :: ntimes
+      
+      ! moved from land_iau_state_type because they are constant
+      real(kind=kind_phys)              :: wt
+      real(kind=kind_phys)              :: wt_normfact
+      real(kind=kind_phys)              :: rdt
 
   end type land_iau_control_type
 
@@ -265,7 +275,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
    logical              :: exists
    integer              :: ncid, dimid, varid, status, IDIM
    
-   real(kind=kind_phys) :: dt, rdt
+   real(kind=kind_phys) :: dt   !, rdt
    integer              :: im, jm, km, nfiles, ntimes
 
    integer :: is,  ie,  js,  je
@@ -290,19 +300,19 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
 
    print*, "rank is ie js je nlon nlat", Land_IAU_Control%me, is, ie, js, je, nlon, nlat
 
+   ! allocate arrays that will hold iau state
    allocate(Land_IAU_Data%stc_inc(nlon, nlat, km))
    allocate(Land_IAU_Data%slc_inc(nlon, nlat, km))
    ! allocate(Land_IAU_Data%snow_land_mask(nlon, nlat)) 
    
-! allocate arrays that will hold iau state
-   allocate (Land_IAU_state%inc1%stc_inc(nlon, nlat, km))
-   allocate (Land_IAU_state%inc1%slc_inc(nlon, nlat, km))
-   allocate (Land_IAU_state%inc2%stc_inc(nlon, nlat, km))
-   allocate (Land_IAU_state%inc2%slc_inc(nlon, nlat, km)) 
+   ! allocate (Land_IAU_state%inc1%stc_inc(nlon, nlat, km))
+   ! allocate (Land_IAU_state%inc1%slc_inc(nlon, nlat, km))
+   ! allocate (Land_IAU_state%inc2%stc_inc(nlon, nlat, km))
+   ! allocate (Land_IAU_state%inc2%slc_inc(nlon, nlat, km)) 
 
-   Land_IAU_state%hr1=Land_IAU_Control%iaufhrs(1)
-   Land_IAU_state%wt = 1.0 ! IAU increment filter weights (default 1.0)
-   Land_IAU_state%wt_normfact = 1.0
+   Land_IAU_Data%hr1=Land_IAU_Control%iaufhrs(1)
+   Land_IAU_Control%wt = 1.0 ! IAU increment filter weights (default 1.0)
+   Land_IAU_Control%wt_normfact = 1.0
    if (Land_IAU_Control%iau_filter_increments) then
       ! compute increment filter weights, sum to obtain normalization factor
       dtp=Land_IAU_Control%dtp
@@ -321,13 +331,15 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
          normfact = normfact + wt
          if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'filter wts',k,kstep,wt
       enddo
-      Land_IAU_state%wt_normfact = (2*nstep+1)/normfact
+      Land_IAU_Control%wt_normfact = (2*nstep+1)/normfact
    endif
 
    ! increment files in fv3 tiles 
    if (trim(Land_IAU_Control%iau_inc_files(1)) .eq. '' .or. Land_IAU_Control%iaufhrs(1) .lt. 0) then ! only 1 file expected
-      print*, "warning! in Land IAU but increment file name is empty or iaufhrs(1) is negative"
-      Land_IAU_Control%do_land_iau=.false.
+      print*, "Error! in Land IAU init: increment file name is empty or iaufhrs(1) is negative"
+      errmsg = "Error! in Land IAU init: increment file name is empty or iaufhrs(1) is negative"
+      errflg = 1
+      ! Land_IAU_Control%do_land_iau=.false.
       return   
    endif    
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then
@@ -365,41 +377,39 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
       deallocate(idt)
    endif
    dt = (Land_IAU_Control%iau_delthrs*3600.)
-   rdt = 1.0/dt
-   Land_IAU_state%rdt = rdt
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'land_iau interval, rdt',Land_IAU_Control%iau_delthrs,Land_IAU_state%rdt
+   Land_IAU_Control%rdt = 1.0/dt   !rdt
+   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'land_iau interval, rdt',Land_IAU_Control%iau_delthrs,Land_IAU_Control%rdt
 
    ! Read all increment files at iau init time (at beginning of cycle) 
    ! allocate (wk3_stc(n_t, 1:im,jbeg:jend, 1:km))  
-   call read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  !, wk3_stc, wk3_slc
+   call read_iau_forcing_fv3(Land_IAU_Control, Land_IAU_state%stc_inc, Land_IAU_state%slc_inc, errmsg, errflg)  !, wk3_stc, wk3_slc
    ! call read_iau_forcing_fv3(Land_IAU_Control, Land_IAU_state%inc1%stc_inc, Land_IAU_state%inc1%slc_inc, errmsg, errflg)
    
    ! increments already in the fv3 grid--no need for interpolation       
-   do k = 1, npz  ! do k = 1,n_soill    !  
-      do j = 1, nlat
-         do i = 1, nlon                
-            Land_IAU_state%inc1%stc_inc(i,j,k)  = wk3_stc(1, i, j, k)
-            Land_IAU_state%inc1%slc_inc(i,j,k)  = wk3_slc(1, i, j, k) 
-         end do
-       enddo
-   enddo
+   ! do k = 1, npz  ! do k = 1,n_soill    !  
+   !    do j = 1, nlat
+   !       do i = 1, nlon                
+   !          Land_IAU_state%inc1%stc_inc(i,j,k)  = wk3_stc(1, i, j, k)
+   !          Land_IAU_state%inc1%slc_inc(i,j,k)  = wk3_slc(1, i, j, k) 
+   !       end do
+   !     enddo
+   ! enddo
 
    if (ntimes.EQ.1) then  ! only need to get incrments once since constant forcing over window
       call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state)
    endif
-   if (ntimes.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them     
-      Land_IAU_state%hr2=Land_IAU_Control%iaufhrs(2)   
-
-      ! Land_IAU_Data%snow_land_mask(:, :)  = wk3_slmsk(1, :, :)
-
-      do k = 1, npz  ! do k = 1,n_soill    !  
-         do j = 1, nlat
-            do i = 1, nlon                
-               Land_IAU_state%inc2%stc_inc(i,j,k)  = wk3_stc(2, i, j, k)
-               Land_IAU_state%inc2%slc_inc(i,j,k)  = wk3_slc(2, i, j, k) 
-            end do
-          enddo
-      enddo
+   if (ntimes.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them  
+       ! interpolation is now done in land_iau_mod_getiauforcing 
+      Land_IAU_Data%hr2=Land_IAU_Control%iaufhrs(2)   
+      ! ! Land_IAU_Data%snow_land_mask(:, :)  = wk3_slmsk(1, :, :)
+      ! do k = 1, npz  ! do k = 1,n_soill    !  
+      !    do j = 1, nlat
+      !       do i = 1, nlon                
+      !          Land_IAU_state%inc2%stc_inc(i,j,k)  = wk3_stc(2, i, j, k)
+      !          Land_IAU_state%inc2%slc_inc(i,j,k)  = wk3_slc(2, i, j, k) 
+      !       end do
+      !     enddo
+      ! enddo
    endif
 !   print*,'end of IAU init',dt,rdt
 
@@ -419,19 +429,21 @@ subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, Land_IAU_state
    errmsg = ''
    errflg = 0
 
-   if (allocated (wk3_stc)) deallocate (wk3_stc)
-   if (allocated (wk3_slc)) deallocate (wk3_slc)
-   ! if (allocated (wk3_slmsk)) deallocate (wk3_slmsk)
-
    if (allocated(Land_IAU_Data%stc_inc)) deallocate (Land_IAU_Data%stc_inc)
    if (allocated(Land_IAU_Data%slc_inc)) deallocate (Land_IAU_Data%slc_inc)
    ! if (allocated(Land_IAU_Data%snow_land_mask)) deallocate (Land_IAU_Data%snow_land_mask)   
 
-   if (allocated(Land_IAU_state%inc1%stc_inc)) deallocate(Land_IAU_state%inc1%stc_inc)
-   if (allocated(Land_IAU_state%inc1%slc_inc)) deallocate(Land_IAU_state%inc1%slc_inc)
+   if (allocated(Land_IAU_state%stc_inc)) deallocate(Land_IAU_state%stc_inc)
+   if (allocated(Land_IAU_state%slc_inc)) deallocate(Land_IAU_state%slc_inc)
 
-   if (allocated(Land_IAU_state%inc2%stc_inc)) deallocate(Land_IAU_state%inc2%stc_inc)
-   if (allocated(Land_IAU_state%inc2%slc_inc)) deallocate(Land_IAU_state%inc2%slc_inc)
+   ! if (allocated (wk3_stc)) deallocate (wk3_stc)
+   ! if (allocated (wk3_slc)) deallocate (wk3_slc)
+   ! ! if (allocated (wk3_slmsk)) deallocate (wk3_slmsk)
+
+   ! if (allocated(Land_IAU_state%inc1%stc_inc)) deallocate(Land_IAU_state%inc1%stc_inc)
+   ! if (allocated(Land_IAU_state%inc1%slc_inc)) deallocate(Land_IAU_state%inc1%slc_inc)
+   ! if (allocated(Land_IAU_state%inc2%stc_inc)) deallocate(Land_IAU_state%inc2%stc_inc
+   ! if (allocated(Land_IAU_state%inc2%slc_inc)) deallocate(Land_IAU_state%inc2%slc_inc)
 
 end subroutine land_iau_mod_finalize
 
@@ -440,7 +452,7 @@ end subroutine land_iau_mod_finalize
    implicit none
    type (land_iau_control_type),          intent(in) :: Land_IAU_Control
    type(land_iau_external_data_type),  intent(inout) :: Land_IAU_Data
-   type(land_iau_state_type),          intent(inout) :: Land_IAU_state
+   type(land_iau_state_type),             intent(in) :: Land_IAU_State
    character(len=*),                     intent(out) :: errmsg
    integer,                              intent(out) :: errflg
    real(kind=kind_phys) t1,t2,sx,wx,wt,dtp
@@ -455,6 +467,8 @@ end subroutine land_iau_mod_finalize
 
    Land_IAU_Data%in_interval=.false.
    if (ntimes.LE.0) then
+       errmsg = 'in land_iau_mod_getiauforcing, but ntimes <=0, probably no increment data. Exiting.'
+       errflg = 0
        return
    endif
 
@@ -483,10 +497,10 @@ end subroutine land_iau_mod_finalize
          else
             wt = 1.
          endif
-         Land_IAU_state%wt = Land_IAU_state%wt_normfact*wt
-         !if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'kstep,t1,t,t2,filter wt=',kstep,t1,Land_IAU_Control%fhour,t2,Land_IAU_state%wt/Land_IAU_state%wt_normfact
+         Land_IAU_Control%wt = Land_IAU_Control%wt_normfact*wt
+         !if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'kstep,t1,t,t2,filter wt=',kstep,t1,Land_IAU_Control%fhour,t2,Land_IAU_Control%wt/Land_IAU_Control%wt_normfact
       else
-         Land_IAU_state%wt = 0.
+         Land_IAU_Control%wt = 0.
       endif
    endif
 
@@ -498,8 +512,10 @@ end subroutine land_iau_mod_finalize
 !         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'no iau forcing',t1,Land_IAU_Control%fhour,t2
          Land_IAU_Data%in_interval=.false.
       else
-         if (Land_IAU_Control%iau_filter_increments) call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state)
-         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_state%wt/Land_IAU_state%wt_normfact,Land_IAU_state%rdt
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+            print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_Control%wt/Land_IAU_Control%wt_normfact,Land_IAU_Control%rdt
+         endif
+         if (Land_IAU_Control%iau_filter_increments) call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state)         
          Land_IAU_Data%in_interval=.true.
       endif
       return
@@ -513,7 +529,7 @@ end subroutine land_iau_mod_finalize
 !         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'no iau forcing',Land_IAU_Control%iaufhrs(1),Land_IAU_Control%fhour,Land_IAU_Control%iaufhrs(nfiles)
          Land_IAU_Data%in_interval=.false.
       else
-         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_state%wt/Land_IAU_state%wt_normfact,Land_IAU_state%rdt
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_Control%wt/Land_IAU_Control%wt_normfact,Land_IAU_Control%rdt
          Land_IAU_Data%in_interval=.true.
          do k=ntimes, 1, -1
             if (Land_IAU_Control%iaufhrs(k) > Land_IAU_Control%fhour) then
@@ -521,9 +537,9 @@ end subroutine land_iau_mod_finalize
             endif
          enddo
 !         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'itnext=',itnext
-         if (Land_IAU_Control%fhour >= Land_IAU_state%hr2) then ! need to read in next increment file
-            Land_IAU_state%hr1=Land_IAU_state%hr2
-            Land_IAU_state%hr2=Land_IAU_Control%iaufhrs(itnext)
+         if (Land_IAU_Control%fhour >= Land_IAU_Data%hr2) then ! need to read in next increment file
+            Land_IAU_Data%hr1=Land_IAU_Data%hr2
+            Land_IAU_Data%hr2=Land_IAU_Control%iaufhrs(itnext)
             Land_IAU_state%inc1=Land_IAU_state%inc2
      
             ! if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'reading next lnd iau increment file',trim(Land_IAU_Control%iau_inc_files(itnext))
@@ -557,14 +573,14 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
 
    ntimes = Land_IAU_Control%ntimes
 
-   delt = (Land_IAU_state%hr2-(Land_IAU_Control%fhour))/(Land_IAU_state%hr2-Land_IAU_state%hr1)
+   delt = (Land_IAU_Data%hr2-(Land_IAU_Control%fhour))/(Land_IAU_Data%hr2-Land_IAU_Data%hr1)
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'in land_iau updateiauforcing ntimes ',ntimes,Land_IAU_Control%iaufhrs(1:ntimes), &
-                                                                  " rdt wt delt_t ", Land_IAU_state%rdt, Land_IAU_state%wt, delt
+                                                                  " rdt wt delt_t ", Land_IAU_Control%rdt, Land_IAU_Control%wt, delt
    do j = js,je
       do i = is,ie
          do k = 1,npz  ! do k = 1,n_soill    !         
-            Land_IAU_Data%stc_inc(i,j,k)  =(delt*Land_IAU_state%inc1%stc_inc(i,j,k)  + (1.-delt)* Land_IAU_state%inc2%stc_inc(i,j,k))*Land_IAU_state%rdt*Land_IAU_state%wt
-            Land_IAU_Data%slc_inc(i,j,k)  =(delt*Land_IAU_state%inc1%slc_inc(i,j,k)  + (1.-delt)* Land_IAU_state%inc2%slc_inc(i,j,k))*Land_IAU_state%rdt*Land_IAU_state%wt
+            Land_IAU_Data%stc_inc(i,j,k)  =(delt*Land_IAU_state%inc1%stc_inc(i,j,k)  + (1.-delt)* Land_IAU_state%inc2%stc_inc(i,j,k))*Land_IAU_Control%rdt*Land_IAU_Control%wt
+            Land_IAU_Data%slc_inc(i,j,k)  =(delt*Land_IAU_state%inc1%slc_inc(i,j,k)  + (1.-delt)* Land_IAU_state%inc2%slc_inc(i,j,k))*Land_IAU_Control%rdt*Land_IAU_Control%wt
          end do
        enddo
    enddo
@@ -575,7 +591,7 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
    implicit none
    type(land_iau_control_type),       intent(in   ) :: Land_IAU_Control
    type(land_iau_external_data_type), intent(inout) :: Land_IAU_Data
-   type(land_iau_state_type),         intent(in   ) :: Land_IAU_state
+   type(land_iau_state_type),         intent(in   ) :: Land_IAU_State
    real(kind=kind_phys) delt
    integer i, j, k
    integer :: is,  ie,  js,  je, npz
@@ -586,12 +602,12 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
    je  = js + Land_IAU_Control%ny-1
    npz = Land_IAU_Control%lsoil
    !  this is only called if using 1 increment file
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'in land_iau setiauforcing rdt = ',Land_IAU_state%rdt
+   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'in land_iau setiauforcing rdt = ',Land_IAU_Control%rdt
    do j = js, je
       do i = is, ie
          do k = 1, npz   !  do k = 1,n_soill    !         
-            Land_IAU_Data%stc_inc(i,j,k) = Land_IAU_state%wt*Land_IAU_state%inc1%stc_inc(i,j,k)*Land_IAU_state%rdt
-            Land_IAU_Data%slc_inc(i,j,k) = Land_IAU_state%wt*Land_IAU_state%inc1%slc_inc(i,j,k)*Land_IAU_state%rdt
+            Land_IAU_Data%stc_inc(i,j,k) = Land_IAU_Control%wt*Land_IAU_State%stc_inc(1,i,j,k)*Land_IAU_Control%rdt
+            Land_IAU_Data%slc_inc(i,j,k) = Land_IAU_Control%wt*Land_IAU_State%slc_inc(1,i,j,k)*Land_IAU_Control%rdt
          end do
          ! Land_IAU_Data%snow_land_mask(i, j)  = wk3_slmsk(1, i, j)
       enddo
@@ -599,9 +615,10 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
 
  end subroutine setiauforcing
 
-subroutine read_iau_forcing_fv3(Land_IAU_Control, errmsg, errflg)  
+subroutine read_iau_forcing_fv3(Land_IAU_Control, wk3_stc, wk3_slc, errmsg, errflg)  
 
-   type (land_iau_control_type), intent(in) :: Land_IAU_Control
+   type (land_iau_control_type),       intent(in) :: Land_IAU_Control
+   real(kind=kind_phys), allocatable, intent(out) :: wk3_stc(:, :, :, :), wk3_slc(:, :, :, :)
    character(len=*),          intent(inout) :: errmsg
    integer,                   intent(inout) :: errflg
 
