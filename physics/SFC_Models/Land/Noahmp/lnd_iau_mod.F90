@@ -467,7 +467,7 @@ end subroutine land_iau_mod_finalize
 
    Land_IAU_Data%in_interval=.false.
    if (ntimes.LE.0) then
-       errmsg = 'in land_iau_mod_getiauforcing, but ntimes <=0, probably no increment data. Exiting.'
+       errmsg = 'in land_iau_mod_getiauforcing, but ntimes <=0, probably no increment files. Exiting.'
        errflg = 0
        return
    endif
@@ -515,8 +515,8 @@ end subroutine land_iau_mod_finalize
          if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
             print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_Control%wt/Land_IAU_Control%wt_normfact,Land_IAU_Control%rdt
          endif
-         if (Land_IAU_Control%iau_filter_increments) call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state)         
          Land_IAU_Data%in_interval=.true.
+         if (Land_IAU_Control%iau_filter_increments) call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state)       
       endif
       return
    endif
@@ -529,42 +529,45 @@ end subroutine land_iau_mod_finalize
 !         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'no iau forcing',Land_IAU_Control%iaufhrs(1),Land_IAU_Control%fhour,Land_IAU_Control%iaufhrs(nfiles)
          Land_IAU_Data%in_interval=.false.
       else
-         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_Control%wt/Land_IAU_Control%wt_normfact,Land_IAU_Control%rdt
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+            print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ',t1,Land_IAU_Control%fhour,t2,Land_IAU_Control%wt/Land_IAU_Control%wt_normfact,Land_IAU_Control%rdt
+         endif
          Land_IAU_Data%in_interval=.true.
          do k=ntimes, 1, -1
             if (Land_IAU_Control%iaufhrs(k) > Land_IAU_Control%fhour) then
                itnext=k
             endif
          enddo
-!         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'itnext=',itnext
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+            print *,'Land iau increments at times ', itnext-1, ' and ', itnext  !trim(Land_IAU_Control%iau_inc_files(itnext))
+         endif
          if (Land_IAU_Control%fhour >= Land_IAU_Data%hr2) then ! need to read in next increment file
             Land_IAU_Data%hr1=Land_IAU_Data%hr2
             Land_IAU_Data%hr2=Land_IAU_Control%iaufhrs(itnext)
-            Land_IAU_state%inc1=Land_IAU_state%inc2
-     
-            ! if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'reading next lnd iau increment file',trim(Land_IAU_Control%iau_inc_files(itnext))
-            if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'copying next lnd iau increment ', itnext  !trim(Land_IAU_Control%iau_inc_files(itnext))
-            Land_IAU_state%inc2%stc_inc(:, :, :) = wk3_stc(itnext, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
-            Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(itnext, :, :, :) 
+            ! Land_IAU_state%inc1=Land_IAU_state%inc2 
+            ! Land_IAU_state%inc2%stc_inc(:, :, :) = wk3_stc(itnext, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
+            ! Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(itnext, :, :, :) 
          endif
          ! Land_IAU_Data%snow_land_mask(:, :)  = wk3_slmsk(itnext-1, :, :)
-         call updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
+         call updateiauforcing(itnext, Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
       endif
    endif
 
  end subroutine land_iau_mod_getiauforcing
 
-subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
+subroutine updateiauforcing(t2, Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
 
    implicit none
+   integer,                               intent(in) :: t2
    type (land_iau_control_type),          intent(in) :: Land_IAU_Control
    type(land_iau_external_data_type),  intent(inout) :: Land_IAU_Data
-   type(land_iau_state_type),          intent(inout) :: Land_IAU_state
+   type(land_iau_state_type),             intent(in) :: Land_IAU_State
    real(kind=kind_phys) delt
    integer i,j,k
-   integer :: is,  ie,  js,  je, npz
+   integer :: is,  ie,  js,  je, npz, t1
    integer :: ntimes
    
+   t1  = t2 - 1
    is  = 1  !Land_IAU_Control%isc
    ie  = is + Land_IAU_Control%nx-1
    js  = 1  !Land_IAU_Control%jsc
@@ -579,8 +582,8 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
    do j = js,je
       do i = is,ie
          do k = 1,npz  ! do k = 1,n_soill    !         
-            Land_IAU_Data%stc_inc(i,j,k)  =(delt*Land_IAU_state%inc1%stc_inc(i,j,k)  + (1.-delt)* Land_IAU_state%inc2%stc_inc(i,j,k))*Land_IAU_Control%rdt*Land_IAU_Control%wt
-            Land_IAU_Data%slc_inc(i,j,k)  =(delt*Land_IAU_state%inc1%slc_inc(i,j,k)  + (1.-delt)* Land_IAU_state%inc2%slc_inc(i,j,k))*Land_IAU_Control%rdt*Land_IAU_Control%wt
+            Land_IAU_Data%stc_inc(i,j,k)  =(delt*Land_IAU_State%stc_inc(t1,i,j,k)  + (1.-delt)* Land_IAU_State%stc_inc(t2,i,j,k))*Land_IAU_Control%rdt*Land_IAU_Control%wt
+            Land_IAU_Data%slc_inc(i,j,k)  =(delt*Land_IAU_State%slc_inc(t1,i,j,k)  + (1.-delt)* Land_IAU_State%slc_inc(t2,i,j,k))*Land_IAU_Control%rdt*Land_IAU_Control%wt
          end do
        enddo
    enddo
@@ -738,46 +741,46 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, wk3_stc, wk3_slc, errmsg, errf
 end subroutine read_iau_forcing_fv3
 
   !> Calculate soil mask for land on model grid.
-!! Output is 1  - soil, 2 - snow-covered, 0 - land ice, -1  not land.
-!!
-!! @param[in] lensfc  Number of land points for this tile 
-!! @param[in] veg_type_landice Value of vegetion class that indicates land-ice
-!! @param[in] stype Soil type
-!! @param[in] swe Model snow water equivalent
-!! @param[in] vtype Model vegetation type
-!! @param[out] mask Land mask for increments
-!! @author Clara Draper @date March 2021
-!! @author Yuan Xue: introduce stype to make the mask calculation more generic
-subroutine calculate_landinc_mask(swe,vtype,stype,lensfc,veg_type_landice, mask)
- 
-   implicit none
+   !! Output is 1  - soil, 2 - snow-covered, 0 - land ice, -1  not land.
+   !!
+   !! @param[in] lensfc  Number of land points for this tile 
+   !! @param[in] veg_type_landice Value of vegetion class that indicates land-ice
+   !! @param[in] stype Soil type
+   !! @param[in] swe Model snow water equivalent
+   !! @param[in] vtype Model vegetation type
+   !! @param[out] mask Land mask for increments
+   !! @author Clara Draper @date March 2021
+   !! @author Yuan Xue: introduce stype to make the mask calculation more generic
+   subroutine calculate_landinc_mask(swe,vtype,stype,lensfc,veg_type_landice, mask)
+   
+      implicit none
 
-   integer, intent(in)           :: lensfc, veg_type_landice
-   real, intent(in)              :: swe(lensfc)
-   integer, intent(in)           :: vtype(lensfc),stype(lensfc)
-   integer, intent(out)          :: mask(lensfc)
+      integer, intent(in)           :: lensfc, veg_type_landice
+      real, intent(in)              :: swe(lensfc)
+      integer, intent(in)           :: vtype(lensfc),stype(lensfc)
+      integer, intent(out)          :: mask(lensfc)
 
-   integer :: i
+      integer :: i
 
-   mask = -1 ! not land
+      mask = -1 ! not land
 
-   ! land (but not land-ice)
-   do i=1,lensfc
-       if (stype(i) .GT. 0) then
-         if (swe(i) .GT. 0.001) then ! snow covered land
-               mask(i) = 2
-         else                        ! non-snow covered land
-               mask(i) = 1
+      ! land (but not land-ice)
+      do i=1,lensfc
+         if (stype(i) .GT. 0) then
+            if (swe(i) .GT. 0.001) then ! snow covered land
+                  mask(i) = 2
+            else                        ! non-snow covered land
+                  mask(i) = 1
+            endif
+         end if ! else should work here too
+         if ( vtype(i) ==  veg_type_landice  ) then ! land-ice
+                  mask(i) = 0
          endif
-       end if ! else should work here too
-       if ( vtype(i) ==  veg_type_landice  ) then ! land-ice
-               mask(i) = 0
-       endif
-   end do
+      end do
 
-end subroutine calculate_landinc_mask
+   end subroutine calculate_landinc_mask
 
-  SUBROUTINE NETCDF_ERR(ERR, STRING, errflg, errmsg_out)
+   subroutine netcdf_err(ERR, STRING, errflg, errmsg_out)
 
    !--------------------------------------------------------------
    ! IF AT NETCDF CALL RETURNS AN ERROR, PRINT OUT A MESSAGE
@@ -804,7 +807,7 @@ end subroutine calculate_landinc_mask
       errflg = 1
       return
 
-   END SUBROUTINE NETCDF_ERR
+   end subroutine netcdf_err
 
    subroutine get_nc_dimlen(ncid, dim_name, dim_len, errflg, errmsg_out )
       integer, intent(in):: ncid
@@ -840,11 +843,11 @@ end subroutine calculate_landinc_mask
       errflg = 0
 
       status = nf90_inq_varid(ncid, trim(var_name), varid)
-      CALL NETCDF_ERR(status, 'getting varid: '//trim(var_name), errflg, errmsg_out)
+      call netcdf_err(status, 'getting varid: '//trim(var_name), errflg, errmsg_out)
       if (errflg .ne. 0) return
       status = nf90_get_var(ncid, varid, var_arr)
                   ! start = (/1/), count = (/dim_len/))
-      CALL NETCDF_ERR(status, 'reading var: '//trim(var_name), errflg, errmsg_out)
+      call netcdf_err(status, 'reading var: '//trim(var_name), errflg, errmsg_out)
 
    end subroutine get_var1d
 
@@ -853,15 +856,14 @@ end subroutine calculate_landinc_mask
       integer, intent(in):: is, ix, js, jy, ks,kz
       real(kind=kind_phys), intent(out):: var3d(ix, jy, kz)   !var3d(is:ie,js:je,ks:ke)
       integer, intent(out):: status 
-      ! integer, dimension(3):: start, nreco
-      ! start(1) = is; start(2) = js; start(3) = ks
-      ! nreco(1) = ie - is + 1
-      ! nreco(2) = je - js + 1
-      ! nreco(3) = ke - ks + 1
+      ! integer :: errflg
+      ! character(len=*) :: errmsg_out
 
       status = nf90_get_var(ncid, varid, var3d, &  !start = start, count = nreco)
                start = (/is, js, ks/), count = (/ix, jy, kz/))
-               ! start = (/is, js, ks/), count = (/ie - is + 1, je - js + 1, ke - ks + 1/))
+
+      ! call netcdf_err(status, 'get_var3d_values', errflg, errmsg_out)
+      
 
    end subroutine get_var3d_values
 
