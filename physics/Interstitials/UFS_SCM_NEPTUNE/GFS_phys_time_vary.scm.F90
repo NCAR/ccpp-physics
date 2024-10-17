@@ -12,9 +12,7 @@
       use mersenne_twister, only: random_setseed, random_number
 
       use module_ozphys, only: ty_ozphys
-
-      use h2o_def,   only : levh2o, h2o_coeff, h2o_lat, h2o_pres, h2o_time, h2oplin
-      use h2ointerp, only : read_h2odata, setindxh2o, h2ointerpol
+      use module_h2ophys, only: ty_h2ophys
 
       use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm, iamin, iamax, jamin, jamax
       use aerinterp,  only : read_aerdata, setindxaer, aerinterpol, read_aerdataf
@@ -61,7 +59,7 @@
 !! @{
       subroutine GFS_phys_time_vary_init (                                                         &
               me, master, ntoz, h2o_phys, iaerclm, iccn, iflip, im, nx, ny, idate, xlat_d, xlon_d, &
-              jindx1_o3, jindx2_o3, ddy_o3, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,                &
+              jindx1_o3, jindx2_o3, ddy_o3, ozphys, h2ophys, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,        &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
               do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
@@ -74,7 +72,7 @@
               smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, snliqxy, tsnoxy , smoiseq, zsnsoxy,   &
               slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, con_t0c, lsm_cold_start, nthrds,    &
               lkm, use_lake_model, lakefrac, lakedepth, iopt_lake, iopt_lake_clm, iopt_lake_flake, &
-              lakefrac_threshold, lakedepth_threshold, ozphys, errmsg, errflg)
+              lakefrac_threshold, lakedepth_threshold, errmsg, errflg)
 
          implicit none
 
@@ -109,6 +107,7 @@
          real(kind_phys),      intent(in)    :: landfrac(:)
          real(kind_phys),      intent(inout) :: weasd(:)
          type(ty_ozphys),      intent(in)    :: ozphys
+         type(ty_h2ophys),     intent(in)    :: h2ophys
 
          ! NoahMP - only allocated when NoahMP is used
          integer, intent(in) :: lsoil, lsnow_lsm_lbound, lsnow_lsm_ubound
@@ -194,25 +193,6 @@
          jamin=999
          jamax=-999
 
-!> - Call read_h2odata() to read stratospheric water vapor data
-         call read_h2odata (h2o_phys, me, master)
-
-         ! Consistency check that the hardcoded values for levh2o and
-         ! h2o_coeff in GFS_typedefs.F90 match what is set by read_h2odata
-         ! in GFS_typedefs.F90: allocate (Tbd%h2opl (IM,levh2o,h2o_coeff))
-         if (size(h2opl, dim=2).ne.levh2o) then
-            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
-                  "levh2o from read_h2odata does not match value in GFS_typedefs.F90: ", &
-                  levh2o, " /= ", size(h2opl, dim=2)
-            errflg = 1
-         end if
-         if (size(h2opl, dim=3).ne.h2o_coeff) then
-            write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",       &
-                  "h2o_coeff from read_h2odata does not match value in GFS_typedefs.F90: ", &
-                  h2o_coeff, " /= ", size(h2opl, dim=3)
-            errflg = 1
-         end if
-
 !> - Call read_aerdata() to read aerosol climatology
          if (iaerclm) then
             ! Consistency check that the value for ntrcaerm set in GFS_typedefs.F90
@@ -265,7 +245,7 @@
 
 !> - Call setindxh2o() to initialize stratospheric water vapor data
          if (h2o_phys) then
-           call setindxh2o (im, xlat_d, jindx1_h, jindx2_h, ddy_h)
+            call h2ophys%setup_h2oprog(xlat_d, jindx1_h, jindx2_h, ddy_h)
          endif
 
 !> - Call setindxaer() to initialize aerosols data
@@ -666,7 +646,7 @@
 !! @{
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
             me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, nsswr, fhswr, lsswr, fhour, &
-            imfdeepcnv, cal_pre, random_clds, ozphys, ntoz, h2o_phys, iaerclm, iccn, clstp,         &
+            imfdeepcnv, cal_pre, random_clds, ozphys, h2ophys, ntoz, h2o_phys, iaerclm, iccn, clstp,         &
             jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm,              &
@@ -701,6 +681,7 @@
          real(kind_phys),      intent(in), optional :: ddy_j1tau(:), ddy_j2tau(:)
          real(kind_phys),      intent(inout) :: tau_amf(:)
          type(ty_ozphys),      intent(in)    :: ozphys
+         type(ty_h2ophys),     intent(in)    :: h2ophys
          integer,              intent(in)    :: nthrds
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
@@ -803,11 +784,9 @@
             call ozphys%update_o3prog(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
          endif
 
-!> - Call h2ointerpol() to make stratospheric water vapor data interpolation
+!> - Update stratospheric h2o concentration.
          if (h2o_phys) then
-           call h2ointerpol (me, im, idate, fhour, &
-                             jindx1_h, jindx2_h,   &
-                             h2opl, ddy_h)
+            call h2ophys%update_h2oprog(jindx1_h, jindx2_h, ddy_h, rjday, n1, n2, h2opl)
          endif
 
 !> - Call ciinterpol() to make IN and CCN data interpolation
@@ -894,12 +873,6 @@
          errflg = 0
 
          if (.not.is_initialized) return
-
-         ! Deallocate h2o arrays
-         if (allocated(h2o_lat) ) deallocate(h2o_lat)
-         if (allocated(h2o_pres)) deallocate(h2o_pres)
-         if (allocated(h2o_time)) deallocate(h2o_time)
-         if (allocated(h2oplin) ) deallocate(h2oplin)
 
          ! Deallocate aerosol arrays
          if (allocated(aerin)   ) deallocate(aerin)
