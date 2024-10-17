@@ -245,7 +245,7 @@
 
 !> - Call setindxh2o() to initialize stratospheric water vapor data
          if (h2o_phys) then
-            call h2ophys%setup_h2oprog(xlat_d, jindx1_h, jindx2_h, ddy_h)
+            call h2ophys%setup(xlat_d, jindx1_h, jindx2_h, ddy_h)
          endif
 
 !> - Call setindxaer() to initialize aerosols data
@@ -786,7 +786,7 @@
 
 !> - Update stratospheric h2o concentration.
          if (h2o_phys) then
-            call h2ophys%update_h2oprog(jindx1_h, jindx2_h, ddy_h, rjday, n1, n2, h2opl)
+            call h2ophys%update(jindx1_h, jindx2_h, ddy_h, rjday, n1, n2, h2opl)
          endif
 
 !> - Call ciinterpol() to make IN and CCN data interpolation
