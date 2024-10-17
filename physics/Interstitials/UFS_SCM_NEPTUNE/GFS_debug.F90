@@ -1611,11 +1611,11 @@
            !if (vegtype(i)==15) then
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, flag_iter(i)  :', i, blkno, flag_iter(i)
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, flag_guess(i) :', i, blkno, flag_guess(i)
-             write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, stype(i)      :', i, blkno, stype(i)
+             write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, stype(i)      :', i, blkno, stype(i)
 
-             write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, scolor(i)      :', i, blkno, scolor(i)
-             write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, vtype(i)      :', i, blkno, vtype(i)
-             write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, slope(i)      :', i, blkno, slope(i)
+             write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, scolor(i)     :', i, blkno, scolor(i)
+             write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, vtype(i)      :', i, blkno, vtype(i)
+             write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, slope(i)      :', i, blkno, slope(i)
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, dry(i)        :', i, blkno, dry(i)
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, icy(i)        :', i, blkno, icy(i)
              write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, wet(i)        :', i, blkno, wet(i)
