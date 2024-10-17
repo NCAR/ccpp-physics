@@ -42,8 +42,8 @@
                                 nlunit, pores, resid,              &
                                 do_mynnsfclay,do_mynnedmf,         &
                                 errmsg, errflg,                    &
-                                Land_IAU_Control, Land_IAU_Data, Land_IAU_state)
-                                ! , me, mpi_root, &
+                                Land_IAU_Control, Land_IAU_Data, Land_IAU_state,   &
+                                me, mpi_root)
                                 ! fn_nml, input_nml_file, isc, jsc, ncols, nx, ny, tile_num, &
                                 ! nblks, blksz, xlon, xlat,                             &     
                                 ! lsoil, lsnow_lsm, dtp, fhour)
@@ -54,26 +54,27 @@
     use noahmp_tables
 
     implicit none
-
+    
+    integer,              intent(in) :: me         !  mpi_rank  
+    integer,              intent(in) :: mpi_root   ! = GFS_Control%master    
     integer,              intent(in) :: lsm
-    integer,              intent(in) :: lsm_noahmp       
+    integer,              intent(in) :: lsm_noahmp    
     integer,              intent(in) :: isot, ivegsrc, nlunit
     real (kind=kind_phys), dimension(:), intent(out) :: pores, resid
     logical,              intent(in) :: do_mynnsfclay
     logical,              intent(in) :: do_mynnedmf
     character(len=*),     intent(out) :: errmsg
     integer,              intent(out) :: errflg
-    ! land iau mod
-    
+
+    ! land iau mod    
     ! Land IAU Control holds settings' information, maily read from namelist (e.g., block of global domain that belongs to a process ,
     ! whether to do IAU increment at this time step, time step informatoin, etc)    
     type(land_iau_control_type), intent(inout) :: Land_IAU_Control
     ! Land IAU Data holds spatially and temporally interpolated soil temperature increments per time step
     type(land_iau_external_data_type), intent(inout) :: Land_IAU_Data   !(number of blocks):each proc holds nblks
-    type(land_iau_state_type),  intent(inout) :: Land_IAU_state
+    type(land_iau_state_type),  intent(inout) :: Land_IAU_state         ! holds data read from file (before interpolation)
+      
 
-    ! integer,              intent(in) :: me         !  mpi_rank
-    ! integer,                       intent(in) :: mpi_root   ! = GFS_Control%master        
     ! character(*),                  intent(in) :: fn_nml
     ! character(len=:), pointer, intent(in), dimension(:) :: input_nml_file 
     ! integer,                       intent(in) :: isc, jsc, ncols, nx, ny, nblks      !=GFS_Control%ncols, %nx, %ny, nblks
