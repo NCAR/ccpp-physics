@@ -256,6 +256,10 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
       ix = ix + blksz(nb)
    enddo
 
+   Land_IAU_Control%wt = 1.0 ! IAU increment filter weights (default 1.0)
+   Land_IAU_Control%wt_normfact = 1.0
+   Land_IAU_Control%rdt = 0   ! 1/ dt
+
 end subroutine land_iau_mod_set_control
 
 subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)    
