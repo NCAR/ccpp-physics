@@ -1312,8 +1312,7 @@ module lsm_ruc
 
         ! --- ... accumulated total runoff and surface runoff
         runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * delt  ! accum total kg m-2
-        !srunoff(i) = srunoff(i) + runof(i) * delt             ! accum surface kg m-2
-        srunoff(i) = acrunoff(i,j)        ! accum surface kg m-2
+        srunoff(i) = srunoff(i) + runof(i) * delt             ! accum surface kg m-2
 
         ! --- ... accumulated frozen precipitation (accumulation in lsmruc)
         snowfallac_lnd(i) = snfallac_lnd(i,j) ! accum kg m-2

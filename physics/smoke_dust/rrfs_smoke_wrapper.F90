@@ -148,7 +148,7 @@ contains
     real(kind_phys), dimension(:,:),   intent(in), optional :: emi_ant_in
     real(kind_phys), dimension(:),     intent(in)    :: u10m, v10m, ustar, dswsfc,         &
                            recmol, garea, rlat,rlon, tskin, pb2d, zorl, snow,              &
-                           rain_cpl, rainc_cpl, hf2d, t2m, dpt2m 
+                           rain_cpl, rainc_cpl, hf2d, t2m, dpt2m
     real(kind_phys), dimension(:,:),   intent(in)    :: vegtype_frac
     real(kind_phys), dimension(:,:),   intent(in)    :: ph3d, pr3d
     real(kind_phys), dimension(:,:),   intent(in)    :: phl3d, prl3d, tk3d, us3d, vs3d, spechum, w
@@ -347,7 +347,7 @@ contains
       do k=kts,kte
       do i=its,ite
       ! ebu is divided by coef_bb_dc since it is applied in the output
-         ebu(i,k,1)=ebu_smoke(i,k) / coef_bb_dc(i,1)
+        ebu(i,k,1)=ebu_smoke(i,k) / MAX(1.E-4,coef_bb_dc(i,1))
       enddo
       enddo
     ENDIF
@@ -752,6 +752,9 @@ contains
     moist          = 0._kind_phys  
     chem           = 0._kind_phys
     z_at_w         = 0._kind_phys
+    if ( ebb_dcycle == 1 ) then
+       coef_bb_dc  = 1._kind_phys
+    endif
 
     do i=its,ite
      u10  (i,1)=u10m (i)
