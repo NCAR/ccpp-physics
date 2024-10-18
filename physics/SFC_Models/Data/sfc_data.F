@@ -27,8 +27,9 @@
      &       cm, ch, prsl1, prslki, prsik1, prslk1,                     &
      &       wind, thsfc_loc,                                           &
 !  ---  input/outputs:
-     &       hice, fice, tice, tsfc_wat, qss_i, qss_w, cmm, chh,        &
-     &       evapi, evapw, hflxi, hflxw,                                &
+     &       hice, fice, tice, tsfc_wat, qss_i, qss_w,                  &
+     &       cmm_i, cmm_w, chh_i, chh_w,                                &
+     &       evap_i, evap_w, hflx_i, hflx_w, gflux,                     &
      &       errmsg, errflg,                                            &
      &       naux2d, aux2d)
 
@@ -92,8 +93,9 @@
       real(kind_phys), intent(inout), optional :: aux2d(:,:)
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(:), intent(inout) :: cmm, chh,   &
-     & evapi, evapw, hflxi, hflxw, qss_i, qss_w
+      real (kind=kind_phys), dimension(:), intent(inout) ::             &
+     & cmm_i, cmm_w, chh_i, chh_w,                                      &
+     & evap_i, evap_w, hflx_i, hflx_w, qss_i, qss_w, gflux
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -117,6 +119,13 @@
       if (.not. use_data) return
 
       do i = 1, im
+
+         aux2d(i,1) = mask_dat(i) 
+         aux2d(i,2) = tice_dat(i)
+         aux2d(i,3) = hice_dat(i)
+         aux2d(i,4) = fice_dat(i)
+         aux2d(i,5) = tsfco_dat(i)
+
          if (mask_dat(i) > 0.0) then
             ! overwrite internal variables
             tice(i) = tice_dat(i)
@@ -124,15 +133,19 @@
             fice(i) = fice_dat(i) 
             tsfc_wat(i) = tsfco_dat(i)
 
-            aux2d(i,1) = cmm(i)
-            aux2d(i,2) = chh(i)
-            aux2d(i,3) = evapi(i)
-            aux2d(i,4) = evapw(i)
-            aux2d(i,5) = hflxi(i)
-            aux2d(i,6) = hflxw(i)
+            aux2d(i,6) = cmm_i(i)
+            aux2d(i,7) = chh_i(i)
+            aux2d(i,8) = evap_i(i)
+            aux2d(i,9) = hflx_i(i)
+            aux2d(i,10) = qss_i(i)
+            aux2d(i,11) = cmm_w(i)
+            aux2d(i,12) = chh_w(i)
+            aux2d(i,13) = evap_w(i)
+            aux2d(i,14) = hflx_w(i)
+            aux2d(i,15) = qss_w(i)
 
             ! sfc_sice calculates fluxes only for islmsk == 2
-            if (fice(i) > zero) then
+            if (fice(i) > zero) then ! calculate fluxes over sea-ice
                q0 = max(q1(i), qmin)
                if (thsfc_loc) then
                   theta1(i) = t1(i)*prslki(i)
@@ -145,39 +158,48 @@
                q0 = min(qs1, q0)
                qssi = fpvs(tice(i))
                qssi = eps*qssi/(ps(i)+epsm1*qssi)
-               qssw = fpvs(tgice)
-               qssw = eps*qssw/(ps(i)+epsm1*qssw)
-               cmm(i) = cm(i)*wind(i)
-               chh(i) = rho(i)*ch(i)*wind(i)
-               rch(i) = chh(i)*cp
-               evapi(i) = elocp*rch(i)*(qssi-q0)
-               evapw(i) = elocp*rch(i)*(qssw-q0)
+               cmm_i(i) = cm(i)*wind(i)
+               chh_i(i) = rho(i)*ch(i)*wind(i)
+               rch(i) = chh_i(i)*cp
+               evap_i(i) = elocp*rch(i)*(qssi-q0)
                if (thsfc_loc) then
-                  hflxi(i) = rch(i)*(tice(i)-theta1(i))
-                  hflxw(i) = rch(i)*(tgice-theta1(i))
+                  hflx_i(i) = rch(i)*(tice(i)-theta1(i))
                else
                   tem = one/prsik1(i)
-                  hflxi(i) = rch(i)*(tice(i)*tem-theta1(i))
-                  hflxw(i) = rch(i)*(tgice*tem-theta1(i))
+                  hflx_i(i) = rch(i)*(tice(i)*tem-theta1(i))
                end if 
                tsfc_wat(i) = tgice
-               qss_i(i) = q1(i)+evapi(i)/(elocp*rch(i))
-               qss_w(i) = q1(i)+evapw(i)/(elocp*rch(i))
-               !weasd(i) = snowd(i)*1000.0_kind_phys
-               !snwdph(i) = weasd(i)*dsi
+               qss_i(i) = q1(i)+evap_i(i)/(elocp*rch(i))
                tem = one/rho(i)
-               hflxi(i) = hflxi(i)*tem*cpinv
-               hflxw(i) = hflxw(i)*tem*cpinv
-               evapi(i) = evapi(i)*tem*hvapi
-               evapw(i) = evapw(i)*tem*hvapi 
+               hflx_i(i) = hflx_i(i)*tem*cpinv
+               evap_i(i) = evap_i(i)*tem*hvapi
+            else ! calculate fluxes over sea
+               q0 = max(q1(i), qmin)
+               rho(i) = prsl1(i)/(rd*t1(i)*(one+rvrdm1*q0))
+               qssw = fpvs(tsfc_wat(i))
+               qssw = eps*qssw/(ps(i)+epsm1*qssw)
+               cmm_w(i) = cm(i)*wind(i)
+               chh_w(i) = rho(i)*ch(i)*wind(i)
+               rch(i) = chh_w(i)*cp
+               tem = one/rho(i)
+               hflx_w(i) = rch(i)*(tsfc_wat(i)-t1(i)*prslki(i)) 
+               evap_w(i) = elocp*rch(i)*(qssw-q0)
+               hflx_w(i) = hflx_w(i)*tem*cpinv
+               evap_w(i) = evap_w(i)*tem*hvapi
+               qss_w(i) = qssw
+               gflux(i) = zero
             end if
 
-            aux2d(i,7) = cmm(i)
-            aux2d(i,8) = chh(i)
-            aux2d(i,9) = evapi(i)
-            aux2d(i,10) = evapw(i)
-            aux2d(i,11) = hflxi(i)
-            aux2d(i,12) = hflxw(i)
+            aux2d(i,16) = cmm_i(i)
+            aux2d(i,17) = chh_i(i)
+            aux2d(i,18) = evap_i(i)
+            aux2d(i,19) = hflx_i(i)
+            aux2d(i,20) = qss_i(i)
+            aux2d(i,21) = cmm_w(i)
+            aux2d(i,22) = chh_w(i)
+            aux2d(i,23) = evap_w(i)
+            aux2d(i,24) = hflx_w(i)
+            aux2d(i,25) = qss_w(i)
 
          end if
       end do
