@@ -252,7 +252,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   !> update land states with iau increments
   if (.not. Land_IAU_Data%in_interval) then
     if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-      print*, "current time step not in IAU interval " 
+      print*, "noahmpdrv_timestep_init: current time step not in Land iau interval " 
     endif
     return
   endif
