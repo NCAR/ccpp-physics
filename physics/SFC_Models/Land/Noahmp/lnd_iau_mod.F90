@@ -57,6 +57,8 @@ module land_iau_mod
       real(kind=kind_phys)              :: wt
       real(kind=kind_phys)              :: wt_normfact
       real(kind=kind_phys)              :: rdt
+      ! track the increment steps here
+      integer                           :: itnext
   end type land_iau_external_data_type
 
 !!> \section arg_table_land_iau_state_type Argument Table
@@ -359,6 +361,10 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'land_iau_init: ntimes = ',ntimes
    Land_IAU_Control%ntimes = ntimes
    if (ntimes < 1) then
+      print*, "Error! in Land IAU init: ntimes < 1"
+      errmsg = "Error! in Land IAU init: ntimes < 1"
+      errflg = 1
+      ! Land_IAU_Control%do_land_iau=.false.
       return
    endif
    if (ntimes > 1) then
@@ -396,10 +402,12 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
 
    if (ntimes.EQ.1) then  ! only need to get incrments once since constant forcing over window
       call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state)
+      Land_IAU_Data%itnext = 0
    endif
    if (ntimes.GT.1) then  !have multiple files, but only need 2 at a time and interpoalte for timesteps between them  
        ! interpolation is now done in land_iau_mod_getiauforcing 
       Land_IAU_Data%hr2=Land_IAU_Control%iaufhrs(2)   
+      Land_IAU_Data%itnext = 2
       ! ! Land_IAU_Data%snow_land_mask(:, :)  = wk3_slmsk(1, :, :)
       ! do k = 1, npz  ! do k = 1,n_soill    !  
       !    do j = 1, nlat
@@ -455,7 +463,7 @@ end subroutine land_iau_mod_finalize
    character(len=*),                     intent(out) :: errmsg
    integer,                              intent(out) :: errflg
    real(kind=kind_phys) t1,t2,sx,wx,wt,dtp
-   integer n,i,j,k,kstep,nstep,itnext
+   integer n,i,j,k,kstep,nstep      !,itnext
    integer :: ntimes
 
     ! Initialize CCPP error handling variables
@@ -522,7 +530,7 @@ end subroutine land_iau_mod_finalize
    endif
 
    if (ntimes > 1) then
-      itnext=2
+      !itnext=2  !Land_IAU_Data%itnext = 2 
 !8.8.24 TBCL: noahmpdrv_timestep_init doesn't get visited at t1, so include t2
       ! if ( Land_IAU_Control%fhour < t1 .or. Land_IAU_Control%fhour >= t2 ) then
       if ( Land_IAU_Control%fhour <= t1 .or. Land_IAU_Control%fhour > t2 ) then
@@ -534,34 +542,34 @@ end subroutine land_iau_mod_finalize
             print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ', &
             t1,Land_IAU_Control%fhour,t2,Land_IAU_Data%wt/Land_IAU_Data%wt_normfact,Land_IAU_Data%rdt
          endif         
-         do k=ntimes, 1, -1
-            if (Land_IAU_Control%iaufhrs(k) >= Land_IAU_Control%fhour) then
-               itnext=k
-            endif
-         enddo
-         
+         ! do k=ntimes, 1, -1
+         !    if (Land_IAU_Control%iaufhrs(k) >= Land_IAU_Control%fhour) then
+         !       itnext=k
+         !    endif
+         ! enddo         
          if (Land_IAU_Control%fhour > Land_IAU_Data%hr2) then ! need to read in next increment file
+            Land_IAU_Data%itnext = Land_IAU_Data%itnext + 1
             Land_IAU_Data%hr1=Land_IAU_Data%hr2
-            Land_IAU_Data%hr2=Land_IAU_Control%iaufhrs(itnext)
+            Land_IAU_Data%hr2=Land_IAU_Control%iaufhrs(Land_IAU_Data%itnext)
             ! Land_IAU_state%inc1=Land_IAU_state%inc2 
             ! Land_IAU_state%inc2%stc_inc(:, :, :) = wk3_stc(itnext, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
             ! Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(itnext, :, :, :) 
          endif
          if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-            print *,'Land iau increments at times ', itnext-1, ' and ', itnext, &
+            print *,'Land iau increments at times ', Land_IAU_Data%itnext-1, ' and ', Land_IAU_Data%itnext, &
                     ' hr1, hr2 = ', Land_IAU_Data%hr1, Land_IAU_Data%hr2
          endif
          ! Land_IAU_Data%snow_land_mask(:, :)  = wk3_slmsk(itnext-1, :, :)
-         call updateiauforcing(itnext, Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
+         call updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
       endif
    endif
 
  end subroutine land_iau_mod_getiauforcing
 
-subroutine updateiauforcing(t2, Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
+subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
 
    implicit none
-   integer,                               intent(in) :: t2
+   
    type (land_iau_control_type),          intent(in) :: Land_IAU_Control
    type(land_iau_external_data_type),  intent(inout) :: Land_IAU_Data
    type(land_iau_state_type),             intent(in) :: Land_IAU_State
@@ -569,7 +577,9 @@ subroutine updateiauforcing(t2, Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
    integer i,j,k
    integer :: is,  ie,  js,  je, npz, t1
    integer :: ntimes
-   
+   integer :: t2
+  
+   t2 = Land_IAU_Data%itnext
    t1  = t2 - 1
    is  = 1  !Land_IAU_Control%isc
    ie  = is + Land_IAU_Control%nx-1
