@@ -508,14 +508,14 @@ end subroutine land_iau_mod_finalize
 !8.8.24 TBCL: noahmpdrv_timestep_init doesn't get visited at t1, so include t2
       ! if ( Land_IAU_Control%fhour < t1 .or. Land_IAU_Control%fhour >= t2 ) then
       if ( Land_IAU_Control%fhour <= t1 .or. Land_IAU_Control%fhour > t2 ) then
-!         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'no iau forcing',t1,Land_IAU_Control%fhour,t2
+      ! if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'no iau forcing',t1,Land_IAU_Control%fhour,t2
          Land_IAU_Data%in_interval=.false.
       else
+         Land_IAU_Data%in_interval=.true.
          if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
             print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ', &
             t1,Land_IAU_Control%fhour,t2,Land_IAU_Data%wt/Land_IAU_Data%wt_normfact,Land_IAU_Data%rdt
-         endif
-         Land_IAU_Data%in_interval=.true.
+         endif         
          if (Land_IAU_Control%iau_filter_increments) call setiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_state)       
       endif
       return
@@ -529,25 +529,27 @@ end subroutine land_iau_mod_finalize
 !         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'no iau forcing',Land_IAU_Control%iaufhrs(1),Land_IAU_Control%fhour,Land_IAU_Control%iaufhrs(nfiles)
          Land_IAU_Data%in_interval=.false.
       else
+         Land_IAU_Data%in_interval=.true.
          if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
             print *,'apply lnd iau forcing t1,t,t2,filter wt rdt= ', &
             t1,Land_IAU_Control%fhour,t2,Land_IAU_Data%wt/Land_IAU_Data%wt_normfact,Land_IAU_Data%rdt
-         endif
-         Land_IAU_Data%in_interval=.true.
+         endif         
          do k=ntimes, 1, -1
-            if (Land_IAU_Control%iaufhrs(k) > Land_IAU_Control%fhour) then
+            if (Land_IAU_Control%iaufhrs(k) >= Land_IAU_Control%fhour) then
                itnext=k
             endif
          enddo
-         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-            print *,'Land iau increments at times ', itnext-1, ' and ', itnext  !trim(Land_IAU_Control%iau_inc_files(itnext))
-         endif
-         if (Land_IAU_Control%fhour >= Land_IAU_Data%hr2) then ! need to read in next increment file
+         
+         if (Land_IAU_Control%fhour > Land_IAU_Data%hr2) then ! need to read in next increment file
             Land_IAU_Data%hr1=Land_IAU_Data%hr2
             Land_IAU_Data%hr2=Land_IAU_Control%iaufhrs(itnext)
             ! Land_IAU_state%inc1=Land_IAU_state%inc2 
             ! Land_IAU_state%inc2%stc_inc(:, :, :) = wk3_stc(itnext, :, :, :)  !Land_IAU_state%inc1%stc_inc(is:ie, js:je, km))
             ! Land_IAU_state%inc2%slc_inc(:, :, :) = wk3_slc(itnext, :, :, :) 
+         endif
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+            print *,'Land iau increments at times ', itnext-1, ' and ', itnext, &
+                    ' hr1, hr2 = ', Land_IAU_Data%hr1, Land_IAU_Data%hr2
          endif
          ! Land_IAU_Data%snow_land_mask(:, :)  = wk3_slmsk(itnext-1, :, :)
          call updateiauforcing(itnext, Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
@@ -563,7 +565,7 @@ subroutine updateiauforcing(t2, Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
    type (land_iau_control_type),          intent(in) :: Land_IAU_Control
    type(land_iau_external_data_type),  intent(inout) :: Land_IAU_Data
    type(land_iau_state_type),             intent(in) :: Land_IAU_State
-   real(kind=kind_phys) delt
+   real(kind=kind_phys) delt_t  
    integer i,j,k
    integer :: is,  ie,  js,  je, npz, t1
    integer :: ntimes
@@ -577,14 +579,17 @@ subroutine updateiauforcing(t2, Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
 
    ntimes = Land_IAU_Control%ntimes
 
-   delt = (Land_IAU_Data%hr2-(Land_IAU_Control%fhour))/(Land_IAU_Data%hr2-Land_IAU_Data%hr1)
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'in land_iau updateiauforcing ntimes ',ntimes,Land_IAU_Control%iaufhrs(1:ntimes), &
-                                                                  " rdt wt delt_t ", Land_IAU_Data%rdt, Land_IAU_Data%wt, delt
+   delt_t = (Land_IAU_Data%hr2-(Land_IAU_Control%fhour))/(Land_IAU_Data%hr2-Land_IAU_Data%hr1)
+   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+      print *,'in land_iau updateiauforcing ntimes ', &
+      ntimes,Land_IAU_Control%iaufhrs(1:ntimes), &                                                                 
+      " rdt wt delt_t ", Land_IAU_Data%rdt, Land_IAU_Data%wt, delt_t
+   endif
    do j = js,je
       do i = is,ie
          do k = 1,npz  ! do k = 1,n_soill    !         
-            Land_IAU_Data%stc_inc(i,j,k)  =(delt*Land_IAU_State%stc_inc(t1,i,j,k)  + (1.-delt)* Land_IAU_State%stc_inc(t2,i,j,k))*Land_IAU_Data%rdt*Land_IAU_Data%wt
-            Land_IAU_Data%slc_inc(i,j,k)  =(delt*Land_IAU_State%slc_inc(t1,i,j,k)  + (1.-delt)* Land_IAU_State%slc_inc(t2,i,j,k))*Land_IAU_Data%rdt*Land_IAU_Data%wt
+            Land_IAU_Data%stc_inc(i,j,k)  =(delt_t*Land_IAU_State%stc_inc(t1,i,j,k)  + (1.-delt_t)* Land_IAU_State%stc_inc(t2,i,j,k))*Land_IAU_Data%rdt*Land_IAU_Data%wt
+            Land_IAU_Data%slc_inc(i,j,k)  =(delt_t*Land_IAU_State%slc_inc(t1,i,j,k)  + (1.-delt_t)* Land_IAU_State%slc_inc(t2,i,j,k))*Land_IAU_Data%rdt*Land_IAU_Data%wt
          end do
        enddo
    enddo
