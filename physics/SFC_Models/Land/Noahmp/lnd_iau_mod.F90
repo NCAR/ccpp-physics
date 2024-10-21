@@ -706,9 +706,9 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, wk3_stc, wk3_slc, errmsg, errf
       if (status == nf90_noerr) then   !if (ierr == 0) then
          do it = 1, n_t
             ! var stored as soilt1_inc(Time, yaxis_1, xaxis_1)
-            call get_var3d_values(ncid, varid, Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, it, 1, wk3_stc(it,:, :, i), status)
-            ! call get_var3d_values(ncid, varid, 1,im, jbeg,jend, it, 1, stc_inc_out(it,:, :, i), status)
-            call netcdf_err(status, 'reading var: '//trim(stc_vars(i)), errflg, errmsg)
+            call get_var3d_values(ncid, varid, trim(stc_vars(i)), Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, &
+                 it, 1, wk3_stc(it,:, :, i), status, errflg, errmsg)
+            ! call netcdf_err(status, 'reading var: '//trim(stc_vars(i)), errflg, errmsg)
             if (errflg .ne. 0) return 
          enddo
       else
@@ -722,9 +722,9 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, wk3_stc, wk3_slc, errmsg, errf
       status = nf90_inq_varid(ncid, trim(slc_vars(i)), varid)
       if (status == nf90_noerr) then   !if (ierr == 0) then
          do it = 1, n_t
-            call get_var3d_values(ncid, varid, Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, it, 1, wk3_slc(it, :, :, i), status)
-            ! call get_var3d_values(ncid, varid, 1,im, jbeg,jend, it, 1, slc_inc_out(it, :, :, i), status)
-            call netcdf_err(status, 'reading var: '//trim(slc_vars(i)), errflg, errmsg)
+            call get_var3d_values(ncid, varid, trim(slc_vars(i)), Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, &
+                 it, 1, wk3_slc(it, :, :, i), status, errflg, errmsg)
+            ! call netcdf_err(status, 'reading var: '//trim(slc_vars(i)), errflg, errmsg)
             if (errflg .ne. 0) return   
          end do       
       else
@@ -737,9 +737,9 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, wk3_stc, wk3_slc, errmsg, errf
    ! status = nf90_inq_varid(ncid, trim(slsn_mask), varid)
    ! if (status == nf90_noerr) then   !if (ierr == 0) then
    !    do it = 1, n_t
-   !       call get_var3d_values_int(ncid, varid, Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, &
-   !                                 it, 1, wk3_slmsk(it, :, :), status)
-   !       call netcdf_err(status, 'reading var: '//trim(slsn_mask), errflg, errmsg)
+   !       call get_var3d_values_int(ncid, varid, trim(slsn_mask), Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, &
+   !                                 it, 1, wk3_slmsk(it, :, :), status, errflg, errmsg)
+   !       ! call netcdf_err(status, 'reading var: '//trim(slsn_mask), errflg, errmsg)
    !       if (errflg .ne. 0) return
    !    enddo         
    ! else
@@ -747,12 +747,12 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, wk3_stc, wk3_slc, errmsg, errf
    !       'assuming value of 1 for all grid cells. Please make sure the increment files have soil snow mask var'
    !    wk3_slmsk(:, :, :) = 1
    ! endif
+   
+   !8.3.24 set too small increments to zero
+   where(abs(wk3_stc) < Land_IAU_Control%min_T_increment) wk3_stc = 0.0
 
    status =nf90_close(ncid) 
    call netcdf_err(status, 'closing file '//trim(fname), errflg, errmsg) 
-
-   !8.3.24 set too small increments to zero
-   where(abs(wk3_stc) < Land_IAU_Control%min_T_increment) wk3_stc = 0.0
 
 end subroutine read_iau_forcing_fv3
 
@@ -867,31 +867,45 @@ end subroutine read_iau_forcing_fv3
 
    end subroutine get_var1d
 
-   subroutine get_var3d_values(ncid, varid, is,ix, js,jy, ks,kz, var3d, status)
+   subroutine get_var3d_values(ncid, varid, var_name, is,ix, js,jy, ks,kz, var3d, status, errflg, errmsg_out)
       integer, intent(in):: ncid, varid
       integer, intent(in):: is, ix, js, jy, ks,kz
+      character(len=*), intent(in)::  var_name
       real(kind=kind_phys), intent(out):: var3d(ix, jy, kz)   !var3d(is:ie,js:je,ks:ke)
       integer, intent(out):: status 
-      ! integer :: errflg
-      ! character(len=*) :: errmsg_out
+      integer :: errflg
+      character(len=*) :: errmsg_out
+
+      !Errors messages handled through CCPP error handling variables
+      errmsg_out = ''
+      errflg = 0
 
       status = nf90_get_var(ncid, varid, var3d, &  !start = start, count = nreco)
                start = (/is, js, ks/), count = (/ix, jy, kz/))
 
-      ! call netcdf_err(status, 'get_var3d_values', errflg, errmsg_out)
+      call netcdf_err(status, 'get_var3d_values '//trim(var_name), errflg, errmsg_out)
       
 
    end subroutine get_var3d_values
 
-   subroutine get_var3d_values_int(ncid, varid, is,ix, js,jy, ks,kz, var3d, status)
+   subroutine get_var3d_values_int(ncid, varid, var_name, is,ix, js,jy, ks,kz, var3d, status, errflg, errmsg_out)
       integer, intent(in):: ncid, varid
       integer, intent(in):: is, ix, js, jy, ks,kz
+      character(len=*), intent(in)::  var_name
       integer, intent(out):: var3d(ix, jy, kz)   !var3d(is:ie,js:je,ks:ke)
       integer, intent(out):: status 
+      integer :: errflg
+      character(len=*) :: errmsg_out
+
+      !Errors messages handled through CCPP error handling variables
+      errmsg_out = ''
+      errflg = 0
 
       status = nf90_get_var(ncid, varid, var3d, &  !start = start, count = nreco)
                start = (/is, js, ks/), count = (/ix, jy, kz/))
                ! start = (/is, js, ks/), count = (/ie - is + 1, je - js + 1, ke - ks + 1/))
+      
+      call netcdf_err(status, 'get_var3d_values_int '//trim(var_name), errflg, errmsg_out)
 
    end subroutine get_var3d_values_int
   
