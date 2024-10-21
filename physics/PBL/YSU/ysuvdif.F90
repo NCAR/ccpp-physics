@@ -11,6 +11,9 @@
       module ysuvdif
       contains
 
+!> \section arg_table_ysuvdif_init Argument Table
+!! \htmlinclude ysuvdif_init.html
+!!
       subroutine ysuvdif_init (do_ysu,errmsg,errflg)
 
         logical,          intent(in) :: do_ysu

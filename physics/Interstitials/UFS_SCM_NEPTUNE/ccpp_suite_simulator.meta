@@ -49,6 +49,34 @@
   dimensions = (8)
   type = integer
   intent = in
+[iactive_T]
+  standard_name = index_for_active_T_in_CCPP_suite_simulator
+  long_name = index into active process tracer array for temperature in CCPP suite simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iactive_u]
+  standard_name = index_for_active_u_in_CCPP_suite_simulator
+  long_name = index into active process tracer array for zonal wind in CCPP suite simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iactive_v]
+  standard_name = index_for_active_v_in_CCPP_suite_simulator
+  long_name = index into active process tracer array for meridional wind in CCPP suite simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iactive_q]
+  standard_name = index_for_active_q_in_CCPP_suite_simulator
+  long_name = index into active process tracer array for moisture in CCPP suite simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [proc_start]
   standard_name = index_for_first_physics_process_in_CCPP_suite_simulator
   long_name = index for first physics process in CCPP suite simulator
@@ -62,6 +90,13 @@
   units     = count
   dimensions = ()
   type = integer
+  intent = inout
+[physics_process]
+  standard_name = physics_process_type_for_CCPP_suite_simulator
+  long_name = physics process type for CCPP suite simulator
+  units = mixed
+  dimensions = (number_of_physics_process_in_CCPP_suite_simulator)
+  type = base_physics_process
   intent = inout
 [in_pre_active]
   standard_name = flag_to_indicate_location_in_physics_process_loop_before_active_scheme
@@ -117,34 +152,6 @@
   type = real
   kind = kind_phys
   intent = in
-[iactive_T]
-  standard_name = index_for_active_T_in_CCPP_suite_simulator
-  long_name = index into active process tracer array for temperature in CCPP suite simulator
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[iactive_u]
-  standard_name = index_for_active_u_in_CCPP_suite_simulator
-  long_name = index into active process tracer array for zonal wind in CCPP suite simulator
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[iactive_v]
-  standard_name = index_for_active_v_in_CCPP_suite_simulator
-  long_name = index into active process tracer array for meridional wind in CCPP suite simulator
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[iactive_q]
-  standard_name = index_for_active_q_in_CCPP_suite_simulator
-  long_name = index into active process tracer array for moisture in CCPP suite simulator
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [gt0]
   standard_name = air_temperature_of_new_state
   long_name = temperature updated by physics
@@ -176,13 +183,6 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
-[physics_process]
-  standard_name = physics_process_type_for_CCPP_suite_simulator
-  long_name = physics process type for CCPP suite simulator
-  units = mixed
-  dimensions = (number_of_physics_process_in_CCPP_suite_simulator)
-  type = base_physics_process
   intent = inout
 [errmsg]
   standard_name = ccpp_error_message

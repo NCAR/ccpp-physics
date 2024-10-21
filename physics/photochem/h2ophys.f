@@ -12,6 +12,9 @@
 
       contains
 
+!! \section arg_table_h2ophys_init Argument Table
+!! \htmlinclude h2ophys_init.html
+!!
       subroutine h2ophys_init(h2o_phys, errmsg, errflg)
 
       implicit none
