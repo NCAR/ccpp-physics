@@ -278,6 +278,7 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
 [con_hfus]
   standard_name = latent_heat_of_fusion_of_water_at_0C
   long_name = latent heat of fusion
@@ -285,7 +286,8 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  
+  intent = in
+
 #######################################################################
 [ccpp-arg-table]
   name = noahmpdrv_finalize
