@@ -389,6 +389,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
    ! allocate (wk3_stc(n_t, 1:im,jbeg:jend, 1:km))  
    call read_iau_forcing_fv3(Land_IAU_Control, Land_IAU_state%stc_inc, Land_IAU_state%slc_inc, errmsg, errflg)  !, wk3_stc, wk3_slc
    ! call read_iau_forcing_fv3(Land_IAU_Control, Land_IAU_state%inc1%stc_inc, Land_IAU_state%inc1%slc_inc, errmsg, errflg)
+   if (errflg .ne. 0) return
    
    ! increments already in the fv3 grid--no need for interpolation       
    ! do k = 1, npz  ! do k = 1,n_soill    !  
