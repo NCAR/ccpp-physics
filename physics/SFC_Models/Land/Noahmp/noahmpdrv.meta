@@ -263,7 +263,29 @@
   dimensions = ()
   type = integer
   intent = out
-
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degree Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+[con_hfus]
+  standard_name = latent_heat_of_fusion_of_water_at_0C
+  long_name = latent heat of fusion
+  units = J kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  
 #######################################################################
 [ccpp-arg-table]
   name = noahmpdrv_finalize

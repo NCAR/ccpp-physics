@@ -160,7 +160,8 @@
 subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &      !me, mpi_root,
                                     isot, ivegsrc, soiltyp, vegtype, weasd, &
                                     land_iau_control, land_iau_data, land_iau_state, &
-                                    stc, slc, smc, errmsg, errflg)       ! smc, t2mmp, q2mp,    
+                                    stc, slc, smc, errmsg, errflg,   &       ! smc, t2mmp, q2mp, 
+                                    con_g, con_t0c, con_hfus)  
    
   use machine,                 only: kind_phys  
   use namelist_soilveg
@@ -189,9 +190,11 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   real(kind=kind_phys), dimension(:,:)   , intent(inout) :: smc        !
   character(len=*),                          intent(out) :: errmsg
   integer,                                   intent(out) :: errflg
+  real(kind=kind_phys), intent(in)                       :: con_g       ! grav
+  real(kind=kind_phys), intent(in)                       :: con_t0c     ! tfreez
+  real(kind=kind_phys), intent(in)                       :: con_hfus    ! hfus
 
-  ! IAU update
-  
+  ! IAU update  
   real(kind=kind_phys),allocatable, dimension(:,:)       :: stc_inc_flat, slc_inc_flat
   real(kind=kind_phys), dimension(km)                    :: dz ! layer thickness
   ! real(kind=kind_phys)                                   :: stc_bck(ncols, km), d_stc(ncols, km)
@@ -215,9 +218,10 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   
   ! real (kind=kind_phys), dimension(max_soiltyp)  :: maxsmc, bb, satpsi
   ! real, dimension(30)      :: maxsmc, bb, satpsi
-  real(kind=kind_phys), parameter          :: tfreez=273.16 !< con_t0c  in physcons
-  real(kind=kind_phys), parameter          :: hfus=0.3336e06 !< latent heat of fusion(j/kg)
-  real(kind=kind_phys), parameter          :: grav=9.80616   !< gravity accel.(m/s2)
+  ! real(kind=kind_phys), parameter          :: tfreez=273.16 !< con_t0c  in physcons
+  ! real(kind=kind_phys), parameter          :: hfus=0.3336e06 !< latent heat of fusion(j/kg) con_hfus
+  ! real(kind=kind_phys), parameter          :: con_g  !grav=9.80616   !< gravity accel.(m/s2)
+
   real(kind=kind_phys)                     :: smp !< for computing supercooled water 
 
   real(kind=kind_phys)                     :: hc_incr
@@ -318,7 +322,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
       soil_freeze=.false.
       soil_ice=.false.
       do k = 1, lsoil_incr   ! k = 1, km
-        if ( stc(ij,k) < tfreez)  soil_freeze=.true.
+        if ( stc(ij,k) < con_t0c)  soil_freeze=.true.
         if ( smc(ij,k) - slc(ij,k) > 0.001 )  soil_ice=.true.
 
         if (Land_IAU_Control%upd_stc) then
@@ -329,7 +333,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
           endif
         endif
 
-        if ( (stc(ij,k) < tfreez) .and. (.not. soil_freeze) .and. (k==1) ) nfrozen_upd = nfrozen_upd + 1
+        if ( (stc(ij,k) < con_t0c) .and. (.not. soil_freeze) .and. (k==1) ) nfrozen_upd = nfrozen_upd + 1
 
         ! do not do updates if this layer or any above is frozen
         if ( (.not. soil_freeze ) .and. (.not. soil_ice ) ) then
@@ -383,14 +387,14 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
                 !case 1: frz ==> frz, recalculate slc, smc remains
                 !case 2: unfrz ==> frz, recalculate slc, smc remains
                 !both cases are considered in the following if case
-                if (stc(i,l) .LT. tfreez )then
+                if (stc(i,l) .LT. con_t0c )then
                   !recompute supercool liquid water,smc_anl remain unchanged
-                  smp = hfus*(tfreez-stc(i,l))/(grav*stc(i,l)) !(m)
+                  smp = con_hfus*(con_t0c-stc(i,l))/(con_g*stc(i,l)) !(m)
                   slc_new=maxsmc(soiltype)*(smp/satpsi(soiltype))**(-1./bb(soiltype))
                   slc(i,l) = max( min( slc_new, smc(i,l)), 0.0 )
                 endif
                 !case 3: frz ==> unfrz, melt all soil ice (if any)
-                if (stc(i,l) .GT. tfreez )then !do not rely on stc_bck
+                if (stc(i,l) .GT. con_t0c )then !do not rely on stc_bck
                   slc(i,l)=smc(i,l)
                 endif
             enddo
