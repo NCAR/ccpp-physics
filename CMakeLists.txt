@@ -143,7 +143,6 @@ SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel" OR ${CMAKE_Fortran_COMPILER_ID} STREQUAL "IntelLLVM"))
   # Define a list of schemes that need lower optimization with Intel in Release mode
   set(SCHEME_NAMES_LOWER_OPTIMIZATION module_sf_mynn.F90
-                                      module_mp_nssl_2mom.F90
                                       mynnedmf_wrapper.F90
                                       gcycle.F90
                                       module_mp_nssl_2mom.F90)
