@@ -9,17 +9,73 @@
   type = scheme
 [Model]
   standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type in FV3
+  long_name = instance of derived type GFS_control_type
   units = DDT
   dimensions = ()
   type = GFS_control_type
   intent = in
-[Data]
-  standard_name = GFS_data_type_instance_all_blocks
-  long_name = instance of derived type GFS_data_type
+[Statein]
+  standard_name = GFS_statein_type_instance
+  long_name = prognostic state data in from dycore
   units = DDT
-  dimensions = (ccpp_block_count)
-  type = GFS_data_type
+  dimensions = ()
+  type = GFS_statein_type
+  intent = in
+[Stateout]
+  standard_name = GFS_stateout_type_instance
+  long_name = prognostic state or tendencies return to dycore
+  units = DDT
+  dimensions = ()
+  type = GFS_stateout_type
+  intent = in
+[Sfcprop]
+  standard_name = GFS_sfcprop_type_instance
+  long_name = instance of derived type GFS_sfcprop_type
+  units = DDT
+  dimensions = ()
+  type = GFS_sfcprop_type
+  intent = in
+[Coupling]
+  standard_name = GFS_coupling_type_instance
+  long_name = instance of derived type GFS_coupling_type
+  units = DDT
+  dimensions = ()
+  type = GFS_coupling_type
+  intent = in
+[Grid]
+  standard_name = GFS_grid_type_instance
+  long_name = instance of derived type GFS_grid_type
+  units = DDT
+  dimensions = ()
+  type = GFS_grid_type
+  intent = in
+[Tbd]
+  standard_name = GFS_tbd_type_instance
+  long_name = instance of derived type GFS_tbd_type
+  units = DDT
+  dimensions = ()
+  type = GFS_tbd_type
+  intent = in
+[Cldprop]
+  standard_name = GFS_cldprop_type_instance
+  long_name = instance of derived type GFS_cldprop_type
+  units = DDT
+  dimensions = ()
+  type = GFS_cldprop_type
+  intent = in
+[Radtend]
+  standard_name = GFS_radtend_type_instance
+  long_name = instance of derived type GFS_radtend_type
+  units = DDT
+  dimensions = ()
+  type = GFS_radtend_type
+  intent = in
+[Diag]
+  standard_name = GFS_diag_type_instance
+  long_name = instance of derived type GFS_diag_type
+  units = DDT
+  dimensions = ()
+  type = GFS_diag_type
   intent = in
 [Interstitial]
   standard_name = GFS_interstitial_type_instance_all_threads
@@ -55,12 +111,68 @@
   dimensions = ()
   type = GFS_control_type
   intent = in
-[Data]
-  standard_name = GFS_data_type_instance_all_blocks
-  long_name = instance of derived type GFS_data_type
+[Statein]
+  standard_name = GFS_statein_type_instance
+  long_name = prognostic state data in from dycore
   units = DDT
-  dimensions = (ccpp_block_count)
-  type = GFS_data_type
+  dimensions = ()
+  type = GFS_statein_type
+  intent = in
+[Stateout]
+  standard_name = GFS_stateout_type_instance
+  long_name = prognostic state or tendencies return to dycore
+  units = DDT
+  dimensions = ()
+  type = GFS_stateout_type
+  intent = in
+[Sfcprop]
+  standard_name = GFS_sfcprop_type_instance
+  long_name = instance of derived type GFS_sfcprop_type
+  units = DDT
+  dimensions = ()
+  type = GFS_sfcprop_type
+  intent = in
+[Coupling]
+  standard_name = GFS_coupling_type_instance
+  long_name = instance of derived type GFS_coupling_type
+  units = DDT
+  dimensions = ()
+  type = GFS_coupling_type
+  intent = in
+[Grid]
+  standard_name = GFS_grid_type_instance
+  long_name = instance of derived type GFS_grid_type
+  units = DDT
+  dimensions = ()
+  type = GFS_grid_type
+  intent = in
+[Tbd]
+  standard_name = GFS_tbd_type_instance
+  long_name = instance of derived type GFS_tbd_type
+  units = DDT
+  dimensions = ()
+  type = GFS_tbd_type
+  intent = in
+[Cldprop]
+  standard_name = GFS_cldprop_type_instance
+  long_name = instance of derived type GFS_cldprop_type
+  units = DDT
+  dimensions = ()
+  type = GFS_cldprop_type
+  intent = in
+[Radtend]
+  standard_name = GFS_radtend_type_instance
+  long_name = instance of derived type GFS_radtend_type
+  units = DDT
+  dimensions = ()
+  type = GFS_radtend_type
+  intent = in
+[Diag]
+  standard_name = GFS_diag_type_instance
+  long_name = instance of derived type GFS_diag_type
+  units = DDT
+  dimensions = ()
+  type = GFS_diag_type
   intent = in
 [Interstitial]
   standard_name = GFS_interstitial_type_instance_all_threads
@@ -213,12 +325,68 @@
   dimensions = ()
   type = GFS_control_type
   intent = in
-[Data]
-  standard_name = GFS_data_type_instance_all_blocks
-  long_name = instance of derived type GFS_data_type
+[Statein]
+  standard_name = GFS_statein_type_instance
+  long_name = prognostic state data in from dycore
   units = DDT
-  dimensions = (ccpp_block_count)
-  type = GFS_data_type
+  dimensions = ()
+  type = GFS_statein_type
+  intent = in
+[Stateout]
+  standard_name = GFS_stateout_type_instance
+  long_name = prognostic state or tendencies return to dycore
+  units = DDT
+  dimensions = ()
+  type = GFS_stateout_type
+  intent = in
+[Sfcprop]
+  standard_name = GFS_sfcprop_type_instance
+  long_name = instance of derived type GFS_sfcprop_type
+  units = DDT
+  dimensions = ()
+  type = GFS_sfcprop_type
+  intent = in
+[Coupling]
+  standard_name = GFS_coupling_type_instance
+  long_name = instance of derived type GFS_coupling_type
+  units = DDT
+  dimensions = ()
+  type = GFS_coupling_type
+  intent = in
+[Grid]
+  standard_name = GFS_grid_type_instance
+  long_name = instance of derived type GFS_grid_type
+  units = DDT
+  dimensions = ()
+  type = GFS_grid_type
+  intent = in
+[Tbd]
+  standard_name = GFS_tbd_type_instance
+  long_name = instance of derived type GFS_tbd_type
+  units = DDT
+  dimensions = ()
+  type = GFS_tbd_type
+  intent = in
+[Cldprop]
+  standard_name = GFS_cldprop_type_instance
+  long_name = instance of derived type GFS_cldprop_type
+  units = DDT
+  dimensions = ()
+  type = GFS_cldprop_type
+  intent = in
+[Radtend]
+  standard_name = GFS_radtend_type_instance
+  long_name = instance of derived type GFS_radtend_type
+  units = DDT
+  dimensions = ()
+  type = GFS_radtend_type
+  intent = in
+[Diag]
+  standard_name = GFS_diag_type_instance
+  long_name = instance of derived type GFS_diag_type
+  units = DDT
+  dimensions = ()
+  type = GFS_diag_type
   intent = in
 [Interstitial]
   standard_name = GFS_interstitial_type_instance_all_threads
@@ -254,12 +422,68 @@
   dimensions = ()
   type = GFS_control_type
   intent = in
-[Data]
-  standard_name = GFS_data_type_instance_all_blocks
-  long_name = instance of derived type GFS_data_type
+[Statein]
+  standard_name = GFS_statein_type_instance
+  long_name = prognostic state data in from dycore
   units = DDT
-  dimensions = (ccpp_block_count)
-  type = GFS_data_type
+  dimensions = ()
+  type = GFS_statein_type
+  intent = in
+[Stateout]
+  standard_name = GFS_stateout_type_instance
+  long_name = prognostic state or tendencies return to dycore
+  units = DDT
+  dimensions = ()
+  type = GFS_stateout_type
+  intent = in
+[Sfcprop]
+  standard_name = GFS_sfcprop_type_instance
+  long_name = instance of derived type GFS_sfcprop_type
+  units = DDT
+  dimensions = ()
+  type = GFS_sfcprop_type
+  intent = in
+[Coupling]
+  standard_name = GFS_coupling_type_instance
+  long_name = instance of derived type GFS_coupling_type
+  units = DDT
+  dimensions = ()
+  type = GFS_coupling_type
+  intent = in
+[Grid]
+  standard_name = GFS_grid_type_instance
+  long_name = instance of derived type GFS_grid_type
+  units = DDT
+  dimensions = ()
+  type = GFS_grid_type
+  intent = in
+[Tbd]
+  standard_name = GFS_tbd_type_instance
+  long_name = instance of derived type GFS_tbd_type
+  units = DDT
+  dimensions = ()
+  type = GFS_tbd_type
+  intent = in
+[Cldprop]
+  standard_name = GFS_cldprop_type_instance
+  long_name = instance of derived type GFS_cldprop_type
+  units = DDT
+  dimensions = ()
+  type = GFS_cldprop_type
+  intent = in
+[Radtend]
+  standard_name = GFS_radtend_type_instance
+  long_name = instance of derived type GFS_radtend_type
+  units = DDT
+  dimensions = ()
+  type = GFS_radtend_type
+  intent = in
+[Diag]
+  standard_name = GFS_diag_type_instance
+  long_name = instance of derived type GFS_diag_type
+  units = DDT
+  dimensions = ()
+  type = GFS_diag_type
   intent = in
 [Interstitial]
   standard_name = GFS_interstitial_type_instance_all_threads
