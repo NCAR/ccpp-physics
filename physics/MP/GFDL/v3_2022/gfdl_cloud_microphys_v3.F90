@@ -66,7 +66,7 @@ contains
            return
        endif
 
-!       call module_gfdl_cloud_microphys_v3_init(me, master, nlunit, input_nml_file, logunit, fn_nml, hydrostatic, errmsg, errflg)
+       call module_gfdl_cloud_microphys_v3_init(me, master, nlunit, input_nml_file, logunit, fn_nml, hydrostatic, errmsg, errflg)
 
        is_initialized = .true.
 

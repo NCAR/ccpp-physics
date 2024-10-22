@@ -40,7 +40,7 @@ module module_gfdl_cloud_microphys
     ! check_nml_error, file_exist, close_file
 
    use module_mp_radar
-   use module_gfdlmp_param, only: cfg => cfg_v1
+   use module_gfdlmp_param, only: cfg
 
    implicit none
 
@@ -3407,44 +3407,17 @@ subroutine module_gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file,
     logical :: exists
 
     ! ------------------------------------------------------------------------
-    ! namelist variables
-    ! ------------------------------------------------------------------------
-    real :: cld_min, tice, t_min, t_sub, mp_time, rh_inc, rh_inr, rh_ins,    &
-         tau_r2g, tau_smlt, tau_g2r, tau_imlt, tau_i2s, tau_l2r, tau_v2l,    &
-         tau_l2v, tau_g2v, tau_v2g, dw_land, dw_ocean, ccn_o, ccn_l, rthresh,&
-         sat_adj0, qc_crt, qi_lim, ql_mlt, ql_gen, qi_gen, ql0_max, qi0_max, &
-         qi0_crt, qr0_crt, qs0_crt, c_paut, c_psaci, c_piacr, c_cracw,       &
-         c_pgacs, alin, clin, vi_fac, vs_fac, vg_fac, vr_fac, vi_max, vs_max,&
-         vg_max, vr_max, rewmin, rewmax, reimin, reimax, rermin, rermax,     &
-         resmin, resmax, regmin, regmax, qs_mlt
-    logical :: const_vi, const_vs, const_vg, const_vr, fast_sat_adj,         &
-         z_slope_liq, z_slope_ice, use_ccn, use_ppm, mono_prof, mp_print,    &
-         do_hail, de_ice, sedi_transport, do_sedi_w, do_sedi_heat, prog_ccn, &
-         do_qa, rad_snow, rad_graupel, rad_rain, fix_negative, tintqs
-    integer :: reiflag, icloud_f, irain_f
-    ! ------------------------------------------------------------------------
     ! namelist
+    ! To extend/modify namelist and/or default values, see ../module_gfdl_param.F90
     ! ------------------------------------------------------------------------
-    namelist / gfdl_cloud_microphysics_nml /                                 &
-       mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land, dw_ocean, &
-       vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vi_max,  &
-       vs_max, vg_max, vr_max, qs_mlt, qs0_crt, qi_gen, ql0_max, qi0_max,    &
-       qi0_crt, qr0_crt, fast_sat_adj, rh_inc, rh_ins, rh_inr, const_vi,     &
-       const_vs, const_vg, const_vr, use_ccn, rthresh, ccn_l, ccn_o, qc_crt, &
-       tau_g2v, tau_v2g, sat_adj0, c_piacr, tau_imlt, tau_v2l, tau_l2v,      &
-       tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci, c_pgacs,           &
-       z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,        &
-       rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
-       do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
-       mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
-       resmin, resmax, regmin, regmax, tintqs, do_hail
-
+    namelist / gfdl_cloud_microphysics_nml / cfg
+    
     ! Initialize CCPP error-handling
     errflg = 0
     errmsg = ''
 
 #ifdef INTERNAL_FILE_NML
-    read (input_nml_file, nml = gfdl_cloud_microphysics_nml)
+    read (nml = gfdl_cloud_microphysics_nml, iostat = ios, unit = nlunit, iomsg = errmsg)
 #else
     inquire (file = trim (fn_nml), exist = exists)
     if (.not. exists) then
@@ -3456,7 +3429,7 @@ subroutine module_gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file,
         open (unit = nlunit, file = fn_nml, action = 'read' , status = 'old', iostat = ios)
     endif
     rewind (nlunit)
-    read (nlunit, nml = gfdl_cloud_microphysics_nml)
+    read (nml = gfdl_cloud_microphysics_nml, iostat = ios, unit = nlunit, iomsg = errmsg)
     close (nlunit)
 #endif
 
@@ -3469,18 +3442,6 @@ subroutine module_gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file,
 
     !
     if (do_setup) then
-       errmsg = cfg%update(mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land, dw_ocean, &
-                           vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vi_max,  &
-                           vs_max, vg_max, vr_max, qs_mlt, qs0_crt, qi_gen, ql0_max, qi0_max,    &
-                           qi0_crt, qr0_crt, fast_sat_adj, rh_inc, rh_ins, rh_inr, const_vi,     &
-                           const_vs, const_vg, const_vr, use_ccn, rthresh, ccn_l, ccn_o, qc_crt, &
-                           tau_g2v, tau_v2g, sat_adj0, c_piacr, tau_imlt, tau_v2l, tau_l2v,      &
-                           tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci, c_pgacs,           &
-                           z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,        &
-                           rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
-                           do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
-                           mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
-                           resmin, resmax, regmin, regmax, tintqs, do_hail)
         call setup_con
         call setupm
         do_setup = .false.
