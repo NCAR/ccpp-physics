@@ -200,6 +200,13 @@
   dimensions = ()
   type = integer
   intent = in
+[flag_init]
+  standard_name = flag_for_first_timestep
+  long_name = flag signaling first time step for time integration loop
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [kte]
   standard_name = vertical_layer_dimension
   long_name = vertical layer dimension
@@ -642,6 +649,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ntfsmoke]
+  standard_name = index_for_fire_smoke_in_tracer_concentration_array
+  long_name = tracer index for fire smoke
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [ntdust]
   standard_name = index_for_dust_in_tracer_concentration_array
   long_name = tracer index for dust
@@ -945,6 +959,22 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
+  intent = in
+[smoke_fire]
+  standard_name = smoke_emission_of_fire
+  long_name = smoke emission of fire
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[cpl_fire]
+  standard_name = do_fire_coupling
+  long_name = flag controlling fire_behavior collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [errmsg]
   standard_name = ccpp_error_message
