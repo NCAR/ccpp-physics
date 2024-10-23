@@ -883,6 +883,13 @@ contains
                  cutenm(i)=0.
               endif   ! pret > 0
 
+              maxupmf(i)=0.
+              if(forcing2(i,6).gt.0.)then
+                maxupmf(i)=maxval(xmb(i)*zu(i,kts:ktf)/forcing2(i,6))
+              endif
+              if (xland(i)==0)then ! cu precip rate (mm/h)
+                 if((maxupmf(i).lt.0.1) .or. (pret(i)*3600.lt.0.05)) pret(i)=0.
+              endif
               if(pret(i).gt.0.)then
                  cuten(i)=1.
                  cutenm(i)=0.
@@ -999,10 +1006,6 @@ contains
             gdc(i,15,10)=qfx(i)
             gdc(i,16,10)=pret(i)*3600.
 
-            maxupmf(i)=0.
-            if(forcing2(i,6).gt.0.)then
-              maxupmf(i)=maxval(xmb(i)*zu(i,kts:ktf)/forcing2(i,6))
-            endif
 
             if(ktop(i).gt.2 .and.pret(i).gt.0.)dt_mf(i,ktop(i)-1)=ud_mf(i,ktop(i))
             endif
