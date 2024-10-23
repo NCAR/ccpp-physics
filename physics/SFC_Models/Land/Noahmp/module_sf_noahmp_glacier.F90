@@ -971,18 +971,20 @@ contains
         albsni(1: nband) = 0.
 
 ! when cosz > 0
+! https://github.com/ufs-community/ccpp-physics/issues/227
+        if (cosz>0) then
+          sl=2.0
+          sl1=1./sl
+          sl2=2.*sl
+          cf1=((1.+sl1)/(1.+sl2*cosz)-sl1)
+          fzen=amax1(cf1,0.)
 
-        sl=2.0
-        sl1=1./sl
-        sl2=2.*sl
-        cf1=((1.+sl1)/(1.+sl2*cosz)-sl1)
-        fzen=amax1(cf1,0.)
+          albsni(1)=0.95*(1.-c1*fage)
+          albsni(2)=0.65*(1.-c2*fage)
 
-        albsni(1)=0.95*(1.-c1*fage)         
-        albsni(2)=0.65*(1.-c2*fage)        
-
-        albsnd(1)=albsni(1)+0.4*fzen*(1.-albsni(1))    !  vis direct
-        albsnd(2)=albsni(2)+0.4*fzen*(1.-albsni(2))    !  nir direct
+          albsnd(1)=albsni(1)+0.4*fzen*(1.-albsni(1))    !  vis direct
+          albsnd(2)=albsni(2)+0.4*fzen*(1.-albsni(2))    !  nir direct
+        endif
 
   end subroutine snowalb_bats_glacier
 ! ==================================================================================================
