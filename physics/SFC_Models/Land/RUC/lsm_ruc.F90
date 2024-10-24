@@ -455,13 +455,13 @@ module lsm_ruc
      ! for land
      &       sncovr1_lnd, qsurf_lnd, gflux_lnd, evap_lnd,                &
      &       cmm_lnd, chh_lnd, hflx_lnd, sbsno,                          &
-     &       acsnow_lnd, snowmt_lnd, snohf,                              &
+     &       snowmt_lnd, snohf,                                          &
      ! for ice
      &       sncovr1_ice, qsurf_ice, gflux_ice, evap_ice, ep1d_ice,      &
      &       cmm_ice, chh_ice, hflx_ice,                                 &
      &       snowmt_ice
       real (kind_phys), dimension(:), intent(inout), optional ::         &
-             acsnow_ice
+             acsnow_lnd, acsnow_ice
       real (kind_phys), dimension(:), intent(  out) ::                   &
      &       albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd
       real (kind_phys), dimension(:), intent(  out), optional ::         &
