@@ -68,24 +68,24 @@ module land_iau_mod
       integer :: ny
       integer :: tile_num
       integer :: nblks
-      integer, allocatable :: blksz(:)    ! this could vary for the last block
+      integer, allocatable :: blksz(:)        ! this could vary for the last block
       integer, allocatable :: blk_strt_indx(:)
 
-      integer              :: lsoil  !< number of soil layers
+      integer              :: lsoil           !< number of soil layers
       integer              :: lsnow_lsm       !< maximum number of snow layers internal to land surface model
       logical              :: do_land_iau
       real(kind=kind_phys) :: iau_delthrs     ! iau time interval (to scale increments) in hours
-      character(len=240)   :: iau_inc_files(7)! list of increment files
+      character(len=240)   :: iau_inc_files(7)     ! list of increment files
       real(kind=kind_phys) :: iaufhrs(7)      ! forecast hours associated with increment files
       logical              :: iau_filter_increments   
-      integer              :: lsoil_incr    ! soil layers (from top) updated by DA   
+      integer              :: lsoil_incr      ! soil layers (from top) updated by DA   
       logical              :: upd_stc
       logical              :: upd_slc
       logical              :: do_stcsmc_adjustment  !do moisture/temperature adjustment for consistency after increment add
       real(kind=kind_phys) :: min_T_increment
  
       integer              :: me              !< MPI rank designator
-      integer              :: mpi_root          !< MPI rank of master atmosphere processor
+      integer              :: mpi_root        !< MPI rank of master atmosphere processor
       character(len=64)    :: fn_nml          !< namelist filename for surface data cycling
       real(kind=kind_phys) :: dtp             !< physics timestep in seconds
       real(kind=kind_phys) :: fhour           !< current forecast hour
@@ -101,16 +101,16 @@ contains
 
 subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me, mpi_root, &
                                    isc, jsc, nx, ny, tile_num, nblks, blksz, &
-                                   lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)          !nlunit
+                                   lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)          
 
    type (land_iau_control_type), intent(inout) :: Land_IAU_Control
-   character(*), intent(in)                    :: fn_nml          !< namelist filename for surface data cycling
+   character(*), intent(in)                    :: fn_nml               !< namelist filename for surface data cycling
    character(len=:), intent(in), dimension(:), pointer :: input_nml_file_i
    integer, intent(in)                        :: me, mpi_root          !< MPI rank of master atmosphere processor   
    integer, intent(in)                        :: isc, jsc, nx, ny, tile_num, nblks, lsoil, lsnow_lsm
-   integer, dimension(:),          intent(in) :: blksz   !(one:) !GFS_Control%blksz
-   real(kind=kind_phys), intent(in)           :: dtp             !< physics timestep in seconds
-   real(kind=kind_phys), intent(in)           :: fhour           !< current forecast hour
+   integer, dimension(:),          intent(in) :: blksz                 !(one:) !GFS_Control%blksz
+   real(kind=kind_phys), intent(in)           :: dtp                   !< physics timestep in seconds
+   real(kind=kind_phys), intent(in)           :: fhour                 !< current forecast hour
    character(len=*),              intent(out) :: errmsg
    integer,                       intent(out) :: errflg
    
@@ -127,7 +127,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    logical               :: do_land_iau               = .false.
    real(kind=kind_phys)  :: land_iau_delthrs              = 0           !< iau time interval (to scale increments)
    character(len=240)    :: land_iau_inc_files(7)         = ''          !< list of increment files
-   real(kind=kind_phys)  :: land_iau_fhrs(7)               = -1          !< forecast hours associated with increment files
+   real(kind=kind_phys)  :: land_iau_fhrs(7)               = -1         !< forecast hours associated with increment files
    logical               :: land_iau_filter_increments    = .false.     !< filter IAU increments
 
    integer               :: lsoil_incr = 4

@@ -13,7 +13,7 @@
 
     use module_sf_noahmplsm
     
-    ! Land IAU increments for soil temperature (can also do soil moisture increments if needed)
+    ! Land IAU increments for soil temperature (plan to extend to soil moisture increments)
     use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type,  &
                              land_iau_state_type
                             
@@ -44,9 +44,6 @@
                                 errmsg, errflg,                    &
                                 Land_IAU_Control, Land_IAU_Data, Land_IAU_state,   &
                                 me, mpi_root)
-                                ! fn_nml, input_nml_file, isc, jsc, ncols, nx, ny, tile_num, &
-                                ! nblks, blksz, xlon, xlat,                             &     
-                                ! lsoil, lsnow_lsm, dtp, fhour)
 
     use machine,          only: kind_phys
     use set_soilveg_mod,  only: set_soilveg
@@ -66,26 +63,16 @@
     character(len=*),     intent(out) :: errmsg
     integer,              intent(out) :: errflg
 
-    ! land iau mod    
-    ! Land IAU Control holds settings' information, maily read from namelist (e.g., block of global domain that belongs to a process ,
+    ! land iau mod DDTs    
+    ! Land IAU Control holds settings' information, maily read from namelist 
+    ! (e.g., block of global domain that belongs to current process,
     ! whether to do IAU increment at this time step, time step informatoin, etc)    
     type(land_iau_control_type), intent(inout) :: Land_IAU_Control
-    ! Land IAU Data holds spatially and temporally interpolated soil temperature increments per time step
-    type(land_iau_external_data_type), intent(inout) :: Land_IAU_Data   !(number of blocks):each proc holds nblks
-    type(land_iau_state_type),  intent(inout) :: Land_IAU_state         ! holds data read from file (before interpolation)
-      
-
-    ! character(*),                  intent(in) :: fn_nml
-    ! character(len=:), pointer, intent(in), dimension(:) :: input_nml_file 
-    ! integer,                       intent(in) :: isc, jsc, ncols, nx, ny, nblks      !=GFS_Control%ncols, %nx, %ny, nblks
-    ! integer,                       intent(in) :: tile_num  !GFS_control_type%tile_num
-    ! integer, dimension(:),         intent(in) :: blksz   !(one:) !GFS_Control%blksz
-    ! real(kind_phys), dimension(:), intent(in) :: xlon    ! longitude !GFS_Data(cdata%blk_no)%Grid%xlon
-    ! real(kind_phys), dimension(:), intent(in) :: xlat    ! latitude
-
-    ! integer,                       intent(in) :: lsoil, lsnow_lsm
-    ! real(kind=kind_phys),          intent(in) :: dtp, fhour
-
+    ! land iau state holds increment data read from file (before interpolation)
+    type(land_iau_state_type),  intent(inout) :: Land_IAU_state         
+    ! Land IAU Data holds spatially and temporally interpolated increments per time step
+    type(land_iau_external_data_type), intent(inout) :: Land_IAU_Data   ! arry of (number of blocks):each proc holds nblks
+  
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
@@ -125,7 +112,6 @@
     call read_mp_table_parameters(errmsg, errflg)
 
     ! initialize psih and psim 
-
     if ( do_mynnsfclay ) then
     call psi_init(psi_opt,errmsg,errflg)
     endif
@@ -133,34 +119,22 @@
     pores (:) = maxsmc (:)
     resid (:) = drysmc (:)
 
-    ! ! Read Land IAU settings 
-    ! call land_iau_mod_set_control(Land_IAU_Control, fn_nml, input_nml_file, &
-    !       me, mpi_root, isc,jsc, nx, ny, tile_num, nblks, blksz,  &
-    !       lsoil, lsnow_lsm, dtp, fhour, errmsg, errflg)
-    ! Initialize IAU for land
+    ! Initialize IAU for land--land_iau_control was set by host model
     if (.not. Land_IAU_Control%do_land_iau) return
-    call land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)  !  xlon, xlat, errmsg, errflg)
+    call land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg) 
 
   end subroutine noahmpdrv_init
 
 !> \ingroup NoahMP_LSM
 !! \brief This subroutine is called before noahmpdrv_run 
-!!  to update states with iau increments, if available---
+!!  to update states with iau increments, if available
 !! \section arg_table_noahmpdrv_timestep_init Argument Table
 !! \htmlinclude noahmpdrv_timestep_init.html
 !!
-!! For Noah-MP, the adjustment scheme shown below is applied to soil moisture and temp:
-!! Case 1: frozen ==> frozen, recalculate slc following opt_frz=1, smc remains
-!! Case 2: unfrozen ==> frozen, recalculate slc following opt_frz=1, smc remains
-!! Case 3: frozen ==> unfrozen, melt all soil ice (if any)
-!! Case 4: unfrozen ==> unfrozen along with other cases, (e.g., soil temp=tfrz),do nothing
-!! Note: For Case 3, Yuan Xue thoroughly evaluated a total of four options and
-!! current option is found to be the best as of 11/09/2023
-
-subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &      !me, mpi_root,
+subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &      
                                     isot, ivegsrc, soiltyp, vegtype, weasd, &
                                     land_iau_control, land_iau_data, land_iau_state, &
-                                    stc, slc, smc, errmsg, errflg,   &       ! smc, t2mmp, q2mp, 
+                                    stc, slc, smc, errmsg, errflg,   &      
                                     con_g, con_t0c, con_hfus)  
    
   use machine,                 only: kind_phys  
@@ -197,33 +171,21 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &   
   ! IAU update  
   real(kind=kind_phys),allocatable, dimension(:,:)       :: stc_inc_flat, slc_inc_flat
   real(kind=kind_phys), dimension(km)                    :: dz ! layer thickness
-  ! real(kind=kind_phys)                                   :: stc_bck(ncols, km), d_stc(ncols, km)
-  ! integer, allocatable, dimension(:)                     :: diff_indices
   
-!TODO: 7.31.24: This is hard-coded in noahmpdrv
+!TODO: This is hard-coded in noahmpdrv
   real(kind=kind_phys)          :: zsoil(4) = (/ -0.1, -0.4, -1.0, -2.0 /)   !zsoil(km)
 
   integer                       :: lsoil_incr
-  ! integer                       :: veg_type_landice
-
   integer, allocatable          :: mask_tile(:)
   integer,allocatable           :: stc_updated(:), slc_updated(:)
   logical                       :: soil_freeze, soil_ice
-  ! integer                       :: n_freeze, n_thaw
   integer                       :: soiltype, n_stc, n_slc
   real(kind=kind_phys)          :: slc_new
 
   integer                  :: i, j, ij, l, k, ib
   integer                  :: lensfc
-  
-  ! real (kind=kind_phys), dimension(max_soiltyp)  :: maxsmc, bb, satpsi
-  ! real, dimension(30)      :: maxsmc, bb, satpsi
-  ! real(kind=kind_phys), parameter          :: tfreez=273.16 !< con_t0c  in physcons
-  ! real(kind=kind_phys), parameter          :: hfus=0.3336e06 !< latent heat of fusion(j/kg) con_hfus
-  ! real(kind=kind_phys), parameter          :: con_g  !grav=9.80616   !< gravity accel.(m/s2)
 
   real(kind=kind_phys)                     :: smp !< for computing supercooled water 
-
   real(kind=kind_phys)                     :: hc_incr
 
   integer                  :: nother, nsnowupd
