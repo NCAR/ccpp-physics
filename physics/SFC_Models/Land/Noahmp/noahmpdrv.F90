@@ -499,7 +499,7 @@ end subroutine noahmpdrv_timestep_init
       iopt_trs,iopt_diag,xlatin, xcoszin, iyrlen, julian, garea, &
       rainn_mp, rainc_mp, snow_mp, graupel_mp, ice_mp, rhonewsn1,&
       con_hvap, con_cp, con_jcal, rhoh2o, con_eps, con_epsm1,    &
-      con_fvirt, con_rd, con_hfus, thsfc_loc,                    &
+      con_fvirt, con_rd, con_hfus, thsfc_loc, cpllnd,cpllnd2atm, &
 
 !  ---  in/outs:
       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
@@ -672,6 +672,9 @@ end subroutine noahmpdrv_timestep_init
   real(kind=kind_phys)                   , intent(in)    :: con_hfus   ! lat heat H2O fusion  [J/kg]
 
   logical                                , intent(in)    :: thsfc_loc  ! Flag for reference pressure in theta calculation
+
+  logical                                , intent(in)    :: cpllnd     ! Flag for land coupling (atm->lnd)
+  logical                                , intent(in)    :: cpllnd2atm ! Flag for land coupling (lnd->atm)
 
   real(kind=kind_phys), dimension(:)     , intent(inout) :: weasd      ! water equivalent accumulated snow depth [mm]
   real(kind=kind_phys), dimension(:)     , intent(inout) :: snwdph     ! snow depth [mm]
@@ -1033,7 +1036,7 @@ end subroutine noahmpdrv_timestep_init
   logical               :: is_snowing             ! used for penman calculation
   logical               :: is_freeze_rain         ! used for penman calculation
   integer :: i, k
-   
+
 !
 !  --- local derived constants:
 !
@@ -1049,6 +1052,11 @@ end subroutine noahmpdrv_timestep_init
 !
   errmsg = ''
   errflg = 0
+
+!
+!  --- Just return if external land component is activated for two-way interaction
+!
+  if (cpllnd .and. cpllnd2atm) return
 
   do i = 1, im
 
