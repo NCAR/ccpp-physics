@@ -293,7 +293,9 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
             wt = 1.0
          endif
          normfact = normfact + wt
-         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,'filter wts',k,kstep,wt
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+            print *,'Land IAU init: IAU filter weights params k, kstep, wt ',k, kstep, wt
+         endif
       enddo
       Land_IAU_Data%wt_normfact = (2*nstep+1)/normfact
    endif
@@ -302,7 +304,6 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
    if (trim(Land_IAU_Control%iau_inc_files(1)) .eq. '' .or. Land_IAU_Control%iaufhrs(1) .lt. 0) then ! only 1 file expected
       errmsg = "Error! in Land IAU init: increment file name is empty or iaufhrs(1) is negative"
       errflg = 1
-      ! Land_IAU_Control%do_land_iau=.false.
       return   
    endif    
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then
@@ -312,7 +313,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
    ! determine number of valid forecast hours
    ! is read from the increment file ("Time" dim)
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then
-      print *, " Number of forecast times (in hours) with valid increment values"
+      print *, "Land_iau_init: timesetps and forecast times (in hours) with valid increment values"
    endif
    ntimesall = size(Land_IAU_Control%iaufhrs)
    ntimes = 0
@@ -326,9 +327,8 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
 
    Land_IAU_Control%ntimes = ntimes
    if (ntimes < 1) then
-      errmsg = "Error! in Land IAU init: ntimes < 1"
+      errmsg = "Error! in Land IAU init: ntimes < 1 (no valid hour with increments); do_land_iau should not be .true."
       errflg = 1
-      ! Land_IAU_Control%do_land_iau=.false.
       return
    endif
    if (ntimes > 1) then
@@ -350,7 +350,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
    endif
    ! Read all increment files at iau init time (at beginning of cycle) 
    ! increments are already in the fv3 grid--no need for interpolation     
-   call read_iau_forcing_fv3(Land_IAU_Control, Land_IAU_state%stc_inc, Land_IAU_state%slc_inc, errmsg, errflg)  !, wk3_stc, wk3_slc
+   call read_iau_forcing_fv3(Land_IAU_Control, Land_IAU_state%stc_inc, Land_IAU_state%slc_inc, errmsg, errflg)  
    if (errflg .ne. 0) return
 
    if (ntimes.EQ.1) then  ! only need to get incrments once since constant forcing over window

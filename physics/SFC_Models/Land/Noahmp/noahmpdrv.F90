@@ -323,22 +323,14 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
 
   deallocate(stc_inc_flat, slc_inc_flat)   !, tmp2m_inc_flat,spfh2m_inc_flat)
 
-! (consistency) adjustments for updated soil temp and moisture
-
-  ! call set_soilveg_noahmp(isot, ivegsrc, maxsmc, bb, satpsi, errflg)
-  call read_mp_table_parameters(errmsg, errflg)       
-  ! maxsmc(1:slcats) = smcmax_table(1:slcats)  
-  ! bb(1:slcats) = bexp_table(1:slcats)  
-  ! satpsi(1:slcats) = psisat_table(1:slcats)     
+ !!do moisture/temperature adjustment for consistency after increment add 
+  call read_mp_table_parameters(errmsg, errflg)          
   if (errflg .ne. 0) then
-        print *, 'FATAL ERROR in noahmpdrv_timestep_init: problem in set_soilveg_noahmp'
         errmsg = 'FATAL ERROR in noahmpdrv_timestep_init: problem in set_soilveg_noahmp'
         return
   endif
-
   n_stc = 0
-  n_slc = 0
-  !!do moisture/temperature adjustment for consistency after increment add
+  n_slc = 0  
   if (Land_IAU_Control%do_stcsmc_adjustment) then
     if (Land_IAU_Control%upd_stc) then
       do i=1,lensfc
@@ -369,7 +361,6 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
       do l = 2, km 
           dz(l) = -zsoil(l) + zsoil(l-1) 
       enddo 
-      ! print *, 'Applying soil moisture mins ' 
       do i=1,lensfc
         if (slc_updated(i) == 1 ) then 
           n_slc = n_slc+1
@@ -389,7 +380,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
     deallocate(mask_tile)
   
 
-    write(*,'(a,i2)') ' statistics of grids with stc/smc updates for rank : ', Land_IAU_Control%me
+    write(*,'(a,i2)') ' noahmpdrv_timestep_init: statistics of grids with stc/smc updates for rank : ', Land_IAU_Control%me
     write(*,'(a,i8)') ' soil grid total', lensfc
     write(*,'(a,i8)') ' soil grid cells stc updated = ',nstcupd
     write(*,'(a,i8)') ' soil grid cells slc updated = ',nslcupd
@@ -409,7 +400,7 @@ end subroutine noahmpdrv_timestep_init
 !! \section arg_table_noahmpdrv_finalize Argument Table
 !! \htmlinclude noahmpdrv_finalize.html
 !!
-  subroutine noahmpdrv_finalize (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)       ! smc, t2mmp, q2mp,    
+  subroutine noahmpdrv_finalize (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)          
    
     use machine,          only: kind_phys 
     implicit none
@@ -461,7 +452,7 @@ end subroutine noahmpdrv_timestep_init
       iopt_trs,iopt_diag,xlatin, xcoszin, iyrlen, julian, garea, &
       rainn_mp, rainc_mp, snow_mp, graupel_mp, ice_mp, rhonewsn1,&
       con_hvap, con_cp, con_jcal, rhoh2o, con_eps, con_epsm1,    &
-      con_fvirt, con_rd, con_hfus, thsfc_loc, cpllnd,cpllnd2atm, &
+      con_fvirt, con_rd, con_hfus, thsfc_loc, cpllnd, cpllnd2atm, &
 
 !  ---  in/outs:
       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
