@@ -2005,7 +2005,7 @@ CONTAINS
         ugrid = sqrt(u1(kts)**2 + v1(kts)**2)
         uonset= 15. 
         wt_u = (1.0 - min(max(ugrid - uonset, 0.0)/30.0, 0.5)) 
-        cns  = 2.7 !was 3.5
+        cns  = 3.5
         alp1 = 0.23
         alp2 = 0.3
         alp3 = 2.5 * wt_u !taper off bouyancy enhancement in shear-driven pbls
@@ -2039,7 +2039,7 @@ CONTAINS
         zwk = zw(k)
         DO WHILE (zwk .LE. zi2+h1)
            dzk = 0.5*( dz(k)+dz(k-1) )
-           qdz = min(max( qkw(k)-qmin, 0.03 ), 30.0)*dzk
+           qdz = min(max( qkw(k)-qmin, 0.02 ), 30.0)*dzk
            elt = elt +qdz*zwk
            vsc = vsc +qdz
            k   = k+1
@@ -5036,7 +5036,7 @@ ENDIF
     IF (FLAG_QI) THEN
       DO k=kts,kte
          Dth(k)=(thl(k) + xlvcp/exner(k)*sqc2(k)          &
-           &            + xlscp/exner(k)*(sqi2(k)+sqs(k)) &
+           &            + xlscp/exner(k)*(sqi2(k))        & !+sqs(k)) &
            &            - th(k))/delt
          !Use form from Tripoli and Cotton (1981) with their
          !suggested min temperature to improve accuracy:
@@ -6057,7 +6057,7 @@ if ( fltv2 > 0.002 .AND. (maxwidth > minwidth) .AND. superadiabatic) then
     if ((landsea-1.5).LT.0) then  !land
        acfac = .5*tanh((fltv2 - 0.02)/0.05) + .5
     else                          !water
-       acfac = .5*tanh((fltv2 - 0.01)/0.03) + .5
+       acfac = .5*tanh((fltv2 - 0.015)/0.04) + .5
     endif
     !add a windspeed-dependent adjustment to acfac that tapers off
     !the mass-flux scheme linearly above sfc wind speeds of 10 m/s.
