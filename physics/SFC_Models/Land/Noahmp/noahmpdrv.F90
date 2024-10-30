@@ -24,12 +24,12 @@
 
       integer, parameter :: psi_opt = 0 ! 0: MYNN or 1:GFS
 
-    private
+      private
 
-    public :: noahmpdrv_init, noahmpdrv_run, &
+      public :: noahmpdrv_init, noahmpdrv_run, &
               noahmpdrv_timestep_init, noahmpdrv_finalize    
 
-    contains
+      contains
 
 !> \ingroup NoahMP_LSM
 !! \brief This subroutine is called during the CCPP initialization phase and calls set_soilveg() to 
