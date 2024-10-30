@@ -9,7 +9,7 @@
 !! as diagnotics calculation.
 
 !> This module contains the CCPP-compliant NoahMP land surface model driver.
-  module noahmpdrv
+    module noahmpdrv
 
     use module_sf_noahmplsm
     
