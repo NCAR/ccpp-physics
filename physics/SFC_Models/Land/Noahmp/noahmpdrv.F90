@@ -9,9 +9,9 @@
 !! as diagnotics calculation.
 
 !> This module contains the CCPP-compliant NoahMP land surface model driver.
-    module noahmpdrv
+        module noahmpdrv
 
-    use module_sf_noahmplsm
+        use module_sf_noahmplsm
     
     ! Land IAU increments for soil temperature (plan to extend to soil moisture increments)
     use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type,  &
