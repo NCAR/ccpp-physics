@@ -12,14 +12,13 @@
       module noahmpdrv
 
       use module_sf_noahmplsm
-    
+
 ! Land IAU increments for soil temperature (plan to extend to soil moisture increments)
       use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type,  &
                              land_iau_state_type
                             
       use land_iau_mod,  only: land_iau_mod_init, land_iau_mod_getiauforcing, land_iau_mod_finalize,    &    
                              calculate_landinc_mask   ! land_iau_mod_set_control, 
-
       implicit none
 
       integer, parameter :: psi_opt = 0 ! 0: MYNN or 1:GFS
@@ -27,7 +26,7 @@
       private
 
       public :: noahmpdrv_init, noahmpdrv_run, &
-              noahmpdrv_timestep_init, noahmpdrv_finalize    
+                noahmpdrv_timestep_init, noahmpdrv_finalize 
 
       contains
 
@@ -38,90 +37,96 @@
 !! \htmlinclude noahmpdrv_init.html
 !!
       subroutine noahmpdrv_init(lsm, lsm_noahmp, me, isot, ivegsrc, &
-                                nlunit, pores, resid,              &
-                                do_mynnsfclay,do_mynnedmf,         &
-                                errmsg, errflg,                    &
+                                nlunit, pores, resid,               &
+                                do_mynnsfclay,do_mynnedmf,          &
+                                errmsg, errflg,                     &
                                 Land_IAU_Control, Land_IAU_Data, Land_IAU_state)
 
-    use machine,          only: kind_phys
-    use set_soilveg_mod,  only: set_soilveg
-    use namelist_soilveg
-    use noahmp_tables
+        use machine,          only: kind_phys
+        use set_soilveg_mod,  only: set_soilveg
+        use namelist_soilveg
+        use noahmp_tables
 
-    implicit none
-    
-    integer,              intent(in) :: me         !  mpi_rank  
-    integer,              intent(in) :: mpi_root   ! = GFS_Control%master    
-    integer,              intent(in) :: lsm
-    integer,              intent(in) :: lsm_noahmp    
-    integer,              intent(in) :: isot, ivegsrc, nlunit
-    real (kind=kind_phys), dimension(:), intent(out) :: pores, resid
-    logical,              intent(in) :: do_mynnsfclay
-    logical,              intent(in) :: do_mynnedmf
-    character(len=*),     intent(out) :: errmsg
-    integer,              intent(out) :: errflg
+        implicit none
+        integer,              intent(in) :: lsm
+        integer,              intent(in) :: lsm_noahmp    
+        integer,              intent(in)  :: me, isot, ivegsrc, nlunit
+
+        real (kind=kind_phys), dimension(:), intent(out) :: pores, resid
+
+        logical,              intent(in) :: do_mynnsfclay
+        logical,              intent(in) :: do_mynnedmf
+
+
+        character(len=*),     intent(out) :: errmsg
+        integer,              intent(out) :: errflg
 
     ! land iau mod DDTs    
     ! Land IAU Control holds settings' information, maily read from namelist 
     ! (e.g., block of global domain that belongs to current process,
-    ! whether to do IAU increment at this time step, time step informatoin, etc)    
-    type(land_iau_control_type), intent(inout) :: Land_IAU_Control
-    ! land iau state holds increment data read from file (before interpolation)
-    type(land_iau_state_type),  intent(inout) :: Land_IAU_state         
-    ! Land IAU Data holds spatially and temporally interpolated increments per time step
-    type(land_iau_external_data_type), intent(inout) :: Land_IAU_Data   ! arry of (number of blocks):each proc holds nblks
-  
-    ! Initialize CCPP error handling variables
-    errmsg = ''
-    errflg = 0
+    ! whether to do IAU increment at this time step, time step informatoin, etc)  
+    ! made optional to allow NoahMP Component model call this function without having to deal with IAU  
+        type(land_iau_control_type), intent(inout), optional :: Land_IAU_Control
+        ! land iau state holds increment data read from file (before interpolation)
+        type(land_iau_state_type),  intent(inout), optional  :: Land_IAU_state         
+        ! Land IAU Data holds spatially and temporally interpolated increments per time step
+        type(land_iau_external_data_type), intent(inout), optional :: Land_IAU_Data   ! arry of (number of blocks):each proc holds nblks
 
-    ! Consistency checks
-    if (lsm/=lsm_noahmp) then
-      write(errmsg,'(*(a))') 'Logic error: namelist choice of ',   &
-    &       'LSM is different from Noah'
-      errflg = 1
-      return
-    end if
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
-    if (ivegsrc /= 1) then
-      errmsg = 'The NOAHMP LSM expects that the ivegsrc physics '// &
-                'namelist parameter is 1. Exiting...'
-      errflg = 1
-      return
-    end if
-    if (isot /= 1) then
-      errmsg = 'The NOAHMP LSM expects that the isot physics '// &
-                'namelist parameter is 1. Exiting...'
-      errflg = 1
-      return
-    end if
+        ! Consistency checks
+        if (lsm/=lsm_noahmp) then
+          write(errmsg,'(*(a))') 'Logic error: namelist choice of ',   &
+       &       'LSM is different from Noah'
+          errflg = 1
+          return
+        end if
 
-    if ( do_mynnsfclay .and. .not. do_mynnedmf) then
-      errmsg = 'Problem : do_mynnsfclay = .true.' // &
-                'but mynnpbl is .false.. Exiting ...'
-      errflg = 1
-      return
-    end if
+        if (ivegsrc /= 1) then
+          errmsg = 'The NOAHMP LSM expects that the ivegsrc physics '// &
+                   'namelist parameter is 1. Exiting...'
+          errflg = 1
+          return
+        end if
+        if (isot /= 1) then
+          errmsg = 'The NOAHMP LSM expects that the isot physics '// &
+                   'namelist parameter is 1. Exiting...'
+          errflg = 1
+          return
+        end if
 
-    !--- initialize soil vegetation
-    call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
+        if ( do_mynnsfclay .and. .not. do_mynnedmf) then
+          errmsg = 'Problem : do_mynnsfclay = .true.' // &
+                   'but mynnpbl is .false.. Exiting ...'
+          errflg = 1
+          return
+        end if
 
-    !--- read in noahmp table
-    call read_mp_table_parameters(errmsg, errflg)
 
-    ! initialize psih and psim 
-    if ( do_mynnsfclay ) then
-    call psi_init(psi_opt,errmsg,errflg)
-    endif
+        !--- initialize soil vegetation
+        call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
-    pores (:) = maxsmc (:)
-    resid (:) = drysmc (:)
+        !--- read in noahmp table
+        call read_mp_table_parameters(errmsg, errflg)
 
-    ! Initialize IAU for land--land_iau_control was set by host model
-    if (.not. Land_IAU_Control%do_land_iau) return
-    call land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg) 
+        ! initialize psih and psim 
 
-  end subroutine noahmpdrv_init
+        if ( do_mynnsfclay ) then
+        call psi_init(psi_opt,errmsg,errflg)
+        endif
+
+        pores (:) = maxsmc (:)
+        resid (:) = drysmc (:)
+        
+        if (present(Land_IAU_Control) .and. present(Land_IAU_Data) .and. present(Land_IAU_State)) then 
+          ! Initialize IAU for land--land_iau_control was set by host model
+          if (.not. Land_IAU_Control%do_land_iau) return
+          call land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg) 
+        endif
+
+      end subroutine noahmpdrv_init
 
 !> \ingroup NoahMP_LSM
 !! \brief This subroutine is called before noahmpdrv_run 
@@ -441,7 +446,7 @@ end subroutine noahmpdrv_timestep_init
   subroutine noahmpdrv_run                                       &
 !...................................
 !  ---  inputs:
-    (im, km, lsnowl, itime, ps, u1, v1, t1, q1, soiltyp,soilcol,&
+    ( im, km, lsnowl, itime, ps, u1, v1, t1, q1, soiltyp,soilcol,&
       vegtype, sigmaf, dlwflx, dswsfc, snet, delt, tg3, cm, ch,  &
       prsl1, prslk1, prslki, prsik1, zf,pblh, dry, wind, slopetyp,&
       shdmin, shdmax, snoalb, sfalb, flag_iter,con_g,            &
@@ -450,7 +455,7 @@ end subroutine noahmpdrv_timestep_init
       iopt_trs,iopt_diag,xlatin, xcoszin, iyrlen, julian, garea, &
       rainn_mp, rainc_mp, snow_mp, graupel_mp, ice_mp, rhonewsn1,&
       con_hvap, con_cp, con_jcal, rhoh2o, con_eps, con_epsm1,    &
-      con_fvirt, con_rd, con_hfus, thsfc_loc, cpllnd, cpllnd2atm, &
+      con_fvirt, con_rd, con_hfus, thsfc_loc, cpllnd, cpllnd2atm,&
 
 !  ---  in/outs:
       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
@@ -546,7 +551,7 @@ end subroutine noahmpdrv_timestep_init
   integer                                , intent(in)    :: im         ! horiz dimension and num of used pts
   integer                                , intent(in)    :: km         ! vertical soil layer dimension
   integer                                , intent(in)    :: lsnowl     ! lower bound for snow level arrays
-  integer                                , intent(in)    :: itime      ! NOT USED current forecast iteration
+  integer                                , intent(in)    :: itime      ! NOT USED
   real(kind=kind_phys), dimension(:)     , intent(in)    :: ps         ! surface pressure [Pa]
   real(kind=kind_phys), dimension(:)     , intent(in)    :: u1         ! u-component of wind [m/s]
   real(kind=kind_phys), dimension(:)     , intent(in)    :: v1         ! u-component of wind [m/s]
@@ -987,7 +992,7 @@ end subroutine noahmpdrv_timestep_init
   logical               :: is_snowing             ! used for penman calculation
   logical               :: is_freeze_rain         ! used for penman calculation
   integer :: i, k
-
+      
 !
 !  --- local derived constants:
 !
@@ -2064,4 +2069,4 @@ SUBROUTINE PEDOTRANSFER_SR2006(nsoil,sand,clay,orgm,parameters)
 ! ----------------------------------------------------------------------
       end subroutine penman
 
-end module noahmpdrv
+      end module noahmpdrv
