@@ -541,7 +541,6 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
    je  = js + Land_IAU_Control%ny-1
    npz = Land_IAU_Control%lsoil
    !  this is only called if using 1 increment file
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root)
    do j = js, je
       do i = is, ie
          do k = 1, npz   !  do k = 1,n_soill    !         
