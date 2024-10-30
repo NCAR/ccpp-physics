@@ -38,9 +38,9 @@
 !! \htmlinclude noahmpdrv_init.html
 !!
       subroutine noahmpdrv_init(lsm, lsm_noahmp, me, isot, ivegsrc, &
-                               nlunit, pores, resid,              &
-                               do_mynnsfclay,do_mynnedmf,         &
-                               errmsg, errflg,                    &
+                                nlunit, pores, resid,              &
+                                do_mynnsfclay,do_mynnedmf,         &
+                                errmsg, errflg,                    &
                                 Land_IAU_Control, Land_IAU_Data, Land_IAU_state)
 
     use machine,          only: kind_phys
