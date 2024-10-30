@@ -13,16 +13,16 @@
 
       use module_sf_noahmplsm
     
-    ! Land IAU increments for soil temperature (plan to extend to soil moisture increments)
-    use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type,  &
+! Land IAU increments for soil temperature (plan to extend to soil moisture increments)
+      use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type,  &
                              land_iau_state_type
                             
-    use land_iau_mod,  only: land_iau_mod_init, land_iau_mod_getiauforcing, land_iau_mod_finalize,    &    
+      use land_iau_mod,  only: land_iau_mod_init, land_iau_mod_getiauforcing, land_iau_mod_finalize,    &    
                              calculate_landinc_mask   ! land_iau_mod_set_control, 
 
-    implicit none
+      implicit none
 
-    integer, parameter :: psi_opt = 0 ! 0: MYNN or 1:GFS
+      integer, parameter :: psi_opt = 0 ! 0: MYNN or 1:GFS
 
     private
 
