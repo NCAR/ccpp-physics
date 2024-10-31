@@ -672,7 +672,7 @@ end subroutine read_iau_forcing_fv3
       implicit none
 
       integer, intent(in)           :: lensfc, veg_type_landice
-      real, intent(in)              :: swe(lensfc)
+      real(kind=kind_phys), intent(in)              :: swe(lensfc)
       integer, intent(in)           :: vtype(lensfc),stype(lensfc)
       integer, intent(out)          :: mask(lensfc)
 
