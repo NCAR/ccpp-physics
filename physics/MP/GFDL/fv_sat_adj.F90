@@ -155,6 +155,8 @@ subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
     end if
 
     if (is_initialized) return
+    ! Set up scheme parameters
+    call cfg%setup(errmsg,  errflg)
 
     ! generate es table (dt = 0.1 deg c)
 

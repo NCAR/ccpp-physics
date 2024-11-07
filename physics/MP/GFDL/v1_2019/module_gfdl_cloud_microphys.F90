@@ -3405,39 +3405,20 @@ subroutine module_gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file,
 
     integer :: ios
     logical :: exists
-
-    ! ------------------------------------------------------------------------
-    ! namelist
-    ! To extend/modify namelist and/or default values, see ../module_gfdl_param.F90
-    ! ------------------------------------------------------------------------
-    namelist / gfdl_cloud_microphysics_nml / cfg
     
     ! Initialize CCPP error-handling
     errflg = 0
     errmsg = ''
 
-#ifdef INTERNAL_FILE_NML
-    read (nml = gfdl_cloud_microphysics_nml, iostat = ios, unit = nlunit, iomsg = errmsg)
-#else
-    inquire (file = trim (fn_nml), exist = exists)
-    if (.not. exists) then
-        write (6, *) 'gfdl - mp :: namelist file: ', trim (fn_nml), ' does not exist'
-        errflg = 1
-        errmsg = 'ERROR(module_gfdl_cloud_microphys_init): namelist file '//trim (fn_nml)//' does not exist'
-        return
-    else
-        open (unit = nlunit, file = fn_nml, action = 'read' , status = 'old', iostat = ios)
-    endif
-    rewind (nlunit)
-    read (nml = gfdl_cloud_microphysics_nml, iostat = ios, unit = nlunit, iomsg = errmsg)
-    close (nlunit)
-#endif
+    ! Read namelist
+    call cfg%setup(errmsg, errflg, unit = nlunit, input_nml_file = input_nml_file, &
+         fn_nml = fn_nml, version=1, iostat = ios)
 
     ! write version number and namelist to log file
     if (me == master) then
         write (logunit, *) " ================================================================== "
         write (logunit, *) "module_gfdl_cloud_microphys"
-        write (logunit, nml = gfdl_cloud_microphysics_nml)
+        !write (logunit, nml = gfdl_cloud_microphysics_nml)
     endif
 
     !
