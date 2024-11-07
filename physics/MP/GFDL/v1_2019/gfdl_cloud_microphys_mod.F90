@@ -28,7 +28,7 @@
 !>\defgroup mod_gfdl_cloud_mp GFDL Cloud MP modules
 !!\ingroup gfdlmp
 !! This module contains the column GFDL Cloud microphysics scheme.
-module module_gfdl_cloud_microphys
+module gfdl_cloud_microphys_mod
 
     ! use mpp_mod, only: stdlog, mpp_pe, mpp_root_pe, mpp_clock_id, &
     ! mpp_clock_begin, mpp_clock_end, clock_routine, &
@@ -46,8 +46,8 @@ module module_gfdl_cloud_microphys
 
    private
 
-   public module_gfdl_cloud_microphys_driver, module_gfdl_cloud_microphys_init, &
-          module_gfdl_cloud_microphys_end, cloud_diagnosis
+   public gfdl_cloud_microphys_mod_driver, gfdl_cloud_microphys_mod_init, &
+          gfdl_cloud_microphys_mod_end, cloud_diagnosis
 !   public wqs1, wqs2, qs_blend, wqsat_moist, wqsat2_moist
 !   public qsmith_init, qsmith, es2_table1d, es3_table1d, esw_table1d
 !   public setup_con, wet_bulb
@@ -180,7 +180,7 @@ contains
 
 !>\ingroup mod_gfdl_cloud_mp
 !! This subroutine is the driver of the GFDL cloud microphysics
-subroutine module_gfdl_cloud_microphys_driver (                                 &
+subroutine gfdl_cloud_microphys_mod_driver (                                 &
             iis, iie, jjs, jje, kks, kke, ktop, kbot,                           &
             qv, ql, qr, qi, qs, qg, qa, qn,                                     &
             qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,      &
@@ -490,7 +490,7 @@ subroutine module_gfdl_cloud_microphys_driver (                                 
        enddo
     endif
 
-end subroutine module_gfdl_cloud_microphys_driver
+end subroutine gfdl_cloud_microphys_mod_driver
 
 ! -----------------------------------------------------------------------
 !>\ingroup mod_gfdl_cloud_mp
@@ -3388,7 +3388,7 @@ end subroutine setupm
 !>\ingroup mod_gfdl_cloud_mp
 !! The subroutine 'gfdl_cloud_microphys_init' initializes the GFDL
 !! cloud microphysics.
-subroutine module_gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file, logunit, &
+subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, logunit, &
      fn_nml, errmsg, errflg)
 
     implicit none
@@ -3417,7 +3417,7 @@ subroutine module_gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file,
     ! write version number and namelist to log file
     if (me == master) then
         write (logunit, *) " ================================================================== "
-        write (logunit, *) "module_gfdl_cloud_microphys"
+        write (logunit, *) "gfdl_cloud_microphys_mod"
         !write (logunit, nml = gfdl_cloud_microphysics_nml)
     endif
 
@@ -3503,14 +3503,14 @@ subroutine module_gfdl_cloud_microphys_init (me, master, nlunit, input_nml_file,
 
    call radar_init
 
-end subroutine module_gfdl_cloud_microphys_init
+end subroutine gfdl_cloud_microphys_mod_init
 
 ! =======================================================================
 ! end of gfdl cloud microphysics
 !>\ingroup mod_gfdl_cloud_mp
 !! The subroutine 'gfdl_cloud_microphys_init' terminates the GFDL
 !! cloud microphysics.
-subroutine module_gfdl_cloud_microphys_end()
+subroutine gfdl_cloud_microphys_mod_end()
 
     implicit none
 
@@ -3525,7 +3525,7 @@ subroutine module_gfdl_cloud_microphys_end()
 
     tables_are_initialized = .false.
 
-end subroutine module_gfdl_cloud_microphys_end
+end subroutine gfdl_cloud_microphys_mod_end
 
 ! =======================================================================
 ! qsmith table initialization
@@ -4875,4 +4875,4 @@ end subroutine cloud_diagnosis
       end subroutine refl10cm_gfdl
 !+---+-----------------------------------------------------------------+
 
-end module module_gfdl_cloud_microphys
+end module gfdl_cloud_microphys_mod

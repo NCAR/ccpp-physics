@@ -3,9 +3,9 @@
 !! \cite chen_and_lin_2013 ).
 module gfdl_cloud_microphys
 
-   use module_gfdl_cloud_microphys, only: module_gfdl_cloud_microphys_init,   &
-                                          module_gfdl_cloud_microphys_driver, &
-                                          module_gfdl_cloud_microphys_end,    &
+   use gfdl_cloud_microphys_mod, only: gfdl_cloud_microphys_mod_init,   &
+                                          gfdl_cloud_microphys_mod_driver, &
+                                          gfdl_cloud_microphys_mod_end,    &
                                           cloud_diagnosis
 
    implicit none
@@ -63,7 +63,7 @@ contains
            return
        endif
 
-       call module_gfdl_cloud_microphys_init(me, master, nlunit, input_nml_file, logunit, fn_nml, errmsg, errflg)
+       call gfdl_cloud_microphys_mod_init(me, master, nlunit, input_nml_file, logunit, fn_nml, errmsg, errflg)
 
        is_initialized = .true.
 
@@ -89,7 +89,7 @@ contains
 
        if (.not.is_initialized) return
 
-       call module_gfdl_cloud_microphys_end()
+       call gfdl_cloud_microphys_mod_end()
 
        is_initialized = .false.
 
@@ -234,7 +234,7 @@ contains
       snow0     = 0
       graupel0  = 0
 
-      call module_gfdl_cloud_microphys_driver(iis, iie, jjs, jje, kks, kke, ktop, kbot, &
+      call gfdl_cloud_microphys_mod_driver(iis, iie, jjs, jje, kks, kke, ktop, kbot, &
                  qv1, ql1, qr1, qi1, qs1, qg1, qa1, qn1, qv_dt, ql_dt, qr_dt, qi_dt, &
                  qs_dt, qg_dt, qa_dt, pt_dt, pt, w,  uin, vin, u_dt, v_dt, dz, delp, &
                  garea, dtp, frland, rain0, snow0, ice0, graupel0, hydrostatic,      &

@@ -254,7 +254,7 @@ INPUT                  =  pdftxt/SRW_mainpage.txt              \
                         ../cnvc90.f \
                         ../module_bfmicrophysics.f \
                         ../gfdl_cloud_microphys.F90 \
-                        ../module_gfdl_cloud_microphys.F90 \
+                        ../gfdl_cloud_microphys_mod.F90 \
                         ../GFS_MP_generic_pre.F90 \
                         ../GFS_MP_generic_post.F90   \
                         ../GFS_PBL_generic_common.F90    \

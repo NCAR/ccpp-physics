@@ -1,4 +1,4 @@
-!>\file module_gfdl_cloud_microphys_v3.F90
+!>\file gfdl_cloud_microphys_v3_mod.F90
 !! This file contains the entity of GFDL MP scheme Version 3.
 
 !***********************************************************************
@@ -35,7 +35,7 @@
 ! Version 3: Zhou et al. (2022 doi: 10.1029/2021MS002971)
 ! =======================================================================
 
-module module_gfdl_cloud_microphys_v3
+module gfdl_cloud_microphys_v3_mod
   use module_gfdlmp_param, only: cfg
     implicit none
 
@@ -78,9 +78,9 @@ module module_gfdl_cloud_microphys_v3
     ! public subroutines, functions, and variables
     ! -----------------------------------------------------------------------
 
-    public :: module_gfdl_cloud_microphys_v3_init
-    public :: module_gfdl_cloud_microphys_v3_driver
-    public :: module_gfdl_cloud_microphys_v3_end
+    public :: gfdl_cloud_microphys_v3_mod_init
+    public :: gfdl_cloud_microphys_v3_mod_driver
+    public :: gfdl_cloud_microphys_v3_mod_end
     public :: cld_sat_adj, cld_eff_rad, rad_ref
     public :: qs_init, wqs, mqs, mqs3d
     public :: c_liq, c_ice, rhow, wet_bulb
@@ -234,7 +234,7 @@ contains
 ! GFDL cloud microphysics initialization
 ! =======================================================================
 
-subroutine module_gfdl_cloud_microphys_v3_init (me, master, nlunit, input_nml_file, logunit, &
+subroutine gfdl_cloud_microphys_v3_mod_init (me, master, nlunit, input_nml_file, logunit, &
         fn_nml, hydrostatic, errmsg, errflg)
 
     implicit none
@@ -273,7 +273,7 @@ subroutine module_gfdl_cloud_microphys_v3_init (me, master, nlunit, input_nml_fi
     if (.not. exists) then
         write (6, *) 'gfdl - mp :: namelist file: ', trim (fn_nml), ' does not exist'
         errflg = 1
-        errmsg = 'ERROR(module_gfdl_cloud_microphys_v3_init): namelist file '//trim (fn_nml)//' does not exist'
+        errmsg = 'ERROR(gfdl_cloud_microphys_v3_mod_init): namelist file '//trim (fn_nml)//' does not exist'
         return
     else
         open (unit = nlunit, file = fn_nml, action = 'read' , status = 'old', iostat = ios)
@@ -306,13 +306,13 @@ subroutine module_gfdl_cloud_microphys_v3_init (me, master, nlunit, input_nml_fi
 
     call setup_mhc_lhc (hydrostatic)
 
-end subroutine module_gfdl_cloud_microphys_v3_init
+end subroutine gfdl_cloud_microphys_v3_mod_init
 
 ! =======================================================================
 ! GFDL cloud microphysics driver
 ! =======================================================================
 
-subroutine module_gfdl_cloud_microphys_v3_driver (qv, ql, qr, qi, qs, qg, qa, qnl, qni, pt, wa, &
+subroutine gfdl_cloud_microphys_v3_mod_driver (qv, ql, qr, qi, qs, qg, qa, qnl, qni, pt, wa, &
         ua, va, delz, delp, gsize, dtm, hs, water, rain, ice, snow, graupel, &
         hydrostatic, is, ie, ks, ke, q_con, cappa, consv_te, adj_vmr, te, dte, &
         prefluxw, prefluxr, prefluxi, prefluxs, prefluxg, last_step, do_inline_mp)
@@ -354,13 +354,13 @@ subroutine module_gfdl_cloud_microphys_v3_driver (qv, ql, qr, qi, qs, qg, qa, qn
         gsize, hs, q_con, cappa, consv_te, adj_vmr, te, dte, prefluxw, prefluxr, &
         prefluxi, prefluxs, prefluxg, last_step, do_inline_mp, .false., .true.)
 
-end subroutine module_gfdl_cloud_microphys_v3_driver
+end subroutine gfdl_cloud_microphys_v3_mod_driver
 
 ! =======================================================================
 ! GFDL cloud microphysics end
 ! =======================================================================
 
-subroutine module_gfdl_cloud_microphys_v3_end
+subroutine gfdl_cloud_microphys_v3_mod_end
 
     implicit none
 
@@ -381,7 +381,7 @@ subroutine module_gfdl_cloud_microphys_v3_end
 
     tables_are_initialized = .false.
 
-end subroutine module_gfdl_cloud_microphys_v3_end
+end subroutine gfdl_cloud_microphys_v3_mod_end
 
 ! =======================================================================
 ! setup cloud microphysics parameters
@@ -7370,4 +7370,4 @@ function wet_bulb_moist (qv, ql, qi, qr, qs, qg, tk, den)
 
 end function wet_bulb_moist
 
-end module module_gfdl_cloud_microphys_v3
+end module gfdl_cloud_microphys_v3_mod

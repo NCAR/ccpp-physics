@@ -3,7 +3,7 @@
   type = scheme
   dependencies = ../../../hooks/machine.F
   dependencies = ../../module_mp_radar.F90
-  dependencies = module_gfdl_cloud_microphys.F90
+  dependencies = gfdl_cloud_microphys_mod.F90
   dependencies = ../module_gfdlmp_param.F90
 
 ########################################################################
