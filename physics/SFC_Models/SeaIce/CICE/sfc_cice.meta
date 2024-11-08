@@ -160,6 +160,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [qsurf]
   standard_name = surface_specific_humidity_over_ice
   long_name = surface air saturation specific humidity over ice
