@@ -356,6 +356,13 @@
   dimensions = ()
   type = integer
   intent = in
+[flag_init]
+  standard_name = flag_for_first_timestep
+  long_name = flag signaling first time step for time integration loop
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ps]
   standard_name = surface_air_pressure
   long_name = surface pressure
