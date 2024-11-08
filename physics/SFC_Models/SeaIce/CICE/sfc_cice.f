@@ -101,8 +101,10 @@
 
 !     real (kind=kind_phys), dimension(im), intent(in) :: u1, v1,       &
       real (kind=kind_phys), dimension(:), intent(in) ::                &
-     &       t1, q1, cm, ch, prsl1, wind, snowd
-
+     &       t1, q1, cm, ch, prsl1, wind
+      real (kind=kind_phys), dimension(:), intent(in), optional ::      &
+     &       snowd 
+      
       real (kind=kind_phys), dimension(:), intent(in), optional ::      &
      &       dqsfc, dtsfc, dusfc, dvsfc
       logical, dimension(:), intent(in) :: flag_cice, flag_iter
