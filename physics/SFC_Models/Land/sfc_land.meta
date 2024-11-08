@@ -14,6 +14,13 @@
   dimensions = ()
   type = integer
   intent = in
+[flag_init]
+  standard_name = flag_for_first_timestep
+  long_name = flag signaling first time step for time integration loop
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [cpllnd]
   standard_name = flag_for_land_coupling
   long_name = flag controlling cpllnd collection (default off)

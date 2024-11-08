@@ -127,7 +127,8 @@
   subroutine noahmpdrv_run                                       &
 !...................................
 !  ---  inputs:
-    ( im, km, lsnowl, itime, ps, u1, v1, t1, q1, soiltyp,soilcol,&
+    ( im, km, lsnowl, itime, flag_init, ps, u1, v1, t1, q1,      &
+      soiltyp,soilcol,                                           &
       vegtype, sigmaf, dlwflx, dswsfc, snet, delt, tg3, cm, ch,  &
       prsl1, prslk1, prslki, prsik1, zf,pblh, dry, wind, slopetyp,&
       shdmin, shdmax, snoalb, sfalb, flag_iter,con_g,            &
@@ -233,6 +234,7 @@
   integer                                , intent(in)    :: km         ! vertical soil layer dimension
   integer                                , intent(in)    :: lsnowl     ! lower bound for snow level arrays
   integer                                , intent(in)    :: itime      ! NOT USED
+  logical                                , intent(in)    :: flag_init  ! flag signaling first time step
   real(kind=kind_phys), dimension(:)     , intent(in)    :: ps         ! surface pressure [Pa]
   real(kind=kind_phys), dimension(:)     , intent(in)    :: u1         ! u-component of wind [m/s]
   real(kind=kind_phys), dimension(:)     , intent(in)    :: v1         ! u-component of wind [m/s]
@@ -693,7 +695,7 @@
 !
 !  --- Just return if external land component is activated for two-way interaction
 !
-  if (cpllnd .and. cpllnd2atm) return
+  if (cpllnd .and. cpllnd2atm .and. (.not. flag_init)) return
 
   do i = 1, im
 
