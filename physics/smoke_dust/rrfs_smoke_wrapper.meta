@@ -844,6 +844,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [uspdavg]
   standard_name = mean_wind_speed_in_boundary_layer
   long_name = average wind speed within the boundary layer
@@ -967,6 +968,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [oro]
   standard_name = height_above_mean_sea_level
   long_name = height_above_mean_sea_level
