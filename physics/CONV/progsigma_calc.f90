@@ -115,7 +115,7 @@
             sigmab(i) = sigmain(i,k)
           else
             sigmab(i) = sigmab(i) / sumx(i)
-            sigmab(i) = min(sigmab(i), 1.0)
+            sigmab(i) = min(sigmab(i), 1._kind_phys)
             if(sigmab(i) < 1.E-5) sigmab(i)=0.
           endif
         endif
@@ -184,7 +184,7 @@
       !sigmab
       do i = 1,im
          if(cnvflg(i))then
-            DEN=MIN(termC(i)+termB(i),1.E8)
+            DEN=MIN(termC(i)+termB(i),1._kind_phys)
             cvg=termD(i)*delt
             ZZ=MAX(0.0,SIGN(1.0,termA(i)))            &
                  *MAX(0.0,SIGN(1.0,termB(i)))         &
