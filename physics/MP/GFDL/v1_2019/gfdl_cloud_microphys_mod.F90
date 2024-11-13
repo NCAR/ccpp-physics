@@ -3410,15 +3410,24 @@ subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, lo
     errflg = 0
     errmsg = ''
 
+    ! -----------------------------------------------------------------------
     ! Read namelist
-    call cfg%setup(errmsg, errflg, unit = nlunit, input_nml_file = input_nml_file, &
-         fn_nml = fn_nml, version=1, iostat = ios)
-
+    ! -----------------------------------------------------------------------
+    if (me == master) then
+       print*,'PRE NML'
+       call cfg%display()
+    endif
+    call cfg%register(errmsg = errmsg, errflg = errflg, unit = nlunit,      &
+         input_nml_file = input_nml_file, fn_nml = fn_nml, version=1,       &
+         iostat = ios)
+    if (me == master) then
+       print*,'POST NML'
+       call cfg%display()
+    endif
     ! write version number and namelist to log file
     if (me == master) then
         write (logunit, *) " ================================================================== "
-        write (logunit, *) "gfdl_cloud_microphys_mod"
-        !write (logunit, nml = gfdl_cloud_microphysics_nml)
+        write (logunit, *) "gfdl_cloud_microphysics_nml"
     endif
 
     !

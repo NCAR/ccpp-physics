@@ -222,12 +222,6 @@ module gfdl_cloud_microphys_v3_mod
     real, allocatable :: table0 (:), table1 (:), table2 (:), table3 (:), table4 (:)
     real, allocatable :: des0 (:), des1 (:), des2 (:), des3 (:), des4 (:)
 
-    ! -----------------------------------------------------------------------
-    ! namelist
-    ! To extend/modify namelist and/or default values, see ../module_gfdl_param.F90
-    ! -----------------------------------------------------------------------
-    namelist / gfdl_mp_nml / cfg
-
 contains
 
 ! =======================================================================
@@ -266,31 +260,20 @@ subroutine gfdl_cloud_microphys_v3_mod_init (me, master, nlunit, input_nml_file,
     errflg = 0
     errmsg = ''
 
-#ifdef INTERNAL_FILE_NML
-    read (nml = gfdl_cloud_microphysics_nml, iostat = ios, unit = nlunit, iomsg = errmsg)
-#else
-    inquire (file = trim (fn_nml), exist = exists)
-    if (.not. exists) then
-        write (6, *) 'gfdl - mp :: namelist file: ', trim (fn_nml), ' does not exist'
-        errflg = 1
-        errmsg = 'ERROR(gfdl_cloud_microphys_v3_mod_init): namelist file '//trim (fn_nml)//' does not exist'
-        return
-    else
-        open (unit = nlunit, file = fn_nml, action = 'read' , status = 'old', iostat = ios)
-    endif
-    rewind (nlunit)
-    read (nml = gfdl_mp_nml, iostat = ios, unit = nlunit, iomsg = errmsg)
-    close (nlunit)
-#endif
-
+    ! -----------------------------------------------------------------------
+    ! Read namelist
+    ! -----------------------------------------------------------------------
+    call cfg%register(errmsg = errmsg, errflg = errflg, unit = nlunit,      &
+         input_nml_file = input_nml_file, fn_nml = fn_nml, version=3,       &
+         iostat = ios)
+    
     ! -----------------------------------------------------------------------
     ! write version number and namelist to log file
     ! -----------------------------------------------------------------------
-
-    write (logunit, *) " ================================================================== "
-    write (logunit, *) "gfdl_mp_mod"
-    write (logunit, nml = gfdl_mp_nml)
-    write (*, nml = gfdl_mp_nml)
+    if (me == master) then
+       write (logunit, *) " ================================================================== "
+       write (logunit, *) "gfdl_cloud_microphysics_nml_v3"
+    endif
 
     ! -----------------------------------------------------------------------
     ! initialize microphysics variables

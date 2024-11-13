@@ -4,25 +4,50 @@ module module_gfdlmp_param
   use machine, only: kind_phys
   implicit none
 
+  public :: cfg
+  private
+  
   ! #######################################################################################
   ! Data container for GFDL MP runtime configurations information (i.e. Namelist)
   ! #######################################################################################
   type ty_gfdlmp_config
-     real :: cld_min, tice, t_min, t_sub, mp_time, rh_inc, rh_inr, rh_ins,    &
-          tau_r2g, tau_smlt, tau_g2r, tau_imlt, tau_i2s, tau_l2r, tau_v2l, tau_l2v,       &
-          tau_g2v, tau_v2g, dw_land, dw_ocean, ccn_o, ccn_l, rthresh, sat_adj0, qc_crt,   &
-          qi_lim, ql_mlt, ql_gen, qi_gen, ql0_max, qi0_max, qi0_crt, qr0_crt, qs0_crt,    &
-          c_paut, c_psaci, c_piacr, c_cracw, c_pgacs, alin, clin, vi_fac, vs_fac, vg_fac, &
+     ! GFDL MP Version 1 parameters.
+     real :: tau_g2r, tau_g2v, tau_v2g, qc_crt, qr0_crt, c_piacr, c_cracw, alin, clin
+     logical :: fast_sat_adj, use_ccn, use_ppm, mono_prof, mp_print, de_ice, sedi_transport
+
+     ! GFDL MP common (v1/v3) parameters
+     real :: cld_min, tice, t_min, t_sub, mp_time, rh_inc, rh_inr, rh_ins, tau_r2g,       &
+          tau_smlt, tau_imlt, tau_i2s, tau_l2r, tau_v2l, tau_l2v, dw_land, dw_ocean,      &
+          ccn_o, ccn_l, rthresh, sat_adj0, qi_lim, ql_mlt, ql_gen, qi_gen, ql0_max,       &
+          qi0_max, qi0_crt, qs0_crt, c_paut, c_psaci, c_pgacs, vi_fac, vs_fac, vg_fac,    &
           vr_fac, vi_max, vs_max, vg_max, vr_max, rewmin, rewmax, reimin, reimax, rermin, &
           rermax, resmin, resmax, regmin, regmax, qs_mlt
-     logical :: const_vi, const_vs, const_vg, const_vr, fast_sat_adj, z_slope_liq,        &
-          z_slope_ice, use_ccn, use_ppm, mono_prof, mp_print, do_hail, de_ice,            &
-          sedi_transport, do_sedi_w, do_sedi_heat, prog_ccn, do_qa, rad_snow, rad_graupel,&
-          rad_rain, fix_negative, tintqs
+     logical :: const_vi, const_vs, const_vg, const_vr, z_slope_liq, z_slope_ice, do_hail,&
+          do_sedi_w, do_sedi_heat, prog_ccn, do_qa, rad_snow, rad_graupel, rad_rain,      &
+          fix_negative, tintqs
+
+     ! GFDL MP Version 3 parameters
      integer :: reiflag, icloud_f, irain_f
+     real :: c_psacw, c_pracw, c_praci, c_pgacw,  c_pgaci, c_pracs, c_psacr, c_pgacr,     &
+          alinw, alini, alinr, alins, aling, alinh, blinw, blini, blinr, blins, bling,    &
+          blinh, vw_fac, vw_max, tice_mlt, tau_gmlt, tau_wbf, tau_revp, is_fac, ss_fac,   &
+          gs_fac, rh_fac_evap, rh_fac_cond, sed_fac, xr_a, xr_b, xr_c, te_err, tw_err,    &
+          rh_thres, rhc_cevap, rhc_revap, f_dq_p, f_dq_m, fi2s_fac, fi2g_fac, fs2g_fac,   &
+          n0w_sig, n0i_sig, n0r_sig, n0s_sig, n0g_sig, n0h_sig, n0w_exp, n0i_exp, n0r_exp,&
+          n0s_exp, n0g_exp, n0h_exp, muw, mui, mur, mus, mug, muh, beta, rewfac, reifac
+     logical :: const_vw, do_sedi_uv, do_sedi_melt, liq_ice_combine, snow_grauple_combine,&
+          use_rhc_cevap, use_rhc_revap, do_cld_adj, do_evap_timescale, do_cond_timescale, &
+          consv_checker, do_warm_rain_mp, do_wbf, do_psd_water_fall, do_psd_ice_fall,     &
+          do_psd_water_num, do_psd_ice_num, do_new_acc_water, do_new_acc_ice, cp_heating, &
+          delay_cond_evap, do_subgrid_proc, fast_fr_mlt, fast_dep_sub
+     integer :: ntimes, nconds, inflag, igflag, ifflag, rewflag, rerflag, resflag,        &
+          regflag, radr_flag, rads_flag, radg_flag, sedflag, vdiffflag
    contains
-     procedure, public :: setup
-     procedure, public :: print_namelist_v1
+     generic, public :: register => register_gfdlmp_param
+     generic, public :: display  => display_gfdlmp_param
+     ! Internal procedures
+     procedure, private :: register_gfdlmp_param
+     procedure, private :: display_gfdlmp_param
   end type ty_gfdlmp_config
 
   type(ty_gfdlmp_config) :: cfg
@@ -33,18 +58,21 @@ contains
   ! Reads in namelist if associated file fields are provided, otherwise, set parameters
   ! to their default values.
   ! #######################################################################################
-  subroutine setup(self, errmsg, errflg, unit, input_nml_file, fn_nml, version, iostat)
+  subroutine register_gfdlmp_param(self, errmsg, errflg, unit, input_nml_file, fn_nml,    &
+       version, iostat)
     class(ty_gfdlmp_config), intent(inout) :: self
     character(len = *), intent(in ), optional  :: input_nml_file(:)
     character(len = *), intent(in ), optional  :: fn_nml
     integer,            intent(in ), optional  :: unit
     integer,            intent(in ), optional  :: version
     integer,            intent(out), optional  :: iostat
-    character(len=*),   intent(out) :: errmsg
-    integer,            intent(out) :: errflg
+    character(len=*),   intent(out), optional  :: errmsg
+    integer,            intent(out), optional  :: errflg
     logical :: exists
 
+    ! #####################################################################################
     ! GFDL MP Version 1 parameters.
+    ! #####################################################################################
     real    :: tau_g2r        = 600.    !< graupel melting to rain time scale (s)
     real    :: tau_g2v        = 900.    !< graupel sublimation time scale (s)
     real    :: tau_v2g        = 21600.  !< graupel deposition -- make it a slow process time scale (s)
@@ -63,7 +91,9 @@ contains
     logical :: de_ice         = .false. !< to prevent excessive build - up of cloud ice from external sources
     logical :: sedi_transport = .true.  !< transport of momentum in sedimentation
 
+    ! #####################################################################################
     ! GFDL MP common (v1/v3) parameters
+    ! #####################################################################################
     real :: cld_min  = 0.05       !< (v1/v3) minimum cloud fraction
     real :: tice     = 273.16     !< (DIF for v3) freezing temperature (K): ref: GFDL, GFS (DJS: V3=273.15)
     real :: t_min    = 178.       !< (v1/v3) min temp to freeze - dry all water vapor
@@ -150,7 +180,9 @@ contains
                                      !< 5: Wyser (1998)
                                      !< 6: Sun and Rikus (1999), Sun (2001)
                                      !< 7: effective radius
+    ! #####################################################################################
     ! GFDL MP Version 3 parameters
+    ! #####################################################################################
     real :: c_psacw = 1.0 ! cloud water to snow accretion efficiency
     real :: c_pracw = 0.8 ! cloud water to rain accretion efficiency
     real :: c_praci = 1.0 ! cloud ice to rain accretion efficiency
@@ -312,8 +344,10 @@ contains
                           !< after the cloud ice radiative property's PSD is rebuilt,
                           !< this parameter should be 1.0.
 
+    ! #######################################################################################
     ! V1 namelist
-    namelist / gfdl_cloud_microphysics_nml_v1 /                                             &
+    ! #######################################################################################
+    namelist / gfdl_cloud_microphysics_nml /                                                &
          mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land, dw_ocean, vi_fac,      &
          vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vi_max, vs_max, vg_max,       &
          vr_max, qs_mlt, qs0_crt, qi_gen, ql0_max, qi0_max, qi0_crt, qr0_crt, fast_sat_adj, &
@@ -324,8 +358,11 @@ contains
          cld_min, use_ppm, mono_prof, do_sedi_heat, sedi_transport, do_sedi_w, de_ice,      &
          icloud_f, irain_f, mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin,      &
          rermax, resmin, resmax, regmin, regmax, tintqs, do_hail
+
+    ! #######################################################################################
     ! V3 Namelist
-    namelist / gfdl_cloud_microphysics_nml_v3 /                                             &
+    ! #######################################################################################
+    namelist / gfdl_cloud_microphysics_v3_nml /                                             &
          t_min, t_sub, tau_r2g, tau_smlt, tau_gmlt, dw_land, dw_ocean, vw_fac, vi_fac,      &
          vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vw_max, vi_max, vs_max,       &
          vg_max, vr_max, qs_mlt, qs0_crt, ql0_max, qi0_max, qi0_crt, ifflag, rh_inc, rh_ins,&
@@ -348,11 +385,13 @@ contains
          do_psd_ice_num, vdiffflag, rewfac, reifac, cp_heating, nconds, do_evap_timescale,  &
          delay_cond_evap, do_subgrid_proc, fast_fr_mlt, fast_dep_sub
 
-    ! Make sure that all inputs to read appropriate NML are provided
+    ! Make sure that all inputs to read appropriate NML are provided, if not use default
+    ! parameters
     if (present(unit)           .and. present(iostat) .and. &
         present(input_nml_file) .and. present(fn_nml) .and. &
-        present(version)) then
-       
+        present(version)        .and. present(errflg) .and. &
+        present(errmsg)) then
+
        if ((version .ne. 1) .and. (version .ne. 3)) then
           write (6, *) 'gfdl - mp :: invalid scheme version number'
           errflg = 1
@@ -361,8 +400,8 @@ contains
        endif
     
 #ifdef INTERNAL_FILE_NML
-       if (version==1) read (input_nml_file, nml = gfdl_cloud_microphysics_nml_v1)
-       if (version==3) read (input_nml_file, nml = gfdl_cloud_microphysics_nml_v3)
+       if (version==1) read (input_nml_file, nml = gfdl_cloud_microphysics_nml)
+       if (version==3) read (input_nml_file, nml = gfdl_cloud_microphysics_v3_nml)
 #else
        inquire (file = trim (fn_nml), exist = exists)
        if (.not. exists) then
@@ -374,13 +413,15 @@ contains
           open (unit = unit, file = fn_nml, action = 'read' , status = 'old', iostat = iostat)
        endif
        rewind (unit)
-       if (version==1) read (unit, nml = gfdl_cloud_microphysics_nml_v1)
-       if (version==3) read (unit, nml = gfdl_cloud_microphysics_nml_v3)
+       if (version==1) read (unit, nml = gfdl_cloud_microphysics_nml)
+       if (version==3) read (unit, nml = gfdl_cloud_microphysics_v3_nml)
        close (unit)
 #endif
     endif
 
-    !
+    ! #####################################################################################
+    ! Populate parameter type
+    ! #####################################################################################
     self%mp_time        = mp_time
     self%t_min          = t_min
     self%t_sub          = t_sub
@@ -468,15 +509,12 @@ contains
     self%tintqs         = tintqs
     self%do_hail        = do_hail
 
-  end subroutine setup
+  end subroutine register_gfdlmp_param
   
-  function print_namelist_v1(self) result(error_msg)
+  subroutine display_gfdlmp_param(self)
     class(ty_gfdlmp_config), intent(in) :: self
-    character(len=128)                  :: error_msg
 
-    ! Initialize error handling
-    error_msg=''
-    
+    write(*,*) '---------- GFDL MP Configurations ----------'
     write(*,*) 'self%mp_time        = ',self%mp_time
     write(*,*) 'self%t_min          = ',self%t_min
     write(*,*) 'self%t_sub          = ',self%t_sub
@@ -564,6 +602,6 @@ contains
     write(*,*) 'self%tintqs         = ',self%tintqs
     write(*,*) 'self%do_hail        = ',self%do_hail
     
-  end function print_namelist_v1
+  end subroutine display_gfdlmp_param
   !
 end module module_gfdlmp_param
