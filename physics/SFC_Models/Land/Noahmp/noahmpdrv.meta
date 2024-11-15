@@ -103,6 +103,7 @@
   dimensions = ()
   type = land_iau_control_type
   intent = inout
+  optional = True
 [land_iau_data]
   standard_name = land_data_assimilation_data
   long_name = land data assimilation data
@@ -110,6 +111,7 @@
   dimensions = ()
   type = land_iau_external_data_type
   intent = inout
+  optional = True
 [land_iau_state]
   standard_name = land_data_assimilation_interpolated_data
   long_name = land data assimilation space- and time-interpolated
@@ -117,6 +119,7 @@
   dimensions = ()
   type = land_iau_state_type
   intent = inout
+  optional = True
 
 ########################################################################
 [ccpp-arg-table]
