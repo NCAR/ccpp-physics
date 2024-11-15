@@ -37,21 +37,19 @@ module land_iau_mod
       real(kind=kind_phys),allocatable :: stc_inc(:,:,:)   
       real(kind=kind_phys),allocatable :: slc_inc(:,:,:)   
       logical                          :: in_interval = .false.
-      ! integer,allocatable              :: snow_land_mask(:, :)     ! Calculate snow soil mask at runtime from (dynamic) swe
-      ! moved from land_iau_state_type 
       real(kind=kind_phys)              :: hr1        
       real(kind=kind_phys)              :: hr2      
       real(kind=kind_phys)              :: wt
       real(kind=kind_phys)              :: wt_normfact
-      real(kind=kind_phys)              :: rdt
-      ! track the increment steps here
-      integer                           :: itnext
+      real(kind=kind_phys)              :: rdt      
+      integer                           :: itnext ! track the increment steps here
   end type land_iau_external_data_type
 
 !!> \section arg_table_land_iau_state_type Argument Table
 !! \htmlinclude land_iau_state_type.html
 !!
-  ! land_iau_state will hold 'raw' (not interpolated) inrements, read during land_iau_mod_init
+  ! land_iau_state_type holds 'raw' (not interpolated) inrements, 
+  ! read during land_iau_mod_init
   type land_iau_state_type
       real(kind=kind_phys),allocatable :: stc_inc(:,:,:,:)
       real(kind=kind_phys),allocatable :: slc_inc(:,:,:,:) 
@@ -152,7 +150,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
     input_nml_file => input_nml_file_i
     read(input_nml_file, nml=land_iau_nml, ERR=888, END=999, iostat=ios)
 #else
-   inquire (file=trim(fn_nml), exist=exists)    ! TBCL: this maybe be replaced by nlunit passed from ccpp
+   inquire (file=trim(fn_nml), exist=exists)    ! TODO: this maybe be replaced by nlunit passed from ccpp
    if (.not. exists) then    
       errmsg = 'lnd_iau_mod_set_control: namelist file '//trim(fn_nml)//' does not exist'
       errflg = 1
@@ -172,14 +170,14 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    endif 
 #endif
  
-888 if (ios /= 0) then  ! .and. ios /= iostat_end) then
+888 if (ios /= 0) then  
          write(iosstr, '(I0)') ios         
          errmsg = 'lnd_iau_mod_set_control: I/O error code '//trim(iosstr)//' at land_iau namelist read'  
          errflg = 1
          return
     end if 
        
-999 if (ios /= 0) then   ! ios .eq. iostat_end) then  
+999 if (ios /= 0) then  
         write(iosstr, '(I0)') ios
         if (me == mpi_root) then
           WRITE(6, * ) 'lnd_iau_mod_set_control: Warning! EoF ('//trim(iosstr)//') while reading land_iau namelist,' &
@@ -220,8 +218,8 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file_i, me
    allocate(Land_IAU_Control%blksz(nblks))
    allocate(Land_IAU_Control%blk_strt_indx(nblks))
 
-   ! Land_IAU_Control%blk_strt_indx: start index of each block, for flattened (ncol=nx*ny) arrays 
-   ! required in noahmpdriv_run to get subsection of the stc array for each proces/thread
+   ! Land_IAU_Control%blk_strt_indx = start index of each block, for flattened (ncol=nx*ny) arrays 
+   ! It's required in noahmpdriv_run to get subsection of the stc array for each proces/thread
    ix = 1
    do nb=1, nblks
       Land_IAU_Control%blksz(nb) = blksz(nb)
@@ -272,7 +270,6 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
    ! allocate arrays that will hold iau state
    allocate(Land_IAU_Data%stc_inc(nlon, nlat, km))
    allocate(Land_IAU_Data%slc_inc(nlon, nlat, km))
-   ! allocate(Land_IAU_Data%snow_land_mask(nlon, nlat)) 
 
    Land_IAU_Data%hr1=Land_IAU_Control%iaufhrs(1)
    Land_IAU_Data%wt = 1.0 ! IAU increment filter weights (default 1.0)
@@ -310,8 +307,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
       print*,"Land_iau_init: Increment file name: ", trim(adjustl(Land_IAU_Control%iau_inc_files(1)))
    endif
 
-   ! determine number of valid forecast hours
-   ! is read from the increment file ("Time" dim)
+   ! determine number of valid forecast hours; read from the increment file ("Time" dim)
    if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then
       print *, "Land_iau_init: timesetps and forecast times (in hours) with valid increment values"
    endif
@@ -345,9 +341,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
    endif
    dt = (Land_IAU_Control%iau_delthrs*3600.)
    Land_IAU_Data%rdt = 1.0/dt   !rdt
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-      print *,'Land_iau_init: IAU interval(dt), rdt (1/dt)',Land_IAU_Control%iau_delthrs,Land_IAU_Data%rdt
-   endif
+   
    ! Read all increment files at iau init time (at beginning of cycle) 
    ! increments are already in the fv3 grid--no need for interpolation     
    call read_iau_forcing_fv3(Land_IAU_Control, Land_IAU_state%stc_inc, Land_IAU_state%slc_inc, errmsg, errflg)  
@@ -382,7 +376,6 @@ subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, Land_IAU_state
 
    if (allocated(Land_IAU_Data%stc_inc)) deallocate (Land_IAU_Data%stc_inc)
    if (allocated(Land_IAU_Data%slc_inc)) deallocate (Land_IAU_Data%slc_inc)
-   ! if (allocated(Land_IAU_Data%snow_land_mask)) deallocate (Land_IAU_Data%snow_land_mask)   
 
    if (allocated(Land_IAU_state%stc_inc)) deallocate(Land_IAU_state%stc_inc)
    if (allocated(Land_IAU_state%slc_inc)) deallocate(Land_IAU_state%slc_inc)
@@ -398,7 +391,7 @@ end subroutine land_iau_mod_finalize
    character(len=*),                     intent(out) :: errmsg
    integer,                              intent(out) :: errflg
    real(kind=kind_phys) t1,t2,sx,wx,wt,dtp
-   integer n,i,j,k,kstep,nstep      !,itnext
+   integer n,i,j,k,kstep,nstep     
    integer :: ntimes
 
     ! Initialize CCPP error handling variables
@@ -445,8 +438,6 @@ end subroutine land_iau_mod_finalize
 
    if (ntimes.EQ.1) then
    !  check to see if we are in the IAU window, no need to update the states since they are fixed over the window
-!TBCL: noahmpdrv_timestep_init doesn't get visited at t1 (when running from global workflow), so include t2?
-      ! if ( Land_IAU_Control%fhour < t1 .or. Land_IAU_Control%fhour >= t2 ) then
       if ( Land_IAU_Control%fhour <= t1 .or. Land_IAU_Control%fhour > t2 ) then
          Land_IAU_Data%in_interval=.false.
       else
@@ -474,12 +465,7 @@ end subroutine land_iau_mod_finalize
             Land_IAU_Data%hr1=Land_IAU_Data%hr2
             Land_IAU_Data%hr2=Land_IAU_Control%iaufhrs(Land_IAU_Data%itnext)
          endif
-         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-            print *,'land_iau_mod_getiauforcing: Land iau increments interplated between time steps ', &
-                     Land_IAU_Data%itnext-1, ' and ', Land_IAU_Data%itnext, &
-                    ' times (hr1, hr2) ', Land_IAU_Data%hr1, Land_IAU_Data%hr2
-         endif
-         ! Land_IAU_Data%snow_land_mask(:, :)  = wk3_slmsk(itnext-1, :, :)
+         
          call updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
       endif
    endif
@@ -495,26 +481,18 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
    type(land_iau_state_type),             intent(in) :: Land_IAU_State
    real(kind=kind_phys) delt_t  
    integer i,j,k
-   integer :: is,  ie,  js,  je, npz, t1
-   integer :: ntimes
-   integer :: t2
+   integer :: is,  ie,  js,  je, npz, t1, t2
   
    t2 = Land_IAU_Data%itnext
    t1  = t2 - 1
-   is  = 1  !Land_IAU_Control%isc
+   is  = 1  ! Land_IAU_Control%isc
    ie  = is + Land_IAU_Control%nx-1
-   js  = 1  !Land_IAU_Control%jsc
+   js  = 1  ! Land_IAU_Control%jsc
    je  = js + Land_IAU_Control%ny-1
    npz = Land_IAU_Control%lsoil
 
-   ntimes = Land_IAU_Control%ntimes
-
    delt_t = (Land_IAU_Data%hr2-(Land_IAU_Control%fhour))/(Land_IAU_Data%hr2-Land_IAU_Data%hr1)
-   if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-      print *,'in land_iau updateiauforcing ntimes ', &
-      ntimes,Land_IAU_Control%iaufhrs(1:ntimes), &                                                                 
-      " rdt wt delt_t ", Land_IAU_Data%rdt, Land_IAU_Data%wt, delt_t
-   endif
+   
    do j = js,je
       do i = is,ie
          do k = 1,npz  ! do k = 1,n_soill    !         
@@ -535,15 +513,15 @@ subroutine updateiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State)
    integer i, j, k
    integer :: is,  ie,  js,  je, npz
    
-   is  = 1 !Land_IAU_Control%isc
+   is  = 1 
    ie  = is + Land_IAU_Control%nx-1
-   js  = 1 !Land_IAU_Control%jsc
+   js  = 1 
    je  = js + Land_IAU_Control%ny-1
    npz = Land_IAU_Control%lsoil
-   !  this is only called if using 1 increment file
+
    do j = js, je
       do i = is, ie
-         do k = 1, npz   !  do k = 1,n_soill    !         
+         do k = 1, npz          
             Land_IAU_Data%stc_inc(i,j,k) = Land_IAU_Data%wt*Land_IAU_State%stc_inc(1,i,j,k)*Land_IAU_Data%rdt
             Land_IAU_Data%slc_inc(i,j,k) = Land_IAU_Data%wt*Land_IAU_State%slc_inc(1,i,j,k)*Land_IAU_Data%rdt
          end do
@@ -612,38 +590,37 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, wk3_stc, wk3_slc, errmsg, errf
 
    allocate(wk3_stc(n_t, Land_IAU_Control%nx, Land_IAU_Control%ny, km))
    allocate(wk3_slc(n_t, Land_IAU_Control%nx, Land_IAU_Control%ny, km))
-   ! allocate(wk3_slmsk(n_t, Land_IAU_Control%nx, Land_IAU_Control%ny))
    
    do i = 1, size(stc_vars)
       if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *, trim(stc_vars(i))
-      ! call check_var_exists(ncid, trim(stc_vars(i)), ierr)
       status = nf90_inq_varid(ncid, trim(stc_vars(i)), varid)
-      if (status == nf90_noerr) then   !if (ierr == 0) then
+      if (status == nf90_noerr) then   
          do it = 1, n_t
             ! var stored as soilt1_inc(Time, yaxis_1, xaxis_1)
             call get_var3d_values(ncid, varid, trim(stc_vars(i)), Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, &
                  it, 1, wk3_stc(it,:, :, i), status, errflg, errmsg)
-            ! call netcdf_err(status, 'reading var: '//trim(stc_vars(i)), errflg, errmsg)
             if (errflg .ne. 0) return 
          enddo
       else
-         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *, &
-         'warning: no increment for ',trim(stc_vars(i)),' found, assuming zero'
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+            print *, 'warning! No increment for ',trim(stc_vars(i)),' found, assuming zero'
+         endif
          wk3_stc(:, :, :, i) = 0.
       endif
    enddo
    do i = 1, size(slc_vars)
       if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *, trim(slc_vars(i))
       status = nf90_inq_varid(ncid, trim(slc_vars(i)), varid)
-      if (status == nf90_noerr) then   !if (status == 0) 
+      if (status == nf90_noerr) then   
          do it = 1, n_t
             call get_var3d_values(ncid, varid, trim(slc_vars(i)), Land_IAU_Control%isc, Land_IAU_Control%nx, Land_IAU_Control%jsc, Land_IAU_Control%ny, &
                  it, 1, wk3_slc(it, :, :, i), status, errflg, errmsg)
             if (errflg .ne. 0) return   
          end do       
       else
-         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) print *,&
-         'warning: no increment for ',trim(slc_vars(i)),' found, assuming zero'
+         if (Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
+            print *, 'warning! No increment for ',trim(slc_vars(i)),' found, assuming zero'
+         endif
          wk3_slc(:, :, :, i) = 0.
       endif
    enddo
@@ -759,8 +736,8 @@ end subroutine read_iau_forcing_fv3
       status = nf90_inq_varid(ncid, trim(var_name), varid)
       call netcdf_err(status, 'getting varid: '//trim(var_name), errflg, errmsg_out)
       if (errflg .ne. 0) return
+
       status = nf90_get_var(ncid, varid, var_arr)
-                  ! start = (/1/), count = (/dim_len/))
       call netcdf_err(status, 'reading var: '//trim(var_name), errflg, errmsg_out)
 
    end subroutine get_var1d
@@ -769,7 +746,7 @@ end subroutine read_iau_forcing_fv3
       integer, intent(in):: ncid, varid
       integer, intent(in):: is, ix, js, jy, ks,kz
       character(len=*), intent(in)::  var_name
-      real(kind=kind_phys), intent(out):: var3d(ix, jy, kz)   !var3d(is:ie,js:je,ks:ke)
+      real(kind=kind_phys), intent(out):: var3d(ix, jy, kz)   
       integer, intent(out):: status 
       integer :: errflg
       character(len=*) :: errmsg_out
@@ -778,7 +755,7 @@ end subroutine read_iau_forcing_fv3
       errmsg_out = ''
       errflg = 0
 
-      status = nf90_get_var(ncid, varid, var3d, &  !start = start, count = nreco)
+      status = nf90_get_var(ncid, varid, var3d, &  
                start = (/is, js, ks/), count = (/ix, jy, kz/))
 
       call netcdf_err(status, 'get_var3d_values '//trim(var_name), errflg, errmsg_out)
@@ -790,7 +767,7 @@ end subroutine read_iau_forcing_fv3
       integer, intent(in):: ncid, varid
       integer, intent(in):: is, ix, js, jy, ks,kz
       character(len=*), intent(in)::  var_name
-      integer, intent(out):: var3d(ix, jy, kz)   !var3d(is:ie,js:je,ks:ke)
+      integer, intent(out):: var3d(ix, jy, kz)   
       integer, intent(out):: status 
       integer :: errflg
       character(len=*) :: errmsg_out
@@ -801,7 +778,6 @@ end subroutine read_iau_forcing_fv3
 
       status = nf90_get_var(ncid, varid, var3d, &  !start = start, count = nreco)
                start = (/is, js, ks/), count = (/ix, jy, kz/))
-               ! start = (/is, js, ks/), count = (/ie - is + 1, je - js + 1, ke - ks + 1/))
       
       call netcdf_err(status, 'get_var3d_values_int '//trim(var_name), errflg, errmsg_out)
 
