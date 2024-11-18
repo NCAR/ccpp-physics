@@ -124,7 +124,7 @@
      &                                    u1(:,:),    v1(:,:),          &
      &                                    cnvw(:,:),  cnvc(:,:)
       real(kind=kind_phys), intent(out) :: rn(:), dt_mf(:,:)
-      real(kind=kind_phys), intent(out), optional :: ud_mf(:,:)
+      real(kind=kind_phys), intent(out) :: ud_mf(:,:)
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 !

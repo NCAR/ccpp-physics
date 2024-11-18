@@ -87,7 +87,7 @@
       real(kind=kind_phys), intent(out) :: rn(:),                       &
      &   cnvw(:,:), cnvc(:,:), dt_mf(:,:)
 !
-      real(kind=kind_phys), intent(out), optional :: ud_mf(:,:),        &
+      real(kind=kind_phys), intent(out) :: ud_mf(:,:),                  &
      &     sigmaout(:,:)
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
      &                     asolfac, evef, pgcon

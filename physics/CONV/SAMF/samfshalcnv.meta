@@ -382,7 +382,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [dt_mf]
   standard_name = instantaneous_atmosphere_detrainment_convective_mass_flux
   long_name = (detrainment mass flux) * delt

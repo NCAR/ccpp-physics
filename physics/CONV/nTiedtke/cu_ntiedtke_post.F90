@@ -23,8 +23,8 @@ module cu_ntiedtke_post
       ! Interface variables
       real(kind_phys),  intent(in)  :: t(:,:)
       real(kind_phys),  intent(in)  :: q(:,:)
-      real(kind_phys),  intent(out), optional :: prevst(:,:)
-      real(kind_phys),  intent(out), optional :: prevsq(:,:)
+      real(kind_phys),  intent(out) :: prevst(:,:)
+      real(kind_phys),  intent(out) :: prevsq(:,:)
       character(len=*), intent(out) :: errmsg
       integer, intent(out)          :: errflg
 
