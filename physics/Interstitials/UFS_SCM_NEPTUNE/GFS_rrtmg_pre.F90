@@ -133,7 +133,7 @@
 
       logical,              intent(in) :: nssl_ccn_on, nssl_invertccn
       integer,              intent(in) :: spp_rad
-      real(kind_phys),      intent(in), optional :: spp_wts_rad(:,:)
+      real(kind_phys),      intent(in),optional :: spp_wts_rad(:,:)
 
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp, dcorr_con
       real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd, con_pi, con_g, con_ttp, con_thgni
@@ -143,11 +143,9 @@
                                                         slmsk, dx, si
 
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, prsl, prslk,   &
-                                                          tgrs
-      real(kind=kind_phys), dimension(:,:), intent(in), optional :: &
-                                                          mg_cld, effrr_in,    &
-                                                          cnvw_in, cnvc_in,    &
-                                                          sppt_wts, sfc_wts
+           tgrs
+      real(kind=kind_phys), dimension(:,:), intent(in),optional :: mg_cld,     &
+           effrr_in, cnvw_in, cnvc_in, sppt_wts, sfc_wts
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: aer_nm
@@ -208,7 +206,7 @@
       real(kind=kind_phys), dimension(:,:,:), intent(out) :: faerlw1,&
                                                              faerlw2,&
                                                              faerlw3
-      real(kind=kind_phys), dimension(:,:),   intent(out), optional :: alpha
+      real(kind=kind_phys), dimension(:,:),   intent(out) :: alpha
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 

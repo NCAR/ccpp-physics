@@ -32,7 +32,6 @@
   type = character
   kind = len=128
   intent = out
-  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -278,7 +277,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP
   long_name = air pressure at vertical interface for radiation calculation
@@ -287,7 +285,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [t_lay]
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature at vertical layer for radiation calculation
@@ -296,7 +293,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [t_lev]
   standard_name = air_temperature_at_interface_for_RRTMGP
   long_name = air temperature  at vertical interface for radiation calculation
@@ -305,7 +301,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [deltaZ]
   standard_name = layer_thickness
   long_name = layer_thickness
@@ -314,7 +309,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [deltaZc]
   standard_name = layer_thickness_from_layer_center
   long_name = layer_thickness
@@ -323,7 +317,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [deltaP]
   standard_name = layer_thickness_in_Pa
   long_name = layer_thickness_in_Pa
@@ -332,7 +325,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [top_at_1]
   standard_name = flag_for_vertical_ordering_in_radiation
   long_name = flag for vertical ordering in radiation
@@ -362,7 +354,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [tsfg]
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
@@ -387,7 +378,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [relhum]
   standard_name = relative_humidity
   long_name = layer relative humidity
@@ -396,7 +386,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [qs_lay]
   standard_name = saturation_vapor_pressure
   long_name = saturation vapor pressure
@@ -405,7 +394,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [q_lay]
   standard_name = water_vapor_mixing_ratio
   long_name = water vaport mixing ratio
@@ -414,7 +402,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [vmr_o2]
   standard_name = volume_mixing_ratio_for_o2
   long_name = molar mixing ratio of o2 in with respect to dry air
@@ -423,7 +410,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [vmr_h2o]
   standard_name = volume_mixing_ratio_for_h2o
   long_name = molar mixing ratio of h2o in with respect to dry air
@@ -432,7 +418,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [vmr_o3]
   standard_name = volume_mixing_ratio_for_o3
   long_name = molar mixing ratio of o3 in with respect to dry air
@@ -441,7 +426,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [vmr_ch4]
   standard_name = volume_mixing_ratio_for_ch4
   long_name = molar mixing ratio of ch4 in with respect to dry air
@@ -450,7 +434,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [vmr_n2o]
   standard_name = volume_mixing_ratio_for_n2o
   long_name = molar mixing ratio of n2o in with respect to dry air
@@ -459,7 +442,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [vmr_co2]
   standard_name = volume_mixing_ratio_for_co2
   long_name = molar mixing ratio of co2 in with respect to dry air
@@ -468,7 +450,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [active_gases_array]
   standard_name = list_of_active_gases_used_by_RRTMGP
   long_name = list of active gases used by RRTMGP
@@ -477,7 +458,6 @@
   type = character
   kind = len=*
   intent = in
-  optional = True
 [coszdg]
   standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
   long_name = daytime mean cosz over rad call period
@@ -510,7 +490,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [nday]
   standard_name = daytime_points_dimension
   long_name = daytime points dimension

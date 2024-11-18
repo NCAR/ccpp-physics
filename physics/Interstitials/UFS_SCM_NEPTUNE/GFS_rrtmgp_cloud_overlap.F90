@@ -113,7 +113,7 @@ contains
     !
     ! Convective cloud overlap parameter
     !
-    if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
+    if (present(cld_cnv_frac) .and. present(cnv_cloud_overlap_param)) then
        if (iovr_convcld == iovr_dcorr .or. iovr_convcld == iovr_exp .or. iovr_convcld == iovr_exprand) then
           call get_alpha_exper(nCol, nLev, iovr_convcld, iovr_exprand, deltaZc*0.001, de_lgth, cld_cnv_frac, cnv_cloud_overlap_param)
        else

@@ -68,7 +68,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -196,27 +195,6 @@
   dimensions = ()
   type = logical
   intent = in
-[imfdeepcnv]
-  standard_name = control_for_deep_convection_scheme
-  long_name = flag for mass-flux deep convection scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[imfdeepcnv_gf]
-  standard_name = identifier_for_grell_freitas_deep_convection
-  long_name = flag for Grell-Freitas deep convection scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[imfdeepcnv_samf]
-  standard_name = identifer_for_scale_aware_mass_flux_deep_convection
-  long_name = flag for SAMF deep convection scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [de_lgth]
   standard_name = cloud_decorrelation_length
   long_name = cloud decorrelation length
@@ -233,7 +211,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [precip_overlap_param]
   standard_name = precip_overlap_param
   long_name = precipitation overlap parameter
@@ -242,7 +219,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [cnv_cloud_overlap_param]
   standard_name = convective_cloud_overlap_param
   long_name = convective cloud overlap parameter

@@ -31,12 +31,12 @@ contains
 !! \htmlinclude rrtmgp_sw_main_init.html
 !!
   subroutine rrtmgp_sw_main_init(rrtmgp_root_dir, rrtmgp_sw_file_gas, rrtmgp_sw_file_clouds,&
-       active_gases_array, doGP_cldoptics_PADE, doGP_cldoptics_LUT, doGP_sgs_pbl,           &
-       doGP_sgs_cnv, nrghice, mpicomm, mpirank, mpiroot, nLay, rrtmgp_phys_blksz,           &
-       errmsg, errflg)
+       active_gases_array, doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm,       &
+       mpirank, mpiroot, nLay, rrtmgp_phys_blksz, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
+<<<<<<< HEAD
          rrtmgp_root_dir,       & !< RTE-RRTMGP root directory
          rrtmgp_sw_file_clouds, & !< RRTMGP file containing K-distribution data
          rrtmgp_sw_file_gas       !< RRTMGP file containing cloud-optics data
@@ -47,6 +47,16 @@ contains
          doGP_cldoptics_LUT,    & !< Use RRTMGP cloud-optics: LUTs?
          doGP_sgs_pbl,          & !< Flag to include sgs PBL clouds
          doGP_sgs_cnv             !< Flag to include sgs convective clouds
+=======
+         rrtmgp_root_dir,       & ! RTE-RRTMGP root directory
+         rrtmgp_sw_file_clouds, & ! RRTMGP file containing K-distribution data
+         rrtmgp_sw_file_gas       ! RRTMGP file containing cloud-optics data
+    character(len=*), dimension(:), intent(in) :: &
+         active_gases_array       ! List of active gases from namelist as array)
+    logical, intent(in) :: &
+         doGP_cldoptics_PADE,   & ! Use RRTMGP cloud-optics: PADE approximation?
+         doGP_cldoptics_LUT       ! Use RRTMGP cloud-optics: LUTs?
+>>>>>>> 1fc0f540 (Optional argument cleanup: Radiation)
     integer, intent(inout) :: &
          nrghice                  !< Number of ice-roughness categories
     type(MPI_Comm),intent(in) :: &
@@ -80,7 +90,7 @@ contains
 !> \section arg_table_rrtmgp_sw_main_run Argument Table
 !! \htmlinclude rrtmgp_sw_main_run.html
 !!
-  subroutine rrtmgp_sw_main_run(doSWrad, doSWclrsky, top_at_1, doGP_sgs_cnv, doGP_sgs_pbl,  &
+  subroutine rrtmgp_sw_main_run(doSWrad, doSWclrsky, top_at_1,   &
        nCol, nDay, nLay, nGases, rrtmgp_phys_blksz, idx, icseed_sw, iovr, iovr_convcld,     &
        iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, isubc_sw,     &
        iSFC, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, coszen,&
@@ -96,9 +106,7 @@ contains
     logical, intent(in) :: &
          doSWrad,             & ! Flag to perform shortwave calculation
          doSWclrsky,          & ! Flag to compute clear-sky fluxes
-         top_at_1,            & ! Flag for vertical ordering convention
-         doGP_sgs_pbl,        & ! Flag to include sgs PBL clouds
-         doGP_sgs_cnv           ! Flag to include sgs convective clouds
+         top_at_1               ! Flag for vertical ordering convention
     integer,intent(in) :: &
          nCol,                & ! Number of horizontal points
          nDay,                & ! Number of daytime points
@@ -117,7 +125,7 @@ contains
          iSFC
     integer,intent(in),dimension(:) :: &
          idx                    ! Index array for daytime points
-    integer,intent(in),dimension(:), optional :: &
+    integer,intent(in),dimension(:) :: &
          icseed_sw              ! Seed for random number generation for shortwave radiation
     real(kind_phys), dimension(:), intent(in) :: &
          sfc_alb_nir_dir,     & ! Surface albedo (direct)
@@ -125,7 +133,7 @@ contains
          sfc_alb_uvvis_dir,   & ! Surface albedo (direct)
          sfc_alb_uvvis_dif,   & ! Surface albedo (diffuse)
          coszen                 ! Cosize of SZA
-    real(kind_phys), dimension(:,:), intent(in), optional :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lay,               & ! Pressure @ model layer-centers (Pa)
          t_lay,               & ! Temperature (K)
          p_lev,               & ! Pressure @ model layer-interfaces (Pa)
@@ -145,9 +153,10 @@ contains
          cld_swp,             & ! Water path for                    snow   hydrometeors
          cld_resnow,          & ! Effective radius for              snow   hydrometeors
          cld_rwp,             & ! Water path for                    rain   hydrometeors
-         cld_rerain             ! Effective radius for              rain   hydrometeors
-    real(kind_phys), dimension(:,:), intent(in), optional :: &    
+         cld_rerain,          & ! Effective radius for              rain   hydrometeors
          precip_frac,         & ! Precipitation fraction
+         cloud_overlap_param    !
+    real(kind_phys), dimension(:,:), intent(in), optional :: &    
          cld_cnv_lwp,         & ! Water path for       convective   liquid cloud-particles
          cld_cnv_reliq,       & ! Effective radius for convective   liquid cloud-particles
          cld_cnv_iwp,         & ! Water path for       convective   ice    cloud-particles
@@ -155,13 +164,12 @@ contains
          cld_pbl_lwp,         & ! Water path for       PBL          liquid cloud-particles
          cld_pbl_reliq,       & ! Effective radius for PBL          liquid cloud-particles
          cld_pbl_iwp,         & ! Water path for       PBL          ice    cloud-particles
-         cld_pbl_reice,       & ! Effective radius for PBL          ice    cloud-particles
-         cloud_overlap_param    !
+         cld_pbl_reice          ! Effective radius for PBL          ice    cloud-particles
     real(kind_phys), dimension(:,:,:), intent(in) :: &
-          aersw_tau,          & ! Aerosol optical depth
-          aersw_ssa,          & ! Aerosol single scattering albedo
-          aersw_g               ! Aerosol asymmetry paramter
-    character(len=*), dimension(:), intent(in), optional :: &
+         aersw_tau,           & ! Aerosol optical depth
+         aersw_ssa,           & ! Aerosol single scattering albedo
+         aersw_g                ! Aerosol asymmetry paramter
+    character(len=*), dimension(:), intent(in) :: &
          active_gases_array     ! List of active gases from namelist as array
     real(kind_phys), intent(in) :: &
          solcon                 ! Solar constant
@@ -173,7 +181,7 @@ contains
          errflg                ! CCPP error flag
     real(kind_phys), dimension(:,:), intent(inout) :: &
          cldtausw              ! Approx 10.mu band layer cloud optical depth  
-    real(kind_phys), dimension(:,:), intent(inout), optional :: &
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          fluxswUP_allsky,    & ! RRTMGP upward all-sky flux profiles (W/m2)
          fluxswDOWN_allsky,  & ! RRTMGP downward all-sky flux profiles (W/m2)
          fluxswUP_clrsky,    & ! RRTMGP upward clear-sky flux profiles (W/m2)
@@ -197,7 +205,7 @@ contains
     real(kind_dbl_prec), dimension(sw_gas_props%get_ngpt(),nLay,rrtmgp_phys_blksz) :: rng3D,rng3D2
     real(kind_dbl_prec), dimension(sw_gas_props%get_ngpt()*nLay) :: rng2D
     logical, dimension(rrtmgp_phys_blksz,nLay,sw_gas_props%get_ngpt()) :: maskMCICA
-    logical :: cloudy_column, clear_column
+    logical :: cloudy_column, clear_column, doGP_sgs_pbl, doGP_sgs_cnv
     real(kind_phys), dimension(sw_gas_props%get_nband(),rrtmgp_phys_blksz) :: &
          sfc_alb_dir, sfc_alb_dif
     real(kind_phys), dimension(rrtmgp_phys_blksz,nLay+1,sw_gas_props%get_nband()),target :: &
@@ -224,6 +232,19 @@ contains
 
     if (.not. doSWrad) return
 
+    ! Do we have convective cloud properties?
+    doGP_sgs_cnv = .false.
+    if (present(cld_cnv_lwp) .and. present(cld_cnv_reliq) .and. &
+         present(cld_cnv_iwp) .and. present(cld_cnv_reice)) then
+       doGP_sgs_cnv = .true.
+    endif
+    ! Do we have pbl cloud prperties?
+    doGP_sgs_pbl = .false.
+    if (present(cld_pbl_lwp) .and. present(cld_pbl_reliq) .and. &
+         present(cld_pbl_iwp) .and. present(cld_pbl_reice)) then
+       doGP_sgs_pbl = .true.
+    endif
+    
     ! ty_gas_concs
     call check_error_msg('rrtmgp_sw_main_gas_concs_init',gas_concs%init(active_gases_array))
 
