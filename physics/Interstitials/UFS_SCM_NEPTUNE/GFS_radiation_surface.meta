@@ -184,7 +184,6 @@
   type = character
   kind = len=3
   intent = in
-  optional = True
 [lndp_prt_list]
   standard_name = land_surface_perturbation_magnitudes
   long_name = magnitude of perturbations for landperts
@@ -193,7 +192,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [landfrac]
   standard_name = land_area_fraction
   long_name = fraction of horizontal grid area occupied by land
@@ -463,7 +461,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [albdnir_ice]
   standard_name = surface_albedo_direct_NIR_over_ice
   long_name = direct surface albedo NIR band over ice
@@ -472,7 +469,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [albivis_ice]
   standard_name = surface_albedo_diffuse_visible_over_ice
   long_name = diffuse surface albedo visible band over ice
@@ -481,7 +477,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [albinir_ice]
   standard_name = surface_albedo_diffuse_NIR_over_ice
   long_name = diffuse surface albedo NIR band over ice
@@ -490,7 +485,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [semisbase]
   standard_name = baseline_surface_longwave_emissivity
   long_name = baseline surface lw emissivity in fraction

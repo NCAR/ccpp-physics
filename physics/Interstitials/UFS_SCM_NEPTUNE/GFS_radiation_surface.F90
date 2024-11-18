@@ -79,10 +79,10 @@
                                                            hprime, tsfg, tsfa, tisfc,   &
                                                            coszen, alvsf, alnsf, alvwf, &
                                                            alnwf, facsf, facwf, snoalb
-      real(kind=kind_phys), dimension(:),   intent(in), optional :: lndp_prt_list
-      character(len=3)    , dimension(:),   intent(in), optional :: lndp_var_list
-      real(kind=kind_phys), dimension(:),   intent(in), optional :: albdvis_ice, albdnir_ice,    &
-                                                                    albivis_ice, albinir_ice
+      real(kind=kind_phys), dimension(:),   intent(in) :: lndp_prt_list
+      character(len=3)    , dimension(:),   intent(in) :: lndp_var_list
+      real(kind=kind_phys), dimension(:),   intent(in) :: albdvis_ice, albdnir_ice,     &
+                                                          albivis_ice, albinir_ice
 
       real(kind=kind_phys), dimension(:),   intent(inout) :: albdvis_lnd, albdnir_lnd,  &
                                                              albivis_lnd, albinir_lnd,  &

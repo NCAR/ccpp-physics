@@ -33,14 +33,13 @@ contains
 !! \section GFS_rrtmgp_post_run
   ! ######################################################################################## 
   subroutine GFS_rrtmgp_post_run (nCol, nLev, nDay, iSFC, iTOA, idxday, doLWrad, doSWrad,  &
-       do_lw_clrsky_hr, do_sw_clrsky_hr, save_diag, fhlwr, fhswr, sfc_alb_nir_dir,         &
-       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, p_lev, tsfa, coszen, coszdg, &
-       fluxlwDOWN_clrsky, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,             &
-       fluxswDOWN_clrsky, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky,             &
-       raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw, cldtausw, scmpsw, fluxr,    &
-       sfcdlw, sfculw, sfcflw, tsflw, htrlw, htrlwu, topflw, nirbmdi, nirdfdi, visbmdi,    &
-       visdfdi, nirbmui, nirdfui, visbmui, visdfui, sfcnsw, sfcdsw, htrsw, sfcfsw, topfsw, &
-       htrswc, htrlwc, errmsg, errflg)
+       save_diag, fhlwr, fhswr, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir,       &
+       sfc_alb_uvvis_dif, p_lev, tsfa, coszen, coszdg, fluxlwDOWN_clrsky, fluxlwUP_allsky, &
+       fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxswDOWN_clrsky, fluxswUP_allsky,             &
+       fluxswDOWN_allsky, fluxswUP_clrsky, raddt, aerodp, cldsa, mtopa, mbota, cld_frac,   &
+       cldtaulw, cldtausw, scmpsw, fluxr, sfcdlw, sfculw, sfcflw, tsflw, htrlw, htrlwu,    &
+       topflw, nirbmdi, nirdfdi, visbmdi, visdfdi, nirbmui, nirdfui, visbmui, visdfui,     &
+       sfcnsw, sfcdsw, htrsw, sfcfsw, topfsw, htrswc, htrlwc, errmsg, errflg)
 
     ! Inputs
     integer, intent(in) ::  &
@@ -57,8 +56,6 @@ contains
     logical, intent(in) :: & 
          doLWrad,           & ! Logical flags for lw radiation calls
          doSWrad,           & ! Logical flags for sw radiation calls
-         do_lw_clrsky_hr,   & ! Output clear-sky LW heating-rate?
-         do_sw_clrsky_hr,   & ! Output clear-sky SW heating-rate? 
          save_diag            ! Output radiation diagnostics?
     real(kind_phys), intent(in) :: &
          fhlwr,             & ! Frequency for LW radiation calls
@@ -71,16 +68,18 @@ contains
          sfc_alb_nir_dif,   & ! Surface albedo (diffuse)
          sfc_alb_uvvis_dir, & ! Surface albedo (direct)
          sfc_alb_uvvis_dif    ! Surface albedo (diffuse)
-    real(kind_phys), dimension(:,:), intent(in), optional :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev,             & ! Pressure @ model layer-interfaces (Pa)
          fluxlwUP_allsky,   & ! RRTMGP longwave all-sky flux      (W/m2)
          fluxlwDOWN_allsky, & ! RRTMGP longwave all-sky flux      (W/m2)
+         fluxswUP_allsky,   & ! RRTMGP shortwave all-sky flux     (W/m2)
+         fluxswDOWN_allsky    ! RRTMGP shortwave all-sky flux     (W/m2)
+    real(kind_phys), dimension(:,:), intent(in), optional :: &
          fluxlwUP_clrsky,   & ! RRTMGP longwave clear-sky flux    (W/m2)
          fluxlwDOWN_clrsky, & ! RRTMGP longwave clear-sky flux    (W/m2)
-         fluxswUP_allsky,   & ! RRTMGP shortwave all-sky flux     (W/m2)
-         fluxswDOWN_allsky, & ! RRTMGP shortwave all-sky flux     (W/m2)
          fluxswUP_clrsky,   & ! RRTMGP shortwave clear-sky flux   (W/m2)
-         fluxswDOWN_clrsky    ! RRTMGP shortwave clear-sky flux   (W/m2)
+	 fluxswDOWN_clrsky    ! RRTMGP shortwave clear-sky flux   (W/m2)
+    
     real(kind_phys), intent(in) :: &
          raddt                ! Radiation time step
     real(kind_phys), dimension(:,:), intent(in) :: &
@@ -143,7 +142,7 @@ contains
     integer :: i, j, k, itop, ibtc
     real(kind_phys) :: tem0d, tem1, tem2
     real(kind_phys), dimension(nDay, nLev) :: thetaTendClrSky, thetaTendAllSky
-
+    
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
@@ -156,7 +155,7 @@ contains
        ! #######################################################################################
 
        ! Clear-sky heating-rate (optional)
-       if (do_lw_clrsky_hr) then
+       if (present(fluxlwUP_clrsky) .and. present(fluxlwDOWN_clrsky)) then
           call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(  &
                fluxlwUP_clrsky,   & ! IN  - RRTMGP upward longwave clear-sky flux profiles (W/m2)
                fluxlwDOWN_clrsky, & ! IN  - RRTMGP downward longwave clear-sky flux profiles (W/m2)
@@ -194,7 +193,9 @@ contains
        sfculw(:) = sfcflw(:)%upfxc
        
        ! Heating-rate at radiation timestep, used for adjustment between radiation calls.
-       htrlwu = htrlw
+       if (present(htrlwu)) then
+          htrlwu = htrlw
+       endif
        
        ! #######################################################################################
        ! Save LW diagnostics
@@ -247,7 +248,7 @@ contains
           ! #################################################################################
 
           ! Clear-sky heating-rate (optional)
-          if (do_sw_clrsky_hr) then
+          if (present(fluxswUP_clrsky) .and. present(fluxswDOWN_clrsky)) then
              htrswc(:,:) = 0._kind_phys
              call check_error_msg('GFS_rrtmgp_post',compute_heating_rate( &
                   fluxswUP_clrsky(idxday(1:nDay),:),   & ! IN  - Shortwave upward clear-sky flux profiles (W/m2)
@@ -312,7 +313,7 @@ contains
              visdfui(i) = 0.0
           enddo
           
-          if (do_sw_clrsky_hr) then
+          if (present(fluxswUP_clrsky) .and. present(fluxswDOWN_clrsky)) then
              htrswc(:,:) = 0
           endif
        endif                  ! end_if_nday
