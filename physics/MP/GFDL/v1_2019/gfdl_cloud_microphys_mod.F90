@@ -194,7 +194,7 @@ contains
 
 !>\ingroup mod_gfdl_cloud_mp
 !! This subroutine is the driver of the GFDL cloud microphysics
-subroutine gfdl_cloud_microphys_mod_driver (                                 &
+subroutine gfdl_cloud_microphys_mod_driver (                                    &
             iis, iie, jjs, jje, kks, kke, ktop, kbot,                           &
             qv, ql, qr, qi, qs, qg, qa, qn,                                     &
             qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,      &
@@ -3344,7 +3344,7 @@ subroutine setupm
     ! sjl, may 28, 2012
 
     cracw = craci ! cracw = 3.27206196043822
-    cracw = c_cracw * c_cracw
+    cracw = c_cracw * cracw
 
     ! subl and revp: five constants for three separate processes
 
@@ -3419,7 +3419,17 @@ subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, lo
 
     integer :: ios
     logical :: exists
-    
+
+    ! integer, intent (in) :: id, jd, kd
+    ! integer, intent (in) :: axes (4)
+    ! type (time_type), intent (in) :: time
+
+    ! integer :: unit, io, ierr, k, logunit
+    ! logical :: flag
+    ! real :: tmp, q1, q2
+
+    ! master = (mpp_pe () .eq.mpp_root_pe ())
+
     ! Initialize CCPP error-handling
     errflg = 0
     errmsg = ''
