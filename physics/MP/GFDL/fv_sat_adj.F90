@@ -60,9 +60,12 @@ module fv_sat_adj
                          hlf => con_hfus_dyn, &
                          cp_air => con_cp_dyn
     ! *DH
-    use machine,              only: kind_grid, kind_dyn
-    use module_gfdlmp_param,  only: cfg
-    
+    use machine,                  only: kind_grid, kind_dyn
+    use module_gfdlmp_param, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
+    use module_gfdlmp_param, only: icloud_f, sat_adj0, t_sub, cld_min
+    use module_gfdlmp_param, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
+    use module_gfdlmp_param, only: rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land, tintqs
+    use module_gfdlmp_param, only: display_gfdlmp_param
 #ifdef MULTI_GASES
     use ccpp_multi_gases_mod, only: multi_gases_init,     &
                                     multi_gases_finalize, &
@@ -156,6 +159,10 @@ subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
 
     if (is_initialized) return
 
+    if (mpirank==mpiroot) then
+       write(*,*) 'In fv_sat_adj init()'
+       call display_gfdlmp_param()
+    endif
     ! generate es table (dt = 0.1 deg c)
 
     allocate (table (length))
@@ -454,16 +461,16 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
     !> - Define conversion scalar / factor.
     ! -----------------------------------------------------------------------
     
-    fac_i2s = 1. - exp (- mdt / cfg%tau_i2s)
-    fac_v2l = 1. - exp (- sdt / cfg%tau_v2l)
-    fac_r2g = 1. - exp (- mdt / cfg%tau_r2g)
-    fac_l2r = 1. - exp (- mdt / cfg%tau_l2r)
+    fac_i2s = 1. - exp (- mdt / tau_i2s)
+    fac_v2l = 1. - exp (- sdt / tau_v2l)
+    fac_r2g = 1. - exp (- mdt / tau_r2g)
+    fac_l2r = 1. - exp (- mdt / tau_l2r)
     
-    fac_l2v = 1. - exp (- sdt / cfg%tau_l2v)
-    fac_l2v = min (cfg%sat_adj0, fac_l2v)
+    fac_l2v = 1. - exp (- sdt / tau_l2v)
+    fac_l2v = min (sat_adj0, fac_l2v)
     
-    fac_imlt = 1. - exp (- sdt / cfg%tau_imlt)
-    fac_smlt = 1. - exp (- mdt / cfg%tau_smlt)
+    fac_imlt = 1. - exp (- sdt / tau_imlt)
+    fac_smlt = 1. - exp (- mdt / tau_smlt)
     
     ! -----------------------------------------------------------------------
     !> - Define heat capacity of dry air and water vapor based on hydrostatical property.
@@ -578,7 +585,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                 sink (i) = min (qi (i, j), fac_imlt * (pt1 (i) - tice) / icp2 (i))
                 qi (i, j) = qi (i, j) - sink (i)
                 ! sjl, may 17, 2017
-                ! tmp = min (sink (i), dim (cfg%ql_mlt, ql (i, j))) ! max ql amount
+                ! tmp = min (sink (i), dim (ql_mlt, ql (i, j))) ! max ql amount
                 ! ql (i, j) = ql (i, j) + tmp
                 ! qr (i, j) = qr (i, j) + sink (i) - tmp
                 ! sjl, may 17, 2017
@@ -667,11 +674,11 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         
             call wqs2_vect (is, ie, pt1, den, wqsat, dq2dt)
         
-            adj_fac = cfg%sat_adj0
+            adj_fac = sat_adj0
         do i = is, ie
             dq0 = (qv (i, j) - wqsat (i)) / (1. + tcp3 (i) * dq2dt (i))
             if (dq0 > 0.) then ! whole grid - box saturated
-                src (i) = min (adj_fac * dq0, max (cfg%ql_gen - ql (i, j), fac_v2l * dq0))
+                src (i) = min (adj_fac * dq0, max (ql_gen - ql (i, j), fac_v2l * dq0))
             else ! evaporation of ql
                 ! sjl 20170703 added ql factor to prevent the situation of high ql and rh<1
                 ! factor = - min (1., fac_l2v * sqrt (max (0., ql (i, j)) / 1.e-5) * 10. * (1. - qv (i, j) / wqsat (i)))
@@ -836,7 +843,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             if (qs (i, j) > 1.e-7 .and. dtmp > 0.) then
                 tmp = min (1., (dtmp * 0.1) ** 2) * qs (i, j) ! no limter on melting above 10 deg c
                 sink (i) = min (tmp, fac_smlt * dtmp / icp2 (i))
-                tmp = min (sink (i), dim (cfg%qs_mlt, ql (i, j))) ! max ql due to snow melt
+                tmp = min (sink (i), dim (qs_mlt, ql (i, j))) ! max ql due to snow melt
                 qs (i, j) = qs (i, j) - sink (i)
                 ql (i, j) = ql (i, j) + tmp
                 qr (i, j) = qr (i, j) + sink (i) - tmp
@@ -853,8 +860,8 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         ! -----------------------------------------------------------------------
         
             do i = is, ie
-            if (ql (i, j) > cfg%ql0_max) then
-                sink (i) = fac_l2r * (ql (i, j) - cfg%ql0_max)
+            if (ql (i, j) > ql0_max) then
+                sink (i) = fac_l2r * (ql (i, j) - ql0_max)
                 qr (i, j) = qr (i, j) + sink (i)
                 ql (i, j) = ql (i, j) - sink (i)
             endif
@@ -878,7 +885,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         
             do i = is, ie
             src (i) = 0.
-            if (pt1 (i) < cfg%t_sub) then ! too cold to be accurate; freeze qv as a fix
+            if (pt1 (i) < t_sub) then ! too cold to be accurate; freeze qv as a fix
                 src (i) = dim (qv (i, j), 1.e-6)
             elseif (pt1 (i) < tice0) then
                 qsi = iqs2 (pt1 (i), den (i), dqsdt)
@@ -892,10 +899,10 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                 endif
                 if (dq > 0.) then ! vapor - > ice
                     tmp = tice - pt1 (i)
-                    qi_crt = cfg%qi_gen * min (cfg%qi_lim, 0.1 * tmp) / den (i)
+                    qi_crt = qi_gen * min (qi_lim, 0.1 * tmp) / den (i)
                     src (i) = min (sink (i), max (qi_crt - qi (i, j), pidep), tmp / tcp2 (i))
                 else
-                    pidep = pidep * min (1., dim (pt1 (i), cfg%t_sub) * 0.2)
+                    pidep = pidep * min (1., dim (pt1 (i), t_sub) * 0.2)
                     src (i) = max (pidep, sink (i), - qi (i, j))
                 endif
             endif
@@ -951,7 +958,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
         ! -----------------------------------------------------------------------
         
             do i = is, ie
-            qim = cfg%qi0_max / den (i)
+            qim = qi0_max / den (i)
             if (qi (i, j) > qim) then
                 sink (i) = fac_i2s * (qi (i, j) - qim)
                 qi (i, j) = qi (i, j) - sink (i)
@@ -1011,8 +1018,8 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             !>  - If it is the last step, combine water species.
             ! -----------------------------------------------------------------------
             
-            if (cfg%rad_snow) then
-                if (cfg%rad_graupel) then
+            if (rad_snow) then
+                if (rad_graupel) then
                     do i = is, ie
                         q_sol (i) = qi (i, j) + qs (i, j) + qg (i, j)
                     enddo
@@ -1026,7 +1033,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                     q_sol (i) = qi (i, j)
                 enddo
             endif
-            if (cfg%rad_rain) then
+            if (rad_rain) then
                 do i = is, ie
                     q_liq (i) = ql (i, j) + qr (i, j)
                 enddo
@@ -1045,7 +1052,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
             
             do i = is, ie
                 
-                if(cfg%tintqs) then 
+                if(tintqs) then 
                   tin = pt1(i)
                 else 
                   tin = pt1 (i) - (lcp2 (i) * q_cond (i) + icp2 (i) * q_sol (i)) ! minimum temperature
@@ -1076,7 +1083,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                     qstar (i) = rqi * qsi + (1. - rqi) * qsw
                 endif
                 !>   - higher than 10 m is considered "land" and will have higher subgrid variability
-                dw = cfg%dw_ocean + (cfg%dw_land - cfg%dw_ocean) * min (1., abs (hs (i, j)) / (10. * grav))
+                dw = dw_ocean + (dw_land - dw_ocean) * min (1., abs (hs (i, j)) / (10. * grav))
                 !>   - "scale - aware" subgrid variability: 100 - km as the base
                 hvar (i) = min (0.2, max (0.01, dw * sqrt (sqrt (area (i, j)) / 100.e3)))
                 
@@ -1089,16 +1096,16 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                 rh = qpz (i) / qstar (i)
                 
                 ! -----------------------------------------------------------------------
-                ! cfg%icloud_f = 0: bug - fixed
-                ! cfg%icloud_f = 1: old fvgfs gfdl) mp implementation
-                ! cfg%icloud_f = 2: binary cloud scheme (0 / 1)
+                ! icloud_f = 0: bug - fixed
+                ! icloud_f = 1: old fvgfs gfdl) mp implementation
+                ! icloud_f = 2: binary cloud scheme (0 / 1)
                 ! -----------------------------------------------------------------------
                 
                 if (rh > 0.75 .and. qpz (i) > 1.e-8) then
                     dq = hvar (i) * qpz (i)
                     q_plus = qpz (i) + dq
                     q_minus = qpz (i) - dq
-                    if (cfg%icloud_f == 2) then
+                    if (icloud_f == 2) then
                         if (qpz (i) > qstar (i)) then
                             qa (i, j) = 1.
                         elseif (qstar (i) < q_plus .and. q_cond (i) > 1.e-8) then
@@ -1112,7 +1119,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                             qa (i, j) = 1.
                         else
                             if (qstar (i) < q_plus) then
-                                if (cfg%icloud_f == 0) then
+                                if (icloud_f == 0) then
                                     qa (i, j) = (q_plus - qstar (i)) / (dq + dq)
                                 else
                                     qa (i, j) = (q_plus - qstar (i)) / (2. * dq * (1. - q_cond (i)))
@@ -1122,7 +1129,7 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
                             endif
                             ! impose minimum cloudiness if substantial q_cond (i) exist
                             if (q_cond (i) > 1.e-8) then
-                                qa (i, j) = max (cfg%cld_min, qa (i, j))
+                                qa (i, j) = max (cld_min, qa (i, j))
                             endif
                             qa (i, j) = min (1., qa (i, j))
                         endif
