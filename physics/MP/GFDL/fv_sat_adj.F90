@@ -65,7 +65,7 @@ module fv_sat_adj
     use module_gfdlmp_param, only: icloud_f, sat_adj0, t_sub, cld_min
     use module_gfdlmp_param, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
     use module_gfdlmp_param, only: rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land, tintqs
-    use module_gfdlmp_param, only: display_gfdlmp_param
+
 #ifdef MULTI_GASES
     use ccpp_multi_gases_mod, only: multi_gases_init,     &
                                     multi_gases_finalize, &
@@ -159,10 +159,6 @@ subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
 
     if (is_initialized) return
 
-    if (mpirank==mpiroot) then
-       write(*,*) 'In fv_sat_adj init()'
-       call display_gfdlmp_param()
-    endif
     ! generate es table (dt = 0.1 deg c)
 
     allocate (table (length))

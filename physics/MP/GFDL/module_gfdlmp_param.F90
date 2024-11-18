@@ -3,7 +3,7 @@
 module module_gfdlmp_param
   use machine, only: kind_phys => kind_dbl_prec
   implicit none
-  public :: read_gfdlmp_nml, display_gfdlmp_param
+  public :: read_gfdlmp_nml
   private
 
   ! #####################################################################################
@@ -295,8 +295,10 @@ module module_gfdlmp_param
                                               !< this parameter should be 1.0.
 
   ! #######################################################################################
-  ! V1 namelist
+  ! NAMELISTS
   ! #######################################################################################
+  
+  ! V1 namelist
   namelist / gfdl_cloud_microphysics_nml /                                                &
        mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land, dw_ocean, vi_fac,      &
        vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vi_max, vs_max, vg_max,       &
@@ -309,9 +311,7 @@ module module_gfdlmp_param
        icloud_f, irain_f, mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin,      &
        rermax, resmin, resmax, regmin, regmax, tintqs, do_hail
 
-  ! #######################################################################################
   ! V3 Namelist
-  ! #######################################################################################
   namelist / gfdl_cloud_microphysics_v3_nml /                                             &
        t_min, t_sub, tau_r2g, tau_smlt, tau_gmlt, dw_land, dw_ocean, vw_fac, vi_fac,      &
        vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vw_max, vi_max, vs_max,       &
@@ -334,20 +334,32 @@ module module_gfdlmp_param
        ss_fac, gs_fac, rh_fac_evap, rh_fac_cond, snow_grauple_combine, do_psd_water_num,  &
        do_psd_ice_num, vdiffflag, rewfac, reifac, cp_heating, nconds, do_evap_timescale,  &
        delay_cond_evap, do_subgrid_proc, fast_fr_mlt, fast_dep_sub
-
+  !
   public                                                                                  &
-       mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land, dw_ocean, &
-       vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vi_max,  &
-       vs_max, vg_max, vr_max, qs_mlt, qs0_crt, qi_gen, ql0_max, qi0_max,    &
-       qi0_crt, qr0_crt, fast_sat_adj, rh_inc, rh_ins, rh_inr, const_vi,     &
-       const_vs, const_vg, const_vr, use_ccn, rthresh, ccn_l, ccn_o, qc_crt, &
-       tau_g2v, tau_v2g, sat_adj0, c_piacr, tau_imlt, tau_v2l, tau_l2v,      &
-       tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci, c_pgacs,           &
-       z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,        &
-       rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
-       do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
-       mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
-       resmin, resmax, regmin, regmax, tintqs, do_hail
+       tau_g2r, tau_g2v, tau_v2g, qc_crt, qr0_crt, c_piacr, c_cracw, alin, clin,          &
+       fast_sat_adj, use_ccn, use_ppm, mono_prof, mp_print, de_ice, sedi_transport,       &
+       t_min, t_sub, tau_r2g, tau_smlt, tau_gmlt, dw_land, dw_ocean, vw_fac, vi_fac,      &
+       vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vw_max, vi_max, vs_max,       &
+       vg_max, vr_max, qs_mlt, qs0_crt, ql0_max, qi0_max, qi0_crt, ifflag, rh_inc, rh_ins,&
+       rh_inr, const_vw, const_vi, const_vs, const_vg, const_vr, rthresh, ccn_l, ccn_o,   &
+       igflag, c_paut, tau_imlt, tau_v2l, tau_l2v, tau_i2s, tau_l2r, qi_lim, ql_gen,      &
+       do_hail, inflag, c_psacw, c_psaci, c_pracs, c_psacr, c_pgacr, c_pgacs, c_pgacw,    &
+       c_pgaci, z_slope_liq, z_slope_ice, prog_ccn, c_pracw, c_praci, rad_snow,           &
+       rad_graupel, rad_rain, cld_min, sedflag, sed_fac, do_sedi_uv, do_sedi_w,           &
+       do_sedi_heat, icloud_f, irain_f, xr_a, xr_b, xr_c, ntimes, tau_revp, tice_mlt,     &
+       do_cond_timescale, mp_time, consv_checker, te_err, tw_err, use_rhc_cevap,          &
+       use_rhc_revap, tau_wbf, do_warm_rain_mp, rh_thres, f_dq_p, f_dq_m, do_cld_adj,     &
+       rhc_cevap, rhc_revap, beta, liq_ice_combine, rewflag, reiflag, rerflag, resflag,   &
+       regflag, rewmin, rewmax, reimin, reimax, rermin, rermax, resmin, resmax, regmin,   &
+       regmax, fs2g_fac, fi2s_fac, fi2g_fac, do_sedi_melt, radr_flag, rads_flag,          &
+       radg_flag, do_wbf, do_psd_water_fall, do_psd_ice_fall, n0w_sig, n0i_sig, n0r_sig,  &
+       n0s_sig, n0g_sig, n0h_sig, n0w_exp, n0i_exp, n0r_exp, n0s_exp, n0g_exp, n0h_exp,   &
+       muw, mui, mur, mus, mug, muh, alinw, alini, alinr, alins, aling, alinh, blinw,     &
+       blini, blinr, blins, bling, blinh, do_new_acc_water, do_new_acc_ice, is_fac,       &
+       ss_fac, gs_fac, rh_fac_evap, rh_fac_cond, snow_grauple_combine, do_psd_water_num,  &
+       do_psd_ice_num, vdiffflag, rewfac, reifac, cp_heating, nconds, do_evap_timescale,  &
+       delay_cond_evap, do_subgrid_proc, fast_fr_mlt, fast_dep_sub, qi_gen, sat_adj0,     &
+       tice, tintqs
 contains
 
   ! #######################################################################################
@@ -396,96 +408,6 @@ contains
        close (unit)
 #endif
     endif
-  end subroutine read_gfdlmp_nml
-  
-  subroutine display_gfdlmp_param()
-    write(*,*) '---------- GFDL MP Configuration ----------'
-    write(*,*) 'mp_time        = ',mp_time
-    write(*,*) 't_min          = ',t_min
-    write(*,*) 't_sub          = ',t_sub
-    write(*,*) 'tau_r2g        = ',tau_r2g
-    write(*,*) 'tau_smlt       = ',tau_smlt
-    write(*,*) 'tau_g2r        = ',tau_g2r
-    write(*,*) 'dw_land        = ',dw_land
-    write(*,*) 'dw_ocean       = ',dw_ocean
-    write(*,*) 'vi_fac         = ',vi_fac
-    write(*,*) 'vr_fac         = ',vr_fac
-    write(*,*) 'vs_fac         = ',vs_fac
-    write(*,*) 'vg_fac         = ',vg_fac
-    write(*,*) 'ql_mlt         = ',ql_mlt
-    write(*,*) 'do_qa          = ',do_qa
-    write(*,*) 'fix_negative   = ',fix_negative
-    write(*,*) 'vi_max         = ',vi_max
-    write(*,*) 'vs_max         = ',vs_max
-    write(*,*) 'vg_max         = ',vg_max
-    write(*,*) 'vr_max         = ',vr_max
-    write(*,*) 'qs_mlt         = ',qs_mlt
-    write(*,*) 'qs0_crt        = ',qs0_crt
-    write(*,*) 'qi_gen         = ',qi_gen
-    write(*,*) 'ql0_max        = ',ql0_max
-    write(*,*) 'qi0_max        = ',qi0_max
-    write(*,*) 'qi0_crt        = ',qi0_crt
-    write(*,*) 'qr0_crt        = ',qr0_crt
-    write(*,*) 'fast_sat_adj   = ',fast_sat_adj
-    write(*,*) 'rh_inc         = ',rh_inc
-    write(*,*) 'rh_ins         = ',rh_ins
-    write(*,*) 'rh_inr         = ',rh_inr
-    write(*,*) 'const_vi       = ',const_vi
-    write(*,*) 'const_vs       = ',const_vs
-    write(*,*) 'const_vg       = ',const_vg
-    write(*,*) 'const_vr       = ',const_vr
-    write(*,*) 'use_ccn        = ',use_ccn
-    write(*,*) 'rthresh        = ',rthresh
-    write(*,*) 'ccn_l          = ',ccn_l
-    write(*,*) 'ccn_o          = ',ccn_o
-    write(*,*) 'qc_crt         = ',qc_crt
-    write(*,*) 'tau_g2v        = ',tau_g2v
-    write(*,*) 'tau_v2g        = ',tau_v2g
-    write(*,*) 'sat_adj0       = ',sat_adj0
-    write(*,*) 'c_piacr        = ',c_piacr
-    write(*,*) 'tau_imlt       = ',tau_imlt
-    write(*,*) 'tau_v2l        = ',tau_v2l
-    write(*,*) 'tau_l2v        = ',tau_l2v
-    write(*,*) 'tau_i2s        = ',tau_i2s
-    write(*,*) 'tau_l2r        = ',tau_l2r
-    write(*,*) 'qi_lim         = ',qi_lim
-    write(*,*) 'ql_gen         = ',ql_gen
-    write(*,*) 'c_paut         = ',c_paut
-    write(*,*) 'c_psaci        = ',c_psaci
-    write(*,*) 'c_pgacs        = ',c_pgacs
-    write(*,*) 'z_slope_liq    = ',z_slope_liq
-    write(*,*) 'z_slope_ice    = ',z_slope_ice
-    write(*,*) 'prog_ccn       = ',prog_ccn
-    write(*,*) 'c_cracw        = ',c_cracw
-    write(*,*) 'alin           = ',alin
-    write(*,*) 'clin           = ',clin
-    write(*,*) 'tice           = ',tice
-    write(*,*) 'rad_snow       = ',rad_snow
-    write(*,*) 'rad_graupel    = ',rad_graupel
-    write(*,*) 'rad_rain       = ',rad_rain
-    write(*,*) 'cld_min        = ',cld_min
-    write(*,*) 'use_ppm        = ',use_ppm
-    write(*,*) 'mono_prof      = ',mono_prof
-    write(*,*) 'do_sedi_heat   = ',do_sedi_heat
-    write(*,*) 'sedi_transport = ',sedi_transport
-    write(*,*) 'do_sedi_w      = ',do_sedi_w
-    write(*,*) 'de_ice         = ',de_ice
-    write(*,*) 'icloud_f       = ',icloud_f
-    write(*,*) 'irain_f        = ',irain_f
-    write(*,*) 'mp_print       = ',mp_print
-    write(*,*) 'reiflag        = ',reiflag
-    write(*,*) 'rewmin         = ',rewmin
-    write(*,*) 'rewmax         = ',rewmax
-    write(*,*) 'reimin         = ',reimin
-    write(*,*) 'reimax         = ',reimax
-    write(*,*) 'rermin         = ',rermin
-    write(*,*) 'rermax         = ',rermax
-    write(*,*) 'resmin         = ',resmin
-    write(*,*) 'resmax         = ',resmax
-    write(*,*) 'regmin         = ',regmin
-    write(*,*) 'regmax         = ',regmax
-    write(*,*) 'tintqs         = ',tintqs
-    write(*,*) 'do_hail        = ',do_hail
-  end subroutine display_gfdlmp_param
+  end subroutine read_gfdlmp_nml  
   !
 end module module_gfdlmp_param

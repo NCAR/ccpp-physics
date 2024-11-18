@@ -54,7 +54,7 @@ module gfdl_cloud_microphys_mod
         mono_prof, do_sedi_heat, sedi_transport, do_sedi_w, de_ice,       &
         icloud_f, irain_f, mp_print, reiflag, rewmin, rewmax, reimin,     &
         reimax, rermin, rermax, resmin, resmax, regmin, regmax, tintqs,   &
-        do_hail, display_gfdlmp_param
+        do_hail
 
    implicit none
 
@@ -3437,17 +3437,9 @@ subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, lo
     ! -----------------------------------------------------------------------
     ! Read namelist
     ! -----------------------------------------------------------------------
-    if (me == master) then
-       write(*,*) 'Pre GFDLMP namelist read'
-       call display_gfdlmp_param()
-    endif
     call read_gfdlmp_nml(errmsg = errmsg, errflg = errflg, unit = nlunit,   &
          input_nml_file = input_nml_file, fn_nml = fn_nml, version=1,       &
          iostat = ios)
-    if (me == master) then
-       write(*,*) 'Post GFDLMP namelist read'
-       call display_gfdlmp_param()
-    endif
 
     ! write version number and namelist to log file
     if (me == master) then

@@ -57,7 +57,7 @@ module gfdl_cloud_microphys_v3_mod
        blini, blinr, blins, bling, blinh, do_new_acc_water, do_new_acc_ice, is_fac,       &
        ss_fac, gs_fac, rh_fac_evap, rh_fac_cond, snow_grauple_combine, do_psd_water_num,  &
        do_psd_ice_num, vdiffflag, rewfac, reifac, cp_heating, nconds, do_evap_timescale,  &
-       delay_cond_evap, do_subgrid_proc, fast_fr_mlt, fast_dep_sub
+       delay_cond_evap, do_subgrid_proc, fast_fr_mlt, fast_dep_sub, qi_gen
     implicit none
 
     private
