@@ -167,7 +167,7 @@ contains
      real(kind=kind_phys),  dimension (its:)                   &
         ,intent (in  )                   ::  rand_mom,rand_vmas
 !$acc declare copyin(rand_clos,rand_mom,rand_vmas)
-     real(kind=kind_phys), intent(in), dimension (its:), optional :: ca_deep(:)
+     real(kind=kind_phys), intent(in), dimension (its:) :: ca_deep(:)
      integer, intent(in) :: do_capsuppress
      real(kind=kind_phys), intent(in), dimension(:) :: cap_suppress_j
 !$acc declare create(cap_suppress_j)
@@ -190,7 +190,7 @@ contains
         ,intent (in  )                      ::                         &
         tmf
      real(kind=kind_phys),    dimension (its:,kts:)                              &
-        ,intent (in  ), optional            ::                         &
+        ,intent (in  )                      ::                         &
         qmicro, sigmain, forceqv_spechum
      real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (inout  )                   ::                         &
@@ -226,7 +226,7 @@ contains
          q,qo,zuo,zdo,zdm
 !$acc declare sigmaout                                                                                                                                                      
      real(kind=kind_phys),    dimension (its:,kts:)                              &
-        ,intent (out), optional           ::                           &
+        ,intent (out)                     ::                           &
          sigmaout
      real(kind=kind_phys), dimension (its:)                                         &
         ,intent (in   )                   ::                           &
