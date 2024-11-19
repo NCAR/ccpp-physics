@@ -1,7 +1,7 @@
 ! #########################################################################################
 ! #########################################################################################
 module module_gfdlmp_param
-  use machine, only: kind_phys => kind_dbl_prec
+  use machine, only: kind_phys
   implicit none
   public :: read_gfdlmp_nml
   private
