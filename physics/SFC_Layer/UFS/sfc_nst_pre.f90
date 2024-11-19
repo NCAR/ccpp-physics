@@ -31,12 +31,12 @@ contains
     logical, dimension(:), intent(in) :: wet
     real (kind=kind_phys), intent(in) :: tgice
     real (kind=kind_phys), dimension(:), intent(in) :: tsfco, oceanfrac
-    real (kind=kind_phys), dimension(:), intent(in), optional :: xt, xz, dt_cool, z_c
+    real (kind=kind_phys), dimension(:), intent(in) :: xt, xz, dt_cool, z_c
     logical, intent(in) :: cplflx
 
     !  ---  input/outputs:
     real (kind=kind_phys), dimension(:), intent(inout) :: tsurf_wat, tseal
-    real (kind=kind_phys), dimension(:), intent(inout), optional :: tref
+    real (kind=kind_phys), dimension(:), intent(inout) :: tref
 
     !  ---  outputs:
     character(len=*), intent(out) :: errmsg

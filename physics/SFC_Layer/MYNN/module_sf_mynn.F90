@@ -313,15 +313,13 @@ CONTAINS
                                                                CH, &
                                                         FLHC,FLQC, &
                                                       GZ1OZ0,WSPD, &
-                                                        PSIM,PSIH
-      REAL(kind_phys), DIMENSION( ims:ime ), OPTIONAL            , &
-                            INTENT(INOUT)          ::        USTM, &
-                                                             CHS2, &
-                                                             CQS2, &
-                                                               LH, &
+                                                        PSIM,PSIH, &
+                                                        USTM,CHS2, &
+                                                        CQS2, WSTAR
+      REAL(kind_phys), DIMENSION( ims:ime ),                       &
+                            INTENT(INOUT)          ::          LH, &
                                                               ZOL, &
-                                                              MOL, &
-                                                            WSTAR
+                                                              MOL
 
       LOGICAL, DIMENSION( ims:ime ), INTENT(IN)    ::              &
 &                             wet,  dry,  icy,  flag_iter
@@ -617,13 +615,13 @@ CONTAINS
                                                            GZ1OZ0, &
                                                              WSPD, &
                                                              PSIM, &
-                                                             PSIH
-      REAL(kind_phys), DIMENSION( ims:ime ), OPTIONAL,             &
+                                                             PSIH, &
+                                                             USTM, &
+                                                        CHS2,CQS2
+      REAL(kind_phys), DIMENSION( ims:ime ),                       &
                             INTENT(INOUT)           ::        MOL, &
                                                               ZOL, &
-                                                               LH, &
-                                                        CHS2,CQS2, &
-                                                             USTM
+                                                               LH
 
       LOGICAL, DIMENSION( ims:ime ), INTENT(IN)    ::              &
      &                wet,     dry,     icy,    flag_iter
@@ -660,9 +658,8 @@ CONTAINS
 !--------------------------------------------
 !JOE-additinal output
       REAL(kind_phys), DIMENSION( ims:ime ),                       &
-     &                      INTENT(OUT)            ::       qstar
-      REAL(kind_phys), DIMENSION( ims:ime ), OPTIONAL,             &
-     &                      INTENT(OUT)            ::       wstar
+     &                      INTENT(OUT)            ::       qstar, &
+                                                            wstar
 
 !JOE-end
 
