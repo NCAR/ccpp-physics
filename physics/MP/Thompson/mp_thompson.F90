@@ -381,10 +381,10 @@ module mp_thompson
          real,                      intent(in   ) :: dt_inner
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
          real(kind_phys),           intent(inout) :: prcp(:)
-         real(kind_phys),           intent(inout), optional :: rain(:)
-         real(kind_phys),           intent(inout), optional :: graupel(:)
-         real(kind_phys),           intent(inout), optional :: ice(:)
-         real(kind_phys),           intent(inout), optional :: snow(:)
+         real(kind_phys),           intent(inout) :: rain(:)
+         real(kind_phys),           intent(inout) :: graupel(:)
+         real(kind_phys),           intent(inout) :: ice(:)
+         real(kind_phys),           intent(inout) :: snow(:)
          real(kind_phys),           intent(  out) :: sr(:)
          ! Radar reflectivity
          real(kind_phys),           intent(inout) :: refl_10cm(:,:)

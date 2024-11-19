@@ -144,10 +144,10 @@ contains
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: phii
 
       ! rain/snow/ice/graupel/precip amounts, fraction of frozen precip
-      real(kind_phys),      intent(out  ), dimension(:), optional :: rain0
-      real(kind_phys),      intent(out  ), dimension(:), optional :: snow0
-      real(kind_phys),      intent(out  ), dimension(:), optional :: ice0
-      real(kind_phys),      intent(out  ), dimension(:), optional :: graupel0
+      real(kind_phys),      intent(out  ), dimension(:) :: rain0
+      real(kind_phys),      intent(out  ), dimension(:) :: snow0
+      real(kind_phys),      intent(out  ), dimension(:) :: ice0
+      real(kind_phys),      intent(out  ), dimension(:) :: graupel0
       real(kind_phys),      intent(out  ), dimension(:) :: prcp0
       real(kind_phys),      intent(out  ), dimension(:) :: sr
 
