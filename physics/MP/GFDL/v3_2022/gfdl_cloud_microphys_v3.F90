@@ -125,7 +125,7 @@ contains
       reset, effr_in, rew, rei, rer, res, reg,                                     &
       cplchm, pfi_lsan, pfl_lsan, errmsg, errflg)
 
-      use machine, only: kind_phys, kind_dyn 
+      use machine, only: kind_phys, kind_dyn, kind_dbl_prec
 
       implicit none
 
@@ -183,7 +183,8 @@ contains
       real(kind=kind_phys), dimension(1:im,1,1:levs) :: pfils, pflls
       real(kind=kind_phys), dimension(1:im,1,1:levs) :: adj_vmr, te
       real(kind=kind_phys), dimension(1:im,1:levs) :: prefluxw, prefluxr, prefluxi, prefluxs, prefluxg
-      real(kind=kind_phys), dimension(1:im) :: dte, hs, gsize  
+      real(kind=kind_phys), dimension(1:im) :: hs, gsize
+      real(kind=kind_dbl_prec), dimension(1:im) :: dte
       !real(kind=kind_phys), dimension(:,:), allocatable :: den
       real(kind=kind_phys), dimension(1:im) :: water0
       real(kind=kind_phys) :: onebg
