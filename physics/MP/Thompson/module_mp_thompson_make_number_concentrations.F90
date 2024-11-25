@@ -4,7 +4,7 @@
 !>\ingroup aathompson
 module module_mp_thompson_make_number_concentrations
 
-      use physcons, only: PI => con_pi
+      use module_mp_thompson, only: PI
 
       implicit none
 
@@ -137,12 +137,14 @@ module module_mp_thompson_make_number_concentrations
       real, intent(in):: Q_cloud, qnwfa
 
       !real, parameter:: PI = 3.1415926536
-      real, parameter:: am_r = PI*1000./6.
+      real :: am_r
       real, dimension(15), parameter:: g_ratio = (/24,60,120,210,336,   &
      &                504,720,990,1320,1716,2184,2730,3360,4080,4896/)
       double precision:: lambda, qnc
       real:: q_nwfa, x1, xDc
       integer:: nu_c
+
+      am_r = PI*1000./6.
 
       if (Q_cloud == 0) then
          make_DropletNumber = 0
@@ -176,7 +178,9 @@ module module_mp_thompson_make_number_concentrations
       real, intent(in):: Q_rain, temp
       double precision:: lambda, N0, qnr
       !real, parameter:: PI = 3.1415926536
-      real, parameter:: am_r = PI*1000./6.
+      real :: am_r
+
+      am_r = PI*1000./6.
 
       if (Q_rain == 0) then
          make_RainNumber = 0
