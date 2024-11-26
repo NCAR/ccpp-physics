@@ -301,6 +301,7 @@ contains
       call w3doxdat(jdat,jdow,jdoy,jday)
 !     rjday is the minutes in a day
       rjday =  jdat(5)*60+jdat(6)+jdat(7)/60.
+      write(*,*)"BBBBB",jdat(2),jdat(3), jdat(5)
       if(rjday >= t2sv .or. jdat(3).ne.n1sv) then !!need to either to read in a record or open a new file
 #ifdef DEBUG
         if (me == master) write(*,*)"read in a new MERRA2 record", n2sv+1
@@ -324,9 +325,9 @@ contains
          write(myr,'(i4.4)') jdat(1)
          write(mn,'(i2.2)') jdat(2)
          write(dy,'(i2.2)') jdat(3)
-         fname=trim("merra2_"//myr//mn//dy//".nc")
+         fname="merra2_"//myr//mn//dy//".nc"
          call read_netfaer_dl(fname,n2sv, iflip, 2, errmsg, errflg)
-         write(*,*)"AAAAA",fname
+         write(*,*)"AAAAAND",fname, t1sv, rjday, t2sv
       else if (rjday >= t2sv) then
         if(t2sv < aer_t(tsaer)) then 
           n1sv=jdat(3)
@@ -336,8 +337,9 @@ contains
           write(myr,'(i4.4)') jdat(1)
           write(mn,'(i2.2)') jdat(2)
           write(dy,'(i2.2)') jdat(3)
-          fname=trim("merra2_"//myr//mn//dy//".nc")
+          fname="merra2_"//myr//mn//dy//".nc"
           call read_netfaer_dl(fname,n2sv, iflip, 2, errmsg, errflg)
+         write(*,*)"AAAAANR",fname, t1sv, rjday, t2sv
         else !! need to read a new file
           n1sv=jdat(3)
           t1sv=aer_t(tsaer)
@@ -345,6 +347,7 @@ contains
           t2sv=1440.
           call fdnx_fname (jdat(1), jdat(2),jdat(3),fname)
           call read_netfaer_dl(trim(fname), n2sv, iflip, 2, errmsg, errflg)
+         write(*,*)"AAAAANF",fname, t1sv, rjday, t2sv
         end if
       end if
 !

@@ -976,6 +976,7 @@ module mp_thompson
          nwfa=((aerfld(:,:,6)/0.0045435214+aerfld(:,:,7)/0.2907854+aerfld(:,:,8)/12.91224+ &
               aerfld(:,:,9)/206.2216+ aerfld(:,:,10)/4326.23)*9.+aerfld(:,:,11)/0.3053104*5+ &
               aerfld(:,:,15)/0.3232698*8)*1.e15
+        write(*,*)"CCCCCNW", nwfa(3,3)
       end subroutine get_niwfa
 
 end module mp_thompson

@@ -186,12 +186,6 @@ module GFS_rrtmg_setup
         iaerflg = mod(iaer, 1000)   
       endif
       iaermdl = iaer/1000               ! control flag for aerosol scheme selection
-      if ( iaermdl < 0 .or.  (iaermdl>2 .and. iaermdl/=5) ) then
-         print *, ' Error -- IAER flag is incorrect, Abort'
-         errflg = 1
-         errmsg = 'ERROR(GFS_rrtmg_setup): IAER flag is incorrect'
-         return
-      endif
 
 !  ---  assign initial permutation seed for mcica cloud-radiation
       if ( isubcsw>0 .or. isubclw>0 ) then

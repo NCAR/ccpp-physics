@@ -91,11 +91,6 @@ contains
        iaerflg = mod(iaer, 1000)   
     endif
     iaermdl = iaer/1000               ! control flag for aerosol scheme selection
-    if ( iaermdl < 0 .or.  (iaermdl>2 .and. iaermdl/=5) ) then
-       errmsg = trim(errmsg) // ' Error -- IAER flag is incorrect, Abort'
-       errflg = 1
-       return
-    endif
 
     ! Assign initial permutation seed for mcica cloud-radiation
     if ( isubc_sw>0 .or. isubc_lw>0 ) then
