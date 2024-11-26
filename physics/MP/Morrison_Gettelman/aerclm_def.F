@@ -3,8 +3,8 @@
       implicit none
 
       integer, parameter   :: levsaer=72, ntrcaerm=15, timeaer=2
-      integer              :: latsaer, lonsaer, ntrcaer, levsw
-      integer              :: n1sv, n2sv
+      integer              :: latsaer, lonsaer, ntrcaer, levsw, tsaer
+      integer              :: n1sv, n2sv, t1sv, t2sv
       integer              :: iamin, iamax, jamin, jamax
 
       character*10         :: specname(ntrcaerm)
@@ -12,6 +12,7 @@
 
       real (kind=kind_phys), allocatable, dimension(:) :: aer_lat
       real (kind=kind_phys), allocatable, dimension(:) :: aer_lon
+      real (kind=kind_phys), allocatable, dimension(:) :: aer_t
       real (kind=kind_io4),  allocatable, dimension(:,:,:,:) :: aer_pres
       real (kind=kind_io4),  allocatable, dimension(:,:,:,:,:) :: aerin
 

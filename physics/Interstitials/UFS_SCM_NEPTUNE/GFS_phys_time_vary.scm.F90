@@ -16,6 +16,7 @@
 
       use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm, iamin, iamax, jamin, jamax
       use aerinterp,  only : read_aerdata, setindxaer, aerinterpol, read_aerdataf
+      use aerinterp,  only : read_aerdata_dl, aerinterpol_dl, read_aerdataf_dl
 
       use iccn_def,   only : ciplin, ccnin, ci_pres
       use iccninterp, only : read_cidata, setindxci, ciinterpol
@@ -58,7 +59,7 @@
 !>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
 !! @{
       subroutine GFS_phys_time_vary_init (                                                         &
-              me, master, ntoz, h2o_phys, iaerclm, iccn, iflip, im, nx, ny, idate, xlat_d, xlon_d, &
+              me, master, ntoz, h2o_phys, iaerclm,iaermdl, iccn, iflip, im, nx, ny, idate, xlat_d, xlon_d, &
               jindx1_o3, jindx2_o3, ddy_o3, ozphys, h2ophys, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,        &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
@@ -76,7 +77,7 @@
          implicit none
 
          ! Interface variables
-         integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny
+         integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny, iaermdl
          logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhour
@@ -203,7 +204,11 @@
                ! If iaerclm is .true., then ntrcaer == ntrcaerm
                ntrcaer = size(aer_nm, dim=3)
                ! Read aerosol climatology
-               call read_aerdata (me,master,iflip,idate,errmsg,errflg)
+               if(iaermdl==1) then
+                 call read_aerdata (me,master,iflip,idate,errmsg,errflg)
+               elseif(iaermdl==6) then
+                 call read_aerdata_dl (me,master,iflip,idate,errmsg,errflg)
+               end if
             endif
          else
             ! Update the value of ntrcaer in aerclm_def with the value defined
@@ -301,9 +306,12 @@
          endif
          
          if (errflg/=0) return
-
          if (iaerclm) then
-           call read_aerdataf (me, master, iflip, idate, fhour, errmsg, errflg)
+           if (iaermdl==1) then
+             call read_aerdataf (me, master, iflip, idate, fhour, errmsg, errflg)
+           elseif (iaermdl==6) then
+             call read_aerdataf_dl (me, master, iflip, idate, fhour, errmsg, errflg)
+           end if
            if (errflg/=0) return
          end if
 
@@ -613,7 +621,7 @@
 !! @{
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
             me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, nsswr, fhswr, lsswr, fhour, &
-            imfdeepcnv, cal_pre, random_clds, ozphys, h2ophys, ntoz, h2o_phys, iaerclm, iccn, clstp,         &
+            imfdeepcnv, cal_pre, random_clds, ozphys, h2ophys, ntoz, h2o_phys, iaerclm, iaermdl, iccn, clstp,         &
             jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm,              &
@@ -624,7 +632,7 @@
 
          ! Interface variables
          integer,              intent(in)    :: me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, &
-                                                nsswr, imfdeepcnv, iccn, ntoz, iflip
+                                                nsswr, imfdeepcnv, iccn, ntoz, iflip, iaermdl
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhswr, fhour
          logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm
@@ -776,11 +784,19 @@
          if (iaerclm) then
            ! aerinterpol is using threading inside, don't
            ! move into OpenMP parallel section above
-           call aerinterpol (me, master, nthrds, im, idate, &
-                             fhour, iflip, jindx1_aer, jindx2_aer, &
-                             ddy_aer, iindx1_aer,           &
-                             iindx2_aer, ddx_aer,           &
-                             levs, prsl, aer_nm)
+           if (iaermdl==1) then
+             call aerinterpol (me, master, nthrds, im, idate, &
+                               fhour, iflip, jindx1_aer, jindx2_aer, &
+                               ddy_aer, iindx1_aer,           &
+                               iindx2_aer, ddx_aer,           &
+                               levs, prsl, aer_nm)
+           elseif (iaermdl==6) then
+             call aerinterpol_dl (me, master, nthrds, im, idate, &
+                               fhour, iflip, jindx1_aer, jindx2_aer, &
+                               ddy_aer, iindx1_aer,           &
+                               iindx2_aer, ddx_aer,           &
+                               levs, prsl, aer_nm)
+           endif
          endif
          
 !       Not needed for SCM:
