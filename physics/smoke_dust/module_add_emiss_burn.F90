@@ -55,7 +55,7 @@ CONTAINS
    real(kind_phys) :: timeq, fire_age, age_hr, dt1,dt2,dtm         ! For BB emis. diurnal cycle calculation
 
 ! For Gaussian diurnal cycle
-   real(kind_phys), INTENT(IN) :: sc_factor  ! to scale up the wildfire emissions, Jordan please make this a namelist option
+   real(kind_phys), INTENT(IN) :: sc_factor  ! to scale up the wildfire emissions
    real(kind_phys), PARAMETER :: rinti=2.1813936e-8, ax2=3400., const2=130., &
                    coef2=10.6712963e-4, cx2=7200., timeq_max=3600.*24.
 !>-- Fire parameters: Fores west, Forest east, Shrubland, Savannas, Grassland, Cropland
