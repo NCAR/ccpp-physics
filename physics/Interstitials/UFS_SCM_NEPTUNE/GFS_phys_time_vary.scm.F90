@@ -94,7 +94,7 @@
          real(kind_phys),      intent(in)    :: h2opl(:,:,:)
          integer,              intent(inout), optional :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
          real(kind_phys),      intent(inout), optional :: ddy_aer(:), ddx_aer(:)
-         real(kind_phys),      intent(in)    :: aer_nm(:,:,:)
+         real(kind_phys),      intent(in)   , optional :: aer_nm(:,:,:)
          integer,              intent(inout), optional :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
          real(kind_phys),      intent(inout), optional :: ddy_ci(:), ddx_ci(:)
          integer,              intent(inout) :: imap(:), jmap(:)
@@ -235,7 +235,7 @@
             ! Update the value of ntrcaer in aerclm_def with the value defined
             ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
             ! If iaerclm is .false., then ntrcaer == 1
-            ntrcaer = size(aer_nm, dim=3)
+            ntrcaer = 1
          endif
 
 !> - Call iccninterp::read_cidata() to read IN and CCN data
@@ -685,7 +685,7 @@
          real(kind_phys),      intent(inout) :: ozpl(:,:,:), h2opl(:,:,:)
          integer,              intent(in), optional :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
          real(kind_phys),      intent(in), optional :: ddy_aer(:), ddx_aer(:)
-         real(kind_phys),      intent(inout) :: aer_nm(:,:,:)
+         real(kind_phys),      intent(inout), optional :: aer_nm(:,:,:)
          integer,              intent(in), optional :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
          real(kind_phys),      intent(in), optional :: ddy_ci(:), ddx_ci(:)
          real(kind_phys),      intent(inout) :: in_nm(:,:), ccn_nm(:,:)
