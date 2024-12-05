@@ -7,8 +7,7 @@
   dependencies = Interstitials/UFS_SCM_NEPTUNE/sfcsub.F,Radiation/mersenne_twister.f
   dependencies = MP/Morrison_Gettelman/aerclm_def.F,MP/Morrison_Gettelman/aerinterp.F90
   dependencies = SFC_Models/Land/Noah/namelist_soilveg.f,SFC_Models/Land/Noah/set_soilveg.f,SFC_Models/Land/Noahmp/noahmp_tables.f90
-  dependencies = photochem/module_ozphys.F90
-  dependencies = photochem/h2o_def.f,photochem/h2ointerp.f90
+  dependencies = photochem/module_ozphys.F90,photochem/module_h2ophys.F90
   dependencies = GWD/cires_tauamf_data.F90
 
 ########################################################################
@@ -108,6 +107,20 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
+  intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
+[h2ophys]
+  standard_name = dataset_for_h2o_photochemistry_physics
+  long_name = dataset for NRL h2o photochemistry physics
+  units = mixed
+  dimensions = ()
+  type = ty_h2ophys
   intent = in
 [jindx1_o3]
   standard_name = lower_latitude_index_of_ozone_forcing_for_interpolation
@@ -1015,13 +1028,6 @@
   type = real
   kind = kind_phys
   intent = in
-[ozphys]
-  standard_name = dataset_for_ozone_physics
-  long_name = dataset for NRL ozone physics
-  units = mixed
-  dimensions = ()
-  type = ty_ozphys
-  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1517,6 +1523,20 @@
   type = real
   kind = kind_phys
   intent = inout
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
+[h2ophys]
+  standard_name = dataset_for_h2o_photochemistry_physics
+  long_name = dataset for NRL h2o photochemistry physics
+  units = mixed
+  dimensions = ()
+  type = ty_h2ophys
+  intent = in
 [nthrds]
   standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads available for physics schemes

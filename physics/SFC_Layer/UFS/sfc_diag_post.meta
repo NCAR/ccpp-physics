@@ -82,13 +82,6 @@
   type = real
   kind = kind_phys
   intent = in
-[vegtype]
-  standard_name = vegetation_type_classification
-  long_name = vegetation type at each grid cell
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent= in
 [t2mmp]
   standard_name = temperature_at_2m_from_noahmp
   long_name = 2 meter temperature from noahmp

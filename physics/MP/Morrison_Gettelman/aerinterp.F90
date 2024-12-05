@@ -282,7 +282,7 @@ contains
       character(*), intent(inout) :: errmsg
       integer, intent(in) :: iflip
       integer   i1,i2, iday,j,j1,j2,l,npts,nc,n1,n2,lev,k,i,ii, klev
-      real(kind=kind_phys) fhour,temj, tx1, tx2,temi, tem
+      real(kind=kind_phys) fhour,temj, tx1, tx2,temi, tem, tem1, tem2
       real(kind=kind_phys), dimension(npts) :: temij,temiy,temjx,ddxy
       
 !
@@ -363,10 +363,9 @@ contains
 !$OMP parallel num_threads(nthrds) default(none)             &
 !$OMP          shared(npts,ntrcaer,aerin,aer_pres,prsl)      &
 !$OMP          shared(ddx,ddy,jindx1,jindx2,iindx1,iindx2)   &
-!$OMP          shared(aerpm,aerpres,aerout,lev,nthrds) &
-!$OMP          shared(temij,temiy,temjx,ddxy)                &
-!$OMP          private(l,j,k,ii,i1,i2,j1,j2,tem)             &
-!$OMP          copyin(tx1,tx2) firstprivate(tx1,tx2)
+!$OMP          shared(aerpm,aerpres,aerout,lev,nthrds)       &
+!$OMP          shared(temij,temiy,temjx,ddxy,tx1,tx2)        &
+!$OMP          private(l,j,k,ii,i1,i2,j1,j2,tem,tem1,tem2)
 
 !$OMP do
 #endif
@@ -416,10 +415,10 @@ contains
               ENDIF
              ENDDO
              tem  = 1.0 / (aerpres(j,i1) - aerpres(j,i2))
-             tx1  = (prsl(j,L) - aerpres(j,i2)) * tem
-             tx2  = (aerpres(j,i1) - prsl(j,L)) * tem
+             tem1  = (prsl(j,L) - aerpres(j,i2)) * tem
+             tem2  = (aerpres(j,i1) - prsl(j,L)) * tem
              DO ii = 1, ntrcaer
-               aerout(j,L,ii) = aerpm(j,i1,ii)*tx1 + aerpm(j,i2,ii)*tx2
+               aerout(j,L,ii) = aerpm(j,i1,ii)*tem1 + aerpm(j,i2,ii)*tem2
              ENDDO
            endif
         ENDDO   !L-loop

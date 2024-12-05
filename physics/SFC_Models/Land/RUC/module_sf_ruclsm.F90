@@ -1740,7 +1740,7 @@ CONTAINS
          !-- will reduce warm bias in western Canada
          !-- and US West coast, where max snow albedo is low (0.3-0.5).
            !print *,'ALB increase to 0.7',alb_snow,snhei,snhei_crit,albsn,i,j
-           !ALBsn = 0.7_kind_phys
+           ALBsn = 0.7_kind_phys
          endif
 
          Emiss= emissn
@@ -1753,7 +1753,7 @@ CONTAINS
          !-- will reduce warm bias in western Canada
          !-- and US West coast, where max snow albedo is low (0.3-0.5).
            !print *,'ALB increase to 0.7',alb_snow,snhei,snhei_crit,albsn,i,j
-           !ALBsn = 0.7_kind_phys
+           ALBsn = 0.7_kind_phys
            !print *,'NO mosaic ALB increase to 0.7',alb_snow,snhei,snhei_crit,alb,i,j
          endif
 

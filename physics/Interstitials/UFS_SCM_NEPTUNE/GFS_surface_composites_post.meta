@@ -796,6 +796,31 @@
   type = real
   kind = kind_phys
   intent = in
+[hflx_fire]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_of_fire
+  long_name = kinematic surface upward sensible heat flux of fire
+  units = K m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[evap_fire]
+  standard_name = surface_upward_specific_humidity_flux_of_fire
+  long_name = kinematic surface upward latent heat flux of fire
+  units = kg kg-1 m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[cpl_fire]
+  standard_name = do_fire_coupling
+  long_name = flag controlling fire_behavior collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [qss]
   standard_name = surface_specific_humidity
   long_name = surface air saturation specific humidity

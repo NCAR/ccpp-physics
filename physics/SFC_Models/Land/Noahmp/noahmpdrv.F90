@@ -663,6 +663,7 @@
   real (kind=kind_phys) :: precip_freeze_frac_in  ! used for penman calculation
  
   real (kind=kind_phys) :: virtfac1               ! virtual factor
+  real (kind=kind_phys) :: tflux                  ! surface flux temp
   real (kind=kind_phys) :: tvs1                   ! surface virtual temp
   real (kind=kind_phys) :: vptemp                 ! virtual potential temp
 
@@ -944,7 +945,8 @@
         t2mmp(i)               = temperature_bare_2m
         q2mp(i)                = spec_humidity_bare_2m
 
-        tskin(i)               = temperature_ground
+        tskin(i)               = temperature_radiative
+        tflux                  = temperature_ground
         surface_temperature    = temperature_ground
         vegetation_fraction    = vegetation_frac
         ch_vegetated           = 0.0
@@ -1038,7 +1040,8 @@
          q2mp(i)  = spec_humidity_veg_2m * vegetation_fraction + &
                    spec_humidity_bare_2m * (1-vegetation_fraction)
 
-         tskin(i) = surface_temperature
+         tskin(i)               = temperature_radiative
+         tflux                  = surface_temperature
 
       endif          ! glacial split ends
 
@@ -1194,9 +1197,9 @@
        endif
 
        if(thsfc_loc) then ! Use local potential temperature
-              tvs1   = tskin(i) * virtfac1
+              tvs1   = tflux * virtfac1
          else ! Use potential temperature referenced to 1000 hPa
-              tvs1   = tskin(i)/prsik1(i) * virtfac1
+              tvs1   = tflux/prsik1(i) * virtfac1
        endif
 
       z0_total  = max(min(z0_total,forcing_height),1.0e-6)
