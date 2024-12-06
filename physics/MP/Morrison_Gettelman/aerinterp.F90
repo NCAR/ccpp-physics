@@ -325,9 +325,7 @@ contains
          write(mn,'(i2.2)') jdat(2)
          write(dy,'(i2.2)') jdat(3)
          fname="merra2_"//myr//mn//dy//".nc"
-         write(*,*)"BBBB", fname
          call read_netfaer_dl(fname,n2sv, iflip, 2, errmsg, errflg)
-         write(*,*)"AAAAAND",fname, t1sv, rjday, t2sv
       else if (rjday >= t2sv) then
         if(t2sv < aer_t(tsaer)) then 
           n1sv=jdat(3)
@@ -339,7 +337,6 @@ contains
           write(dy,'(i2.2)') jdat(3)
           fname="merra2_"//myr//mn//dy//".nc"
           call read_netfaer_dl(fname,n2sv, iflip, 2, errmsg, errflg)
-         write(*,*)"AAAAANR",fname, t1sv, rjday, t2sv
         else !! need to read a new file
           n1sv=jdat(3)
           t1sv=aer_t(tsaer)
@@ -347,7 +344,6 @@ contains
           t2sv=1440.
           call fdnx_fname (jdat(1), jdat(2),jdat(3),fname)
           call read_netfaer_dl(fname, n2sv, iflip, 2, errmsg, errflg)
-         write(*,*)"AAAAANF",fname, t1sv, rjday, t2sv
         end if
       end if
 !
