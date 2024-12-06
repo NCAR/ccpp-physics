@@ -66,23 +66,6 @@ CONTAINS
     timeq= mod(timeq,timeq_max)
     coef_con=1._kind_phys/((2._kind_phys*pi)**0.5)
 
-
-! RAR: Grasslands (29% of ther western HRRR CONUS domain) probably also need to
-! be added below, check this later
-! RAR: In the HRRR CONUS domain (western part) crop 11%, 2% cropland/natural
-! vegetation and 0.4% urban of pixels
-!.OR. lu_index(i,j)==14)  then ! Croplands(12), Urban and Built-Up(13),
-!cropland/natural vegetation (14) mosaic in MODI-RUC vegetation classes
-! Peak hours for the fire activity depending on the latitude
-!                   if (xlong(i,j)<-130.) then  max_ti= 24.041288* 3600.    !
-!                   peak at 24 UTC, fires in  Alaska
-!                   elseif (xlong(i,j)<-100.) then   max_ti= 22.041288* 3600.
-!                   ! peak at 22 UTC, fires in the western US
-!                   elseif (xlong(i,j)<-70.) then   ! peak at 20 UTC, fires in
-!                   the eastern US,   max_ti= 20.041288* 3600.
-!                   else   max_ti= 18.041288* 3600.
-!                   endif
-
     if (ebb_dcycle==2) then
     
      do j=jts,jte
