@@ -455,12 +455,13 @@ module lsm_ruc
      ! for land
      &       sncovr1_lnd, qsurf_lnd, gflux_lnd, evap_lnd,                &
      &       cmm_lnd, chh_lnd, hflx_lnd, sbsno,                          &
-     &       acsnow_lnd, snowmt_lnd, snohf,                              &
+     &       snowmt_lnd, snohf,                                          &
      ! for ice
      &       sncovr1_ice, qsurf_ice, gflux_ice, evap_ice, ep1d_ice,      &
      &       cmm_ice, chh_ice, hflx_ice,                                 &
-     &       acsnow_ice, snowmt_ice
-
+     &       snowmt_ice
+      real (kind_phys), dimension(:), intent(inout), optional ::         &
+             acsnow_lnd, acsnow_ice
       real (kind_phys), dimension(:), intent(  out) ::                   &
      &       albdvis_lnd, albdnir_lnd,  albivis_lnd,  albinir_lnd
       real (kind_phys), dimension(:), intent(  out), optional ::         &
@@ -1312,8 +1313,7 @@ module lsm_ruc
 
         ! --- ... accumulated total runoff and surface runoff
         runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * delt  ! accum total kg m-2
-        !srunoff(i) = srunoff(i) + runof(i) * delt             ! accum surface kg m-2
-        srunoff(i) = acrunoff(i,j)        ! accum surface kg m-2
+        srunoff(i) = srunoff(i) + runof(i) * delt             ! accum surface kg m-2
 
         ! --- ... accumulated frozen precipitation (accumulation in lsmruc)
         snowfallac_lnd(i) = snfallac_lnd(i,j) ! accum kg m-2

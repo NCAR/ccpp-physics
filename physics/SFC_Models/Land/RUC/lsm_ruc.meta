@@ -1489,6 +1489,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snowmt_lnd]
   standard_name = surface_snow_melt_over_land
   long_name = snow melt during timestep over land
@@ -1653,6 +1654,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [snowmt_ice]
   standard_name = surface_snow_melt_over_ice
   long_name = snow melt during timestep over ice
