@@ -184,7 +184,7 @@
       !sigmab
       do i = 1,im
          if(cnvflg(i))then
-            DEN=MIN(termC(i)+termB(i),1._kind_phys)
+            DEN=MIN(termC(i)+termB(i),1.e8_kind_phys)
             cvg=termD(i)*delt
             ZZ=MAX(0.0,SIGN(1.0,termA(i)))            &
                  *MAX(0.0,SIGN(1.0,termB(i)))         &
