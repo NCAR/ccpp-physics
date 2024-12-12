@@ -214,7 +214,7 @@
   kind = kind_phys
   intent = in
 [tgrs]
-  standard_name = air_temperature
+  standard_name = physics_timestep_initial_air_temperature
   long_name = model layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -230,7 +230,7 @@
   kind = kind_phys
   intent = in
 [qgrs_water_vapor]
-  standard_name = specific_humidity
+  standard_name = physics_timestep_initial_specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -238,7 +238,7 @@
   kind = kind_phys
   intent = in
 [qgrs_cloud_water]
-  standard_name = cloud_liquid_water_mixing_ratio
+  standard_name = physics_timestep_initial_cloud_liquid_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

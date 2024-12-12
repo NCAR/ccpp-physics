@@ -87,7 +87,7 @@
   kind = kind_phys
   intent = inout
 [gt0]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -95,7 +95,7 @@
   kind = kind_phys
   intent = inout
 [gq0]
-  standard_name = tracer_concentration_of_new_state
+  standard_name = tracer_concentration
   long_name = tracer concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)

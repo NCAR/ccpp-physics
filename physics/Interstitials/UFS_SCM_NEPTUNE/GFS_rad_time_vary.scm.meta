@@ -207,7 +207,7 @@
   intent = inout
   optional = True
 [t]
-  standard_name = air_temperature
+  standard_name = physics_timestep_initial_air_temperature
   long_name = model layer mean temperature
   units = K
   dimensions = (horizontal_dimension,vertical_layer_dimension)
@@ -215,7 +215,7 @@
   kind = kind_phys
   intent = in
 [qv]
-  standard_name = specific_humidity
+  standard_name = physics_timestep_initial_specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_layer_dimension)

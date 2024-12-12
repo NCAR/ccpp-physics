@@ -92,7 +92,7 @@
   kind = kind_phys
   intent = in
 [gt0]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = updated air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

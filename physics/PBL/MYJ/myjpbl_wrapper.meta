@@ -127,7 +127,7 @@
   type = integer
   intent = in
 [ugrs]
-  standard_name = x_wind
+  standard_name = physics_timestep_initial_x_wind
   long_name = x component of layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -135,7 +135,7 @@
   kind = kind_phys
   intent = in
 [vgrs]
-  standard_name = y_wind
+  standard_name = physics_timestep_initial_y_wind
   long_name = y component of layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -143,7 +143,7 @@
   kind = kind_phys
   intent = in
 [tgrs]
-  standard_name = air_temperature
+  standard_name = physics_timestep_initial_air_temperature
   long_name = layer mean air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

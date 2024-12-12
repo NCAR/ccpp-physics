@@ -248,7 +248,7 @@
   kind = kind_phys
   intent = in
 [gq0]
-  standard_name = tracer_concentration_of_new_state
+  standard_name = tracer_concentration
   long_name = tracer concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
@@ -313,7 +313,7 @@
   intent = in
   optional = True
 [spechum]
-  standard_name = specific_humidity
+  standard_name = physics_timestep_initial_specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

@@ -134,7 +134,7 @@
   kind = kind_phys
   intent = in
 [h2o0]
-  standard_name = specific_humidity_of_new_state
+  standard_name = specific_humidity
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -142,7 +142,7 @@
   kind = kind_phys
   intent = inout
 [oz0]
-  standard_name = ozone_concentration_of_new_state
+  standard_name = ozone_concentration
   long_name = ozone concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -150,7 +150,7 @@
   kind = kind_phys
   intent = inout
 [gt0]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

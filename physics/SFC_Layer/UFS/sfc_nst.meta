@@ -119,7 +119,7 @@
   kind = kind_phys
   intent = in
 [u1]
-  standard_name = x_wind_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_x_wind_at_surface_adjacent_layer
   long_name = x component of surface layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -127,7 +127,7 @@
   kind = kind_phys
   intent = in
 [v1]
-  standard_name = y_wind_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_y_wind_at_surface_adjacent_layer
   long_name = y component of surface layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -158,7 +158,7 @@
   type = integer
   intent = in
 [t1]
-  standard_name = air_temperature_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_air_temperature_at_surface_adjacent_layer
   long_name = surface layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent)
@@ -166,7 +166,7 @@
   kind = kind_phys
   intent = in
 [q1]
-  standard_name = specific_humidity_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_specific_humidity_at_surface_adjacent_layer
   long_name = surface layer mean specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent)

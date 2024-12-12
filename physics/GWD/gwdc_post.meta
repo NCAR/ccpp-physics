@@ -146,7 +146,7 @@
   type = integer
   intent = in
 [gu0]
-  standard_name = x_wind_of_new_state
+  standard_name = x_wind
   long_name = updated zonal wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -154,7 +154,7 @@
   kind = kind_phys
   intent = inout
 [gv0]
-  standard_name = y_wind_of_new_state
+  standard_name = y_wind
   long_name = updated meridional wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -162,7 +162,7 @@
   kind = kind_phys
   intent = inout
 [gt0]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = updated air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

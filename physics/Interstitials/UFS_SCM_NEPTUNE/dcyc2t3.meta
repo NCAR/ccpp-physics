@@ -410,7 +410,7 @@
   intent = in
   optional = True
 [t_lay]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = model layer mean temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

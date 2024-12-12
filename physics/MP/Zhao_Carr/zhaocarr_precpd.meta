@@ -87,7 +87,7 @@
   kind = kind_phys
   intent = in
 [q]
-  standard_name = specific_humidity_of_new_state
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -95,7 +95,7 @@
   kind = kind_phys
   intent = inout
 [cwm]
-  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
+  standard_name = cloud_liquid_water_mixing_ratio
   long_name = moist cloud condensed water mixing ratio
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -103,7 +103,7 @@
   kind = kind_phys
   intent = inout
 [t]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = layer mean air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
