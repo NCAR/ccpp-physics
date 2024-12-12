@@ -128,7 +128,7 @@
   kind = kind_phys
   intent = in
 [tf]
-  standard_name = air_temperature_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_air_temperature_at_surface_adjacent_layer
   long_name = air temperature at lowest model layer
   units = K
   dimensions = (horizontal_loop_extent)
