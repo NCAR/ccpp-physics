@@ -64,7 +64,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [rrfs_sd]
   standard_name = do_smoke_coupling
   long_name = flag controlling rrfs_sd collection (default off)
