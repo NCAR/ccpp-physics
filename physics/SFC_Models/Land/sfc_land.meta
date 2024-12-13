@@ -224,7 +224,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [qsurf_lnd]
   standard_name = surface_specific_humidity_over_land_from_land
   long_name = surface air saturation specific humidity over land
@@ -233,7 +232,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [evap_lnd]
   standard_name = surface_upward_latent_heat_flux_over_land_from_land
   long_name = sfc latent heat flux input over land for coupling
@@ -242,7 +240,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [hflx_lnd]
   standard_name = surface_upward_sensible_heat_flux_over_land_from_land
   long_name = sfc sensible heat flux input over land for coupling
@@ -251,7 +248,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [ep_lnd]
   standard_name = surface_upward_potential_latent_heat_flux_over_land_from_land
   long_name = surface upward potential latent heat flux over land for coupling
@@ -260,7 +256,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [t2mmp_lnd]
   standard_name = temperature_at_2m_over_land_from_land
   long_name = 2 meter temperature over land for coupling
@@ -268,8 +263,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
-  optional = True
+  intent = in 
 [q2mp_lnd]
   standard_name = specific_humidity_at_2m_over_land_from_land
   long_name = 2 meter specific humidity over land for coupling
@@ -278,7 +272,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [gflux_lnd]
   standard_name = upward_heat_flux_in_soil_over_land_from_land
   long_name = soil heat flux over land for coupling
@@ -287,7 +280,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [runoff_lnd]
   standard_name = surface_runoff_flux_from_land
   long_name = surface runoff flux over land for coupling
@@ -296,7 +288,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [drain_lnd]
   standard_name = subsurface_runoff_flux_from_land
   long_name = subsurface runoff flux over land for coupling
@@ -305,7 +296,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [cmm_lnd]
   standard_name = surface_drag_wind_speed_for_momentum_in_air_over_land_from_land
   long_name = momentum exchange coefficient over land for coupling
@@ -313,8 +303,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
-  optional = True
+  intent = out
 [chh_lnd]
   standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land_from_land
   long_name = thermal exchange coefficient over land for coupling
@@ -323,21 +312,11 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [zvfun_lnd]
   standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction_from_land
   long_name = function of surface roughness length and green vegetation fraction
   units = none
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
-[slc]
-  standard_name = volume_fraction_of_unfrozen_water_in_soil
-  long_name = volume fraction of unfrozen soil moisture
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
   type = real
   kind = kind_phys
   intent = in
@@ -389,7 +368,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [q2mp]
   standard_name = specific_humidity_at_2m_from_noahmp
   long_name = 2 meter specific humidity from noahmp
@@ -398,7 +376,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [gflux]
   standard_name = upward_heat_flux_in_soil_over_land
   long_name = soil heat flux over land

@@ -38,55 +38,32 @@
    implicit none
 
    ! Inputs
-   integer             , intent(in) :: im
-   logical             , intent(in) :: flag_init
-   logical             , intent(in) :: flag_restart
-   logical             , intent(in) :: cpllnd
-   logical             , intent(in) :: cpllnd2atm
-   logical             , intent(in) :: flag_iter(:)
-   logical             , intent(in) :: dry(:)
-   real(kind=kind_phys), intent(in) :: t1(:)
-   real(kind=kind_phys), intent(in) :: q1(:)
-   real(kind=kind_phys), intent(in) :: prsl1(:)
-   real(kind=kind_phys), intent(in) :: prslki(:)
-   real(kind=kind_phys), intent(in) :: ps(:)
-   real(kind=kind_phys), intent(in) :: tskin(:)
-   real(kind=kind_phys), intent(in) :: wind(:)
-   real(kind=kind_phys), intent(in) :: cm(:)
-   real(kind=kind_phys), intent(in) :: ch(:)
-   real(kind=kind_phys), intent(in) :: dlwflx(:)
-   real(kind=kind_phys), intent(in) :: dswsfc(:)
-   real(kind=kind_phys), intent(in) :: sfalb(:)
-   real(kind=kind_phys), intent(in) :: sfcemis(:)
-   real(kind=kind_phys), intent(in) :: rd
-   real(kind=kind_phys), intent(in) :: eps
-   real(kind=kind_phys), intent(in) :: epsm1
-   real(kind=kind_phys), intent(in) :: rvrdm1
-   real(kind=kind_phys), intent(in) :: hvap
-   real(kind=kind_phys), intent(in) :: cp
-   real(kind=kind_phys), intent(in) :: con_sbc
-   real(kind=kind_phys), intent(in), optional :: sncovr1_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: qsurf_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: evap_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: hflx_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: ep_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: t2mmp_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: q2mp_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: gflux_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: runoff_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: drain_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: cmm_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: chh_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: zvfun_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: slc(:,:)
+   integer             , intent(in)    :: im
+   logical             , intent(in)    :: cpllnd
+   logical             , intent(in)    :: cpllnd2atm
+   logical             , intent(in)    :: flag_iter(:)
+   logical             , intent(in)    :: dry(:)
+   real(kind=kind_phys), intent(in)    :: sncovr1_lnd(:)
+   real(kind=kind_phys), intent(in)    :: qsurf_lnd(:)
+   real(kind=kind_phys), intent(in)    :: evap_lnd(:)
+   real(kind=kind_phys), intent(in)    :: hflx_lnd(:)
+   real(kind=kind_phys), intent(in)    :: ep_lnd(:)
+   real(kind=kind_phys), intent(in)    :: t2mmp_lnd(:)
+   real(kind=kind_phys), intent(in)    :: q2mp_lnd(:)
+   real(kind=kind_phys), intent(in)    :: gflux_lnd(:)
+   real(kind=kind_phys), intent(in)    :: runoff_lnd(:)
+   real(kind=kind_phys), intent(in)    :: drain_lnd(:)
+   real(kind=kind_phys), intent(in)    :: cmm_lnd(:)
+   real(kind=kind_phys), intent(in)    :: chh_lnd(:)
+   real(kind=kind_phys), intent(in)    :: zvfun_lnd(:)
    ! Inputs/Outputs
    real(kind=kind_phys), intent(inout) :: sncovr1(:)
    real(kind=kind_phys), intent(inout) :: qsurf(:)
    real(kind=kind_phys), intent(inout) :: evap(:)
    real(kind=kind_phys), intent(inout) :: hflx(:)
    real(kind=kind_phys), intent(inout) :: ep(:)
-   real(kind=kind_phys), intent(inout), optional :: t2mmp(:)
-   real(kind=kind_phys), intent(inout), optional :: q2mp(:)
+   real(kind=kind_phys), intent(inout) :: t2mmp(:)
+   real(kind=kind_phys), intent(inout) :: q2mp(:)
    real(kind=kind_phys), intent(inout) :: gflux(:)
    real(kind=kind_phys), intent(inout) :: runoff(:)
    real(kind=kind_phys), intent(inout) :: drain(:)
