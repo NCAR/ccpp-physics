@@ -109,7 +109,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -126,7 +125,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [deltaZ]
   standard_name = layer_thickness
   long_name = layer_thickness
@@ -135,7 +133,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [cloud_overlap_param]
   standard_name = cloud_overlap_param
   long_name = cloud overlap parameter
@@ -144,7 +141,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [precip_overlap_param]
   standard_name = precip_overlap_param
   long_name = precipitation overlap parameter
@@ -153,7 +149,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter

@@ -28,7 +28,7 @@ contains
       real(kind=kind_phys), intent(out) ::                              &
      &  oc(:), oa4(:,:), clx(:,:),                                      &
      &  theta(:), sigma(:), gamma(:), elvmax(:)
-      real(kind=kind_phys), intent(out), optional ::                    &
+      real(kind=kind_phys), intent(out)  ::                             &
      &  varss(:), ocss(:), oa4ss(:,:), clxss(:,:)
       logical, intent(in) :: lssav, ldiag3d, flag_for_gwd_generic_tend
       real(kind=kind_phys), intent(in) :: dtdt(:,:), dudt(:,:), dvdt(:,:)
