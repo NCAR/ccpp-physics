@@ -50,13 +50,6 @@
   dimensions = ()
   type = logical
   intent = in
-[add_fire_heat_flux_in]
-  standard_name = flag_for_fire_heat_flux
-  long_name = flag to add fire heat flux to LSM
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [do_plumerise_in]
   standard_name = do_smoke_plumerise
   long_name = rrfs smoke plumerise option
@@ -71,19 +64,19 @@
   dimensions = ()
   type = integer
   intent = in
-[n_dbg_lines_in]
-  standard_name = smoke_debug_lines
-  long_name = rrfs smoke add smoke option
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
 [plume_wind_eff_in]
   standard_name = option_for_wind_effects_on_smoke_plumerise
   long_name = wind effect plumerise option
   units = index
   dimensions = ()
   type = integer
+  intent = in
+[add_fire_heat_flux_in]
+  standard_name = flag_for_fire_heat_flux
+  long_name = flag to add fire heat flux to LSM
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [addsmoke_flag_in]
   standard_name = control_for_smoke_biomass_burning_emissions
@@ -99,12 +92,27 @@
   dimensions = ()
   type = integer
   intent = in
-[smoke_forecast_in]
+[hwp_method_in]
   standard_name = do_smoke_forecast
   long_name = index for rrfs smoke forecast
   units = index
   dimensions = ()
   type = integer
+  intent = in
+[add_fire_moist_flux_in]
+  standard_name = flag_for_fire_moisture_flux
+  long_name = flag to add fire moisture flux
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[plume_alpha_in]
+  standard_name = alpha_for_plumerise_scheme
+  long_name = alpha paramter for plumerise scheme
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [dust_opt_in]
   standard_name = control_for_smoke_dust
@@ -188,6 +196,13 @@
   dimensions = ()
   type = integer
   intent = out
+[n_dbg_lines_in]
+  standard_name = smoke_debug_lines
+  long_name = rrfs smoke add smoke option
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 
 #####################################################################
 [ccpp-arg-table]
@@ -598,7 +613,7 @@
   standard_name = emission_smoke_prvd_RRFS
   long_name = emission fire RRFS daily
   units = various
-  dimensions = (horizontal_loop_extent,4)
+  dimensions = (horizontal_loop_extent,5)
   type = real
   kind = kind_phys
   intent = in
@@ -821,6 +836,15 @@
   dimensions = ()
   type = integer
   intent = in
+[rho_dry]
+  standard_name = dry_air_density
+  long_name = dry air density
+  units = kg m-3
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
 [uspdavg]
   standard_name = mean_wind_speed_in_boundary_layer
   long_name = average wind speed within the boundary layer
@@ -945,13 +969,6 @@
   kind = kind_phys
   intent = out
   optional = True
-[kpbl]
-  standard_name = vertical_index_at_top_of_atmosphere_boundary_layer
-  long_name = PBL top model level index
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = in
 [oro]
   standard_name = height_above_mean_sea_level
   long_name = height_above_mean_sea_level
@@ -969,6 +986,14 @@
   kind = kind_phys
   intent = in
   optional = True
+[totprcp]
+  standard_name = accumulated_lwe_thickness_of_precipitation_amount
+  long_name = accumulated total precipitation
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [cpl_fire]
   standard_name = do_fire_coupling
   long_name = flag controlling fire_behavior collection (default off)
