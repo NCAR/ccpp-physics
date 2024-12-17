@@ -87,6 +87,40 @@
 !     levs         - integer, vertical layer dimension                  !
 !     deltim       - real, physics time step in seconds                 !
 !     fhswr        - real, Short wave radiation time step in seconds    !
+!     fhlwr        - real, Long wave radiation time step in seconds     !
+!     lslwr        - logical, flag for sw radiation calls               !
+!     fluxr (im, nfxr) - real, time-accum 2d rad diag fields            !
+!     topflw (im)  - topfsw_type, lw radiation fluxes at toa            !
+!     sfcflw (im)  - sfcflw_type, lw radiation fluxes at sfc            !
+!     lsswr        - logical, flag for lw radiation calls               !
+!     coszdg       - real, Cosine(SZA), daytime                         !
+!     topfsw (im)  - topfsw_type, sw radiation fluxes at TOA            !
+!     sfcfsw (im)  - sfcfsw_type, sw radiation fluxes at sfc            !
+!     scmpsw (im)  - cmpfsw_type, special components of sw down fluxes  !
+!     raddt        - real, radiation timestep                           !
+!     cldsa (im,5) - real, frac of clouds in low, mid, high, total, BL  !
+!     mtopa (im,3) - integer, Vertical indices for low, middle and high !
+!                    cloud bases                                        !
+!     mbota (im,3) - integer, Vertical indices for low, middle and high !
+!                    cloud tops                                         !
+!     cldtausw (im, im+LTP) - real, approx .55mu band layer cloud       !
+!                             optical depth                             !
+!     cldtaulw (im, im+LTP) - real, approx 10 mu band layer cloud       ! 
+!                             optical depth                             !
+!     tgrs (im,levs) - real, model layer mean temperature               !
+!     aerodp (im, nspc1) - real, Vertical integrated optical depth for  ! 
+!                          various aerosol species                      !
+!     nfxr         - integer, num variables stored in fluxr array       !
+!     lm           - integer, number vertical layers for rad calc       !
+!     ltp          - integer, extra top layers                          !
+!     nday         - integer, daytime points dimension                  !
+!     kb           - integer, vertical index diff. b/w layer and lower  !
+!                    bound                                              !
+!     kd           - integer, vertical index diff. b/w in/out and local ! 
+!     kt           - integer, vertical index diff. b/w in/out and upper !
+!                    bound
+!     lssav        - logical, flag for storing radiation diagnostics    !
+!     nspc1        - logical, num. species for optical dept plus total  !
 !     dry          - logical, true over land                            !
 !     icy          - logical, true over ice                             !
 !     wet          - logical, true over water                           !
@@ -158,6 +192,8 @@
 !!-     Mar  2019  s. moorthi - modify xmu calculation in a time centered
 !!                             way and add more accuracy when physics
 !!                             time step is close to radiation time step
+!!-     Dec  2024  l. reames - move fluxr calculations from *_post
+!!                             routines to dcyc3t3_run  
 !> \section arg_table_dcyc2t3_run Argument Table
 !! \htmlinclude dcyc2t3_run.html
 !!
@@ -177,6 +213,9 @@
      &       use_LW_jacobian, sfculw, use_med_flux, sfculw_med,         &
      &       fluxlwUP_jac, t_lay, p_lay, p_lev, flux2D_lwUP,            &
      &       flux2D_lwDOWN,pert_radtend,do_sppt,ca_global,tsfc_radtime, &
+     &       lslwr,fluxr,fhlwr,topflw,sfcflw,lsswr,coszdg,topfsw,sfcfsw,&
+     &       scmpsw,raddt,cldsa,mtopa,mbota,cldtausw,cldtaulw,tgrs,     &
+     &       aerodp, nfxr, lm, ltp, nday,  kb, kd , kt, lssav, nspc1,   &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
      &       dtdt,dtdtnp,htrlw,                                         &
@@ -185,9 +224,6 @@
      &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
      &       adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   &
      &       adjnirbmd,adjnirdfd,adjvisbmd,adjvisdfd,                   &
-     &       lslwr,fluxr,fhlwr,topflw,sfcflw,lsswr,coszdg,topfsw,sfcfsw,&
-     &       scmpsw,raddt,cldsa,mtopa,mbota,cldtausw,cldtaulw,tgrs,     &
-     &       aerodp, nfxr, lm, ltp, nday,  kb, kd , kt, lssav, nspc1,   &
      &       errmsg,errflg                                              &
      &     )
 !
