@@ -18,11 +18,14 @@ module rrfs_smoke_config
   !-- aerosol module configurations
   integer :: chem_opt = 1   
   integer :: kemit = 1
-  integer :: dust_opt = 5
+  integer :: dust_opt = 1
+  real(kind=kind_phys) :: dust_drylimit_factor  = 1.0
+  real(kind=kind_phys) :: dust_moist_correction = 1.0
+  real(kind=kind_phys) :: dust_alpha = 0.
+  real(kind=kind_phys) :: dust_gamma = 0.
   integer :: seas_opt = 0   ! turn off by default
   logical :: do_plumerise  = .true.
   integer :: addsmoke_flag = 1
-  integer :: smoke_forecast = 1
   integer :: plumerisefire_frq=60
   integer :: n_dbg_lines = 3
   integer :: wetdep_ls_opt = 1
@@ -30,13 +33,16 @@ module rrfs_smoke_config
   integer :: pm_settling = 1
   integer :: nfire_types = 5
   integer :: ebb_dcycle  = 2 ! 1: read in ebb_smoke(i,24), 2: daily
+  integer :: hwp_method = 2
   logical :: dbg_opt     = .true.
   logical :: aero_ind_fdb = .false.
   logical :: add_fire_heat_flux= .false.
+  logical :: add_fire_moist_flux= .false.
   logical :: do_rrfs_sd = .true.
-!  integer :: wind_eff_opt = 1
+  integer :: plume_wind_eff = 1
   logical :: extended_sd_diags = .false.
   real(kind_phys) :: wetdep_ls_alpha = .5 ! scavenging factor
+  real(kind_phys) :: plume_alpha = 0.05
 
   ! --
   integer, parameter :: CHEM_OPT_GOCART= 1

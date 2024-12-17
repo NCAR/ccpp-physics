@@ -29,7 +29,10 @@ module mp_thompson
 !! \section arg_table_mp_thompson_init Argument Table
 !! \htmlinclude mp_thompson_init.html
 !!
-      subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, con_eps,      &
+      subroutine mp_thompson_init(ncol, nlev, con_pi, con_t0c, con_rv,     &
+                                  con_cp, con_rgas, con_boltz, con_amd,    &
+                                  con_amw, con_avgd, con_hvap, con_hfus,   &
+                                  con_g, con_rd, con_eps,                  &
                                   restart, imp_physics,                    &
                                   imp_physics_thompson, convert_dry_rho,   &
                                   spechum, qc, qr, qi, qs, qg, ni, nr,     &
@@ -39,13 +42,17 @@ module mp_thompson
                                   aerfld, mpicomm, mpirank, mpiroot,       &
                                   threads, ext_diag, diag3d,               &
                                   is_initialized, errmsg, errflg)
-
+         use module_mp_thompson, only : PI, T_0, Rv, R, RoverRv, Cp
+         use module_mp_thompson, only : R_uni, k_b, M_w, M_a, N_avo, lvap0, lfus
+         
          implicit none
 
          ! Interface variables
          integer,                   intent(in   ) :: ncol
          integer,                   intent(in   ) :: nlev
-         real(kind_phys),           intent(in   ) :: con_g, con_rd, con_eps
+         real(kind_phys),           intent(in   ) :: con_pi, con_t0c, con_rv, con_cp, con_rgas, &
+                                                     con_boltz, con_amd, con_amw, con_avgd,     &
+                                                     con_hvap, con_hfus, con_g, con_rd, con_eps
          logical,                   intent(in   ) :: restart
          logical,                   intent(inout) :: is_initialized
          integer,                   intent(in   ) :: imp_physics
@@ -103,6 +110,21 @@ module mp_thompson
 
          if (is_initialized) return
 
+         ! Set local Thompson MP module constants from host model
+         PI = con_pi
+         T_0 = con_t0c
+         Rv = con_Rv
+         R = con_rd
+         RoverRv = con_eps
+         Cp = con_cp
+         R_uni = con_rgas
+         k_b = con_boltz
+         M_w = con_amw*1.0E-3 !module_mp_thompson expects kg/mol
+         M_a = con_amd*1.0E-3 !module_mp_thompson expects kg/mol
+         N_avo = con_avgd
+         lvap0 = con_hvap
+         lfus = con_hfus
+         
          ! Consistency checks
          if (imp_physics/=imp_physics_thompson) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Thompson MP"
@@ -687,6 +709,44 @@ module mp_thompson
             nrten3     => diag3d(:,:,35:35)
             ncten3     => diag3d(:,:,36:36)
             qcten3     => diag3d(:,:,37:37)
+         else
+            allocate(prw_vcdc   (0,0,0))
+            allocate(prw_vcde   (0,0,0))
+            allocate(tpri_inu   (0,0,0))
+            allocate(tpri_ide_d (0,0,0))
+            allocate(tpri_ide_s (0,0,0))
+            allocate(tprs_ide   (0,0,0))
+            allocate(tprs_sde_d (0,0,0))
+            allocate(tprs_sde_s (0,0,0))
+            allocate(tprg_gde_d (0,0,0))
+            allocate(tprg_gde_s (0,0,0))
+            allocate(tpri_iha   (0,0,0))
+            allocate(tpri_wfz   (0,0,0))
+            allocate(tpri_rfz   (0,0,0))
+            allocate(tprg_rfz   (0,0,0))
+            allocate(tprs_scw   (0,0,0))
+            allocate(tprg_scw   (0,0,0))
+            allocate(tprg_rcs   (0,0,0))
+            allocate(tprs_rcs   (0,0,0))
+            allocate(tprr_rci   (0,0,0))
+            allocate(tprg_rcg   (0,0,0))
+            allocate(tprw_vcd_c (0,0,0))
+            allocate(tprw_vcd_e (0,0,0))
+            allocate(tprr_sml   (0,0,0))
+            allocate(tprr_gml   (0,0,0))
+            allocate(tprr_rcg   (0,0,0))
+            allocate(tprr_rcs   (0,0,0))
+            allocate(tprv_rev   (0,0,0))
+            allocate(tten3      (0,0,0))
+            allocate(qvten3     (0,0,0))
+            allocate(qrten3     (0,0,0))
+            allocate(qsten3     (0,0,0))
+            allocate(qgten3     (0,0,0))
+            allocate(qiten3     (0,0,0))
+            allocate(niten3     (0,0,0))
+            allocate(nrten3     (0,0,0))
+            allocate(ncten3     (0,0,0))
+            allocate(qcten3     (0,0,0))
          end if set_extended_diagnostic_pointers
          !> - Call mp_gt_driver() with or without aerosols, with or without effective radii, ...
          if (is_aerosol_aware) then
