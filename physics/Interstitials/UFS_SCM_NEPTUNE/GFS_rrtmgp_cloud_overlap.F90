@@ -21,6 +21,8 @@ contains
 !! *The number of "clouds" being produced by the model physics is often greater than one.
 !! rte-rrtmgp can accomodate multiple cloud-types. This module preservers this enhancement
 !! in the EMCs coupling to the RRTMGP scheme.
+!!
+!! \section GFS_rrtmgp_cloud_overlap_run
   subroutine GFS_rrtmgp_cloud_overlap_run(nCol, nLev, yearlen, doSWrad, doLWrad,         &
        julian, lat, deltaZc, con_pi, con_g, con_rd, con_epsq,                            &
        dcorr_con, idcor, iovr, iovr_dcorr, iovr_exp, iovr_exprand, idcor_con,            &
@@ -31,21 +33,21 @@ contains
     
     ! Inputs   
     integer, intent(in)     :: &
-         nCol,                 & !< Number of horizontal grid points
-         nLev,                 & !< Number of vertical layers
-         yearlen,              & !< Length of current year (365/366) WTF?
-         imfdeepcnv,           & !<
-         imfdeepcnv_gf,        & !<
-         imfdeepcnv_samf,      & !<
-         iovr,                 & !< Choice of cloud-overlap method
-         iovr_convcld,         & !< Choice of convective cloud-overlap method
-         iovr_dcorr,           & !< Flag for decorrelation-length cloud overlap method
-         iovr_exp,             & !< Flag for exponential cloud overlap method
-         iovr_exprand,         & !< Flag for exponential-random cloud overlap method
-         idcor,                & !< Choice of method for decorrelation length computation
-         idcor_con,            & !< Flag for decorrelation-length. Use constant value
-         idcor_hogan,          & !< Flag for decorrelation-length. (https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.647)
-         idcor_oreopoulos        !< Flag for decorrelation-length. (10.5194/acp-12-9097-2012) 
+         nCol,                 & ! Number of horizontal grid points
+         nLev,                 & ! Number of vertical layers
+         yearlen,              & ! Length of current year (365/366) WTF?
+         imfdeepcnv,           & !
+         imfdeepcnv_gf,        & !
+         imfdeepcnv_samf,      & !
+         iovr,                 & ! Choice of cloud-overlap method
+         iovr_convcld,         & ! Choice of convective cloud-overlap method
+         iovr_dcorr,           & ! Flag for decorrelation-length cloud overlap method
+         iovr_exp,             & ! Flag for exponential cloud overlap method
+         iovr_exprand,         & ! Flag for exponential-random cloud overlap method
+         idcor,                & ! Choice of method for decorrelation length computation
+         idcor_con,            & ! Flag for decorrelation-length. Use constant value
+         idcor_hogan,          & ! Flag for decorrelation-length. (https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.647)
+         idcor_oreopoulos        ! Flag for decorrelation-length. (10.5194/acp-12-9097-2012) 
     logical, intent(in)     :: &
          top_at_1,             & !< Vertical ordering flag
     	 doSWrad,              & !< Call SW radiation?
@@ -62,17 +64,17 @@ contains
     real(kind_phys), dimension(:,:), intent(in) :: &
          cld_frac                !< Total cloud fraction
     real(kind_phys), dimension(:,:), intent(in), optional :: &
-         cld_cnv_frac            !< Convective cloud-fraction
+         cld_cnv_frac            ! Convective cloud-fraction
     real(kind_phys), dimension(:,:), intent(in), optional :: &
-         deltaZc                 !< Layer thickness (from layer-centers)(m)
+         deltaZc                 ! Layer thickness (from layer-centers)(m)
     
     ! Outputs     
     real(kind_phys), dimension(:),intent(out) :: &
-         de_lgth                   !< Decorrelation length
+         de_lgth                   ! Decorrelation length
     real(kind_phys), dimension(:,:),intent(out), optional :: &
-         cloud_overlap_param,    & !< Cloud-overlap parameter
-         cnv_cloud_overlap_param,& !< Convective cloud-overlap parameter
-         precip_overlap_param      !< Precipitation overlap parameter
+         cloud_overlap_param,    & ! Cloud-overlap parameter
+         cnv_cloud_overlap_param,& ! Convective cloud-overlap parameter
+         precip_overlap_param      ! Precipitation overlap parameter
     character(len=*), intent(out) :: &
          errmsg                    !< Error message
     integer, intent(out) :: &
@@ -113,7 +115,7 @@ contains
     !
     ! Convective cloud overlap parameter
     !
-    if (present(cld_cnv_frac) .and. present(cnv_cloud_overlap_param)) then
+    if (imfdeepcnv == imfdeepcnv_samf .or. imfdeepcnv == imfdeepcnv_gf) then
        if (iovr_convcld == iovr_dcorr .or. iovr_convcld == iovr_exp .or. iovr_convcld == iovr_exprand) then
           call get_alpha_exper(nCol, nLev, iovr_convcld, iovr_exprand, deltaZc*0.001, de_lgth, cld_cnv_frac, cnv_cloud_overlap_param)
        else

@@ -58,9 +58,23 @@
   dimensions = ()
   type = logical
   intent = in
+[do_sw_clrsky_hr]
+  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep_assuming_clear_sky
+  long_name = flag to output sw heating rate
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [doLWrad]
   standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[do_lw_clrsky_hr]
+  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep_assuming_clear_sky
+  long_name = flag to output lw heating rate
   units = flag
   dimensions = ()
   type = logical
@@ -152,6 +166,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [fluxlwUP_allsky]
   standard_name = RRTMGP_lw_flux_profile_upward_allsky
   long_name = RRTMGP upward longwave all-sky flux profile
@@ -160,6 +175,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [fluxlwDOWN_allsky]
   standard_name = RRTMGP_lw_flux_profile_downward_allsky
   long_name = RRTMGP downward longwave all-sky flux profile
@@ -168,6 +184,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [fluxlwUP_clrsky]
   standard_name = RRTMGP_lw_flux_profile_upward_clrsky
   long_name = RRTMGP upward longwave clr-sky flux profile
@@ -194,6 +211,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [fluxswDOWN_allsky]
   standard_name = RRTMGP_sw_flux_profile_downward_allsky
   long_name = RRTMGP downward shortwave all-sky flux profile
@@ -202,6 +220,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [fluxswUP_clrsky]
   standard_name = RRTMGP_sw_flux_profile_upward_clrsky
   long_name = RRTMGP upward shortwave clr-sky flux profile
@@ -462,7 +481,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [htrlwc]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_timestep
   long_name = longwave clear sky heating rate
@@ -471,7 +489,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

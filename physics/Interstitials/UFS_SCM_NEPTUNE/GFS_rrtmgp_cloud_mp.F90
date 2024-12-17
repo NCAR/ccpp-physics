@@ -93,36 +93,36 @@ contains
          con_ttp,                   & !< Triple point temperature of water (K)  
          con_eps                      !< Physical constant: gas constant air / gas constant H2O
     real(kind_phys), dimension(:), intent(in) :: &
-         lsmask,                    & !< Land/Sea mask
-         xlon,                      & !< Longitude
-         xlat,                      & !< Latitude 
-         dx                           !< Characteristic grid lengthscale (m)
+         lsmask,                    & ! Land/Sea mask
+         xlon,                      & ! Longitude
+         xlat,                      & ! Latitude 
+         dx                           ! Characteristic grid lengthscale (m)
     real(kind_phys), dimension(:,:), intent(in), optional :: &
-         tv_lay,                    & !< Virtual temperature (K)
-         t_lay,                     & !< Temperature (K)
-         qs_lay,                    & !< Saturation vapor pressure (Pa)
-         q_lay,                     & !< water-vapor mixing ratio (kg/kg)
-         relhum,                    & !< Relative humidity
-         p_lay                        !< Pressure at model-layers (Pa)
+         tv_lay,                    & ! Virtual temperature (K)
+         t_lay,                     & ! Temperature (K)
+         qs_lay,                    & ! Saturation vapor pressure (Pa)
+         q_lay,                     & ! water-vapor mixing ratio (kg/kg)
+         relhum,                    & ! Relative humidity
+         p_lay                        ! Pressure at model-layers (Pa)
     real(kind_phys), dimension(:,:), intent(in) :: &
-         cnv_mixratio                 !< Convective cloud mixing-ratio (kg/kg)
+         cnv_mixratio                 ! Convective cloud mixing-ratio (kg/kg)
     real(kind_phys), dimension(:,:), intent(in), optional :: &
-         qci_conv,                  & !< Convective cloud condesate after rainout (kg/kg)
-         deltaZ,                    & !< Layer-thickness (m)
-         deltaZc,                   & !< Layer-thickness, from layer centers (m)
-         deltaP,                    & !< Layer-thickness (Pa)
-         qc_mynn,                   & !<
-         qi_mynn                      !<
+         qci_conv,                  & ! Convective cloud condesate after rainout (kg/kg)
+         deltaZ,                    & ! Layer-thickness (m)
+         deltaZc,                   & ! Layer-thickness, from layer centers (m)
+         deltaP,                    & ! Layer-thickness (Pa)
+         qc_mynn,                   & !
+         qi_mynn                      !
     real(kind_phys), dimension(:,:), intent(in), optional :: &
-         cld_pbl_frac                 !<
+         cld_pbl_frac                 !
     real(kind_phys), dimension(:,:), intent(inout), optional :: &
-         effrin_cldliq,             & !< Effective radius for stratiform liquid cloud-particles (microns)
-         effrin_cldice,             & !< Effective radius for stratiform ice cloud-particles (microns)
-         effrin_cldsnow               !< Effective radius for stratiform snow cloud-particles (microns)
+         effrin_cldliq,             & ! Effective radius for stratiform liquid cloud-particles (microns)
+         effrin_cldice,             & ! Effective radius for stratiform ice cloud-particles (microns)
+         effrin_cldsnow               ! Effective radius for stratiform snow cloud-particles (microns)
     real(kind_phys), dimension(:,:), intent(in), optional :: &
-         effrin_cldrain               !< Effective radius for stratiform rain cloud-particles (microns)
+         effrin_cldrain               ! Effective radius for stratiform rain cloud-particles (microns)
     real(kind_phys), dimension(:,:), intent(in), optional :: &
-         p_lev                        !< Pressure at model-level interfaces (Pa)
+         p_lev                        ! Pressure at model-level interfaces (Pa)
     real(kind_phys), dimension(:,:,:),intent(in) :: &
          tracer                       !< Cloud condensate amount in layer by type ()
 
@@ -135,26 +135,26 @@ contains
     real(kind_phys), dimension(:), intent(out) :: &
          cldfra2d                     !< Instantaneous 2D (max-in-column) cloud fraction
     real(kind_phys), dimension(:,:),intent(inout) :: &
-         cld_frac,                  & !< Cloud-fraction for   stratiform   clouds
-         cld_lwp,                   & !< Water path for       stratiform   liquid cloud-particles
-         cld_reliq,                 & !< Effective radius for stratiform   liquid cloud-particles
-         cld_iwp,                   & !< Water path for       stratiform   ice    cloud-particles
-         cld_reice,                 & !< Effective radius for stratiform   ice    cloud-particles
-         cld_swp,                   & !< Water path for                    snow   hydrometeors
-         cld_resnow,                & !< Effective radius for              snow   hydrometeors
-         cld_rwp,                   & !< Water path for                    rain   hydrometeors
-         cld_rerain                   !< Effective radius for              rain   hydrometeors
+         cld_frac,                  & ! Cloud-fraction for   stratiform   clouds
+         cld_lwp,                   & ! Water path for       stratiform   liquid cloud-particles
+         cld_reliq,                 & ! Effective radius for stratiform   liquid cloud-particles
+         cld_iwp,                   & ! Water path for       stratiform   ice    cloud-particles
+         cld_reice,                 & ! Effective radius for stratiform   ice    cloud-particles
+         cld_swp,                   & ! Water path for                    snow   hydrometeors
+         cld_resnow,                & ! Effective radius for              snow   hydrometeors
+         cld_rwp,                   & ! Water path for                    rain   hydrometeors
+         cld_rerain                   ! Effective radius for              rain   hydrometeors
     real(kind_phys), dimension(:,:),intent(inout), optional :: &
-         precip_frac,               & !< Precipitation fraction
-         cld_cnv_frac,              & !< Cloud-fraction for   convective clouds
-         cld_cnv_lwp,               & !< Water path for       convective   liquid cloud-particles
-         cld_cnv_reliq,             & !< Effective radius for convective   liquid cloud-particles
-         cld_cnv_iwp,               & !< Water path for       convective   ice    cloud-particles
-         cld_cnv_reice,             & !< Effective radius for convective   ice    cloud-particles
-         cld_pbl_lwp,               & !< Water path for       SGS PBL liquid cloud-particles
-         cld_pbl_reliq,             & !< Effective radius for SGS PBL liquid cloud-particles
-         cld_pbl_iwp,               & !< Water path for       SGS PBL ice    cloud-particles
-         cld_pbl_reice                !< Effective radius for SGS PBL ice    cloud-particles
+         precip_frac,               & ! Precipitation fraction
+         cld_cnv_frac,              & ! Cloud-fraction for   convective clouds
+         cld_cnv_lwp,               & ! Water path for       convective   liquid cloud-particles
+         cld_cnv_reliq,             & ! Effective radius for convective   liquid cloud-particles
+         cld_cnv_iwp,               & ! Water path for       convective   ice    cloud-particles
+         cld_cnv_reice,             & ! Effective radius for convective   ice    cloud-particles
+         cld_pbl_lwp,               & ! Water path for       SGS PBL liquid cloud-particles
+         cld_pbl_reliq,             & ! Effective radius for SGS PBL liquid cloud-particles
+         cld_pbl_iwp,               & ! Water path for       SGS PBL ice    cloud-particles
+         cld_pbl_reice                ! Effective radius for SGS PBL ice    cloud-particles
     character(len=*), intent(out) :: &
          errmsg                       !< Error message
     integer, intent(out) :: &  
