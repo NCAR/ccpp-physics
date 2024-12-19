@@ -1,5 +1,5 @@
 [ccpp-table-properties]
-  name = GFS_rrtmgp_post
+  name = GFS_radiation_post
   type = scheme
   relative_path	= ../../
   dependencies = hooks/machine.F,Radiation/radiation_aerosols.f
@@ -7,7 +7,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_rrtmgp_post_run
+  name = GFS_radiation_post_run
   type = scheme
 [nCol]
   standard_name = horizontal_loop_extent
@@ -77,6 +77,13 @@
   long_name = flag to output lw heating rate
   units = flag
   dimensions = ()
+  type = logical
+  intent = in
+[do_RRTMGP]
+  standard_name = flag_for_rrtmgp_radiation_scheme
+  long_name = flag for RRTMGP scheme
+  units = flag
+  dimensions =  ()
   type = logical
   intent = in
 [sfc_alb_nir_dir]
@@ -377,6 +384,14 @@
   long_name = longwave clear sky heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = inout
+[total_albedo]
+  standard_name = total_sky_albedo
+  long_name = total sky albedo at toa
+  units = frac
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout

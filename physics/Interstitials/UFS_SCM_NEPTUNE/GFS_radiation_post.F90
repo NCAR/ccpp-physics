@@ -1,10 +1,10 @@
-!> \file GFS_rrtmgp_post.F90
+!> \file GFS_radiation_post.F90
 !!
-!> \defgroup GFS_rrtmgp_post GFS_rrtmgp_post.F90
+!> \defgroup GFS_radiation_post GFS_rrtmgp_post.F90
 !!
 !! \brief RRTMGP post-processing routine.
 !!
-module GFS_rrtmgp_post
+module GFS_radiation_post
   use machine,                   only: kind_phys
   use module_radlw_parameters,   only: topflw_type, sfcflw_type
   use module_radsw_parameters,   only: topfsw_type, sfcfsw_type, cmpfsw_type
@@ -12,34 +12,32 @@ module GFS_rrtmgp_post
   use radiation_tools,           only: check_error_msg
   implicit none
 
-  public GFS_rrtmgp_post_run
+  public GFS_radiation_post_run
 
 contains
   ! ######################################################################################## 
-!>\defgroup gfs_rrtmgp_post_mod GFS RRTMGP Post Module
-!> \section arg_table_GFS_rrtmgp_post_run
-!! \htmlinclude GFS_rrtmgp_post.html
+!>\defgroup gfs_radiation_post_mod GFS Radiation Post Module
+!> \section arg_table_GFS_radiation_post_run
+!! \htmlinclude GFS_radiation_post.html
 !!
-!! \ingroup GFS_rrtmgp_post
+!! \ingroup GFS_radiation_post
 !!
 !! \brief The all-sky radiation tendency is computed, the clear-sky tendency is computed 
 !! if requested.
 !!
 !! RRTMGP surface and TOA fluxes are copied to fields that persist between radiation/physics
 !! calls.
-!! 
-!! (optional) Save additional diagnostics.
 !!
-!! \section GFS_rrtmgp_post_run
+!! \section GFS_radiation_post_run
   ! ######################################################################################## 
-  subroutine GFS_rrtmgp_post_run (nCol, nLev, nDay, iSFC, iTOA, idxday, doLWrad, doSWrad,  &
-       do_lw_clrsky_hr, do_sw_clrsky_hr, sfc_alb_nir_dir,                                  &
+  subroutine GFS_radiation_post_run (nCol, nLev, nDay, iSFC, iTOA, idxday, doLWrad, doSWrad,  &
+       do_lw_clrsky_hr, do_sw_clrsky_hr, do_RRTMGP, sfc_alb_nir_dir,                       &
        sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, p_lev, tsfa,                 &
        fluxlwDOWN_clrsky, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,             &
        fluxswDOWN_clrsky, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky, scmpsw,     &
        sfcdlw, sfculw, sfcflw, tsflw, htrlw, htrlwu, topflw, nirbmdi, nirdfdi, visbmdi,    &
        visdfdi, nirbmui, nirdfui, visbmui, visdfui, sfcnsw, sfcdsw, htrsw, sfcfsw, topfsw, &
-       htrswc, htrlwc, errmsg, errflg)
+       htrswc, htrlwc, total_albedo, errmsg, errflg)
 
     ! Inputs
     integer, intent(in) ::  &
@@ -54,7 +52,8 @@ contains
          doLWrad,           & ! Logical flags for lw radiation calls
          doSWrad,           & ! Logical flags for sw radiation calls
          do_lw_clrsky_hr,   & ! Output clear-sky LW heating-rate?
-         do_sw_clrsky_hr      ! Output clear-sky SW heating-rate? 
+         do_sw_clrsky_hr,   & ! Output clear-sky SW heating-rate? 
+         do_RRTMGP            ! Flag for using RRTMGP scheme
     real(kind_phys), dimension(:), intent(in) ::  &
          tsfa,              & ! Lowest model layer air temperature for radiation (K)
          sfc_alb_nir_dir,   & ! Surface albedo (direct) 
@@ -98,6 +97,8 @@ contains
     real(kind_phys), dimension(:,:), intent(inout) :: &
          htrlw,             & ! LW all-sky heating rate (K/s)
          htrsw                ! SW all-sky heating rate (K/s)
+    real(kind_phys), dimension(nCol), intent(inout) :: &
+         total_albedo         ! Total sky albedo at TOA (W/m2)
     real(kind_phys), dimension(:,:), intent(inout), optional :: &
          htrlwu               ! LW all-sky heating-rate updated in-between radiation calls.
     type(sfcflw_type), dimension(:), intent(inout) :: &
@@ -130,51 +131,56 @@ contains
     if (.not. (doLWrad .or. doSWrad)) return
 
     if (doLWRad) then
-       ! #######################################################################################
-       ! Compute LW heating-rates.
-       ! #######################################################################################
+       if (do_RRTMGP) then
+          ! #######################################################################################
+          ! Compute LW heating-rates.
+          ! #######################################################################################
 
-       ! Clear-sky heating-rate (optional)
-       if (do_lw_clrsky_hr) then
-          call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(  &
-               fluxlwUP_clrsky,   & ! IN  - RRTMGP upward longwave clear-sky flux profiles (W/m2)
-               fluxlwDOWN_clrsky, & ! IN  - RRTMGP downward longwave clear-sky flux profiles (W/m2)
-               p_lev,             & ! IN  - Pressure @ layer-interfaces (Pa)
-               htrlwc))             ! OUT - Longwave clear-sky heating rate (K/sec)
+          ! Clear-sky heating-rate (optional)
+          if (do_lw_clrsky_hr) then
+             call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(  &
+                  fluxlwUP_clrsky,   & ! IN  - RRTMGP upward longwave clear-sky flux profiles (W/m2)
+                  fluxlwDOWN_clrsky, & ! IN  - RRTMGP downward longwave clear-sky flux profiles (W/m2)
+                  p_lev,             & ! IN  - Pressure @ layer-interfaces (Pa)
+                  htrlwc))             ! OUT - Longwave clear-sky heating rate (K/sec)
+          endif
+
+          ! All-sky heating-rate (mandatory)
+          call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(     &
+               fluxlwUP_allsky,      & ! IN  - RRTMGP upward longwave all-sky flux profiles (W/m2)
+               fluxlwDOWN_allsky,    & ! IN  - RRTMGP downward longwave all-sky flux profiles (W/m2)
+               p_lev,                & ! IN  - Pressure @ layer-interfaces (Pa)
+               htrlw))                 ! OUT - Longwave all-sky heating rate (K/sec)
+
+          ! #######################################################################################
+          ! Save LW outputs.
+          ! (Copy fluxes from RRTMGP types into model radiation types.)
+          ! #######################################################################################
+          ! TOA fluxes
+
+          topflw(:)%upfxc = fluxlwUP_allsky(:,iTOA)
+          topflw(:)%upfx0 = fluxlwUP_clrsky(:,iTOA)
+          
+          ! Surface fluxes
+          sfcflw(:)%upfxc = fluxlwUP_allsky(:,iSFC)
+          sfcflw(:)%upfx0 = fluxlwUP_clrsky(:,iSFC)
+          sfcflw(:)%dnfxc = fluxlwDOWN_allsky(:,iSFC)
+          sfcflw(:)%dnfx0 = fluxlwDOWN_clrsky(:,iSFC)
+          
+          ! Save surface air temp for diurnal adjustment at model t-steps
+          tsflw (:) = tsfa(:)
+          
+          ! Radiation fluxes for other physics processes
+          sfcdlw(:) = sfcflw(:)%dnfxc
+          sfculw(:) = sfcflw(:)%upfxc
+          
+          ! Heating-rate at radiation timestep, used for adjustment between radiation calls.
+          htrlwu = htrlw
        endif
-
-       ! All-sky heating-rate (mandatory)
-       call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(     &
-            fluxlwUP_allsky,      & ! IN  - RRTMGP upward longwave all-sky flux profiles (W/m2)
-            fluxlwDOWN_allsky,    & ! IN  - RRTMGP downward longwave all-sky flux profiles (W/m2)
-            p_lev,                & ! IN  - Pressure @ layer-interfaces (Pa)
-            htrlw))                 ! OUT - Longwave all-sky heating rate (K/sec)
-
-       ! #######################################################################################
-       ! Save LW outputs.
-       ! (Copy fluxes from RRTMGP types into model radiation types.)
-       ! #######################################################################################
-       ! TOA fluxes
-
-       topflw(:)%upfxc = fluxlwUP_allsky(:,iTOA)
-       topflw(:)%upfx0 = fluxlwUP_clrsky(:,iTOA)
-       
-       ! Surface fluxes
-       sfcflw(:)%upfxc = fluxlwUP_allsky(:,iSFC)
-       sfcflw(:)%upfx0 = fluxlwUP_clrsky(:,iSFC)
-       sfcflw(:)%dnfxc = fluxlwDOWN_allsky(:,iSFC)
-       sfcflw(:)%dnfx0 = fluxlwDOWN_clrsky(:,iSFC)
-       
-       ! Save surface air temp for diurnal adjustment at model t-steps
-       tsflw (:) = tsfa(:)
-       
-       ! Radiation fluxes for other physics processes
-       sfcdlw(:) = sfcflw(:)%dnfxc
-       sfculw(:) = sfcflw(:)%upfxc
-       
-       ! Heating-rate at radiation timestep, used for adjustment between radiation calls.
-       htrlwu = htrlw
-       
+    
+!  ---  The total sky (with clouds) shortwave albedo
+       total_albedo = 0.0
+       where(topfsw(:)%dnfxc>0) total_albedo(:) = topfsw(:)%upfxc/topfsw(:)%dnfxc
     endif
     ! #######################################################################################
     ! #######################################################################################
@@ -182,7 +188,7 @@ contains
     ! #######################################################################################
     ! #######################################################################################
     ! #######################################################################################
-    if (doSWRad) then
+    if (doSWRad .and. do_RRTMGP) then
        if (nDay .gt. 0) then
           ! #################################################################################
           ! Compute SW heating-rates
@@ -267,5 +273,5 @@ contains
        
     endif
 
-  end subroutine GFS_rrtmgp_post_run
-end module GFS_rrtmgp_post
+  end subroutine GFS_radiation_post_run
+end module GFS_radiation_post
