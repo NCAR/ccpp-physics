@@ -1,0 +1,248 @@
+[ccpp-table-properties]
+  name = GFS_rad_time_vary
+  type = scheme
+  relative_path = ../../
+  dependencies = hooks/machine.F,Radiation/mersenne_twister.f,Radiation/RRTMG/radcons.f90
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_rad_time_vary_timestep_init
+  type = scheme
+[lrseeds]
+  standard_name = do_host_provided_random_seeds
+  long_name = flag to use host-provided random seeds
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[rseeds]
+  standard_name = random_number_seeds_from_host
+  long_name = random number seeds from host
+  units = none
+  dimensions = (horizontal_dimension, number_of_host_provided_random_number_streams)
+  type = integer
+  intent = in
+  optional = True
+[lslwr]
+  standard_name = flag_for_calling_longwave_radiation
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lsswr]
+  standard_name = flag_for_calling_shortwave_radiation
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[isubc_lw]
+  standard_name = flag_for_lw_clouds_sub_grid_approximation
+  long_name = flag for lw clouds sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[isubc_sw]
+  standard_name = flag_for_sw_clouds_grid_approximation
+  long_name = flag for sw clouds sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[icsdsw]
+  standard_name = random_number_seed_for_mcica_shortwave
+  long_name = random seeds for sub-column cloud generators sw
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = True
+[icsdlw]
+  standard_name = random_number_seed_for_mcica_longwave
+  long_name = random seeds for sub-column cloud generators lw
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = True
+[cnx]
+  standard_name = number_of_x_points_for_current_cubed_sphere_tile
+  long_name = number of points in x direction for this cubed sphere face
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[cny]
+  standard_name = number_of_y_points_for_current_cubed_sphere_tile
+  long_name = number of points in y direction for this cubed sphere face
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[isc]
+  standard_name = starting_x_index_for_this_MPI_rank
+  long_name = starting index in the x direction for this MPI rank
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[jsc]
+  standard_name = starting_y_index_for_this_MPI_rank
+  long_name = starting index in the y direction for this MPI rank
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[imap]
+  standard_name = map_of_block_column_number_to_global_i_index
+  long_name = map of local index ix to global index i for this block
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+[jmap]
+  standard_name = map_of_block_column_number_to_global_j_index
+  long_name = map of local index ix to global index j for this block
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+[sec]
+  standard_name = forecast_time_in_seconds
+  long_name = seconds elapsed since model initialization
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[kdt]
+  standard_name = index_of_timestep
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[imp_physics]
+  standard_name = control_for_microphysics_scheme
+  long_name = choice of microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imp_physics_zhao_carr]
+  standard_name = identifier_for_zhao_carr_microphysics_scheme
+  long_name = choice of Zhao-Carr microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[ipsd0]
+  standard_name = initial_seed_for_mcica
+  long_name = initial permutaion seed for mcica radiation
+  units = 1
+  dimensions =  ()
+  type = integer
+  intent = in
+[ipsdlim]
+  standard_name = limit_for_initial_seed_for_mcica
+  long_name = limit for initial permutaion seed for mcica radiation
+  units = 1
+  dimensions =  ()
+  type = integer
+  intent = in
+[ps_2delt]
+  standard_name = surface_air_pressure_two_timesteps_back
+  long_name = surface air pressure two timesteps back
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[ps_1delt]
+  standard_name = surface_air_pressure_on_previous_timestep
+  long_name = surface air pressure at previous timestep
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[t_2delt]
+  standard_name = air_temperature_two_timesteps_back
+  long_name = air temperature two timesteps back
+  units = K
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[t_1delt]
+  standard_name = air_temperature_on_previous_timestep_in_xyz_dimensioned_restart_array
+  long_name = air temperature at previous timestep
+  units = K
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[qv_2delt]
+  standard_name = specific_humidity_two_timesteps_back
+  long_name = water vapor specific humidity two timesteps back
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[qv_1delt]
+  standard_name = specific_humidity_on_previous_timestep_in_xyz_dimensioned_restart_array
+  long_name = water vapor specific humidity at previous timestep
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[t]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[qv]
+  standard_name = specific_humidity
+  long_name = water vapor specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[ps]
+  standard_name = air_pressure_at_lowest_model_interface
+  long_name = air pressure at lowest model interface
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+

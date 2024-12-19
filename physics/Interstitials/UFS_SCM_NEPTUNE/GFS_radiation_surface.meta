@@ -1,0 +1,540 @@
+[ccpp-table-properties]
+  name = GFS_radiation_surface
+  type = scheme
+  relative_path = ../../
+  dependencies = Radiation/radiation_surface.f
+  dependencies = SFC_Models/Land/RUC/set_soilveg_ruc.F90,SFC_Models/Land/RUC/namelist_soilveg_ruc.F90
+  dependencies = hooks/machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_radiation_surface_init
+  type = scheme
+[me]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ialb]
+  standard_name = control_for_surface_albedo
+  long_name = flag for using climatology alb, based on sfc type
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iems]
+  standard_name = control_for_surface_emissivity
+  long_name = surface emissivity control flag, use fixed value of 1
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[semis_file]
+  standard_name = surface_emissivity_data_file
+  long_name = surface emissivity data file for radiation
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=26
+  intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_radiation_surface_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ialb]
+  standard_name = control_for_surface_albedo
+  long_name = flag for using climatology alb, based on sfc type
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[nf_albd]
+  standard_name = number_of_components_for_surface_albedo
+  long_name = number of IR/VIS/UV compinents for surface albedo
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[frac_grid]
+  standard_name = flag_for_fractional_landmask
+  long_name = flag for fractional grid
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lslwr]
+  standard_name = flag_for_calling_longwave_radiation
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lsswr]
+  standard_name = flag_for_calling_shortwave_radiation
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lsm]
+  standard_name = control_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[lsm_noahmp]
+  standard_name = identifier_for_noahmp_land_surface_scheme
+  long_name = flag for NOAH MP land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[lsm_ruc]
+  standard_name = identifier_for_ruc_land_surface_scheme
+  long_name = flag for RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[xlat]
+  standard_name = latitude
+  long_name = latitude
+  units = radian
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[xlon]
+  standard_name = longitude
+  long_name = longitude
+  units = radian
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[slmsk]
+  standard_name = area_type
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[lndp_type]
+  standard_name = control_for_stochastic_land_surface_perturbation
+  long_name = index for stochastic land surface perturbations type
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[n_var_lndp]
+  standard_name = number_of_perturbed_land_surface_variables
+  long_name = number of land surface variables perturbed
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[sfc_alb_pert]
+  standard_name = surface_albedo_perturbation
+  long_name = surface albedo perturbation
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[lndp_var_list]
+  standard_name = land_surface_perturbation_variables
+  long_name = variables to be perturbed for landperts
+  units = none
+  dimensions =  (number_of_perturbed_land_surface_variables)
+  type = character
+  kind = len=3
+  intent = in
+  optional = True
+[lndp_prt_list]
+  standard_name = land_surface_perturbation_magnitudes
+  long_name = magnitude of perturbations for landperts
+  units = variable
+  dimensions = (number_of_perturbed_land_surface_variables)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[landfrac]
+  standard_name = land_area_fraction
+  long_name = fraction of horizontal grid area occupied by land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[snodl]
+  standard_name = surface_snow_thickness_water_equivalent_over_land
+  long_name = water equivalent snow depth over land
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[snodi]
+  standard_name = surface_snow_thickness_water_equivalent_over_ice
+  long_name = water equivalent snow depth over ice
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sncovr]
+  standard_name = surface_snow_area_fraction_over_land
+  long_name = surface snow area fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sncovr_ice]
+  standard_name = surface_snow_area_fraction_over_ice
+  long_name = surface snow area fraction over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[fice]
+  standard_name = sea_ice_area_fraction_of_sea_area_fraction
+  long_name = ice fraction over open water
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[zorl]
+  standard_name = surface_roughness_length
+  long_name = surface roughness length
+  units = cm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[hprime]
+  standard_name = standard_deviation_of_subgrid_orography
+  long_name = standard deviation of subgrid height_above_mean_sea_level
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[tsfg]
+  standard_name = surface_ground_temperature_for_radiation
+  long_name = surface ground temperature for radiation
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[tsfa]
+  standard_name = surface_air_temperature_for_radiation
+  long_name = lowest model layer air temperature for radiation
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[tisfc]
+  standard_name = surface_skin_temperature_over_ice
+  long_name = surface_skin_temperature_over_ice
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[coszen]
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
+  long_name = mean cos of zenith angle over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[cplice]
+  standard_name = flag_for_sea_ice_coupling
+  long_name = flag controlling cplice collection (default on)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[min_seaice]
+  standard_name = min_sea_ice_area_fraction
+  long_name = minimum sea ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[min_lakeice]
+  standard_name = min_lake_ice_area_fraction
+  long_name = minimum lake ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[lakefrac]
+  standard_name = lake_area_fraction
+  long_name = fraction of horizontal grid area occupied by lake
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[use_lake_model]
+  standard_name = flag_for_using_lake_model
+  long_name = flag indicating lake points using a lake model
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = inout
+[alvsf]
+  standard_name = vis_albedo_strong_cosz
+  long_name = mean vis albedo with strong cosz dependency
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[alnsf]
+  standard_name = nir_albedo_strong_cosz
+  long_name = mean nir albedo with strong cosz dependency
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[alvwf]
+  standard_name = vis_albedo_weak_cosz
+  long_name = mean vis albedo with weak cosz dependency
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[alnwf]
+  standard_name = nir_albedo_weak_cosz
+  long_name = mean nir albedo with weak cosz dependency
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[facsf]
+  standard_name =strong_cosz_area_fraction
+  long_name = fractional coverage with strong cosz dependency
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[facwf]
+  standard_name = weak_cosz_area_fraction
+  long_name = fractional coverage with weak cosz dependency
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[semis_lnd]
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[semis_ice]
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[semis_wat]
+  standard_name = surface_longwave_emissivity_over_water
+  long_name = surface lw emissivity in fraction over water
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[snoalb]
+  standard_name = upper_bound_of_max_albedo_assuming_deep_snow
+  long_name = maximum snow albedo
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[use_cice_alb]
+  standard_name = flag_for_cice_albedo
+  long_name = flag for using ice albedos form CICE when coupled (default on)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[con_ttp]
+  standard_name = triple_point_temperature_of_water
+  long_name = triple point temperature of water
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[albdvis_lnd]
+  standard_name = surface_albedo_direct_visible_over_land
+  long_name = direct surface albedo visible band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[albdnir_lnd]
+  standard_name = surface_albedo_direct_NIR_over_land
+  long_name = direct surface albedo NIR band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[albivis_lnd]
+  standard_name = surface_albedo_diffuse_visible_over_land
+  long_name = diffuse surface albedo visible band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[albinir_lnd]
+  standard_name = surface_albedo_diffuse_NIR_over_land
+  long_name = diffuse surface albedo NIR band over land
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[albdvis_ice]
+  standard_name = surface_albedo_direct_visible_over_ice
+  long_name = direct surface albedo visible band over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[albdnir_ice]
+  standard_name = surface_albedo_direct_NIR_over_ice
+  long_name = direct surface albedo NIR band over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[albivis_ice]
+  standard_name = surface_albedo_diffuse_visible_over_ice
+  long_name = diffuse surface albedo visible band over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[albinir_ice]
+  standard_name = surface_albedo_diffuse_NIR_over_ice
+  long_name = diffuse surface albedo NIR band over ice
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[semisbase]
+  standard_name = baseline_surface_longwave_emissivity
+  long_name = baseline surface lw emissivity in fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[semis]
+  standard_name = surface_longwave_emissivity
+  long_name = surface lw emissivity in fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[sfcalb]
+  standard_name = surface_albedo_components
+  long_name = surface albedo IR/UV/VIS components
+  units = frac
+  dimensions = (horizontal_loop_extent,number_of_components_for_surface_albedo)
+  type = real
+  kind = kind_phys
+  intent = inout
+[sfc_alb_dif]
+  standard_name = surface_albedo_for_diffused_shortwave_on_radiation_timestep
+  long_name = mean surface diffused sw albedo
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out

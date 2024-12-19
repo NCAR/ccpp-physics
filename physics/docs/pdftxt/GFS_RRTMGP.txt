@@ -1,14 +1,86 @@
 /**
-\page GFS_RRTMGP GFS RRTMGP Shortwave/Longwave Radiation Scheme
+\page GFS_RRTMGP_page RTE+RRTMGP Shortwave/Longwave Radiation Scheme
 
-\section des_rrtmgp Description
+\section des_rte_rrtmgp Description
 
-\section  intraphysics_rrtmgp Intraphysics Communication
- + For RRTMG-Longwave radiation parameterization (\ref arg_table_rrtmg_lw_run)
- + For RRTMG-Shortwave radiation parameterization (\ref arg_table_rrtmg_sw_run) 
+ RTE+RRTMGP is a set of codes for computing radiative fluxes in planetary atmospheres.
 
-\section  gen_al_rrtmgp General Algorithm
- + \ref gen_lwrad
- + \ref gen_swrad
+ RRTMGP uses a k-distribution to provide an optical description (absorption and possibly
+ Rayleigh optical depth) of the gaseous atmosphere, along with the relevant source functions,
+ on a pre-determined spectral grid given temperatures, pressures, and gas concentration.
+ The k-distribution currently distributed with this package is applicable to the Earth's
+ atmosphere under present-day, pre-industrial, and 4xCO2 conditions.
+
+ RTE computes fluxes given spectrally-resolved optical descriptions and source functions.
+ The fluxes are normally summarized or reduced via a user extensible class.
+
+\subsection Clear-sky-opt Clear-sky Optical Properties
+
+ The RRTMGP LW algorithm contains 128 unevenly distributed g-points (quadrature points) in 16
+ broad spectral bands, while the SW algorithm includes 112 g-points
+ in 14 bands. In addition to the major atmospheric absorbing gases of
+ ozone, water vapor, and carbon dioxide, the algorithm also includes
+ various minor absorbing species such as methane, nitrous oxide,
+ oxygen, and in the longwave up to four types of halocarbons (CFCs).
+
+\subsection Aerosol-opt Aerosol Optical Properties
+
+ Aerosol optical properties for	the RRTMGP bands are computed externally and provided to
+ the radiation and incremented onto the gaseous optics. This is identical to how the aerosol
+ optics	are included within RRTMG. There are no internal assumptions on aerosol properties
+ within	the radiation scheme.
+
+\subsection Cloud-opt Cloud Optical Properties
+
+ Cloud optical properties are computed as a function of effective radius for the
+ RRTMGP bands. Based on Mie calculations for liquid and results from Yang et al. 2013 \cite Yang_2013
+ for ice with variable surface roughness.
+
+ To represent statistically the unresolved subgrid cloud variability
+ when dealing multi layered clouds, a Monte-Carlo Independent Column
+ Approximation (\b McICA) method is used prior to calling the RTE.
+ Several cloud overlap methods, including maximum-random, exponential,
+ and exponential-random are available in both LW and SW
+ radiation calculations. (\b Unlike RRTMG, in RRTMGP the subgrid sampling
+ step is not within the spectral loop, but rather happens outside of
+ the RTE.)
+
+\subsection Radiative fields from model outputs (\f$W m^{-2}\f$)
+- At surface total sky
+ - DLWRFsfc: Downward LW
+ - DSWRFsfc: Downward SW
+ - ULWRFsfc: Upward LW
+ - USWRFsfc: Upward SW
+ - NBDSFsfc: Near IR beam downward
+ - NDDSFsfc: Near IR diffuse downward
+ - VBDSFsfc: UV+Visible beam downward
+ - VDDSFsfc: UV+Visible diffuse downward
+ - DUVBsfc:  UV-B downward flux
+- At surface clear sky
+ - CSDLFsfc: Downward LW
+ - CSDSFsfc: Downward SW
+ - CSULFsfc: Upward LW
+ - CSDLFsfc: Downward LW
+ - CSUSFsfc: Upward sw
+ - CDUVBsfc: UV-B downward flux
+- At TOA total sky
+ - DSWRFtoa: Downward SW
+ - ULWRFtoa: Upward LW
+ - USWRFtoa: Upward SW
+- At TOA clear sky:
+ - CSULFtoa: Upward LW
+ - CSUSFtoa: Upward SW
+
+\section intraphysics_rrtmgp Intraphysics Communication
+ + \b GFS RRTMGP pre-processing used, for both Longwave and Shortwave: \ref arg_table_GFS_rrtmgp_pre_run
+ + \b GFS surface-to-RRTMGP interface: \ref arg_table_GFS_radiation_surface_run
+ + \b GFS RRTMGP cloud microphysics interface: \ref arg_table_GFS_rrtmgp_cloud_mp_run
+ + \b GFS RRTMGP cloud overlap interface: \ref arg_table_GFS_rrtmgp_cloud_overlap_run
+ + \b GFS cloud diagnostics: \ref arg_table_GFS_cloud_diagnostics_run
+ + \b GFS RRTMGP aerosol interface: \ref arg_table_rrtmgp_aerosol_optics_run
+ + \b GFS RRTMGP-Longwave radiation driver: \ref arg_table_rrtmgp_lw_main_run
+ + \b GFS RRTMGP-Shortwave radiation driver: \ref arg_table_rrtmgp_sw_main_run
+ + \b GFS RRTMGP post-processing, for both Longwave and Shortwave: \ref arg_table_GFS_rrtmgp_post_run
+
 
 */

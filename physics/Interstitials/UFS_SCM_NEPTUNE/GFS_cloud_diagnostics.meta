@@ -1,0 +1,216 @@
+[ccpp-table-properties]
+  name = GFS_cloud_diagnostics
+  type = scheme
+  relative_path = ../../
+  dependencies = hooks/machine.F,Radiation/radiation_clouds.f
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_cloud_diagnostics_run
+  type = scheme
+[ncol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[nLev]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr]
+  standard_name = flag_for_cloud_overlap_method_for_radiation
+  long_name = max-random overlap clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_rand]
+  standard_name = flag_for_random_cloud_overlap_method
+  long_name = choice of random cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_maxrand]
+  standard_name = flag_for_maximum_random_cloud_overlap_method
+  long_name = choice of maximum-random cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_max]
+  standard_name = flag_for_maximum_cloud_overlap_method
+  long_name = choice of maximum cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_dcorr]
+  standard_name = flag_for_decorrelation_length_cloud_overlap_method
+  long_name = choice of decorrelation-length cloud overlap method
+  units     = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_exp]
+  standard_name = flag_for_exponential_cloud_overlap_method
+  long_name = choice of exponential cloud overlap method
+  units     = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_exprand]
+  standard_name = flag_for_exponential_random_cloud_overlap_method
+  long_name = choice of exponential-random cloud overlap method
+  units     = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[lsswr]
+  standard_name = flag_for_calling_shortwave_radiation
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lslwr]
+  standard_name = flag_for_calling_longwave_radiation
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lat]
+  standard_name = latitude
+  long_name = latitude
+  units = radian
+  dimensions = (horizontal_loop_extent)
+  type = real
+  intent = in
+  kind = kind_phys
+[de_lgth]
+  standard_name = cloud_decorrelation_length
+  long_name = cloud decorrelation length
+  units = km
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[p_lay]
+  standard_name = air_pressure_at_layer_for_RRTMGP
+  long_name = air pressure at vertical layer for radiation calculation
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[cld_frac]
+  standard_name = total_cloud_fraction
+  long_name = layer total cloud fraction
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[p_lev]
+  standard_name = air_pressure_at_interface_for_RRTMGP
+  long_name = air pressure at vertical interface for radiation calculation
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[deltaZ]
+  standard_name = layer_thickness
+  long_name = layer_thickness
+  units = m
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[cloud_overlap_param]
+  standard_name = cloud_overlap_param
+  long_name = cloud overlap parameter
+  units = km
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[precip_overlap_param]
+  standard_name = precip_overlap_param
+  long_name = precipitation overlap parameter
+  units = km
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_radiation
+  long_name = flag for vertical ordering in radiation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[si]
+  standard_name = sigma_pressure_hybrid_vertical_coordinate
+  long_name = vertical sigma coordinate for radiation initialization
+  units = none
+  dimensions = (vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[mtopa]
+  standard_name = model_layer_number_at_cloud_top
+  long_name = vertical indices for low, middle and high cloud tops
+  units = index
+  dimensions = (horizontal_loop_extent,3)
+  type = integer
+  intent = out
+[mbota]
+  standard_name = model_layer_number_at_cloud_base
+  long_name = vertical indices for low, middle and high cloud bases
+  units = index
+  dimensions = (horizontal_loop_extent,3)
+  type = integer
+  intent = out
+[cldsa]
+  standard_name = cloud_area_fraction_for_radiation
+  long_name = fraction of clouds for low, middle, high, total and BL
+  units = frac
+  dimensions = (horizontal_loop_extent,5)
+  type = real
+  kind = kind_phys
+  intent = out
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out

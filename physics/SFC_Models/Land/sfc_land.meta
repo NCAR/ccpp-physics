@@ -1,0 +1,282 @@
+[ccpp-table-properties]
+  name = sfc_land
+  type = scheme
+  dependencies = ../../hooks/machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = sfc_land_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[cpllnd]
+  standard_name = flag_for_land_coupling
+  long_name = flag controlling cpllnd collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[cpllnd2atm]
+  standard_name = flag_for_one_way_land_coupling_to_atmosphere
+  long_name = flag controlling land coupling to the atmosphere (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[flag_iter]
+  standard_name = flag_for_iteration
+  long_name = flag for iteration
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = in
+[dry]
+  standard_name = flag_nonzero_land_surface_fraction
+  long_name = flag indicating presence of some land surface area fraction
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = in
+[sncovr1_lnd]
+  standard_name = surface_snow_area_fraction_over_land_from_land
+  long_name = surface snow area fraction over land for coupling
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[qsurf_lnd]
+  standard_name = surface_specific_humidity_over_land_from_land
+  long_name = surface air saturation specific humidity over land
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[evap_lnd]
+  standard_name = surface_upward_latent_heat_flux_over_land_from_land
+  long_name = sfc latent heat flux input over land for coupling
+  units = kg kg-1 m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[hflx_lnd]
+  standard_name = surface_upward_sensible_heat_flux_over_land_from_land
+  long_name = sfc sensible heat flux input over land for coupling
+  units = K m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[ep_lnd]
+  standard_name = surface_upward_potential_latent_heat_flux_over_land_from_land
+  long_name = surface upward potential latent heat flux over land for coupling
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[t2mmp_lnd]
+  standard_name = temperature_at_2m_over_land_from_land
+  long_name = 2 meter temperature over land for coupling
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in 
+  optional = True
+[q2mp_lnd]
+  standard_name = specific_humidity_at_2m_over_land_from_land
+  long_name = 2 meter specific humidity over land for coupling
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[gflux_lnd]
+  standard_name = upward_heat_flux_in_soil_over_land_from_land
+  long_name = soil heat flux over land for coupling
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[runoff_lnd]
+  standard_name = surface_runoff_flux_from_land
+  long_name = surface runoff flux over land for coupling
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[drain_lnd]
+  standard_name = subsurface_runoff_flux_from_land
+  long_name = subsurface runoff flux over land for coupling
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[cmm_lnd]
+  standard_name = surface_drag_wind_speed_for_momentum_in_air_over_land_from_land
+  long_name = momentum exchange coefficient over land for coupling
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = True
+[chh_lnd]
+  standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land_from_land
+  long_name = thermal exchange coefficient over land for coupling
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[zvfun_lnd]
+  standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction_from_land
+  long_name = function of surface roughness length and green vegetation fraction
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[sncovr1]
+  standard_name = surface_snow_area_fraction_over_land
+  long_name = surface snow area fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[qsurf]
+  standard_name = surface_specific_humidity_over_land
+  long_name = surface air saturation specific humidity over land
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[evap]
+  standard_name = kinematic_surface_upward_latent_heat_flux_over_land
+  long_name = kinematic surface upward latent heat flux over land
+  units = kg kg-1 m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[hflx]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_over_land
+  long_name = kinematic surface upward sensible heat flux over land
+  units = K m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[ep]
+  standard_name = surface_upward_potential_latent_heat_flux_over_land
+  long_name = surface upward potential latent heat flux over land
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[t2mmp]
+  standard_name = temperature_at_2m_from_noahmp
+  long_name = 2 meter temperature from noahmp
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[q2mp]
+  standard_name = specific_humidity_at_2m_from_noahmp
+  long_name = 2 meter specific humidity from noahmp
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[gflux]
+  standard_name = upward_heat_flux_in_soil_over_land
+  long_name = soil heat flux over land
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[runoff]
+  standard_name = surface_runoff_flux
+  long_name = surface runoff flux
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[drain]
+  standard_name = subsurface_runoff_flux
+  long_name = subsurface runoff flux
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[cmm]
+  standard_name = surface_drag_wind_speed_for_momentum_in_air_over_land
+  long_name = momentum exchange coefficient over land
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[chh]
+  standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land
+  long_name = thermal exchange coefficient over land
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[zvfun]
+  standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
+  long_name = function of surface roughness length and green vegetation fraction
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out

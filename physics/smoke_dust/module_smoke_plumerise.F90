@@ -14,26 +14,28 @@
 module module_smoke_plumerise
 
   use machine , only : kind_phys
-  use plume_data_mod,  only : num_frp_plume, p_frp_hr, p_frp_std,                  &
+  !use plume_data_mod,  only : num_frp_plume, p_frp_hr, p_frp_std
                               !tropical_forest, boreal_forest, savannah, grassland,   &
-                              wind_eff
+                             ! wind_eff
   USE module_zero_plumegen_coms
+  USE rrfs_smoke_config, only : n_dbg_lines
 
   !real(kind=kind_phys),parameter :: rgas=r_d
   !real(kind=kind_phys),parameter :: cpor=cp/r_d
 CONTAINS
 
 ! RAR:
-    subroutine plumerise(m1,m2,m3,ia,iz,ja,jz,             &
-!                         firesize,mean_fct,                         &
-                        ! nspecies,eburn_in,eburn_out,               &
+    subroutine plumerise(m1,m2,m3,ia,iz,ja,jz,                      &
                          up,vp,wp,theta,pp,dn0,rv,zt_rams,zm_rams,  &
+                         wind_eff_opt,                              &
                          frp_inst,k1,k2, dbg_opt, g, cp, rgas,      &
-                         cpor,  errmsg, errflg   )
+                         cpor,  errmsg, errflg, icall, mpiid, lat, long, curr_secs  )
 
   implicit none
 
   LOGICAL, INTENT (IN) :: dbg_opt
+  INTEGER, INTENT (IN) :: wind_eff_opt, mpiid
+  real(kind_phys),  INTENT(IN) ::  lat,long, curr_secs ! SRB
 
 !  INTEGER, PARAMETER ::  ihr_frp=1, istd_frp=2!, imean_fsize=3, istd_fsize=4       ! RAR:
 
@@ -42,6 +44,7 @@ CONTAINS
   real(kind=kind_phys) :: g, cp, rgas, cpor
 
   integer :: ng,m1,m2,m3,ia,iz,ja,jz,ibcon,mynum,i,j,k,imm,ixx,ispc !,nspecies
+
 
   INTEGER, INTENT (OUT) :: k1,k2
   character(*), intent(inout) :: errmsg
@@ -68,9 +71,12 @@ CONTAINS
 !  integer, parameter :: grassland       = 4
 !  real(kind=kind_phys), dimension(nveg_agreg) :: firesize,mean_fct
 
-  INTEGER, PARAMETER :: wind_eff = 1
-
+  INTEGER ::  wind_eff
+  INTEGER, INTENT(IN) :: icall
   type(plumegen_coms), pointer :: coms
+
+! Set wind effect from namelist
+  wind_eff = wind_eff_opt
 
 !  integer:: iloop
   !REAL(kind=kind_phys), INTENT (IN)   :: convert_smold_to_flam
@@ -103,12 +109,6 @@ CONTAINS
 ! print *,' Plumerise_scalar 1',ncall
   coms => get_thread_coms()
 
-IF (frp_inst<frp_threshold) THEN
-   k1=1
-   k2=2
-   !return
-END IF
-    
 ! print *,' Plumerise_scalar 2',m1
   j=1
   i=1
@@ -158,28 +158,28 @@ END IF
         endif
         burnt_area= max(1.0e4,burnt_area)
         
-        IF (dbg_opt) THEN
-            WRITE(*,*) 'plumerise: m1 ', m1
-            WRITE(*,*) 'plumerise: imm, FRP,burnt_area ', imm, FRP,burnt_area
-         !   WRITE(*,*) 'convert_smold_to_flam ',convert_smold_to_flam
-            WRITE(*,*) 'plumerise:  zcon ',  coms%zcon
-            WRITE(*,*) 'plumerise: zzcon ', coms%zzcon
-         END IF
+        IF ( dbg_opt .and. (icall .le. n_dbg_lines) .and. (frp_inst .ge. frp_threshold) ) THEN
+            WRITE(1000+mpiid,*) 'inside plumerise: xlat,xlong,curr_secs, m1 ', lat,long, int(curr_secs), m1
+            WRITE(1000+mpiid,*) 'inside plumerise: xlat,xlong,curr_secs,imm,FRP,burnt_area ', lat, long, int(curr_secs), imm, FRP,burnt_area
+        END IF
 
-         IF (dbg_opt) then
-             WRITE(*,*) 'plumerise: imm ', imm
-             WRITE(*,*) 'plumerise: burnt_area ',burnt_area
-         END IF
-    
+       IF (frp_inst<frp_threshold) THEN
+         k1=1
+         k2=2
+         !exit
+         return
+       END IF
+
        !- get fire properties (burned area, plume radius, heating rates ...)
        call get_fire_properties(coms,imm,iveg_ag,burnt_area,FRP,errmsg,errflg)
        if(errflg/=0) return
 
-       !------  generates the plume rise    ------
-       call makeplume (coms,kmt,ztopmax(imm),ixx,imm)
 
-       IF (dbg_opt) then
-            WRITE(*,*) 'plumerise after makeplume: imm,kmt,ztopmax(imm) ',imm,kmt,ztopmax(imm)
+       !------  generates the plume rise    ------
+       call makeplume (coms,kmt,ztopmax(imm),ixx,imm,mpiid)
+
+       IF ( dbg_opt .and.  (icall .le. n_dbg_lines) .and. (frp_inst .ge. frp_threshold) ) then
+            WRITE(1000+mpiid,*) 'inside plumerise after makeplume:xlat,xlong,curr_secs,imm,kmt,ztopmax(imm) ', lat, long, int(curr_secs), imm,kmt, ztopmax(imm)
        END IF
 
     enddo lp_minmax
@@ -199,12 +199,12 @@ END IF
         !   enddo
         !enddo
 
-    IF (dbg_opt) then
-        WRITE(*,*) 'plumerise after set_flam_vert: nkp,k1,k2, ', nkp,k1,k2
-        WRITE(*,*) 'plumerise after set_flam_vert: dzi ', dzi
+    !IF (dbg_opt) then
+    !    WRITE(*,*) 'plumerise after set_flam_vert: nkp,k1,k2, ', nkp,k1,k2
+    !    WRITE(*,*) 'plumerise after set_flam_vert: dzi ', dzi
        !WRITE(*,*) 'plumerise after set_flam_vert: eburn_in(2) ', eburn_in(2)
        !WRITE(*,*) 'plumerise after set_flam_vert: eburn_out(:,2) ',eburn_out(:,2)
-    END IF
+    !END IF
 
 !   enddo lp_veg   ! sub-grid vegetation, currently it's aggregated
 
@@ -564,7 +564,7 @@ return
 end subroutine get_fire_properties
 !-------------------------------------------------------------------------------
 !
-SUBROUTINE MAKEPLUME (coms,kmt,ztopmax,ixx,imm)  
+SUBROUTINE MAKEPLUME (coms,kmt,ztopmax,ixx,imm,mpiid)
 !
 ! *********************************************************************
 !
@@ -623,10 +623,10 @@ SUBROUTINE MAKEPLUME (coms,kmt,ztopmax,ixx,imm)
 !
 !
 !**********************************************************************
-!**********************************************************************               
-!use module_zero_plumegen_coms 
-implicit none 
-!logical :: endspace  
+!**********************************************************************
+!use module_zero_plumegen_coms
+implicit none
+!logical :: endspace
 type(plumegen_coms), pointer :: coms
 character (len=10) :: varn
 integer ::  izprint, iconv,  itime, k, kk, kkmax, deltak,ilastprint,kmt &
@@ -634,11 +634,12 @@ integer ::  izprint, iconv,  itime, k, kk, kkmax, deltak,ilastprint,kmt &
 real(kind=kind_phys) ::  vc, g,  r,  cp,  eps,  &
          tmelt,  heatsubl,  heatfus,  heatcond, tfreeze, &
          ztopmax, wmax, rmaxtime, es, esat, heat,dt_save !ESAT_PR,
-character (len=2) :: cixx 
+character (len=2) :: cixx
+integer, intent(in) :: mpiid
 ! Set threshold to be the same as dz=100., the constant grid spacing of plume grid model(meters) found in set_grid()
     REAL(kind=kind_phys) :: DELZ_THRESOLD = 100. 
 
-    INTEGER     :: imm
+    INTEGER     :: imm, dtknt
 
 !  real(kind=kind_phys), external:: esat_pr!
 !
@@ -656,6 +657,7 @@ coms%tstpf = 2.0  !- timestep factor
 coms%viscosity = 500.!- coms%viscosity constant (original value: 0.001)
 
 nrectotal=150
+dtknt = 0
 !
 !*************** PROBLEM SETUP AND INITIAL CONDITIONS *****************
 coms%mintime = 1  
@@ -699,9 +701,13 @@ rmaxtime = float(coms%maxtime)
 !sam 81  format('nm1=',I0,' from kmt=',I0,' kkmax=',I0,' deltak=',I0)
 !sam     write(0,81) coms%nm1,kmt,kkmax,deltak
 !-- set timestep
-    !coms%dt = (coms%zm(2)-coms%zm(1)) / (coms%tstpf * wmax)  
-    coms%dt = min(5.,(coms%zm(2)-coms%zm(1)) / (coms%tstpf * wmax))
-                                
+    !coms%dt = (coms%zm(2)-coms%zm(1)) / (coms%tstpf * wmax) i
+    coms%dt = max(0.01,min(5.,(coms%zm(2)-coms%zm(1)) / (coms%tstpf * wmax)))
+    dtknt = dtknt + 1
+!    if (coms%dt .ne. 5.)then
+!    WRITE(1000+mpiid,*) 'dtknt,zm(2),zm(1) ', dtknt,coms%zm(2),coms%zm(1)
+!    WRITE(1000+mpiid,*) 'coms%tstpf,wmax,dt =', coms%tstpf,wmax,coms%dt
+!    endif
 !-- elapsed time, sec
     coms%time = coms%time+coms%dt 
 !-- elapsed time, minutes                                      

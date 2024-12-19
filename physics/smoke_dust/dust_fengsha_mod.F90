@@ -21,8 +21,8 @@ module dust_fengsha_mod
 contains
 
   subroutine gocart_dust_fengsha_driver(dt,              &
-       chem,rho_phy,smois,p8w,ssm,                       &
-       isltyp,vegfra,snowh,xland,area,g,emis_dust,       &
+       chem,rho_phy,smois,stemp,p8w,ssm,                 &
+       isltyp,snowh,xland,area,g,emis_dust,              &
        ust,znt,clay,sand,rdrag,uthr,                     &
        num_emis_dust,num_chem,num_soil_layers,           &
        ids,ide, jds,jde, kds,kde,                        &
@@ -37,7 +37,6 @@ contains
 
     ! 2d input variables
     REAL(kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: ssm     ! Sediment supply map
-    REAL(kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: vegfra  ! vegetative fraction (-)
     REAL(kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: snowh   ! snow height (m)
     REAL(kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: xland   ! dominant land use type
     REAL(kind_phys), DIMENSION( ims:ime , jms:jme ), INTENT(IN) :: area    ! area of grid cell
@@ -55,11 +54,13 @@ contains
     REAL(kind_phys), DIMENSION( ims:ime , kms:kme , jms:jme ), INTENT(IN) :: rho_phy
     REAL(kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme, num_chem ), INTENT(INOUT) :: chem
     REAL(kind_phys), DIMENSION( ims:ime, 1, jms:jme,num_emis_dust),OPTIONAL, INTENT(INOUT) :: emis_dust
-    REAL(kind_phys), DIMENSION( ims:ime, num_soil_layers, jms:jme ), INTENT(IN) :: smois
+    REAL(kind_phys), DIMENSION( ims:ime, num_soil_layers, jms:jme ), INTENT(IN) :: smois, stemp
 
     !0d input variables 
     REAL(kind_phys), INTENT(IN) :: dt ! time step
     REAL(kind_phys), INTENT(IN) :: g  ! gravity (m/s**2)
+
+
 
     ! Local variables
     integer :: nmx,i,j,k,imx,jmx,lmx
@@ -75,6 +76,7 @@ contains
     real(kind_phys), DIMENSION (num_emis_dust) :: distribution
     real(kind_phys), dimension (3) :: massfrac
     real(kind_phys) :: erodtot
+    real(kind_phys) :: moist_volumetric
 
     ! conversion values
     conver=1.e-9
@@ -138,12 +140,14 @@ contains
              endif
 
              ! limit where there is lots of vegetation
-             if (vegfra(i,j) .gt. .17) then
-                ilwi = 0
-             endif
 
              ! limit where there is snow on the ground
              if (snowh(i,j) .gt. 0) then
+                ilwi = 0
+             endif
+
+             ! Don't emit over frozen soil
+             if (stemp(i,1,j) < 268.0) then ! -5C
                 ilwi = 0
              endif
 
@@ -174,10 +178,13 @@ contains
                 endif
              endif
 
+             ! soil moisture correction factor 
+             moist_volumetric = dust_moist_correction * smois(i,2,j) 
+
              ! Call dust emission routine.
              
              call source_dust(imx,jmx, lmx, nmx, dt, tc, ustar, massfrac, & 
-                  erodtot, dxy, smois(i,1,j), airden, airmas, bems, g, dust_alpha, dust_gamma, &
+                  erodtot, dxy, moist_volumetric, airden, airmas, bems, g, dust_alpha, dust_gamma, &
                   R, uthr(i,j))
 
              ! convert back to concentration
@@ -457,10 +464,16 @@ contains
 
    !  Now compute size-dependent total emission flux
    !  ----------------------------------------------
-   ! Fecan moisture correction
-   ! -------------------------
-   h = moistureCorrectionFecan(slc, sand, clay, rhop)
-   
+
+   if (dust_moist_opt .eq. 1) then
+
+      ! Fecan moisture correction
+      ! -------------------------
+      h = moistureCorrectionFecan(slc, sand, clay)
+   else
+      ! shao soil moisture correction 
+      h = moistureCorrectionShao(slc)
+   end if
    ! Adjust threshold
    ! ----------------
    u_thresh = uthrs * h
@@ -478,7 +491,7 @@ contains
 
  end subroutine DustEmissionFENGSHA
 !-----------------------------------------------------------------
-  real function soilMoistureConvertVol2Grav(vsoil, sandfrac, rhop)
+  real function soilMoistureConvertVol2Grav(vsoil, sandfrac)
 
 ! !USES:
     implicit NONE
@@ -486,7 +499,6 @@ contains
 ! !INPUT PARAMETERS:
     REAL(kind_phys), intent(in) :: vsoil       ! volumetric soil moisture fraction [1]
     REAL(kind_phys), intent(in) :: sandfrac    ! fractional sand content [1]
-    REAL(kind_phys), intent(in) :: rhop        ! dry dust density [kg m-3]
 
 ! !DESCRIPTION: Convert soil moisture fraction from volumetric to gravimetric.
 !
@@ -500,20 +512,21 @@ contains
 
 !  !CONSTANTS:
     REAL(kind_phys), parameter :: rhow = 1000.    ! density of water [kg m-3]
-
+    REAL(kind_phys), parameter :: rhop = 1700.    ! density of dry soil 
 !EOP
 !-------------------------------------------------------------------------
 !  Begin...
 
 !  Saturated volumetric water content (sand-dependent) ! [m3 m-3]
-    vsat = 0.489 - 0.00126 * ( 100. * sandfrac )
+    vsat = 0.489 - 0.126 * sandfrac 
+    
 
 !  Gravimetric soil content
-    soilMoistureConvertVol2Grav = vsoil * rhow / (rhop * (1. - vsat))
+    soilMoistureConvertVol2Grav = 100.0 * (vsoil * rhow / rhop / ( 1. - vsat))
 
   end function soilMoistureConvertVol2Grav
 !----------------------------------------------------------------
-  real function moistureCorrectionFecan(slc, sand, clay, rhop)
+  real function moistureCorrectionFecan(slc, sand, clay)
 
 ! !USES:
     implicit NONE
@@ -522,7 +535,6 @@ contains
     REAL(kind_phys), intent(in) :: slc     ! liquid water content of top soil layer, volumetric fraction [1]
     REAL(kind_phys), intent(in) :: sand    ! fractional sand content [1]
     REAL(kind_phys), intent(in) :: clay    ! fractional clay content [1]
-    REAL(kind_phys), intent(in) :: rhop    ! dry dust density [kg m-3]
 
 ! !DESCRIPTION: Compute correction factor to account for Fecal soil moisture
 !
@@ -540,15 +552,46 @@ contains
 !  Begin...
 
 !  Convert soil moisture from volumetric to gravimetric
-    grvsoilm = soilMoistureConvertVol2Grav(slc, sand, 2650.)
+    grvsoilm = soilMoistureConvertVol2Grav(slc, sand)
 
 !  Compute fecan dry limit
-    drylimit = clay * (14.0 * clay + 17.0)
+    drylimit = dust_drylimit_factor * clay * (14.0 * clay + 17.0)
 
 !  Compute soil moisture correction
     moistureCorrectionFecan = sqrt(1.0 + 1.21 * max(0., grvsoilm - drylimit)**0.68)
 
   end function moistureCorrectionFecan
+!----------------------------------------------------------------
+  real function moistureCorrectionShao(slc)
+
+! !USES:
+    implicit NONE
+
+! !INPUT PARAMETERS:
+    REAL(kind_phys), intent(in) :: slc     ! liquid water content of top soil layer, volumetric fraction [1]
+
+! !DESCRIPTION: Compute correction factor to account for Fecal soil moisture
+!
+! !REVISION HISTORY:
+!
+!  02Apr2020, B.Baker/NOAA    - Original implementation
+!  01Apr2020, R.Montuoro/NOAA - Adapted for GOCART process library
+
+!  !Local Variables
+    real :: grvsoilm
+    real :: drylimit
+
+!EOP
+!---------------------------------------------------------------
+!  Begin...
+
+    if (slc < 0.03) then
+       moistureCorrectionShao = exp(22.7 * slc) 
+    else
+       moistureCorrectionShao = exp(95.3 * slc - 2.029)
+    end if
+
+  end function moistureCorrectionShao
 !---------------------------------------------------------------
   real function DustFluxV2HRatioMB95(clay, kvhmax)
 

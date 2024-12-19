@@ -1,0 +1,242 @@
+[ccpp-table-properties]
+  name = GFS_GWD_generic_pre
+  type = scheme
+  dependencies = ../../hooks/machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_GWD_generic_pre_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = vertical layer dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[nmtvr]
+  standard_name = number_of_statistical_measures_of_subgrid_orography
+  long_name = number of statistical measures of subgrid height_above_mean_sea_level
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[mntvar]
+  standard_name = statistical_measures_of_subgrid_orography_collection_array
+  long_name = array of statistical measures of subgrid height_above_mean_sea_level
+  units = mixed
+  dimensions = (horizontal_loop_extent,number_of_statistical_measures_of_subgrid_orography)
+  type = real
+  kind = kind_phys
+  intent = in
+[oc]
+  standard_name = convexity_of_subgrid_orography
+  long_name = convexity of subgrid height_above_mean_sea_level
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[oa4]
+  standard_name = asymmetry_of_subgrid_orography
+  long_name = asymmetry of subgrid height_above_mean_sea_level
+  units = none
+  dimensions = (horizontal_loop_extent,4)
+  type = real
+  kind = kind_phys
+  intent = out
+[clx]
+  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height
+  long_name = horizontal fraction of grid box covered by subgrid height_above_mean_sea_level higher than critical height
+  units = frac
+  dimensions = (horizontal_loop_extent,4)
+  type = real
+  kind = kind_phys
+  intent = out
+[theta]
+  standard_name = angle_from_east_of_maximum_subgrid_orographic_variations
+  long_name = angle with_respect to east of maximum subgrid orographic variations
+  units = degree
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[varss]
+  standard_name = standard_deviation_of_subgrid_orography_small_scale
+  long_name = standard deviation of subgrid height_above_mean_sea_level small scale
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = True
+[ocss]
+  standard_name = convexity_of_subgrid_orography_small_scale
+  long_name = convexity of subgrid height_above_mean_sea_level small scale
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = True
+[oa4ss]
+  standard_name = asymmetry_of_subgrid_orography_small_scale
+  long_name = asymmetry of subgrid height_above_mean_sea_level small scale
+  units = none
+  dimensions = (horizontal_loop_extent,4)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = True
+[clxss]
+  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height_small_scale
+  long_name = horizontal fraction of grid box covered by subgrid height_above_mean_sea_level higher than critical height small scale
+  units = frac
+  dimensions = (horizontal_loop_extent,4)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = True
+[sigma]
+  standard_name = slope_of_subgrid_orography
+  long_name = slope of subgrid height_above_mean_sea_level
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[gamma]
+  standard_name = anisotropy_of_subgrid_orography
+  long_name = anisotropy of subgrid height_above_mean_sea_level
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[elvmax]
+  standard_name = maximum_subgrid_orography
+  long_name = maximum of subgrid height_above_mean_sea_level
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+[lssav]
+  standard_name = flag_for_diagnostics
+  long_name = logical flag for storing diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ldiag3d]
+  standard_name = flag_for_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[dudt]
+  standard_name = process_split_cumulative_tendency_of_x_wind
+  long_name = zonal wind tendency due to model physics
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dvdt]
+  standard_name = process_split_cumulative_tendency_of_y_wind
+  long_name = meridional wind tendency due to model physics
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dtdt]
+  standard_name = process_split_cumulative_tendency_of_air_temperature
+  long_name = updated tendency of the temperature
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+[index_of_temperature]
+  standard_name = index_of_temperature_in_cumulative_change_index
+  long_name = index of temperature in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_x_wind]
+  standard_name = index_of_x_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_y_wind]
+  standard_name = index_of_y_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_process_orographic_gwd]
+  standard_name = index_of_orographic_gravity_wave_drag_process_in_cumulative_change_index
+  long_name = index of orographic gravity wave drag process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[dtf]
+  standard_name = timestep_for_dynamics
+  long_name = dynamics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[flag_for_gwd_generic_tend]
+  standard_name = flag_for_generic_tendency_due_to_gravity_wave_drag
+  long_name = true if GFS_GWD_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out

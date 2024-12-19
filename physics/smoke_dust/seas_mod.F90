@@ -185,7 +185,6 @@ CONTAINS
                   chem(i,kts,j,p_seas_3) = chem(i,kts,j,p_seas_3) + tc(3)*converi
                   chem(i,kts,j,p_seas_4) = chem(i,kts,j,p_seas_4) + tc(4)*converi
                   chem(i,kts,j,p_seas_5) = chem(i,kts,j,p_seas_5) + tc(5)*converi
-                  !print*,'hli tc(2),chem(i,kts,j,p_seas_2)',tc(2),chem(i,kts,j,p_seas_2)
 
                   ! for output diagnostics
                   emis_seas(i,1,j,p_eseas1) = bems(1)

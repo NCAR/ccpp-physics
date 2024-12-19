@@ -1,0 +1,22 @@
+/**
+\page NoahMP NoahMP Land Surface Model
+\section des_noahmp  Description
+
+This implementation of the NoahMP Land Surface Model (LSM) is adapted from the version implemented in WRF v3.7 with additions by NOAA EMC staff to work with the UFS Atmosphere model. Authoritative documentation of the NoahMP scheme can be accessed at the following links:
+
+- Technical documentation freely available at He et al. (2023) \cite He_2023.
+
+- A primary reference for the NoahMP LSM is Niu et al. (2011) \cite niu_et_al_2011.
+
+\section noahmp_update CCPP Physics Updates
+\version CCPP-SCM v7.0.0
+- As part of a larger-scale effort to unify how microphysics outputs (in particular snow) are used in the land models and outputs, an additional option for using the unified frozen precipitation fraction in NoahMP was added
+- Diagnostic 2-meter temperature and humidity are based on vegetation and bare-ground tiles
+- Bug fixes for GFS-based thermal roughness length scheme
+ 
+\section intra_noahmp Intraphysics Communication
+ +  \ref arg_table_noahmpdrv_run
+
+\section gen_al_noahmp General Algorithm
++ \ref general_noahmpdrv
+*/
