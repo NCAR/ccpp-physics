@@ -4,8 +4,10 @@
 \section gfsv16_suite_overview Overview
 
 Version 16 of the Global Forecast System (GFS) was implemented operationally by the NOAA
-National Centers for Environmental Prediction (NCEP) in 2021. The GFS_v16 suite uses the parameterizations in the following order:
- - \ref GFS_RRTMG
+National Centers for Environmental Prediction (NCEP) in 2021. While GFS version 16 did not make
+use of CCPP physics suites, the GFS_v16 suite is meant to emulate the physics used in that operational implementation.
+The GFS_v16 suite uses the parameterizations in the following order:
+ - \ref GFS_RRTMG_page
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
  - \ref GFS_OCEAN
@@ -20,24 +22,26 @@ National Centers for Environmental Prediction (NCEP) in 2021. The GFS_v16 suite 
  - \ref GFDL_cloud
 
 \section sdf_gfsv16b Suite Definition File 
-\include  suite_FV3_GFS_v16.xml
+\include  suite_SCM_GFS_v16.xml
 
 
 \section gfs16_nml_opt_des Namelist 
 \ref GFDL_cloud namelist options 
-\snippet RE210/FV3_GFS_v16_input.nml GFDL_CLOUD_MP_NML
+\snippet RE7/input_GFS_v16.nml GFDL_CLOUD_MICROPHYSICS_NML
 Other namelist options
-\snippet RE210/FV3_GFS_v16_input.nml GFS_PHYSICS_NML
+\snippet RE7/input_GFS_v16.nml GFS_PHYSICS_NML
 
 - nstf_name = \f$[2,0,0,0,0]^1 [2,1,0,0,0]^2\f$
  - \f$^1\f$ NSST is on and coupled with spin up off
  - \f$^2\f$ NSST is on and coupled with spin up on
 
 - Grid-spacing dependency of \p cdmbgwd
- - \b C48:  cdmbgwd="0.071,2.1,1.0,1.0" 
- - \b C96:  cdmbgwd="0.14,1.8,1.0,1.0"
- - \b C192: cdmbgwd="0.23,1.5,1.0,1.0"
- - \b C384: cdmbgwd="1.1,0.72,1.0,1.0"
- - \b C768: cdmbgwd="4.0,0.15,1.0,1.0"
+ - \b C48:   cdmbgwd="0.071,2.1,1.0,1.0" 
+ - \b C96:   cdmbgwd="0.14,1.8,1.0,1.0"
+ - \b C192:  cdmbgwd="0.23,1.5,1.0,1.0"
+ - \b C384:  cdmbgwd="1.1,0.72,1.0,1.0"
+ - \b C768:  cdmbgwd="4.0,0.15,1.0,1.0"
+ - \b C1152: cdmbgwd="4.0,0.10,1.0,1.0"
+ - \b C3072: cdmbgwd="4.0,0.05,1.0,1.0"
 
 */

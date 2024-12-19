@@ -1,0 +1,186 @@
+########################################################################
+[ccpp-table-properties]
+  name = gwdc_post
+  type = scheme
+  dependencies = ../hooks/machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = gwdc_post_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical layers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[lssav]
+  standard_name = flag_for_diagnostics
+  long_name = flag for calculating diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ldiag3d]
+  standard_name = flag_for_diagnostics_3D
+  long_name = flag for calculating 3-D diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[dtf]
+  standard_name = timestep_for_dynamics
+  long_name = dynamics time step
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[dtp]
+  standard_name = timestep_for_physics
+  long_name = physics time step
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_cp]
+  standard_name = specific_heat_of_dry_air_at_constant_pressure
+  long_name = specific heat of dry air at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[tauctx]
+  standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
+  long_name = zonal stress at cloud top due to convective gravity wave drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[taucty]
+  standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
+  long_name = meridional stress at cloud top due to convective gravity wave drag
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[gwdcu]
+  standard_name = tendency_of_x_wind_due_to_convective_gravity_wave_drag
+  long_name = zonal wind tendency due to convective gravity wave drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[gwdcv]
+  standard_name = tendency_of_y_wind_due_to_convective_gravity_wave_drag
+  long_name = meridional wind tendency due to convective gravity wave drag
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[dugwd]
+  standard_name = time_integral_of_x_stress_due_to_gravity_wave_drag
+  long_name = integral over time of zonal stress due to gravity wave drag
+  units = Pa s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dvgwd]
+  standard_name = time_integral_of_y_stress_due_to_gravity_wave_drag
+  long_name = integral over time of meridional stress due to gravity wave drag
+  units = Pa s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+[index_of_x_wind]
+  standard_name = index_of_x_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_y_wind]
+  standard_name = index_of_y_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_process_nonorographic_gwd]
+  standard_name = index_of_nonorographic_gravity_wave_drag_process_in_cumulative_change_index
+  long_name = index of nonorographic gravity wave drag process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[gu0]
+  standard_name = x_wind_of_new_state
+  long_name = updated zonal wind
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gv0]
+  standard_name = y_wind_of_new_state
+  long_name = updated meridional wind
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gt0]
+  standard_name = air_temperature_of_new_state
+  long_name = updated air temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out

@@ -1,5 +1,5 @@
 /**
-\page GFS_SFCSICE GFS Sea Ice Scheme
+\page GFS_SFCSICE Sea Ice Scheme
 \section des_sice Description
  Sea ice is a thin skin of frozen water covering the polar oceans.  The sea ice strongly 
  interacts with both the atmosphere above and the ocean underneath in the high

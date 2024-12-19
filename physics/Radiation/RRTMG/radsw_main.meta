@@ -1,0 +1,513 @@
+[ccpp-table-properties]
+  name = rrtmg_sw
+  type = scheme
+  dependencies = ../../hooks/machine.F,../mersenne_twister.f,../../hooks/physcons.F90,radsw_datatb.f,radsw_param.f
+
+########################################################################
+[ccpp-arg-table]
+  name = rrtmg_sw_run
+  type = scheme
+[plyr]
+  standard_name = air_pressure_at_layer_for_radiation_in_hPa
+  long_name = air pressure layer
+  units = hPa
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[plvl]
+  standard_name = air_pressure_at_interface_for_radiation_in_hPa
+  long_name = air pressure level
+  units = hPa
+  dimensions = (horizontal_loop_extent,adjusted_vertical_level_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[tlyr]
+  standard_name = air_temperature_at_layer_for_radiation
+  long_name = air temperature layer
+  units = K
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[tlvl]
+  standard_name = air_temperature_at_interface_for_radiation
+  long_name = air temperature level
+  units = K
+  dimensions = (horizontal_loop_extent,adjusted_vertical_level_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[qlyr]
+  standard_name = water_vapor_specific_humidity_at_layer_for_radiation
+  long_name = specific humidity layer
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[olyr]
+  standard_name = ozone_concentration_at_layer_for_radiation
+  long_name = ozone concentration layer
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[gasvmr_co2]
+  standard_name = volume_mixing_ratio_of_co2
+  long_name = volume mixing ratio co2
+  units = m3 m-3
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[gasvmr_n2o]
+  standard_name = volume_mixing_ratio_of_n2o
+  long_name = volume mixing ratio no2
+  units = m3 m-3
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[gasvmr_ch4]
+  standard_name = volume_mixing_ratio_of_ch4
+  long_name = volume mixing ratio ch4
+  units = m3 m-3
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[gasvmr_o2]
+  standard_name = volume_mixing_ratio_of_o2
+  long_name = volume mixing ratio o2
+  units = m3 m-3
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[gasvmr_co]
+  standard_name = volume_mixing_ratio_of_co
+  long_name = volume mixing ratio co
+  units = m3 m-3
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[gasvmr_cfc11]
+  standard_name = volume_mixing_ratio_of_cfc11
+  long_name = volume mixing ratio cfc11
+  units = m3 m-3
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[gasvmr_cfc12]
+  standard_name = volume_mixing_ratio_of_cfc12
+  long_name = volume mixing ratio cfc12
+  units = m3 m-3
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[gasvmr_cfc22]
+  standard_name = volume_mixing_ratio_of_cfc22
+  long_name = volume mixing ratio cfc22
+  units = m3 m-3
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[gasvmr_ccl4]
+  standard_name = volume_mixing_ratio_of_ccl4
+  long_name = volume mixing ratio ccl4
+  units = m3 m-3
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[icseed]
+  standard_name = random_number_seed_for_mcica_shortwave
+  long_name = seed for random number generation for shortwave radiation
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = True
+[aeraod]
+  standard_name = aerosol_optical_depth_for_shortwave_bands_01_16
+  long_name = aerosol optical depth for shortwave bands 01-16
+  units = none
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[aerssa]
+  standard_name = aerosol_single_scattering_albedo_for_shortwave_bands_01_16
+  long_name = aerosol single scattering albedo for shortwave bands 01-16
+  units = frac
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[aerasy]
+  standard_name = aerosol_asymmetry_parameter_for_shortwave_bands_01_16
+  long_name = aerosol asymmetry paramter for shortwave bands 01-16
+  units = none
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfcalb_nir_dir]
+  standard_name = surface_albedo_due_to_near_IR_direct
+  long_name = surface albedo due to near IR direct beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfcalb_nir_dif]
+  standard_name = surface_albedo_due_to_near_IR_diffused
+  long_name = surface albedo due to near IR diffused beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfcalb_uvis_dir]
+  standard_name = surface_albedo_due_to_UV_and_VIS_direct
+  long_name = surface albedo due to UV+VIS direct beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfcalb_uvis_dif]
+  standard_name = surface_albedo_due_to_UV_and_VIS_diffused
+  long_name = surface albedo due to UV+VIS diffused beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[dzlyr]
+  standard_name = layer_thickness_for_radiation
+  long_name = layer thickness
+  units = km
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[delpin]
+  standard_name = layer_pressure_thickness_for_radiation
+  long_name = layer pressure thickness
+  units = hPa
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[de_lgth]
+  standard_name = cloud_decorrelation_length
+  long_name = cloud decorrelation length
+  units = km
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[alpha]
+  standard_name = cloud_overlap_decorrelation_parameter
+  long_name = cloud overlap decorrelation parameter
+  units = frac
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[cosz]
+  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
+  long_name = cosine of the solar zenit angle
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[solcon]
+  standard_name = solar_constant
+  long_name = solar constant
+  units = W m-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[nday]
+  standard_name = daytime_points_dimension
+  long_name = daytime points dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[idxday]
+  standard_name = daytime_points
+  long_name = daytime points
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+[npts]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[nlay]
+  standard_name = adjusted_vertical_layer_dimension_for_radiation
+  long_name = number of vertical layers for radiation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[nlp1]
+  standard_name = adjusted_vertical_level_dimension_for_radiation
+  long_name = number of vertical levels for radiation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[lprnt]
+  standard_name = flag_print
+  long_name = flag to print
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[inc_minor_gas]
+  standard_name = flag_to_include_minor_gases_in_rrtmg
+  long_name = flag to include minor trace gases in rrtmg
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[top_at_1]
+  standard_name = flag_for_vertical_ordering_in_radiation
+  long_name = flag for vertical ordering in radiation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[iswcice]
+  standard_name = flag_for_optical_property_for_ice_clouds_for_shortwave_radiation
+  long_name = sw optical property for ice clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iswcliq]
+  standard_name = control_for_shortwave_radiation_liquid_clouds
+  long_name = sw optical property for liquid clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[isubcsw]
+  standard_name = flag_for_sw_clouds_grid_approximation
+  long_name = flag for sw clouds sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr]
+  standard_name = flag_for_cloud_overlap_method_for_radiation
+  long_name = max-random overlap clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_exp]
+  standard_name = flag_for_exponential_cloud_overlap_method
+  long_name = choice of exponential cloud overlap method
+  units         = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_exprand]
+  standard_name = flag_for_exponential_random_cloud_overlap_method
+  long_name = choice of exponential-random cloud overlap method
+  units     = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_max]
+  standard_name = flag_for_maximum_cloud_overlap_method
+  long_name = choice of maximum cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_rand]
+  standard_name = flag_for_random_cloud_overlap_method
+  long_name = choice of random cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_maxrand]
+  standard_name = flag_for_maximum_random_cloud_overlap_method
+  long_name = choice of maximum-random cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iovr_dcorr]
+  standard_name = flag_for_decorrelation_length_cloud_overlap_method
+  long_name = choice of decorrelation-length cloud overlap method
+  units         = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iswmode]
+  standard_name = control_for_sw_scattering_choice
+  long_name = control of rrtmg shortwave scattering choice
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
+[cld_cf]
+  standard_name = total_cloud_fraction
+  long_name = total cloud fraction
+  units = frac
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[lsswr]
+  standard_name = flag_for_calling_shortwave_radiation
+  long_name = flag to calculate SW irradiances
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[hswc]
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step_and_radiation_levels
+  long_name = shortwave total sky heating rate
+  units = K s-1
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = inout
+[topflx]
+  standard_name = sw_fluxes_top_atmosphere
+  long_name = shortwave total sky fluxes at the top of the atm
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = topfsw_type
+  intent = inout
+[sfcflx]
+  standard_name = surface_sw_fluxes_assuming_total_and_clear_sky_on_radiation_timestep
+  long_name = shortwave total sky fluxes at the Earth surface
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = sfcfsw_type
+  intent = inout
+[cldtau]
+  standard_name = cloud_optical_depth_layers_at_0p55mu_band
+  long_name = approx .55mu band layer cloud optical depth
+  units = none
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = inout
+[hsw0]
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step_and_radiation_levels
+  long_name = shortwave clear sky heating rate
+  units = K s-1
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = inout
+[fdncmp]
+  standard_name = components_of_surface_downward_shortwave_fluxes
+  long_name = derived type for special components of surface downward shortwave fluxes
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = cmpfsw_type
+  intent = inout
+[cld_lwp]
+  standard_name = cloud_liquid_water_path
+  long_name = cloud liquid water path
+  units = g m-2
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[cld_ref_liq]
+  standard_name = mean_effective_radius_for_liquid_cloud
+  long_name = mean effective radius for liquid cloud
+  units = um
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[cld_iwp]
+  standard_name = cloud_ice_water_path
+  long_name = cloud ice water path
+  units = g m-2
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[cld_ref_ice]
+  standard_name = mean_effective_radius_for_ice_cloud
+  long_name = mean effective radius for ice cloud
+  units = um
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[cld_rwp]
+  standard_name = cloud_rain_water_path
+  long_name = cloud rain water path
+  units = g m-2
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[cld_ref_rain]
+  standard_name = mean_effective_radius_for_rain_drop
+  long_name = mean effective radius for rain drop
+  units = um
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[cld_swp]
+  standard_name = cloud_snow_water_path
+  long_name = cloud snow water path
+  units = g m-2
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[cld_ref_snow]
+  standard_name = mean_effective_radius_for_snow_flake
+  long_name = mean effective radius for snow flake
+  units = um
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
