@@ -37,7 +37,7 @@
      runoff_lnd, drain_lnd, cmm_lnd, chh_lnd, zvfun_lnd,             &
      sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp,                    &
      gflux, runoff, drain, cmm, chh, zvfun,                          &
-     errmsg, errflg, naux2d, aux2d)
+     errmsg, errflg)
 
    implicit none
 
