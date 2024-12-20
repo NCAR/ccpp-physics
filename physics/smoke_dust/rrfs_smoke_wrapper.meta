@@ -959,6 +959,7 @@
   units = index
   dimensions = ()
   type = integer
+  intent = in
 [smoke_fire]
   standard_name = smoke_emission_of_fire
   long_name = smoke emission of fire
