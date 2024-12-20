@@ -54,7 +54,7 @@ module cu_ntiedtke
 
 !     entrdd: average turbulent entrainment & detrainment rate for downdrafts (Eq. 6.15 IFS Cy48r1)
 !     ------
-      real(kind=kind_phys),parameter:: entrdd  = 2.0e-4
+      real(kind=kind_phys),parameter:: entrdd = 2.0e-4
 
 !     cmfcmax:   maximum massflux value allowed for updrafts etc
 !     -------
@@ -72,25 +72,25 @@ module cu_ntiedtke
 !     NRL changed from 2.0e4 to 1.5e4 as a result of NEPTUNE tuning experiments,
 !     see https://github.nrlmry.navy.mil/NEPTUNE/ccpp-physics/pull/28
 !     -------
-      real(kind=kind_phys),parameter:: zdnoprc = 2.0e4
+      real(kind=kind_phys),parameter:: zdnoprc = 1.5e4
 
 !     cprcon:    coefficient from cloud water to rain water
 !     -------
-      real(kind=kind_phys),parameter:: cprcon  = 1.4e-3
+      real(kind=kind_phys),parameter:: cprcon = 1.4e-3
 
 !     pgcoef:   0.7 to 1.0 is good depends on the basin
 !     -------
-      real(kind=kind_phys),parameter:: pgcoef  = 0.7
+      real(kind=kind_phys),parameter:: pgcoef = 0.7
 
 !     entorg:   organized updraft entrainment scaling factor (Eq. 6.7 IFS Cy48r1)
 !     NRL changed from 1.75e-3 to 2.10e-3 as a result of NEPTUNE tuning experiments,
 !     see https://github.nrlmry.navy.mil/NEPTUNE/ccpp-physics/pull/28
 !     -------
-      real(kind=kind_phys),parameter:: entorg  = 1.75e-3
+      real(kind=kind_phys),parameter:: entorg = 2.1e-3  ! exp 2.4, 2.1, and 1.4, orig. 1.75
 
 !     detturb:   turbulent detrainment scaling factor (Eq. 6.8 IFS Cy48r1)
 !     -------
-      real(kind=kind_phys),parameter:: detturb  = 0.75e-4
+      real(kind=kind_phys),parameter:: detturb = 0.75e-4
 
 !     isequil: representing equilibrium and nonequilibrium convection
 !     ( .false. [default]; .true. [experimental]. Ref. Bechtold et al. 2014 JAS )
