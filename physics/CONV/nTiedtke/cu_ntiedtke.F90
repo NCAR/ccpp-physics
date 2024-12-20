@@ -22,17 +22,17 @@ module cu_ntiedtke
 
      real(kind=kind_phys),private :: rovcp,r5alvcp,r5alscp,ralvdcp,ralsdcp,ralfdcp
 
-      real(kind=kind_phys),parameter:: t13   = 0.333333333
-      real(kind=kind_phys),parameter:: tmelt = 273.16
-      real(kind=kind_phys),parameter:: c1es  = 610.78
-      real(kind=kind_phys),parameter:: c3les = 17.2693882
-      real(kind=kind_phys),parameter:: c3ies = 21.875
-      real(kind=kind_phys),parameter:: c4les = 35.86
-      real(kind=kind_phys),parameter:: c4ies = 7.66
+     real(kind=kind_phys),parameter:: t13   = 0.333333333
+     real(kind=kind_phys),parameter:: tmelt = 273.16
+     real(kind=kind_phys),parameter:: c1es  = 610.78
+     real(kind=kind_phys),parameter:: c3les = 17.2693882
+     real(kind=kind_phys),parameter:: c3ies = 21.875
+     real(kind=kind_phys),parameter:: c4les = 35.86
+     real(kind=kind_phys),parameter:: c4ies = 7.66
 
-      real(kind=kind_phys),parameter:: rtwat = tmelt
-      real(kind=kind_phys),parameter:: rtber = tmelt-5.
-      real(kind=kind_phys),parameter:: rtice = tmelt-23.
+     real(kind=kind_phys),parameter:: rtwat = tmelt
+     real(kind=kind_phys),parameter:: rtber = tmelt-5.
+     real(kind=kind_phys),parameter:: rtice = tmelt-23.
      parameter(         &
       rcpd=1.0/cpd,     &
       zrg=1.0/g,        &
@@ -218,13 +218,13 @@ contains
       integer, dimension(:), intent(out) :: kbot, ktop, kcnv
       real(kind=kind_phys), dimension (:,:), intent(out), optional :: ud_mf
       real(kind=kind_phys), dimension (:,:), intent(out) :: dd_mf, dt_mf, cnvw, cnvc
- 
+
 ! error messages
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
- 
+
 ! local variables
-      real(kind=kind_phys),allocatable ::  pcen(:,:,:),ptenc(:,:,:) 
+      real(kind=kind_phys),allocatable ::  pcen(:,:,:),ptenc(:,:,:)
       integer,dimension(lq):: lndj
       logical,dimension(lq):: locum
       integer:: i,j,k
@@ -638,7 +638,7 @@ contains
            zmfmax = (paph(jl,ikb)-paph(jl,ikb-1))*zcons2
           !-----------------------------------------------
           ! Deep convection.
-          ! Initial updraft mass flux is 10% of its maximum 
+          ! Initial updraft mass flux is 10% of its maximum
           ! value, which is determined by the layer thickness
           ! and time step.
           !-----------------------------------------------
@@ -1561,7 +1561,7 @@ contains
               (rho*pten(jl,klev))
         part2 = -hfx(jl)*rcpd-vtmpc1*pten(jl,klev)*qfx(jl)
         root  = 0.001-part1*part2
-            
+
         if(part2 .lt. 0.) then
            conw  = 1.2*(root)**t13
            deltt = max(1.5*hfx(jl)/(rho*cpd*conw),0.)
@@ -1597,8 +1597,8 @@ contains
       if(loflag(jl)) then
             !----------------------------------------
             ! Parcel entrainment rate for shallow convection.
-            ! Used to determine whether or not shallow 
-            ! convection is triggered. Final entrainment 
+            ! Used to determine whether or not shallow
+            ! convection is triggered. Final entrainment
             ! rate is calculated later.
             !----------------------------------------
             eta(jl) = 0.8 / (pgeo(jl,jk)*zrg) + 2.e-4
@@ -1620,13 +1620,13 @@ contains
         zqold(jl) = pqu(jl,jk)
 
         zph(jl)=paph(jl,jk)
-            
+
       end if
       end do
         ! check if the parcel is saturated
       ik=jk
       icall=1
-        
+
       call cuadjtqn(klon,klev,ik,zph,ptu,pqu,loflag,icall)
 
       do jl=1,klon
@@ -1711,7 +1711,7 @@ contains
 
         if(paph(jl,ikb) - paph(jl,ikt) > zdnoprc) lldcum(jl) = .false.
 
-        ! if shallow cumulus is found, define some properties 
+        ! if shallow cumulus is found, define some properties
         if(lldcum(jl)) then
             ktype(jl) = 2
             ldcum(jl) = .true.
@@ -2257,7 +2257,7 @@ contains
       ! -------------------------------------------------------
       ! do adiabatic ascent for entraining/detraining plume
       if(llo3) then
-        
+
         do jl = 1,klon
           zqold(jl) = 0.
         end do
@@ -2271,7 +2271,7 @@ contains
           ! Why is it negative?
           !---------------------------------------
           if ( jk == kcbot(jl) ) then
-            
+
             zoentr(jl) = -entorg*(min(1.,pqen(jl,jk)/pqsen(jl,jk)) - &
                          1.)*(pgeoh(jl,jk)-pgeoh(jl,jk+1))*zrg
             zoentr(jl) = min(0.4,zoentr(jl))*pmfu(jl,jk+1)
@@ -2290,8 +2290,8 @@ contains
             zdmfen(jl) = zoentr(jl)
             !---------------------------------------
             ! Set entrainment/detrainment rates for
-            ! shallow or mid-level convection. This 
-            ! overwrites the values from the call 
+            ! shallow or mid-level convection. This
+            ! overwrites the values from the call
             ! to cuentr.
             !---------------------------------------
             if ( ktype(jl) >= 2 ) then
@@ -2301,9 +2301,9 @@ contains
               zdmfde(jl) = zdmfen(jl)
             end if
             !---------------------------------------
-            ! Multiply detrainment rate by (1.6-RH) 
+            ! Multiply detrainment rate by (1.6-RH)
             ! (Eq. 6.8/6.9 IFS Cy48r1)
-            ! For deep convection, will be value 
+            ! For deep convection, will be value
             ! from call to cuentr.
             ! For shallow convection, value is set above.
             !---------------------------------------
@@ -2344,15 +2344,15 @@ contains
           ptu(jl,jk) = max(100.,ptu(jl,jk)) ! updraft can't get colder than 100 K
           ptu(jl,jk) = min(400.,ptu(jl,jk)) ! updraft can't get warmer than 400 K
 
-          zqold(jl) = pqu(jl,jk)  ! store parcel humidity, used later to determine how much 
+          zqold(jl) = pqu(jl,jk)  ! store parcel humidity, used later to determine how much
                                   ! cloud water to condense after adjusting 'pqu' for saturation
-          
+
           zlrain(jl,jk) = zlrain(jl,jk+1)*(pmfu(jl,jk+1)-zdmfde(jl)) * &
                           (1./max(cmfcmin,pmfu(jl,jk)))
           zluold(jl) = plu(jl,jk)
         end do
         !---------------------------------------
-        ! Reset parcel values to environmental 
+        ! Reset parcel values to environmental
         ! values if below departure level
         !---------------------------------------
         do jl = 1,klon
@@ -2370,7 +2370,7 @@ contains
         !------------------------------------------------
         ik = jk
         icall = 1   ! flag for condensation in updrafts
-        
+
       if ( jlm > 0 ) then
         call cuadjtqn(klon,klev,ik,zph,ptu,pqu,loflag,icall)
       end if
@@ -2438,12 +2438,12 @@ contains
                            (1.+zdken)
               !----------------------------------------------
               ! Organized detrainment for negatively buoyant
-              ! updraft (generally at cloud top) based 
-              ! on the decrease of updraft velocity with height 
+              ! updraft (generally at cloud top) based
+              ! on the decrease of updraft velocity with height
               ! (Eq. 6.12 IFS Cy48r1 without RH term)
               !
-              ! Is stable -> no org. entrainment. This overwrites 
-              ! PMFU for current level which has been calculated 
+              ! Is stable -> no org. entrainment. This overwrites
+              ! PMFU for current level which has been calculated
               ! above with organised entrainment (ICON comment)
               !----------------------------------------------
               if ( zbuo(jl,jk) < 0. ) then
@@ -2461,8 +2461,8 @@ contains
               ! set to zero (Eq. 6.7 IFS Cy48r1)
               !----------------------------------------------
               if ( zbuo(jl,jk) > -0.2  ) then
-                ! when positively buoyant, have organised entrainment 
-                ! which increases MF with height, while detrainment 
+                ! when positively buoyant, have organised entrainment
+                ! which increases MF with height, while detrainment
                 ! is pretty small and constant (ICON comment)
                 ikb = kcbot(jl)
                 ! zoentr is overwritten, but not used until
@@ -2470,7 +2470,7 @@ contains
                 zoentr(jl) = entorg*(0.3-(min(1.,pqen(jl,jk-1) /    &
                   pqsen(jl,jk-1))-1.))*(pgeoh(jl,jk-1)-pgeoh(jl,jk)) * &
                   zrg*min(1.,pqsen(jl,jk)/pqsen(jl,ikb))**3
-                  
+
                 zoentr(jl) = min(0.4,zoentr(jl))*pmfu(jl,jk)
               else
                 zoentr(jl) = 0.
@@ -2483,8 +2483,8 @@ contains
               end if
               !-------------------------------------------
               ! determine convection top level;
-              ! the last set of criteria serves to limit 
-              ! the overshooting of updrafts 
+              ! the last set of criteria serves to limit
+              ! the overshooting of updrafts
               ! through the tropopause (ICON comment)
               !-------------------------------------------
               if ( kup(jl,jk) > 0. .and. pmfu(jl,jk) > 0. ) then
@@ -3100,7 +3100,7 @@ contains
 !    *lndj*       land sea mask (1 for land)
 !    *ldcum*        flag: .true. for convective points
 
-!    input parameters (real):                                                  
+!    input parameters (real):
 
 !    *ztmst*        time step for the physics                       s
 !    *pten*         provisional environment temperature (t+1)       k
@@ -3120,7 +3120,7 @@ contains
 
 !    *lddraf*       set to .false. if ldcum=.false. or kdtop<kctop
 
-!    updated parameters (real):                                                
+!    updated parameters (real):
 
 !    *pmfu*         massflux in updrafts                          kg/(m2*s)
 !    *pmfd*         massflux in downdrafts                        kg/(m2*s)
@@ -3133,7 +3133,7 @@ contains
 !    *pdmfup*       flux difference of precip. in updrafts        kg/(m2*s)
 !    *pdmfdp*       flux difference of precip. in downdrafts      kg/(m2*s)
 
-!    output parameters (real):                                                 
+!    output parameters (real):
 
 !    *pdpmel*       change in precip.-fluxes due to melting       kg/(m2*s)
 !    *plglac*       flux of frozen cloud water in updrafts        kg/(m2*s)
@@ -3447,7 +3447,7 @@ contains
       if ( jk < klev ) then
         do jl = 1,klon
           if ( ldcum(jl) ) then
-            
+
             zalv = foelhm(pten(jl,jk))
 
             zdtdt(jl,jk) = zdp(jl,jk)*rcpd * &
