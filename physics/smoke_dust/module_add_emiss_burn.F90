@@ -66,15 +66,6 @@ CONTAINS
     timeq= mod(timeq,timeq_max)
     coef_con=1._kind_phys/((2._kind_phys*pi)**0.5)
 
-! RAR: for option #1 ebb and frp are ingested for 24 hours. No modification is applied! 
-    if (ebb_dcycle==1) then
-      do k=kts,kte
-        do i=its,ite
-         ebu(i,k,1)=ebu_in(i,1)  
-        enddo
-      enddo
-     endif
-
     if (ebb_dcycle==2) then
     
      do j=jts,jte
