@@ -197,7 +197,7 @@
       real (kind=kind_phys), parameter :: ovcst  = 1.0 - 1.0e-8
 
       real (kind=kind_phys), parameter :: reliq_def = 10.0        !< default liq radius to 10 micron
-      real (kind=kind_phys), parameter :: reice_def = 50.0        !< default ice radius to 50 micron
+      real (kind=kind_phys), parameter :: reice_def = 25.0        !< default ice radius to 50 micron
       real (kind=kind_phys), parameter :: rrain_def = 1000.0      !< default rain radius to 1000 micron
       real (kind=kind_phys), parameter :: rsnow_def = 250.0       !< default snow radius to 250 micron
 
