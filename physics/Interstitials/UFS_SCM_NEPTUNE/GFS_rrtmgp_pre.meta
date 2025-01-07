@@ -430,7 +430,7 @@
   units = none
   dimensions =  (number_of_active_gases_used_by_RRTMGP)
   type = character
-  kind = len=*
+  kind = len=128
   intent = in
   optional = True
 [tsfc_radtime]

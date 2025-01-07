@@ -425,7 +425,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -433,7 +433,7 @@
   standard_name = cloud_liquid_water_path
   long_name = layer cloud liquid water path
   units = g m-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -441,7 +441,7 @@
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
   units = um
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -449,7 +449,7 @@
   standard_name = cloud_ice_water_path
   long_name = layer cloud ice water path
   units = g m-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -457,7 +457,7 @@
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
   units = um
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -465,7 +465,7 @@
   standard_name = cloud_snow_water_path
   long_name = layer cloud snow water path
   units = g m-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -473,7 +473,7 @@
   standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow cloud
   units = um
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -481,7 +481,7 @@
   standard_name = cloud_rain_water_path
   long_name = layer cloud rain water path
   units = g m-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -489,7 +489,7 @@
   standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain cloud
   units = um
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -596,7 +596,7 @@
   standard_name = aerosol_optical_depth_for_shortwave_bands_01_16
   long_name = aerosol optical depth for shortwave bands 01-16
   units = none
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_shortwave_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -604,7 +604,7 @@
   standard_name = aerosol_single_scattering_albedo_for_shortwave_bands_01_16
   long_name = aerosol single scattering albedo for shortwave bands 01-16
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_shortwave_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -612,7 +612,7 @@
   standard_name = aerosol_asymmetry_parameter_for_shortwave_bands_01_16
   long_name = aerosol asymmetry parameter for shortwave bands 01-16
   units = none
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_bands_for_shortwave_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -671,7 +671,7 @@
   standard_name = cloud_optical_depth_layers_at_0p55mu_band
   long_name = approx .55mu band layer cloud optical depth
   units = none
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = inout
