@@ -138,7 +138,7 @@ contains
 
           ! Clear-sky heating-rate (optional)
           if (do_lw_clrsky_hr) then
-             call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(  &
+             call check_error_msg('GFS_radiation_post',compute_heating_rate(  &
                   fluxlwUP_clrsky,   & ! IN  - RRTMGP upward longwave clear-sky flux profiles (W/m2)
                   fluxlwDOWN_clrsky, & ! IN  - RRTMGP downward longwave clear-sky flux profiles (W/m2)
                   p_lev,             & ! IN  - Pressure @ layer-interfaces (Pa)
@@ -146,7 +146,7 @@ contains
           endif
 
           ! All-sky heating-rate (mandatory)
-          call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(     &
+          call check_error_msg('GFS_radiation_post',compute_heating_rate(     &
                fluxlwUP_allsky,      & ! IN  - RRTMGP upward longwave all-sky flux profiles (W/m2)
                fluxlwDOWN_allsky,    & ! IN  - RRTMGP downward longwave all-sky flux profiles (W/m2)
                p_lev,                & ! IN  - Pressure @ layer-interfaces (Pa)
