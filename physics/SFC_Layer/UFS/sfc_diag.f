@@ -11,7 +11,7 @@
 !!
 !>  @{
       subroutine sfc_diag_run (im,xlat_d,xlon_d,                        &
-     &                    lsm,lsm_ruc,grav,cp,eps,epsm1,con_rocp,       &
+     &                    lsm,ilsm_ruc,grav,cp,eps,epsm1,con_rocp,      &
      &                    con_karman,                                   &
      &                    shflx,cdq,wind,                               &
      &                    usfco,vsfco,icplocn2atm,                      &
@@ -27,7 +27,7 @@
       use physcons, only : con_t0c
       implicit none
 !
-      integer, intent(in) :: im, lsm, lsm_ruc, iopt_lake, iopt_lake_clm
+      integer, intent(in) :: im, lsm, ilsm_ruc, iopt_lake, iopt_lake_clm
       logical, intent(in) :: use_lake2m
       integer, intent(in) :: icplocn2atm
       logical, intent(in) :: thsfc_loc  ! Flag for reference pot. temp.
@@ -105,7 +105,7 @@
         fhi     = fh2(i) / fh(i)
         wrk     = 1.0 - fhi
 
-        if(lsm /= lsm_ruc) then
+        if(lsm /= ilsm_ruc) then
         !-- original method
           if(have_2m) then
              ! already have 2m T & Q from lake
