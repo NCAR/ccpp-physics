@@ -77,7 +77,7 @@
   dimensions = ()
   type = integer
   intent = in
-[lsm_ruc]
+[ilsm_ruc]
   standard_name = identifier_for_ruc_land_surface_scheme
   long_name = flag for RUC land surface model
   units = flag
