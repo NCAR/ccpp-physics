@@ -1077,8 +1077,6 @@ CONTAINS
                   tso(i,k,j) = tso1d(k)
         enddo
 
-        tso(i,nzs,j) = tbot(i,j)
-
         do k=1,nzs
              smfr3d(i,k,j) = smfrkeep(k)
            keepfr3dflag(i,k,j) = keepfr (k)
@@ -1104,8 +1102,10 @@ CONTAINS
         if(snow(i,j)==zero) EMISSL(i,j) = EMISBCK(i,j)
         EMISS (I,J) = EMISSL(I,J)
         ! SNOW is in [mm], SNWE is in [m]; CANWAT is in mm, CANWATR is in m
-        SNOW   (i,j) = SNWE*1000._kind_phys
-        SNOWH  (I,J) = SNHEI 
+        !-- 17 may 2024 - cap snow for points at high elevations where all year round skin temperatures are close to 0 C 
+        !-- Snow density for these points will be 3000/7.5=400 [kg/m^3]
+        SNOW   (i,j) = min(3._kind_phys,SNWE)*1000._kind_phys ! cap to be < 3 m
+        SNOWH  (I,J) = min(7.5_kind_phys,SNHEI) ! cap to be < 7.5 m
         CANWAT (I,J) = CANWATR*1000._kind_phys
 
      if (debug_print) then
