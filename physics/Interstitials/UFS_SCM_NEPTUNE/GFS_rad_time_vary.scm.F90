@@ -10,9 +10,8 @@
 
       contains
 
-!>\defgroup mod_GFS_rad_time_vary GFS Radiation Time Update
-!! This module contains code related to GFS radiation setup.
-!> @{
+!> This module contains code related to GFS radiation setup.
+
 !> \section arg_table_GFS_rad_time_vary_timestep_init Argument Table
 !! \htmlinclude GFS_rad_time_vary_timestep_init.html
 !!
@@ -97,6 +96,5 @@
          endif
 
       end subroutine GFS_rad_time_vary_timestep_init
-!> @}
 
    end module GFS_rad_time_vary

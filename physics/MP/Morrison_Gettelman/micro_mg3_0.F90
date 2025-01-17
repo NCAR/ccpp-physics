@@ -2,12 +2,9 @@
 !! This file contains Morrison-Gettelman MP version 3.0 -
 !! Update of MG microphysics with prognostic hail OR graupel.
 
-!>\ingroup mg2mg3
-!>\defgroup mg3_mp Morrison-Gettelman MP version 3.0
-!> @{
-!!---------------------------------------------------------------------------------
-!! Purpose:
-!!   MG microphysics version 3.0 - Update of MG microphysics with
+!---------------------------------------------------------------------------------
+! Purpose:
+!>   MG microphysics version 3.0 - Update of MG microphysics with
 !!                                 prognostic hail OR graupel.
 !!
 !! \authors Andrew Gettelman, Hugh Morrison
@@ -248,8 +245,7 @@ logical  :: do_liq_liu
 contains
 !===============================================================================
 
-!>\ingroup mg3_mp
-!! This subroutine initializes the microphysics
+!> This subroutine initializes the microphysics
 !! and needs to be called once at start of simulation.
 !!\author Andrew Gettelman, Dec 2005
 subroutine micro_mg_init(                                         &
@@ -433,8 +429,7 @@ end subroutine micro_mg_init
 !===============================================================================
 !microphysics routine for each timestep goes here...
 
-!>\ingroup mg3_mp
-!! This subroutine calculates the MG3 microphysical processes.
+!> This subroutine calculates the MG3 microphysical processes.
 !>\authors Hugh Morrison, Andrew Gettelman, NCAR, Peter Caldwell, LLNL
 !! e-mail: morrison@ucar.edu, andrew@ucar.edu
 !!\section mg3_micro_mg_tend MG3 micro_mg_tend General Algorithm
@@ -4484,8 +4479,7 @@ end subroutine micro_mg_tend
 !OUTPUT CALCULATIONS
 !========================================================================
 
-!>\ingroup mg3_mp
-!! This subroutine calculates effective radii for rain and cloud.
+!> This subroutine calculates effective radii for rain and cloud.
 subroutine calc_rercld(lamr, n0r, lamc, pgam, qric, qcic, ncic, rercld, mgncol,nlev)
   integer, intent(in) :: mgncol, nlev                           ! horizontal and vertical dimension
   real(r8), dimension(mgncol,nlev), intent(in) :: lamr          ! rain size parameter (slope)
@@ -4528,4 +4522,3 @@ end subroutine calc_rercld
 !========================================================================
 
 end module micro_mg3_0
-!>@}

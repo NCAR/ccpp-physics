@@ -3,7 +3,7 @@
   type = scheme
   relative_path = ../../
   dependencies = tools/funcphys.f90,hooks/machine.F
-  dependencies = MP/Thompson/module_mp_thompson.F90,MP/Thompson/module_mp_thompson_make_number_concentrations.F90
+  dependencies = MP/module_mp_radar.F90,MP/Thompson/module_mp_thompson.F90,MP/Thompson/module_mp_thompson_make_number_concentrations.F90
   dependencies = Radiation/RRTMG/radcons.f90,Radiation/radiation_aerosols.f
   dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
   dependencies = Radiation/RRTMG/radlw_param.f,Radiation/RRTMG/radsw_param.f,Radiation/radiation_cloud_overlap.F90

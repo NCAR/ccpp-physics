@@ -1,6 +1,7 @@
 !>\file lsm_ruc.F90 
 !!  This file contains the RUC land surface scheme driver.
 
+!> This module contain the RUC land surface model driver
 module lsm_ruc
 
         use machine,           only: kind_phys, kind_dbl_prec
@@ -322,7 +323,7 @@ module lsm_ruc
 !> \section arg_table_lsm_ruc_run Argument Table
 !! \htmlinclude lsm_ruc_run.html
 !!
-!>\section gen_lsmruc RUC LSM General Algorithm
+!>\section gen_lsm_ruc_run RUC LSM General Algorithm
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
@@ -1312,8 +1313,7 @@ module lsm_ruc
 
         ! --- ... accumulated total runoff and surface runoff
         runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * delt  ! accum total kg m-2
-        !srunoff(i) = srunoff(i) + runof(i) * delt             ! accum surface kg m-2
-        srunoff(i) = acrunoff(i,j)        ! accum surface kg m-2
+        srunoff(i) = srunoff(i) + runof(i) * delt             ! accum surface kg m-2
 
         ! --- ... accumulated frozen precipitation (accumulation in lsmruc)
         snowfallac_lnd(i) = snfallac_lnd(i,j) ! accum kg m-2
