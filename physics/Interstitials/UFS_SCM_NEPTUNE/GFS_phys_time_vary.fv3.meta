@@ -243,7 +243,7 @@
   standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
   long_name = mass mixing ratio of aerosol from gocart or merra2
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
+  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers)
   type = real
   kind = kind_phys
   intent = out
@@ -1380,7 +1380,7 @@
   standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
   long_name = mass mixing ratio of aerosol from gocart or merra2
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
+  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers)
   type = real
   kind = kind_phys
   intent = inout
