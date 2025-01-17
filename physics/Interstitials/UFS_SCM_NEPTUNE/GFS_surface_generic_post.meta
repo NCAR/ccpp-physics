@@ -168,7 +168,7 @@
   dimensions = ()
   type = integer
   intent = in
-[lsm_noahmp]
+[ilsm_noahmp]
   standard_name = identifier_for_noahmp_land_surface_scheme
   long_name = flag for NOAH MP land surface model
   units = flag
@@ -454,7 +454,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = True
 [epi]
   standard_name = instantaneous_surface_potential_evaporation
@@ -968,6 +968,14 @@
   type = real
   kind = kind_phys
   intent = in
+[zvfun]
+  standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
+  long_name = function of surface roughness length and green vegetation fraction
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [hflx]
   standard_name = surface_upward_temperature_flux
   long_name = kinematic surface upward sensible heat flux
@@ -992,14 +1000,6 @@
   type = real
   kind = kind_phys
   intent = out
-[zvfun]
-  standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
-  long_name = function of surface roughness length and green vegetation fraction
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [hffac]
   standard_name = surface_upward_sensible_heat_flux_reduction_factor
   long_name = surface upward sensible heat flux reduction factor from canopy heat storage

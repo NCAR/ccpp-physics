@@ -8,6 +8,9 @@
 
       contains
 
+!! \section arg_table_myjsfc_wrapper_init Argument Table
+!! \htmlinclude myjsfc_wrapper_init.html
+!!
       subroutine myjsfc_wrapper_init (do_myjsfc,    &
       & errmsg,errflg)
 

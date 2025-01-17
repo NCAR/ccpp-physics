@@ -8,6 +8,9 @@
 
       contains
 
+!! \section arg_table_myjpbl_wrapper_init Argument Table
+!! \htmlinclude myjpbl_wrapper_init.html
+!!
       subroutine myjpbl_wrapper_init (do_myjpbl,errmsg,errflg)
       
       logical,              intent(in)  :: do_myjpbl

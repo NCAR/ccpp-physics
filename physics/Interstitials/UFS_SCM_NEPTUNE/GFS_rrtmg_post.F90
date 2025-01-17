@@ -37,26 +37,26 @@
       logical,              intent(in) :: lsswr, lslwr, lssav
       real(kind=kind_phys), intent(in) :: raddt, fhlwr, fhswr
             
-      real(kind=kind_phys), dimension(im),        intent(in) :: coszen, coszdg
+      real(kind=kind_phys), dimension(:),   intent(in) :: coszen, coszdg
       
-      real(kind=kind_phys), dimension(im,kmp1),   intent(in) :: prsi
-      real(kind=kind_phys), dimension(im,km),     intent(in) :: tgrs
+      real(kind=kind_phys), dimension(:,:), intent(in) :: prsi
+      real(kind=kind_phys), dimension(:,:), intent(in) :: tgrs
       
-      real(kind=kind_phys), dimension(im,NSPC1),  intent(in) :: aerodp
-      real(kind=kind_phys), dimension(im,5),      intent(in) :: cldsa
-      integer,              dimension(im,3),      intent(in) :: mbota, mtopa
-      real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: clouds1
-      real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: cldtausw
-      real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: cldtaulw
-      real(kind=kind_phys), dimension(im),        intent(inout) :: total_albedo
+      real(kind=kind_phys), dimension(:,:), intent(in) :: aerodp
+      real(kind=kind_phys), dimension(:,:), intent(in) :: cldsa
+      integer,              dimension(:,:), intent(in) :: mbota, mtopa
+      real(kind=kind_phys), dimension(:,:), intent(in) :: clouds1
+      real(kind=kind_phys), dimension(:,:), intent(in) :: cldtausw
+      real(kind=kind_phys), dimension(:,:), intent(in) :: cldtaulw
+      real(kind=kind_phys), dimension(:),   intent(inout) :: total_albedo
       
-      type(sfcflw_type), dimension(im), intent(in) :: sfcflw
-      type(sfcfsw_type), dimension(im), intent(in) :: sfcfsw
-      type(cmpfsw_type), dimension(im), intent(in) :: scmpsw
-      type(topflw_type), dimension(im), intent(in) :: topflw
-      type(topfsw_type), dimension(im), intent(in) :: topfsw
+      type(sfcflw_type), dimension(:), intent(in) :: sfcflw
+      type(sfcfsw_type), dimension(:), intent(in) :: sfcfsw
+      type(cmpfsw_type), dimension(:), intent(in) :: scmpsw
+      type(topflw_type), dimension(:), intent(in) :: topflw
+      type(topfsw_type), dimension(:), intent(in) :: topfsw
       
-      real(kind=kind_phys), dimension(im,nfxr), intent(inout) :: fluxr
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: fluxr
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg

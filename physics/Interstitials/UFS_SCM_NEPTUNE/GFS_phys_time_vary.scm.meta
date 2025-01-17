@@ -395,14 +395,14 @@
   dimensions = ()
   type = integer
   intent = in
-[lsm_noahmp]
+[ilsm_noahmp]
   standard_name = identifier_for_noahmp_land_surface_scheme
   long_name = flag for NOAH MP land surface model
   units = flag
   dimensions = ()
   type = integer
   intent = in
-[lsm_ruc]
+[ilsm_ruc]
   standard_name = identifier_for_ruc_land_surface_scheme
   long_name = flag for RUC land surface model
   units = flag
@@ -602,6 +602,90 @@
   kind = kind_phys
   intent = inout
   optional = True
+[albdvis_lnd]
+  standard_name = surface_albedo_direct_visible_over_land
+  long_name = direct surface albedo visible band over land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[albdnir_lnd]
+  standard_name = surface_albedo_direct_NIR_over_land
+  long_name = direct surface albedo NIR band over land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[albivis_lnd]
+  standard_name = surface_albedo_diffuse_visible_over_land
+  long_name = diffuse surface albedo visible band over land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[albinir_lnd]
+  standard_name = surface_albedo_diffuse_NIR_over_land
+  long_name = diffuse surface albedo NIR band over land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[albdvis_ice]
+  standard_name = surface_albedo_direct_visible_over_ice
+  long_name = direct surface albedo visible band over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[albdnir_ice]
+  standard_name = surface_albedo_direct_NIR_over_ice
+  long_name = direct surface albedo NIR band over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[albivis_ice]
+  standard_name = surface_albedo_diffuse_visible_over_ice
+  long_name = diffuse surface albedo visible band over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[albinir_ice]
+  standard_name = surface_albedo_diffuse_NIR_over_ice
+  long_name = diffuse surface albedo NIR band over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[emiss_lnd]
+  standard_name = surface_longwave_emissivity_over_land
+  long_name = surface lw emissivity in fraction over land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[emiss_ice]
+  standard_name = surface_longwave_emissivity_over_ice
+  long_name = surface lw emissivity in fraction over ice
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [taussxy]
   standard_name = dimensionless_age_of_surface_snow
   long_name = non-dimensional snow age
@@ -737,90 +821,6 @@
   kind = kind_phys
   intent = inout
   optional = True
-[albdvis_lnd]
-  standard_name = surface_albedo_direct_visible_over_land
-  long_name = direct surface albedo visible band over land
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[albdnir_lnd]
-  standard_name = surface_albedo_direct_NIR_over_land
-  long_name = direct surface albedo NIR band over land
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[albivis_lnd]
-  standard_name = surface_albedo_diffuse_visible_over_land
-  long_name = diffuse surface albedo visible band over land
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[albinir_lnd]
-  standard_name = surface_albedo_diffuse_NIR_over_land
-  long_name = diffuse surface albedo NIR band over land
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[albdvis_ice]
-  standard_name = surface_albedo_direct_visible_over_ice
-  long_name = direct surface albedo visible band over ice
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[albdnir_ice]
-  standard_name = surface_albedo_direct_NIR_over_ice
-  long_name = direct surface albedo NIR band over ice
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[albivis_ice]
-  standard_name = surface_albedo_diffuse_visible_over_ice
-  long_name = diffuse surface albedo visible band over ice
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[albinir_ice]
-  standard_name = surface_albedo_diffuse_NIR_over_ice
-  long_name = diffuse surface albedo NIR band over ice
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[emiss_lnd]
-  standard_name = surface_longwave_emissivity_over_land
-  long_name = surface lw emissivity in fraction over land
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[emiss_ice]
-  standard_name = surface_longwave_emissivity_over_ice
-  long_name = surface lw emissivity in fraction over ice
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [snowxy]
   standard_name = number_of_snow_layers
   long_name = number of snow layers
@@ -1195,6 +1195,20 @@
   dimensions = ()
   type = logical
   intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
+[h2ophys]
+  standard_name = dataset_for_h2o_photochemistry_physics
+  long_name = dataset for NRL h2o photochemistry physics
+  units = mixed
+  dimensions = ()
+  type = ty_h2ophys
+  intent = in
 [ntoz]
   standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for ozone mixing ratio
@@ -1514,20 +1528,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[ozphys]
-  standard_name = dataset_for_ozone_physics
-  long_name = dataset for NRL ozone physics
-  units = mixed
-  dimensions = ()
-  type = ty_ozphys
-  intent = in
-[h2ophys]
-  standard_name = dataset_for_h2o_photochemistry_physics
-  long_name = dataset for NRL h2o photochemistry physics
-  units = mixed
-  dimensions = ()
-  type = ty_h2ophys
-  intent = in
 [nthrds]
   standard_name = number_of_openmp_threads
   long_name = number of OpenMP threads available for physics schemes

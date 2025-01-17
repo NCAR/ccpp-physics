@@ -90,7 +90,11 @@
         real (kind=kind_phys) :: dnfxc      !< total sky downward flux at sfc
         real (kind=kind_phys) :: dnfx0      !< clear sky downward flux at sfc
       end type sfcflw_type
-!
+
+!> derived type for LW flux profiles
+!! \section arg_table_proflw_type Argument Table
+!! \htmlinclude proflw_type.html
+!!
       type proflw_type                      !< define type construct for optional radiation flux profiles
         real (kind=kind_phys) :: upfxc      !< level up flux for total sky
         real (kind=kind_phys) :: dnfxc      !< level down flux for total sky

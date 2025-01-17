@@ -25,13 +25,6 @@
   type = real
   kind = kind_phys
   intent = in
-[levs]
-  standard_name = vertical_layer_dimension
-  long_name = vertical layer dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [fhswr]
   standard_name = period_of_shortwave_radiation_calls
   long_name = frequency for shortwave radiation
@@ -39,6 +32,13 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = vertical layer dimension
+  units = count
+  dimensions = ()
+  type = integer
   intent = in
 [flag_init]
   standard_name = flag_for_first_timestep
@@ -157,14 +157,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[qs]
-  standard_name = snow_mixing_ratio
-  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [qv]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -205,6 +197,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[qs]
+  standard_name = snow_mixing_ratio
+  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [qg]
   standard_name = graupel_mixing_ratio
   long_name = graupel mixing ratio wrt dry+vapor (no condensates)
@@ -213,15 +213,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[ud_mf]
-  standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
-  long_name = (updraft mass flux) * delt
-  units = kg m-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
 [qci_conv]
   standard_name = convective_cloud_condesate_after_rainout
   long_name = convective cloud condesate after rainout
@@ -247,6 +238,15 @@
   type = real
   kind = kind_phys
   intent = inout
+[ud_mf]
+  standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
+  long_name = (updraft mass flux) * delt
+  units = kg m-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
 [imfdeepcnv]
   standard_name = control_for_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
@@ -338,7 +338,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = inout
@@ -346,7 +346,7 @@
   standard_name = cloud_liquid_water_path
   long_name = layer cloud liquid water path
   units = g m-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = inout
@@ -354,7 +354,7 @@
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
   units = um
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = inout
@@ -362,7 +362,7 @@
   standard_name = cloud_ice_water_path
   long_name = layer cloud ice water path
   units = g m-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = inout
@@ -370,7 +370,7 @@
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
   units = um
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = inout
