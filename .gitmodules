@@ -2,6 +2,7 @@
   path = physics/Radiation/RRTMGP/rte-rrtmgp
   url = https://github.com/earth-system-radiation/rte-rrtmgp
   branch = main
-[submodule "/glade/work/nusbaume/SE_projects/ccpp-physics/physics/MP/PUMAS/pumas"]
-	path = /glade/work/nusbaume/SE_projects/ccpp-physics/physics/MP/PUMAS/pumas
-	url = https://github.com/nusbaume/PUMAS.git
+[submodule "pumas"]
+  path   = physics/MP/PUMAS/pumas
+  url    = https://github.com/nusbaume/PUMAS.git
+  branch = ccpp_prep
