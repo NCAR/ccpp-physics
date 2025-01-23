@@ -85,6 +85,7 @@
      &     rlmx,elmx,sfc_rlm,tc_pbl,                                    &
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
+     &     ten_t, ten_u, ten_v,                                         &
      &     errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -137,6 +138,8 @@
      &                     dkt(:,:), dku(:,:)
 !
       logical, intent(in)  :: dspheat
+      real(kind=kind_phys), intent(out) :: ten_t(:,:),                  &
+     &                                     ten_u(:,:), ten_v(:,:)
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -240,7 +243,7 @@
      &                     rdt,     rdz,    qmin,   qlmin,
      &                     rimin,   rbcr,   rbint,  tdzmin,
      &                     rlmn,    rlmn0,  rlmn1,  rlmn2,
-     &                     ttend,   utend,  vtend,  qtend,
+     &                     qtend,
      &                     zfac,    zfmin,  vk,     spdk2,
      &                     tkmin,   tkbmx,  xkgdx,
      &                     xkinv1,  xkinv2,
@@ -2216,10 +2219,9 @@ c
 c
       do  k = 1,km
          do i = 1,im
-            ttend      = (f1(i,k)-t1(i,k))*rdt
-            qtend      = (f2(i,k)-q1(i,k,1))*rdt
-            tdt(i,k)   = tdt(i,k)+ttend
-            rtg(i,k,1) = rtg(i,k,1)+qtend
+            ten_t(i,k)   = (f1(i,k)-t1(i,k))*rdt
+            qtend        = (f2(i,k)-q1(i,k,1))*rdt
+            rtg(i,k,1)   = rtg(i,k,1)+qtend
 !           dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
 !           dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
@@ -2235,8 +2237,7 @@ c
         if(idtend>=1) then
           do  k = 1,km
             do i = 1,im
-              ttend      = (f1(i,k)-t1(i,k))*rdt
-              dtend(i,k,idtend) = dtend(i,k,idtend)+ttend*delt
+              dtend(i,k,idtend) = dtend(i,k,idtend)+ten_t(i,k)*delt
             enddo
           enddo
         endif
@@ -2288,8 +2289,7 @@ c
           do i = 1,im
 !           tem = min(diss(i,k), dspmax)
 !           ttend = tem / cp
-            ttend = diss(i,k) / cp
-            tdt(i,k) = tdt(i,k) + dspfac * ttend
+            ten_t(i,k) = ten_t(i,k) + dspfac * diss(i,k) / cp
           enddo
         enddo
         if(ldiag3d .and. .not. gen_tend) then
@@ -2297,8 +2297,8 @@ c
           if(idtend>=1) then
             do k = 1,km1
               do i = 1,im
-                ttend = diss(i,k) / cp
-                dtend(i,k,idtend) = dtend(i,k,idtend)+dspfac*ttend*delt
+                dtend(i,k,idtend) = dtend(i,k,idtend)+              
+     &                              (dspfac * diss(i,k) / cp)*delt
               enddo
             enddo
           endif
@@ -2371,10 +2371,8 @@ c
 c
       do k = 1,km
          do i = 1,im
-            utend = (f1(i,k)-u1(i,k))*rdt
-            vtend = (f2(i,k)-v1(i,k))*rdt
-            du(i,k)  = du(i,k)+utend
-            dv(i,k)  = dv(i,k)+vtend
+            ten_u(i,k) = (f1(i,k)-u1(i,k))*rdt
+            ten_v(i,k) = (f2(i,k)-v1(i,k))*rdt
 !           dusfc(i) = dusfc(i)+conw*del(i,k)*utend
 !           dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
@@ -2395,8 +2393,7 @@ c
         if(idtend>=1) then
           do k = 1,km
             do i = 1,im
-              utend = (f1(i,k)-u1(i,k))*rdt
-              dtend(i,k,idtend) = dtend(i,k,idtend) + utend*delt
+              dtend(i,k,idtend) = dtend(i,k,idtend) + ten_u(i,k)*delt
             enddo
           enddo
         endif
@@ -2405,8 +2402,7 @@ c
         if(idtend>=1) then
           do k = 1,km
             do i = 1,im
-              vtend = (f2(i,k)-v1(i,k))*rdt
-              dtend(i,k,idtend) = dtend(i,k,idtend) + vtend*delt
+              dtend(i,k,idtend) = dtend(i,k,idtend) + ten_v(i,k)*delt
             enddo
           enddo
         endif

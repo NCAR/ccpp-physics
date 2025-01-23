@@ -156,7 +156,7 @@
   kind = kind_phys
   intent = in
 [tgrs]
-  standard_name = physics_timestep_initial_air_temperature
+  standard_name = air_temperature
   long_name = model layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

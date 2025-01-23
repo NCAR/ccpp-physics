@@ -10,17 +10,18 @@
 !!
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
-        trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz,                                            &
+        tend_opt_pbl, trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz,                                            &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
         imp_physics_fer_hires, imp_physics_nssl, nssl_ccn_on, ltaerosol, mraerosol, nssl_hail_on, nssl_3moment,                &
         cplflx, cplaqm, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,                 &
-        shinhong, do_ysu, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                   &
+        shinhong, do_ysu, dvdftra, ten_t, ten_u, ten_v, ten_q, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dtp, dudt, dvdt, dtdt,                   &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,           &
         index_of_process_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,   &
         dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                        &
         rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, kdt, dusfc_cice, dvsfc_cice,                             &
         dtsfc_cice, dqsfc_cice, use_med_flux, dtsfc_med, dqsfc_med, dusfc_med, dvsfc_med, wet, dry, icy, wind, stress_wat,     &
-        hflx_wat, evap_wat, ugrs1, vgrs1, hffac, ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, huge, errmsg, errflg)
+        hflx_wat, evap_wat, ugrs1, vgrs1, hffac, ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, huge,                 &
+        gt0, gq0, gu0, gv0, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -31,6 +32,7 @@
       integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm, kdt
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
       integer, intent(in) :: ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz
+      integer, intent(in) :: tend_opt_pbl
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
@@ -43,7 +45,7 @@
       real(kind=kind_phys), dimension(:,:), intent(in) :: save_u, save_v, save_t
       real(kind=kind_phys), dimension(:,:, :), intent(in) :: save_q
 
-      real(kind=kind_phys), intent(in) :: dtf
+      real(kind=kind_phys), intent(in) :: dtf, dtp
       real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap, huge
       real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsl
@@ -55,10 +57,13 @@
       real(kind=kind_phys), dimension(:,:), intent(in) :: ugrs, vgrs, tgrs
 
       real(kind=kind_phys), dimension(:,:, :), intent(in) :: dvdftra
-      real(kind=kind_phys), dimension(:), intent(in) :: dusfc1, dvsfc1, dtsfc1, dqsfc1, xmu
-      real(kind=kind_phys), dimension(:,:), intent(in) :: dudt, dvdt, dtdt, htrsw, htrlw
-
+      real(kind=kind_phys), dimension(:,:), intent(in) :: ten_t, ten_u, ten_v
+      real(kind=kind_phys), dimension(:,:,:), intent(out) :: ten_q
+      real(kind=kind_phys), dimension(:), intent(in) :: dusfc1, dvsfc1, dtsfc1, dqsfc1
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dudt, dvdt, dtdt
       real(kind=kind_phys), dimension(:,:, :), intent(inout) :: dqdt
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: gt0, gv0, gu0
+      real(kind=kind_phys), dimension(:,:, :), intent(inout) :: gq0
 
       ! The following arrays may not be allocated, depending on certain flags (cplflx, ...).
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
@@ -91,15 +96,16 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+      ten_q = 0.0
 !GJF: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
       if (nvdiff == ntrac .and. (hybedmf .or. do_shoc .or. satmedmf)) then
-        dqdt = dvdftra
+        ten_q = dvdftra
       elseif (nvdiff /= ntrac .and. .not. shinhong .and. .not. do_ysu) then
 !
         if (ntke>0) then
           do k=1,levs
             do i=1,im
-              dqdt(i,k,ntke)  = dvdftra(i,k,ntkev)
+              ten_q(i,k,ntke)  = dvdftra(i,k,ntkev)
             enddo
           enddo
         endif
@@ -119,7 +125,7 @@
             k1 = k1 + 1
             do k=1,levs
               do i=1,im
-                dqdt(i,k,n) = dvdftra(i,k,k1)
+                ten_q(i,k,n) = dvdftra(i,k,k1)
               enddo
             enddo
           enddo
@@ -129,10 +135,10 @@
   ! WSM6
           do k=1,levs
             do i=1,im
-              dqdt(i,k,ntqv)  = dvdftra(i,k,1)
-              dqdt(i,k,ntcw)  = dvdftra(i,k,2)
-              dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-              dqdt(i,k,ntoz)  = dvdftra(i,k,4)
+              ten_q(i,k,ntqv)  = dvdftra(i,k,1)
+              ten_q(i,k,ntcw)  = dvdftra(i,k,2)
+              ten_q(i,k,ntiw)  = dvdftra(i,k,3)
+              ten_q(i,k,ntoz)  = dvdftra(i,k,4)
             enddo
           enddo
 
@@ -140,12 +146,12 @@
   ! Ferrier-Aligo 
           do k=1,levs
             do i=1,im
-              dqdt(i,k,ntqv)    = dvdftra(i,k,1)
-              dqdt(i,k,ntcw)    = dvdftra(i,k,2)
-              dqdt(i,k,ntiw)    = dvdftra(i,k,3)
-              dqdt(i,k,ntrw)    = dvdftra(i,k,4)
-              dqdt(i,k,nqrimef) = dvdftra(i,k,5)
-              dqdt(i,k,ntoz)    = dvdftra(i,k,6)
+              ten_q(i,k,ntqv)    = dvdftra(i,k,1)
+              ten_q(i,k,ntcw)    = dvdftra(i,k,2)
+              ten_q(i,k,ntiw)    = dvdftra(i,k,3)
+              ten_q(i,k,ntrw)    = dvdftra(i,k,4)
+              ten_q(i,k,nqrimef) = dvdftra(i,k,5)
+              ten_q(i,k,ntoz)    = dvdftra(i,k,6)
             enddo
           enddo
 
@@ -154,47 +160,47 @@
           if(ltaerosol) then
             do k=1,levs
               do i=1,im
-                dqdt(i,k,ntqv)  = dvdftra(i,k,1)
-                dqdt(i,k,ntcw)  = dvdftra(i,k,2)
-                dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
-                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
-                dqdt(i,k,ntgl)  = dvdftra(i,k,6)
-                dqdt(i,k,ntlnc) = dvdftra(i,k,7)
-                dqdt(i,k,ntinc) = dvdftra(i,k,8)
-                dqdt(i,k,ntrnc) = dvdftra(i,k,9)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,10)
-                dqdt(i,k,ntwa)  = dvdftra(i,k,11)
-                dqdt(i,k,ntia)  = dvdftra(i,k,12)
+                ten_q(i,k,ntqv)  = dvdftra(i,k,1)
+                ten_q(i,k,ntcw)  = dvdftra(i,k,2)
+                ten_q(i,k,ntiw)  = dvdftra(i,k,3)
+                ten_q(i,k,ntrw)  = dvdftra(i,k,4)
+                ten_q(i,k,ntsw)  = dvdftra(i,k,5)
+                ten_q(i,k,ntgl)  = dvdftra(i,k,6)
+                ten_q(i,k,ntlnc) = dvdftra(i,k,7)
+                ten_q(i,k,ntinc) = dvdftra(i,k,8)
+                ten_q(i,k,ntrnc) = dvdftra(i,k,9)
+                ten_q(i,k,ntoz)  = dvdftra(i,k,10)
+                ten_q(i,k,ntwa)  = dvdftra(i,k,11)
+                ten_q(i,k,ntia)  = dvdftra(i,k,12)
               enddo
             enddo
           else if(mraerosol) then
             do k=1,levs
               do i=1,im
-                dqdt(i,k,ntqv)  = dvdftra(i,k,1)
-                dqdt(i,k,ntcw)  = dvdftra(i,k,2)
-                dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
-                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
-                dqdt(i,k,ntgl)  = dvdftra(i,k,6)
-                dqdt(i,k,ntlnc) = dvdftra(i,k,7)
-                dqdt(i,k,ntinc) = dvdftra(i,k,8)
-                dqdt(i,k,ntrnc) = dvdftra(i,k,9)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,10)
+                ten_q(i,k,ntqv)  = dvdftra(i,k,1)
+                ten_q(i,k,ntcw)  = dvdftra(i,k,2)
+                ten_q(i,k,ntiw)  = dvdftra(i,k,3)
+                ten_q(i,k,ntrw)  = dvdftra(i,k,4)
+                ten_q(i,k,ntsw)  = dvdftra(i,k,5)
+                ten_q(i,k,ntgl)  = dvdftra(i,k,6)
+                ten_q(i,k,ntlnc) = dvdftra(i,k,7)
+                ten_q(i,k,ntinc) = dvdftra(i,k,8)
+                ten_q(i,k,ntrnc) = dvdftra(i,k,9)
+                ten_q(i,k,ntoz)  = dvdftra(i,k,10)
               enddo
             enddo
           else
             do k=1,levs
               do i=1,im
-                dqdt(i,k,ntqv)  = dvdftra(i,k,1)
-                dqdt(i,k,ntcw)  = dvdftra(i,k,2)
-                dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
-                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
-                dqdt(i,k,ntgl)  = dvdftra(i,k,6)
-                dqdt(i,k,ntinc) = dvdftra(i,k,7)
-                dqdt(i,k,ntrnc) = dvdftra(i,k,8)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,9)
+                ten_q(i,k,ntqv)  = dvdftra(i,k,1)
+                ten_q(i,k,ntcw)  = dvdftra(i,k,2)
+                ten_q(i,k,ntiw)  = dvdftra(i,k,3)
+                ten_q(i,k,ntrw)  = dvdftra(i,k,4)
+                ten_q(i,k,ntsw)  = dvdftra(i,k,5)
+                ten_q(i,k,ntgl)  = dvdftra(i,k,6)
+                ten_q(i,k,ntinc) = dvdftra(i,k,7)
+                ten_q(i,k,ntrnc) = dvdftra(i,k,8)
+                ten_q(i,k,ntoz)  = dvdftra(i,k,9)
               enddo
             enddo
           endif
@@ -202,54 +208,54 @@
           if (ntgl > 0) then                                 ! MG
             do k=1,levs
               do i=1,im
-                dqdt(i,k,1)     = dvdftra(i,k,1)
-                dqdt(i,k,ntcw)  = dvdftra(i,k,2)
-                dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
-                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
-                dqdt(i,k,ntgl)  = dvdftra(i,k,6)
-                dqdt(i,k,ntlnc) = dvdftra(i,k,7)
-                dqdt(i,k,ntinc) = dvdftra(i,k,8)
-                dqdt(i,k,ntrnc) = dvdftra(i,k,9)
-                dqdt(i,k,ntsnc) = dvdftra(i,k,10)
-                dqdt(i,k,ntgnc) = dvdftra(i,k,11)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,12)
+                ten_q(i,k,1)     = dvdftra(i,k,1)
+                ten_q(i,k,ntcw)  = dvdftra(i,k,2)
+                ten_q(i,k,ntiw)  = dvdftra(i,k,3)
+                ten_q(i,k,ntrw)  = dvdftra(i,k,4)
+                ten_q(i,k,ntsw)  = dvdftra(i,k,5)
+                ten_q(i,k,ntgl)  = dvdftra(i,k,6)
+                ten_q(i,k,ntlnc) = dvdftra(i,k,7)
+                ten_q(i,k,ntinc) = dvdftra(i,k,8)
+                ten_q(i,k,ntrnc) = dvdftra(i,k,9)
+                ten_q(i,k,ntsnc) = dvdftra(i,k,10)
+                ten_q(i,k,ntgnc) = dvdftra(i,k,11)
+                ten_q(i,k,ntoz)  = dvdftra(i,k,12)
               enddo
             enddo
           else                                               ! MG2
             do k=1,levs
               do i=1,im
-                dqdt(i,k,1)     = dvdftra(i,k,1)
-                dqdt(i,k,ntcw)  = dvdftra(i,k,2)
-                dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
-                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
-                dqdt(i,k,ntlnc) = dvdftra(i,k,6)
-                dqdt(i,k,ntinc) = dvdftra(i,k,7)
-                dqdt(i,k,ntrnc) = dvdftra(i,k,8)
-                dqdt(i,k,ntsnc) = dvdftra(i,k,9)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,10)
+                ten_q(i,k,1)     = dvdftra(i,k,1)
+                ten_q(i,k,ntcw)  = dvdftra(i,k,2)
+                ten_q(i,k,ntiw)  = dvdftra(i,k,3)
+                ten_q(i,k,ntrw)  = dvdftra(i,k,4)
+                ten_q(i,k,ntsw)  = dvdftra(i,k,5)
+                ten_q(i,k,ntlnc) = dvdftra(i,k,6)
+                ten_q(i,k,ntinc) = dvdftra(i,k,7)
+                ten_q(i,k,ntrnc) = dvdftra(i,k,8)
+                ten_q(i,k,ntsnc) = dvdftra(i,k,9)
+                ten_q(i,k,ntoz)  = dvdftra(i,k,10)
               enddo
             enddo
           endif
         elseif (imp_physics == imp_physics_gfdl) then        ! GFDL MP
           do k=1,levs
             do i=1,im
-              dqdt(i,k,ntqv) = dvdftra(i,k,1)
-              dqdt(i,k,ntcw) = dvdftra(i,k,2)
-              dqdt(i,k,ntiw) = dvdftra(i,k,3)
-              dqdt(i,k,ntrw) = dvdftra(i,k,4)
-              dqdt(i,k,ntsw) = dvdftra(i,k,5)
-              dqdt(i,k,ntgl) = dvdftra(i,k,6)
-              dqdt(i,k,ntoz) = dvdftra(i,k,7)
+              ten_q(i,k,ntqv) = dvdftra(i,k,1)
+              ten_q(i,k,ntcw) = dvdftra(i,k,2)
+              ten_q(i,k,ntiw) = dvdftra(i,k,3)
+              ten_q(i,k,ntrw) = dvdftra(i,k,4)
+              ten_q(i,k,ntsw) = dvdftra(i,k,5)
+              ten_q(i,k,ntgl) = dvdftra(i,k,6)
+              ten_q(i,k,ntoz) = dvdftra(i,k,7)
             enddo
           enddo
         elseif (imp_physics == imp_physics_zhao_carr) then
           do k=1,levs
             do i=1,im
-              dqdt(i,k,1)    = dvdftra(i,k,1)
-              dqdt(i,k,ntcw) = dvdftra(i,k,2)
-              dqdt(i,k,ntoz) = dvdftra(i,k,3)
+              ten_q(i,k,1)    = dvdftra(i,k,1)
+              ten_q(i,k,ntcw) = dvdftra(i,k,2)
+              ten_q(i,k,ntoz) = dvdftra(i,k,3)
             enddo
           enddo
         elseif (imp_physics == imp_physics_nssl ) then
@@ -257,31 +263,31 @@
             IF ( nssl_hail_on ) THEN
             do k=1,levs
               do i=1,im
-               dqdt(i,k,ntqv) = dvdftra(i,k,1)  
-               dqdt(i,k,ntcw) = dvdftra(i,k,2)  
-               dqdt(i,k,ntiw) = dvdftra(i,k,3)  
-               dqdt(i,k,ntrw) = dvdftra(i,k,4)  
-               dqdt(i,k,ntsw) = dvdftra(i,k,5)  
-               dqdt(i,k,ntgl) = dvdftra(i,k,6)  
-               dqdt(i,k,nthl) = dvdftra(i,k,7)  
-               dqdt(i,k,ntlnc) = dvdftra(i,k,8) 
-               dqdt(i,k,ntinc) = dvdftra(i,k,9) 
-               dqdt(i,k,ntrnc) = dvdftra(i,k,10)
-               dqdt(i,k,ntsnc) = dvdftra(i,k,11)
-               dqdt(i,k,ntgnc) = dvdftra(i,k,12)
-               dqdt(i,k,nthnc) = dvdftra(i,k,13)
-               dqdt(i,k,ntgv) = dvdftra(i,k,14) 
-               dqdt(i,k,nthv) = dvdftra(i,k,15) 
-               dqdt(i,k,ntoz) = dvdftra(i,k,16) 
+               ten_q(i,k,ntqv) = dvdftra(i,k,1)  
+               ten_q(i,k,ntcw) = dvdftra(i,k,2)  
+               ten_q(i,k,ntiw) = dvdftra(i,k,3)  
+               ten_q(i,k,ntrw) = dvdftra(i,k,4)  
+               ten_q(i,k,ntsw) = dvdftra(i,k,5)  
+               ten_q(i,k,ntgl) = dvdftra(i,k,6)  
+               ten_q(i,k,nthl) = dvdftra(i,k,7)  
+               ten_q(i,k,ntlnc) = dvdftra(i,k,8) 
+               ten_q(i,k,ntinc) = dvdftra(i,k,9) 
+               ten_q(i,k,ntrnc) = dvdftra(i,k,10)
+               ten_q(i,k,ntsnc) = dvdftra(i,k,11)
+               ten_q(i,k,ntgnc) = dvdftra(i,k,12)
+               ten_q(i,k,nthnc) = dvdftra(i,k,13)
+               ten_q(i,k,ntgv) = dvdftra(i,k,14) 
+               ten_q(i,k,nthv) = dvdftra(i,k,15) 
+               ten_q(i,k,ntoz) = dvdftra(i,k,16) 
                n = 16
                IF ( nssl_ccn_on ) THEN
-                 dqdt(i,k,ntccn) = dvdftra(i,k,n+1)
+                 ten_q(i,k,ntccn) = dvdftra(i,k,n+1)
                  n = n+1
                ENDIF
                IF ( nssl_3moment ) THEN
-                 dqdt(i,k,ntrz) = dvdftra(i,k,n+1)
-                 dqdt(i,k,ntgz) = dvdftra(i,k,n+2)
-                 dqdt(i,k,nthz) = dvdftra(i,k,n+3)
+                 ten_q(i,k,ntrz) = dvdftra(i,k,n+1)
+                 ten_q(i,k,ntgz) = dvdftra(i,k,n+2)
+                 ten_q(i,k,nthz) = dvdftra(i,k,n+3)
                  n = n+3
                ENDIF
               enddo
@@ -291,27 +297,27 @@
             
             do k=1,levs
               do i=1,im
-               dqdt(i,k,ntqv) = dvdftra(i,k,1)  
-               dqdt(i,k,ntcw) = dvdftra(i,k,2)  
-               dqdt(i,k,ntiw) = dvdftra(i,k,3)  
-               dqdt(i,k,ntrw) = dvdftra(i,k,4)  
-               dqdt(i,k,ntsw) = dvdftra(i,k,5)  
-               dqdt(i,k,ntgl) = dvdftra(i,k,6)  
-               dqdt(i,k,ntlnc) = dvdftra(i,k,7) 
-               dqdt(i,k,ntinc) = dvdftra(i,k,8) 
-               dqdt(i,k,ntrnc) = dvdftra(i,k,9)
-               dqdt(i,k,ntsnc) = dvdftra(i,k,10)
-               dqdt(i,k,ntgnc) = dvdftra(i,k,11)
-               dqdt(i,k,ntgv) = dvdftra(i,k,12) 
-               dqdt(i,k,ntoz) = dvdftra(i,k,13)
+               ten_q(i,k,ntqv) = dvdftra(i,k,1)  
+               ten_q(i,k,ntcw) = dvdftra(i,k,2)  
+               ten_q(i,k,ntiw) = dvdftra(i,k,3)  
+               ten_q(i,k,ntrw) = dvdftra(i,k,4)  
+               ten_q(i,k,ntsw) = dvdftra(i,k,5)  
+               ten_q(i,k,ntgl) = dvdftra(i,k,6)  
+               ten_q(i,k,ntlnc) = dvdftra(i,k,7) 
+               ten_q(i,k,ntinc) = dvdftra(i,k,8) 
+               ten_q(i,k,ntrnc) = dvdftra(i,k,9)
+               ten_q(i,k,ntsnc) = dvdftra(i,k,10)
+               ten_q(i,k,ntgnc) = dvdftra(i,k,11)
+               ten_q(i,k,ntgv) = dvdftra(i,k,12) 
+               ten_q(i,k,ntoz) = dvdftra(i,k,13)
                n = 13
                IF ( nssl_ccn_on ) THEN
-                 dqdt(i,k,ntccn) = dvdftra(i,k,n+1)
+                 ten_q(i,k,ntccn) = dvdftra(i,k,n+1)
                  n = n+1
                ENDIF
                IF ( nssl_3moment ) THEN
-                 dqdt(i,k,ntrz) = dvdftra(i,k,n+1)
-                 dqdt(i,k,ntgz) = dvdftra(i,k,n+2)
+                 ten_q(i,k,ntrz) = dvdftra(i,k,n+1)
+                 ten_q(i,k,ntgz) = dvdftra(i,k,n+2)
                  n = n+2
                ENDIF
               enddo
@@ -321,6 +327,62 @@
         endif
 
       endif ! nvdiff == ntrac
+
+      
+
+      case_PBL_ten: select case (tend_opt_pbl)
+        case (1) !immediately apply tendencies
+                  !Current state = current state + dt*current tendency
+                  !Accumulated tendency unchanged
+          do k=1,levs
+            do i=1,im
+              gt0(i,k) = gt0(i,k) + dtp*ten_t(i,k)
+              gu0(i,k) = gu0(i,k) + dtp*ten_u(i,k)
+              gv0(i,k) = gv0(i,k) + dtp*ten_v(i,k)
+              do n = 1, ntrac
+                gq0(i,k,n) = gq0(i,k,n) + dtp*ten_q(i,k,n)
+              end do
+            end do
+          end do
+        case (2) !add tendencies to sum
+                  !Accumulated tendency = accumulated tendency + current tendency
+                  !Current state unchanged
+          do k=1,levs
+            do i=1,im
+              dtdt(i,k) = dtdt(i,k) + ten_t(i,k)
+              dudt(i,k) = dudt(i,k) + ten_u(i,k)
+              dvdt(i,k) = dvdt(i,k) + ten_v(i,k)
+              do n = 1, ntrac
+                dqdt(i,k,n) = dqdt(i,k,n) + ten_q(i,k,n)
+              end do
+            end do
+          end do
+        case (3) !add tendencies to sum and apply
+                  !Current state = current state + dt*(accumulated tendency + current tendency)
+                  !Accumulated tendency = 0
+          do k=1,levs
+            do i=1,im
+              gt0(i,k) = gt0(i,k) + dtp*(dtdt(i,k) + ten_t(i,k))
+              dtdt(i,k) = 0.0
+              gu0(i,k) = gu0(i,k) + dtp*(dudt(i,k) + ten_u(i,k))
+              dudt(i,k) = 0.0
+              gv0(i,k) = gv0(i,k) + dtp*(dvdt(i,k) + ten_v(i,k))
+              dvdt(i,k) = 0.0
+              do n = 1, ntrac
+                gq0(i,k,n) = gq0(i,k,n) + dtp*(dqdt(i,k,n) + ten_q(i,k,n))
+                dqdt(i,k,n) = 0.0
+              end do
+            end do
+          end do
+        case (4) !Current state unchanged
+                  !Accumulated tendency unchanged
+                  !Current tendency unchanged (but will be overwritten during next primary scheme)
+          exit case_PBL_ten
+        case default
+          errflg = 1
+          errmsg = 'A tendency application control was outside of the acceptable range (1-4)'
+          return
+      end select case_PBL_ten
 
 !  --- ...  coupling insertion
 
