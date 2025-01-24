@@ -2,6 +2,7 @@
   name = gfdl_cloud_microphys_v3
   type = scheme
   dependencies = ../../../hooks/machine.F
+  dependencies = ../../../hooks/physcons.F90
   dependencies = gfdl_cloud_microphys_v3_mod.F90
 
 ########################################################################
@@ -120,20 +121,6 @@
 [ccpp-arg-table]
   name = gfdl_cloud_microphys_v3_run
   type = scheme
-[imp_physics]
-  standard_name = control_for_microphysics_scheme
-  long_name = choice of microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[imp_physics_gfdl]
-  standard_name = identifier_for_gfdl_microphysics_scheme
-  long_name = choice of GFDL microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [fast_mp_consv]
   standard_name = flag_for_fast_microphysics_energy_conservation
   long_name = flag for fast microphysics energy conservation
@@ -513,6 +500,30 @@
   kind = kind_phys
   intent = inout
   optional = True
+[con_one]
+  standard_name = constant_one
+  long_name = mathematical constant of one
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_p001]
+  standard_name = constant_one_hundredth
+  long_name = mathematical constant for one hundredth
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_secinday]
+  standard_name = seconds_in_a_day
+  long_name = number of seconds in a day
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

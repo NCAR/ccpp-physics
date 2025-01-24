@@ -115,33 +115,23 @@ contains
 !! \section arg_table_gfdl_cloud_microphys_v3_run Argument Table
 !! \htmlinclude gfdl_cloud_microphys_v3_run.html
 !!
-   subroutine gfdl_cloud_microphys_v3_run(                                         &
-      imp_physics, imp_physics_gfdl, fast_mp_consv,                                &
+   subroutine gfdl_cloud_microphys_v3_run(fast_mp_consv,                           &
       levs, im, rainmin, con_g, con_fvirt, con_rd, con_eps, garea, slmsk, snowd,   &
       gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt, aerfld,  &
       gt0, gu0, gv0, vvl, prsl, phii, del,                                         &
       rain0, ice0, snow0, graupel0, prcp0, sr, oro,                                &
       dtp, hydrostatic, lradar, refl_10cm,                                         &
       reset, effr_in, rew, rei, rer, res, reg,                                     &
-      cplchm, pfi_lsan, pfl_lsan, errmsg, errflg)
+      cplchm, pfi_lsan, pfl_lsan, con_one, con_p001, con_secinday, errmsg, errflg)
 
       use machine, only: kind_phys, kind_dyn, kind_dbl_prec
 
       implicit none
 
-      ! DH* TODO: CLEANUP, all of these should be coming in through the argument list
-      ! parameters
-      real(kind=kind_phys), parameter :: one = 1.0d0
-      real(kind=kind_phys), parameter :: con_p001= 0.001d0
-      real(kind=kind_phys), parameter :: con_day = 86400.d0
-      !real(kind=kind_phys), parameter :: rainmin = 1.0d-13
-      ! *DH
-
       ! interface variables
-      integer,              intent(in   ) :: imp_physics
-      integer,              intent(in   ) :: imp_physics_gfdl
       integer,              intent(in   ) :: levs, im
       real(kind=kind_phys), intent(in   ) :: con_g, con_fvirt, con_rd, con_eps, rainmin
+      real(kind=kind_phys), intent(in   ) :: con_one, con_p001, con_secinday
       real(kind=kind_phys), intent(in   ), dimension(:)     :: garea, slmsk, snowd, oro 
       real(kind=kind_phys), intent(inout), dimension(:,:)   :: gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, &
                                                                gq0_ntsw, gq0_ntgl, gq0_ntclamt
@@ -205,7 +195,7 @@ contains
       ktop = 1
       kbot = levs
 
-      onebg = one/con_g
+      onebg = con_one/con_g
 
       do k = 1, levs
          kk = levs-k+1
@@ -238,7 +228,7 @@ contains
             qg1(i,k)  = gq0_ntgl(i,kk)
             qa1(i,k)  = gq0_ntclamt(i,kk)
             pt(i,k)   = gt0(i,kk)
-            w(i,k)    = -vvl(i,kk) * (one+con_fvirt * gq0(i,kk))   &
+            w(i,k)    = -vvl(i,kk) * (con_one+con_fvirt * gq0(i,kk))   &
                           *  gt0(i,kk) / prsl(i,kk) * (con_rd*onebg)
             uin(i,k)  = gu0(i,kk)
             vin(i,k)  = gv0(i,kk)
@@ -258,25 +248,18 @@ contains
       snow0     = 0
       graupel0  = 0
  
-      if(imp_physics == imp_physics_gfdl) then 
+      ! Call MP driver
+      last_step = .false.
+      do_inline_mp = .false.
+      hs = oro(:) * con_g
+      gsize = sqrt(garea(:))
 
-        last_step = .false.
-        do_inline_mp = .false. 
-        hs = oro(:) * con_g 
-        gsize = sqrt(garea(:)) 
-
-        call gfdl_cloud_microphys_v3_mod_driver( qv1, ql1, qr1, qi1, qs1, qg1, qa1, qnl, qni, pt, w,&
-                  uin, vin, dz, delp, gsize, dtp, hs, water0, rain0,                        &
-                  ice0, snow0, graupel0, hydrostatic, iis, iie, kks, kke, q_con, cappa,     &
-                  fast_mp_consv, adj_vmr, te, dte, prefluxw, prefluxr, prefluxi, prefluxs,  &
-                  prefluxg, last_step, do_inline_mp ) 
-
-      else 
-        write(errmsg,'(*(a))') 'Invalid imp_physics option for GFDL MP v3'
-        errflg = 1
-        return
-      endif 
-      tem   = dtp*con_p001/con_day
+      call gfdl_cloud_microphys_v3_mod_driver( qv1, ql1, qr1, qi1, qs1, qg1, qa1, qnl, qni, pt, w,&
+                uin, vin, dz, delp, gsize, dtp, hs, water0, rain0,                        &
+                ice0, snow0, graupel0, hydrostatic, iis, iie, kks, kke, q_con, cappa,     &
+                fast_mp_consv, adj_vmr, te, dte, prefluxw, prefluxr, prefluxi, prefluxs,  &
+                prefluxg, last_step, do_inline_mp )
+      tem   = dtp*con_p001/con_secinday
 
       ! fix negative values
       do i = 1, im
@@ -324,24 +307,17 @@ contains
       do k=1,levs
         kk = levs-k+1
         do i=1,im
-
-          if (imp_physics == imp_physics_gfdl) then 
-            gq0(i,k)         = qv1(i,kk)
-            gq0_ntcw(i,k)    = ql1(i,kk) 
-            gq0_ntrw(i,k)    = qr1(i,kk)
-            gq0_ntiw(i,k)    = qi1(i,kk)
-            gq0_ntsw(i,k)    = qs1(i,kk)
-            gq0_ntgl(i,k)    = qg1(i,kk)
-            gq0_ntclamt(i,k) = qa1(i,kk)
-            gt0(i,k)         = pt(i,kk)  
-            gu0(i,k)         = uin(i,kk) 
-            gv0(i,k)         = vin(i,kk) 
-            refl_10cm(i,k)   = refl(i,kk)
-           else 
-            write(errmsg,'(*(a))') 'Invalid imp_physics option for GFDL MP v3' 
-            errflg = 1
-            return
-           endif 
+           gq0(i,k)         = qv1(i,kk)
+           gq0_ntcw(i,k)    = ql1(i,kk)
+           gq0_ntrw(i,k)    = qr1(i,kk)
+           gq0_ntiw(i,k)    = qi1(i,kk)
+           gq0_ntsw(i,k)    = qs1(i,kk)
+           gq0_ntgl(i,k)    = qg1(i,kk)
+           gq0_ntclamt(i,k) = qa1(i,kk)
+           gt0(i,k)         = pt(i,kk)
+           gu0(i,k)         = uin(i,kk)
+           gv0(i,k)         = vin(i,kk)
+           refl_10cm(i,k)   = refl(i,kk)
         enddo
       enddo
 
@@ -350,14 +326,8 @@ contains
         do k=1,levs
           kk = levs-k+1
           do i=1,im
-            if (imp_physics==imp_physics_gfdl) then 
-              pfi_lsan(i,k) = prefluxi (i,kk) + prefluxs (i,kk) + prefluxg (i,kk)
-              pfl_lsan(i,k) = prefluxr (i,kk) 
-            else 
-              write(errmsg,'(*(a))') 'Invalid imp_physics option for GFDL MP v3'
-              errflg = 1
-              return
-            endif 
+             pfi_lsan(i,k) = prefluxi (i,kk) + prefluxs (i,kk) + prefluxg (i,kk)
+             pfl_lsan(i,k) = prefluxr (i,kk)
           enddo
         enddo
       endif
