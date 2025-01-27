@@ -15,7 +15,7 @@ module cu_gf_driver_pre
 !> \section arg_table_cu_gf_driver_pre_run Argument Table
 !! \htmlinclude cu_gf_driver_pre_run.html
 !!
-   subroutine cu_gf_driver_pre_run (flag_init, flag_restart, kdt, fhour, dtp, t, q, prevst, prevsq, &
+   subroutine cu_gf_driver_pre_run (flag_init, flag_restart, gf_coldstart, kdt, fhour, dtp, t, q, prevst, prevsq, &
                                     forcet, forceq, cactiv, cactiv_m, conv_act, conv_act_m,         &
                                     ntsmoke, ntdust, ntcoarsepm, chem3d, gq0, errmsg, errflg)
 
@@ -25,6 +25,8 @@ module cu_gf_driver_pre
 
       logical,          intent(in)  :: flag_init
       logical,          intent(in)  :: flag_restart
+      logical,          intent(in)  :: gf_coldstart 
+      logical,          intent(in)  :: rrfs_sd
       integer,          intent(in)  :: kdt
       real(kind_phys),  intent(in)  :: fhour
       real(kind_phys),  intent(in)  :: dtp
@@ -57,7 +59,7 @@ module cu_gf_driver_pre
       ! For restart runs, can assume that prevst and prevsq
       ! are read from the restart files beforehand, same
       ! for conv_act.
-      if(flag_init .and. .not.flag_restart) then
+      if((flag_init .and. .not.flag_restart) .or. gf_coldstart) then
 !$acc kernels
         forcet(:,:)=0.0
         forceq(:,:)=0.0

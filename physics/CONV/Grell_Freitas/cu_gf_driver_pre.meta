@@ -122,6 +122,20 @@
   type = real
   kind = kind_phys
   intent = in
+[gf_coldstart]
+  standard_name = flag_for_cold_start_gf
+  long_name = flag to cold start G-F 
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[rrfs_sd]
+  standard_name = do_smoke_coupling
+  long_name = flag controlling rrfs_sd collection
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [ntsmoke]
   standard_name = index_for_smoke_in_tracer_concentration_array
   long_name = tracer index for smoke
