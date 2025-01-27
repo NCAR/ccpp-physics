@@ -26,7 +26,7 @@ module cu_gf_driver_pre
 
       logical,          intent(in)  :: flag_init
       logical,          intent(in)  :: flag_restart
-      logical,          intent(in)  :: gf_coldstart 
+      logical,          intent(in)  :: gf_coldstart
       integer,          intent(in)  :: kdt
       real(kind_phys),  intent(in)  :: fhour
       real(kind_phys),  intent(in)  :: dtp
