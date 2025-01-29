@@ -94,7 +94,7 @@
                  termA(i,k) = delt * ((lbb1 * drag(i,k) * (dp/dz)) + (Kd(i,k) * (dp/dz)))
                  termB(i,k) = -1.0 - delt * lbb3 * wush(i,k) * dp/dz
                  termC(i,k) = omega(i,k) - delt * lbb2 * buo(i,k) * (dp/dz) &
-                      - delt * 0.5 * (omega(i,k)**2 - omega(i,k-1)**2) / dp
+                      - delt * omega(i,k) * (omega(i,k-1) - omega(i,k)) / dp
                  !Compute the discriminant
                  discr = termB(i,k)**2 - 4.0 * termA(i,k) * termC(i,k)
 
