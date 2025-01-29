@@ -208,7 +208,7 @@
       real(kind=kind_phys), dimension(:,:,:), intent(out) :: faerlw1,&
                                                              faerlw2,&
                                                              faerlw3
-      real(kind=kind_phys), dimension(:,:),   intent(out) :: alpha
+      real(kind=kind_phys), dimension(:,:),   intent(out), optional :: alpha
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
