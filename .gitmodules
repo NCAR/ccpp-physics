@@ -2,3 +2,7 @@
   path = physics/Radiation/RRTMGP/rte-rrtmgp
   url = https://github.com/earth-system-radiation/rte-rrtmgp
   branch = main
+[submodule "PUMAS"]
+  path = physics/MP/pumas/PUMAS
+  url = https://github.com/dustinswales/PUMAS
+  branch = feature/pumas_microphysics
