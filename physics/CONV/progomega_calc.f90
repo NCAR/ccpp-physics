@@ -60,7 +60,7 @@
         do k = 1,km
            do i = 1,im
               if(cnvflg(i))then
-                 omega(i,k)=-40.0 !Pa/s 
+                 omega(i,k)=-1.2 !Pa/s 
               endif
            enddo
         enddo
