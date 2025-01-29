@@ -70,7 +70,7 @@
      !Lisa Bengtsson: !  compute updraft velocity omega (Pa/s)
      !> - Expand the steady state solution of updraft velocity from Han et al.'s (2017)
      !> \cite han_et_al_2017 equation 7 to include the time-derivative, and an aerodynamic
-     !> drag term from Guérémy 2016.
+     !> drag term from Gueremy 2016.
      !> Solve using implicit time-stepping scheme, solving the quadratic equation for omega. 
      
      do k = 2, km
