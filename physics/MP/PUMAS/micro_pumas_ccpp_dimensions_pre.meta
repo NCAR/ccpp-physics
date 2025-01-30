@@ -75,6 +75,7 @@
   type = real
   kind = kind_phys
   intent = in
+  advected = true
 [micro_airq]
   standard_name = microphysics_water_vapor_mixing_ratio_wrt_moist_air_and_condensed_water
   long_name = microphysics water vapor mixing ratio wrt moist air and condensed water of new state
@@ -91,6 +92,7 @@
   type = real
   kind = kind_phys
   intent = in
+  advected = true
 [micro_cldliq]
   standard_name = microphysics_cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
   long_name = microphysics cloud liquid wrt moist air and condensed water of new state
@@ -107,6 +109,7 @@
   type = real
   kind = kind_phys
   intent = in
+  advected = true
 [micro_cldice]
   standard_name = microphysics_cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
   long_name = microphysics cloud ice mixing ratio wrt moist air and condensed water of new state
@@ -123,6 +126,7 @@
   type = real
   kind = kind_phys
   intent = in
+  advected = true
 [micro_numliq]
   standard_name = microphysics_mass_number_concentration_of_cloud_liquid_water_wrt_moist_air_and_condensed_water
   long_name = microphysics mass number concentration of cloud liquid wrt moist air and condensed water of new state
@@ -139,6 +143,7 @@
   type = real
   kind = kind_phys
   intent = in
+  advected = true
 [micro_numice]
   standard_name = microphysics_mass_number_concentration_of_cloud_ice_wrt_moist_air_and_condensed_water
   long_name = microphysics mass number concentration of cloud ice wrt moist air and condensed water of new state
@@ -155,6 +160,7 @@
   type = real
   kind = kind_phys
   intent = in
+  advected = true
 [micro_rainliq]
   standard_name = microphysics_rain_mixing_ratio_wrt_moist_air_and_condensed_water
   long_name = microphysics rain mixing ratio wrt moist air and condensed water of new state
@@ -171,6 +177,7 @@
   type = real
   kind = kind_phys
   intent = in
+  advected = true
 [micro_snowice]
   standard_name = microphysics_snow_mixing_ratio_wrt_moist_air_and_condensed_water
   long_name = microphysics snow mixing ratio wrt moist air and condensed water of new state
@@ -187,6 +194,7 @@
   type = real
   kind = kind_phys
   intent = in
+  advected = true
 [micro_numrain]
   standard_name = microphysics_mass_number_concentration_of_rain_wrt_moist_air_and_condensed_water
   long_name = microphysics mass number concentration of rain wrt moist air and condensed water of new state
@@ -203,6 +211,7 @@
   type = real
   kind = kind_phys
   intent = in
+  advected = true
 [micro_numsnow]
   standard_name = microphysics_mass_number_concentration_of_snow_wrt_moist_air_and_condensed_water
   long_name = microphysics mass number concentration of snow wrt moist air and condensed water of new state
@@ -219,6 +228,7 @@
   type = real
   kind = kind_phys
   intent = in
+  advected = true
 [micro_graupice]
   standard_name = microphysics_graupel_mixing_ratio_wrt_moist_air_and_condensed_water
   long_name = microphysics graupel mixing ratio wrt moist air and condensed water of new state
@@ -235,6 +245,7 @@
   type = real
   kind = kind_phys
   intent = in
+  advected = true
 [micro_numgraup]
   standard_name = microphysics_mass_number_concentration_of_graupel_wrt_moist_air_and_condensed_water
   long_name = microphysics mass number concentration of graupel wrt moist air and condensed water of new state
@@ -459,6 +470,7 @@
   type = real
   kind = kind_phys
   intent = in
+  constituent = true
 [micro_snowice_tend_external]
   standard_name = microphysics_tendency_of_snow_mixing_ratio_wrt_moist_air_and_condensed_water_from_external_microphysics
   long_name = microphysics tendency of snow mixing ratio wrt moist air and condensed water from external microphysics
@@ -475,6 +487,7 @@
   type = real
   kind = kind_phys
   intent = in
+  constituent = true
 [micro_numsnow_tend_external]
   standard_name = microphysics_tendency_of_mass_number_concentration_of_snow_wrt_moist_air_and_condensed_water_from_external_microphysics
   long_name = microphysics tendency of mass number concentration of snow wrt moist air and condensed water from external microphysics
