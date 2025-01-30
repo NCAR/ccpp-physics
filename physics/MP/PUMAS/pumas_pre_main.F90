@@ -18,6 +18,8 @@ module pumas_pre_main
    !steps needed before the core
    !PUMAS calls.
 
+  !> \section arg_table_pumas_pre_main_init Argument Table
+  !! \htmlinclude pumas_pre_main_init.html
    subroutine pumas_pre_main_init(errmsg, errcode)
 
      character(len=512), intent(out) :: errmsg
