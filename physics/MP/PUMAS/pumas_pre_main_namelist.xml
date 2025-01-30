@@ -1,0 +1,597 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet type="text/xsl" href="namelist_definition.xsl"?>
+
+<entry_id_pg version="2.0">
+
+<entry id="rhmini">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>relative_humidity_threshold_for_ice_nucleation</standard_name>
+  <units>frac</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc> relative humidity threshold parameter for nucleating ice for MG microphysics </desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_do_hail">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_hail_instead_of_graupel</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>flag for hail for MG microphysics (graupel possible if false)</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_do_graupel">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_graupel_instead_of_hail</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>flag for graupel for MG microphysics (hail possible if false)</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="microp_uniform">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_uniform_subcolumns</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>flag for uniform subcolumns for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="do_cldice">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_cloud_ice_processes</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>flag for cloud ice processes for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="use_hetfrz_classnuc">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_heterogeneous_ice_nucleation</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>flag for heterogeneous freezing for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="remove_supersat">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_allowance_of_supersaturation_after_sedimentation</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>allow supersaturation after sedimentation for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_evap_sed_off">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_no_evaporation_of_precipitation</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>true for sedimenting condensate does not evaporate for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_icenuc_rh_off">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_to_remove_threshold_for_ice_nucleation</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>If .true., remove RH threshold from ice nucelation calculation for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_icenuc_use_meyers">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_to_use_meyers_ice_nucleation</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>use temperature dependent ice nucleation from Meyers 1992 for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_evap_scl_ifs">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_to_scale_evaporation_like_ifs</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>if True Apply 0.3 scaling factor to evaporation of precipitation for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_evap_rhthrsh_ifs">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_use_ifs_evaporation_threshold</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>Do not evaporate precipitation until RH below 90% as done in the for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_rainfreeze_ifs">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_to_freeze_rain_at_0C</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>Freeze rain at 0C for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_ifs_sed">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_constant_sedimentation_fall_speed</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>Use constant sedimentation of all species for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_precip_fall_corr">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_fall_speed_correction</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>ensure non-zero precipitation fallspeed for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_accre_sees_auto">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_accretion_sees_autoconverted_condensate</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>KK200 accretion sees newely formed rain for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_implicit_fall">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>do_implicit_fall_speed_calc</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>use implicit calculation for fall speed for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_nccons">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_prescribed_cloud_droplet_number_concentration</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>flag for constant droplet concentration for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_nicons">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_prescribed_cloud_ice_number_concentration</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>flag for constant ice concentration for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_ngcons">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_prescribed_graupel_number_concentration</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>flag for constant graupel concentration for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_nrcons">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_prescribed_rain_number_concentration</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>flag for constant rain concentration for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_nscons">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>flag_for_prescribed_snow_number_concentration</standard_name>
+  <units>flag</units>
+  <type>logical</type>
+  <desc>flag for constant snow concentration for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>.false.</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_precip_frac_method">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>control_for_precipitation_area_fraction_method</standard_name>
+  <units>none</units>
+  <type>char*256</type>
+  <desc>type of precip fraction method for MG microphysics (in_cloud or max_overlap)</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>" "</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_warm_rain">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>control_for_warm_rain_method</standard_name>
+  <units>none</units>
+  <type>char*256</type>
+  <desc>warm rain method (KK2000,sb2001,tau,emulated)</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>" "</value>
+  </values>
+</entry>
+
+<entry id="stochastic_emulated_filename_quantile">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>filename_of_emulated_stochastic_collection_quantiles</standard_name>
+  <units>none</units>
+  <type>char*256</type>
+  <desc>emulated stochastic collection filename for quantiles</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>" "</value>
+  </values>
+</entry>
+
+<entry id="stochastic_emulated_filename_input_scale">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>filename_of_emulated_stochastic_collection_input_scalings</standard_name>
+  <units>none</units>
+  <type>char*256</type>
+  <desc>emulated stochastic collection filename for input scaling</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>" "</value>
+  </values>
+</entry>
+
+<entry id="stochastic_emulated_filename_output_scale">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>filename_of_emulated_stochastic_collection_output_scalings</standard_name>
+  <units>none</units>
+  <type>char*256</type>
+  <desc>emulated stochastic collection filename for output scaling</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>" "</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_dcs_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>autoconverion_to_snow_size_threshold</standard_name>
+  <units>um</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>autoconversion size threshold for cloud ice to snow for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_berg_eff_factor_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>bergeron_findeisen_process_efficiency_factor</standard_name>
+  <units>frac</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>bergeron efficiency factor for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_accre_enhan_fact_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>accretion_enhancement_factor</standard_name>
+  <units>none</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>KK2000 accretion enhancement factor for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_autocon_fact_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>autconversion_enhancement_factor</standard_name>
+  <units>none</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>KK2000 autonconverion enhancement factor for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_autocon_nd_exp_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>autconversion_nd_exponent</standard_name>
+  <units>none</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>KK2000 autonconverion nd exponent in MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_autocon_lwp_exp_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>autconversion_lwp_exponent</standard_name>
+  <units>none</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>KK2000 autonconverion lwp (qc) exponent in MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_homog_size_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>homogeneous_freezing_radius</standard_name>
+  <units>m</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>radius of drops homogeneously frozen in MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_vtrmi_factor_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>scaling_factor_for_ice_fall_speed</standard_name>
+  <units>1</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>scaling factor for cloud ice fall speed in MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_vtrms_factor_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>scaling_factor_for_snow_fall_speed</standard_name>
+  <units>1</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>scaling factor for snow fall speed in MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_effi_factor_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>scaling_factor_for_ice_in_radiation</standard_name>
+  <units>1</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>scaling factor for ice effective radition used by radiation</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_iaccr_factor_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>scaling_factor_for_ice_accretion</standard_name>
+  <units>1</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>scaling factor for ice accretion in MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_max_nicons_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>maximum_ice_number_concentration</standard_name>
+  <units>m-3</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>maximum allowed ice number concentration for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_ncnst_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>prescribed_cloud_droplet_number_concentration</standard_name>
+  <units>m-3</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>droplet concentration constant for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_ninst_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>prescribed_cloud_ice_number_concentration</standard_name>
+  <units>m-3</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>ice concentration constant for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_ngnst_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>prescribed_graupel_number_concentration</standard_name>
+  <units>m-3</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>graupel concentration constant for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_nrnst_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>prescribed_rain_number_concentration</standard_name>
+  <units>m-3</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>rain concentration constant for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+<entry id="micro_mg_nsnst_in">
+  <category>microphys</category>
+  <group>micro_mg_nl</group>
+  <standard_name>prescribed_snow_number_concentration</standard_name>
+  <units>m-3</units>
+  <type>real</type>
+  <kind>kind_phys</kind>
+  <desc>snow concentration constant for MG microphysics</desc>
+  <!-- FIXME: Fix default value(s) -->
+  <values>
+    <value>0</value>
+  </values>
+</entry>
+
+</entry_id_pg>
