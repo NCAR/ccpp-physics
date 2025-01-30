@@ -171,30 +171,6 @@
   type = real
   kind = kind_phys
   intent = out
-[micro_numgraup]
-  standard_name = microphysics_mass_number_concentration_of_graupel_wrt_moist_air_and_condensed_water
-  long_name = microphysics mass number concentration of graupel wrt moist air and condensed water of new state
-  units = kg-1
-  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[micro_relvar]
-  standard_name = microphysics_relative_variance_of_cloud_water
-  long_name = microphysics relative variance of cloud water
-  units = 1
-  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[micro_accre_enhan]
-  standard_name = microphysics_accretion_enhancement_factor
-  long_name = microphysics accretion enhancement factor
-  units = 1
-  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
 [micro_pmid]
   standard_name = microphysics_air_pressure
   long_name = microphysics air pressure

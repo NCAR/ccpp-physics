@@ -602,14 +602,14 @@
   dimensions = ()
   type = character
   kind = len=*
-  intent = in
+  intent = out
 [errflg]
   standard_name = ccpp_error_code
   long_name = error code for error handling in CCPP
   units = 1
   dimensions = ()
   type = integer
-  intent = in
+  intent = out
 
 ########################################################################
 [ccpp-arg-table]
