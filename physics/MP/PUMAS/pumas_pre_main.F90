@@ -18,4 +18,11 @@ module pumas_pre_main
    !steps needed before the core
    !PUMAS calls.
 
+   subroutine pumas_pre_main_init(errmsg, errcode)
+
+     character(len=512), intent(out) :: errmsg
+     integer,            intent(out) :: errcode
+
+   end subroutine pumas_pre_main_init
+
 end module pumas_pre_main
