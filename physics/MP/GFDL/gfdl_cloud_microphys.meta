@@ -41,7 +41,7 @@
 [logunit]
   standard_name = iounit_of_log
   long_name = fortran unit number for writing logfile
-  units = none
+  units = 1
   dimensions = ()
   type = integer
   intent = in
