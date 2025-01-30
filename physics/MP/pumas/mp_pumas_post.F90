@@ -6,8 +6,8 @@
 !
 ! ########################################################################################
 module mp_pumas_post
-  use machine, only: kind_phys, kind_dbl_postc
-  use proc_rates_type
+  use machine, only: kind_phys, kind_dbl_prec
+  use micro_pumas_diags, only: proc_rates_type
   implicit none
   public mp_pumas_post_init, mp_pumas_post_run, mp_pumas_post_finalize
 contains
@@ -47,15 +47,8 @@ contains
              micro_reflz10cm, micro_rercld, micro_ncai, micro_ncal, micro_rainliq,&
              micro_snowice, micro_numrain_vol, micro_numsnow_vol, micro_diam_rain,&
              micro_diam_snow, micro_graupice, micro_numgraup_vol, micro_diam_graup,&
-             micro_lflx, micro_iflx, micro_gflx, micro_rflx, micro_sflx,&
-             micro_rainliq_in_prec, micro_reff_rain, micro_reff_snow, micro_reff_grau, &
-             micro_numrain_vol_in_prec, micro_numsnow_vol_in_prec, micro_refl, micro_arefl, &
-             micro_areflz, micro_frefl, micro_csrfl, micro_acsrfl, micro_fcsrfl, &
-             micro_refl10cm, micro_reflz10cm, micro_rercld, micro_ncai, micro_ncal, &
-             micro_rainliq, micro_snowice, micro_numrain_vol, micro_numsnow_vol, &
-             micro_diam_rain, micro_diam_snow, micro_graupice, micro_numgraup_vol, &
-             micro_diam_graup, micro_freq_graup, micro_freq_snow, micro_freq_rain, &
-             micro_frac_ice, micro_frac_cldliq_tend, micro_rain_evap, micro_proc_rates, &
+             micro_freq_graup, micro_freq_snow, micro_freq_rain, micro_frac_ice, &
+             micro_frac_cldliq_tend, micro_rain_evap, &
              errmsg, errflg)
 
     ! Inputs
@@ -128,9 +121,8 @@ contains
          micro_freq_rain, &
          micro_frac_ice, &
          micro_frac_cldliq_tend, &
-         micro_rain_evap, &
-         micro_proc_rates
-
+         micro_rain_evap
+    
     type(proc_rates_type), intent(inout) ::  micro_proc_rates
    
     ! CCPP error handling
