@@ -31,7 +31,28 @@ contains
   !! \htmlinclude mp_pumas_pre_run.html
   !!
   ! ######################################################################################
-  subroutine mp_pumas_pre_run(errmsg, errflg)
+  subroutine mp_pumas_pre_run(micro_ncol, micro_nlev, micro_nlevp1, micro_dust_nbins, &
+       micro_airT, micro_airq, micro_cldliq, micro_cldice, micro_numliq, &
+       micro_numice, micro_rainliq, micro_snowice, micro_numrain, micro_numsnow, micro_graupice,&
+       micro_numgraup, micro_relvar, micro_accre_enhan, micro_pmid, micro_pdel, micro_pint,     &
+       micro_strat_cldfrc, micro_strat_liq_cldfrc, micro_strat_ice_cldfrc, micro_qsatfac,       &
+       micro_naai, micro_npccn, micro_rndst, micro_nacon, micro_snowice_tend_external,          &
+       micro_numsnow_tend_external, micro_effi_external, micro_frzimm, micro_frzcnt,            &
+       micro_frzdep, errmsg, errflg)
+    ! Inputs
+    integer, intent(in) :: micro_ncol, micro_nlev, micro_nlevp1, micro_dust_nbins
+
+    ! Outputs
+    real(kind_phys), dimension(:,:), intent(out) :: micro_airT, micro_airq, micro_cldliq,&
+         micro_cldice, micro_numliq,  micro_numice, micro_rainliq, micro_snowice,        &
+         micro_numrain, micro_numsnow, micro_graupice, micro_numgraup, micro_relvar,     &
+         micro_accre_enhan, micro_pmid, micro_pdel, micro_pint, micro_strat_cldfrc,      &
+         micro_strat_liq_cldfrc, micro_strat_ice_cldfrc, micro_qsatfac, micro_naai,      &
+         micro_npccn, micro_snowice_tend_external, micro_numsnow_tend_external,          &
+         micro_effi_external, micro_frzimm, micro_frzcnt, micro_frzdep
+    real(kind_phys), dimension(:,:,:), intent(out) :: micro_rndst, micro_nacon
+
+    ! CCPP error reporting
     character(len=*), intent(  out) :: errmsg
     integer,          intent(  out) :: errflg
 

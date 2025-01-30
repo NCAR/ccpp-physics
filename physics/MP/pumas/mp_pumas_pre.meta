@@ -28,6 +28,285 @@
 [ccpp-arg-table]
   name = mp_pumas_pre_run
   type = scheme
+[micro_ncol]
+  #Equivalent to "horizontal_loop_extent" unless subcolumns is enabled
+  standard_name = microphysics_horizontal_loop_extent
+  long_name = number of horizontal columns used by microphysics
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[micro_nlev]
+  #Vertical levels from surface to highest level with tropospheric clouds
+  standard_name = microphysics_vertical_layer_dimension
+  long_name = vertical layer dimension used by microphysics
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[micro_nlevp1]
+  #Vertical interfaces from surface to highest level with tropospheric clouds
+  standard_name = microphysics_vertical_interface_dimension
+  long_name = vertical interface dimension used by microphysics
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[micro_dust_nbins]
+  standard_name = dust_size_bins_dimension
+  long_name = number of dust particle size bins
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[micro_airT]
+  standard_name = microphysics_air_temperature
+  long_name = microphysics air temperature of new state
+  units = K
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_airq]
+  standard_name = microphysics_water_vapor_mixing_ratio_wrt_moist_air_and_condensed_water
+  long_name = microphysics water vapor mixing ratio wrt moist air and condensed water of new state
+  units = kg kg-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_cldliq]
+  standard_name = microphysics_cloud_liquid_water_mixing_ratio_wrt_moist_air_and_condensed_water
+  long_name = microphysics cloud liquid wrt moist air and condensed water of new state
+  units = kg kg-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_cldice]
+  standard_name = microphysics_cloud_ice_mixing_ratio_wrt_moist_air_and_condensed_water
+  long_name = microphysics cloud ice mixing ratio wrt moist air and condensed water of new state
+  units = kg kg-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_numliq]
+  standard_name = microphysics_mass_number_concentration_of_cloud_liquid_water_wrt_moist_air_and_condensed_water
+  long_name = microphysics mass number concentration of cloud liquid wrt moist air and condensed water of new state
+  units = kg-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_numice]
+  standard_name = microphysics_mass_number_concentration_of_cloud_ice_wrt_moist_air_and_condensed_water
+  long_name = microphysics mass number concentration of cloud ice wrt moist air and condensed water of new state
+  units = kg-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_rainliq]
+  standard_name = microphysics_rain_mixing_ratio_wrt_moist_air_and_condensed_water
+  long_name = microphysics rain mixing ratio wrt moist air and condensed water of new state
+  units = kg kg-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_snowice]
+  standard_name = microphysics_snow_mixing_ratio_wrt_moist_air_and_condensed_water
+  long_name = microphysics snow mixing ratio wrt moist air and condensed water of new state
+  units = kg kg-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_numrain]
+  standard_name = microphysics_mass_number_concentration_of_rain_wrt_moist_air_and_condensed_water
+  long_name = microphysics mass number concentration of rain wrt moist air and condensed water of new state
+  units = kg-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_numsnow]
+  standard_name = microphysics_mass_number_concentration_of_snow_wrt_moist_air_and_condensed_water
+  long_name = microphysics mass number concentration of snow wrt moist air and condensed water of new state
+  units = kg-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_graupice]
+  standard_name = microphysics_graupel_mixing_ratio_wrt_moist_air_and_condensed_water
+  long_name = microphysics graupel mixing ratio wrt moist air and condensed water of new state
+  units = kg kg-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_numgraup]
+  standard_name = microphysics_mass_number_concentration_of_graupel_wrt_moist_air_and_condensed_water
+  long_name = microphysics mass number concentration of graupel wrt moist air and condensed water of new state
+  units = kg-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_relvar]
+  standard_name = microphysics_relative_variance_of_cloud_water
+  long_name = microphysics relative variance of cloud water
+  units = 1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_accre_enhan]
+  standard_name = microphysics_accretion_enhancement_factor
+  long_name = microphysics accretion enhancement factor
+  units = 1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_pmid]
+  standard_name = microphysics_air_pressure
+  long_name = microphysics air pressure
+  units = Pa
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_pdel]
+  standard_name = microphysics_air_pressure_thickness
+  long_name = microphysics air pressure thickness
+  units = Pa
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_pint]
+  standard_name = microphysics_air_pressure_at_interfaces
+  long_name = microphysics air pressure at interfaces
+  units = Pa
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_strat_cldfrc]
+  standard_name = microphysics_stratiform_cloud_area_fraction
+  long_name = microphysics stratiform cloud area fraction
+  units = fraction
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_strat_liq_cldfrc]
+  standard_name = microphysics_stratiform_cloud_liquid_area_fraction
+  long_name = microphysics stratiform cloud liquid area fraction
+  units = fraction
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_strat_ice_cldfrc]
+  standard_name = microphysics_stratiform_cloud_ice_area_fraction
+  long_name = microphysics stratiform cloud ice area fraction
+  units = fraction
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_qsatfac]
+  standard_name = microphysics_subgrid_cloud_water_saturation_scaling_factor
+  long_name = microphysics subgrid cloud water saturation scaling factor
+  units = 1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_naai]
+  standard_name = microphysics_tendency_of_activated_ice_nuclei_mass_number_concentration
+  long_name = microphysics tendency of activated ice nuclei mass number concentration
+  units = kg-1 s-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_npccn]
+  standard_name = microphysics_tendency_of_activated_cloud_condensation_nuclei_mass_number_concentration
+  long_name = microphysics tendency of activated cloud condensation nuclei mass number concentration
+  units = kg-1 s-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_rndst]
+  standard_name = microphysics_dust_radii_by_size_bin
+  long_name = microphysics dust bin radii
+  units = m
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension, dust_size_bins_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_nacon]
+  standard_name = microphysics_dust_number_concentration_by_size_bin
+  long_name = microphysics dust number concentration by size bin
+  units = m-3
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension, dust_size_bins_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_snowice_tend_external]
+  standard_name = microphysics_tendency_of_snow_mixing_ratio_wrt_moist_air_and_condensed_water_from_external_microphysics
+  long_name = microphysics tendency of snow mixing ratio wrt moist air and condensed water from external microphysics
+  units = kg kg-1 s-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_numsnow_tend_external]
+  standard_name = microphysics_tendency_of_mass_number_concentration_of_snow_wrt_moist_air_and_condensed_water_from_external_microphysics
+  long_name = microphysics tendency of mass number concentration of snow wrt moist air and condensed water from external microphysics
+  units = kg-1 s-1
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_effi_external]
+  standard_name = microphysics_effective_radius_of_stratiform_cloud_ice_particle_from_external_microphysics
+  long_name = microphysics effective radius of stratiform cloud ice particle from external microphysics
+  units = m
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_frzimm]
+  standard_name = microphysics_tendency_of_cloud_liquid_droplet_number_concentration_due_to_immersion_freezing
+  long_name = microphysics tendency of cloud liquid droplet number concentration due to immersion freezing
+  units = cm-3
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_frzcnt]
+  standard_name = microphysics_tendency_of_cloud_liquid_droplet_number_concentration_due_to_contact_freezing
+  long_name = microphysics tendency of cloud liquid droplet number concentration due to contact freezing
+  units = cm-3
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[micro_frzdep]
+  standard_name = microphysics_tendency_of_cloud_ice_number_concentration_due_to_deposition_nucleation
+  long_name = microphysics tendency of cloud ice number concentration due to deposition nucleation
+  units = cm-3
+  dimensions = (microphysics_horizontal_loop_extent, microphysics_vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
