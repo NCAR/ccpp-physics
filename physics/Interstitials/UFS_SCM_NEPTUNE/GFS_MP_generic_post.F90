@@ -19,13 +19,13 @@
 !> \section gfs_mp_gen GFS MP Generic Post General Algorithm
 !> @{
       subroutine GFS_MP_generic_post_run(                                                                                 &
-        im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl,    &
-        imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, cpllnd, progsigma, con_g, rhowater, rainmin, dtf, &
-        frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, phil, htop, refl_10cm,              & 
-        imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf, con_t0c, snow, graupel, save_t, save_q,        &
-        rain0, ice0, snow0, graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp,&
-        totprcp, totice, totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl,    &
-        pwat, frzr, frzrb, frozr, frozrb, tsnowp, tsnowpb, rhonewsn1, exticeden,                                          & 
+        im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_tempo,   &
+        imp_physics_nssl, imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, cpllnd, progsigma, con_g,       &
+        rhowater, rainmin, dtf, frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, phil, htop, &
+        refl_10cm, imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf, con_t0c, snow, graupel, save_t,     &
+        save_q, rain0, ice0, snow0, graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, &
+        cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl,     &
+        snow_cpl, pwat, frzr, frzrb, frozr, frozrb, tsnowp, tsnowpb, rhonewsn1, exticeden,                                &
         drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,                             &
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp,                                           &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d,dqdt_qmicro, lssav, num_dfi_radar,       &
@@ -38,7 +38,7 @@
 
       integer, intent(in) :: im, levs, kdt, nrcm, nncl, ntcw, ntrac, num_dfi_radar, index_of_process_dfi_radar
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
-      integer, intent(in) :: imp_physics_nssl, iopt_lake_clm, iopt_lake, lkm
+      integer, intent(in) :: imp_physics_nssl, iopt_lake_clm, iopt_lake, lkm, imp_physics_tempo
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, cpllnd, progsigma, exticeden
       integer, intent(in) :: index_of_temperature,index_of_process_mp,use_lake_model(:)
       integer, intent(in) :: imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf
@@ -136,7 +136,7 @@
 !
 ! Combine convective reflectivity with MP reflectivity for selected
 ! parameterizations.
-     if ( (imp_physics==imp_physics_thompson .or. imp_physics==imp_physics_nssl) .and. &
+     if ( (imp_physics==imp_physics_thompson .or. imp_physics==imp_physics_tempo .or. imp_physics==imp_physics_nssl) .and. &
        (imfdeepcnv==imfdeepcnv_samf .or. imfdeepcnv==imfdeepcnv_gf .or. imfshalcnv==imfshalcnv_gf) ) then
          do i=1,im
            factor(i) = 0.0
@@ -181,7 +181,8 @@
       endif
 
 ! compute surface snowfall, graupel/sleet, freezing rain and precip ice density
-      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_nssl ) then
+      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson .or. &
+           imp_physics == imp_physics_tempo .or. imp_physics == imp_physics_nssl ) then
          do i = 1, im
             if (gt0(i,1) .le. 273) then
                frzr(i) = frzr(i) + rain0(i)
@@ -259,7 +260,7 @@
         ice     = ice0
         snow    = snow0
       ! Do it right from the beginning for Thompson
-      else if (imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_nssl ) then
+      else if (imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_tempo .or. imp_physics == imp_physics_nssl ) then
         tprcp   = max (zero, rainc + frain * rain1) ! time-step convective and explicit precip
         graupel = frain*graupel0              ! time-step graupel
         ice     = frain*ice0                  ! time-step ice
@@ -305,7 +306,8 @@
 !
 !       HCHUANG: use new precipitation type to decide snow flag for LSM snow accumulation
 
-        if (imp_physics /= imp_physics_gfdl .and. imp_physics /= imp_physics_thompson .and. imp_physics /= imp_physics_nssl) then
+        if (imp_physics /= imp_physics_gfdl .and. imp_physics /= imp_physics_thompson .and. &
+             imp_physics /= imp_physics_tempo .and. imp_physics /= imp_physics_nssl) then
           do i=1,im
             tprcp(i)  = max(zero, rain(i) )
             if(doms(i) > zero .or. domip(i) > zero) then
@@ -393,7 +395,7 @@
 !! \f$0^oC\f$.
 
       if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson .or. &
-          imp_physics == imp_physics_nssl ) then
+          imp_physics == imp_physics_tempo .or. imp_physics == imp_physics_nssl ) then
 
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP

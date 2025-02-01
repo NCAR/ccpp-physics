@@ -624,7 +624,7 @@ contains
          integer, intent(in) :: rand_perturb_on, kme_stoch, n_var_spp
          real(wp), dimension(:,:), optional, intent(in) :: rand_pert
          real(wp), dimension(:), optional, intent(in) :: spp_prt_list
-         real(wp), dimension(:), intent(in) :: spp_stddev_cutoff
+         real(wp), dimension(:), intent(in), optional :: spp_stddev_cutoff
          character(len=10), optional, dimension(:), intent(in) :: spp_var_list
          integer, intent(in):: has_reqc, has_reqi, has_reqs
          
@@ -711,7 +711,7 @@ contains
 
         ! CCPP error handling
         character(len=*), optional, intent(  out) :: errmsg
-         integer, optional, intent(  out) :: errflg
+        integer, optional, intent(  out) :: errflg
 
         ! CCPP
         if (present(errmsg)) errmsg = ''
