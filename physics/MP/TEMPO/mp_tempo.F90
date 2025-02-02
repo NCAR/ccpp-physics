@@ -748,9 +748,9 @@ module mp_tempo
          end if set_extended_diagnostic_pointers
          !> - Call mp_gt_driver() with or without aerosols, with or without effective radii, ...
          if (is_aerosol_aware) then
-            write(errmsg,'(*(a))') "TEMPO aerosol-aware UNTESTED -- DO NOT USE"
-            errflg = 1
-            return
+!            write(errmsg,'(*(a))') "TEMPO aerosol-aware UNTESTED -- DO NOT USE"
+!            errflg = 1
+!            return
             call tempo_3d_to_1d_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                               nc=nc, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
@@ -774,24 +774,24 @@ module mp_tempo
                               fullradar_diag=fullradar_diag, istep=istep, nsteps=nsteps,     &
                               first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
                               ! Extended diagnostics
-                              ext_diag=ext_diag,                                             &
-                              ! vts1=vts1, txri=txri, txrc=txrc,                             &
-                              prw_vcdc=prw_vcdc,                                             &
-                              prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
-                              tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
-                              tprs_sde_d=tprs_sde_d,                                         &
-                              tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
-                              tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
-                              tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
-                              tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
-                              tprs_rcs=tprs_rcs,                                             &
-                              tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
-                              tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
-                              tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
-                              tprv_rev=tprv_rev, tten3=tten3,                                &
-                              qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
-                              qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                              qcten3=qcten3, pfils=pfils, pflls=pflls)
+                              ext_diag=ext_diag, pfils=pfils, pflls=pflls)
+                              ! ! vts1=vts1, txri=txri, txrc=txrc,                             &
+                              ! prw_vcdc=prw_vcdc,                                             &
+                              ! prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
+                              ! tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
+                              ! tprs_sde_d=tprs_sde_d,                                         &
+                              ! tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
+                              ! tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
+                              ! tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
+                              ! tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
+                              ! tprs_rcs=tprs_rcs,                                             &
+                              ! tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
+                              ! tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
+                              ! tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
+                              ! tprv_rev=tprv_rev, tten3=tten3,                                &
+                              ! qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
+                              ! qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
+                              ! qcten3=qcten3,
          else if (merra2_aerosol_aware) then
             write(errmsg,'(*(a))') "TEMPO aerosol-aware with MERRA2 UNTESTED -- DO NOT USE"
             errflg = 1
@@ -819,24 +819,24 @@ module mp_tempo
                                fullradar_diag=fullradar_diag, istep=istep, nsteps=nsteps,     &
                                first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
                                ! Extended diagnostics
-                               ext_diag=ext_diag,                                             &
-                               ! vts1=vts1, txri=txri, txrc=txrc,                             &
-                               prw_vcdc=prw_vcdc,                                             &
-                               prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
-                               tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
-                               tprs_sde_d=tprs_sde_d,                                         &
-                               tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
-                               tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
-                               tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
-                               tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
-                               tprs_rcs=tprs_rcs,                                             &
-                               tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
-                               tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
-                               tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
-                               tprv_rev=tprv_rev, tten3=tten3,                                &
-                               qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
-                               qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
-                               qcten3=qcten3, pfils=pfils, pflls=pflls)
+                               ext_diag=ext_diag, pfils=pfils, pflls=pflls)
+                               ! ! vts1=vts1, txri=txri, txrc=txrc,                             &
+                               ! prw_vcdc=prw_vcdc,                                             &
+                               ! prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
+                               ! tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
+                               ! tprs_sde_d=tprs_sde_d,                                         &
+                               ! tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
+                               ! tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
+                               ! tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
+                               ! tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
+                               ! tprs_rcs=tprs_rcs,                                             &
+                               ! tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
+                               ! tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
+                               ! tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
+                               ! tprv_rev=tprv_rev, tten3=tten3,                                &
+                               ! qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
+                               ! qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
+                               ! qcten3=qcten3,
          else
             call tempo_3d_to_1d_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
