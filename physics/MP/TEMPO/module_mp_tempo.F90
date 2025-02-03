@@ -526,7 +526,11 @@ contains
                     !>  - Call qr_acr_qg() to create rain collecting graupel & graupel collecting rain table
                     if (mpirank==mpiroot) write(*,*) '  creating rain collecting graupel table'
                     call cpu_time(stime)
-                    call qr_acr_qg_par(dimNRHG)
+                    if (dimNRHG == NRHG) then
+                       call qr_acr_qg_par(dimNRHG, qr_acr_qg_hailaware_file)
+                    else
+                       call qr_acr_qg_par(dimNRHG, qr_acr_qg_file)
+                    endif
                     call cpu_time(etime)
                     if (mpirank==mpiroot) print '("Computing rain collecting graupel table took ",f10.3," seconds.")', etime-stime
 

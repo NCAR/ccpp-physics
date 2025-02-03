@@ -237,6 +237,13 @@
   dimensions = ()
   type = logical
   intent = in
+[is_hail_aware]
+  standard_name = flag_for_hail_physics
+  long_name = flag for hail-aware physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [merra2_aerosol_aware]
   standard_name = do_merra2_aerosol_awareness
   long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
@@ -512,6 +519,13 @@
 [is_aerosol_aware]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol-aware physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[is_hail_aware]
+  standard_name = flag_for_hail_physics
+  long_name = flag for hail-aware physics
   units = flag
   dimensions = ()
   type = logical

@@ -35,6 +35,7 @@ module mp_tempo
                                   imp_physics_tempo, convert_dry_rho,      &
                                   spechum, qc, qr, qi, qs, qg, ni, nr,     &
                                   is_aerosol_aware,  merra2_aerosol_aware, &
+                                  is_hail_aware,                           &
                                   nc, nwfa2d, nifa2d,                      &
                                   nwfa, nifa, tgrs, prsl, phil, area,      &
                                   aerfld, mpicomm, mpirank, mpiroot,       &
@@ -66,6 +67,7 @@ module mp_tempo
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
          logical,                   intent(in   ) :: merra2_aerosol_aware
+         logical,                   intent(in   ) :: is_hail_aware
          real(kind_phys),           intent(inout), optional :: nc(:,:)
          real(kind_phys),           intent(inout), optional :: nwfa(:,:)
          real(kind_phys),           intent(inout), optional :: nifa(:,:)
@@ -147,6 +149,7 @@ module mp_tempo
          
          call tempo_init(is_aerosol_aware_in=is_aerosol_aware,                 &
                             merra2_aerosol_aware_in=merra2_aerosol_aware,      &
+                            is_hail_aware_in=is_hail_aware,                    &
                             mpicomm=mpicomm, mpirank=mpirank, mpiroot=mpiroot, &
                             threads=threads, errmsg=errmsg, errflg=errflg)
          if (errflg /= 0) return
@@ -340,7 +343,7 @@ module mp_tempo
       subroutine mp_tempo_run(ncol, nlev, con_g, con_rd,           &
                               con_eps, convert_dry_rho,            &
                               spechum, qc, qr, qi, qs, qg, ni, nr, &
-                              is_aerosol_aware,                    &
+                              is_aerosol_aware, is_hail_aware,     &
                               merra2_aerosol_aware, nc, nwfa, nifa,&
                               nwfa2d, nifa2d, aero_ind_fdb,        &
                               tgrs, prsl, phii, omega,             &
@@ -381,7 +384,7 @@ module mp_tempo
          real(kind_phys),           intent(inout) :: nr(:,:)
          ! Aerosols
          logical,                   intent(in)    :: is_aerosol_aware, fullradar_diag 
-         logical,                   intent(in)    :: merra2_aerosol_aware
+         logical,                   intent(in)    :: merra2_aerosol_aware, is_hail_aware
          real(kind_phys), optional, intent(inout) :: nc(:,:)
          real(kind_phys), optional, intent(inout) :: nwfa(:,:)
          real(kind_phys), optional, intent(inout) :: nifa(:,:)
