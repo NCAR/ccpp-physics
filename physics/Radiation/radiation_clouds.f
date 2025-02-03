@@ -309,6 +309,8 @@
             print *,'   --- GFDL Lin cloud microphysics'
          elseif (imp_physics == 8) then
             print *,'   --- Thompson cloud microphysics'
+         elseif (imp_physics == 88) then
+            print *,'   --- TEMPO cloud microphysics'
          elseif (imp_physics == 6) then
             print *,'   --- WSM6 cloud microphysics'
          elseif (imp_physics == 10) then
@@ -343,6 +345,7 @@
      &       ntrac, ntcw, ntiw, ntrw, ntsw, ntgl, ntclamt,              &
      &       imp_physics, imp_physics_nssl, imp_physics_fer_hires,      &
      &       imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,  &
+     &       imp_physics_tempo,                                         &
      &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
      &       imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,   &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
@@ -518,6 +521,7 @@
      &     imp_physics_fer_hires,       ! Flag for fer-hires scheme
      &     imp_physics_gfdl,            ! Flag for gfdl scheme
      &     imp_physics_thompson,        ! Flag for thompsonscheme
+     &     imp_physics_tempo,           ! Flag for TEMPO scheme
      &     imp_physics_wsm6,            ! Flag for wsm6 scheme
      &     imp_physics_zhao_carr,       ! Flag for zhao-carr scheme
      &     imp_physics_zhao_carr_pdf,   ! Flag for zhao-carr+PDF scheme
@@ -740,7 +744,8 @@
      &                   cld_resnow)
           endif ! MYNN PBL or GF
 
-        elseif(imp_physics == imp_physics_thompson) then                              ! Thompson MP
+        elseif(imp_physics == imp_physics_thompson                      &
+     &         .or. imp_physics == imp_physics_tempo) then      ! Thompson/TEMPO MP
 
           if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf               &
      &          .or. imfdeepcnv == imfdeepcnv_c3) then ! MYNN PBL or GF conv
