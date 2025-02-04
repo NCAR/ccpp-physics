@@ -214,6 +214,24 @@
   type = real
   kind = kind_phys
   intent = inout
+[chw]
+  standard_name = mass_number_concentration_of_graupel_in_air
+  long_name = graupel number concentration
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[vh]
+  standard_name = graupel_volume
+  long_name = graupel particle volume
+  units = m3 kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
 [ni]
   standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air
   long_name = ice number concentration
@@ -500,6 +518,24 @@
   type = real
   kind = kind_phys
   intent = inout
+[chw]
+  standard_name = mass_number_concentration_of_graupel_of_new_state
+  long_name = graupel number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[vh]
+  standard_name = graupel_volume_of_new_state
+  long_name = graupel particle volume
+  units = m3 kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
 [ni]
   standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air_of_new_state
   long_name = ice number concentration

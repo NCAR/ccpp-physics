@@ -34,6 +34,7 @@ module mp_tempo
                                   restart, imp_physics,                    &
                                   imp_physics_tempo, convert_dry_rho,      &
                                   spechum, qc, qr, qi, qs, qg, ni, nr,     &
+                                  chw, vh,                                 &
                                   is_aerosol_aware,  merra2_aerosol_aware, &
                                   is_hail_aware,                           &
                                   nc, nwfa2d, nifa2d,                      &
@@ -64,6 +65,7 @@ module mp_tempo
          real(kind_phys),           intent(inout) :: qg(:,:)
          real(kind_phys),           intent(inout) :: ni(:,:)
          real(kind_phys),           intent(inout) :: nr(:,:)
+         real(kind_phys),           intent(inout), optional :: chw(:,:), vh(:,:)
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
          logical,                   intent(in   ) :: merra2_aerosol_aware
@@ -190,6 +192,10 @@ module mp_tempo
 
            ni = ni/(1.0_kind_phys-spechum)
            nr = nr/(1.0_kind_phys-spechum)
+           if (is_hail_aware) then
+              chw = chw/(1.0_kind_phys-spechum)
+              vh  = vh/(1.0_kind_phys-spechum)
+           endif
            if (is_aerosol_aware .or. merra2_aerosol_aware) then
               nc = nc/(1.0_kind_phys-spechum)
               nwfa = nwfa/(1.0_kind_phys-spechum)
@@ -211,6 +217,10 @@ module mp_tempo
          where(qr .GT. 0 .and. nr .LE. 0.0) nr = make_RainNumber(qr*rho, tgrs) * orho
          where(qr .EQ. 0.0 .and. nr .GT. 0.0) nr=0.0
 
+         if (is_hail_aware) then
+            where(qg .LE. 0.0) chw=0.0
+            where(qg .LE. 0.0) vh=0.0
+         endif
 
          !..Check for existing aerosol data, both CCN and IN aerosols.  If missing
          !.. fill in just a basic vertical profile, somewhat boundary-layer following.
@@ -322,6 +332,10 @@ module mp_tempo
 
            ni = ni/(1.0_kind_phys+qv)
            nr = nr/(1.0_kind_phys+qv)
+           if (is_hail_aware) then
+              chw = chw/(1.0_kind_phys+qv)
+              vh  = vh/(1.0_kind_phys+qv)
+           endif
            if (is_aerosol_aware .or. merra2_aerosol_aware) then
               nc = nc/(1.0_kind_phys+qv)
               nwfa = nwfa/(1.0_kind_phys+qv)
@@ -343,6 +357,7 @@ module mp_tempo
       subroutine mp_tempo_run(ncol, nlev, con_g, con_rd,           &
                               con_eps, convert_dry_rho,            &
                               spechum, qc, qr, qi, qs, qg, ni, nr, &
+                              chw, vh,                             &
                               is_aerosol_aware, is_hail_aware,     &
                               merra2_aerosol_aware, nc, nwfa, nifa,&
                               nwfa2d, nifa2d, aero_ind_fdb,        &
@@ -382,6 +397,7 @@ module mp_tempo
          real(kind_phys),           intent(inout) :: qg(:,:)
          real(kind_phys),           intent(inout) :: ni(:,:)
          real(kind_phys),           intent(inout) :: nr(:,:)
+         real(kind_phys), optional, intent(inout) :: chw(:,:), vh(:,:)
          ! Aerosols
          logical,                   intent(in)    :: is_aerosol_aware, fullradar_diag 
          logical,                   intent(in)    :: merra2_aerosol_aware, is_hail_aware
@@ -526,6 +542,12 @@ module mp_tempo
          errmsg = ''
          errflg = 0
 
+         if (is_hail_aware .and. sedi_semi) then
+            write(errmsg, fmt='((a))') 'Cannot use hail-aware TEMPO with sedi_semi... plese set sedi_semi=.false.'
+            errflg = 1
+            return
+         endif
+
          if (first_time_step .and. istep==1 .and. blkno==1) then
             ! Check initialization state
             if (.not.is_initialized) then
@@ -604,6 +626,10 @@ module mp_tempo
 
            ni = ni/(1.0_kind_phys-spechum)
            nr = nr/(1.0_kind_phys-spechum)
+           if (is_hail_aware) then
+              chw = chw/(1.0_kind_phys-spechum)
+              vh  = vh/(1.0_kind_phys-spechum)
+           endif
            if (is_aerosol_aware .or. merra2_aerosol_aware) then
               nc = nc/(1.0_kind_phys-spechum)
               nwfa = nwfa/(1.0_kind_phys-spechum)
@@ -751,6 +777,33 @@ module mp_tempo
          end if set_extended_diagnostic_pointers
          !> - Call mp_gt_driver() with or without aerosols, with or without effective radii, ...
          if (is_aerosol_aware) then
+            if (is_hail_aware) then
+               call tempo_3d_to_1d_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, qb=vh, ni=ni, nr=nr,        &
+                    nc=nc, ng=chw, nwfa=nwfa, nifa=nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
+                    tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
+                    sedi_semi=sedi_semi, decfl=decfl, lsm=islmsk,                  &
+                    rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                    snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                    icenc=ice_mp, icencv=delta_ice_mp,                             &
+                    graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                    refl_10cm=refl_10cm,                                           &
+                    diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                    max_hail_diam_sfc=max_hail_diam_sfc,                           &
+                    has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                    aero_ind_fdb=aero_ind_fdb, rand_perturb_on=spp_mp_opt,         &
+                    kme_stoch=kme_stoch,                                           &
+                    rand_pert=spp_wts_mp, spp_var_list=spp_var_list,               &
+                    spp_prt_list=spp_prt_list, n_var_spp=n_var_spp,                &
+                    spp_stddev_cutoff=spp_stddev_cutoff,                           &
+                    ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                    ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                    its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                    fullradar_diag=fullradar_diag, istep=istep, nsteps=nsteps,     &
+                    first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+                    ! Extended diagnostics
+                    ext_diag=ext_diag, pfils=pfils, pflls=pflls)
+            else
+
 !            write(errmsg,'(*(a))') "TEMPO aerosol-aware UNTESTED -- DO NOT USE"
 !            errflg = 1
 !            return
@@ -795,6 +848,7 @@ module mp_tempo
                               ! qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
                               ! qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
                               ! qcten3=qcten3,
+         endif
          else if (merra2_aerosol_aware) then
             write(errmsg,'(*(a))') "TEMPO aerosol-aware with MERRA2 UNTESTED -- DO NOT USE"
             errflg = 1
@@ -899,6 +953,10 @@ module mp_tempo
 
            ni = ni/(1.0_kind_phys+qv)
            nr = nr/(1.0_kind_phys+qv)
+           if (is_hail_aware) then
+              chw = chw/(1.0_kind_phys+qv)
+              vh  = vh/(1.0_kind_phys+qv)
+           endif
            if (is_aerosol_aware .or. merra2_aerosol_aware) then
               nc = nc/(1.0_kind_phys+qv)
               nwfa = nwfa/(1.0_kind_phys+qv)

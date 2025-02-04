@@ -528,6 +528,7 @@ contains
                     call cpu_time(stime)
                     if (dimNRHG == NRHG) then
                        call qr_acr_qg_par(dimNRHG, qr_acr_qg_hailaware_file)
+                       using_hail_aware_table = .true.
                     else
                        call qr_acr_qg_par(dimNRHG, qr_acr_qg_file)
                     endif
