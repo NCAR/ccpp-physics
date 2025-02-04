@@ -5,3 +5,4 @@
 [submodule "physics/MP/TEMPO/TEMPO"]
 	path = physics/MP/TEMPO/TEMPO
 	url = https://github.com/NCAR/TEMPO
+	branch = main
