@@ -726,7 +726,8 @@
 
       real (kind=kind_phys), intent(in) :: cosz(npts), solcon,          &
      &       de_lgth(npts)
-      real (kind=kind_phys), dimension(npts,nlay), intent(in) :: alpha
+      real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
+             alpha
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(:,:), intent(inout) :: hswc
