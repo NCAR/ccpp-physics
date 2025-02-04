@@ -630,7 +630,8 @@
 
       real (kind=kind_phys), dimension(:), intent(in) :: sfemis,        &
      &       sfgtmp, de_lgth
-      real (kind=kind_phys), dimension(npts,nlay), intent(in) :: alpha
+      real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
+             alpha
 
       real (kind=kind_phys), dimension(:,:,:),intent(in)::              &
      &       aeraod, aerssa
