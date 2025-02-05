@@ -3615,7 +3615,7 @@ module module_mp_thompson
 
    !+---+-----------------------------------------------------------------+ !  EVAPORATION
                elseif (clap .lt. -eps .AND. ssatw(k).lt.-1.E-6 .AND.     &
-                        (is_aerosol_aware .or. merra2_aerosol_aware)) then  
+                        is_aerosol_aware) then  
                   tempc = temp(k) - 273.15
                   otemp = 1./temp(k)
                   rvs = rho(k)*qvs(k)
