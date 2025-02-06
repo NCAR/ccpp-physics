@@ -3024,7 +3024,7 @@ endif   ! croptype == 0
   
   call snow_age (parameters,dt,tg,sneqvo,sneqv,tauss,fage) 
   
-  if(cosz > 0) 
+  if(cosz <= 0) 
 
 ! weight reflectance/transmittance by lai and sai
 
@@ -3044,7 +3044,8 @@ endif   ! croptype == 0
      call snowalb_class (parameters,nband,qsnow,dt,alb,albold,albsnd,albsni,iloc,jloc)
      albold = alb
   end if
-  end if
+
+100 continue
 
 ! ground surface albedo
 
