@@ -21,13 +21,6 @@
   dimensions = ()
   type = logical
   intent = in
-[flag_restart]
-  standard_name = flag_for_restart
-  long_name = flag for restart (warmstart) or coldstart
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [cpllnd]
   standard_name = flag_for_land_coupling
   long_name = flag controlling cpllnd collection (default off)
