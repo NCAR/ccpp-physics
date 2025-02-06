@@ -7,6 +7,9 @@
       use mfpbltq_mod
       use tridi_mod
       use mfscuq_mod
+      !PCC_CANOPY
+      use canopy_utils_mod
+
       contains
 
 !> \defgroup module_satmedmfvdifq GFS TKE-EDMF PBL Module
@@ -83,9 +86,19 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,                &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,tc_pbl,                                    &
+     &     do_canopy, vegtype, lai,                                     &
+!IVAI: canopy inputs
+     &     claie, cfch, cfrt, cclu, cpopu,
+!IVAI
+!TODO -Canopy Inputs
+!     &     rdcanopylai, rdcanopyfch, rdcanopyfrt, rdcanopyclu,        &
+!     &     canopylaixy, canopyfchxy, canopyfrtxy, canopycluxy,        & 
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
-     &     errmsg,errflg)
+     &     errmsg,errflg,                                               &
+!IVAI: aux arrays
+     &     naux2d,naux3d,aux2d,aux3d)
+
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -106,6 +119,21 @@
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
       real(kind=kind_phys), intent(in) :: rlmx, elmx
+      !PCC_CANOPY------------------------------------
+      logical, intent(in)  :: do_canopy
+      integer, intent(in)  :: vegtype(:)
+      real(kind=kind_phys), intent(in) :: lai(:)
+!IVAI: canopy inputs
+      real(kind=kind_phys), intent(in)  :: claie(:), cfch(:), cfrt(:),
+     &                                     cclu(:), cpopu(:)
+!TODO Canopy Inputs
+!      logical, intent(in)  :: rdcanopylai, rdcanopyfch, rdcanopyfrt,  &
+!                              rdcanopyclu
+!      real(kind=kind_phys), intent(in) :: canopylaixy(:),               &
+!                                          canopyfchxy(:),               &
+!                                          canopyfrtxy(:),             &
+!                                          canopycluxy(:)
+      !----------------------------------------------
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
      &                     tdt(:,:),    rtg(:,:,:)
       real(kind=kind_phys), intent(in) ::                               &
@@ -254,11 +282,50 @@
 !
       real(kind=kind_phys) ck0, ck1, ch0, ch1, ce0, rchck
 !
+!PCC_CANOPY------------------------------------
+      real(kind=kind_phys) PICAN
+!----------------------------------------------
+
       real(kind=kind_phys) qlcr, zstblmax, hcrinv
 !
       real(kind=kind_phys) h1
 
       real(kind=kind_phys) bfac, mffac
+
+!PCC_CANOPY------------------------------------
+      integer COUNTCAN,KCAN
+      integer kount         !IVAI
+      real(kind=kind_phys) FCH,       MOL,   HOL, TLCAN,
+     &                     SIGMACAN,  RRCAN, BBCAN,
+     &                     AACAN,     ZCAN,  ZFL, BOTCAN,
+     &                     EDDYVEST1, EDDYVEST_INT
+!TODO Canopy Inputs
+!     &                     XCANOPYLAI, XCANOPYFCH,
+!     &                     XCANOPYFRT, XCANOPYCLU
+
+      ! in canopy eddy diffusivity [ m**2/s ]
+      real(kind=kind_phys), allocatable  :: EDDYVESTX ( : )
+      ! in canopy layer [m]
+      real(kind=kind_phys), allocatable  :: ZCANX     ( : )
+      ! Declare local maximum canopy layers
+      integer, parameter :: MAXCAN = 1000
+      integer, parameter :: mvt   = 30 ! use 30 instead of 27
+      !Based on MODIS IGBP 20 Category Dataset
+      real :: fch_table(mvt)         !< top of canopy (m)
+       data   ( fch_table(i),i=1,mvt)   /
+     &          20.0, 20.0, 18.0, 16.0, 16.0, 1.10,
+     &          1.10, 13.0, 10.0, 1.00, 5.00, 2.00,
+     &          15.0, 1.50, 0.00, 0.00, 0.00, 4.00,
+     &          2.00, 0.50, 0.00, 0.00, 0.00, 0.00,
+     &          0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
+!----------------------------------------------
+
+!IVAI
+      integer, intent(in) :: naux2d,naux3d
+      real(kind_phys), intent(inout) :: aux2d(:,:)
+      real(kind_phys), intent(inout) :: aux3d(:,:,:)
+!IVAI
+
 !!
       parameter(bfac=100.)
       parameter(wfac=7.0,cfac=4.5)
@@ -282,6 +349,18 @@
       parameter(ck1=0.15,ch1=0.15)
       parameter(cs0=0.4,csmf=0.5)
       parameter(rchck=1.5,ndt=20)
+!PCC_CANOPY------------------------------------
+      parameter (PICAN = 3.1415927)
+!----------------------------------------------
+
+!PCC_CANOPY------------------------------------
+      if (do_canopy) then
+        if(.not.allocated(EDDYVESTX))
+     &    allocate( EDDYVESTX    ( MAXCAN ) )
+        if(.not.allocated(ZCANX))
+     &    allocate( ZCANX    ( MAXCAN ) )
+      endif
+!----------------------------------------------
 
       if (tc_pbl == 0) then
         ck0 = 0.4
@@ -1293,6 +1372,203 @@
 !
         enddo
       enddo
+      !PCC_CANOPY------------------------------------
+      kount=0 !IVAI
+      if (do_canopy) then 
+
+!IVAI
+!        print*, 'SATMEDMFVDIFQ_RUN: CLAIE = ', claie(:)
+!        print*, 'SATMEDMFVDIFQ_RUN: CFCH = ' , cfch (:)
+!        print*, 'SATMEDMFVDIFQ_RUN: CFRT = ' , cfrt (:)
+!        print*, 'SATMEDMFVDIFQ_RUN: CCLU = ' , cclu (:)
+!        print*, 'SATMEDMFVDIFQ_RUN: CPOPU= ' , cpopu(:)
+! 2D aux arrays: canopy data in diffusion
+        aux2d(:,1) = cfch (:)
+        aux2d(:,2) = claie(:)
+        aux2d(:,3) = cfrt(:)
+
+! 3D aux arrays: before canopy correction
+        aux3d(:,:,1) = dkq(:,:)
+        aux3d(:,:,2) = dkt(:,:)
+        aux3d(:,:,3) = dku(:,:)
+!IVAI
+        do k = 1, km1-1
+          do i = 1, im
+
+!TODO: Canopy Inputs
+!           if(rdcanopylai) then
+!             XCANOPYLAI = canopylaixy(i)
+!           else
+!             XCANOPYLAI = 0.0
+!           endif
+!           if(rdcanopyfch) then
+!             XCANOPYFCH = canopyfchxy(i)
+!           else
+!             XCANOPYFCH = 0.0
+!           endif
+!           if(rdcanopyfrt) then
+!             XCANOPYFRT = canopyfrtxy(i)
+!           else
+!             XCANOPYFRT = 0.0
+!           endif
+!           if(rdcanopyclu) then
+!             XCANOPYCLU = canopycluxy(i)
+!           else
+!             XCANOPYCLU = 0.0
+!           endif
+!
+!           FCH = XCANOPYFCH !top of canopy from input file
+
+!IVAI: AQM canopy Inputs
+!           FCH = fch_table(vegtype(i)) !top of canopy from look-up table
+            FCH = cfch(i)               !top of canopy from AQM canopy inputs
+            IF (k .EQ. 1) THEN !use model layer interfaces
+              KCAN = 1
+            ELSE
+              IF (   cfch(i) .GT. zi(i,k)
+     &         .AND. cfch(i) .LE. zi(i,k+1) ) THEN
+                KCAN = 1
+              ELSE
+                KCAN = 0
+              END IF
+            END IF
+
+            IF (KCAN .EQ. 1) THEN !canopy inside model layer
+!           Check for other Contiguous Canopy Grid Cell Conditions
+
+!           Not a contigous canopy cell
+            IF (   claie(i) .LT. 0.1
+     &        .OR. cfch (i) .LT. 0.5
+!IVAI: modified contiguous canopy condition
+!    &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.5
+     &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.75
+!IVAI
+     &        .OR. cpopu(i) .GT. 10000.0
+     &        .OR. (EXP(-0.5*claie(i)*cclu(i)) .GT. 0.45
+     &                          .AND. cfch(i)  .LT. 18.) ) THEN
+
+
+!TODO: Canopy Inputs
+!                        IF ( XCANOPYLAI .LT. 0.1  !from canopy inputs
+!                        IF ( lai(i) .LT. 0.1  !from LSM
+!     &                   .OR. FCH .LT. 0.5 ) THEN
+!     &                   .OR. MAX(0.0, 1.0 - XCANOPYFRT) .GT. 0.5
+!     &                   .OR. POPU .GT. 10000.0
+!     &                   .OR. EXP(-0.5*XCANOPYLAI*XCANOPYCLU).GT. 0.45
+!     &                      .AND. FCH .LT. 18.0 ) THEN 
+
+              dkt(i,k)= dkt(i,k)
+              dkq(i,k)= dkq(i,k)
+              dku(i,k)= dku(i,k)
+
+            ELSE ! There is a contiguous forest canopy, apply correction over canopy layers
+
+! Output contiguous canopy mask
+              if (kount .EQ. 0 ) aux2d(i,5) = aux2d(i,5) + 1
+
+!Raupauch M. R. A Practical Lagrangian method for relating scalar
+!concentrations to
+! source distributions in vegetation canopies. Q. J. R. Meteor. Soc.
+! (1989), 115, pp 609-632
+              MOL  = zol(i)/zl(i,k)  !Monin-Obukhov Length in layer
+              HOL = FCH/MOL  !local canopy stability parameter (hc/MOL)
+              ZCAN = zi(i,k+1) ! Initialize each model layer top that contains canopy (m)
+                             ! Integrate across total model interface
+              ZFL = ZCAN     ! Set ZFL = ZCAN
+              COUNTCAN = 0   ! Initialize canopy layers
+
+              IF (k .EQ. 1) THEN  !Find bottom in each model layer
+                  BOTCAN = 0.5
+              ELSE
+                  BOTCAN = zi(i,k)
+              END IF
+
+              DO WHILE (ZCAN.GE.BOTCAN)
+                 ! TLCAN = Lagrangian timescale
+                 TLCAN = (FCH/ustar(i)) * (
+     &                   (0.256 * (ZCAN-(0.75*FCH))/FCH ) +
+     &                   (0.492*EXP((-0.256*ZCAN/FCH)/0.492)) )
+                 IF ( HOL .LT. -0.1 )  THEN  !STRONG UNSTABLE
+                  IF ( ZCAN/FCH .GT. 1.25 ) THEN !SIGMACAN = Eulerian vertical velocity variance
+                    SIGMACAN = 1.25*ustar(i)
+                  END IF
+                  IF ( ZCAN/FCH .GE. 0.175  
+     &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
+                      SIGMACAN = ustar(i) * ( 0.75 + 
+     &                         (0.5 * COS((PICAN/1.06818) *
+     &                         (1.25 - (ZCAN/FCH)))) )
+                  END IF
+                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
+                    SIGMACAN = 0.25*ustar(i)
+                  END IF
+                 END IF
+                 IF ( HOL .GE. -0.1  .AND. HOL .LT. 0.1 )   THEN !WEAKLY UNSTABLE to NEUTRAL
+                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
+                    SIGMACAN = 1.0*ustar(i)
+                  END IF
+                  IF ( ZCAN/FCH .GE. 0.175  
+     &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
+                    SIGMACAN = ustar(i) * ( 0.625 + 
+     &                       (0.375* COS((PICAN/1.06818) *
+     &                       (1.25 - (ZCAN/FCH)))) )
+                  END IF
+                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
+                    SIGMACAN = 0.25*ustar(i)
+                  END IF
+                 END IF
+                 IF ( HOL .GE.  0.1  .AND.  HOL .LT. 0.9 )   THEN !STABLE
+                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
+                    SIGMACAN = 0.25*(4.375 - (3.75*HOL))*ustar(i)
+                  END IF
+                  IF ( ZCAN/FCH .GE. 0.175  
+     &                 .AND. ZCAN/FCH .LE. 1.25 ) THEN
+                    RRCAN=4.375-(3.75*HOL)
+                    AACAN=(0.125*RRCAN) + 0.125
+                    BBCAN=(0.125*RRCAN) - 0.125
+                    SIGMACAN = ustar(i) * ( AACAN + 
+     &                             (BBCAN * COS((PICAN/1.06818) *
+     &                             (1.25 - (ZCAN/FCH)))) )
+                  END IF
+                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
+                    SIGMACAN = 0.25*ustar(i)
+                  END IF
+                 END IF
+                 IF ( HOL .GE.  0.9 ) THEN  !VERY STABLE
+                    SIGMACAN = 0.25*ustar(i)
+                 END IF
+                 IF ( ZCAN .EQ. ZFL )  THEN ! Each model layer that includes canopy
+                  EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN
+                 ELSE IF ( ZCAN .LE. FCH )  THEN !in-canopy layers and set arrays
+                  COUNTCAN = COUNTCAN + 1
+                  ZCANX (COUNTCAN)     = ZCAN
+                  EDDYVESTX (COUNTCAN) = (SIGMACAN*SIGMACAN)*TLCAN
+                 END IF
+                 ZCAN = ZCAN-0.5  !step down in-canopy resolution of 0.5m
+              END DO !end loop on canopy layers
+              EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)
+     &                                ),EDDYVESTX(COUNTCAN:1:-1)) / ZFL
+              dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
+              dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
+              dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
+
+!IVAI: Output contiguos canopy correction bottom layer and 3D
+              if ( kount .EQ.  0)
+     &           aux2d(i,4) = 1./EDDYVEST1  * EDDYVEST_INT
+              aux3d(i,k,4) = 1./EDDYVEST1  * EDDYVEST_INT
+!IVAI
+
+            END IF   ! contigous canopy conditions
+
+            END IF   ! (KCAN .EQ. 1) model layer(s) containing canopy
+
+          enddo !i
+
+          kount = kount + 1 !IVAI
+
+        enddo !k
+
+      endif !do_canopy
+
 !> ## Compute TKE.
 !!  - Compute a minimum TKE deduced from background diffusivity for momentum.
 !
@@ -1564,6 +1840,7 @@
           tkeh(i,k) = 0.5 * (tke(i,k)+tke(i,k+1))
         enddo
       enddo
+
       do k=1,kps
         do i=1,im
           e_diff(i,k) = tke(i,k) - tke(i,k+1)
