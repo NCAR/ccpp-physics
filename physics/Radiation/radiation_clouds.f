@@ -197,10 +197,9 @@
       real (kind=kind_phys), parameter :: ovcst  = 1.0 - 1.0e-8
 
       real (kind=kind_phys), parameter :: reliq_def = 10.0        !< default liq radius to 10 micron
-      real (kind=kind_phys), parameter :: reice_def = 50.0        !< default ice radius to 50 micron
+      real (kind=kind_phys), parameter :: reice_def = 25.0        !< default ice radius to 50 micron
       real (kind=kind_phys), parameter :: rrain_def = 1000.0      !< default rain radius to 1000 micron
       real (kind=kind_phys), parameter :: rsnow_def = 250.0       !< default snow radius to 250 micron
-      real (kind=kind_phys), parameter :: creice_def = 25.0       !< default convective ice radius to 25 micron overland
 
       real (kind=kind_phys), parameter :: cldssa_def = 0.99       !< default cld single scat albedo
       real (kind=kind_phys), parameter :: cldasy_def = 0.84       !< default cld asymmetry factor
@@ -2165,13 +2164,8 @@
             cip(i,k) = max(0.0, (clw(i,k,ntiw) +
      &             snow2ice*clw(i,k,ntsw) + tem2) *
      &             gfac * delp(i,k))
-            if(tem2 > 1.e-12 .and.  clw(i,k,ntiw) < 1.e-12) then
-                 if(nint(slmsk(i))==1) then
-                   rei(i,k)=creice_def
-                 else
-                   rei(i,k)=reice_def
-                 endif
-            endif       
+            if(tem2 > 1.e-12 .and.  clw(i,k,ntiw) < 1.e-12)
+     &             rei(i,k)=reice_def
             crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))
             csp(i,k) = max(0.0, (1.-snow2ice)*clw(i,k,ntsw) *
      &             gfac * delp(i,k))
