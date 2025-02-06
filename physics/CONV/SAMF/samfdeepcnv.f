@@ -1845,11 +1845,8 @@ c
           val = 1.e-4
           if (wc(i) < val) cnvflg(i)=.false.
         endif
-      enddo
-      
-      
+      enddo      
 c
-
 !> - For progsigma = T, calculate the mean updraft velocity within the cloud (omegac),cast in pressure coordinates.                                                                                                                                  
       if(progsigma)then
          do i = 1, im
