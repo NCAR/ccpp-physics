@@ -128,38 +128,6 @@
   type = real
   kind = kind_phys
   intent = in
-[dlwflx]
-  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_land
-  long_name = total sky surface downward longwave flux absorbed by the ground over land
-  units = W m-2
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[dswsfc]
-  standard_name = surface_downwelling_shortwave_flux
-  long_name = total sky surface downward shortwave flux
-  units = W m-2
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[sfalb]
-  standard_name = surface_albedo_for_diffused_shortwave_on_radiation_timestep
-  long_name = mean surface diffused shortwave albedo
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[sfcemis]
-  standard_name = surface_longwave_emissivity_over_land
-  long_name = surface lw emissivity in fraction over land
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
@@ -204,14 +172,6 @@
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat of dry air at constant pressure
   units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_sbc]
-  standard_name = stefan_boltzmann_constant
-  long_name = Stefan-Boltzmann constant
-  units = W m-2 K-4
   dimensions = ()
   type = real
   kind = kind_phys
@@ -268,7 +228,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = in 
   optional = True
 [q2mp_lnd]
   standard_name = specific_humidity_at_2m_over_land_from_land
@@ -313,7 +273,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = out
   optional = True
 [chh_lnd]
   standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land_from_land
@@ -333,14 +293,6 @@
   kind = kind_phys
   intent = in
   optional = True
-[slc]
-  standard_name = volume_fraction_of_unfrozen_water_in_soil
-  long_name = volume fraction of unfrozen soil moisture
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
-  type = real
-  kind = kind_phys
-  intent = in
 [sncovr1]
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction
