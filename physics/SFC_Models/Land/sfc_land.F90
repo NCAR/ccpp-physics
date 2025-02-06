@@ -28,8 +28,8 @@
 !! \section general General Algorithm
 !! \section detailed Detailed Algorithm
 !! @{
-   subroutine sfc_land_run(im, flag_init, cpllnd, cpllnd2atm,        &
-     flag_iter, dry, sncovr1_lnd, qsurf_lnd, evap_lnd, hflx_lnd,     &
+   subroutine sfc_land_run(im, cpllnd, cpllnd2atm, flag_iter, dry,   &
+     sncovr1_lnd, qsurf_lnd, evap_lnd, hflx_lnd,                     &
      ep_lnd, t2mmp_lnd, q2mp_lnd, gflux_lnd,                         &
      runoff_lnd, drain_lnd, cmm_lnd, chh_lnd, zvfun_lnd,             &
      sncovr1, qsurf, evap, hflx, ep, t2mmp, q2mp,                    &
@@ -40,7 +40,6 @@
 
    ! Inputs
    integer             , intent(in)    :: im
-   logical             , intent(in)    :: flag_init
    logical             , intent(in)    :: cpllnd
    logical             , intent(in)    :: cpllnd2atm
    logical             , intent(in)    :: flag_iter(:)
@@ -84,7 +83,7 @@
    errflg = 0
 
    ! Check coupling from component land to atmosphere
-   if (flag_init .or. (.not. cpllnd2atm)) return
+   if (.not. cpllnd2atm) return
 
    ! Fill variables
    do i = 1, im
