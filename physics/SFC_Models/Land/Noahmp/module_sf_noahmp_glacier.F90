@@ -842,14 +842,12 @@ contains
 
 ! snow albedos: age even when sun is not present
 
-  if(cosz > 0) then
   if(opt_alb == 1) &
      call snowalb_bats_glacier (nband,cosz,fage,albsnd,albsni)
   if(opt_alb == 2) then
      call snowalb_class_glacier(nband,qsnow,dt,alb,albold,albsnd,albsni)
      albold = alb
   end if
-  end if 
 
 ! zero summed solar fluxes
 

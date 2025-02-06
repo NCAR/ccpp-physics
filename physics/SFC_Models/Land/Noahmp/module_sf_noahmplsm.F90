@@ -3024,7 +3024,7 @@ endif   ! croptype == 0
   
   call snow_age (parameters,dt,tg,sneqvo,sneqv,tauss,fage) 
   
-  if(cosz <= 0) 
+  if(cosz <= 0) goto 100
 
 ! weight reflectance/transmittance by lai and sai
 
@@ -3044,8 +3044,6 @@ endif   ! croptype == 0
      call snowalb_class (parameters,nband,qsnow,dt,alb,albold,albsnd,albsni,iloc,jloc)
      albold = alb
   end if
-
-100 continue
 
 ! ground surface albedo
 
@@ -9145,6 +9143,10 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 
 ! recharge rate qin to groundwater
 
+!      ka  = hk(iwt)
+! harmonic average, c.he changed based on gy niu's update
+!      ka  = 2.0*(hk(iwt)*parameters%dksat(iwt)*1.0e3) / (hk(iwt)+parameters%dksat(iwt)*1.0e3)
+!     tried one suggesteed by gy niu
       ka =  0.5*(hk(iwt)+parameters%dksat(iwt)*1.0e3)      
 
       wh_zwt  = - zwt * 1.e3                          !(mm)
