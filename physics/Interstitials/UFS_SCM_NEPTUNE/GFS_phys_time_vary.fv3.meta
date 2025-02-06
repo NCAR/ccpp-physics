@@ -1042,13 +1042,6 @@
   dimensions = ()
   type = ty_h2ophys
   intent = in
-[is_initialized]
-  standard_name = flag_for_gfs_phys_time_vary_interstitial_initialization
-  long_name = flag carrying interstitial initialization status
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1069,13 +1062,6 @@
 [ccpp-arg-table]
   name = GFS_phys_time_vary_finalize
   type = scheme
-[is_initialized]
-  standard_name = flag_for_gfs_phys_time_vary_interstitial_initialization
-  long_name = flag carrying interstitial initialization status
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -2069,13 +2055,26 @@
   dimensions = ()
   type = ty_h2ophys
   intent = in
-[is_initialized]
-  standard_name = flag_for_gfs_phys_time_vary_interstitial_initialization
-  long_name = flag carrying interstitial initialization status
-  units = flag
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
   dimensions = ()
-  type = logical
-  intent = in
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_phys_time_vary_timestep_finalize
+  type = scheme
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
