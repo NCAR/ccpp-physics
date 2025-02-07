@@ -198,14 +198,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[sfcdswc]
-  standard_name = surface_downwelling_shortwave_flux_on_radiation_timestep_assuming_clear_sky
-  long_name = clear sky sfc downward sw flux
-  units = W m-2
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
 [htrsw]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky sw heating rate
