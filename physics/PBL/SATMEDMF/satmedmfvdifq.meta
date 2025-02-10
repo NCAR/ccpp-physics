@@ -655,7 +655,7 @@
 [cpopu]
   standard_name = canopy_population_density
   long_name = population density used for canopy correction
-  units = 10000people 10km-2
+  units = people km-2
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
