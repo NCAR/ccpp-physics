@@ -225,7 +225,7 @@
          do i= 1, im
             if(cnvflg(i)) then
                sigmab(i)=sigmab(i)/betadcu
-               sigmab(i)=MAX(sigmind,sigmab(i))
+               sigmab(i)=MAX(sigmind_new,sigmab(i))
             endif
          enddo
       endif
