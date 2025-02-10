@@ -95,9 +95,9 @@
 !     &     canopylaixy, canopyfchxy, canopyfrtxy, canopycluxy,        & 
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
-     &     errmsg,errflg,                                               &
+     &     errmsg,errflg)                                               
 !IVAI: aux arrays
-     &     naux2d,naux3d,aux2d,aux3d)
+!     &     naux2d,naux3d,aux2d,aux3d)
 
 !
       use machine  , only : kind_phys
@@ -321,9 +321,9 @@
 !----------------------------------------------
 
 !IVAI
-      integer, intent(in) :: naux2d,naux3d
-      real(kind_phys), intent(inout) :: aux2d(:,:)
-      real(kind_phys), intent(inout) :: aux3d(:,:,:)
+!      integer, intent(in) :: naux2d,naux3d
+!      real(kind_phys), intent(inout) :: aux2d(:,:)
+!      real(kind_phys), intent(inout) :: aux3d(:,:,:)
 !IVAI
 
 !!
@@ -1383,14 +1383,14 @@
 !        print*, 'SATMEDMFVDIFQ_RUN: CCLU = ' , cclu (:)
 !        print*, 'SATMEDMFVDIFQ_RUN: CPOPU= ' , cpopu(:)
 ! 2D aux arrays: canopy data in diffusion
-        aux2d(:,1) = cfch (:)
-        aux2d(:,2) = claie(:)
-        aux2d(:,3) = cfrt(:)
+!        aux2d(:,1) = cfch (:)
+!        aux2d(:,2) = claie(:)
+!        aux2d(:,3) = cfrt(:)
 
 ! 3D aux arrays: before canopy correction
-        aux3d(:,:,1) = dkq(:,:)
-        aux3d(:,:,2) = dkt(:,:)
-        aux3d(:,:,3) = dku(:,:)
+!        aux3d(:,:,1) = dkq(:,:)
+!        aux3d(:,:,2) = dkt(:,:)
+!        aux3d(:,:,3) = dku(:,:)
 !IVAI
         do k = 1, km1-1
           do i = 1, im
@@ -1464,7 +1464,7 @@
             ELSE ! There is a contiguous forest canopy, apply correction over canopy layers
 
 ! Output contiguous canopy mask
-              if (kount .EQ. 0 ) aux2d(i,5) = aux2d(i,5) + 1
+!              if (kount .EQ. 0 ) aux2d(i,5) = aux2d(i,5) + 1
 
 !Raupauch M. R. A Practical Lagrangian method for relating scalar
 !concentrations to
@@ -1552,9 +1552,9 @@
               dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
 
 !IVAI: Output contiguos canopy correction bottom layer and 3D
-              if ( kount .EQ.  0)
-     &           aux2d(i,4) = 1./EDDYVEST1  * EDDYVEST_INT
-              aux3d(i,k,4) = 1./EDDYVEST1  * EDDYVEST_INT
+!              if ( kount .EQ.  0)
+!     &           aux2d(i,4) = 1./EDDYVEST1  * EDDYVEST_INT
+!              aux3d(i,k,4) = 1./EDDYVEST1  * EDDYVEST_INT
 !IVAI
 
             END IF   ! contigous canopy conditions
