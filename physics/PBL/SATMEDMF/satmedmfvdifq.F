@@ -86,11 +86,10 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,                &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,tc_pbl,                                    &
-     &     do_canopy, vegtype, lai,                                     &
-!IVAI: canopy inputs
-     &     claie, cfch, cfrt, cclu, cpopu,
+!IVAI: canopy inputs from AQM                      
+     &     do_canopy, claie, cfch, cfrt, cclu, cpopu,                   &
 !IVAI
-!TODO -Canopy Inputs
+!TODO -Canopy Inputs from UFS
 !     &     rdcanopylai, rdcanopyfch, rdcanopyfrt, rdcanopyclu,        &
 !     &     canopylaixy, canopyfchxy, canopyfrtxy, canopycluxy,        & 
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
@@ -119,10 +118,8 @@
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
       real(kind=kind_phys), intent(in) :: rlmx, elmx
-      !PCC_CANOPY------------------------------------
+!PCC CANOPY------------------------------------
       logical, intent(in)  :: do_canopy
-      integer, intent(in)  :: vegtype(:)
-      real(kind=kind_phys), intent(in) :: lai(:)
 !IVAI: canopy inputs
       real(kind=kind_phys), intent(in)  :: claie(:), cfch(:), cfrt(:),
      &                                     cclu(:), cpopu(:)
