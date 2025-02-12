@@ -333,7 +333,7 @@
      &,                                                   rhc
       real(kind=kind_phys), dimension(:,:), intent(out) :: ud_mf
       real(kind=kind_phys), dimension(:,:), intent(out) :: dd_mf, dt_mf
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: qlcn, qicn, w_upi   &
+      real(kind=kind_phys), dimension(:,:), intent(inout), optional :: qlcn, qicn, w_upi   &
      &,                                                   cnv_mfd                &
      &,                                                   cnv_dqldt, clcn        &
      &,                                                   cnv_fice, cnv_ndrop    &

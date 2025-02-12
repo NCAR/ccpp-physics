@@ -708,6 +708,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [nifa]
   standard_name = mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols_of_new_state
   long_name = number concentration of ice-friendly aerosols
@@ -716,6 +717,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [emanoc]
   standard_name = emission_of_anothropogenic_for_mp_indir_fdb
   long_name = emission of anothropogenic for mp indirect feedabck
@@ -857,6 +859,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [wetdpr]
   standard_name = mp_wet_deposition_smoke_dust
   long_name = large scale wet deposition of smoke and dust
@@ -865,6 +868,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [hwp]
   standard_name = hourly_wildfire_potential
   long_name = rrfs hourly fire weather potential

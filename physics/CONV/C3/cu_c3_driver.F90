@@ -121,7 +121,7 @@ contains
    real(kind=kind_phys),  dimension( : , : ), intent(in    ) :: w,phil,delp
    real(kind=kind_phys), dimension ( : , : ), intent(in    ) :: sigmain,qmicro
    real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: t,us,vs
-   real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: qci_conv
+   real(kind=kind_phys),  dimension( : , : ), intent(inout ), optional :: qci_conv
    real(kind=kind_phys),  dimension( : , : ), intent(out   ) :: cnvw_moist,cnvc
    real(kind=kind_phys), dimension ( : , : ), intent(out   ) :: sigmaout
    real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: cliw, clcw
@@ -141,7 +141,7 @@ contains
    integer, dimension (:), intent(out) :: hbot,htop,kcnv
    integer, dimension (:), intent(in)  :: xland
    real(kind=kind_phys),    dimension (:), intent(in) :: pbl
-   real(kind=kind_phys),    dimension (:), intent(in) :: maxMF
+   real(kind=kind_phys),    dimension (:), intent(in), optional :: maxMF
 !$acc declare copyout(hbot,htop,kcnv)
 !$acc declare copyin(xland,pbl)
    integer, dimension (im) :: tropics
@@ -159,7 +159,7 @@ contains
    ! Specific humidity from FV3
    real(kind=kind_phys), dimension (:,:), intent(in) :: qv2di_spechum
    real(kind=kind_phys), dimension (:,:), intent(inout) :: qv_spechum
-   real(kind=kind_phys), dimension (:), intent(inout) :: aod_gf
+   real(kind=kind_phys), dimension (:), intent(inout), optional :: aod_gf
 !$acc declare copyin(qv2di_spechum) copy(qv_spechum,aod_gf)
    ! Local water vapor mixing ratios and cloud water mixing ratios
    real(kind=kind_phys), dimension (im,km) :: qv2di, qv, forceqv, cnvw
