@@ -104,7 +104,7 @@ contains
         ,intent (in  )                      ::                         &
         tmf
      real(kind=kind_phys),    dimension (its:,kts:)                              &
-        ,intent (in  )                      ::                         &
+        ,intent (in  ), optional                      ::                         &
         qmicro, sigmain, forceqv_spechum
 
      real(kind=kind_phys),    dimension (its:)                                      &
@@ -139,7 +139,7 @@ contains
         dtime,tcrit,fv,r_d,betascu,betamcu,betadcu
 !$acc declare sigmaout
      real(kind=kind_phys),    dimension (its:,kts:)                              &
-        ,intent (out)                     ::                           &
+        ,intent (out), optional                     ::                           &
         sigmaout
 
 

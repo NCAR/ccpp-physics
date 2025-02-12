@@ -166,10 +166,10 @@ contains
     real(kind_phys), dimension(:),     intent(inout) :: max_fplume, min_fplume, uspdavg, hpbl_thetav
     real(kind_phys), dimension(:),     intent(inout) :: hwp, peak_hr_out
     real(kind_phys), dimension(:),     intent(inout) :: hwp_ave
-    real(kind_phys), dimension(:,:),   intent(inout) :: nwfa, nifa
+    real(kind_phys), dimension(:,:),   intent(inout), optional :: nwfa, nifa
     real(kind_phys), dimension(:,:),   intent(inout) :: ddvel_inout
-    real(kind_phys), dimension(:,:),   intent(inout) :: drydep_flux_out
-    real(kind_phys), dimension(:,:),   intent(inout) :: wetdpr
+    real(kind_phys), dimension(:,:),   intent(inout), optional :: drydep_flux_out
+    real(kind_phys), dimension(:,:),   intent(inout), optional :: wetdpr
     real(kind_phys), dimension(:),     intent(in)    :: wetness
     real(kind_phys), dimension(:),     intent(out)   :: lu_nofire_out,lu_qfire_out
     integer,         dimension(:),     intent(out)   :: fire_type_out
