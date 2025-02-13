@@ -63,7 +63,7 @@
       km1=km-1
       invdelt = 1./delt
 
-      if (flag_init) then
+      if(flag_init .and. .not. flag_restart) then
            sigmind_new=0.0
       else
            sigmind_new=sigmind
