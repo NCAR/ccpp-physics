@@ -1,5 +1,6 @@
 !>\file module_soil_pre.F90
-!! This file contains subroutines that initialize RUC LSM levels, soil
+
+!> This module contains subroutines that initialize RUC LSM levels, soil
 !! temperature/moisture.
 module module_soil_pre
 

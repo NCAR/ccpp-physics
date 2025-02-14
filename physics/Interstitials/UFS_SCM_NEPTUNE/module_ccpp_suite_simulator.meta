@@ -1,0 +1,24 @@
+[ccpp-table-properties]
+  name = base_physics_process
+  type = ddt
+  dependencies =
+
+[ccpp-arg-table]
+  name = base_physics_process
+  type = ddt
+
+########################################################################
+[ccpp-table-properties]
+  name = module_ccpp_suite_simulator
+  type = module
+  dependencies = ../../hooks/machine.F
+
+[ccpp-arg-table]
+  name = module_ccpp_suite_simulator
+  type = module
+[base_physics_process]
+  standard_name = base_physics_process
+  long_name = definition of type base_physics_process
+  units = DDT
+  dimensions = ()
+  type = base_physics_process

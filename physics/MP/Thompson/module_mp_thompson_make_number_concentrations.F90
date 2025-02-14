@@ -2,6 +2,8 @@
 !! This file contains
 
 !>\ingroup aathompson
+
+!>This module ocntains lookup tables of radiative effective radius of cloud ice, rain and water.
 module module_mp_thompson_make_number_concentrations
 
       use module_mp_thompson, only: PI
