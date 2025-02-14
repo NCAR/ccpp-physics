@@ -140,7 +140,7 @@ module mp_fer_hires
       real(kind_phys),   intent(in   ) :: epsq,r_d,p608,cp,g
       real(kind_phys),   intent(inout) :: t(:,:)
       real(kind_phys),   intent(inout) :: q(:,:)
-      real(kind_phys),   intent(inout) :: train(:,:)
+      real(kind_phys),   intent(inout), optional :: train(:,:)
       real(kind_phys),   intent(out  ) :: sr(:)
       real(kind_phys),   intent(inout) :: qc(:,:)
       real(kind_phys),   intent(inout) :: qr(:,:)

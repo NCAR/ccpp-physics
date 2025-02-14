@@ -894,7 +894,7 @@ div.contents p, div.contents li {
 }
 
 div.contents div.dyncontent {
-    margin: var(--spacing-medium) 0;
+    margin: var(--spacing-medium) 0; overflow-x: scroll;
 }
 
 @media (prefers-color-scheme: dark) {

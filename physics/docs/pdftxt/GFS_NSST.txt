@@ -1,5 +1,5 @@
 /**
-\page GFS_NSST GFS Near-Surface Sea Temperature Scheme
+\page GFS_NSST Near-Surface Sea Temperature Scheme
 \section des_nst Description
 
 Sea Surface Temperature (SST) is required in a Numerical Weather Prediction (NWP) system as the lower thermal

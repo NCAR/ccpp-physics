@@ -1,3 +1,7 @@
+!>\file GFDL_parse_tracers.F90
+!!
+
+!> This module contains code to parse tracers in GFDL MP
 module parse_tracers
 
   integer, parameter :: NO_TRACER = -99

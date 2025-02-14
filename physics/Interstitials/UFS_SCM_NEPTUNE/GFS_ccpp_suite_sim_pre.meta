@@ -1,0 +1,175 @@
+[ccpp-table-properties]
+  name = GFS_ccpp_suite_sim_pre
+  type = scheme
+  dependencies = ../../hooks/machine.F,module_ccpp_suite_simulator.F90
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_ccpp_suite_sim_pre_run
+  type = scheme
+[do_ccpp_suite_sim]
+  standard_name = flag_for_ccpp_suite_simulator
+  long_name = flag for ccpp suite simulator
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[physics_process]
+  standard_name = physics_process_type_for_CCPP_suite_simulator
+  long_name = physics process type for CCPP suite simulator
+  units = mixed
+  dimensions = (number_of_physics_process_in_CCPP_suite_simulator)
+  type = base_physics_process
+  intent = in
+[dtend]
+  standard_name = cumulative_change_of_state_variables
+  long_name = diagnostic tendencies for state variables
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,cumulative_change_of_state_variables_outer_index_max)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[dtidx]
+  standard_name = cumulative_change_of_state_variables_outer_index
+  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
+  type = integer
+  intent = in
+[dtp]
+  standard_name = timestep_for_physics
+  long_name = physics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[index_of_process_dcnv]
+  standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
+  long_name = index of deep convection process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_process_longwave]
+  standard_name = index_of_longwave_heating_process_in_cumulative_change_index
+  long_name = index of longwave heating process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_process_shortwave]
+  standard_name = index_of_shortwave_heating_process_in_cumulative_change_index
+  long_name = index of shortwave heating process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_process_orographic_gwd]
+  standard_name = index_of_orographic_gravity_wave_drag_process_in_cumulative_change_index
+  long_name = index of orographic gravity wave drag process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_process_scnv]
+  standard_name = index_of_shallow_convection_process_process_in_cumulative_change_index
+  long_name = index of shallow convection process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_process_pbl]
+  standard_name = index_of_subgrid_scale_vertical_mixing_process_in_cumulative_change_index
+  long_name = index of subgrid scale vertical mixing process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_process_mp]
+  standard_name = index_of_microphysics_process_process_in_cumulative_change_index
+  long_name = index of microphysics transport process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_temperature]
+  standard_name = index_of_temperature_in_cumulative_change_index
+  long_name = index of temperature in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_x_wind]
+  standard_name = index_of_x_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_y_wind]
+  standard_name = index_of_y_wind_in_cumulative_change_index
+  long_name = index of x-wind in first dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntqv]
+  standard_name = index_of_specific_humidity_in_tracer_concentration_array
+  long_name = tracer index for water vapor (specific humidity)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[active_phys_tend]
+  standard_name = tendencies_for_active_process_in_ccpp_suite_simulator
+  long_name = tendencies for active physics process in ccpp suite simulator
+  units = mixed
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_prognostics_varaibles_in_CCPP_suite_simulator)
+  type = real
+  kind = kind_phys
+  intent = out
+[iactive_T]
+  standard_name = index_for_active_T_in_CCPP_suite_simulator
+  long_name = index into active process tracer array for temperature in CCPP suite simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iactive_u]
+  standard_name = index_for_active_u_in_CCPP_suite_simulator
+  long_name = index into active process tracer array for zonal wind in CCPP suite simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iactive_v]
+  standard_name = index_for_active_v_in_CCPP_suite_simulator
+  long_name = index into active process tracer array for meridional wind in CCPP suite simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iactive_q]
+  standard_name = index_for_active_q_in_CCPP_suite_simulator
+  long_name = index into active process tracer array for moisture in CCPP suite simulator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out

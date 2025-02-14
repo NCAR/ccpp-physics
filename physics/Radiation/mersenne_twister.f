@@ -2,10 +2,10 @@
 !! This file contains the module that calculates random numbers using the 
 !! Mersenne twister
 
-!> \defgroup mersenne_ge Mersenne Twister Module
-!! Module: mersenne_twister   Modern random number generator
-!!\author Iredell          Org: W/NX23     date: 2005-06-14
-!! Abstract: This module calculates random numbers using the Mersenne twister.
+! Module: mersenne_twister   Modern random number generator
+!\author Iredell          Org: W/NX23     date: 2005-06-14
+!> This module calculates random numbers using the Mersenne twister.
+!!
 !!   (It has been adapted to a Fortran 90 module from open source software.
 !!   The comments from the original software are given below in the remarks.)
 !!   The Mersenne twister (aka MT19937) is a state-of-the-art random number

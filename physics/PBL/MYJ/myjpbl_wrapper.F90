@@ -32,29 +32,29 @@
 !!
 !###===================================================================
   SUBROUTINE myjpbl_wrapper_run(                    &
-     &  restart,do_myjsfc,                          &
-     &  im,levs,dt_phs,                             &
-     &  kdt,ntrac,ntke,                             &
-     &  ntcw,ntiw,ntrw,ntsw,ntgl,                   &
-     &  ugrs, vgrs, tgrs, qgrs,                     &
-     &  prsl, prsi, phii, hprime1,                  &
-     &  prsik_1, prslk_1, prslki, tsfc, qsfc,       &
-     &  phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,    &
-     &  phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,   &
-     &  phy_myj_akhs, phy_myj_akms,                 &
-     &  phy_myj_chkqlm, phy_myj_elflx,              &
-     &  phy_myj_a1u, phy_myj_a1t, phy_myj_a1q,      &
-     &  pblh, kpbl, kinver, slmsk,                  &
-     &  garea, ustar, cm, ch, wind,                 &
-     &  snowd, zorl, evap, hflx,                    &
-     &  dudt, dvdt, dtdt, dqdt,                     &
-     &  dusfc,dvsfc,dtsfc,dqsfc,                    &
-     &  dkt,xkzm_m, xkzm_h,xkzm_s, gamt,gamq,       &
-     &  con_cp,con_g,con_rd,                        &
-     &  me, lprnt, gen_tend, ldiag3d, dtend, dtidx, &
-     &  index_of_temperature, index_of_x_wind,      &
-     &  index_of_y_wind, index_of_process_pbl,      &
-     &  ntqv, errmsg, errflg )
+        restart,do_myjsfc,                          &
+        im,levs,dt_phs,                             &
+        kdt,ntrac,ntke,                             &
+        ntcw,ntiw,ntrw,ntsw,ntgl,                   &
+        ugrs, vgrs, tgrs, qgrs,                     &
+        prsl, prsi, phii, hprime1,                  &
+        prsik_1, prslk_1, prslki, tsfc, qsfc,       &
+        phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,    &
+        phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,   &
+        phy_myj_akhs, phy_myj_akms,                 &
+        phy_myj_chkqlm, phy_myj_elflx,              &
+        phy_myj_a1u, phy_myj_a1t, phy_myj_a1q,      &
+        pblh, kpbl, kinver, slmsk,                  &
+        garea, ustar, cm, ch, wind,                 &
+        snowd, zorl, evap, hflx,                    &
+        dudt, dvdt, dtdt, dqdt,                     &
+        dusfc,dvsfc,dtsfc,dqsfc,                    &
+        dkt,xkzm_m, xkzm_h,xkzm_s, gamt,gamq,       &
+        con_cp,con_g,con_rd,                        &
+        me, lprnt, gen_tend, ldiag3d, dtend, dtidx, &
+        index_of_temperature, index_of_x_wind,      &
+        index_of_y_wind, index_of_process_pbl,      &
+        ntqv, errmsg, errflg )
 
 !
 
@@ -92,7 +92,7 @@
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
       integer, intent(in) :: index_of_temperature, index_of_x_wind, &
-     &                       index_of_y_wind, index_of_process_pbl, ntqv
+                             index_of_y_wind, index_of_process_pbl, ntqv
 
 !MYJ-1D
       integer,intent(in) :: im, levs
@@ -104,18 +104,18 @@
 
 !MYJ-2D
       real(kind=kind_phys),dimension(:),intent(in) ::        &
-     &     prsik_1, prslk_1, prslki, slmsk, garea,           &
+           prsik_1, prslk_1, prslki, slmsk, garea,           &
            snowd, evap, hflx, cm, ch, wind, hprime1
       real(kind=kind_phys),dimension(:),intent(inout) ::     &
-     &     zorl, ustar, tsfc, qsfc
-      real(kind=kind_phys),dimension(:),intent(inout)   ::   &
-     &        phy_myj_qsfc, phy_myj_thz0, phy_myj_qz0,       &
-     &        phy_myj_uz0, phy_myj_vz0, phy_myj_z0base,      &
-     &        phy_myj_akhs, phy_myj_akms,                    &
-     &        phy_myj_chkqlm, phy_myj_elflx,                 &
-     &        phy_myj_a1u, phy_myj_a1t, phy_myj_a1q
+           zorl, ustar, tsfc, qsfc
+      real(kind=kind_phys),dimension(:),intent(inout),optional :: &
+              phy_myj_thz0, phy_myj_z0base, phy_myj_chkqlm,  &
+              phy_myj_akhs, phy_myj_akms, phy_myj_qz0,       &
+              phy_myj_qsfc, phy_myj_elflx, phy_myj_a1u,      &
+              phy_myj_a1t, phy_myj_a1q, phy_myj_uz0,         &
+              phy_myj_vz0
       real(kind=kind_phys),dimension(:),intent(out) ::       &
-     &     pblh,dusfc,dvsfc,dtsfc,dqsfc,gamt,gamq
+           pblh,dusfc,dvsfc,dtsfc,dqsfc,gamt,gamq
       integer,dimension(:),intent(out) :: kpbl
       integer,dimension(:),intent(in) ::  kinver
 
@@ -123,7 +123,7 @@
       real(kind=kind_phys),dimension(:,:),intent(in) ::      &
               phii, prsi
       real(kind=kind_phys),dimension(:,:),intent(in) ::      &
-     &        ugrs, vgrs, tgrs, prsl
+              ugrs, vgrs, tgrs, prsl
 !      real(kind=kind_phys),dimension(:,:),intent(inout)  :: &
 !             dudt, dvdt, dtdt, dkt
       real(kind=kind_phys),dimension(:,:),intent(inout)   :: &
@@ -133,7 +133,7 @@
 
 !MYJ-4D
       real(kind=kind_phys),dimension(:,:,:),intent(inout) :: &
-     &       qgrs,dqdt
+             qgrs,dqdt
 
 !LOCAL
       integer :: ntsd, k, k1, i, kx1
@@ -150,8 +150,8 @@
            ustar1,z0,pblh_myj,                             &
            elflx,mixht,ct
       real(kind=kfpt), dimension(im,levs) ::               &
-     &        u_myj, v_myj, t_myj, q_myj, th_myj,          &
-     &        cw, dz_myj, pmid, q2, exner, del
+              u_myj, v_myj, t_myj, q_myj, th_myj,          &
+              cw, dz_myj, pmid, q2, exner, del
       real(kind=kfpt), dimension(im,levs+1) :: pint
       real(kind=kfpt),dimension(im,levs) ::                &
               rublten,rvblten,rthblten,rqvblten,rqcblten
@@ -161,15 +161,15 @@
       real(kind=kfpt),dimension(im) :: thlm,qlm
       real(kind=kfpt),dimension(im,13) :: phy_f2d_myj
       real(kind=kfpt), dimension(im,levs) :: xcofh  &
-     &        ,xkzo,xkzmo
+              ,xkzo,xkzmo
       real(kind=kind_phys) :: g, r_d, g_inv, cappa
       real(kind=kind_phys) :: thz0, qz0, a1u, a1t, a1q
       real(kind=kind_phys) :: z0m, aa1u, aa1t, z1uov, z1tox
       real(kind=kind_phys) :: tmax,tmin,t_myj1
       real(kind=kind_phys),dimension(im)       ::           &
-     &        thsfc,sfcz,tsfc1,                              &
-     &        sm,work3,wind1,work4                            &
-     &        ,rho,qfc1,gdx,xkzm_hx,xkzm_mx,tx1, tx2
+              thsfc,sfcz,tsfc1,                              &
+              sm,work3,wind1,work4                            &
+              ,rho,qfc1,gdx,xkzm_hx,xkzm_mx,tx1, tx2
 !      real(kind=kind_phys), dimension(im,levs,ntrac) ::    &
 !     &        qgrs_myj
       real(kind=kind_phys),dimension(im,levs) :: dkt2

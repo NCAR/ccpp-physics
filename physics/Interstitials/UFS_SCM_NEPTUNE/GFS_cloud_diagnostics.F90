@@ -28,7 +28,7 @@ contains
 !! This was bundled together with the prognostic cloud modules within the RRTMG implementation.
 !! For the RRTMGP implementation we propose to keep these diagnostics independent.
 !> @{
-!> \section arg_table_GFS_cloud_diagnostics_run
+!> \section arg_table_GFS_cloud_diagnostics_run Argument Table
 !! \htmlinclude GFS_cloud_diagnostics_run.html
 !!  
   subroutine GFS_cloud_diagnostics_run(nCol, nLev, iovr, iovr_rand, iovr_maxrand,        &

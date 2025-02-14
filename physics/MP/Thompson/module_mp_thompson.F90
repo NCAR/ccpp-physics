@@ -3,7 +3,7 @@
 
 !>\ingroup aathompson
 
-!! This module computes the moisture tendencies of water vapor,
+!> This module computes the moisture tendencies of water vapor,
 !! cloud droplets, rain, cloud ice (pristine), snow, and graupel.
 !! Prior to WRFv2.2 this code was based on Reisner et al (1998), but
 !! few of those pieces remain.  A complete description is now found in
@@ -93,7 +93,7 @@ module module_mp_thompson
 !.. droplet number concentration.
    !real(wp), parameter :: Nt_c = 100.e6
    real(wp), parameter :: Nt_c_o = 50.e6
-   real(wp), parameter :: Nt_c_l = 100.e6
+   real(wp), parameter :: Nt_c_l = 150.e6
    real(wp), parameter, private :: Nt_c_max = 1999.e6
 
 !..Declaration of constants for assumed CCN/IN aerosols when none in

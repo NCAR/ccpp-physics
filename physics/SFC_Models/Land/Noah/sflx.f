@@ -1,5 +1,7 @@
 !>\file sflx.f
-!! This file is the entity of GFS Noah LSM Model(Version 2.7).
+!!
+
+!> This module contains the entity of GFS Noah LSM Model(Version 2.7).
       module sflx
       contains
 !>\ingroup Noah_LSM
