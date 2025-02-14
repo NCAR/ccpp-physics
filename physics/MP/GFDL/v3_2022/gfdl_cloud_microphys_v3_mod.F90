@@ -903,7 +903,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
     ! unit convert to mm/day
     ! -----------------------------------------------------------------------
 
-    convt = 86400. * rgrav / dts
+    convt = 86400. * rgrav / dtm
 
     do i = is, ie
 
@@ -1069,7 +1069,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
         if (fix_negative) &
             call neg_adj (ks, ke, tz, dp, qvz, qlz, qrz, qiz, qsz, qgz, cond)
 
-        condensation (i) = condensation (i) + cond * convt * ntimes
+        condensation (i) = condensation (i) + cond * convt
 
         ! -----------------------------------------------------------------------
         ! fast microphysics loop
@@ -1582,16 +1582,11 @@ subroutine mp_full (ks, ke, ntimes, tz, qv, ql, qr, qi, qs, qg, dp, dz, u, v, w,
         snow = snow + s1 * convt
         graupel = graupel + g1 * convt
 
-        !prefluxw = prefluxw + pfw * convt
-        !prefluxr = prefluxr + pfr * convt
-        !prefluxi = prefluxi + pfi * convt
-        !prefluxs = prefluxs + pfs * convt
-        !prefluxg = prefluxg + pfg * convt
-        prefluxw = prefluxw + pfw 
-        prefluxr = prefluxr + pfr 
-        prefluxi = prefluxi + pfi 
-        prefluxs = prefluxs + pfs 
-        prefluxg = prefluxg + pfg 
+        prefluxw = prefluxw + pfw * convt
+        prefluxr = prefluxr + pfr * convt
+        prefluxi = prefluxi + pfi * convt
+        prefluxs = prefluxs + pfs * convt
+        prefluxg = prefluxg + pfg * convt
 
         ! -----------------------------------------------------------------------
         ! warm rain cloud microphysics
