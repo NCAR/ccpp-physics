@@ -1,3 +1,5 @@
+!>\file machine.F
+!!
       module machine
 
 !! \section arg_table_machine

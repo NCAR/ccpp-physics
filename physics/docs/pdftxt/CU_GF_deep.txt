@@ -17,7 +17,7 @@ internally or with temporal and spatial correlation patterns; (c)for higher reso
 
 \section version_cugf_enh CCPP Physics Updates
 
-\version UFS-SRW v3.0.0
+\version CCPP-SCM v7.0.0
 
 <b>The Implementation of GF in RRFS prototypes</b>
 - Updates for aerosol-awareness (experimental)
