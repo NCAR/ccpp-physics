@@ -249,7 +249,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [qtr]
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other convective trans. tracers

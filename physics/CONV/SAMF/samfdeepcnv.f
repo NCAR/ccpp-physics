@@ -97,7 +97,7 @@
      &   fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
-     &   prslp(:,:),  garea(:), hpbl(:), dot(:,:), phil(:,:), tkeh(:,:)
+     &   prslp(:,:),  garea(:), hpbl(:), dot(:,:), phil(:,:), 
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       logical, intent(in)  :: first_time_step,restart,hwrf_samfdeep,    &
      &     progsigma,do_mynnedmf
@@ -115,7 +115,7 @@
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
       real(kind=kind_phys), intent(inout) ::   qtr(:,:,:),              &
      &   q1(:,:), t1(:,:),   u1(:,:), v1(:,:),                          &
-     &   cnvw(:,:),  cnvc(:,:)
+     &   cnvw(:,:),  cnvc(:,:), tkeh(:,:)
 
       integer, intent(out) :: kbot(:), ktop(:)
       real(kind=kind_phys), intent(out) :: cldwrk(:),                   &

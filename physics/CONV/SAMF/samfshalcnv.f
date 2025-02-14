@@ -71,7 +71,7 @@
      &   betamcu
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
-     &   prslp(:,:), garea(:), hpbl(:), dot(:,:), phil(:,:), tkeh(:,:), &
+     &   prslp(:,:), garea(:), hpbl(:), dot(:,:), phil(:,:),            &
      &   tmf(:,:,:), q(:,:)
       real(kind=kind_phys), intent(in), optional :: qmicro(:,:),        &
      &     prevsq(:,:)
@@ -81,7 +81,7 @@
       integer, intent(inout)  :: kcnv(:)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
       real(kind=kind_phys), intent(inout) ::   qtr(:,:,:),              &
-     &   q1(:,:), t1(:,:), u1(:,:), v1(:,:)
+     &   q1(:,:), t1(:,:), u1(:,:), v1(:,:), tkeh(:,:)
 !
       integer, intent(out) :: kbot(:), ktop(:)
       real(kind=kind_phys), intent(out) :: rn(:),                       &
