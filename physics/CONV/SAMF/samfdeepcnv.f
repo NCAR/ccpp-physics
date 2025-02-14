@@ -97,7 +97,7 @@
      &   fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
-     &   prslp(:,:),  garea(:), hpbl(:), dot(:,:), phil(:,:), 
+     &   prslp(:,:),  garea(:), hpbl(:), dot(:,:), phil(:,:) 
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       logical, intent(in)  :: first_time_step,restart,hwrf_samfdeep,    &
      &     progsigma,do_mynnedmf
