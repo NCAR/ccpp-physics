@@ -1285,22 +1285,24 @@ c
              enddo
            enddo
          enddo
-         kk = ntk -2
-         do k = 2, km1
-           do i = 1, im
-             if (cnvflg(i)) then
-               if(k > kb(i) .and. k < kmax(i)) then
-                 dz = zi(i,k) - zi(i,k-1)
-                 tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
-                 tem  = cq * tem
-                 factor = 1. + tem
-                 ecko(i,k,kk) = ((1. - tem) * ecko(i,k-1,kk) + tem *
+         if(ntk > 2) then
+           kk = ntk -2
+           do k = 2, km1
+             do i = 1, im
+               if (cnvflg(i)) then
+                 if(k > kb(i) .and. k < kmax(i)) then
+                   dz = zi(i,k) - zi(i,k-1)
+                   tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
+                   tem  = cq * tem
+                   factor = 1. + tem
+                   ecko(i,k,kk) = ((1. - tem) * ecko(i,k-1,kk) + tem *
      &                   (ctro(i,k,kk) + ctro(i,k-1,kk))) / factor
-                 ercko(i,k,kk) = ecko(i,k,kk)
+                   ercko(i,k,kk) = ecko(i,k,kk)
+                 endif
                endif
-             endif
+             enddo
            enddo
-         enddo
+         endif
        endif
       endif
 c
