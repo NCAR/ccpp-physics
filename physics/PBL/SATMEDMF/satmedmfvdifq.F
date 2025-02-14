@@ -351,6 +351,7 @@
       do k=1,km
         do i=1,im
           tke(i,k) = max(q1(i,k,ntke), tkmin)
+          tkeh(i,k) = 0
         enddo
       enddo
       do k=1,km1
