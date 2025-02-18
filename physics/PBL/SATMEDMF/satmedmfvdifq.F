@@ -1,8 +1,8 @@
 !> \file satmedmfvdifq.F
-!! This file contains the CCPP-compliant SATMEDMF scheme (updated version) which
+
+!> This file contains the CCPP-compliant SATMEDMF scheme (updated version) which
 !! computes subgrid vertical turbulence mixing using scale-aware TKE-based moist
 !! eddy-diffusion mass-flux (TKE-EDMF) parameterization (by Jongil Han).
-
       module satmedmfvdifq
       use mfpbltq_mod
       use tridi_mod

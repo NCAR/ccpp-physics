@@ -1,11 +1,11 @@
 !>  \file ugwpv1_gsldrag_post.F90
-!! This file contains
+
+!> This module contains code to be executed after the UGWP v1 scheme
 module ugwpv1_gsldrag_post
 
 contains
 
 !>\defgroup ugwpv1_gsldrag_post ugwpv1_gsldrag Scheme Post
-!! @{
 !> \section arg_table_ugwpv1_gsldrag_post_run Argument Table
 !! \htmlinclude ugwpv1_gsldrag_post_run.html
 !!
@@ -142,5 +142,4 @@ contains
 !=====================================================================
       end subroutine ugwpv1_gsldrag_post_run      
 
-!! @}
 end module ugwpv1_gsldrag_post

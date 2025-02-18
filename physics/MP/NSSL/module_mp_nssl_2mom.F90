@@ -1,11 +1,5 @@
 !>  \file module_mp_nssl_2mom.F90
-
-
-
-
-
-
-
+!!
 
 !---------------------------------------------------------------------
 ! code snapshot: "Sep 22 2023" at "22:01:53"
@@ -176,8 +170,11 @@
 
 
 !>\defgroup mod_nsslmp NSSL 2-moment microphysics modules
-!!\ingroup nsslmp testphrase one
-!! Module for NSSL cloud physics
+!!\ingroup nsslmp 
+
+!> This module contains 1/2/3-moment bulk microphysics scheme based on a combination of
+!! Straka and Mansell (2005, JAM) and Zeigler (1985, JAS) and modified/upgraded in
+!! in Mansell, Zeigler, and Bruning (2010, JAS).
 MODULE module_mp_nssl_2mom
   IMPLICIT NONE
   
