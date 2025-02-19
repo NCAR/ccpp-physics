@@ -146,11 +146,11 @@ contains
     integer, parameter :: its=1,jts=1,jte=1, kts=1
 
     integer,         dimension(:),     intent(in)    :: land, vegtype_dom, soiltyp
-    real(kind_phys), dimension(:,:),   intent(in)    :: smc, tslb
-    real(kind_phys), dimension(:,:,:), intent(in)    :: dust12m_in
-    real(kind_phys), dimension(:,:,:), intent(in)    :: smoke_RRFS
-    real(kind_phys), dimension(:,:),   intent(in)    :: smoke2d_RRFS
-    real(kind_phys), dimension(:,:),   intent(in)    :: emi_ant_in
+    real(kind_phys), dimension(:,:),   intent(in), optional    :: smc, tslb
+    real(kind_phys), dimension(:,:,:), intent(in), optional    :: dust12m_in
+    real(kind_phys), dimension(:,:,:), intent(in), optional    :: smoke_RRFS
+    real(kind_phys), dimension(:,:),   intent(in), optional    :: smoke2d_RRFS
+    real(kind_phys), dimension(:,:),   intent(in), optional    :: emi_ant_in
     real(kind_phys), dimension(:),     intent(in)    :: u10m, v10m, ustar, dswsfc,         &
                            recmol, garea, rlat,rlon, tskin, pb2d, zorl, snow,              &
                            rain_cpl, rainc_cpl, hf2d, t2m, dpt2m, totprcp
@@ -158,22 +158,23 @@ contains
     real(kind_phys), dimension(:,:),   intent(in)    :: ph3d, pr3d
     real(kind_phys), dimension(:,:),   intent(in)    :: phl3d, prl3d, tk3d, us3d, vs3d, spechum, w
     real(kind_phys), dimension(:,:,:), intent(inout) :: qgrs, gq0
-    real(kind_phys), dimension(:,:,:), intent(inout) :: chem3d
-    real(kind_phys), dimension(:),     intent(inout) :: emdust, emseas, emanoc
-    real(kind_phys), dimension(:),     intent(inout) :: ebb_smoke_in,coef_bb, frp_output, fhist
-    real(kind_phys), dimension(:,:),   intent(inout) :: ebu_smoke
-    real(kind_phys), dimension(:),     intent(out  ) :: fire_heat_flux_out, frac_grid_burned_out
-    real(kind_phys), dimension(:),     intent(inout) :: max_fplume, min_fplume, uspdavg, hpbl_thetav
-    real(kind_phys), dimension(:),     intent(inout) :: hwp, peak_hr_out
-    real(kind_phys), dimension(:),     intent(inout) :: hwp_ave
+    real(kind_phys), dimension(:,:,:), intent(inout), optional :: chem3d
+    real(kind_phys), dimension(:),     intent(inout), optional :: emdust, emseas, emanoc
+    real(kind_phys), dimension(:),     intent(inout), optional :: ebb_smoke_in,coef_bb, frp_output, fhist
+    real(kind_phys), dimension(:,:),   intent(inout), optional :: ebu_smoke
+    real(kind_phys), dimension(:,:),   intent(inout), optional :: rho_dry 
+    real(kind_phys), dimension(:),     intent(out  ), optional :: fire_heat_flux_out, frac_grid_burned_out
+    real(kind_phys), dimension(:),     intent(inout), optional :: max_fplume, min_fplume, uspdavg, hpbl_thetav
+    real(kind_phys), dimension(:),     intent(inout), optional :: hwp, peak_hr_out
+    real(kind_phys), dimension(:),     intent(inout), optional :: hwp_ave
     real(kind_phys), dimension(:,:),   intent(inout), optional :: nwfa, nifa
-    real(kind_phys), dimension(:,:),   intent(inout) :: ddvel_inout
+    real(kind_phys), dimension(:,:),   intent(inout), optional :: ddvel_inout
     real(kind_phys), dimension(:,:),   intent(inout), optional :: drydep_flux_out
     real(kind_phys), dimension(:,:),   intent(inout), optional :: wetdpr
-    real(kind_phys), dimension(:),     intent(in)    :: wetness
-    real(kind_phys), dimension(:),     intent(out)   :: lu_nofire_out,lu_qfire_out
-    integer,         dimension(:),     intent(out)   :: fire_type_out
-    real(kind_phys), dimension(:),     intent(in)    :: smoke_fire
+    real(kind_phys), dimension(:),     intent(in),    optional :: wetness
+    real(kind_phys), dimension(:),     intent(out),   optional :: lu_nofire_out,lu_qfire_out
+    integer,         dimension(:),     intent(out),   optional :: fire_type_out
+    real(kind_phys), dimension(:),     intent(in),    optional :: smoke_fire
     logical,                           intent(in)    :: cpl_fire
     integer,                           intent(in)    :: imp_physics, imp_physics_thompson
     real(kind_phys), dimension(:),     intent(in)    :: oro
