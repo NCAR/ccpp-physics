@@ -1,6 +1,7 @@
 !>  \file cires_ugwp_post.F90
-!! This file contains
+!! This file contains the calcualtion of the UGWP v0 diagnostics
 
+!> This module contains the calculation of the UGWP v0 diagnostics (ldiag_ugwp)
 module cires_ugwp_post
 
 contains

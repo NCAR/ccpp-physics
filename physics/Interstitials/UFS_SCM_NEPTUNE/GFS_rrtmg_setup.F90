@@ -171,8 +171,6 @@ module GFS_rrtmg_setup
       ! Initialize the CCPP error handling variables
       errmsg = ''
       errflg = 0
-
-      if (is_initialized) return
       
       if (do_RRTMGP) then
         write(errmsg,'(*(a))') "Logic error: do_RRTMGP must be set to .false."
@@ -212,6 +210,8 @@ module GFS_rrtmg_setup
                  ' lcnorm=',lcnorm,' lnoprec=',lnoprec
          print *, 'lextop=',lextop, ' ltp=',ltp
       endif
+
+      if (is_initialized) return
 
       ! Call initialization routines
       call sol_init ( me, isol, solar_file, con_solr_2008,con_solr_2002,&

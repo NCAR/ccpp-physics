@@ -84,8 +84,9 @@
      &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
      &    clam,c0s,c1,betal,betas,evef,pgcon,asolfac,                   &
      &    do_ca, ca_closure, ca_entr, ca_trigger, nthresh,ca_deep,      &
-     &    rainevap,sigmain,sigmaout,omegain,omegaout,                   &
-     &    betadcu,betamcu,betascu,maxMF,do_mynnedmf,errmsg,errflg)
+     &    rainevap,sigmain,sigmaout,omegain,omegaout,betadcu,betamcu,   &
+     &    betascu,maxMF,do_mynnedmf,sigmab_coldstart,errmsg,errflg)
+
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -101,7 +102,7 @@
      &   prslp(:,:),  garea(:), hpbl(:), dot(:,:), phil(:,:)
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       logical, intent(in)  :: first_time_step,restart,hwrf_samfdeep,    &
-     &     progsigma,progomega,do_mynnedmf
+     &     progsigma,progomega,do_mynnedmf,sigmab_coldstart
       real(kind=kind_phys), intent(in) :: nthresh,betadcu,betamcu,      &
      &                                    betascu
       real(kind=kind_phys), intent(in), optional :: ca_deep(:)
@@ -2939,7 +2940,8 @@ c
 !> - From Bengtsson et al. (2022) \cite Bengtsson_2022 prognostic closure scheme, equation 8, call progsigma_calc() to compute updraft area fraction based on a moisture budget
       if(progsigma)then
 !Initial computations, dynamic q-tendency                                                                                                                                               
-         if(first_time_step .and. .not.restart)then
+         if(first_time_step .and. (.not.restart 
+     &           .or. sigmab_coldstart))then
             do k = 1,km
                do i = 1,im
                   qadv(i,k)=0.

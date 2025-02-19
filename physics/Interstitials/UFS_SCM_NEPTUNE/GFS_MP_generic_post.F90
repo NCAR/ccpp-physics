@@ -8,16 +8,13 @@
       module GFS_MP_generic_post
       contains
 
-!>\defgroup gfs_calpreciptype GFS Precipitation Type Diagnostics Module
-!! \brief If dominant precip type is requested (i.e., Zhao-Carr MP scheme), 4 more algorithms in calpreciptype()
+!> If dominant precip type is requested (i.e., Zhao-Carr MP scheme), 4 more algorithms in calpreciptype()
 !! will be called.  the tallies are then summed in calwxt_dominant(). For GFDL cloud MP scheme, determine convective 
 !! rain/snow by surface temperature;  and determine explicit rain/snow by rain/snow coming out directly from MP.
 !! 
 !> \section arg_table_GFS_MP_generic_post_run Argument Table
 !! \htmlinclude GFS_MP_generic_post_run.html
 !!
-!> \section gfs_mp_gen GFS MP Generic Post General Algorithm
-!> @{
       subroutine GFS_MP_generic_post_run(                                                                                 &
         im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl,    &
         imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, cpllnd, progsigma, con_g, rhowater, rainmin, dtf, &
@@ -545,6 +542,5 @@
       endif
 
       end subroutine GFS_MP_generic_post_run
-!> @}
 
       end module GFS_MP_generic_post

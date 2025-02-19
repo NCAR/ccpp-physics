@@ -1,3 +1,9 @@
+!>\file progsigma_calc.f90
+
+!> This module contains the subroutine that calculates the prognostic
+!! updraft area fraction that is used for closure computations in
+!! saSAS deep and shallow convection, based on a moisture budget
+!! as described in Bengtsson et al. 2022 \cite Bengtsson_2022.
       module progsigma
 
         implicit none
@@ -6,14 +12,6 @@
 
       contains
 
-!>\file progsigma_calc.f90
-!! This file contains the subroutine that calculates the prognostic
-!! updraft area fraction that is used for closure computations in 
-!! saSAS deep and shallow convection, based on a moisture budget
-!! as described in Bengtsson et al. 2022 \cite Bengtsson_2022.
-
-!>\ingroup SAMFdeep
-!>\ingroup SAMF_shal
 !> This subroutine computes a prognostic updraft area fraction
 !! used in the closure computations in the samfdeepcnv.f scheme
 !! This subroutine computes a prognostic updraft area fracftion
@@ -54,7 +52,7 @@
 
       real(kind=kind_phys) :: gcvalmx,epsilon,ZZ,cvg,mcon,buy2,   &
                           fdqb,dtdyn,dxlim,rmulacvg,tem,     &
-                          DEN,dp1,invdelt
+                          DEN,dp1,invdelt,sigmind_new
 
      !Parameters
       gcvalmx = 0.1
@@ -62,6 +60,12 @@
       epsilon=1.E-11
       km1=km-1
       invdelt = 1./delt
+
+      if(flag_init .and. .not. flag_restart) then
+           sigmind_new=0.0
+      else
+           sigmind_new=sigmind
+      end if
 
      !Initialization 2D
       do k = 1,km
@@ -168,13 +172,6 @@
       enddo
 
       !sigmab
-      if(flag_init .and. .not. flag_restart)then
-         do i = 1,im
-            if(cnvflg(i))then
-               sigmab(i)=0.03
-            endif
-         enddo
-      else
          do i = 1,im
             if(cnvflg(i))then
                DEN=MIN(termC(i)+termB(i),1.E8)
@@ -186,11 +183,10 @@
                sigmab(i)=(ZZ*(termA(i)+cvg))/(DEN+(1.0-ZZ))
                if(sigmab(i)>0.)then
                   sigmab(i)=MIN(sigmab(i),0.95)  
-                  sigmab(i)=MAX(sigmab(i),0.01)
+                  sigmab(i)=MAX(sigmab(i),sigmind_new)
                endif
             endif!cnvflg
          enddo
-      endif
 
       do k=1,km
          do i=1,im
@@ -219,7 +215,7 @@
          do i= 1, im
             if(cnvflg(i)) then
                sigmab(i)=sigmab(i)/betadcu
-               sigmab(i)=MAX(sigmind,sigmab(i))
+               sigmab(i)=MAX(sigmind_new,sigmab(i))
             endif
          enddo
       endif
