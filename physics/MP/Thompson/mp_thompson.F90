@@ -3,7 +3,8 @@
 
 
 !>\defgroup aathompson Aerosol-Aware Thompson MP Module
-!! This module contains the aerosol-aware Thompson microphysics scheme.
+
+!> This module contains the aerosol-aware Thompson microphysics scheme.
 module mp_thompson
 
       use mpi_f08

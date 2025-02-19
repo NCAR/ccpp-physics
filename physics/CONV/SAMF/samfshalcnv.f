@@ -1,6 +1,7 @@
 !>  \file samfshalcnv.f
-!!  This file contains the Scale-Aware mass flux Shallow Convection scheme.
+!!
 
+!>  This module contains the Scale-Aware mass flux Shallow Convection scheme.
       module samfshalcnv
 
       use samfcnv_aerosols, only : samfshalcnv_aerosols

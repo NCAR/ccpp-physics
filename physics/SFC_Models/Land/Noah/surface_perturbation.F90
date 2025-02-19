@@ -3,6 +3,7 @@
 !! albedo and vegetation fraction perturbations.
 
 !>\defgroup gfs_sfcpert GFS Surface Perturbation Module
+
 !> This module contains routines used in the percentile matching algorithm for the
 !! albedo and vegetation fraction perturbations.
 module surface_perturbation

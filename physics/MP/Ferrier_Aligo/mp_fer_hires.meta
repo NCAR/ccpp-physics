@@ -194,6 +194,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [sr]
   standard_name = ratio_of_snowfall_to_rainfall
   long_name = snow ratio: ratio of snow to total precipitation (explicit only)

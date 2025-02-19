@@ -1,6 +1,7 @@
 !>  \file sfc_nst_post.f90
-!!  This file contains code to be executed after the GFS NSST model.
+!!  This file contains code to be executed after the near-surface sea temperature scheme.
 
+!> This module contains code to be executed after the near-surface sea temperature scheme
 module sfc_nst_post
 
   use machine               , only : kind_phys, kp => kind_phys

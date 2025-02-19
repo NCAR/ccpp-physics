@@ -1,11 +1,7 @@
-! ###########################################################################################
 !> \file rrtmgp_lw_main.F90
-!!
-!> \defgroup rrtmgp_lw_main rrtmgp_lw_main.F90
-!!
-!! \brief This module contains the longwave RRTMGP radiation scheme.
-!!
-! ###########################################################################################
+!! This file contains the longwave RRTMGP radiation scheme.
+
+!> This module contains the RRTMGP-LW radiation scheme
 module rrtmgp_lw_main
   use mpi_f08
   use machine,                only: kind_phys, kind_dbl_prec
@@ -29,48 +25,43 @@ module rrtmgp_lw_main
 
   public rrtmgp_lw_main_init, rrtmgp_lw_main_run
 contains
-  ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_main_init
+
+!> \section arg_table_rrtmgp_lw_main_init Argument Table
 !! \htmlinclude rrtmgp_lw_main_int.html
 !!
-!> \ingroup rrtmgp_lw_main
-!!
-!! \brief 
-!!
-!! \section rrtmgp_lw_main_init
-!> @{
-  ! #########################################################################################
   subroutine rrtmgp_lw_main_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, rrtmgp_lw_file_clouds,&
        active_gases_array, doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm,       &
        mpirank, mpiroot, nLay, rrtmgp_phys_blksz, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
-         rrtmgp_root_dir,       & ! RTE-RRTMGP root directory
-         rrtmgp_lw_file_clouds, & ! RRTMGP file containing coefficients used to compute
-                                  ! clouds optical properties
-         rrtmgp_lw_file_gas       ! RRTMGP file containing coefficients used to compute
-                                  ! gaseous optical properties
-    character(len=*), dimension(:), intent(in) :: &
-         active_gases_array ! List of active gases from namelist as array)
+         rrtmgp_root_dir,       & !< RTE-RRTMGP root directory
+         rrtmgp_lw_file_clouds, & !< RRTMGP file containing coefficients used to compute
+                                  !< clouds optical properties
+         rrtmgp_lw_file_gas       !< RRTMGP file containing coefficients used to compute
+                                  !< gaseous optical properties
+    character(len=*), dimension(:), intent(in), optional :: &
+         active_gases_array !< List of active gases from namelist as array)
     logical, intent(in) :: &
-         doGP_cldoptics_PADE,   & ! Use RRTMGP cloud-optics: PADE approximation?
-         doGP_cldoptics_LUT       ! Use RRTMGP cloud-optics: LUTs?
+         doGP_cldoptics_PADE,   & !< Use RRTMGP cloud-optics: PADE approximation?
+         doGP_cldoptics_LUT,    & !< Use RRTMGP cloud-optics: LUTs?
+         doGP_sgs_pbl,          & !< Flag to include sgs PBL clouds
+         doGP_sgs_cnv             !< Flag to include sgs convective clouds 
     integer, intent(inout) :: &
-         nrghice                  ! Number of ice-roughness categories
+         nrghice                  !< Number of ice-roughness categories
     type(MPI_Comm),intent(in) :: &
-         mpicomm                  ! MPI communicator
+         mpicomm                  !< MPI communicator
     integer,intent(in) :: &
-         mpirank,               & ! Current MPI rank
-         mpiroot,               & ! Master MPI rank
-         rrtmgp_phys_blksz,     & ! Number of horizontal points to process at once.
+         mpirank,               & !< Current MPI rank
+         mpiroot,               & !< Master MPI rank
+         rrtmgp_phys_blksz,     & !< Number of horizontal points to process at once.
          nLay
 
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg                   ! CCPP error message
+         errmsg                   !< CCPP error message
     integer,          intent(out) :: &
-         errflg                   ! CCPP error code
+         errflg                   !< CCPP error code
 
     ! Initialize CCPP error handling variables 
     errmsg = ''
@@ -86,18 +77,10 @@ contains
          errmsg, errflg)
 
   end subroutine rrtmgp_lw_main_init
-!> @}
-  ! ######################################################################################
-!! \section arg_table_rrtmgp_lw_main_run
+
+!> \section arg_table_rrtmgp_lw_main_run Argument Table
 !! \htmlinclude rrtmgp_lw_main_run.html
 !!
-!> \ingroup rrtmgp_lw_main
-!!
-!! \brief
-!!
-!! \section rrtmgp_lw_main_run
-!> @{
-  ! ######################################################################################
   subroutine rrtmgp_lw_main_run(doLWrad, doLWclrsky, top_at_1, doGP_lwscat,              &
        nCol, nLay, nGases,rrtmgp_phys_blksz,                 &
        nGauss_angles, icseed_lw, iovr, iovr_convcld, iovr_max, iovr_maxrand, iovr_rand,  &
@@ -623,5 +606,4 @@ contains
     enddo
 
   end subroutine rrtmgp_lw_main_run
-!> @}
 end module rrtmgp_lw_main

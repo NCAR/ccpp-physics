@@ -3,7 +3,8 @@
 
 
 !>\defgroup nsslmp NSSL MP Module
-!! This module contains the front end to NSSL microphysics scheme.
+
+!> This module contains the front end to NSSL microphysics scheme.
 module mp_nssl
 
     use machine, only : kind_phys
