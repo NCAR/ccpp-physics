@@ -36,7 +36,6 @@ contains
 
     ! Inputs
     character(len=128),intent(in) :: &
-<<<<<<< HEAD
          rrtmgp_root_dir,       & !< RTE-RRTMGP root directory
          rrtmgp_sw_file_clouds, & !< RRTMGP file containing K-distribution data
          rrtmgp_sw_file_gas       !< RRTMGP file containing cloud-optics data
@@ -44,19 +43,7 @@ contains
          active_gases_array       !< List of active gases from namelist as array)
     logical, intent(in) :: &
          doGP_cldoptics_PADE,   & !< Use RRTMGP cloud-optics: PADE approximation?
-         doGP_cldoptics_LUT,    & !< Use RRTMGP cloud-optics: LUTs?
-         doGP_sgs_pbl,          & !< Flag to include sgs PBL clouds
-         doGP_sgs_cnv             !< Flag to include sgs convective clouds
-=======
-         rrtmgp_root_dir,       & ! RTE-RRTMGP root directory
-         rrtmgp_sw_file_clouds, & ! RRTMGP file containing K-distribution data
-         rrtmgp_sw_file_gas       ! RRTMGP file containing cloud-optics data
-    character(len=*), dimension(:), intent(in) :: &
-         active_gases_array       ! List of active gases from namelist as array)
-    logical, intent(in) :: &
-         doGP_cldoptics_PADE,   & ! Use RRTMGP cloud-optics: PADE approximation?
-         doGP_cldoptics_LUT       ! Use RRTMGP cloud-optics: LUTs?
->>>>>>> 1fc0f540 (Optional argument cleanup: Radiation)
+         doGP_cldoptics_LUT       !< Use RRTMGP cloud-optics: LUTs?
     integer, intent(inout) :: &
          nrghice                  !< Number of ice-roughness categories
     type(MPI_Comm),intent(in) :: &
