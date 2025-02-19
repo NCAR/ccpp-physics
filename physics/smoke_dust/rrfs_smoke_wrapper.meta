@@ -440,6 +440,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tslb]
   standard_name = soil_temperature_for_land_surface_model
   long_name = soil temperature for land surface model
@@ -448,6 +449,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [vegtype_dom]
   standard_name = vegetation_type_classification
   long_name = vegetation type at each grid cell
@@ -596,6 +598,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [emi_ant_in]
   standard_name = anthropogenic_background_input
   long_name = anthropogenic background input
@@ -604,6 +607,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [smoke_RRFS]
   standard_name = emission_smoke_RRFS
   long_name = emission fire RRFS
@@ -612,6 +616,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [smoke2d_RRFS]
   standard_name = emission_smoke_prvd_RRFS
   long_name = emission fire RRFS daily
@@ -620,6 +625,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ntrac]
   standard_name = number_of_tracers
   long_name = number of tracers
@@ -651,6 +657,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [tile_num]
   standard_name = index_of_cubed_sphere_tile
   long_name = tile number
@@ -726,6 +733,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [emdust]
   standard_name = emission_of_dust_for_smoke
   long_name = emission of dust for smoke
@@ -734,6 +742,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [emseas]
   standard_name = emission_of_sea_salt_for_mp_indir_fdb
   long_name = emission of sea salt for mp indirect feedabck
@@ -742,6 +751,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [ebb_smoke_in]
   standard_name = surface_smoke_emission
   long_name = emission of surface smoke
@@ -750,6 +760,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [frp_output]
   standard_name = frp_hourly
   long_name = hourly fire radiative power
@@ -758,6 +769,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [coef_bb]
   standard_name = coef_bb_dc
   long_name = coef to estimate the fire emission
@@ -766,6 +778,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fire_type_out]
   standard_name = fire_type
   long_name = type of fire
@@ -773,6 +786,7 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
+  optional = True
 [ebu_smoke]
   standard_name = ebu_smoke
   long_name = buffer of vertical fire emission
@@ -781,6 +795,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fhist]
   standard_name = fire_hist
   long_name = coefficient to scale the fire activity depending on the fire duration
@@ -789,6 +804,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [min_fplume]
   standard_name = minimum_fire_plume_sigma_pressure_level
   long_name = minimum model level of fire plumerise
@@ -797,6 +813,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [max_fplume]
   standard_name = maximum_fire_plume_sigma_pressure_level
   long_name = maximum model level of fire plumerise
@@ -805,6 +822,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [mpicomm]
   standard_name = mpi_communicator
   long_name = MPI communicator
@@ -843,6 +861,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [hpbl_thetav]
   standard_name = atmosphere_boundary_layer_thickness_from_modified_parcel
   long_name = pbl height based on modified parcel method
@@ -851,6 +870,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [drydep_flux_out]
   standard_name = dry_deposition_flux
   long_name = rrfs dry deposition flux
@@ -877,6 +897,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [hwp_ave]
   standard_name = hourly_wildfire_potential_average
   long_name = rrfs hourly fire weather potential average
@@ -885,6 +906,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [wetness]
   standard_name = normalized_soil_wetness_for_land_surface_model
   long_name = normalized soil wetness
@@ -893,6 +915,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [ndvel]
   standard_name = number_of_chemical_species_deposited
   long_name = number of chemical pbl deposited
@@ -908,6 +931,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [peak_hr_out]
  standard_name = peak_hr_fire
  long_name = time_of_peak_fire_emissions
@@ -916,6 +940,7 @@
  type = real
  kind = kind_phys
  intent = out
+ optional = True
 [lu_nofire_out]
  standard_name = sum_of_land_use_fractions_for_no_fire_pixels
  long_name = land use of no fire pixels for type
@@ -924,6 +949,7 @@
  type = real
  kind = kind_phys
  intent = out
+ optional = True
 [lu_qfire_out]
  standard_name = sum_of_land_use_fractions_for_cropland_fire_pixels
  long_name = land use of fire pixels for type
@@ -932,6 +958,7 @@
  type = real
  kind = kind_phys
  intent = out
+ optional = True
 [fire_heat_flux_out]
   standard_name = surface_fire_heat_flux
   long_name = heat flux of fire at the surface
@@ -940,6 +967,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [frac_grid_burned_out]
   standard_name = fraction_of_grid_cell_burning
   long_name = ration of the burnt area to the grid cell area
@@ -948,6 +976,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [oro]
   standard_name = height_above_mean_sea_level
   long_name = height_above_mean_sea_level
@@ -964,6 +993,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [totprcp]
   standard_name = accumulated_lwe_thickness_of_precipitation_amount
   long_name = accumulated total precipitation
