@@ -82,7 +82,6 @@ module mp_nssl
          real(kind_phys), parameter :: qmin = 1.e-12
          integer :: ierr
          logical :: missing_vars = .False.
-         
 
  ! Initialize the CCPP error handling variables
         errflg = 0
@@ -161,6 +160,7 @@ module mp_nssl
                 nssl_alphah=nssl_alphah,                                                    &
                 nssl_alphahl=nssl_alphahl,                                                  &
                 nssl_cccn=nssl_cccn,                                                        &
+                nssl_ccn_on=nssl_ccn_on,                                                    &
                 errflg=errflg,myrank=mpirank,mpiroot=mpiroot)
 
          ! For restart runs, the init is done here
