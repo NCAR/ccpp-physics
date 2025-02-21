@@ -16,7 +16,7 @@ Excessive size sorting (common in 2-moment schemes) is effectively controlled by
   - More accurate saturation mixing ratio calculation (iqvsopt=1)
   - Changed default droplet renucleation to irenuc=5, which allows extra nucleation at high supersaturation
   - A default explicit rain breakup for 3-moment rain (irainbreak=2) has been added to reduce excessive median drop diameters in rain cores, which in turn increases evaporation and cool pool temperature deficits (were too warm). 
-  - Imposed reflectivity conservation in graupel->hail conversion (ihlcnh=2) and Bigg freezing (both 2- and 3-moment)
+  - Imposed reflectivity conservation in graupel->hail conversion (ihlcnh=3) and Bigg freezing (both 2- and 3-moment)
 
 The NSSL scheme is designed with deep (severe) convection in mind at grid spacings of up to 4 km, but can also be run at larger grid spacing as needed for nesting etc. It is also able to capture non-severe and winter weather.
 

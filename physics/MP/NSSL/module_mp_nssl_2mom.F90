@@ -78,7 +78,7 @@
 !  - More accurate saturation mixing ratio calculation (iqvsopt=1)
 !  - Changed default droplet renucleation to irenuc=5, which allows extra nucleation at high supersaturation
 !  - Default explicit rain breakup for 3-moment (irainbreak=2)
-!  - Imposed reflectivity conservation in graupel->hail conversion (ihlcnh=2) and Bigg 
+!  - Imposed reflectivity conservation in graupel->hail conversion (ihlcnh=3) and Bigg 
 !    freezing (both 2- and 3-moment)
 !  - Option (nsplinter=1001) for ice crystal production by drop freezing/shattering (Sullivan et al. 2018)
 !  - Option (incwet = 1) to treat wet growth only for D > Dwet rather than all or nothing; results in 
