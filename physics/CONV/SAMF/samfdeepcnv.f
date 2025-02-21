@@ -84,7 +84,7 @@
      &    clam,c0s,c1,betal,betas,evef,pgcon,asolfac,                   &
      &    do_ca, ca_closure, ca_entr, ca_trigger, nthresh,ca_deep,      &
      &    rainevap,sigmain,sigmaout,betadcu,betamcu,betascu,            &
-     &    maxMF, do_mynnedmf,errmsg,errflg)
+     &    maxMF, do_mynnedmf,sigmab_coldstart,errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -100,7 +100,7 @@
      &   prslp(:,:),  garea(:), hpbl(:), dot(:,:), phil(:,:) 
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       logical, intent(in)  :: first_time_step,restart,hwrf_samfdeep,    &
-     &     progsigma,do_mynnedmf
+     &     progsigma,do_mynnedmf,sigmab_coldstart
       real(kind=kind_phys), intent(in) :: nthresh,betadcu,betamcu,      &
      &                                    betascu
       real(kind=kind_phys), intent(in), optional :: ca_deep(:)
@@ -2934,7 +2934,8 @@ c
       if(progsigma)then
 
 !Initial computations, dynamic q-tendency                                                                                                                                               
-         if(first_time_step .and. .not.restart)then
+         if(first_time_step .and. (.not.restart 
+     &           .or. sigmab_coldstart))then
             do k = 1,km
                do i = 1,im
                   qadv(i,k)=0.
