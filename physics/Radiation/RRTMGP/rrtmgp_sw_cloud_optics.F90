@@ -1,3 +1,7 @@
+!>\file rrtmgp_sw_cloud_optics.F90
+!!
+
+!> This module contains the cloud optics properties calculation for RRTMGP-SW
 module rrtmgp_sw_cloud_optics
   use machine,                  only: kind_phys
   use mo_rte_kind,              only: wl
@@ -16,43 +20,43 @@ module rrtmgp_sw_cloud_optics
        nrghice_fromfileSW, nBandSW, nSize_liqSW, nSize_iceSW, nSizeregSW, &
        nCoeff_extSW, nCoeff_ssa_gSW, nBoundSW, nPairsSW
   real(kind_phys) :: &
-       radliq_facSW,          & ! Factor for calculating LUT interpolation indices for liquid   
-       radice_facSW             ! Factor for calculating LUT interpolation indices for ice  
+       radliq_facSW,          & !< Factor for calculating LUT interpolation indices for liquid   
+       radice_facSW             !< Factor for calculating LUT interpolation indices for ice  
   real(kind_phys), dimension(:,:), allocatable :: &
-       lut_extliqSW,          & ! LUT shortwave liquid extinction coefficient  
-       lut_ssaliqSW,          & ! LUT shortwave liquid single scattering albedo   
-       lut_asyliqSW,          & ! LUT shortwave liquid asymmetry parameter  
-       band_limsCLDSW           ! Beginning and ending wavenumber [cm -1] for each band                           
+       lut_extliqSW,          & !< LUT shortwave liquid extinction coefficient  
+       lut_ssaliqSW,          & !< LUT shortwave liquid single scattering albedo   
+       lut_asyliqSW,          & !< LUT shortwave liquid asymmetry parameter  
+       band_limsCLDSW           !< Beginning and ending wavenumber [cm -1] for each band                           
   real(kind_phys), dimension(:,:,:), allocatable :: &
-       lut_exticeSW,          & ! LUT shortwave ice extinction coefficient
-       lut_ssaiceSW,          & ! LUT shortwave ice single scattering albedo
-       lut_asyiceSW             ! LUT shortwave ice asymmetry parameter
+       lut_exticeSW,          & !< LUT shortwave ice extinction coefficient
+       lut_ssaiceSW,          & !< LUT shortwave ice single scattering albedo
+       lut_asyiceSW             !< LUT shortwave ice asymmetry parameter
   real(kind_phys), dimension(:), allocatable :: &
-       pade_sizereg_extliqSW, & ! Particle size regime boundaries for shortwave liquid extinction 
-                                ! coefficient for Pade interpolation  
-       pade_sizereg_ssaliqSW, & ! Particle size regime boundaries for shortwave liquid single 
-                                ! scattering albedo for Pade interpolation 
-       pade_sizereg_asyliqSW, & ! Particle size regime boundaries for shortwave liquid asymmetry 
-                                ! parameter for Pade interpolation  
-       pade_sizereg_exticeSW, & ! Particle size regime boundaries for shortwave ice extinction 
-                                ! coefficient for Pade interpolation  
-       pade_sizereg_ssaiceSW, & ! Particle size regime boundaries for shortwave ice single 
-                                ! scattering albedo for Pade interpolation 
-       pade_sizereg_asyiceSW    ! Particle size regime boundaries for shortwave ice asymmetry 
-                                ! parameter for Pade interpolation  
+       pade_sizereg_extliqSW, & !< Particle size regime boundaries for shortwave liquid extinction 
+                                !< coefficient for Pade interpolation  
+       pade_sizereg_ssaliqSW, & !< Particle size regime boundaries for shortwave liquid single 
+                                !< scattering albedo for Pade interpolation 
+       pade_sizereg_asyliqSW, & !< Particle size regime boundaries for shortwave liquid asymmetry 
+                                !< parameter for Pade interpolation  
+       pade_sizereg_exticeSW, & !< Particle size regime boundaries for shortwave ice extinction 
+                                !< coefficient for Pade interpolation  
+       pade_sizereg_ssaiceSW, & !< Particle size regime boundaries for shortwave ice single 
+                                !< scattering albedo for Pade interpolation 
+       pade_sizereg_asyiceSW    !< Particle size regime boundaries for shortwave ice asymmetry 
+                                !< parameter for Pade interpolation  
   real(kind_phys), dimension(:,:,:), allocatable :: &
-       pade_extliqSW,         & ! PADE coefficients for shortwave liquid extinction
-       pade_ssaliqSW,         & ! PADE coefficients for shortwave liquid single scattering albedo
-       pade_asyliqSW            ! PADE coefficients for shortwave liquid asymmetry parameter
+       pade_extliqSW,         & !< PADE coefficients for shortwave liquid extinction
+       pade_ssaliqSW,         & !< PADE coefficients for shortwave liquid single scattering albedo
+       pade_asyliqSW            !< PADE coefficients for shortwave liquid asymmetry parameter
   real(kind_phys), dimension(:,:,:,:), allocatable :: &
-       pade_exticeSW,         & ! PADE coefficients for shortwave ice extinction
-       pade_ssaiceSW,         & ! PADE coefficients for shortwave ice single scattering albedo
-       pade_asyiceSW            ! PADE coefficients for shortwave ice asymmetry parameter
+       pade_exticeSW,         & !< PADE coefficients for shortwave ice extinction
+       pade_ssaiceSW,         & !< PADE coefficients for shortwave ice single scattering albedo
+       pade_asyiceSW            !< PADE coefficients for shortwave ice asymmetry parameter
   real(kind_phys) :: &
-       radliq_lwrSW,          & ! Liquid particle size lower bound for LUT interpolation
-       radliq_uprSW,          & ! Liquid particle size upper bound for LUT interpolation
-       radice_lwrSW,          & ! Ice particle    size upper bound for LUT interpolation
-       radice_uprSW             ! Ice particle    size lower bound for LUT interpolation
+       radliq_lwrSW,          & !< Liquid particle size lower bound for LUT interpolation
+       radliq_uprSW,          & !< Liquid particle size upper bound for LUT interpolation
+       radice_lwrSW,          & !< Ice particle    size upper bound for LUT interpolation
+       radice_uprSW             !< Ice particle    size lower bound for LUT interpolation
 
   ! Parameters used for rain and snow(+groupel) RRTMGP cloud-optics. *NOTE* Same as in RRTMG
   ! Need to document these magic numbers below.
@@ -66,30 +70,31 @@ contains
   ! ######################################################################################
   ! SUBROUTINE sw_cloud_optics_init
   ! ######################################################################################
+!>
   subroutine rrtmgp_sw_cloud_optics_init( rrtmgp_root_dir, rrtmgp_sw_file_clouds,        &
        doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm, mpirank, mpiroot,      &
        errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
-         rrtmgp_root_dir,    & ! RTE-RRTMGP root directory
-         rrtmgp_sw_file_clouds ! RRTMGP file containing cloud-optic data
+         rrtmgp_root_dir,    & !< RTE-RRTMGP root directory
+         rrtmgp_sw_file_clouds !< RRTMGP file containing cloud-optic data
     logical, intent(in) :: &
-         doGP_cldoptics_PADE,& ! Use RRTMGP cloud-optics: PADE approximation?
-         doGP_cldoptics_LUT    ! Use RRTMGP cloud-optics: LUTs?    
+         doGP_cldoptics_PADE,& !< Use RRTMGP cloud-optics: PADE approximation?
+         doGP_cldoptics_LUT    !< Use RRTMGP cloud-optics: LUTs?    
     integer, intent(inout) :: &
-         nrghice               ! Number of ice-roughness categories
+         nrghice               !< Number of ice-roughness categories
     type(MPI_Comm), intent(in) :: &
-         mpicomm               ! MPI communicator
+         mpicomm               !< MPI communicator
     integer, intent(in) :: &
-         mpirank,            & ! Current MPI rank
-         mpiroot               ! Master MPI rank
+         mpirank,            & !< Current MPI rank
+         mpiroot               !< Master MPI rank
 
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg                ! CCPP error message
+         errmsg                !< CCPP error message
     integer,          intent(out) :: &
-         errflg                ! CCPP error code
+         errflg                !< CCPP error code
     
     ! Local variables
     integer :: status,ncid,dimid,varID,mpierr
