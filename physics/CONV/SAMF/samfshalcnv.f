@@ -1504,13 +1504,15 @@ c
          do k = 1, km
             do i = 1, im
                if (cnvflg(i)) then
-                  omega_u(i,k)=omegaout(i,k)
-                  omega_u(i,k)=MAX(omega_u(i,k),-80.)
-!    Convert to m/s for use in convective time-scale:
-                  rho = po(i,k)*100. / (rd * to(i,k))
-                  tem = (-omega_u(i,k)) / ((rho * grav))
-                  wu2(i,k) = tem**2
-                  wu2(i,k) = max(wu2(i,k), 0.)
+                  if(k > kbcon1(i) .and. k < ktcon(i)) then
+                     omega_u(i,k)=omegaout(i,k)
+                     omega_u(i,k)=MAX(omega_u(i,k),-80.)
+!     Convert to m/s for use in convective time-scale:
+                     rho = po(i,k)*100. / (rd * to(i,k))
+                     tem = (-omega_u(i,k)) / ((rho * grav))
+                     wu2(i,k) = tem**2
+                     wu2(i,k) = max(wu2(i,k), 0.)
+                  endif
                endif
             enddo
          enddo
