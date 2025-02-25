@@ -1,4 +1,4 @@
-!> \file GFS_rrtmgp_post.F90
+!> \file GFS_radiation_post.F90
 !! RRTMGP post-processing routine.
 !!
 module GFS_radiation_post
@@ -13,8 +13,8 @@ module GFS_radiation_post
 
 contains
 
-!> \section arg_table_GFS_rrtmgp_post_run Argument Table
-!! \htmlinclude GFS_rrtmgp_post_run.html
+!> \section arg_table_GFS_radiation_post_run Argument Table
+!! \htmlinclude GFS_radiation_post_run.html
 !!
 !!The all-sky radiation tendency is computed, the clear-sky tendency is computed 
 !! if requested.
@@ -190,7 +190,7 @@ contains
           ! Clear-sky heating-rate (optional)
           if (do_sw_clrsky_hr) then
              htrswc(:,:) = 0._kind_phys
-             call check_error_msg('GFS_rrtmgp_post',compute_heating_rate( &
+             call check_error_msg('GFS_radiation_post',compute_heating_rate( &
                   fluxswUP_clrsky(idxday(1:nDay),:),   & ! IN  - Shortwave upward clear-sky flux profiles (W/m2)
                   fluxswDOWN_clrsky(idxday(1:nDay),:), & ! IN  - Shortwave downward clear-sky flux profiles (W/m2)
                   p_lev(idxday(1:nDay),:),             & ! IN  - Pressure at model-interface (Pa)
@@ -200,7 +200,7 @@ contains
           
           ! All-sky heating-rate (mandatory)
           htrsw(:,:) = 0._kind_phys
-          call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(    &
+          call check_error_msg('GFS_radiation_post',compute_heating_rate(    &
                fluxswUP_allsky(idxday(1:nDay),:),      & ! IN  - Shortwave upward all-sky flux profiles (W/m2)
                fluxswDOWN_allsky(idxday(1:nDay),:),    & ! IN  - Shortwave downward all-sky flux profiles (W/m2)
                p_lev(idxday(1:nDay),:),                & ! IN  - Pressure at model-interface (Pa)

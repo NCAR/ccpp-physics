@@ -179,7 +179,7 @@ INPUT                  =  pdftxt/SRW_mainpage.txt              \
                         ../GFS_surface_loop_control_part2.F90   \
                         ../GFS_radiation_surface.F90     \
                         ../GFS_rrtmg_pre.F90             \
-                        ../GFS_rrtmg_post.F90           \
+                        ../GFS_radiation_post.F90           \
                         ../GFS_rrtmg_setup.F90          \
                         ../rad_sw_pre.F90              \
                         ../sgscloud_radpre.F90    \
