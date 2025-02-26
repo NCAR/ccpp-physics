@@ -460,7 +460,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = True
 [omegain]
   standard_name = prognostic_updraft_velocity_in_convection
@@ -478,7 +478,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = True
 [betascu]
   standard_name = tuning_param_for_shallow_cu

@@ -31,7 +31,7 @@
      real(kind=kind_phys), intent(in)  :: delt,grav,bb1,bb2
      real(kind=kind_phys), intent(in)  :: omegain(im,km), del(im,km),zi(im,km)
      real(kind=kind_phys), intent(in)  :: drag(im,km),buo(im,km),wush(im,km),tentr(im,km)
-     real(kind=kind_phys), intent(out) :: omegaout(im,km)
+     real(kind=kind_phys), intent(inout) :: omegaout(im,km)
      logical, intent(in)               :: cnvflg(im),first_time_step,flag_restart
      real(kind=kind_phys) :: termA(im,km),termB(im,km),termC(im,km),omega(im,km)
      real(kind=kind_phys) :: RHS(im,km),Kd(im,km)

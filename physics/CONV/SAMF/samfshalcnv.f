@@ -90,8 +90,9 @@
       real(kind=kind_phys), intent(out) :: rn(:),                       &
      &   cnvw(:,:), cnvc(:,:), dt_mf(:,:)
 !
-      real(kind=kind_phys), intent(out), optional :: ud_mf(:,:),        &
-     &     sigmaout(:,:), omegaout(:,:)
+      real(kind=kind_phys), intent(out), optional :: ud_mf(:,:)        
+      real(kind=kind_phys), intent(inout), optional :: sigmaout(:,:),   &
+     &   omegaout(:,:)
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
      &                     asolfac, evef, pgcon
       logical,          intent(in)  :: hwrf_samfshal,first_time_step,   &
@@ -352,7 +353,21 @@ c
        enddo
       endif
 !!
-
+      if (present(sigmaout)) then
+	do k = 1, km
+            do i = 1, im
+                sigmaout(i,k) = 0.0
+            enddo
+        enddo
+      endif
+      if (present(omegaout)) then
+	do k = 1, km
+            do i = 1, im
+                omegaout(i,k) = 0.0
+            enddo
+        enddo
+      endif
+      
 !>  - Return to the calling routine if deep convection is present or the surface buoyancy flux is negative.
       totflg = .true.
       do i=1,im
