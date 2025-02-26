@@ -8,6 +8,7 @@
       integer              :: iamin, iamax, jamin, jamax
 
       character*10         :: specname(ntrcaerm)
+      character*50         :: fname_dl
       real (kind=kind_phys):: aer_time(13)
 
       real (kind=kind_phys), allocatable, dimension(:) :: aer_lat

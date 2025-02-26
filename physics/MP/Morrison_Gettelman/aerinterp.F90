@@ -49,7 +49,7 @@ contains
 !--- locals
       integer      :: ncid, varid, ndims, hmx
       integer      :: i, j, k, n, ii, imon, klev
-      character    :: fname*50, mn*2, vname*10, dy*2, myr*4
+      character    :: fname*50, mn*2, vname*10, dy*2, myr*4, fname_dl*50
       logical      :: file_exist
       integer :: dimids(NF90_MAX_VAR_DIMS)
       integer :: dimlen(NF90_MAX_VAR_DIMS)
@@ -198,7 +198,7 @@ contains
       real(kind=kind_phys) rjday
       real(kind=kind_dbl_prec) rinc(5)
       integer jdow, jdoy, jday
-      character myr*4, mn*2, dy*2, fname*50
+      character myr*4, mn*2, dy*2
 
       integer, allocatable  :: invardims(:)
 !
@@ -225,7 +225,7 @@ contains
       write(myr,'(i4.4)') jdat(1)
       write(mn,'(i2.2)') jdat(2)
       write(dy,'(i2.2)') jdat(3)
-      fname="merra2_"//myr//mn//dy//".nc"
+      fname_dl="merra2_"//myr//mn//dy//".nc"
 !     rjday is the minutes in a day
       rjday =  jdat(5)*60+jdat(6)+jdat(7)/60.
 !     
@@ -242,15 +242,15 @@ contains
       enddo
       if(fd_upb) then
         t1sv = aer_t(j-1)
-        call read_netfaer_dl(fname, j-1, iflip, 1, errmsg, errflg)
-        call read_netfaer_dl(fname, n2sv, iflip, 2, errmsg, errflg)
+        call read_netfaer_dl(fname_dl, j-1, iflip, 1, errmsg, errflg)
+        call read_netfaer_dl(fname_dl, n2sv, iflip, 2, errmsg, errflg)
       else
         t1sv = aer_t(tsaer)
-        call read_netfaer_dl(fname, tsaer, iflip, 1, errmsg, errflg)
+        call read_netfaer_dl(fname_dl, tsaer, iflip, 1, errmsg, errflg)
         n2sv=1
         t2sv=1440.
-        call fdnx_fname (jdat(1), jdat(2),jdat(3),fname)
-        call read_netfaer_dl(fname, n2sv, iflip, 2, errmsg, errflg)
+        call fdnx_fname (jdat(1), jdat(2),jdat(3),fname_dl)
+        call read_netfaer_dl(fname_dl, n2sv, iflip, 2, errmsg, errflg)
       end if
       END SUBROUTINE read_aerdataf_dl
 !**********************************************************************
@@ -282,7 +282,7 @@ contains
       real(kind=kind_phys) rjday
       real(kind=kind_dbl_prec) rinc(5)
       integer jdow, jdoy, jday
-      character myr*4, mn*2, dy*2, fname*50
+      character myr*4, mn*2, dy*2
 !
       errflg = 0
       errmsg = ' '
@@ -302,18 +302,7 @@ contains
 !     rjday is the minutes in a day
       rjday =  jdat(5)*60+jdat(6)+jdat(7)/60.
       if(rjday >= t2sv .or. jdat(3).ne.n1sv) then !!need to either to read in a record or open a new file
-#ifdef DEBUG
-        if (me == master) write(*,*)"read in a new MERRA2 record", n2sv+1
-#endif
-        DO ii = 1, ntrcaerm
-          do j = jamin, jamax
-            do k = 1, levsaer
-              do i = iamin, iamax
-                aerin(i,j,k,ii,1) = aerin(i,j,k,ii,2)
-              enddo   !i-loop (lon)
-            enddo     !k-loop (lev)
-          enddo       !j-loop (lat)
-        ENDDO         ! ii-loop (ntracaerm)
+        call read_netfaer_dl(fname_dl,n2sv, iflip, 1, errmsg, errflg)
       end if
 !! ===================================================================
       if(jdat(3).ne.n1sv) then  ! a new day is produced from n2sv=1440
@@ -324,8 +313,8 @@ contains
          write(myr,'(i4.4)') jdat(1)
          write(mn,'(i2.2)') jdat(2)
          write(dy,'(i2.2)') jdat(3)
-         fname="merra2_"//myr//mn//dy//".nc"
-         call read_netfaer_dl(fname,n2sv, iflip, 2, errmsg, errflg)
+         fname_dl="merra2_"//myr//mn//dy//".nc"
+         call read_netfaer_dl(fname_dl,n2sv, iflip, 2, errmsg, errflg)
       else if (rjday >= t2sv) then
         if(t2sv < aer_t(tsaer)) then 
           n1sv=jdat(3)
@@ -335,15 +324,15 @@ contains
           write(myr,'(i4.4)') jdat(1)
           write(mn,'(i2.2)') jdat(2)
           write(dy,'(i2.2)') jdat(3)
-          fname="merra2_"//myr//mn//dy//".nc"
-          call read_netfaer_dl(fname,n2sv, iflip, 2, errmsg, errflg)
+          fname_dl="merra2_"//myr//mn//dy//".nc"
+          call read_netfaer_dl(fname_dl,n2sv, iflip, 2, errmsg, errflg)
         else !! need to read a new file
           n1sv=jdat(3)
           t1sv=aer_t(tsaer)
           n2sv=1
           t2sv=1440.
-          call fdnx_fname (jdat(1), jdat(2),jdat(3),fname)
-          call read_netfaer_dl(fname, n2sv, iflip, 2, errmsg, errflg)
+          call fdnx_fname (jdat(1), jdat(2),jdat(3),fname_dl)
+          call read_netfaer_dl(fname_dl, n2sv, iflip, 2, errmsg, errflg)
         end if
       end if
 !
@@ -729,17 +718,12 @@ contains
 #ifdef DEBUG
         if (me == master) write(*,*)"read in a new month MERRA2", n2
 #endif
-        DO ii = 1, ntrcaerm
-          do j = jamin, jamax
-            do k = 1, levsaer
-              do i = iamin, iamax
-                aerin(i,j,k,ii,1) = aerin(i,j,k,ii,2)
-              enddo   !i-loop (lon)
-            enddo     !k-loop (lev)
-          enddo       !j-loop (lat)
-        ENDDO         ! ii-loop (ntracaerm)
 !! ===================================================================
+        call read_netfaer(n1, iflip, 1, errmsg, errflg)
+        if(errflg/=0) return
         call read_netfaer(n2, iflip, 2, errmsg, errflg)
+        if(errflg/=0) return
+!! ===================================================================
         n1sv=n1
         n2sv=n2
       end if
