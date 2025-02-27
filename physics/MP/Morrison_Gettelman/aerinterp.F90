@@ -49,7 +49,7 @@ contains
 !--- locals
       integer      :: ncid, varid, ndims, hmx
       integer      :: i, j, k, n, ii, imon, klev
-      character    :: fname*50, mn*2, vname*10, dy*2, myr*4, fname_dl*50
+      character    :: fname*50, mn*2, vname*10, dy*2, myr*4
       logical      :: file_exist
       integer :: dimids(NF90_MAX_VAR_DIMS)
       integer :: dimlen(NF90_MAX_VAR_DIMS)
