@@ -493,6 +493,13 @@
   dimensions = ()
   type = logical
   intent = in
+[sigmab_coldstart]
+  standard_name = flag_to_cold_start_for_sigmab_init
+  long_name = flag to cold start for sigmab initialization
+  units = flag
+  dimensions = ()
+  type = logical 
+  intent = in
 [qlcn]
   standard_name = mass_fraction_of_convective_cloud_liquid_water
   long_name = mass fraction of convective cloud liquid water
