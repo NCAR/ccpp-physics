@@ -349,7 +349,9 @@
           BVF2 = grav2 * RDZ * (VTK(I,K+1)-VTK(I,K))
      &                       / (VTK(I,K+1)+VTK(I,K))
           bnv2(i,k+1) = max( BVF2, bnv2min )
-          RI_N(I,K+1) = Bnv2(i,k)/SHR2        ! Richardson number consistent with BNV2
+          ! https://github.com/NCAR/ccpp-physics/issues/1103
+          !RI_N(I,K+1) = Bnv2(i,k)/SHR2        ! Richardson number consistent with BNV2
+          RI_N(I,K+1) = Bnv2(i,max(k,2))/SHR2        ! Richardson number consistent with BNV2
 !
 ! add here computation for Ktur and OGW-dissipation fro VE-GFS
 !
