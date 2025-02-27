@@ -401,21 +401,6 @@ c
         enddo
       enddo
 !
-      if (present(sigmaout)) then
-        do k = 1, km
-            do i = 1, im
-                sigmaout(i,k) = 0.0
-            enddo
-        enddo
-      endif
-      if (present(omegaout)) then
-        do k = 1, km
-            do i = 1, im
-                omegaout(i,k) = 0.0
-            enddo
-        enddo
-      endif
-      
       if (hwrf_samfdeep) then
         do i=1,im
           scaldfunc(i)=-1.0

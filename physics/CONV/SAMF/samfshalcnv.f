@@ -352,22 +352,7 @@ c
         xmb(i) = 0.
        enddo
       endif
-!!
-      if (present(sigmaout)) then
-	do k = 1, km
-            do i = 1, im
-                sigmaout(i,k) = 0.0
-            enddo
-        enddo
-      endif
-      if (present(omegaout)) then
-	do k = 1, km
-            do i = 1, im
-                omegaout(i,k) = 0.0
-            enddo
-        enddo
-      endif
-      
+!!      
 !>  - Return to the calling routine if deep convection is present or the surface buoyancy flux is negative.
       totflg = .true.
       do i=1,im
