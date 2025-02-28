@@ -155,7 +155,7 @@
   real(kind=kind_phys), parameter :: cdg   = 3.15121  ! drag coefficient of graupel (Locatelli and Hobbs, 1974)
   real(kind=kind_phys), parameter :: cdh   = 0.5      ! drag coefficient of hail (Heymsfield and Wright, 2014)
   real(kind=kind_phys), parameter :: rhow  = 1.0e3    ! density of cloud water (kg/m^3)
-  real(kind=kind_phys), parameter :: rhoi  = 9.17e2   ! density of cloud ice (kg/m^3)
+  real(kind=kind_phys), parameter :: rhoci = 9.17e2   ! density of cloud ice (kg/m^3)
   real(kind=kind_phys), parameter :: rhor  = 1.0e3    ! density of rain (Lin et al. 1983) (kg/m^3)
   real(kind=kind_phys), parameter :: rhog  = 4.0e2    ! density of graupel (Rutledge and Hobbs 1984) (kg/m^3)
   real(kind=kind_phys), parameter :: rhoh  = 9.17e2   ! density of hail (Lin et al. 1983) (kg/m^3)
