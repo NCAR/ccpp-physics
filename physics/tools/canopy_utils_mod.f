@@ -24,29 +24,4 @@
 
 ! ---------------------------------------------------------------------------
 
-      function interp_linear1_internal(x,y,xout) result(yout)
-        !! Interpolates for the y value at the desired x value,
-        !! given x and y values around the desired point.
-
-        implicit none
-
-        real, intent(IN)  :: x(2), y(2), xout
-        real :: yout
-        real :: alph
-
-        if ( xout .lt. x(1) .or. xout .gt. x(2) ) then
-            write(*,*) "interp1: xout < x0 or xout > x1 !"
-            write(*,*) "xout = ",xout
-            write(*,*) "x0   = ",x(1)
-            write(*,*) "x1   = ",x(2)
-            stop
-        end if
-
-        alph = (xout - x(1)) / (x(2) - x(1))
-        yout = y(1) + alph*(y(2) - y(1))
-
-        return
-
-       end function interp_linear1_internal 
-
        end module canopy_utils_mod

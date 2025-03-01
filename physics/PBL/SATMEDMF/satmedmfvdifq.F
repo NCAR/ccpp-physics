@@ -7,8 +7,6 @@
       use mfpbltq_mod
       use tridi_mod
       use mfscuq_mod
-      !PCC_CANOPY
-      use canopy_utils_mod
 
       contains
 
@@ -77,7 +75,7 @@
 !! (mfscuq.f).
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
       subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,               &
-     &     ntiw,ntke,grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
+     &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
      &     dv,du,tdt,rtg,u1,v1,t1,q1,usfco,vsfco,icplocn2atm,           &
      &     swh,hlw,xmu,garea,zvfun,sigmaf,                              &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
@@ -90,8 +88,6 @@
      &     do_canopy, claie, cfch, cfrt, cclu, cpopu,                   &
 !IVAI
 !TODO -Canopy Inputs from UFS
-!     &     rdcanopylai, rdcanopyfch, rdcanopyfrt, rdcanopyclu,        &
-!     &     canopylaixy, canopyfchxy, canopyfrtxy, canopycluxy,        & 
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg)                                               
@@ -113,7 +109,7 @@
       integer, intent(out) :: kpbl(:)
       logical, intent(in)  :: gen_tend,ldiag3d
 !
-      real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
+      real(kind=kind_phys), intent(in) :: grav,pi,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
@@ -123,13 +119,6 @@
 !IVAI: canopy inputs
       real(kind=kind_phys), intent(in)  :: claie(:), cfch(:), cfrt(:),
      &                                     cclu(:), cpopu(:)
-!TODO Canopy Inputs
-!      logical, intent(in)  :: rdcanopylai, rdcanopyfch, rdcanopyfrt,  &
-!                              rdcanopyclu
-!      real(kind=kind_phys), intent(in) :: canopylaixy(:),               &
-!                                          canopyfchxy(:),               &
-!                                          canopyfrtxy(:),             &
-!                                          canopycluxy(:)
       !----------------------------------------------
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
      &                     tdt(:,:),    rtg(:,:,:)
@@ -280,9 +269,6 @@
       real(kind=kind_phys) ck0, ck1, ch0, ch1, ce0, rchck
 !
 !PCC_CANOPY------------------------------------
-      real(kind=kind_phys) PICAN
-!----------------------------------------------
-
       real(kind=kind_phys) qlcr, zstblmax, hcrinv
 !
       real(kind=kind_phys) h1
@@ -296,9 +282,6 @@
      &                     SIGMACAN,  RRCAN, BBCAN,
      &                     AACAN,     ZCAN,  ZFL, BOTCAN,
      &                     EDDYVEST1, EDDYVEST_INT
-!TODO Canopy Inputs
-!     &                     XCANOPYLAI, XCANOPYFCH,
-!     &                     XCANOPYFRT, XCANOPYCLU
 
       ! in canopy eddy diffusivity [ m**2/s ]
       real(kind=kind_phys), allocatable  :: EDDYVESTX ( : )
@@ -346,10 +329,6 @@
       parameter(ck1=0.15,ch1=0.15)
       parameter(cs0=0.4,csmf=0.5)
       parameter(rchck=1.5,ndt=20)
-!PCC_CANOPY------------------------------------
-      parameter (PICAN = 3.1415927)
-!----------------------------------------------
-
 !PCC_CANOPY------------------------------------
       if (do_canopy) then
         if(.not.allocated(EDDYVESTX))
@@ -1392,30 +1371,6 @@
         do k = 1, km1-1
           do i = 1, im
 
-!TODO: Canopy Inputs
-!           if(rdcanopylai) then
-!             XCANOPYLAI = canopylaixy(i)
-!           else
-!             XCANOPYLAI = 0.0
-!           endif
-!           if(rdcanopyfch) then
-!             XCANOPYFCH = canopyfchxy(i)
-!           else
-!             XCANOPYFCH = 0.0
-!           endif
-!           if(rdcanopyfrt) then
-!             XCANOPYFRT = canopyfrtxy(i)
-!           else
-!             XCANOPYFRT = 0.0
-!           endif
-!           if(rdcanopyclu) then
-!             XCANOPYCLU = canopycluxy(i)
-!           else
-!             XCANOPYCLU = 0.0
-!           endif
-!
-!           FCH = XCANOPYFCH !top of canopy from input file
-
 !IVAI: AQM canopy Inputs
 !           FCH = fch_table(vegtype(i)) !top of canopy from look-up table
             FCH = cfch(i)               !top of canopy from AQM canopy inputs
@@ -1492,7 +1447,7 @@
                   IF ( ZCAN/FCH .GE. 0.175  
      &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
                       SIGMACAN = ustar(i) * ( 0.75 + 
-     &                         (0.5 * COS((PICAN/1.06818) *
+     &                         (0.5 * COS((PI/1.06818) *
      &                         (1.25 - (ZCAN/FCH)))) )
                   END IF
                   IF ( ZCAN/FCH .LT. 0.175 )  THEN
@@ -1506,7 +1461,7 @@
                   IF ( ZCAN/FCH .GE. 0.175  
      &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
                     SIGMACAN = ustar(i) * ( 0.625 + 
-     &                       (0.375* COS((PICAN/1.06818) *
+     &                       (0.375* COS((PI/1.06818) *
      &                       (1.25 - (ZCAN/FCH)))) )
                   END IF
                   IF ( ZCAN/FCH .LT. 0.175 )  THEN
@@ -1523,7 +1478,7 @@
                     AACAN=(0.125*RRCAN) + 0.125
                     BBCAN=(0.125*RRCAN) - 0.125
                     SIGMACAN = ustar(i) * ( AACAN + 
-     &                             (BBCAN * COS((PICAN/1.06818) *
+     &                             (BBCAN * COS((PI/1.06818) *
      &                             (1.25 - (ZCAN/FCH)))) )
                   END IF
                   IF ( ZCAN/FCH .LT. 0.175 )  THEN

@@ -105,6 +105,13 @@
   type = real
   kind = kind_phys
   intent = in
+[pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
 [rd]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
@@ -639,7 +646,7 @@
 [cpopu]
   standard_name = canopy_population_density
   long_name = population density used for canopy correction
-  units = people km-2
+  units = km-2
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
