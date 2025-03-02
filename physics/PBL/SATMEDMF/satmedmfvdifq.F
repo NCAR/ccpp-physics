@@ -7,6 +7,8 @@
       use mfpbltq_mod
       use tridi_mod
       use mfscuq_mod
+      !PCC_CANOPY
+      use canopy_utils_mod
 
       contains
 
