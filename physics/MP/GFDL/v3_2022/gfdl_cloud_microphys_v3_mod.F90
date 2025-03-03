@@ -79,8 +79,11 @@ module gfdl_cloud_microphys_v3_mod
                        one_r8    => con_one,     &
                        con_amd, con_amw, visd,   &
                        visk, vdifu, tcond, cdg,  &
-                       cdh, rhow, rhoi=>rhoci, rhor,    &
-                       rhog, rhoh, qcmin, qfmin
+                       cdh, rhow => rhocw,       &
+                       rhoi => rhoci,            &
+                       rhor => rhocr,            &
+                       rhog => rhocg,            &
+                       rhoh => rhoch, qcmin, qfmin
     private
 
     ! -----------------------------------------------------------------------
