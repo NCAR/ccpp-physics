@@ -112,6 +112,7 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
 [rd]
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
