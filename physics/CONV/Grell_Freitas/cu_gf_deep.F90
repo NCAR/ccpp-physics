@@ -143,7 +143,7 @@ contains
                                 !! betwee -1 and +1
               ,do_capsuppress,cap_suppress_j    &    !         
               ,k22                              &    !
-              ,jmin,kdt,tropics)                         !
+              ,jmin,kdt,mc_thresh)                         !
 
    implicit none
 
@@ -182,16 +182,16 @@ contains
 !$acc declare copy(cnvwt,outu,outv,outt,outq,outqc,cupclw,frh_out,pre,xmb_out)
      real(kind=kind_phys),    dimension (its:ite)                      &
         ,intent (in  )                   ::                            &
-        hfx,qfx,xmbm_in,xmbs_in
-!$acc declare copyin(hfx,qfx,xmbm_in,xmbs_in)
+        mc_thresh,hfx,qfx,xmbm_in,xmbs_in
+!$acc declare copyin(mc_thresh,hfx,qfx,xmbm_in,xmbs_in)
      integer,    dimension (its:ite)                                   &
         ,intent (inout  )                ::                            &
         kbcon,ktop
 !$acc declare copy(kbcon,ktop)
      integer,    dimension (its:ite)                                   &
         ,intent (in  )                   ::                            &
-        kpbl,tropics
-!$acc declare copyin(kpbl,tropics)
+        kpbl
+!$acc declare copyin(kpbl)
   !
   ! basic environmental input includes moisture convergence (mconv)
   ! omega (omeg), windspeed (us,vs), and a flag (ierr) to turn off
@@ -497,7 +497,7 @@ contains
          if(imid.eq.1)then
            c0(i)=0.002
          endif
-         if(kdt.le.(4500./dtime))rrfs_factor(i)=1.-(float(kdt)/(4500./dtime)-1.)**2
+!         if(kdt.le.(4500./dtime))rrfs_factor(i)=1.-(float(kdt)/(4500./dtime)-1.)**2
       enddo
 !$acc end kernels
 
@@ -574,15 +574,15 @@ contains
 !
 !$acc kernels
       start_level(:)=kte
+      frh_out(:) = 0.
 !$acc end kernels
 
 !$acc kernels
 !$acc loop private(radius,frh)
       do i=its,ite
          c1d(i,:)= 0. !c1 ! 0. ! c1 ! max(.003,c1+float(csum(i))*.0001)
-         entr_rate(i)=7.e-5 - min(20.,float(csum(i))) * 3.e-6
-         if(xland1(i) == 0)entr_rate(i)=7.e-5
-         if(dx(i)<dx_thresh) entr_rate(i)=2.e-4
+         !entr_rate(i)=7.e-5  !- min(20.,float(csum(i))) * 3.e-6
+         entr_rate(i)=1.e-4
          if(imid.eq.1)entr_rate(i)=3.e-4
          radius=.2/entr_rate(i)
          frh=min(1.,3.14*radius*radius/dx(i)/dx(i))
@@ -594,7 +594,7 @@ contains
          sig(i)=(1.-frh)**2
          !frh_out(i) = frh
          if(forcing(i,7).eq.0.)sig(i)=1.
-         frh_out(i) = frh*sig(i)
+         frh_out(i) = frh !*sig(i)
       enddo
 !$acc end kernels
       sig_thresh = (1.-frh_thresh)**2
@@ -639,7 +639,7 @@ contains
 !
       depth_min=3000.
 !---  for RRFS allow only very deep convection
-      if(dx(its)<dx_thresh)depth_min=5000.
+      !if(dx(its)<dx_thresh)depth_min=5000.
       if(imid.eq.1)depth_min=2500.
 !
 !--- maximum depth (mb) of capping 
@@ -1969,6 +1969,7 @@ contains
 !$acc atomic update
           mconv(i)=mconv(i)+omeg(i,k)*dq/g
         enddo
+        if ( mconv(i) < mc_thresh(i)) ierr(i)=2242
       enddo
 !$acc end kernels
       call cup_forcing_ens_3d(closure_n,xland1,aa0,aa1,xaa0_ens,mbdt,dtime, &
@@ -4200,7 +4201,7 @@ endif
          clos_wei=16./max(1.,closure_n(i))
          xmb_ave(i)=min(xmb_ave(i),100.)
          xmb(i)=clos_wei*sig(i)*xmb_ave(i)
-         if(dx(i)<dx_thresh) xmb(i)=rrfs_factor(i)*xmb(i)
+         !if(dx(i)<dx_thresh) xmb(i)=rrfs_factor(i)*xmb(i)
 
            if(xmb(i) < 1.e-16)then
               ierr(i)=19
@@ -4261,49 +4262,10 @@ endif
           endif
        enddo
 !$acc end kernels
- return
-
-!$acc kernels
-      do i=its,itf
-        pwtot(i)=0.
-        pre2(i)=0.
-        if(ierr(i).eq.0)then
-            do k=kts,ktop(i)
-              pwtot(i)=pwtot(i)+pw(i,k,1)
-            enddo
-            do k=kts,ktop(i)
-            dp=100.*(p_cup(i,k)-p_cup(i,k+1))/g
-            dtt =dellat  (i,k,1)
-            dtq =dellaq  (i,k,1)
-! necessary to drive downdraft
-            dtpwd=-pwd(i,k)*edt(i)
-! take from dellaqc first
-            dtqc=dellaqc (i,k,1)*dp - dtpwd
-! if this is negative, use dellaqc first, rest needs to come from rain
-           if(dtqc < 0.)then
-             dtpwd=dtpwd-dellaqc(i,k,1)*dp
-             dtqc=0.
-! if this is positive, can come from clw detrainment
-           else
-             dtqc=dtqc/dp
-             dtpwd=0.
-           endif
-           outtem(i,k)= xmb(i)* dtt
-           outq  (i,k)= xmb(i)* dtq
-           outqc (i,k)= xmb(i)* dtqc
-           xf_ens(i,:)=sig(i)*xf_ens(i,:)
-! what is evaporated
-           pre(i)=pre(i)-xmb(i)*dtpwd
-           pre2(i)=pre2(i)+xmb(i)*(pw(i,k,1)+edt(i)*pwd(i,k))
-!           write(15,124)k,dellaqc(i,k,1),dtqc,-pwd(i,k)*edt(i),dtpwd
-          enddo
-          pre(i)=-pre(i)+xmb(i)*pwtot(i)
-        endif
 #ifndef _OPENACC
 124     format(1x,i3,4e13.4)
 125     format(1x,2e13.4)
 #endif
-      enddo
 !$acc end kernels
 
    end subroutine cup_output_ens_3d
