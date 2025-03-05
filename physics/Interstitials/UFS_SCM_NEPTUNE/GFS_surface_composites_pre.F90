@@ -45,7 +45,7 @@ contains
       real(kind=kind_phys), dimension(:), intent(in   )  :: snowd, tprcp, uustar, weasd, qss, tisfc
 
       real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl
-      real(kind=kind_phys), dimension(:), intent(inout)  :: tgrs1
+      real(kind=kind_phys), dimension(:), intent(in)     :: tgrs1
       real(kind=kind_phys), dimension(:), intent(inout)  :: snowd_lnd, snowd_ice, tprcp_wat,            &
                     tprcp_lnd, tprcp_ice, tsfc_wat, tsurf_wat,tsurf_lnd, tsurf_ice,                     &
                     uustar_wat, uustar_lnd, uustar_ice, weasd_lnd, weasd_ice,                           &

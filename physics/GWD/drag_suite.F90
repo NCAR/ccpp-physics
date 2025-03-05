@@ -383,9 +383,10 @@
      &                      dusfc_ms(:),dvsfc_ms(:),             &
      &                      dusfc_bl(:),dvsfc_bl(:),             &
      &                      dusfc_ss(:),dvsfc_ss(:),             &
-     &                      dusfc_fd(:),dvsfc_fd(:)
+     &                      dusfc_fd(:),dvsfc_fd(:),             &
+     &                      dtaux2d_ms(:,:)
    real(kind=kind_phys), intent(inout), optional ::              &
-     &         dtaux2d_ms(:,:),dtauy2d_ms(:,:),                  &
+     &         dtauy2d_ms(:,:),                                  &
      &         dtaux2d_bl(:,:),dtauy2d_bl(:,:),                  &
      &         dtaux2d_ss(:,:),dtauy2d_ss(:,:),                  &
      &         dtaux2d_fd(:,:),dtauy2d_fd(:,:)

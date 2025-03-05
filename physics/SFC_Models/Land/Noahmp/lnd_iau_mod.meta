@@ -33,7 +33,7 @@
 [ccpp-table-properties]
   name = land_iau_mod
   type = module
-  dependencies = machine.F
+  dependencies = ../../../hooks/machine.F
 
 [ccpp-arg-table]
   name = land_iau_mod

@@ -841,72 +841,6 @@
   kind = kind_phys
   intent = inout
   optional = True
-[mpicomm]
-  standard_name = mpi_communicator
-  long_name = MPI communicator
-  units = index
-  dimensions = ()
-  type = MPI_Comm
-  intent = in
-[mpirank]
-  standard_name = mpi_rank
-  long_name = current MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[mpiroot]
-  standard_name = mpi_root
-  long_name = master MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[rho_dry]
-  standard_name = dry_air_density
-  long_name = dry air density
-  units = kg m-3
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[uspdavg]
-  standard_name = mean_wind_speed_in_boundary_layer
-  long_name = average wind speed within the boundary layer
-  units = m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[hpbl_thetav]
-  standard_name = atmosphere_boundary_layer_thickness_from_modified_parcel
-  long_name = pbl height based on modified parcel method
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[drydep_flux_out]
-  standard_name = dry_deposition_flux
-  long_name = rrfs dry deposition flux
-  units = ug m-2
-  dimensions = (horizontal_loop_extent,number_of_chemical_species_deposited)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[wetdpr]
-  standard_name = mp_wet_deposition_smoke_dust
-  long_name = large scale wet deposition of smoke and dust
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,number_of_chemical_species_vertically_mixed)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
 [hwp]
   standard_name = hourly_wildfire_potential
   long_name = rrfs hourly fire weather potential
@@ -950,6 +884,22 @@
   kind = kind_phys
   intent = inout
   optional = True
+[smoke_fire]
+  standard_name = smoke_emission_of_fire
+  long_name = smoke emission of fire
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[cpl_fire]
+  standard_name = do_fire_coupling
+  long_name = flag controlling fire_behavior collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [peak_hr_out]
   standard_name = peak_hr_fire
   long_name = time_of_peak_fire_emissions
@@ -1003,6 +953,14 @@
   type = real
   kind = kind_phys
   intent = in
+[totprcp]
+  standard_name = accumulated_lwe_thickness_of_precipitation_amount
+  long_name = accumulated total precipitation
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [uspdavg]
   standard_name = mean_wind_speed_in_boundary_layer
   long_name = average wind speed within the boundary layer
@@ -1017,6 +975,15 @@
   long_name = pbl height based on modified parcel method
   units = m
   dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[rho_dry]
+  standard_name = dry_air_density
+  long_name = dry air density
+  units = kg m-3
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -1041,30 +1008,6 @@
   units = index
   dimensions = ()
   type = integer
-  intent = in
-[smoke_fire]
-  standard_name = smoke_emission_of_fire
-  long_name = smoke emission of fire
-  units = kg m-2
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
-[totprcp]
-  standard_name = accumulated_lwe_thickness_of_precipitation_amount
-  long_name = accumulated total precipitation
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[cpl_fire]
-  standard_name = do_fire_coupling
-  long_name = flag controlling fire_behavior collection (default off)
-  units = flag
-  dimensions = ()
-  type = logical
   intent = in
 [errmsg]
   standard_name = ccpp_error_message
