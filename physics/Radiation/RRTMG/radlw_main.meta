@@ -2,6 +2,7 @@
   name = rrtmg_lw
   type = scheme
   dependencies = ../../hooks/machine.F,../mersenne_twister.f,../../hooks/physcons.F90,radlw_datatb.f,radlw_param.f
+  module_name = rrtmg_lw
 
 ########################################################################
 [ccpp-arg-table]

@@ -6,13 +6,3 @@
 [ccpp-arg-table]
   name = base_physics_process
   type = ddt
-
-########################################################################
-[ccpp-table-properties]
-  name = module_ccpp_suite_simulator
-  type = module
-  dependencies = ../../hooks/machine.F
-
-[ccpp-arg-table]
-  name = module_ccpp_suite_simulator
-  type = module

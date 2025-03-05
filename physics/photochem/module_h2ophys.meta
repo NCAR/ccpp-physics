@@ -6,13 +6,3 @@
 [ccpp-arg-table]
   name = ty_h2ophys
   type = ddt
-
-########################################################################
-[ccpp-table-properties]
-  name = module_h2ophys
-  type = module
-  dependencies = ../hooks/machine.F
-
-[ccpp-arg-table]
-  name = module_h2ophys
-  type = module

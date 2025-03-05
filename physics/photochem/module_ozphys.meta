@@ -6,14 +6,4 @@
 [ccpp-arg-table]
   name = ty_ozphys
   type = ddt
-
-########################################################################
-[ccpp-table-properties]
-  name = module_ozphys
-  type = module
-  dependencies = ../hooks/machine.F,../tools/funcphys.f90
-
-[ccpp-arg-table]
-  name = module_ozphys
-  type = module
   
