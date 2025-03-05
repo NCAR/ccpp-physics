@@ -24,7 +24,7 @@ contains
                                  flag_cice, cplflx, cplice, cplwav2atm, lsm, ilsm_ruc,                                    &
                                  landfrac, lakefrac, lakedepth, oceanfrac, frland,                                        &
                                  dry, icy, lake, use_lake_model, wet, hice, cice, zorlo, zorll, zorli,                    &
-                                 snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat,                                &
+                                 snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat, tgrs1,                         &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
                                  weasd,            weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
                                            tisfc, tsurf_wat, tsurf_lnd, tsurf_ice,                                        &
@@ -45,6 +45,7 @@ contains
       real(kind=kind_phys), dimension(:), intent(in   )  :: snowd, tprcp, uustar, weasd, qss, tisfc
 
       real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl
+      real(kind=kind_phys), dimension(:), intent(in)     :: tgrs1
       real(kind=kind_phys), dimension(:), intent(inout)  :: snowd_lnd, snowd_ice, tprcp_wat,            &
                     tprcp_lnd, tprcp_ice, tsfc_wat, tsurf_wat,tsurf_lnd, tsurf_ice,                     &
                     uustar_wat, uustar_lnd, uustar_ice, weasd_lnd, weasd_ice,                           &
@@ -179,6 +180,13 @@ contains
                 else
                   if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
                 endif
+              else
+                wet(i) = .false. ! no open ocean
+              endif
+              if(wet(i) .and. tsfco(i) < 0) then
+                1013 format('using tgrs1 instead of bad tsfco(i=',I0,')=',E20.12,' slmsk(i)=',E12.7,' cice(i)=',E12.7,' islmsk(i)=',I0,' islmsk_cice(i)=',I0,' oceanfrac(i)=',E12.7,' cplice=',L1,' icy(i)=',L1,' cplflx=',L1)
+                write(0,1013) i,tsfco(i),slmsk(i),cice(i),islmsk(i),islmsk_cice(i),oceanfrac(i),cplice,icy(i),cplflx
+                tsfco(i) = tgrs1(i)
               endif
             else ! Not ocean and not land
               is_clm = lkm>0 .and. iopt_lake==iopt_lake_clm .and. use_lake_model(i)>0

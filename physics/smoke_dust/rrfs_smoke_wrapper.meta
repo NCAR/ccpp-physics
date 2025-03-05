@@ -92,12 +92,35 @@
   dimensions = ()
   type = integer
   intent = in
-[smoke_forecast_in]
-  standard_name = do_smoke_forecast
-  long_name = index for rrfs smoke forecast
-  units = index
+[hwp_method_in]
+  standard_name = control_for_HWP_equation
+  long_name = control for HWP equation
+  units = 1
   dimensions = ()
   type = integer
+  intent = in
+[add_fire_moist_flux_in]
+  standard_name = flag_for_fire_moisture_flux
+  long_name = flag to add fire moisture flux
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[sc_factor_in]
+  standard_name = scale_factor_for_wildfire_emissions
+  long_name = scale factor for wildfire emissions
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[plume_alpha_in]
+  standard_name = alpha_for_plumerise_scheme
+  long_name = alpha paramter for plumerise scheme
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [dust_opt_in]
   standard_name = control_for_smoke_dust
@@ -188,7 +211,7 @@
   dimensions = ()
   type = integer
   intent = in
-  
+
 #####################################################################
 [ccpp-arg-table]
   name = rrfs_smoke_wrapper_run
@@ -598,7 +621,7 @@
   standard_name = emission_smoke_prvd_RRFS
   long_name = emission fire RRFS daily
   units = various
-  dimensions = (horizontal_loop_extent,4)
+  dimensions = (horizontal_loop_extent,5)
   type = real
   kind = kind_phys
   intent = in
@@ -861,6 +884,22 @@
   kind = kind_phys
   intent = inout
   optional = True
+[smoke_fire]
+  standard_name = smoke_emission_of_fire
+  long_name = smoke emission of fire
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[cpl_fire]
+  standard_name = do_fire_coupling
+  long_name = flag controlling fire_behavior collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [peak_hr_out]
   standard_name = peak_hr_fire
   long_name = time_of_peak_fire_emissions
@@ -906,16 +945,17 @@
   kind = kind_phys
   intent = out
   optional = True
-[kpbl]
-  standard_name = vertical_index_at_top_of_atmosphere_boundary_layer
-  long_name = PBL top model level index
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = integer
-  intent = in
 [oro]
   standard_name = height_above_mean_sea_level
   long_name = height_above_mean_sea_level
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[totprcp]
+  standard_name = accumulated_lwe_thickness_of_precipitation_amount
+  long_name = accumulated total precipitation
   units = m
   dimensions = (horizontal_loop_extent)
   type = real
@@ -935,6 +975,15 @@
   long_name = pbl height based on modified parcel method
   units = m
   dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[rho_dry]
+  standard_name = dry_air_density
+  long_name = dry air density
+  units = kg m-3
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -959,22 +1008,6 @@
   units = index
   dimensions = ()
   type = integer
-  intent = in
-[smoke_fire]
-  standard_name = smoke_emission_of_fire
-  long_name = smoke emission of fire
-  units = kg m-2
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
-[cpl_fire]
-  standard_name = do_fire_coupling
-  long_name = flag controlling fire_behavior collection (default off)
-  units = flag
-  dimensions = ()
-  type = logical
   intent = in
 [errmsg]
   standard_name = ccpp_error_message

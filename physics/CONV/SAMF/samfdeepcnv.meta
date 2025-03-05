@@ -715,6 +715,13 @@
   dimensions = ()
   type = logical
   intent = in
+[sigmab_coldstart]
+  standard_name = flag_to_cold_start_for_sigmab_init
+  long_name = flag to cold start for sigmab initialization
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
