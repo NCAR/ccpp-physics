@@ -51,7 +51,7 @@ contains
 ! #########################################################################################
   subroutine GFS_photochemistry_run (dtp, ozphys, oz_phys_2015, oz_phys_2006, con_1ovg,   &
        prsl, dp, ozpl, h2o_phys, h2ophys, h2opl, h2o0, oz0, gt0, do3_dt_prd, do3_dt_ozmx, &
-       do3_dt_temp, do3_dt_ohoz, errmsg, errflg)
+       do3_dt_temp, do3_dt_ohoz, dqv_dt_prd, dqv_dt_qvmx, errmsg, errflg)
     
     ! Inputs
     real(kind=kind_phys), intent(in) :: &
@@ -78,7 +78,9 @@ contains
          do3_dt_prd,   & ! Physics tendency: production and loss effect
          do3_dt_ozmx,  & ! Physics tendency: ozone mixing ratio effect
          do3_dt_temp,  & ! Physics tendency: temperature effect
-         do3_dt_ohoz     ! Physics tendency: overhead ozone effect
+         do3_dt_ohoz,  & ! Physics tendency: overhead ozone effect
+         dqv_dt_prd,   & ! Physics tendency: Climatological net production effect
+         dqv_dt_qvmx     ! Physics tendency: specific humidity effect
 
     ! Outputs
     real(kind=kind_phys), intent(inout), dimension(:,:) :: &
@@ -102,7 +104,7 @@ contains
             do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
     endif
     if (h2o_phys) then
-       call h2ophys%run(dtp, prsl, h2opl, h2o0)
+       call h2ophys%run(dtp, prsl, h2opl, h2o0, dqv_dt_prd, dqv_dt_qvmx)
     endif
 
   end subroutine GFS_photochemistry_run
