@@ -193,6 +193,24 @@
   kind = kind_phys
   intent = inout
   optional = True
+[dqv_dt_prd]
+  standard_name = water_vapor_tendency_due_to_production_and_loss_rate
+  long_name = water_vapor tendency due to production and loss rate
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[dqv_dt_qvmx]
+  standard_name = water_vapor_tendency_due_to_water_vapor_mixing_ratio
+  long_name = water_vapor tendency due to water_vapor mixing ratio
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

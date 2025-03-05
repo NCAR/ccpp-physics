@@ -22,6 +22,7 @@ contains
   subroutine GFS_physics_post_run(nCol, nLev, ntoz, ntracp100, nprocess, nprocess_summed,   &
        dtidx, is_photochem, ldiag3d, ip_physics, ip_photochem, ip_prod_loss, ip_ozmix,      &
        ip_temp, ip_overhead_ozone, do3_dt_prd, do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz,       &
+       ntqv, dqv_dt_prd, dqv_dt_qvmx, &
        dtend, errmsg, errflg)
 
     ! Inputs
@@ -29,6 +30,7 @@ contains
          nCol,           & ! Horizontal dimension
          nLev,           & ! Number of vertical layers
          ntoz,           & ! Index for ozone mixing ratio
+         ntqv,           & ! Index for water vapor mixing ratio
          ntracp100,      & ! Number of tracers plus 100
          nprocess,       & ! Number of processes that cause changes in state variables 
          nprocess_summed,& ! Number of causes in dtidx per tracer summed for total physics tendency
@@ -50,7 +52,9 @@ contains
          do3_dt_prd,     & ! Physics tendency: production and loss effect
          do3_dt_ozmx,    & ! Physics tendency: ozone mixing ratio effect
          do3_dt_temp,    & ! Physics tendency: temperature effect
-         do3_dt_ohoz       ! Physics tendency: overhead ozone effect
+         do3_dt_ohoz,    & ! Physics tendency: overhead ozone effect
+         dqv_dt_prd,     & ! Physics tendency: climatological net production effect
+         dqv_dt_qvmx       ! Physics tendency: water vapor mixing ratio effect
 
     ! Outputs
     real(kind=kind_phys), intent(inout), dimension(:,:,:), optional :: &
@@ -105,6 +109,32 @@ contains
     itrac = ntoz+100
     ichem = dtidx(itrac, ip_photochem)
     if(ichem >= 1) then
+       call sum_it(ichem, itrac, is_photochem)
+    endif
+
+    ! #######################################################################################
+    !
+    ! Water vapor photochemistry diagnostics
+    !
+    ! #######################################################################################
+    idtend = dtidx(100+ntqv, ip_prod_loss)
+    if (idtend >= 1 .and. associated(dqv_dt_prd)) then
+       dtend(:, :, idtend) = dtend(:, :, idtend) + dqv_dt_prd
+    endif
+    !
+    idtend = dtidx(100+ntqv,ip_ozmix)
+    if (idtend >= 1 .and. associated(dqv_dt_qvmx)) then
+       dtend(:, :, idtend) = dtend(:, :, idtend) + dqv_dt_qvmx
+    endif
+
+    ! #######################################################################################
+    !
+    ! Total photochemical tendencies
+    !
+    ! #######################################################################################
+    itrac = ntqv + 100
+    ichem = dtidx(itrac, ip_photochem)
+    if (ichem >= 1) then
        call sum_it(ichem, itrac, is_photochem)
     endif
 
