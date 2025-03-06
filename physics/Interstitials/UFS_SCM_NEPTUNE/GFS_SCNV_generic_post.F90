@@ -9,7 +9,7 @@
 !! \htmlinclude GFS_SCNV_generic_post_run.html
 !!
       subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, qdiag3d, &
-        frain, gu0, gv0, gt0, gq0, save_u, save_v, save_t, save_q,                 &
+        frain, gu0, gv0, gt0, gq0, save_q, ten_t, ten_u, ten_v, delt,              &
         clw, shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw, nsamftrac,    &
         rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                      &
         dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,      &
@@ -26,8 +26,7 @@
       integer, intent(in) :: ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,ntsigma,ntrac
       logical, intent(in) :: lssav, ldiag3d, qdiag3d, flag_for_scnv_generic_tend
       real(kind=kind_phys),                     intent(in) :: frain
-      real(kind=kind_phys), dimension(:,:), intent(in) :: gu0, gv0, gt0
-      real(kind=kind_phys), dimension(:,:), intent(in) :: save_u, save_v, save_t
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: gu0, gv0, gt0
       real(kind=kind_phys), dimension(:,:,:),   intent(in) :: save_q, gq0
 
       ! dtend only allocated if ldiag3d == .true.
@@ -55,6 +54,13 @@
 
       integer :: i, k, n, idtend, tracers
       real(kind=kind_phys) :: tem
+
+      real(kind=kind_phys), dimension(:,:), intent(in) :: ten_t, ten_u, ten_v
+      real(kind=kind_phys), intent(in) ::  delt
+
+      gt0 = gt0 + ten_t * delt
+      gu0 = gu0 + ten_u * delt
+      gv0 = gv0 + ten_v * delt
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -85,17 +91,17 @@
         if (ldiag3d) then
           idtend = dtidx(index_of_temperature, index_of_process_scnv)
           if(idtend>=1) then
-             dtend(:,:,idtend) = dtend(:,:,idtend) + (gt0 - save_t) * frain
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (ten_t * delt) * frain
           endif
 
           idtend = dtidx(index_of_x_wind, index_of_process_scnv)
           if(idtend>=1) then
-             dtend(:,:,idtend) = dtend(:,:,idtend) + (gu0 - save_u) * frain
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (ten_u * delt) * frain
           endif
 
           idtend = dtidx(index_of_y_wind, index_of_process_scnv)
           if(idtend>=1) then
-             dtend(:,:,idtend) = dtend(:,:,idtend) + (gv0 - save_v) * frain
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (ten_v * delt) * frain
           endif
 
           if (cscnv .or. satmedmf .or. trans_trac .or. ras) then

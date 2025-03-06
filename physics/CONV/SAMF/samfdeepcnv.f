@@ -75,7 +75,7 @@
       subroutine samfdeepcnv_run (im,km,first_time_step,restart,        &
      &    tmf,qmicro,itc,ntc,cliq,cp,cvap,                              &
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
-     &    t0c,delt,ntk,ntr,delp,                                        &
+     &    t0c,delt,ntk,ntr,delp, ten_t, ten_u, ten_v,                   &
      &    prslp,psp,phil,qtr,prevsq,q,q1,t1,u1,v1,fscav,                &
      &    hwrf_samfdeep,progsigma,cldwrk,rn,kbot,ktop,kcnv,             &
      &    islimsk,garea,dot,ncloud,hpbl,ud_mf,dd_mf,dt_mf,cnvw,cnvc,    &
@@ -114,8 +114,9 @@
       integer, intent(inout)  :: kcnv(:)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
       real(kind=kind_phys), intent(inout) ::   qtr(:,:,:),              &
-     &   q1(:,:), t1(:,:),   u1(:,:), v1(:,:),                          &
-     &   cnvw(:,:),  cnvc(:,:)
+     &   q1(:,:), cnvw(:,:),  cnvc(:,:)
+
+      real(kind=kind_phys), intent(in) :: t1(:,:), u1(:,:), v1(:,:)
 
       integer, intent(out) :: kbot(:), ktop(:)
       real(kind=kind_phys), intent(out) :: cldwrk(:),                   &
@@ -308,6 +309,19 @@ c     data acritt/.203,.515,.521,.566,.625,.665,.659,.688,
 c    &            .743,.813,.886,.947,1.138,1.377,1.896/
       real(kind=kind_phys) tf, tcr, tcrf
       parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
+
+      real(kind=kind_phys), intent(out) :: ten_t(:,:), ten_u(:,:),      &
+     & ten_v(:,:)
+
+      real(kind=kind_phys) :: new_t1(im,km),new_u1(im,km),new_v1(im,km)
+
+      ten_t = 0._kind_phys
+      ten_u = 0._kind_phys
+      ten_v = 0._kind_phys
+
+      new_t1 = t1 
+      new_u1 = u1 
+      new_v1 = v1
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -3107,13 +3121,13 @@ c
             if(k <= ktcon(i)) then
               tem2   = xmb(i) * dt2
               dellat = (dellah(i,k) - hvap * dellaq(i,k)) / cp
-              t1(i,k) = t1(i,k) + tem2 * dellat
+              new_t1(i,k) = t1(i,k) + tem2 * dellat
               q1(i,k) = q1(i,k) + tem2 * dellaq(i,k)
 !             tem = tem2 / rcs(i)
 !             u1(i,k) = u1(i,k) + dellau(i,k) * tem
 !             v1(i,k) = v1(i,k) + dellav(i,k) * tem
-              u1(i,k) = u1(i,k) + tem2 * dellau(i,k)
-              v1(i,k) = v1(i,k) + tem2 * dellav(i,k)
+              new_u1(i,k) = u1(i,k) + tem2 * dellau(i,k)
+              new_v1(i,k) = v1(i,k) + tem2 * dellav(i,k)
               dp = 1000. * del(i,k)
               tem = xmb(i) * dp / grav
               delhbar(i) = delhbar(i) + tem * dellah(i,k)
@@ -3300,7 +3314,7 @@ c
         do i = 1, im
           if (cnvflg(i) .and. k <= kmax(i)) then
             if(k <= ktcon(i)) then
-              qeso(i,k) = 0.01 * fpvs(t1(i,k))      ! fpvs is in pa
+              qeso(i,k) = 0.01 * fpvs(new_t1(i,k))      ! fpvs is in pa
               qeso(i,k) = eps * qeso(i,k)/(pfld(i,k) + epsm1*qeso(i,k))
               val     =             1.e-8
               qeso(i,k) = max(qeso(i,k), val )
@@ -3352,7 +3366,7 @@ c
 !             if(islimsk(i) == 1) evef=edt(i) * evfactl
 !             if(islimsk(i) == 1) evef=.07
               qcond(i) = evef * (q1(i,k) - qeso(i,k))
-     &                 / (1. + el2orc * qeso(i,k) / t1(i,k)**2)
+     &                 / (1. + el2orc * qeso(i,k) / new_t1(i,k)**2)
               dp = 1000. * del(i,k)
               tem = grav / dp
               tem1 = dp / grav
@@ -3368,7 +3382,7 @@ c
               endif
               if(rn(i) > 0. .and. qevap(i) > 0.) then
                 q1(i,k) = q1(i,k) + qevap(i)
-                t1(i,k) = t1(i,k) - elocp * qevap(i)
+                new_t1(i,k) = new_t1(i,k) - elocp * qevap(i)
                 rn(i) = rn(i) - .001 * qevap(i) * tem1
                 deltv(i) = - elocp*qevap(i)/dt2
                 delq(i) =  + qevap(i)/dt2
@@ -3474,7 +3488,7 @@ c
 !           if (k > kb(i) .and. k <= ktcon(i)) then
             if (k >= kbcon(i) .and. k <= ktcon(i)) then
               tem  = dellal(i,k) * xmb(i) * dt2
-              tem1 = max(0.0, min(1.0, (tcr-t1(i,k))*tcrf))
+              tem1 = max(0.0, min(1.0, (tcr-new_t1(i,k))*tcrf))
               if (qtr(i,k,2) > -999.0) then
                 qtr(i,k,1) = qtr(i,k,1) + tem * tem1            ! ice
                 qtr(i,k,2) = qtr(i,k,2) + tem *(1.0-tem1)       ! water
@@ -3493,10 +3507,10 @@ c
         do i = 1, im
           if(cnvflg(i) .and. rn(i) <= 0.) then
             if (k <= kmax(i)) then
-              t1(i,k) = to(i,k)
+              new_t1(i,k) = to(i,k)
               q1(i,k) = qo(i,k)
-              u1(i,k) = uo(i,k)
-              v1(i,k) = vo(i,k)
+              new_u1(i,k) = uo(i,k)
+              new_v1(i,k) = vo(i,k)
             endif
           endif
         enddo
@@ -3584,7 +3598,7 @@ c
           if(cnvflg(i) .and. rn(i) > 0.) then
             if(k > kb(i) .and. k < ktop(i)) then
               tem = 0.5 * (eta(i,k-1) + eta(i,k)) * xmb(i)
-              tem1 = pfld(i,k) * 100. / (rd * t1(i,k))
+              tem1 = pfld(i,k) * 100. / (rd * new_t1(i,k))
               if(progsigma)then
                 tem2 = sigmab(i)
               else
@@ -3602,7 +3616,7 @@ c
           if(cnvflg(i) .and. rn(i) > 0.) then
             if(k > 1 .and. k <= jmin(i)) then
               tem = 0.5*edto(i)*(etad(i,k-1)+etad(i,k))*xmb(i)
-              tem1 = pfld(i,k) * 100. / (rd * t1(i,k))
+              tem1 = pfld(i,k) * 100. / (rd * new_t1(i,k))
               if(progsigma)then
                 tem2 = sigmab(i)
               else
@@ -3623,7 +3637,7 @@ c
             QLCN(i,k)     = qtr(i,k,2) - qlcn(i,k)
             QICN(i,k)     = qtr(i,k,1) - qicn(i,k)
             cf_upi(i,k)   = cnvc(i,k)
-            w_upi(i,k)    = ud_mf(i,k)*t1(i,k)*rd /
+            w_upi(i,k)    = ud_mf(i,k)*new_t1(i,k)*rd /
      &                     (dt2*max(sigmagfm(i),1.e-12)*prslp(i,k))
             CNV_MFD(i,k)  = ud_mf(i,k)/dt2
             CLCN(i,k)     = cnvc(i,k)
@@ -3633,6 +3647,11 @@ c
         enddo
       endif
       endif ! (.not.hwrf_samfdeep)
+
+      ten_t = (new_t1 - t1)/delt 
+      ten_u = (new_u1 - u1)/delt 
+      ten_v = (new_v1 - v1)/delt 
+
       return
       end subroutine samfdeepcnv_run
 

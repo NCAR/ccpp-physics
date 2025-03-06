@@ -49,30 +49,6 @@
   dimensions = ()
   type = logical
   intent = in
-[gu0]
-  standard_name = x_wind
-  long_name = zonal wind updated by physics
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[gv0]
-  standard_name = y_wind
-  long_name = meridional wind updated by physics
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[gt0]
-  standard_name = air_temperature
-  long_name = temperature updated by physics
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
 [gq0]
   standard_name = tracer_concentration
   long_name = tracer concentration updated by physics
@@ -95,30 +71,6 @@
   dimensions = ()
   type = integer
   intent = in
-[save_u]
-  standard_name = x_wind_save
-  long_name = x-wind before entering a physics scheme
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[save_v]
-  standard_name = y_wind_save
-  long_name = y-wind before entering a physics scheme
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[save_t]
-  standard_name = air_temperature_save
-  long_name = air temperature before entering a physics scheme
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [save_q]
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme

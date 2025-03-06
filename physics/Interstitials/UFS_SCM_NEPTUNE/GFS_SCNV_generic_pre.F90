@@ -8,8 +8,8 @@
 !> \section arg_table_GFS_SCNV_generic_pre_run Argument Table
 !! \htmlinclude GFS_SCNV_generic_pre_run.html
 !!
-      subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, gu0, gv0, gt0, gq0, &
-        save_u, save_v, save_t, save_q, ntqv, nsamftrac, flag_for_scnv_generic_tend,       &
+      subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, gq0,                &
+        save_q, ntqv, nsamftrac, flag_for_scnv_generic_tend,                               &
         dtidx, index_of_process_scnv, ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,  &
         ntsigma, cscnv, satmedmf, trans_trac, ras, ntrac, clw, errmsg, errflg)
 
@@ -20,10 +20,8 @@
         integer, intent(in) :: im, levs, ntqv, nsamftrac, index_of_process_scnv, dtidx(:,:)
         integer, intent(in) :: ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc, ntsigma,ntrac
         logical, intent(in) :: ldiag3d, qdiag3d, flag_for_scnv_generic_tend
-        real(kind=kind_phys), dimension(:,:),   intent(in) :: gu0, gv0, gt0
         real(kind=kind_phys), dimension(:,:,:), intent(in) :: gq0
         real(kind=kind_phys), dimension(:,:,:), intent(inout) :: save_q
-        real(kind=kind_phys), dimension(:,:),   intent(inout) :: save_u, save_v, save_t
         character(len=*),                 intent(out) :: errmsg
         integer,                          intent(out) :: errflg
         logical, intent(in) :: cscnv, satmedmf, trans_trac, ras
@@ -36,13 +34,6 @@
         errflg = 0
 
         if (ldiag3d .and. flag_for_scnv_generic_tend) then
-          do k=1,levs
-            do i=1,im
-              save_u(i,k)   = gu0(i,k)
-              save_v(i,k)   = gv0(i,k)
-              save_t(i,k)   = gt0(i,k)
-            enddo
-          enddo
           if (qdiag3d) then
              if (cscnv .or. satmedmf .or. trans_trac .or. ras) then
                 tracers = 2
