@@ -46,7 +46,7 @@
   kind = kind_phys
   intent = in
 [tgrs]
-  standard_name = air_temperature
+  standard_name = physics_timestep_initial_air_temperature
   long_name = mid-layer temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -54,7 +54,7 @@
   kind = kind_phys
   intent = in
 [qgrs1]
-  standard_name = specific_humidity
+  standard_name = physics_timestep_initial_specific_humidity
   long_name = mid-layer specific humidity of water vapor
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

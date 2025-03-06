@@ -50,7 +50,7 @@
   type = logical
   intent = in
 [gq0_ice]
-  standard_name = cloud_ice_mixing_ratio_of_new_state
+  standard_name = cloud_ice_mixing_ratio
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -58,7 +58,7 @@
   kind = kind_phys
   intent = in
 [gq0_water]
-  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
+  standard_name = cloud_liquid_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -66,7 +66,7 @@
   kind = kind_phys
   intent = in
 [gq0_rain]
-  standard_name = rain_mixing_ratio_of_new_state
+  standard_name = rain_mixing_ratio
   long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -74,7 +74,7 @@
   kind = kind_phys
   intent = in
 [gq0_snow]
-  standard_name = snow_mixing_ratio_of_new_state
+  standard_name = snow_mixing_ratio
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -82,7 +82,7 @@
   kind = kind_phys
   intent = in
 [gq0_graupel]
-  standard_name = graupel_mixing_ratio_of_new_state
+  standard_name = graupel_mixing_ratio
   long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -90,7 +90,7 @@
   kind = kind_phys
   intent = in
 [gq0_rain_nc]
-  standard_name = mass_number_concentration_of_rain_of_new_state
+  standard_name = mass_number_concentration_of_rain
   long_name = number concentration of rain updated by physics
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -98,7 +98,7 @@
   kind = kind_phys
   intent = in
 [gq0_snow_nc]
-  standard_name = mass_number_concentration_of_snow_of_new_state
+  standard_name = mass_number_concentration_of_snow
   long_name = number concentration of snow updated by physics
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -106,7 +106,7 @@
   kind = kind_phys
   intent = in
 [gq0_graupel_nc]
-  standard_name = mass_number_concentration_of_graupel_of_new_state
+  standard_name = mass_number_concentration_of_graupel
   long_name = number concentration of graupel updated by physics
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -155,7 +155,7 @@
   kind = kind_phys
   intent = in
 [gt0]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
