@@ -119,9 +119,6 @@ contains
 !=====================================================================
 ! Updates inside the ugwpv1_gsldrag.F90
 !
-!        dtdt = dtdt + dtdt_gw
-!        dudt = dudt + dudt_gw
-!        dvdt = dvdt + dvdt_gw
 !
 !       "post" may  also create the "time-averaged" diagnostics"
 !            

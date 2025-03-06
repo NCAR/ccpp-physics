@@ -312,9 +312,9 @@ contains
           dudt_obl, dvdt_obl, du_oblcol, dv_oblcol,                                     &
           dudt_oss, dvdt_oss, du_osscol, dv_osscol,                                     &
           dudt_ofd, dvdt_ofd, du_ofdcol, dv_ofdcol,                                     &
-          dudt_ngw, dvdt_ngw, dtdt_ngw, kdis_ngw, dudt_gw, dvdt_gw, dtdt_gw, kdis_gw,   &
-          tau_ogw, tau_ngw,  tau_oss,                                                   &
-          zogw,  zlwb,  zobl,  zngw,   dusfcg, dvsfcg,  dudt, dvdt, dtdt, rdxzb,        &
+          dudt_ngw, dvdt_ngw, dtdt_ngw, kdis_ngw, dudt_gw, dvdt_gw, dtdt_gw, dqdt_gw,   &
+          kdis_gw, tau_ogw, tau_ngw,  tau_oss,                                          &
+          zogw,  zlwb,  zobl,  zngw,   dusfcg, dvsfcg, rdxzb,                           &
           dtend, dtidx, index_of_x_wind, index_of_y_wind, index_of_temperature,         &
           index_of_process_orographic_gwd, index_of_process_nonorographic_gwd,          &
           lprnt, ipr, spp_wts_gwd, spp_gwd, errmsg, errflg)
@@ -424,12 +424,10 @@ contains
 
     real(kind=kind_phys), intent(out) , dimension(:,:), optional :: dudt_ngw, dvdt_ngw, kdis_ngw, dtdt_ngw
     real(kind=kind_phys), intent(out) , dimension(:,:) :: dudt_gw,  dvdt_gw, dtdt_gw, kdis_gw
+    real(kind=kind_phys), intent(out) , dimension(:,:,:) :: dqdt_gw
 
     real(kind=kind_phys), intent(out) , dimension(:)   :: zogw, zlwb, zobl, zngw
 !
-!
-    real(kind=kind_phys), intent(inout), dimension(:,:) :: dudt, dvdt, dtdt
-
     real(kind=kind_phys), intent(inout), optional            :: dtend(:,:,:)
     integer, intent(in)                                      :: dtidx(:,:)
     integer, intent(in)                                 :: & 
@@ -511,7 +509,7 @@ contains
 
 ! ngw+ogw - diag
 
-       dudt_gw(:,:)=0. ;  dvdt_gw(:,:)=0.  ; dtdt_gw(:,:)=0.  ; kdis_gw(:,:)=0.
+       dudt_gw(:,:)=0. ;  dvdt_gw(:,:)=0.  ; dtdt_gw(:,:)=0.  ; dqdt_gw(:,:,:)=0. ; kdis_gw(:,:)=0.
 ! source fluxes
 
       tau_ogw(:)=0. ; tau_ngw(:)=0. ;  tau_oss(:)=0.
@@ -749,12 +747,6 @@ contains
         dtdt_gw =  Pdtdt
         kdis_gw =  Pkdis
      end if
-!
-! accumulate "tendencies" as in the GFS-ipd (pbl + ugwp + zero-RF)
-!
-     dudt  = dudt  + dudt_gw
-     dvdt  = dvdt  + dvdt_gw
-     dtdt  = dtdt  + dtdt_gw
 
     end subroutine ugwpv1_gsldrag_run
 end module ugwpv1_gsldrag

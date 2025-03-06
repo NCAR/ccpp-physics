@@ -203,7 +203,7 @@
 !> \section det_drag_suite GFS Orographic GWD Scheme Detailed Algorithm
 !> @{
    subroutine drag_suite_run(                                           &
-     &           IM,KM,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,                 &
+     &           IM,KM,dvdt,dudt,dtdt,dqdt,U1,V1,T1,Q1,KPBL,            &
      &           PRSI,DEL,PRSL,PRSLK,PHII,PHIL,DELTIM,KDT,              &
      &           var,oc1,oa4,ol4,                                       &
      &           varss,oc1ss,oa4ss,ol4ss,                               &
@@ -335,9 +335,9 @@
    real(kind=kind_phys) ::  rcl, cdmb
    real(kind=kind_phys) ::  g_inv, rd_inv
 
-   real(kind=kind_phys), intent(inout) ::                        &
+   real(kind=kind_phys), intent(out) ::                        &
      &                   dudt(:,:),dvdt(:,:),                &
-     &                   dtdt(:,:)
+     &                   dtdt(:,:),dqdt(:,:,:)
    real(kind=kind_phys), intent(inout) :: rdxzb(:)
    real(kind=kind_phys), intent(in) ::                           &
      &                            u1(:,:),v1(:,:),           &
@@ -536,7 +536,12 @@
    udtend = -1
    vdtend = -1
    Tdtend = -1
-
+   
+   dudt(:,:)  = 0.
+   dvdt(:,:)  = 0.
+   dtdt(:,:)  = 0.
+   dqdt(:,:,:)= 0.
+   
    if(ldiag3d) then
       udtend = dtidx(index_of_x_wind,index_of_process_orographic_gwd)
       vdtend = dtidx(index_of_y_wind,index_of_process_orographic_gwd)
@@ -1548,7 +1553,7 @@ endif
    real(kind=kind_phys) ::  rcl, cdmb
    real(kind=kind_phys) ::  g_inv, g_cp, rd_inv
 
-   real(kind=kind_phys), intent(inout) ::                        &
+   real(kind=kind_phys), intent(out) ::                        &
      &                   dudt(:,:),dvdt(:,:),                &
      &                   dtdt(:,:)
    real(kind=kind_phys), intent(out) :: rdxzb(:)
@@ -1758,7 +1763,11 @@ endif
    udtend = -1
    vdtend = -1
    Tdtend = -1
-
+   
+   dudt(:,:)  = 0.
+   dvdt(:,:)  = 0.
+   dtdt(:,:)  = 0.
+   
    if(ldiag3d) then
       udtend = dtidx(index_of_x_wind,index_of_process_orographic_gwd)
       vdtend = dtidx(index_of_y_wind,index_of_process_orographic_gwd)
