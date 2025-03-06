@@ -223,6 +223,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cosz]
   standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
   long_name = cosine of the solar zenit angle

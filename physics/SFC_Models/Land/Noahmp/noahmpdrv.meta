@@ -96,6 +96,233 @@
   dimensions = ()
   type = integer
   intent = out
+[land_iau_control]
+  standard_name = land_data_assimilation_control
+  long_name = land data assimilation control
+  units = mixed
+  dimensions = ()
+  type = land_iau_control_type
+  intent = inout
+  optional = True
+[land_iau_data]
+  standard_name = land_data_assimilation_data
+  long_name = land data assimilation data
+  units = mixed
+  dimensions = ()
+  type = land_iau_external_data_type
+  intent = inout
+  optional = True
+[land_iau_state]
+  standard_name = land_data_assimilation_interpolated_data
+  long_name = land data assimilation space- and time-interpolated
+  units = mixed
+  dimensions = ()
+  type = land_iau_state_type
+  intent = inout
+  optional = True
+
+########################################################################
+[ccpp-arg-table]
+  name = noahmpdrv_timestep_init
+  type = scheme
+[itime]
+  standard_name = index_of_timestep
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[fhour]
+  standard_name = forecast_time
+  long_name = current forecast time
+  units = h
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[delt]
+  standard_name = timestep_for_dynamics
+  long_name = dynamics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[km]
+  standard_name = vertical_dimension_of_soil
+  long_name = vertical dimension of soil layers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ncols]
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[isot]
+  standard_name = control_for_soil_type_dataset
+  long_name = soil type dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ivegsrc]
+  standard_name = control_for_vegetation_dataset
+  long_name = land use dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[soiltyp]
+  standard_name = soil_type_classification
+  long_name = soil type at each grid cell
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent= in
+[vegtype]
+  standard_name = vegetation_type_classification
+  long_name = vegetation type at each grid cell
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent= in
+[weasd]
+  standard_name = water_equivalent_accumulated_snow_depth_over_land
+  long_name = water equivalent of accumulated snow depth over land
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[land_iau_control]
+  standard_name = land_data_assimilation_control
+  long_name = land data assimilation control
+  units = mixed
+  dimensions = ()
+  type = land_iau_control_type
+  intent = inout
+[land_iau_data]
+  standard_name = land_data_assimilation_data
+  long_name = land data assimilation data
+  units = mixed
+  dimensions = ()
+  type = land_iau_external_data_type
+  intent = inout
+[land_iau_state]
+  standard_name = land_data_assimilation_interpolated_data
+  long_name = land data assimilation space- and time-interpolated
+  units = mixed
+  dimensions = ()
+  type = land_iau_state_type
+  intent = inout
+[stc]
+  standard_name = soil_temperature
+  long_name = soil temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension_of_soil)
+  type = real
+  kind = kind_phys
+  intent = inout
+[slc]
+  standard_name = volume_fraction_of_unfrozen_water_in_soil
+  long_name = liquid soil moisture
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension_of_soil)
+  type = real
+  kind = kind_phys
+  intent = inout
+[smc]
+  standard_name = volume_fraction_of_condensed_water_in_soil
+  long_name = total soil moisture
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension_of_soil)
+  type = real
+  kind = kind_phys
+  intent = inout
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degree Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_hfus]
+  standard_name = latent_heat_of_fusion_of_water_at_0C
+  long_name = latent heat of fusion
+  units = J kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+
+#######################################################################
+[ccpp-arg-table]
+  name = noahmpdrv_finalize
+  type = scheme
+[land_iau_control]
+  standard_name = land_data_assimilation_control
+  long_name = land data assimilation control
+  units = mixed
+  dimensions = ()
+  type = land_iau_control_type
+  intent = in
+[land_iau_data]
+  standard_name = land_data_assimilation_data
+  long_name = land data assimilation data
+  units = mixed
+  dimensions = ()
+  type = land_iau_external_data_type
+  intent = inout
+[land_iau_state]
+  standard_name = land_data_assimilation_interpolated_data
+  long_name = land data assimilation space- and time-interpolated
+  units = mixed
+  dimensions = ()
+  type = land_iau_state_type
+  intent = inout
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
 
 ########################################################################
 [ccpp-arg-table]

@@ -1,0 +1,58 @@
+[ccpp-table-properties]
+  name = land_iau_external_data_type
+  type = ddt
+  dependencies =
+
+[ccpp-arg-table]
+  name = land_iau_external_data_type
+  type = ddt
+
+########################################################################
+
+[ccpp-table-properties]
+  name = land_iau_state_type
+  type = ddt
+  dependencies =
+
+[ccpp-arg-table]
+  name = land_iau_state_type
+  type = ddt
+
+########################################################################
+
+[ccpp-table-properties]
+  name = land_iau_control_type
+  type = ddt
+  dependencies =
+
+[ccpp-arg-table]
+  name = land_iau_control_type
+  type = ddt
+
+########################################################################
+[ccpp-table-properties]
+  name = land_iau_mod
+  type = module
+  dependencies = machine.F
+
+[ccpp-arg-table]
+  name = land_iau_mod
+  type = module
+[land_iau_external_data_type]
+  standard_name = land_iau_external_data_type
+  long_name = definition of type land_iau_external_data_type
+  units = DDT
+  dimensions = ()
+  type = land_iau_external_data_type
+[land_iau_state_type]
+  standard_name = land_iau_state_type
+  long_name = definition of type land_iau_state_type
+  units = DDT
+  dimensions = ()
+  type = land_iau_state_type
+[land_iau_control_type]
+  standard_name = land_iau_control_type
+  long_name = definition of type land_iau_control_type
+  units = DDT
+  dimensions = ()
+  type = land_iau_control_type

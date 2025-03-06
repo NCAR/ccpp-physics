@@ -275,6 +275,13 @@
   dimensions = ()
   type = integer
   intent = in
+[conv_cf_opt]
+  standard_name = option_for_convection_scheme_cloud_fraction_computation 
+  long_name = option for convection scheme cloud fraction computation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [qc_save]
   standard_name = cloud_condensed_water_mixing_ratio_save
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) before entering a physics scheme

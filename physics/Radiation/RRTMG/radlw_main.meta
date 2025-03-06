@@ -199,6 +199,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [npts]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
