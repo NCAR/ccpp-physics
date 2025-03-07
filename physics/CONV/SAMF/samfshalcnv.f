@@ -54,7 +54,7 @@
      &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
      &     t0c,delt,ntk,ntr,delp,first_time_step,restart,               & 
      &     tmf,qmicro,progsigma,progomega,                              &
-     &     prslp,psp,phil,qtr,prevsq,q,q1,t1,u1,v1,fscav,               &
+     &     prslp,psp,phil,tkeh,qtr,prevsq,q,q1,t1,u1,v1,fscav,          &
      &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
      &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,                & 
@@ -84,7 +84,7 @@
       integer, intent(inout)  :: kcnv(:)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
       real(kind=kind_phys), intent(inout) ::   qtr(:,:,:),              &
-     &   q1(:,:), t1(:,:), u1(:,:), v1(:,:)
+     &   q1(:,:), t1(:,:), u1(:,:), v1(:,:), tkeh(:,:)
 !
       integer, intent(out) :: kbot(:), ktop(:)
       real(kind=kind_phys), intent(out) :: rn(:),                       &
@@ -875,14 +875,13 @@ c
             tkemean(i) = 0.
           endif
         enddo
-
+!
         do k = 1, km1
           do i = 1, im
             if(cnvflg(i)) then
               if(k >= kb(i) .and. k < kbcon(i)) then
                 dz = zo(i,k+1) - zo(i,k)
-                tem = 0.5 * (qtr(i,k,ntk)+qtr(i,k+1,ntk))
-                tkemean(i) = tkemean(i) + tem * dz
+                tkemean(i) = tkemean(i) + tkeh(i,k) * dz
                 sumx(i) = sumx(i) + dz
               endif
             endif
@@ -1096,6 +1095,24 @@ c
              enddo
            enddo
          enddo
+         if(ntk > 2) then
+           kk = ntk -2
+           do k = 2, km1
+             do i = 1, im
+               if (cnvflg(i)) then
+                 if(k > kb(i) .and. k < kmax(i)) then
+                   dz = zi(i,k) - zi(i,k-1)
+                   tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
+                   tem  = cq * tem
+                   factor = 1. + tem
+                   ecko(i,k,kk) = ((1. - tem) * ecko(i,k-1,kk) + tem *
+     &                   (ctro(i,k,kk) + ctro(i,k-1,kk))) / factor
+                   ercko(i,k,kk) = ecko(i,k,kk)
+                 endif
+               endif
+             enddo
+           enddo
+         endif
        endif
       endif
 c
@@ -2008,7 +2025,7 @@ c
          flag_mid = .false.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
      &        flag_mid,del,tmfq,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,
-     &        delt,qadv,kbcon1,ktcon,cnvflg,betascu,betamcu,betadcu,
+     &        delt,qadv,kb,kbcon1,ktcon,cnvflg,betascu,betamcu,betadcu,
      &        sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)
       endif
 
