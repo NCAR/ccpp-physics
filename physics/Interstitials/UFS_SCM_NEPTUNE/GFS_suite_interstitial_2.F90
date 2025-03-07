@@ -33,7 +33,7 @@
       real(kind=kind_phys), intent(in   ), dimension(:), optional :: ulwsfc_cice
       real(kind=kind_phys), intent(in   ), dimension(:)     :: cice
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: htrsw, htrlw, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
-      real(kind=kind_phys), intent(in   ), dimension(:,:), optional :: htrlwu
+      real(kind=kind_phys), intent(inout), dimension(:,:), optional :: htrlwu
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: prsi
       real(kind=kind_phys), intent(in   ), dimension(:,:,:) :: lwhd
       integer,              intent(inout), dimension(:)     :: kinver
@@ -235,3 +235,4 @@
     end subroutine GFS_suite_interstitial_2_run
 
   end module GFS_suite_interstitial_2
+

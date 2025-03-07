@@ -842,7 +842,7 @@ contains
     real(kind_phys) :: rho, orho
     real(kind_phys),dimension(nCol,nLev) :: qv_mp, qc_mp, qi_mp, qs_mp, ni_mp, nc_mp,    &
          nwfa, re_cloud, re_ice, re_snow
-    integer :: ilsmask 
+    integer :: ilsmask
 
     ! Prepare cloud mixing-ratios and number concentrations for calc_effectRa
     do iLay = 1, nLev

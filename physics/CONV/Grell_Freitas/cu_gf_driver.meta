@@ -445,16 +445,16 @@
   dimensions = ()
   type = integer
   intent = in
-[ntcw]
-  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for cloud condensate (or liquid water)
+[ntiw]
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for  ice water
   units = index
   dimensions = ()
   type = integer
   intent = in
-[ntiw]
-  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for  ice water
+[ntcw]
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
   type = integer
@@ -494,29 +494,6 @@
   dimensions = ()
   type = integer
   intent = in
-[dfi_radar_max_intervals]
-  standard_name = maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals
-  long_name = maximum allowed number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[ldiag3d]
-  standard_name = flag_for_diagnostics_3D
-  long_name = flag for 3d diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[qci_conv]
-  standard_name = convective_cloud_condesate_after_rainout
-  long_name = convective cloud condesate after rainout
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
 [fhour]
   standard_name = forecast_time
   long_name = current forecast time
@@ -524,13 +501,6 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  intent = in
-[do_cap_suppress]
-  standard_name = flag_for_radar_derived_convection_suppression
-  long_name = flag for radar-derived convection suppression
-  units = flag
-  dimensions = ()
-  type = logical
   intent = in
 [fh_dfi_radar]
   standard_name = forecast_lead_times_bounding_radar_derived_temperature_or_convection_suppression_intervals
@@ -563,6 +533,36 @@
   kind = kind_phys
   intent = in
   optional = True
+[dfi_radar_max_intervals]
+  standard_name = maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = maximum allowed number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ldiag3d]
+  standard_name = flag_for_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[qci_conv]
+  standard_name = convective_cloud_condesate_after_rainout
+  long_name = convective cloud condesate after rainout
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[do_cap_suppress]
+  standard_name = flag_for_radar_derived_convection_suppression
+  long_name = flag for radar-derived convection suppression
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [maxupmf]
   standard_name = maximum_convective_updraft_mass_flux
   long_name = maximum convective updraft mass flux within a column
@@ -616,6 +616,13 @@
   dimensions = ()
   type = integer
   intent = in
+[spp_cu_deep]
+  standard_name = control_for_deep_convection_spp_perturbations
+  long_name = control for deep convection spp perturbations
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [spp_wts_cu_deep]
   standard_name = spp_weights_for_cu_deep_scheme
   long_name = spp weights for cu deep scheme
@@ -625,13 +632,6 @@
   kind = kind_phys
   intent = in
   optional = True
-[spp_cu_deep]
-  standard_name = control_for_deep_convection_spp_perturbations
-  long_name = control for deep convection spp perturbations
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [nchem]
   standard_name = number_of_chemical_species_vertically_mixed
   long_name = number of chemical species vertically mixed
@@ -656,13 +656,6 @@
   type = real
   kind = kind_phys
   intent = in
-[do_smoke_transport]
-  standard_name = do_smoke_conv_transport
-  long_name = flag for rrfs smoke convective transport
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [wetdpc_deep]
   standard_name = conv_wet_deposition_smoke_dust
   long_name = convective wet removal of smoke and dust
@@ -672,6 +665,13 @@
   kind = kind_phys
   intent = inout
   optional = True
+[do_smoke_transport]
+  standard_name = do_smoke_conv_transport
+  long_name = flag for rrfs smoke convective transport
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration

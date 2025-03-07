@@ -392,7 +392,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [us3d]
   standard_name = x_wind_of_new_state
   long_name = updated x-direction wind
@@ -400,7 +400,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [vs3d]
   standard_name = y_wind_of_new_state
   long_name = updated y-direction wind
@@ -408,7 +408,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [spechum]
   standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
@@ -416,7 +416,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [w]
   standard_name = lagrangian_tendency_of_air_pressure
   long_name = layer mean vertical velocity
@@ -439,7 +439,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_of_soil_internal_to_land_surface_scheme)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = True
 [tslb]
   standard_name = soil_temperature_for_land_surface_model
@@ -457,6 +457,14 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
+[vegtype_frac]
+  standard_name = fraction_of_vegetation_category
+  long_name = fraction of horizontal grid area occupied by given vegetation category
+  units = frac
+  dimensions = (horizontal_loop_extent,number_of_vegetation_categories)
+  type = real
+  kind = kind_phys
+  intent = in
 [soiltyp]
   standard_name = soil_type_classification
   long_name = soil type at each grid cell
@@ -470,14 +478,6 @@
   units = count
   dimensions = ()
   type = integer
-  intent = in
-[vegtype_frac]
-  standard_name = fraction_of_vegetation_category
-  long_name = fraction of horizontal grid area occupied by given vegetation category
-  units = frac
-  dimensions = (horizontal_loop_extent,number_of_vegetation_categories)
-  type = real
-  kind = kind_phys
   intent = in
 [dswsfc]
   standard_name = surface_downwelling_shortwave_flux
@@ -752,6 +752,24 @@
   kind = kind_phys
   intent = inout
   optional = True
+[drydep_flux_out]
+  standard_name = dry_deposition_flux
+  long_name = rrfs dry deposition flux
+  units = ug m-2
+  dimensions = (horizontal_loop_extent,number_of_chemical_species_deposited)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[wetdpr]
+  standard_name = mp_wet_deposition_smoke_dust
+  long_name = large scale wet deposition of smoke and dust
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,number_of_chemical_species_vertically_mixed)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
 [ebb_smoke_in]
   standard_name = surface_smoke_emission
   long_name = emission of surface smoke
@@ -823,72 +841,6 @@
   kind = kind_phys
   intent = inout
   optional = True
-[mpicomm]
-  standard_name = mpi_communicator
-  long_name = MPI communicator
-  units = index
-  dimensions = ()
-  type = MPI_Comm
-  intent = in
-[mpirank]
-  standard_name = mpi_rank
-  long_name = current MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[mpiroot]
-  standard_name = mpi_root
-  long_name = master MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[rho_dry]
-  standard_name = dry_air_density
-  long_name = dry air density
-  units = kg m-3
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[uspdavg]
-  standard_name = mean_wind_speed_in_boundary_layer
-  long_name = average wind speed within the boundary layer
-  units = m s-1
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[hpbl_thetav]
-  standard_name = atmosphere_boundary_layer_thickness_from_modified_parcel
-  long_name = pbl height based on modified parcel method
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[drydep_flux_out]
-  standard_name = dry_deposition_flux
-  long_name = rrfs dry deposition flux
-  units = ug m-2
-  dimensions = (horizontal_loop_extent,number_of_chemical_species_deposited)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[wetdpr]
-  standard_name = mp_wet_deposition_smoke_dust
-  long_name = large scale wet deposition of smoke and dust
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,number_of_chemical_species_vertically_mixed)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
 [hwp]
   standard_name = hourly_wildfire_potential
   long_name = rrfs hourly fire weather potential
@@ -896,7 +848,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = True
 [hwp_ave]
   standard_name = hourly_wildfire_potential_average
@@ -932,32 +884,48 @@
   kind = kind_phys
   intent = inout
   optional = True
+[smoke_fire]
+  standard_name = smoke_emission_of_fire
+  long_name = smoke emission of fire
+  units = kg m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[cpl_fire]
+  standard_name = do_fire_coupling
+  long_name = flag controlling fire_behavior collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [peak_hr_out]
- standard_name = peak_hr_fire
- long_name = time_of_peak_fire_emissions
- units = s
- dimensions = (horizontal_loop_extent)
- type = real
- kind = kind_phys
- intent = out
+  standard_name = peak_hr_fire
+  long_name = time_of_peak_fire_emissions
+  units = s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = True
 [lu_nofire_out]
- standard_name = sum_of_land_use_fractions_for_no_fire_pixels
- long_name = land use of no fire pixels for type
- units = 1
- dimensions = (horizontal_loop_extent)
- type = real
- kind = kind_phys
- intent = out
+  standard_name = sum_of_land_use_fractions_for_no_fire_pixels
+  long_name = land use of no fire pixels for type
+  units = 1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = True
 [lu_qfire_out]
- standard_name = sum_of_land_use_fractions_for_cropland_fire_pixels
- long_name = land use of fire pixels for type
- units = 1
- dimensions = (horizontal_loop_extent)
- type = real
- kind = kind_phys
- intent = out
+  standard_name = sum_of_land_use_fractions_for_cropland_fire_pixels
+  long_name = land use of fire pixels for type
+  units = 1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = True
 [fire_heat_flux_out]
   standard_name = surface_fire_heat_flux
@@ -985,15 +953,6 @@
   type = real
   kind = kind_phys
   intent = in
-[smoke_fire]
-  standard_name = smoke_emission_of_fire
-  long_name = smoke emission of fire
-  units = kg m-2
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
 [totprcp]
   standard_name = accumulated_lwe_thickness_of_precipitation_amount
   long_name = accumulated total precipitation
@@ -1002,12 +961,53 @@
   type = real
   kind = kind_phys
   intent = in
-[cpl_fire]
-  standard_name = do_fire_coupling
-  long_name = flag controlling fire_behavior collection (default off)
-  units = flag
+[uspdavg]
+  standard_name = mean_wind_speed_in_boundary_layer
+  long_name = average wind speed within the boundary layer
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[hpbl_thetav]
+  standard_name = atmosphere_boundary_layer_thickness_from_modified_parcel
+  long_name = pbl height based on modified parcel method
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[rho_dry]
+  standard_name = dry_air_density
+  long_name = dry air density
+  units = kg m-3
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
   dimensions = ()
-  type = logical
+  type = MPI_Comm
+  intent = in
+[mpirank]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
   intent = in
 [errmsg]
   standard_name = ccpp_error_message
