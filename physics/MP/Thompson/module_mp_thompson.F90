@@ -1806,7 +1806,7 @@ module module_mp_thompson
       !deallocate (vtsk1)
       !deallocate (txri1)
       !deallocate (txrc1)
-      deallocate_extended_diagnostics: if (ext_diag) then
+      ! deallocate_extended_diagnostics: if (ext_diag) then
          deallocate (prw_vcdc1)
          deallocate (prw_vcde1)
          deallocate (tpri_inu1)
@@ -1844,7 +1844,7 @@ module module_mp_thompson
          deallocate (nrten1)
          deallocate (ncten1)
          deallocate (qcten1)
-      end if deallocate_extended_diagnostics
+      ! end if deallocate_extended_diagnostics
 
    end subroutine mp_gt_driver
 !> @}
