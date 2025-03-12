@@ -2848,6 +2848,7 @@
       jgds    = -1
       jpds(5) = kpds5
       kpds    = jpds
+      kgds    = jgds
 !
       call getgbh(lugb,lugi,lskip,jpds,jgds,lgrib,ndata,
      &            lskip,kpds,kgds,iret)
@@ -4034,6 +4035,7 @@
         jpds=-1
         jgds=-1
         kpds=jpds
+        kgds=jgds
         call getgbh(lugb,lugi,lskip,jpds,jgds,lgrib,ndata,
      &              lskip,kpds,kgds,iret)
         close(lugb)
@@ -8468,6 +8470,7 @@ cjfe
       jpds(5) = kpds5
       jpds(7) = kpds7
       kpds    = jpds
+      kgds    = jgds
       call getgbh(lugb,lugi,lskip,jpds,jgds,lgrib,ndata,
      &            lskip,kpds,kgds,iret)
       if (me .eq. 0) then
@@ -8681,6 +8684,7 @@ cjfe
       jgds=-1
       jpds(5)=kpds5
       kpds = jpds
+      kgds = jgds
       call getgbh(lugb,lugi,lskip,jpds,jgds,lgrib,ndata,
      &            lskip,kpds,kgds,iret)
       if (me .eq. 0) then
