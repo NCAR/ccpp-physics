@@ -4011,6 +4011,7 @@
 !  read in snow depth/snow cover
 !
       irtscv=0
+      irtsno=0
       if(fnsnoa(1:8).ne.'        ') then
         do i=1,len
           scvanl(i)=0.
