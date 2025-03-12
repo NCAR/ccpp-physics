@@ -6,7 +6,7 @@ project(ccpp_physics
 
 #------------------------------------------------------------------------------
 set(PACKAGE "ccpp-physics")
-set(AUTHORS "Grant Firl" "Dustin Swales" "Man Zhang" "Mike Kavulich" )
+set(AUTHORS "Grant Firl" "Dustin Swales" "Dom Heinzeller" "Man Zhang" "Mike Kavulich")
 
 #------------------------------------------------------------------------------
 # Set MPI flags for Fortran with MPI F08 interface
@@ -17,7 +17,7 @@ endif()
 
 #------------------------------------------------------------------------------
 # Set OpenMP flags for C/C++/Fortran
-if (OPENMP)
+if(OPENMP)
   find_package(OpenMP REQUIRED)
 endif()
 
@@ -51,12 +51,6 @@ else(TYPEDEFS)
 endif(TYPEDEFS)
 list(REMOVE_DUPLICATES TYPEDEFS)
 
-# Generate list of Fortran modules from the CCPP type
-# definitions that need need to be installed
-foreach(typedef_module ${TYPEDEFS})
-    list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${typedef_module})
-endforeach()
-
 #------------------------------------------------------------------------------
 # Set the sources: physics schemes
 set(SCHEMES $ENV{CCPP_SCHEMES})
@@ -78,45 +72,40 @@ else(CAPS)
 endif(CAPS)
 list(REMOVE_DUPLICATES CAPS)
 
-# Schemes and caps from the CCPP code generator use full paths with symlinks
-# resolved, we need to do the same here for the below logic to work
-get_filename_component(FULL_PATH_TO_CMAKELISTS CMakeLists.txt REALPATH BASE_DIR ${LOCAL_CURRENT_SOURCE_DIR})
-get_filename_component(LOCAL_CURRENT_SOURCE_DIR ${FULL_PATH_TO_CMAKELISTS} DIRECTORY)
-
 #------------------------------------------------------------------------------
 
 # List of files that need to be compiled without OpenMP
-set(SCHEMES_OPENMP_OFF ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rrtmgp/mo_gas_optics.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rrtmgp/mo_rrtmgp_constants.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rrtmgp/mo_gas_concentrations.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rrtmgp/mo_rrtmgp_util_string.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/mo_rrtmgp_clr_all_sky.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/mo_fluxes_byband.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/solar_variability/mo_solar_variability.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/mo_heating_rates.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/mo_fluxes_bygpoint.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/mo_compute_bc.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/cloud_optics/mo_cloud_sampling.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/cloud_optics/mo_cloud_optics.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_rte_config.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_source_functions.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_rte_sw.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_fluxes.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_rte_lw.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_rte_util_array.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/kernels/mo_optical_props_kernels.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_rte_kind.F90
-                       ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_optical_props.F90)
+set(SCHEMES_OPENMP_OFF ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rrtmgp/mo_gas_optics.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rrtmgp/mo_rrtmgp_constants.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rrtmgp/mo_gas_concentrations.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rrtmgp/mo_rrtmgp_util_string.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/mo_rrtmgp_clr_all_sky.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/mo_fluxes_byband.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/solar_variability/mo_solar_variability.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/mo_heating_rates.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/mo_fluxes_bygpoint.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/mo_compute_bc.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/cloud_optics/mo_cloud_sampling.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/extensions/cloud_optics/mo_cloud_optics.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_rte_config.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_source_functions.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_rte_sw.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_fluxes.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_rte_lw.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_rte_util_array.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/kernels/mo_optical_props_kernels.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_rte_kind.F90
+                       ${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte/mo_optical_props.F90)
 
 # List of files that need to be compiled with different precision
 set(SCHEMES_DYNAMICS)
 
-if(${LOCAL_CURRENT_SOURCE_DIR}/physics/MP/GFDL/fv_sat_adj.F90 IN_LIST SCHEMES)
-  list(APPEND SCHEMES_DYNAMICS ${LOCAL_CURRENT_SOURCE_DIR}/physics/MP/GFDL/fv_sat_adj.F90)
+if(${CMAKE_CURRENT_SOURCE_DIR}/physics/MP/GFDL/fv_sat_adj.F90 IN_LIST SCHEMES)
+  list(APPEND SCHEMES_DYNAMICS ${CMAKE_CURRENT_SOURCE_DIR}/physics/MP/GFDL/fv_sat_adj.F90)
 endif()
 
 # Remove files that need to be compiled with different precision
@@ -137,55 +126,75 @@ endif()
 
 # Assign standard floating point precision flags to all remaining schemes and caps
 SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
-             APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS}")
+             APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS}")
+
+if(OPENMP)
+  # Compile all remaining schemes and caps with OpenMP flags
+   SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
+               APPEND_STRING PROPERTY COMPILE_FLAGS "${OpenMP_Fortran_FLAGS}")
+endif()
+
+# For CAPS, remove bounds checks with Intel Classic (ifort), Intel LLVM (ifx),
+# and GNU (gfortran) to avoid the compilation being killed or taking forever
+if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel" OR ${CMAKE_Fortran_COMPILER_ID} STREQUAL "IntelLLVM")
+  set_PROPERTY(SOURCE ${CAPS}
+               APPEND_STRING PROPERTY COMPILE_FLAGS "-check nobounds")
+elseif(${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
+  set_PROPERTY(SOURCE ${CAPS}
+               APPEND_STRING PROPERTY COMPILE_FLAGS "-fcheck=no-bounds")
+endif()
 
 # Lower optimization for certain schemes when compiling with Intel in Release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel" OR ${CMAKE_Fortran_COMPILER_ID} STREQUAL "IntelLLVM"))
   # Define a list of schemes that need lower optimization with Intel in Release mode
-  set(SCHEME_NAMES_LOWER_OPTIMIZATION module_sf_mynn.F90
-                                      module_mp_nssl_2mom.F90
-                                      mynnedmf_wrapper.F90
-                                      gcycle.F90)
+  set(SCHEME_NAMES_LOWER_OPTIMIZATION
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/mynnedmf_wrapper.F90
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/gcycle.F90
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_mp_nssl_2mom.F90
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90
+  )
   foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_LOWER_OPTIMIZATION)
-    set(SCHEMES_TMP ${SCHEMES})
-    # Need to determine the name of the scheme with its path
-    list(FILTER SCHEMES_TMP INCLUDE REGEX ".*${SCHEME_NAME}$")
-    SET_SOURCE_FILES_PROPERTIES(${SCHEMES_TMP}
-                                APPEND_STRING PROPERTY COMPILE_FLAGS
-                                " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS} -O1")
+    SET_SOURCE_FILES_PROPERTIES(${SCHEME_NAME}
+                                APPEND_STRING PROPERTY COMPILE_FLAGS "-O1")
   endforeach()
 endif()
 
 # No optimization for certain schemes when compiling with Intel in Release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel" OR ${CMAKE_Fortran_COMPILER_ID} STREQUAL "IntelLLVM"))
   # Define a list of schemes that can't be optimized with Intel in Release mode
-  set(SCHEME_NAMES_NO_OPTIMIZATION GFS_typedefs.F90)
+  set(SCHEME_NAMES_NO_OPTIMIZATION
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/aerinterp.F90
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/GFS_typedefs.F90
+  )
   foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_NO_OPTIMIZATION)
-    set(SCHEMES_TMP ${SCHEMES})
-    # Need to determine the name of the scheme with its path
-    list(FILTER SCHEMES_TMP INCLUDE REGEX ".*${SCHEME_NAME}$")
-    SET_SOURCE_FILES_PROPERTIES(${SCHEMES_TMP}
-                                APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS} -O0")
+    SET_SOURCE_FILES_PROPERTIES(${SCHEME_NAME}
+                                APPEND_STRING PROPERTY COMPILE_FLAGS "-O0")
   endforeach()
+endif()
+
+if(${CMAKE_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f IN_LIST SCHEMES)
+  if(${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
+    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
+                                APPEND_STRING PROPERTY COMPILE_FLAGS " -fno-range-check")
+  endif()
 endif()
 
 #------------------------------------------------------------------------------
 
+set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR})
+
 add_library(ccpp_physics STATIC ${SCHEMES} ${SCHEMES_OPENMP_OFF} ${SCHEMES_DYNAMICS} ${CAPS})
-# Generate list of Fortran modules from defined sources
-foreach(source_f90 ${CAPS})
-    get_filename_component(tmp_source_f90 ${source_f90} NAME)
-    string(REGEX REPLACE ".F90" ".mod" tmp_module_f90 ${tmp_source_f90})
-    string(TOLOWER ${tmp_module_f90} module_f90)
-    list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${module_f90})
-endforeach()
 
 set_target_properties(ccpp_physics PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR})
 
 target_include_directories(ccpp_physics PUBLIC
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+  INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
+target_link_libraries(ccpp_physics PRIVATE MPI::MPI_Fortran)
 target_link_libraries(ccpp_physics PUBLIC w3emc::w3emc_d
                                           sp::sp_d
                                           NetCDF::NetCDF_Fortran)
@@ -202,6 +211,5 @@ install(EXPORT ccpp_physics-targets
         FILE ccpp_physics-config.cmake
         DESTINATION lib/cmake
 )
-# Define where to install the C headers and Fortran modules
-#install(FILES ${HEADERS_C} DESTINATION include)
-install(FILES ${MODULES_F90} DESTINATION include)
+
+install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
