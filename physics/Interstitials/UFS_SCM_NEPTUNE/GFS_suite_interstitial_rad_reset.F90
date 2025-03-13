@@ -13,7 +13,7 @@ contains
 !> \section arg_table_GFS_suite_interstitial_rad_reset_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_rad_reset_run.html
 !!
-  subroutine GFS_suite_interstitial_rad_reset_run (do_RRTMGP, clear_val, aerodp, alb1d,     &
+  subroutine GFS_suite_interstitial_rad_reset_run (im, do_RRTMGP, clear_val, aerodp, alb1d, &
        alpha, cldsa, cldtaulw, cldtausw, cloud_frac, cloud_lwp, cloud_reliq, cloud_iwp,     &
        cloud_reice, cloud_rwp, cloud_rerain, cloud_swp, cloud_resnow, de_lgth, delr, dzlyr, &
        faerlw, faersw, gasvmr_co2, gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co,            &
@@ -30,6 +30,7 @@ contains
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw, toa_src_lw, vmr_o2, vmr_h2o,       &
        vmr_o3, vmr_ch4, vmr_n2o, vmr_co2, flxprf_lw, flxprf_sw, errmsg, errflg)
     !
+    integer,            intent(in   ) :: im
     logical,            intent(in   ) :: do_RRTMGP
     real(kind_phys),    intent(in   ) :: clear_val
     real (kind_phys),   intent(inout) :: aerodp(:,:), alb1d(:), cldsa(:,:),                 &

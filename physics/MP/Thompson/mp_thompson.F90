@@ -354,7 +354,7 @@ module mp_thompson
                               refl_10cm, fullradar_diag,           &
                               max_hail_diam_sfc,                   &
                               do_radar_ref, aerfld,                &
-                              mpicomm, mpirank, mpiroot, blkno,    &
+                              mpicomm, mpirank, mpiroot, chunk_no, &
                               ext_diag, diag3d, reset_diag3d,      &
                               spp_wts_mp, spp_mp, n_var_spp,       &
                               spp_prt_list, spp_var_list,          &
@@ -416,7 +416,7 @@ module mp_thompson
          logical,                   intent(in)    :: sedi_semi
          integer,                   intent(in)    :: decfl
          ! MPI and block information
-         integer,                   intent(in)    :: blkno
+         integer,                   intent(in)    :: chunk_no
          type(MPI_Comm),            intent(in)    :: mpicomm
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
@@ -526,7 +526,7 @@ module mp_thompson
          errmsg = ''
          errflg = 0
 
-         if (first_time_step .and. istep==1 .and. blkno==1) then
+         if (first_time_step .and. istep==1 .and. chunk_no==1) then
             ! Check initialization state
             if (.not.is_initialized) then
                write(errmsg, fmt='((a))') 'mp_thompson_run called before mp_thompson_init'

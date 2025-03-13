@@ -8,6 +8,13 @@
 [ccpp-arg-table]
   name = GFS_suite_interstitial_rad_reset_run
   type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [do_RRTMGP]
   standard_name = flag_for_rrtmgp_radiation_scheme
   long_name = flag for RRTMGP scheme

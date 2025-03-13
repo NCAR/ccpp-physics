@@ -12,8 +12,8 @@ contains
 !> \section arg_table_GFS_suite_interstitial_phys_reset_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_phys_reset_run.html
 !!
-  subroutine GFS_suite_interstitial_phys_reset_run(clear_val, huge, levs, kdt, ldiag_ugwp, &
-       do_ugwp_v0, do_ugwp_v0_nst_only, do_ugwp_v1, gwd_opt, imp_physics,                  &
+  subroutine GFS_suite_interstitial_phys_reset_run(im, clear_val, huge, levs, kdt,         &
+       ldiag_ugwp, do_ugwp_v0, do_ugwp_v0_nst_only, do_ugwp_v1, gwd_opt, imp_physics,      &
        imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl, imp_physics_mg, lsm,      &
        ilsm_noahmp, dtp, avg_max_length, nsfullradar_diag,                                 &
        adjsfculw_land, adjsfculw_ice, adjsfculw_water, adjnirbmd, adjnirbmu, adjnirdfd,    &
@@ -47,7 +47,7 @@ contains
     real (kind_phys), intent(in   ) :: clear_val, huge, avg_max_length, nsfullradar_diag,  &
          dtp
     integer,          intent(in   ) :: levs, kdt, gwd_opt, imp_physics, imp_physics_gfdl,  &
-         imp_physics_thompson, imp_physics_nssl, imp_physics_mg, lsm, ilsm_noahmp
+         imp_physics_thompson, imp_physics_nssl, imp_physics_mg, lsm, ilsm_noahmp, im
     logical,          intent(in   ) :: ldiag_ugwp, do_ugwp_v0, do_ugwp_v0_nst_only,        &
          do_ugwp_v1
     ! Outputs

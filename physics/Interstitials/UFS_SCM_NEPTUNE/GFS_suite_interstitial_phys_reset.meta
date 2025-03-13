@@ -8,6 +8,13 @@
 [ccpp-arg-table]
   name = GFS_suite_interstitial_phys_reset_run
   type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [clear_val]
   standard_name = constant_zero
   long_name = constant for zero
