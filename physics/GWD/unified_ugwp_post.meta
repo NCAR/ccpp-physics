@@ -139,7 +139,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [dvdt_ogw]
   standard_name = tendency_of_y_wind_due_to_mesoscale_orographic_gravity_wave_drag
   long_name = y momentum tendency from meso scale ogw

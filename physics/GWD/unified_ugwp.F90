@@ -301,14 +301,14 @@ contains
       &                      dusfc_ss(:),dvsfc_ss(:),             &
       &                      dusfc_fd(:),dvsfc_fd(:)
     real(kind=kind_phys), intent(out), optional ::                &
-      &         dtaux2d_ms(:,:),dtauy2d_ms(:,:),                  &
+      &         dtauy2d_ms(:,:),                                  &
       &         dtaux2d_bl(:,:),dtauy2d_bl(:,:),                  &
       &         dtaux2d_ss(:,:),dtauy2d_ss(:,:),                  &
       &         dtaux2d_fd(:,:),dtauy2d_fd(:,:),                  &
       &         dudt_ngw(:,:),dvdt_ngw(:,:),dtdt_ngw(:,:)
     real(kind=kind_phys), intent(in) ::     hpbl(:),              &
       &                                     br1(:),               &
-      &                                     slmsk(:)
+      &                                     slmsk(:), dtaux2d_ms(:,:)
 
     real(kind=kind_phys),    intent(out), dimension(:)          :: dusfcg, dvsfcg
     real(kind=kind_phys),    intent(out), dimension(:)          :: rdxzb
