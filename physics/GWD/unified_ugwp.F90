@@ -299,7 +299,8 @@ contains
       &                      dusfc_ms(:),dvsfc_ms(:),             &
       &                      dusfc_bl(:),dvsfc_bl(:),             &
       &                      dusfc_ss(:),dvsfc_ss(:),             &
-      &                      dusfc_fd(:),dvsfc_fd(:)
+      &                      dusfc_fd(:),dvsfc_fd(:),             &
+      &                      dtaux2d_ms(:,:)
     real(kind=kind_phys), intent(out), optional ::                &
       &         dtauy2d_ms(:,:),                                  &
       &         dtaux2d_bl(:,:),dtauy2d_bl(:,:),                  &
@@ -308,7 +309,7 @@ contains
       &         dudt_ngw(:,:),dvdt_ngw(:,:),dtdt_ngw(:,:)
     real(kind=kind_phys), intent(in) ::     hpbl(:),              &
       &                                     br1(:),               &
-      &                                     slmsk(:), dtaux2d_ms(:,:)
+      &                                     slmsk(:)
 
     real(kind=kind_phys),    intent(out), dimension(:)          :: dusfcg, dvsfcg
     real(kind=kind_phys),    intent(out), dimension(:)          :: rdxzb
