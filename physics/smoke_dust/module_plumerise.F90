@@ -21,11 +21,14 @@ subroutine ebu_driver (      flam_frac,ebu_in,ebu,                   &
                              z_at_w,z,g,con_cp,con_rd,               &   ! scale_fire_emiss is part of config_flags
                              frp_inst, k_min, k_max,                 &   ! RAR:
                              wind_eff_opt,                           &
-                             kpbl_thetav,                            &   ! SRB: added kpbl_thetav
+                             kpbl_thetav, kpbl,                      &   ! SRB: added kpbl_thetav and kpbl
+                             curr_secs,xlat, xlong , uspdavg2d,      &
+                             hpbl2d,  mpiid, alpha,                  &
+                             frp_min, frp_wthreshold,zpbl_lim,uspd_lim,   &
                              ids,ide, jds,jde, kds,kde,              &
                              ims,ime, jms,jme, kms,kme,              &
-                             its,ite, jts,jte, kts,kte, errmsg, errflg,curr_secs, &
-                             xlat, xlong , uspdavg2, hpbl_thetav2, mpiid)
+                             its,ite, jts,jte, kts,kte,              & 
+                             errmsg, errflg                          ) 
 
   use rrfs_smoke_config
   !use plume_data_mod
@@ -33,17 +36,13 @@ subroutine ebu_driver (      flam_frac,ebu_in,ebu,                   &
   USE module_smoke_plumerise
   IMPLICIT NONE
 
-   REAL(kind_phys), PARAMETER :: frp_threshold= 1.e+7   ! Minimum FRP (Watts) to distribute smoke in PBL 
-   
-   REAL(kind_phys), PARAMETER :: zpbl_threshold   = 2000.    ! SRB: Minimum PBL depth to have plume rise 
-   REAL(kind_phys), PARAMETER :: uspd_threshold   = 5.       ! SRB: Wind speed averaged across PBL depth to control smoke release levels 
-   REAL(kind_phys), PARAMETER :: frp_threshold500 = 500.e+6  ! SRB: Minimum FRP (Watts) to have plume rise 
+   REAL(kind_phys), intent(in) :: frp_min, frp_wthreshold, zpbl_lim, uspd_lim
     
    real(kind=kind_phys), DIMENSION( ims:ime, jms:jme), INTENT(IN ) :: frp_inst         ! RAR: FRP array
 
    real(kind_phys), DIMENSION(ims:ime,jms:jme), INTENT(IN) ::  xlat,xlong ! SRB
 
-   real(kind_phys), DIMENSION(ims:ime, jms:jme),  INTENT(IN)  ::     kpbl_thetav ! SRB  
+   integer,         dimension(ims:ime, jms:jme),     intent(in)    :: kpbl, kpbl_thetav
 
    character(*), intent(inout) :: errmsg
    integer, intent(inout) :: errflg
@@ -52,6 +51,7 @@ subroutine ebu_driver (      flam_frac,ebu_in,ebu,                   &
                                   its,ite, jts,jte, kts,kte
    real(kind_phys) :: curr_secs
    INTEGER,      INTENT(IN   ) :: wind_eff_opt
+   REAL(kind_phys), INTENT(IN)    :: alpha !  SRB: Enrainment constant for plumerise scheme
    real(kind=kind_phys), DIMENSION( ims:ime, kms:kme, jms:jme ), INTENT(INOUT ) ::  ebu
    real(kind=kind_phys), INTENT(IN )  :: g, con_cp, con_rd
    real(kind=kind_phys), DIMENSION( ims:ime, jms:jme ), INTENT(IN )  :: ebu_in
@@ -61,11 +61,11 @@ subroutine ebu_driver (      flam_frac,ebu_in,ebu,                   &
 
 ! Local variables...
       INTEGER :: nv, i, j, k,  kp1, kp2
-      INTEGER :: icall=0
+      INTEGER :: icall
       INTEGER, DIMENSION(ims:ime, jms:jme), INTENT (OUT) :: k_min, k_max      ! Min and max ver. levels for BB injection spread
-      REAL, DIMENSION(ims:ime, jms:jme), INTENT (OUT) :: uspdavg2, hpbl_thetav2 ! SRB
+      REAL, DIMENSION(ims:ime, jms:jme), INTENT (IN) :: uspdavg2d, hpbl2d ! SRB
       real(kind_phys), dimension (kte) :: u_in ,v_in ,w_in ,theta_in ,pi_in, rho_phyin ,qv_in ,zmid, z_lev, uspd ! SRB
-      real(kind=kind_phys) :: dz_plume, cpor, con_rocp, uspdavg ! SRB
+      real(kind=kind_phys) :: dz_plume, cpor, con_rocp ! SRB
 
 ! MPI variables
       INTEGER, INTENT(IN) :: mpiid
@@ -73,7 +73,7 @@ subroutine ebu_driver (      flam_frac,ebu_in,ebu,                   &
         cpor    =con_cp/con_rd
         con_rocp=con_rd/con_cp
 
-        if (mod(int(curr_secs),1800) .eq. 0) then
+        if ( dbg_opt .and. (mod(int(curr_secs),1800) .eq. 0) ) then
             icall = 0
         endif
 
@@ -94,18 +94,6 @@ subroutine ebu_driver (      flam_frac,ebu_in,ebu,                   &
           enddo
        !enddo
 
-! For now the flammable fraction is constant, based on the namelist. The next
-! step to use LU index and meteorology to parameterize it
-       do j=jts,jte
-        do i=its,ite
-           flam_frac(i,j)= 0.
-           if (frp_inst(i,j) > frp_threshold) then 
-              flam_frac(i,j)= 0.9
-           end if
-        enddo
-       enddo
-
-
 ! RAR: new FRP based approach
 ! Haiqin: do_plumerise is added to the namelist options
 check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumerise
@@ -122,11 +110,10 @@ check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumeri
                   z_lev(k)= z_at_w(i,k,j)-z_at_w(i,kts,j)
                   rho_phyin(k)= rho_phy(i,k,j)
                   theta_in(k)= theta_phy(i,k,j)
-                  uspd(k)= wind_phy(i,k,j) ! SRB
+                  !uspd(k)= wind_phy(i,k,j) ! SRB
                enddo
 
-
-             IF (dbg_opt .and. (icall .le. n_dbg_lines) .and. (frp_inst(i,j) .ge. frp_threshold) ) then
+             IF (dbg_opt .and. (icall .le. n_dbg_lines) .and. (frp_inst(i,j) .ge. frp_min) ) then
                WRITE(1000+mpiid,*) 'module_plumerise_before:xlat,xlong,curr_secs,ebu(kts),frp_inst',xlat(i,j), xlong(i,j), int(curr_secs),ebu(i,kts,j),frp_inst(i,j)
                WRITE(1000+mpiid,*) 'module_plumerise_before:xlat,xlong,curr_secs,u(10),v(10),w(10),qv(10)',xlat(i,j), xlong(i,j),int(curr_secs), u_in(10),v_in(10),w_in(kte),qv_in(10)
              END IF
@@ -139,46 +126,51 @@ check_pl:  IF (do_plumerise) THEN    ! if the namelist option is set for plumeri
                               frp_inst(i,j), k_min(i,j),            & 
                               k_max(i,j), dbg_opt, g, con_cp,       &
                               con_rd, cpor, errmsg, errflg,         &
-                              icall, mpiid, xlat(i,j), xlong(i,j), curr_secs )
+                              icall, mpiid, xlat(i,j), xlong(i,j),  & 
+                              curr_secs, alpha, frp_min )
                if(errflg/=0) return
 
                kp1= k_min(i,j)
                kp2= k_max(i,j)   
-               dz_plume= z_at_w(i,kp2,j) - z_at_w(i,kp1,j)
 
 ! SRB: Adding condition for overwriting plumerise levels               
-               uspdavg=SUM(uspd(kts:kpbl_thetav(i,j)))/kpbl_thetav(i,j) !Average wind speed within the boundary layer
+               !uspdavg=SUM(uspd(kts:kpbl(i)))/kpbl(i) !Average wind speed within the boundary layer
 
 ! SRB: Adding output
-               uspdavg2(i,j) = uspdavg
-               hpbl_thetav2(i,j) = z_lev(kpbl_thetav(i,j))
-                
-               IF ((frp_inst(i,j) .gt. frp_threshold) .AND. (frp_inst(i,j) .le. frp_threshold500) .AND. & 
-                  (z_lev(kpbl_thetav(i,j)) .gt. zpbl_threshold) .AND. (wind_eff_opt .eq. 1)) THEN
-                  kp1=1
-                  IF (uspdavg .ge. uspd_threshold) THEN ! Too windy 
-                     kp2=kpbl_thetav(i,j)/3 
-                  ELSE
-                     kp2=kpbl_thetav(i,j)
-                  END IF
-                  dz_plume= z_at_w(i,kp2,j) - z_at_w(i,kp1,j)
-                  do k=kp1,kp2-1     
-                     ebu(i,k,j)= ebu_in(i,j)* (z_at_w(i,k+1,j)-z_at_w(i,k,j))/dz_plume
-                  enddo
+               !uspdavg2(i,j) = uspdavg
+               !hpbl_thetav2(i,j) = z_lev(kpbl(i))
+               
+               IF (frp_inst(i,j) .le. frp_min) THEN
+                  !kp1=1
+                  !kp2=2
+                  flam_frac(i,j)= 0. 
+               ELSE IF ( (frp_inst(i,j) .le. frp_wthreshold) .AND. ( uspdavg2d(i,1) .ge. uspd_lim ) .AND. & 
+                       ( hpbl2d(i,1) .gt. zpbl_lim) .AND. (wind_eff_opt .eq. 1)) THEN
+                  kp1=2
+                  kp2=MAX(3,NINT(real(kpbl(i,j))/3._kind_phys))
+                  flam_frac(i,j)=0.85 
                ELSE
-                  do k=kp1,kp2-1     
-                     ebu(i,k,j)= flam_frac(i,j)* ebu_in(i,j)* (z_at_w(i,k+1,j)-z_at_w(i,k,j))/dz_plume
-                  enddo
-                  ebu(i,kts,j)=   (1.-flam_frac(i,j))* ebu_in(i,j)
+                  flam_frac(i,j)=0.9  ! kp1,2 come from the plumerise scheme
                END IF
 ! SRB: End modification 
 
-               IF ( dbg_opt .and. (icall .le. n_dbg_lines)  .and. (frp_inst(i,j) .ge. frp_threshold) ) then
+               ! RAR: emission distribution
+               dz_plume= z_at_w(i,kp2,j) - z_at_w(i,kp1,j)
+               do k=kp1,kp2-1
+                     ebu(i,k,j)=flam_frac(i,j)*ebu_in(i,j)*(z_at_w(i,k+1,j)-z_at_w(i,k,j))/dz_plume
+               enddo
+               ebu(i,kts,j)= (1.-flam_frac(i,j))* ebu_in(i,j)
+
+               ! For output diagnostic
+               k_min(i,j) = kp1
+               k_max(i,j) = kp2
+
+               IF ( dbg_opt .and. (icall .le. n_dbg_lines)  .and. (frp_inst(i,j) .ge. frp_min) ) then
                    WRITE(1000+mpiid,*) 'mod_plumerise_after:xlat,xlong,curr_secs,k_min(i,j), k_max(i,j) ',xlat(i,j),xlong(i,j),int(curr_secs),kp1,kp2
                    WRITE(1000+mpiid,*) 'mod_plumerise_after:xlat,xlong,curr_secs,ebu(kts),frp_inst',xlat(i,j),xlong(i,j),int(curr_secs),ebu(i,kts,j),frp_inst(i,j)
                    WRITE(1000+mpiid,*) 'mod_plumerise_after:xlat,xlong,curr_secs,u(10),v(10),w(10),qv(10)',xlat(i,j),xlong(i,j),int(curr_secs),u_in(10),v_in(10),w_in(kte),qv_in(10)
-                   WRITE(1000+mpiid,*) 'mod_plumerise_after:xlat,xlong,curr_secs,uspdavg,kpbl_thetav',xlat(i,j),xlong(i,j),int(curr_secs),uspdavg,kpbl_thetav(i,j)
-                 IF ( frp_inst(i,j) .ge. 3.e+9 ) then
+                   !WRITE(1000+mpiid,*) 'mod_plumerise_after:xlat,xlong,curr_secs,uspdavg,kpbl_thetav,kpbl',xlat(i,j),xlong(i,j),int(curr_secs),uspdavg,kpbl_thetav(i,j),kpbl(i)
+                 IF ( frp_inst(i,j) .ge. 2.e+10 ) then
                    WRITE(1000+mpiid,*) 'mod_plumerise_after:High FRP at : xlat,xlong,curr_secs,frp_inst',xlat(i,j),xlong(i,j),int(curr_secs),frp_inst(i,j)
                  END IF
                  icall = icall + 1

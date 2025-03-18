@@ -1,43 +1,28 @@
 !>\file  module_smoke_plumerise.F90
 !! This file contains the fire plume rise module.
-
-!-------------------------------------------------------------------------
-!- 12 April 2016
-!- Implementing the fire radiative power (FRP) methodology for biomass burning
-!- emissions and convective energy estimation.
-!- Saulo Freitas, Gabriel Pereira (INPE/UFJS, Brazil)
-!- Ravan Ahmadov, Georg Grell (NOAA, USA)
-!- The flag "plumerise_flag" defines the method:
-!-    =1 => original method
-!-    =2 => FRP based
-!-------------------------------------------------------------------------
 module module_smoke_plumerise
 
   use machine , only : kind_phys
-  !use plume_data_mod,  only : num_frp_plume, p_frp_hr, p_frp_std
-                              !tropical_forest, boreal_forest, savannah, grassland,   &
-                             ! wind_eff
   USE module_zero_plumegen_coms
   USE rrfs_smoke_config, only : n_dbg_lines
 
-  !real(kind=kind_phys),parameter :: rgas=r_d
-  !real(kind=kind_phys),parameter :: cpor=cp/r_d
-CONTAINS
+  CONTAINS
 
 ! RAR:
     subroutine plumerise(m1,m2,m3,ia,iz,ja,jz,                      &
                          up,vp,wp,theta,pp,dn0,rv,zt_rams,zm_rams,  &
                          wind_eff_opt,                              &
                          frp_inst,k1,k2, dbg_opt, g, cp, rgas,      &
-                         cpor,  errmsg, errflg, icall, mpiid, lat, long, curr_secs  )
+                         cpor,  errmsg, errflg, icall, mpiid,       &
+                         lat, long, curr_secs, alpha, frp_min  )
 
   implicit none
 
   LOGICAL, INTENT (IN) :: dbg_opt
   INTEGER, INTENT (IN) :: wind_eff_opt, mpiid
-  real(kind_phys),  INTENT(IN) ::  lat,long, curr_secs ! SRB
+  real(kind_phys),  INTENT(IN) ::  lat,long, curr_secs, alpha ! SRB
 
-!  INTEGER, PARAMETER ::  ihr_frp=1, istd_frp=2!, imean_fsize=3, istd_fsize=4       ! RAR:
+  REAL(kind_phys), INTENT(IN) :: frp_min 
 
 !  integer, intent(in) :: PLUMERISE_flag
   real(kind=kind_phys) :: frp_inst   ! This is the instantenous FRP, at a given time step
@@ -45,15 +30,11 @@ CONTAINS
 
   integer :: ng,m1,m2,m3,ia,iz,ja,jz,ibcon,mynum,i,j,k,imm,ixx,ispc !,nspecies
 
-
   INTEGER, INTENT (OUT) :: k1,k2
   character(*), intent(inout) :: errmsg
   integer, intent(inout) :: errflg
 
-!  integer :: ncall = 0
   integer :: kmt
-!  real(kind=kind_phys),dimension(m1,nspecies), intent(inout) :: eburn_out
-!  real(kind=kind_phys),dimension(nspecies), intent(in) :: eburn_in
 
   real(kind=kind_phys),    dimension(m1,m2,m3) :: up, vp, wp,theta,pp,dn0,rv 
   real(kind=kind_phys),    dimension(m1)       :: zt_rams,zm_rams
@@ -61,16 +42,6 @@ CONTAINS
   real(kind=kind_phys),    dimension(2)        :: ztopmax
   real(kind=kind_phys)                         :: q_smold_kgm2
  
-  REAL(kind_phys), PARAMETER :: frp_threshold= 1.e+7   ! Minimum FRP (Watts) to have plume rise 
-
-! From plumerise1.F routine
-  integer, parameter :: iveg_ag=1 
-!  integer, parameter :: tropical_forest = 1
-!  integer, parameter :: boreal_forest   = 2
-!  integer, parameter :: savannah        = 3
-!  integer, parameter :: grassland       = 4
-!  real(kind=kind_phys), dimension(nveg_agreg) :: firesize,mean_fct
-
   INTEGER ::  wind_eff
   INTEGER, INTENT(IN) :: icall
   type(plumegen_coms), pointer :: coms
@@ -78,43 +49,10 @@ CONTAINS
 ! Set wind effect from namelist
   wind_eff = wind_eff_opt
 
-!  integer:: iloop
-  !REAL(kind=kind_phys), INTENT (IN)   :: convert_smold_to_flam
-
-  !Fator de conversao de unidades
-  !!fcu=1.	  !=> kg [gas/part] /kg [ar]
-  !!fcu =1.e+12   !=> ng [gas/part] /kg [ar]
-  !!real(kind=kind_phys),parameter :: fcu =1.e+6 !=> mg [gas/part] /kg [ar] 
-  !----------------------------------------------------------------------
-  !               indexacao para o array "plume(k,i,j)" 
-  ! k 
-  ! 1   => area media (m^2) dos focos  em biomas floresta dentro do gribox i,j 
-  ! 2   => area media (m^2) dos focos  em biomas savana dentro do gribox i,j
-  ! 3   => area media (m^2) dos focos  em biomas pastagem dentro do gribox i,j
-  ! 4   => desvio padrao da area media (m^2) dos focos : floresta
-  ! 5   => desvio padrao da area media (m^2) dos focos : savana
-  ! 6   => desvio padrao da area media (m^2) dos focos : pastagem
-  ! 7 a 9 =>  sem uso
-  !10(=k_CO_smold) => parte da emissao total de CO correspondente a fase smoldering
-  !11, 12 e 13 => este array guarda a relacao entre
-  !               qCO( flaming, floresta) e a quantidade total emitida 
-  !               na fase smoldering, isto e;
-  !               qCO( flaming, floresta) =  plume(11,i,j)*plume(10,i,j)
-  !               qCO( flaming, savana  ) =  plume(12,i,j)*plume(10,i,j)
-  !               qCO( flaming, pastagem) =  plume(13,i,j)*plume(10,i,j)
-  !20(=k_PM25_smold),21,22 e 23 o mesmo para PM25               
-  !
-  !24-n1 =>  sem uso
   !----------------------------------------------------------------------
 ! print *,' Plumerise_scalar 1',ncall
   coms => get_thread_coms()
-
-IF (frp_inst<frp_threshold) THEN
-   k1=1
-   k2=2
-   !return
-END IF
-    
+   
 ! print *,' Plumerise_scalar 2',m1
   j=1
   i=1
@@ -137,12 +75,6 @@ END IF
     coms%zcon  (k)=zt_rams(k)               ! termod-point height
     coms%zzcon (k)=zm_rams(k)               ! W-point height
   enddo
- 
-!  do ispc=2,nspecies
-   !  eburn_out(1,ispc) = eburn_in(ispc)    ! eburn_in is the emissions at the 1st level
-!     eburn_out(2:m1,ispc)= 0.  ! RAR: k>1 are used from eburn_out
-!  enddo
-
          !- get envinronmental state (temp, water vapor mix ratio, ...)
          call get_env_condition(coms,1,m1,kmt,wind_eff,g,cp,rgas,cpor,errmsg,errflg)
          if(errflg/=0) return
@@ -152,31 +84,36 @@ END IF
         ! iloop=1
 !         IF (PLUMERISE_flag == 1) iloop=nveg_agreg
 
-    !lp_veg:  do iveg_ag=1,iloop
-    FRP = max(1000.,frp_inst)
+   !frp_inst = max(1000.,frp_inst)
 
-    !- loop over the minimum and maximum heat fluxes/FRP
+    !- loop over the minimum and maximum heat fluxes/frp_inst
     lp_minmax: do imm=1,2
         if(imm==1 ) then
-          burnt_area = 0.7* 0.0006* FRP   !    0.00021* FRP          ! - 0.5*plume_fre(istd_fsize))
+          burnt_area = 0.7* 0.0006* frp_inst   !    0.00021* frp_inst          ! - 0.5*plume_fre(istd_fsize))
         elseif(imm==2 ) then
-          burnt_area = 1.3* 0.0006* FRP   ! RAR: Based on Laura's paper I increased the fire size *3. This should depend on the fuel type and meteorology/HWP
+          burnt_area = 1.3* 0.0006* frp_inst   ! RAR: Based on Laura's paper I increased the fire size *3. This should depend on the fuel type and meteorology/HWP
         endif
         burnt_area= max(1.0e4,burnt_area)
         
-        IF ( dbg_opt .and. (icall .le. n_dbg_lines) .and. (frp_inst .ge. frp_threshold) ) THEN
+        IF ( dbg_opt .and. (icall .le. n_dbg_lines) .and. (frp_inst .ge. frp_min) ) THEN
             WRITE(1000+mpiid,*) 'inside plumerise: xlat,xlong,curr_secs, m1 ', lat,long, int(curr_secs), m1
-            WRITE(1000+mpiid,*) 'inside plumerise: xlat,xlong,curr_secs,imm,FRP,burnt_area ', lat, long, int(curr_secs), imm, FRP,burnt_area
+            WRITE(1000+mpiid,*) 'inside plumerise: xlat,xlong,curr_secs,imm,frp_inst,burnt_area ', lat, long, int(curr_secs), imm, frp_inst,burnt_area
         END IF
 
+       IF (frp_inst<frp_min) THEN
+         k1=1
+         k2=2         
+         return
+       END IF
+
        !- get fire properties (burned area, plume radius, heating rates ...)
-       call get_fire_properties(coms,imm,iveg_ag,burnt_area,FRP,errmsg,errflg)
+       call get_fire_properties(coms,imm,burnt_area,frp_inst,errmsg,errflg)
        if(errflg/=0) return
 
        !------  generates the plume rise    ------
-       call makeplume (coms,kmt,ztopmax(imm),ixx,imm)
+       call makeplume (coms,kmt,ztopmax(imm),ixx,imm,mpiid, alpha)
 
-       IF ( dbg_opt .and.  (icall .le. n_dbg_lines) .and. (frp_inst .ge. frp_threshold) ) then
+       IF ( dbg_opt .and.  (icall .le. n_dbg_lines) .and. (frp_inst .ge. frp_min) ) then
             WRITE(1000+mpiid,*) 'inside plumerise after makeplume:xlat,xlong,curr_secs,imm,kmt,ztopmax(imm) ', lat, long, int(curr_secs), imm,kmt, ztopmax(imm)
        END IF
 
@@ -184,27 +121,6 @@ END IF
 
         !- define o dominio vertical onde a emissao flaming ira ser colocada
         call set_flam_vert(ztopmax,k1,k2,nkp,coms%zzcon)     !,W_VMD,VMD)
-
-        !     WRITE(6,*) 'module_chem_plumerise_scalar: eburn_out(:,3) ', eburn_out(:,3)
-
-        !- thickness of the vertical layer between k1 and k2 eta levels (lower and upper bounds for the injection height )
-        !dzi= 1./(coms%zzcon(k2)-coms%zzcon(k1))   ! RAR: k2>=k1+1  
-
-        !- emission during flaming phase is evenly distributed between levels k1 and k2
-        !do k=k1,k2
-        !   do ispc= 2,nspecies
-        !     eburn_out(k,ispc)= dzi* eburn_in(ispc)
-        !   enddo
-        !enddo
-
-    !IF (dbg_opt) then
-    !    WRITE(*,*) 'plumerise after set_flam_vert: nkp,k1,k2, ', nkp,k1,k2
-    !    WRITE(*,*) 'plumerise after set_flam_vert: dzi ', dzi
-       !WRITE(*,*) 'plumerise after set_flam_vert: eburn_in(2) ', eburn_in(2)
-       !WRITE(*,*) 'plumerise after set_flam_vert: eburn_out(:,2) ',eburn_out(:,2)
-    !END IF
-
-!   enddo lp_veg   ! sub-grid vegetation, currently it's aggregated
 
 end subroutine plumerise
 !-------------------------------------------------------------------------
@@ -282,22 +198,6 @@ enddo
 
 !-ewe - env wind effect
 if(wind_eff < 1)  coms%vel_e(1:kmt) = 0.
-
-!-use este para gerar o RAMS.out
-! ------- print environment state
-!print*,'k,coms%zt(k),coms%pe(k),coms%te(k)-273.15,coms%qvenv(k)*1000'
-!do k=1,kmt
-! write(*,100)  k,coms%zt(k),coms%pe(k),coms%te(k)-273.15,coms%qvenv(k)*1000.
-! 100 format(1x,I5,4f20.12)
-!enddo
-!stop 333
-
-
-!--------- nao eh necessario este calculo
-!do k=1,kmt
-!  call thetae(coms%pe(k),coms%te(k),coms%qvenv(k),coms%thee(k))
-!enddo
-
 
 !--------- converte press de Pa para kPa para uso modelo de plumerise
 do k=1,kmt
@@ -381,62 +281,15 @@ end subroutine set_grid
        !print*,'2: ztopmax k=',ztopmax(2), k2
        k2= k1+1     ! RAR: I added k1+1
     ENDIF
-    
-    !- version 2    
-    !- vertical mass distribution
-    !- 
-!    w_thresold = 1.
-!    DO imm=1,2
-
-!       VMD(1:nkp,imm)= 0.
-!       xxx=0.
-!       k_initial= 0
-!       k_final  = 0
-    
-       !- define range of the upper detrainemnt layer
-!       do ko=nkp-10,2,-1
-     
-!        if(w_vmd(ko,imm) < w_thresold) cycle
-     
-!        if(k_final==0) k_final=ko
-     
-!        if(w_vmd(ko,imm)-1. > w_vmd(ko-1,imm)) then
-!          k_initial=ko
-!          exit
-!        endif
-      
-!       enddo
-       !- if there is a non zero depth layer, make the mass vertical distribution 
-!       if(k_final > 0 .and. k_initial > 0) then 
-       
-!           k_initial=int((k_final+k_initial)*0.5)
-       
-           !- parabolic vertical distribution between k_initial and k_final
-!           kk4 = k_final-k_initial+2
-!           do ko=1,kk4-1
-!               kl=ko+k_initial-1
-!               VMD(kl,imm) = 6.* float(ko)/float(kk4)**2 * (1. - float(ko)/float(kk4))
-!           enddo
-!           if(sum(VMD(1:NKP,imm)) .ne. 1.) then
-!             xxx= ( 1.- sum(VMD(1:NKP,imm)) )/float(k_final-k_initial+1)
-!             do ko=k_initial,k_final
-!                VMD(ko,imm) = VMD(ko,imm)+ xxx !- values between 0 and 1.
-!              enddo
-               ! print*,'new mass=',sum(mass)*100.,xxx
-               !pause
-!           endif
-!        endif !k_final > 0 .and. k_initial > 
-
-!    ENDDO
-    
+   
   END SUBROUTINE set_flam_vert
 !-------------------------------------------------------------------------
 
-subroutine get_fire_properties(coms,imm,iveg_ag,burnt_area,FRP,errmsg,errflg)
+subroutine get_fire_properties(coms,imm,burnt_area,FRP,errmsg,errflg)
 !use module_zero_plumegen_coms
 implicit none
 type(plumegen_coms), pointer :: coms
-integer ::  moist,  i,  icount,imm,iveg_ag  !,plumerise_flag
+integer ::  moist,  i,  icount,imm
 real(kind=kind_phys)::   bfract,  effload,  heat,  hinc ,burnt_area,heat_fluxW,FRP
 !real(kind=kind_phys),    dimension(2,4) :: heat_flux
 integer, intent(inout) :: errflg
@@ -446,12 +299,7 @@ INTEGER, parameter :: use_last = 1    ! RAR 10/31/2022: I set to one, checking w
 !real(kind=kind_phys), parameter :: beta = 5.0   !ref.: Wooster et al., 2005
 REAL(kind=kind_phys), parameter :: beta = 0.88  !ref.: Paugam et al., 2015
 
-!
 coms%area = burnt_area! area of burn, m^2
-
-!IF ( PLUMERISE_flag == 1) THEN
-!    !fluxo de calor para o bioma
-!    heat_fluxW = heat_flux(imm,iveg_ag) * 1000. ! converte para W/m^2
 
 !ELSEIF ( PLUMERISE_flag == 2) THEN
     ! "beta" factor converts FRP to convective energy
@@ -473,25 +321,9 @@ coms%maxtime =coms%mdur+2  ! model time, min
 !heat = 15.5e6   !joules/kg - cerrado
 heat = 19.3e6    !joules/kg - floresta em alta floresta (mt)
 !coms%alpha = 0.1      !- entrainment constant
-coms%alpha = 0.05      !- entrainment constant
+!coms%alpha = 0.05      !- entrainment constant
 
-!-------------------- printout ----------------------------------------
-
-!!WRITE ( * ,  * ) ' SURFACE =', COMS%ZSURF, 'M', '  LCL =', COMS%ZBASE, 'M'  
-!
-!PRINT*,'======================================================='
-!print * , ' FIRE BOUNDARY CONDITION   :'  
-!print * , ' DURATION OF BURN, MINUTES =',COMS%MDUR  
-!print * , ' AREA OF BURN, HA	      =',COMS%AREA*1.e-4
-!print * , ' HEAT FLUX, kW/m^2	      =',heat_fluxW*1.e-3
-!print * , ' TOTAL LOADING, KG/M**2    =',COMS%BLOAD  
-!print * , ' FUEL MOISTURE, %	      =',MOIST !average fuel moisture,percent dry
-!print * , ' MODEL TIME, MIN.	      =',COMS%MAXTIME  
-!
-!
-!
 ! ******************** fix up inputs *********************************
-!
                                              
 !IF (MOD (COMS%MAXTIME, 2) .NE.0) COMS%MAXTIME = COMS%MAXTIME+1  !make coms%maxtime even
                                                   
@@ -501,12 +333,10 @@ COMS%RSURF = SQRT (COMS%AREA / 3.14159) !- entrainment surface radius (m)
 
 COMS%FMOIST   = MOIST / 100.       !- fuel moisture fraction
 !
-!
 ! calculate the energy flux and water content at lboundary.
 ! fills heating() on a minute basis. could ask for a file at this po
 ! in the program. whatever is input has to be adjusted to a one
 ! minute timescale.
-!
                         
   DO I = 1, ntime         !- make sure of energy release
     COMS%HEATING (I) = 0.0001  !- avoid possible divide by 0
@@ -562,7 +392,7 @@ return
 end subroutine get_fire_properties
 !-------------------------------------------------------------------------------
 !
-SUBROUTINE MAKEPLUME (coms,kmt,ztopmax,ixx,imm)  
+SUBROUTINE MAKEPLUME (coms,kmt,ztopmax,ixx,imm,mpiid, alpha)
 !
 ! *********************************************************************
 !
@@ -619,24 +449,24 @@ SUBROUTINE MAKEPLUME (coms,kmt,ztopmax,ixx,imm)
 !	ALPHA = ENTRAINMENT CONSTANT
 !       MAXTIME = TERMINATION TIME (MIN)
 !
-!
 !**********************************************************************
-!**********************************************************************               
-!use module_zero_plumegen_coms 
-implicit none 
-!logical :: endspace  
+!**********************************************************************
+!use module_zero_plumegen_coms
+implicit none
+!logical :: endspace
 type(plumegen_coms), pointer :: coms
 character (len=10) :: varn
 integer ::  izprint, iconv,  itime, k, kk, kkmax, deltak,ilastprint,kmt &
            ,ixx,nrectotal,i_micro,n_sub_step
 real(kind=kind_phys) ::  vc, g,  r,  cp,  eps,  &
          tmelt,  heatsubl,  heatfus,  heatcond, tfreeze, &
-         ztopmax, wmax, rmaxtime, es, esat, heat,dt_save !ESAT_PR,
-character (len=2) :: cixx 
+         ztopmax, wmax, rmaxtime, es, esat, heat,dt_save, alpha !ESAT_PR,
+character (len=2) :: cixx
+integer, intent(in) :: mpiid
 ! Set threshold to be the same as dz=100., the constant grid spacing of plume grid model(meters) found in set_grid()
     REAL(kind=kind_phys) :: DELZ_THRESOLD = 100. 
 
-    INTEGER     :: imm
+    INTEGER     :: imm, dtknt
 
 !  real(kind=kind_phys), external:: esat_pr!
 !
@@ -654,6 +484,7 @@ coms%tstpf = 2.0  !- timestep factor
 coms%viscosity = 500.!- coms%viscosity constant (original value: 0.001)
 
 nrectotal=150
+dtknt = 0
 !
 !*************** PROBLEM SETUP AND INITIAL CONDITIONS *****************
 coms%mintime = 1  
@@ -668,7 +499,7 @@ ilastprint=0
 COMS%L       = 1   ! COMS%L initialization
 
 !--- initialization
-CALL INITIAL(coms,kmt)  
+CALL INITIAL(coms,kmt,alpha)  
 
 !--- initial print fields:
 izprint  = 0          ! if = 0 => no printout
@@ -697,9 +528,13 @@ rmaxtime = float(coms%maxtime)
 !sam 81  format('nm1=',I0,' from kmt=',I0,' kkmax=',I0,' deltak=',I0)
 !sam     write(0,81) coms%nm1,kmt,kkmax,deltak
 !-- set timestep
-    !coms%dt = (coms%zm(2)-coms%zm(1)) / (coms%tstpf * wmax)  
-    coms%dt = min(5.,(coms%zm(2)-coms%zm(1)) / (coms%tstpf * wmax))
-                                
+    !coms%dt = (coms%zm(2)-coms%zm(1)) / (coms%tstpf * wmax) i
+    coms%dt = max(0.01,min(5.,(coms%zm(2)-coms%zm(1)) / (coms%tstpf * wmax)))
+    dtknt = dtknt + 1
+!    if (coms%dt .ne. 5.)then
+!    WRITE(1000+mpiid,*) 'dtknt,zm(2),zm(1) ', dtknt,coms%zm(2),coms%zm(1)
+!    WRITE(1000+mpiid,*) 'coms%tstpf,wmax,dt =', coms%tstpf,wmax,coms%dt
+!    endif
 !-- elapsed time, sec
     coms%time = coms%time+coms%dt 
 !-- elapsed time, minutes                                      
@@ -712,7 +547,7 @@ rmaxtime = float(coms%maxtime)
 
 !-- bounday conditions (k=1)
     COMS%L=1
-    call lbound(coms)
+    call lbound(coms, alpha)
 
 !-- dynamics for the level k>1 
 !-- W advection 
@@ -726,10 +561,10 @@ rmaxtime = float(coms%maxtime)
     !call scl_advectc_plumerise2(coms,'SC',COMS%NM1)
 
 !-- scalars entrainment, adiabatic
-    call scl_misc(coms,COMS%NM1)
+    call scl_misc(coms,COMS%NM1, alpha)
     
 !-- scalars dinamic entrainment
-     call  scl_dyn_entrain(COMS%NM1,nkp,coms%wbar,coms%w,coms%adiabat,coms%alpha,coms%radius,coms%tt,coms%t,coms%te,coms%qvt,coms%qv,coms%qvenv,coms%qct,coms%qc,coms%qht,coms%qh,coms%qit,coms%qi,&
+     call  scl_dyn_entrain(COMS%NM1,nkp,coms%wbar,coms%w,coms%adiabat,alpha,coms%radius,coms%tt,coms%t,coms%te,coms%qvt,coms%qv,coms%qvenv,coms%qct,coms%qc,coms%qht,coms%qh,coms%qit,coms%qi,&
                     coms%vel_e,coms%vel_p,coms%vel_t,coms%rad_p,coms%rad_t)
 
 !-- gravity wave damping using Rayleigh friction layer fot COMS%T
@@ -786,7 +621,7 @@ rmaxtime = float(coms%maxtime)
     call buoyancy_plumerise(COMS%NM1, COMS%T, COMS%TE, COMS%QV, COMS%QVENV, COMS%QH, COMS%QI, COMS%QC, COMS%WT, COMS%SCR1)
  
 !-- Entrainment 
-    call entrainment(coms,COMS%NM1,COMS%W,COMS%WT,COMS%RADIUS,COMS%ALPHA)
+    call entrainment(coms,COMS%NM1,COMS%W,COMS%WT,COMS%RADIUS,alpha)
 
 !-- update W
     call update_plumerise(coms,coms%nm1,'W')
@@ -904,7 +739,7 @@ RETURN
 END SUBROUTINE BURN
 !-------------------------------------------------------------------------------
 !
-SUBROUTINE LBOUND (coms)  
+SUBROUTINE LBOUND (coms, alpha)  
 !
 ! ********** BOUNDARY CONDITIONS AT ZSURF FOR PLUME AND CLOUD ********
 !
@@ -926,7 +761,7 @@ real(kind=kind_phys), parameter :: g = 9.80796, r = 287.04, cp = 1004.6, eps = 0
 real(kind=kind_phys), parameter :: tfreeze = 269.3, pi = 3.14159, e1 = 1./3., e2 = 5./3.
 real(kind=kind_phys) :: es,  esat, eflux, water,  pres, c1,  c2, f, zv,  denscor, xwater !,ESAT_PR
 !  real(kind=kind_phys), external:: esat_pr!
-
+REAL(kind=kind_phys)    , INTENT(IN)    :: alpha
 !            
 COMS%QH (1) = COMS%QH (2)   !soak up hydrometeors
 COMS%QI (1) = COMS%QI (2)              
@@ -939,9 +774,9 @@ COMS%QC (1) = 0.       !no cloud here
 !
    PRES = COMS%PE (1) * 1000.   !need pressure in N/m**2
                               
-   C1 = 5. / (6. * COMS%ALPHA)  !alpha is entrainment constant
+   C1 = 5. / (6. * alpha)  !alpha is entrainment constant
 
-   C2 = 0.9 * COMS%ALPHA  
+   C2 = 0.9 * alpha
 
    F = EFLUX / (PRES * CP * PI)  
                              
@@ -1008,7 +843,7 @@ RETURN
 END SUBROUTINE LBOUND
 !-------------------------------------------------------------------------------
 !
-SUBROUTINE INITIAL (coms,kmt)  
+SUBROUTINE INITIAL (coms,kmt,alpha)  
 !
 ! ************* SETS UP INITIAL CONDITIONS FOR THE PROBLEM ************
 !use module_zero_plumegen_coms 
@@ -1017,6 +852,7 @@ type(plumegen_coms), pointer :: coms
 real(kind=kind_phys), parameter :: tfreeze = 269.3
 integer ::  isub,  k,  n1,  n2,  n3,  lbuoy,  itmp,  isubm1 ,kmt
 real(kind=kind_phys) ::     xn1,  xi,  es,  esat!,ESAT_PR
+REAL(kind=kind_phys)    , INTENT(IN)    :: alpha
 !
 COMS%N=kmt
 ! initialize temperature structure,to the end of equal spaced sounding,
@@ -1050,13 +886,13 @@ COMS%N=kmt
 ! Initialize the entrainment radius, Turner-style plume
   coms%radius(1) = coms%rsurf
   do k=2,COMS%N
-     coms%radius(k) = coms%radius(k-1)+(6./5.)*coms%alpha*(coms%zt(k)-coms%zt(k-1))
+     coms%radius(k) = coms%radius(k-1)+(6./5.)*alpha*(coms%zt(k)-coms%zt(k-1))
   enddo
 ! Initialize the entrainment radius, Turner-style plume
     coms%radius(1) = coms%rsurf
     coms%rad_p(1)  = coms%rsurf
     DO k=2,COMS%N
-       coms%radius(k) = coms%radius(k-1)+(6./5.)*coms%alpha*(coms%zt(k)-coms%zt(k-1))
+       coms%radius(k) = coms%radius(k-1)+(6./5.)*alpha*(coms%zt(k)-coms%zt(k-1))
        coms%rad_p(k)  = coms%radius(k)
    ENDDO
     
@@ -1072,7 +908,7 @@ COMS%N=kmt
   !ENDDO
   !stop 333
 
-   CALL LBOUND(COMS)
+   CALL LBOUND(COMS, alpha)
 
 RETURN  
 END SUBROUTINE INITIAL
@@ -1529,21 +1365,21 @@ end subroutine tend0_plumerise
 
 !     ****************************************************************
 
-subroutine scl_misc(coms,m1)
+subroutine scl_misc(coms,m1,alpha)
 !use module_zero_plumegen_coms
 implicit none
 type(plumegen_coms), pointer :: coms
 real(kind=kind_phys), parameter :: g = 9.81, cp=1004.
 integer m1,k
 real(kind=kind_phys) dmdtm
-
+REAL(kind=kind_phys)    , INTENT(IN)    :: alpha
  do k=2,m1-1
       COMS%WBAR    = 0.5*(COMS%W(k)+COMS%W(k-1))  
 !-- dry adiabat
       COMS%ADIABAT = - COMS%WBAR * G / CP 
 !      
 !-- entrainment     
-      DMDTM = 2. * COMS%ALPHA * ABS (COMS%WBAR) / COMS%RADIUS (k)  != (1/M)DM/COMS%DT
+      DMDTM = 2. * alpha * ABS (COMS%WBAR) / COMS%RADIUS (k)  != (1/M)DM/COMS%DT
       
 !-- tendency temperature = adv + adiab + entrainment
       COMS%TT(k) = COMS%TT(K) + COMS%ADIABAT - DMDTM * ( COMS%T  (k) -    COMS%TE (k) ) 

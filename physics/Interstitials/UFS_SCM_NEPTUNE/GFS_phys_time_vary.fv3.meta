@@ -8,8 +8,7 @@
   dependencies = Radiation/mersenne_twister.f
   dependencies = MP/Morrison_Gettelman/aerclm_def.F,MP/Morrison_Gettelman/aerinterp.F90
   dependencies = SFC_Models/Land/Noah/namelist_soilveg.f,SFC_Models/Land/Noah/set_soilveg.f,SFC_Models/Land/Noahmp/noahmp_tables.f90
-  dependencies = photochem/module_ozphys.F90
-  dependencies = photochem/h2o_def.f,photochem/h2ointerp.f90
+  dependencies = photochem/module_ozphys.F90,photochem/module_h2ophys.F90
   dependencies = GWD/cires_tauamf_data.F90
 
 ########################################################################
@@ -1036,6 +1035,20 @@
   dimensions = ()
   type = ty_ozphys
   intent = in
+[h2ophys]
+  standard_name = dataset_for_h2o_photochemistry_physics
+  long_name = dataset for NRL h2o photochemistry physics
+  units = mixed
+  dimensions = ()
+  type = ty_h2ophys
+  intent = in
+[is_initialized]
+  standard_name = flag_for_gfs_phys_time_vary_interstitial_initialization
+  long_name = flag carrying interstitial initialization status
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1056,6 +1069,13 @@
 [ccpp-arg-table]
   name = GFS_phys_time_vary_finalize
   type = scheme
+[is_initialized]
+  standard_name = flag_for_gfs_phys_time_vary_interstitial_initialization
+  long_name = flag carrying interstitial initialization status
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -2042,26 +2062,20 @@
   dimensions = ()
   type = ty_ozphys
   intent = in
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
+[h2ophys]
+  standard_name = dataset_for_h2o_photochemistry_physics
+  long_name = dataset for NRL h2o photochemistry physics
+  units = mixed
   dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-[errflg]
-  standard_name = ccpp_error_code
-  long_name = error code for error handling in CCPP
-  units = 1
+  type = ty_h2ophys
+  intent = in
+[is_initialized]
+  standard_name = flag_for_gfs_phys_time_vary_interstitial_initialization
+  long_name = flag carrying interstitial initialization status
+  units = flag
   dimensions = ()
-  type = integer
-  intent = out
-
-########################################################################
-[ccpp-arg-table]
-  name = GFS_phys_time_vary_timestep_finalize
-  type = scheme
+  type = logical
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
