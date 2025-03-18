@@ -221,7 +221,7 @@
   kind = kind_phys
   intent = in
 [gt0]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -229,7 +229,7 @@
   kind = kind_phys
   intent = in
 [gq0]
-  standard_name = tracer_concentration_of_new_state
+  standard_name = tracer_concentration
   long_name = tracer concentration updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
@@ -237,7 +237,7 @@
   kind = kind_phys
   intent = in
 [sigmain]
-  standard_name = prognostic_updraft_area_fraction_in_convection
+  standard_name = physics_timestep_initial_prognostic_updraft_area_fraction_in_convection
   long_name = convective updraft area fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -246,7 +246,7 @@
   intent = inout
   optional = True
 [sigmaout]
-  standard_name = updraft_area_fraction_updated_by_physics
+  standard_name = updraft_area_fraction
   long_name = convective updraft area fraction updated by physics
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

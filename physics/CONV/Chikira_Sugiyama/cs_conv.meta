@@ -72,7 +72,7 @@
   type = integer
   intent = in
 [t]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = mid-layer temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -80,7 +80,7 @@
   kind = kind_phys
   intent = inout
 [q]
-  standard_name = specific_humidity_of_new_state
+  standard_name = specific_humidity
   long_name = mid-layer specific humidity of water vapor
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -177,7 +177,7 @@
   kind = kind_phys
   intent = inout
 [u]
-  standard_name = x_wind_of_new_state
+  standard_name = x_wind
   long_name = mid-layer zonal wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -185,7 +185,7 @@
   kind = kind_phys
   intent = inout
 [v]
-  standard_name = y_wind_of_new_state
+  standard_name = y_wind
   long_name = mid-layer meridional wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

@@ -491,7 +491,7 @@
   intent = in
   optional = True
 [u_i]
-  standard_name = x_wind_of_new_state
+  standard_name = x_wind
   long_name = zonal wind updated by physics
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -499,7 +499,7 @@
   kind = kind_phys
   intent = in
 [v_i]
-  standard_name = y_wind_of_new_state
+  standard_name = y_wind
   long_name = meridional wind updated by physics
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -566,7 +566,7 @@
   intent = in
   optional = True
 [q_io]
-  standard_name = specific_humidity_of_new_state
+  standard_name = specific_humidity
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -574,7 +574,7 @@
   kind = kind_phys
   intent = inout
 [lwm_o]
-  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
+  standard_name = cloud_liquid_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -582,7 +582,7 @@
   kind = kind_phys
   intent = out
 [qi_o]
-  standard_name = cloud_ice_mixing_ratio_of_new_state
+  standard_name = cloud_ice_mixing_ratio
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -590,7 +590,7 @@
   kind = kind_phys
   intent = out
 [t_io]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -614,7 +614,7 @@
   kind = kind_phys
   intent = out
 [ncpl_io]
-  standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air_of_new_state
+  standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air
   long_name = number concentration of cloud droplets updated by physics
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -623,7 +623,7 @@
   intent = inout
   optional = True
 [ncpi_io]
-  standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air_of_new_state
+  standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air
   long_name = number concentration of ice updated by physics
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

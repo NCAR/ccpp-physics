@@ -249,7 +249,7 @@
   kind = kind_phys
   intent = in
 [U]
-  standard_name = x_wind
+  standard_name = physics_timestep_initial_x_wind
   long_name = x component of layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -257,7 +257,7 @@
   kind = kind_phys
   intent = in
 [V]
-  standard_name = y_wind
+  standard_name = physics_timestep_initial_y_wind
   long_name = y component of layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -273,7 +273,7 @@
   kind = kind_phys
   intent = in
 [T3D]
-  standard_name = air_temperature
+  standard_name = physics_timestep_initial_air_temperature
   long_name = layer mean air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -281,7 +281,7 @@
   kind = kind_phys
   intent = inout
 [qgrs_water_vapor]
-  standard_name = specific_humidity
+  standard_name = physics_timestep_initial_specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -289,7 +289,7 @@
   kind = kind_phys
   intent = inout
 [qgrs_liquid_cloud]
-  standard_name = cloud_liquid_water_mixing_ratio
+  standard_name = physics_timestep_initial_cloud_liquid_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -297,7 +297,7 @@
   kind = kind_phys
   intent = inout
 [qgrs_ice]
-  standard_name = cloud_ice_mixing_ratio
+  standard_name = physics_timestep_initial_cloud_ice_mixing_ratio
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -305,7 +305,7 @@
   kind = kind_phys
   intent = inout
 [qgrs_snow]
-  standard_name = snow_mixing_ratio
+  standard_name = physics_timestep_initial_snow_mixing_ratio
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -313,7 +313,7 @@
   kind = kind_phys
   intent = inout
 [qgrs_cloud_droplet_num_conc]
-  standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air
+  standard_name = physics_timestep_initial_mass_number_concentration_of_cloud_liquid_water_particles_in_air
   long_name = number concentration of cloud droplets (liquid)
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -322,7 +322,7 @@
   intent = in
   optional = True
 [qgrs_cloud_ice_num_conc]
-  standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air
+  standard_name = physics_timestep_initial_mass_number_concentration_of_cloud_ice_water_crystals_in_air
   long_name = number concentration of ice
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -330,7 +330,7 @@
   kind = kind_phys
   intent = in
 [qgrs_ozone]
-  standard_name = ozone_mixing_ratio
+  standard_name = physics_timestep_initial_ozone_mixing_ratio
   long_name = ozone mixing ratio
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -338,7 +338,7 @@
   kind = kind_phys
   intent = in
 [qgrs_water_aer_num_conc]
-  standard_name = mass_number_concentration_of_hygroscopic_aerosols
+  standard_name = physics_timestep_initial_mass_number_concentration_of_hygroscopic_aerosols
   long_name = number concentration of water-friendly aerosols
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -347,7 +347,7 @@
   intent = in
   optional = True
 [qgrs_ice_aer_num_conc]
-  standard_name = mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols
+  standard_name = physics_timestep_initial_mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols
   long_name = number concentration of ice-friendly aerosols
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -356,7 +356,7 @@
   intent = in
   optional = True
 [qgrs_cccn]
-  standard_name = cloud_condensation_nuclei_number_concentration
+  standard_name = physics_timestep_initial_cloud_condensation_nuclei_number_concentration
   long_name = number concentration of cloud condensation nuclei
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -751,7 +751,7 @@
   intent = inout
   optional = True
 [qke_adv]
-  standard_name = turbulent_kinetic_energy
+  standard_name = physics_timestep_initial_turbulent_kinetic_energy
   long_name = turbulent kinetic energy
   units = J
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

@@ -210,7 +210,7 @@
   kind = kind_phys
   intent = in
 [ugrs]
-  standard_name = x_wind
+  standard_name = physics_timestep_initial_x_wind
   long_name = zonal wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -218,7 +218,7 @@
   kind = kind_phys
   intent = in
 [vgrs]
-  standard_name = y_wind
+  standard_name = physics_timestep_initial_y_wind
   long_name = meridional wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -226,7 +226,7 @@
   kind = kind_phys
   intent = in
 [tgrs]
-  standard_name = air_temperature
+  standard_name = physics_timestep_initial_air_temperature
   long_name = model layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -234,7 +234,7 @@
   kind = kind_phys
   intent = in
 [qgrs_wv]
-  standard_name = specific_humidity
+  standard_name = physics_timestep_initial_specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -242,7 +242,7 @@
   kind = kind_phys
   intent = in
 [qgrs_cw]
-  standard_name = cloud_liquid_water_mixing_ratio
+  standard_name = physics_timestep_initial_cloud_liquid_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -250,7 +250,7 @@
   kind = kind_phys
   intent = in
 [qgrs_rw]
-  standard_name = rain_mixing_ratio
+  standard_name = physics_timestep_initial_rain_mixing_ratio
   long_name = moist mixing ratio of rain
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -258,7 +258,7 @@
   kind = kind_phys
   intent = in
 [qgrs_sw]
-  standard_name = snow_mixing_ratio
+  standard_name = physics_timestep_initial_snow_mixing_ratio
   long_name = moist mixing ratio of snow
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -266,7 +266,7 @@
   kind = kind_phys
   intent = in
 [qgrs_iw]
-  standard_name = cloud_ice_mixing_ratio
+  standard_name = physics_timestep_initial_cloud_ice_mixing_ratio
   long_name = moist mixing ratio of cloud ice
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -274,7 +274,7 @@
   kind = kind_phys
   intent = in
 [qgrs_gl]
-  standard_name = graupel_mixing_ratio
+  standard_name = physics_timestep_initial_graupel_mixing_ratio
   long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) 
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -282,7 +282,7 @@
   kind = kind_phys
   intent = in
 [gu0]
-  standard_name = x_wind_of_new_state
+  standard_name = x_wind
   long_name = zonal wind updated by physics
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -290,7 +290,7 @@
   kind = kind_phys
   intent = inout
 [gv0]
-  standard_name = y_wind_of_new_state
+  standard_name = y_wind
   long_name = meridional wind updated by physics
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -298,7 +298,7 @@
   kind = kind_phys
   intent = inout
 [gt0]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -306,7 +306,7 @@
   kind = kind_phys
   intent = inout
 [gq0_wv]
-  standard_name = specific_humidity_of_new_state
+  standard_name = specific_humidity
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -323,7 +323,7 @@
   intent = inout
   optional = True
 [gq0_cw]
-  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
+  standard_name = cloud_liquid_water_mixing_ratio
   long_name = cloud condensed water mixing ratio updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -331,7 +331,7 @@
   kind = kind_phys
   intent = inout
 [gq0_rw]
-  standard_name = rain_mixing_ratio_of_new_state
+  standard_name = rain_mixing_ratio
   long_name = moist mixing ratio of rain updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -339,7 +339,7 @@
   kind = kind_phys
   intent = inout
 [gq0_sw]
-  standard_name = snow_mixing_ratio_of_new_state
+  standard_name = snow_mixing_ratio
   long_name = moist mixing ratio of snow updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -347,7 +347,7 @@
   kind = kind_phys
   intent = inout
 [gq0_iw]
-  standard_name = cloud_ice_mixing_ratio_of_new_state
+  standard_name = cloud_ice_mixing_ratio
   long_name = moist mixing ratio of cloud ice updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -355,7 +355,7 @@
   kind = kind_phys
   intent = inout
 [gq0_gl]
-  standard_name = graupel_mixing_ratio_of_new_state
+  standard_name = graupel_mixing_ratio
   long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

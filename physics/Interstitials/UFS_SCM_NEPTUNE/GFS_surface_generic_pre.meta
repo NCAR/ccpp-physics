@@ -418,7 +418,7 @@
   kind = kind_phys
   intent = out
 [u1]
-  standard_name = x_wind_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_x_wind_at_surface_adjacent_layer
   long_name = zonal wind at lowest model layer
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -426,7 +426,7 @@
   kind = kind_phys
   intent = in
 [v1]
-  standard_name = y_wind_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_y_wind_at_surface_adjacent_layer
   long_name = meridional wind at lowest model layer
   units = m s-1
   dimensions = (horizontal_loop_extent)

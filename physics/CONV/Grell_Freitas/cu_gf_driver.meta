@@ -204,7 +204,7 @@
   kind = kind_phys
   intent = out
 [qv_spechum]
-  standard_name = specific_humidity_of_new_state
+  standard_name = specific_humidity
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -212,7 +212,7 @@
   kind = kind_phys
   intent = inout
 [t]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = updated temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -228,7 +228,7 @@
   kind = kind_phys
   intent = out
 [us]
-  standard_name = x_wind_of_new_state
+  standard_name = x_wind
   long_name = updated x-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -236,7 +236,7 @@
   kind = kind_phys
   intent = inout
 [vs]
-  standard_name = y_wind_of_new_state
+  standard_name = y_wind
   long_name = updated y-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -244,7 +244,7 @@
   kind = kind_phys
   intent = inout
 [t2di]
-  standard_name = air_temperature
+  standard_name = physics_timestep_initial_air_temperature
   long_name = mid-layer temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -260,7 +260,7 @@
   kind = kind_phys
   intent = in
 [qv2di_spechum]
-  standard_name = specific_humidity
+  standard_name = physics_timestep_initial_specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
