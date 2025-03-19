@@ -883,17 +883,6 @@ module mp_thompson
            pfl_lsan(:,:) = pflls(:,:,1)
          end if
 
-         ! DH* Not really needed because they go out of scope ...
-         ! But having them in here seems to cause problems with Intel?
-         ! It looked like this is also nullifying the pointers passed
-         ! from the CCPP caps.
-         !unset_extended_diagnostic_pointers: if (ext_diag) then
-         !  !vts1       => null()
-         !  !txri       => null()
-         !  !txrc       => null()
-         !end if unset_extended_diagnostic_pointers
-         ! *DH
-
       end subroutine mp_thompson_run
 !>@}
 
