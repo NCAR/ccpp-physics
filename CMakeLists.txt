@@ -8,6 +8,8 @@ project(ccpp_physics
 set(PACKAGE "ccpp-physics")
 set(AUTHORS "Grant Firl" "Dustin Swales" "Dom Heinzeller" "Man Zhang" "Mike Kavulich")
 
+include(GNUInstallDirs)
+
 #------------------------------------------------------------------------------
 # Set MPI flags for Fortran with MPI F08 interface
 find_package(MPI REQUIRED Fortran)
@@ -131,17 +133,17 @@ SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
 if(OPENMP)
   # Compile all remaining schemes and caps with OpenMP flags
    SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
-               APPEND_STRING PROPERTY COMPILE_FLAGS "${OpenMP_Fortran_FLAGS}")
+               APPEND_STRING PROPERTY COMPILE_FLAGS " ${OpenMP_Fortran_FLAGS}")
 endif()
 
 # For CAPS, remove bounds checks with Intel Classic (ifort), Intel LLVM (ifx),
 # and GNU (gfortran) to avoid the compilation being killed or taking forever
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel" OR ${CMAKE_Fortran_COMPILER_ID} STREQUAL "IntelLLVM")
   set_PROPERTY(SOURCE ${CAPS}
-               APPEND_STRING PROPERTY COMPILE_FLAGS "-check nobounds")
+               APPEND_STRING PROPERTY COMPILE_FLAGS " -check nobounds")
 elseif(${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   set_PROPERTY(SOURCE ${CAPS}
-               APPEND_STRING PROPERTY COMPILE_FLAGS "-fcheck=no-bounds")
+               APPEND_STRING PROPERTY COMPILE_FLAGS " -fcheck=no-bounds")
 endif()
 
 # Lower optimization for certain schemes when compiling with Intel in Release mode
@@ -156,7 +158,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" AND (${CMAKE_Fortran_COMPILER_ID} STREQUA
   )
   foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_LOWER_OPTIMIZATION)
     SET_SOURCE_FILES_PROPERTIES(${SCHEME_NAME}
-                                APPEND_STRING PROPERTY COMPILE_FLAGS "-O1")
+                                APPEND_STRING PROPERTY COMPILE_FLAGS " -O1")
   endforeach()
 endif()
 
@@ -169,7 +171,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" AND (${CMAKE_Fortran_COMPILER_ID} STREQUA
   )
   foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_NO_OPTIMIZATION)
     SET_SOURCE_FILES_PROPERTIES(${SCHEME_NAME}
-                                APPEND_STRING PROPERTY COMPILE_FLAGS "-O0")
+                                APPEND_STRING PROPERTY COMPILE_FLAGS " -O0")
   endforeach()
 endif()
 
