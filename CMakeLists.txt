@@ -150,10 +150,10 @@ endif()
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel" OR ${CMAKE_Fortran_COMPILER_ID} STREQUAL "IntelLLVM"))
   # Define a list of schemes that need lower optimization with Intel in Release mode
   set(SCHEME_NAMES_LOWER_OPTIMIZATION
-    ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90
-    ${CMAKE_CURRENT_SOURCE_DIR}/physics/mynnedmf_wrapper.F90
-    ${CMAKE_CURRENT_SOURCE_DIR}/physics/gcycle.F90
-    ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_mp_nssl_2mom.F90
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/SFC_Layer/MYNN/module_sf_mynn.F90
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/PBL/MYNN_EDMF/mynnedmf_wrapper.F90
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/Interstitials/UFS_SCM_NEPTUNE/gcycle.F90
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/MP/NSSL/module_mp_nssl_2mom.F90
     ${CMAKE_CURRENT_SOURCE_DIR}/physics/rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90
   )
   foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_LOWER_OPTIMIZATION)
@@ -166,18 +166,25 @@ endif()
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel" OR ${CMAKE_Fortran_COMPILER_ID} STREQUAL "IntelLLVM"))
   # Define a list of schemes that can't be optimized with Intel in Release mode
   set(SCHEME_NAMES_NO_OPTIMIZATION
-    ${CMAKE_CURRENT_SOURCE_DIR}/physics/aerinterp.F90
+    ${CMAKE_CURRENT_SOURCE_DIR}/physics/MP/Morrison_Gettelman/aerinterp.F90
     ${CMAKE_CURRENT_SOURCE_DIR}/physics/GFS_typedefs.F90
   )
   foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_NO_OPTIMIZATION)
     SET_SOURCE_FILES_PROPERTIES(${SCHEME_NAME}
                                 APPEND_STRING PROPERTY COMPILE_FLAGS " -O0")
   endforeach()
+  # Since GFS_typedefs.F90 is provided by the host model,
+  # we need to "find" it in the list of SCHEMES
+  set(SCHEMES_TMP ${SCHEMES})
+  # Need to determine the name of the scheme with its path
+  list(FILTER SCHEMES_TMP INCLUDE REGEX ".*GFS_typedefs.F90$")
+  SET_SOURCE_FILES_PROPERTIES(${SCHEMES_TMP}
+                              APPEND_STRING PROPERTY COMPILE_FLAGS " -O0")
 endif()
 
-if(${CMAKE_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f IN_LIST SCHEMES)
+if(${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/mersenne_twister.f IN_LIST SCHEMES)
   if(${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
+    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/mersenne_twister.f
                                 APPEND_STRING PROPERTY COMPILE_FLAGS " -fno-range-check")
   endif()
 endif()
