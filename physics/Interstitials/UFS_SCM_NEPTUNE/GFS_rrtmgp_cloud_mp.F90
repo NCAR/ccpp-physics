@@ -743,10 +743,10 @@ contains
           cld_swp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,4) * tem1 * deltaP)
        
           ! Xu-Randall (1996) cloud-fraction. **Additionally, Conditioned on relative-humidity**
-          cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
+          cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +          &
                cld_condensate(iCol,iLay,3) + cld_condensate(iCol,iLay,4)
-          cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
-               qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0)
+          cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),                    &
+               qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0, cond_cfrac_onRH)
        enddo
     enddo
 
@@ -777,9 +777,12 @@ contains
 !> This function computes the cloud-fraction following
 !! Xu-Randall(1996) \cite xu_and_randall_1996 
 !!
-  function cld_frac_XuRandall(p_lay, qs_lay, relhum, cld_mr, alpha)
+  function cld_frac_XuRandall(p_lay, qs_lay, relhum, cld_mr, alpha, cond_cfrac_onRH)
     implicit none
     ! Inputs
+   logical, intent(in), optional :: &
+       cond_cfrac_onRH    ! If true, cloud-fracion set to unity when rh>99%
+
     real(kind_phys), intent(in) :: &
        p_lay,    & !< Pressure (Pa)
        qs_lay,   & !< Saturation vapor-pressure (Pa)
@@ -800,7 +803,7 @@ contains
 
     clwt = 1.0e-8 * (p_lay*0.001)
     if (cld_mr > clwt) then
-       if(relhum > 0.99) then
+       if(present(cond_cfrac_onRH) .and. relhum > 0.99) then
           cld_frac_XuRandall = 1.
        else
           onemrh = max(1.e-10, 1.0 - relhum)
