@@ -743,14 +743,10 @@ contains
           cld_swp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,4) * tem1 * deltaP)
        
           ! Xu-Randall (1996) cloud-fraction. **Additionally, Conditioned on relative-humidity**
-          if (present(cond_cfrac_onRH) .and. relhum(iCol,iLay) > 0.99) then
-             cld_frac(iCol,iLay) = 1._kind_phys
-          else
-             cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
-                  cld_condensate(iCol,iLay,3) + cld_condensate(iCol,iLay,4)
-             cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
-                  qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0)
-          endif
+          cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
+               cld_condensate(iCol,iLay,3) + cld_condensate(iCol,iLay,4)
+          cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
+               qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0)
        enddo
     enddo
 
@@ -802,14 +798,18 @@ contains
        lambda = 0.50, & !
        P      = 0.25
 
-    clwt = 1.0e-6 * (p_lay*0.001)
+    clwt = 1.0e-8 * (p_lay*0.001)
     if (cld_mr > clwt) then
-       onemrh = max(1.e-10, 1.0 - relhum)
-       tem1   = alpha / min(max((onemrh*qs_lay)**lambda,0.0001),1.0)
-       tem2   = max(min(tem1*(cld_mr - clwt), 50.0 ), 0.0 )
-       tem3   = sqrt(sqrt(relhum)) ! This assumes "p" = 0.25. Identical, but cheaper than relhum**p
-       !
-       cld_frac_XuRandall = max( tem3*(1.0-exp(-tem2)), 0.0 )
+       if(relhum > 0.99) then
+          cld_frac_XuRandall = 1.
+       else
+          onemrh = max(1.e-10, 1.0 - relhum)
+          tem1   = alpha / min(max((onemrh*qs_lay)**lambda,0.0001),1.0)
+          tem2   = max(min(tem1*(cld_mr - clwt), 50.0 ), 0.0 )
+          tem3   = sqrt(sqrt(relhum)) ! This assumes "p" = 0.25. Identical, but cheaper than relhum**p
+          !
+          cld_frac_XuRandall = max( tem3*(1.0-exp(-tem2)), 0.0 )
+      endif
     else
        cld_frac_XuRandall = 0.0
     endif
