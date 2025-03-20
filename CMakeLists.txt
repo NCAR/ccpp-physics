@@ -127,13 +127,13 @@ if(SCHEMES_OPENMP_OFF)
 endif()
 
 # Assign standard floating point precision flags to all remaining schemes and caps
-SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
-             APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS}")
-
 if(OPENMP)
   # Compile all remaining schemes and caps with OpenMP flags
-   SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
-               APPEND_STRING PROPERTY COMPILE_FLAGS " ${OpenMP_Fortran_FLAGS}")
+  SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
+               APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS}")
+else()
+  SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
+               APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS}")
 endif()
 
 # For CAPS, remove bounds checks with Intel Classic (ifort), Intel LLVM (ifx),
@@ -158,28 +158,22 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" AND (${CMAKE_Fortran_COMPILER_ID} STREQUA
   )
   foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_LOWER_OPTIMIZATION)
     SET_SOURCE_FILES_PROPERTIES(${SCHEME_NAME}
-                                APPEND_STRING PROPERTY COMPILE_FLAGS " -O1")
+                                APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS} -O1")
   endforeach()
 endif()
 
 # No optimization for certain schemes when compiling with Intel in Release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel" OR ${CMAKE_Fortran_COMPILER_ID} STREQUAL "IntelLLVM"))
   # Define a list of schemes that can't be optimized with Intel in Release mode
-  set(SCHEME_NAMES_NO_OPTIMIZATION
-    ${CMAKE_CURRENT_SOURCE_DIR}/physics/MP/Morrison_Gettelman/aerinterp.F90
-    ${CMAKE_CURRENT_SOURCE_DIR}/physics/GFS_typedefs.F90
-  )
+  # Since GFS_typedefs.F90 is provided by the host model, we need to "find" it in the list of SCHEMES
+  set(SCHEME_NAMES_NO_OPTIMIZATION GFS_typedefs.F90)
   foreach(SCHEME_NAME IN LISTS SCHEME_NAMES_NO_OPTIMIZATION)
-    SET_SOURCE_FILES_PROPERTIES(${SCHEME_NAME}
-                                APPEND_STRING PROPERTY COMPILE_FLAGS " -O0")
+    set(SCHEMES_TMP ${SCHEMES})
+    # Need to determine the name of the scheme with its path
+    list(FILTER SCHEMES_TMP INCLUDE REGEX ".*${SCHEME_NAME}$")
+    SET_SOURCE_FILES_PROPERTIES(${SCHEMES_TMP}
+                                APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS} -O0")
   endforeach()
-  # Since GFS_typedefs.F90 is provided by the host model,
-  # we need to "find" it in the list of SCHEMES
-  set(SCHEMES_TMP ${SCHEMES})
-  # Need to determine the name of the scheme with its path
-  list(FILTER SCHEMES_TMP INCLUDE REGEX ".*GFS_typedefs.F90$")
-  SET_SOURCE_FILES_PROPERTIES(${SCHEMES_TMP}
-                              APPEND_STRING PROPERTY COMPILE_FLAGS " -O0")
 endif()
 
 if(${CMAKE_CURRENT_SOURCE_DIR}/physics/Radiation/mersenne_twister.f IN_LIST SCHEMES)
