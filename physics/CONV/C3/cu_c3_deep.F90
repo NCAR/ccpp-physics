@@ -153,7 +153,7 @@ contains
                                 !! betwee -1 and +1
               ,do_capsuppress,cap_suppress_j    &    !         
               ,k22                              &    !
-              ,jmin,tropics)                         !
+              ,jmin,mc_thresh)                         !
 
    implicit none
 
@@ -198,16 +198,16 @@ contains
 !$acc declare copy(cnvwt,outu,outv,outt,outq,outqc,cupclw,frh_out,pre,xmb_out)
      real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (in  )                   ::                            &
-        hfx,qfx,xmbm_in,xmbs_in
-!$acc declare copyin(hfx,qfx,xmbm_in,xmbs_in)
+        mc_thresh,hfx,qfx,xmbm_in,xmbs_in
+!$acc declare copyin(mc_thresh,hfx,qfx,xmbm_in,xmbs_in)
      integer,    dimension (its:)                                   &
         ,intent (inout  )                ::                            &
         kbcon,ktop
 !$acc declare copy(kbcon,ktop)
      integer,    dimension (its:)                                   &
         ,intent (in  )                   ::                            &
-        kpbl,tropics
-!$acc declare copyin(kpbl,tropics)
+        kpbl
+!$acc declare copyin(kpbl)
   !
   ! basic environmental input includes moisture convergence (mconv)
   ! omega (omeg), windspeed (us,vs), and a flag (ierr) to turn off
@@ -448,10 +448,19 @@ contains
 !---meltglac-------------------------------------------------
 
      real(kind=kind_phys),    dimension (its:ite,kts:kte) ::  p_liq_ice,melting_layer,melting
-!$acc declare create(p_liq_ice,melting_layer,melting)
+! icoldpool
+     integer, parameter :: icoldpool=0
+     real(kind=kind_phys), parameter ::  Kfr = 0.9, epsx = 1.e2, alpha_dd=45., pi=3.1416
+     real(kind=kind_phys),    dimension (its:ite) ::  beta_x, vcpool, wlpool,umcl,vmcl,slope_pool
+     real(kind=kind_phys),    dimension (its:ite,kts:kte) ::  buoysrc,dellat_d
+     real(kind=kind_phys) :: aux,mcl_speed,total_dz,mx_buoy2,h_env,dpsum
 
      integer :: itemp
+!$acc declare create(p_liq_ice,melting_layer,melting,buoysrc,beta_x,vcpool,wlpool,umcl,vmcl)
 
+
+
+      mx_buoy2 = cp*10.
 !---meltglac-------------------------------------------------
 !$acc kernels
       melting_layer(:,:)=0.
@@ -586,9 +595,8 @@ contains
 !$acc loop private(radius,frh)
       do i=its,ite
          c1d(i,:)= 0. !c1 ! 0. ! c1 ! max(.003,c1+float(csum(i))*.0001)
-         entr_rate(i)=7.e-5 - min(20.,float(csum(i))) * 3.e-6
-         if(xland1(i) == 0)entr_rate(i)=7.e-5
-         if(dx(i)<dx_thresh) entr_rate(i)=2.e-4
+         !entr_rate(i)=7.e-5  !- min(20.,float(csum(i))) * 3.e-6
+         entr_rate(i)=1.e-4
          if(imid.eq.1)entr_rate(i)=3.e-4
          radius=.2/entr_rate(i)
          frh=min(1.,3.14*radius*radius/dx(i)/dx(i))
@@ -600,7 +608,7 @@ contains
          sig(i)=(1.-frh)**2
          !frh_out(i) = frh
          if(forcing(i,7).eq.0.)sig(i)=1.
-         frh_out(i) = frh*sig(i)
+         frh_out(i) = frh !*sig(i)
       enddo
 !$acc end kernels
       sig_thresh = (1.-frh_thresh)**2
@@ -645,7 +653,7 @@ contains
 !--- minimum depth (m), clouds must have
 !
       depth_min=3000.
-      if(dx(its)<dx_thresh)depth_min=5000.
+      !if(dx(its)<dx_thresh)depth_min=5000.
       if(imid.eq.1)depth_min=2500.
 !
 !--- maximum depth (mb) of capping 
@@ -1093,14 +1101,14 @@ contains
       if(imid.eq.1)then
         call cup_up_moisture('mid',ierr,zo_cup,qco,qrco,pwo,pwavo,               &
              p_cup,kbcon,ktop,dbyo,clw_all,xland1,                               &
-             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,                           &
+             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,jmin,                           &
              zqexec,ccn,ccnclean,rho,c1d,tn_cup,autoconv,up_massentr,up_massdetr,psum,psumh,       &
              1,itf,ktf,                                                          &
              its,ite, kts,kte)
       else
          call cup_up_moisture('deep',ierr,zo_cup,qco,qrco,pwo,pwavo,             &
              p_cup,kbcon,ktop,dbyo,clw_all,xland1,                               &
-             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,                           &
+             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,jmin,                           &
              zqexec,ccn,ccnclean,rho,c1d,tn_cup,autoconv,up_massentr,up_massdetr,psum,psumh,       &
              1,itf,ktf,                                                          &
              its,ite, kts,kte)
@@ -1599,6 +1607,7 @@ contains
         dellv  (i,k)=0.
         dellah (i,k)=0.
         dellat (i,k)=0.
+        dellat_d (i,k)=0.
         dellaq (i,k)=0.
         dellaqc(i,k)=0.
       enddo
@@ -1723,6 +1732,7 @@ contains
          g_rain=  0.5*(pwo (i,1)+pwo (i,2))*g/dp
          e_dn  = -0.5*(pwdo(i,1)+pwdo(i,2))*g/dp*edto(i)  ! pwdo < 0 and e_dn must > 0
          dellaq(i,1) = dellaq(i,1)+ e_dn-g_rain
+         dellat_d(i,1)=zdo(i,2)*edto(i)*(hcdo(i,2)-heo_cup(i,2))*g/dp
          
          !--- conservation check
          !- water mass balance
@@ -1780,6 +1790,12 @@ contains
             ! trash= trash+ (dellaq(i,k)+dellaqc(i,k)+ g_rain-e_dn)*dp/g
 
          enddo   ! k
+         do k=2,jmin(i)-1
+            dp=100.*(po_cup(i,k)-po_cup(i,k+1))
+            dellat_d(i,k)= &
+               edto(i)*dd_massdetro(i,k)*(.5*(hcdo(i,k+1)+hcdo(i,k))-heo(i,k))*g/dp
+         enddo   ! k
+
         endif
 
       enddo
@@ -1991,6 +2007,7 @@ contains
 !$acc atomic update
           mconv(i)=mconv(i)+omeg(i,k)*dq/g
         enddo
+        if ((mconv(i) < mc_thresh(i)) .and. (xland1(i) == 0)) ierr(i)=2242
       enddo
 
 !> - From Bengtsson et al. (2022) \cite Bengtsson_2022 prognostic closure scheme, 
@@ -2016,9 +2033,9 @@ contains
             endif
          enddo
          call progsigma_calc(itf,ktf,flag_init,flag_restart,flag_shallow,  &
-              flag_mid,del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,xlv,dtime,  &
-              forceqv_spechum,kbcon,ktop,cnvflg,betascu,betamcu,betadcu,   &
-              sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)        
+            flag_mid,del,tmf,qmicro,dbyo1,zdqca,omega_u,zeta,xlv,dtime,    &
+            forceqv_spechum,k22,kbcon,ktop,cnvflg,betascu,betamcu,betadcu, &
+            sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)        
       endif
 
 !$acc end kernels
@@ -2088,6 +2105,34 @@ contains
             ichoice,imid,ipr,itf,ktf,                                    &
             its,ite, kts,kte,dx,sigmab,                                  &
             dicycle,xf_dicycle,xf_progsigma)
+    !
+    !
+          if (icoldpool > 0 .and. imid ==0) then
+          buoysrc(:,:)=0.
+          do i=its,itf
+            vcpool(i)=0.
+            wlpool(i)=0.
+            total_dz=0.
+            beta_x(i)=0.
+            if(ierr(i).gt.0)cycle ! exit loopI
+               do k = kts,jmin(i)-1
+                 buoysrc(i,k)=beta_x(i)-dellat_d(i,k)*xmb(i)*dtime !/sig(i)*cp
+                 if(buoysrc(i,k) < epsx .or. total_dz .gt. z_detr ) cycle
+                  H_env      = heo(i,k)
+                  dz         = zo(i,k+1)-zo(i,k)
+                  total_dz   = total_dz + dz
+                  vcpool(i) = vcpool(i) + (g*dz*min(mx_buoy2,buoysrc(i,k))/H_env)
+                  wlpool(i) = wlpool(i) + (g*dz*min(mx_buoy2,buoysrc(i,k))/H_env )
+              end do
+              do k = kts,jmin(i)-1
+                 buoysrc(i,k)=-dellat_d(i,k)*xmb(i)*dtime
+              end do
+              vcpool(i) = min(20., Kfr *sqrt(vcpool(i)))
+              slope_pool(i) = alpha_dd
+              wlpool(i) = min(10.,  Kfr *sin( slope_pool(i)*pi/180. )* sqrt(wlpool(i)))
+          enddo ! i-loop
+          endif ! icoldpool
+
 
 !> - Call rain_evap_below_cloudbase() to calculate evaporation below cloud base
 
@@ -2116,6 +2161,48 @@ contains
           endif
       enddo
 !$acc end kernels
+      if (icoldpool > 0 .and. icoldpool /= 2 .and. imid ==0) then
+      ! --- adding the gust front horizontal speed to the 2-d MCL wind
+      ! --- only magnitude is augmented, direction is kept the same
+      do i=its,itf
+          umcl(i)=0.
+          vmcl(i)=0.
+          dpsum=0.
+          if(ierr(i) > 0 ) cycle
+           do k=kts+1,ktop(i)-1
+             trash =-(po_cup(i,k)-po_cup(i,kts))
+             if(trash.gt.300..and. trash.lt.600.)then
+                dp=100.*(po_cup(i,k)-po_cup(i,k+1))
+                umcl(i)=umcl(i)+us(i,k)*dp
+                vmcl(i)=vmcl(i)+us(i,k)*dp
+                dpsum=dpsum+dp
+             endif
+           enddo
+           if(dpsum > 0.) then
+           umcl(i)=umcl(i)/dpsum
+           vmcl(i)=vmcl(i)/dpsum
+           MCL_speed= sqrt( umcl(i)**2 + vmcl(i)**2 )
+           aux =  (MCL_speed + vcpool(i))/(MCL_speed+1.e-6)
+           umcl(i) = aux * umcl(i)
+           vmcl(i) = aux * vmcl(i)
+           endif
+      enddo
+            ! --- gust front momentum impact
+      do i=its,itf
+          if(ierr(i) > 0 .or. vcpool(i) .le.0.) cycle
+             k=kts
+             dp=100.*(po_cup(i,k)-po_cup(i,k+1))
+             outu(i,k) = outu(i,k) + edto(i)*zdo(i,k+1)*umcl(i)*g/dp*xmb(i)
+             outv(i,k) = outv(i,k) + edto(i)*zdo(i,k+1)*vmcl(i)*g/dp*xmb(i)
+             do k=kts+1,kdet(i)
+                  dp=100.*(po_cup(i,k)-po_cup(i,k+1))
+                  outu(i,k) = outu(i,k) + edto(i)*dd_massdetro(i,k)*umcl(i)*g/dp*xmb(i)
+                  outv(i,k) = outv(i,k) + edto(i)*dd_massdetro(i,k)*vmcl(i)*g/dp*xmb(i)
+             enddo
+      enddo
+     endif ! icoldpool
+     if(icoldpool == 1)vcpool(:)=0.
+
 ! rain evaporation as in sas
 !
       if(irainevap.eq.1)then
@@ -2142,6 +2229,8 @@ contains
          if(ierr(i).eq.0)then
          evef = edt(i) * evfact * sig(i)**2
          if(xland(i).gt.0.5 .and. xland(i).lt.1.5) evef = edt(i) * evfactl * sig(i)**2
+         !evef=.09
+         !evef=.9
 !$acc loop seq
          do k = ktop(i), 1, -1
               rain =  pwo(i,k) + edto(i) * pwdo(i,k)
@@ -4228,7 +4317,7 @@ endif
 !> Calculates moisture properties of the updraft.
    subroutine cup_up_moisture(name,ierr,z_cup,qc,qrc,pw,pwav,     &
               p_cup,kbcon,ktop,dby,clw_all,xland1,                &
-              q,gamma_cup,zu,qes_cup,k22,qe_cup,c0,               &
+              q,gamma_cup,zu,qes_cup,k22,qe_cup,c0,jmin,               &
               zqexec,ccn,ccnclean,rho,c1d,t,autoconv,             &
               up_massentr,up_massdetr,psum,psumh,                 &
               itest,itf,ktf,                                      &
@@ -4267,7 +4356,7 @@ endif
   ! entr= entrainment rate 
      integer, dimension (its:)                                 &
         ,intent (in   )                   ::                      &
-        kbcon,ktop,k22,xland1
+        kbcon,ktop,k22,xland1,jmin
 !$acc declare copyin(p_cup,rho,q,zu,gamma_cup,qe_cup,up_massentr,up_massdetr,dby,qes_cup,z_cup,zqexec,c0,kbcon,ktop,k22,xland1)
      real(kind=kind_phys),    intent (in  ) ::                    & ! HCB
         ccnclean
@@ -4490,16 +4579,17 @@ endif
                clw_allh(i,k)=max(0.,qch(i,k)-qrch) 
                qrcb(i,k)=max(0.,(qch(i,k)-qrch)) ! /(1.+c0(i)*dz*zu(i,k))
                if(is_deep)then
-                 clwdet=0.1 !0.02                 ! 05/11/2021
-                 !if(k.lt.kklev(i)) clwdet=0.    ! 05/05/2021
+                 clwdet=1.2 !0.1 !0.02
                else
-                 clwdet=0.1 !0.02                  ! 05/05/2021
-                 !if(k.lt.kklev(i)) clwdet=0.     ! 05/25/2021
+                 clwdet=1.2 !0.1 !0.02
+               endif
+               if (k.gt.jmin(i))then
+                 clwdet=2.
                endif
                if(k.gt.kbcon(i)+1)c1d(i,k)=clwdet*up_massdetr(i,k-1)
                if(k.gt.kbcon(i)+1)c1d_b(i,k)=clwdet*up_massdetr(i,k-1)
-                c1d(i,k)=0.005
-                c1d_b(i,k)=0.005
+                !c1d(i,k)=0.005
+                !c1d_b(i,k)=0.005
 
                if(autoconv.eq.2) then
 ! 

@@ -242,6 +242,14 @@
   type = real
   kind = kind_phys
   intent = in
+[tkeh]
+  standard_name = vertical_turbulent_kinetic_energy_at_interface
+  long_name = vertical turbulent kinetic energy at model layer interfaces
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [qtr]
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other convective trans. tracers
@@ -493,6 +501,13 @@
   units = flag 
   dimensions = ()
   type = logical
+  intent = in
+[sigmab_coldstart]
+  standard_name = flag_to_cold_start_for_sigmab_init
+  long_name = flag to cold start for sigmab initialization
+  units = flag
+  dimensions = ()
+  type = logical 
   intent = in
 [qlcn]
   standard_name = mass_fraction_of_convective_cloud_liquid_water

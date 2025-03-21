@@ -3,6 +3,8 @@
 !!  This file contains the NoahMP Glacier scheme.
 
 !>\ingroup NoahMP_LSM
+
+!> This module contains the NoahMP Glacier scheme
 module noahmp_glacier_globals
 
   use machine ,   only : kind_phys
@@ -77,6 +79,8 @@ end module noahmp_glacier_globals
 !------------------------------------------------------------------------------------------!
 
 !>\ingroup NoahMP_LSM
+
+!> This module contains NoahMP glacier routines
 module noahmp_glacier_routines
   use noahmp_glacier_globals
 #ifndef CCPP
@@ -842,12 +846,14 @@ contains
 
 ! snow albedos: age even when sun is not present
 
+  if(cosz > 0) then
   if(opt_alb == 1) &
      call snowalb_bats_glacier (nband,cosz,fage,albsnd,albsni)
   if(opt_alb == 2) then
      call snowalb_class_glacier(nband,qsnow,dt,alb,albold,albsnd,albsni)
      albold = alb
   end if
+  end if 
 
 ! zero summed solar fluxes
 
@@ -3489,6 +3495,7 @@ end if   ! opt_gla == 1
 end module noahmp_glacier_routines
 ! ==================================================================================================
 
+!> This module contains the interface of noahmp_glacier_routines and noahmp_glacier_globals
 module module_sf_noahmp_glacier
 
   use noahmp_glacier_routines
