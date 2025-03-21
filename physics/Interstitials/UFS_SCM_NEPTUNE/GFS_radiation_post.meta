@@ -1,5 +1,5 @@
 [ccpp-table-properties]
-  name = GFS_rrtmgp_post
+  name = GFS_radiation_post
   type = scheme
   relative_path	= ../../
   dependencies = hooks/machine.F,Radiation/radiation_aerosols.f
@@ -7,7 +7,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_rrtmgp_post_run
+  name = GFS_radiation_post_run
   type = scheme
 [nCol]
   standard_name = horizontal_loop_extent
@@ -79,44 +79,12 @@
   dimensions = ()
   type = logical
   intent = in
-[save_diag]
-  standard_name = flag_for_diagnostics
-  long_name = logical flag for storing diagnostics
+[do_RRTMGP]
+  standard_name = flag_for_rrtmgp_radiation_scheme
+  long_name = flag for RRTMGP scheme
   units = flag
-  dimensions = ()
+  dimensions =  ()
   type = logical
-  intent = in
-[fhlwr]
-  standard_name = period_of_longwave_radiation_calls
-  long_name = frequency for longwave radiation
-  units = s
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[fhswr]
-  standard_name = period_of_shortwave_radiation_calls
-  long_name = frequency for shortwave radiation
-  units = s
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[coszen]
-  standard_name = cosine_of_solar_zenith_angle_for_daytime_points_on_radiation_timestep
-  long_name = mean cos of zenith angle over rad call period
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[coszdg]
-  standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
-  long_name = daytime mean cosz over rad call period
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
   intent = in
 [sfc_alb_nir_dir]
   standard_name = surface_albedo_due_to_near_IR_direct
@@ -239,68 +207,6 @@
   kind = kind_phys
   intent = in
   optional = True
-[raddt]
-  standard_name = time_step_for_radiation
-  long_name = radiation time step
-  units = s
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[aerodp]
-  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
-  long_name = vertical integrated optical depth for various aerosol species
-  units = none
-  dimensions = (horizontal_loop_extent,number_of_species_for_aerosol_optical_depth)
-  type = real
-  kind = kind_phys
-  intent = in
-[cldsa]
-  standard_name = cloud_area_fraction_for_radiation
-  long_name = fraction of clouds for low, middle, high, total and BL
-  units = frac
-  dimensions = (horizontal_loop_extent,5)
-  type = real
-  kind = kind_phys
-  intent = in
-[mtopa]
-  standard_name = model_layer_number_at_cloud_top
-  long_name = vertical indices for low, middle and high cloud tops
-  units = index
-  dimensions = (horizontal_loop_extent,3)
-  type = integer
-  intent = in
-[mbota]
-  standard_name = model_layer_number_at_cloud_base
-  long_name = vertical indices for low, middle and high cloud bases
-  units = index
-  dimensions = (horizontal_loop_extent,3)
-  type = integer
-  intent = in
-[cld_frac]
-  standard_name = total_cloud_fraction
-  long_name = layer total cloud fraction
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[cldtaulw]
-  standard_name = cloud_optical_depth_layers_at_10mu_band
-  long_name = approx 10mu band layer cloud optical depth
-  units = none
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[cldtausw]
-  standard_name = cloud_optical_depth_layers_at_0p55mu_band
-  long_name = approx .55mu band layer cloud optical depth
-  units = none
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
 [scmpsw]
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes
@@ -308,14 +214,6 @@
   dimensions = (horizontal_loop_extent)
   type = cmpfsw_type
   intent = in
-[fluxr]
-  standard_name = cumulative_radiation_diagnostic
-  long_name = time-accumulated 2D radiation-related diagnostic fields
-  units = mixed
-  dimensions = (horizontal_loop_extent,number_of_diagnostics_variables_for_radiation)
-  type = real
-  kind = kind_phys
-  intent = inout
 [sfcdlw]
   standard_name = surface_downwelling_longwave_flux_on_radiation_timestep
   long_name = total sky sfc downward lw flux
@@ -486,6 +384,14 @@
   long_name = longwave clear sky heating rate
   units = K s-1
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = inout
+[total_albedo]
+  standard_name = total_sky_albedo
+  long_name = total sky albedo at toa
+  units = frac
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
