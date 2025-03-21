@@ -14,6 +14,9 @@ module shoc
 
 contains
 
+!> \section arg_table_shoc_init Argument Table
+!! \htmlinclude shoc_init.html
+!!
 subroutine shoc_init (do_shoc, errmsg, errflg)
   implicit none
   logical, intent(in) :: do_shoc

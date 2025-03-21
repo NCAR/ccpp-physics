@@ -721,14 +721,6 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
-[max_hail_diam_sfc]
-  standard_name = max_hail_diameter_sfc
-  long_name = instantaneous maximum hail diameter at lowest model level
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
   intent = inout
 [fullradar_diag]
   standard_name = do_full_radar_reflectivity
@@ -737,6 +729,14 @@
   dimensions = ()
   type = logical
   intent = in
+[max_hail_diam_sfc]
+  standard_name = max_hail_diameter_sfc
+  long_name = instantaneous maximum hail diameter at lowest model level
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [do_radar_ref]
   standard_name = flag_for_radar_reflectivity
   long_name = flag for radar reflectivity
@@ -773,9 +773,9 @@
   dimensions = ()
   type = integer
   intent = in
-[blkno]
-  standard_name = ccpp_block_number
-  long_name = number of block for explicit data blocking in CCPP
+[chunk_no]
+  standard_name = ccpp_chunk_number
+  long_name = number of chunk for contiguous data in CCPP
   units = index
   dimensions = ()
   type = integer
@@ -834,15 +834,6 @@
   kind = kind_phys
   intent = in
   optional = True
-[spp_stddev_cutoff]
-  standard_name = magnitude_of_spp_standard_deviation_cutoff
-  long_name = magnitude of spp standard deviation cutoff
-  units = 1
-  dimensions = (number_of_perturbed_spp_schemes)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
 [spp_var_list]
   standard_name = perturbed_spp_schemes
   long_name = perturbed spp schemes
@@ -850,6 +841,15 @@
   dimensions = (number_of_perturbed_spp_schemes)
   type = character
   kind = len=10
+  intent = in
+  optional = True
+[spp_stddev_cutoff]
+  standard_name = magnitude_of_spp_standard_deviation_cutoff
+  long_name = magnitude of spp standard deviation cutoff
+  units = 1
+  dimensions = (number_of_perturbed_spp_schemes)
+  type = real
+  kind = kind_phys
   intent = in
   optional = True
 [cplchm]

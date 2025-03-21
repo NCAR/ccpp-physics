@@ -36,20 +36,6 @@
   dimensions = ()
   type = integer
   intent = in
-[mpirank]
-  standard_name = mpi_rank
-  long_name = current MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[mpiroot]
-  standard_name = mpi_root
-  long_name = master MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
 [progsigma]
   standard_name = do_prognostic_updraft_area_fraction
   long_name = flag for prognostic sigma in cumuls scheme
@@ -61,6 +47,20 @@
   standard_name = number_of_x_points_for_current_cubed_sphere_tile
   long_name = number of points in x direction for this cubed sphere face
   units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[mpirank]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
   dimensions = ()
   type = integer
   intent = in
@@ -189,6 +189,14 @@
   type = real
   kind = kind_phys
   intent = in
+[r_d]
+  standard_name = gas_constant_of_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [xlv]
   standard_name = latent_heat_of_vaporization_of_water_at_0C
   long_name = latent heat of evaporation/sublimation
@@ -200,14 +208,6 @@
 [r_v]
   standard_name = gas_constant_water_vapor
   long_name = ideal gas constant for water vapor
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[r_d]
-  standard_name = gas_constant_of_dry_air
-  long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
   type = real
@@ -231,6 +231,30 @@
   kind = kind_phys
   intent = in
   optional = True
+[phil]
+  standard_name = geopotential
+  long_name = layer geopotential
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[delp]
+  standard_name = air_pressure_difference_between_midlayers
+  long_name = pres(k) - pres(k+1)
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[raincv]
+  standard_name = lwe_thickness_of_deep_convective_precipitation_amount
+  long_name = deep convective rainfall amount on physics timestep
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [tmf]
   standard_name = tendency_of_vertically_diffused_tracer_concentration
   long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
@@ -257,15 +281,6 @@
   kind = kind_phys
   intent = in
   optional = True
-[sigmaout]
-  standard_name = updraft_area_fraction_updated_by_physics
-  long_name = convective updraft area fraction updated by physics
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = True
 [betascu]
   standard_name = tuning_param_for_shallow_cu
   long_name = tuning param for shallow cu in case prognostic closure is used
@@ -289,30 +304,6 @@
   dimensions = ()
   type = real
   intent = in
-[phil]
-  standard_name = geopotential
-  long_name = layer geopotential
-  units = m2 s-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[delp]
-  standard_name = air_pressure_difference_between_midlayers
-  long_name = pres(k) - pres(k+1)
-  units = Pa
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[raincv]
-  standard_name = lwe_thickness_of_deep_convective_precipitation_amount
-  long_name = deep convective rainfall amount on physics timestep
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
 [qv_spechum]
   standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
@@ -462,6 +453,23 @@
   type = real
   kind = kind_phys
   intent = inout
+[ca_deep]
+  standard_name = cellular_automata_area_fraction_for_deep_convection_from_coupled_process
+  long_name = fraction of cellular automata for deep convection
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[rainevap]
+  standard_name = physics_field_for_coupling
+  long_name = physics_field_for_coupling
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [pbl]
   standard_name = atmosphere_boundary_layer_thickness
   long_name = PBL thickness
@@ -555,16 +563,16 @@
   dimensions = ()
   type = integer
   intent = in
-[ntcw]
-  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for cloud condensate (or liquid water)
+[ntiw]
+  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for  ice water
   units = index
   dimensions = ()
   type = integer
   intent = in
-[ntiw]
-  standard_name = index_of_cloud_ice_mixing_ratio_in_tracer_concentration_array
-  long_name = tracer index for  ice water
+[ntcw]
+  standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for cloud condensate (or liquid water)
   units = index
   dimensions = ()
   type = integer
@@ -604,29 +612,6 @@
   dimensions = ()
   type = integer
   intent = in
-[dfi_radar_max_intervals]
-  standard_name = maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals
-  long_name = maximum allowed number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[ldiag3d]
-  standard_name = flag_for_diagnostics_3D
-  long_name = flag for 3d diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[qci_conv]
-  standard_name = convective_cloud_condesate_after_rainout
-  long_name = convective cloud condesate after rainout
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
 [fhour]
   standard_name = forecast_time
   long_name = current forecast time
@@ -634,13 +619,6 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  intent = in
-[do_cap_suppress]
-  standard_name = flag_for_radar_derived_convection_suppression
-  long_name = flag for radar-derived convection suppression
-  units = flag
-  dimensions = ()
-  type = logical
   intent = in
 [fh_dfi_radar]
   standard_name = forecast_lead_times_bounding_radar_derived_temperature_or_convection_suppression_intervals
@@ -673,23 +651,45 @@
   kind = kind_phys
   intent = in
   optional = True
-[ca_deep]
-  standard_name = cellular_automata_area_fraction_for_deep_convection_from_coupled_process
-  long_name = fraction of cellular automata for deep convection
-  units = frac
-  dimensions = (horizontal_loop_extent)
+[dfi_radar_max_intervals]
+  standard_name = maximum_number_of_radar_derived_temperature_or_convection_suppression_intervals
+  long_name = maximum allowed number of time ranges with radar-derived microphysics temperature tendencies or radar-derived convection suppression
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ldiag3d]
+  standard_name = flag_for_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[qci_conv]
+  standard_name = convective_cloud_condesate_after_rainout
+  long_name = convective cloud condesate after rainout
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = True
-[rainevap]
-  standard_name = physics_field_for_coupling
-  long_name = physics_field_for_coupling
-  units = m2 s-2
-  dimensions = (horizontal_loop_extent)
+[do_cap_suppress]
+  standard_name = flag_for_radar_derived_convection_suppression
+  long_name = flag for radar-derived convection suppression
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[sigmaout]
+  standard_name = updraft_area_fraction_updated_by_physics
+  long_name = convective updraft area fraction updated by physics
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [maxupmf]
   standard_name = maximum_convective_updraft_mass_flux
   long_name = maximum convective updraft mass flux within a column

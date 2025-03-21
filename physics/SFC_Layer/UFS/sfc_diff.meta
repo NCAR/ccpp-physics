@@ -87,14 +87,6 @@
   type = real
   kind = kind_phys
   intent = in
-[zvfun]
-  standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
-  long_name = function of surface roughness length and green vegetation fraction
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
@@ -218,6 +210,13 @@
   type = real
   kind = kind_phys
   intent = in
+[sfc_z0_type]
+  standard_name = flag_for_surface_roughness_option_over_water
+  long_name = surface roughness options over water
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [u1]
   standard_name = x_wind_at_surface_adjacent_layer
   long_name = x component of surface layer wind
@@ -249,13 +248,6 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
-[sfc_z0_type]
-  standard_name = flag_for_surface_roughness_option_over_water
-  long_name = surface roughness options over water
-  units = flag
-  dimensions = ()
-  type = integer
   intent = in
 [icplocn2atm]
   standard_name = control_for_air_sea_flux_computation_over_water
@@ -612,6 +604,14 @@
   type = real
   kind = kind_phys
   intent = inout
+[zvfun]
+  standard_name = function_of_surface_roughness_length_and_green_vegetation_fraction
+  long_name = function of surface roughness length and green vegetation fraction
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

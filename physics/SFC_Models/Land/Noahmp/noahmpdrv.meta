@@ -2,7 +2,7 @@
   name = noahmpdrv
   type = scheme
   dependencies = ../../../tools/funcphys.f90,../../../hooks/machine.F
-  dependencies = module_sf_noahmp_glacier.F90,module_sf_noahmplsm.F90,noahmp_tables.f90
+  dependencies = module_sf_noahmp_glacier.F90,module_sf_noahmplsm.F90,noahmp_tables.f90,lnd_iau_mod.F90
   dependencies = ../Noah/set_soilveg.f
 
 ########################################################################
@@ -16,7 +16,7 @@
   dimensions = ()
   type = integer
   intent = in
-[lsm_noahmp]
+[ilsm_noahmp]
   standard_name = identifier_for_noahmp_land_surface_scheme
   long_name = flag for NOAH MP land surface model
   units = flag
@@ -1226,6 +1226,7 @@
   kind = kind_phys
   intent = inout
   optional = True
+  assumed_shape = True
 [zsnsoxy]
   standard_name = depth_from_snow_surface_at_bottom_interface
   long_name = depth from the top of the snow surface at the bottom of the layer
@@ -1235,6 +1236,7 @@
   kind = kind_phys
   intent = inout
   optional = True
+  assumed_shape	= True
 [snicexy]
   standard_name = lwe_thickness_of_ice_in_surface_snow
   long_name = lwe_thickness_of_ice_in_surface_snow
@@ -1244,6 +1246,7 @@
   kind = kind_phys
   intent = inout
   optional = True
+  assumed_shape	= True
 [snliqxy]
   standard_name = lwe_thickness_of_liquid_water_in_surface_snow
   long_name = snow layer liquid water
@@ -1253,6 +1256,7 @@
   kind = kind_phys
   intent = inout
   optional = True
+  assumed_shape	= True
 [lfmassxy]
   standard_name = leaf_mass_content
   long_name = leaf mass

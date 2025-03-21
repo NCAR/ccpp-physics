@@ -42,8 +42,8 @@ contains
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_zmtb, tot_zlwb, tot_zogw
         real(kind=kind_phys), intent(in),    dimension(:,:) :: gw_dtdt, gw_dudt, gw_dvdt, dudt_mtb
-        real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dudt_ogw, dvdt_ogw
-        real(kind=kind_phys), intent(in),    dimension(:,:) :: dudt_tms
+        real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dvdt_ogw
+        real(kind=kind_phys), intent(in),    dimension(:,:) :: dudt_tms, dudt_ogw
         real(kind=kind_phys), intent(inout), dimension(:,:), optional :: du3dt_mtb, du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw
         real(kind=kind_phys), intent(inout), dimension(:,:), optional :: ldu3dt_ogw, ldu3dt_obl, ldu3dt_oss, ldu3dt_ofd
         real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dudt_ngw, dvdt_ngw, dtdt_ngw

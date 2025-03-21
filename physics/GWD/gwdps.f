@@ -314,8 +314,8 @@
       real(kind=kind_phys), intent(in) ::                               &
      &                     THETA(:), SIGMA(:), GAMMA(:)
       real(kind=kind_phys), intent(inout) :: DUSFC(:), DVSFC(:),        &
-     &                     RDXZB(:)
-      real(kind=kind_phys), intent(inout), optional :: dtaux2d_ms(:,:), &
+     &                     RDXZB(:), dtaux2d_ms(:,:)
+      real(kind=kind_phys), intent(inout), optional ::                  &
      &                     dtauy2d_ms(:,:), dtaux2d_bl(:,:),            &
      &                     dtauy2d_bl(:,:)
       real(kind=kind_phys), intent(inout), optional :: dusfc_ms(:),     &

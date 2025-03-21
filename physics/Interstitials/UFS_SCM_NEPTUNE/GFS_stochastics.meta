@@ -6,6 +6,22 @@
 [ccpp-arg-table]
   name = GFS_stochastics_init
   type = scheme
+[si]
+  standard_name = sigma_pressure_hybrid_vertical_coordinate
+  long_name = vertical sigma coordinate for radiation initialization
+  units = none
+  dimensions = (vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[vfact_ca]
+  standard_name = cellular_automata_vertical_weight
+  long_name = vertical weight for ca
+  units = frac
+  dimensions = (vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [km]
   standard_name = vertical_dimension_for_radiation
   long_name = number of vertical levels for radiation calculations
@@ -27,22 +43,6 @@
   dimensions = ()
   type = logical
   intent = in
-[si]
-  standard_name = sigma_pressure_hybrid_vertical_coordinate
-  long_name = vertical sigma coordinate for radiation initialization
-  units = none
-  dimensions = (vertical_interface_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[vfact_ca]
-  standard_name = cellular_automata_vertical_weight
-  long_name = vertical weight for ca
-  units = frac
-  dimensions = (vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
