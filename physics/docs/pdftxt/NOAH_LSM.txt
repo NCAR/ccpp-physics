@@ -1,5 +1,5 @@
 /**
-\page GFS_NOAH GFS Noah Land Surface Model
+\page GFS_NOAH Noah Land Surface Model
 \section des_noah  Description
  Land-atmosphere interactions are a main driver of Earth's surface
  water and energy budgets. The importance of the land surface is

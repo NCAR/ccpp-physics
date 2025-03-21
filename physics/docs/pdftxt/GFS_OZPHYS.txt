@@ -1,5 +1,5 @@
 /**
-\page GFS_OZPHYS GFS Ozone Photochemistry (2015) Scheme
+\page GFS_OZPHYS Ozone Photochemistry (2015) Scheme
 \section des_ozone  Description
  In recent years, the leading NWP centers have extended the vertical range of their NWP and DA systems
  from the surface up through the stratosphere (~10-50 km altitude) and lower mesosphere (~50-65 km). Some
@@ -50,11 +50,9 @@ The ozone photochemistry scheme has been upgraded recently through latest coeffi
 depend on the temperature and column ozone climatology
 (\c global_o3prdlos.f77 is replaced by \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77 in ozphys_2015_run).
 
-\section intra_ozone  Intraphysics Communication
-- \ref arg_table_ozphys_2015_run
 
 \section gen_ozone  General Algorithm
-- \ref genal_ozphys_2015
+- module_ozphys::run_o3prog_2015()
 
 
 */

@@ -1,7 +1,7 @@
 !>\file set_soilveg_ruc.F90
-!! This file contains subroutine to specify vegetation and soil
-!! parameters for a given soild and land-use classification. 
 
+!> This module contains subroutine to specify vegetation and soil
+!! parameters for a given soild and land-use classification. 
       module set_soilveg_ruc_mod
 
       use machine ,   only : kind_phys
