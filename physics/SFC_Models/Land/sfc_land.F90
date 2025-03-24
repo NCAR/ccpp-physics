@@ -14,13 +14,7 @@
 
    contains
 
-!> \defgroup sfc_land for coupling to land
-!! @{
-!! \section diagram Calling Hierarchy Diagram
-!! \section intraphysics Intraphysics Communication
-!!
 !> \brief Brief description of the subroutine
-!!
 !! \section arg_table_sfc_land_run Arguments
 !! \htmlinclude sfc_land_run.html
 !!
@@ -196,5 +190,4 @@
  
    end subroutine sfc_land_run
 
-!> @}
    end module sfc_land

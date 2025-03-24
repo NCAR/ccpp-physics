@@ -1,6 +1,7 @@
 !>\file radiation_tools.F90
 !!
 
+!> This module contains tools for radiation
 module radiation_tools
   use machine, only: &
        kind_phys                   ! Working type
@@ -11,8 +12,7 @@ module radiation_tools
        rrtmgp_minT    ! Minimum temperature allowed in RRTMGP
 contains
 
-  ! ######################################################################################### 
-  ! ######################################################################################### 
+!>
   subroutine cmp_tlev(nCol,nLev,minP,p_lay,t_lay,p_lev,tsfc,t_lev)
     ! Inputs
     integer, intent(in) :: &
@@ -83,9 +83,7 @@ contains
 
   end subroutine cmp_tlev
 
-  ! #########################################################################################
-  ! SUBROUTINE check_error_msg
-  ! #########################################################################################
+!>
   subroutine check_error_msg(routine_name, error_msg)
     character(len=*), intent(in) :: &
          error_msg, routine_name

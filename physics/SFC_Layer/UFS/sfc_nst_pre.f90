@@ -1,6 +1,7 @@
 !>  \file sfc_nst_pre.f90
-!!  This file contains preparation for the GFS NSST model.
+!!  This file contains preparation for the near-surface sea temperature scheme.
 
+!> This module contain preparation for the near-surface sea temperature scheme 
 module sfc_nst_pre
 
   use machine               , only : kind_phys
@@ -11,7 +12,7 @@ module sfc_nst_pre
 
 contains
 
-  !> \defgroup GFS_NSST_PRE GFS Near-Surface Sea Temperature Pre
+  !> \defgroup GFS_NSST_PRE Near-Surface Sea Temperature Pre
   !!
   !! The NSST scheme is one of the three schemes used to represent the
   !! surface in the GFS physics suite. The other two are the Noah land

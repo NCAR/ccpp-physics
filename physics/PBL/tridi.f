@@ -1,5 +1,8 @@
 !>\file tridi.f
 !! These subroutines are originally internal subroutines in moninedmf.f
+
+!> This module contains routine to compute tridiagonal matrix elements for TKE, heat, moist
+!! and momentum
       module tridi_mod
       contains
 
