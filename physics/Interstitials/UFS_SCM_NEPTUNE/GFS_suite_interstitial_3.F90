@@ -11,12 +11,12 @@
     subroutine GFS_suite_interstitial_3_run (otsptflag,                 &
                im, levs, nn, cscnv,imfshalcnv, imfdeepcnv,              &
                imfshalcnv_samf, imfdeepcnv_samf, imfdeepcnv_c3,         &
-               imfshalcnv_c3,progsigma,                                 &
+               imfshalcnv_c3,progsigma,progomega,                       &
                first_time_step, restart,                                &
                satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,   &
                ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc,    &
                xlon, xlat, gt0, gq0, sigmain,sigmaout,qmicro,           &
-               imp_physics, imp_physics_mg,                             &
+               omegain,omegaout,imp_physics, imp_physics_mg,            &
                imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,        &
                imp_physics_gfdl, imp_physics_thompson, dtidx, ntlnc,    &
                imp_physics_wsm6, imp_physics_fer_hires, prsi, ntinc,    &
@@ -38,7 +38,7 @@
         imp_physics_nssl, imp_physics_tempo, me, index_of_process_conv_trans
       integer,              intent(in   ), dimension(:)     :: islmsk, kpbl, kinver
       logical,              intent(in   )                   :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras, progsigma
-      logical,              intent(in   )                   :: first_time_step, restart
+      logical,              intent(in   )                   :: first_time_step, restart, progomega
       integer,              intent(in   )                   :: imfshalcnv, imfdeepcnv, imfshalcnv_samf,imfdeepcnv_samf
       integer,              intent(in   )                   :: imfshalcnv_c3,imfdeepcnv_c3
       integer,                                          intent(in) :: ntinc, ntlnc
@@ -54,8 +54,8 @@
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: gt0
       real(kind=kind_phys), intent(in   ), dimension(:,:,:) :: gq0
 
-      real(kind=kind_phys), intent(inout   ), dimension(:,:), optional :: sigmain
-      real(kind=kind_phys), intent(inout   ), dimension(:,:), optional :: sigmaout, qmicro
+      real(kind=kind_phys), intent(inout   ), dimension(:,:), optional :: sigmain, omegain
+      real(kind=kind_phys), intent(inout   ), dimension(:,:), optional :: sigmaout, qmicro, omegaout
       real(kind=kind_phys), intent(inout), dimension(:,:)   :: rhc, save_qc
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), intent(inout), dimension(:,:)   :: save_qi
@@ -81,7 +81,7 @@
       errmsg = ''
       errflg = 0
 
-      ! In case of using prognostic updraf area fraction, initialize area fraction here
+      ! In case of using prognostic updraft area fraction, initialize area fraction here
       ! since progsigma_calc is called from both deep and shallow schemes.
       if(((imfshalcnv == imfshalcnv_samf) .or. (imfdeepcnv == imfdeepcnv_samf) &
           .or. (imfshalcnv == imfshalcnv_c3) .or. (imfdeepcnv == imfdeepcnv_c3)) &
@@ -102,7 +102,26 @@
          enddo
       endif
 
-
+      ! In case of using prognostic updraft velocity, initialize updraft velocity here
+      ! since progomega_calc is called from both deep and shallow schemes.
+      if(((imfshalcnv == imfshalcnv_samf) .or. (imfdeepcnv == imfdeepcnv_samf) &
+          .or. (imfshalcnv == imfshalcnv_c3) .or. (imfdeepcnv == imfdeepcnv_c3)) &
+          .and. progomega)then
+         if(first_time_step .and. .not. restart)then
+            do k=1,levs
+               do i=1,im
+                  omegain(i,k)=0.0
+                  omegaout(i,k)=0.0
+               enddo
+            enddo
+         endif
+         do k=1,levs
+            do i=1,im
+               omegaout(i,k)=0.0
+            enddo
+         enddo
+      endif
+      
       if (cscnv .or. satmedmf .or. trans_trac .or. ras) then
         tracers = 2
         do n=2,ntrac
