@@ -31,7 +31,10 @@ contains
         logical :: micro_init
         real(wp) :: stime, etime
         logical, parameter :: precomputed_tables = .false.
-
+        
+        ! Initialize physical constants
+        call mp_tempo_params_init()
+        
         ! Set module variable is_aerosol_aware/merra2_aerosol_aware
         configs%aerosol_aware = is_aerosol_aware_in
         merra2_aerosol_aware = merra2_aerosol_aware_in

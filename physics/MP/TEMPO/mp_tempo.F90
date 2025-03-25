@@ -109,21 +109,6 @@ module mp_tempo
          errflg = 0
 
          if (is_initialized) return
-
-         ! Set local TEMPO MP module constants from host model
-         ! PI = con_pi
-         ! T_0 = con_t0c
-         ! Rv = con_Rv
-         ! R = con_rd
-         ! RoverRv = con_eps
-         ! Cp = con_cp
-         ! R_uni = con_rgas
-         ! k_b = con_boltz
-         ! M_w = con_amw*1.0E-3 !module_mp_tempo expects kg/mol
-         ! M_a = con_amd*1.0E-3 !module_mp_tempo expects kg/mol
-         ! N_avo = con_avgd
-         ! lvap0 = con_hvap
-         ! lfus = con_hfus
          
          ! Consistency checks
          if (imp_physics/=imp_physics_tempo) then
@@ -146,7 +131,7 @@ module mp_tempo
             return
          end if
 
-         ! Call TEMPO init
+         ! Call TEMPO init (also sets initial default values of physical constants)
          if (mpirank==mpiroot) write(*,*) 'Calling tempo_init() with is_aerosol_aware = ', is_aerosol_aware
          
          call tempo_init(is_aerosol_aware_in=is_aerosol_aware,                 &
@@ -161,7 +146,32 @@ module mp_tempo
            is_initialized = .true.
            return
          end if
-
+         
+         ! Set local TEMPO MP module constants from host model and overwrite derived constants calculated in module_mp_tempo_params/mp_tempo_params_init()
+         PI = con_pi
+         lvap0 = con_hvap
+         lfus = con_hfus
+         lsub = lvap0 + lfus
+         olfus = 1./lfus
+         
+         Rv = con_Rv
+         R = con_rd
+         RoverRv = con_eps
+         Cp2 = con_cp
+         T_0 = con_t0c
+         R_uni = con_rgas
+         k_b = con_boltz
+         N_avo = con_avgd
+         
+         oRv = 1.0 / Rv
+         am_r = PI * rho_w2 / 6.0
+         M_w = con_amw*1.0E-3 !module_mp_tempo expects kg/mol
+         M_a = con_amd*1.0E-3 !module_mp_tempo expects kg/mol
+         
+         ma_w = M_w/N_avo
+         
+         ar_volume = 4.0 / 3.0 * PI * (2.5e-6)**3
+         
          ! Geopotential height in m2 s-2 to height in m
          hgt = phil/con_g
 
