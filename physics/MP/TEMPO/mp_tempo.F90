@@ -165,9 +165,19 @@ module mp_tempo
          
          oRv = 1.0 / Rv
          am_r = PI * rho_w2 / 6.0
+         am_i = PI * rho_i / 6.0
+         am_g = (/PI*rho_g(1)/6.0, &
+          PI*rho_g(2)/6.0, &
+          PI*rho_g(3)/6.0, &
+          PI*rho_g(4)/6.0, &
+          PI*rho_g(5)/6.0, &
+          PI*rho_g(6)/6.0, &
+          PI*rho_g(7)/6.0, &
+          PI*rho_g(8)/6.0, &
+          PI*rho_g(9)/6.0/)
+         
          M_w = con_amw*1.0E-3 !module_mp_tempo expects kg/mol
          M_a = con_amd*1.0E-3 !module_mp_tempo expects kg/mol
-         
          ma_w = M_w/N_avo
          
          ar_volume = 4.0 / 3.0 * PI * (2.5e-6)**3
