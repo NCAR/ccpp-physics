@@ -39,7 +39,7 @@
       real(kind=kind_phys), intent(in) :: sigmain(im,km)
 
 !     intent out
-      real(kind=kind_phys), intent(out) :: sigmaout(im,km)
+      real(kind=kind_phys), intent(inout) :: sigmaout(im,km)
       real(kind=kind_phys), intent(out) :: sigmab(im)
 
 

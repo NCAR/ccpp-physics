@@ -15,8 +15,8 @@
       index_of_temperature, index_of_x_wind, index_of_y_wind, ntqv, gq0, save_q,  &
       cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d, flag_for_dcnv_generic_tend,         &
       ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,                               &
-      ntgnc, nthl, nthnc, nthv, ntgv, ntrz, ntgz, nthz, ntsigma, ntrac,clw,       &
-      satmedmf, trans_trac, errmsg, errflg)
+      ntgnc, nthl, nthnc, nthv, ntgv, ntrz, ntgz, nthz, ntsigma, ntomega,         &
+      ntrac,clw,satmedmf, trans_trac, errmsg, errflg)
 
 
       use machine,               only: kind_phys
@@ -47,7 +47,7 @@
            index_of_x_wind, index_of_y_wind, ntqv
       integer, intent(in) :: ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,     &
                              ntgnc, nthl, nthnc, nthv, ntgv, ntrz, ntgz, nthz, &
-                             ntsigma, ntrac
+                             ntsigma, ntomega, ntrac
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: clw
 
 
@@ -115,7 +115,7 @@
                      n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc   .and. &
                      n /= nthl  .and. n /= nthnc .and. n /= nthv    .and. &
                      n /= ntrz  .and. n /= ntgz  .and. n /= nthz    .and. &
-                     n /= ntgv  .and. n /= ntsigma) then
+                     n /= ntgv  .and. n /= ntsigma .and. n /= ntomega) then
                    tracers = tracers + 1
                    idtend = dtidx(100+n,index_of_process_dcnv)
                    if(idtend>0) then

@@ -370,6 +370,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ntomega]
+  standard_name = index_of_updraft_velocity_in_tracer_concentration_array
+  long_name = tracer index of updraft_velocity
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
