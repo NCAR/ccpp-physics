@@ -4,7 +4,5 @@
   branch = main
 [submodule "physics/MP/TEMPO/TEMPO"]
   path = physics/MP/TEMPO/TEMPO
-  #url = https://github.com/NCAR/TEMPO
-  #branch = main
-  url = https://github.com/grantfirl/TEMPO
-  branch = TEMPO_constants 
+  url = https://github.com/NCAR/TEMPO
+  branch = main
