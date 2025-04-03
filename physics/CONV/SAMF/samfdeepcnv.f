@@ -116,7 +116,8 @@
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
       integer, intent(inout)  :: kcnv(:)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
-      real(kind=kind_phys), intent(inout) :: cnvw(:,:),  cnvc(:,:), tkeh(:,:)
+      real(kind=kind_phys), intent(inout) :: cnvw(:,:),  cnvc(:,:),     &
+     &                                       tkeh(:,:)
       
       real(kind=kind_phys), intent(in) :: qtr(:,:,:), q1(:,:)
       real(kind=kind_phys), intent(in) :: t1(:,:), u1(:,:), v1(:,:)
