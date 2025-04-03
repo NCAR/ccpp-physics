@@ -331,17 +331,12 @@ contains
 #ifdef DEBUG
         if (me == master) write(*,*)"read in a new month MERRA2", n2
 #endif
-        DO ii = 1, ntrcaerm
-          do j = jamin, jamax
-            do k = 1, levsaer
-              do i = iamin, iamax
-                aerin(i,j,k,ii,1) = aerin(i,j,k,ii,2)
-              enddo   !i-loop (lon)
-            enddo     !k-loop (lev)
-          enddo       !j-loop (lat)
-        ENDDO         ! ii-loop (ntracaerm)
 !! ===================================================================
+        call read_netfaer(n1, iflip, 1, errmsg, errflg)
+        if(errflg/=0) return
         call read_netfaer(n2, iflip, 2, errmsg, errflg)
+        if(errflg/=0) return
+!! ===================================================================
         n1sv=n1
         n2sv=n2
       end if
