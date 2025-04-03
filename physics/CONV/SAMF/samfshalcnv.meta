@@ -55,6 +55,13 @@
   dimensions = ()
   type = integer
   intent = in
+[nn]
+  standard_name = number_of_tracers_for_convective_transport
+  long_name = number of tracers for convective transport
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [first_time_step]
   standard_name = flag_for_first_timestep
   long_name = flag for first time step for time integration loop (cold/warmstart)
@@ -249,7 +256,15 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
+[dqtr]
+  standard_name = tendency_of_convective_transportable_tracers
+  long_name = array to contain tendencies of cloud water and other convective trans. tracers
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
+  type = real
+  kind = kind_phys
+  intent = out
 [prevsq]
   standard_name = specific_humidity_on_previous_timestep
   long_name = specific_humidity_on_previous_timestep
@@ -274,7 +289,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [t1]
   standard_name = air_temperature
   long_name = updated temperature
@@ -320,6 +335,14 @@
   long_name = tendency of y wind calculated by one physics scheme
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_q]
+  standard_name = tendency_of_tracer_concentration
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = out

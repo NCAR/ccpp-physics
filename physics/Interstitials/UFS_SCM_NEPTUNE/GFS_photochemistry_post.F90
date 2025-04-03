@@ -17,30 +17,14 @@ contains
        errmsg, errflg)
     
     ! Inputs
-    integer, intent(in) :: &
-         tend_opt_photochem, &
-         im,             ! horizontal loop extent
-         levs,           ! vertical dimension
-         ntrac
-    real(kind=kind_phys), intent(in) :: &
-         dtp             ! Model timestep
-    real(kind=kind_phys), intent(in), dimension(:,:) :: &
-         ten_u, ten_v, ten_t
-    real(kind=kind_phys), intent(in), dimension(:,:,:) :: &
-         ten_q             ! tendency of tracer concentration
-         
-    real(kind=kind_phys), intent(inout), dimension(:,:) :: &
-         gt0,             ! Air temperature (K)
-         gu0,
-         gv0
-    real(kind=kind_phys), intent(inout), dimension(:,:,:) :: &
-         gq0             ! tracer concentration
-    real(kind=kind_phys), intent(inout), dimension(:,:) :: &
-         dtdt,             
-         dudt,
-         dvdt
-    real(kind=kind_phys), intent(inout), dimension(:,:,:) :: &
-         dqdt
+    integer, intent(in) :: tend_opt_photochem, im, levs, ntrac
+    real(kind=kind_phys), intent(in) :: dtp
+    real(kind=kind_phys), intent(in), dimension(:,:) :: ten_u, ten_v, ten_t
+    real(kind=kind_phys), intent(in), dimension(:,:,:) :: ten_q
+    real(kind=kind_phys), intent(inout), dimension(:,:) :: gt0, gu0, gv0
+    real(kind=kind_phys), intent(inout), dimension(:,:,:) :: gq0
+    real(kind=kind_phys), intent(inout), dimension(:,:) :: dtdt, dudt, dvdt
+    real(kind=kind_phys), intent(inout), dimension(:,:,:) :: dqdt
 
     ! Outputs
     character(len=*), intent(out) :: &

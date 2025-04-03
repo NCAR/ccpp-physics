@@ -58,9 +58,9 @@ contains
          dtp,          & ! Model timestep
          con_1ovg        ! Physical constant (1./gravity)
     integer, intent(in) :: &
-         ntqv,           ! index for specific humidity in the tracer array
-         ntoz,           ! index for ozone in the the tracer array
-         im,             ! horizontal loop extent
+         ntqv,           &! index for specific humidity in the tracer array
+         ntoz,           &! index for ozone in the the tracer array
+         im,             &! horizontal loop extent
          levs            ! vertical dimension
     real(kind=kind_phys), intent(in), dimension(:,:) :: &
          prsl,         & ! Air pressure (Pa)

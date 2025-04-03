@@ -137,157 +137,122 @@
                   dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,tracers)-gq0(:,:,n)
                endif
             endif
-            do k=1,levs
-              do i=1,im
-                gq0(i,k,n) = clw(i,k,tracers)
-              enddo
-            enddo
           endif
         enddo
       endif
 
-      if (ntcw > 0) then
-
-!  for microphysics
-        if (imp_physics == imp_physics_zhao_carr     .or. &
-            imp_physics == imp_physics_zhao_carr_pdf .or. &
-            imp_physics == imp_physics_gfdl) then
-           gq0(1:im,:,ntcw) = clw(1:im,:,1) + clw(1:im,:,2)
-
-        elseif (ntiw > 0) then
-          do k=1,levs
-            do i=1,im
-              gq0(i,k,ntiw) = clw(i,k,1)                     ! ice
-              gq0(i,k,ntcw) = clw(i,k,2)                     ! water
-            enddo
-          enddo
-
-          if ( imp_physics == imp_physics_nssl ) then
-              liqm =  con_pi/6.*1.e3*(18.e-6)**3  ! 4./3.*con_pi*1.e-12
-              icem =  con_pi/6.*1.e3*(120.e-6)**3 ! 4./3.*con_pi*3.2768*1.e-14*890.
-              qccn = nssl_cccn/1.225 !1.225 is a reference air density and should match what is used in module_mp_nssl_2mom.F90 (rho00)
-              do k=1,levs
-                do i=1,im
-                   ! check number of available ccn
-                   IF ( nssl_ccn_on ) THEN
-                     IF ( nssl_invertccn ) THEN
-                       xccn = qccn - gq0(i,k,ntccn)
-                     ELSE
-                       xccn = gq0(i,k,ntccn)
-                     ENDIF
+      if (ntcw > 0 .and. ntiw > 0) then
+        if ( imp_physics == imp_physics_nssl ) then
+            liqm =  con_pi/6.*1.e3*(18.e-6)**3  ! 4./3.*con_pi*1.e-12
+            icem =  con_pi/6.*1.e3*(120.e-6)**3 ! 4./3.*con_pi*3.2768*1.e-14*890.
+            qccn = nssl_cccn/1.225 !1.225 is a reference air density and should match what is used in module_mp_nssl_2mom.F90 (rho00)
+            do k=1,levs
+              do i=1,im
+                 ! check number of available ccn
+                 IF ( nssl_ccn_on ) THEN
+                   IF ( nssl_invertccn ) THEN
+                     xccn = qccn - gq0(i,k,ntccn)
                    ELSE
-                     xccn = Max(0.0, qccn - gq0(i,k,ntlnc))
+                     xccn = gq0(i,k,ntccn)
                    ENDIF
+                 ELSE
+                   xccn = Max(0.0, qccn - gq0(i,k,ntlnc))
+                 ENDIF
+                 
+                 IF ( gq0(i,k,ntlnc) > 0.0 .and. save_qc(i,k) > 0.0 ) THEN
+                    xcwmas = Max( liqm, clw(i,k,2)/gq0(i,k,ntlnc) )
+                 ELSE
+                    xcwmas = liqm
+                 ENDIF
+
+                 IF ( gq0(i,k,ntinc) > 0.0 .and. save_qi(i,k) > 0.0 ) THEN
+                    xcimas = Max( liqm, clw(i,k,1)/gq0(i,k,ntinc) )
+                 ELSE
+                    xcimas = icem
+                 ENDIF
                    
-                   IF ( gq0(i,k,ntlnc) > 0.0 .and. save_qc(i,k) > 0.0 ) THEN
-                      xcwmas = Max( liqm, clw(i,k,2)/gq0(i,k,ntlnc) )
-                   ELSE
-                      xcwmas = liqm
-                   ENDIF
-
-                   IF ( gq0(i,k,ntinc) > 0.0 .and. save_qi(i,k) > 0.0 ) THEN
-                      xcimas = Max( liqm, clw(i,k,1)/gq0(i,k,ntinc) )
-                   ELSE
-                      xcimas = icem
-                   ENDIF
-                   
-                  IF ( xccn > 0.0 ) THEN
-                  xccw = Min( xccn, max(0.0, (clw(i,k,2)-save_qc(i,k))) / xcwmas )
-                  gq0(i,k,ntlnc) = gq0(i,k,ntlnc) + xccw 
-                  IF ( nssl_ccn_on ) THEN
-                     IF ( nssl_invertccn ) THEN
-                       ! ccn are activated CCN, so add
-                       gq0(i,k,ntccn) = gq0(i,k,ntccn) + xccw
-                     ELSE
-                       ! ccn are unactivated CCN, so subtract
-                       gq0(i,k,ntccn) = gq0(i,k,ntccn) - xccw
-                     ENDIF
-                  ENDIF
-                  ENDIF
+                 IF ( xccn > 0.0 ) THEN
+                 xccw = Min( xccn, max(0.0, (clw(i,k,2)-save_qc(i,k))) / xcwmas )
+                 gq0(i,k,ntlnc) = gq0(i,k,ntlnc) + xccw 
+                 IF ( nssl_ccn_on ) THEN
+                    IF ( nssl_invertccn ) THEN
+                      ! ccn are activated CCN, so add
+                      gq0(i,k,ntccn) = gq0(i,k,ntccn) + xccw
+                    ELSE
+                      ! ccn are unactivated CCN, so subtract
+                      gq0(i,k,ntccn) = gq0(i,k,ntccn) - xccw
+                    ENDIF
+                 ENDIF
+                 ENDIF
 
                   gq0(i,k,ntinc) = gq0(i,k,ntinc)  &
                            +  max(0.0, (clw(i,k,1)-save_qi(i,k))) / xcimas
-                enddo
               enddo
-          endif
+            enddo
+        endif
 
-          if (imp_physics == imp_physics_thompson .and. (ntlnc>0 .or. ntinc>0)) then
-            if_convert_dry_rho: if (convert_dry_rho) then
-              do k=1,levs
-                do i=1,im
-                  !> - Convert specific humidity to dry mixing ratio
-                  qv_mp(i,k) = spechum(i,k) / (one-spechum(i,k))
-                  !> - Density of air in kg m-3 and inverse density
-                  rho = con_eps*prsl(i,k) / (con_rd*save_tcp(i,k)*(qv_mp(i,k)+con_eps))
-                  orho = one/rho
-                  if (ntlnc>0) then
-                    !> - Convert moist mixing ratio to dry mixing ratio
-                    qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k)) / (one-spechum(i,k))
-                    !> - Convert number concentration from moist to dry
-                    nc_mp(i,k) = gq0(i,k,ntlnc) / (one-spechum(i,k))
-                    nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
-                    !> - Convert number concentrations from dry to moist
-                    gq0(i,k,ntlnc) = nc_mp(i,k) / (one+qv_mp(i,k))
-                  endif
-                  if (ntinc>0) then
-                    !> - Convert moist mixing ratio to dry mixing ratio
-                    qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k)) / (one-spechum(i,k))
-                    !> - Convert number concentration from moist to dry
-                    ni_mp(i,k) = gq0(i,k,ntinc) / (one-spechum(i,k)) 
-                    ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
-                    !> - Convert number concentrations from dry to moist
-                    gq0(i,k,ntinc) = ni_mp(i,k) / (one+qv_mp(i,k))
-                  endif
-                enddo
+        if (imp_physics == imp_physics_thompson .and. (ntlnc>0 .or. ntinc>0)) then
+          if_convert_dry_rho: if (convert_dry_rho) then
+            do k=1,levs
+              do i=1,im
+                !> - Convert specific humidity to dry mixing ratio
+                qv_mp(i,k) = spechum(i,k) / (one-spechum(i,k))
+                !> - Density of air in kg m-3 and inverse density
+                rho = con_eps*prsl(i,k) / (con_rd*save_tcp(i,k)*(qv_mp(i,k)+con_eps))
+                orho = one/rho
+                if (ntlnc>0) then
+                  !> - Convert moist mixing ratio to dry mixing ratio
+                  qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k)) / (one-spechum(i,k))
+                  !> - Convert number concentration from moist to dry
+                  nc_mp(i,k) = gq0(i,k,ntlnc) / (one-spechum(i,k))
+                  nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                  !> - Convert number concentrations from dry to moist
+                  gq0(i,k,ntlnc) = nc_mp(i,k) / (one+qv_mp(i,k))
+                endif
+                if (ntinc>0) then
+                  !> - Convert moist mixing ratio to dry mixing ratio
+                  qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k)) / (one-spechum(i,k))
+                  !> - Convert number concentration from moist to dry
+                  ni_mp(i,k) = gq0(i,k,ntinc) / (one-spechum(i,k)) 
+                  ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                  !> - Convert number concentrations from dry to moist
+                  gq0(i,k,ntinc) = ni_mp(i,k) / (one+qv_mp(i,k))
+                endif
               enddo
-            else
-              do k=1,levs
-                do i=1,im
-                  !> - Density of air in kg m-3 and inverse density
-                  rho = con_eps*prsl(i,k) / (con_rd*save_tcp(i,k)*(spechum(i,k)+con_eps))
-                  orho = one/rho
-                  if (ntlnc>0) then
-                    !> - Update cloud water mixing ratio
-                    qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k))
-                    !> - Update cloud water number concentration
-                    gq0(i,k,ntlnc) = max(zero, gq0(i,k,ntlnc) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
-                  endif
-                  if (ntinc>0) then
-                    !> - Update cloud ice mixing ratio
-                    qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k))
-                    !> - Update cloud ice number concentration
-                    gq0(i,k,ntinc) = max(zero, gq0(i,k,ntinc) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
-                  endif
-                enddo
+            enddo
+          else
+            do k=1,levs
+              do i=1,im
+                !> - Density of air in kg m-3 and inverse density
+                rho = con_eps*prsl(i,k) / (con_rd*save_tcp(i,k)*(spechum(i,k)+con_eps))
+                orho = one/rho
+                if (ntlnc>0) then
+                  !> - Update cloud water mixing ratio
+                  qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k))
+                  !> - Update cloud water number concentration
+                  gq0(i,k,ntlnc) = max(zero, gq0(i,k,ntlnc) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                endif
+                if (ntinc>0) then
+                  !> - Update cloud ice mixing ratio
+                  qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k))
+                  !> - Update cloud ice number concentration
+                  gq0(i,k,ntinc) = max(zero, gq0(i,k,ntinc) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                endif
               enddo
-            end if if_convert_dry_rho
-            if(ldiag3d .and. qdiag3d) then
-              idtend = dtidx(100+ntlnc,index_of_process_conv_trans)
-              if(idtend>0) then
-                dtend(:,:,idtend) = dtend(:,:,idtend) + gq0(:,:,ntlnc) - save_lnc
-              endif
-              idtend = dtidx(100+ntinc,index_of_process_conv_trans)
-              if(idtend>0) then
-                dtend(:,:,idtend) = dtend(:,:,idtend) + gq0(:,:,ntinc) - save_inc
-              endif
+            enddo
+          end if if_convert_dry_rho
+          if(ldiag3d .and. qdiag3d) then
+            idtend = dtidx(100+ntlnc,index_of_process_conv_trans)
+            if(idtend>0) then
+              dtend(:,:,idtend) = dtend(:,:,idtend) + gq0(:,:,ntlnc) - save_lnc
+            endif
+            idtend = dtidx(100+ntinc,index_of_process_conv_trans)
+            if(idtend>0) then
+              dtend(:,:,idtend) = dtend(:,:,idtend) + gq0(:,:,ntinc) - save_inc
             endif
           endif
-
-        else
-          do k=1,levs
-            do i=1,im
-              gq0(i,k,ntcw) = clw(i,k,1) + clw(i,k,2)
-            enddo
-          enddo
-        endif   ! end if_ntiw
-
-      else
-        do k=1,levs
-          do i=1,im
-            clw(i,k,1) = clw(i,k,1) + clw(i,k,2)
-          enddo
-        enddo
-      endif   ! end if_ntcw
+        endif
+      endif   ! end if_ntcw and if_ntiw
 
     end subroutine GFS_suite_interstitial_4_run
 
