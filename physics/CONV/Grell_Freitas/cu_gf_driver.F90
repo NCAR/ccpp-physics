@@ -1,7 +1,7 @@
 !>\file cu_gf_driver.F90
 !! This file is scale-aware Grell-Freitas cumulus scheme driver.
 
-
+!> This module contains the scale-aware Grell-Freitas cumulus scheme driver.
 module cu_gf_driver
 
    ! DH* TODO: replace constants with arguments to cu_gf_driver_run
@@ -56,7 +56,7 @@ contains
 !! \htmlinclude cu_gf_driver_run.html
 !!
 !>\section gen_gf_driver Grell-Freitas Cumulus Scheme Driver General Algorithm
-      subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart,&
+      subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,flag_init,flag_restart, gf_coldstart, &
                cactiv,cactiv_m,g,cp,xlv,r_v,forcet,forceqv_spechum,phil,raincv, &
                qv_spechum,t,cld1d,us,vs,t2di,w,qv2di_spechum,p2di,psuri,        &
                hbot,htop,kcnv,xland,hfx2,qfx2,aod_gf,cliw,clcw,                 &
@@ -97,7 +97,7 @@ contains
    integer      :: its,ite, jts,jte, kts,kte
    integer, intent(in   ) :: im,km,ntracer,nchem,kdt
    integer, intent(in   ) :: ichoice_in,ichoicem_in,ichoice_s_in
-   logical, intent(in   ) :: flag_init, flag_restart, do_mynnedmf
+   logical, intent(in   ) :: flag_init, flag_restart, do_mynnedmf, gf_coldstart
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
    real (kind=kind_phys), intent(in) :: g,cp,xlv,r_v
    logical, intent(in   ) :: ldiag3d
@@ -220,10 +220,10 @@ contains
    real(kind=kind_phys), dimension (im,km) :: qcheck,zo,t2d,q2d,po,p2d,rhoi,clw_ten
    real(kind=kind_phys), dimension (im,km) :: tn,qo,tshall,qshall,dz8w,omeg
    real(kind=kind_phys), dimension (im)    :: z1,psur,cuten,cutens,cutenm
-   real(kind=kind_phys), dimension (im)    :: umean,vmean,pmean
+   real(kind=kind_phys), dimension (im)    :: umean,vmean,pmean,mc_thresh
    real(kind=kind_phys), dimension (im)    :: xmbs,xmbs2,xmb,xmbm,xmb_dumm,mconv
 !$acc declare create(qcheck,zo,t2d,q2d,po,p2d,rhoi,clw_ten,tn,qo,tshall,qshall,dz8w,omeg, &
-!$acc                z1,psur,cuten,cutens,cutenm,umean,vmean,pmean,           &
+!$acc                z1,psur,cuten,cutens,cutenm,umean,vmean,pmean,mc_thresh,           &
 !$acc                xmbs,xmbs2,xmb,xmbm,xmb_dumm,mconv)
 
    integer :: i,j,k,icldck,ipr,jpr,jpr_deep,ipr_deep,uidx,vidx,tidx,qidx
@@ -431,7 +431,7 @@ contains
       ccn_m(i) = 0.
 
       ! set aod and ccn
-      if (flag_init .and. .not.flag_restart) then
+      if ((flag_init .and. .not.flag_restart) .or. gf_coldstart) then
         aod_gf(i)=aodc0
       else
         if((cactiv(i).eq.0) .and. (cactiv_m(i).eq.0))then
@@ -596,6 +596,7 @@ contains
       hfx(i)=hfx2(i)*cp*rhoi(i,1)
       qfx(i)=qfx2(i)*xlv*rhoi(i,1)
       dx(i) = sqrt(garea(i))
+      mc_thresh(i)=3.25/dx(i)
      enddo
 
      do i=its,itf
@@ -770,7 +771,7 @@ contains
                                ! betwee -1 and +1
               ,do_cap_suppress_here,cap_suppress_j &
               ,k22m          &
-              ,jminm,kdt,tropics)
+              ,jminm,kdt,mc_thresh)
 !$acc kernels
             do i=its,itf
              do k=kts,ktf
@@ -856,7 +857,7 @@ contains
                                ! betwee -1 and +1
               ,do_cap_suppress_here,cap_suppress_j &
               ,k22          &
-              ,jmin,kdt,tropics)
+              ,jmin,kdt,mc_thresh)
           jpr=0
           ipr=0
 !$acc kernels

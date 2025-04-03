@@ -248,6 +248,7 @@
 ! Many of these changes are now documented in references listed above.
 !====================================================================
 
+!> This module contains the entity of MYNN-EDMF PBL scheme
 MODULE module_bl_mynn
 
   use bl_mynn_common,only: &
@@ -302,7 +303,7 @@ MODULE module_bl_mynn
 ! Note that the following mixing-length constants are now specified in mym_length
 !      &cns=3.5, alp1=0.23, alp2=0.3, alp3=3.0, alp4=10.0, alp5=0.2
 
-  real(kind_phys), parameter :: gpw=5./3., qcgmin=1.e-8, qkemin=1.e-12
+  real(kind_phys), parameter :: qkemin=1.e-4
   real(kind_phys), parameter :: tliq = 269. !all hydrometeors are liquid when T > tliq
 
 ! Constants for cloud PDF (mym_condensation)
@@ -350,12 +351,12 @@ MODULE module_bl_mynn
 CONTAINS
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
-!! This subroutine is the GSD MYNN-EDNF PBL driver routine,which
+!>\ingroup gp_mynnedmf
+!! This subroutine is the MYNN-EDNF PBL driver routine,which
 !! encompassed the majority of the subroutines that comprise the 
 !! procedures that ultimately solve for tendencies of 
 !! \f$U, V, \theta, q_v, q_c, and q_i\f$.
-!!\section gen_mynn_bl_driver GSD mynn_bl_driver General Algorithm
+!!\section gen_mynn_bl_driver  mynn_bl_driver General Algorithm
 !> @{
   SUBROUTINE mynn_bl_driver(            &
        &initflag,restart,cycling,       &
@@ -452,10 +453,6 @@ CONTAINS
 !       closure       : <= 2.5;  Level 2.5
 !                  2.5< and <3;  Level 2.6
 !                        =   3;  Level 3
-
-! SGT: Changed this to use assumed shape arrays (dimension(:,:,:)) with no "optional" arguments
-!      to prevent a crash on Cheyenne. Do not change it back without testing if the code runs
-!      on Cheyenne with the GNU compiler.
     
     real(kind_phys), intent(in) :: delt
     real(kind_phys), dimension(:),   intent(in) :: dx
@@ -1510,10 +1507,10 @@ CONTAINS
 !
 !-------------------------------------------------------------------
 
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine initializes the mixing length, TKE, \f$\theta^{'2}\f$,
 !! \f$q^{'2}\f$, and \f$\theta^{'}q^{'}\f$.
-!!\section gen_mym_ini GSD MYNN-EDMF mym_initialize General Algorithm 
+!!\section gen_mym_ini  MYNN-EDMF mym_initialize General Algorithm 
 !> @{
   SUBROUTINE  mym_initialize (                                & 
        &            kts,kte,xland,                            &
@@ -1696,7 +1693,7 @@ CONTAINS
 !       These are defined on the walls of the grid boxes.
 !
 
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine calculates the level 2, non-dimensional wind shear
 !! \f$G_M\f$ and vertical temperature gradient \f$G_H\f$ as well as 
 !! the level 2 stability funcitons \f$S_h\f$ and \f$S_m\f$.
@@ -1717,7 +1714,7 @@ CONTAINS
 !!\param gh      \f$G_H\f$ divided by \f$L^{2}/q^{2}\f$ (\f$s^{-2}\f$)
 !!\param sm      stability function for momentum, at Level 2
 !!\param sh      stability function for heat, at Level 2
-!!\section gen_mym_level2 GSD MYNN-EDMF mym_level2 General Algorithm
+!!\section gen_mym_level2  MYNN-EDMF mym_level2 General Algorithm
 !! @ {
   SUBROUTINE  mym_level2 (kts,kte,                &
        &            dz,                           &
@@ -1848,7 +1845,7 @@ CONTAINS
 !     NOTE: the mixing lengths are meant to be calculated at the full-
 !           sigmal levels (or interfaces beween the model layers).
 !
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine calculates the mixing lengths.
   SUBROUTINE  mym_length (                     & 
     &            kts,kte,xland,                &
@@ -1937,11 +1934,11 @@ CONTAINS
         h1=MIN(h1,maxdz)         ! 1/2 transition layer depth
         h2=h1/2.0                ! 1/4 transition layer depth
 
-        qkw(kts) = SQRT(MAX(qke(kts),1.0e-10))
+        qkw(kts) = SQRT(MAX(qke(kts), qkemin))
         DO k = kts+1,kte
            afk = dz(k)/( dz(k)+dz(k-1) )
            abk = 1.0 -afk
-           qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk,1.0e-3))
+           qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk, qkemin))
         END DO
 
         elt = 1.0e-5
@@ -1961,7 +1958,7 @@ CONTAINS
 
         elt =  alp1*elt/vsc
         vflx = ( vt(kts)+1.0 )*flt +( vq(kts)+tv0 )*flq
-        vsc = ( gtr*elt*MAX( vflx, 0.0 ) )**(1.0/3.0)
+        vsc = ( gtr*elt*MAX( vflx, 0.0 ) )**onethird
 
         !   **  Strictly, el(i,k=1) is not zero.  **
         el(kts) = 0.0
@@ -2019,14 +2016,14 @@ CONTAINS
         h1=MIN(h1,600.)          ! 1/2 transition layer depth
         h2=h1/2.0                ! 1/4 transition layer depth
 
-        qtke(kts)=MAX(0.5*qke(kts), 0.01) !tke at full sigma levels
+        qtke(kts)=MAX(0.5*qke(kts), 0.5*qkemin) !tke at full sigma levels
         thetaw(kts)=theta(kts)            !theta at full-sigma levels
-        qkw(kts) = SQRT(MAX(qke(kts),1.0e-10))
+        qkw(kts) = SQRT(MAX(qke(kts), qkemin))
 
         DO k = kts+1,kte
            afk = dz(k)/( dz(k)+dz(k-1) )
            abk = 1.0 -afk
-           qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk,1.0e-3))
+           qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk, qkemin))
            qtke(k) = 0.5*(qkw(k)**2)     ! q -> TKE
            thetaw(k)= theta(k)*abk + theta(k-1)*afk
         END DO
@@ -2039,14 +2036,14 @@ CONTAINS
         zwk = zw(k)
         DO WHILE (zwk .LE. zi2+h1)
            dzk = 0.5*( dz(k)+dz(k-1) )
-           qdz = min(max( qkw(k)-qmin, 0.02 ), 30.0)*dzk
+           qdz = min(max( qkw(k)-qmin, 0.01 ), 30.0)*dzk
            elt = elt +qdz*zwk
            vsc = vsc +qdz
            k   = k+1
            zwk = zw(k)
         END DO
 
-        elt = MIN( MAX( alp1*elt/vsc, 10.), 400.)
+        elt = MIN( MAX( alp1*elt/vsc, 8.), 400.)
         !avoid use of buoyancy flux functions which are ill-defined at the surface
         !vflx = ( vt(kts)+1.0 )*flt + ( vq(kts)+tv0 )*flq
         vflx = fltv
@@ -2122,13 +2119,13 @@ CONTAINS
         h1=MIN(h1,600.)
         h2=h1*0.5                ! 1/4 transition layer depth
 
-        qtke(kts)=MAX(0.5*qke(kts),0.01) !tke at full sigma levels
-        qkw(kts) = SQRT(MAX(qke(kts),1.0e-4))
+        qtke(kts)=MAX(0.5*qke(kts), 0.5*qkemin) !tke at full sigma levels
+        qkw(kts) = SQRT(MAX(qke(kts), qkemin))
 
         DO k = kts+1,kte
            afk = dz(k)/( dz(k)+dz(k-1) )
            abk = 1.0 -afk
-           qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk,1.0e-3))
+           qkw(k) = SQRT(MAX(qke(k)*abk+qke(k-1)*afk, qkemin))
            qtke(k) = 0.5*qkw(k)**2  ! qkw -> TKE
         END DO
 
@@ -2247,7 +2244,7 @@ CONTAINS
   END SUBROUTINE mym_length
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine was taken from the BouLac scheme in WRF-ARW and modified for
 !! integration into the MYNN PBL scheme. WHILE loops were added to reduce the
 !! computational expense. This subroutine computes the length scales up and down
@@ -2410,7 +2407,7 @@ CONTAINS
   END SUBROUTINE boulac_length0
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine was taken from the BouLac scheme in WRF-ARW
 !! and modified for integration into the MYNN PBL scheme.
 !! WHILE loops were added to reduce the computational expense.
@@ -2601,10 +2598,10 @@ CONTAINS
 !     # dtl, dqw, dtv, gm and gh are allowed to share storage units with
 !       dfm, dfh, dfq, tcd and qcd, respectively, for saving memory.
 !
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine calculates the vertical diffusivity coefficients and the 
 !! production terms for the turbulent quantities.      
-!>\section gen_mym_turbulence GSD mym_turbulence General Algorithm
+!>\section gen_mym_turbulence  mym_turbulence General Algorithm
 !! Two subroutines mym_level2() and mym_length() are called within this
 !!subrouine to collect variable to carry out successive calculations:
 !! - mym_level2() calculates the level 2 nondimensional wind shear \f$G_M\f$
@@ -3195,7 +3192,7 @@ CONTAINS
 !       scheme (program).
 !
 !-------------------------------------------------------------------
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine predicts the turbulent quantities at the next step.
   SUBROUTINE  mym_predict (kts,kte,                                     &
        &            closure,                                            &
@@ -3361,8 +3358,8 @@ CONTAINS
     CALL tridiag2(kte,a,b,c,d,x)
 
     DO k=kts,kte
-!       qke(k)=max(d(k-kts+1), 1.e-4)
-       qke(k)=max(x(k), 1.e-4)
+!       qke(k)=max(d(k-kts+1), qkemin)
+       qke(k)=max(x(k), qkemin)
        qke(k)=min(qke(k), 150.)
     ENDDO
       
@@ -3598,7 +3595,7 @@ CONTAINS
 !       Set these values to those adopted by you.
 !
 !-------------------------------------------------------------------
-!>\ingroup gsd_mynn_edmf 
+!>\ingroup gp_mynnedmf 
 !! This subroutine calculates the nonconvective component of the 
 !! subgrid cloud fraction and mixing ratio as well as the functions used to 
 !! calculate the buoyancy flux. Different cloud PDFs can be selected by
@@ -4025,7 +4022,7 @@ CONTAINS
   END SUBROUTINE mym_condensation
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine solves for tendencies of U, V, \f$\theta\f$, qv,
 !! qc, and qi
   SUBROUTINE mynn_tendencies(kts,kte,i,       &
@@ -5359,7 +5356,7 @@ ENDIF
   END SUBROUTINE mynn_mix_chem
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
   SUBROUTINE retrieve_exchange_coeffs(kts,kte,&
        &dfm,dfh,dz,K_m,K_h)
 
@@ -5387,7 +5384,7 @@ ENDIF
   END SUBROUTINE retrieve_exchange_coeffs
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
   SUBROUTINE tridiag(n,a,b,c,d)
 
 !! to solve system of linear eqs on tridiagonal matrix n times n
@@ -5423,7 +5420,7 @@ ENDIF
   END SUBROUTINE tridiag
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
       subroutine tridiag2(n,a,b,c,d,x)
       implicit none
 !      a - sub-diagonal (means it is the diagonal below the main diagonal)
@@ -5458,7 +5455,7 @@ ENDIF
 
     end subroutine tridiag2
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
        subroutine tridiag3(kte,a,b,c,d,x)
 
 !ccccccccccccccccccccccccccccccc                                                                   
@@ -5500,7 +5497,7 @@ ENDIF
         end subroutine tridiag3
 
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine calculates hybrid diagnotic boundary-layer height (PBLH).
 !!
 !! NOTES ON THE PBLH FORMULATION: The 1.5-theta-increase method defines
@@ -5517,7 +5514,7 @@ ENDIF
 !!the TKE-method more during stable conditions (PBLH < 400 m).
 !!A variable tke threshold (TKEeps) is used since no hard-wired
 !!value could be found to work best in all conditions.
-!>\section gen_get_pblh  GSD get_pblh General Algorithm
+!>\section gen_get_pblh  get_pblh General Algorithm
 !> @{
   SUBROUTINE GET_PBLH(KTS,KTE,zi,thetav1D,qke1D,zw1D,dz1D,landsea,kzi)
 
@@ -5663,7 +5660,7 @@ ENDIF
 !> @}
   
 ! ==================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine is the Dynamic Multi-Plume (DMP) Mass-Flux Scheme.
 !! 
 !! dmp_mf() calculates the nonlocal turbulent transport from the dynamic
@@ -6509,11 +6506,11 @@ IF (nup2 > 0) THEN
    do k=kts,kte-1
       do I=1,nup
          edmf_a(K)  =edmf_a(K)  +UPA(K,i)
-         edmf_w(K)  =edmf_w(K)  +rhoz(k)*UPA(K,i)*UPW(K,i)
-         edmf_qt(K) =edmf_qt(K) +rhoz(k)*UPA(K,i)*UPQT(K,i)
-         edmf_thl(K)=edmf_thl(K)+rhoz(k)*UPA(K,i)*UPTHL(K,i)
-         edmf_ent(K)=edmf_ent(K)+rhoz(k)*UPA(K,i)*ENT(K,i)
-         edmf_qc(K) =edmf_qc(K) +rhoz(k)*UPA(K,i)*UPQC(K,i)
+         edmf_w(K)  =edmf_w(K)  +UPA(K,i)*UPW(K,i)
+         edmf_qt(K) =edmf_qt(K) +UPA(K,i)*UPQT(K,i)
+         edmf_thl(K)=edmf_thl(K)+UPA(K,i)*UPTHL(K,i)
+         edmf_ent(K)=edmf_ent(K)+UPA(K,i)*ENT(K,i)
+         edmf_qc(K) =edmf_qc(K) +UPA(K,i)*UPQC(K,i)
       enddo
    enddo
    do k=kts,kte-1
@@ -6829,7 +6826,7 @@ ENDIF !END Debugging
 
 END SUBROUTINE DMP_MF
 !=================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This subroutine 
 subroutine condensation_edmf(QT,THL,P,zagl,THV,QC)
 !
@@ -7389,7 +7386,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
   END SUBROUTINE SCALE_AWARE
 
 ! =====================================================================
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! \author JAYMES- added 22 Apr 2015
 !! This function calculates saturation vapor pressure.  Separate ice and liquid functions
 !! are used (identical to those in module_mp_thompson.F, v3.6). Then, the
@@ -7443,7 +7440,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 ! ====================================================================
 
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This function extends function "esat" and returns a "blended"
 !! saturation mixing ratio. Tice currently set to 240 K, t0c = 273.15 K.
 !!\author JAYMES
@@ -7500,7 +7497,7 @@ SUBROUTINE SCALE_AWARE(dx,PBL1,Psig_bl,Psig_shcu)
 
 ! ===================================================================
 
-!>\ingroup gsd_mynn_edmf
+!>\ingroup gp_mynnedmf
 !! This function interpolates the latent heats of vaporization and sublimation into
 !! a single, temperature-dependent, "blended" value, following 
 !! Chaboureau and Bechtold (2002) \cite Chaboureau_2002, Appendix.

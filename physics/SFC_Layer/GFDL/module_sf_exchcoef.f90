@@ -1,4 +1,5 @@
-!  This MODULE holds the routines that calculate air-sea exchange coefficients 
+!>\file module_sf_exchcoef.f90
+!!  This MODULE holds the routines that calculate air-sea exchange coefficients 
 
 MODULE module_sf_exchcoef
 CONTAINS

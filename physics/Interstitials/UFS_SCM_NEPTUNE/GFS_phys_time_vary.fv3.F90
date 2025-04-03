@@ -45,9 +45,7 @@
 
       private
 
-      public GFS_phys_time_vary_init, GFS_phys_time_vary_timestep_init, GFS_phys_time_vary_timestep_finalize, GFS_phys_time_vary_finalize
-
-      logical :: is_initialized = .false.
+      public GFS_phys_time_vary_init, GFS_phys_time_vary_timestep_init, GFS_phys_time_vary_finalize
 
       real(kind=kind_phys), parameter :: con_hr        =  3600.0_kind_phys
       real(kind=kind_phys), parameter :: con_99        =    99.0_kind_phys
@@ -96,7 +94,8 @@
               smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, snliqxy, tsnoxy , smoiseq, zsnsoxy,   &
               slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, con_t0c, lsm_cold_start, nthrds,    &
               lkm, use_lake_model, lakefrac, lakedepth, iopt_lake, iopt_lake_clm, iopt_lake_flake, &
-              lakefrac_threshold, lakedepth_threshold, ozphys, h2ophys, errmsg, errflg)
+              lakefrac_threshold, lakedepth_threshold, ozphys, h2ophys, is_initialized, errmsg,    &
+              errflg)
 
          implicit none
 
@@ -194,6 +193,7 @@
          real(kind_phys),      intent(in)    :: con_t0c
 
          integer,              intent(in)    :: nthrds
+         logical,              intent(inout) :: is_initialized
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
 
@@ -723,7 +723,8 @@
             tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
             zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype,scolor, shdmin, shdmax, snowd, &
             cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac, ozphys, h2ophys,            &
-            do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, errmsg, errflg)
+            do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, is_initialized,      &
+            errmsg, errflg)
 
          implicit none
 
@@ -772,6 +773,7 @@
          real(kind_phys),      intent(inout), optional :: smois(:,:), sh2o(:,:), tslb(:,:), tref(:)
          integer,              intent(inout) :: vtype(:), stype(:),scolor(:), slope(:) 
 
+         logical,              intent(in)    :: is_initialized
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
 
@@ -949,36 +951,17 @@
       end subroutine GFS_phys_time_vary_timestep_init
 !> @}
 
-!> \section arg_table_GFS_phys_time_vary_timestep_finalize Argument Table
-!! \htmlinclude GFS_phys_time_vary_timestep_finalize.html
-!!
-!>\section gen_GFS_phys_time_vary_timestep_finalize GFS_phys_time_vary_timestep_finalize General Algorithm
-!> @{
-      subroutine GFS_phys_time_vary_timestep_finalize (errmsg, errflg)
-
-         implicit none
-
-         ! Interface variables
-         character(len=*),                 intent(out)   :: errmsg
-         integer,                          intent(out)   :: errflg
-
-         ! Initialize CCPP error handling variables
-         errmsg = ''
-         errflg = 0
-
-      end subroutine GFS_phys_time_vary_timestep_finalize
-!> @}
-
 !> \section arg_table_GFS_phys_time_vary_finalize Argument Table
 !! \htmlinclude GFS_phys_time_vary_finalize.html
 !!
-      subroutine GFS_phys_time_vary_finalize(errmsg, errflg)
+      subroutine GFS_phys_time_vary_finalize(is_initialized, errmsg, errflg)
 
          implicit none
 
          ! Interface variables
-         character(len=*),                 intent(out)   :: errmsg
-         integer,                          intent(out)   :: errflg
+         logical,          intent(inout) :: is_initialized
+         character(len=*), intent(out)   :: errmsg
+         integer,          intent(out)   :: errflg
 
          ! Initialize CCPP error handling variables
          errmsg = ''

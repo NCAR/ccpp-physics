@@ -1,5 +1,6 @@
 !>\file rrtmg_sw_post.F90
-!! This file contains GFS RRTMG scheme post.
+
+!> This module contains RRTMG-SW scheme post
       module rrtmg_sw_post
       contains
 
@@ -14,7 +15,7 @@
                  swhtr, sfcalb1, sfcalb2, sfcalb3, sfcalb4, htswc, htsw0,      &
                  nirbmdi, nirdfdi, visbmdi, visdfdi, nirbmui, nirdfui, visbmui,&
                  visdfui, sfcdsw, sfcnsw, htrsw, swhc, scmpsw, sfcfsw, topfsw, &
-                 errmsg, errflg)
+                 sfcdswc, errmsg, errflg)
 
       use machine,                   only: kind_phys
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,   &
@@ -33,7 +34,8 @@
                                                              visbmdi, visdfdi, &
                                                              nirbmui, nirdfui, &
                                                              visbmui, visdfui, &
-                                                             sfcdsw,  sfcnsw
+                                                             sfcdsw,  sfcnsw,  &
+                                                             sfcdswc
       real(kind=kind_phys), dimension(:,:), intent(inout) :: htrsw, swhc
 
       type(cmpfsw_type), dimension(:),     intent(inout) :: scmpsw
@@ -122,6 +124,7 @@
         do i=1,im
           sfcnsw(i) = sfcfsw(i)%dnfxc - sfcfsw(i)%upfxc
           sfcdsw(i) = sfcfsw(i)%dnfxc
+          sfcdswc(i)= sfcfsw(i)%dnfx0
         enddo
 
       endif                                ! end_if_lsswr
