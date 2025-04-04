@@ -109,10 +109,10 @@ contains
 
   end subroutine rrfs_smoke_wrapper_init
 
-!! \section arg_table_rrfs_smoke_wrapper_run Argument Table
+!> \section arg_table_rrfs_smoke_wrapper_run Argument Table
 !! \htmlinclude rrfs_smoke_wrapper_run.html
 !!
-!>\section rrfs_smoke_wrapper rrfs-sd Scheme General Algorithm
+!>\section gen_rrfs_smoke_wrapper rrfs-sd Scheme General Algorithm
 !> @{
     subroutine rrfs_smoke_wrapper_run(im, flag_init, kte, kme, ktau, dt, garea, land, jdate,          &
                    u10m, v10m, ustar, rlat, rlon, tskin, pb2d, t2m, dpt2m,                 &
