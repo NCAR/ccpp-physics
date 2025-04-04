@@ -1,0 +1,32 @@
+/**
+\page RRFS_sas_page  RRFS_sas Suite 
+
+\section RRFS_sas_suite_overview Overview
+
+The RRFS_sas suite is one of the candidates for the future operational implementation of
+the Rapid Refresh Forecast System (RRFS), which can be configured using the UFS SRW App.  This suite is most 
+applicable for runs at 3-km resolution. 
+
+The RRFS_sas suite uses the parameterizations in the following order:
+ - \ref SGSCLOUD_page
+ - \ref GFS_RRTMG_page
+ - \ref SFC_MYNNSFL
+ - \ref RUCLSM
+ - \ref CLM_LAKE_page
+ - \ref SMK_DUST
+ - \ref MYNNEDMF
+ - \ref GFS_drag_suite
+ - \ref GFS_H2OPHYS
+ - \ref GFS_SAMFdeep
+ - \ref THOMPSON
+
+\section sdf_rrfs_sas Suite Definition File 
+\include suite_RRFS_sas.xml
+
+\section rrfs_nml_option Namelist 
+- General physics options
+\snippet RRFS_sas_input.nml GFS_PHYSICS_NML
+
+
+
+*/

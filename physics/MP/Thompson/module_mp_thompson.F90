@@ -6254,13 +6254,13 @@ module module_mp_thompson
    end subroutine calc_refl10cm
 !
 !-------------------------------------------------------------------
+!> This routine is a semi-Lagrangian forward advection for hydrometeors
+!! with mass conservation and positive definite advection
+!! 2nd order interpolation with monotonic piecewise parabolic method is used.
+!! This routine is under assumption of decfl < 1 for semi_Lagrangian 
+!!(Juang and Hong, 2010 \cite Henry_Juang_2010).
    SUBROUTINE semi_lagrange_sedim(km,dzl,wwl,rql,precip,pfsan,dt,R1)
 !-------------------------------------------------------------------
-!
-! This routine is a semi-Lagrangain forward advection for hydrometeors
-! with mass conservation and positive definite advection
-! 2nd order interpolation with monotonic piecewise parabolic method is used.
-! This routine is under assumption of decfl < 1 for semi_Lagrangian
 !
 ! dzl    depth of model layer in meter
 ! wwl    terminal velocity at model layer m/s
