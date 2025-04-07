@@ -68,7 +68,7 @@ contains
                dfi_radar_max_intervals,ldiag3d,qci_conv,do_cap_suppress,        &
                maxupmf,maxMF,do_mynnedmf,ichoice_in,ichoicem_in,ichoice_s_in,   &
                spp_cu_deep,spp_wts_cu_deep,nchem,chem3d,fscav,wetdpc_deep,      &
-               do_smoke_transport,kdt,errmsg,errflg)
+               do_smoke_transport,kdt,qamin,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -163,6 +163,8 @@ contains
    real(kind_phys), dimension(:,:,:), intent(inout), optional :: chem3d
    real(kind_phys), dimension(:,:), intent(inout), optional   :: wetdpc_deep
 !$acc declare copy(cactiv,cactiv_m,chem3d,wetdpc_deep)
+
+   real(kind_phys), intent(in) :: qamin
 
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
@@ -771,7 +773,8 @@ contains
                                ! betwee -1 and +1
               ,do_cap_suppress_here,cap_suppress_j &
               ,k22m          &
-              ,jminm,kdt,mc_thresh)
+              ,jminm,kdt,mc_thresh &
+              ,qamin)
 !$acc kernels
             do i=its,itf
              do k=kts,ktf
@@ -857,7 +860,8 @@ contains
                                ! betwee -1 and +1
               ,do_cap_suppress_here,cap_suppress_j &
               ,k22          &
-              ,jmin,kdt,mc_thresh)
+              ,jmin,kdt,mc_thresh &
+              ,qamin)
           jpr=0
           ipr=0
 !$acc kernels
