@@ -4,7 +4,6 @@
 module get_phi_fv3
 
    use machine,  only: kind_phys
-   use physcons, only: con_fvirt
 
 !--- public declarations
    public get_phi_fv3_run
