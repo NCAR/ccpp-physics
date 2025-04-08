@@ -16,10 +16,10 @@
 !! \htmlinclude GFS_MP_generic_post_run.html
 !!
       subroutine GFS_MP_generic_post_run(                                                                                 &
-        im, levs, kdt, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl,    &
+        im, levs, kdt, tend_opt_mp, nrcm, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl,    &
         imp_physics_mg, imp_physics_fer_hires, cal_pre, cplflx, cplchm, cpllnd, progsigma, con_g, rhowater, rainmin, dtf, &
-        frain, rainc, rain1, rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, phil, htop, refl_10cm,              & 
-        imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf, con_t0c, snow, graupel, save_t, save_q,        &
+        frain, rainc, rain1, rann, xlat, xlon, ten_t, ten_u, ten_v, ten_q, dudt, dvdt, dtdt, dqdt, gt0, gu0, gv0, gq0, prsl, prsi, phii, tsfc, ice, phil, htop, refl_10cm,              & 
+        imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf, con_t0c, snow, graupel,        &
         rain0, ice0, snow0, graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp,&
         totprcp, totice, totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl, snow_cpl,    &
         pwat, frzr, frzrb, frozr, frozrb, tsnowp, tsnowpb, rhonewsn1, exticeden,                                          & 
@@ -33,7 +33,7 @@
       use calpreciptype_mod, only: calpreciptype
       implicit none
 
-      integer, intent(in) :: im, levs, kdt, nrcm, nncl, ntcw, ntrac, num_dfi_radar, index_of_process_dfi_radar
+      integer, intent(in) :: im, levs, kdt, tend_opt_mp, nrcm, nncl, ntcw, ntrac, num_dfi_radar, index_of_process_dfi_radar
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       integer, intent(in) :: imp_physics_nssl, iopt_lake_clm, iopt_lake, lkm
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, cpllnd, progsigma, exticeden
@@ -43,16 +43,20 @@
       real(kind=kind_phys),                    intent(in)    :: fh_dfi_radar(:), fhour, con_t0c
       real(kind=kind_phys),                    intent(in)    :: radar_tten_limits(:)
       integer,                                 intent(in)    :: ix_dfi_radar(:)
-      real(kind=kind_phys), dimension(:,:),    intent(inout) :: gt0,refl_10cm
+      real(kind=kind_phys), dimension(:,:),    intent(in)    :: ten_u, ten_v, ten_t
+      real(kind=kind_phys), dimension(:,:,:),  intent(in)    :: ten_q
+      real(kind=kind_phys), dimension(:,:),    intent(inout) :: dudt, dvdt, dtdt
+      real(kind=kind_phys), dimension(:,:,:),  intent(inout) :: dqdt
+      real(kind=kind_phys), dimension(:,:),    intent(inout) :: gt0,gu0,gv0,refl_10cm
 
       real(kind=kind_phys),                    intent(in)    :: dtf, frain, con_g, rainmin, rhowater
       real(kind=kind_phys), dimension(:),      intent(in)    :: rain1, xlat, xlon, tsfc
       real(kind=kind_phys), dimension(:),      intent(inout) :: ice, snow, graupel, rainc
       real(kind=kind_phys), dimension(:),      intent(in), optional :: rain0, ice0, snow0, graupel0
       real(kind=kind_phys), dimension(:,:),    intent(in)    :: rann
-      real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsl, save_t, del
+      real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsl, del
       real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsi, phii,phil
-      real(kind=kind_phys), dimension(:,:,:),  intent(in)    :: gq0, save_q
+      real(kind=kind_phys), dimension(:,:,:),  intent(inout) :: gq0
 
       real(kind=kind_phys), dimension(:,:,:),  intent(in), optional :: dfi_radar_tten
 
@@ -101,11 +105,12 @@
       real(kind=kind_phys), parameter :: p850    = 85000.0_kind_phys
       ! *DH
 
-      integer :: i, k, ic, itrac, idtend, itime, idtend_radar, idtend_mp
+      integer :: i, k, n, ic, itrac, idtend, itime, idtend_radar, idtend_mp
 
       real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       real(kind=kind_phys) :: crain, csnow, onebg, tem, total_precip, tem1, tem2, ttend
       real(kind=kind_phys), dimension(im) :: domr, domzr, domip, doms, t850, work1
+      real(kind=kind_phys), dimension(im,levs) :: save_t
 
       real :: snowrat,grauprat,icerat,curat,prcpncfr,prcpcufr
       real :: rhonewsnow,rhoprcpice,rhonewgr,rhonewice
@@ -124,8 +129,65 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
+      
       onebg = one/con_g
+      
+      save_t = gt0 !save temperature before tendency application in case 
+                   !the temperature tendency application is overwritten by radar tendencies below
+      
+      case_MP_ten: select case (tend_opt_mp)
+        case (1) !immediately apply tendencies
+                  !Current state = current state + dt*current tendency
+                  !Accumulated tendency unchanged
+          do k=1,levs
+            do i=1,im
+              gt0(i,k) = gt0(i,k) + dtp*ten_t(i,k)
+              gu0(i,k) = gu0(i,k) + dtp*ten_u(i,k)
+              gv0(i,k) = gv0(i,k) + dtp*ten_v(i,k)
+              do n = 1, ntrac
+                gq0(i,k,n) = gq0(i,k,n) + dtp*ten_q(i,k,n)
+              end do
+            end do
+          end do
+        case (2) !add tendencies to sum
+                  !Accumulated tendency = accumulated tendency + current tendency
+                  !Current state unchanged
+          do k=1,levs
+            do i=1,im
+              dtdt(i,k) = dtdt(i,k) + ten_t(i,k)
+              dudt(i,k) = dudt(i,k) + ten_u(i,k)
+              dvdt(i,k) = dvdt(i,k) + ten_v(i,k)
+              do n = 1, ntrac
+                dqdt(i,k,n) = dqdt(i,k,n) + ten_q(i,k,n)
+              end do
+            end do
+          end do
+        case (3) !add tendencies to sum and apply
+                  !Current state = current state + dt*(accumulated tendency + current tendency)
+                  !Accumulated tendency = 0
+          do k=1,levs
+            do i=1,im
+              gt0(i,k) = gt0(i,k) + dtp*(dtdt(i,k) + ten_t(i,k))
+              dtdt(i,k) = 0.0
+              gu0(i,k) = gu0(i,k) + dtp*(dudt(i,k) + ten_u(i,k))
+              dudt(i,k) = 0.0
+              gv0(i,k) = gv0(i,k) + dtp*(dvdt(i,k) + ten_v(i,k))
+              dvdt(i,k) = 0.0
+              do n = 1, ntrac
+                gq0(i,k,n) = gq0(i,k,n) + dtp*(dqdt(i,k,n) + ten_q(i,k,n))
+                dqdt(i,k,n) = 0.0
+              end do
+            end do
+          end do
+        case (4) !Current state unchanged
+                  !Accumulated tendency unchanged
+                  !Current tendency unchanged (but will be overwritten during next primary scheme)
+          exit case_MP_ten
+        case default
+          errflg = 1
+          errmsg = 'A tendency application control was outside of the acceptable range (1-4)'
+          return
+      end select case_MP_ten
       
       do i = 1, im
         rain(i) = rainc(i) + frain * rain1(i) ! time-step convective plus explicit
@@ -480,7 +542,7 @@
                  if(idtend>=1) then
                     do k=1,levs
                        do i=1,im
-                          dtend(i,k,idtend) = dtend(i,k,idtend) + (gq0(i,k,itrac)-save_q(i,k,itrac)) * frain
+                          dtend(i,k,idtend) = dtend(i,k,idtend) + ten_q(i,k,itrac)*dtp
                        enddo
                     enddo
                  endif
@@ -493,7 +555,7 @@
       if(progsigma)then
          do k=1,levs
             do i=1,im
-               dqdt_qmicro(i,k)=(gq0(i,k,1)-save_q(i,k,1))/dtp
+               dqdt_qmicro(i,k)=ten_q(i,k,1)
             enddo
          enddo
       endif
