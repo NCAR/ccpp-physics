@@ -714,7 +714,7 @@
             zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype,scolor, shdmin, shdmax, snowd, &
             cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac, ozphys, h2ophys,            &
             do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, is_initialized,      &
-            errmsg, errflg)
+            cplflx, lakefrac_threshold, errmsg, errflg)
 
          implicit none
 
@@ -722,8 +722,8 @@
          integer,              intent(in)    :: me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, &
                                                 nsswr, imfdeepcnv, iccn, nscyc, ntoz, iflip
          integer,              intent(in)    :: idate(:)
-         real(kind_phys),      intent(in)    :: fhswr, fhour
-         logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm
+         real(kind_phys),      intent(in)    :: fhswr, fhour, lakefrac_threshold
+         logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm, cplflx
          real(kind_phys),      intent(out)   :: clstp
          integer,              intent(in), optional    :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
          real(kind_phys),      intent(in), optional    :: ddy_o3(:),  ddy_h(:)
@@ -920,13 +920,13 @@
          if (nscyc >  0) then
            if (mod(kdt,nscyc) == 1) THEN
              call gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit, fn_nml,      &
-                 input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,         &
+                 input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc, cplflx, &
                  use_ufo, nst_anl, fhcyc, phour, landfrac, lakefrac, min_seaice, min_lakeice,&
                  frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc,        &
                  tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,         &
                  zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,            &
                  stype, scolor, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,            &
-                 xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
+                 lakefrac_threshold, xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
            endif
          endif
 

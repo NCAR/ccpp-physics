@@ -16,13 +16,13 @@ contains
 !! This subroutine repopulates specific time-varying surface properties for
 !! atmospheric forecast runs.
   subroutine gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit, fn_nml, &
-      input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,          &
+      input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc, cplflx,  &
       use_ufo, nst_anl, fhcyc, phour, landfrac, lakefrac, min_seaice, min_lakeice, &
       frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc,         &
       tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,          &
       zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,             &
       stype, scolor, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,             &
-      xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
+      lakefrac_threshold, xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
 !
 !
     use machine,      only: kind_phys, kind_io8
@@ -33,9 +33,9 @@ contains
     integer,              intent(in)    :: idate(:), ialb, isot, ivegsrc
     character(len = 64), intent(in)     :: fn_nml
     character(len=*),     intent(in)    :: input_nml_file(:)
-    logical,              intent(in)    :: use_ufo, nst_anl, frac_grid
+    logical,              intent(in)    :: use_ufo, nst_anl, frac_grid, cplflx
     real(kind=kind_phys), intent(in)    :: fhcyc, phour, landfrac(:), lakefrac(:), &
-                                           min_seaice, min_lakeice,                &
+                                           min_seaice, min_lakeice,lakefrac_threshold, &
                                            xlat_d(:), xlon_d(:)
     real(kind=kind_phys), intent(inout), optional ::   &
                                            smois(:,:), &
@@ -103,11 +103,22 @@ contains
         STCFC1 (nx*ny*max(lsoil,lsoil_lsm)), &
         SLCFC1 (nx*ny*max(lsoil,lsoil_lsm))
 
+!
+! declare the variables (arrays) for cplflx, surface type dependent gcycle changes
+!
+    real(kind=kind_io8) ::                   &
+        hice_save    (nx*ny),                &        ! sea or lake ice thickness
+        fice_save    (nx*ny),                &        ! sea or lake ice fraction
+        snowd_save   (nx*ny),                &        ! water equivalent snow depth
+        snoalb_save  (nx*ny),                &        ! maximum snow albedo
+        tisfc_save   (nx*ny),                &        ! surface skin temperature over (sea or lake) ice
+        weasd_save   (nx*ny)                          ! water equiv of acc snow depth over land and (sea or lake)  ice
+
 
     real (kind=kind_io8) :: min_ice(nx*ny)
     integer              :: i_indx(nx*ny), j_indx(nx*ny)
     character(len=6)     :: tile_num_ch
-    real(kind=kind_phys) :: sig1t(nx*ny)
+    real(kind=kind_phys) :: sig1t
     integer              :: npts, nb, ix, jx, ls, ios, ll
     logical              :: exists
 
@@ -131,11 +142,25 @@ contains
       sig1t = 0.0_kind_phys
       npts  = nx*ny
 !
+! Some surface variables need to be updated by gcycle with coupled mode, and nsst mode dependent. A few variables are saved 
+! in order to be able to update them over the specific surface types  only after call sfccycle
+!
+      if ( cplflx ) then
+        hice_save   = hice 
+        fice_save   = fice
+        snowd_save  = snowd
+        snoalb_save = snoalb
+        tisfc_save  = tisfc
+        weasd_save  = weasd
+      endif
+
       if ( nsst > 0 ) then
         TSFFCS = tref
       else
         TSFFCS = tsfco
-      end if
+      endif
+
+
 ! integer to real/double precision
       slpfcs = real(slope)
       vegfcs = real(vtype)
@@ -251,11 +276,47 @@ contains
       close (nlunit)
 #endif
 !
-      if ( nsst > 0 ) then
-        tref = TSFFCS
+! The gcycle resulted change is applied to some variables in the way of the coupled mode dependent, water surface type (ocean or lake)
+! dependent and nsst mode dependent
+!
+      if ( cplflx ) then
+!       In coupled mode, keep these variables the same as is (before sfccycle is called) over non-lake water and non-land
+        do ix=1,npts
+          if (lakefrac(ix) <= lakefrac_threshold .and. (slmskw(ix) > 0.0_kind_phys) ) then      
+            hice(ix)   = hice_save(ix) 
+            fice(ix)   = fice_save(ix)
+            snowd(ix)  = snowd_save(ix)
+            snoalb(ix) = snoalb_save(ix)
+            tisfc(ix)  = tisfc_save(ix)
+            weasd(ix)  = weasd_save(ix)
+          endif
+        enddo
+!       In the coupled mode and when NSST is on, update tref, tsfc and tsfco over lake and land (not ocean)
+        if ( nsst > 0 ) then       
+          do ix=1,npts
+            if ( (lakefrac(ix) > lakefrac_threshold) .or. (slmskl(ix) > 0.0_kind_phys) ) then 
+              tref(ix)  = TSFFCS(ix) 
+              tsfc(ix)  = TSFFCS(ix)
+              tsfco(ix) = TSFFCS(ix)
+            endif
+          enddo
+!       In the coupled mode and when NSST is off, update tref, tsfc and tsfco over land and lake (not ocean)
+        else             
+          do ix=1,npts
+            if ( (lakefrac(ix) > lakefrac_threshold) .or. (slmskl(ix) > 0.0_kind_phys) ) then  
+              tsfc(ix)  = TSFFCS(ix)
+              tsfco(ix) = TSFFCS(ix)
+            endif
+          enddo
+        endif
+!     The same as before (this modification) in uncoupled mode
       else
-        tsfc  = TSFFCS
-        tsfco = TSFFCS
+        if ( nsst > 0 ) then
+          tref = TSFFCS
+        else
+          tsfc  = TSFFCS
+          tsfco = TSFFCS
+        endif
       endif
 !
 ! real/double precision to integer
