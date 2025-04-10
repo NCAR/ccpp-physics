@@ -21,6 +21,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ntrac]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [ltp]
   standard_name = extra_top_layer
   long_name = extra top layers
@@ -42,6 +49,13 @@
   dimensions = ()
   type = integer
   intent = in
+[tend_opt_lwrad]
+  standard_name = control_for_application_method_of_longwave_radiation_tendencies
+  long_name = control for application method of longwave radiation tendencies
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
 [lslwr]
   standard_name = flag_for_calling_longwave_radiation
   long_name = logical flags for lw radiation calls
@@ -55,6 +69,14 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[delt]
+  standard_name = timestep_for_physics
+  long_name = physics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [tsfa]
   standard_name = surface_air_temperature_for_radiation
@@ -119,6 +141,102 @@
   type = real
   kind = kind_phys
   intent = inout
+[gu0]
+  standard_name = x_wind
+  long_name = updated x-direction wind
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gv0]
+  standard_name = y_wind
+  long_name = updated y-direction wind
+  units = m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gt0]
+  standard_name = air_temperature
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[gq0]
+  standard_name = tracer_concentration
+  long_name = tracer concentration updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dudt]
+  standard_name = process_split_cumulative_tendency_of_x_wind
+  long_name = updated tendency of the x wind
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dvdt]
+  standard_name = process_split_cumulative_tendency_of_y_wind
+  long_name = updated tendency of the y wind
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dtdt]
+  standard_name = process_split_cumulative_tendency_of_air_temperature
+  long_name = updated tendency of the temperature
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dqdt]
+  standard_name = process_split_cumulative_tendency_of_tracers
+  long_name = updated tendency of the tracers due to model physics
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = inout
+[ten_t]
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_u]
+  standard_name = tendency_of_x_wind
+  long_name = tendency of x wind calculated by one physics scheme
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_v]
+  standard_name = tendency_of_y_wind
+  long_name = tendency of y wind calculated by one physics scheme
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_q]
+  standard_name = tendency_of_tracer_concentration
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

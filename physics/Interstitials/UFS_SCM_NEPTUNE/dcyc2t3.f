@@ -174,21 +174,21 @@
      &       sfcdsw,sfcdswc,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,            &
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
-     &       im, levs, deltim, fhswr,                                   &
+     &       im, levs, ntrac, deltim, delt, tend_opt_rad_scaler, fhswr, &
      &       dry, icy, wet, damp_LW_fluxadj, lfnc_k, lfnc_p0,           &
      &       use_LW_jacobian, sfculw, use_med_flux, sfculw_med,         &
-     &       fluxlwUP_jac, t_lay, p_lay, p_lev, flux2D_lwUP,            &
+     &       fluxlwUP_jac, p_lay, p_lev, flux2D_lwUP,                   &
      &       flux2D_lwDOWN,pert_radtend,do_sppt,ca_global,tsfc_radtime, &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
-     &       dtdt,dtdtnp,htrlw,                                         &
+     &       dtdtnp,htrlw,                                              &
 !  ---  outputs:
      &       adjsfcdsw,adjsfcdswc,adjsfcnsw,adjsfcdlw,                  &
      &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
      &       adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   &
      &       adjnirbmd,adjnirdfd,adjvisbmd,adjvisdfd,                   &
-     &       errmsg,errflg                                              &
-     &     )
+     &       gu0, gv0, gt0, gq0, dudt, dvdt, dtdt, dqdt, ten_t, ten_u,  &
+     &       ten_v, ten_q, errmsg,errflg)
 !
       use machine,         only : kind_phys
 
@@ -203,7 +203,7 @@
      &                                   czlimt = 0.0001_kind_phys        ! ~ cos(89.99427)
 
 !  ---  inputs:
-      integer, intent(in) :: im, levs
+      integer, intent(in) :: im, levs, ntrac, tend_opt_rad_scaler
 
 !     integer, intent(in) :: ipr
 !     logical lprnt
@@ -212,7 +212,7 @@
      &     pert_radtend, use_med_flux
       logical, intent(in) :: do_sppt,ca_global
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
-     &     deltim, fhswr, lfnc_k, lfnc_p0
+     &     deltim, delt, fhswr, lfnc_k, lfnc_p0
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
@@ -228,7 +228,7 @@
      &      sfcnirbmd, sfcnirdfd, sfcvisbmd, sfcvisdfd
 
       real(kind=kind_phys), dimension(:,:), intent(in) :: swh, hlw,     &
-     &                                     swhc, hlwc, p_lay, t_lay
+     &                                     swhc, hlwc, p_lay
 
       real(kind=kind_phys), dimension(:,:), intent(in) :: p_lev
       real(kind=kind_phys), dimension(:,:), intent(in), optional ::     &
@@ -241,7 +241,6 @@
 
 
 !  ---  input/output:
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: dtdt
       real(kind=kind_phys), dimension(:,:), intent(inout), optional ::  &
      &      dtdtnp, htrlw
 
@@ -253,12 +252,20 @@
 
       real(kind=kind_phys), dimension(:), intent(out) ::                &
      &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
-
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: gu0, gv0,  &
+     &                                                       gt0
+      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: gq0
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dudt, dvdt,&
+     &                                                       dtdt
+      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: dqdt
+      real(kind=kind_phys), dimension(:,:), intent(out) :: ten_t, ten_u,&
+     &                                                     ten_v
+      real(kind=kind_phys), dimension(:,:,:), intent(out) :: ten_q
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 !  ---  locals:
-      integer :: i, k, nstp, nstl, it, istsun(im),iSFC,iTOA
+      integer :: i, k, n, nstp, nstl, it, istsun(im),iSFC,iTOA
       real(kind=kind_phys) :: cns,  coszn, tem1, tem2, anginc,          &
      &                        rstl, solang, dT
       real(kind=kind_phys), dimension(im,levs+1) :: flxlwup_adj,        &
@@ -277,7 +284,12 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
+      
+      ten_t = 0.0
+      ten_u = 0.0
+      ten_v = 0.0
+      ten_q = 0.0
+      
 !     Vertical ordering?
       if (p_lev(1,1) .lt.  p_lev(1, levs)) then 
          iSFC = levs + 1
@@ -429,14 +441,14 @@
                else
                   lfnc = 1.
                endif
-               dtdt(i,k) = dtdt(i,k) + swh(i,k)*xmu(i) +                &
+               ten_t(i,k) = swh(i,k)*xmu(i) +                           &
      &              htrlw(i,k)*lfnc + (1.-lfnc)*hlw(i,k)
             enddo
          enddo
       else
          do k = 1, levs
             do i = 1, im
-               dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + hlw(i,k)
+               ten_t(i,k)  = swh(i,k)*xmu(i)  + hlw(i,k)
             enddo
          enddo
       endif
@@ -458,7 +470,64 @@
            enddo
          endif
       endif
-!
+!     
+      case_rad_scaler_ten: select case (tend_opt_rad_scaler)
+        case (1) !immediately apply tendencies
+                  !Current state = current state + dt*current tendency
+                  !Accumulated tendency unchanged
+          do k=1,levs
+            do i=1,im
+              gt0(i,k) = gt0(i,k) + delt*ten_t(i,k)
+              gu0(i,k) = gu0(i,k) + delt*ten_u(i,k)
+              gv0(i,k) = gv0(i,k) + delt*ten_v(i,k)
+              do n = 1, ntrac
+                gq0(i,k,n) = gq0(i,k,n) + delt*ten_q(i,k,n)
+              end do
+            end do
+          end do
+        case (2) !add tendencies to sum
+                  !Accumulated tendency = accumulated tendency + current tendency
+                  !Current state unchanged
+          do k=1,levs
+            do i=1,im
+              dtdt(i,k) = dtdt(i,k) + ten_t(i,k)
+              dudt(i,k) = dudt(i,k) + ten_u(i,k)
+              dvdt(i,k) = dvdt(i,k) + ten_v(i,k)
+              do n = 1, ntrac
+                dqdt(i,k,n) = dqdt(i,k,n) + ten_q(i,k,n)
+              end do
+            end do
+          end do
+        case (3) !add tendencies to sum and apply
+                  !Current state = current state + dt*(accumulated tendency + current tendency)
+                  !Accumulated tendency = 0
+          do k=1,levs
+            do i=1,im
+              gt0(i,k) = gt0(i,k) + delt*(dtdt(i,k) + ten_t(i,k))
+              dtdt(i,k) = 0.0
+              gu0(i,k) = gu0(i,k) + delt*(dudt(i,k) + ten_u(i,k))
+              dudt(i,k) = 0.0
+              gv0(i,k) = gv0(i,k) + delt*(dvdt(i,k) + ten_v(i,k))
+              dvdt(i,k) = 0.0
+              do n = 1, ntrac
+                gq0(i,k,n) = gq0(i,k,n) + delt*(dqdt(i,k,n) +           &
+     &                       ten_q(i,k,n))
+                dqdt(i,k,n) = 0.0
+              end do
+            end do
+          end do
+        case (4) !Current state unchanged
+                  !Accumulated tendency unchanged
+                  !Current tendency unchanged (but will be overwritten during next primary scheme)
+          exit case_rad_scaler_ten
+        case default
+          errflg = 1
+          write(errmsg,'(*(a))') 'A tendency application control was ', &
+     &                 ' outside of the acceptable range (1-4)'
+          return
+      end select case_rad_scaler_ten
+      
+      
       return
 !...................................
       end subroutine dcyc2t3_run
