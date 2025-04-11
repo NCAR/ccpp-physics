@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = lsm_ruc
   type = scheme
-  dependencies = ../../../hooks/machine.F,../../../hooks/physcons.F90
+  dependencies = ../../../hooks/machine.F
   dependencies = module_sf_ruclsm.F90,module_soil_pre.F90,namelist_soilveg_ruc.F90,set_soilveg_ruc.F90
 
 ########################################################################
@@ -69,6 +69,14 @@
   standard_name = gas_constant_of_dry_air
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degrees Celsius
+  units = K
   dimensions = ()
   type = real
   kind = kind_phys
@@ -1132,7 +1140,7 @@
   intent = inout
 [semis_lnd]
   standard_name = surface_longwave_emissivity_over_land
-  long_name = surface lw emissivity in fraction over land 
+  long_name = surface lw emissivity in fraction over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
