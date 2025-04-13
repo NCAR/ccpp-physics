@@ -1173,6 +1173,21 @@
   dimensions = (4)
   type = integer
   intent = in
+[cplflx]
+  standard_name = flag_for_surface_flux_coupling
+  long_name = flag controlling cplflx collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lakefrac_threshold]
+  standard_name = lakefrac_threshold_for_enabling_lake_model
+  long_name = fraction of horizontal grid area occupied by lake must be greater than this value to enable a lake model
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [nsswr]
   standard_name = number_of_timesteps_between_shortwave_radiation_calls
   long_name = number of timesteps between shortwave radiation calls
