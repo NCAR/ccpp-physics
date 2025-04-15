@@ -282,7 +282,7 @@ contains
       if ( cplflx ) then
 !       In coupled mode, keep these variables the same as is (before sfccycle is called) over non-lake water and non-land
         do ix=1,npts
-          if (lakefrac(ix) <= lakefrac_threshold .and. (slmskw(ix) > 0.0_kind_phys) ) then      
+          if (lakefrac(ix) <= lakefrac_threshold .and. (slmskw(ix) == 0.0_kind_phys) ) then      
             hice(ix)   = hice_save(ix) 
             fice(ix)   = fice_save(ix)
             snowd(ix)  = snowd_save(ix)
