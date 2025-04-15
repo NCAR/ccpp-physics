@@ -5,6 +5,7 @@
   dependencies = hooks/machine.F,MP/module_mp_radar.F90,MP/Thompson/module_mp_thompson.F90
   dependencies = Radiation/radiation_aerosols.f,photochem/module_ozphys.F90
   dependencies = Radiation/radiation_gases.f,Radiation/radiation_astronomy.f
+  dependencies = Radiation/RRTMG/iounitdef.f
 
 ########################################################################
 [ccpp-arg-table]

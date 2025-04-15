@@ -6,10 +6,8 @@ module rrtmgp_sw_main
   use mpi_f08
   use machine,                only: kind_phys, kind_dbl_prec
   use mo_optical_props,       only: ty_optical_props_2str
-  use mo_cloud_optics,        only: ty_cloud_optics
   use module_radsw_parameters, only: cmpfsw_type
   use mo_rte_sw,              only: rte_sw
-  use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations,  only: ty_gas_concs
   use mo_fluxes_byband,       only: ty_fluxes_byband
   use radiation_tools,        only: check_error_msg
@@ -31,9 +29,8 @@ contains
 !! \htmlinclude rrtmgp_sw_main_init.html
 !!
   subroutine rrtmgp_sw_main_init(rrtmgp_root_dir, rrtmgp_sw_file_gas, rrtmgp_sw_file_clouds,&
-       active_gases_array, doGP_cldoptics_PADE, doGP_cldoptics_LUT, doGP_sgs_pbl,           &
-       doGP_sgs_cnv, nrghice, mpicomm, mpirank, mpiroot, nLay, rrtmgp_phys_blksz,           &
-       errmsg, errflg)
+       active_gases_array, doGP_sgs_pbl, doGP_sgs_cnv, nrghice, mpicomm, mpirank, mpiroot,  &
+       nLay, rrtmgp_phys_blksz, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
@@ -43,8 +40,6 @@ contains
     character(len=*), dimension(:), intent(in), optional :: &
          active_gases_array       !< List of active gases from namelist as array)
     logical, intent(in) :: &
-         doGP_cldoptics_PADE,   & !< Use RRTMGP cloud-optics: PADE approximation?
-         doGP_cldoptics_LUT,    & !< Use RRTMGP cloud-optics: LUTs?
          doGP_sgs_pbl,          & !< Flag to include sgs PBL clouds
          doGP_sgs_cnv             !< Flag to include sgs convective clouds
     integer, intent(inout) :: &
@@ -72,8 +67,7 @@ contains
 
     ! RRTMGP shortwave cloud-optics initialization
     call rrtmgp_sw_cloud_optics_init(rrtmgp_root_dir, rrtmgp_sw_file_clouds,               &
-         doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm, mpirank, mpiroot,      &
-         errmsg, errflg)
+         nrghice, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
   end subroutine rrtmgp_sw_main_init
 
