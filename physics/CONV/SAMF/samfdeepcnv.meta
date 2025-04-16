@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = samfdeepcnv
   type = scheme
-  dependencies = ../../tools/funcphys.f90,../../hooks/machine.F,samfaerosols.F,../progsigma_calc.f90
+  dependencies = ../../tools/funcphys.f90,../../hooks/machine.F,samfaerosols.F,../progsigma_calc.f90,../progomega_calc.f90
 
 ########################################################################
 [ccpp-arg-table]
@@ -242,6 +242,14 @@
   type = real
   kind = kind_phys
   intent = in
+[tkeh]
+  standard_name = vertical_turbulent_kinetic_energy_at_interface
+  long_name = vertical turbulent kinetic energy at model layer interfaces
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [qtr]
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other convective trans. tracers
@@ -317,6 +325,13 @@
 [progsigma]
   standard_name = do_prognostic_updraft_area_fraction
   long_name = flag for prognostic sigma in cumuls scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[progomega]
+  standard_name = do_prognostic_updraft_velocity
+  long_name = flag for prognostic omega in cumuls scheme
   units = flag
   dimensions = ()
   type = logical
@@ -452,7 +467,25 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
+  optional = True
+[omegain]
+  standard_name = prognostic_updraft_velocity_in_convection
+  long_name = convective updraft velocity
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[omegaout]
+  standard_name = updraft_velocity_updated_by_physics
+  long_name = convective updraft velocity updated by physics
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = True
 [betascu]
   standard_name = tuning_param_for_shallow_cu

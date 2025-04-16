@@ -983,9 +983,9 @@ contains
             endif
          enddo
          call progsigma_calc(itf,ktf,flag_init,flag_restart,flag_shallow,  &
-              flag_mid,del,tmf,qmicro,dbyo,zdqca,omega_u,zeta,xlv,dtime,  &
-              forceqv_spechum,kbcon,ktop,cnvflg,betascu,betamcu,betadcu,   &
-              sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)
+            flag_mid,del,tmf,qmicro,dbyo,zdqca,omega_u,zeta,xlv,dtime,     &
+            forceqv_spechum,k22,kbcon,ktop,cnvflg,betascu,betamcu,betadcu, &
+            sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)
 
       endif
 

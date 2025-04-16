@@ -2848,6 +2848,7 @@
       jgds    = -1
       jpds(5) = kpds5
       kpds    = jpds
+      kgds    = jgds
 !
       call getgbh(lugb,lugi,lskip,jpds,jgds,lgrib,ndata,
      &            lskip,kpds,kgds,iret)
@@ -4011,6 +4012,7 @@
 !  read in snow depth/snow cover
 !
       irtscv=0
+      irtsno=0
       if(fnsnoa(1:8).ne.'        ') then
         do i=1,len
           scvanl(i)=0.
@@ -4033,6 +4035,7 @@
         jpds=-1
         jgds=-1
         kpds=jpds
+        kgds=jgds
         call getgbh(lugb,lugi,lskip,jpds,jgds,lgrib,ndata,
      &              lskip,kpds,kgds,iret)
         close(lugb)
@@ -8467,6 +8470,7 @@ cjfe
       jpds(5) = kpds5
       jpds(7) = kpds7
       kpds    = jpds
+      kgds    = jgds
       call getgbh(lugb,lugi,lskip,jpds,jgds,lgrib,ndata,
      &            lskip,kpds,kgds,iret)
       if (me .eq. 0) then
@@ -8680,6 +8684,7 @@ cjfe
       jgds=-1
       jpds(5)=kpds5
       kpds = jpds
+      kgds = jgds
       call getgbh(lugb,lugi,lskip,jpds,jgds,lgrib,ndata,
      &            lskip,kpds,kgds,iret)
       if (me .eq. 0) then
