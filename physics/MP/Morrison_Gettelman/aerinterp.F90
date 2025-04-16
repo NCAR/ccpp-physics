@@ -19,7 +19,7 @@ contains
       logical function netcdf_check(status, errmsg, errflg, why)
       use netcdf
       implicit none
-      character(len=*), intent(inout) :: errmsg
+      character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
       integer, intent(in) :: status
       character(len=*), intent(in) :: why
@@ -43,8 +43,8 @@ contains
 
 !--- in/out
       integer, intent(in) :: me, master, iflip, idate(4)
-      character(len=*), intent(inout) :: errmsg
-      integer, intent(inout) :: errflg
+      character(len=*), intent(out) :: errmsg
+      integer, intent(out) :: errflg
       real(kind=kind_phys), intent(in) :: fhour
 !--- locals
       integer      :: ncid, varid, ndims, hmx
@@ -262,8 +262,8 @@ contains
       use aerclm_def
 
       implicit none
-      integer, intent(inout) :: errflg
-      character(*), intent(inout) :: errmsg
+      integer, intent(out) :: errflg
+      character(*), intent(out) :: errmsg
       integer, intent(in) :: iflip
       integer   i1,i2, iday,j,j1,j2,l,npts,nc,n1,n2,lev,k,i,ii, klev
       real(kind=kind_phys) fhour,temj, tx1, tx2,temi, tem, tem1, tem2
@@ -429,8 +429,8 @@ contains
 
 !--- in/out
       integer, intent(in) :: me, master, iflip, idate(4)
-      character(len=*), intent(inout) :: errmsg
-      integer, intent(inout) :: errflg
+      character(len=*), intent(out) :: errmsg
+      integer, intent(out) :: errflg
 
 !--- locals
       integer      :: ncid, varid, ndims, hmx
@@ -665,8 +665,8 @@ contains
       use aerclm_def
 
       implicit none
-      integer, intent(inout) :: errflg
-      character(*), intent(inout) :: errmsg
+      integer, intent(out) :: errflg
+      character(*), intent(out) :: errmsg
       integer, intent(in) :: iflip
       integer   i1,i2, iday,j,j1,j2,l,npts,nc,n1,n2,lev,k,i,ii, klev
       real(kind=kind_phys) fhour,temj, tx1, tx2,temi, tem, tem1, tem2
@@ -860,8 +860,8 @@ contains
       use netcdf
       integer, intent(in) :: iflip, nf, nt
       character,intent(in)   :: fname*50
-      integer, intent(inout) :: errflg
-      character(*), intent(inout) :: errmsg
+      integer, intent(out) :: errflg
+      character(*), intent(out) :: errmsg
       integer      :: ncid, varid, i,j,k,ii,klev
       character    ::   vname*10
       real(kind=kind_io4),allocatable,dimension(:,:,:) :: buff
@@ -967,8 +967,8 @@ contains
       use aerclm_def
       use netcdf
       integer, intent(in) :: iflip, nf, nt
-      integer, intent(inout) :: errflg
-      character(*), intent(inout) :: errmsg
+      integer, intent(out) :: errflg
+      character(*), intent(out) :: errmsg
       integer      :: ncid, varid, i,j,k,ii,klev
       character    :: fname*50, mn*2, vname*10
       real(kind=kind_io4),allocatable,dimension(:,:,:) :: buff
