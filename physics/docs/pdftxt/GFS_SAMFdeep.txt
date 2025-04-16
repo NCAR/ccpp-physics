@@ -28,7 +28,7 @@
  downdrafts and only one cloud type (the deepest possible), rather than
  a spectrum based on cloud top heights or assumed entrainment rates.
  The scheme was implemented for the GFS in 1995 by Pan and Wu (1995) \cite pan_and_wu_1995, 
- with further modifications discussed in Han and Pan (2011) \cite han_and_pan_2011 , including the calculation
+ with further modifications discussed in Han and Pan (2011) \cite han_and_pan_2011, including the calculation
  of cloud top, a greater CFL-criterion-based maximum cloud base mass flux,
  updated cloud model entrainment and detrainment, improved convective
  transport of horizontal momentum, a more general triggering function,
@@ -50,7 +50,10 @@
  cloud condensate in the updraft. The lateral entrainment is also enhanced
  to more strongly suppress convection in a drier environment.
 
- In further update for FY19 GFS implementation, interaction with turbulent
+
+\subsection gfsv16updates GFSv16 Updates
+
+ In further update for FY19 GFSv16 implementation, interaction with turbulent
  kinetic energy (TKE), which is a prognostic variable used in a scale-aware
  TKE-based moist EDMF vertical turbulent mixing scheme, is included.
  Entrainment rates in updrafts and downdrafts are proportional to sub-cloud
@@ -58,167 +61,24 @@
  cumulus convection is deduced from cumulus mass flux. On the other hand,
  tracers such as ozone and aerosol are also transported by cumulus convection.
 
- Occasional model crashes have been occurred when stochastic physics is on,
- due to too much convective cooling and heating tendencies near the cumulus
- top which are amplified by stochastic physics. To reduce too much convective
- cooling at the cloud top, the convection schemes have been modified for the
+ Occasional model crashes occurred when stochastic physics is on,
+ due to too strong convective cooling and heating tendencies near the cumulus
+ top which are amplified by stochastic physics. In order to alleviate this,
+ the convection schemes were modified for the
  rain conversion rate, entrainment and detrainment rates, overshooting layers,
  and maximum allowable cloudbase mass flux (as of June 2018).
 
-\subsection ca_page Cellular Automata Stochastic Convective Organization Scheme 
+\subsection gfsv17updates_samf GFS saSAS Scheme Updates in GFSv17
+ The updates to the SAMF parameterization described above, between GFSv16 and GFSv17
+ are carefully outlined in Bengtsson and Han (2004)(submitted to WAF). The main updates include:
 
-\b Scientific \b Background
+ - Implementation of a positive definition mass-flux scheme and a method for removing the negative tracers (Han et al. 2022 \cite Han_et_al_2022)
+ - Introduction of a new closure based on a prognostic evolution of the convective updraft area fraction in both shallow and deep convection (Bengtsson et al. 2022 \cite Bengtsson_2022)
+ - Introduction of 3D effects of cold-pool dynamics and stochastic initiation using self-organizing \ref cellular_automata (Bengtsson et al. 2021 \cite bengtsson_et_al_2021)
+ - Introduction of environmental wind shear and TKE dependence in convection, to seek improvements in hurricane forecast prediction (Han et al. 2024 \cite Han_2024)
+ - Stricter convective initiation criteria to allow for more CAPE to build up to address a low CAPE bias in GFSv16 (Han et al. 2021 \cite han_2021)
+ - Reduction of convective rain evaporation rate to address a systematic cold bias near the surface in GFSv16 (Han et al. 2021 \cite han_2021)
 
-Cumulus clouds in the atmosphere can organize into a variety of sizes, ranging 
-from small fair‐weather cumulus clouds, rain showers and thunderstorms, to 
-larger scale weather systems. In weather and climate models, such organization 
-is traditionally not well-represented as the motions associated with cumulus 
-clouds are generally too small to be resolved by the numerical model. 
-In this scheme we use a stochastic cellular automaton (CA), a mathematical 
-model often used to describe self‐organizing behavior in physical systems to 
-represent the effects of convective organization. The scheme addresses the 
-effect of convective organization in a bulk-plume cumulus convection 
-parameterizations (saSAS), where this type of organization has to be 
-represented in terms of how the resolved flow would “feel” convection if 
-more coherent structures were present on the subgrid.  
-
-In addition, for longer range forecasts (seasonal, decadal, climate), 
-the relevance of stochastic cumulus convection in numerical models can also 
-be discussed in terms of noise induced forcing. As an example, on the 
-time scale of organized convectively coupled waves, the small scale individual 
-convective plumes grow and decay so rapidly that they are not predictable 
-on time-scales longer than a few hours, whereas the organized larger scale 
-convectively coupled wave envelope can have a deterministic limit of 
-predictability of about two weeks. Thus, for longer range forecasts, 
-individual convective plumes can be viewed as stochastic noise - they can 
-have an impact on the convectively coupled waves (due to noise forcing), 
-but they are not predictable on their own. By providing the CA with a 
-stochastic initialization, the effect of stochastic cumulus convection 
-is also represented by the scheme. 
-
-The scientific motivation for the scheme, the CA rulesets explored, and 
-the impact on convectively coupled equatorial waves can be found in the 
-following references; Bengtsson et al. 2011 \cite Bengtsson_2011, 
-Bengtsson et al. 2013 \cite bengtsson_et_al_2013, 
-Bengtsson and Kornich (2016) \cite bengtsson_and_kornich_2016, 
-Bengtsson et al 2019 \cite Bengtsson_2019, 
-and Bengtsson et al. 2021 \cite bengtsson_et_al_2021. 
-
-\b Technical \b remarks
-
-The CA source code is located in the stochastic physics submodule in 
-the ufs-weather-model: https://github.com/noaa-psd/stochastic_physics . 
-In the UFS Weather Model, the main call to the CA routines are made 
-from FV3/stochastic_physics_driver.F90. 
-
-There are currently two options to evolve the CA (can be done simultaneously); 
-(\p ca_global) a large scale global pattern which evolves the ruleset according 
-to game of life with cell history, or (\p ca_sgs) a sub-grid scale pattern 
-which is conditioned on a forcing from the atmospheric model. The two options 
-are controlled by namelist and are evolved in cellular_automata_globa.F90 
-and cellular_automata_sgs.F90 respectively. Both approaches use the main 
-CA module update_ca.F90 to evolve the CA in time. Since the CA needs to know 
-about its neighborhood it uses the halo information to gather the state 
-in adjacent MPI domains and/or adjacent cube sphere interfaces. 
-
-\b The \p ca_sgs \b option - \b Coupled \b to \b saSAS \b cumulus \b convection \b scheme
-
-The evolution of the CA is an extension to the automaton family known as “Generations,” 
-which in turn is based on the “Game of Life”(Chopard & Droz, 1998 \cite Chopard_1998)
- but adds cell history to the rule set. It is a deterministic CA ruleset, initialized 
-with Gaussian white noise. Thus, when used in an ensemble system, each ensemble 
-member can provide a different seed to the random number generator governing 
-the initial state to then generate a different evolution for each member. 
-By cell history we refer to newborn cells being given a “lifetime,”τ, 
-that is incrementally reduced by 1 each time step where the rules are not met,
- in contrast to going directly from 1 to 0. The CA is conditioned on a 
-forcing from the host model through the lifetime variable τ such that:
-
-\f[
-\tau =N\left( \frac{\int_{l=1}^{l=top}E\frac{dp }{g} }{\max\left( \int_{l=1}^{l=top} E\frac{d p}{g}\right)} \right)
-\f]
-
-here, N is an integer that when multiplied by the model time-step represents 
-a physical time scale, such that τ is longer in regions where the forcing is larger, 
-E is the vertically integrated convective rain evaporation from the 
-saSAS cumulus convection scheme stored in Coupling%condition. The denominator is 
-the maximum value of the forcing in the global domain. While the grid-scale 
-forcing in practice could be any two-dimensional field, we choose here 
-to set it as the vertically integrated subgrid rain evaporation amount, 
-serving as an indicator of geographical regions where enhanced subgrid 
-organization may arise through convective cold-pools.
-
-The CA is evolved on a finer grid than the numerical prediction 
-host model (size controlled by namelist), and can be either coarse 
-grained back to the host model grid as a fraction, or (in case of \p nca_plumes = .true.) 
-give back the maximum number of connected “plumes” (represented by 
-connected CA cells), and their associated size within each numerical 
-prediction host model grid-box. nca_plumes is default true and the 
-maximum cluster size is passed to the saSAS cumulus convection scheme 
-in the Coupling%ca_deep container. 
-
-Depending on the activated namelist options, the CA can feed back to 
-the saSAS convection scheme via the entrainment (\p ca_entr), closure 
-(\p ca_closure) or convective initiation (\p ca_trigger) in the following way:
-
-- Entrainment (\p ca_entr): In entraining plume model bulk mass-flux schemes, 
-the upward mass-flux is typically parameterized as a function of environmental 
-air being entrained into the rising plume (as well as parcel properties at 
-cloud base). The fractional entrainment is described as a function of the 
-plume radius. Larger thermals (plumes) have smaller fractional entrainment, 
-which is a consequence of the fact that larger areas have relatively smaller 
-perimeters. In this scheme, the assumption is that subgrid organization will 
-lead to a few larger plumes rather than several smaller plumes, such that 
-the grid-box average fractional entrainment is reduced. Thus, after 
-the CA is updated, we count the number of plumes, and their associated 
-size within each NWP grid-box (\p nca_plumes = true). If the largest 
-cluster of cells found on the subgrid is larger than a set radius, then the 
-fractional entrainment rate is reduced at that grid-point by 30% 
-(selected based on experimentation)
-
-- Triggering (\p ca_trigger): In NWP models physical processes are parameterized 
-in columns, and the horizontal interaction between physical processes takes 
-place only through advection and diffusion. As the CA can organize clusters 
-across adjacent NWP model grid-boxes, the method offers a novel approach to 
-enhance the probability of triggering of convection in nearby areas, 
-representing subgrid fluctuations in temperature and humidity, and triggering 
-in premoistened regions if convection is triggered in a cluster. The 
-stochastic nature of the CA may enhance organization in different 
-directions within the grid-box, and across grid-boxes, depending on the 
-initial seed. If the model is run as an ensemble, the convection scheme's 
-stochastic triggering function can help to improve uncertainty estimates 
-associated with subgrid fluctuations of temperature and humidity and 
-randomness in organization. In this work, model grid boxes in which the 
-CA's largest connecting plume exceeds a given threshold will be considered 
-as candidates for convective activation, in addition to saSAS’s current 
-triggering criteria.
-
-- Closure (\p ca_closure): We assume that convection that organizes into 
-plumes with larger radii tends to cover a larger area fraction of the 
-grid-box and thereby acts to enhance the cloud base mass flux. In this 
-coupling strategy, we again count the number of plumes (represented by 
-connected cellular automaton cells), and their associated size within 
-each NWP grid-box. If the largest cluster of cells found on the subgrid 
-is larger than a set radius, then the cloud base mass-flux is enhanced in 
-that grid-box by 25% (selected based on experimentation). This option is 
-being revisited by reformulating the entire closure using a prognostic 
-evolution of the updraft area fraction, and is in its current formulation 
-not recommended. 
-
-\subsection gen_enh Physics Updates in GFS Cumulus Convection
-
-- To enhance the surface-based convective available potential energy (CAPE), 
-more strict convection trigger conditions are applied.
-- Enhanced downdraft detrainments start from 60 mb above the ground surface 
-rather than from the cloud base.
-- Reduced rain evaporation with the removal of wind shear dependency, which 
-helps to reduce cold bias in tropospheric temperature profile especially over Tropics.
-- Separation cloud depth of deep and shallow convection is 
-increased to 200 hPa from 150 hPa.
-- Updraft entrainment rates for moisture, hydrometeors, and tracers are 
-increased by about 30%.
-- A positive definite TVD (Total Variation Diminishing) mass-flux transport 
-scheme for moisture, hydrometeors and tracers and a method for removing negative tracer mixing ratio values have been implemented.
 
 \sa NCEP Office Note 505 \cite https://doi.org/10.25923/cybh-w893 and 506 \cite https://doi.org/10.25923/5051-3r70 
 \section intra_deep  Intraphysics Communication

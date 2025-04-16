@@ -4,12 +4,13 @@
 \section allscheme_overview Physical Parameterizations 
 
 In the CCPP, each parameterization is in its own modern Fortran module (see rules for a scheme to be considered CCPP-compliant at 
-<a href="https://ccpp-techdoc.readthedocs.io/en/v6.0.0/CompliantPhysicsParams.html"> CCPP-Compliant Physics Parameterizations </a>),
+<a href="https://ccpp-techdoc.readthedocs.io/en/v7.0.0/CompliantPhysicsParams.html"> CCPP-Compliant Physics Parameterizations </a>),
 which facilitates model development and code maintenance. While some individual parameterization can be invoked for the SCM, most host models will assemble the parameterizations in suites. 
 
 
 \b Radiation
- - \subpage GFS_RRTMG 
+ - \subpage GFS_RRTMG_page 
+ - \subpage GFS_RRTMGP_page
 
 \b PBL \b and \b Turbulence
  - \subpage GFS_SATMEDMFVDIFQ 
@@ -22,7 +23,6 @@ which facilitates model development and code maintenance. While some individual 
 
 \b Cumulus \b Parameterizations
  - \subpage GFS_SAMFdeep 
-  - \ref ca_page 
  - \subpage GFS_SAMFshal 
  - \subpage CU_GF 
 
@@ -39,8 +39,8 @@ which facilitates model development and code maintenance. While some individual 
 
 \b Gravity \b Wave \b Drag
  - \subpage GFS_UGWP_v0 
- - \subpage GFS_UNIFIED_UGWP
  - \subpage GFS_drag_suite
+ - \subpage ugwpv1_gsldrag
 
 \b Surface \b Layer 
  - \subpage GFS_SFCLYR 
@@ -51,9 +51,8 @@ which facilitates model development and code maintenance. While some individual 
  - \subpage GFS_OCEAN 
  - \subpage GFS_SFCSICE 
 
-\b Others
- - \ref ca_page
- - \subpage GFS_SPP
+\b Lakes 
+ - \subpage CLM_LAKE_page
 
 The input information for the parameterizations includes the values of the gridbox mean prognostic variables (wind components, temperature,
 specific humidity, cloud fraction, water contents for cloud liquid, cloud ice, rain, snow, graupel, and ozone concentration), the provisional
@@ -70,30 +69,28 @@ produce the tendencies.
 - The second part of the physics suite, comprised of the parameterizations of gravity wave physics, ozone, stratospheric water vapor, deep and shallow convection (if using),
  and microphysics, is computed using sequential splitting in the order listed above, in which the model state is updated between calls
 to the parameterization.
-- If the in-core saturation adjustment is used (\p do_sat_adj=.true.), it is invoked at shorter timesteps along with the dynamical solver.
 
 \section allsuite_overview Physics Suites
 
-There are two publicly supported host models that use CCPP v6: the UFS Weather Model and the CCPP Single Column Model (SCM). 
-The UFS Weather Model is included in the UFS Short Range Weather Application (SRW App) v2.
-The forcing datasets included in the CCPP SCM v6.0.0 public release were created by averaging observations and large-eddy simulations over areas that are
-too coarse to resolve convection. Therefore, best results will be obtained with the CCPP SCM v6.0 when using suites that include parameterized
+The obly publicly supported host model for CCPP v7.0.0 is the CCPP Single Column Model (CCPP-SCM). 
+The forcing datasets included in the CCPP-SCM v7.0.0 public release were created by averaging observations and large-eddy simulations over areas that are
+too coarse to resolve convection. Therefore, best results will be obtained with the CCPP-SCM v7.0.0 when using suites that include parameterized
 convection.
 
-Table 1.  Physics suites and primary schemes supported in CCPP v6.0.0  
+Table 1.  Physics suites and primary schemes supported in CCPP v7.0.0  
 \tableofcontents
-| Physics suites   |     GFS_v16        |   GFS_v17_p8            |       RAP        |    HRRR                     |   RRFS_v1beta      |      WoFS_v0     |         
-|------------------|--------------------|-------------------------|------------------|-----------------------------|--------------------|---------------|
-|\b Host           | SCM \n SRWv2       |  SCM                    |    SCM           |   SCM \n SRWv2              |  SCM \n SRWv2      |  SCM \n SRWv2  |
-|\b Deep \b Cu     | \ref GFS_SAMFdeep  |  \ref GFS_SAMFdeep + \ref ca_page |  \ref CU_GF      | \a  off           |   \a off           |   \a off      |
-|\b Shallow \b Cu  | \ref GFS_SAMFshal  |  \ref GFS_SAMFshal      |  \ref CU_GF      | \ref MYNNEDMF               | \ref MYNNEDMF      |  \ref MYNNEDMF |
-|\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o aerosol-aware   |  \ref THOMPSON   | \ref THOMPSON    | \ref THOMPSON      | \ref NSSLMICRO_page     |
-|\b PBL/TURB       | \ref GFS_SATMEDMFVDIFQ     |  \ref GFS_SATMEDMFVDIFQ  |  \ref MYNNEDMF     | \ref MYNNEDMF    | \ref MYNNEDMF     |   \ref MYNNEDMF    |
-|\b Radiation      | \ref GFS_RRTMG     |  \ref GFS_RRTMG        |  \ref GFS_RRTMG  | \ref GFS_RRTMG              | \ref GFS_RRTMG     |   \ref GFS_RRTMG    |
-|\b Surface \b Layer | \ref GFS_SFCLYR  |  \ref GFS_SFCLYR        | \ref SFC_MYNNSFL | \ref SFC_MYNNSFL            | \ref SFC_MYNNSFL   |   \ref SFC_MYNNSFL  |
-|\b LSM            | \ref GFS_NOAH      |  \ref NoahMP            |  \ref RUCLSM     | \ref RUCLSM                 |   \ref NoahMP      | \ref GFS_NOAH   |
-|\b Gravity \b Wave \b Drag| \ref GFS_UGWP_v0  |  \ref GFS_UNIFIED_UGWP |  \ref GFS_drag_suite  | \ref GFS_drag_suite | \ref  GFS_UGWP_v0  |   \ref GFS_UGWP_v0   |
-|\b Sea \b Ice     | \ref GFS_SFCSICE   | \ref GFS_SFCSICE        |  \ref RUCLSM     |  \ref RUCLSM                | \ref GFS_SFCSICE   |   \ref GFS_SFCSICE     |  
+| Physics suites   |     GFS_v16        |   GFS_v17_p8_ugwpv1  |       GFS_v16_RRTMGP        |      HRRR_gf          |      WoFS_v0     |         
+|------------------|--------------------|----------------------|-----------------------------|-----------------------|------------------|
+|\b Host           | SCM                |  SCM                 |    SCM                      |  SCM                  |  SCM             |  
+|\b Deep \b Cu     | \ref GFS_SAMFdeep  |  \ref GFS_SAMFdeep   |   \ref GFS_SAMFdeep         |  \ref CU_GF           |   \a off         |
+|\b Shallow \b Cu  | \ref GFS_SAMFshal  |  \ref GFS_SAMFshal   |   \ref GFS_SAMFshal         | \ref CU_GF            | \ref MYNNEDMF    |
+|\b Microphysics   | \ref GFDL_cloud    |  \ref THOMPSON w/o aerosol-aware   |  \ref GFDL_cloud   | \ref THOMPSON   | \ref NSSLMICRO_page     |
+|\b PBL/TURB       | \ref GFS_SATMEDMFVDIFQ    |  \ref GFS_SATMEDMFVDIFQ  |  \ref GFS_SATMEDMFVDIFQ   | \ref MYNNEDMF     |   \ref MYNNEDMF    |
+|\b Radiation      | \ref GFS_RRTMG_page     |  \ref GFS_RRTMG_page     |  \ref GFS_RRTMGP_page      | \ref GFS_RRTMG_page     |   \ref GFS_RRTMG_page    |
+|\b Surface \b Layer | \ref GFS_SFCLYR  |  \ref GFS_SFCLYR        | \ref GFS_SFCLYR | \ref SFC_MYNNSFL   |   \ref SFC_MYNNSFL  |
+|\b LSM            | \ref GFS_NOAH      |  \ref NoahMP            |  \ref GFS_NOAH     |    \ref RUCLSM      | \ref GFS_NOAH   |
+|\b Gravity \b Wave \b Drag| \ref GFS_UGWP_v0  |  \ref ugwpv1_gsldrag |  \ref GFS_UGWP_v0  | \ref GFS_drag_suite |    \ref GFS_UGWP_v0   |
+|\b Sea \b Ice     | \ref GFS_SFCSICE   | \ref GFS_SFCSICE        |  \ref GFS_SFCSICE     |  \ref RUCLSM             |   \ref GFS_SFCSICE     |  
 \tableofcontents
 
 

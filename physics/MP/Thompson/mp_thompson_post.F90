@@ -1,3 +1,7 @@
+!> \file mp_thompson_post.F90
+!!
+
+!>This module contain the post processing of Thompson microphysics
 module mp_thompson_post
 
    use mpi_f08
@@ -15,7 +19,7 @@ module mp_thompson_post
 
 contains
 
-!! \section arg_table_mp_thompson_post_init Argument Table
+!> \section arg_table_mp_thompson_post_init Argument Table
 !! \htmlinclude mp_thompson_post_init.html
 !!
    subroutine mp_thompson_post_init(ttendlim, errmsg, errflg)
@@ -125,7 +129,7 @@ contains
 
    end subroutine mp_thompson_post_run
 
-!! \section arg_table_mp_thompson_post_finalize Argument Table
+!> \section arg_table_mp_thompson_post_finalize Argument Table
 !! \htmlinclude mp_thompson_post_finalize.html
 !!
    subroutine mp_thompson_post_finalize(errmsg, errflg)

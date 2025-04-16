@@ -1,8 +1,9 @@
 !>\file mp_thompson_pre.F90
 !!
 
-! CCPP license goes here, as well as further documentation
 !>\ingroup aathompson
+
+!> This module contains the pre-processing of Thompson cloud microphysics
 module mp_thompson_pre
 
       use machine, only : kind_phys

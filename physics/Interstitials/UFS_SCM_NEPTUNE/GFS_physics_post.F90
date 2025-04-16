@@ -1,4 +1,3 @@
-! ###########################################################################################
 !> \file GFS_physics_post.F90
 !!
 !! This module contains GFS specific calculations (e.g. diagnostics) and suite specific
@@ -13,10 +12,7 @@ module GFS_physics_post
   public GFS_physics_post_run
 contains
 
-! ###########################################################################################
-! SUBROUTINE GFS_physics_post_run
-! ###########################################################################################
-!! \section arg_table_GFS_physics_post_run Argument Table
+!> \section arg_table_GFS_physics_post_run Argument Table
 !! \htmlinclude GFS_physics_post_run.html
 !!
   subroutine GFS_physics_post_run(nCol, nLev, ntoz, ntracp100, nprocess, nprocess_summed,   &
@@ -27,42 +23,42 @@ contains
 
     ! Inputs
     integer, intent(in) :: &
-         nCol,           & ! Horizontal dimension
-         nLev,           & ! Number of vertical layers
-         ntoz,           & ! Index for ozone mixing ratio
-         ntqv,           & ! Index for water vapor mixing ratio
-         ntracp100,      & ! Number of tracers plus 100
-         nprocess,       & ! Number of processes that cause changes in state variables 
-         nprocess_summed,& ! Number of causes in dtidx per tracer summed for total physics tendency
-         ip_physics,     & ! Index for process in diagnostic tendency output
-         ip_photochem,   & ! Index for process in diagnostic tendency output
-         ip_prod_loss,   & ! Index for process in diagnostic tendency output
-         ip_ozmix,       & ! Index for process in diagnostic tendency output
-         ip_temp,        & ! Index for process in diagnostic tendency output
-         ip_overhead_ozone ! Index for process in diagnostic tendency output    
+         nCol,           & !< Horizontal dimension
+         nLev,           & !< Number of vertical layers
+         ntoz,           & !< Index for ozone mixing ratio
+         ntqv,           & !< Index for water vapor mixing ratio
+         ntracp100,      & !< Number of tracers plus 100
+         nprocess,       & !< Number of processes that cause changes in state variables 
+         nprocess_summed,& !< Number of causes in dtidx per tracer summed for total physics tendency
+         ip_physics,     & !< Index for process in diagnostic tendency output
+         ip_photochem,   & !< Index for process in diagnostic tendency output
+         ip_prod_loss,   & !< Index for process in diagnostic tendency output
+         ip_ozmix,       & !< Index for process in diagnostic tendency output
+         ip_temp,        & !< Index for process in diagnostic tendency output
+         ip_overhead_ozone !< Index for process in diagnostic tendency output    
     integer, intent(in), dimension(:,:) :: &
-         dtidx             ! Bookkeeping indices for GFS diagnostic tendencies
+         dtidx             !< Bookkeeping indices for GFS diagnostic tendencies
     logical, intent(in) :: &
-         ldiag3d           ! Flag for 3d diagnostic fields
+         ldiag3d           !< Flag for 3d diagnostic fields
     logical, intent(in), dimension(:) :: &
-         is_photochem      ! Flags for photochemistry processes to sum
+         is_photochem      !< Flags for photochemistry processes to sum
 
     ! Inputs (optional)
     real(kind=kind_phys), intent(in), dimension(:,:), pointer, optional :: &
-         do3_dt_prd,     & ! Physics tendency: production and loss effect
-         do3_dt_ozmx,    & ! Physics tendency: ozone mixing ratio effect
-         do3_dt_temp,    & ! Physics tendency: temperature effect
-         do3_dt_ohoz,    & ! Physics tendency: overhead ozone effect
-         dqv_dt_prd,     & ! Physics tendency: climatological net production effect
-         dqv_dt_qvmx       ! Physics tendency: water vapor mixing ratio effect
+         do3_dt_prd,     & !< Physics tendency: production and loss effect
+         do3_dt_ozmx,    & !< Physics tendency: ozone mixing ratio effect
+         do3_dt_temp,    & !< Physics tendency: temperature effect
+         do3_dt_ohoz,    & !< Physics tendency: overhead ozone effect
+         dqv_dt_prd,     & !< Physics tendency: climatological net production effect
+         dqv_dt_qvmx       !< Physics tendency: water vapor mixing ratio effect
 
     ! Outputs
     real(kind=kind_phys), intent(inout), dimension(:,:,:), optional :: &
-         dtend             ! Diagnostic tendencies for state variables
+         dtend             !< Diagnostic tendencies for state variables
     character(len=*), intent(out) :: &
-         errmsg            ! CCPP error message
+         errmsg            !< CCPP error message
     integer, intent(out) :: &
-         errflg            ! CCPP error flag
+         errflg            !< CCPP error flag
 
     ! Locals
     integer :: idtend, ichem, iphys, itrac
@@ -153,6 +149,7 @@ contains
 
   contains
 
+!>
     subroutine sum_it(isum,itrac,sum_me)
       integer, intent(in) :: isum ! third index of dtend of summary process
       integer, intent(in) :: itrac ! tracer or state variable being summed

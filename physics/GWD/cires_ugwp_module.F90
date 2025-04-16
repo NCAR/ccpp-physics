@@ -1,5 +1,7 @@
 !>\file cires_ugwp_module.F90
+!!
 
+!>This module contains the UGWPv0 driver
 module  cires_ugwpv0_module
 
 !
@@ -9,8 +11,8 @@ module  cires_ugwpv0_module
     implicit none
     logical            :: module_is_initialized
 
-    logical            :: do_physb_gwsrcs = .false.        ! control for physics-based GW-sources
-    logical            :: do_rfdamp       = .false.        ! control for Rayleigh friction inside ugwp_driver
+    logical            :: do_physb_gwsrcs = .false.        !< control for physics-based GW-sources
+    logical            :: do_rfdamp       = .false.        !< control for Rayleigh friction inside ugwp_driver
 
     real, parameter    :: arad=6370.e3
     real, parameter    :: pi = atan(1.0)
@@ -18,24 +20,24 @@ module  cires_ugwpv0_module
     real, parameter    :: hps   = 7000.
     real, parameter    :: hpskm = hps/1000.
 !
-    real               :: kxw = 6.28e-3/100.               ! single horizontal wavenumber of ugwp schemes
+    real               :: kxw = 6.28e-3/100.               !< single horizontal wavenumber of ugwp schemes
     real, parameter    :: ricrit = 0.25
     real, parameter    :: frcrit = 0.50
     real, parameter    :: linsat = 1.00
     real, parameter    :: linsat2 = linsat*linsat
 !
 
-    integer               :: knob_ugwp_solver=1            ! 1, 2, 3, 4 - (linsat, ifs_2010, ad_gfdl, dsp_dis)
-    integer, dimension(4) :: knob_ugwp_source              ! [1,1,1,0]  - (oro, fronts, conv, imbf-owp]
-    integer, dimension(4) :: knob_ugwp_wvspec              !  number of waves for- (oro, fronts, conv, imbf-owp]
-    integer, dimension(4) :: knob_ugwp_azdir               !   number of wave azimuths for- (oro, fronts, conv, imbf-owp]
-    integer, dimension(4) :: knob_ugwp_stoch               !  1 - deterministic ; 0 - stochastic
-    real,    dimension(4) :: knob_ugwp_effac               !  efficiency factors for- (oro, fronts, conv, imbf-owp]
+    integer               :: knob_ugwp_solver=1            !< 1, 2, 3, 4 - (linsat, ifs_2010, ad_gfdl, dsp_dis)
+    integer, dimension(4) :: knob_ugwp_source              !< [1,1,1,0]  - (oro, fronts, conv, imbf-owp]
+    integer, dimension(4) :: knob_ugwp_wvspec              !<  number of waves for- (oro, fronts, conv, imbf-owp]
+    integer, dimension(4) :: knob_ugwp_azdir               !<   number of wave azimuths for- (oro, fronts, conv, imbf-owp]
+    integer, dimension(4) :: knob_ugwp_stoch               !<  1 - deterministic ; 0 - stochastic
+    real,    dimension(4) :: knob_ugwp_effac               !<  efficiency factors for- (oro, fronts, conv, imbf-owp]
 
-    integer               :: knob_ugwp_doaxyz=1            ! 1 -gwdrag
-    integer               :: knob_ugwp_doheat=1            ! 1 -gwheat
-    integer               :: knob_ugwp_dokdis=0            ! 1 -gwmixing
-    integer               :: knob_ugwp_ndx4lh = 2          ! n-number  of  "unresolved" "n*dx" for lh_gw
+    integer               :: knob_ugwp_doaxyz=1            !< 1 -gwdrag
+    integer               :: knob_ugwp_doheat=1            !< 1 -gwheat
+    integer               :: knob_ugwp_dokdis=0            !< 1 -gwmixing
+    integer               :: knob_ugwp_ndx4lh = 2          !< n-number  of  "unresolved" "n*dx" for lh_gw
 !
     integer  :: ugwp_azdir
     integer  :: ugwp_stoch
@@ -45,12 +47,12 @@ module  cires_ugwpv0_module
     real     :: ugwp_effac
 
 !
-    data knob_ugwp_source / 1,0, 1, 0 /                    !  oro-conv-fjet-okw-taub_lat:      1-active 0-off
-    data knob_ugwp_wvspec /1,32,32,32/                     !  number of waves for- (oro, fronts, conv, imbf-owp, taulat]
-    data knob_ugwp_azdir  /2, 4, 4,4/                      !  number of wave azimuths for- (oro, fronts, conv, imbf-okwp]
-    data knob_ugwp_stoch  /0, 0, 0,0/                      !  0 - deterministic ; 1 - stochastic, non-activated option
-    data knob_ugwp_effac  /1.,1.,1.,1./                    !  efficiency factors for- (oro, fronts, conv, imbf-owp]
-    integer  :: knob_ugwp_version = 0                      !  version control had sense under IPD in CCPP=> to SUITES
+    data knob_ugwp_source / 1,0, 1, 0 /                    !<  oro-conv-fjet-okw-taub_lat:      1-active 0-off
+    data knob_ugwp_wvspec /1,32,32,32/                     !<  number of waves for- (oro, fronts, conv, imbf-owp, taulat]
+    data knob_ugwp_azdir  /2, 4, 4,4/                      !<  number of wave azimuths for- (oro, fronts, conv, imbf-okwp]
+    data knob_ugwp_stoch  /0, 0, 0,0/                      !<  0 - deterministic ; 1 - stochastic, non-activated option
+    data knob_ugwp_effac  /1.,1.,1.,1./                    !<  efficiency factors for- (oro, fronts, conv, imbf-owp]
+    integer  :: knob_ugwp_version = 0                      !<  version control had sense under IPD in CCPP=> to SUITES
     integer  :: launch_level = 55
 !
     namelist /cires_ugwp_nml/ knob_ugwp_solver, knob_ugwp_source,knob_ugwp_wvspec, knob_ugwp_azdir,  &
