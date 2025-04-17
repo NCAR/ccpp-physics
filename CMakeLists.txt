@@ -196,7 +196,8 @@ target_include_directories(ccpp_physics PUBLIC
 target_link_libraries(ccpp_physics PRIVATE MPI::MPI_Fortran)
 target_link_libraries(ccpp_physics PUBLIC w3emc::w3emc_d
                                           sp::sp_d
-                                          NetCDF::NetCDF_Fortran)
+                                          NetCDF::NetCDF_Fortran
+                                          fms)
 
 # Define where to install the library
 install(TARGETS ccpp_physics
