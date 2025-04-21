@@ -3,8 +3,7 @@
 
 !> This module contains the cloud optics properties calculation for RRTMGP-SW
 module rrtmgp_sw_cloud_optics
-  use machine,                  only: kind_phys
-  use mo_rte_kind,              only: wl
+  use mo_rte_kind,              only: wl, wp
   use mo_cloud_optics_rrtmgp,   only: ty_cloud_optics => ty_cloud_optics_rrtmgp
   use rrtmgp_sw_gas_optics,     only: sw_gas_props
   use radiation_tools,          only: check_error_msg
@@ -19,16 +18,16 @@ module rrtmgp_sw_cloud_optics
   integer :: &
        nrghice_fromfileSW, nBandSW, nSize_liqSW, nSize_iceSW, nSizeregSW, &
        nCoeff_extSW, nCoeff_ssa_gSW, nBoundSW, nPairsSW
-  real(kind_phys), dimension(:,:), allocatable :: &
+  real(wp), dimension(:,:), allocatable :: &
        lut_extliqSW,          & !< LUT shortwave liquid extinction coefficient  
        lut_ssaliqSW,          & !< LUT shortwave liquid single scattering albedo   
        lut_asyliqSW,          & !< LUT shortwave liquid asymmetry parameter  
        band_limsCLDSW           !< Beginning and ending wavenumber [cm -1] for each band                           
-  real(kind_phys), dimension(:,:,:), allocatable :: &
+  real(wp), dimension(:,:,:), allocatable :: &
        lut_exticeSW,          & !< LUT shortwave ice extinction coefficient
        lut_ssaiceSW,          & !< LUT shortwave ice single scattering albedo
        lut_asyiceSW             !< LUT shortwave ice asymmetry parameter
-  real(kind_phys) :: &
+  real(wp) :: &
        radliq_lwrSW,          & !< Liquid particle size lower bound for LUT interpolation
        radliq_uprSW,          & !< Liquid particle size upper bound for LUT interpolation
        radice_lwrSW,          & !< Ice particle    size upper bound for LUT interpolation
@@ -36,11 +35,11 @@ module rrtmgp_sw_cloud_optics
 
   ! Parameters used for rain and snow(+groupel) RRTMGP cloud-optics. *NOTE* Same as in RRTMG
   ! Need to document these magic numbers below.
-  real(kind_phys),parameter :: &
+  real(wp),parameter :: &
        a0r = 3.07e-3,        & !
        a0s = 0.0,            & !
        a1s = 1.5               !  
-  real(kind_phys),dimension(:),allocatable :: b0r,b0s,b1s,c0r,c0s
+  real(wp),dimension(:),allocatable :: b0r,b0s,b1s,c0r,c0s
 
 contains
   ! ######################################################################################

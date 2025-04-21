@@ -7,8 +7,7 @@
 !! (optical-depth, single-scattering albedo, asymmetry parameter) are computed for ALL
 !! cloud types visible to RRTMGP.
 module rrtmgp_lw_cloud_optics
-  use machine,                  only: kind_phys
-  use mo_rte_kind,              only: wl
+  use mo_rte_kind,              only: wl, wp
   use mo_cloud_optics_rrtmgp,   only: ty_cloud_optics => ty_cloud_optics_rrtmgp
   use rrtmgp_lw_gas_optics,     only: lw_gas_props
   use radiation_tools,          only: check_error_msg
@@ -23,22 +22,22 @@ module rrtmgp_lw_cloud_optics
   integer :: &
        nrghice_fromfileLW, nBandLW, nSize_liqLW, nSize_iceLW, nSizeRegLW, &
        nCoeff_extLW, nCoeff_ssa_gLW, nBoundLW, npairsLW
-  real(kind_phys), dimension(:,:), allocatable :: &
+  real(wp), dimension(:,:), allocatable :: &
        lut_extliqLW,          & !< LUT shortwave liquid extinction coefficient  
        lut_ssaliqLW,          & !< LUT shortwave liquid single scattering albedo   
        lut_asyliqLW,          & !< LUT shortwave liquid asymmetry parameter  
        band_limsCLDLW           !< Beginning and ending wavenumber [cm -1] for each band                           
-  real(kind_phys), dimension(:,:,:), allocatable :: &
+  real(wp), dimension(:,:,:), allocatable :: &
        lut_exticeLW,          & !< LUT shortwave ice extinction coefficient
        lut_ssaiceLW,          & !< LUT shortwave ice single scattering albedo
        lut_asyiceLW             !< LUT shortwave ice asymmetry parameter
   
   ! Parameters used for rain and snow(+groupel) RRTMGP cloud-optics
-  real(kind_phys), parameter :: &
+  real(wp), parameter :: &
        absrain  = 0.33e-3, & !< Rain drop absorption coefficient m2/g .
        abssnow0 = 1.5,     & !< Snow flake absorption coefficient (micron), fu coeff
        abssnow1 = 2.34e-3    !< Snow flake absorption coefficient m2/g, ncar coef
-  real(kind_phys) :: &
+  real(wp) :: &
        radliq_lwrLW,         & !< Liquid particle size lower bound for LUT interpolation   
        radliq_uprLW,         & !< Liquid particle size upper bound for LUT interpolation
        radice_lwrLW,         & !< Ice particle size upper bound for LUT interpolation  

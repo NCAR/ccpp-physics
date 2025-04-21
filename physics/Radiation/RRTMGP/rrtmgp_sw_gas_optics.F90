@@ -4,8 +4,7 @@
 !> This module contains a routine to initialize the k-distribution data used
 !! by the RRTMGP shortwave radiation scheme.
 module rrtmgp_sw_gas_optics
-  use machine,                only: kind_phys
-  use mo_rte_kind,            only: wl
+  use mo_rte_kind,            only: wl, wp
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations,  only: ty_gas_concs
   use radiation_tools,        only: check_error_msg
@@ -15,7 +14,7 @@ module rrtmgp_sw_gas_optics
 #endif
 
   implicit none
-  real(kind_phys),parameter :: &
+  real(wp),parameter :: &
        tsi_default = 1360.85767381726, &
        mg_default  = 0.1567652,        &
        sb_default  = 902.7126
@@ -37,22 +36,22 @@ module rrtmgp_sw_gas_optics
        minor_limits_gpt_upperSW             !< Beginning and ending gpoint for each minor interval in upper atmosphere
   integer, dimension(:,:,:), allocatable :: &
        key_speciesSW                        !< Key species pair for each band
-  real(kind_phys) :: &
+  real(wp) :: &
        press_ref_tropSW,                  & !< Reference pressure separating the lower and upper atmosphere [Pa]
        temp_ref_pSW,                      & !< Standard spectroscopic reference pressure [Pa]
        temp_ref_tSW,                      & !< Standard spectroscopic reference temperature [K]
        tsi_defaultSW,                     & !< 
        mg_defaultSW,                      & !< Mean value of Mg2 index over the average solar cycle from the NRLSSI2 model of solar variability
        sb_defaultSW                         !< Mean value of sunspot index over the average solar cycle from the NRLSSI2 model of solar variability
-  real(kind_phys), dimension(:), allocatable :: &
+  real(wp), dimension(:), allocatable :: &
        press_refSW,                       & !< Pressures for reference atmosphere; press_ref(# reference layers) [Pa]
        temp_refSW,                        & !< Temperatures for reference atmosphere; temp_ref(# reference layers) [K]
        solar_quietSW,                     & !< Spectrally-dependent quiet sun irradiance from the NRLSSI2 model of solar variability
        solar_facularSW,                   & !< Spectrally-dependent facular term from the NRLSSI2 model of solar variability
        solar_sunspotSW                      !< Spectrally-dependent sunspot term from the NRLSSI2 model of solar variability
-  real(kind_phys), dimension(:,:), allocatable :: &
+  real(wp), dimension(:,:), allocatable :: &
        band_limsSW                          !< Beginning and ending wavenumber [cm -1] for each band
-  real(kind_phys), dimension(:,:,:), allocatable :: &
+  real(wp), dimension(:,:,:), allocatable :: &
        vmr_refSW,                         & !< Volume mixing ratios for reference atmosphere
        kminor_lowerSW,                    & !< (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
                                             !< [nTemp x nEta x nContributors] array)
@@ -60,7 +59,7 @@ module rrtmgp_sw_gas_optics
                                             !< [nTemp x nEta x nContributors] array)
        rayl_lowerSW,                      & !< Stored coefficients due to rayleigh scattering contribution
        rayl_upperSW                         !< Stored coefficients due to rayleigh scattering contribution
-  real(kind_phys), dimension(:,:,:,:), allocatable :: &
+  real(wp), dimension(:,:,:,:), allocatable :: &
        kmajorSW                             !< Stored absorption coefficients due to major absorbing gases
   character(len=32),  dimension(:), allocatable :: &
        gas_namesSW,                       & !< Names of absorbing gases

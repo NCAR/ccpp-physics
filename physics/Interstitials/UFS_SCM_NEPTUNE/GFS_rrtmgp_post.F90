@@ -7,6 +7,7 @@ module GFS_rrtmgp_post
   use module_radsw_parameters,   only: topfsw_type, sfcfsw_type, cmpfsw_type
   use mo_heating_rates,          only: compute_heating_rate
   use radiation_tools,           only: check_error_msg
+  use mo_rte_kind,               only: rte_wp => wp
   implicit none
 
   public GFS_rrtmgp_post_run
@@ -133,7 +134,8 @@ contains
     ! Local variables
     integer :: i, j, k, itop, ibtc
     real(kind_phys) :: tem0d, tem1, tem2
-    real(kind_phys), dimension(nDay, nLev) :: thetaTendClrSky, thetaTendAllSky
+    real(rte_wp), dimension(nDay, nLev) :: thetaTendClrSkySW, thetaTendAllSkySW
+    real(rte_wp), dimension(nCol, nLev) :: thetaTendClrSkyLW, thetaTendAllSkyLW
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -149,18 +151,20 @@ contains
        ! Clear-sky heating-rate (optional)
        if (do_lw_clrsky_hr) then
           call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(  &
-               fluxlwUP_clrsky,   & ! IN  - RRTMGP upward longwave clear-sky flux profiles (W/m2)
-               fluxlwDOWN_clrsky, & ! IN  - RRTMGP downward longwave clear-sky flux profiles (W/m2)
-               p_lev,             & ! IN  - Pressure @ layer-interfaces (Pa)
-               htrlwc))             ! OUT - Longwave clear-sky heating rate (K/sec)
+               real(fluxlwUP_clrsky, kind=rte_wp),   & ! IN  - RRTMGP upward longwave clear-sky flux profiles (W/m2)
+               real(fluxlwDOWN_clrsky, kind=rte_wp), & ! IN  - RRTMGP downward longwave clear-sky flux profiles (W/m2)
+               real(p_lev, kind=rte_wp),             & ! IN  - Pressure @ layer-interfaces (Pa)
+               thetaTendClrSkyLW))                     ! OUT - Longwave clear-sky heating rate (K/sec)
+          htrlwc = thetaTendClrSkyLW
        endif
 
        ! All-sky heating-rate (mandatory)
        call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(     &
-            fluxlwUP_allsky,      & ! IN  - RRTMGP upward longwave all-sky flux profiles (W/m2)
-            fluxlwDOWN_allsky,    & ! IN  - RRTMGP downward longwave all-sky flux profiles (W/m2)
-            p_lev,                & ! IN  - Pressure @ layer-interfaces (Pa)
-            htrlw))                 ! OUT - Longwave all-sky heating rate (K/sec)
+            real(fluxlwUP_allsky, kind=rte_wp),      & ! IN  - RRTMGP upward longwave all-sky flux profiles (W/m2)
+            real(fluxlwDOWN_allsky, kind=rte_wp),    & ! IN  - RRTMGP downward longwave all-sky flux profiles (W/m2)
+            real(p_lev, kind=rte_wp),                & ! IN  - Pressure @ layer-interfaces (Pa)
+            thetaTendAllSkyLW))                        ! OUT - Longwave all-sky heating rate (K/sec)
+       htrlw = thetaTendAllSkyLW
 
        ! #######################################################################################
        ! Save LW outputs.
@@ -241,21 +245,21 @@ contains
           if (do_sw_clrsky_hr) then
              htrswc(:,:) = 0._kind_phys
              call check_error_msg('GFS_rrtmgp_post',compute_heating_rate( &
-                  fluxswUP_clrsky(idxday(1:nDay),:),   & ! IN  - Shortwave upward clear-sky flux profiles (W/m2)
-                  fluxswDOWN_clrsky(idxday(1:nDay),:), & ! IN  - Shortwave downward clear-sky flux profiles (W/m2)
-                  p_lev(idxday(1:nDay),:),             & ! IN  - Pressure at model-interface (Pa)
-                  thetaTendClrSky))                      ! OUT - Clear-sky heating-rate (K/sec)
-             htrswc(idxday(1:nDay),:)=thetaTendClrSky !**NOTE** GP doesn't use radiation levels, it uses the model fields. Not sure if this is necessary
+                  real(fluxswUP_clrsky(idxday(1:nDay),:), kind=rte_wp),   & ! IN  - Shortwave upward clear-sky flux profiles (W/m2)
+                  real(fluxswDOWN_clrsky(idxday(1:nDay),:), kind=rte_wp), & ! IN  - Shortwave downward clear-sky flux profiles (W/m2)
+                  real(p_lev(idxday(1:nDay),:), kind=rte_wp),             & ! IN  - Pressure at model-interface (Pa)
+                  thetaTendClrSkySW))                         ! OUT - Clear-sky heating-rate (K/sec)
+             htrswc(idxday(1:nDay),:)=thetaTendClrSkySW !**NOTE** GP doesn't use radiation levels, it uses the model fields. Not sure if this is necessary
           endif
           
           ! All-sky heating-rate (mandatory)
           htrsw(:,:) = 0._kind_phys
           call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(    &
-               fluxswUP_allsky(idxday(1:nDay),:),      & ! IN  - Shortwave upward all-sky flux profiles (W/m2)
-               fluxswDOWN_allsky(idxday(1:nDay),:),    & ! IN  - Shortwave downward all-sky flux profiles (W/m2)
-               p_lev(idxday(1:nDay),:),                & ! IN  - Pressure at model-interface (Pa)
-               thetaTendAllSky))                         ! OUT - All-sky heating-rate (K/sec)
-          htrsw(idxday(1:nDay),:) = thetaTendAllSky
+               real(fluxswUP_allsky(idxday(1:nDay),:), kind=rte_wp),      & ! IN  - Shortwave upward all-sky flux profiles (W/m2)
+               real(fluxswDOWN_allsky(idxday(1:nDay),:), kind=rte_wp),    & ! IN  - Shortwave downward all-sky flux profiles (W/m2)
+               real(p_lev(idxday(1:nDay),:), kind=rte_wp),                & ! IN  - Pressure at model-interface (Pa)
+               thetaTendAllSkySW))                                          ! OUT - All-sky heating-rate (K/sec)
+          htrsw(idxday(1:nDay),:) = thetaTendAllSkySW
           
           ! #################################################################################
           ! Save SW outputs

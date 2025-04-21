@@ -20,6 +20,7 @@ module rrtmgp_lw_main
                                     eps, oneminus, ftiny
   use mersenne_twister,       only: random_setseed, random_number, random_stat 
   use rrtmgp_sampling,        only: sampled_mask, draw_samples
+  use mo_rte_kind,            only: rte_wp => wp
   implicit none
 
   public rrtmgp_lw_main_init, rrtmgp_lw_main_run
@@ -180,12 +181,13 @@ contains
     logical, dimension(rrtmgp_phys_blksz,nLay,lw_gas_props%get_ngpt()) :: maskMCICA
     real(kind_phys), dimension(rrtmgp_phys_blksz) :: tau_rain, tau_snow
     real(kind_dbl_prec), dimension(lw_gas_props%get_ngpt()) :: rng1D
-    real(kind_dbl_prec), dimension(lw_gas_props%get_ngpt(),nLay,rrtmgp_phys_blksz) :: rng3D,rng3D2
+    real(rte_wp), dimension(lw_gas_props%get_ngpt(),nLay,rrtmgp_phys_blksz) :: rng3D,rng3D2
     real(kind_dbl_prec), dimension(lw_gas_props%get_ngpt()*nLay) :: rng2D
-    real(kind_phys), dimension(rrtmgp_phys_blksz,nLay+1,lw_gas_props%get_nband()),target :: &
+    real(rte_wp), dimension(rrtmgp_phys_blksz,nLay+1,lw_gas_props%get_nband()),target :: &
          fluxLW_up_allsky, fluxLW_up_clrsky, fluxLW_dn_allsky, fluxLW_dn_clrsky
-    real(kind_phys), dimension(rrtmgp_phys_blksz,lw_gas_props%get_ngpt()) :: lw_Ds
-    real(kind_phys), dimension(lw_gas_props%get_nband(),rrtmgp_phys_blksz) :: sfc_emiss_byband
+    real(rte_wp), dimension(rrtmgp_phys_blksz,lw_gas_props%get_ngpt()) :: lw_Ds
+    real(rte_wp), dimension(lw_gas_props%get_nband(),rrtmgp_phys_blksz) :: sfc_emiss_byband
+    real(rte_wp), dimension(rrtmgp_phys_blksz,nLay+1) :: fluxLW_up_jac
 
     ! Local RRTMGP DDTs.
     type(ty_gas_concs)          :: gas_concs
@@ -254,18 +256,18 @@ contains
        sources%sfc_source                = 0._kind_phys
        sources%lay_source                = 0._kind_phys
        sources%sfc_source_Jac            = 0._kind_phys
-       fluxLW_up_allsky                  = 0._kind_phys
-       fluxLW_dn_allsky                  = 0._kind_phys
-       fluxLW_up_clrsky                  = 0._kind_phys
-       fluxLW_dn_clrsky                  = 0._kind_phys
+       fluxLW_up_allsky                  = 0._rte_wp
+       fluxLW_dn_allsky                  = 0._rte_wp
+       fluxLW_up_clrsky                  = 0._rte_wp
+       fluxLW_dn_clrsky                  = 0._rte_wp
        if (doGP_sgs_cnv) lw_optical_props_cnvcloudsByBand%tau = 0._kind_phys
        if (doGP_sgs_pbl) lw_optical_props_pblcloudsByBand%tau = 0._kind_phys
 
        ! ty_fluxes_byband
-       fluxLW_up_allsky        = 0._kind_phys
-       fluxLW_dn_allsky        = 0._kind_phys
-       fluxLW_up_clrsky        = 0._kind_phys
-       fluxLW_dn_clrsky        = 0._kind_phys
+       fluxLW_up_allsky        = 0._rte_wp
+       fluxLW_dn_allsky        = 0._rte_wp
+       fluxLW_up_clrsky        = 0._rte_wp
+       fluxLW_dn_clrsky        = 0._rte_wp
        flux_allsky%bnd_flux_up => fluxLW_up_allsky
        flux_allsky%bnd_flux_dn => fluxLW_dn_allsky
        flux_clrsky%bnd_flux_up => fluxLW_up_clrsky
@@ -277,17 +279,17 @@ contains
        !
        ! ###################################################################################
        call check_error_msg('rrtmgp_lw_main_set_vmr_o2',  &
-            gas_concs%set_vmr(trim(active_gases_array(istr_o2)), vmr_o2(iCol:iCol2,:)))
+            gas_concs%set_vmr(trim(active_gases_array(istr_o2)), real(vmr_o2(iCol:iCol2,:),kind=rte_wp)))
        call check_error_msg('rrtmgp_lw_main_set_vmr_co2', &
-            gas_concs%set_vmr(trim(active_gases_array(istr_co2)),vmr_co2(iCol:iCol2,:)))
+            gas_concs%set_vmr(trim(active_gases_array(istr_co2)),real(vmr_co2(iCol:iCol2,:),kind=rte_wp)))
        call check_error_msg('rrtmgp_lw_main_set_vmr_ch4', &
-            gas_concs%set_vmr(trim(active_gases_array(istr_ch4)),vmr_ch4(iCol:iCol2,:)))
+            gas_concs%set_vmr(trim(active_gases_array(istr_ch4)),real(vmr_ch4(iCol:iCol2,:),kind=rte_wp)))
        call check_error_msg('rrtmgp_lw_main_set_vmr_n2o', &
-            gas_concs%set_vmr(trim(active_gases_array(istr_n2o)),vmr_n2o(iCol:iCol2,:)))
+            gas_concs%set_vmr(trim(active_gases_array(istr_n2o)),real(vmr_n2o(iCol:iCol2,:),kind=rte_wp)))
        call check_error_msg('rrtmgp_lw_main_set_vmr_h2o', &
-            gas_concs%set_vmr(trim(active_gases_array(istr_h2o)),vmr_h2o(iCol:iCol2,:)))
+            gas_concs%set_vmr(trim(active_gases_array(istr_h2o)),real(vmr_h2o(iCol:iCol2,:),kind=rte_wp)))
        call check_error_msg('rrtmgp_lw_main_set_vmr_o3',  &
-            gas_concs%set_vmr(trim(active_gases_array(istr_o3)), vmr_o3(iCol:iCol2,:)))
+            gas_concs%set_vmr(trim(active_gases_array(istr_o3)), real(vmr_o3(iCol:iCol2,:),kind=rte_wp)))
 
        ! ###################################################################################
        !
@@ -311,14 +313,14 @@ contains
        !
        ! ###################################################################################
        call check_error_msg('rrtmgp_lw_main_gas_optics',lw_gas_props%gas_optics(&
-            p_lay(iCol:iCol2,:),              & ! IN  - Pressure @ layer-centers (Pa)
-            p_lev(iCol:iCol2,:),              & ! IN  - Pressure @ layer-interfaces (Pa)
-            t_lay(iCol:iCol2,:),              & ! IN  - Temperature @ layer-centers (K)
-            tsfg(iCol:iCol2),                 & ! IN  - Skin-temperature (K)
+            real(p_lay(iCol:iCol2,:),kind=rte_wp),              & ! IN  - Pressure @ layer-centers (Pa)
+            real(p_lev(iCol:iCol2,:),kind=rte_wp),              & ! IN  - Pressure @ layer-interfaces (Pa)
+            real(t_lay(iCol:iCol2,:),kind=rte_wp),              & ! IN  - Temperature @ layer-centers (K)
+            real(tsfg(iCol:iCol2),kind=rte_wp),                 & ! IN  - Skin-temperature (K)
             gas_concs,                        & ! IN  - RRTMGP DDT: trace gas volumne mixing-ratios
             lw_optical_props_clrsky,          & ! OUT - RRTMGP DDT: longwave optical properties
             sources,                          & ! OUT - RRTMGP DDT: source functions
-            tlev=t_lev(iCol:iCol2,:)))          ! IN  - Temperature @ layer-interfaces (K) (optional)
+            tlev=real(t_lev(iCol:iCol2,:),kind=rte_wp)))          ! IN  - Temperature @ layer-interfaces (K) (optional)
 
        ! ###################################################################################
        !
@@ -340,20 +342,20 @@ contains
        if (any(zcf1 .gt. eps)) then
           ! Microphysical (gridmean) cloud optics
           call check_error_msg('rrtmgp_lw_main_cloud_optics',lw_cloud_props%cloud_optics(&
-               cld_lwp(iCol:iCol2,:),                & ! IN  - Cloud liquid water path (g/m2)
-               cld_iwp(iCol:iCol2,:),                & ! IN  - Cloud ice water path (g/m2)
-               cld_reliq(iCol:iCol2,:),              & ! IN  - Cloud liquid effective radius (microns)
-               cld_reice(iCol:iCol2,:),              & ! IN  - Cloud ice effective radius (microns)
+               real(cld_lwp(iCol:iCol2,:),kind=rte_wp),                & ! IN  - Cloud liquid water path (g/m2)
+               real(cld_iwp(iCol:iCol2,:),kind=rte_wp),                & ! IN  - Cloud ice water path (g/m2)
+               real(cld_reliq(iCol:iCol2,:),kind=rte_wp),              & ! IN  - Cloud liquid effective radius (microns)
+               real(cld_reice(iCol:iCol2,:),kind=rte_wp),              & ! IN  - Cloud ice effective radius (microns)
                lw_optical_props_cloudsByBand))         ! OUT - RRTMGP DDT containing cloud radiative properties
                                                        !       in each band
           ! Include convective (subgrid scale) clouds?
           if (doGP_sgs_cnv) then
              ! Compute
              call check_error_msg('rrtmgp_lw_main_cnv_cloud_optics',lw_cloud_props%cloud_optics(&
-                  cld_cnv_lwp(iCol:iCol2,:),         & ! IN  - Convective cloud liquid water path (g/m2)
-                  cld_cnv_iwp(iCol:iCol2,:),         & ! IN  - Convective cloud ice water path (g/m2)
-                  cld_cnv_reliq(iCol:iCol2,:),       & ! IN  - Convective cloud liquid effective radius (microns)
-                  cld_cnv_reice(iCol:iCol2,:),       & ! IN  - Convective cloud ice effective radius (microns)
+                  real(cld_cnv_lwp(iCol:iCol2,:),kind=rte_wp),         & ! IN  - Convective cloud liquid water path (g/m2)
+                  real(cld_cnv_iwp(iCol:iCol2,:),kind=rte_wp),         & ! IN  - Convective cloud ice water path (g/m2)
+                  real(cld_cnv_reliq(iCol:iCol2,:),kind=rte_wp),       & ! IN  - Convective cloud liquid effective radius (microns)
+                  real(cld_cnv_reice(iCol:iCol2,:),kind=rte_wp),       & ! IN  - Convective cloud ice effective radius (microns)
                   lw_optical_props_cnvcloudsByBand))   ! OUT - RRTMGP DDT containing convective cloud radiative properties
                                                        !       in each band
              ! Increment
@@ -365,10 +367,10 @@ contains
           if (doGP_sgs_pbl) then
              ! Compute
              call check_error_msg('rrtmgp_lw_main_pbl_cloud_optics',lw_cloud_props%cloud_optics(&
-                  cld_pbl_lwp(iCol:iCol2,:),         & ! IN  - PBL cloud liquid water path (g/m2)
-                  cld_pbl_iwp(iCol:iCol2,:),         & ! IN  - PBL cloud ice water path (g/m2)
-                  cld_pbl_reliq(iCol:iCol2,:),       & ! IN  - PBL cloud liquid effective radius (microns)
-                  cld_pbl_reice(iCol:iCol2,:),       & ! IN  - PBL cloud ice effective radius (microns)
+                  real(cld_pbl_lwp(iCol:iCol2,:),kind=rte_wp),         & ! IN  - PBL cloud liquid water path (g/m2)
+                  real(cld_pbl_iwp(iCol:iCol2,:),kind=rte_wp),         & ! IN  - PBL cloud ice water path (g/m2)
+                  real(cld_pbl_reliq(iCol:iCol2,:),kind=rte_wp),       & ! IN  - PBL cloud liquid effective radius (microns)
+                  real(cld_pbl_reice(iCol:iCol2,:),kind=rte_wp),       & ! IN  - PBL cloud ice effective radius (microns)
                   lw_optical_props_pblcloudsByBand))   ! OUT - RRTMGP DDT containing PBL cloud radiative properties
                                                        !       in each band
              ! Increment
@@ -444,7 +446,7 @@ contains
           ! Cloud-overlap.
           ! Maximum-random, random or maximum.
           if (iovr == iovr_maxrand .or. iovr == iovr_rand .or. iovr == iovr_max) then
-             call sampled_mask(real(rng3D,kind=kind_phys), cld_frac(iCol:iCol2,:), maskMCICA)
+             call sampled_mask(rng3D, real(cld_frac(iCol:iCol2,:),kind=rte_wp), maskMCICA)
           endif
           ! Exponential decorrelation length overlap
           if (iovr == iovr_dcorr) then
@@ -455,13 +457,14 @@ contains
                 rng3D2(:,:,ix) = reshape(source = rng2D,shape=[lw_gas_props%get_ngpt(),nLay])
              enddo
              !
-             call sampled_mask(real(rng3D,kind=kind_phys), cld_frac(iCol:iCol2,:), maskMCICA,                    &
-                  overlap_param = cloud_overlap_param(iCol:iCol2,1:nLay-1), randoms2 = real(rng3D2, kind=kind_phys))
+             call sampled_mask(rng3D, real(cld_frac(iCol:iCol2,:),kind=rte_wp), &
+                  maskMCICA, overlap_param = real(cloud_overlap_param(iCol:iCol2,1:nLay-1),kind=rte_wp), &
+                  randoms2 = rng3D2)
           endif
           ! Exponential or Exponential-random
           if (iovr == iovr_exp .or. iovr == iovr_exprand) then
-             call sampled_mask(real(rng3D,kind=kind_phys), cld_frac(iCol:iCol2,:), maskMCICA,  &
-                  overlap_param = cloud_overlap_param(iCol:iCol2,1:nLay-1))
+             call sampled_mask(rng3D, real(cld_frac(iCol:iCol2,:),kind=rte_wp), &
+                  maskMCICA, overlap_param = real(cloud_overlap_param(iCol:iCol2,1:nLay-1),kind=rte_wp))
           endif
           ! Sampling. Map band optical depth to each g-point using McICA
           call check_error_msg('rrtmgp_lw_main_cloud_sampling',&
@@ -539,7 +542,7 @@ contains
                   sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
                   flux_allsky,                     & ! OUT - Flxues 
                   n_gauss_angles = nGauss_angles,  & ! IN  - Number of angles in Gaussian quadrature
-                  flux_up_Jac    = fluxlwUP_jac))    ! OUT - surface temperature flux (upward) Jacobian (W/m2/K)
+                  flux_up_Jac    = fluxLW_up_jac))   ! OUT - surface temperature flux (upward) Jacobian (W/m2/K)
           else
              call check_error_msg('rrtmgp_lw_main_lw_rte_allsky',rte_lw(           &
                   lw_optical_props_clouds,         & ! IN  - optical-properties
@@ -564,7 +567,7 @@ contains
                   sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
                   flux_allsky,                     & ! OUT - Flxues 
                   n_gauss_angles = nGauss_angles,  & ! IN  - Number of angles in Gaussian quadrature
-                  flux_up_Jac    = fluxlwUP_jac))    ! OUT - surface temperature flux (upward) Jacobian (W/m2/K)
+                  flux_up_Jac    = fluxLW_up_jac))   ! OUT - surface temperature flux (upward) Jacobian (W/m2/K)
           else
              call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
                   lw_optical_props_clrsky,         & ! IN  - optical-properties
@@ -579,8 +582,11 @@ contains
        ! Store fluxes
        fluxlwUP_allsky(iCol:iCol2,:)   = sum(flux_allsky%bnd_flux_up, dim=3)
        fluxlwDOWN_allsky(iCol:iCol2,:) = sum(flux_allsky%bnd_flux_dn, dim=3)
-       
+
        ! Save fluxes for coupling
+       if (use_LW_jacobian) then
+          fluxlwUP_jac(iCol:iCol2,:)    = fluxLW_up_jac
+       endif
        fluxlwUP_radtime(iCol:iCol2,:)   = fluxlwUP_allsky(iCol:iCol2,:)
        fluxlwDOWN_radtime(iCol:iCol2,:) = fluxlwDOWN_allsky(iCol:iCol2,:)
 
