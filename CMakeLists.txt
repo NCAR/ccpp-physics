@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
 
 project(ccpp_physics
         VERSION 5.0.0
@@ -6,7 +6,9 @@ project(ccpp_physics
 
 #------------------------------------------------------------------------------
 set(PACKAGE "ccpp-physics")
-set(AUTHORS "Grant Firl" "Dustin Swales" "Man Zhang" "Mike Kavulich" )
+set(AUTHORS "Grant Firl" "Dustin Swales" "Dom Heinzeller" "Man Zhang" "Mike Kavulich")
+
+include(GNUInstallDirs)
 
 #------------------------------------------------------------------------------
 # Set MPI flags for Fortran with MPI F08 interface
@@ -17,7 +19,7 @@ endif()
 
 #------------------------------------------------------------------------------
 # Set OpenMP flags for C/C++/Fortran
-if (OPENMP)
+if(OPENMP)
   find_package(OpenMP REQUIRED)
 endif()
 
@@ -50,12 +52,6 @@ else(TYPEDEFS)
   message(STATUS "Got CCPP TYPEDEFS from cmakefile include file")
 endif(TYPEDEFS)
 list(REMOVE_DUPLICATES TYPEDEFS)
-
-# Generate list of Fortran modules from the CCPP type
-# definitions that need need to be installed
-foreach(typedef_module ${TYPEDEFS})
-    list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${typedef_module})
-endforeach()
 
 #------------------------------------------------------------------------------
 # Set the sources: physics schemes
@@ -138,7 +134,21 @@ endif()
 
 # Assign standard floating point precision flags to all remaining schemes and caps
 SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
-             APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS} ${OpenMP_Fortran_FLAGS}")
+             APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PHYSICS}")
+if(OPENMP)
+  SET_PROPERTY(SOURCE ${SCHEMES} ${CAPS}
+               APPEND_STRING PROPERTY COMPILE_FLAGS " ${OpenMP_Fortran_FLAGS}")
+endif()
+
+# For CAPS, remove bounds checks with Intel Classic (ifort), Intel LLVM (ifx),
+# and GNU (gfortran) to avoid the compilation being killed or taking forever
+if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel" OR ${CMAKE_Fortran_COMPILER_ID} STREQUAL "IntelLLVM")
+  set_PROPERTY(SOURCE ${CAPS}
+               APPEND_STRING PROPERTY COMPILE_FLAGS " -check nobounds")
+elseif(${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
+  set_PROPERTY(SOURCE ${CAPS}
+               APPEND_STRING PROPERTY COMPILE_FLAGS " -fcheck=no-bounds")
+endif()
 
 # Lower optimization for certain schemes when compiling with Intel in Release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel" OR ${CMAKE_Fortran_COMPILER_ID} STREQUAL "IntelLLVM"))
@@ -172,21 +182,19 @@ endif()
 
 #------------------------------------------------------------------------------
 
+set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR})
+
 add_library(ccpp_physics STATIC ${SCHEMES} ${SCHEMES_OPENMP_OFF} ${SCHEMES_DYNAMICS} ${CAPS})
-# Generate list of Fortran modules from defined sources
-foreach(source_f90 ${CAPS})
-    get_filename_component(tmp_source_f90 ${source_f90} NAME)
-    string(REGEX REPLACE ".F90" ".mod" tmp_module_f90 ${tmp_source_f90})
-    string(TOLOWER ${tmp_module_f90} module_f90)
-    list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${module_f90})
-endforeach()
 
 set_target_properties(ccpp_physics PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR})
 
 target_include_directories(ccpp_physics PUBLIC
-                           $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+  INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR}>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
 
+target_link_libraries(ccpp_physics PRIVATE MPI::MPI_Fortran)
 target_link_libraries(ccpp_physics PUBLIC w3emc::w3emc_d
                                           sp::sp_d
                                           NetCDF::NetCDF_Fortran)
@@ -203,6 +211,5 @@ install(EXPORT ccpp_physics-targets
         FILE ccpp_physics-config.cmake
         DESTINATION lib/cmake
 )
-# Define where to install the C headers and Fortran modules
-#install(FILES ${HEADERS_C} DESTINATION include)
-install(FILES ${MODULES_F90} DESTINATION include)
+
+install(DIRECTORY ${CMAKE_Fortran_MODULE_DIRECTORY}/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
