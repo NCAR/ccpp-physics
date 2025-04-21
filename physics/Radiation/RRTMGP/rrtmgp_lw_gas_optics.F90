@@ -348,9 +348,15 @@ contains
     ! #######################################################################################
 
     ! Real scalars
+#ifdef RTE_USE_SP
+    call mpi_bcast(press_ref_tropLW, 1,      MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(temp_ref_pLW,     1,      MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(temp_ref_tLW,     1,      MPI_REAL,             mpiroot, mpicomm, mpierr)
+#else
     call mpi_bcast(press_ref_tropLW, 1,      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(temp_ref_pLW,     1,      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(temp_ref_tLW,     1,      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
 
     ! Integer arrays
     call mpi_bcast(kminor_start_lowerLW,               &
@@ -367,6 +373,28 @@ contains
          size(key_speciesLW),                MPI_INTEGER,          mpiroot, mpicomm, mpierr)
 
     ! Real arrays
+#ifdef RTE_USE_SP
+    call mpi_bcast(press_refLW,                        &
+         size(press_refLW),                  MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(temp_refLW,                         &
+         size(temp_refLW),                   MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(band_limsLW,                        &
+         size(band_limsLW),                  MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(totplnkLW,                          &
+         size(totplnkLW),                    MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(optimal_angle_fitLW,                &
+         size(optimal_angle_fitLW),          MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(vmr_refLW,                          &
+         size(vmr_refLW),                    MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(kminor_lowerLW,                     &
+         size(kminor_lowerLW),               MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(kminor_upperLW,                     &
+         size(kminor_upperLW),               MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(kmajorLW,                           &
+         size(kmajorLW),                     MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(planck_fracLW,                      &
+         size(planck_fracLW),                MPI_REAL,             mpiroot, mpicomm, mpierr)
+#else
     call mpi_bcast(press_refLW,                        &
          size(press_refLW),                  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(temp_refLW,                         &
@@ -387,7 +415,7 @@ contains
          size(kmajorLW),                     MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(planck_fracLW,                      &
          size(planck_fracLW),                MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-
+#endif
 
     ! Characters
     do iChar=1,nabsorbersLW

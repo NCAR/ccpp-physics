@@ -204,28 +204,38 @@ contains
     ! #######################################################################################
 
     ! Real scalars
+#ifdef RTE_USE_SP
+    call mpi_bcast(radliq_lwrSW, 1, MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(radliq_uprSW, 1, MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(radice_lwrSW, 1, MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(radice_uprSW, 1, MPI_REAL,             mpiroot, mpicomm, mpierr)
+#else
     call mpi_bcast(radliq_lwrSW, 1, MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(radliq_uprSW, 1, MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(radice_lwrSW, 1, MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(radice_uprSW, 1, MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-
-    ! Real arrays
-    call mpi_bcast(band_limsCLDSW, size(band_limsCLDSW),  &
-         MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(lut_extliqSW, size(lut_extliqSW),      &
-         MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(lut_ssaliqSW, size(lut_ssaliqSW),      &
-         MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(lut_asyliqSW, size(lut_asyliqSW),      &
-         MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(lut_exticeSW, size(lut_exticeSW),      &
-         MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(lut_ssaiceSW, size(lut_ssaiceSW),      &
-         MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(lut_asyiceSW, size(lut_asyiceSW),      &
-         MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
 #endif
 
+    ! Real arrays
+#ifdef RTE_USE_SP
+    call mpi_bcast(band_limsCLDSW, size(band_limsCLDSW),  MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(lut_extliqSW,   size(lut_extliqSW),    MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(lut_ssaliqSW,   size(lut_ssaliqSW),    MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(lut_asyliqSW,   size(lut_asyliqSW),    MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(lut_exticeSW,   size(lut_exticeSW),    MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(lut_ssaiceSW,   size(lut_ssaiceSW),    MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(lut_asyiceSW,   size(lut_asyiceSW),    MPI_REAL,             mpiroot, mpicomm, mpierr)
+#else
+    call mpi_bcast(band_limsCLDSW, size(band_limsCLDSW),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(lut_extliqSW,   size(lut_extliqSW),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(lut_ssaliqSW,   size(lut_ssaliqSW),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(lut_asyliqSW,   size(lut_asyliqSW),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(lut_exticeSW,   size(lut_exticeSW),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(lut_ssaiceSW,   size(lut_ssaiceSW),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(lut_asyiceSW,   size(lut_asyiceSW),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+
+#endif
     ! #######################################################################################
     !   
     ! Initialize RRTMGP DDT's...

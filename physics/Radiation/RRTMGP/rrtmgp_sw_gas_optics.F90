@@ -382,13 +382,22 @@ contains
     ! #######################################################################################
 
     ! Real scalars
+#ifdef RTE_USE_SP
+    call mpi_bcast(press_ref_tropSW, 1,           MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(temp_ref_pSW,     1,           MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(temp_ref_tSW,     1,           MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(tsi_defaultSW,    1,           MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(mg_defaultSW,     1,           MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(sb_defaultSW,     1,           MPI_REAL,             mpiroot, mpicomm, mpierr)
+#else
     call mpi_bcast(press_ref_tropSW, 1,           MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(temp_ref_pSW,     1,           MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(temp_ref_tSW,     1,           MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(tsi_defaultSW,    1,           MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(mg_defaultSW,     1,           MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(sb_defaultSW,     1,           MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    
+#endif
+
     ! Integer arrays
     call mpi_bcast(kminor_start_lowerSW,               &
          size(kminor_start_lowerSW),              MPI_INTEGER,          mpiroot, mpicomm, mpierr)
@@ -404,6 +413,32 @@ contains
          size(key_speciesSW),                     MPI_INTEGER,          mpiroot, mpicomm, mpierr)
     
     ! Real arrays
+#ifdef RTE_USE_SP
+    call mpi_bcast(press_refSW,                        &
+         size(press_refSW),                       MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(temp_refSW,                         &
+         size(temp_refSW),                        MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(solar_quietSW,                      &
+         size(solar_quietSW),                     MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(solar_facularSW,                    &
+         size(solar_facularSW),                   MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(solar_sunspotSW,                    &
+         size(solar_sunspotSW),                   MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(band_limsSW,                        &
+         size(band_limsSW),                       MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(vmr_refSW,                          &
+         size(vmr_refSW),                         MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(kminor_lowerSW,                     &
+         size(kminor_lowerSW),                    MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(kminor_upperSW,                     &
+         size(kminor_upperSW),                    MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(rayl_lowerSW,                       &
+         size(rayl_lowerSW),                      MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(rayl_upperSW,                       &
+         size(rayl_upperSW),                      MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(kmajorSW,                           &
+         size(kmajorSW),                          MPI_REAL,             mpiroot, mpicomm, mpierr)
+#else
     call mpi_bcast(press_refSW,                        &
          size(press_refSW),                       MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(temp_refSW,                         &
@@ -428,7 +463,7 @@ contains
          size(rayl_upperSW),                      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(kmajorSW,                           &
          size(kmajorSW),                          MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-    
+#endif
     ! Characters
     do iChar=1,nabsorbersSW
        call mpi_bcast(gas_namesSW(iChar),              &
