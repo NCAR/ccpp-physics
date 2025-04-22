@@ -1206,8 +1206,8 @@ end subroutine noahmpdrv_timestep_init
 
         snow_cover_fraction    = 1.0
         temperature_leaf       = undefined  
-        canopy_ice             = undefined
-        canopy_liquid          = undefined
+        canopy_ice             = 0.0
+        canopy_liquid          = 0.0
         vapor_pres_canopy_air  = undefined
         temperature_canopy_air = undefined
         canopy_wet_fraction    = undefined
