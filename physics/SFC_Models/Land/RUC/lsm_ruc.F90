@@ -9,7 +9,7 @@ module lsm_ruc
         use namelist_soilveg_ruc
         use set_soilveg_ruc_mod,  only: set_soilveg_ruc
         use module_soil_pre
-        use module_sf_ruclsm
+        use module_sf_ruclsm, only: rslf, lsmruc, ruc_lsm_cons_init, ruclsminit
 
         implicit none
 
@@ -45,7 +45,10 @@ module lsm_ruc
                                albdvis_lnd,albdnir_lnd,albivis_lnd,albinir_lnd, & ! out
                                albdvis_ice,albdnir_ice,albivis_ice,albinir_ice, & ! out
                                zs, sh2o, smfrkeep, tslb, smois, wetness,        & ! out
-                               tsice, pores, resid, errmsg, errflg)
+                               tsice, pores, resid,                             & ! out
+                               rhowater, con_t0c, con_hfus, con_hvap,           & ! in
+                               con_pi, con_rv, con_g, con_csol, con_tice,       & ! in
+                               errmsg, errflg)
 
       implicit none
 !  ---  in
@@ -106,6 +109,18 @@ module lsm_ruc
       real (kind_phys), dimension(:),   intent(out) :: semisbase
       real (kind_phys), dimension(:),   intent(out) :: pores, resid
 
+!  --- in
+      real (kind_phys), intent(in) :: rhowater
+      real (kind_phys), intent(in) :: con_t0c
+      real (kind_phys), intent(in) :: con_hfus
+      real (kind_phys), intent(in) :: con_hvap
+      real (kind_phys), intent(in) :: con_pi
+      real (kind_phys), intent(in) :: con_rv
+      real (kind_phys), intent(in) :: con_g
+      real (kind_phys), intent(in) :: con_csol
+      real (kind_phys), intent(in) :: con_tice
+
+
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 
@@ -141,6 +156,9 @@ module lsm_ruc
         errflg = 1
         return
       end if
+
+      call ruc_lsm_cons_init(rhowater, con_t0c, con_hfus, con_hvap, &
+                          con_pi, con_rv, con_g, con_csol, con_tice)
 
 !> - Call rucinit() to initialize soil/ice/water  variables
 
