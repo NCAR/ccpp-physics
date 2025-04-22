@@ -1653,6 +1653,14 @@
   type = real
   kind = kind_phys
   intent = in
+[oceanfrac]
+  standard_name = sea_area_fraction
+  long_name = fraction of horizontal grid area occupied by ocean
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [lakefrac]
   standard_name = lake_area_fraction
   long_name = fraction of horizontal grid area occupied by lake

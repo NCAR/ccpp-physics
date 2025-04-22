@@ -16,13 +16,14 @@ contains
 !! This subroutine repopulates specific time-varying surface properties for
 !! atmospheric forecast runs.
   subroutine gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit, fn_nml, &
-      input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc, cplflx,  &
+      input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,          &
       use_ufo, nst_anl, fhcyc, phour, landfrac, lakefrac, min_seaice, min_lakeice, &
       frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc,         &
       tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,          &
       zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,             &
       stype, scolor, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,             &
-      lakefrac_threshold, xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
+      cplflx, oceanfrac, lakefrac_threshold,                                       &
+      xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
 !
 !
     use machine,      only: kind_phys, kind_io8
@@ -35,8 +36,8 @@ contains
     character(len=*),     intent(in)    :: input_nml_file(:)
     logical,              intent(in)    :: use_ufo, nst_anl, frac_grid, cplflx
     real(kind=kind_phys), intent(in)    :: fhcyc, phour, landfrac(:), lakefrac(:), &
-                                           min_seaice, min_lakeice,lakefrac_threshold, &
-                                           xlat_d(:), xlon_d(:)
+                                           min_seaice, min_lakeice,oceanfrac, &
+                                           lakefrac_threshold, xlat_d(:), xlon_d(:)
     real(kind=kind_phys), intent(inout), optional ::   &
                                            smois(:,:), &
                                            sh2o(:,:),  &
@@ -280,9 +281,9 @@ contains
 ! dependent and nsst mode dependent
 !
       if ( cplflx ) then
-!       In coupled mode, keep these variables the same as is (before sfccycle is called) over non-lake water and non-land
+!       In coupled mode, keep these variables the same as is (before sfccycle is called) over ocean
         do ix=1,npts
-          if (lakefrac(ix) <= lakefrac_threshold .and. (slmskw(ix) == 0.0_kind_phys) ) then      
+          if ( oceanfrac(ix) > 0.0_kind_phys ) then      
             hice(ix)   = hice_save(ix) 
             fice(ix)   = fice_save(ix)
             snowd(ix)  = snowd_save(ix)
@@ -291,19 +292,19 @@ contains
             weasd(ix)  = weasd_save(ix)
           endif
         enddo
-!       In the coupled mode and when NSST is on, update tref, tsfc and tsfco over lake and land (not ocean)
+!       In the coupled mode and when NSST is on, update tref, tsfc and tsfco over non-ocean
         if ( nsst > 0 ) then       
           do ix=1,npts
-            if ( (lakefrac(ix) > lakefrac_threshold) .or. (slmskl(ix) > 0.0_kind_phys) ) then 
+            if ( oceanfrac(ix) == 0.0_kind_phys ) then 
               tref(ix)  = TSFFCS(ix) 
               tsfc(ix)  = TSFFCS(ix)
               tsfco(ix) = TSFFCS(ix)
             endif
           enddo
-!       In the coupled mode and when NSST is off, update tref, tsfc and tsfco over land and lake (not ocean)
+!       In the coupled mode and when NSST is off, update tref, tsfc and tsfco over not ocean
         else             
           do ix=1,npts
-            if ( (lakefrac(ix) > lakefrac_threshold) .or. (slmskl(ix) > 0.0_kind_phys) ) then  
+            if ( oceanfrac(ix) == 0.0_kind_phys ) then 
               tsfc(ix)  = TSFFCS(ix)
               tsfco(ix) = TSFFCS(ix)
             endif

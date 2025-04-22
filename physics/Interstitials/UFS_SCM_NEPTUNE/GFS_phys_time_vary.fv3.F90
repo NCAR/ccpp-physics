@@ -710,7 +710,8 @@
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm, fn_nml,      &
             imap, jmap, prsl, seed0, rann, nthrds, nx, ny, nsst, tile_num, nlunit, lsoil, lsoil_lsm,&
             kice, ialb, isot, ivegsrc, input_nml_file, use_ufo, nst_anl, frac_grid, fhcyc, phour,   &
-            lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref,  &
+            oceanfrac, lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice,  &
+            tg3, tref,  &
             tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
             zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype,scolor, shdmin, shdmax, snowd, &
             cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac, ozphys, h2ophys,            &
@@ -754,7 +755,7 @@
          character(len=*),     intent(in)    :: fn_nml
          logical,              intent(in)    :: use_ufo, nst_anl, frac_grid
          real(kind_phys),      intent(in)    :: fhcyc, phour, lakefrac(:), min_seaice, min_lakeice,  &
-                                                xlat_d(:), xlon_d(:), landfrac(:)
+                                                xlat_d(:), xlon_d(:), landfrac(:),oceanfrac(:)
          real(kind_phys),      intent(inout) :: smc(:,:), slc(:,:), stc(:,:), tiice(:,:), tg3(:),    &
                                       tsfc(:), tsfco(:), tisfc(:), hice(:), fice(:),                 &
                                       facsf(:), facwf(:), alvsf(:), alvwf(:), alnsf(:), alnwf(:),    &
@@ -921,13 +922,14 @@
          if (nscyc >  0) then
            if (mod(kdt,nscyc) == 1) THEN
              call gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit, fn_nml,      &
-                 input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc, cplflx, &
+                 input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,         &
                  use_ufo, nst_anl, fhcyc, phour, landfrac, lakefrac, min_seaice, min_lakeice,&
                  frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc,        &
                  tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,         &
                  zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,            &
                  stype, scolor, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,            &
-                 lakefrac_threshold, xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
+                 cplflx, oceanfrac, lakefrac_threshold,                                      &
+                 xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
            endif
          endif
 
