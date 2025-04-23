@@ -362,7 +362,7 @@ module mp_thompson
                               cplchm, pfi_lsan, pfl_lsan,          &
                               is_initialized, ten_q, dspechum, dqc, dqr,  &
                               dqi, dqs, dqg, dni, dnr, dnc, dnwfa, &
-                              dnifa, dtgrs, errmsg, errflg)
+                              dnifa, dtgrs, ten_u, ten_v, errmsg, errflg)
 
          implicit none
 
@@ -428,6 +428,8 @@ module mp_thompson
          logical,                   intent(in)    :: reset_diag3d
          
          real(kind_phys),           intent(  out) :: ten_q(:,:,:)
+         real(kind_phys),           intent(  out) :: ten_u(:,:,:)
+         real(kind_phys),           intent(  out) :: ten_v(:,:,:)
          real(kind_phys),           intent(  out) :: dspechum(:,:)
          real(kind_phys),           intent(  out) :: dqc(:,:)
          real(kind_phys),           intent(  out) :: dqr(:,:)
@@ -557,6 +559,8 @@ module mp_thompson
                         ! we also need to initialize the entire array to 0, so that when
                         ! tendencies are applied, all tracer tendencies other than those
                         ! set in this scheme are 0.
+         ten_u    = 0.0
+         ten_v    = 0.0
          dspechum = 0.0
          dqc      = 0.0
          dqr      = 0.0
