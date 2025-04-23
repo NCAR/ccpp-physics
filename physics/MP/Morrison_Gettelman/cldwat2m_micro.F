@@ -24,11 +24,6 @@
 
 #ifdef NEMS_GSM
        use machine,       only : r8 => kind_phys
-       use physcons, gravit => con_g,    rair    => con_rd,             &
-     &               rh2o   => con_rv,   epsilon => con_eps,            &
-     &               tmelt  => con_tice, cpair   => con_cp,             &
-     &               latvap => con_hvap, latice  => con_hfus,           &
-     &               pi => con_pi
        use wv_saturation, only : estblf, hlatv, tmin, hlatf, rgasv, pcf,&
      &                           epsqs, ttrice, vqsatd2,cp,             &
      &                           vqsatd2_single,polysvp,gestbl
@@ -68,10 +63,21 @@
 
        real(r8), parameter :: zero=0.0_r8,  one=1.0_r8,  two=2.0_r8     &
      &,                       three=3.0_r8, four=4.0_r8, five=5.0_r8    &
-     &,                       half=0.5_r8,  oneb3=one/three             &
-     &,                       onebcp=one/cpair
+     &,                       half=0.5_r8,  oneb3=one/three
+
 #ifdef NEMS_GSM
 !
+       real(r8) :: gravit = 1.0E30_r8
+       real(r8) :: rair = 1.0E30_r8
+       real(r8) :: rh2o = 1.0E30_r8
+       real(r8) :: epsilon = 1.0E30_r8
+       real(r8) :: tmelt = 1.0E30_r8
+       real(r8) :: cpair = 1.0E30_r8
+       real(r8) :: latvap = 1.0E30_r8
+       real(r8) :: latice = 1.0E30_r8
+       real(r8) :: pi = 1.0E30_r8
+       real(r8) :: onebcp = 1.0E30_r8
+
        integer,  parameter :: iulog = 6
 
        real(r8), parameter :: rhmini = 0.80_r8
@@ -170,8 +176,13 @@
      &,                   lammins, lammaxs
 
 !> parameters for snow/rain fraction for convective clouds
+#ifdef NEMS_GSM
+      real(r8), private :: tmax_fsnow = 1.0E30_r8
+      real(r8), private :: tmin_fsnow = 1.0E30_r8
+#else
       real(r8), private, parameter :: tmax_fsnow = tmelt
      &,                               tmin_fsnow = tmelt-5._r8
+#endif
 
 !needed for findsp
       real(r8), private:: tt0
@@ -187,7 +198,11 @@
 !>\ingroup cldwat2m_micro_mod
 !! This subroutine initializes constants for MG microphysics.
 !!\author Andrew Gettelman
-      subroutine ini_micro(Dcs_, QCVAR_, ts_auto_ice_)
+       subroutine ini_micro(Dcs_, QCVAR_, ts_auto_ice_                  &
+#ifdef NEMS_GSM
+
+#endif
+     & )
 
 !-----------------------------------------------------------------------
 !
@@ -212,8 +227,12 @@
        logical           :: history_microphysics
 
 
+#ifdef NEMS_GSM
 
-#ifdef CAM 
+       onebcp=one/cpair
+#endif
+
+#ifdef CAM
 
        call phys_getopts(eddy_scheme_out = eddy_scheme,
      & history_microphysics_out = history_microphysics )
@@ -1166,7 +1185,7 @@
 !initialize aerosol number
 !          naer2(i,k,:) = zero
            dum2l(i,k) = zero
-           dum2i(i,k) = zero 
+           dum2i(i,k) = zero
            ncmax(i,k) = zero
 
 ! for debug purpose
@@ -1327,7 +1346,7 @@
 
 !                miu_ice    = mui_hemp_l(lami(k))
                  miu_ice(k) = max(min(0.008_r8*(lami(k)*0.01)**0.87_r8,
-     &                                      10.0_r8), 0.1_r8) 
+     &                                      10.0_r8), 0.1_r8)
                  tx1        = one + miu_ice(k)
                  tx2        = one / gamma(tx1)
                  aux        = (gamma(tx1+di)*tx2) ** oneodi
@@ -1542,7 +1561,7 @@
 
                dum2i(i,k) = naai(i,k)
              else
-   
+
 ! cooper curve (factor of 1000 is to convert from L-1 to m-3)
                dum2i(i,k) = 0.005_r8*exp(0.304_r8*(273.15_r8-t(i,k)))
      &                     * 1000._r8
@@ -1690,7 +1709,7 @@
 
                km = k - 1
 ! set cwml and cwmi to current qc and qi
-  
+
                cwml(i,k) = qc(i,k)
                cwmi(i,k) = qi(i,k)
 
@@ -1874,7 +1893,7 @@
 
 ! add upper limit to in-cloud number concentration to prevent numerical error
                  ncic(i,k) = min(ncic(i,k),qcic(i,k)*1.e20_r8)
- 
+
                  ncic(i,k) = max(ncic(i,k),cdnl*irho(i,k))
 
 ! get pgam from fit to observations of martin et al. 1994
@@ -1956,9 +1975,9 @@
 !                prc(k) = cons2/(cons3*cons18)*1350._r8
 !    &                  * qcic(i,k)**2.47_r8
 !    &                  * (1.e-6_r8*ncic(i,k)*rho(i,k))**(-1.79_r8)
-  
+
                  if (auto_option == 1) then
-  
+
                    tx1    = qcic(i,k)*rho(i, k)/3.0e-4
                    prc(k) = 1.0e-3 * qcic(i,k) * (one-exp(-tx1*tx1))
      &                    * gamma(one+qcvar)/(cons3*qcvar)
@@ -1996,7 +2015,7 @@
      &                    / (gamma(qcvar)*(qcvar*qcvar))
 
                    prc(k) = prc(k)*dcrit
-  
+
                    xs = 1/xs
                  else
                    prc(k) = cons2/(cons3*cons18)*1350._r8
@@ -2084,7 +2103,7 @@
 
                  if (.false.) then
                     vaux = ts_auto_ice * 10.0_r8
- 
+
                     nprci(k) = (niic(i, k)/vaux)*exp(-lami(k)*dcs)
                     tx1 = one / lami(k)
                     tx2 = tx1 * tx1
@@ -2330,7 +2349,7 @@ checked up to here moorthi
 
 
                  if ((nnucct(k)+nnuccc(k))*deltat > ncic(i, k)) then
-  
+
                    tx1 = tx2 * tx3
                    nnuccc(k) = ncic(i, k)*dti
                    mnuccc(k) = cons9/(cons3*cons19)* pi*pirhow/36._r8
@@ -2434,12 +2453,12 @@ checked up to here moorthi
                  tx4 = tx1 * tx1
                  tx5 = pi * ecr * rho(i,k) *n0r(k) * n0s(k)
 
-                 pracs(k) = pirhow*tx2*tx5 * 
+                 pracs(k) = pirhow*tx2*tx5 *
      &          (tx4*tx4*tx3*(five*tx4+tx3*(two*tx1+half*tx3)))
 
 
                  tx2 = unr(k) - uns(k)
-                 tx2 = sqrt(1.7_r8*tx2*tx2 + 0.3_r8*unr(k)*uns(k)) 
+                 tx2 = sqrt(1.7_r8*tx2*tx2 + 0.3_r8*unr(k)*uns(k))
 
                  npracs(k) = half*tx2*tx5*tx1*tx3*(tx4+tx3*(tx1+tx3))
 
@@ -2493,7 +2512,7 @@ checked up to here moorthi
 !.......................................................................
 ! Self-collection of rain drops
 ! from Beheng(1994)
-  
+
                if (qric(i,k) >= qsmall) then
                  nragg(k) = -8._r8*nric(i,k)*qric(i,k)*rho(i,k)
                else
@@ -2514,7 +2533,7 @@ checked up to here moorthi
                  nprai(k) = tx1 * niic(i,k)
 
                  nprai(k)= min(nprai(k), 1.0e10)
-  
+
                else
                  prai(k)  = zero
                  nprai(k) = zero
@@ -2658,7 +2677,7 @@ checked up to here moorthi
      &                 * cons14 / (lams(k)**((five+bs)*half)))
                  bergs(k) = epss*(qvs-qvi)/abi
                else
-                 bergs(k) = zero 
+                 bergs(k) = zero
                end if
 
 
@@ -2744,7 +2763,7 @@ checked up to here moorthi
                    ratio = (nie*dti+(nnucct(k)+nsacwi(k))*lcldm(i,k))
      &                  / ((nprci(k)+nprai(k)-nsubi(k))*icldm(i,k))*omsm
                  else
-  
+
                    ratio = zero
                  end if
                  nprci(k) = nprci(k) * ratio
@@ -2850,8 +2869,8 @@ checked up to here moorthi
      &                      + berg(i,k)) * xlf
 
 
-!      if(xlon<0.01.and.xlon>-0.01.and.xlat>1.346        
-!    & .and.xlat<1.347.and.k==38)                        
+!      if(xlon<0.01.and.xlon>-0.01.and.xlat>1.346
+!    & .and.xlat<1.347.and.k==38)
 !    & write(*,*)"anning_m0",pre(k),prds(k),cmei(i,k),
 !    & bergs(k),psacws(k),
 !    & mnuccc(k),mnucct(k),msacwi(k),mnuccr(k),pracs(k),berg(i,k)
@@ -2869,7 +2888,7 @@ checked up to here moorthi
                qrtend(i,k) = qrtend(i,k)
      &                     + (pra(k)+prc(k))*lcldm(i,k)
      &                     + (pre(k)-pracs(k)-mnuccr(k))*cldmax(i,k)
-       
+
                qnitend(i,k) = qnitend(i,k)
      &                      + (prai(k)+prci(k))*icldm(i,k)
      &                      + (psacws(k)+bergs(k))*lcldm(i,k)
@@ -2877,7 +2896,7 @@ checked up to here moorthi
 
 !     if (lprint) write(0,*)' k=',k,' qnitend=',qnitend(i,k),
 !    & prai(k), prci(k), icldm(i,k),psacws(k),bergs(k),lcldm(i,k)
-!    &,prds(k),pracs(k),mnuccr(k),' cldmax=',cldmax(i,k) 
+!    &,prds(k),pracs(k),mnuccr(k),' cldmax=',cldmax(i,k)
 
 ! add output for cmei (accumulate)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                cmeiout(i,k) = cmeiout(i,k) + cmei(i,k)
@@ -3079,8 +3098,8 @@ checked up to here moorthi
 
                        tlat(i,k) = tlat(i,k) + tmp
 
-!      if(xlon<0.01.and.xlon>-0.01.and.xlat>1.346        
-!    & .and.xlat<1.347.and.k==38)                        
+!      if(xlon<0.01.and.xlon>-0.01.and.xlat>1.346
+!    & .and.xlat<1.347.and.k==38)
 !    & write(*,*)"anning_m1",tmp
 
                        qrtot    = qrtot + dum*qstot
@@ -3120,10 +3139,10 @@ checked up to here moorthi
 
                         tlat(i,k)   = tlat(i,k) + tmp
 
-!      if(xlon<0.01.and.xlon>-0.01.and.xlat>1.346        
-!    & .and.xlat<1.347.and.k==38)                        
+!      if(xlon<0.01.and.xlon>-0.01.and.xlat>1.346
+!    & .and.xlat<1.347.and.k==38)
 !    & write(*,*)"anning_m2",tmp
-  
+
                         qstot    = qstot + dum*qrtot
                         qrtot    = (one-dum)*qrtot
                         nstot    = nstot + dum*nrtot
@@ -3142,7 +3161,7 @@ checked up to here moorthi
 ! if rain/snow mix ratio is zero so should number concentration
 
                  if (qniic(i,k) < qsmall) then
-                   qniic(i,k) = zero 
+                   qniic(i,k) = zero
                    nsic(i,k)  = zero
                  end if
 
@@ -3189,7 +3208,7 @@ checked up to here moorthi
                    tx2    = 9.1_r8*rhof(i,k)
                    unr(k) = min(tx1*cons4, tx2)
                    umr(k) = min(tx1*(cons5/6._r8),tx2)
- 
+
                  else
                    lamr(k) = zero
                    n0r(k)  = zero
@@ -3590,7 +3609,7 @@ checked up to here moorthi
                faloutni(k) = max(fni(k) * dumni(i,k), zero)
                faloutc(k)  = max(fc(k)  * dumc(i,k),  zero)
                faloutnc(k) = max(fnc(k) * dumnc(i,k), zero)
-             end do 
+             end do
 
 ! top of model
 
@@ -3711,7 +3730,7 @@ checked up to here moorthi
 ! end sedimentation
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ! calculate sedimentation for rain and snow
-! Anning Cheng 9/19/2016, forecast rain and snow 
+! Anning Cheng 9/19/2016, forecast rain and snow
 ! reuse dummy variable for cloud water and ice
 !  iter =1 for fprcp >= 1
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -3860,7 +3879,7 @@ checked up to here moorthi
                faloutni(k) = max(fni(k) * nsnw(i,k), zero)
                faloutc(k)  = max(fc(k)  * qrn(i,k), zero)
                faloutnc(k) = max(fnc(k) * nrn(i,k), zero)
-             end do 
+             end do
 
 ! top of model
 
@@ -3894,7 +3913,7 @@ checked up to here moorthi
 
                faltndc   = (faloutc(k)  - faloutc(k-1))  * tx1
                faltndnc  = (faloutnc(k) - faloutnc(k-1)) * tx1
-   
+
                faltndi   = (falouti(k)  - falouti(k-1))  * tx1
                faltndni  = (faloutni(k) - faloutni(k-1)) * tx1
 
@@ -4155,7 +4174,7 @@ checked up to here moorthi
 
              dumc(i,k) = min(dumc(i,k),5.e-3_r8)
              dumi(i,k) = min(dumi(i,k),5.e-3_r8)
- 
+
 !...................
 ! cloud ice effective radius
 
@@ -4252,13 +4271,13 @@ checked up to here moorthi
 !assign output fields for shape here
                lamcrad(i,k) = lamc(k)
                pgamrad(i,k) = pgam(k)
- 
+
              else
                effc(i,k)    = 10._r8
                lamcrad(i,k) = zero
                pgamrad(i,k) = zero
              end if
- 
+
 
 ! ice effective diameter for david mitchell's optics
              deffi(i,k) = effi(i,k) * (rhoi / 917._r8*two)
