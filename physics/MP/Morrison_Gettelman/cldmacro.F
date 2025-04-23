@@ -20,14 +20,6 @@
      & MAPL_AIRMW, MAPL_RVAP , MAPL_PI , MAPL_R8 , MAPL_R4
        use MAPL_BaseMod, only: MAPL_UNDEF
 #endif
-#ifdef NEMS_GSM
-      use physcons, MAPL_TICE => con_t0c,  MAPL_GRAV => con_g,
-     &              MAPL_CP   => con_cp,   MAPL_ALHL => con_hvap,
-     &              MAPL_ALHF => con_hfus, MAPL_PI   => con_pi,
-     &              MAPL_RGAS => con_rd,   MAPL_RVAP => con_rv
-#endif
-
-
        implicit none
 
 
@@ -39,6 +31,7 @@
        public meltfrz_inst
        public fix_up_clouds_2M
        PUBLIC CLOUD_PTR_STUBS
+       public cldmacro_init
 
 !! Some parameters set by PHYSPARAMS
 
@@ -89,15 +82,24 @@
        real    :: turnrhcrit_upper
        real    :: MIN_RI, MAX_RI, MIN_RL, MAX_RL, RI_ANV
 
-
-       real, parameter :: T_ICE_MAX = MAPL_TICE
+#ifdef NEMS_GSM
+       real :: MAPL_TICE = 1.0E30
+       real :: MAPL_GRAV = 1.0E30
+       real :: MAPL_CP   = 1.0E30
+       real :: MAPL_ALHL = 1.0E30
+       real :: MAPL_ALHF = 1.0E30
+       real :: MAPL_PI   = 1.0E30
+       real :: MAPL_RGAS = 1.0E30
+       real :: MAPL_RVAP = 1.0E30
+       real :: T_ICE_MAX = 1.0E30
+       real :: MAPL_ALHS = 1.0E30
+       real :: alhlbcp   = 1.0E30
+       real :: alhfbcp = 1.0E30
+       real :: alhsbcp = 1.0E30
+#endif
        real, parameter :: RHO_W = 1.0e3
        real, parameter :: MIN_CLD_FRAC = 1.0e-8
-       real, parameter :: MAPL_ALHS = MAPL_ALHL+MAPL_ALHF
 
-       real, parameter :: alhlbcp = MAPL_ALHL/MAPL_CP
-     &,                   alhfbcp = MAPL_ALHF/MAPL_CP
-     &,                   alhsbcp = alhlbcp+alhfbcp
 
 
 !      real, parameter :: PI_0 = 4.*atan(1.)
@@ -106,6 +108,28 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
        contains
+
+#ifdef NEMS_GSM
+       subroutine cldmacro_init(con_t0c, con_g, con_cp, con_hvap        &
+     &,         con_hfus, con_pi, con_rd, con_rv)
+         real, intent(in) ::  con_t0c, con_g, con_cp, con_hvap
+         real, intent(in) ::  con_hfus, con_pi, con_rd, con_rv
+         MAPL_TICE = con_t0c
+         MAPL_GRAV = con_g
+         MAPL_CP   = con_cp
+         MAPL_ALHL = con_hvap
+         MAPL_ALHF = con_hfus
+         MAPL_PI   = con_pi
+         MAPL_RGAS = con_rd
+         MAPL_RVAP = con_rv
+
+         T_ICE_MAX = MAPL_TICE
+         MAPL_ALHS = MAPL_ALHL+MAPL_ALHF
+         alhlbcp = MAPL_ALHL/MAPL_CP
+         alhfbcp = MAPL_ALHF/MAPL_CP
+         alhsbcp = alhlbcp+alhfbcp
+       end subroutine cldmacro_init
+#endif
 
 !>\ingroup cldmacro_mod
 !! This subroutine is the cloud macrophysics scheme in MG micriphysics.
@@ -195,7 +219,7 @@
 !      real :: MASS,  iMASS, TOTFRC, QRN_CU_1D, QSN_CU, QRN_ALL, QSN_ALL
 !    &,        QTMP1, QTMP2, QTMP3, QTOT, TEMP, RHCRIT, AA3, BB3, ALPHA
 !    &,        VFALL, VFALLRN, VFALLSN,  TOT_PREC_UPD, AREA_UPD_PRC
-!    &,        AREA_UPD_PRC_tolayer  
+!    &,        AREA_UPD_PRC_tolayer
 !    &,        PRN_CU_above, PSN_CU_above
 !    &,        AREA_UPD_PRC_tolayer, U_above,U_below,  V_above,V_below
 !    &,        DZET_above,DZET_below, PRN_CU_above, PSN_CU_above
@@ -371,7 +395,7 @@
            NCPL_dev(I,K) = max(NCPL_dev(I,K)+CNV_NDROP_dev(I,K)*tx1,0.0)
            NCPI_dev(I,K) = max(NCPI_dev(I,K)+CNV_NICE_dev(I,K)*tx1,0.0)
 
- 
+
 !          TEND = RMFDTR_dev(I,K)*iMASS * SCLMFDFR
 !          ANVFRC_dev(I,K)   = min(ANVFRC_dev(I,K) + TEND*DT, 1.0)
 
@@ -470,7 +494,7 @@
 !            QTMP1 = QLW_LS_dev(I,K) + QLW_AN_dev(I,K)
 !            QTMP2 = QIW_LS_dev(I,K) + QIW_AN_dev(I,K)
 !            QTOT  = QTMP1 + QTMP2
-  
+
 !            call PRECIP3 (K, LM, DT, FRLAND_dev(I), RHCRIT, QRN_CU_1D,
 !    &                     QSN_CU, QTMP1, QTMP2, TEMP, Q_dev(I,K), mass,
 !    &                     imass, PP_dev(I,K), DZET_dev(I,K),
@@ -733,8 +757,8 @@
              QC    = QCl(i,k) + QCi(i,k)
              QA    = QAl(i,k) + QAi(i,k)
            !Anning do not let empty cloud exist
-             if(QC <= 0.) CF(i,k) = 0. 
-             if(QA <= 0.) AF(i,k) = 0. 
+             if(QC <= 0.) CF(i,k) = 0.
+             if(QA <= 0.) AF(i,k) = 0.
              QCx   = QC + QA
              QT    = QCx + QV(i,k)
              CFALL = AF(i,k) + CF(i,k)
@@ -905,7 +929,7 @@
 
 !      TEp = TEo
        QSn = QSx
-       TEn = TE 
+       TEn = TE
        CFn = CFx
        QVn = QVx
        QCn = QCx
@@ -1034,7 +1058,7 @@
        dQAl = 0.0
        dQAi = 0.0
 
-!large scale  QCx is not in envi 
+!large scale  QCx is not in envi
 
        QCx = QCo - QC
 !      Anning Cheng prevented unstable here
@@ -1047,7 +1071,7 @@
          dQCl = QCx - dQCi
        end if
 
-!Anvil QAx is not in anvil 
+!Anvil QAx is not in anvil
        QAx = QAo - QA
 !      Anning Cheng prevented unstable here
 !      if(QAx < -1.e-3) QAx = -1.e-3
@@ -1128,7 +1152,7 @@
          if(qtmax < qstar) then
            clfrac = 0.
          elseif ( (qtmode <= qstar).and.(qstar < qtmax) ) then
-           clfrac = (qtmax-qstar)*(qtmax-qstar) / 
+           clfrac = (qtmax-qstar)*(qtmax-qstar) /
      &            ((qtmax-qtmin)*(qtmax-qtmode))
          elseif ( (qtmin <= qstar).and.(qstar < qtmode) ) then
            clfrac = 1. - ((qstar-qtmin)*(qstar-qtmin)
@@ -1238,7 +1262,7 @@
      &                    TE, QV, DCF, DMF, QLA, QIA, CF, AF, QS,       &
      &                    NL, NI, CNVFICE, CNVNDROP, CNVNICE)
 
-       real, intent(in)    :: DT, ICEPARAM, SCLMFDFR, MASS, iMASS, QS   & 
+       real, intent(in)    :: DT, ICEPARAM, SCLMFDFR, MASS, iMASS, QS   &
      &,                       DMF,PL, DCF, CF
        real, intent(inout) :: TE, AF,QV, QLA, QIA, NI, NL               &
      &,                       CNVFICE, CNVNDROP, CNVNICE
@@ -1478,7 +1502,7 @@
 
         RAINRAT0 = Ifactor*QPl*MASS/DT
         SNOWRAT0 = Ifactor*QPi*MASS/DT
- 
+
         call MARSHPALMQ2(RAINRAT0,PL,DIAMrn,NRAIN,FALLrn,VErn)
         call MARSHPALMQ2(SNOWRAT0,PL,DIAMsn,NSNOW,FALLsn,VEsn)
 
@@ -1728,7 +1752,7 @@
 
 
        RX = (/ 0. , 5. , 20. , 80. , 320. , 1280., 4*1280., 16*1280. /)
-       D3X = (/ 0.019, 0.032, 0.043, 0.057, 0.076, 0.102, 0.137 , 
+       D3X = (/ 0.019, 0.032, 0.043, 0.057, 0.076, 0.102, 0.137 ,
      &    0.183 /)
 
        RAIN_DAY = RAIN * 3600. *24.
@@ -1912,7 +1936,7 @@
      & NIX
       real esl,esi, esn,desdt,weight,hlatsb,hlatvp,hltalt,tterm,
      &      gam,pl100
-       
+
 
        pl100=pl*100
        DIFF = 0.0
@@ -2203,7 +2227,7 @@
      & SC_ICE, CFICE, CFLIQ, RHICE, RHLIQ, ALPH, RAD_CF, RAD_QL, RAD_QI,&
      & RAD_QS, RAD_QR, RAD_QV, CLDREFFI, CLDREFFL, NHET_IMM, NHET_DEP,  &
      & NHET_DHF, DUST_IMM, DUST_DEP, DUST_DHF, SCF, SCF_ALL, SIGW_GW,   &
-     & SIGW_CNV, SIGW_TURB, SIGW_RC, RHCmicro, DNHET_IMM, NONDUST_IMM,  & 
+     & SIGW_CNV, SIGW_TURB, SIGW_RC, RHCmicro, DNHET_IMM, NONDUST_IMM,  &
      & NONDUST_DEP, BERG, BERGSO, MELT, DNHET_CT, DTDT_macro, QCRES,    &
      & DT_RASP, FRZPP_LS, SNOWMELT_LS, QIRES, AUTICE, PFRZ, DNCNUC,     &
      & DNCHMSPLIT, DNCSUBL, DNCAUTICE, DNCACRIS, DNDCCN, DNDACRLS,      &
