@@ -19,9 +19,14 @@
 !! \htmlinclude mynnsfc_wrapper_init.html
 !!
       subroutine mynnsfc_wrapper_init(do_mynnsfclay, &
-       &                             errmsg, errflg)
+           con_cp, con_g, con_rd, con_rv, &
+           con_rocp, con_hvap, con_hfus, con_fvirt, &
+           con_eps, errmsg, errflg)
 
          logical,          intent(in)  :: do_mynnsfclay
+         real(kind_phys), intent(in) :: con_cp, con_g, con_rd, con_rv
+         real(kind_phys), intent(in) :: con_rocp, con_hvap, con_hfus, con_fvirt
+         real(kind_phys), intent(in) :: con_eps
          character(len=*), intent(out) :: errmsg
          integer, intent(out) :: errflg
 
@@ -29,12 +34,17 @@
          errmsg = ''
          errflg = 0
 
+        ! Initialize sf_mynn
+        call sf_mynn_init(con_cp, con_g, con_rd, con_rv, &
+             con_rocp, con_hvap, con_hfus, con_fvirt, &
+             con_eps)
+
         ! Consistency checks
         if (.not. do_mynnsfclay) then
           write(errmsg,fmt='(*(a))') 'Logic error: do_mynnsfclay = .false.'
           errflg = 1
           return
-        end if 
+        end if
 
          ! initialize tables for psih and psim (stable and unstable)
          CALL PSI_INIT(psi_opt,errmsg,errflg)
@@ -307,7 +317,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              z0pert=z0pert,ztpert=ztpert,                                     & !intent(in)
              redrag=redrag,sfc_z0_type=sfc_z0_type,                           & !intent(in)
              itimestep=itimestep,iter=iter,flag_iter=flag_iter,               &
-             flag_restart=flag_restart,                                       & 
+             flag_restart=flag_restart,                                       &
                          wet=wet,              dry=dry,              icy=icy, &  !intent(in)
              tskin_wat=tskin_wat,  tskin_lnd=tskin_lnd,  tskin_ice=tskin_ice, &  !intent(in)
              tsurf_wat=tsurf_wat,  tsurf_lnd=tsurf_lnd,  tsurf_ice=tsurf_ice, &  !intent(in)
