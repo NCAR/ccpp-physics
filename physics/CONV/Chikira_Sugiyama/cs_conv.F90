@@ -195,12 +195,12 @@ module cs_conv
 !
 ! modified arguments
 !
-   real(kind_phys), intent(inout), optional :: CBMFX(:,:)      ! cloud base mass flux (kg/m2/s)
+   real(kind_phys), intent(inout) :: CBMFX(:,:)      ! cloud base mass flux (kg/m2/s)
 !
 ! output arguments
 !
 !  updraft, downdraft, and detrainment mass flux (kg/m2/s)
-   real(kind_phys), intent(inout), dimension(:,:), optional :: ud_mf
+   real(kind_phys), intent(inout), dimension(:,:) :: ud_mf
    real(kind_phys), intent(inout), dimension(:,:) :: dd_mf, dt_mf
    
    real(kind_phys), intent(out)   :: rain1(:)        ! lwe thickness of deep convective precipitation amount (m)
