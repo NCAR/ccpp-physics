@@ -176,9 +176,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       real(kind_phys), dimension(:), intent(inout) ::       &
      &        hflx, qflx, wspd, qsfc,                       &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
-     &        rmol, ch
-      real(kind_phys), dimension(:), intent(inout), optional :: &
-     &        ustm, zol, mol, lh, wstar, CHS2, CQS2
+     &        rmol, ch, ustm, wstar, CHS2, CQS2,            &
+     &        zol, mol, lh
       !LOCAL
       real(kind_phys), dimension(im) ::                     &
      &        hfx, znt, psim, psih,                         &
