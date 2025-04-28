@@ -4,8 +4,8 @@
 !---------------------------------------------------------------------
 ! code snapshot: "Apr 17 2025" at "12:17:55"
 !---------------------------------------------------------------------
-!>\ingroup mod_mp_nssl2m
-!! This module provides a 1/2/3-moment bulk microphysics scheme based on a combination of
+
+!> This module provides a 1/2/3-moment bulk microphysics scheme based on a combination of
 !! Straka and Mansell (2005, JAM) and Zeigler (1985, JAS) and modified/upgraded in
 !! in Mansell, Zeigler, and Bruning (2010, JAS).  Two-moment adaptive sedimentation
 !! follows Mansell (2010, JAS), using parameter infall = 4.
