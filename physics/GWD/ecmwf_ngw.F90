@@ -5,8 +5,35 @@ module ecmwf_ngw
 
 
 contains
+!------------------------------------------------------------------------------------------
+!   April 2025 Adding ECMWF Non-stationary gravity wave scheme option by  Bo Yang
+!------------------------------------------------------------------------------------------
+!  different orientation at vertical
+!  1 is the highest level for ECMWF, 1 is the lowest level for GFS
+!  Vertical levels are reversed after entering the subroutine ecmwf_ngw_emc and reversed back before exiting
+!  This non-stationary GWD module was obtained by Fanglin Yang from ECMWF, with permission for operational use at NCEP. We would
+!  like to thank Andy Brown, Michael Sleigh, Peter Bechtold, and Nils Wedi at ECMWF for their support in porting this code to the
+!  UFS.
+!! Original Fortran Code by J. SCINOCCIA
+! Rewritten in IFS format by A. ORR E.C.M.W.F. August 2008
+! PURPOSE
+! -------
 
+! THIS ROUTINE COMPUTES NON-OROGRAPHIC GRAVITY WAVE DRAG
+! AFTER SCINOCCA (2003) AND Mc LANDRESS AND SCINOCCIA (JAS 2005)
+! HYDROSTATIC NON-ROTATIONAL SIMPLIFIED VERSION OF THE
+! WARNER AND MCINTYRE (1996) NON-OROGRAPHIC GRAVITY WAVE PARAMETERIZATION
+! CONSTANTS HAVE BEEN OPTIMIZED FOLLOWING M. ERN ET AL. (ATMOS. CHEM. PHYS. 2006)
 
+! REFERENCE: Orr, A., P. Bechtold, J. Scinoccia, M. Ern, M. Janiskova, 2010:
+! Improved middle atmosphere climate and analysis in the ECMWF forecasting system
+! through a non-orographic gravity wave parametrization. J. Climate., 23, 5905-5926.
+
+! LAUNCH SPECTRUM - GENERALIZED DESAUBIES
+! INCLUDES A CRITICAL-LEVEL CORRECTION THAT PREVENTS THE
+! MOMEMTUM DEPOSITION IN EACH AZIMUTH FROM DRIVING THE FLOW TO SPEEDS FASTER
+! THAN THE PHASE SPEED OF THE WAVES, I.E. WHEN WAVES BREAK THEY DRAG THE MEAN
+! FLOW TOWARDS THEIR PHASE SPEED - NOT PAST IT.
 !!! different orientation for vertical
 !!! 1 is the highest level for ECMWF, 1 is the lowest level for GFS
 !---------------------------------------------------
