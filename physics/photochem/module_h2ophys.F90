@@ -233,7 +233,13 @@ contains
        enddo
 
        if (present(dqv_dt_prd)) dqv_dt_prd(:, iLev) = pltc(:, 1) * dt
-       if (present(dqv_dt_qv))  dqv_dt_qv(:, iLev)  = (h2o(:, iLev) - pltc(:, 3)) * dt / pltc(:, 2)
+       if (present(dqv_dt_qv))  then
+          where (pltc(:, 2) .ne. 0)
+             dqv_dt_qv(:, iLev)  = (h2o(:, iLev) - pltc(:, 3)) * dt / pltc(:, 2)
+          elsewhere
+             dqv_dt_qv(:, iLev) = 0
+          end where
+       end if
     enddo
 
 
