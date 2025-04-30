@@ -15,8 +15,8 @@
       use module_h2ophys, only: ty_h2ophys
 
       use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm, iamin, iamax, jamin, jamax
-      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol, read_aerdataf
-      use aerinterp,  only : read_aerdata_dl, aerinterpol_dl, read_aerdataf_dl
+      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol, read_aerdataf, &
+                             read_aerdata_dl, aerinterpol_dl, read_aerdataf_dl
 
       use iccn_def,   only : ciplin, ccnin, ci_pres
       use iccninterp, only : read_cidata, setindxci, ciinterpol
