@@ -921,6 +921,7 @@
 !> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
          if (nscyc >  0) then
            if (mod(kdt,nscyc) == 1) THEN
+             write(*,*) 'GFS_phys_time_vary_timestep_init, ktd,nscyc : ',ktd,nscyc
              call gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit, fn_nml,      &
                  input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,         &
                  use_ufo, nst_anl, fhcyc, phour, landfrac, lakefrac, min_seaice, min_lakeice,&
