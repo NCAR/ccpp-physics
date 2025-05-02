@@ -109,10 +109,10 @@ contains
 
   end subroutine rrfs_smoke_wrapper_init
 
-!! \section arg_table_rrfs_smoke_wrapper_run Argument Table
+!> \section arg_table_rrfs_smoke_wrapper_run Argument Table
 !! \htmlinclude rrfs_smoke_wrapper_run.html
 !!
-!>\section rrfs_smoke_wrapper rrfs-sd Scheme General Algorithm
+!>\section gen_rrfs_smoke_wrapper rrfs-sd Scheme General Algorithm
 !> @{
     subroutine rrfs_smoke_wrapper_run(im, flag_init, kte, kme, ktau, dt, garea, land, jdate,          &
                    u10m, v10m, ustar, rlat, rlon, tskin, pb2d, t2m, dpt2m,                 &
@@ -146,11 +146,11 @@ contains
     integer, parameter :: its=1,jts=1,jte=1, kts=1
 
     integer,         dimension(:),     intent(in)    :: land, vegtype_dom, soiltyp
-    real(kind_phys), dimension(:,:),   intent(in), optional :: smc, tslb
-    real(kind_phys), dimension(:,:,:), intent(in), optional :: dust12m_in
-    real(kind_phys), dimension(:,:,:), intent(in), optional :: smoke_RRFS
-    real(kind_phys), dimension(:,:),   intent(in), optional :: smoke2d_RRFS
-    real(kind_phys), dimension(:,:),   intent(in), optional :: emi_ant_in
+    real(kind_phys), dimension(:,:),   intent(in), optional    :: smc, tslb
+    real(kind_phys), dimension(:,:,:), intent(in), optional    :: dust12m_in
+    real(kind_phys), dimension(:,:,:), intent(in), optional    :: smoke_RRFS
+    real(kind_phys), dimension(:,:),   intent(in), optional    :: smoke2d_RRFS
+    real(kind_phys), dimension(:,:),   intent(in), optional    :: emi_ant_in
     real(kind_phys), dimension(:),     intent(in)    :: u10m, v10m, ustar, dswsfc,         &
                            recmol, garea, rlat,rlon, tskin, pb2d, zorl, snow,              &
                            rain_cpl, rainc_cpl, hf2d, t2m, dpt2m, totprcp
@@ -162,7 +162,7 @@ contains
     real(kind_phys), dimension(:),     intent(inout), optional :: emdust, emseas, emanoc
     real(kind_phys), dimension(:),     intent(inout), optional :: ebb_smoke_in,coef_bb, frp_output, fhist
     real(kind_phys), dimension(:,:),   intent(inout), optional :: ebu_smoke
-    real(kind_phys), dimension(:,:),   intent(inout), optional :: rho_dry
+    real(kind_phys), dimension(:,:),   intent(inout), optional :: rho_dry 
     real(kind_phys), dimension(:),     intent(out  ), optional :: fire_heat_flux_out, frac_grid_burned_out
     real(kind_phys), dimension(:),     intent(inout), optional :: max_fplume, min_fplume, uspdavg, hpbl_thetav
     real(kind_phys), dimension(:),     intent(inout), optional :: hwp, peak_hr_out

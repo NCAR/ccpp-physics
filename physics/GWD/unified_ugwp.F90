@@ -274,11 +274,11 @@ contains
     integer,                 intent(in), dimension(:)       :: vtype
     real(kind=kind_phys),    intent(in), dimension(:)       :: ak, bk
     real(kind=kind_phys),    intent(in), dimension(:)       :: oro, oro_uf, hprime, oc, theta, sigma, gamma
-    real(kind=kind_phys),    intent(in), dimension(:), optional :: varss,oc1ss
+    real(kind=kind_phys),    intent(in), dimension(:)       :: varss,oc1ss
     real(kind=kind_phys),    intent(in), dimension(:)       :: dx
 
 !vay-nov 2020
-    real(kind=kind_phys),    intent(in), dimension(:,:), optional ::  oa4ss,ol4ss   
+    real(kind=kind_phys),    intent(in), dimension(:,:)     ::  oa4ss,ol4ss   
     
     logical,                 intent(in)                     :: flag_for_gwd_generic_tend
     
