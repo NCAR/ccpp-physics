@@ -12,7 +12,7 @@
 ! Part-0   specifications of common constants, limiters and "criiical" values
 ! 
 !
-    
+!> This module contains common constants, limiters and "critical" values in      
     module ugwp_common
 !
      use machine,  only : kind_phys

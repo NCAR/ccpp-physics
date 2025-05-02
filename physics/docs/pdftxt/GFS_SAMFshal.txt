@@ -1,5 +1,5 @@
 /**
-\page GFS_SAMFshal GFS SAS-based Mass-Flux Scheme for Shallow convection (sa-MF)
+\page GFS_SAMFshal SAS-based Mass-Flux Scheme for Shallow convection (sa-MF)
 
 \section des_shal Description
  \ref SAMF_shal is an updated version of the previous mass-flux shallow

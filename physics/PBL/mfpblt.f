@@ -2,10 +2,14 @@
 !! This file contains the subroutine that calculates mass flux and
 !! updraft parcel properties for thermals driven by surface heating 
 !! for use in the TKE-EDMF PBL scheme.
+
+!> This module contains the subroutine that calculates mass flux and
+!! updraft parcel properties for thermals driven by surface heating 
+!! for use in the TKE-EDMF PBL scheme.
       module mfpblt_mod
       contains
-!>\ingroup satmedmf
-!! This subroutine computes mass flux and updraft parcel properties for
+
+!> This subroutine computes mass flux and updraft parcel properties for
 !! thermals driven by surface heating. 
 !!\section mfpblt_gen GFS mfpblt General Algorithm 
 !> @{

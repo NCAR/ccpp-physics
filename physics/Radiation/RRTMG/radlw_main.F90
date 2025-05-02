@@ -609,7 +609,7 @@
       integer, intent(in) :: npts, nlay, nlp1, ilwcliq, ilwcice,        &
            isubclw, iovr, iovr_dcorr, iovr_exp, iovr_exprand, iovr_rand,&
            iovr_maxrand, iovr_max
-      integer, intent(in), optional :: icseed(npts)
+      integer, intent(in) :: icseed(npts)
 
       logical,  intent(in) :: lprnt, inc_minor_gas
 
@@ -630,7 +630,7 @@
 
       real (kind=kind_phys), dimension(:), intent(in) :: sfemis,        &
      &       sfgtmp, de_lgth
-      real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
+      real (kind=kind_phys), dimension(npts,nlay),intent(in) ::         &
              alpha
 
       real (kind=kind_phys), dimension(:,:,:),intent(in)::              &
@@ -760,7 +760,7 @@
         end if
       endif                    ! end if_ilwcliq
 
-!> -# Change random number seed value for each radiation invocation
+!> - Change random number seed value for each radiation invocation
 !!    (isubclw =1 or 2).
 
       if     ( isubclw == 1 ) then     ! advance prescribed permutation seed
@@ -782,7 +782,7 @@
 
       lab_do_iplon : do iplon = 1, npts
 
-!> -# Read surface emissivity.
+!> - Read surface emissivity.
         if (sfemis(iplon) > eps .and. sfemis(iplon) <= 1.0) then  ! input surface emissivity
           do j = 1, nbands
             semiss(j) = sfemis(iplon)
@@ -796,7 +796,7 @@
         stemp = sfgtmp(iplon)          ! surface ground temp
         if (iovr == iovr_dcorr) delgth= de_lgth(iplon)    ! clouds decorr-length
 
-!> -# Prepare atmospheric profile for use in rrtm.
+!> - Prepare atmospheric profile for use in rrtm.
 !           the vertical index of internal array is from surface to top
 
 !  --- ...  molecular amounts are input or converted to volume mixing ratio
@@ -820,7 +820,7 @@
             dz(k)   = dzlyr(iplon,k1)
             if (iovr == iovr_exp .or. iovr == iovr_exprand) alph(k) = alpha(iplon,k) ! alpha decorrelation
 
-!> -# Set absorber amount for h2o, co2, and o3.
+!> - Set absorber amount for h2o, co2, and o3.
 
 !test use
 !           h2ovmr(k)= max(f_zero,qlyr(iplon,k1)*amdw)                  ! input mass mixing ratio
@@ -841,7 +841,7 @@
             colamt(k,3) = max(temcol(k), coldry(k)*o3vmr(k))           ! o3
           enddo
 
-!> -# Set up column amount for rare gases n2o,ch4,o2,co,ccl4,cf11,cf12,
+!> - Set up column amount for rare gases n2o,ch4,o2,co,ccl4,cf11,cf12,
 !!    cf22, convert from volume mixing ratio to molec/cm2 based on
 !!    coldry (scaled to 1.0e-20).
 
@@ -872,7 +872,7 @@
             enddo
           endif
 
-!> -# Set aerosol optical properties.
+!> - Set aerosol optical properties.
 
           do k = 1, nlay
             k1 = nlp1 - k
@@ -882,7 +882,7 @@
             enddo
           enddo
 
-!> -# Read cloud optical properties.
+!> - Read cloud optical properties.
           if (ilwcliq > 0) then    ! use prognostic cloud method
             do k = 1, nlay
               k1 = nlp1 - k
@@ -907,7 +907,7 @@
           cldfrc(0)    = f_one       ! padding value only
           cldfrc(nlp1) = f_zero      ! padding value only
 
-!> -# Compute precipitable water vapor for diffusivity angle adjustments.
+!> - Compute precipitable water vapor for diffusivity angle adjustments.
 
           tem1 = f_zero
           tem2 = f_zero
@@ -1027,7 +1027,7 @@
 
         endif                       ! top_at_1
 
-!> -# Compute column amount for broadening gases.
+!> - Compute column amount for broadening gases.
 
         do k = 1, nlay
           summol = f_zero
@@ -1037,7 +1037,7 @@
           colbrd(k) = coldry(k) - summol
         enddo
 
-!> -# Compute diffusivity angle adjustments.
+!> - Compute diffusivity angle adjustments.
 
         tem1 = 1.80
         tem2 = 1.50
@@ -1065,7 +1065,7 @@
 !      print *,' o3vmr ',o3vmr
 !     endif
 
-!> -# For cloudy atmosphere, call cldprop() to set cloud optical
+!> - For cloudy atmosphere, call cldprop() to set cloud optical
 !!    properties.
 
         lcf1 = .false.
@@ -1116,7 +1116,7 @@
 !      print *,' cldfrac',cldfrc
 !     endif
 
-!> -# Calling setcoef() to compute various coefficients needed in
+!> - Calling setcoef() to compute various coefficients needed in
 !!    radiative transfer calculations.
         call setcoef                                                    &
 !  ---  inputs:
@@ -1151,7 +1151,7 @@
 !      print *,'indfor',indfor
 !     endif
 
-!> -# Call taumol() to calculte the gaseous optical depths and Plank
+!> - Call taumol() to calculte the gaseous optical depths and Plank
 !! fractions for each longwave spectral band.
 
         call taumol                                                     &
@@ -1178,7 +1178,7 @@
 !     enddo
 !     endif
 
-!> -# Call the radiative transfer routine based on cloud scheme
+!> - Call the radiative transfer routine based on cloud scheme
 !!    selection. Compute the upward/downward radiative fluxes, and
 !!    heating rates for both clear or cloudy atmosphere.
 !!\n  - call rtrn(): clouds are assumed as randomly overlaping in a
@@ -1224,7 +1224,7 @@
 
         endif   ! end if_isubclw_block
 
-!> -# Save outputs.
+!> - Save outputs.
 
         topflx(iplon)%upfxc = totuflux(nlay)
         topflx(iplon)%upfx0 = totuclfl(nlay)
@@ -1442,11 +1442,11 @@
         endif
       endif
 
-!> -# Setup default surface emissivity for each band.
+!> - Setup default surface emissivity for each band.
 
       semiss0(:) = f_one
 
-!> -# Setup constant factors for flux and heating rate
+!> - Setup constant factors for flux and heating rate
 !! the 1.0e-2 is to convert pressure from mb to \f$N/m^2\f$.
 
       pival = 2.0 * asin(f_one)
@@ -1461,7 +1461,7 @@
         heatfac = con_g * 1.0e-2 / con_cp           !   (in k/second)
       endif
 
-!> -# Compute lookup tables for transmittance, tau transition
+!> - Compute lookup tables for transmittance, tau transition
 !! function, and clear sky tau (for the cloudy sky radiative
 !! transfer).  tau is computed as a function of the tau
 !! transition function, transmittance is calculated as a
@@ -1669,7 +1669,7 @@
         enddo
       enddo
 
-!> -# Compute cloud radiative properties for a cloudy column:
+!> - Compute cloud radiative properties for a cloudy column:
 !!\n  - Compute cloud radiative properties for rain and snow (tauran,tausnw)
 !!\n  - Calculation of absorption coefficients due to water clouds(tauliq)
 !!\n  - Calculation of absorption coefficients due to ice clouds (tauice).
@@ -1797,7 +1797,7 @@
 
       endif  lab_if_ilwcliq
 
-!> -# if GFS_typedefs::isubclw > 0, call mcica_subcol() to distribute
+!> - if GFS_typedefs::isubclw > 0, call mcica_subcol() to distribute
 !!    cloud properties to each g-point.
 
       if ( isubclw > 0 ) then      ! mcica sub-col clouds approx
@@ -1895,7 +1895,7 @@
 !
 !===> ...  begin here
 !
-!> -# Call random_setseed() to advance randum number generator by ipseed values.
+!> - Call random_setseed() to advance randum number generator by ipseed values.
 
       call random_setseed                                               &
 !  ---  inputs:
@@ -1904,7 +1904,7 @@
      &      stat                                                        &
      &    )
 
-!> -# Sub-column set up according to overlapping assumption:
+!> - Sub-column set up according to overlapping assumption:
 !!  - For random overlap, pick a random value at every level 
 !!  - For max-random overlap, pick a random value at every level
 !!  - For maximum overlap, pick same random numebr at every level
@@ -2093,7 +2093,7 @@
 
       end select
 
-!> -# Generate subcolumns for homogeneous clouds.
+!> - Generate subcolumns for homogeneous clouds.
 
       do k = 1, nlay
         tem1 = f_one - cldf(k)
@@ -2244,7 +2244,7 @@
 !
 !===> ... begin here
 !
-!> -# Calculate information needed by the radiative transfer routine
+!> - Calculate information needed by the radiative transfer routine
 !! that is specific to this atmosphere, especially some of the
 !! coefficients and indices needed to compute the optical depths
 !! by interpolating data from stored reference atmospheres.
@@ -2261,7 +2261,7 @@
       enddo
 
 !  --- ...  begin layer loop
-!> -# Calculate the integrated Planck functions for each band at the
+!> - Calculate the integrated Planck functions for each band at the
 !! surface, level, and layer temperatures.
 
       laytrop = 0
@@ -2283,7 +2283,7 @@
      &               * (totplnk(indlev+1,i) - totplnk(indlev,i)) )
         enddo
 
-!> -# Find the two reference pressures on either side of the
+!> - Find the two reference pressures on either side of the
 !! layer pressure. store them in jp and jp1. store in fp the
 !! fraction of the difference (in ln(pressure)) between these
 !! two values that the layer pressure lies.
@@ -2295,7 +2295,7 @@
         fp   = max(f_zero, min(f_one, 5.0*(preflog(jp(k))-plog) ))
 !org    fp   = 5.0 * (preflog(jp(k)) - plog)
 
-!> -# Determine, for each reference pressure (jp and jp1), which
+!> - Determine, for each reference pressure (jp and jp1), which
 !! reference temperature (these are different for each
 !! reference pressure) is nearest the layer temperature but does
 !! not exceed it. store these indices in jt and jt1, resp.
@@ -2313,7 +2313,7 @@
 !org    ft  = tem1 - float(jt (k) - 3)
 !org    ft1 = tem2 - float(jt1(k) - 3)
 
-!> -# We have now isolated the layer ln pressure and temperature,
+!> - We have now isolated the layer ln pressure and temperature,
 !! between two reference pressures and two reference temperatures
 !!(for each reference pressure).  we multiply the pressure
 !! fraction fp with the appropriate temperature fractions to get
@@ -2329,7 +2329,7 @@
         forfac(k) = pavel(k)*stpfac / (tavel(k)*(1.0 + h2ovmr(k)))
         selffac(k) = h2ovmr(k) * forfac(k)
 
-!> -# Set up factors needed to separately include the minor gases
+!> - Set up factors needed to separately include the minor gases
 !! in the calculation of absorption coefficient.
 
         scaleminor(k) = pavel(k) / tavel(k)
@@ -2339,7 +2339,7 @@
         indminor(k) = min(18, max(1, int(tem1)))
         minorfrac(k) = tem1 - float(indminor(k))
 
-!> -# If the pressure is less than ~100mb, perform a different
+!> - If the pressure is less than ~100mb, perform a different
 !! set of species interpolations.
 
         if (plog > 4.56) then
@@ -2350,14 +2350,14 @@
           indfor(k) = min(2, max(1, int(tem1)))
           forfrac(k) = tem1 - float(indfor(k))
 
-!> -# Set up factors needed to separately include the water vapor
+!> - Set up factors needed to separately include the water vapor
 !! self-continuum in the calculation of absorption coefficient.
 
           tem1 = (tavel(k) - 188.0) / 7.2
           indself(k) = min(9, max(1, int(tem1)-7))
           selffrac(k) = tem1 - float(indself(k) + 7)
 
-!> -# Setup reference ratio to be used in calculation of binary
+!> - Setup reference ratio to be used in calculation of binary
 !! species parameter in lower atmosphere.
 
           rfrate(k,1,1) = chi_mls(1,jp(k)) / chi_mls(2,jp(k))
@@ -2384,7 +2384,7 @@
           indself(k) = 0
           selffrac(k) = f_zero
 
-!> -# Setup reference ratio to be used in calculation of binary
+!> - Setup reference ratio to be used in calculation of binary
 !! species parameter in upper atmosphere.
 
           rfrate(k,1,1) = chi_mls(1,jp(k)) / chi_mls(2,jp(k))
@@ -2395,7 +2395,7 @@
 
         endif
 
-!> -# Rescale \a selffac and \a forfac for use in taumol.
+!> - Rescale \a selffac and \a forfac for use in taumol.
 
         selffac(k) = colamt(k,1) * selffac(k)
         forfac(k)  = colamt(k,1) * forfac(k)
@@ -2614,7 +2614,7 @@
         radtotd = f_zero
         radclrd = f_zero
 
-!> -# Downward radiative transfer loop.
+!> - Downward radiative transfer loop.
 
         do k = nlay, 1, -1
 
@@ -2693,7 +2693,7 @@
 
         enddo   ! end do_k_loop
 
-!> -# Compute spectral emissivity & reflectance, include the
+!> - Compute spectral emissivity & reflectance, include the
 !!    contribution of spectrally varying longwave emissivity and
 !!     reflection from the surface to the upward radiative transfer.
 
@@ -2703,15 +2703,15 @@
         reflct = f_one - semiss(ib)
         rad0 = semiss(ib) * fracs(ig,1) * pklay(ib,0)
 
-!> -# Compute total sky radiance.
+!> - Compute total sky radiance.
         radtotu = rad0 + reflct*radtotd
         toturad(0,ib) = toturad(0,ib) + radtotu
 
-!> -# Compute clear sky radiance
+!> - Compute clear sky radiance
         radclru = rad0 + reflct*radclrd
         clrurad(0,ib) = clrurad(0,ib) + radclru
 
-!> -# Upward radiative transfer loop.
+!> - Upward radiative transfer loop.
 
         do k = 1, nlay
           clfr = cldfrc(k)
@@ -2747,7 +2747,7 @@
 
       enddo   ! end do_ig_loop
 
-!> -# Process longwave output from band for total and clear streams.
+!> - Process longwave output from band for total and clear streams.
 !!    Calculate upward, downward, and net flux.
 
       flxfac = wtdiff * fluxfac
@@ -3000,7 +3000,7 @@
 
         if (cldfrc(k) > eps) then
 
-!> -# Setup maximum/random cloud overlap.
+!> - Setup maximum/random cloud overlap.
 
           if (cldfrc(k+1) >= cldfrc(k)) then
             if (lstcldu(k)) then
@@ -3144,7 +3144,7 @@
 
       enddo
 
-!> -# Initialize for radiative transfer
+!> - Initialize for radiative transfer
 
       do ib = 1, NBANDS
         do k = 0, NLAY
@@ -3170,7 +3170,7 @@
         radtotd = f_zero
         radclrd = f_zero
 
-!> -# Downward radiative transfer loop:
+!> - Downward radiative transfer loop:
 
         do k = nlay, 1, -1
 
@@ -3267,7 +3267,7 @@
 
         enddo   ! end do_k_loop
 
-!> -# Compute spectral emissivity & reflectance, include the
+!> - Compute spectral emissivity & reflectance, include the
 !!    contribution of spectrally varying longwave emissivity and
 !!    reflection from the surface to the upward radiative transfer.
 
@@ -3277,15 +3277,15 @@
         reflct = f_one - semiss(ib)
         rad0 = semiss(ib) * fracs(ig,1) * pklay(ib,0)
 
-!> -# Compute total sky radiance.
+!> - Compute total sky radiance.
         radtotu = rad0 + reflct*radtotd
         toturad(0,ib) = toturad(0,ib) + radtotu
 
-!> -# Compute clear sky radiance.
+!> - Compute clear sky radiance.
         radclru = rad0 + reflct*radclrd
         clrurad(0,ib) = clrurad(0,ib) + radclru
 
-!> -# Upward radiative transfer loop:
+!> - Upward radiative transfer loop:
 
         do k = 1, nlay
 
@@ -3339,7 +3339,7 @@
 
       enddo   ! end do_ig_loop
 
-!> -# Process longwave output from band for total and clear streams.
+!> - Process longwave output from band for total and clear streams.
 !! calculate upward, downward, and net flux.
 
       flxfac = wtdiff * fluxfac
@@ -3589,7 +3589,7 @@
         radtotd = f_zero
         radclrd = f_zero
 
-!> -# Downward radiative transfer loop.
+!> - Downward radiative transfer loop.
 !!\n  - Clear sky, gases contribution
 !!\n  - Total sky, gases+clouds contribution
 !!\n  - Cloudy layer
@@ -3673,7 +3673,7 @@
 
         enddo   ! end do_k_loop
 
-!> -# Compute spectral emissivity & reflectance, include the
+!> - Compute spectral emissivity & reflectance, include the
 !!    contribution of spectrally varying longwave emissivity and
 !!    reflection from the surface to the upward radiative transfer.
 
@@ -3683,15 +3683,15 @@
         reflct = f_one - semiss(ib)
         rad0 = semiss(ib) * fracs(ig,1) * pklay(ib,0)
 
-!> -# Compute total sky radiance.
+!> - Compute total sky radiance.
         radtotu = rad0 + reflct*radtotd
         toturad(0,ib) = toturad(0,ib) + radtotu
 
-!> -# Compute clear sky radiance.
+!> - Compute clear sky radiance.
         radclru = rad0 + reflct*radclrd
         clrurad(0,ib) = clrurad(0,ib) + radclru
 
-!> -# Upward radiative transfer loop.
+!> - Upward radiative transfer loop.
 !!\n  - Compute total sky radiance
 !!\n  - Compute clear sky radiance
 
@@ -3732,7 +3732,7 @@
 
       enddo   ! end do_ig_loop
 
-!> -# Process longwave output from band for total and clear streams.
+!> - Process longwave output from band for total and clear streams.
 !!    Calculate upward, downward, and net flux.
 
       flxfac = wtdiff * fluxfac
@@ -3751,7 +3751,7 @@
         totdclfl(k) = totdclfl(k) * flxfac
       enddo
 
-!> -# Calculate net fluxes and heating rates.
+!> - Calculate net fluxes and heating rates.
       fnet(0) = totuflux(0) - totdflux(0)
 
       do k = 1, nlay
@@ -3760,7 +3760,7 @@
         htr (k) = (fnet(k-1) - fnet(k)) * rfdelp(k)
       enddo
 
-!> -# Optional clear sky heating rates.
+!> - Optional clear sky heating rates.
       if ( lhlw0 ) then
         fnetc(0) = totuclfl(0) - totdclfl(0)
 
@@ -3770,7 +3770,7 @@
         enddo
       endif
 
-!> -# Optional spectral band heating rates.
+!> - Optional spectral band heating rates.
       if ( lhlwb ) then
         do ib = 1, nbands
           fnet(0) = (toturad(0,ib) - totdrad(0,ib)) * flxfac

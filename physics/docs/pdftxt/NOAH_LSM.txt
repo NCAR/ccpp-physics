@@ -1,0 +1,46 @@
+/**
+\page GFS_NOAH Noah Land Surface Model
+\section des_noah  Description
+ Land-atmosphere interactions are a main driver of Earth's surface
+ water and energy budgets. The importance of the land surface is
+ rather intuitive, and has been demonstrated not only in terms of
+ predictability on daily to seasonal timescale (Betts et al. (2017) \cite betts_et_al_2017), but also in terms
+ of influencing extremes such as drought and heatwaves (Paimazumder and Done (2016) \cite paimazumder_and_done_2016),
+ PBL evolution and cloud
+ formation (Milovac et al. (2016) \cite milovac_et_al_2016) and afternoon
+ convection (Guillod et al. (2015) \cite guillod_et_al_2015), and
+ tropical cyclone re-intensification (Andersen and Shepherd (2014) \cite andersen_and_shepherd_2014). 
+ Other linkages, such as the role of soil
+ moisture (SM) or vegetation heterogeneity in mesoscale circulation
+  (Hsu et al. (2017) \cite hsu_et_al_2017) and planetary waves (Koster et al. (2014) \cite koster_et_al_2014), 
+ and those driven by land use
+ and land cover change or management (Hirsch et al. (2015) \cite hirsch_et_al_2015; 
+ Findell et al. (2017) \cite findell_et_al_2017) are topics of active research.
+
+ Figure 1 is a schematic of local land-atmosphere interactions in a
+ quiescent synoptic regime, including the soil moisture-precipitation
+ (SM-P) feedback pathways (Ek and Mahrt (1994) \cite ek_and_mahrt_1994; Ek and Holtslag (2004) \cite ek_and_holtslag_2004 ).  Solid arrows indicate a positive feedback
+ pathway, and large dashed arrows represent a negative feedback, while
+ red indicates radiative, black indicates surface layer and PBL, and
+ brown indicates land surface processes. Thin red and grey dashed lines
+ with arrows also represent positive feedbacks. The single horizontal
+ gay-dotted line (no arrows) indicates the top of the PBL, and the seven
+ small vertical dashed lines (no arrows) represent precipitation
+ \image html Noah_LA_interaction.png "Figure 1: Local Land-atmosphere Interaction (courtesy of Michael Ek)" width=900
+Recently, the land surface updates in 2017 GFS operational physics includes:
+ - IGBP 20-type 1-km land classification
+ - STASGO 19-type 1-km soil classification
+ - MODIS-based snow free albedo
+ - MODIS-based maximum snow albedo
+ - Diurnal albedo treatment
+ - Unify snow cover, albedo between radiation and land surface model
+ - Increase ground heat flux under deep snow
+ - Upgrade surface layer parameterization scheme \ref GFS_SFCLYR to modify the roughness-length formulation and introduce a stability parameter constraint in the Monin-Obukhov similarity theory to prevent the land-atmosphere system from fully decoupling leading to excessive cooling of 2m temperature during sunset
+ \image html land_dataset.png "Figure 2: Land Data Sets Used in NCEP Modeling Systems" width=900
+
+\section intra_noah Intraphysics Communication
+- \ref arg_table_lsm_noah_run
+
+\section gen_al_noah General Algorithm
+- lsm_noah::lsm_noah_run
+*/

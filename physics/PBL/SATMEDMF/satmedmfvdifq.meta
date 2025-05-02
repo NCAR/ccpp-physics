@@ -518,6 +518,14 @@
   type = real
   kind = kind_phys
   intent = out
+[tkeh]
+  standard_name = vertical_turbulent_kinetic_energy_at_interface
+  long_name = vertical turbulent kinetic energy at model layer interfaces
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [dkt]
   standard_name = atmosphere_heat_diffusivity
   long_name = atmospheric heat diffusivity

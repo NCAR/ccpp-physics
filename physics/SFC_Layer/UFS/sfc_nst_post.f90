@@ -1,6 +1,7 @@
 !>  \file sfc_nst_post.f90
-!!  This file contains code to be executed after the GFS NSST model.
+!!  This file contains code to be executed after the near-surface sea temperature scheme.
 
+!> This module contains code to be executed after the near-surface sea temperature scheme
 module sfc_nst_post
 
   use machine               , only : kind_phys, kp => kind_phys
@@ -32,8 +33,7 @@ contains
     real (kind=kind_phys), intent(in) :: rlapse, tgice
     real (kind=kind_phys), dimension(:), intent(in) :: oro, oro_uf
     integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
-    real (kind=kind_phys), dimension(:), intent(in) :: xlon
-    real (kind=kind_phys), dimension(:), intent(in), optional :: xt, xz, dt_cool, z_c, tref
+    real (kind=kind_phys), dimension(:), intent(in) :: xt, xz, dt_cool, z_c, tref, xlon
 
     !  ---  input/outputs:
     real (kind=kind_phys), dimension(:), intent(inout) :: tsurf_wat, tsfc_wat

@@ -1,6 +1,7 @@
 !>\file rrtmgp_aerosol_optics.F90
 !!
 
+!> This module contains aerosol optics properties for RRTMGP
 module rrtmgp_aerosol_optics
   use machine,                   only: kind_phys
   use radiation_tools,           only: check_error_msg
@@ -15,13 +16,7 @@ module rrtmgp_aerosol_optics
 
 contains
 
-  ! #########################################################################################
-  ! SUBROUTINE rrtmgp_aerosol_optics_run()
-  ! #########################################################################################
-
-!>\defgroup rrtmgp_aerosol_optics_mod GFS RRTMGP Aerosol Optics Module
-!> @{
-!! \section arg_table_rrtmgp_aerosol_optics_run
+!> \section arg_table_rrtmgp_aerosol_optics_run Argument Table
 !! \htmlinclude rrtmgp_aerosol_optics_run.html
 !!
   subroutine rrtmgp_aerosol_optics_run(doSWrad, doLWrad, nCol, nLev, nDay, idxday, p_lev,   &
@@ -50,7 +45,7 @@ contains
          lon,                   & ! Longitude
          lat,                   & ! Latitude
          lsmask                   ! Land/sea/sea-ice mask
-    real(kind_phys), dimension(:,:),intent(in), optional :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          p_lay,                 & ! Pressure @ layer-centers (Pa)
          tv_lay,                & ! Virtual-temperature @ layer-centers (K)
          relhum                   ! Relative-humidity @ layer-centers
@@ -60,7 +55,7 @@ contains
          tracer                   ! trace gas concentrations
     real(kind_phys), dimension(:, :,:),intent(in) :: &
          aerfld                   ! aerosol input concentrations
-    real(kind_phys), dimension(:,:),intent(in), optional :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          p_lev                    ! Pressure @ layer-interfaces (Pa)
     real (kind=kind_phys), dimension(:,:), intent(out) :: &
          ext550                   ! 3d optical extinction for total aerosol species
@@ -125,5 +120,4 @@ contains
     endif
 
   end subroutine rrtmgp_aerosol_optics_run
-!> @}  
 end module rrtmgp_aerosol_optics

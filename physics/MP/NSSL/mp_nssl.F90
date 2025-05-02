@@ -3,7 +3,8 @@
 
 
 !>\defgroup nsslmp NSSL MP Module
-!! This module contains the front end to NSSL microphysics scheme.
+
+!> This module contains the front end to NSSL microphysics scheme.
 module mp_nssl
 
     use machine, only : kind_phys
@@ -68,12 +69,12 @@ module mp_nssl
          real(kind_phys),           intent(inout) :: qi (:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: qs (:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: qh (:,:) !(1:ncol,1:nlev) graupel
-         real(kind_phys),           intent(inout), optional :: ccw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: ccw(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: crw(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: cci(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: csw(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: chw(:,:) !(1:ncol,1:nlev) graupel number 
-         real(kind_phys),           intent(inout), optional :: vh (:,:) !(1:ncol,1:nlev) graupel volume 
+         real(kind_phys),           intent(inout) :: vh (:,:) !(1:ncol,1:nlev) graupel volume 
 
          ! Local variables: dimensions used in nssl_init
          integer               :: ims,ime, jms,jme, kms,kme, nx, nz, i,k
@@ -82,7 +83,6 @@ module mp_nssl
          real(kind_phys), parameter :: qmin = 1.e-12
          integer :: ierr
          logical :: missing_vars = .False.
-         
 
  ! Initialize the CCPP error handling variables
         errflg = 0
@@ -161,6 +161,7 @@ module mp_nssl
                 nssl_alphah=nssl_alphah,                                                    &
                 nssl_alphahl=nssl_alphahl,                                                  &
                 nssl_cccn=nssl_cccn,                                                        &
+                nssl_ccn_on=nssl_ccn_on,                                                    &
                 errflg=errflg,myrank=mpirank,mpiroot=mpiroot)
 
          ! For restart runs, the init is done here
@@ -232,13 +233,13 @@ module mp_nssl
          real(kind_phys),           intent(inout) :: qs (:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: qh (:,:) !(1:ncol,1:nlev) graupel
          real(kind_phys),           intent(inout), optional :: qhl(:,:) !(1:ncol,1:nlev) hail
-         real(kind_phys),           intent(inout), optional :: ccw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: ccw(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: crw(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: cci(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: csw(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: chw(:,:) !(1:ncol,1:nlev) graupel number 
          real(kind_phys),           intent(inout), optional :: chl(:,:) !(1:ncol,1:nlev) hail number
-         real(kind_phys),           intent(inout), optional :: vh (:,:) !(1:ncol,1:nlev) graupel volume 
+         real(kind_phys),           intent(inout) :: vh (:,:) !(1:ncol,1:nlev) graupel volume 
          real(kind_phys),           intent(inout), optional :: vhl(:,:) !(1:ncol,1:nlev) hail volume
          real(kind_phys),           intent(inout), optional :: zrw(:,:) !(1:ncol,1:nlev) rain reflectivity
          real(kind_phys),           intent(inout), optional :: zhw(:,:) !(1:ncol,1:nlev) graupel reflectivity
@@ -252,10 +253,10 @@ module mp_nssl
          real(kind_phys),           intent(in   ) :: dtp
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
          real(kind_phys),           intent(  out) :: prcp   (:) !(1:ncol)
-         real(kind_phys),           intent(  out), optional :: rain   (:) !(1:ncol)
-         real(kind_phys),           intent(  out), optional :: graupel(:) !(1:ncol)
-         real(kind_phys),           intent(  out), optional :: ice    (:) !(1:ncol)
-         real(kind_phys),           intent(  out), optional :: snow   (:) !(1:ncol)
+         real(kind_phys),           intent(  out) :: rain   (:) !(1:ncol)
+         real(kind_phys),           intent(  out) :: graupel(:) !(1:ncol)
+         real(kind_phys),           intent(  out) :: ice    (:) !(1:ncol)
+         real(kind_phys),           intent(  out) :: snow   (:) !(1:ncol)
          real(kind_phys),           intent(  out) :: sr     (:) !(1:ncol)
          ! Radar reflectivity
          real(kind_phys),           intent(inout) :: refl_10cm(:,:) !(1:ncol,1:nlev)

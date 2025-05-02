@@ -1,8 +1,8 @@
 !> \file satmedmfvdifq.F
-!! This file contains the CCPP-compliant SATMEDMF scheme (updated version) which
+
+!> This file contains the CCPP-compliant SATMEDMF scheme (updated version) which
 !! computes subgrid vertical turbulence mixing using scale-aware TKE-based moist
 !! eddy-diffusion mass-flux (TKE-EDMF) parameterization (by Jongil Han).
-
       module satmedmfvdifq
       use mfpbltq_mod
       use tridi_mod
@@ -83,7 +83,7 @@
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
-     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,                &
+     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,tkeh,           &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,tc_pbl,                                    &
 !IVAI: canopy inputs from AQM                      
@@ -123,7 +123,7 @@
      &                                     cclu(:), cpopu(:)
       !----------------------------------------------
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
-     &                     tdt(:,:),    rtg(:,:,:)
+     &                     tdt(:,:),    rtg(:,:,:),    tkeh(:,:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(:,:),     v1(:,:),                        &
      &                     usfco(:),    vsfco(:),                       &
@@ -168,7 +168,7 @@
       integer lcld(im),kcld(im),krad(im),mrad(im)
       integer kx1(im), kb1(im), kpblx(im)
 !
-      real(kind=kind_phys) tke(im,km), tkeh(im,km-1), e2(im,0:km)
+      real(kind=kind_phys) tke(im,km), tkei(im,km-1), e2(im,0:km)
 !
       real(kind=kind_phys) theta(im,km),thvx(im,km),  thlvx(im,km),
      &                     qlx(im,km),  thetae(im,km),thlx(im,km),
@@ -408,6 +408,7 @@
       do k=1,km
         do i=1,im
           tke(i,k) = max(q1(i,k,ntke), tkmin)
+          tkeh(i,k) = 0
         enddo
       enddo
       do k=1,km1
@@ -1791,7 +1792,7 @@
 !
       do k=1,kps
         do i=1,im
-          tkeh(i,k) = 0.5 * (tke(i,k)+tke(i,k+1))
+          tkei(i,k) = 0.5 * (tke(i,k)+tke(i,k+1))
         enddo
       enddo
 
@@ -1813,7 +1814,7 @@
       do k = 1, kps
         do i = 1, im
           kmx = max(kpbl(i), krad(i))
-          e_half(i,k) = tkeh(i,k)
+          e_half(i,k) = tkei(i,k)
           if((pcnvflg(i) .or. scuflg(i)) .and. (k < kmx)) then
             tem = 0.
             if(pcnvflg(i) .and. k < kpbl(i)) then
@@ -1829,14 +1830,14 @@
      &               rrkp = e_diff(i,k+1) / e_diff(i,k)
               phkp = (rrkp+abs(rrkp)) / (1.+abs(rrkp))
               e_half(i,k) = tke(i,k+1) +
-     &                   phkp*(tkeh(i,k)-tke(i,k+1))
+     &                   phkp*(tkei(i,k)-tke(i,k+1))
             elseif (tem < 0.) then
               rrkp = 0.
               if(abs(e_diff(i,k)) > 1.e-22)
      &               rrkp = e_diff(i,k-1) / e_diff(i,k)
               phkp = (rrkp+abs(rrkp)) / (1.+abs(rrkp))
               e_half(i,k) = tke(i,k) +
-     &                  phkp*(tkeh(i,k)-tke(i,k))
+     &                  phkp*(tkei(i,k)-tke(i,k))
             endif
           endif
         enddo

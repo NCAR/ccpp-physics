@@ -1,8 +1,8 @@
 /**
-\page NSSLMICRO_page NSSL 2-moment Cloud Microphysics Scheme
+\page NSSLMICRO_page NSSL 2/3-moment Cloud Microphysics Scheme
 \section nssl2m_descrp Description
 
-The NSSL 2/3-moment bulk microphysical parameterization scheme that describes form and phase changes among a range of liquid and ice hydrometeors, as described in Mansell et al. (2010) \cite Mansell_etal_2010, Mansell and Ziegler (2013) \cite Mansell_2013, and Mansell et al. (2020) \cite Mansell_etal_2020. The microphysical parameterization predicts the mass mixing ratio and number concentration of cloud droplets, raindrops, cloud ice crystals (columns), snow particles (including large crystals and aggregates), graupel, and (optionally) hail. Optionally, a third moment (reflectivity or 6th moment) of rain, graupel, and hail can be activated.
+The NSSL 2/3-moment bulk microphysical parameterization scheme that describes form and phase changes among a range of liquid and ice hydrometeors, as described in Mansell et al. (2010) \cite Mansell_etal_2010, Mansell and Ziegler (2013) \cite Mansell_2013, and Mansell et al. (2020) \cite Mansell_2020. The microphysical parameterization predicts the mass mixing ratio and number concentration of cloud droplets, raindrops, cloud ice crystals (columns), snow particles (including large crystals and aggregates), graupel, and (optionally) hail. Optionally, a third moment (reflectivity or 6th moment) of rain, graupel, and hail can be activated.
 
 The graupel and hail particle densities are also calculated by predicting the total particle volume. The graupel category therefore emulates a range of characteristics from high-density frozen drops (includes small hail) to low-density graupel (from rimed ice crystals/snow) in its size and density spectrum. The hail category is designed to simulate larger hail sizes. Hail is only produced from higher-density large graupel.
 
@@ -10,7 +10,13 @@ Hydrometeor size distributions are assumed to follow a gamma functional form. Mi
 
 Cloud concentration nuclei (CCN) concentration is predicted as in Mansell et al. (2010) \cite Mansell_etal_2010 with a bulk activation spectrum approximating small aerosols. The model tracks the number of unactivated CCN, and the local CCN concentration is depleted as droplets are activated, either at cloud base or in cloud. The CCN are subjected to advection and subgrid turbulent mixing but have no other interactions with hydrometeors; for example, scavenging by raindrops is omitted. CCN are restored by droplet evaporation and by a gradual regeneration when no hydrometeors are present. Aerosol sensitivity is enhanced by explicitly treating droplet condensation instead of using a saturation adjustment. Supersaturation (within reason) is allowed to persist in updraft with low droplet concentration.
 
-Excessive size sorting (common in 2-moment schemes) is effectively controlled by an adaptive breakup method that prevents reflectivity growth by sedimentation (Mansell 2010 \cite Mansell_2010). Activating the 3-moment scheme provides a natural sedimentation feedback that narrows the size spectrum as size-sorting procedes without the the artificial breakup induced by the 2-moment scheme.
+Excessive size sorting (common in 2-moment schemes) is effectively controlled by an adaptive breakup method that prevents reflectivity growth by sedimentation (Mansell 2010 \cite Mansell_2010). Activating the 3-moment scheme provides a natural sedimentation feedback that narrows the size spectrum as size-sorting procedes without the the artificial breakup induced by the 2-moment scheme. 
+
+2025: 
+  - More accurate saturation mixing ratio calculation (iqvsopt=1)
+  - Changed default droplet renucleation to irenuc=5, which allows extra nucleation at high supersaturation
+  - A default explicit rain breakup for 3-moment rain (irainbreak=2) has been added to reduce excessive median drop diameters in rain cores, which in turn increases evaporation and cool pool temperature deficits (were too warm). 
+  - Imposed reflectivity conservation in graupel->hail conversion (ihlcnh=3) and Bigg freezing (both 2- and 3-moment)
 
 The NSSL scheme is designed with deep (severe) convection in mind at grid spacings of up to 4 km, but can also be run at larger grid spacing as needed for nesting etc. It is also able to capture non-severe and winter weather.
 

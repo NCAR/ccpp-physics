@@ -68,8 +68,7 @@
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 
-!>\ingroup thompson_radar
-!!
+!>
       subroutine radar_init
 
       IMPLICIT NONE
@@ -189,13 +188,11 @@
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 
-!>\ingroup thompson_radar
-      COMPLEX*16 FUNCTION m_complex_water_ray(lambda,T)
-
 !>      Complex refractive Index of Water as function of Temperature T
 !!      [deg C] and radar wavelength lambda [m]; valid for
 !!      lambda in [0.001,1.0] m; T in [-10.0,30.0] deg C
 !!      after Ray (1972)
+      COMPLEX*16 FUNCTION m_complex_water_ray(lambda,T)
 
       IMPLICIT NONE
       DOUBLE PRECISION, INTENT(IN):: T,lambda
@@ -264,8 +261,7 @@
 
 !+---+-----------------------------------------------------------------+
 
-!>ingroup thompson_radar
-!!
+!>
       subroutine rayleigh_soak_wetgraupel (x_g, a_geo, b_geo, fmelt,    &
                      meltratio_outside, m_w, m_i, lambda, C_back,       &
                      mixingrule,matrix,inclusion,                       &
@@ -362,8 +358,7 @@
       end subroutine rayleigh_soak_wetgraupel
 
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_radar
-!!
+!>
       complex*16 function get_m_mix_nested (m_a, m_i, m_w, volair,      &
                      volice, volwater, mixingrule, host, matrix,        &
                      inclusion, hostmatrix, hostinclusion, cumulerror)
@@ -493,8 +488,7 @@
       end function get_m_mix_nested
 
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_radar
-!!
+!>
       COMPLEX*16 FUNCTION get_m_mix (m_a, m_i, m_w, volair, volice,     &
                      volwater, mixingrule, matrix, inclusion, error)
 
@@ -535,8 +529,7 @@
       END FUNCTION get_m_mix
 
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_radar
-!!
+!>
       COMPLEX*16 FUNCTION m_complex_maxwellgarnett(vol1, vol2, vol3,    &
                      m1, m2, m3, inclusion, error)
 
@@ -584,7 +577,7 @@
       END FUNCTION m_complex_maxwellgarnett
 
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_radar
+!>
       REAL FUNCTION GAMMLN(XX)
 !     --- RETURNS THE VALUE LN(GAMMA(XX)) FOR XX > 0.
       IMPLICIT NONE
@@ -610,7 +603,7 @@
       END FUNCTION GAMMLN
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 !+---+-----------------------------------------------------------------+
-!>\ingroup thompson_radar
+!>
       REAL FUNCTION WGAMMA(y)
 
       IMPLICIT NONE

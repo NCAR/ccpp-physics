@@ -1,7 +1,7 @@
 !>\file cu_gf_driver.F90
 !! This file is scale-aware Grell-Freitas cumulus scheme driver.
 
-
+!> This module contains the scale-aware Grell-Freitas cumulus scheme driver.
 module cu_gf_driver
 
    ! DH* TODO: replace constants with arguments to cu_gf_driver_run
@@ -82,7 +82,7 @@ contains
       integer            :: ichoicem=13  ! 0 2 5 13
       integer            :: ichoice_s=3  ! 0 1 2 3
       integer, intent(in) :: spp_cu_deep ! flag for using SPP perturbations
-      real(kind_phys), dimension(:,:), intent(in),optional ::        &
+      real(kind_phys), dimension(:,:), optional, intent(in) ::        &
      &                    spp_wts_cu_deep
       real(kind=kind_phys) :: spp_wts_cu_deep_tmp
 
@@ -129,7 +129,7 @@ contains
    integer, dimension (:), intent(out) :: hbot,htop,kcnv
    integer, dimension (:), intent(in)  :: xland
    real(kind=kind_phys),    dimension (:), intent(in) :: pbl
-   real(kind=kind_phys),    dimension (:), intent(in), optional :: maxMF
+   real(kind=kind_phys),    dimension (:), intent(in) :: maxMF
 !$acc declare copyout(hbot,htop,kcnv)
 !$acc declare copyin(xland,pbl)
    integer, dimension (im) :: tropics
@@ -220,10 +220,10 @@ contains
    real(kind=kind_phys), dimension (im,km) :: qcheck,zo,t2d,q2d,po,p2d,rhoi,clw_ten
    real(kind=kind_phys), dimension (im,km) :: tn,qo,tshall,qshall,dz8w,omeg
    real(kind=kind_phys), dimension (im)    :: z1,psur,cuten,cutens,cutenm
-   real(kind=kind_phys), dimension (im)    :: umean,vmean,pmean
+   real(kind=kind_phys), dimension (im)    :: umean,vmean,pmean,mc_thresh
    real(kind=kind_phys), dimension (im)    :: xmbs,xmbs2,xmb,xmbm,xmb_dumm,mconv
 !$acc declare create(qcheck,zo,t2d,q2d,po,p2d,rhoi,clw_ten,tn,qo,tshall,qshall,dz8w,omeg, &
-!$acc                z1,psur,cuten,cutens,cutenm,umean,vmean,pmean,           &
+!$acc                z1,psur,cuten,cutens,cutenm,umean,vmean,pmean,mc_thresh,           &
 !$acc                xmbs,xmbs2,xmb,xmbm,xmb_dumm,mconv)
 
    integer :: i,j,k,icldck,ipr,jpr,jpr_deep,ipr_deep,uidx,vidx,tidx,qidx
@@ -596,6 +596,7 @@ contains
       hfx(i)=hfx2(i)*cp*rhoi(i,1)
       qfx(i)=qfx2(i)*xlv*rhoi(i,1)
       dx(i) = sqrt(garea(i))
+      mc_thresh(i)=3.25/dx(i)
      enddo
 
      do i=its,itf
@@ -770,7 +771,7 @@ contains
                                ! betwee -1 and +1
               ,do_cap_suppress_here,cap_suppress_j &
               ,k22m          &
-              ,jminm,kdt,tropics)
+              ,jminm,kdt,mc_thresh)
 !$acc kernels
             do i=its,itf
              do k=kts,ktf
@@ -856,7 +857,7 @@ contains
                                ! betwee -1 and +1
               ,do_cap_suppress_here,cap_suppress_j &
               ,k22          &
-              ,jmin,kdt,tropics)
+              ,jmin,kdt,mc_thresh)
           jpr=0
           ipr=0
 !$acc kernels
