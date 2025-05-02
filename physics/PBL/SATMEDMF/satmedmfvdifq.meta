@@ -754,33 +754,3 @@
   dimensions = ()
   type = integer
   intent = out
-#[naux2d]
-#  standard_name = number_of_xy_dimensioned_auxiliary_arrays
-#  long_name = number of 2d auxiliary arrays to output (for debugging)
-#  units = count
-#  dimensions = ()
-#  type = integer
-#  intent = out
-#[naux3d]
-#  standard_name  = number_of_xyz_dimensioned_auxiliary_arrays
-#  long_name = number of 3d auxiliary arrays to output (for debugging)
-#  units = count
-#  dimensions = ()
-#  type = integer
-#  intent = out
-#[aux2d]
-#  standard_name = auxiliary_2d_arrays
-#  long_name = auxiliary 2d arrays to output (for debugging)
-#  units = none
-#  dimensions = (horizontal_loop_extent,number_of_3d_auxiliary_arrays)
-#  type = real
-#  kind = kind_phys
-#  intent = out
-#[aux3d]
-#  standard_name = auxiliary_3d_arrays
-#  long_name = auxiliary 3d arrays to output (for debugging)
-#  units = none
-#  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_3d_auxiliary_arrays)
-#  type = real
-#  kind = kind_phys
-#  intent = out
