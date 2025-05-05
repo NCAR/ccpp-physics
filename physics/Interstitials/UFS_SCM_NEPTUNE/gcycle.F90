@@ -36,7 +36,7 @@ contains
     character(len=*),     intent(in)    :: input_nml_file(:)
     logical,              intent(in)    :: use_ufo, nst_anl, frac_grid, cplflx
     real(kind=kind_phys), intent(in)    :: fhcyc, phour, landfrac(:), lakefrac(:), &
-                                           min_seaice, min_lakeice,oceanfrac, &
+                                           min_seaice, min_lakeice,oceanfrac(:), &
                                            lakefrac_threshold, xlat_d(:), xlon_d(:)
     real(kind=kind_phys), intent(inout), optional ::   &
                                            smois(:,:), &
