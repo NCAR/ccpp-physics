@@ -37,12 +37,19 @@ contains
 !!! different orientation for vertical
 !!! 1 is the highest level for ECMWF, 1 is the lowest level for GFS
 !---------------------------------------------------
-
 !      subroutine cires_ugwpv1_ngw_solv2(mpi_id, master, im, levs, kdt, dtp, &
 !                 tau_ngw, tm , um, vm, qm, prsl, prsi, zmet,  zmeti, prslk, &
 !                 xlatd, sinlat, coslat,                                     &
 !             pdudt, pdvdt, pdtdt, dked, zngw)
 
+! (C) Copyright 1989- ECMWF.
+!
+! This software is licensed under the terms of the Apache Licence Version 2.0
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+!
+! In applying this licence, ECMWF does not waive the privileges and immunities
+! granted to it by virtue of its status as an intergovernmental organisation
+! nor does it submit to any jurisdiction.
 
        subroutine ecmwf_ngw_emc(mpi_id, master, KLON, KLEV, kdt, PTSTEP, DX,        &
         tau_ngw, PTM11, PUM11, PVM11, qm1, PAPM11, PAPHM11, PGEO11,  zmeti1, prslk1, &
