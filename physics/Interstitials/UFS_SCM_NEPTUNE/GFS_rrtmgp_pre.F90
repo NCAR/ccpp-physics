@@ -40,9 +40,9 @@ contains
     integer, intent(in) :: &
          nGases       !< Number of active gases in RRTMGP
     character(len=*), intent(in) :: &
-         active_gases ! List of active gases from namelist
+         active_gases !< List of active gases from namelist
     character(len=*), dimension(:), intent(out), optional :: &
-         active_gases_array ! List of active gases from namelist as array
+         active_gases_array !< List of active gases from namelist as array
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -144,9 +144,9 @@ contains
          prslk,             & !< Exner function at model layer centers (1)
          prsi                 !< Pressure at model-interfaces (Pa)
     real(kind_phys), dimension(:,:,:), intent(in) :: & 
-         qgrs                 ! Tracer concentrations (kg/kg)
+         qgrs                 !< Tracer concentrations (kg/kg)
     character(len=*), dimension(:), intent(in), optional :: &
-         active_gases_array   ! List of active gases from namelist as array
+         active_gases_array   !< List of active gases from namelist as array
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -168,20 +168,20 @@ contains
          coszen,            & !< Cosine of SZA
          coszdg               !< Cosine of SZA, daytime
     integer, dimension(:), intent(inout) ::  &
-         idxday               ! Indices for daylit points 
+         idxday               !< Indices for daylit points 
     real(kind_phys), dimension(:,:), intent(inout), optional :: &
-         p_lay,             & ! Pressure at model-layer
-         t_lay,             & ! Temperature at model layer
-         q_lay,             & ! Water-vapor mixing ratio (kg/kg)
-         tv_lay,            & ! Virtual temperature at model-layers 
-         relhum,            & ! Relative-humidity at model-layers   
-         qs_lay,            & ! Saturation vapor pressure at model-layers
-         deltaZ,            & ! Layer thickness (m)
-         deltaZc,           & ! Layer thickness (m) (between layer centers)
-         deltaP,            & ! Layer thickness (Pa)
-         p_lev,             & ! Pressure at model-interface
-         sfc_emiss_byband,  & !
-         t_lev,             & ! Temperature at model-interface
+         p_lay,             & !< Pressure at model-layer
+         t_lay,             & !< Temperature at model layer
+         q_lay,             & !< Water-vapor mixing ratio (kg/kg)
+         tv_lay,            & !< Virtual temperature at model-layers 
+         relhum,            & !< Relative-humidity at model-layers   
+         qs_lay,            & !< Saturation vapor pressure at model-layers
+         deltaZ,            & !< Layer thickness (m)
+         deltaZc,           & !< Layer thickness (m) (between layer centers)
+         deltaP,            & !< Layer thickness (Pa)
+         p_lev,             & !< Pressure at model-interface
+         sfc_emiss_byband,  & !<
+         t_lev,             & !< Temperature at model-interface
          vmr_o2, vmr_h2o, vmr_o3, vmr_ch4, vmr_n2o, vmr_co2
 
     ! Local variables

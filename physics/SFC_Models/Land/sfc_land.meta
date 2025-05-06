@@ -268,7 +268,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in 
+  intent = in
   optional = True
 [q2mp_lnd]
   standard_name = specific_humidity_at_2m_over_land_from_land
@@ -313,7 +313,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
   optional = True
 [chh_lnd]
   standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land_from_land
@@ -333,6 +333,14 @@
   kind = kind_phys
   intent = in
   optional = True
+[slc]
+  standard_name = volume_fraction_of_unfrozen_water_in_soil
+  long_name = volume fraction of unfrozen soil moisture
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_soil)
+  type = real
+  kind = kind_phys
+  intent = in
 [sncovr1]
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction

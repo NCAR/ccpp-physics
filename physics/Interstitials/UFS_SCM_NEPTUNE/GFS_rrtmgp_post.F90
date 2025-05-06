@@ -46,32 +46,32 @@ contains
          mbota,             & !< Vertical indices for low, middle and high cloud tops
          mtopa                !< ertical indices for low, middle and high cloud bases
     logical, intent(in) :: & 
-         doLWrad,           & ! Logical flags for lw radiation calls
-         doSWrad,           & ! Logical flags for sw radiation calls
-         do_lw_clrsky_hr,   & ! Output clear-sky LW heating-rate?
-         do_sw_clrsky_hr,   & ! Output clear-sky SW heating-rate? 
-         save_diag            ! Output radiation diagnostics?
+         doLWrad,           & !< Logical flags for lw radiation calls
+         doSWrad,           & !< Logical flags for sw radiation calls
+         do_lw_clrsky_hr,   & !< Output clear-sky LW heating-rate?
+         do_sw_clrsky_hr,   & !< Output clear-sky SW heating-rate? 
+         save_diag            !< Output radiation diagnostics?
     real(kind_phys), intent(in) :: &
          fhlwr,             & !< Frequency for LW radiation calls
          fhswr                !< Frequency for SW radiation calls
     real(kind_phys), dimension(:), intent(in) ::  &
-         tsfa,              & ! Lowest model layer air temperature for radiation (K)
-         coszen,            & ! Cosine(SZA)
-         coszdg,            & ! Cosine(SZA), daytime
-         sfc_alb_nir_dir,   & ! Surface albedo (direct) 
-         sfc_alb_nir_dif,   & ! Surface albedo (diffuse)
-         sfc_alb_uvvis_dir, & ! Surface albedo (direct)
-         sfc_alb_uvvis_dif    ! Surface albedo (diffuse)
+         tsfa,              & !< Lowest model layer air temperature for radiation (K)
+         coszen,            & !< Cosine(SZA)
+         coszdg,            & !< Cosine(SZA), daytime
+         sfc_alb_nir_dir,   & !< Surface albedo (direct) 
+         sfc_alb_nir_dif,   & !< Surface albedo (diffuse)
+         sfc_alb_uvvis_dir, & !< Surface albedo (direct)
+         sfc_alb_uvvis_dif    !< Surface albedo (diffuse)
     real(kind_phys), dimension(:,:), intent(in), optional :: &
-         p_lev,             & ! Pressure @ model layer-interfaces (Pa)
-         fluxlwUP_allsky,   & ! RRTMGP longwave all-sky flux      (W/m2)
-         fluxlwDOWN_allsky, & ! RRTMGP longwave all-sky flux      (W/m2)
-         fluxlwUP_clrsky,   & ! RRTMGP longwave clear-sky flux    (W/m2)
-         fluxlwDOWN_clrsky, & ! RRTMGP longwave clear-sky flux    (W/m2)
-         fluxswUP_allsky,   & ! RRTMGP shortwave all-sky flux     (W/m2)
-         fluxswDOWN_allsky, & ! RRTMGP shortwave all-sky flux     (W/m2)
-         fluxswUP_clrsky,   & ! RRTMGP shortwave clear-sky flux   (W/m2)
-         fluxswDOWN_clrsky    ! RRTMGP shortwave clear-sky flux   (W/m2)
+         p_lev,             & !< Pressure @ model layer-interfaces (Pa)
+         fluxlwUP_allsky,   & !< RRTMGP longwave all-sky flux      (W/m2)
+         fluxlwDOWN_allsky, & !< RRTMGP longwave all-sky flux      (W/m2)
+         fluxlwUP_clrsky,   & !< RRTMGP longwave clear-sky flux    (W/m2)
+         fluxlwDOWN_clrsky, & !< RRTMGP longwave clear-sky flux    (W/m2)
+         fluxswUP_allsky,   & !< RRTMGP shortwave all-sky flux     (W/m2)
+         fluxswDOWN_allsky, & !< RRTMGP shortwave all-sky flux     (W/m2)
+         fluxswUP_clrsky,   & !< RRTMGP shortwave clear-sky flux   (W/m2)
+         fluxswDOWN_clrsky    !< RRTMGP shortwave clear-sky flux   (W/m2)
     real(kind_phys), intent(in) :: &
          raddt                !< Radiation time step
     real(kind_phys), dimension(:,:), intent(in) :: &

@@ -38,11 +38,33 @@
    implicit none
 
    ! Inputs
-   integer             , intent(in)    :: im
-   logical             , intent(in)    :: cpllnd
-   logical             , intent(in)    :: cpllnd2atm
-   logical             , intent(in)    :: flag_iter(:)
-   logical             , intent(in)    :: dry(:)
+   integer             , intent(in) :: im
+   logical             , intent(in) :: flag_init
+   logical             , intent(in) :: flag_restart
+   logical             , intent(in) :: cpllnd
+   logical             , intent(in) :: cpllnd2atm
+   logical             , intent(in) :: flag_iter(:)
+   logical             , intent(in) :: dry(:)
+   real(kind=kind_phys), intent(in) :: t1(:)
+   real(kind=kind_phys), intent(in) :: q1(:)
+   real(kind=kind_phys), intent(in) :: prsl1(:)
+   real(kind=kind_phys), intent(in) :: prslki(:)
+   real(kind=kind_phys), intent(in) :: ps(:)
+   real(kind=kind_phys), intent(in) :: tskin(:)
+   real(kind=kind_phys), intent(in) :: wind(:)
+   real(kind=kind_phys), intent(in) :: cm(:)
+   real(kind=kind_phys), intent(in) :: ch(:)
+   real(kind=kind_phys), intent(in) :: dlwflx(:)
+   real(kind=kind_phys), intent(in) :: dswsfc(:)
+   real(kind=kind_phys), intent(in) :: sfalb(:)
+   real(kind=kind_phys), intent(in) :: sfcemis(:)
+   real(kind=kind_phys), intent(in) :: rd
+   real(kind=kind_phys), intent(in) :: eps
+   real(kind=kind_phys), intent(in) :: epsm1
+   real(kind=kind_phys), intent(in) :: rvrdm1
+   real(kind=kind_phys), intent(in) :: hvap
+   real(kind=kind_phys), intent(in) :: cp
+   real(kind=kind_phys), intent(in) :: con_sbc
    real(kind=kind_phys), intent(in), optional :: sncovr1_lnd(:)
    real(kind=kind_phys), intent(in), optional :: qsurf_lnd(:)
    real(kind=kind_phys), intent(in), optional :: evap_lnd(:)
@@ -56,6 +78,7 @@
    real(kind=kind_phys), intent(in), optional :: cmm_lnd(:)
    real(kind=kind_phys), intent(in), optional :: chh_lnd(:)
    real(kind=kind_phys), intent(in), optional :: zvfun_lnd(:)
+   real(kind=kind_phys), intent(in), optional :: slc(:,:)
    ! Inputs/Outputs
    real(kind=kind_phys), intent(inout) :: sncovr1(:)
    real(kind=kind_phys), intent(inout) :: qsurf(:)
