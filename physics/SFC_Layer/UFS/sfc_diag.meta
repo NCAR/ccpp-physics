@@ -2,7 +2,7 @@
   name = sfc_diag
   type = scheme
   dependencies_path = ../../
-  dependencies = tools/funcphys.f90,hooks/machine.F,hooks/physcons.F90
+  dependencies = tools/funcphys.f90,hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -91,6 +91,14 @@
   units = none
   dimensions = ()
   type = real
+  intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degrees Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
 [zf]
   standard_name = height_above_ground_at_lowest_model_layer
