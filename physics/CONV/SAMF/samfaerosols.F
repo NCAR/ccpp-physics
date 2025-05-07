@@ -34,7 +34,8 @@ c     -- input arguments
      &  eta, etad, zi, xlamue, xlamud
       real(kind=kind_phys), dimension(ix,km),       intent(in) :: delp
       real(kind=kind_phys), dimension(ix,km,ntr+2), intent(in) :: qtr
-      real(kind=kind_phys),                         intent(in) :: g, qamin
+      real(kind=kind_phys),                         intent(in) :: g
+      real(kind=kind_phys),                         intent(in) :: qamin
 c     -- output arguments
       real(kind=kind_phys), dimension(im,km,ntc),   intent(out) :: qaero
 
@@ -412,7 +413,7 @@ c               add negative mass to wet deposition
       subroutine samfshalcnv_aerosols(im, ix, km, itc, ntc, ntr, delt,
      &  cnvflg, kb, kmax, kbcon, ktcon, fscav,
      &  xmb, c0t, eta, zi, xlamue, xlamud, delp,
-     &  qtr, qaero, con_gg, qamin)
+     &  qtr, qaero, con_g, qamin)
 
       use machine , only : kind_phys
 
@@ -434,7 +435,8 @@ c     -- input arguments
      &  eta, zi, xlamue  !, xlamud
       real(kind=kind_phys), dimension(ix,km),       intent(in) :: delp
       real(kind=kind_phys), dimension(ix,km,ntr+2), intent(in) :: qtr
-      real(kind=kind_phys),                         intent(in) :: con_g, qamin
+      real(kind=kind_phys),                         intent(in) :: con_g
+      real(kind=kind_phys),                         intent(in) :: qamin
 c     -- output arguments
       real(kind=kind_phys), dimension(im,km,ntc),   intent(out) :: qaero
 
