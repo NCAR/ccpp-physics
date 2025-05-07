@@ -13,8 +13,6 @@ module cu_ntiedtke
      ! DH* TODO - replace with arguments to subroutine calls,
      ! this also requires redefining derived constants in the
      ! parameter section below
-     use physcons, only:rd=>con_rd, rv=>con_rv, g=>con_g, &
-   &       cpd=>con_cp, alv=>con_hvap, alf=>con_hfus
 
      implicit none
      real(kind=kind_phys),private :: rcpd,vtmpc1,als,                &
@@ -34,19 +32,15 @@ module cu_ntiedtke
      real(kind=kind_phys),parameter:: rtber = tmelt-5.
      real(kind=kind_phys),parameter:: rtice = tmelt-23.
      parameter(         &
-      rcpd=1.0/cpd,     &
-      zrg=1.0/g,        &
-      c2es=c1es*rd/rv,  &
-      als  = alv+alf,   &
       c5les=c3les*(tmelt-c4les),  &
-      c5ies=c3ies*(tmelt-c4ies),  &
-      r5alvcp=c5les*alv*rcpd,     &
-      r5alscp=c5ies*als*rcpd,     &
-      ralvdcp=alv*rcpd,           &
-      ralsdcp=als*rcpd,           &
-      ralfdcp=alf*rcpd,           &
-      vtmpc1=rv/rd-1.0,           &
-      rovcp = rd*rcpd )
+      c5ies=c3ies*(tmelt-c4ies))
+
+     real(kind=kind_phys) :: rd = 1.0E30_kind_phys
+     real(kind=kind_phys) :: rv = 1.0E30_kind_phys
+     real(kind=kind_phys) :: g = 1.0E30_kind_phys
+     real(kind=kind_phys) :: cpd = 1.0E30_kind_phys
+     real(kind=kind_phys) :: alv = 1.0E30_kind_phys
+     real(kind=kind_phys) :: alf = 1.0E30_kind_phys
 
 !     momtrans: momentum transport method ( 1 = IFS40r1 method; 2 = new method )
 !     -------
@@ -121,12 +115,16 @@ contains
 !! \htmlinclude cu_ntiedtke_init.html
 !!
       subroutine cu_ntiedtke_init(imfshalcnv, imfshalcnv_ntiedtke, imfdeepcnv,  &
-                          imfdeepcnv_ntiedtke,mpirank, mpiroot, errmsg, errflg)
+                          imfdeepcnv_ntiedtke, con_rd, con_rv, &
+                          con_g, con_cp, con_hvap, con_hfus, &
+                          mpirank, mpiroot, errmsg, errflg)
 
          implicit none
 
          integer,                   intent(in) :: imfshalcnv, imfshalcnv_ntiedtke
          integer,                   intent(in) :: imfdeepcnv, imfdeepcnv_ntiedtke
+         real(kind=kind_phys),      intent(in) :: con_rd, con_rv, con_g
+         real(kind=kind_phys),      intent(in) :: con_cp, con_hvap, con_hfus
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
          character(len=*),          intent(  out) :: errmsg
@@ -135,6 +133,26 @@ contains
          ! initialize ccpp error handling variables
          errmsg = ''
          errflg = 0
+
+         ! initialize variables using constants
+         rd = con_rd
+         rv = con_rv
+         g = con_g
+         cpd = con_cp
+         alv = con_hvap
+         alf = con_hfus
+
+         rcpd=1.0/cpd
+         zrg=1.0/g
+         c2es=c1es*rd/rv
+         als  = alv+alf
+         r5alvcp=c5les*alv*rcpd
+         r5alscp=c5ies*als*rcpd
+         ralvdcp=alv*rcpd
+         ralsdcp=als*rcpd
+         ralfdcp=alf*rcpd
+         vtmpc1=rv/rd-1.0
+         rovcp = rd*rcpd
 
          ! DH* temporary
          if (mpirank==mpiroot) then
@@ -4099,4 +4117,3 @@ contains
 !=================================================================================================================
  end module cu_ntiedtke
 !=================================================================================================================
-
