@@ -80,6 +80,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &   tsurf_wat, tsurf_lnd, tsurf_ice,  &  !intent(in)
      &    qsfc_wat,  qsfc_lnd,  qsfc_ice,  &  !intent(in)
      &              snowh_lnd, snowh_ice,  &  !intent(in)
+     &              con_g, con_cp,         &  !intent(in)
      &     znt_wat,   znt_lnd,   znt_ice,  &  !intent(inout)
      &     ust_wat,   ust_lnd,   ust_ice,  &  !intent(inout)
      &      cm_wat,    cm_lnd,    cm_ice,  &  !intent(inout)
@@ -104,8 +105,6 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 
 ! should be moved to inside the mynn:
       use machine , only : kind_phys
-      use physcons, only : cp     => con_cp,              &
-     &                     grav   => con_g
 
 !      USE module_sf_mynn, only : SFCLAY_mynn
 !tgs - info on iterations:
@@ -121,8 +120,6 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !-------------------------------------------------------------------
       implicit none
 !-------------------------------------------------------------------
-!  ---  derive more constant parameters:
-      real(kind_phys), parameter :: g_inv=1./grav
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -161,7 +158,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &                    tskin_wat, tskin_lnd, tskin_ice,  &
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,  &
      &                               snowh_lnd, snowh_ice
-
+      real(kind_phys), intent(in) :: con_cp, con_g
       real(kind_phys), dimension(:), intent(inout) ::       &
      &                      znt_wat,   znt_lnd,   znt_ice,  &
      &                      ust_wat,   ust_lnd,   ust_ice,  &
@@ -196,6 +193,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 
      real(kind_phys), dimension(im,levs) ::                 &
     &        dz, th, qv
+     real(kind_phys) :: cp, grav, g_inv
 
 !MYNN-1D
       INTEGER :: k, i
@@ -216,6 +214,10 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      cp = con_cp
+      grav = con_g
+      g_inv=1./grav
 
 !      if (lprnt) then
 !         write(0,*)"=============================================="

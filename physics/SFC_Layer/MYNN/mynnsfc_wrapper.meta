@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = mynnsfc_wrapper
   type = scheme
-  dependencies = ../../hooks/machine.F,../../hooks/physcons.F90,module_sf_mynn.F90
+  dependencies = ../../hooks/machine.F,module_sf_mynn.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -467,6 +467,22 @@
   long_name = water equivalent snow depth over ice
   units = mm
   dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_cp]
+  standard_name = specific_heat_of_dry_air_at_constant_pressure
+  long_name = specific heat of dry air at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
   type = real
   kind = kind_phys
   intent = in
