@@ -59,6 +59,7 @@
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
      &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,                & 
      &     sigmain,sigmaout,omegain,omegaout,betadcu,betamcu,betascu,   &
+     &     qamin,                                                       &
      &     errmsg,errflg)
 !
       use machine , only : kind_phys
@@ -90,7 +91,7 @@
       real(kind=kind_phys), intent(out) :: rn(:),                       &
      &   cnvw(:,:), cnvc(:,:), dt_mf(:,:)
 !
-      real(kind=kind_phys), intent(out) :: ud_mf(:,:)
+      real(kind=kind_phys), intent(out), optional :: ud_mf(:,:)
       real(kind=kind_phys), intent(inout), optional :: sigmaout(:,:),   &
      &   omegaout(:,:)
 
@@ -132,7 +133,7 @@
      &                     ptem,    ptem1
 !
       integer              kb(im), kb1(im), kbcon(im), kbcon1(im),
-     &                     ktcon(im), ktcon1(im), 
+     &                     ktcon(im), ktcon1(im),
      &                     kbm(im), kmax(im)
 !
       real(kind=kind_phys) aa1(im),     cina(im),
@@ -353,7 +354,7 @@ c
         xmb(i) = 0.
        enddo
       endif
-!!      
+!!
 !>  - Return to the calling routine if deep convection is present or the surface buoyancy flux is negative.
       totflg = .true.
       do i=1,im
@@ -373,7 +374,7 @@ c
 !>  - determine scale-aware rain conversion parameter decreasing with decreasing grid size
       do i=1,im
         if(gdx(i) < dxcrtc0) then
-          tem = gdx(i) / dxcrtc0 
+          tem = gdx(i) / dxcrtc0
           tem1 = tem**3
           c0(i) = c0(i) * tem1
         endif
@@ -1534,9 +1535,9 @@ c
                endif
             enddo
          enddo
-         
+
       else
-!     diagnostic updraft velocity 
+!     diagnostic updraft velocity
          do k = 2, km1
             do i = 1, im
                if (cnvflg(i)) then
@@ -1568,7 +1569,7 @@ c
          enddo
 
       endif !progomega
-     
+
 !  compute updraft velocity averaged over the whole cumulus
 !
 !> - Calculate the mean updraft velocity within the cloud (wc).
@@ -1684,7 +1685,7 @@ c
       enddo
       endif
 c
-     
+
 c--- compute precipitation efficiency in terms of windshear
 c
 !! - Calculate the wind shear and precipitation efficiency according to equation 58 in Fritsch and Chappell (1980) \cite fritsch_and_chappell_1980 :
@@ -2084,7 +2085,7 @@ c
 !    &  cnvflg, kb, kmax, ktcon, fscav,
 !!   &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
 !    &  xmb, c0t, eta, zi, xlamue, xlamud, delp,
-!    &  qtr, qaero)
+!    &  qtr, qaero, grav, qamin)
 !     endif
 !
 !> ## For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
@@ -2456,7 +2457,7 @@ c     convective cloud water
             endif
          enddo
       enddo
-c     
+c
 c  convective cloud cover
 c
 !> - Calculate convective cloud cover, which is used when pdf-based cloud fraction is used (i.e., pdfcld=.true.).
@@ -2564,4 +2565,3 @@ c
       end subroutine samfshalcnv_run
 !> @}
       end module samfshalcnv
-
