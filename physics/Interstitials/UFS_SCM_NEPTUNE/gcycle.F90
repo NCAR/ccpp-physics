@@ -297,8 +297,6 @@ contains
           do ix=1,npts
             if ( oceanfrac(ix) == 0.0_kind_phys ) then 
               tref(ix)  = TSFFCS(ix) 
-              tsfc(ix)  = TSFFCS(ix)
-              tsfco(ix) = TSFFCS(ix)
             endif
           enddo
 !       In the coupled mode and when NSST is off, update tref, tsfc and tsfco over not ocean
