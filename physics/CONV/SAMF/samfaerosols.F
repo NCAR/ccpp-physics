@@ -13,10 +13,9 @@
       subroutine samfdeepcnv_aerosols(im, ix, km, itc, ntc, ntr, delt,
      &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kd94, ktcon, fscav,
      &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
-     &  qtr, qaero)
+     &  qtr, qaero, g, qamin)
 
       use machine , only : kind_phys
-      use physcons, only : g => con_g, qamin
 
       implicit none
 
@@ -35,6 +34,7 @@ c     -- input arguments
      &  eta, etad, zi, xlamue, xlamud
       real(kind=kind_phys), dimension(ix,km),       intent(in) :: delp
       real(kind=kind_phys), dimension(ix,km,ntr+2), intent(in) :: qtr
+      real(kind=kind_phys),                         intent(in) :: g, qamin
 c     -- output arguments
       real(kind=kind_phys), dimension(im,km,ntc),   intent(out) :: qaero
 
@@ -412,10 +412,9 @@ c               add negative mass to wet deposition
       subroutine samfshalcnv_aerosols(im, ix, km, itc, ntc, ntr, delt,
      &  cnvflg, kb, kmax, kbcon, ktcon, fscav,
      &  xmb, c0t, eta, zi, xlamue, xlamud, delp,
-     &  qtr, qaero)
+     &  qtr, qaero, con_gg, qamin)
 
       use machine , only : kind_phys
-      use physcons, only : g => con_g, qamin
 
       implicit none
 
@@ -435,6 +434,7 @@ c     -- input arguments
      &  eta, zi, xlamue  !, xlamud
       real(kind=kind_phys), dimension(ix,km),       intent(in) :: delp
       real(kind=kind_phys), dimension(ix,km,ntr+2), intent(in) :: qtr
+      real(kind=kind_phys),                         intent(in) :: con_g, qamin
 c     -- output arguments
       real(kind=kind_phys), dimension(im,km,ntc),   intent(out) :: qaero
 
@@ -463,9 +463,10 @@ c     -- additional variables for fct
       real(kind=kind_phys), parameter :: zero    = 0.0_kind_phys
       real(kind=kind_phys), parameter :: epsil   = 1.e-22_kind_phys    ! prevent division by zero
       real(kind=kind_phys), parameter :: escav   = 0.8_kind_phys       ! wet scavenging efficiency
+      real(kind=kind_phys) :: g
 
 c     -- begin
-
+      g = con_g
 c     -- check if aerosols are present
       if ( ntc <= 0 .or. itc <= 0 .or. ntr <= 0 ) return
       if ( ntr  < itc + ntc - 3 ) return
