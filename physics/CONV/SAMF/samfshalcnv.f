@@ -99,6 +99,7 @@
      &                     asolfac, evef, pgcon
       logical,          intent(in)  :: hwrf_samfshal,first_time_step,   &
      &     restart,progsigma,progomega
+      real(kind=kind_phys), intent(in) :: qamin
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
