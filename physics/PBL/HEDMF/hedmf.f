@@ -1120,7 +1120,7 @@ c
 !>  For details of the mfpbl subroutine, step into its documentation ::mfpbl
       call mfpbl(im,im,km,ntrac,dt2,pcnvflg,
      &       zl,zi,thvx,q1,t1,u1,v1,hpbl,kpbl,
-     &       sflux,ustar,wstar,xmf,tcko,qcko,ucko,vcko)
+     &       sflux,ustar,wstar,xmf,tcko,qcko,ucko,vcko,con_g,con_cp)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  compute diffusion coefficients for cloud-top driven diffusion
