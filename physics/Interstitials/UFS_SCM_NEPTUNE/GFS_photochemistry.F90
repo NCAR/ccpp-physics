@@ -44,14 +44,9 @@ contains
 !> \section arg_table_GFS_photochemistry_run Argument Table
 !! \htmlinclude GFS_photochemistry_run.html
 !!
-<<<<<<< HEAD
 ! #########################################################################################
   subroutine GFS_photochemistry_run (dtp, ntqv, ntoz, im, levs, ozphys, oz_phys_2015, oz_phys_2006, con_1ovg,   &
        prsl, dp, ozpl, h2o_phys, h2ophys, h2opl, gq0, gt0, ten_q, ten_u, ten_v, ten_t, do3_dt_prd, do3_dt_ozmx, &
-=======
-  subroutine GFS_photochemistry_run (dtp, ozphys, oz_phys_2015, oz_phys_2006, con_1ovg,   &
-       prsl, dp, ozpl, h2o_phys, h2ophys, h2opl, h2o0, oz0, gt0, do3_dt_prd, do3_dt_ozmx, &
->>>>>>> ufs/dev
        do3_dt_temp, do3_dt_ohoz, errmsg, errflg)
     
     ! Inputs
