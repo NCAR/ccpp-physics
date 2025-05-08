@@ -71,8 +71,8 @@
       errmsg = ''
       errflg = 0
       
-      new_lnc = gq0(:,:,ntlnc)
-      new_inc = gq0(:,:,ntinc)
+      if (ntlnc > 0) new_lnc = gq0(:,:,ntlnc)
+      if (ntinc > 0) new_inc = gq0(:,:,ntinc)
       !clw is not updated after SCNV, only the whole tracer array;
       
       if(ldiag3d) then
@@ -278,18 +278,22 @@
         endif !Thompson MP
         
         if(ldiag3d .and. qdiag3d) then
-          idtend = dtidx(100+ntlnc,index_of_process_conv_trans)
-          if(idtend>0) then
-            dtend(:,:,idtend) = dtend(:,:,idtend) + new_lnc(:,:) - gq0(:,:,ntlnc)
+          if (ntlnc > 0) then
+            idtend = dtidx(100+ntlnc,index_of_process_conv_trans)
+            if(idtend>0) then
+              dtend(:,:,idtend) = dtend(:,:,idtend) + new_lnc(:,:) - gq0(:,:,ntlnc)
+            endif
           endif
-          idtend = dtidx(100+ntinc,index_of_process_conv_trans)
-          if(idtend>0) then
-            dtend(:,:,idtend) = dtend(:,:,idtend) + new_inc(:,:) - gq0(:,:,ntinc)
+          if (ntinc > 0) then
+            idtend = dtidx(100+ntinc,index_of_process_conv_trans)
+            if(idtend>0) then
+              dtend(:,:,idtend) = dtend(:,:,idtend) + new_inc(:,:) - gq0(:,:,ntinc)
+            endif
           endif
         endif
         
-        gq0(:,:,ntlnc) = new_lnc(:,:)
-        gq0(:,:,ntinc) = new_inc(:,:)
+        if (ntlnc > 0) gq0(:,:,ntlnc) = new_lnc(:,:)
+        if (ntinc > 0) gq0(:,:,ntinc) = new_inc(:,:)
         
       endif   ! end if_ntcw and if_ntiw
 
