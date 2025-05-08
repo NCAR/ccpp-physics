@@ -47,7 +47,7 @@
 !!  @{
       subroutine mfpbl(im,ix,km,ntrac,delt,cnvflg,                      &
      &   zl,zm,thvx,q1,t1,u1,v1,hpbl,kpbl,                              &
-     &   sflx,ustar,wstar,xmf,tcko,qcko,ucko,vcko,grav,cp)
+     &   sflx,ustar,wstar,xmf,tcko,qcko,ucko,vcko,con_g,con_cp)
 !
       use machine , only : kind_phys
 !
@@ -66,8 +66,8 @@
      &                     wstar(im),  xmf(im,km),                      &
      &                     tcko(im,km),qcko(im,km,ntrac),               &
      &                     ucko(im,km),vcko(im,km)
-      real(kind=kind_phys), intent(in) :: grav ! constant con_g
-      real(kind=kind_phys), intent(in) :: cp ! constant con_cp
+      real(kind=kind_phys), intent(in) :: con_g
+      real(kind=kind_phys), intent(in) :: con_cp
 !
 c  local variables and arrays
 !
@@ -92,7 +92,11 @@ c  local variables and arrays
      &                     buo(im,km)
 !
       logical totflg, flg(im)
+      real(kind=kind_phys) :: grav
+      real(kind=kind_phys) :: cp
 !
+      grav = con_g
+      cp = con_cp
 c  physical parameters
       g=grav
       gocp=g/cp
