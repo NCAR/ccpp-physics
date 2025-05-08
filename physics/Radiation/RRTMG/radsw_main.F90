@@ -90,7 +90,6 @@
 !                                                                          !
 !   external modules referenced:                                           !
 !                                                                          !
-!       'module physcons'                                                  !
 !       'mersenne_twister'                                                 !
 !                                                                          !
 !   compilation sequence is:                                               !
@@ -299,12 +298,10 @@
 !!!!!                         end descriptions                         !!!!!
 !!!!!  ==============================================================  !!!!!
 
-!> This module contains the CCPP-compliant NCEP's modifications of the 
-!! rrtmg-sw radiation code from aer inc.     
-      module rrtmg_sw 
+!> This module contains the CCPP-compliant NCEP's modifications of the
+!! rrtmg-sw radiation code from aer inc.
+      module rrtmg_sw
 !
-      use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
-     &                             con_amw, con_amo3
       use machine,          only : rb => kind_phys, im => kind_io4,     &
      &                             kind_phys, kind_dbl_prec
 
@@ -344,10 +341,6 @@
 
       real (kind=kind_phys), parameter :: f_zero  = 0.0
       real (kind=kind_phys), parameter :: f_one   = 1.0
-
-! \name atomic weights for conversion from mass to volume mixing ratios
-      real (kind=kind_phys), parameter :: amdw    = con_amd/con_amw
-      real (kind=kind_phys), parameter :: amdo3   = con_amd/con_amo3
 
 ! \name band indices
       integer, dimension(nblow:nbhgh) :: nspa, nspb
@@ -506,7 +499,9 @@
      &       HSW0,HSWB,FLXPRF,FDNCMP,                                   &   ! ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
      &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
-     &       cld_od, cld_ssa, cld_asy, errmsg, errflg                   &
+     &       cld_od, cld_ssa, cld_asy,                                  &
+     &       con_g, con_avgd, con_amd, con_amw, con_amo3,               &
+     &       errmsg, errflg                                             &
      &     )
 
 !  ====================  defination of variables  ====================  !
@@ -596,7 +591,7 @@
 !   iovr_max     - choice of cloud-overlap: maximum                     !
 !   iovr_dcorr   - choice of cloud-overlap: decorrelation length        !
 !   iovr_exp     - choice of cloud-overlap: exponential                 !
-!   iovr_exprand - choice of cloud-overlap: exponential random          !   
+!   iovr_exprand - choice of cloud-overlap: exponential random          !
 !                                                                       !
 !  output variables:                                                    !
 !   hswc  (npts,nlay): total sky heating rates (k/sec or k/day)         !
@@ -699,8 +694,8 @@
       real (kind=kind_phys), dimension(:,:), intent(in) ::              &
      &       plyr, tlyr, qlyr, olyr, dzlyr, delpin
 
-      real (kind=kind_phys),dimension(:),intent(in):: sfcalb_nir_dir 
-      real (kind=kind_phys),dimension(:),intent(in):: sfcalb_nir_dif 
+      real (kind=kind_phys),dimension(:),intent(in):: sfcalb_nir_dir
+      real (kind=kind_phys),dimension(:),intent(in):: sfcalb_nir_dif
       real (kind=kind_phys),dimension(:),intent(in):: sfcalb_uvis_dir
       real (kind=kind_phys),dimension(:),intent(in):: sfcalb_uvis_dif
 
@@ -719,6 +714,8 @@
      &       cld_lwp, cld_ref_liq,  cld_iwp, cld_ref_ice,               &
      &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
      &       cld_od, cld_ssa, cld_asy
+      real(kind=kind_phys), intent(in) :: con_g, con_avgd, con_amd
+      real(kind=kind_phys), intent(in) :: con_amw, con_amo3
 
       real(kind=kind_phys),dimension(:,:,:),intent(in)::aeraod
       real(kind=kind_phys),dimension(:,:,:),intent(in)::aerssa
@@ -790,6 +787,9 @@
       integer :: i, ib, ipt, j1, k, kk, laytrop, mb, ig
       integer :: inflgsw, iceflgsw, liqflgsw
       integer :: irng, permuteseed
+! \name atomic weights for conversion from mass to volume mixing ratios
+      real (kind=kind_phys) :: amdw
+      real (kind=kind_phys) :: amdo3
 !
 !===> ... begin here
 !
@@ -797,6 +797,9 @@
       errmsg = ''
       errflg = 0
 
+      ! Set atomic weights
+      amdw    = con_amd/con_amw
+      amdo3   = con_amd/con_amo3
 ! Select cloud liquid and ice optics parameterization options
 ! For passing in cloud optical properties directly:
 !     inflgsw  = 0
@@ -1389,7 +1392,8 @@
 !-----------------------------------
       subroutine rswinit( me, rad_hr_units, inc_minor_gas, iswcliq,     &
            isubcsw, iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,&
-           iovr_exp, iovr_exprand, iswmode, errflg, errmsg )
+           iovr_exp, iovr_exprand, iswmode, con_cp, con_g,              &
+           errflg, errmsg )
 
 !  ===================  program usage description  ===================  !
 !                                                                       !
@@ -1447,6 +1451,7 @@
            iswmode, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,      &
            iovr_exp, iovr_exprand
       logical, intent(in) :: inc_minor_gas
+      real(kind=kind_phys), intent(in) :: con_cp, con_g
 !  ---  outputs:
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -1513,7 +1518,7 @@
         heatfac = con_g * 1.0e-2 / con_cp           !   (in k/second)
       endif
 
-!> - Define exponential lookup tables for transmittance. 
+!> - Define exponential lookup tables for transmittance.
 !          tau is  computed as a function of the \a tau transition function, and
 !           transmittance is calculated as a function of tau.  all tables
 !           are computed at intervals of 0.0001.  the inverse of the
@@ -2153,13 +2158,13 @@
 !       For exponential cloud overlap, the correlation is applied across layers
 !       without regard to the configuration of clear and cloudy layers.
 
-!       For exponential-random cloud overlap, a new exponential transition is 
-!       performed within each group of adjacent cloudy layers and blocks of 
-!       cloudy layers with clear layers between them are correlated randomly. 
+!       For exponential-random cloud overlap, a new exponential transition is
+!       performed within each group of adjacent cloudy layers and blocks of
+!       cloudy layers with clear layers between them are correlated randomly.
 !
-!       NOTE: The code below is identical for case (4) and (5) because the 
-!       distinction in the vertical correlation between EXP and ER is already 
-!       built into the specification of alpha (in subroutine get_alpha_exper). 
+!       NOTE: The code below is identical for case (4) and (5) because the
+!       distinction in the vertical correlation between EXP and ER is already
+!       built into the specification of alpha (in subroutine get_alpha_exper).
 
 !  ---  setup 2 sets of random numbers
 
@@ -2184,7 +2189,7 @@
           enddo
 
 !  ---  then working upward from the surface:
-!       if a random number (from an independent set: cdfun2) is smaller than 
+!       if a random number (from an independent set: cdfun2) is smaller than
 !       alpha, then use the previous layer's number, otherwise use a new random
 !       number (keep the originally assigned one in cdfunc for that layer).
 
@@ -2674,11 +2679,11 @@
           zasy3 = 0.75 * zasy1
 
 !>  - Perform general two-stream expressions:
-!!\n  control parameters provided by host-model                             
-!!\n    iswmode - control flag for 2-stream transfer schemes               
-!!\n              = 1 delta-eddington    (joseph et al., 1976)             
-!!\n              = 2 pifm               (zdunkowski et al., 1980)         
-!!\n              = 3 discrete ordinates (liou, 1973)                      
+!!\n  control parameters provided by host-model
+!!\n    iswmode - control flag for 2-stream transfer schemes
+!!\n              = 1 delta-eddington    (joseph et al., 1976)
+!!\n              = 2 pifm               (zdunkowski et al., 1980)
+!!\n              = 3 discrete ordinates (liou, 1973)
           if ( iswmode == 1 ) then
             zgam1 = 1.75 - zssa1 * (f_one + zasy3)
             zgam2 =-0.25 + zssa1 * (f_one - zasy3)
@@ -3269,7 +3274,7 @@
 !    iswmode - control flag for 2-stream transfer schemes               !
 !              = 1 delta-eddington    (joseph et al., 1976)             !
 !              = 2 pifm               (zdunkowski et al., 1980)         !
-!              = 3 discrete ordinates (liou, 1973)                      ! 
+!              = 3 discrete ordinates (liou, 1973)                      !
 !                                                                       !
 !  output variables:                                                    !
 !    fxupc   - real, tot sky upward flux                     nlp1*nbdsw !
@@ -3468,10 +3473,10 @@
           zasy3 = 0.75 * zasy1
 
 !>  - Perform general two-stream expressions:
-!!\n control parameters provided by host-model 
-!!\n iswmode - control flag for 2-stream transfer schemes 
-!!\n           = 1 delta-eddington (joseph et al., 1976) 
-!!\n           = 2 pifm (zdunkowski et al., 1980) 
+!!\n control parameters provided by host-model
+!!\n iswmode - control flag for 2-stream transfer schemes
+!!\n           = 1 delta-eddington (joseph et al., 1976)
+!!\n           = 2 pifm (zdunkowski et al., 1980)
 !!\n           = 3 discrete ordinates (liou, 1973)
           if ( iswmode == 1 ) then
             zgam1 = 1.75 - zssa1 * (f_one + zasy3)
@@ -3709,7 +3714,7 @@
               endif
               zgam4 = f_one - zgam3
 
-!>  - Compute homogeneous reflectance and transmittance for both convertive 
+!>  - Compute homogeneous reflectance and transmittance for both convertive
 !! and non-convertive scattering.
 
               if ( zssaw >= zcrit ) then    ! for conservative scattering
