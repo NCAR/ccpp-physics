@@ -7,7 +7,7 @@ module sfc_nst
   use machine ,               only : kind_phys, kp => kind_phys
   use funcphys ,              only : fpvs
   use module_nst_parameters , only : one, zero, half
-  use module_nst_parameters , only : t0k, cp_w, omg_m, omg_sh, sigma_r, solar_time_6am, sst_max
+  use module_nst_parameters , only : t0k, cp_w, omg_m, omg_sh, solar_time_6am, sst_max
   use module_nst_parameters , only : ri_c, z_w_max, delz, wd_max, rad2deg, const_rot, tau_min, tw_max
   use module_nst_water_prop , only : get_dtzm_point, density, rhocoef, grv, sw_ps_9b
   use nst_module ,            only : cool_skin, dtm_1p, cal_w, cal_ttop, convdepth, dtm_1p_fca
@@ -86,7 +86,7 @@ contains
     !     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
     !     usfco, vsfco - real, u/v component of surface current (m/s)  im   !
     !     icplocn2atm - integer, option to include ocean surface       1    !
-    !                       current in the computation of flux              ! 
+    !                       current in the computation of flux              !
     !     t1       - real, surface layer mean temperature ( k )        im   !
     !     q1       - real, surface layer mean specific humidity        im   !
     !     tref     - real, reference/foundation temperature ( k )      im   !
@@ -171,7 +171,7 @@ contains
     !  ---  inputs:
     integer, intent(in) :: im, kdt, ipr, nstf_name1, nstf_name4, nstf_name5
     integer, intent(in) :: icplocn2atm
-  
+
     real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps, &
          epsm1, rvrdm1, rd, rhw0, sbc, pi, tgice
     real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,  &
