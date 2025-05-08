@@ -7,7 +7,7 @@ module sfc_nst
   use machine ,               only : kind_phys, kp => kind_phys
   use funcphys ,              only : fpvs
   use module_nst_parameters , only : one, zero, half
-  use module_nst_parameters , only : t0k, cp_w, omg_m, omg_sh, sigma_r, solar_time_6am, sst_max
+  use module_nst_parameters , only : t0k, cp_w, omg_m, omg_sh, solar_time_6am, sst_max
   use module_nst_parameters , only : ri_c, z_w_max, delz, wd_max, rad2deg, const_rot, tau_min, tw_max
   use module_nst_water_prop , only : get_dtzm_point, density, rhocoef, grv, sw_ps_9b
   use nst_module ,            only : cool_skin, dtm_1p, cal_w, cal_ttop, convdepth, dtm_1p_fca

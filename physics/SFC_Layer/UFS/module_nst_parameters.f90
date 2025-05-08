@@ -14,24 +14,11 @@ module module_nst_parameters
   use machine, only :  kind_phys
   !
   ! air constants and coefficients from the atmospehric model
-  use physcons, only:        &
-        eps     =>  con_eps  &         !< con_rd/con_rv (nd)
-       ,cp_a    => con_cp    &         !< spec heat air @p    (j/kg/k)
-       ,epsm1   => con_epsm1 &         !< eps - 1 (nd)
-       ,hvap    => con_hvap  &         !< lat heat h2o cond   (j/kg)
-       ,sigma_r => con_sbc   &         !< stefan-boltzmann    (w/m2/k4)
-       ,grav    => con_g     &         !< acceleration due to gravity (kg/m/s^2)
-       ,omega   => con_omega &         !< ang vel of earth    (1/s)
-       ,rvrdm1  => con_fvirt &         !< con_rv/con_rd-1. (nd)
-       ,rd      => con_rd    &         !< gas constant air (j/kg/k)
-       ,rocp    => con_rocp  &         !< r/cp
-       ,pi      => con_pi
-
   implicit none
 
   private
 
-  public :: sigma_r
+  ! public :: sigma_r
   public :: zero, one, half
   public :: niter_conv, niter_z_w, niter_sfs
   public :: z_w_max, z_w_min, z_w_ini, z_c_max, z_c_ini, eps_z_w, eps_conv, eps_sfs
@@ -79,6 +66,7 @@ module module_nst_parameters
        ,novalue        = 0             &
        ,smallnumber    = 1.e-6         &
        ,timestep_oc    = sec_in_day/8. &       !< time step in the ocean model (3 hours)
+       ,pi             = 4.0d0*atan(1.0d0) &
        ,radian         = 2.*pi/180.    &
        ,rad2deg        = 180./pi       &
        ,cp_w           = 4000.         &       !< specific heat water (j/kg/k )
