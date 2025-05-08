@@ -620,6 +620,13 @@
   dimensions = ()
   type = logical
   intent = in
+[cplaqm]
+  standard_name = flag_for_air_quality_coupling
+  long_name = flag controlling cplaqm collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [claie]
   standard_name = canopy_leaf_area_index
   long_name = canopy leaf area index
@@ -628,6 +635,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cfch]
   standard_name = canopy_forest_height
   long_name = canopy forest height
@@ -636,6 +644,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cfrt]
   standard_name = canopy_forest_fraction
   long_name = canopy forest fraction
@@ -644,6 +653,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cclu]
   standard_name = canopy_clumping_index
   long_name = canopy clumping index
@@ -652,6 +662,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [cpopu]
   standard_name = canopy_population_density
   long_name = population density used for canopy correction
@@ -660,6 +671,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [sfc_rlm]
   standard_name = choice_of_near_surface_mixing_length_in_boundary_layer_mass_flux_scheme
   long_name = choice of near surface mixing length in boundary layer mass flux scheme

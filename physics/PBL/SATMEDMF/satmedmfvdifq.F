@@ -87,7 +87,7 @@
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,tc_pbl,                                    &
 !IVAI: canopy inputs from AQM                      
-     &     do_canopy, claie, cfch, cfrt, cclu, cpopu,                   &
+     &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           &
 !IVAI
 !TODO -Canopy Inputs from UFS
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
@@ -117,10 +117,10 @@
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
       real(kind=kind_phys), intent(in) :: rlmx, elmx
 !PCC CANOPY------------------------------------
-      logical, intent(in)  :: do_canopy
+      logical, intent(in)  :: do_canopy, cplaqm
 !IVAI: canopy inputs
-      real(kind=kind_phys), intent(in)  :: claie(:), cfch(:), cfrt(:),
-     &                                     cclu(:), cpopu(:)
+      real(kind=kind_phys), optional, intent(in)  :: claie(:), cfch(:), &
+     &                     cfrt(:), cclu(:), cpopu(:)
       !----------------------------------------------
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
      &                     tdt(:,:),    rtg(:,:,:),    tkeh(:,:)
@@ -1353,7 +1353,7 @@
       enddo
       !PCC_CANOPY------------------------------------
       kount=0 !IVAI
-      if (do_canopy) then 
+      if (do_canopy .and. cplaqm) then 
 
 !IVAI
 !        print*, 'SATMEDMFVDIFQ_RUN: CLAIE = ', claie(:)
@@ -1522,7 +1522,7 @@
 
         enddo !k
 
-      endif !do_canopy
+      endif !do_canopy .and. cplaqm
 
 !> ## Compute TKE.
 !!  - Compute a minimum TKE deduced from background diffusivity for momentum.
