@@ -221,7 +221,7 @@
      &       bexppert, xlaipert, vegfpert,pertvegf,                     &  ! sfc perts, mgehne
      &       albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,        &  
      &       adjvisbmd, adjnirbmd, adjvisdfd, adjnirdfd, rhonewsn1,     &  
-     &       exticeden, con_cp, con_csol, con_t0c,                      &
+     &       exticeden, con_csol, con_t0c,                              &
 !  ---  in/outs:
      &       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
      &       canopy, trans, tsurf, zorl,                                &
@@ -273,7 +273,7 @@
       logical, dimension(:), intent(in) :: flag_iter, flag_guess, land
 
       logical, intent(in) :: lheatstrg, exticeden
-      real (kind=kind_phys),  intent(in) :: con_cp, con_csol, con_t0c
+      real (kind=kind_phys),  intent(in) :: con_csol, con_t0c
 !  ---  in/out:
       real (kind=kind_phys), dimension(:), intent(inout) :: weasd,      &
      &       snwdph, tskin, tprcp, srflag, canopy, trans, tsurf, zorl
@@ -535,7 +535,7 @@
      &       vtype, stype, slope, shdmin1d, alb, snoalb1d,              &
      &       rhonewsn, exticeden,                                       &
      &       bexpp, xlaip,                                              & ! sfc-perts, mgehne
-     &       con_cp, con_csol, con_t0c,                                 &
+     &       cp, con_csol, con_t0c,                                     &
      &       lheatstrg,                                                 &
 !  ---  input/outputs:
      &       tbot, cmc, tsea, stsoil, smsoil, slsoil, sneqv, chx, cmx,  &

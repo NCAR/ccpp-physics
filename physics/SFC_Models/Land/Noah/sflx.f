@@ -273,17 +273,10 @@
 !
       use machine ,   only : kind_phys
 !
-c$$$      use physcons,   only : con_cp, con_rd, con_t0c, con_g, con_pi,    &
-c$$$     &                       con_cliq, con_csol, con_hvap, con_hfus,    &
-c$$$     &                       con_sbc
 !
       implicit none
 
 !  ---  constant parameters:
-!      *** note: some of the constants are different in subprograms and need to
-!          be consolidated with the standard def in module physcons at sometime
-!          at the present time, those diverse values are kept temperately to
-!          provide the same result as the original codes.  -- y.t.h.  may09
 
       integer,               parameter :: nsold   = 4           !< max soil layers
 
