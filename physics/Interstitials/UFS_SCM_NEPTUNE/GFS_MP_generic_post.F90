@@ -542,7 +542,7 @@
                  if(idtend>=1) then
                     do k=1,levs
                        do i=1,im
-                          dtend(i,k,idtend) = dtend(i,k,idtend) + ten_q(i,k,itrac)*dtp
+                          dtend(i,k,idtend) = dtend(i,k,idtend) + ten_q(i,k,itrac)*dtp*frain
                        enddo
                     enddo
                  endif

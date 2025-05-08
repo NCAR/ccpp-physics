@@ -990,38 +990,6 @@
   type = real
   kind = kind_phys
   intent = in
-[save_u]
-  standard_name = x_wind_save
-  long_name = x-wind before entering a physics scheme
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[save_v]
-  standard_name = y_wind_save
-  long_name = y-wind before entering a physics scheme
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[save_t]
-  standard_name = air_temperature_save
-  long_name = air temperature before entering a physics scheme
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[save_q]
-  standard_name = tracer_concentration_save
-  long_name = tracer concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
-  type = real
-  kind = kind_phys
-  intent = in
 [huge]
   standard_name = netcdf_float_fillvalue
   long_name = definition of NetCDF float FillValue

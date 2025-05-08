@@ -346,14 +346,6 @@
   type = real
   kind = kind_phys
   intent = in
-[save_q]
-  standard_name = tracer_concentration_save
-  long_name = tracer concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
-  type = real
-  kind = kind_phys
-  intent = in
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration

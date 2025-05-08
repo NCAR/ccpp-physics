@@ -20,7 +20,7 @@
         dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                        &
         rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, kdt, dusfc_cice, dvsfc_cice,                             &
         dtsfc_cice, dqsfc_cice, use_med_flux, dtsfc_med, dqsfc_med, dusfc_med, dvsfc_med, wet, dry, icy, wind, stress_wat,     &
-        hflx_wat, evap_wat, ugrs1, vgrs1, hffac, ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, huge,                 &
+        hflx_wat, evap_wat, ugrs1, vgrs1, hffac, ugrs, vgrs, tgrs, qgrs, huge,                                                 &
         gt0, gq0, gu0, gv0, errmsg, errflg)
 
       use machine,                only : kind_phys
@@ -42,8 +42,6 @@
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
       logical, intent(in) :: flag_for_pbl_generic_tend      
-      real(kind=kind_phys), dimension(:,:), intent(in) :: save_u, save_v, save_t
-      real(kind=kind_phys), dimension(:,:, :), intent(in) :: save_q
 
       real(kind=kind_phys), intent(in) :: dtf, dtp
       real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap, huge
@@ -491,33 +489,33 @@
           if (lsidea) then
             idtend = dtidx(index_of_temperature, index_of_process_pbl)
             if(idtend>=1) then
-              dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + dtdt(1:im,1:levs)*dtf
+              dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + ten_t(1:im,1:levs)*dtf
             endif
           else
             idtend = dtidx(index_of_temperature, index_of_process_pbl)
             if(idtend>=1) then
-              dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (tgrs(1:im,1:levs) - save_t(1:im,1:levs))
+              dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + ten_t(1:im,1:levs)*dtp
             endif
           endif
           idtend = dtidx(index_of_x_wind, index_of_process_pbl)
           if(idtend>=1) then
-            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (ugrs(1:im,1:levs) - save_u(1:im,1:levs))
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + ten_u(1:im,1:levs)*dtp
           endif
           idtend = dtidx(index_of_y_wind, index_of_process_pbl)
           if(idtend>=1) then
-            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (vgrs(1:im,1:levs) - save_v(1:im,1:levs))
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + ten_v(1:im,1:levs)*dtp
           endif
           idtend = dtidx(100+ntqv, index_of_process_pbl)
           if(idtend>=1) then
-            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + qgrs(1:im,1:levs,ntqv) - save_q(1:im,1:levs,ntqv)
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + ten_q(1:im,1:levs,ntqv)*dtp
           endif
           idtend = dtidx(100+ntoz, index_of_process_pbl)
           if(idtend>=1) then
-            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + qgrs(1:im,1:levs,ntoz) - save_q(1:im,1:levs,ntoz)
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + ten_q(1:im,1:levs,ntoz)*dtp
           endif
           idtend = dtidx(100+ntke, index_of_process_pbl)
           if(idtend>=1) then
-            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (qgrs(1:im,1:levs,ntke) - save_q(1:im,1:levs,ntke))
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + ten_q(1:im,1:levs,ntke)*dtp
           endif
         endif
 

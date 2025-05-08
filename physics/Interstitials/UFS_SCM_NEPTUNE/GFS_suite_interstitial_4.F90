@@ -12,8 +12,8 @@
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_nssl, nssl_invertccn, nssl_ccn_on,                                                  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,&
-      index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nssl_cccn, nwfa, spechum, ldiag3d,     &
-      qdiag3d, save_lnc, save_inc, ntk, ntke, otsptflag, errmsg, errflg)
+      index_of_process_conv_trans, index_of_process_dcnv, index_of_process_scnv, gq0, clw, prsl, save_tcp, con_rd, con_eps, nssl_cccn, nwfa, spechum, ldiag3d,&
+      qdiag3d, ntk, ntke, otsptflag, errmsg, errflg)
 
       use machine,               only: kind_phys
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
@@ -33,16 +33,17 @@
       real(kind=kind_phys), intent(in   )                   :: con_pi, dtf
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qc
       ! save_qi is not allocated for Zhao-Carr MP
-      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qi, save_lnc, save_inc
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qi
 
       ! dtend and dtidx are only allocated if ldiag3d
       logical, intent(in)                                   :: ldiag3d, qdiag3d
       real(kind=kind_phys), dimension(:,:,:), intent(inout), optional :: dtend
       integer,              dimension(:,:),   intent(in)    :: dtidx
-      integer,                                intent(in)    :: index_of_process_conv_trans,ntk,ntke
+      integer,                                intent(in)    :: index_of_process_conv_trans,&
+                                      index_of_process_dcnv,index_of_process_scnv,ntk,ntke
 
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: gq0
-      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: clw
+      real(kind=kind_phys), dimension(:,:,:), intent(in) :: clw
       real(kind=kind_phys), dimension(:,:),   intent(in) :: prsl
       real(kind=kind_phys),                   intent(in) :: con_rd, con_eps, nssl_cccn
       real(kind=kind_phys), dimension(:,:),   intent(in), optional :: nwfa
@@ -54,7 +55,7 @@
 
       ! local variables
       real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
-      integer :: i,k,n,tracers,idtend
+      integer :: i,k,n,tracers,idtend,idtend_deep,idtend_shal
       real(kind=kind_phys) :: liqm, icem, xccn, xcwmas, xccw, xcimas, qccn
 
       real(kind=kind_phys) :: rho, orho
@@ -63,30 +64,29 @@
       real(kind=kind_phys), dimension(im,levs) :: qi_mp !< kg kg-1 (dry mixing ratio)
       real(kind=kind_phys), dimension(im,levs) :: nc_mp !< kg-1 (dry mixing ratio)
       real(kind=kind_phys), dimension(im,levs) :: ni_mp !< kg-1 (dry mixing ratio)
+      
+      real(kind=kind_phys), dimension(im,levs) :: new_lnc, new_inc
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
-      ! This code was previously in GFS_SCNV_generic_post, but it really belongs
-      ! here, because it fixes the convective transportable_tracers mess for Zhao-Carr
-      ! and GFDL MP from GFS_suite_interstitial_3. This whole code around clw(:,:,2)
-      ! being set to -999 for Zhao-Carr MP (which doesn't have cloud ice) and GFDL-MP
-      ! (which does have cloud ice, but for some reason it was decided to code it up
-      ! in the same way as for Zhao-Carr, nowadays unnecessary and confusing) needs
-      ! to be cleaned up. The convection schemes doing something different internally
-      ! based on clw(i,k,2) being -999.0 or not is not a good idea.
-      do k=1,levs
-        do i=1,im
-          if (clw(i,k,2) <= -999.0) clw(i,k,2) = 0.0
-        enddo
-      enddo
-
+      
+      new_lnc = gq0(:,:,ntlnc)
+      new_inc = gq0(:,:,ntinc)
+      !clw is not updated after SCNV, only the whole tracer array;
+      
       if(ldiag3d) then
          if(ntk>0 .and. ntk<=size(clw,3)) then
             idtend=dtidx(100+ntke,index_of_process_conv_trans)
+            idtend_deep=dtidx(100+ntke,index_of_process_dcnv)
+            idtend_shal=dtidx(100+ntke,index_of_process_scnv)
             if(idtend>=1) then
-               dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,ntk)-gq0(:,:,ntk)
+               if(idtend_deep>=1) then
+                 dtend(:,:,idtend) = dtend(:,:,idtend) + dtend(:,:,idtend_deep)
+               endif
+               if(idtend_shal>=1) then
+                 dtend(:,:,idtend) = dtend(:,:,idtend) + dtend(:,:,idtend_shal)
+               endif
             endif
          endif
          if(ntcw>0) then
@@ -94,22 +94,50 @@
                  imp_physics == imp_physics_zhao_carr_pdf .or. &
                  imp_physics == imp_physics_gfdl) then
                idtend=dtidx(100+ntcw,index_of_process_conv_trans)
+               idtend_deep=dtidx(100+ntcw,index_of_process_dcnv)
+               idtend_shal=dtidx(100+ntcw,index_of_process_scnv)
                if(idtend>=1) then
-                  dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,1)+clw(:,:,2) - gq0(:,:,ntcw)
+                  if(idtend_deep>=1) then
+                    dtend(:,:,idtend) = dtend(:,:,idtend) + dtend(:,:,idtend_deep)
+                  endif
+                  if(idtend_shal>=1) then
+                    dtend(:,:,idtend) = dtend(:,:,idtend) + dtend(:,:,idtend_shal)
+                  endif
                endif
             else if(ntiw>0) then
                idtend=dtidx(100+ntiw,index_of_process_conv_trans)
+               idtend_deep=dtidx(100+ntiw,index_of_process_dcnv)
+               idtend_shal=dtidx(100+ntiw,index_of_process_scnv)
                if(idtend>=1) then
-                  dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,1)-gq0(:,:,ntiw)
+                  if(idtend_deep>=1) then
+                    dtend(:,:,idtend) = dtend(:,:,idtend) + dtend(:,:,idtend_deep)
+                  endif
+                  if(idtend_shal>=1) then
+                    dtend(:,:,idtend) = dtend(:,:,idtend) + dtend(:,:,idtend_shal)
+                  endif
                endif
                idtend=dtidx(100+ntcw,index_of_process_conv_trans)
+               idtend_deep=dtidx(100+ntcw,index_of_process_dcnv)
+               idtend_shal=dtidx(100+ntcw,index_of_process_scnv)
                if(idtend>=1) then
-                  dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,2)-gq0(:,:,ntcw)
+                  if(idtend_deep>=1) then
+                    dtend(:,:,idtend) = dtend(:,:,idtend) + dtend(:,:,idtend_deep)
+                  endif
+                  if(idtend_shal>=1) then
+                    dtend(:,:,idtend) = dtend(:,:,idtend) + dtend(:,:,idtend_shal)
+                  endif
                endif
             else
                idtend=dtidx(100+ntcw,index_of_process_conv_trans)
+               idtend_deep=dtidx(100+ntcw,index_of_process_dcnv)
+               idtend_shal=dtidx(100+ntcw,index_of_process_scnv)
                if(idtend>=1) then
-                  dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,1)+clw(:,:,2) - gq0(:,:,ntcw)
+                  if(idtend_deep>=1) then
+                    dtend(:,:,idtend) = dtend(:,:,idtend) + dtend(:,:,idtend_deep)
+                  endif
+                  if(idtend_shal>=1) then
+                    dtend(:,:,idtend) = dtend(:,:,idtend) + dtend(:,:,idtend_shal)
+                  endif
                endif
             endif
          endif
@@ -133,8 +161,15 @@
               tracers = tracers + 1
             if(n/=ntk .and. n/=ntlnc .and. n/=ntinc .and. n /= ntcw .and. n /= ntiw) then
                idtend=dtidx(100+n,index_of_process_conv_trans)
+               idtend_deep=dtidx(100+n,index_of_process_dcnv)
+               idtend_shal=dtidx(100+n,index_of_process_scnv)
                if(idtend>=1) then
-                  dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,tracers)-gq0(:,:,n)
+                 if(idtend_deep>=1) then
+                   dtend(:,:,idtend) = dtend(:,:,idtend) + dtend(:,:,idtend_deep)
+                 endif
+                 if(idtend_shal>=1) then
+                   dtend(:,:,idtend) = dtend(:,:,idtend) + dtend(:,:,idtend_shal)
+                 endif
                endif
             endif
           endif
@@ -160,20 +195,20 @@
                  ENDIF
                  
                  IF ( gq0(i,k,ntlnc) > 0.0 .and. save_qc(i,k) > 0.0 ) THEN
-                    xcwmas = Max( liqm, clw(i,k,2)/gq0(i,k,ntlnc) )
+                    xcwmas = Max( liqm, gq0(i,k,ntcw)/gq0(i,k,ntlnc) )
                  ELSE
                     xcwmas = liqm
                  ENDIF
 
                  IF ( gq0(i,k,ntinc) > 0.0 .and. save_qi(i,k) > 0.0 ) THEN
-                    xcimas = Max( liqm, clw(i,k,1)/gq0(i,k,ntinc) )
+                    xcimas = Max( liqm, gq0(i,k,ntiw)/gq0(i,k,ntinc) )
                  ELSE
                     xcimas = icem
                  ENDIF
                    
                  IF ( xccn > 0.0 ) THEN
-                 xccw = Min( xccn, max(0.0, (clw(i,k,2)-save_qc(i,k))) / xcwmas )
-                 gq0(i,k,ntlnc) = gq0(i,k,ntlnc) + xccw 
+                 xccw = Min( xccn, max(0.0, (gq0(i,k,ntcw)-save_qc(i,k))) / xcwmas )
+                 new_lnc(i,k) = new_lnc(i,k) + xccw
                  IF ( nssl_ccn_on ) THEN
                     IF ( nssl_invertccn ) THEN
                       ! ccn are activated CCN, so add
@@ -184,9 +219,8 @@
                     ENDIF
                  ENDIF
                  ENDIF
-
-                  gq0(i,k,ntinc) = gq0(i,k,ntinc)  &
-                           +  max(0.0, (clw(i,k,1)-save_qi(i,k))) / xcimas
+                 new_inc(i,k) = new_inc(i,k)  &
+                          +  max(0.0, (gq0(i,k,ntiw)-save_qi(i,k))) / xcimas
               enddo
             enddo
         endif
@@ -202,21 +236,21 @@
                 orho = one/rho
                 if (ntlnc>0) then
                   !> - Convert moist mixing ratio to dry mixing ratio
-                  qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k)) / (one-spechum(i,k))
+                  qc_mp(i,k) = (gq0(i,k,ntcw)-save_qc(i,k)) / (one-spechum(i,k))
                   !> - Convert number concentration from moist to dry
                   nc_mp(i,k) = gq0(i,k,ntlnc) / (one-spechum(i,k))
                   nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
                   !> - Convert number concentrations from dry to moist
-                  gq0(i,k,ntlnc) = nc_mp(i,k) / (one+qv_mp(i,k))
+                  new_lnc(i,k) = nc_mp(i,k) / (one+qv_mp(i,k))
                 endif
                 if (ntinc>0) then
                   !> - Convert moist mixing ratio to dry mixing ratio
-                  qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k)) / (one-spechum(i,k))
+                  qi_mp(i,k) = (gq0(i,k,ntiw)-save_qi(i,k)) / (one-spechum(i,k))
                   !> - Convert number concentration from moist to dry
                   ni_mp(i,k) = gq0(i,k,ntinc) / (one-spechum(i,k)) 
                   ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
                   !> - Convert number concentrations from dry to moist
-                  gq0(i,k,ntinc) = ni_mp(i,k) / (one+qv_mp(i,k))
+                  new_inc(i,k) = ni_mp(i,k) / (one+qv_mp(i,k))
                 endif
               enddo
             enddo
@@ -228,30 +262,35 @@
                 orho = one/rho
                 if (ntlnc>0) then
                   !> - Update cloud water mixing ratio
-                  qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k))
+                  qc_mp(i,k) = (gq0(i,k,ntcw)-save_qc(i,k))
                   !> - Update cloud water number concentration
-                  gq0(i,k,ntlnc) = max(zero, gq0(i,k,ntlnc) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                  new_lnc(i,k) = max(zero, new_lnc(i,k) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
                 endif
                 if (ntinc>0) then
                   !> - Update cloud ice mixing ratio
-                  qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k))
+                  qi_mp(i,k) = (gq0(i,k,ntiw)-save_qi(i,k))
                   !> - Update cloud ice number concentration
-                  gq0(i,k,ntinc) = max(zero, gq0(i,k,ntinc) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                  new_inc(i,k) = max(zero, new_inc(i,k) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
                 endif
               enddo
             enddo
           end if if_convert_dry_rho
-          if(ldiag3d .and. qdiag3d) then
-            idtend = dtidx(100+ntlnc,index_of_process_conv_trans)
-            if(idtend>0) then
-              dtend(:,:,idtend) = dtend(:,:,idtend) + gq0(:,:,ntlnc) - save_lnc
-            endif
-            idtend = dtidx(100+ntinc,index_of_process_conv_trans)
-            if(idtend>0) then
-              dtend(:,:,idtend) = dtend(:,:,idtend) + gq0(:,:,ntinc) - save_inc
-            endif
+        endif !Thompson MP
+        
+        if(ldiag3d .and. qdiag3d) then
+          idtend = dtidx(100+ntlnc,index_of_process_conv_trans)
+          if(idtend>0) then
+            dtend(:,:,idtend) = dtend(:,:,idtend) + new_lnc(:,:) - gq0(:,:,ntlnc)
+          endif
+          idtend = dtidx(100+ntinc,index_of_process_conv_trans)
+          if(idtend>0) then
+            dtend(:,:,idtend) = dtend(:,:,idtend) + new_inc(:,:) - gq0(:,:,ntinc)
           endif
         endif
+        
+        gq0(:,:,ntlnc) = new_lnc(:,:)
+        gq0(:,:,ntinc) = new_inc(:,:)
+        
       endif   ! end if_ntcw and if_ntiw
 
     end subroutine GFS_suite_interstitial_4_run

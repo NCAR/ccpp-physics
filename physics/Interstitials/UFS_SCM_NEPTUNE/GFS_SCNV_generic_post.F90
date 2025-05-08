@@ -9,7 +9,7 @@
 !! \htmlinclude GFS_SCNV_generic_post_run.html
 !!
       subroutine GFS_SCNV_generic_post_run (im, levs, tracers_total, otsptflag, imp_physics, imp_physics_gfdl, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, tend_opt_scnv, lssav, ldiag3d, qdiag3d, &
-        frain, gu0, gv0, gt0, gq0, dudt, dvdt, dtdt, dqdt, save_q, ten_t, ten_u, ten_v, ten_q, delt,              &
+        frain, gu0, gv0, gt0, gq0, dudt, dvdt, dtdt, dqdt, ten_t, ten_u, ten_v, ten_q, delt,              &
         clw, dclw, shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw, nsamftrac,    &
         rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                      &
         dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,      &
@@ -30,7 +30,6 @@
       real(kind=kind_phys),                     intent(in) :: frain
       real(kind=kind_phys), dimension(:,:), intent(inout) :: gu0, gv0, gt0
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: gq0
-      real(kind=kind_phys), dimension(:,:,:),   intent(in) :: save_q
 
       ! dtend only allocated if ldiag3d == .true.
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
@@ -192,7 +191,7 @@
                    tracers = tracers + 1
                    idtend = dtidx(100+n,index_of_process_scnv)
                    if(idtend>0) then
-                      dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,tracers)-save_q(:,:,n) * frain
+                      dtend(:,:,idtend) = dtend(:,:,idtend) + (ten_q(:,:,n)*delt) * frain
                    endif
                 endif
              enddo
@@ -200,13 +199,13 @@
             do n=2,ntrac
                idtend = dtidx(100+n,index_of_process_scnv)
                if(idtend>0) then
-                  dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,n)-save_q(:,:,n))*frain
+                  dtend(:,:,idtend) = dtend(:,:,idtend) + (ten_q(:,:,n)*delt)*frain
                endif
             enddo
           endif
           idtend = dtidx(100+ntqv, index_of_process_scnv)
           if(idtend>=1) then
-             dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,ntqv) - save_q(:,:,ntqv)) * frain
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (ten_q(:,:,ntqv)*delt) * frain
           endif
         endif
       endif

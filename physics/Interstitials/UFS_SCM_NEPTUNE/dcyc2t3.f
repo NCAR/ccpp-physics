@@ -167,7 +167,7 @@
 !> @{
       subroutine dcyc2t3_run                                            &
 !  ---  inputs:
-     &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        &
+     &     ( lssav, ldiag3d, lsidea, solhr,slag,sdec,cdec,sinlat,coslat,&
      &       con_g, con_cp, con_pi, con_sbc,                            &
      &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,tf,tsflw,tsfc,      &
      &       sfcemis_lnd, sfcemis_ice, sfcemis_wat,                     &
@@ -179,9 +179,11 @@
      &       use_LW_jacobian, sfculw, use_med_flux, sfculw_med,         &
      &       fluxlwUP_jac, p_lay, p_lev, flux2D_lwUP,                   &
      &       flux2D_lwDOWN,pert_radtend,do_sppt,ca_global,tsfc_radtime, &
+     &       dtidx,index_of_process_longwave,index_of_process_shortwave,&
+     &       index_of_temperature,                                      &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
-     &       dtdtnp,htrlw,                                              &
+     &       dtdtnp,htrlw,dtend,                                        &
 !  ---  outputs:
      &       adjsfcdsw,adjsfcdswc,adjsfcnsw,adjsfcdlw,                  &
      &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
@@ -209,8 +211,8 @@
 !     logical lprnt
       logical, dimension(:), intent(in) :: dry, icy, wet
       logical, intent(in) :: use_LW_jacobian, damp_LW_fluxadj,          &
-     &     pert_radtend, use_med_flux
-      logical, intent(in) :: do_sppt,ca_global
+     &     pert_radtend, use_med_flux 
+      logical, intent(in) :: do_sppt,ca_global,lssav,ldiag3d,lsidea
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
      &     deltim, delt, fhswr, lfnc_k, lfnc_p0
 
@@ -238,7 +240,12 @@
      &     con_pi, con_sbc
 
       real(kind_phys)  :: pid12
-
+      real(kind_phys), optional, intent(inout), dimension(:,:,:) ::     &
+     &                                                       dtend
+      integer,              intent(in),    dimension(:,:) :: dtidx
+      integer, intent(in) :: index_of_process_longwave,                 &
+     &                       index_of_process_shortwave,                &
+     &                       index_of_temperature
 
 !  ---  input/output:
       real(kind=kind_phys), dimension(:,:), intent(inout), optional ::  &
@@ -265,7 +272,7 @@
       integer,          intent(out) :: errflg
 
 !  ---  locals:
-      integer :: i, k, n, nstp, nstl, it, istsun(im),iSFC,iTOA
+      integer :: i, k, n, nstp, nstl, it, istsun(im),iSFC,iTOA,idtend
       real(kind=kind_phys) :: cns,  coszn, tem1, tem2, anginc,          &
      &                        rstl, solang, dT
       real(kind=kind_phys), dimension(im,levs+1) :: flxlwup_adj,        &
@@ -527,6 +534,31 @@
           return
       end select case_rad_scaler_ten
       
+      if (lssav .and. ldiag3d .and. .not. lsidea) then
+        idtend = dtidx(index_of_temperature,index_of_process_longwave)
+        if(idtend>=1) then
+          if (use_LW_jacobian) then
+            do k=1,levs
+               do i=1,im
+                 dtend(i,k,idtend) = dtend(i,k,idtend) + (ten_t(i,k) -  &
+     &                               swh(i,k)*xmu(i))*deltim
+               end do
+            end do
+          else
+            dtend(:,:,idtend) = dtend(:,:,idtend) + hlw(:,:)*deltim
+          endif
+        endif
+
+        idtend = dtidx(index_of_temperature,index_of_process_shortwave)
+        if(idtend>=1) then
+           do k=1,levs
+              do i=1,im
+                 dtend(i,k,idtend) = dtend(i,k,idtend)                  &
+     &                               + swh(i,k)*xmu(i)*deltim
+              enddo
+           enddo
+        endif
+      end if
       
       return
 !...................................

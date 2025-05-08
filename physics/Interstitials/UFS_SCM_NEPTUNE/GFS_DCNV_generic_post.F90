@@ -15,7 +15,7 @@
       dudt, dvdt, dtdt, dqdt, &
       delt, ud_mf, dd_mf, dt_mf, con_g, npdf3d, num_p3d, ncnvcld3d, nsamftrac,    &
       rainc, cldwrk, upd_mf, dwn_mf, det_mf, dtend, dtidx, index_of_process_dcnv, &
-      index_of_temperature, index_of_x_wind, index_of_y_wind, ntqv, gq0, save_q,  &
+      index_of_temperature, index_of_x_wind, index_of_y_wind, ntqv, gq0,          &
       cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d, flag_for_dcnv_generic_tend,         &
       ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,                               &
       ntgnc, nthl, nthnc, nthv, ntgv, ntrz, ntgz, nthz, ntsigma, ntomega, ntrac,  &
@@ -36,7 +36,6 @@
       real(kind=kind_phys), dimension(:),     intent(in) :: rain1, cld1d
       real(kind=kind_phys), dimension(:,:),   intent(inout) :: gu0, gv0, gt0
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: gq0
-      real(kind=kind_phys), dimension(:,:,:), intent(in) :: save_q
       real(kind=kind_phys), dimension(:,:),   intent(in) :: dd_mf, dt_mf
       real(kind=kind_phys), dimension(:,:),   intent(in), optional :: ud_mf
       real(kind=kind_phys), intent(in) :: con_g
@@ -258,7 +257,7 @@
                    tracers = tracers + 1
                    idtend = dtidx(100+n,index_of_process_dcnv)
                    if(idtend>0) then
-                      dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,tracers)-save_q(:,:,n) * frain
+                      dtend(:,:,idtend) = dtend(:,:,idtend) + (ten_q(:,:,n)*delt) * frain
                    endif
                 endif
              enddo
@@ -266,13 +265,13 @@
             do n=2,ntrac
                idtend = dtidx(100+n,index_of_process_dcnv)
                if(idtend>0) then
-                  dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,n)-save_q(:,:,n))*frain
+                  dtend(:,:,idtend) = dtend(:,:,idtend) + (ten_q(:,:,n)*delt)*frain
                endif
             enddo
           endif
           idtend = dtidx(100+ntqv, index_of_process_dcnv)
           if(idtend>=1) then
-             dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0(:,:,ntqv) - save_q(:,:,ntqv)) * frain
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (ten_q(:,:,ntqv)*delt) * frain
           endif
 
           ! convective mass fluxes

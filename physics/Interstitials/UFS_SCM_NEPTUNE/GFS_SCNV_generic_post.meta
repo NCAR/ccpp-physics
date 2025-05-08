@@ -204,14 +204,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[save_q]
-  standard_name = tracer_concentration_save
-  long_name = tracer concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
-  type = real
-  kind = kind_phys
-  intent = in
 [dtend]
   standard_name = cumulative_change_of_state_variables
   long_name = diagnostic tendencies for state variables

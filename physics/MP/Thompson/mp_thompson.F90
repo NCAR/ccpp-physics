@@ -428,8 +428,8 @@ module mp_thompson
          logical,                   intent(in)    :: reset_diag3d
          
          real(kind_phys),           intent(  out) :: ten_q(:,:,:)
-         real(kind_phys),           intent(  out) :: ten_u(:,:,:)
-         real(kind_phys),           intent(  out) :: ten_v(:,:,:)
+         real(kind_phys),           intent(  out) :: ten_u(:,:)
+         real(kind_phys),           intent(  out) :: ten_v(:,:)
          real(kind_phys),           intent(  out) :: dspechum(:,:)
          real(kind_phys),           intent(  out) :: dqc(:,:)
          real(kind_phys),           intent(  out) :: dqr(:,:)
