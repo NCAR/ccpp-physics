@@ -502,14 +502,6 @@
   dimensions = ()
   type = logical
   intent = in
-[con_cp]
-  standard_name = specific_heat_of_dry_air_at_constant_pressure
-  long_name = specific heat of dry air at constant pressure
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
 [con_csol]
   standard_name = specific_heat_of_ice_at_constant_pressure
   long_name = specific heat of ice at constant pressure
