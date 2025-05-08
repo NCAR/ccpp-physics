@@ -16,7 +16,7 @@ module cu_gf_driver_post
 !> \section arg_table_cu_gf_driver_post_run Argument Table
 !! \htmlinclude cu_gf_driver_post_run.html
 !!
-   subroutine cu_gf_driver_post_run (im, km, t, q, prevst, prevsq, cactiv, cactiv_m, conv_act, conv_act_m, rrfs_sd, ntsmoke, ntdust, ntcoarsepm, chem3d, gq0, errmsg, errflg)
+   subroutine cu_gf_driver_post_run (im, km, t, q, prevst, prevsq, cactiv, cactiv_m, conv_act, conv_act_m, ntsmoke, ntdust, ntcoarsepm, chem3d, gq0, errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -26,13 +26,12 @@ module cu_gf_driver_post
       integer,          intent(in)  :: im, km
       real(kind_phys),  intent(in)  :: t(:,:)
       real(kind_phys),  intent(in)  :: q(:,:)
-      real(kind_phys),  intent(out), optional :: prevst(:,:)
-      real(kind_phys),  intent(out), optional :: prevsq(:,:)
-      integer,          intent(in),  optional :: cactiv(:)
-      integer,          intent(in),  optional :: cactiv_m(:)
-      real(kind_phys),  intent(out), optional :: conv_act(:)
-      real(kind_phys),  intent(out), optional :: conv_act_m(:)
-      logical,          intent(in)  :: rrfs_sd
+      real(kind_phys),  intent(out) :: prevst(:,:)
+      real(kind_phys),  intent(out) :: prevsq(:,:)
+      integer,          intent(in)  :: cactiv(:)
+      integer,          intent(in)  :: cactiv_m(:)
+      real(kind_phys),  intent(out) :: conv_act(:)
+      real(kind_phys),  intent(out) :: conv_act_m(:)
       integer,          intent(in)  :: ntsmoke, ntdust, ntcoarsepm
       real(kind_phys),  intent(inout), optional :: chem3d(:,:,:)
       real(kind_phys),  intent(inout) :: gq0(:,:,:)
@@ -64,7 +63,7 @@ module cu_gf_driver_post
         endif
       enddo
 
-      if (rrfs_sd) then
+      if (present(chem3d)) then
        gq0(:,:,ntsmoke   ) = chem3d(:,:,1)
        gq0(:,:,ntdust    ) = chem3d(:,:,2)
        gq0(:,:,ntcoarsepm) = chem3d(:,:,3)

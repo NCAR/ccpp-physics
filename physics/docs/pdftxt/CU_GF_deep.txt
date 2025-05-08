@@ -15,18 +15,6 @@ The impacts of GF scheme in operational RAP/HRRR include: (a)uses mass-flux sche
 (b)takes parameterization uncertainty into account by allowing parameters from multiple convective schemes which can be perturbed 
 internally or with temporal and spatial correlation patterns; (c)for higher resolutions (less than 10 km), in addition to scale awareness as in Arakawa et al. (2011) \cite Arakawa_2011 GF can transition as grid spacing decreases into a shallow convection scheme; (d)Coupled to the grid-scale precipitation and radiation schemes through passing of diagnosed cloud liquid and ice from simulated precipitating convective cloud and shallow convective clouds.
 
-\section version_cugf_enh CCPP Physics Updates
-
-\version CCPP-SCM v7.0.0
-
-<b>The Implementation of GF in RRFS prototypes</b>
-- Updates for aerosol-awareness (experimental)
-- Scale-awareness is turned off when explicit microphysics is not active anywhere in the column
-- GF is completely turned off at grid points when MYNN produces shallow convection at that point
-- Radar reflectivity considers mass flux PDF as well as whether scale-awareness is turned on at the grid point in equation.
-
-<b>The implementation of GF in HAFS is ongoing.</b>
-
 \section intra_rough_gf Intraphysics Communication
 The GF scheme passes cloud hydrometeors to the grid-scale microphysics scheme (\ref THOMPSON ) through detrainment from each 
 convective cloud layer containing convective cloud. The detrained condensate interacts with short- and longwave radiation by 

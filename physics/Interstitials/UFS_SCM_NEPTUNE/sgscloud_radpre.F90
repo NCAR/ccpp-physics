@@ -22,18 +22,18 @@
 !> \section arg_table_sgscloud_radpre_run Argument Table
 !! \htmlinclude sgscloud_radpre_run.html
 !!
-!!    cloud array description:                                          !
-!!          clouds(:,:,1)  -  layer total cloud fraction                !
-!!          clouds(:,:,2)  -  layer cloud liq water path                !
-!!          clouds(:,:,3)  -  mean effective radius for liquid cloud    !
-!!          clouds(:,:,4)  -  layer cloud ice water path                !
-!!          clouds(:,:,5)  -  mean effective radius for ice cloud       !
-!!          clouds(:,:,6)  -  layer rain drop water path                !
-!!          clouds(:,:,7)  -  mean effective radius for rain drop       !
-!!          clouds(:,:,8)  -  layer snow flake water path               !
-!!          clouds(:,:,9)  -  mean effective radius for snow flake
-!!
-!>\section sgscloud_radpre_mod  SGS Cloud Scheme Pre General Algorithm
+!    cloud array description:                                          !
+!          clouds(:,:,1)  -  layer total cloud fraction                !
+!          clouds(:,:,2)  -  layer cloud liq water path                !
+!          clouds(:,:,3)  -  mean effective radius for liquid cloud    !
+!          clouds(:,:,4)  -  layer cloud ice water path                !
+!          clouds(:,:,5)  -  mean effective radius for ice cloud       !
+!          clouds(:,:,6)  -  layer rain drop water path                !
+!          clouds(:,:,7)  -  mean effective radius for rain drop       !
+!          clouds(:,:,8)  -  layer snow flake water path               !
+!          clouds(:,:,9)  -  mean effective radius for snow flake
+!
+! \section sgscloud_radpre_mod  SGS Cloud Scheme Pre General Algorithm
       subroutine sgscloud_radpre_run(    &
            im,dt,fhswr,levs,             &
            flag_init,flag_restart,       &

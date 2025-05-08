@@ -609,7 +609,7 @@
       integer, intent(in) :: npts, nlay, nlp1, ilwcliq, ilwcice,        &
            isubclw, iovr, iovr_dcorr, iovr_exp, iovr_exprand, iovr_rand,&
            iovr_maxrand, iovr_max
-      integer, intent(in), optional :: icseed(npts)
+      integer, intent(in) :: icseed(npts)
 
       logical,  intent(in) :: lprnt, inc_minor_gas
 
@@ -630,7 +630,7 @@
 
       real (kind=kind_phys), dimension(:), intent(in) :: sfemis,        &
      &       sfgtmp, de_lgth
-      real (kind=kind_phys), dimension(npts,nlay),intent(in),optional:: &
+      real (kind=kind_phys), dimension(npts,nlay),intent(in) ::         &
              alpha
 
       real (kind=kind_phys), dimension(:,:,:),intent(in)::              &

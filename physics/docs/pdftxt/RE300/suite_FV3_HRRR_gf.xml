@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_WoFS_v0"  version="1">
+<suite name="FV3_HRRR_gf" version="1">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">
@@ -19,7 +19,6 @@
       <scheme>rad_sw_pre</scheme>
       <scheme>rrtmg_sw</scheme>
       <scheme>rrtmg_sw_post</scheme>
-      <scheme>rrtmg_lw_pre</scheme>
       <scheme>rrtmg_lw</scheme>
       <scheme>sgscloud_radpost</scheme>
       <scheme>rrtmg_lw_post</scheme>
@@ -42,11 +41,8 @@
     <subcycle loop="2">
       <scheme>mynnsfc_wrapper</scheme>
       <scheme>GFS_surface_loop_control_part1</scheme>
-      <scheme>sfc_nst_pre</scheme>
-      <scheme>sfc_nst</scheme>
-      <scheme>sfc_nst_post</scheme>
-      <scheme>lsm_noah</scheme>
-      <scheme>sfc_sice</scheme>
+      <scheme>lsm_ruc</scheme>
+      <scheme>clm_lake</scheme>
       <scheme>GFS_surface_loop_control_part2</scheme>
     </subcycle>
     <!-- End of surface iteration loop -->
@@ -55,20 +51,30 @@
       <scheme>sfc_diag</scheme>
       <scheme>sfc_diag_post</scheme>
       <scheme>GFS_surface_generic_post</scheme>
+      <scheme>rrfs_smoke_wrapper</scheme>
       <scheme>mynnedmf_wrapper</scheme>
+      <scheme>rrfs_smoke_postpbl</scheme>
       <scheme>GFS_GWD_generic_pre</scheme>
-      <scheme>cires_ugwp</scheme>
-      <scheme>cires_ugwp_post</scheme>
+      <scheme>drag_suite</scheme>
       <scheme>GFS_GWD_generic_post</scheme>
       <scheme>GFS_suite_stateout_update</scheme>
-      <scheme>ozphys_2015</scheme>
-      <scheme>h2ophys</scheme>
+      <scheme>GFS_photochemistry</scheme>
       <scheme>get_phi_fv3</scheme>
+      <scheme>GFS_suite_interstitial_3</scheme>
+      <scheme>GFS_DCNV_generic_pre</scheme>
+      <scheme>cu_gf_driver_pre</scheme>
+      <scheme>cu_gf_driver</scheme>
+      <scheme>GFS_DCNV_generic_post</scheme>
+      <scheme>GFS_suite_interstitial_4</scheme>
+      <scheme>cnvc90</scheme>
       <scheme>GFS_MP_generic_pre</scheme>
-      <scheme>mp_nssl</scheme>
+      <scheme>mp_thompson_pre</scheme>
+      <scheme>mp_thompson</scheme>
+      <scheme>mp_thompson_post</scheme>
       <scheme>GFS_MP_generic_post</scheme>
+      <scheme>cu_gf_driver_post</scheme>
       <scheme>maximum_hourly_diagnostics</scheme>
-      <scheme>phys_tend</scheme>
+      <scheme>GFS_physics_post</scheme>
     </subcycle>
   </group>
   <group name="stochastics">

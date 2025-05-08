@@ -720,7 +720,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [zol]
   standard_name = ratio_of_height_to_monin_obukhov_length
   long_name = monin obukhov surface stability parameter
@@ -729,7 +728,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [mol]
   standard_name = surface_temperature_scale
   long_name = temperature flux divided by ustar (temperature scale)
@@ -738,7 +736,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [rmol]
   standard_name = reciprocal_of_obukhov_length
   long_name = one over obukhov length
@@ -787,7 +784,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [flhc]
   standard_name = surface_exchange_coefficient_for_heat
   long_name = surface exchange coefficient for heat
@@ -852,7 +848,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [chs2]
   standard_name = surface_exchange_coefficient_for_heat_at_2m
   long_name = exchange coefficient for heat at 2 meters
@@ -861,7 +856,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [cqs2]
   standard_name = surface_exchange_coefficient_for_moisture_at_2m
   long_name = exchange coefficient for moisture at 2 meters
@@ -870,7 +864,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [spp_wts_sfc]
   standard_name = spp_weights_for_surface_layer_scheme
   long_name = spp weights for surface layer scheme

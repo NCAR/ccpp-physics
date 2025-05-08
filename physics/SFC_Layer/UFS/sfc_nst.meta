@@ -181,7 +181,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [cm]
   standard_name = surface_drag_coefficient_for_momentum_in_air_over_water
   long_name = surface exchange coeff for momentum over water
@@ -442,7 +441,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [xs]
   standard_name = sea_water_salinity_in_diurnal_thermocline
   long_name = salinity  content in diurnal thermocline layer
@@ -451,7 +449,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [xu]
   standard_name = x_current_in_diurnal_thermocline
   long_name = u-current content in diurnal thermocline layer
@@ -460,7 +457,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [xv]
   standard_name = y_current_in_diurnal_thermocline
   long_name = v-current content in diurnal thermocline layer
@@ -469,7 +465,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [xz]
   standard_name = diurnal_thermocline_layer_thickness
   long_name = diurnal thermocline layer thickness
@@ -478,7 +473,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [zm]
   standard_name = ocean_mixed_layer_thickness
   long_name = mixed layer thickness
@@ -487,7 +481,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [xtts]
   standard_name = derivative_of_heat_content_in_diurnal_thermocline_wrt_surface_skin_temperature
   long_name = d(xt)/d(ts)
@@ -496,7 +489,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [xzts]
   standard_name = derivative_of_diurnal_thermocline_layer_thickness_wrt_surface_skin_temperature
   long_name = d(xz)/d(ts)
@@ -505,7 +497,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [dt_cool]
   standard_name = molecular_sublayer_temperature_correction_in_sea_water
   long_name = sub-layer cooling amount
@@ -514,7 +505,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [z_c]
   standard_name = molecular_sublayer_thickness_in_sea_water
   long_name = sub-layer cooling thickness
@@ -523,7 +513,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [c_0]
   standard_name = coefficient_c_0
   long_name = coefficient1 to calculate d(tz)/d(ts)
@@ -532,7 +521,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [c_d]
   standard_name = coefficient_c_d
   long_name = coefficient2 to calculate d(tz)/d(ts)
@@ -541,7 +529,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [w_0]
   standard_name = coefficient_w_0
   long_name = coefficient3 to calculate d(tz)/d(ts)
@@ -550,7 +537,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [w_d]
   standard_name = coefficient_w_d
   long_name = coefficient4 to calculate d(tz)/d(ts)
@@ -559,7 +545,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [d_conv]
   standard_name = free_convection_layer_thickness_in_sea_water
   long_name = thickness of free convection layer
@@ -568,7 +553,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [ifd]
   standard_name = control_for_diurnal_thermocline_calculation
   long_name = index to start dtlm run or not
@@ -577,7 +561,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [qrain]
   standard_name = surface_sensible_heat_due_to_rainfall
   long_name = sensible heat flux due to rainfall
@@ -586,7 +569,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [qsurf]
   standard_name = surface_specific_humidity_over_water
   long_name = surface air saturation specific humidity over water

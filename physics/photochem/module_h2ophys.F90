@@ -1,8 +1,6 @@
-! #########################################################################################
-!> \section arg_table_module_h2ophys Argument table                               
-!! \htmlinclude module_h2ophys.html                                               
+!>\file module_h2ophys.F90
 !!
-! #########################################################################################
+
 module module_h2ophys
   use machine,  only : kind_phys
   implicit none

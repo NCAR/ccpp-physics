@@ -1,10 +1,6 @@
 !>\file module_ozphys.F90
 !!
-! #########################################################################################
-!> \section arg_table_module_ozphys Argument table                               
-!! \htmlinclude module_ozphys.html                                               
-!!
-!
+
 !> The operational GFS currently parameterizes ozone production and destruction based on 
 !! monthly mean coefficients ( global_o3prdlos.f77) provided by Naval Research Laboratory
 !! through CHEM2D chemistry model (McCormack et al. (2006) \cite mccormack_et_al_2006).

@@ -28,10 +28,10 @@ module cu_ntiedtke_pre
       real(kind_phys),  intent(in)  :: dtp
       real(kind_phys),  intent(in)  :: t(:,:)
       real(kind_phys),  intent(in)  :: q(:,:)
-      real(kind_phys),  intent(in),  optional :: prevst(:,:)
-      real(kind_phys),  intent(in),  optional :: prevsq(:,:)
-      real(kind_phys),  intent(out), optional :: forcet(:,:)
-      real(kind_phys),  intent(out), optional :: forceq(:,:)
+      real(kind_phys),  intent(in)  :: prevst(:,:)
+      real(kind_phys),  intent(in)  :: prevsq(:,:)
+      real(kind_phys),  intent(out) :: forcet(:,:)
+      real(kind_phys),  intent(out) :: forceq(:,:)
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 

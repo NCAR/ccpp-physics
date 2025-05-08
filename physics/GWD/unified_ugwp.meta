@@ -448,7 +448,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [oc1ss]
   standard_name = convexity_of_subgrid_orography_small_scale
   long_name = convexity of subgrid height_above_mean_sea_level small scale
@@ -457,7 +456,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [oa4ss]
   standard_name = asymmetry_of_subgrid_orography_small_scale
   long_name = asymmetry of subgrid height_above_mean_sea_level small scale
@@ -466,7 +464,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [ol4ss]
   standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height_small_scale
   long_name = horizontal fraction of grid box covered by subgrid height_above_mean_sea_level higher than critical height small scale
@@ -475,7 +472,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [dx]
   standard_name = characteristic_grid_lengthscale
   long_name = size of the grid cell

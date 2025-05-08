@@ -759,7 +759,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [rca]
   standard_name = aerodynamic_resistance_in_canopy
   long_name = canopy resistance
@@ -768,7 +767,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

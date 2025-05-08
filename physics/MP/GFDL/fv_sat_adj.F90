@@ -268,9 +268,9 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, isc1, iec1, isc2, iec2, k
     ! If multi-gases physics are not used, ngas is one and qvi identical to qv
     integer,             intent(in)    :: ngas
 #ifdef MULTI_GASES
-    real(kind=kind_dyn), intent(inout), optional :: qvi(isd:ied, jsd:jed, 1:km, 1:ngas)
+    real(kind=kind_dyn), intent(inout) :: qvi(isd:ied, jsd:jed, 1:km, 1:ngas)
 #else
-    real(kind=kind_dyn), intent(inout), optional :: qvi(:,:,:,:)
+    real(kind=kind_dyn), intent(inout) :: qvi(:,:,:,:)
 #endif
     real(kind=kind_dyn), intent(inout) :: qv(isd:ied, jsd:jed, 1:km)
     real(kind=kind_dyn), intent(inout) :: ql(isd:ied, jsd:jed, 1:km)

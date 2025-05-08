@@ -320,7 +320,8 @@ show some variables in the namelist that must match the SDF.
                                                       <li> >= 3.0, prognose tke, q'2, T'2, and T'q'
                                                       </ul>
                                                       <td>2.6
-
+<tr><td>conv_cf_opt      <td>sgscloud_radpre               <td>option for convection scheme cloud fraction computation.0: Chaboureau-Bechtold; 1: Xu-Randall <td>0
+<tr><td>gf_coldstart     <td>cu_gf_driver               <td>flag for cold start GF     <td>.false.
 <tr><td>num_dfi_radar    <td>cu_gf_driver   <td>number of timespans with radar-prescried temperature tendencies  <td>0
 <tr><td>fh_dfi_radar     <td>cu_gf_driver   <td>begin+end of timespans to receive radar-prescribed temperature tendencies <td>-2e10
 <tr><td>do_cap_suppress  <td>cu_gf_driver   <td>enable convection suppression in GF scheme if fh_dfi_radar is specified   <td>.true.
@@ -772,9 +773,39 @@ show some variables in the namelist that must match the SDF.
 <tr><td>fh_dfi_radar           <td>GFS_MP_generic_post, cu_gf_driver, cu_c3_driver          <td>begin&end of four timespans over which radar_tten is applied      <td>-2e10
 <tr><td>radar_tten_limits(2)      <td>GFS_MP_generic_post          <td>radar_tten values outside this range (min,max) are discarded
 <tr><td>do_cap_suppress        <td>cu_gf_driver, cu_c3_driver          <td>set .true. to turn on convection suppression in Grell-Freitas scheme during limited intervals when fh_dfi_radar is enabled <td>.true.
-iccn
 <tr><td>kice       <td>sfc_sice    <td>number of layers in ice      <td>2
 <tr><td>lrefres      <td>      <td>flag for radar reflectivity in restart file     <td>.false.
+<tr><td colspan="4" align= center>\b Parameters \b related \b to \b SRW \b smoke \b and \b dust \b scheme \b options
+<tr><td>dust_drylimit_factor    <td>rrfs_smoke_wrapper               <td>factor for drylimit parameeterization in Fengsha     <td> 1.0     
+<tr><td>dust_moist_correction   <td>rrfs_smoke_wrapper               <td>factor to tune volumetric soil moisture              <td> 1.0
+<tr><td>dust_moist_opt          <td>rrfs_smoke_wrapper               <td>dust moisture option 1:fecan 2:shao                  <td> 1
+<tr><td>dust_alpha              <td>rrfs_smoke_wrapper               <td>alpha paramter for fengsha dust scheme               <td> 0.
+<tr><td>dust_gamma              <td>rrfs_smoke_wrapper               <td>gamma parameter for fengsha dust scheme              <td> 0.
+<tr><td>wetdep_ls_alpha         <td>rrfs_smoke_wrapper               <td>alpha parameter for wet deposition                   <td> 1.
+<tr><td>plume_alpha             <td>rrfs_smoke_wrapper               <td>alpha paramter for plumerise scheme                  <td> 0.
+<tr><td>ebb_dcycle              <td>rrfs_smoke_wrapper               <td>1: retro; 2: forcast of fire emission                <td> 1
+<tr><td>seas_opt                <td>rrfs_smoke_wrapper               <td>1: gocart  <td>2
+<tr><td>dust_opt                <td>rrfs_smoke_wrapper               <td>1: gocart dust fengsha         <td>1
+<tr><td>drydep_opt              <td>rrfs_smoke_wrapper               <td>1: dry deposition based on Emerson et al.(2020)); 2: based on coarsepm setting         <td>1
+<tr><td>coarsepm_settling       <td>rrfs_smoke_wrapper               <td>coarse particulate matter option         <td>1
+<tr><td>plume_wind_eff          <td>rrfs_smoke_wrapper               <td>wind effect plumerise option                     <td>1
+<tr><td>extended_sd_diags       <td>rrfs_smoke_wrapper               <td>flag for extended smoke dust diagnostics        <td>.false.
+<tr><td>wetdep_ls_opt           <td>rrfs_smoke_wrapper               <td>RRFS smoke large scale wet depostion option          <td>1
+<tr><td>do_plumerise             <td>rrfs_smoke_wrapper              <td>RRFS smoke plumerise option         <td>.false.
+<tr><td>addsmoke_flag           <td>rrfs_smoke_wrapper               <td>RRFS smoke add smoke option         <td>1
+<tr><td>plumerisefire_frq       <td>rrfs_smoke_wrapper               <td>RRFS smoke add smoke option         <td>60
+<tr><td>n_dbg_lines             <td>rrfs_smoke_wrapper               <td>RRFS smoke add smoke option         <td>3
+<tr><td>hwp_method              <td>rrfs_smoke_wrapper               <td>the method to calculate hourly wildfile potential                        <td>2
+<tr><td>add_fire_moist_flux     <td>rrfs_smoke_wrapper               <td>flag to add fire moisture flux         <td>.false.
+<tr><td>sc_factor               <td>rrfs_smoke_wrapper               <td>scale factor for wildfire emissions         <td>1.0
+<tr><td>aero_ind_fdb             <td>rrfs_smoke_wrapper   <td>RRFS-sd wfa/ifa emission      <td>.false.
+<tr><td>aero_dir_fdb             <td>rrfs_smoke_wrapper   <td>RRFS-sd smoke/dust radiation feedback    <td>.false.
+<tr><td>rrfs_smoke_debug         <td>rrfs_smoke_wrapper   <td>RRFS-sd plumrise debug        <td>.false
+<tr><td>do_smoke_transport       <td>rrfs_smoke_wrapper   <td>RRFS-sd convective transport of smoke/dust    <td>.true.
+<tr><td>mix_chem                 <td>rrfs_smoke_wrapper   <td>tracer mixing option by MYNNPBL   <td>.false.
+<tr><td>enh_mix                  <td>rrfs_smoke_wrapper   <td>enhance vertical mixing option by MYNN PBL    <td>.false.
+<tr><td>smoke_dir_fdb_coef(7)    <td>rrfs_smoke_wrapper   <td>smoke&dust direct feedback coefficents        <td>(/ 0.33, 0.67, 0.02, 0.13, 0.85, 0.05, 0.95 /)
+<tr><td>smoke_conv_vet_coef(3)   <td>rrfs_smoke_wrapper   <td>smoke&dust convective wet removal coefficents   <td>(/ 0.50, 0.50, 0.50 /)
 </table>
 </div>
 

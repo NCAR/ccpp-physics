@@ -26,16 +26,16 @@ module cu_c3_driver_post
       real(kind_phys),  intent(in)  :: t(:,:)
       real(kind_phys),  intent(in)  :: q(:,:)
       real(kind_phys), dimension(:),intent(in) :: garea
-      real(kind_phys),  intent(out), optional :: prevst(:,:)
-      real(kind_phys),  intent(out), optional :: prevsq(:,:)
-      integer,          intent(in),  optional :: cactiv(:)
-      integer,          intent(in),  optional :: cactiv_m(:)
-      real(kind_phys),  intent(out), optional :: conv_act(:)
-      real(kind_phys),  intent(out), optional :: conv_act_m(:)
+      real(kind_phys),  intent(out) :: prevst(:,:)
+      real(kind_phys),  intent(out) :: prevsq(:,:)
+      integer,          intent(in)  :: cactiv(:)
+      integer,          intent(in)  :: cactiv_m(:)
+      real(kind_phys),  intent(out) :: conv_act(:)
+      real(kind_phys),  intent(out) :: conv_act_m(:)
       ! for Radar reflectivity
       real(kind_phys),  intent(in)  :: dt
       real(kind_phys),  intent(in)  :: raincv(:)
-      real(kind_phys),  intent(in), optional :: maxupmf(:)
+      real(kind_phys),  intent(in)  :: maxupmf(:)
       real(kind_phys),  intent(inout) :: refl_10cm(:,:)
       character(len=*), intent(out) :: errmsg
 !$acc declare copyin(t,q,cactiv,cactiv_m) copyout(prevst,prevsq,conv_act,conv_act_m)

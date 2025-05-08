@@ -62,7 +62,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [xz]
   standard_name = diurnal_thermocline_layer_thickness
   long_name = diurnal thermocline layer thickness
@@ -71,7 +70,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [dt_cool]
   standard_name = molecular_sublayer_temperature_correction_in_sea_water
   long_name = sub-layer cooling amount
@@ -80,7 +78,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [z_c]
   standard_name = molecular_sublayer_thickness_in_sea_water
   long_name = sub-layer cooling thickness
@@ -89,7 +86,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [tref]
   standard_name = reference_sea_surface_temperature
   long_name = reference/foundation temperature
@@ -98,7 +94,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [cplflx]
   standard_name = flag_for_surface_flux_coupling
   long_name = flag controlling cplflx collection (default off)

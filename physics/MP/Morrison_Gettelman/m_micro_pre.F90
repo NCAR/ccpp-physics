@@ -27,13 +27,13 @@
           gq0_graupel(:,:), gq0_rain_nc(:,:), gq0_snow_nc(:,:),         &
           gq0_graupel_nc(:,:), cnvc(:,:), cnvw(:,:), gt0(:,:)
       real(kind=kind_phys), intent(in), optional :: cld_shoc(:,:)
-      real(kind=kind_phys), intent(inout), optional ::                    &
+      real(kind=kind_phys), intent(inout) ::                              &
           qrn(:,:), qsnw(:,:), qgl(:,:), ncpr(:,:), ncps(:,:), ncgl(:,:), &
           cld_frc_MG(:,:)
 
       real(kind=kind_phys), intent(out) :: clw_ice(:,:), clw_water(:,:)
 
-      real(kind=kind_phys), intent(in), optional :: clcn(:,:)
+      real(kind=kind_phys), intent(in) :: clcn(:,:)
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

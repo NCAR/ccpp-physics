@@ -13,11 +13,12 @@ https://rapidrefresh.noaa.gov/hrrr/.
 
 The HRRR suite uses the parameterizations in the following order:
  - \ref SGSCLOUD_page
- - \ref GFS_RRTMG
+ - \ref GFS_RRTMG_page
  - \ref SFC_MYNNSFL
  - \ref GFS_NSST
  - \ref RUCLSM
- - \ref CLM_LAKE_model
+ - \ref CLM_LAKE_page
+ - \ref SMK_DUST
  - \ref MYNNEDMF
  - \ref GFS_drag_suite
  - \ref GFS_OZPHYS
