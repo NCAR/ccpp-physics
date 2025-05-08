@@ -275,7 +275,7 @@
   units = index
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = in 
+  intent = in
 [refl_10cm]
   standard_name = radar_reflectivity_10cm
   long_name = instantaneous refl_10cm
@@ -956,6 +956,46 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
+[con_eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_epsm1]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
+  long_name = (rd/rv) - 1
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_epsq]
+  standard_name = minimum_value_of_specific_humidity
+  long_name = floor value for specific humidity
+  units = kg kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_fvirt]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rog]
+  standard_name = ratio_of_gas_constant_dry_air_to_gravitational_acceleration
+  long_name = (rd/g)
+  units = J s2 K-1 kg-1 m-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -971,4 +1011,3 @@
   dimensions = ()
   type = integer
   intent = out
-

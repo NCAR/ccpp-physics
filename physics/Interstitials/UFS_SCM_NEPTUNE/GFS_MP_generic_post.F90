@@ -2,16 +2,16 @@
 !! This file contains the subroutines that calculate diagnotics variables
 !! after calling any microphysics scheme:
 
-!> This module contains the subroutine that calculates 
+!> This module contains the subroutine that calculates
 !! precipitation type and its post, which provides precipitation forcing
 !! to LSM.
       module GFS_MP_generic_post
       contains
 
 !> If dominant precip type is requested (i.e., Zhao-Carr MP scheme), 4 more algorithms in calpreciptype()
-!! will be called.  the tallies are then summed in calwxt_dominant(). For GFDL cloud MP scheme, determine convective 
+!! will be called.  the tallies are then summed in calwxt_dominant(). For GFDL cloud MP scheme, determine convective
 !! rain/snow by surface temperature;  and determine explicit rain/snow by rain/snow coming out directly from MP.
-!! 
+!!
 !> \section arg_table_GFS_MP_generic_post_run Argument Table
 !! \htmlinclude GFS_MP_generic_post_run.html
 !!
@@ -27,7 +27,9 @@
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, num_diag_buckets,                         &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d,dqdt_qmicro, lssav, num_dfi_radar,       &
         fh_dfi_radar,index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour, prevsq,      &
-        iopt_lake, iopt_lake_clm, lkm, use_lake_model, errmsg, errflg)
+        iopt_lake, iopt_lake_clm, lkm, use_lake_model, con_eps, con_epsm1, &
+        con_epsq, con_fvirt, con_rog, &
+        errmsg, errflg)
 !
       use machine, only: kind_phys
       use calpreciptype_mod, only: calpreciptype
@@ -54,6 +56,9 @@
       real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsl, save_t, del
       real(kind=kind_phys), dimension(:,:),    intent(in)    :: prsi, phii,phil
       real(kind=kind_phys), dimension(:,:,:),  intent(in)    :: gq0, save_q
+      real(kind=kind_phys),                    intent(in)    :: con_eps, con_epsm1
+      real(kind=kind_phys),                    intent(in)    :: con_epsq, con_fvirt
+      real(kind=kind_phys),                    intent(in)    :: con_rog
 
       real(kind=kind_phys), dimension(:,:,:),  intent(in), optional :: dfi_radar_tten
 
@@ -128,7 +133,7 @@
       errflg = 0
 
       onebg = one/con_g
-      
+
       do i = 1, im
         rain(i) = rainc(i) + frain * rain1(i) ! time-step convective plus explicit
       enddo
@@ -140,9 +145,9 @@
          do i=1,im
            factor(i) = 0.0
            lfrz = .true.
-           zfrz(i) = phil(i,1)*onebg 
+           zfrz(i) = phil(i,1)*onebg
            do k = levs, 1, -1
-             zo(i,k) =  phil(i,k)*onebg 
+             zo(i,k) =  phil(i,k)*onebg
              if (gt0(i,k) >= con_t0c .and. lfrz) then
               zfrz(i) = zo(i,k)
               lfrz = .false.
@@ -242,7 +247,7 @@
          endif
       endif
 
-!> - If requested (e.g. Zhao-Carr MP scheme), call calpreciptype() to calculate dominant 
+!> - If requested (e.g. Zhao-Carr MP scheme), call calpreciptype() to calculate dominant
 !! precipitation type.
       ! DH* TODO - Fix wrong code in non-CCPP build (GFS_physics_driver)
       ! and use commented lines here (keep wrong version for bit-for-bit):
@@ -268,7 +273,7 @@
         tprcp   = max (zero, rain) ! time-step convective and explicit precip
         ice     = frain*rain1*sr                  ! time-step ice
       end if
-      
+
       if (lsm==lsm_ruc .or. lsm==lsm_noahmp) then
         raincprv(:)   = rainc(:)
         rainncprv(:)  = frain * rain1(:)
@@ -300,7 +305,9 @@
         call calpreciptype (kdt, nrcm, im, im, levs, levs+1, &
                             rann, xlat, xlon, gt0,           &
                             gq0(:,:,1), prsl, prsi,          &
-                            rain, phii, tsfc,                &  ! input
+                            rain, phii, tsfc,                &
+                            con_g, con_eps, con_epsm1,       &
+                            con_epsq, con_fvirt, con_rog,    &  ! input
                             domr, domzr, domip, doms)           ! output
 !
 !       HCHUANG: use new precipitation type to decide snow flag for LSM snow accumulation
@@ -385,7 +392,7 @@
         enddo
       enddo
 
-      ! Conversion factor from mm per day to m per physics timestep 
+      ! Conversion factor from mm per day to m per physics timestep
       tem = dtp * con_p001 / con_day
 
 !> - For GFDL, Thompson and NSSL MP schemes, determine convective snow by surface temperature;
@@ -398,7 +405,7 @@
 
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
-       
+
         if (lsm /= lsm_ruc) then
           do i = 1, im
             !tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp ! DH now lines 245-250
@@ -541,7 +548,7 @@
         pwat(i) = pwat(i) * onebg
       enddo
 
-      if(progsigma)then      
+      if(progsigma)then
          do k = 1, levs
             do i=1, im
                prevsq(i,k) = gq0(i,k,1)

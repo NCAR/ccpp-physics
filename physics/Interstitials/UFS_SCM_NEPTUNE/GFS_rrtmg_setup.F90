@@ -2,7 +2,7 @@
 !! This file contains
 
 !> \defgroup GFS_rrtmg_setup_mod GFS RRTMG Scheme Setup
-!! This subroutine initializes RRTMG. 
+!! This subroutine initializes RRTMG.
 !> @{
 module GFS_rrtmg_setup
 
@@ -42,7 +42,8 @@ module GFS_rrtmg_setup
         iovr_max, iovr_dcorr, iovr_exp, iovr_exprand, icliq_sw, lcrick,      &
         lcnorm, imp_physics, lnoprec, idate, iflip, do_RRTMGP, me, lalw1bd,  &
         iaermdl, iaerflg, aeros_file, con_pi, con_t0c, con_c, con_boltz,     &
-        con_plnk, con_solr_2008, con_solr_2002, con_g, con_rd, co2usr_file,  &
+        con_plnk, con_solr_2008, con_solr_2002, con_g, con_rd, con_cp,       &
+        co2usr_file,                                                         &
         co2cyc_file, rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, isubclw,&
         iswmode, ipsd0, ltp, lextop, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
@@ -162,7 +163,7 @@ module GFS_rrtmg_setup
       character(len=26),intent(in)  :: aeros_file, solar_file, co2usr_file,&
            co2cyc_file
       real(kind_phys),  intent(in)  :: con_pi, con_t0c, con_c, con_boltz,  &
-           con_plnk, con_solr_2008, con_solr_2002, con_g, con_rd
+           con_plnk, con_solr_2008, con_solr_2002, con_g, con_rd, con_cp
       integer,          intent(inout) :: ipsd0
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -171,7 +172,7 @@ module GFS_rrtmg_setup
       ! Initialize the CCPP error handling variables
       errmsg = ''
       errflg = 0
-      
+
       if (do_RRTMGP) then
         write(errmsg,'(*(a))') "Logic error: do_RRTMGP must be set to .false."
         errflg = 1
@@ -181,7 +182,7 @@ module GFS_rrtmg_setup
       if ( ictm==0 .or. ictm==-2 ) then
         iaerflg = mod(iaer, 100)        ! no volcanic aerosols for clim hindcast
       else
-        iaerflg = mod(iaer, 1000)   
+        iaerflg = mod(iaer, 1000)
       endif
       iaermdl = iaer/1000               ! control flag for aerosol scheme selection
 
@@ -222,12 +223,12 @@ module GFS_rrtmg_setup
 
       call rlwinit ( me, rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, &
            iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
-           iovr_exp, iovr_exprand, errflg, errmsg )
+           iovr_exp, iovr_exprand, con_g, con_cp, errflg, errmsg )
       if(errflg/=0) return
 
       call rswinit ( me, rad_hr_units, inc_minor_gas, icliq_sw, isubclw, &
            iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
-           iovr_exp, iovr_exprand,iswmode, errflg, errmsg )
+           iovr_exp, iovr_exprand,iswmode, con_g, con_cp, errflg, errmsg )
       if(errflg/=0) return
 
       if ( me == 0 ) then
