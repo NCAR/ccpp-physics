@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = fv_sat_adj
   type = scheme
-  dependencies = ../../hooks/machine.F,../../hooks/physcons.F90
+  dependencies = ../../hooks/machine.F
   dependencies = ../multi_gases.F90,../module_mp_radar.F90
   dependencies = module_gfdlmp_param.F90
 
