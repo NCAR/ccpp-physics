@@ -14,14 +14,11 @@
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,                             &
      &   thlx,thvx,thlvx,gdx,thetae,radj,                               &
      &   krad,mrad,radmin,buo,xmfd,                                     &
-     &   tcdo,qcdo,ucdo,vcdo,xlamde)
+     &   tcdo,qcdo,ucdo,vcdo,xlamde,                                    &
+     &   con_g,con_cp,con_rv,con_hvap,con_fvirt,con_eps,con_epsm1)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, grav => con_g, cp => con_cp                         &
-     &,             rv => con_rv, hvap => con_hvap                      &
-     &,             fv => con_fvirt                                     &
-     &,             eps => con_eps, epsm1 => con_epsm1
 !
       implicit none
 !
@@ -43,6 +40,8 @@
      &                     tcdo(im,km), qcdo(im,km,ntrac1),             &
      &                     ucdo(im,km), vcdo(im,km),                    &
      &                     xlamde(im,km-1)
+      real(kind=kind_phys), intent(in) :: con_g,con_cp,con_rv,con_hvap
+      real(kind=kind_phys), intent(in) :: con_fvirt,con_eps,con_epsm1
 !
 !  local variables and arrays
 !
@@ -76,9 +75,6 @@
       real(kind=kind_phys) actei, cldtime
 !
 c  physical parameters
-      parameter(g=grav)
-      parameter(gocp=g/cp)
-      parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
       parameter(ce0=0.4,cm=1.0,pgcon=0.55)
       parameter(qmin=1.e-8,qlmin=1.e-12)
       parameter(b1=0.45,f1=0.15)
@@ -90,6 +86,18 @@ c  physical parameters
 !
 !************************************************************************
 !!
+      grav = con_g
+      cp = con_cp
+      rv = con_rv
+      hvap = con_hvap
+      fv = con_fvirt
+      eps = con_eps
+      epsm1 = con_epsm1
+      g=grav
+      gocp=g/cp
+      elocp=hvap/cp
+      el2orc=hvap*hvap/(rv*cp)
+
       totflg = .true.
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))
@@ -164,7 +172,7 @@ c  physical parameters
       enddo
 !
 !> - First-guess level of downdraft extension (mrad)
-! 
+!
       do i = 1, im
         flg(i) = cnvflg(i)
         mrad(i) = krad(i)
@@ -225,7 +233,7 @@ c  physical parameters
             dz = zl(i,k+1) - zl(i,k)
             tem  = 0.5 * xlamde(i,k) * dz
             factor = 1. + tem
-! 
+!
             thld(i,k) = ((1.-tem)*thld(i,k+1)+tem*
      &                     (thlx(i,k)+thlx(i,k+1)))/factor
             qtd(i,k) = ((1.-tem)*qtd(i,k+1)+tem*
@@ -407,7 +415,7 @@ c
         endif
       enddo
 !
-!> - Compute scale-aware function based on 
+!> - Compute scale-aware function based on
 !! Arakawa and Wu (2013) \cite arakawa_and_wu_2013
 !
       do i = 1, im
@@ -458,7 +466,7 @@ c
 !
       do k = kmscu,1,-1
         do i=1,im
-          if(cnvflg(i) .and. 
+          if(cnvflg(i) .and.
      &       (k >= mrad(i) .and. k < krad(i))) then
             dz = zl(i,k+1) - zl(i,k)
             tem  = 0.5 * xlamde(i,k) * dz
@@ -520,7 +528,7 @@ c
               dz = zl(i,k+1) - zl(i,k)
               tem  = 0.5 * xlamde(i,k) * dz
               factor = 1. + tem
-! 
+!
               qcdo(i,k,n) = ((1.-tem)*qcdo(i,k+1,n)+tem*
      &                       (q1(i,k,n)+q1(i,k+1,n)))/factor
             endif
@@ -543,7 +551,7 @@ c
               dz = zl(i,k+1) - zl(i,k)
               tem  = 0.5 * xlamde(i,k) * dz
               factor = 1. + tem
-! 
+!
               qcdo(i,k,n) = ((1.-tem)*qcdo(i,k+1,n)+tem*
      &                       (q1(i,k,n)+q1(i,k+1,n)))/factor
             endif
