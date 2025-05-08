@@ -378,8 +378,8 @@ contains
     real(kind=kind_phys),    intent(in), dimension(:,:)     :: clx, oa4
 
     real(kind=kind_phys),    intent(in), dimension(:)       :: dx
-    real(kind=kind_phys),    intent(in), dimension(:), optional       :: varss,oc1ss
-    real(kind=kind_phys),    intent(in), dimension(:,:), optional     :: oa4ss,ol4ss
+    real(kind=kind_phys),    intent(in), dimension(:)       :: varss,oc1ss
+    real(kind=kind_phys),    intent(in), dimension(:,:)     :: oa4ss,ol4ss
 
 !=====
 !ccpp-style passing constants, I prefer to take them out from the "call-subr" list
@@ -408,7 +408,7 @@ contains
 
 !Output (optional):
 
-    real(kind=kind_phys), intent(out), dimension(:), optional  ::         &
+    real(kind=kind_phys), intent(out), dimension(:)  ::         &
                             du_ogwcol,  dv_ogwcol,  du_oblcol, dv_oblcol, &
                             du_osscol,  dv_osscol,  du_ofdcol, dv_ofdcol
 !
@@ -418,11 +418,11 @@ contains
     real(kind=kind_phys), intent(out), dimension(:)  :: dusfcg, dvsfcg
     real(kind=kind_phys), intent(out), dimension(:)  :: tau_ogw, tau_ngw, tau_oss
 
-    real(kind=kind_phys), intent(out) , dimension(:,:), optional ::         &
+    real(kind=kind_phys), intent(out) , dimension(:,:) ::         &
                           dudt_ogw, dvdt_ogw, dudt_obl, dvdt_obl, &
                           dudt_oss, dvdt_oss, dudt_ofd, dvdt_ofd
 
-    real(kind=kind_phys), intent(out) , dimension(:,:), optional :: dudt_ngw, dvdt_ngw, kdis_ngw, dtdt_ngw
+    real(kind=kind_phys), intent(out) , dimension(:,:) :: dudt_ngw, dvdt_ngw, kdis_ngw, dtdt_ngw
     real(kind=kind_phys), intent(out) , dimension(:,:) :: dudt_gw,  dvdt_gw, dtdt_gw, kdis_gw
 
     real(kind=kind_phys), intent(out) , dimension(:)   :: zogw, zlwb, zobl, zngw

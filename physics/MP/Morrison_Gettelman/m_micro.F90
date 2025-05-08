@@ -199,7 +199,7 @@ end subroutine m_micro_init
      &                prsl_i,u_i,v_i,phil,   omega_i, QLLS_i,QILS_i,    &
      &                                       lwheat_i,swheat_i
        real (kind=kind_phys), dimension(:,0:),intent(in):: prsi_i, phii
-       real (kind=kind_phys), dimension(:,:),intent(in), optional  ::   &
+       real (kind=kind_phys), dimension(:,:),intent(in) ::              &
      &       CNV_DQLDT_i, CLCN_i,     QLCN_i, QICN_i,                   &
      &       CNV_MFD_i,               cf_upi, CNV_FICE_i, CNV_NDROP_i,  &
      &       CNV_NICE_i,  w_upi
@@ -215,7 +215,7 @@ end subroutine m_micro_init
 
 !   output
        real (kind=kind_phys),dimension(:,:), intent(out) :: lwm_o, qi_o
-       real (kind=kind_phys),dimension(:,:), intent(out), optional ::  &
+       real (kind=kind_phys),dimension(:,:), intent(out) ::  &
             cldreffl, cldreffi, cldreffr, cldreffs, cldreffg
        real (kind=kind_phys),dimension(:), intent(out) :: rn_o,  sr_o
        character(len=*),                    intent(out) :: errmsg
@@ -226,7 +226,7 @@ end subroutine m_micro_init
        integer, dimension(:), intent(inout):: KCBL
        real (kind=kind_phys),dimension(:,:),intent(inout):: q_io, t_io,   &
      &                                             ncpi_io
-       real (kind=kind_phys),dimension(:,:),intent(inout), optional :: &
+       real (kind=kind_phys),dimension(:,:),intent(inout) :: &
             rnw_io, snw_io, ncpr_io, ncps_io, qgl_io,  ncgl_io, ncpl_io, &
             CLLS_io
 ! *GJF

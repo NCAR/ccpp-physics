@@ -349,7 +349,7 @@
    real(kind=kind_phys), intent(in) ::   var(:),oc1(:),        &
      &                                   oa4(:,:),ol4(:,:),    &
      &                                   dx(:)
-   real(kind=kind_phys), intent(in), optional ::   varss(:),oc1ss(:), &
+   real(kind=kind_phys), intent(in) ::   varss(:),oc1ss(:), &
      &                              oa4ss(:,:),ol4ss(:,:)
    real(kind=kind_phys), intent(in) :: THETA(:),SIGMA(:),      &
      &                                 GAMMA(:),ELVMAX(:)
@@ -1562,7 +1562,7 @@ endif
    real(kind=kind_phys), intent(in) ::   var(:),oc1(:),        &
      &                                   oa4(:,:),ol4(:,:),    &
      &                                   dx(:)
-   real(kind=kind_phys), intent(in), optional ::   varss(:),oc1ss(:),    &
+   real(kind=kind_phys), intent(in) ::   varss(:),oc1ss(:),    &
      &                              oa4ss(:,:),ol4ss(:,:)
    real(kind=kind_phys), intent(in) :: THETA(:),SIGMA(:),      &
      &                                 GAMMA(:),ELVMAX(:)

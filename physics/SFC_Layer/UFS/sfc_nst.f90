@@ -178,8 +178,7 @@ contains
          usfco, vsfco, t1, q1, cm, ch, fm, fm10,                    &
          prsl1, prslki, prsik1, prslk1, xlon, xcosz,                &
          sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, wind
-    real (kind=kind_phys), dimension(:), intent(in), optional ::    &
-         tref
+    real (kind=kind_phys), dimension(:), intent(in) :: tref
     real (kind=kind_phys), intent(in) :: timestep
     real (kind=kind_phys), intent(in) :: solhr
 
@@ -195,7 +194,7 @@ contains
     ! control variables of dtl system (5+2) and sl (2) and coefficients for d(tz)/d(ts) calculation
     real (kind=kind_phys), dimension(:), intent(inout) :: tskin, &
          tsurf
-    real (kind=kind_phys), dimension(:), intent(inout), optional :: &
+    real (kind=kind_phys), dimension(:), intent(inout) :: &
          xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool,     &
          z_c, c_0, c_d, w_0, w_d, d_conv, ifd, qrain
 

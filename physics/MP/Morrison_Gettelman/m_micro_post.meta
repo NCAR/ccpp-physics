@@ -44,7 +44,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [ncps]
   standard_name = local_snow_number_concentration
   long_name = number concentration of snow local to physics
@@ -53,7 +52,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [ncgl]
   standard_name = local_graupel_number_concentration
   long_name = number concentration of graupel local to physics
@@ -62,7 +60,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [qrn]
   standard_name = local_rain_water_mixing_ratio
   long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) local to physics
@@ -71,7 +68,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [qsnw]
   standard_name = local_snow_water_mixing_ratio
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) local to physics
@@ -80,7 +76,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [qgl]
   standard_name = local_graupel_mixing_ratio
   long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) local to physics
@@ -89,7 +84,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [gq0_ice]
   standard_name = cloud_ice_mixing_ratio_of_new_state
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics

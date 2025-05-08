@@ -66,7 +66,7 @@
       real (kind=kind_phys),dimension(:),intent(inout) ::                     &
      &           snwdph, hice, tsurf, t_sfc, hflx, evap, fice, ustar, qsfc,    &
      &           ch, cm, chh, cmm, T_ice, tsurf_ice, lflx, gflx
-      real (kind=kind_phys),dimension(:),intent(inout), optional :: &
+      real (kind=kind_phys),dimension(:),intent(inout) :: &
      &           h_ML, t_wML, t_mnw, H_B, T_B, t_bot1, t_bot2, c_t, T_snow
       real (kind=kind_phys),  intent(in) :: julian
 
@@ -443,10 +443,10 @@ subroutine flake_driver_post_run (im, use_lake_model, h_ML, T_wML,  &
 
       real (kind=kind_phys), dimension(:), intent(in) ::               &
      &           lakedepth, tsurf
-      real (kind=kind_phys), dimension(:), intent(in), optional ::     &
+      real (kind=kind_phys), dimension(:), intent(in) ::     &
      &           h_ML, t_wML
 
-      real (kind=kind_phys),dimension(:),intent(inout), optional ::    &
+      real (kind=kind_phys),dimension(:),intent(inout) ::    &
      &           xz, zm, tref
       real (kind=kind_phys),dimension(:),intent(inout) :: tsfco   
 

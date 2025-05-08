@@ -940,7 +940,7 @@
  type = real
  kind = kind_phys
  intent = out
-  optional = True
+ optional = True
 [lu_nofire_out]
  standard_name = sum_of_land_use_fractions_for_no_fire_pixels
  long_name = land use of no fire pixels for type
@@ -949,7 +949,7 @@
  type = real
  kind = kind_phys
  intent = out
-  optional = True
+ optional = True
 [lu_qfire_out]
  standard_name = sum_of_land_use_fractions_for_cropland_fire_pixels
  long_name = land use of fire pixels for type
@@ -958,7 +958,7 @@
  type = real
  kind = kind_phys
  intent = out
-  optional = True
+ optional = True
 [fire_heat_flux_out]
   standard_name = surface_fire_heat_flux
   long_name = heat flux of fire at the surface

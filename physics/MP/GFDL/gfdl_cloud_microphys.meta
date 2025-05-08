@@ -311,7 +311,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [ice0]
   standard_name = lwe_thickness_of_ice_amount
   long_name = ice fall on physics timestep
@@ -320,7 +319,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [snow0]
   standard_name = lwe_thickness_of_snow_amount
   long_name = snow fall on physics timestep
@@ -329,7 +327,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [graupel0]
   standard_name = lwe_thickness_of_graupel_amount
   long_name = graupel fall on physics timestep
@@ -338,7 +335,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [prcp0]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation (rain, ice, snow, graupel) on physics timestep

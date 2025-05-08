@@ -463,7 +463,7 @@ CONTAINS
     real(kind_phys), dimension(:,:), intent(in):: ozone
     real(kind_phys), dimension(:),   intent(in):: ust,       &
          &ch,qsfc,ps,wspd
-    real(kind_phys), dimension(:,:), intent(inout), optional :: &
+    real(kind_phys), dimension(:,:), intent(inout) ::        &
          &Qke,Tsq,Qsq,Cov
     real(kind_phys), dimension(:,:), intent(inout) ::        &
          &qke_adv
@@ -474,7 +474,7 @@ CONTAINS
     real(kind_phys), dimension(:,:), intent(inout) :: dozone
     real(kind_phys), dimension(:,:), intent(in)    :: rthraten
 
-    real(kind_phys), dimension(:,:), intent(out), optional   :: exch_h,exch_m
+    real(kind_phys), dimension(:,:), intent(out)   :: exch_h,exch_m
     real(kind_phys), dimension(:),   intent(in)    :: xland, &
          &ts,znt,hfx,qfx,uoce,voce
 
@@ -493,13 +493,13 @@ CONTAINS
 
     integer,dimension(:),intent(INOUT) ::                    &
          &KPBL
-    integer,dimension(:),intent(INOUT), optional ::                    &
+    integer,dimension(:),intent(INOUT) ::                    &
          &ktop_plume
 
-    real(kind_phys), dimension(:), intent(out), optional ::            &
+    real(kind_phys), dimension(:), intent(out) ::            &
          &maxmf,maxwidth,ztop_plume
 
-    real(kind_phys), dimension(:,:), intent(inout), optional :: el_pbl
+    real(kind_phys), dimension(:,:), intent(inout) :: el_pbl
 
     real(kind_phys), dimension(:,:), intent(inout), optional :: &
          &qWT,qSHEAR,qBUOY,qDISS,dqke
@@ -508,9 +508,9 @@ CONTAINS
     real(kind_phys), dimension(kts:kte) ::                   &
          &qwt1,qshear1,qbuoy1,qdiss1,dqke1,diss_heat
 
-    real(kind_phys), dimension(:,:), intent(out), optional :: Sh3D,Sm3D
+    real(kind_phys), dimension(:,:), intent(out) :: Sh3D,Sm3D
 
-    real(kind_phys), dimension(:,:), intent(inout), optional :: &
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          &qc_bl,qi_bl,cldfra_bl
     real(kind_phys), dimension(kts:kte) :: qc_bl1D,qi_bl1D,                     &
          &cldfra_bl1D,qc_bl1D_old,qi_bl1D_old,cldfra_bl1D_old

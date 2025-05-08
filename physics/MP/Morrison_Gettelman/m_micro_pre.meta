@@ -170,7 +170,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [qsnw]
   standard_name = local_snow_water_mixing_ratio
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) local to physics
@@ -179,7 +178,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [qgl]
   standard_name = local_graupel_mixing_ratio
   long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) local to physics
@@ -188,7 +186,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [ncpr]
   standard_name = local_rain_number_concentration
   long_name = number concentration of rain local to physics
@@ -197,7 +194,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [ncps]
   standard_name = local_snow_number_concentration
   long_name = number concentration of snow local to physics
@@ -206,7 +202,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [ncgl]
   standard_name = local_graupel_number_concentration
   long_name = number concentration of graupel local to physics
@@ -215,7 +210,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [cld_frc_MG]
   standard_name = cloud_fraction_for_MG
   long_name = cloud fraction used by Morrison-Gettelman MP
@@ -224,7 +218,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [clw_water]
   standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -249,7 +242,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -678,7 +678,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [graupel]
   standard_name = lwe_thickness_of_graupel_amount
   long_name = graupel fall on physics timestep
@@ -687,7 +686,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [ice]
   standard_name = lwe_thickness_of_ice_amount
   long_name = ice fall on physics timestep
@@ -696,7 +694,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [snow]
   standard_name = lwe_thickness_of_snow_amount
   long_name = snow fall on physics timestep
@@ -705,7 +702,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [sr]
   standard_name = ratio_of_snowfall_to_rainfall
   long_name = ratio of snowfall to large-scale rainfall

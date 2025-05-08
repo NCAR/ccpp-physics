@@ -308,7 +308,6 @@
   type = real
   kind = kind_dyn
   intent = inout
-  optional = True
 [qv]
   standard_name = water_vapor_specific_humidity_at_Lagrangian_surface
   long_name = water vapor specific humidity updated by fast physics at Lagrangian surface
