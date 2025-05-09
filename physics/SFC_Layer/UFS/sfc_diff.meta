@@ -257,12 +257,12 @@
   dimensions = ()
   type = integer
   intent = in
-[icplocn2atm]
-  standard_name = control_for_air_sea_flux_computation_over_water
+[use_oceanuv]
+  standard_name = flag_for_control_of_air_sea_flux_computation_over_water
   long_name = air-sea flux option
-  units = 1
+  units = flag
   dimensions = ()
-  type = integer
+  type = logical
   intent = in
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
