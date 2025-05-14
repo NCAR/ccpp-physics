@@ -993,6 +993,7 @@ INPUT                  = pdftxt/SRW_mainpage.txt \
                          pdftxt/RAP_suite.txt \
                          pdftxt/RRFS_sas_suite.txt \
                          pdftxt/WoFS_v0_suite.txt \
+                         pdftxt/HAFS_TC_suite.txt \
                          pdftxt/RRFS_SGSCLOUD.txt \
                          pdftxt/GFS_RRTMG.txt \
                          pdftxt/GFS_SFCLYR.txt \
