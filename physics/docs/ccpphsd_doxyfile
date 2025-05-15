@@ -42,7 +42,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "CCPP SciDoc for UFS-SRW v3.0.0"
+PROJECT_NAME           = "CCPP SciDoc for Idealized Regional TC Capability"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -984,40 +984,19 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = pdftxt/SRW_mainpage.txt \
-                         pdftxt/srw3_phy_update.txt \
-                         pdftxt/SRW_all_schemes_list.txt \
-                         pdftxt/GFS_v16_suite.txt \
-                         pdftxt/HRRR_suite.txt \
-                         pdftxt/HRRR_gf_suite.txt \
-                         pdftxt/RAP_suite.txt \
-                         pdftxt/RRFS_sas_suite.txt \
-                         pdftxt/WoFS_v0_suite.txt \
-                         pdftxt/RRFS_SGSCLOUD.txt \
+INPUT                  = pdftxt/HAFS_TC_suite.txt  \
                          pdftxt/GFS_RRTMG.txt \
                          pdftxt/GFS_SFCLYR.txt \
-                         pdftxt/MYNN_SFCLAYER.txt \
-                         pdftxt/GFS_NSST.txt \
                          pdftxt/GFS_OCEAN.txt \
-                         pdftxt/SMOKE_DUST.txt \
                          pdftxt/NOAH_LSM.txt \
                          pdftxt/GFS_SFCSICE.txt \
                          pdftxt/GFS_SATMEDMFVDIFQ.txt \
                          pdftxt/UGWPv0.txt \
-                         pdftxt/GFS_drag_suite.txt \
-                         pdftxt/GFS_GWDPS.txt \
-                         pdftxt/GFS_OZPHYS.txt \
                          pdftxt/GFS_H2OPHYS.txt \
                          pdftxt/GFS_SAMFdeep.txt \
                          pdftxt/GFS_SAMFshal.txt \
-                         pdftxt/GFDL_cloud.txt \
-                         pdftxt/NSSLMICRO.txt \
-                         pdftxt/MYNN_EDMF.txt \
-                         pdftxt/CU_GF_deep.txt \
-                         pdftxt/RUCLSM.txt \
                          pdftxt/THOMPSON.txt \
                          pdftxt/suite_input.nml.txt \
-                         pdftxt/CLM_LAKE.txt \
                          pdftxt/acronyms.txt   \ 
                          ../MP \
                          ../CONV \
@@ -1026,7 +1005,6 @@ INPUT                  = pdftxt/SRW_mainpage.txt \
                          ../PBL \
                          ../SFC_Models \
                          ../photochem \
-                         ../smoke_dust   \
                          ../Radiation   \ 
                          ../Interstitials/UFS_SCM_NEPTUNE
 
