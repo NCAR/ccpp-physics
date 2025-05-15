@@ -98,30 +98,6 @@ module module_gfdlmp_param
   ! #####################################################################################
   ! GFDL MP common (v1/v3) parameters, with different default values
   ! #####################################################################################
-#ifdef GFDLMP_V3
-  real(kind_phys) :: tice           = 273.15  !< freezing temperature (K): ref: GFDL, GFS (DJS: V3=273.15)
-  real(kind_phys) :: tau_imlt       = 1200.   !< cloud ice melting time scale (s) (DJS: V3=1200.)
-  real(kind_phys) :: rthresh        = 20.0e-6 !< critical cloud drop radius (micro m) (DJS: v3=20.0e-6)
-  real(kind_phys) :: c_psaci        = 0.05    !< accretion: cloud ice to snow (was 0.1 in zetac) (DJS: v3=0.05)
-  real(kind_phys) :: c_pgacs        = 0.01    !< snow to graupel "accretion" eff. (was 0.1 in zetac) (DJS: v3=0.01)
-  real(kind_phys) :: vi_max         = 1.0     !< max fall speed for ice (DJS: v3=1.0)
-  real(kind_phys) :: vs_max         = 2.0     !< max fall speed for snow (DJS: v3=2.0)
-  real(kind_phys) :: vg_max         = 12.0    !< max fall speed for graupel (DJS: v3=12.0)
-  real(kind_phys) :: rewmax         = 15.0    !< maximum effective radii (liquid) (DJS: v3=15.0)
-  real(kind_phys) :: rermin         = 16.0    !< minimum effective radii (rain) (DJS: v3=15.0)
-  real(kind_phys) :: regmin         = 150.0   !< minimum effective radii (graupel) (DJS: v3=150.0)
-  logical :: z_slope_ice            = .true.  !< use linear mono slope for autocconversions (DJS: v3=.true.)
-  logical :: do_sedi_w              = .true.  !< transport of vertical motion in sedimentation (DJS: v3=.true.)
-  logical :: fix_negative           = .true.  !< fix negative water species (DJS: v3=.true.)
-  integer :: reiflag                = 5       !< cloud ice effective radius scheme (DJS: v3=5)
-                                              !< 1: Heymsfield and Mcfarquhar (1996)
-                                              !< 2: Donner et al. (1997)
-                                              !< 3: Fu (2007)
-                                              !< 4: Kristjansson et al. (2000)
-                                              !< 5: Wyser (1998)
-                                              !< 6: Sun and Rikus (1999), Sun (2001)
-                                              !< 7: effective radius
-#else
   real(kind_phys) :: tice           = 273.16  !< freezing temperature (K): ref: GFDL, GFS (DJS: V3=273.15)
   real(kind_phys) :: tau_imlt       = 600.    !< cloud ice melting time scale (s) (DJS: V3=1200.)
   real(kind_phys) :: rthresh        = 10.0e-6 !< critical cloud drop radius (micro m) (DJS: v3=20.0e-6)
@@ -144,8 +120,7 @@ module module_gfdlmp_param
                                               !< 5: Wyser (1998)
                                               !< 6: Sun and Rikus (1999), Sun (2001)
                                               !< 7: effective radius
-#endif
-  
+
   ! #####################################################################################
   ! GFDL MP Version 3 parameters
   ! #####################################################################################
