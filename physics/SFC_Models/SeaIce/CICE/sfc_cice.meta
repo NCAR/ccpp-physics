@@ -124,7 +124,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [dtsfc]
   standard_name = surface_upward_sensible_heat_flux_from_coupled_process
   long_name = sfc sensible heat flux for coupling
@@ -133,7 +132,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [dusfc]
   standard_name = surface_x_momentum_flux_from_coupled_process
   long_name = sfc x momentum flux for coupling
@@ -142,7 +140,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [dvsfc]
   standard_name = surface_y_momentum_flux_from_coupled_process
   long_name = sfc y momentum flux for coupling
@@ -151,7 +148,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [snowd]
   standard_name = lwe_surface_snow_from_coupled_process
   long_name = sfc snow depth in meters over sea ice for coupling
@@ -160,7 +156,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [qsurf]
   standard_name = surface_specific_humidity_over_ice
   long_name = surface air saturation specific humidity over ice
