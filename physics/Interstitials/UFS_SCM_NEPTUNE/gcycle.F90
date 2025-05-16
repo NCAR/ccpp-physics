@@ -144,7 +144,7 @@ contains
       npts  = nx*ny
 !
 ! Some surface variables need to be updated by gcycle with coupled mode, and nsst mode dependent. A few variables are saved 
-! in order to be able to update them over the specific surface types  only after call sfccycle
+! in order to be able to update them over the specific surface types only after call sfccycle
 !
       if ( cplflx ) then
         hice_save   = hice 
@@ -292,14 +292,14 @@ contains
             weasd(ix)  = weasd_save(ix)
           endif
         enddo
-!       In the coupled mode and when NSST is on, update tref, tsfc and tsfco over non-ocean
+!       In the coupled mode and when NSST is on, update tref over non-ocean 
         if ( nsst > 0 ) then       
           do ix=1,npts
             if ( oceanfrac(ix) == 0.0_kind_phys ) then 
               tref(ix)  = TSFFCS(ix) 
             endif
           enddo
-!       In the coupled mode and when NSST is off, update tref, tsfc and tsfco over not ocean
+!       In the coupled mode and when NSST is off, update tsfc and tsfco over non-ocean
         else             
           do ix=1,npts
             if ( oceanfrac(ix) == 0.0_kind_phys ) then 
