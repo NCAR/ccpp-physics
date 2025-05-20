@@ -159,7 +159,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [dd_mf]
   standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux
   long_name = (downdraft mass flux) * delt
@@ -216,7 +215,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [mype]
   standard_name = mpi_rank
   long_name = current MPI rank

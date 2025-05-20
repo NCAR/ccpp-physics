@@ -127,7 +127,7 @@
      &                                    cnvw(:,:),  cnvc(:,:)
       real(kind=kind_phys), intent(out) :: cldwrk(:),  rn(:),           &
      &                                     dt_mf(:,:), dd_mf(:,:)
-      real(kind=kind_phys), intent(out), optional :: ud_mf(:,:)
+      real(kind=kind_phys), intent(out) :: ud_mf(:,:)
       real(kind=kind_phys), intent(inout), optional ::                  &
      &                                    qlcn(:,:),      qicn(:,:),    &
      &                                    w_upi(:,:),     cnv_mfd(:,:), &

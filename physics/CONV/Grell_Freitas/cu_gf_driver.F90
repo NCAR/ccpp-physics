@@ -82,7 +82,7 @@ contains
       integer            :: ichoicem=13  ! 0 2 5 13
       integer            :: ichoice_s=3  ! 0 1 2 3
       integer, intent(in) :: spp_cu_deep ! flag for using SPP perturbations
-      real(kind_phys), dimension(:,:), intent(in),optional ::        &
+      real(kind_phys), dimension(:,:), optional, intent(in) ::        &
      &                    spp_wts_cu_deep
       real(kind=kind_phys) :: spp_wts_cu_deep_tmp
 
@@ -129,7 +129,7 @@ contains
    integer, dimension (:), intent(out) :: hbot,htop,kcnv
    integer, dimension (:), intent(in)  :: xland
    real(kind=kind_phys),    dimension (:), intent(in) :: pbl
-   real(kind=kind_phys),    dimension (:), intent(in), optional :: maxMF
+   real(kind=kind_phys),    dimension (:), intent(in) :: maxMF
 !$acc declare copyout(hbot,htop,kcnv)
 !$acc declare copyin(xland,pbl)
    integer, dimension (im) :: tropics
