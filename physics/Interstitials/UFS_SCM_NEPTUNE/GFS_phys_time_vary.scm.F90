@@ -769,17 +769,17 @@
          rjday = jdoy + jdat(5) / 24.
          if (rjday < ozphys%time(1)) rjday = rjday + 365.
 
-         call find_photochemistry_index(ozphys%ntime, ozphys%time, rjday, n1, n2)
-
 !> - Update ozone concentration.
          if (ntoz > 0) then
+            call find_photochemistry_index(ozphys%ntime, ozphys%time, rjday, n1, n2)
+
             call ozphys%update_o3prog(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
          endif
 
-         call find_photochemistry_index(h2ophys%ntime, h2ophys%time, rjday, n1, n2)
-
 !> - Update stratospheric h2o concentration.
          if (h2o_phys) then
+            call find_photochemistry_index(h2ophys%ntime, h2ophys%time, rjday, n1, n2)
+
             call h2ophys%update(jindx1_h, jindx2_h, ddy_h, rjday, n1, n2, h2opl)
          endif
 
