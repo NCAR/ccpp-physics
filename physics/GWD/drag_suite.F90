@@ -2000,11 +2000,13 @@ endif
 !
    do i = its,im
      hmax(i) = max(elvmax(i),zlowtop(i))
+     hmax(i) = max(hmax(i),hpbl(i))
    enddo
 !
    do i = its,im
 !!!     kbl(i)   = max(kpbl(i), klowtop(i))    ! do not use pbl height for the time being...
-     kbl(i)   = max(komax(i), klowtop(i))    
+     kbl(i)   = max(komax(i), klowtop(i))
+     kbl(i)   = max(kbl(i), kpbl(i))    
      kbl(i)   = max(min(kbl(i),kpblmax),kpblmin)
    enddo
 !
