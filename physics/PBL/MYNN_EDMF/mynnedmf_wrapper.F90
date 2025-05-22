@@ -250,8 +250,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind_phys), dimension(:,:), intent(inout), optional ::        &
      &        dqdt_cloud_droplet_num_conc, dqdt_water_aer_num_conc,      &
      &        dqdt_ice_aer_num_conc
-      real(kind_phys), dimension(:,:), intent(inout), optional :: qke,   &
-     &        EL_PBL, Sh3D, Sm3D, qc_bl, qi_bl, cldfra_bl, dqdt_cccn
+      real(kind_phys), dimension(:,:), intent(inout) :: qke,             &
+     &        EL_PBL, Sh3D, Sm3D, qc_bl, qi_bl, cldfra_bl
+      real(kind_phys), dimension(:,:), intent(inout), optional ::        &
+     &        dqdt_cccn
       real(kind_phys), dimension(:,:), intent(inout) ::                  &
      &        qke_adv
       real(kind_phys), dimension(:,:,:), intent(out) :: tmf  
@@ -273,9 +275,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        qgrs_cloud_droplet_num_conc,                               &
      &        qgrs_ice_aer_num_conc
       real(kind_phys), dimension(:,:), intent(in), optional :: qgrs_cccn
+      real(kind_phys), dimension(:,:), intent(out) ::                    &
+     &        Tsq, Qsq, Cov, exch_h, exch_m
       real(kind_phys), dimension(:,:), intent(out), optional ::          &
-     &        Tsq, Qsq, Cov, exch_h, exch_m, dqke, qWT, qSHEAR, qBUOY,   &
-     &        qDISS
+     &        dqke, qWT, qSHEAR, qBUOY, qDISS
       real(kind_phys), dimension(:), intent(in) :: xmu
       real(kind_phys), dimension(:,:), intent(in) :: htrsw, htrlw
       ! spp_wts_pbl only allocated if spp_pbl == 1
@@ -316,11 +319,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind_phys), dimension(:), intent(out) ::                      &
      &        ch,dtsfc1,dqsfc1,dusfc1,dvsfc1,                            &
      &        dtsfci_diag,dqsfci_diag,dusfci_diag,dvsfci_diag
-     real(kind_phys), dimension(:), intent(out), optional ::             &
+     real(kind_phys), dimension(:), intent(out) ::                       &
      &        maxMF,maxwidth,ztop_plume
       integer, dimension(:), intent(inout) ::                            &
      &        kpbl
-      integer, dimension(:), intent(inout), optional ::                  &
+      integer, dimension(:), intent(inout) ::                            &
      &        ktop_plume
 
       real(kind_phys), dimension(:), intent(inout), optional ::          &

@@ -1,7 +1,6 @@
-! #########################################################################################
-!> \file GFS_photochemistry.f90
+!> \file GFS_photochemistry.F90
 !!
-! #########################################################################################
+
 module GFS_photochemistry
   use machine,        only: kind_phys
   use module_ozphys,  only: ty_ozphys
@@ -9,20 +8,18 @@ module GFS_photochemistry
   implicit none
 contains
 
-! #########################################################################################
 !> \section arg_table_GFS_photochemistry_init Argument Table
 !! \htmlinclude GFS_photochemistry_init.html
 !!
-! #########################################################################################
   subroutine GFS_photochemistry_init(oz_phys_2006, oz_phys_2015, h2o_phys, errmsg, errflg)
     logical, intent(in) :: &
-         oz_phys_2015, & ! Do ozone photochemistry? (2015)
-         oz_phys_2006, & ! Do ozone photochemistry? (2006)
-         h2o_phys        ! Do stratospheric h2o photochemistry?
+         oz_phys_2015, & !< Do ozone photochemistry? (2015)
+         oz_phys_2006, & !< Do ozone photochemistry? (2006)
+         h2o_phys        !< Do stratospheric h2o photochemistry?
     character(len=*), intent(out) :: &
-         errmsg          ! CCPP Error message.
+         errmsg          !< CCPP Error message.
     integer,  intent(out) :: &
-         errflg          ! CCPP Error flag.
+         errflg          !< CCPP Error flag.
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -44,11 +41,9 @@ contains
     
   end subroutine GFS_photochemistry_init
 
-! #########################################################################################
 !> \section arg_table_GFS_photochemistry_run Argument Table
 !! \htmlinclude GFS_photochemistry_run.html
 !!
-! #########################################################################################
   subroutine GFS_photochemistry_run (dtp, ozphys, oz_phys_2015, oz_phys_2006, con_1ovg,   &
        prsl, dp, ozpl, h2o_phys, h2ophys, h2opl, h2o0, oz0, gt0, do3_dt_prd, do3_dt_ozmx, &
        do3_dt_temp, do3_dt_ohoz, errmsg, errflg)
