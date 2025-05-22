@@ -22,7 +22,7 @@ contains
       tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,          &
       zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,             &
       stype, scolor, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,             &
-      cplflx, oceanfrac, lakefrac_threshold,                                       &
+      cplflx, oceanfrac,                                                           &
       xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
 !
 !
@@ -37,7 +37,7 @@ contains
     logical,              intent(in)    :: use_ufo, nst_anl, frac_grid, cplflx
     real(kind=kind_phys), intent(in)    :: fhcyc, phour, landfrac(:), lakefrac(:), &
                                            min_seaice, min_lakeice,oceanfrac(:), &
-                                           lakefrac_threshold, xlat_d(:), xlon_d(:)
+                                           xlat_d(:), xlon_d(:)
     real(kind=kind_phys), intent(inout), optional ::   &
                                            smois(:,:), &
                                            sh2o(:,:),  &

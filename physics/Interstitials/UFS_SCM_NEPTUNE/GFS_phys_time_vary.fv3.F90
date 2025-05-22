@@ -702,7 +702,7 @@
 !>\section gen_GFS_phys_time_vary_timestep_init GFS_phys_time_vary_timestep_init General Algorithm
 !> @{
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
-            me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, cplflx, lakefrac_threshold, &
+            me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, cplflx,                     &
             nsswr, fhswr, lsswr, fhour,                                                             &
             imfdeepcnv, cal_pre, random_clds, nscyc, ntoz, h2o_phys, iaerclm, iccn, clstp,          &
             jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
@@ -724,7 +724,7 @@
          integer,              intent(in)    :: me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, &
                                                 nsswr, imfdeepcnv, iccn, nscyc, ntoz, iflip
          integer,              intent(in)    :: idate(:)
-         real(kind_phys),      intent(in)    :: fhswr, fhour, lakefrac_threshold
+         real(kind_phys),      intent(in)    :: fhswr, fhour
          logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm, cplflx
          real(kind_phys),      intent(out)   :: clstp
          integer,              intent(in), optional    :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
@@ -928,7 +928,7 @@
                  tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,         &
                  zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,            &
                  stype, scolor, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,            &
-                 cplflx, oceanfrac, lakefrac_threshold,                                      &
+                 cplflx, oceanfrac,                                                          &
                  xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
            endif
          endif
