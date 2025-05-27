@@ -1731,7 +1731,7 @@ endif
    real(kind=kind_phys),parameter       :: odmax  = 10.
    real(kind=kind_phys),parameter       :: cdmin  = 0.0
    integer              :: komax(im),kbmax(im),kblk(im)
-   real(kind=kind_phys)                 :: hmax(im)
+   real(kind=kind_phys)                 :: href(im),hmax(im)
    real(kind=kind_phys)                 :: cd
    real(kind=kind_phys)                 :: zblk,tautem
    real(kind=kind_phys)                 :: pe,ke
@@ -1916,6 +1916,7 @@ endif
 !  initialize array for flow-blocking drag
 !
    taufb(1:im,1:km+1) = 0.0
+   href(1:im) = 0.0
    hmax(1:im) = 0.0
    komax(1:im) = 0
    kbmax(1:im) = 0
@@ -2000,7 +2001,7 @@ endif
 !
    do i = its,im
      hmax(i) = max(elvmax(i),zlowtop(i))
-     hmax(i) = max(hmax(i),hpbl(i))
+     href(i) = max(hmax(i),hpbl(i))
    enddo
 !
    do i = its,im
@@ -2111,7 +2112,7 @@ IF ( (do_gsl_drag_ls_bl).and.                            &
 !
 !  no drag when sub-oro is too small..
 !
-         ldrag(i) = hmax(i).le.hmt_min
+         ldrag(i) = href(i).le.hmt_min
 !
 !  no drag when critical level in the base layer
 !
