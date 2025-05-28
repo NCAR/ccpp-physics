@@ -861,23 +861,17 @@
          rjday = jdoy + jdat(5) / 24.
          if (rjday < ozphys%time(1)) rjday = rjday + 365.
 
-         n2 = ozphys%ntime + 1
-         do j=2,ozphys%ntime
-            if (rjday < ozphys%time(j)) then
-               n2 = j
-                      exit
-            endif
-         enddo
-         n1 = n2 - 1
-         if (n2 > ozphys%ntime) n2 = n2 - ozphys%ntime
-
 !> - Update ozone concentration.
          if (ntoz > 0) then
+            call find_photochem_time_index(ozphys%ntime, ozphys%time, rjday, n1, n2)
+
             call ozphys%update_o3prog(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
          endif
 
 !> - Update stratospheric h2o concentration.
          if (h2o_phys) then
+            call find_photochem_time_index(h2ophys%ntime, h2ophys%time, rjday, n1, n2)
+
             call h2ophys%update(jindx1_h, jindx2_h, ddy_h, rjday, n1, n2, h2opl)
          endif
 
@@ -930,6 +924,29 @@
            endif
          endif
 
+       contains
+         !> Find the time indexes on either side of current time
+         subroutine find_photochem_time_index(ntime, time, rjday, n1, n2)
+           implicit none
+           !> The number of times provided in the parameter file
+           integer, intent(in) :: ntime
+           !> The indexes of the parameters just before and after the
+           !! current time
+           integer, intent(out) :: n1, n2
+           !> The times provided in the parameter file
+           real, intent(in), dimension(ntime+1) :: time
+           !> The current time of year
+           real, intent(in) :: rjday
+           n2 = ntime + 1
+           do j=2,ntime
+              if (rjday < time(j)) then
+                 n2 = j
+                 exit
+              endif
+           enddo
+           n1 = n2 - 1
+           if (n2 > ntime) n2 = n2 - ntime
+         end subroutine find_photochem_time_index
       end subroutine GFS_phys_time_vary_timestep_init
 !> @}
 
