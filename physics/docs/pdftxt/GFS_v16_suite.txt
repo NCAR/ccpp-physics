@@ -22,14 +22,14 @@ The GFS_v16 suite uses the parameterizations in the following order:
  - \ref GFDL_cloud
 
 \section sdf_gfsv16b Suite Definition File 
-\include  suite_SCM_GFS_v16.xml
+\include  suite_FV3_GFS_v16.xml
 
 
 \section gfs16_nml_opt_des Namelist 
 \ref GFDL_cloud namelist options 
-\snippet RE7/input_GFS_v16.nml GFDL_CLOUD_MICROPHYSICS_NML
+\snippet RE300/FV3_GFS_v16_input.nml GFDL_CLOUD_MICROPHYSICS_NML
 Other namelist options
-\snippet RE7/input_GFS_v16.nml GFS_PHYSICS_NML
+\snippet RE300/FV3_GFS_v16_input.nml GFS_PHYSICS_NML
 
 - nstf_name = \f$[2,0,0,0,0]^1 [2,1,0,0,0]^2\f$
  - \f$^1\f$ NSST is on and coupled with spin up off
