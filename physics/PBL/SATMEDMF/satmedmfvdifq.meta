@@ -257,24 +257,24 @@
   kind = kind_phys
   intent = in
 [def_1]
-  standard_name = vert_shear_square
-  long_name = square of vertical shear
+  standard_name = square_of_vertical_shear_due_to_dynamics
+  long_name = square of vertical shear calculated from dynamics
   units =  m2 s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
 [def_2]
-  standard_name = hori_shear_square
-  long_name = square of horizontal shear
+  standard_name = square_of_horizontal_shear_due_to_dynamics
+  long_name = square of horizontal shear calculated from dynamics
   units =  m2 s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
 [def_3]
-  standard_name = TKE_transfer_rate
-  long_name = rate of TKE transfer and pressure correlation
+  standard_name = transfer_rate_of_tke_due_to_dynamics
+  long_name = rate of TKE transfer and pressure correlation calculated from dynamics
   units =  m2 s-3
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -495,7 +495,7 @@
   type = logical
   intent = in
 [sa3dtke]
-  standard_name = flag_sa_3d_tke_scheme
+  standard_name = do_scale_aware_3d_tke
   long_name = flag for scale-aware 3d tke scheme
   units = flag
   dimensions = ()
@@ -566,16 +566,16 @@
   kind = kind_phys
   intent = out
 [dku3d_h]
-  standard_name = horizontal_atmosphere_momentum_diffusivity_dyncore
-  long_name = horizontal atmospheric momentum diffusivity
+  standard_name = horizontal_atmosphere_momentum_diffusivity_for_dyanmics
+  long_name = horizontal atmospheric momentum diffusivity for dynamics
   units = m2 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
 [dku3d_e]
-  standard_name = atmosphere_momentum_diffusivity_tke_dyncore
-  long_name = atmospheric momentum diffusivity for tke
+  standard_name = horizontal_atmosphere_tke_diffusivity_for_dyanmics
+  long_name = horizontal atmospheric tke diffusivity for dynamics
   units = m2 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
