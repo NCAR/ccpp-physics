@@ -23,23 +23,28 @@ contains
 !! calls.
 !! 
 !! (optional) Save additional diagnostics.
-  subroutine GFS_rrtmgp_post_run (nCol, nLev, nDay, iSFC, iTOA, idxday, doLWrad, doSWrad,  &
-       do_lw_clrsky_hr, do_sw_clrsky_hr, save_diag, fhlwr, fhswr, sfc_alb_nir_dir,         &
-       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, p_lev, tsfa, coszen, coszdg, &
+  subroutine GFS_rrtmgp_post_run (nCol, nLev, ntrac, nDay, iSFC, iTOA, idxday, doLWrad,    &
+       doSWrad, tend_opt_swrad, tend_opt_lwrad, do_lw_clrsky_hr, do_sw_clrsky_hr,          &
+       save_diag, fhlwr, fhswr, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir,       &
+       sfc_alb_uvvis_dif, p_lev, tsfa, coszen, coszdg, delt,                               &
        fluxlwDOWN_clrsky, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,             &
        fluxswDOWN_clrsky, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky,             &
        raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw, cldtausw, scmpsw, fluxr,    &
        sfcdlw, sfculw, sfcflw, tsflw, htrlw, htrlwu, topflw, nirbmdi, nirdfdi, visbmdi,    &
        visdfdi, nirbmui, nirdfui, visbmui, visdfui, sfcnsw, sfcdsw, htrsw, sfcfsw, topfsw, &
-       htrswc, htrlwc, errmsg, errflg)
+       htrswc, htrlwc, gu0, gv0, gt0, gq0, dudt, dvdt, dtdt, dqdt, ten_t, ten_u, ten_v,    &
+       ten_q, errmsg, errflg)
 
     ! Inputs
     integer, intent(in) ::  &
          nCol,              & !< Horizontal loop extent 
          nLev,              & !< Number of vertical layers
+         ntrac,             & !< number of tracers
          nDay,              & !< Number of daylit columns
          iSFC,              & !< Vertical index for surface level
-         iTOA                 !< Vertical index for TOA level
+         iTOA,              & !< Vertical index for TOA level
+         tend_opt_swrad,    &
+         tend_opt_lwrad
     integer, intent(in), dimension(:) :: &
          idxday               !< Index array for daytime points
     integer, intent(in), dimension(:,:) :: &
@@ -53,7 +58,8 @@ contains
          save_diag            !< Output radiation diagnostics?
     real(kind_phys), intent(in) :: &
          fhlwr,             & !< Frequency for LW radiation calls
-         fhswr                !< Frequency for SW radiation calls
+         fhswr,             & !< Frequency for SW radiation calls
+         delt
     real(kind_phys), dimension(:), intent(in) ::  &
          tsfa,              & !< Lowest model layer air temperature for radiation (K)
          coszen,            & !< Cosine(SZA)
@@ -120,6 +126,12 @@ contains
          topfsw               !< SW fluxes at top atmosphere
     type(topflw_type), dimension(:), intent(inout) :: &
          topflw               !< LW  fluxes at top atmosphere
+    real(kind_phys), dimension(:,:),   intent(inout) :: gu0, gv0, gt0
+    real(kind_phys), dimension(:,:,:), intent(inout) :: gq0
+    real(kind_phys), dimension(:,:),   intent(inout) :: dudt, dvdt, dtdt
+    real(kind_phys), dimension(:,:,:), intent(inout) :: dqdt
+    real(kind_phys), dimension(:,:),   intent(out) :: ten_t, ten_u, ten_v
+    real(kind_phys), dimension(:,:,:), intent(out) :: ten_q
     character(len=*), intent(out) :: &
          errmsg               !< CCPP error message
     integer, intent(out) :: &
@@ -131,16 +143,19 @@ contains
          htrswc               !< SW clear-sky heating rate (K/s)
 
     ! Local variables
-    integer :: i, j, k, itop, ibtc
+    integer :: i, j, k, n, itop, ibtc
     real(kind_phys) :: tem0d, tem1, tem2
     real(kind_phys), dimension(nDay, nLev) :: thetaTendClrSky, thetaTendAllSky
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-
-    if (.not. (doLWrad .or. doSWrad)) return
-
+    
+    ten_t = 0.0
+    ten_u = 0.0
+    ten_v = 0.0
+    ten_q = 0.0
+    
     if (doLWRad) then
        ! #######################################################################################
        ! Compute LW heating-rates.
@@ -225,6 +240,64 @@ contains
           enddo
        endif
     endif
+    
+    ten_t = htrlw
+    
+    !This may belong in a separate GFS_radsw_post routine rather than here, although it would need to be created
+    case_LWRAD_ten: select case (tend_opt_lwrad)
+      case (1) !immediately apply tendencies
+                !Current state = current state + dt*current tendency
+                !Accumulated tendency unchanged
+        do k=1,nlev
+          do i=1,ncol
+            gt0(i,k) = gt0(i,k) + delt*ten_t(i,k)
+            gu0(i,k) = gu0(i,k) + delt*ten_u(i,k)
+            gv0(i,k) = gv0(i,k) + delt*ten_v(i,k)
+            do n = 1, ntrac
+              gq0(i,k,n) = gq0(i,k,n) + delt*ten_q(i,k,n)
+            end do
+          end do
+        end do
+      case (2) !add tendencies to sum
+                !Accumulated tendency = accumulated tendency + current tendency
+                !Current state unchanged
+        do k=1,nlev
+          do i=1,ncol
+            dtdt(i,k) = dtdt(i,k) + ten_t(i,k)
+            dudt(i,k) = dudt(i,k) + ten_u(i,k)
+            dvdt(i,k) = dvdt(i,k) + ten_v(i,k)
+            do n = 1, ntrac
+              dqdt(i,k,n) = dqdt(i,k,n) + ten_q(i,k,n)
+            end do
+          end do
+        end do
+      case (3) !add tendencies to sum and apply
+                !Current state = current state + dt*(accumulated tendency + current tendency)
+                !Accumulated tendency = 0
+        do k=1,nlev
+          do i=1,ncol
+            gt0(i,k) = gt0(i,k) + delt*(dtdt(i,k) + ten_t(i,k))
+            dtdt(i,k) = 0.0
+            gu0(i,k) = gu0(i,k) + delt*(dudt(i,k) + ten_u(i,k))
+            dudt(i,k) = 0.0
+            gv0(i,k) = gv0(i,k) + delt*(dvdt(i,k) + ten_v(i,k))
+            dvdt(i,k) = 0.0
+            do n = 1, ntrac
+              gq0(i,k,n) = gq0(i,k,n) + delt*(dqdt(i,k,n) + ten_q(i,k,n))
+              dqdt(i,k,n) = 0.0
+            end do
+          end do
+        end do
+      case (4) !Current state unchanged
+                !Accumulated tendency unchanged
+                !Current tendency unchanged (but will be overwritten during next primary scheme)
+        exit case_LWRAD_ten
+      case default
+        errflg = 1
+        errmsg = 'A tendency application control was outside of the acceptable range (1-4)'
+        return
+    end select case_LWRAD_ten
+    
     ! #######################################################################################
     ! #######################################################################################
     ! #######################################################################################
@@ -381,6 +454,62 @@ contains
           enddo
        endif
     endif
-
+    
+    ten_t = htrsw
+    
+    case_SWRAD_ten: select case (tend_opt_swrad)
+      case (1) !immediately apply tendencies
+                !Current state = current state + dt*current tendency
+                !Accumulated tendency unchanged
+        do k=1,nlev
+          do i=1,ncol
+            gt0(i,k) = gt0(i,k) + delt*ten_t(i,k)
+            gu0(i,k) = gu0(i,k) + delt*ten_u(i,k)
+            gv0(i,k) = gv0(i,k) + delt*ten_v(i,k)
+            do n = 1, ntrac
+              gq0(i,k,n) = gq0(i,k,n) + delt*ten_q(i,k,n)
+            end do
+          end do
+        end do
+      case (2) !add tendencies to sum
+                !Accumulated tendency = accumulated tendency + current tendency
+                !Current state unchanged
+        do k=1,nlev
+          do i=1,ncol
+            dtdt(i,k) = dtdt(i,k) + ten_t(i,k)
+            dudt(i,k) = dudt(i,k) + ten_u(i,k)
+            dvdt(i,k) = dvdt(i,k) + ten_v(i,k)
+            do n = 1, ntrac
+              dqdt(i,k,n) = dqdt(i,k,n) + ten_q(i,k,n)
+            end do
+          end do
+        end do
+      case (3) !add tendencies to sum and apply
+                !Current state = current state + dt*(accumulated tendency + current tendency)
+                !Accumulated tendency = 0
+        do k=1,nlev
+          do i=1,ncol
+            gt0(i,k) = gt0(i,k) + delt*(dtdt(i,k) + ten_t(i,k))
+            dtdt(i,k) = 0.0
+            gu0(i,k) = gu0(i,k) + delt*(dudt(i,k) + ten_u(i,k))
+            dudt(i,k) = 0.0
+            gv0(i,k) = gv0(i,k) + delt*(dvdt(i,k) + ten_v(i,k))
+            dvdt(i,k) = 0.0
+            do n = 1, ntrac
+              gq0(i,k,n) = gq0(i,k,n) + delt*(dqdt(i,k,n) + ten_q(i,k,n))
+              dqdt(i,k,n) = 0.0
+            end do
+          end do
+        end do
+      case (4) !Current state unchanged
+                !Accumulated tendency unchanged
+                !Current tendency unchanged (but will be overwritten during next primary scheme)
+        exit case_SWRAD_ten
+      case default
+        errflg = 1
+        errmsg = 'A tendency application control was outside of the acceptable range (1-4)'
+        return
+    end select case_SWRAD_ten
+    
   end subroutine GFS_rrtmgp_post_run
 end module GFS_rrtmgp_post

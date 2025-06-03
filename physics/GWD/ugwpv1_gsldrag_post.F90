@@ -10,7 +10,7 @@ contains
 !! \htmlinclude ugwpv1_gsldrag_post_run.html
 !!
      subroutine ugwpv1_gsldrag_post_run ( im, levs, ldiag_ugwp,       &
-         dtf, dudt_gw, dvdt_gw, dtdt_gw,                              &
+         dtf, dudt_gw, dvdt_gw,                                       &
          tau_ogw, tau_ngw, zobl, zlwb, zogw, dudt_obl, dvdt_obl,      &
          dudt_ofd, dvdt_ofd, dudt_ogw, dvdt_ogw,                      &
          dudt_oss, dvdt_oss, tot_zmtb, tot_zlwb, tot_zogw,            &
@@ -40,7 +40,7 @@ contains
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_zmtb, tot_zlwb, tot_zogw
 	
-        real(kind=kind_phys), intent(in),    dimension(:,:) :: dtdt_gw, dudt_gw, dvdt_gw
+        real(kind=kind_phys), intent(in),    dimension(:,:) :: dudt_gw, dvdt_gw
         real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dudt_obl, dvdt_obl, dudt_ogw
         real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dvdt_ogw, dudt_ofd, dvdt_ofd
         real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dudt_oss, dvdt_oss

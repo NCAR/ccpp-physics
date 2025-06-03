@@ -564,7 +564,7 @@ contains
                  index_of_y_wind, ldiag3d, ldiag_ugwp,               &
                  ugwp_seq_update, spp_wts_gwd, spp_gwd, errmsg, errflg)
      else
-       call drag_suite_run(im, levs, Pdvdt, Pdudt, Pdtdt,            &
+       call drag_suite_run(im, levs, Pdvdt, Pdudt, Pdtdt, dqdt_gw,   &
                  ugrs,vgrs,tgrs,q1,                                  &
                  kpbl,prsi,del,prsl,prslk,phii,phil,dtp,             &
                  kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &

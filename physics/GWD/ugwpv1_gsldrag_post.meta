@@ -52,14 +52,6 @@
   type = real
   kind = kind_phys
   intent = in
-[dtdt_gw]
-  standard_name = tendency_of_air_temperature
-  long_name = tendency of air temperature calculated by one physics scheme
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
 [tau_ogw]
   standard_name = instantaneous_momentum_flux_due_to_orographic_gravity_wave_drag
   long_name = momentum flux or stress due to orographic gravity wave drag

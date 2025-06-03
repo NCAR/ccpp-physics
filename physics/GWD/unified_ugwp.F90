@@ -454,7 +454,7 @@ contains
            nmtvr_temp = nmtvr
         end if
 
-        call gwdps_run(im, levs, Pdvdt, Pdudt, Pdtdt,                  &
+        call gwdps_run(im, levs, Pdvdt, Pdudt, Pdtdt, gw_dqdt,         &
                    ugrs, vgrs, tgrs, q1,                               &
                    kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt, &
                    hprime, oc, oa4, clx, theta, sigma, gamma,          &

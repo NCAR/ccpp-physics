@@ -69,30 +69,6 @@
   dimensions = ()
   type = integer
   intent = in
-[dv]
-  standard_name = process_split_cumulative_tendency_of_y_wind
-  long_name = updated tendency of the y wind
-  units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[du]
-  standard_name = process_split_cumulative_tendency_of_x_wind
-  long_name = updated tendency of the x wind
-  units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[tau]
-  standard_name = process_split_cumulative_tendency_of_air_temperature
-  long_name = updated tendency of the temperature
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [rtg]
   standard_name = tendency_of_vertically_diffused_tracer_concentration
   long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
@@ -102,7 +78,7 @@
   kind = kind_phys
   intent = inout
 [u1]
-  standard_name = physics_timestep_initial_x_wind
+  standard_name = x_wind
   long_name = x component of layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -110,7 +86,7 @@
   kind = kind_phys
   intent = in
 [v1]
-  standard_name = physics_timestep_initial_y_wind
+  standard_name = y_wind
   long_name = y component of layer wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -118,7 +94,7 @@
   kind = kind_phys
   intent = in
 [t1]
-  standard_name = physics_timestep_initial_air_temperature
+  standard_name = air_temperature
   long_name = layer mean air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -514,6 +490,30 @@
   dimensions = ()
   type = integer
   intent = in
+[ten_t]
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_u]
+  standard_name = tendency_of_x_wind
+  long_name = tendency of x wind calculated by one physics scheme
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_v]
+  standard_name = tendency_of_y_wind
+  long_name = tendency of y wind calculated by one physics scheme
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

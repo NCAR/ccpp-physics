@@ -292,6 +292,7 @@
      &,                     DDVEL,  ud_mf,  dd_mf, dt_mf                &
      &,                     QLCN,   QICN,   w_upi,  cf_upi, CNV_MFD     &
      &,                     CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE  &
+     &,                     ten_t, ten_u, ten_v, ten_q, ten_cc          &
      &,                     errmsg,  errflg)
 !
 !*********************************************************************
@@ -328,7 +329,7 @@
 !
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, prsik, phii
 
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: tin, qin,  uin, vin
+      real(kind=kind_phys), dimension(:,:), intent(in) :: tin, qin,  uin, vin
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsl, prslk, phil      &
      &,                                                   rhc
       real(kind=kind_phys), dimension(:,:), intent(out) :: ud_mf
@@ -342,7 +343,7 @@
       real(kind=kind_phys), dimension(:)  , intent(out) :: rainc
       real(kind=kind_phys), dimension(:)  , intent(out) :: ddvel
       real(kind=kind_phys), dimension(:,:), intent(in)  :: rannum
-      real(kind=kind_phys), intent(inout) :: ccin(:,:,:)
+      real(kind=kind_phys), intent(in) :: ccin(:,:,:)
       real(kind=kind_phys), intent(in)    :: dt, dtf
 !
 !     Added for aerosol scavenging for GOCART
@@ -386,7 +387,13 @@
 !  Scavenging related parameters
 !
       real                fscav_(ntr+2)  ! Fraction scavenged per km
-!
+!     
+      ten_t = 0.0
+      ten_u = 0.0
+      ten_v = 0.0
+      ten_q = 0.0
+      ten_cc = 0.0
+      
       fscav_ = -999.0_kp                 ! By default no scavenging
       if (itc > 0 .and. ntc > 0) then
         n = itc + ntc - 1
@@ -602,11 +609,10 @@
               ll = kp1 -l
               tem = ccin(ipt,ll,1)                                      &
      &            * MAX(ZERO, MIN(ONE, (TCR-toi(L))*TCRF))
-              ccin(ipt,ll,2) = ccin(ipt,ll,1) - tem
-              ccin(ipt,ll,1) = tem
+              QLI(L) = ccin(ipt,ll,1) - tem
+              QII(L) = tem
             enddo
-          endif
-          if (advcld) then
+          elseif (advcld) then
             do l=1,k
               ll = kp1 -l ! Input variables are bottom to top!
               QII(L) = ccin(ipt,ll,1)
@@ -649,11 +655,10 @@
             do l=1,k
               tem = ccin(ipt,l,1)                                       &
      &            * MAX(ZERO, MIN(ONE, (TCR-toi(L))*TCRF))
-              ccin(ipt,l,2) = ccin(ipt,l,1) - tem
-              ccin(ipt,l,1) = tem
+              QLI(L) = ccin(ipt,l,1) - tem
+              QII(L) = tem
             enddo
-          endif
-          if (advcld) then
+          elseif (advcld) then
             do l=1,k
               QII(L) = ccin(ipt,l,1)
               QLI(L) = ccin(ipt,l,2)
@@ -967,10 +972,10 @@
         if (flipv) then
           do l=1,k
             ll = kp1 - l
-            tin(ipt,ll) = toi(l)                  ! Temperature
-            qin(ipt,ll) = qoi(l)                  ! Specific humidity
-            uin(ipt,ll) = uvi(l,ntr+1)            ! U momentum
-            vin(ipt,ll) = uvi(l,ntr+2)            ! V momentum
+            ten_t(ipt,ll) = (toi(l) - tin(ipt,ll))/dt
+            ten_q(ipt,ll,1) = (qoi(l) - qin(ipt,ll))/dt
+            ten_u(ipt,ll) = (uvi(l,ntr+1) - uin(ipt,ll))/dt
+            ten_v(ipt,ll) = (uvi(l,ntr+2) - vin(ipt,ll))/dt
 
 !!        for 2M microphysics, always output these variables
             if (mp_phys == mp_phys_mg) then
@@ -994,21 +999,23 @@
 
             if (ntr > 0) then
               do n=1,ntr
-                ccin(ipt,ll,n+2) = uvi(l,n)           ! Tracers
+                ten_cc(ipt,ll,n+2) = (uvi(l,n) - ccin(ipt,ll,n+2))/dt ! Tracers
               enddo
             endif
           enddo
           if (advcld) then
             do l=1,k
               ll  = kp1 - l
-              ccin(ipt,ll,1) = qii(l)          ! Cloud ice
-              ccin(ipt,ll,2) = qli(l)          ! Cloud water
+              ten_cc(ipt,ll,1) = (qii(l) - ccin(ipt,ll,1))/dt ! Cloud ice 
+              ten_cc(ipt,ll,2) = (qli(l) - ccin(ipt,ll,2))/dt ! Cloud water
             enddo
           else
             do l=1,k
               ll  = kp1 - l
-              ccin(ipt,ll,1) = ccin(ipt,ll,1) + cli(l)
-              ccin(ipt,ll,2) = ccin(ipt,ll,2) + clw(l)
+              ten_cc(ipt,ll,1) = cli(l)/dt
+              ten_cc(ipt,ll,2) = clw(l)/dt
+              ! ccin(ipt,ll,1) = ccin(ipt,ll,1) + cli(l)
+              ! ccin(ipt,ll,2) = ccin(ipt,ll,2) + clw(l)
             enddo
           endif
 !
@@ -1018,10 +1025,10 @@
         else
 
           do l=1,k
-            tin(ipt,l) = toi(l)                   ! Temperature
-            qin(ipt,l) = qoi(l)                   ! Specific humidity
-            uin(ipt,l) = uvi(l,ntr+1)             ! U momentum
-            vin(ipt,l) = uvi(l,ntr+2)             ! V momentum
+            ten_t(ipt,ll) = (toi(l) - tin(ipt,ll))/dt
+            ten_q(ipt,ll,1) = (qoi(l) - qin(ipt,ll))/dt
+            ten_u(ipt,ll) = (uvi(l,ntr+1) - uin(ipt,ll))/dt
+            ten_v(ipt,ll) = (uvi(l,ntr+2) - vin(ipt,ll))/dt
 
 !!        for 2M microphysics, always output these variables
             if (mp_phys == mp_phys_mg) then
@@ -1048,19 +1055,21 @@
 
             if (ntr > 0) then
               do n=1,ntr
-                ccin(ipt,l,n+2) = uvi(l,n)           ! Tracers
+                ten_cc(ipt,l,n+2) = (uvi(l,n) - ccin(ipt,l,n+2))/dt ! Tracers
               enddo
             endif
           enddo
           if (advcld) then
             do l=1,k
-              ccin(ipt,l,1) = qii(l)          ! Cloud ice
-              ccin(ipt,l,2) = qli(l)          ! Cloud water
+              ten_cc(ipt,l,1) = (qii(l) - ccin(ipt,l,1))/dt ! Cloud ice
+              ten_cc(ipt,l,2) = (qli(l) - ccin(ipt,l,2))/dt ! Cloud water
             enddo
           else
             do l=1,k
-              ccin(ipt,l,1) = ccin(ipt,l,1) + cli(l)
-              ccin(ipt,l,2) = ccin(ipt,l,2) + clw(l)
+              ten_cc(ipt,l,1) = cli(l)/dt
+              ten_cc(ipt,l,2) = clw(l)/dt
+              ! ccin(ipt,l,1) = ccin(ipt,l,1) + cli(l)
+              ! ccin(ipt,l,2) = ccin(ipt,l,2) + clw(l)
             enddo
           endif
         endif

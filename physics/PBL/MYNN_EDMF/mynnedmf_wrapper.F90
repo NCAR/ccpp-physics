@@ -730,7 +730,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             xland=xland,ts=ts,qsfc=qsfc,ps=ps,                  &
      &             ust=ust,ch=ch,hfx=hfx,qfx=qfx,rmol=rmol,            &
      &             wspd=wspd,uoce=uoce,voce=voce,                      & !input
-     &             qke=QKE,qke_adv=qke_adv,                            & !output
+     &             qke=QKE,qke_adv=qke_adv,                            & !output  !GJF qke_adv needs to be intent(in)
      &             sh3d=Sh3d,sm3d=Sm3d,                                &
 !chem/smoke
      &             nchem=nchem,kdvel=kdvel,ndvel=ndvel,                &
