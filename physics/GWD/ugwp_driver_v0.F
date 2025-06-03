@@ -816,7 +816,7 @@
       IF( do_tofd ) then
         axtms(:,:) = 0.0 ; aytms(:,:) = 0.0
 
-	
+
         DO I = 1,npt
           J = ipt(i)
           zpbl  =rgrav*phil( j, kpbl(j) )

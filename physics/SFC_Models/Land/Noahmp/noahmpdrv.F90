@@ -1,4 +1,6 @@
+#ifndef CCPP
 #define CCPP
+#endif
 !>  \file noahmpdrv.F90
 !!  This file contains the NoahMP land surface scheme driver.
 
@@ -1152,7 +1154,7 @@ end subroutine noahmpdrv_timestep_init
       call noahmp_options(idveg ,iopt_crs, iopt_btr , iopt_run, iopt_sfc,  &
                                  iopt_frz, iopt_inf , iopt_rad, iopt_alb,  &
                                  iopt_snf, iopt_tbot, iopt_stc, iopt_rsf,  &
-			         iopt_soil,iopt_pedo, iopt_crop,iopt_trs,  &
+                                 iopt_soil,iopt_pedo, iopt_crop,iopt_trs,  &
                                  iopt_diag,iopt_z0m)
 
       if ( vegetation_category == isice_table )  then
@@ -1177,7 +1179,7 @@ end subroutine noahmpdrv_timestep_init
           temperature_soil_bot ,forcing_height       ,snow_ice_frac_old    ,zsoil                , &
           thsfc_loc            ,prslkix              ,prsik1x              ,prslk1x              , &
           air_pressure_surface ,pblhx                ,iz0tlnd              ,itime                , &
-	  vegetation_frac      ,area_grid            ,psi_opt                                    , &
+          vegetation_frac      ,area_grid            ,psi_opt                                    , &
           con_fvirt            ,con_eps              ,con_epsm1            ,con_cp               , &
           snowfall             ,snow_water_equiv_old ,snow_albedo_old      ,                       &
           cm_noahmp            ,ch_noahmp            ,snow_levels          ,snow_water_equiv     , &
@@ -1659,7 +1661,7 @@ end subroutine noahmpdrv_timestep_init
         parameters%den    =    den_table(vegtype)       !tree density (no. of trunks per m2)
         parameters%rc     =     rc_table(vegtype)       !tree crown radius (m)
         parameters%mfsno  =  mfsno_table(vegtype)       !snowmelt m parameter ()
-	parameters%scffac = scffac_table(vegtype)       !snow cover factor
+        parameters%scffac = scffac_table(vegtype)       !snow cover factor
         parameters%cbiom  =  cbiom_table(vegtype)       !canopy biomass heat capacity parameter (m)
         parameters%saim   =   saim_table(vegtype,:)     !monthly stem area index, one-sided
         parameters%laim   =   laim_table(vegtype,:)     !monthly leaf area index, one-sided

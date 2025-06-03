@@ -57,7 +57,7 @@ module gfdl_cloud_microphys_mod
    logical :: module_is_initialized = .false.
    logical :: qsmith_tables_initialized = .false.
 
-   character (len = 17) :: mod_name = 'gfdl_cloud_microphys'
+   character (len = 20) :: mod_name = 'gfdl_cloud_microphys'
 
    real, parameter :: n0r = 8.0e6, n0s = 3.0e6, n0g = 4.0e6
    real, parameter :: rhos = 0.1e3, rhog = 0.4e3

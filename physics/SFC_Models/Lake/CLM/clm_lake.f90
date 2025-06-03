@@ -607,7 +607,7 @@ MODULE clm_lake
             enddo
             do k = -nlevsnow+1,nlevsoil
                t_soisno(c,k)      = t_soisno3d(i,k)
-	       h2osoi_ice(c,k)    = h2osoi_ice3d(i,k)
+               h2osoi_ice(c,k)    = h2osoi_ice3d(i,k)
                h2osoi_liq(c,k)    = h2osoi_liq3d(i,k)
                h2osoi_vol(c,k)    = h2osoi_vol3d(i,k)
                z(c,k)             = z3d(i,k)
@@ -678,20 +678,20 @@ MODULE clm_lake
             savedtke12d(i)         = savedtke1(c)
             snowdp2d(i)            = snowdp(c)
             h2osno2d(i)            = h2osno(c)
-	    snl2d(i)               = snl(c)
+            snl2d(i)               = snl(c)
             t_grnd2d(i)            = t_grnd(c)
             do k = 1,nlevlake
                t_lake3d(i,k)       = t_lake(c,k)
-	       lake_icefrac3d(i,k) = lake_icefrac(c,k)
+               lake_icefrac3d(i,k) = lake_icefrac(c,k)
             enddo
-	    do k = -nlevsnow+1,nlevsoil
-	       z3d(i,k)            = z(c,k)
-	       dz3d(i,k)           = dz(c,k) 
-	       t_soisno3d(i,k)     = t_soisno(c,k)
-	       h2osoi_liq3d(i,k)   = h2osoi_liq(c,k)
-	       h2osoi_ice3d(i,k)   = h2osoi_ice(c,k)
+            do k = -nlevsnow+1,nlevsoil
+               z3d(i,k)            = z(c,k)
+               dz3d(i,k)           = dz(c,k)
+               t_soisno3d(i,k)     = t_soisno(c,k)
+               h2osoi_liq3d(i,k)   = h2osoi_liq(c,k)
+               h2osoi_ice3d(i,k)   = h2osoi_ice(c,k)
                h2osoi_vol3d(i,k)   = h2osoi_vol(c,k)
-	   enddo
+           enddo
            do k = -nlevsnow+0,nlevsoil
                zi3d(i,k)           = zi(c,k)
            enddo
@@ -2305,7 +2305,7 @@ SUBROUTINE ShalLakeTemperature(t_grnd,h2osno,sabg,dz,dz_lake,z,zi,           & !
                     ! unlike eflx_gnet
           if(abs(errsoi(c)) > .001_kind_lake) then ! 1.e-5_kind_lake) then
              WRITE( message,* )'Primary soil energy conservation error in shlake &
-                                column during Tridiagonal Solution,', 'error (W/m^2):', c, errsoi(c) 
+                                &column during Tridiagonal Solution,', 'error (W/m^2):', c, errsoi(c) 
              errmsg=trim(message)
              errflg=1
              return
@@ -5626,7 +5626,7 @@ if_pergro: if (PERGRO) then
      ! initial t_soisno3d
      ! in snow
      if(snowdp2d(i) > 0.) then
-       do k = snl2d(i)+1, 0
+       do k = nint(snl2d(i))+1, 0
          t_soisno3d(i,k) =min(tfrz,tsfc(i))
        enddo
      endif
