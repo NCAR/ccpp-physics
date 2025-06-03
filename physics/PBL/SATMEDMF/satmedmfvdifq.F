@@ -267,7 +267,8 @@
      &                     dku_h(im,km),dkq_h(im,km),dddmp,
      &                     cpl1,cpl2,cpl3,cpl4,
      &                     cpl5,cpl6,pfnl(im),cpnl1,cpnl2,cpnl3,cpnl4,
-     &                     cpnl5,cpnl6,cptke1,cptke2,cptke3
+     &                     cpnl5,cpnl6,cptke1,cptke2,cptke3,
+     &                     inv3
 
       real(kind=kind_phys) ak(im,km),bk(im,km),ck(im,km),pk(im,km),
      &                     f3(im,km),rizt(im,km)
@@ -318,6 +319,7 @@
       parameter(cptke1=0.07,cptke2=0.142,cptke3=0.071)
       parameter(aa1=0.92,aa2=0.74,bb1=16.6,bb2=10.1,cc1=0.08)
       parameter(kmaxles=300.0,esmax=500.0,dddmp=0.1)
+      parameter(inv3=0.33333333)
 !      parameter(aa1=0.92,aa2=0.649,bb1=17.7,bb2=9.5,cc1=0.08)
 
       if (tc_pbl == 0) then
@@ -1533,7 +1535,7 @@
           do i = 1, im
             dz = zi(i,k+1) - zi(i,k)
             tem=grav/theta(i,1)*(thetal(i,k+1)-thetal(i,k))/dz
-            tem1=(garea(i)*dz)**(1.0/3.0)
+            tem1=(garea(i)*dz)**(inv3)
 ! calculate LES mixing length
             if(tem > 0.0) then
               elm_les(i,k)=0.76*sqrt(tkeh(i,k))*tem**(-0.5)
@@ -1862,7 +1864,7 @@
           tem = sqrt(tke(i,k))
 !        calculating 3D TKE transport and pressure correlation
            ptem1 = ce0 / ele(i,k)
-           tem1=(garea(i)*dz)**(1.0/3.0)
+           tem1=(garea(i)*dz)**(inv3)
            tem2=0.19+0.51*ele_les(i,k)/tem1
            ptem2= tem2 / ele_les(i,k)
            ptem=(1.0-pftke(i))*ptem2+pftke(i)*ptem1
