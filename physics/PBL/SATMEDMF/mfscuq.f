@@ -15,7 +15,9 @@
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &   thlx,thvx,thlvx,gdx,thetae,
      &   krad,mrad,radmin,buo,wush,tkemean,vez0fun,xmfd,
-     &   tcdo,qcdo,ucdo,vcdo,xlamdeq,a1)
+     &   tcdo,qcdo,ucdo,vcdo,xlamdeq,a1,
+!The following flag is for SA-3D-TKE (kyf)
+     &   sa3dtke)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -31,6 +33,7 @@
       integer   krad(im), mrad(im)
 !
       logical cnvflg(im)
+      logical sa3dtke !flag for SA-3D-TKE scheme (kyf)
       real(kind=kind_phys) delt
       real(kind=kind_phys) q1(ix,km,ntrac1),t1(ix,km),
      &                     u1(ix,km),      v1(ix,km),
@@ -426,6 +429,16 @@ c
           sigma(i) = min(sigma(i), 0.999)
         endif
       enddo
+!
+!> - Set updraft fraction to 0 when using SA-3D-TKE scheme (kyf)
+!! Scale-aware capability is done with pfnl in satmedmfvdifq.F
+!! Zhu et al. (2025)
+!
+      if (sa3dtke) then
+        do i = 1, im
+          sigma(i) = 0.
+        enddo
+      endif
 !
 !> - Compute scale-aware function based on 
 !! Arakawa and Wu (2013) \cite arakawa_and_wu_2013

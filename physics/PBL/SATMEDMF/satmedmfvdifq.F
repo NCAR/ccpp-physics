@@ -1089,14 +1089,18 @@
       call mfpbltq(im,im,km,kmpbl,ntcw,ntrac1,dt2,
      &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &    gdx,hpbl,kpbl,vpert,buou,wush,tkemean,vez0fun,xmf,
-     &    tcko,qcko,ucko,vcko,xlamue,bl_upfr)
+     &    tcko,qcko,ucko,vcko,xlamue,bl_upfr,
+!The following flag is for SA-3D-TKE (kyf)
+     &    sa3dtke)
 !>  - Call mfscuq(), which is a new mass-flux parameterization for 
 !!    stratocumulus-top-induced turbulence mixing. For details of the mfscuq subroutine, step into its documentation ::mfscuq
       call mfscuq(im,im,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,
      &    krad,mrad,radmin,buod,wush,tkemean,vez0fun,xmfd,
-     &    tcdo,qcdo,ucdo,vcdo,xlamde,bl_dnfr)
+     &    tcdo,qcdo,ucdo,vcdo,xlamde,bl_dnfr,
+!The following flag is for SA-3D-TKE (kyf)
+     &    sa3dtke)
 
       if (tc_pbl == 1) then
 !>  - unify mass fluxes with Cu
@@ -1188,87 +1192,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !> ## Compute an asymtotic mixing length
 !
-      if(sa3dtke) then
-       do k = 1, km1
-        do i = 1, im
-          zlup = 0.0
-          mlenflg = .true.
-          e2(i,k) = max(2.*tke(i,k), 0.001)
-          do n = k, km1
-            if(mlenflg) then
-              dz = zl(i,n+1) - zl(i,n)
-              tem1 = 2.*gotvx(i,n+1)*(thvx(i,k)-thvx(i,n+1))
-              tem2 = cs0*sqrt(e2(i,n))*sqrt(def_1(i,n)+def_2(i,n))
-              e2(i,n+1) = e2(i,n) + (tem1 - tem2) * dz
-              zlup = zlup + dz
-              if(e2(i,n+1) < 0.) then
-                ptem = e2(i,n+1) / (e2(i,n+1) - e2(i,n))
-                zlup = zlup - ptem * dz
-                zlup = max(zlup, 0.)
-                mlenflg = .false.
-              endif
-            endif
-          enddo
-          zldn = 0.0
-          mlenflg = .true.
-          do n = k, 1, -1
-            if(mlenflg) then
-              if(n == 1) then
-                dz = zl(i,1)
-                tem = tsea(i)*(1.+fv*max(q1(i,1,1),qmin))
-                tem1 = 2.*gotvx(i,n)*(tem-thvx(i,k))
-                tem2 = ustar(i)*phims(i)/(vk*dz)
-                tem2 = cs0*sqrt(e2(i,n))*tem2
-                e2(i,n-1) = e2(i,n) + (tem1 - tem2) * dz
-              else
-                dz = zl(i,n) - zl(i,n-1)
-                tem1 = 2.*gotvx(i,n-1)*(thvx(i,n-1)-thvx(i,k))
-                tem2 = cs0*sqrt(e2(i,n))*
-     &                 sqrt(def_1(i,n-1)+def_2(i,n-1))
-                e2(i,n-1) = e2(i,n) + (tem1 - tem2) * dz
-              endif
-              zldn = zldn + dz
-              if(e2(i,n-1) < 0.) then
-                ptem = e2(i,n-1) / (e2(i,n-1) - e2(i,n))
-                zldn = zldn - ptem * dz
-                zldn = max(zldn, 0.)
-                mlenflg = .false.
-              endif
-            endif
-          enddo
-!
-          tem = 0.5 * (zi(i,k+1)-zi(i,k))
-          tem1 = min(tem, rlmnz(i,k))
-!>  - Following Bougeault and Lacarrere(1989), the characteristic length
-!! scale (\f$l_2\f$) (eqn 10 in Han et al.(2019) \cite Han_2019) is given by:
-!!\f[
-!!   l_2=min(l_{up},l_{down})
-!!\f]
-!! and dissipation length scale \f$l_d\f$ is given by:
-!!\f[
-!!   l_d=(l_{up}l_{down})^{1/2}
-!!\f]
-!!    where \f$l_{up}\f$ and \f$l_{down}\f$ are the distances that a parcel
-!! having an initial TKE can travel upward and downward before being stopped
-!! by buoyancy effects.
-!
-! Following Rodier et. al (2017), environmental wind shear effect on
-!   mixing length was included.
-!
-          ptem2 = min(zlup,zldn)
-          rlam(i,k) = elmfac * ptem2
-          rlam(i,k) = max(rlam(i,k), tem1)
-          rlam(i,k) = min(rlam(i,k), rlmx)
-!
-          ptem2 = sqrt(zlup*zldn)
-          ele(i,k) = elefac * ptem2
-          ele(i,k) = max(ele(i,k), tem1)
-          ele(i,k) = min(ele(i,k), elmx)
-!
-        enddo
-       enddo
-      else
-       do k = 1, km1
+      do k = 1, km1
         do i = 1, im
           zlup = 0.0
           mlenflg = .true.
@@ -1344,8 +1268,7 @@
           ele(i,k) = min(ele(i,k), elmx)
 !
         enddo
-       enddo
-      endif !sa3dtke
+      enddo
 
 !>  - Compute the surface layer length scale (\f$l_1\f$) following 
 !! Nakanishi (2001) \cite Nakanish_2001 (eqn 9 of Han et al.(2019) \cite Han_2019)
@@ -1533,8 +1456,7 @@
 
         do k = 1, km1
           do i = 1, im
-            dz = zi(i,k+1) - zi(i,k)
-            tem=grav/theta(i,1)*(thetal(i,k+1)-thetal(i,k))/dz
+            tem=gotvx(i,1)*(thetal(i,k+1)-thetal(i,k))*rdzt(i,k)
             tem1=(garea(i)*dz)**(inv3)
 ! calculate LES mixing length
             if(tem > 0.0) then
@@ -1555,8 +1477,8 @@
         enddo
 
 ! 2. compute MS horizontal km
-        do i = 1, im
-          do k = 1, km1
+        do k = 1, km1
+          do i = 1, im
             tem1=sqrt(garea(i))
             dku_h(i,k)=dddmp*tem1*sqrt(tkeh(i,k))
           enddo
@@ -1575,12 +1497,12 @@
           tkemax=max(tkemax,tkeh(i,k))
           enddo
           do k=1,km1
-            if (abs(tkeh(i,k)-tkemax)/tkemax .lt. 1.0e-9) then
+            if (abs(tkeh(i,k)-tkemax)/tkemax < 1.0e-9) then
               l_tkemax=k
             endif
           enddo
           do k=l_tkemax,km1
-             if (tkeh(i,k)-0.5*tkemax .gt. 0.0) then
+             if (tkeh(i,k)-0.5*tkemax > 0.0) then
              kscl=k
              endif
           enddo
@@ -3086,19 +3008,21 @@ c
 !> ## Save PBL height for diagnostic purpose
 !
       if(sa3dtke) then
-       do i = 1, im
-         hpbl(i) = hpblx(i)
-         kpbl(i) = kpblx(i)
-        do k=1, km
-         dku3d_h(i,k)  = dku_h(i,k)   ! pass dku3d_h to dyn_core
-         dku3d_e(i,k)  = dkq_h(i,k)     ! pass dku3d_e to dyn_core
+        do i = 1, im
+          hpbl(i) = hpblx(i)
+          kpbl(i) = kpblx(i)
         enddo
-       enddo
+        do k = 1, km
+          do i = 1, im
+            dku3d_h(i,k)  = dku_h(i,k)   ! pass dku3d_h to dyn_core
+            dku3d_e(i,k)  = dkq_h(i,k)   ! pass dku3d_e to dyn_core
+          enddo
+        enddo
       else
-       do i = 1, im
-         hpbl(i) = hpblx(i)
-         kpbl(i) = kpblx(i)
-       enddo
+        do i = 1, im
+          hpbl(i) = hpblx(i)
+          kpbl(i) = kpblx(i)
+        enddo
       endif  !sa3dtke
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
