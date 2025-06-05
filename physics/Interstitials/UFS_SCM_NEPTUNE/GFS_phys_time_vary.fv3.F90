@@ -561,7 +561,6 @@
                    myerrmsg = 'Error in GFS_phys_time_vary.fv3.F90: Problem with the logic assigning snow layers in Noah MP initialization'
                    myerrflg = 1
                    call copy_error(myerrmsg, myerrflg, errmsg, errflg)
-                   if(errflg/=0) return
                  endif
 
 ! Now we have the snowxy field
