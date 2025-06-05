@@ -357,7 +357,7 @@
             inquire (file=co2cyc_file, exist=file_exist)
             if ( .not. file_exist ) then
               errflg = 1
-              errmsg = 'ERROR(gas_init): Can not find seasonal cycle '//&
+              errmsg = 'ERROR(gas_init): Cannot find seasonal cycle '// &
      &             'CO2 data file: '//co2cyc_file
               return
             else

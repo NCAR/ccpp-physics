@@ -620,9 +620,6 @@
 
 !      deallocate (kappa_par)
 
-
-2033    return
-
        END subroutine aerosol_activate
 !
 
