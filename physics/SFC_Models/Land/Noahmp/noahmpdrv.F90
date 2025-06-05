@@ -110,14 +110,16 @@
 
         !--- initialize soil vegetation
         call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
+        if(errflg/=0) return
 
         !--- read in noahmp table
         call read_mp_table_parameters(errmsg, errflg)
+        if(errflg/=0) return
 
         ! initialize psih and psim 
-
         if ( do_mynnsfclay ) then
-        call psi_init(psi_opt,errmsg,errflg)
+          call psi_init(psi_opt,errmsg,errflg)
+          if(errflg/=0) return
         endif
 
         pores (:) = maxsmc (:)

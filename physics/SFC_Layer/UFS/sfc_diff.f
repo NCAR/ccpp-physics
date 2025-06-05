@@ -467,7 +467,6 @@
         endif                ! end of if(flagiter) loop
       enddo
 
-      return
       end subroutine sfc_diff_run
 
 !----------------------------------------
@@ -642,7 +641,6 @@
           stress    = cm * wind * wind
           ustar     = sqrt(stress)
 
-      return
 !.................................
       end subroutine stability
 !---------------------------------

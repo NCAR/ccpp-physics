@@ -586,6 +586,8 @@ contains
                  index_of_y_wind, ldiag3d, ldiag_ugwp,               &
                  ugwp_seq_update, spp_wts_gwd, spp_gwd, errmsg, errflg)
      endif
+     if(errflg/=0) return
+
 !
 ! dusfcg = du_ogwcol + du_oblcol + du_osscol + du_ofdcol
 !
@@ -635,6 +637,8 @@ contains
                       dudt_obl, dvdt_obl,dudt_ofd, dvdt_ofd,              &
                       du_ogwcol, dv_ogwcol, du_oblcol, dv_oblcol,         &
                       du_ofdcol, dv_ofdcol, errmsg,errflg           )
+       if(errflg/=0) return
+
 !
 ! orogw_v1: dusfcg = du_ogwcol + du_oblcol  + du_ofdcol                           only 3 terms
 !

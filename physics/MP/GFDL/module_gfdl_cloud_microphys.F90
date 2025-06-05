@@ -3601,7 +3601,6 @@ subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, lo
 #else
     inquire (file = trim (fn_nml), exist = exists)
     if (.not. exists) then
-        write (6, *) 'gfdl - mp :: namelist file: ', trim (fn_nml), ' does not exist'
         errflg = 1
         errmsg = 'ERROR(gfdl_cloud_microphys_mod_init): namelist file '//trim (fn_nml)//' does not exist'
         return
