@@ -164,6 +164,7 @@ module lsm_ruc
 
       !--- initialize soil vegetation
       call set_soilveg_ruc(me, isot, ivegsrc, nlunit, errmsg, errflg)
+      if(errflg/=0) return
 
       pores (:) = maxsmc (:)
       resid (:) = drysmc (:)
@@ -213,6 +214,7 @@ module lsm_ruc
                     zs, dzs, smc, slc, stc,                     & ! in
                     sh2o, smfrkeep, tslb, smois,                & ! out
                     wetness, errmsg, errflg)
+      if(errflg/=0) return
 
       if (lsm_cold_start) then
         do i  = 1, im ! i - horizontal loop
@@ -1622,7 +1624,6 @@ module lsm_ruc
       enddo  ! i
       enddo  ! j
 !
-      return
 !...................................
       end subroutine lsm_ruc_run
 !-----------------------------------
@@ -2021,6 +2022,5 @@ module lsm_ruc
       endif ! debug_print
 
       end subroutine rucinit
-
 
 end module lsm_ruc
