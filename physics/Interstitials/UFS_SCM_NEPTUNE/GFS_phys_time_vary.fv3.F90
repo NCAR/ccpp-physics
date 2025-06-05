@@ -229,6 +229,7 @@
            myerrmsg = 'read_aerdata failed without a message'
            call read_aerdata (me,master,iflip,idate,myerrmsg,myerrflg)
            call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+           if(errflg/=0) return
          else if(iaermdl ==2 ) then
            do ix=1,ntrcaerm
              do j=1,levs
@@ -255,6 +256,7 @@
             myerrmsg = 'read_tau_amf failed without a message'
             call read_tau_amf(me, master, myerrmsg, myerrflg)
             call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+            if(errflg/=0) return
          endif
 
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
@@ -262,6 +264,7 @@
          myerrmsg = 'set_soilveg failed without a message'
          call set_soilveg(me, isot, ivegsrc, nlunit, myerrmsg, myerrflg)
          call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+         if(errflg/=0) return
 
 !> - read in NoahMP table (needed for NoahMP init)
          if(lsm == lsm_noahmp) then
@@ -269,6 +272,7 @@
            myerrmsg = 'read_mp_table_parameters failed without a message'
            call read_mp_table_parameters(myerrmsg, myerrflg)
            call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+           if(errflg/=0) return
          endif
 
 
@@ -557,6 +561,7 @@
                    myerrmsg = 'Error in GFS_phys_time_vary.fv3.F90: Problem with the logic assigning snow layers in Noah MP initialization'
                    myerrflg = 1
                    call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+                   if(errflg/=0) return
                  endif
 
 ! Now we have the snowxy field
@@ -911,9 +916,7 @@
                              ddy_aer, iindx1_aer,           &
                              iindx2_aer, ddx_aer,           &
                              levs, prsl, aer_nm, errmsg, errflg)
-           if(errflg /= 0) then
-             return
-           endif
+           if(errflg /= 0) return
          endif
 
 !> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
