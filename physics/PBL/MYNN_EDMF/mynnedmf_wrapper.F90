@@ -133,7 +133,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  sub_thl,sub_sqv,det_thl,det_sqv,&
      &  maxwidth,maxMF,ztop_plume,      &
      &  ktop_plume,                     &
-     &  dudt, dvdt, dtdt,                                  &
+     &  dudt, dvdt, dtdt, dqdt_all,                        &
      &  dqdt_water_vapor,            dqdt_liquid_cloud,    & ! <=== ntqv, ntcw
      &  dqdt_ice,                    dqdt_snow,            & ! <=== ntiw, ntsw
      &  dqdt_ozone,                                        & ! <=== ntoz
@@ -243,17 +243,15 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 !MYNN-3D
       real(kind_phys), dimension(:,:), intent(in)    :: phii
-      real(kind_phys), dimension(:,:), intent(inout) ::                  &
-     &        dtdt, dudt, dvdt,                                          &
-     &        dqdt_water_vapor, dqdt_liquid_cloud, dqdt_ice,             &
-     &        dqdt_snow, dqdt_ice_num_conc, dqdt_ozone
-      real(kind_phys), dimension(:,:), intent(inout), optional ::        &
-     &        dqdt_cloud_droplet_num_conc, dqdt_water_aer_num_conc,      &
-     &        dqdt_ice_aer_num_conc
+      real(kind_phys), dimension(:,:), intent(out) ::                    &
+     &        dtdt, dudt, dvdt, dqdt_water_vapor, dqdt_liquid_cloud,     &
+     &        dqdt_ice, dqdt_snow, dqdt_ozone
+      real(kind_phys), dimension(:,:,:), intent(out) :: dqdt_all       
+      real(kind_phys), dimension(:,:), intent(out), optional ::          &
+     &        dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,            &
+     &        dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc, dqdt_cccn      
       real(kind_phys), dimension(:,:), intent(inout) :: qke,             &
      &        EL_PBL, Sh3D, Sm3D, qc_bl, qi_bl, cldfra_bl
-      real(kind_phys), dimension(:,:), intent(inout), optional ::        &
-     &        dqdt_cccn
       real(kind_phys), dimension(:,:), intent(inout) ::                  &
      &        qke_adv
       real(kind_phys), dimension(:,:,:), intent(out) :: tmf  
@@ -262,9 +260,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        edmf_a,edmf_w,edmf_qt,                                     &
      &        edmf_thl,edmf_ent,edmf_qc,                                 &
      &        sub_thl,sub_sqv,det_thl,det_sqv
-      real(kind_phys), dimension(:,:), intent(inout) ::                  &
-     &        t3d,qgrs_water_vapor,qgrs_liquid_cloud,qgrs_ice,           &
-     &        qgrs_snow
+      real(kind_phys), dimension(:,:), intent(in) ::                     &
+     &        t3d,qgrs_water_vapor, qgrs_liquid_cloud, qgrs_ice,         &
+     &        qgrs_snow       
       real(kind_phys), dimension(:,:), intent(in) ::                     &
      &        qgrs_cloud_ice_num_conc,                                   &
      &        u,v,omega,                                                 &
@@ -342,6 +340,31 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+      
+      dtdt = 0.0
+      dudt = 0.0
+      dvdt = 0.0
+      dqdt_all = 0.0
+      dqdt_water_vapor = 0.0
+      qdt_liquid_cloud = 0.0
+      dqdt_ice = 0.0
+      dqdt_snow = 0.0
+      dqdt_ozone = 0.0
+      if (imp_physics == imp_physics_thompson) then
+        if (ltaerosol .or. mraerosol) then
+          if (ltaerosol) then
+            dqdt_water_aer_num_conc = 0.0
+            dqdt_ice_aer_num_conc = 0.0
+          end if
+          dqdt_cloud_droplet_num_conc = 0.0
+        end if
+        dqdt_ice_num_conc = 0.0
+      end if
+      if (imp_physics == imp_physics_nssl) then
+        dqdt_cloud_droplet_num_conc = 0.0
+        dqdt_ice_num_conc = 0.0
+        if (nssl_ccn_on) dqdt_cccn = 0.0
+      end if
 
       if (lprnt) then
          write(0,*)"=============================================="
@@ -792,15 +815,15 @@ SUBROUTINE mynnedmf_wrapper_run(        &
         !For MYNN, convert TH-tend to T-tend
         do k = 1, levs
            do i = 1, im
-              dtdt(i,k) = dtdt(i,k) + RTHBLTEN(i,k)*exner(i,k)
-              dudt(i,k) = dudt(i,k) + RUBLTEN(i,k)
-              dvdt(i,k) = dvdt(i,k) + RVBLTEN(i,k)
+              dtdt(i,k) = RTHBLTEN(i,k)*exner(i,k)
+              dudt(i,k) = RUBLTEN(i,k)
+              dvdt(i,k) = RVBLTEN(i,k)
            enddo
         enddo
         accum_duvt3dt: if(ldiag3d .or. lsidea) then
-          call dtend_helper(index_of_x_wind,RUBLTEN)
-          call dtend_helper(index_of_y_wind,RVBLTEN)
-          call dtend_helper(index_of_temperature,RTHBLTEN,exner)
+          call dtend_helper(index_of_x_wind,dudt)
+          call dtend_helper(index_of_y_wind,dvdt)
+          call dtend_helper(index_of_temperature,dtdt)
           if(ldiag3d) then
             call dtend_helper(100+ntoz,dqdt_ozone)
             ! idtend = dtidx(100+ntoz,index_of_process_pbl)
