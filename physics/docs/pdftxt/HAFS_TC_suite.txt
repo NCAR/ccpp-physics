@@ -1,0 +1,34 @@
+/**
+\page HAFSv1_page  HAFS_Thompson Suite 
+
+\section HAFS_suite_overview Overview
+
+The HAFS_thompson suite is one of the physics suites in the operational HAFS, currently applied in the
+National Hurricane Center's Northern Atlantic basin. Wang et al. (2024) \cite Wang_2024 documented the details 
+of physics schemes used in HAFS, including a few TC-specific modifications such as roughness length type
+and PBL scheme which can be configured through the namelist options. 
+
+The HAFS_thompson suite uses the parameterizations in the following order:
+ - \ref GFS_RRTMG_page
+ - \ref GFS_SFCLYR
+ - \ref GFS_OCEAN
+ - \ref GFS_NOAH
+ - \ref GFS_SFCSICE
+ - \ref GFS_SATMEDMFVDIFQ
+ - \ref GFS_UGWP_v0
+ - \ref GFS_H2OPHYS
+ - \ref GFS_SAMFdeep
+ - \ref GFS_SAMFshal
+ - \ref THOMPSON
+
+\section sdf_hafs_sas Suite Definition File 
+\include suite_FV3_HAFS_v1_thompson_nonsst.xml
+
+\section hafs_nml_option Namelist 
+- General physics options
+\snippet tropical_cyclone.nml GFS_PHYSICS_NML
+
+
+
+
+*/
