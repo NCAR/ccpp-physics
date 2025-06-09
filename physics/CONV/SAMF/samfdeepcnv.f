@@ -2540,7 +2540,7 @@ c
 !> - If grid size is less than a threshold value (dxcrtas: currently 8km if progsigma is not used and 30km if progsigma is used), the quasi-equilibrium assumption of Arakawa-Schubert is not used any longer.
 !
       if(progsigma)then
-         dxcrtas=30.e3
+         dxcrtas=500.e3
          dxcrtuf=10.e3
       else
          dxcrtas=8.e3
