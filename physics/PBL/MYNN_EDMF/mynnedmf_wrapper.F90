@@ -288,7 +288,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        dz, w, p, rho, th, qv, delp,                               &
      &        RUBLTEN, RVBLTEN, RTHBLTEN, RQVBLTEN,                      &
      &        RQCBLTEN, RQNCBLTEN, RQIBLTEN, RQNIBLTEN, RQSBLTEN,        &
-     &        RQNWFABLTEN, RQNIFABLTEN, RQNBCABLTEN
+     &        RQNWFABLTEN, RQNIFABLTEN, RQNBCABLTEN, adj_t
       real(kind_phys), allocatable :: old_ozone(:,:)
 
 !smoke/chem arrays
@@ -346,7 +346,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       dvdt = 0.0
       dqdt_all = 0.0
       dqdt_water_vapor = 0.0
-      qdt_liquid_cloud = 0.0
+      dqdt_liquid_cloud = 0.0
       dqdt_ice = 0.0
       dqdt_snow = 0.0
       dqdt_ozone = 0.0
@@ -365,7 +365,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
         dqdt_ice_num_conc = 0.0
         if (nssl_ccn_on) dqdt_cccn = 0.0
       end if
-
+      adj_t = t3d 
+      
+      
       if (lprnt) then
          write(0,*)"=============================================="
          write(0,*)"in mynn wrapper..."
@@ -578,14 +580,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
        do k=1,levs
           do i=1,im
-             th(i,k)=t3d(i,k)/exner(i,k)
-             rho(i,k)=prsl(i,k)/(r_d*t3d(i,k)*(1.+p608*max(sqv(i,k),1e-8)))
-             w(i,k) = -omega(i,k)/(rho(i,k)*grav)
-          enddo
-       enddo
-
-       do k=1,levs
-          do i=1,im
              tmf(i,k,1)=0.
           enddo
        enddo
@@ -610,9 +604,17 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                               delp(i,:), exner(i,:), &
                               sqv(i,:),  sqc(i,:),   &
                               sqi(i,:),  kzero(:),   &
-                              t3d(i,:)               )
+                              adj_t(i,:)             )
       enddo
-
+      
+      do k=1,levs
+         do i=1,im
+            th(i,k)=adj_t(i,k)/exner(i,k)
+            rho(i,k)=prsl(i,k)/(r_d*adj_t(i,k)*(1.+p608*max(sqv(i,k),1e-8)))
+            w(i,k) = -omega(i,k)/(rho(i,k)*grav)
+         enddo
+      enddo
+      
       !intialize more variables
       do i=1,im
          if (slmsk(i)==1. .or. slmsk(i)==2.) then !sea/land/ice mask (=0/1/2) in FV3
@@ -711,7 +713,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          print*,"bl_mynn_edmf_tke=",bl_mynn_edmf_tke
          print*,"bl_mynn_cloudmix=",bl_mynn_cloudmix," bl_mynn_mixqt=",bl_mynn_mixqt
          print*,"icloud_bl=",icloud_bl
-         print*,"T:",t3d(1,1),t3d(1,2),t3d(1,levs)
+         print*,"T:",adj_t(1,1),adj_t(1,2),adj_t(1,levs)
          print*,"TH:",th(1,1),th(1,2),th(1,levs)
          print*,"rho:",rho(1,1),rho(1,2),rho(1,levs)
          print*,"exner:",exner(1,1),exner(1,2),exner(1,levs)
@@ -749,7 +751,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             u=u,v=v,w=w,th=th,sqv3D=sqv,sqc3D=sqc,              &
      &             sqi3D=sqi,sqs3D=sqs,qnc=qnc,qni=qni,                &
      &             qnwfa=qnwfa,qnifa=qnifa,qnbca=qnbca,ozone=ozone,    &
-     &             p=prsl,exner=exner,rho=rho,T3D=t3d,                 &
+     &             p=prsl,exner=exner,rho=rho,T3D=adj_t,               &
      &             xland=xland,ts=ts,qsfc=qsfc,ps=ps,                  &
      &             ust=ust,ch=ch,hfx=hfx,qfx=qfx,rmol=rmol,            &
      &             wspd=wspd,uoce=uoce,voce=voce,                      & !input
@@ -836,7 +838,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
         !Update T, U and V:
         !do k = 1, levs
         !   do i = 1, im
-        !      T3D(i,k) = T3D(i,k) + RTHBLTEN(i,k)*exner(i,k)*delt
+        !      T3D(i,k) = adj_t(i,k) + RTHBLTEN(i,k)*exner(i,k)*delt
         !      u(i,k)   = u(i,k) + RUBLTEN(i,k)*delt
         !      v(i,k)   = v(i,k) + RVBLTEN(i,k)*delt
         !   enddo
@@ -1017,7 +1019,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
        if (lprnt) then
           print*
           print*,"===Finished with mynn_bl_driver; output:"
-          print*,"T:",t3d(1,1),t3d(1,2),t3d(1,levs)
+          print*,"T:",adj_t(1,1),adj_t(1,2),adj_t(1,levs)
           print*,"TH:",th(1,1),th(1,2),th(1,levs)
           print*,"rho:",rho(1,1),rho(1,2),rho(1,levs)
           print*,"exner:",exner(1,1),exner(1,2),exner(1,levs)

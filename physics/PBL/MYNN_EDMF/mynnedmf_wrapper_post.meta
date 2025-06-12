@@ -6,9 +6,9 @@
   
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_photochemistry_post_run
+  name = mynnedmf_wrapper_post_run
   type = scheme
-[tend_opt_photochem]
+[tend_opt_pbl]
   standard_name = control_for_application_method_of_planetary_boundary_layer_tendencies
   long_name = control for application method of planetary boundary layer tendencies
   units = 1

@@ -1138,7 +1138,7 @@
   standard_name = tendency_of_cloud_condensation_nuclei_number_concentration
   long_name = number concentration of cloud condensation nuclei tendency
   units = kg-1 s-1
-  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
