@@ -1319,7 +1319,7 @@ MODULE module_mp_nssl_2mom
 
   integer, intent(in),optional      :: infileunit
 
-  integer,parameter::strsize=512
+  integer,parameter::strsize=64
   character(len=strsize), intent(in), optional :: namelist_filename
   character(len=strsize) :: namelist_inputfile
 
@@ -1475,9 +1475,6 @@ MODULE module_mp_nssl_2mom
       ENDIF
     ENDIF
 
-
-
-
     namelist_inputfile = 'namelist.input' ! default for WRF/cm1
     IF ( present( namelist_filename ) ) THEN
        namelist_inputfile = namelist_filename
@@ -1486,7 +1483,7 @@ MODULE module_mp_nssl_2mom
     ENDIF
 
       IF ( .true. ) THEN ! set to true to enable internal namelist read
-      open(15,file=namelist_inputfile,status='old',form='formatted',action='read')
+      open(15,file=trim(namelist_inputfile),status='old',form='formatted',action='read')
       rewind(15)
       read(15,NML=nssl_mp_params,iostat=istat)
       close(15)
@@ -1504,7 +1501,6 @@ MODULE module_mp_nssl_2mom
          ENDIF
        ENDIF
        ENDIF
-
 
       IF ( iufccn > 0 ) THEN ! make sure to use option that uses UF ccn
         irenuc = 7
