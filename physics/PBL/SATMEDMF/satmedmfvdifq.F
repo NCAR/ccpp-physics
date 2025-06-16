@@ -1456,6 +1456,7 @@
 
         do k = 1, km1
           do i = 1, im
+            dz = zl(i,k+1) - zl(i,k)
             tem=gotvx(i,1)*(thetal(i,k+1)-thetal(i,k))*rdzt(i,k)
             tem1=(garea(i)*dz)**(inv3)
 ! calculate LES mixing length
@@ -1543,6 +1544,24 @@
      &                      pfl(i)*dku_h(i,k)/prnum
           dku_h(i,k)=(1.0-pfl(i))*dku_les(i,k)+pfl(i)*dku_h(i,k)
       enddo
+      enddo
+
+!     perform scale-aware for non-local transport
+      do k = 1, kmpbl
+        do i = 1, im
+          if (pcnvflg(i) .and. k < kpbl(i)) then
+             xmf(i,k) =  pfnl(i) * xmf(i,k)
+          endif
+        enddo
+      enddo
+
+      do k = kmscu, 1, -1
+        do i = 1, im
+          if(scuflg(i) .and.
+     &      (k >= mrad(i) .and. k < krad(i))) then
+             xmfd(i,k) = pfnl(i) * xmfd(i,k)
+          endif
+        enddo
       enddo
 
       endif !sa3dtke
@@ -1783,8 +1802,9 @@
        do n = 1, ndt
        do k = 1,km1
         do i=1,im
-          tem = sqrt(tke(i,k))
+           tem = sqrt(tke(i,k))
 !        calculating 3D TKE transport and pressure correlation
+           dz = zl(i,k+1) - zl(i,k)
            ptem1 = ce0 / ele(i,k)
            tem1=(garea(i)*dz)**(inv3)
            tem2=0.19+0.51*ele_les(i,k)/tem1
@@ -1984,60 +2004,7 @@
          f1(i,1) = tke(i,1)
       enddo
 !
-!The following is for SA-3D-TKE
-      if(sa3dtke) then
-       do k = 1,km1
-        do i=1,im
-          dtodsd  = dt2/del(i,k)
-          dtodsu  = dt2/del(i,k+1)
-          dsig    = prsl(i,k)-prsl(i,k+1)
-          rdz     = rdzt(i,k)
-          tem1    = dsig * dkq(i,k) * rdz
-          dsdz2   = tem1 * rdz
-          au(i,k) = -dtodsd*dsdz2
-          al(i,k) = -dtodsu*dsdz2
-          ad(i,k) = ad(i,k)-au(i,k)
-          ad(i,k+1)= 1.-al(i,k)
-          tem2    = dsig * rdz
-!
-          if(pcnvflg(i) .and. k < kpbl(i)) then
-             ptem      = 0.5 * tem2 * xmf(i,k)
-             ptem=ptem*pfnl(i) ! blending nolocal mixing
-             ptem1     = dtodsd * ptem
-             ptem2     = dtodsu * ptem
-             ptem      = qcko(i,k,ntke) + qcko(i,k+1,ntke)
-             f1(i,k)   = f1(i,k) - ptem * ptem1
-             f1(i,k+1) = tke(i,k+1) + ptem * ptem2
-          else
-             f1(i,k+1) = tke(i,k+1)
-          endif
-!
-          if(scuflg(i)) then
-            if(k >= mrad(i) .and. k < krad(i)) then
-              ptem      = 0.5 * tem2 * xmfd(i,k)
-              ptem=ptem*pfnl(i)
-              ptem1     = dtodsd * ptem
-              ptem2     = dtodsu * ptem
-              ptem      = qcdo(i,k,ntke) + qcdo(i,k+1,ntke)
-              f1(i,k)   = f1(i,k) + ptem * ptem1
-              f1(i,k+1) = f1(i,k+1) - ptem * ptem2
-            endif
-          endif
-!
-          kmx = max(kpbl(i), krad(i))
-          if((pcnvflg(i) .or. scuflg(i)) .and. (k < kmx)) then
-            ptem  = tem2 * (xmf(i,k) - xmfd(i,k))
-            ptem=ptem*pfnl(i)
-            ptem1 = dtodsd * ptem
-            ptem2 = dtodsu * ptem
-            f1(i,k)   = f1(i,k) + e_half(i,k) * ptem1
-            f1(i,k+1) = f1(i,k+1) - e_half(i,k) * ptem2
-          endif
-!
-        enddo
-       enddo
-      else
-       do k = 1,km1
+      do k = 1,km1
         do i=1,im
           dtodsd  = dt2/del(i,k)
           dtodsu  = dt2/del(i,k+1)
@@ -2083,8 +2050,7 @@
           endif
 !
         enddo
-       enddo
-      endif !sa3dtke
+      enddo
 
 c
 !>  - Call tridit() to solve tridiagonal problem for TKE
@@ -2229,71 +2195,7 @@ c
         enddo
       endif
 c
-!The following is for SA-3D-TKE
-      if(sa3dtke) then
-       do k = 1,km1
-        do i = 1,im
-          dtodsd  = dt2/del(i,k)
-          dtodsu  = dt2/del(i,k+1)
-          dsig    = prsl(i,k)-prsl(i,k+1)
-          rdz     = rdzt(i,k)
-          tem1    = dsig * dkt(i,k) * rdz
-          dsdzt   = tem1 * gocp
-          dsdz2   = tem1 * rdz
-          au(i,k) = -dtodsd*dsdz2
-          al(i,k) = -dtodsu*dsdz2
-          ad(i,k) = ad(i,k)-au(i,k)
-          ad(i,k+1)= 1.-al(i,k)
-          tem2    = dsig * rdz
-!
-          if(pcnvflg(i) .and. k < kpbl(i)) then
-             ptem      = 0.5 * tem2 * xmf(i,k)
-             ptem=ptem*pfnl(i)
-             ptem1     = dtodsd * ptem
-             ptem2     = dtodsu * ptem
-             tem       = t1(i,k) + t1(i,k+1)
-             ptem      = tcko(i,k) + tcko(i,k+1)
-             f1(i,k)   = f1(i,k)+dtodsd*dsdzt-(ptem-tem)*ptem1
-             f1(i,k+1) = t1(i,k+1)-dtodsu*dsdzt+(ptem-tem)*ptem2
-             ptem      = qcko(i,k,1) + qcko(i,k+1,1)
-             f2(i,k)   = f2(i,k) - ptem * ptem1
-             f2(i,k+1) = q1(i,k+1,1) + ptem * ptem2
-          else
-             f1(i,k)   = f1(i,k)+dtodsd*dsdzt
-             f1(i,k+1) = t1(i,k+1)-dtodsu*dsdzt
-             f2(i,k+1) = q1(i,k+1,1)
-          endif
-!
-          if(scuflg(i)) then
-            if(k >= mrad(i) .and. k < krad(i)) then
-              ptem      = 0.5 * tem2 * xmfd(i,k)
-              ptem=ptem*pfnl(i)
-              ptem1     = dtodsd * ptem
-              ptem2     = dtodsu * ptem
-              ptem      = tcdo(i,k) + tcdo(i,k+1)
-              tem       = t1(i,k) + t1(i,k+1)
-              f1(i,k)   = f1(i,k) + (ptem - tem) * ptem1
-              f1(i,k+1) = f1(i,k+1) - (ptem - tem) * ptem2
-              ptem      = qcdo(i,k,1) + qcdo(i,k+1,1)
-              f2(i,k)   = f2(i,k) + ptem * ptem1
-              f2(i,k+1) = f2(i,k+1) - ptem * ptem2
-            endif
-          endif
-!
-          kmx = max(kpbl(i), krad(i))
-          if((pcnvflg(i) .or. scuflg(i)) .and. (k < kmx)) then
-            ptem  = tem2 * (xmf(i,k) - xmfd(i,k))
-            ptem=ptem*pfnl(i)
-            ptem1 = dtodsd * ptem
-            ptem2 = dtodsu * ptem
-            f2(i,k)   = f2(i,k) + q_half(i,k,1) * ptem1
-            f2(i,k+1) = f2(i,k+1) - q_half(i,k,1) * ptem2
-          endif
-!
-        enddo
-       enddo
-      else
-       do k = 1,km1
+      do k = 1,km1
         do i = 1,im
           dtodsd  = dt2/del(i,k)
           dtodsu  = dt2/del(i,k+1)
@@ -2350,61 +2252,9 @@ c
           endif
 !
         enddo
-       enddo
-      endif !sa3dtke
+      enddo
 !
-!The following is for SA-3D-TKE
-      if(sa3dtke) then
-       if(ntrac1 >= 2) then
-        do n = 2, ntrac1
-          is = (n-1) * km
-          do k = 1, km1
-            do i = 1, im
-              dtodsd = dt2/del(i,k)
-              dtodsu = dt2/del(i,k+1)
-              dsig  = prsl(i,k)-prsl(i,k+1)
-              tem2  = dsig * rdzt(i,k)
-!
-              if(pcnvflg(i) .and. k < kpbl(i)) then
-                ptem  = 0.5 * tem2 * xmf(i,k)
-                ptem=ptem*pfnl(i)
-                ptem1 = dtodsd * ptem
-                ptem2 = dtodsu * ptem
-                ptem  = qcko(i,k,n) + qcko(i,k+1,n)
-                f2(i,k+is) = f2(i,k+is) - ptem * ptem1
-                f2(i,k+1+is)= q1(i,k+1,n) + ptem * ptem2
-              else
-                f2(i,k+1+is) = q1(i,k+1,n)
-              endif
-!
-              if(scuflg(i)) then
-                if(k >= mrad(i) .and. k < krad(i)) then
-                  ptem  = 0.5 * tem2 * xmfd(i,k)
-                  ptem=ptem*pfnl(i)
-                  ptem1 = dtodsd * ptem
-                  ptem2 = dtodsu * ptem
-                  ptem  = qcdo(i,k,n) + qcdo(i,k+1,n)
-                  f2(i,k+is)  = f2(i,k+is) + ptem * ptem1
-                  f2(i,k+1+is)= f2(i,k+1+is) - ptem * ptem2
-                endif
-              endif
-!
-              kmx = max(kpbl(i), krad(i))
-              if((pcnvflg(i) .or. scuflg(i)) .and. (k < kmx)) then
-                ptem  = tem2 * (xmf(i,k) - xmfd(i,k))
-                ptem=ptem*pfnl(i)
-                ptem1 = dtodsd * ptem
-                ptem2 = dtodsu * ptem
-                f2(i,k+is)   = f2(i,k+is) + q_half(i,k,n) * ptem1
-                f2(i,k+1+is) = f2(i,k+1+is) - q_half(i,k,n) * ptem2
-              endif
-!
-            enddo
-          enddo
-        enddo
-       endif
-      else
-       if(ntrac1 >= 2) then
+      if(ntrac1 >= 2) then
         do n = 2, ntrac1
           is = (n-1) * km
           do k = 1, km1
@@ -2448,8 +2298,7 @@ c
             enddo
           enddo
         enddo
-       endif
-      endif !sa3dtke
+      endif
 c
 !> - Call tridin() to solve tridiagonal problem for heat and moisture
 c
@@ -2850,61 +2699,7 @@ c
          f2(i,1) = v1(i,1)
       enddo
 c
-!The following is for SA-3D-TKE
-      if(sa3dtke) then
-       do k = 1,km1
-        do i=1,im
-          dtodsd  = dt2/del(i,k)
-          dtodsu  = dt2/del(i,k+1)
-          dsig    = prsl(i,k)-prsl(i,k+1)
-          rdz     = rdzt(i,k)
-          tem1    = dsig * dku(i,k) * rdz
-          dsdz2   = tem1*rdz
-          au(i,k) = -dtodsd*dsdz2
-          al(i,k) = -dtodsu*dsdz2
-          ad(i,k) = ad(i,k)-au(i,k)
-          ad(i,k+1)= 1.-al(i,k)
-          tem2    = dsig * rdz
-!
-          if(pcnvflg(i) .and. k < kpbl(i)) then
-             ptem      = 0.5 * tem2 * xmf(i,k)
-             ptem=ptem*pfnl(i)
-             ptem1     = dtodsd * ptem
-             ptem2     = dtodsu * ptem
-             tem       = u1(i,k) + u1(i,k+1)
-             ptem      = ucko(i,k) + ucko(i,k+1)
-             f1(i,k)   = f1(i,k) - (ptem - tem) * ptem1
-             f1(i,k+1) = u1(i,k+1) + (ptem - tem) * ptem2
-             tem       = v1(i,k) + v1(i,k+1)
-             ptem      = vcko(i,k) + vcko(i,k+1)
-             f2(i,k)   = f2(i,k) - (ptem - tem) * ptem1
-             f2(i,k+1) = v1(i,k+1) + (ptem - tem) * ptem2
-          else
-             f1(i,k+1) = u1(i,k+1)
-             f2(i,k+1) = v1(i,k+1)
-          endif
-!
-          if(scuflg(i)) then
-            if(k >= mrad(i) .and. k < krad(i)) then
-              ptem      = 0.5 * tem2 * xmfd(i,k)
-              ptem=ptem*pfnl(i)
-              ptem1     = dtodsd * ptem
-              ptem2     = dtodsu * ptem
-              tem       = u1(i,k) + u1(i,k+1)
-              ptem      = ucdo(i,k) + ucdo(i,k+1)
-              f1(i,k)   = f1(i,k) + (ptem - tem) *ptem1
-              f1(i,k+1) = f1(i,k+1) - (ptem - tem) *ptem2
-              tem       = v1(i,k) + v1(i,k+1)
-              ptem      = vcdo(i,k) + vcdo(i,k+1)
-              f2(i,k)   = f2(i,k) + (ptem - tem) * ptem1
-              f2(i,k+1) = f2(i,k+1) - (ptem - tem) * ptem2
-            endif
-          endif
-!
-        enddo
-       enddo
-      else
-       do k = 1,km1
+      do k = 1,km1
         do i=1,im
           dtodsd  = dt2/del(i,k)
           dtodsu  = dt2/del(i,k+1)
@@ -2952,8 +2747,7 @@ c
           endif
 !
         enddo
-       enddo
-      endif !sa3dtke
+      enddo
 c
 !> - Call tridi2() to solve tridiagonal problem for momentum
 c
