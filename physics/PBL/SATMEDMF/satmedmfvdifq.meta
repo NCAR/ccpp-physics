@@ -273,8 +273,8 @@
   kind = kind_phys
   intent = in
 [def_3]
-  standard_name = transfer_rate_of_tke_due_to_dynamics
-  long_name = rate of TKE transfer and pressure correlation calculated from dynamics
+  standard_name = horizontal_transfer_rate_of_tke_due_to_dynamics
+  long_name = rate of horizontal TKE transfer and pressure correlation calculated from dynamics
   units =  m2 s-3
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -566,7 +566,7 @@
   kind = kind_phys
   intent = out
 [dku3d_h]
-  standard_name = horizontal_atmosphere_momentum_diffusivity_for_dyanmics
+  standard_name = horizontal_atmosphere_momentum_diffusivity_for_dynamics
   long_name = horizontal atmospheric momentum diffusivity for dynamics
   units = m2 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -574,7 +574,7 @@
   kind = kind_phys
   intent = out
 [dku3d_e]
-  standard_name = horizontal_atmosphere_tke_diffusivity_for_dyanmics
+  standard_name = horizontal_atmosphere_tke_diffusivity_for_dynamics
   long_name = horizontal atmospheric tke diffusivity for dynamics
   units = m2 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
