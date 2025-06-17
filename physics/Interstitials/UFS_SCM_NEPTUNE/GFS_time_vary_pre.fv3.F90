@@ -3,7 +3,7 @@
 
    module GFS_time_vary_pre
 
-      use funcphys, only: gfuncphys
+      use funcphys, only: gfuncphys, funcphys_init
 
       implicit none
 
@@ -21,9 +21,16 @@
 !> \section arg_table_GFS_time_vary_pre_init Argument Table
 !! \htmlinclude GFS_time_vary_pre_init.html
 !!
-      subroutine GFS_time_vary_pre_init (errmsg, errflg)
+      subroutine GFS_time_vary_pre_init (con_cp, con_rd, con_cvap, con_cliq, &
+           con_rv, con_hvap, con_ttp, con_psat, con_csol, &
+           con_hfus, con_rocp, con_eps, errmsg, errflg)
 
          implicit none
+
+         real(kind=kind_phys), intent(in) :: con_cp, con_rd, con_cvap
+         real(kind=kind_phys), intent(in) :: con_cliq, con_rv, con_hvap
+         real(kind=kind_phys), intent(in) :: con_ttp, con_psat, con_csol
+         real(kind=kind_phys), intent(in) :: con_hfus, con_rocp, con_eps
 
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
@@ -33,6 +40,11 @@
          errflg = 0
 
          if (is_initialized) return
+
+         !--- Initialize funcphys constants
+         call funcphys_init(con_cp, con_rd, con_cvap, con_cliq, &
+              con_rv, con_hvap, con_ttp, con_psat, con_csol, &
+              con_hfus, con_rocp, con_eps)
 
          !--- Call gfuncphys (funcphys.f) to compute all physics function tables.
          call gfuncphys ()
