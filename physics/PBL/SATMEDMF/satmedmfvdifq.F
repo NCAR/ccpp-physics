@@ -1607,6 +1607,8 @@
             tem = tem + ptem1 + ptem2
             buop = 0.5 * (gotvx(i,1) * sflux(i) + tem)
 !
+            tem1 = dku(i,1)*def_1(i,1)+dku_h(i,1)*def_2(i,1)
+!
             tem = (u1(i,2)-u1(i,1))*rdzt(i,1)
 !           if(pcnvflg(i)) then
 !             ptem = xmf(i,1) * tem
@@ -1638,9 +1640,7 @@
             ptem2 = ptem2 + ptem
 !
             tem2 = stress(i)*ustar(i)*phims(i)/(vk*zl(i,1))
-            shrp = 0.5 * (ptem1 + ptem2 + tem2)
-            tem2 = dku(i,k)*def_1(i,k)+dku_h(i,k)*def_2(i,k)
-            shrp =0.5*(shrp+tem2)
+            shrp = 0.5 * (tem1 + ptem1 + ptem2 + tem2)
           else
             tem1 = -dkt(i,k-1) * bf(i,k-1)
             tem2 = -dkt(i,k) * bf(i,k)
@@ -1666,7 +1666,45 @@
 !         obtaining 3d shear production from dycore
             tem1 = dku(i,k-1)*def_1(i,k-1)+dku_h(i,k-1)*def_2(i,k-1)
             tem2 = dku(i,k)*def_1(i,k)+dku_h(i,k)*def_2(i,k)
-            shrp=0.5*(tem1+tem2)
+            tem  = 0.5*(tem1+tem2)
+            tem1 = (u1(i,k+1)-u1(i,k))*rdzt(i,k)
+            tem2 = (u1(i,k)-u1(i,k-1))*rdzt(i,k-1)
+            if(pcnvflg(i) .and. k <= kpbl(i)) then
+              ptem = xmf(i,k) * tem1 + xmf(i,k-1) * tem2
+              ptem1 = 0.5 * ptem * (u1(i,k)-ucko(i,k))
+            else
+              ptem1 = 0.
+            endif
+            if(scuflg(i)) then
+              if(k >= mrad(i) .and. k < krad(i)) then
+                ptem0 = xmfd(i,k) * tem1 + xmfd(i,k-1) * tem2
+                ptem2 = 0.5 * ptem0 * (ucdo(i,k)-u1(i,k))
+              else
+                ptem2 = 0.
+              endif
+            else
+              ptem2 = 0.
+            endif
+            shrp = tem + ptem1 + ptem2
+            tem1 = (v1(i,k+1)-v1(i,k))*rdzt(i,k)
+            tem2 = (v1(i,k)-v1(i,k-1))*rdzt(i,k-1)
+            if(pcnvflg(i) .and. k <= kpbl(i)) then
+              ptem = xmf(i,k) * tem1 + xmf(i,k-1) * tem2
+              ptem1 = 0.5 * ptem * (v1(i,k)-vcko(i,k))
+            else
+              ptem1 = 0.
+            endif
+            if(scuflg(i)) then
+              if(k >= mrad(i) .and. k < krad(i)) then
+                ptem0 = xmfd(i,k) * tem1 + xmfd(i,k-1) * tem2
+                ptem2 = 0.5 * ptem0 * (vcdo(i,k)-v1(i,k))
+              else
+                ptem2 = 0.
+              endif
+            else
+              ptem2 = 0.
+            endif
+            shrp = shrp + ptem1 + ptem2
           endif
 !
           prod(i,k) = buop + shrp
