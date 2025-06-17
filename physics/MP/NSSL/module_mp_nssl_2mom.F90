@@ -1477,7 +1477,7 @@ MODULE module_mp_nssl_2mom
     ENDIF
     
 #ifdef INTERNAL_FILE_NML
-    read (internal_nml, nml = nssl_mp_params)
+    read (internal_nml, nml = nssl_mp_params, iostat=istat)
 #else
     
     namelist_inputfile = 'namelist.input' ! default for WRF/cm1
