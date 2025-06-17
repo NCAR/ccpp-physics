@@ -1275,7 +1275,7 @@ MODULE module_mp_nssl_2mom
 !! NSSL MP setup routine (sets local options and array indices)
        SUBROUTINE nssl_2mom_init(  &
      & ims,ime, jms,jme, kms,kme, nssl_params, ipctmp, mixphase,ihvol,idoniconlytmp, &
-     & namelist_filename, &
+     & namelist_filename, internal_nml, &
      & nssl_graupelfallfac, &
      & nssl_hailfallfac, &
      & nssl_ehw0, &
@@ -1320,6 +1320,7 @@ MODULE module_mp_nssl_2mom
   integer, intent(in),optional      :: infileunit
 
   integer,parameter::strsize=64
+  character(len=*),       intent(in), optional :: internal_nml(:)
   character(len=strsize), intent(in), optional :: namelist_filename
   character(len=strsize) :: namelist_inputfile
 
@@ -1474,19 +1475,24 @@ MODULE module_mp_nssl_2mom
         irainbreak = 0
       ENDIF
     ENDIF
-
+    
+#ifdef INTERNAL_FILE_NML
+    read (internal_nml, nml = nssl_mp_params)
+#else
+    
     namelist_inputfile = 'namelist.input' ! default for WRF/cm1
-    IF ( present( namelist_filename ) ) THEN
+    IF ( present( namelist_filename ) ) THEN  
        namelist_inputfile = namelist_filename
     ELSE
        namelist_inputfile = 'input.nml'
     ENDIF
-
-      IF ( .true. ) THEN ! set to true to enable internal namelist read
-      open(15,file=trim(namelist_inputfile),status='old',form='formatted',action='read')
-      rewind(15)
-      read(15,NML=nssl_mp_params,iostat=istat)
-      close(15)
+    
+    open(15,file=trim(namelist_inputfile),status='old',form='formatted',action='read')
+    rewind(15)
+    read(15,NML=nssl_mp_params,iostat=istat)
+    close(15)
+#endif
+    IF ( .true. ) THEN ! set to true to enable internal namelist read
       IF ( present ( myrank ) .and. present ( mpiroot ) ) THEN
         IF ( myrank == mpiroot ) THEN
          IF ( istat /= 0 ) THEN
@@ -1498,9 +1504,9 @@ MODULE module_mp_nssl_2mom
          open(15,file='nssl_mp_params.out',status='unknown',form='formatted')
          write(15,NML=nssl_mp_params)
          close(15)
-         ENDIF
-       ENDIF
-       ENDIF
+        ENDIF
+      ENDIF
+     ENDIF
 
       IF ( iufccn > 0 ) THEN ! make sure to use option that uses UF ccn
         irenuc = 7

@@ -28,8 +28,8 @@ module mp_nssl
 !! \htmlinclude mp_nssl_init.html
 !!
     subroutine mp_nssl_init(ncol, nlev, errflg, errmsg, threads, restart, &
-                              fn_nml, mpirank, mpiroot,mpicomm,           &
-                              qc, qr, qi, qs, qh,                         &
+                              fn_nml, input_nml_file, mpirank, mpiroot,   &
+                              mpicomm, qc, qr, qi, qs, qh,                &
                               ccw, crw, cci, csw, chw, vh,                &
                               con_g, con_rd, con_cp, con_rv,              &
                               con_t0c, con_cliq, con_csol, con_eps,       &
@@ -53,6 +53,7 @@ module mp_nssl
          integer,                   intent(in)    :: threads
          logical,                   intent(in)    :: restart
          character(len=*),          intent(in)    :: fn_nml
+         character(len=*),          intent(in)    :: input_nml_file(:)
          real(kind_phys), intent(in) :: con_g, con_rd, con_cp, con_rv, &
                              con_t0c, con_cliq, con_csol, con_eps
 
@@ -157,7 +158,8 @@ module mp_nssl
 
 !           write(0,*) 'call nssl_2mom_init'
          CALL nssl_2mom_init(ims,ime, jms,jme, kms,kme,nssl_params,ipctmp=ipc,mixphase=0,   &
-                namelist_filename=fn_nml,ihvol=ihailv,nssl_ehw0=nssl_ehw0,                  &
+                namelist_filename=fn_nml,internal_nml=input_nml_file,                       &
+                ihvol=ihailv,nssl_ehw0=nssl_ehw0,                                           &
                 nssl_ehlw0=nssl_ehlw0,errmsg=errmsg,                                        &
                 nssl_alphar=nssl_alphar,                                                    &
                 nssl_alphah=nssl_alphah,                                                    &
