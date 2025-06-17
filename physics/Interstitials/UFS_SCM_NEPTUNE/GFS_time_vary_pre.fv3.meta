@@ -3,6 +3,7 @@
   type = scheme
   dependencies_path = ../../
   dependencies = tools/funcphys.f90,hooks/machine.F
+  dependencies = GWD/ugwp_common_v0.f90
 
 ########################################################################
 [ccpp-arg-table]
@@ -100,6 +101,38 @@
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
   units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_fvirt]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rerth]
+  standard_name = radius_of_earth
+  long_name = radius of earth
+  units = m
   dimensions = ()
   type = real
   kind = kind_phys

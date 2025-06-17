@@ -4,6 +4,7 @@
    module GFS_time_vary_pre
 
       use funcphys, only: gfuncphys, funcphys_init
+      use ugwp_common_v0, only: ugwp_common_v0_init
 
       implicit none
 
@@ -18,9 +19,12 @@
 !> \section arg_table_GFS_time_vary_pre_init Argument Table
 !! \htmlinclude GFS_time_vary_pre_init.html
 !!
-      subroutine GFS_time_vary_pre_init (con_cp, con_rd, con_cvap, con_cliq, &
-           con_rv, con_hvap, con_ttp, con_psat, con_csol, &
-           con_hfus, con_rocp, con_eps, errmsg, errflg)
+        subroutine GFS_time_vary_pre_init ( &
+             con_cp, con_rd, con_cvap, con_cliq, &
+             con_rv, con_hvap, con_ttp, con_psat, &
+             con_csol, con_hfus, con_rocp, con_eps, &
+             con_pi, con_g, con_fvirt, con_rerth, &
+             errmsg, errflg)
 
          use machine,               only: kind_phys
          implicit none
@@ -29,6 +33,7 @@
          real(kind=kind_phys), intent(in) :: con_cliq, con_rv, con_hvap
          real(kind=kind_phys), intent(in) :: con_ttp, con_psat, con_csol
          real(kind=kind_phys), intent(in) :: con_hfus, con_rocp, con_eps
+         real(kind=kind_phys), intent(in) :: con_pi, con_g, con_fvirt, con_rerth
 
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
@@ -43,6 +48,8 @@
          call funcphys_init(con_cp, con_rd, con_cvap, con_cliq, &
               con_rv, con_hvap, con_ttp, con_psat, con_csol, &
               con_hfus, con_rocp, con_eps)
+         call ugwp_common_v0_init(con_pi, con_g, con_rd, con_rv, &
+              con_cp, con_fvirt, con_rerth)
 
          !--- Call gfuncphys (funcphys.f) to compute all physics function tables.
          call gfuncphys ()
