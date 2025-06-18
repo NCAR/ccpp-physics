@@ -79,7 +79,6 @@
 !                                                                          !
 !    external modules referenced:                                          !
 !                                                                          !
-!       'module physcons'                                                  !
 !       'mersenne_twister'                                                 !
 !                                                                          !
 !    compilation sequence is:                                              !
@@ -277,8 +276,6 @@
 !! rrtmg-lw radiation code from aer inc.
       module rrtmg_lw
 !
-     !  use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
-     ! &                             con_amw, con_amo3
       use mersenne_twister, only : random_setseed, random_number,       &
      &                             random_stat
       use machine,          only : kind_phys,                           &
