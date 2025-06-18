@@ -200,7 +200,7 @@
 !!\author Andrew Gettelman
        subroutine ini_micro(Dcs_, QCVAR_, ts_auto_ice_                  &
 #ifdef NEMS_GSM
-            cpair_in &
+     & , cpair_in                                                       &
 #endif
      & )
 
