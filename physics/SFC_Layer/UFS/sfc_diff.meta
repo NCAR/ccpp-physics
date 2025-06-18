@@ -143,6 +143,22 @@
   type = real
   kind = kind_phys
   intent = in
+[lakefrac]
+  standard_name = lake_area_fraction
+  long_name = fraction of horizontal grid area occupied by lake
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[fice]
+  standard_name = sea_ice_area_fraction_of_sea_area_fraction
+  long_name = ice fraction over open water
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
 [vegtype]
   standard_name = vegetation_type_classification
   long_name = vegetation type at each grid cell
