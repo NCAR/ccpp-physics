@@ -8,7 +8,7 @@ module sfc_nst
   use funcphys ,              only : fpvs
   use module_nst_parameters , only : one, zero, half
   use module_nst_parameters , only : t0k, cp_w, omg_m, omg_sh, solar_time_6am, sst_max
-  use module_nst_parameters , only : ri_c, z_w_max, delz, wd_max, rad2deg, const_rot, tau_min, tw_max
+  use module_nst_parameters , only : ri_c, z_w_max, delz, wd_max, const_rot, tau_min, tw_max
   use module_nst_water_prop , only : get_dtzm_point, density, rhocoef, grv, sw_ps_9b
   use nst_module ,            only : cool_skin, dtm_1p, cal_w, cal_ttop, convdepth, dtm_1p_fca
   use nst_module ,            only : dtm_1p_tla, dtm_1p_mwa, dtm_1p_mda, dtm_1p_mta, dtl_reset
@@ -244,6 +244,7 @@ contains
     real (kind=kind_phys), parameter :: alps=0.75,bets=0.75,gams=0.15, &
          ws10cr=30., conlf=7.2e-9, consf=6.4e-8
     real (kind=kind_phys) :: windrel
+    real (kind=kind_phys) :: rad2deg
     !
     !======================================================================================================
     ! Initialize CCPP error handling variables
@@ -352,6 +353,7 @@ contains
     !
     zsea1 = 0.001_kp*real(nstf_name4)
     zsea2 = 0.001_kp*real(nstf_name5)
+    rad2deg = 180./pi
 
     !> - Call module_nst_water_prop::density() to compute sea water density.
     !> - Call module_nst_water_prop::rhocoef() to compute thermal expansion
@@ -449,7 +451,7 @@ contains
              !> - Call the diurnal thermocline layer model dtm_1p().
              call dtm_1p(kdt,timestep,rich,taux,tauy,nswsfc(i),           &
                          f_nsol,sss,sep,q_ts,hl_ts,rho_w,alpha,beta,alon, &
-                         sinlat(i),soltim,grav,le,d_conv(i),              &
+                         sinlat(i),soltim,grav,le,d_conv(i),pi,           &
                          xt(i),xs(i),xu(i),xv(i),xz(i),xzts(i),xtts(i))
 
              !     if (lprnt .and. i == ipr) print *,' beg xz2=',xz(i)
