@@ -1018,7 +1018,7 @@ INPUT                  = pdftxt/SRW_mainpage.txt \
                          pdftxt/THOMPSON.txt \
                          pdftxt/suite_input.nml.txt \
                          pdftxt/CLM_LAKE.txt \
-                         pdftxt/acronyms.txt   \ 
+                         pdftxt/acronyms.txt   \
                          ../MP \
                          ../CONV \
                          ../GWD \
@@ -1027,7 +1027,7 @@ INPUT                  = pdftxt/SRW_mainpage.txt \
                          ../SFC_Models \
                          ../photochem \
                          ../smoke_dust   \
-                         ../Radiation   \ 
+                         ../Radiation   \
                          ../Interstitials/UFS_SCM_NEPTUNE
 
 
@@ -1092,7 +1092,7 @@ RECURSIVE              = YES
 EXCLUDE                = ../Radiation/RRTMGP/rte-rrtmgp \
                          ../Interstitials/UFS_SCM_NEPTUNE/GFS_phys_time_vary.scm.F90 \
                          ../MP/Morrison_Gettelman \
-                         ../MP/Ferrier_Aligo \ 
+                         ../MP/Ferrier_Aligo \
                          ../MP/Zhao_Carr \
                          ../PBL/MYJ \
                          ../MP/GFDL/GFDL_parse_tracers.F90 \
@@ -1418,6 +1418,7 @@ HTML_HEADER            = _doxygen/header.html
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
 HTML_FOOTER            = _doxygen/footer.html
+<<<<<<< HEAD
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1460,6 +1461,13 @@ HTML_EXTRA_STYLESHEET  = _doxygen/doxygen-awesome.css \
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
+=======
+HTML_STYLESHEET        =
+HTML_EXTRA_STYLESHEET  = _doxygen/doxygen-awesome.css  \
+                         _doxygen/doxygen-awesome-sidebar-only.css \
+                         _doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css    \
+                         _doxygen/doxygen-awesome-ccpp.css
+>>>>>>> d9e7a242 (Physcons removal, documentation and comments cleanup)
 HTML_EXTRA_FILES       = _doxygen/doxygen-awesome-darkmode-toggle.js \
                          _doxygen/doxygen-awesome-ccpp.js
 
@@ -2615,6 +2623,7 @@ HAVE_DOT               = YES
 # This tag requires that the tag HAVE_DOT is set to YES.
 
 DOT_NUM_THREADS        = 0
+<<<<<<< HEAD
 
 # DOT_COMMON_ATTR is common attributes for nodes, edges and labels of
 # subgraphs. When you want a differently looking font in the dot files that
@@ -2650,6 +2659,10 @@ DOT_NODE_ATTR          = "shape=box,height=0.2,width=0.4"
 # DOT_COMMON_ATTR and others dot attributes.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
+=======
+DOT_FONTNAME           = Source Sans Pro
+DOT_FONTSIZE           =
+>>>>>>> d9e7a242 (Physcons removal, documentation and comments cleanup)
 DOT_FONTPATH           =
 
 # If the CLASS_GRAPH tag is set to YES or GRAPH or BUILTIN then Doxygen will
