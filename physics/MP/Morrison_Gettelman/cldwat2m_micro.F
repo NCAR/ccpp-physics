@@ -200,7 +200,7 @@
 !!\author Andrew Gettelman
        subroutine ini_micro(Dcs_, QCVAR_, ts_auto_ice_                  &
 #ifdef NEMS_GSM
-
+            cpair_in &
 #endif
      & )
 
@@ -225,10 +225,9 @@
 
        character(len=16) :: eddy_scheme = ' '
        logical           :: history_microphysics
-
-
 #ifdef NEMS_GSM
-
+       real(r8), intent(in) :: cpair_in
+       cpair = cpair_in
        onebcp=one/cpair
 #endif
 
