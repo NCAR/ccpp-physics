@@ -96,10 +96,6 @@
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
-!      use physcons, grav => con_g, cp => con_cp, hvap => con_hvap       &
-!     &,             rv => con_rv, fv => con_fvirt, t0c => con_t0c       &
-!     &,             rd => con_rd, cvap => con_cvap, cliq => con_cliq    &
-!     &,             eps => con_eps, epsm1 => con_epsm1
       implicit none
 !
 ! Interface variables

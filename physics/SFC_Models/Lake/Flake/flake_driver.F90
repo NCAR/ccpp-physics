@@ -28,7 +28,7 @@
             lflx, gflx, ustar, qsfc, ch, cm, chh, cmm,       &
             h_ML, t_wML, t_mnw, H_B, T_B, t_bot1,            &
             t_bot2, c_t, T_snow, T_ice, tsurf_ice,           &
-            errmsg, errflg                     )     
+            errmsg, errflg                     )
 
 !==============================================================================
 !
@@ -42,10 +42,6 @@
 !      use flake_parameters
        use machine , only : kind_phys
 !      use funcphys, only : fpvs
-!      use physcons, only : grav   => con_g,    cp   => con_cp,          &
-!     &                     hvap   => con_hvap, rd   => con_rd,          &
-!     &                     eps    => con_eps, epsm1 => con_epsm1,       &
-!     &                     rvrdm1 => con_fvirt
 
 !==============================================================================
 
@@ -112,13 +108,13 @@
         depth_w                           , & ! The lake depth [m]
         fetch_in                          , & ! Typical wind fetch [m]
         depth_bs_in                       , & ! Depth of the thermally active layer of the bottom sediments [m]
-        T_bs_in                           , & ! Temperature at the outer edge of 
+        T_bs_in                           , & ! Temperature at the outer edge of
                                         ! the thermally active layer of the bottom sediments [K]
         par_Coriolis                      , & ! The Coriolis parameter [s^{-1}]
         del_time                              ! The model time step [s]
 
       REAL (KIND = kind_phys) ::   &
-        T_snow_in                        , & ! Temperature at the air-snow interface [K] 
+        T_snow_in                        , & ! Temperature at the air-snow interface [K]
         T_ice_in                         , & ! Temperature at the snow-ice or air-ice interface [K]
         T_mnw_in                         , & ! Mean temperature of the water column [K]
         T_wML_in                         , & ! Mixed-layer temperature [K]
@@ -129,14 +125,14 @@
         h_ice_in                         , & ! Ice thickness [m]
         h_ML_in                          , & ! Thickness of the mixed-layer [m]
         H_B1_in                          , & ! Thickness of the upper layer of bottom sediments [m]
-        T_sfc_in                         , & ! Surface temperature at the previous time step [K]  
+        T_sfc_in                         , & ! Surface temperature at the previous time step [K]
         ch_in                            , &
         cm_in                            , &
         albedo_water                     , &
         water_extinc
 
       REAL (KIND = kind_phys) ::   &
-        T_snow_out                        , & ! Temperature at the air-snow interface [K] 
+        T_snow_out                        , & ! Temperature at the air-snow interface [K]
         T_ice_out                         , & ! Temperature at the snow-ice or air-ice interface [K]
         T_mnw_out                         , & ! Mean temperature of the water column [K]
         T_wML_out                         , & ! Mixed-layer temperature [K]
@@ -148,7 +144,7 @@
         h_ML_out                          , & ! Thickness of the mixed-layer [m]
         H_B1_out                          , & ! Thickness of the upper layer of bottom sediments [m]
         T_sfc_out                         , & ! surface temperature [K]
-        T_sfc_n                           , & ! Updated surface temperature [K]  
+        T_sfc_n                           , & ! Updated surface temperature [K]
         u_star                            , &
         q_sfc                             , &
         chh_out                           , &
@@ -160,7 +156,7 @@
         Q_LHT_flx              , & ! Latent heat flux [W m^{-2}]
         Q_watvap               , & ! Flux of water vapour [kg m^{-2} s^{-1}]
         Q_gflx                 , & ! Flux from ice to water [W m^{-2}]
-        Q_lflx                     ! latent fluxes [W m^{-2}]    
+        Q_lflx                     ! latent fluxes [W m^{-2}]
 
       REAL (KIND = kind_phys) ::   &
         lake_depth_max, T_bot_2_in, T_bot_2_out, dlat,tb,tr,tt,temp,temp2
@@ -276,7 +272,7 @@
 !         w_extinc(i) = 3.0
 
 !     write(0,1002) julian,xlat(i),w_albedo(I),w_extinc(i),elev(i),tsurf(i),T_sfc(i),t_bot1(i)
-!     write(0,1003) use_lake_model(i),i,lakedepth(i), snwdph(i), hice(i), fice(i)        
+!     write(0,1003) use_lake_model(i),i,lakedepth(i), snwdph(i), hice(i), fice(i)
 !     write(0,1004) ps(i), wind(i), t1(i), q1(i), dlwflx(i), dswsfc(i), zlvl(i)
 
         endif  !flag
@@ -418,7 +414,7 @@ module flake_driver_post
    use machine, only: kind_phys
    implicit none
    private
-   public flake_driver_post_init, flake_driver_post_finalize, flake_driver_post_run 
+   public flake_driver_post_init, flake_driver_post_finalize, flake_driver_post_run
 
 contains
    subroutine flake_driver_post_init()
@@ -448,7 +444,7 @@ subroutine flake_driver_post_run (im, use_lake_model, h_ML, T_wML,  &
 
       real (kind=kind_phys),dimension(:),intent(inout) ::    &
      &           xz, zm, tref
-      real (kind=kind_phys),dimension(:),intent(inout) :: tsfco   
+      real (kind=kind_phys),dimension(:),intent(inout) :: tsfco
 
       integer, dimension(:), intent(in) :: use_lake_model
 
@@ -471,7 +467,7 @@ subroutine flake_driver_post_run (im, use_lake_model, h_ML, T_wML,  &
       enddo
 
 
-end subroutine flake_driver_post_run  
+end subroutine flake_driver_post_run
 
 !---------------------------------
 end module flake_driver_post

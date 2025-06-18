@@ -40,7 +40,6 @@
 !    external modules referenced:                                      !
 !                                                                      !
 !       'module machine'             in 'machine.f'                    !
-!       'module physcons'            in 'physcons.f'                   !
 !       'module module_iounitdef'    in 'iounitdef.f'                  !
 !                                                                      !
 !                                                                      !
@@ -101,7 +100,7 @@
 !!\version NCEP-Radiation_surface   v5.1  Nov 2012
 
 !> This module sets up surface albedo for SW radiation and surface
-!! emissivity for LW radiation.  
+!! emissivity for LW radiation.
       module module_radiation_surface
 !
       use machine,           only : kind_phys
@@ -428,7 +427,7 @@
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       fracl, fraco, fraci
       real (kind=kind_phys), dimension(:),intent(inout) ::              &
-     &     lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir 
+     &     lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir
 
       logical, dimension(:), intent(in) ::                              &
      &       icy
@@ -539,7 +538,7 @@
 
             fsno0 = sncovr(i) ! snow fraction on land
 
-            fsno1 = f_one - fsno0 
+            fsno1 = f_one - fsno0
             flnd0 = min(f_one, facsf(i)+facwf(i))
             flnd  = flnd0 * fsno1 ! snow-free fraction
             fsno  = f_one - flnd  ! snow-covered fraction
@@ -604,7 +603,7 @@
 
           !-- ice albedo
           !tgs: this part of the code needs the input from the ice
-          !     model. Otherwise it uses the backup albedo computation 
+          !     model. Otherwise it uses the backup albedo computation
           !     from ialbflg = 1.
 
           if (icy(i)) then   !-- Computation of ice albedo
@@ -641,7 +640,7 @@
               asevb_ice = asevd_ice
               asenb_ice = asend_ice
 
-              if (fsno0 > f_zero) then 
+              if (fsno0 > f_zero) then
               ! Snow on ice
                 dtgd = max(f_zero, min(5.0, (con_ttp-tisfc(i)) ))
                 b1   = 0.03 * dtgd
@@ -671,7 +670,7 @@
             asevb_ice = 0.70
             asenb_ice = 0.65
           endif ! end icy
- 
+
           !-- Composite mean surface albedo from land, open water and
           !-- ice fractions
           sfcalb(i,1) = min(0.99,max(0.01,lsmalbdnir(i)))*fracl(i)      & ! direct beam NIR
@@ -726,7 +725,7 @@
 !!                        or -pi -> +pi ranges
 !!\param xlat             latitude  in radiance, default to pi/2 ->
 !!                        -pi/2 range, otherwise see in-line comment
-!!\param slmsk            landmask: sea/land/ice =0/1/2 
+!!\param slmsk            landmask: sea/land/ice =0/1/2
 !!\param snodl            snow depth water equivalent in mm land
 !!\param snodi            snow depth water equivalent in mm ice
 !!\param sncovr           snow cover over land
@@ -992,7 +991,7 @@
             endif ! lsm check
           endif ! icy
 
-          !-- land emissivity 
+          !-- land emissivity
           !-- from Noah MP or RUC lsms
           sfcemis_land = semis_lnd(i) ! albedo with snow effect from LSM
 

@@ -2,8 +2,8 @@
 !!  This file contains the sfc_sice for coupling to CICE
 
 !> This module contains the CCPP-compliant GFS sea ice post
-!! interstitial codes, which returns updated ice thickness and 
-!! concentration to global arrays where there is no ice, and 
+!! interstitial codes, which returns updated ice thickness and
+!! concentration to global arrays where there is no ice, and
 !! set temperature to surface skin temperature.
 
 !> This module contains the CCPP-compliant GFS sea ice scheme.
@@ -16,8 +16,6 @@
 !! \htmlinclude sfc_cice_run.html
 !!
 
-!!      use physcons, only : hvap => con_hvap,  cp => con_cp,           &
-!!    &                     rvrdm1 => con_fvirt, rd => con_rd
 !
 !-----------------------------------
       subroutine sfc_cice_run                                           &
@@ -91,8 +89,8 @@
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       t1, q1, cm, ch, prsl1, wind
       real (kind=kind_phys), dimension(:), intent(in) ::                &
-     &       snowd 
-      
+     &       snowd
+
       real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       dqsfc, dtsfc, dusfc, dvsfc
       logical, dimension(:), intent(in) :: flag_cice, flag_iter
@@ -147,7 +145,7 @@
           ep(i)     = evap(i)
         endif
       enddo
- 
+
       return
 !-----------------------------------
       end subroutine sfc_cice_run

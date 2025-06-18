@@ -260,7 +260,6 @@ module cs_conv
    real(kind_phys)    :: ftintm, wrk, wrk1, tem
    integer i, k, n, ISTS, IENS, kp1
 
-   ! physcons removal, add types
    real(kind_phys), intent(in) :: cp !< specific heat of dry air at constant pressure [J kg-1 K-1]
    real(kind_phys), intent(in) :: grav !< gravitational acceleration [m s-2]
    real(kind_phys), intent(in) :: rair !< ideal gas constant for dry air [J kg-1 K-1]
@@ -292,7 +291,7 @@ module cs_conv
    errmsg = ''
    errflg = 0
 
-   ! Initialize parameters that used to be calculated with physcons variables
+   ! Initialize parameters
    cpoel=cp/el
    cpoesub=cp/(el+emelt)
    esubocp=1.0/cpoesub
