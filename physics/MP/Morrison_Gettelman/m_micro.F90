@@ -94,7 +94,7 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
     lsbcp  = (hvap+hfus)*onebcp
 
     if (fprcp <= 0) then
-      call ini_micro (mg_dcs, mg_qcvar, mg_ts_auto_ice(1))
+      call ini_micro (mg_dcs, mg_qcvar, mg_ts_auto_ice(1), cpair)
     elseif (fprcp == 1) then
       call micro_mg_init2_0(kind_phys, gravit, rair, rh2o, cpair, &
                             eps, tmelt, latvap, latice, mg_rhmini,&
