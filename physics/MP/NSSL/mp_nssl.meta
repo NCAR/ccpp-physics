@@ -49,6 +49,22 @@
   dimensions = ()
   type = logical
   intent = in
+[fn_nml]
+  standard_name = filename_of_namelist
+  long_name = namelist filename
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = in
+[input_nml_file]
+  standard_name = filename_of_internal_namelist
+  long_name = character string to store full namelist contents
+  units = none
+  dimensions = (number_of_lines_in_internal_namelist)
+  type = character
+  kind = len=*
+  intent = in
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
