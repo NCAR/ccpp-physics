@@ -666,6 +666,13 @@
   dimensions = ()
   type = integer
   intent = in
+[use_lpt]
+  standard_name = control_for_using_LPT_for_TC_applications_in_the_PBL_scheme
+  long_name = control for using LPT in TC applications in the PBL scheme
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
 [ntqv]
   standard_name = index_of_specific_humidity_in_tracer_concentration_array
   long_name = tracer index for water vapor (specific humidity)

@@ -84,7 +84,7 @@
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,tkeh,           &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
-     &     rlmx,elmx,sfc_rlm,tc_pbl,                                    &
+     &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            &
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg)
@@ -99,6 +99,7 @@
      &                        ntke, ntqv
       integer, intent(in)  :: sfc_rlm
       integer, intent(in)  :: tc_pbl
+      integer, intent(in)  :: use_lpt
       integer, intent(in)  :: kinver(:)
       integer, intent(out) :: kpbl(:)
       logical, intent(in)  :: gen_tend,ldiag3d
@@ -288,6 +289,8 @@
       real(kind=kind_phys) h1
 
       real(kind=kind_phys) bfac, mffac
+
+      real(kind=kind_phys) qice(im,km),qliq(im,km)
 !!
       parameter(bfac=100.)
       parameter(wfac=7.0,cfac=4.5)
@@ -539,15 +542,20 @@
         do i=1,im
           pix(i,k)   = psk(i) / prslk(i,k)
           theta(i,k) = t1(i,k) * pix(i,k)
+          qice(i,k) = 0.0
+          qliq(i,k) = 0.0
           if(ntiw > 0) then
             tem = max(q1(i,k,ntcw),qlmin)
             tem1 = max(q1(i,k,ntiw),qlmin)
+            qice(i,k) = tem1
+            qliq(i,k) = tem
             qlx(i,k) = tem + tem1
             ptem = hvap*tem + (hvap+hfus)*tem1
             slx(i,k)   = cp * t1(i,k) + phil(i,k) - ptem
           else
             qlx(i,k) = max(q1(i,k,ntcw),qlmin)
             slx(i,k)   = cp * t1(i,k) + phil(i,k) - hvap*qlx(i,k)
+            qliq(i,k) = qlx(i,k)
           endif
           tem2       = 1.+fv*max(q1(i,k,1),qmin)-qlx(i,k)
           thvx(i,k)  = theta(i,k) * tem2
@@ -2241,6 +2249,10 @@ c
           rdz     = rdzt(i,k)
           tem1    = dsig * dkt(i,k) * rdz
           dsdzt   = tem1 * gocp
+          if (use_lpt > 0) then
+            dsdzt = dsdzt-tem1*elocp*(qliq(i,k+1)-qliq(i,k))*rdz
+     &        -(1+0.33/2.5)*tem1*elocp*(qice(i,k+1)-qice(i,k))*rdz
+          endif
           dsdz2   = tem1 * rdz
           au(i,k) = -dtodsd*dsdz2
           al(i,k) = -dtodsu*dsdz2
