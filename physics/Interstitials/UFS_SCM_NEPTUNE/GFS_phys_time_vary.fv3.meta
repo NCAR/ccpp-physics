@@ -1173,6 +1173,13 @@
   dimensions = (4)
   type = integer
   intent = in
+[cplflx]
+  standard_name = flag_for_surface_flux_coupling
+  long_name = flag controlling cplflx collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [nsswr]
   standard_name = number_of_timesteps_between_shortwave_radiation_calls
   long_name = number of timesteps between shortwave radiation calls
@@ -1635,6 +1642,14 @@
   long_name = forecast time at the previous timestep
   units = h
   dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[oceanfrac]
+  standard_name = sea_area_fraction
+  long_name = fraction of horizontal grid area occupied by ocean
+  units = frac
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
