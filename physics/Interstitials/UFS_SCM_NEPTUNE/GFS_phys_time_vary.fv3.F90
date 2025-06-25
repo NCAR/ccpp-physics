@@ -214,6 +214,9 @@
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
+         ! Initialize copy_error variables
+         myerrflg = 0
+         myerrmsg = 'Error in GFS_phys_time_vary'
 
          if (is_initialized) return
          iamin=999
@@ -225,10 +228,7 @@
 !>  added coupled gocart and radiation option to initializing aer_nm
          if (iaerclm) then
            ntrcaer = ntrcaerm
-           myerrflg = 0
-           myerrmsg = 'read_aerdata failed without a message'
-           call read_aerdata (me,master,iflip,idate,myerrmsg,myerrflg)
-           call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+           call read_aerdata (me,master,iflip,idate,errmsg,errflg)
            if(errflg/=0) return
          else if(iaermdl ==2 ) then
            do ix=1,ntrcaerm
@@ -252,26 +252,17 @@
 
 !> - Call tau_amf dats for  ugwp_v1
          if (do_ugwp_v1) then
-            myerrflg = 0
-            myerrmsg = 'read_tau_amf failed without a message'
-            call read_tau_amf(me, master, myerrmsg, myerrflg)
-            call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+            call read_tau_amf(me, master, errmsg, errflg)
             if(errflg/=0) return
          endif
 
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
-         myerrflg = 0
-         myerrmsg = 'set_soilveg failed without a message'
-         call set_soilveg(me, isot, ivegsrc, nlunit, myerrmsg, myerrflg)
-         call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+         call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
          if(errflg/=0) return
 
 !> - read in NoahMP table (needed for NoahMP init)
          if(lsm == lsm_noahmp) then
-           myerrflg = 0
-           myerrmsg = 'read_mp_table_parameters failed without a message'
-           call read_mp_table_parameters(myerrmsg, myerrflg)
-           call copy_error(myerrmsg, myerrflg, errmsg, errflg)
+           call read_mp_table_parameters(errmsg, errflg)
            if(errflg/=0) return
          endif
 
