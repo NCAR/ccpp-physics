@@ -128,7 +128,9 @@ contains
     call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002, con_pi )
     call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, con_t0c,    &
          con_c, con_boltz, con_plnk, errflg, errmsg)
+    if(errflg/=0) return
     call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, con_pi, errflg, errmsg )
+    if(errflg/=0) return
 
     if ( me == 0 ) then
        print *,' return from rad_initialize (GFS_rrtmgp_setup_init) - after calling radinit'
@@ -136,7 +138,6 @@ contains
     
     is_initialized = .true.
 
-    return
   end subroutine GFS_rrtmgp_setup_init
 
 !> \section arg_table_GFS_rrtmgp_setup_timestep_init Argument Table
@@ -222,11 +223,13 @@ contains
        endif
        iyear0 = iyear
        call sol_update(jdate, kyear, deltsw, deltim, lsol_chg, me, slag, sdec, cdec, solcon, con_pi, errmsg, errflg)
+       if(errflg/=0) return
     endif
 
     ! Update aerosols...
     if ( lmon_chg ) then
        call aer_update ( iyear, imon, me, iaermdl, aeros_file, errflg, errmsg)
+       if(errflg/=0) return
     endif
 
     ! Update trace gases (co2 only)...
@@ -238,13 +241,13 @@ contains
     endif
     call gas_update (kyear, kmon, kday, khour, lco2_chg, me, co2dat_file, co2gbl_file, ictm,&
          ico2, errflg, errmsg )
+    if(errflg/=0) return
     if (ntoz == 0) then
        call ozphys%update_o3clim(kmon, kday, khour, loz1st)
     endif
     
     if ( loz1st ) loz1st = .false.
 
-    return
   end subroutine GFS_rrtmgp_setup_timestep_init
 
 !> \section arg_table_GFS_rrtmgp_setup_finalize Argument Table

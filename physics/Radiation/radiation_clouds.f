@@ -328,7 +328,6 @@
          endif
       endif
 !
-      return
 !...................................
       end subroutine cld_init
 !-----------------------------------
@@ -874,7 +873,6 @@
      &       clds, mtop, mbot                                           &
      &     )
 
-      return
 !...................................
       end subroutine radiation_clouds_prop
 
@@ -1171,7 +1169,6 @@
         enddo
       enddo
 !
-      return
 !...................................
       end subroutine progcld_zhao_carr
 !-----------------------------------
@@ -1465,7 +1462,6 @@
         enddo
       enddo
 !
-      return
 !...................................
       end subroutine progcld_zhao_carr_pdf
 !-----------------------------------
@@ -1707,7 +1703,6 @@
         enddo
       enddo
 !
-      return
 !...................................
       end subroutine progcld_gfdl_lin
 !-----------------------------------
@@ -1955,7 +1950,6 @@
         enddo
       enddo
 !
-      return
 !...................................
       end subroutine progcld_fer_hires
 !...................................
@@ -2269,8 +2263,6 @@
         enddo
       enddo
 
-      return
-
 !............................................
       end subroutine progcld_thompson_wsm6
 !............................................
@@ -2555,8 +2547,6 @@
          iwp_ex(i) = iwp_ex(i)*1.E-3
       enddo
 !
-      return
-
 !............................................
       end subroutine progcld_thompson
 !............................................
@@ -2842,7 +2832,6 @@
         enddo
       enddo
 !
-      return
 !...................................
       end subroutine progclduni
 !-----------------------------------
@@ -3301,7 +3290,6 @@
       endif                                     ! end_if_top_at_1
 
 !
-      return
 !...................................
       end subroutine gethml
 !-----------------------------------
