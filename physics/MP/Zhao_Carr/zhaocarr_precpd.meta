@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = zhaocarr_precpd
   type = scheme
-  dependencies = ../../tools/funcphys.f90,../../hooks/machine.F,../../hooks/physcons.F90
+  dependencies = ../../tools/funcphys.f90,../../hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -267,4 +267,3 @@
   dimensions = ()
   type = integer
   intent = out
-

@@ -12,7 +12,7 @@
 !>  @{
       subroutine sfc_diag_run (im,xlat_d,xlon_d,                        &
      &                    lsm,lsm_ruc,grav,cp,eps,epsm1,con_rocp,       &
-     &                    con_karman,                                   &
+     &                    con_karman,con_t0c,                           & 
      &                    shflx,cdq,wind,                               &
      &                    usfco,vsfco,icplocn2atm,                      &
      &                    zf,ps,u1,v1,t1,q1,prslki,evap,fm,fh,fm10,fh2, &
@@ -24,7 +24,6 @@
 !
       use machine , only : kind_phys, kind_dbl_prec
       use funcphys, only : fpvs
-      use physcons, only : con_t0c
       implicit none
 !
       integer, intent(in) :: im, lsm, lsm_ruc, iopt_lake, iopt_lake_clm
@@ -34,7 +33,7 @@
       logical, intent(in) :: diag_flux  ! Flag for flux method in 2-m diagnostics
       logical, intent(in) :: diag_log   ! Flag for 2-m log diagnostics under stable conditions
       real(kind=kind_phys), intent(in) :: grav,cp,eps,epsm1,con_rocp
-      real(kind=kind_phys), intent(in) :: con_karman
+      real(kind=kind_phys), intent(in) :: con_karman, con_t0c
       real(kind=kind_phys), dimension(:), intent( in) ::                &
      &                      zf, ps, u1, v1, t1, q1, ust, tskin,         &
      &                      usfco, vsfco,                               &
@@ -73,7 +72,7 @@
       errflg = 0
 
       !--
-      testptlat = 35.3_kind_phys 
+      testptlat = 35.3_kind_phys
       testptlon = 273.0_kind_phys
       !--
       debug_print = .false.
@@ -181,9 +180,9 @@
             !no alternatives (yet) for unstable conditions
               Q2_alt = q2m(i)
             ENDIF
-            !-- Note: use of alternative diagnostics will make 
+            !-- Note: use of alternative diagnostics will make
             !   it cooler and drier with stable stratification
-            t2m(i) = T2_alt  
+            t2m(i) = T2_alt
             q2m(i) = Q2_alt
            endif ! log method for stable regime
 
@@ -216,7 +215,7 @@
          dpt2m(i) = 243.5_kind_dbl_prec/( ( 17.67_kind_dbl_prec /       &
      &             log(tem/611.2_kind_dbl_prec) ) - one) + con_t0c
          dpt2m(i) = min(dpt2m(i),t2m(i))
-       
+
 
          if (debug_print) then
          !-- diagnostics for a test point with known lat/lon

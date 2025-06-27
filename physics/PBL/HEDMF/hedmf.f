@@ -77,15 +77,15 @@
      &   coef_ric_l,coef_ric_s,ldiag3d,ntqv,rtg_ozone_index,ntoz,       &
      &   dtend,dtidx,index_of_process_pbl,index_of_x_wind,              &
      &   index_of_y_wind,index_of_temperature,                          &
-     &   flag_for_pbl_generic_tend,errmsg,errflg)
+     &   flag_for_pbl_generic_tend,                                     &
+     &   con_g, con_cp, con_hvap, con_fvirt,                            &
+     &   errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
       !GJF: Note that sending these constants through the argument list
       !results in regression test failures with "PROD" mode compilation
       !flags (specifically, grav and cp)
-      use physcons, grav => con_g, cp => con_cp,
-     &              hvap => con_hvap, fv => con_fvirt
 
       implicit none
 !
@@ -134,6 +134,8 @@
 !
       logical, intent(in) :: dspheat
 !          flag for tke dissipative heating
+      real(kind=kind_phys), intent(in) :: con_g, con_cp
+      real(kind=kind_phys), intent(in) :: con_hvap, con_fvirt
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -210,18 +212,17 @@
       real :: ttend_fac
 
       integer :: idtend1, idtend2
-      
+
       !! for hurricane application
       real(kind=kind_phys) wspm(im,km-1)
       integer kLOC ! RGF
       real :: xDKU ! RGF
 
+      real(kind=kind_phys) :: grav, cp, hvap, fv
+
       integer, parameter :: useshape=2!0-- no change, original ALPHA adjustment,1-- shape1, 2-- shape2(adjust above sfc)
       real :: smax,ashape,sz2h, sksfc,skmax,ashape1,skminusk0, hmax
 cc
-      parameter(gravi=1.0/grav)
-      parameter(gocp=grav/cp)
-      parameter(cont=cp/grav,conq=hvap/grav,conw=1.0/grav)               ! for del in pa
 !     parameter(cont=1000.*cp/grav,conq=1000.*hvap/grav,conw=1000./grav) ! for del in kpa
       parameter(rlam=30.0,vk=0.4,vk2=vk*vk)
       parameter(prmin=0.25,prmax=4.,zolcr=0.2,zolcru=-0.5)
@@ -269,6 +270,17 @@ c
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      grav = con_g
+      cp = con_cp
+      hvap = con_hvap
+      fv = con_fvirt
+
+      gravi=1.0/grav
+      gocp=grav/cp
+      cont=cp/grav
+      conq=hvap/grav
+      conw=1.0/grav
 
 ! compute preliminary variables
 !
@@ -866,12 +878,12 @@ c
 
                 zfac=max(zfac,zfmin)
                 ashape=max(ABS(moninq_fac),0.2)  ! should not be smaller than 0.2, otherwise too much adjustment(?)
-                if (useshape == 1) then 
+                if (useshape == 1) then
                  ashape=(1.0 - ((sz2h*zfac/smax)**0.25) *(1.0 - ashape))
                  tem = zi(i,k+1) * (zfac) * ashape
                 elseif (useshape == 2) then   !only adjus K that is > K_surface_top
                   ashape1=1.0
-                  if (skmax > sksfc) then 
+                  if (skmax > sksfc) then
                     ashape1=(skmax*ashape-sksfc)/(skmax-sksfc)
                   endif
                   skminusk0 = zi(i,k+1)*zfac - hpbl(i)*sksfc
@@ -917,7 +929,7 @@ c
 ! (2) alpha test
 ! if alpha < 0, find alpha for each column and do the loop again
 ! if alpha > 0, we are finished
-      
+
 !GJF: redundant check for moninq_fac < 0?
             if (moninq_fac .lt. 0.) then      ! variable alpha test
 ! k-level of layer around 500 m
@@ -938,7 +950,7 @@ c
                   wspm(i,3) = wspm(i,1)/xDKU  ! ratio of cap to Km at k-level, store in WSPM(i,3)
                   !WSPM(i,4) = amin1(WSPM(I,3),1.0) ! this is new column alpha. cap at 1. ! should never be needed
                   wspm(i,4) = min(wspm(i,3),1.0) ! this is new column alpha. cap at 1. ! should never be needed
- !! recalculate K capped by WSPM(i,1)           
+ !! recalculate K capped by WSPM(i,1)
                   do k = 1, kmpbl
                     if(k < kpbl(i)) then
 !                     zfac = max((1.-(zi(i,k+1)-zl(i,1))/
@@ -957,16 +969,16 @@ c
                         skmax=hmax*(1.0-hmax)**pfac
                         sksfc=min(zi(i,2)/hpbl(i),0.05)  ! surface layer top, 0.05H or ZI(2) (Zi(1)=0)
                         sksfc=sksfc*(1-sksfc)**pfac
-                                
+
                         zfac=max(zfac,zfmin)
                         ashape=max(wspm(i,4),0.2)  !! adjustment coef should not smaller than 0.2
-                        if(useshape ==1) then 
+                        if(useshape ==1) then
                           ashape=(1.0 - ((sz2h*zfac/smax)**0.25)*
      &                           (1.0 - ashape))
                           tem = zi(i,k+1) * (zfac) * ashape
                         elseif (useshape == 2) then !only adjus K that is > K_surface_top 
                           ashape1=1.0
-                          if (skmax > sksfc) then 
+                          if (skmax > sksfc) then
                             ashape1=(skmax*ashape-sksfc)/(skmax-sksfc)
                           endif
                           skminusk0=zi(i,k+1)*zfac - hpbl(i)*sksfc
@@ -1108,7 +1120,7 @@ c
 !>  For details of the mfpbl subroutine, step into its documentation ::mfpbl
       call mfpbl(im,im,km,ntrac,dt2,pcnvflg,
      &       zl,zi,thvx,q1,t1,u1,v1,hpbl,kpbl,
-     &       sflux,ustar,wstar,xmf,tcko,qcko,ucko,vcko)
+     &       sflux,ustar,wstar,xmf,tcko,qcko,ucko,vcko,con_g,con_cp)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  compute diffusion coefficients for cloud-top driven diffusion
@@ -1374,7 +1386,7 @@ c
       else
         ttend_fac = 0.5
       endif
-      
+
       do i = 1,im
          tem   = govrth(i)*sflux(i)
          tem1  = tem + stress(i)*spd1(i)/zl(i,1)
