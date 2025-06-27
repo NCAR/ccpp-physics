@@ -45,7 +45,7 @@ contains
          lon,                   & ! Longitude
          lat,                   & ! Latitude
          lsmask                   ! Land/sea/sea-ice mask
-    real(kind_phys), dimension(:,:),intent(in), optional :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          p_lay,                 & ! Pressure @ layer-centers (Pa)
          tv_lay,                & ! Virtual-temperature @ layer-centers (K)
          relhum                   ! Relative-humidity @ layer-centers
@@ -55,7 +55,7 @@ contains
          tracer                   ! trace gas concentrations
     real(kind_phys), dimension(:, :,:),intent(in) :: &
          aerfld                   ! aerosol input concentrations
-    real(kind_phys), dimension(:,:),intent(in), optional :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          p_lev                    ! Pressure @ layer-interfaces (Pa)
     real (kind=kind_phys), dimension(:,:), intent(out) :: &
          ext550                   ! 3d optical extinction for total aerosol species

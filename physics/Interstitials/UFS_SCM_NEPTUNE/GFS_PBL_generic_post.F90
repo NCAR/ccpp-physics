@@ -110,7 +110,7 @@
                                         imp_physics_thompson, ltaerosol,mraerosol,   &
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
                                         imp_physics_zhao_carr, imp_physics_nssl,&
-                                        nssl_hail_on, nssl_ccn_on, kk,          &
+                                        nssl_hail_on, nssl_ccn_on, nssl_3moment, kk, &
                                         errmsg, errflg)
           if (errflg /= 0) return
           !

@@ -280,7 +280,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [dx]
   standard_name = characteristic_grid_lengthscale
   long_name = relative dx for the grid cell

@@ -190,7 +190,7 @@ contains
         ,intent (in  )                      ::                         &
         tmf
      real(kind=kind_phys),    dimension (its:,kts:)                              &
-        ,intent (in  ), optional            ::                         &
+        ,intent (in  ), optional                      ::                         &
         qmicro, sigmain, forceqv_spechum
      real(kind=kind_phys),    dimension (its:)                                      &
         ,intent (inout  )                   ::                         &
@@ -226,7 +226,7 @@ contains
          q,qo,zuo,zdo,zdm
 !$acc declare sigmaout                                                                                                                                                      
      real(kind=kind_phys),    dimension (its:,kts:)                              &
-        ,intent (out), optional           ::                           &
+        ,intent (out), optional                     ::                           &
          sigmaout
      real(kind=kind_phys), dimension (its:)                                         &
         ,intent (in   )                   ::                           &
