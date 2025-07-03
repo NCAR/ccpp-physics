@@ -702,14 +702,16 @@
 !>\section gen_GFS_phys_time_vary_timestep_init GFS_phys_time_vary_timestep_init General Algorithm
 !> @{
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
-            me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, nsswr, fhswr, lsswr, fhour, &
+            me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, cplflx,                     &
+            nsswr, fhswr, lsswr, fhour,                                                             &
             imfdeepcnv, cal_pre, random_clds, nscyc, ntoz, h2o_phys, iaerclm, iccn, clstp,          &
             jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm, fn_nml,      &
             imap, jmap, prsl, seed0, rann, nthrds, nx, ny, nsst, tile_num, nlunit, lsoil, lsoil_lsm,&
             kice, ialb, isot, ivegsrc, input_nml_file, use_ufo, nst_anl, frac_grid, fhcyc, phour,   &
-            lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref,  &
+            oceanfrac, lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice,  &
+            tg3, tref,                                                                              &
             tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
             zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype,scolor, shdmin, shdmax, snowd, &
             cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, landfrac, ozphys, h2ophys,            &
@@ -723,7 +725,7 @@
                                                 nsswr, imfdeepcnv, iccn, nscyc, ntoz, iflip
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhswr, fhour
-         logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm
+         logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm, cplflx
          real(kind_phys),      intent(out)   :: clstp
          integer,              intent(in), optional    :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
          real(kind_phys),      intent(in), optional    :: ddy_o3(:),  ddy_h(:)
@@ -753,7 +755,7 @@
          character(len=*),     intent(in)    :: fn_nml
          logical,              intent(in)    :: use_ufo, nst_anl, frac_grid
          real(kind_phys),      intent(in)    :: fhcyc, phour, lakefrac(:), min_seaice, min_lakeice,  &
-                                                xlat_d(:), xlon_d(:), landfrac(:)
+                                                xlat_d(:), xlon_d(:), landfrac(:),oceanfrac(:)
          real(kind_phys),      intent(inout) :: smc(:,:), slc(:,:), stc(:,:), tiice(:,:), tg3(:),    &
                                       tsfc(:), tsfco(:), tisfc(:), hice(:), fice(:),                 &
                                       facsf(:), facwf(:), alvsf(:), alvwf(:), alnsf(:), alnwf(:),    &
@@ -920,6 +922,7 @@
                  tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,         &
                  zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,            &
                  stype, scolor, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,            &
+                 cplflx, oceanfrac,                                                          &
                  xlat_d, xlon_d, slmsk, imap, jmap, errmsg, errflg)
            endif
          endif
