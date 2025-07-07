@@ -77,7 +77,7 @@
 !! (mfscuq.f).
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
       subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,               &
-     &     ntiw,ntke,grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
+     &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
 !The following three variables are for SA-3D-TKE
      &     def_1,def_2,def_3,sa3dtke,dku3d_h,dku3d_e,                   &
      &     dv,du,tdt,rtg,u1,v1,t1,q1,usfco,vsfco,icplocn2atm,           &
