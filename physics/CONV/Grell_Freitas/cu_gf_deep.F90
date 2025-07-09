@@ -4,7 +4,6 @@
 !> This module contains the Grell_Freitas deep convection scheme
 module cu_gf_deep
      use machine , only : kind_phys
-     use physcons, only : qamin
      real(kind=kind_phys), parameter::g=9.81
      real(kind=kind_phys), parameter:: cp=1004.
      real(kind=kind_phys), parameter:: xlv=2.5e6
@@ -143,7 +142,8 @@ contains
                                 !! betwee -1 and +1
               ,do_capsuppress,cap_suppress_j    &    !         
               ,k22                              &    !
-              ,jmin,kdt,mc_thresh)                         !
+              ,jmin,kdt,mc_thresh               &
+              ,qamin)
 
    implicit none
 
@@ -192,6 +192,7 @@ contains
         ,intent (in  )                   ::                            &
         kpbl
 !$acc declare copyin(kpbl)
+     real(kind_phys), intent(in) :: qamin
   !
   ! basic environmental input includes moisture convergence (mconv)
   ! omega (omeg), windspeed (us,vs), and a flag (ierr) to turn off

@@ -341,6 +341,14 @@
   type = real
   kind = kind_phys
   intent = in
+[con_cp]
+  standard_name = specific_heat_of_dry_air_at_constant_pressure
+  long_name = specific heat of dry air at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [lalw1bd]
   standard_name = do_longwave_aerosol_band_properties
   long_name = control of band or multiband longwave aerosol properties
