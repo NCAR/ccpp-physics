@@ -1,0 +1,70 @@
+/**
+\page Acronyms_desp Acronyms
+
+\tableofcontents
+| Abbreviation     |     Explanation     |
+|------------------|---------------------|
+| aa               | Aerosol-aware       |
+| CA               | Cellular Automata   |
+| CCN              | Cloud Condensation Nulei |
+| CCPP             | Common Community Physics Package |
+| CIRES            | Cooperative Institute for Research in Environmental Sciences |
+| CLM              | Community Land Model   |
+| CSAW             | Chikira-Sugiyama convection with Arakawa-Wu extension |
+| dycore           | Dynamical core   |
+| EDMF             | Eddy-Diffusivity Mass Flux   |
+| EMC              | Environmental Modeling Center |
+| FV3              | Finite-Volume Cubed Sphere   |
+| GF               | Grell-Freitas convective scheme |
+| GFDL             | Geophysical Fluid Dynamics Laboratory |
+| GFS              | Global Forecast System     |
+| GOCART           | Goddard Chemistry Aerosol Radiation and Transport model |
+| GSL              | NOAA Global Systems Laboratory |
+| HEDMF            | Hybrid eddy-diffusivity mass-flux |
+| HRRR             | High-Resolution Rapid Refresh    |
+| LSM              | Land Surface Model        |
+| LW               | Longwave     |
+| McICA            | Monte-Carlo Independent Column Approximation |
+| MERRA-2          | Modern-Era Retrospective Analysis for Research and Applications, Version2 |
+| MF               | Mass-Flux        |
+| MG               | Morrison-Gettelman     |
+| MP               | Microphysics |
+| MYNN             | Mellor-Yamada-Nakanishi-Niino |
+| NASA             | National Aeronautics and Space Administration |
+| NCAR             | National Center for Atmospheric Research |
+| NOAA             | National Oceanic and Atmospheric Administration |
+| NoahMP           | Noah-Multiparameterization Land Surface Model |
+| NRL              | Naval Research Laboratory |
+| NSST             | Near Sea Surface Temperature ocean scheme |
+| NSSL             | NOAA National Severe Storms Laboratory |
+| NWP              | Numerical Weather Prediction |
+| PBL              | Planetary Boundary Layer   |
+| PSD              | Partical size distribution |
+| PSL              | NOAA Physics Sciences Laboratory |
+| RRFS             | Rapid Refresh Forecast System |
+| RRTMG            | Rapid Radiative Transfer Model for General circulation model applications |
+| RRTMGP           | Rapid Radiation Transfer Model for General circulation model applications-Parallel 
+| RTE              | Radiative Transfer for Energetics |
+| RUC              | Rapid Update Cycle  |
+| sa               | Scale-aware      |
+| SAS              | Simplified Arakawa-Schubert |
+| SCM              | Single-Column Model |
+| SDF              | Suite Definition File |
+| sfc              | Surface |
+| SHUM             | Perturbed boundary layer specific humidity |
+| SKEB             | Stochastic Kinetic Energy Backscatter |
+| SPPT             | Stochastically Perturbed Physics Tendencies |
+| SW               | Shortwave |
+| TOA              | Top of the Atmosphere |
+| TKE              | Turbulent Kinetic Energy |
+| YSU              | Yonsei University |
+| UFS              | Unified Forecast System |
+| UGWP             | Unified Gravity Wave Physics |
+| WoFS             | Warn on Forecast     |
+| WRF              | Weather Research and Forecasting |
+\tableofcontents
+
+
+
+
+*/

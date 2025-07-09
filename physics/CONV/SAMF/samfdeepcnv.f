@@ -8,7 +8,8 @@
 
       use samfcnv_aerosols, only : samfdeepcnv_aerosols
       use progsigma, only : progsigma_calc
- 
+      use progomega, only : progomega_calc
+      
       contains
 
       subroutine samfdeepcnv_init(imfdeepcnv,imfdeepcnv_samf,            &
@@ -76,15 +77,16 @@
      &    tmf,qmicro,itc,ntc,cliq,cp,cvap,                              &
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
      &    t0c,delt,ntk,ntr,delp,                                        &
-     &    prslp,psp,phil,qtr,prevsq,q,q1,t1,u1,v1,fscav,                &
-     &    hwrf_samfdeep,progsigma,cldwrk,rn,kbot,ktop,kcnv,             &
+     &    prslp,psp,phil,tkeh,qtr,prevsq,q,q1,t1,u1,v1,fscav,           &
+     &    hwrf_samfdeep,progsigma,progomega,cldwrk,rn,kbot,ktop,kcnv,   &
      &    islimsk,garea,dot,ncloud,hpbl,ud_mf,dd_mf,dt_mf,cnvw,cnvc,    &
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
      &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
      &    clam,c0s,c1,betal,betas,evef,pgcon,asolfac,                   &
      &    do_ca, ca_closure, ca_entr, ca_trigger, nthresh,ca_deep,      &
-     &    rainevap,sigmain,sigmaout,betadcu,betamcu,betascu,            &
-     &    maxMF, do_mynnedmf,errmsg,errflg)
+     &    rainevap,sigmain,sigmaout,omegain,omegaout,betadcu,betamcu,   &
+     &    betascu,maxMF,do_mynnedmf,sigmab_coldstart,errmsg,errflg)
+
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -97,31 +99,32 @@
      &   fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
-     &   prslp(:,:),  garea(:), hpbl(:), dot(:,:), phil(:,:)
+     &   prslp(:,:),  garea(:), hpbl(:), dot(:,:), phil(:,:) 
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       logical, intent(in)  :: first_time_step,restart,hwrf_samfdeep,    &
-     &     progsigma,do_mynnedmf
+     &     progsigma,progomega,do_mynnedmf,sigmab_coldstart
       real(kind=kind_phys), intent(in) :: nthresh,betadcu,betamcu,      &
      &                                    betascu
       real(kind=kind_phys), intent(in), optional :: ca_deep(:)
       real(kind=kind_phys), intent(in), optional :: sigmain(:,:),       &
-     &     qmicro(:,:),  prevsq(:,:)
+     &     qmicro(:,:),  prevsq(:,:), omegain(:,:)
       real(kind=kind_phys), intent(in) :: tmf(:,:,:),q(:,:)
       real(kind=kind_phys), dimension (:), intent(in), optional :: maxMF
       real(kind=kind_phys), intent(out) :: rainevap(:)
-      real(kind=kind_phys), intent(out), optional :: sigmaout(:,:)
+      real(kind=kind_phys), intent(inout), optional :: sigmaout(:,:),     &
+     &     omegaout(:,:)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
       integer, intent(inout)  :: kcnv(:)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
       real(kind=kind_phys), intent(inout) ::   qtr(:,:,:),              &
      &   q1(:,:), t1(:,:),   u1(:,:), v1(:,:),                          &
-     &   cnvw(:,:),  cnvc(:,:)
+     &   cnvw(:,:),  cnvc(:,:), tkeh(:,:)
 
       integer, intent(out) :: kbot(:), ktop(:)
       real(kind=kind_phys), intent(out) :: cldwrk(:),                   &
      &   rn(:),                                                         &
      &   dd_mf(:,:), dt_mf(:,:)
-      real(kind=kind_phys), intent(out), optional :: ud_mf(:,:)
+      real(kind=kind_phys), intent(out) :: ud_mf(:,:)
       ! GJF* These variables are conditionally allocated depending on whether the
       !     Morrison-Gettelman microphysics is used, so they must be declared 
       !     using assumed shape.
@@ -215,7 +218,8 @@ cj
 !
 !  parameters for prognostic sigma closure                                                                                                                                                      
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
-     &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im),qadv(im,km)
+     &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im),qadv(im,km),
+     &     sigmaoutx(im),tentr(im,km)
       real(kind=kind_phys) gravinv,invdelt,sigmind,sigminm,sigmins
       parameter(sigmind=0.01,sigmins=0.03,sigminm=0.01)
       logical flag_shallow, flag_mid
@@ -332,6 +336,7 @@ c-----------------------------------------------------------------------
 c-----------------------------------------------------------------------
 !>  ## Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
 !>  - Convert input pressure terms to centibar units.
+
 !************************************************************************
 !     convert input Pa terms to Cb terms  -- Moorthi
       ps   = psp   * 0.001
@@ -952,8 +957,7 @@ c
             if(cnvflg(i)) then
               if(k >= kb(i) .and. k < kbcon(i)) then
                 dz = zo(i,k+1) - zo(i,k)
-                tem = 0.5 * (qtr(i,k,ntk)+qtr(i,k+1,ntk))
-                tkemean(i) = tkemean(i) + tem * dz
+                tkemean(i) = tkemean(i) + tkeh(i,k) * dz
                 sumx(i) = sumx(i) + dz
               endif
             endif
@@ -1130,7 +1134,8 @@ c
         do k = 2, km1
         do i=1,im
           if(cnvflg(i) .and.
-     &      (k > kbcon(i) .and. k < kmax(i))) then
+     &       (k > kbcon(i) .and. k < kmax(i))) then
+              tentr(i,k)=xlamue(i,k)*fent1(i,k)
               tem = cxlamet(i) * frh(i,k) * fent2(i,k)
               xlamue(i,k) = xlamue(i,k)*fent1(i,k) + tem
               tem1 = cxlamdt(i) * frh(i,k)
@@ -1285,6 +1290,24 @@ c
              enddo
            enddo
          enddo
+         if(ntk > 2) then
+           kk = ntk -2
+           do k = 2, km1
+             do i = 1, im
+               if (cnvflg(i)) then
+                 if(k > kb(i) .and. k < kmax(i)) then
+                   dz = zi(i,k) - zi(i,k-1)
+                   tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
+                   tem  = cq * tem
+                   factor = 1. + tem
+                   ecko(i,k,kk) = ((1. - tem) * ecko(i,k-1,kk) + tem *
+     &                   (ctro(i,k,kk) + ctro(i,k-1,kk))) / factor
+                   ercko(i,k,kk) = ecko(i,k,kk)
+                 endif
+               endif
+             enddo
+           enddo
+         endif
        endif
       endif
 c
@@ -1742,43 +1765,64 @@ c
       enddo
 !
 !  compute updraft velocity square(wu2)
-!> - Calculate updraft velocity square(wu2) according to Han et al.'s (2017) \cite han_et_al_2017 equation 7.
-!
+!> - Calculate diagnostic updraft velocity square(wu2) according to Han et al.'s (2017) \cite han_et_al_2017 equation 7.
+!> - if progomega = true, calculate prognostic updraft velocity (Pa/s) according to progomega routine.
+      
       if (hwrf_samfdeep) then
-      do i = 1, im
-        if (cnvflg(i)) then
-          k = kbcon1(i)
-          tem = po(i,k) / (rd * to(i,k))
-          wucb = -0.01 * dot(i,k) / (tem * grav)
-          if(wucb.gt.0.) then
-            wu2(i,k) = wucb * wucb
-          else
-            wu2(i,k) = 0.
-          endif
-        endif
-      enddo
-      endif
-!
-      do k = 2, km1
-        do i = 1, im
-          if (cnvflg(i)) then
-            if(k > kbcon1(i) .and. k < ktcon(i)) then
-              dz    = zi(i,k) - zi(i,k-1)
-              tem  = 0.25 * bb1 * (drag(i,k-1)+drag(i,k)) * dz
-              tem1 = 0.5 * bb2 * (buo(i,k-1)+buo(i,k))
-              tem2 = wush(i,k) * sqrt(wu2(i,k-1))
-              tem2 = (tem1 - tem2) * dz
-              ptem = (1. - tem) * wu2(i,k-1)
-              ptem1 = 1. + tem
-              wu2(i,k) = (ptem + tem2) / ptem1
-              wu2(i,k) = max(wu2(i,k), 0.)
+         do i = 1, im
+            if (cnvflg(i)) then
+               k = kbcon1(i)
+               tem = po(i,k) / (rd * to(i,k))
+               wucb = -0.01 * dot(i,k) / (tem * grav)
+               if(wucb.gt.0.) then
+                  wu2(i,k) = wucb * wucb
+               else
+                  wu2(i,k) = 0.
+               endif
             endif
-          endif
-        enddo
-      enddo
-
-      if(progsigma)then                                                                                                                                                                   
-          do k = 2, km1
+         enddo
+      endif
+!                  
+      if (progomega) then
+         call progomega_calc(first_time_step,restart,im,km,
+     &        kbcon1,ktcon,omegain,delt,del,zi,cnvflg,omegaout,
+     &        grav,buo,drag,wush,tentr,bb1,bb2)
+         do k = 1, km
+            do i = 1, im
+               if (cnvflg(i)) then
+                  if(k > kbcon1(i) .and. k < ktcon(i)) then
+                     omega_u(i,k)=omegaout(i,k)
+                     omega_u(i,k)=MAX(omega_u(i,k),-80.)
+!     Convert to m/s for use in convective time-scale:
+                     rho = po(i,k)*100. / (rd * to(i,k))
+                     tem = (-omega_u(i,k)) / ((rho * grav))
+                     wu2(i,k) = tem**2
+                     wu2(i,k) = max(wu2(i,k), 0.)
+                  endif
+              endif
+            enddo
+         enddo
+      else
+!     diagnostic method:
+         do k = 2, km1
+            do i = 1, im
+               if (cnvflg(i)) then
+                  if(k > kbcon1(i) .and. k < ktcon(i)) then
+                     dz    = zi(i,k) - zi(i,k-1)
+                     tem  = 0.25 * bb1 * (drag(i,k-1)+drag(i,k)) * dz
+                     tem1 = 0.5 * bb2 * (buo(i,k-1)+buo(i,k))
+                     tem2 = wush(i,k) * sqrt(wu2(i,k-1))
+                     tem2 = (tem1 - tem2) * dz
+                     ptem = (1. - tem) * wu2(i,k-1)
+                     ptem1 = 1. + tem
+                     wu2(i,k) = (ptem + tem2) / ptem1
+                     wu2(i,k) = max(wu2(i,k), 0.)
+                  endif
+               endif
+            enddo
+         enddo
+!       convert to Pa/s for use in closure
+         do k = 1, km
             do i = 1, im
                if (cnvflg(i)) then
                   if(k > kbcon1(i) .and. k < ktcon(i)) then
@@ -1789,10 +1833,11 @@ c
                endif
             enddo
          enddo
-      endif 
+
+      endif                     !progomega
+     
 !
 !  compute updraft velocity average over the whole cumulus
-!
 !> - Calculate the mean updraft velocity within the cloud (wc).
       do i = 1, im
         wc(i) = 0.
@@ -1820,11 +1865,10 @@ c
           val = 1.e-4
           if (wc(i) < val) cnvflg(i)=.false.
         endif
-      enddo
+      enddo      
 c
-
 !> - For progsigma = T, calculate the mean updraft velocity within the cloud (omegac),cast in pressure coordinates.                                                                                                                                  
-      if(progsigma)then                                                                                                                                                            
+      if(progsigma)then
          do i = 1, im
             omegac(i) = 0.
             sumx(i) = 0.
@@ -2911,12 +2955,12 @@ c
            advfac(i) = min(advfac(i), 1.)
         endif
       enddo
-
+      
 !> - From Bengtsson et al. (2022) \cite Bengtsson_2022 prognostic closure scheme, equation 8, call progsigma_calc() to compute updraft area fraction based on a moisture budget
       if(progsigma)then
-
 !Initial computations, dynamic q-tendency                                                                                                                                               
-         if(first_time_step .and. .not.restart)then
+         if(first_time_step .and. (.not.restart 
+     &           .or. sigmab_coldstart))then
             do k = 1,km
                do i = 1,im
                   qadv(i,k)=0.
@@ -2940,7 +2984,7 @@ c
          flag_mid = .false.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
      &        flag_mid,del,tmfq,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,
-     &        delt,qadv,kbcon1,ktcon,cnvflg,betascu,betamcu,betadcu,
+     &        delt,qadv,kb,kbcon1,ktcon,cnvflg,betascu,betamcu,betadcu,
      &        sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)
       endif
 
@@ -3423,17 +3467,28 @@ c
         endif
       enddo
 c
-c  convective cloud water
+!
+      if(progsigma)then
+         do i = 1, im
+            sigmaoutx(i)=max(sigmaout(i,1),0.0)
+            sigmaoutx(i)=min(sigmaoutx(i),1.0)
+         enddo
+      endif
 c
 !> - Calculate convective cloud water.
       do k = 1, km
-        do i = 1, im
-          if (cnvflg(i) .and. rn(i) > 0.) then
-            if (k >= kbcon(i) .and. k < ktcon(i)) then
-              cnvw(i,k) = cnvwt(i,k) * xmb(i) * dt2
+         do i = 1, im
+            if (cnvflg(i) .and. rn(i) > 0.) then
+               if (k >= kbcon(i) .and. k < ktcon(i)) then
+                  cnvw(i,k) = cnvwt(i,k) * xmb(i) * dt2
+                  if(progsigma)then
+                     cnvw(i,k) = cnvw(i,k) * sigmaoutx(i)
+                  else
+                     cnvw(i,k) = cnvw(i,k) * sigmagfm(i)
+                  endif
+               endif
             endif
-          endif
-        enddo
+         enddo
       enddo
 c
 c  convective cloud cover

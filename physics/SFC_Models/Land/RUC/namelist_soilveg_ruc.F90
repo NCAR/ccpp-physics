@@ -1,6 +1,6 @@
 !>\file namelist_soilveg_ruc.F90
-!>\ingroup RUC_lsm
 
+!> This module contains the namelist options of soil/vegetation in RUC
       module namelist_soilveg_ruc
 
       use machine ,   only : kind_phys

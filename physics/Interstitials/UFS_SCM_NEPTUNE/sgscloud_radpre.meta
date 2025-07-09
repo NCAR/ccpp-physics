@@ -4,7 +4,7 @@
   relative_path = ../../
   dependencies = tools/funcphys.f90,hooks/machine.F
   dependencies = hooks/physcons.F90,Radiation/RRTMG/radcons.f90
-  dependencies = Radiation/radiation_clouds.f,MP/Thompson/module_mp_thompson.F90
+  dependencies = Radiation/radiation_clouds.f,MP/module_mp_radar.F90,MP/Thompson/module_mp_thompson.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -271,6 +271,13 @@
 [imfdeepcnv_sas]
   standard_name = identifier_for_simplified_arakawa_schubert_deep_convection
   long_name = flag for SAS deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[conv_cf_opt]
+  standard_name = option_for_convection_scheme_cloud_fraction_computation 
+  long_name = option for convection scheme cloud fraction computation
   units = flag
   dimensions = ()
   type = integer

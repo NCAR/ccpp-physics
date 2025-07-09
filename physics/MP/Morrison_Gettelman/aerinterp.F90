@@ -282,7 +282,7 @@ contains
       character(*), intent(inout) :: errmsg
       integer, intent(in) :: iflip
       integer   i1,i2, iday,j,j1,j2,l,npts,nc,n1,n2,lev,k,i,ii, klev
-      real(kind=kind_phys) fhour,temj, tx1, tx2,temi, tem
+      real(kind=kind_phys) fhour,temj, tx1, tx2,temi, tem, tem1, tem2
       real(kind=kind_phys), dimension(npts) :: temij,temiy,temjx,ddxy
       
 !
@@ -331,17 +331,12 @@ contains
 #ifdef DEBUG
         if (me == master) write(*,*)"read in a new month MERRA2", n2
 #endif
-        DO ii = 1, ntrcaerm
-          do j = jamin, jamax
-            do k = 1, levsaer
-              do i = iamin, iamax
-                aerin(i,j,k,ii,1) = aerin(i,j,k,ii,2)
-              enddo   !i-loop (lon)
-            enddo     !k-loop (lev)
-          enddo       !j-loop (lat)
-        ENDDO         ! ii-loop (ntracaerm)
 !! ===================================================================
+        call read_netfaer(n1, iflip, 1, errmsg, errflg)
+        if(errflg/=0) return
         call read_netfaer(n2, iflip, 2, errmsg, errflg)
+        if(errflg/=0) return
+!! ===================================================================
         n1sv=n1
         n2sv=n2
       end if
@@ -363,10 +358,9 @@ contains
 !$OMP parallel num_threads(nthrds) default(none)             &
 !$OMP          shared(npts,ntrcaer,aerin,aer_pres,prsl)      &
 !$OMP          shared(ddx,ddy,jindx1,jindx2,iindx1,iindx2)   &
-!$OMP          shared(aerpm,aerpres,aerout,lev,nthrds) &
-!$OMP          shared(temij,temiy,temjx,ddxy)                &
-!$OMP          private(l,j,k,ii,i1,i2,j1,j2,tem)             &
-!$OMP          copyin(tx1,tx2) firstprivate(tx1,tx2)
+!$OMP          shared(aerpm,aerpres,aerout,lev,nthrds)       &
+!$OMP          shared(temij,temiy,temjx,ddxy,tx1,tx2)        &
+!$OMP          private(l,j,k,ii,i1,i2,j1,j2,tem,tem1,tem2)
 
 !$OMP do
 #endif
@@ -416,10 +410,10 @@ contains
               ENDIF
              ENDDO
              tem  = 1.0 / (aerpres(j,i1) - aerpres(j,i2))
-             tx1  = (prsl(j,L) - aerpres(j,i2)) * tem
-             tx2  = (aerpres(j,i1) - prsl(j,L)) * tem
+             tem1  = (prsl(j,L) - aerpres(j,i2)) * tem
+             tem2  = (aerpres(j,i1) - prsl(j,L)) * tem
              DO ii = 1, ntrcaer
-               aerout(j,L,ii) = aerpm(j,i1,ii)*tx1 + aerpm(j,i2,ii)*tx2
+               aerout(j,L,ii) = aerpm(j,i1,ii)*tem1 + aerpm(j,i2,ii)*tem2
              ENDDO
            endif
         ENDDO   !L-loop

@@ -335,7 +335,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [cliw]
   standard_name = ice_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -584,6 +583,13 @@
 [do_mynnedmf]
   standard_name = flag_for_mellor_yamada_nakanishi_niino_pbl_scheme
   long_name = flag to activate MYNN-EDMF
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[gf_coldstart]
+  standard_name = flag_for_cold_start_gf
+  long_name = flag to cold start G-F 
   units = flag
   dimensions = ()
   type = logical

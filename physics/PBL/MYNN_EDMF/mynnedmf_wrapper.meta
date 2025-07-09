@@ -749,7 +749,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [qke_adv]
   standard_name = turbulent_kinetic_energy
   long_name = turbulent kinetic energy
@@ -766,7 +765,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [qsq]
   standard_name = variance_of_specific_humidity
   long_name = water vapor fluctuation squared
@@ -775,7 +773,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [cov]
   standard_name = covariance_of_air_temperature_and_specific_humidity
   long_name = covariance of temperature and moisture
@@ -784,7 +781,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [el_pbl]
   standard_name = turbulent_mixing_length
   long_name = mixing length in meters
@@ -793,7 +789,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [Sh3D]
   standard_name = stability_function_for_heat
   long_name = stability function for heat
@@ -802,7 +797,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [Sm3D]
   standard_name = stability_function_for_momentum
   long_name = stability function for momentum
@@ -811,7 +805,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [exch_h]
   standard_name = atmosphere_heat_diffusivity_for_mynnedmf
   long_name = diffusivity for heat for MYNN PBL (defined for all mass levels)
@@ -820,7 +813,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [exch_m]
   standard_name = atmosphere_momentum_diffusivity_for_mynnedmf
   long_name = diffusivity for momentum for MYNN PBL (defined for all mass levels)
@@ -829,7 +821,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [dqke]
   standard_name = total_time_rate_of_change_of_tke
   long_name = total tke tendency
@@ -898,7 +889,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [QI_BL]
   standard_name = subgrid_scale_cloud_ice_mixing_ratio
   long_name = subgrid cloud ice mixing ratio from PBL scheme
@@ -907,7 +897,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [CLDFRA_BL]
   standard_name = subgrid_scale_cloud_area_fraction_in_atmosphere_layer
   long_name = subgrid cloud fraction from PBL scheme
@@ -916,7 +905,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [edmf_a]
   standard_name = emdf_updraft_area
   long_name = updraft area from mass flux scheme
@@ -1015,7 +1003,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [maxMF]
   standard_name = maximum_mass_flux
   long_name = maximum mass flux within a column
@@ -1024,7 +1011,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [ztop_plume]
   standard_name = height_of_tallest_plume_in_a_column
   long_name = height of tallest plume in a column
@@ -1033,7 +1019,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = True
 [ktop_plume]
   standard_name = k_level_of_highest_plume
   long_name = k-level of highest plume
@@ -1041,7 +1026,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = inout
-  optional = True
 [dudt]
   standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = updated tendency of the x wind
@@ -1150,6 +1134,14 @@
   kind = kind_phys
   intent = inout
   optional = True
+[tmf]
+  standard_name = tendency_of_vertically_diffused_tracer_concentration
+  long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
 [flag_for_pbl_generic_tend]
   standard_name = flag_for_generic_tendency_due_to_planetary_boundary_layer
   long_name = true if GFS_PBL_generic should calculate tendencies
@@ -1428,6 +1420,27 @@
   dimensions = ()
   type = integer
   intent = in
+[imfdeepcnv]
+  standard_name = control_for_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imfdeepcnv_c3]
+  standard_name = identifier_for_c3_deep_convection
+  long_name = flag for C3 deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imfdeepcnv_samf]
+  standard_name = identifer_for_scale_aware_mass_flux_deep_convection
+  long_name = flag for SAMF deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in 
 [nssl_ccn_on]
   standard_name = nssl_ccn_on
   long_name = CCN activation flag in NSSL micro

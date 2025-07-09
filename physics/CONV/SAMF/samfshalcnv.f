@@ -1,11 +1,12 @@
 !>  \file samfshalcnv.f
-!!  This file contains the Scale-Aware mass flux Shallow Convection scheme.
+!!
 
+!>  This module contains the Scale-Aware mass flux Shallow Convection scheme.
       module samfshalcnv
 
       use samfcnv_aerosols, only : samfshalcnv_aerosols
       use progsigma, only : progsigma_calc
-
+      use progomega, only : progomega_calc
       contains
 
       subroutine samfshalcnv_init(imfshalcnv, imfshalcnv_samf,          &
@@ -52,12 +53,13 @@
       subroutine samfshalcnv_run(im,km,itc,ntc,cliq,cp,cvap,            &
      &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
      &     t0c,delt,ntk,ntr,delp,first_time_step,restart,               & 
-     &     tmf,qmicro,progsigma,                                        &
-     &     prslp,psp,phil,qtr,prevsq,q,q1,t1,u1,v1,fscav,               &
+     &     tmf,qmicro,progsigma,progomega,                              &
+     &     prslp,psp,phil,tkeh,qtr,prevsq,q,q1,t1,u1,v1,fscav,          &
      &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
      &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,                & 
-     &     sigmain,sigmaout,betadcu,betamcu,betascu,errmsg,errflg)
+     &     sigmain,sigmaout,omegain,omegaout,betadcu,betamcu,betascu,   &
+     &     errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -75,24 +77,27 @@
      &   tmf(:,:,:), q(:,:)
       real(kind=kind_phys), intent(in), optional :: qmicro(:,:),        &
      &     prevsq(:,:)
-      real(kind=kind_phys), intent(in), optional :: sigmain(:,:)
+      real(kind=kind_phys), intent(in), optional :: sigmain(:,:),       &
+     &     omegain(:,:)
 !
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       integer, intent(inout)  :: kcnv(:)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
       real(kind=kind_phys), intent(inout) ::   qtr(:,:,:),              &
-     &   q1(:,:), t1(:,:), u1(:,:), v1(:,:)
+     &   q1(:,:), t1(:,:), u1(:,:), v1(:,:), tkeh(:,:)
 !
       integer, intent(out) :: kbot(:), ktop(:)
       real(kind=kind_phys), intent(out) :: rn(:),                       &
      &   cnvw(:,:), cnvc(:,:), dt_mf(:,:)
 !
-      real(kind=kind_phys), intent(out), optional :: ud_mf(:,:),        &
-     &     sigmaout(:,:)
+      real(kind=kind_phys), intent(out) :: ud_mf(:,:)
+      real(kind=kind_phys), intent(inout), optional :: sigmaout(:,:),   &
+     &   omegaout(:,:)
+
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
      &                     asolfac, evef, pgcon
       logical,          intent(in)  :: hwrf_samfshal,first_time_step,   &
-     &     restart,progsigma
+     &     restart,progsigma,progomega
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
@@ -162,7 +167,7 @@ cc
 !  parameters for prognostic sigma closure
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
-     &                     sigmab(im),qadv(im,km)
+     &                     sigmab(im),qadv(im,km),sigmaoutx(im)
       real(kind=kind_phys) gravinv,dxcrtas,invdelt,sigmind,sigmins,
      &                     sigminm
       logical flag_shallow,flag_mid
@@ -348,8 +353,7 @@ c
         xmb(i) = 0.
        enddo
       endif
-!!
-
+!!      
 !>  - Return to the calling routine if deep convection is present or the surface buoyancy flux is negative.
       totflg = .true.
       do i=1,im
@@ -872,14 +876,13 @@ c
             tkemean(i) = 0.
           endif
         enddo
-
+!
         do k = 1, km1
           do i = 1, im
             if(cnvflg(i)) then
               if(k >= kb(i) .and. k < kbcon(i)) then
                 dz = zo(i,k+1) - zo(i,k)
-                tem = 0.5 * (qtr(i,k,ntk)+qtr(i,k+1,ntk))
-                tkemean(i) = tkemean(i) + tem * dz
+                tkemean(i) = tkemean(i) + tkeh(i,k) * dz
                 sumx(i) = sumx(i) + dz
               endif
             endif
@@ -1093,6 +1096,24 @@ c
              enddo
            enddo
          enddo
+         if(ntk > 2) then
+           kk = ntk -2
+           do k = 2, km1
+             do i = 1, im
+               if (cnvflg(i)) then
+                 if(k > kb(i) .and. k < kmax(i)) then
+                   dz = zi(i,k) - zi(i,k-1)
+                   tem  = 0.25 * (xlamue(i,k)+xlamue(i,k-1)) * dz
+                   tem  = cq * tem
+                   factor = 1. + tem
+                   ecko(i,k,kk) = ((1. - tem) * ecko(i,k-1,kk) + tem *
+     &                   (ctro(i,k,kk) + ctro(i,k-1,kk))) / factor
+                   ercko(i,k,kk) = ecko(i,k,kk)
+                 endif
+               endif
+             enddo
+           enddo
+         endif
        endif
       endif
 c
@@ -1478,7 +1499,7 @@ c
 !
 !  compute updraft velocity square(wu2)
 !> - Calculate updraft velocity square(wu2) according to Han et al.'s (2017) \cite han_et_al_2017 equation 7.
-!
+!!> - if progomega = true, calculate prognostic updraft velocity (Pa/s) according to progomega routine.
       if (hwrf_samfshal) then
       do i = 1, im
        if (cnvflg(i)) then
@@ -1493,26 +1514,48 @@ c
        endif
       enddo
       endif
-      do k = 2, km1
-        do i = 1, im
-          if (cnvflg(i)) then
-            if(k > kbcon1(i) .and. k < ktcon(i)) then
-              dz    = zi(i,k) - zi(i,k-1)
-              tem  = 0.25 * bb1 * (drag(i,k-1)+drag(i,k)) * dz
-              tem1 = 0.5 * bb2 * (buo(i,k-1)+buo(i,k))
-              tem2 = wush(i,k) * sqrt(wu2(i,k-1))
-              tem2 = (tem1 - tem2) * dz
-              ptem = (1. - tem) * wu2(i,k-1)
-              ptem1 = 1. + tem
-              wu2(i,k) = (ptem + tem2) / ptem1
-              wu2(i,k) = max(wu2(i,k), 0.)
-            endif
-          endif
-        enddo
-      enddo
 !
-      if(progsigma)then                                                                                                                               
-          do k = 2, km1
+      if (progomega) then
+         call progomega_calc(first_time_step,restart,im,km,
+     &        kbcon1,ktcon,omegain,delt,del,zi,cnvflg,omegaout,
+     &        grav,buo,drag,wush,xlamue,bb1,bb2)
+         do k = 1, km
+            do i = 1, im
+               if (cnvflg(i)) then
+                  if(k > kbcon1(i) .and. k < ktcon(i)) then
+                     omega_u(i,k)=omegaout(i,k)
+                     omega_u(i,k)=MAX(omega_u(i,k),-80.)
+!     Convert to m/s for use in convective time-scale:
+                     rho = po(i,k)*100. / (rd * to(i,k))
+                     tem = (-omega_u(i,k)) / ((rho * grav))
+                     wu2(i,k) = tem**2
+                     wu2(i,k) = max(wu2(i,k), 0.)
+                  endif
+               endif
+            enddo
+         enddo
+         
+      else
+!     diagnostic updraft velocity 
+         do k = 2, km1
+            do i = 1, im
+               if (cnvflg(i)) then
+                  if(k > kbcon1(i) .and. k < ktcon(i)) then
+                     dz    = zi(i,k) - zi(i,k-1)
+                     tem  = 0.25 * bb1 * (drag(i,k-1)+drag(i,k)) * dz
+                     tem1 = 0.5 * bb2 * (buo(i,k-1)+buo(i,k))
+                     tem2 = wush(i,k) * sqrt(wu2(i,k-1))
+                     tem2 = (tem1 - tem2) * dz
+                     ptem = (1. - tem) * wu2(i,k-1)
+                     ptem1 = 1. + tem
+                     wu2(i,k) = (ptem + tem2) / ptem1
+                     wu2(i,k) = max(wu2(i,k), 0.)
+                  endif
+               endif
+            enddo
+         enddo
+!convert to Pa/s for use in closure
+         do k = 2, km1
             do i = 1, im
                if (cnvflg(i)) then
                   if(k > kbcon1(i) .and. k < ktcon(i)) then
@@ -1523,8 +1566,9 @@ c
                endif
             enddo
          enddo
-      endif    
 
+      endif !progomega
+     
 !  compute updraft velocity averaged over the whole cumulus
 !
 !> - Calculate the mean updraft velocity within the cloud (wc).
@@ -1982,7 +2026,7 @@ c
          flag_mid = .false.
          call progsigma_calc(im,km,first_time_step,restart,flag_shallow,
      &        flag_mid,del,tmfq,qmicro,dbyo1,zdqca,omega_u,zeta,hvap,
-     &        delt,qadv,kbcon1,ktcon,cnvflg,betascu,betamcu,betadcu,
+     &        delt,qadv,kb,kbcon1,ktcon,cnvflg,betascu,betamcu,betadcu,
      &        sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)
       endif
 
@@ -2397,20 +2441,29 @@ cj
         endif
       enddo
 c
-c  convective cloud water
-c
-!> - Calculate shallow convective cloud water.
+      if(progsigma)then
+         do i = 1, im
+            sigmaoutx(i)=max(sigmaout(i,1),0.0)
+            sigmaoutx(i)=min(sigmaoutx(i),1.0)
+         enddo
+      endif
+      
+c     convective cloud water
       do k = 1, km
-        do i = 1, im
-          if (cnvflg(i)) then
-            if (k >= kbcon(i) .and. k < ktcon(i)) then
-              cnvw(i,k) = cnvwt(i,k) * xmb(i) * dt2
+         do i = 1, im
+            if (cnvflg(i)) then
+               if (k >= kbcon(i) .and. k < ktcon(i)) then
+                  cnvw(i,k) = cnvwt(i,k) * xmb(i) * dt2
+                  if (progsigma) then
+                     cnvw(i,k) = cnvw(i,k) * sigmaoutx(i)
+                  else
+                     cnvw(i,k) = cnvw(i,k) * sigmagfm(i)
+                  endif
+               endif
             endif
-          endif
-        enddo
+         enddo
       enddo
-
-c
+c     
 c  convective cloud cover
 c
 !> - Calculate convective cloud cover, which is used when pdf-based cloud fraction is used (i.e., pdfcld=.true.).

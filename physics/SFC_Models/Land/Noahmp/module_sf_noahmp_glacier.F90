@@ -3,6 +3,8 @@
 !!  This file contains the NoahMP Glacier scheme.
 
 !>\ingroup NoahMP_LSM
+
+!> This module contains the NoahMP Glacier scheme
 module noahmp_glacier_globals
 
   use machine ,   only : kind_phys
@@ -77,6 +79,8 @@ end module noahmp_glacier_globals
 !------------------------------------------------------------------------------------------!
 
 !>\ingroup NoahMP_LSM
+
+!> This module contains NoahMP glacier routines
 module noahmp_glacier_routines
   use noahmp_glacier_globals
 #ifndef CCPP
@@ -842,12 +846,14 @@ contains
 
 ! snow albedos: age even when sun is not present
 
+  if(cosz > 0) then
   if(opt_alb == 1) &
      call snowalb_bats_glacier (nband,cosz,fage,albsnd,albsni)
   if(opt_alb == 2) then
      call snowalb_class_glacier(nband,qsnow,dt,alb,albold,albsnd,albsni)
      albold = alb
   end if
+  end if 
 
 ! zero summed solar fluxes
 
@@ -2624,14 +2630,23 @@ end if   ! opt_gla == 1
                             snliq  ,imelt  ,ficeold,                 & !in
                             isnow  ,dzsnso )                           !inout
 
+   if(isnow < 0) &        !when multi-layer
      call  combine_glacier (nsnow    ,nsoil  ,                         & !in
                             isnow    ,sh2o   ,stc    ,snice  ,snliq  , & !inout
                             dzsnso   ,sice   ,snowh  ,sneqv  ,         & !inout
                             ponding1 ,ponding2)                          !out
 
+   if(isnow < 0) &        !when multi-layer
      call   divide_glacier (nsnow  ,nsoil  ,                           & !in
                             isnow  ,stc    ,snice  ,snliq  ,dzsnso )     !inout
    end if
+
+   call  snowh2o_glacier (nsnow    ,nsoil    ,dt     ,qsnfro ,qsnsub , & !in 
+                          qrain    ,                                   & !in
+                          isnow    ,dzsnso   ,snowh  ,sneqv  ,snice  , & !inout
+                          snliq    ,sh2o     ,sice   ,stc    ,         & !inout
+                          ponding1 ,ponding2 ,fsh    ,                 & !inout
+                          qsnbot )                                       !out
 
 !set empty snow layers to zero
 
@@ -2643,16 +2658,9 @@ end if   ! opt_gla == 1
         zsnso(iz) = 0.
    enddo
 
-   call  snowh2o_glacier (nsnow    ,nsoil    ,dt     ,qsnfro ,qsnsub , & !in 
-                          qrain    ,                                   & !in
-                          isnow    ,dzsnso   ,snowh  ,sneqv  ,snice  , & !inout
-                          snliq    ,sh2o     ,sice   ,stc    ,         & !inout
-			  ponding1 ,ponding2 ,fsh    ,                 & !inout
-                          qsnbot )                                       !out
-
 !to obtain equilibrium state of snow in glacier region
        
-   if(sneqv > mwd .and. isnow /= 0) then   ! 100 mm -> maximum water depth
+   if(sneqv > mwd) then   ! 100 mm -> maximum water depth
       bdsnow      = snice(0) / dzsnso(0)
       snoflow     = (sneqv - mwd)
       snice(0)    = snice(0)  - snoflow 
@@ -2662,7 +2670,7 @@ end if   ! opt_gla == 1
 
 ! sum up snow mass for layered snow
 
-   if(isnow /= 0) then
+   if(isnow < 0) then
        sneqv = 0.
        snowh = 0.
        do iz = isnow+1,0
@@ -2738,7 +2746,7 @@ end if   ! opt_gla == 1
 
 ! creating a new layer
  
-    if(isnow == 0  .and. qsnow>0. .and. snowh >= 0.05) then
+    if(isnow == 0  .and. qsnow>0. .and. snowh >= 0.025) then
       isnow    = -1
       newnode  =  1
       dzsnso(0)= snowh
@@ -2896,8 +2904,8 @@ end if   ! opt_gla == 1
     real (kind=kind_phys)    :: zwice                 !< total ice mass in snow
     real (kind=kind_phys)    :: zwliq                 !< total liquid water in snow
     real (kind=kind_phys)    :: dzmin(3)              !< minimum of top snow layer
-    data dzmin /0.045, 0.05, 0.2/
-!    data dzmin /0.025, 0.025, 0.1/  ! mb: change limit
+!    data dzmin /0.045, 0.05, 0.2/
+    data dzmin /0.025, 0.025, 0.1/  ! mb: change limit
 !-----------------------------------------------------------------------
 
        isnow_old = isnow
@@ -2907,17 +2915,29 @@ end if   ! opt_gla == 1
              if(j /= 0) then
                 snliq(j+1) = snliq(j+1) + snliq(j)
                 snice(j+1) = snice(j+1) + snice(j)
+                dzsnso(j+1) = dzsnso(j+1) + dzsnso(j)
              else
                if (isnow_old < -1) then
                 snliq(j-1) = snliq(j-1) + snliq(j)
                 snice(j-1) = snice(j-1) + snice(j)
+                dzsnso(j-1) = dzsnso(j-1) + dzsnso(j)
                else
-                ponding1 = ponding1 + snliq(j)       ! isnow will get set to zero below
-                sneqv = snice(j)                     ! ponding will get added to ponding from
-                snowh = dzsnso(j)                    ! phasechange which should be zero here
-                snliq(j) = 0.0                       ! because there it was only calculated
-                snice(j) = 0.0                       ! for thin snow
-                dzsnso(j) = 0.0
+                 if(snice(j) >= 0.) then
+                  ponding1 = snliq(j)    ! isnow will get set to zero below; ponding1 will get
+                  sneqv = snice(j)       ! added to ponding from phasechange ponding should be
+                  snowh = dzsnso(j)      ! zero here because it was calculated for thin snow
+                 else   ! snice over-sublimated earlier
+                  ponding1 = snliq(j) + snice(j)
+                  if(ponding1 < 0.) then  ! if snice and snliq sublimates remove from soil
+                   sice(1) = max(0.0,sice(1)+ponding1/(dzsnso(1)*1000.))
+                   ponding1 = 0.0
+                  end if
+                  sneqv = 0.0
+                  snowh = 0.0
+                 end if
+                 snliq(j) = 0.0
+                 snice(j) = 0.0
+                 dzsnso(j) = 0.0
                endif
 !                sh2o(1) = sh2o(1)+snliq(j)/(dzsnso(1)*1000.)
 !                sice(1) = sice(1)+snice(j)/(dzsnso(1)*1000.)
@@ -2960,8 +2980,8 @@ end if   ! opt_gla == 1
 ! check the snow depth - all snow gone
 ! the liquid water assumes ponding on soil surface.
 
-!       if (snowh < 0.025 .and. isnow < 0 ) then ! mb: change limit
-       if (snowh < 0.05 .and. isnow < 0 ) then
+       if (snowh < 0.025 .and. isnow < 0 ) then ! mb: change limit
+!       if (snowh < 0.05 .and. isnow < 0 ) then
           isnow  = 0
           sneqv = zwice
           ponding2 = ponding2 + zwliq           ! limit of isnow < 0 means input ponding
@@ -3159,8 +3179,8 @@ end if   ! opt_gla == 1
                   zwliq, zwice, tsno(1))
 
              ! subdivide a new layer
-!             if (msno <= 2 .and. dz(2) > 0.20) then  ! mb: change limit
-             if (msno <= 2 .and. dz(2) > 0.10) then
+             if (msno <= 2 .and. dz(2) > 0.20) then  ! mb: change limit
+!             if (msno <= 2 .and. dz(2) > 0.10) then
                 msno = 3
                 dtdz = (tsno(1) - tsno(2))/((dz(1)+dz(2))/2.)
                 dz(2)    = dz(2)/2.
@@ -3287,6 +3307,7 @@ end if   ! opt_gla == 1
         sneqv  = sneqv - qsnsub*dt + qsnfro*dt
         propor = sneqv/temp
         snowh  = max(0.,propor * snowh)
+        snowh  = min(max(snowh,sneqv/500.0),sneqv/50.0)  ! limit adjustment to a reasonable density
       elseif(opt_gla == 2) then
         fsh = fsh - (qsnfro-qsnsub)*hsub
         qsnfro = 0.0
@@ -3489,6 +3510,7 @@ end if   ! opt_gla == 1
 end module noahmp_glacier_routines
 ! ==================================================================================================
 
+!> This module contains the interface of noahmp_glacier_routines and noahmp_glacier_globals
 module module_sf_noahmp_glacier
 
   use noahmp_glacier_routines

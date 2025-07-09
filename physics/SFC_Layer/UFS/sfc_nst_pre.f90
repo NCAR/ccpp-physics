@@ -1,6 +1,7 @@
 !>  \file sfc_nst_pre.f90
-!!  This file contains preparation for the GFS NSST model.
+!!  This file contains preparation for the near-surface sea temperature scheme.
 
+!> This module contain preparation for the near-surface sea temperature scheme 
 module sfc_nst_pre
 
   use machine               , only : kind_phys
@@ -11,7 +12,7 @@ module sfc_nst_pre
 
 contains
 
-  !> \defgroup GFS_NSST_PRE GFS Near-Surface Sea Temperature Pre
+  !> \defgroup GFS_NSST_PRE Near-Surface Sea Temperature Pre
   !!
   !! The NSST scheme is one of the three schemes used to represent the
   !! surface in the GFS physics suite. The other two are the Noah land
@@ -31,12 +32,12 @@ contains
     logical, dimension(:), intent(in) :: wet
     real (kind=kind_phys), intent(in) :: tgice
     real (kind=kind_phys), dimension(:), intent(in) :: tsfco, oceanfrac
-    real (kind=kind_phys), dimension(:), intent(in), optional :: xt, xz, dt_cool, z_c
+    real (kind=kind_phys), dimension(:), intent(in) :: xt, xz, dt_cool, z_c
     logical, intent(in) :: cplflx
 
     !  ---  input/outputs:
     real (kind=kind_phys), dimension(:), intent(inout) :: tsurf_wat, tseal
-    real (kind=kind_phys), dimension(:), intent(inout), optional :: tref
+    real (kind=kind_phys), dimension(:), intent(inout) :: tref
 
     !  ---  outputs:
     character(len=*), intent(out) :: errmsg

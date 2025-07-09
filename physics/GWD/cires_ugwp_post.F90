@@ -1,6 +1,7 @@
 !>  \file cires_ugwp_post.F90
-!! This file contains
+!! This file contains the calcualtion of the UGWP v0 diagnostics
 
+!> This module contains the calculation of the UGWP v0 diagnostics (ldiag_ugwp)
 module cires_ugwp_post
 
 contains
@@ -34,7 +35,7 @@ contains
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_zmtb, tot_zlwb, tot_zogw
         real(kind=kind_phys), intent(in),    dimension(:,:) :: gw_dtdt, gw_dudt, gw_dvdt, dudt_mtb, dudt_tms
-        real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dudt_ogw
+        real(kind=kind_phys), intent(in),    dimension(:,:) :: dudt_ogw
         real(kind=kind_phys), intent(inout), dimension(:,:), optional :: du3dt_mtb, du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw
         real(kind=kind_phys), intent(inout), dimension(:,:) :: dtdt, dudt, dvdt
 

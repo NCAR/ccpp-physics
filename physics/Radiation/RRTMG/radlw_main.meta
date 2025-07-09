@@ -134,7 +134,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = True
 [aeraod]
   standard_name = aerosol_optical_depth_for_longwave_bands_01_16
   long_name = aerosol optical depth for longwave bands 01-16
@@ -364,6 +363,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [cld_lwp]
   standard_name = cloud_liquid_water_path
   long_name = cloud liquid water path

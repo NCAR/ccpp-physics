@@ -134,7 +134,6 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-  optional = True
 [aeraod]
   standard_name = aerosol_optical_depth_for_shortwave_bands_01_16
   long_name = aerosol optical depth for shortwave bands 01-16
@@ -425,6 +424,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [fdncmp]
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes
@@ -432,6 +432,7 @@
   dimensions = (horizontal_loop_extent)
   type = cmpfsw_type
   intent = inout
+  optional = True
 [cld_lwp]
   standard_name = cloud_liquid_water_path
   long_name = cloud liquid water path

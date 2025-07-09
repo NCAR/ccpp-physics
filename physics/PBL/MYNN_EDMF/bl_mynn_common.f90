@@ -7,7 +7,7 @@
 !! module (module_bl_mynn) further below:
 
 !>\ingroup gp_mynnedmf
-!! Define Model-specific constants/parameters
+!! This module defines model-specific constants/parameters.
  module bl_mynn_common
 
 !------------------------------------------

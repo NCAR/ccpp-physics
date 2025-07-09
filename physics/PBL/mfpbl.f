@@ -1,9 +1,12 @@
 !>  \file mfpbl.f
 !!  This file contains the subroutine that calculates the updraft properties and mass flux for use in the Hybrid EDMF PBL scheme.
+
+!> This module contains the subroutine that calculates the updraft properties and mass flux 
+!! for use in the Hybrid EDMF PBL scheme.
       module mfpbl_mod
       contains
-!>  \ingroup HEDMF
-!!  \brief This subroutine is used for calculating the mass flux and updraft properties.
+
+!>  \brief This subroutine is used for calculating the mass flux and updraft properties.
 !!
 !!  The mfpbl routines works as follows: if the PBL is convective, first, the ascending parcel entrainment rate is calculated as a
 !!  function of height. Next, a surface parcel is initiated according to surface layer properties and the updraft buoyancy is calculated

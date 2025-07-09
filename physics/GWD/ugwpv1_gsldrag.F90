@@ -1,5 +1,7 @@
 !>  \file ugwpv1_gsldrag.F90
-!! This introduces two gravity wave drag schemes ugwpv1/CIRES and GSL/drag_suite.F90 under "ugwpv1_gsldrag" suite:
+
+!> This module introduces two gravity wave drag schemes: UGWPv1 and orographic drag scheme 
+!!
 !!      1) The "V1 CIRES UGWP" scheme as tested in the FV3GFSv16-127L atmosphere model and workflow, which includes:
 !!            a) the orograhic gravity wave drag, flow blocking scheme and TOFD (Beljaars et al, 2004).
 !!            b) the v1 CIRE ugwp non-stationary GW scheme, new revision that generate realistic climate of FV3GFS-127L
@@ -33,7 +35,6 @@
 !!       do_ugwp_v1_w_gsldrag -- activates V1 CIRES UGWP scheme with orographic drag of GSL
 !! Note that only one "large-scale" scheme can be activated at a time.
 !!
-
 module ugwpv1_gsldrag
 
     use machine, only: kind_phys
@@ -63,8 +64,6 @@ contains
 !> \section arg_table_ugwpv1_gsldrag_init Argument Table
 !! \htmlinclude ugwpv1_gsldrag_init.html
 !!
-! -----------------------------------------------------------------------
-!
     subroutine ugwpv1_gsldrag_init  (                                          &
                 me, master, nlunit, input_nml_file, logunit,                   &
                 fn_nml2, jdat, lonr, latr, levs, ak, bk, dtp,                  &
@@ -291,18 +290,14 @@ contains
 ! -----------------------------------------------------------------------
 !  order = dry-adj=>conv=mp-aero=>radiation -sfc/land- chem -> vertdiff-> [rf-gws]=> ion-re
 ! -----------------------------------------------------------------------
-!>@brief These subroutines and modules execute the CIRES UGWP Version 0
-!>\defgroup ugwpv1_gsldrag_run Unified Gravity Wave Physics General Algorithm
-!> @{
-!! The physics of NGWs in the UGWP framework (Yudin et al. 2018 \cite yudin_et_al_2018) is represented by four GW-solvers, which is introduced in Lindzen (1981) \cite lindzen_1981, Hines (1997) \cite hines_1997, Alexander and Dunkerton (1999) \cite alexander_and_dunkerton_1999, and Scinocca (2003) \cite scinocca_2003. The major modification of these GW solvers is represented by the addition of the background dissipation of temperature and winds to the saturation criteria for wave breaking. This feature is important in the mesosphere and thermosphere for WAM applications and it considers appropriate scale-dependent dissipation of waves near the model top lid providing the momentum and energy conservation in the vertical column physics (Shaw and Shepherd 2009 \cite shaw_and_shepherd_2009). In the UGWP-v0, the modification of Scinocca (2003) \cite scinocca_2003 scheme for NGWs with non-hydrostatic and rotational effects for GW propagations and background dissipation is represented by the subroutine \ref fv3_ugwp_solv2_v0. In the next release of UGWP, additional GW-solvers will be implemented along with physics-based triggering of waves and stochastic approaches for selection of GW modes characterized by horizontal phase velocities, azimuthal directions and magnitude of the vertical momentum flux (VMF).
+!>\section gen_ugwpv1_gsldrag_run Unified Gravity Wave Physics General Algorithm
+!! The physics of NGWs in the UGWP framework (Yudin et al. 2018 \cite yudin_et_al_2018) is represented by four GW-solvers, which is introduced in Lindzen (1981) \cite lindzen_1981, Hines (1997) \cite hines_1997, Alexander and Dunkerton (1999) \cite alexander_and_dunkerton_1999, and Scinocca (2003) \cite scinocca_2003. The major modification of these GW solvers is represented by the addition of the background dissipation of temperature and winds to the saturation criteria for wave breaking. This feature is important in the mesosphere and thermosphere for WAM applications and it considers appropriate scale-dependent dissipation of waves near the model top lid providing the momentum and energy conservation in the vertical column physics (Shaw and Shepherd 2009 \cite shaw_and_shepherd_2009). In the UGWP-v0, the modification of Scinocca (2003) \cite scinocca_2003 scheme for NGWs with non-hydrostatic and rotational effects for GW propagations and background dissipation is represented by the subroutine fv3_ugwp_solv2_v0. In the next release of UGWP, additional GW-solvers will be implemented along with physics-based triggering of waves and stochastic approaches for selection of GW modes characterized by horizontal phase velocities, azimuthal directions and magnitude of the vertical momentum flux (VMF).
 !!
 !! In UGWP-v0, the specification for the VMF function is adopted from the GEOS-5 global atmosphere model of GMAO NASA/GSFC, as described in Molod et al. (2015) \cite molod_et_al_2015 and employed in the MERRRA-2 reanalysis (Gelaro et al., 2017 \cite gelaro_et_al_2017). The Fortran subroutine \ref slat_geos5_tamp describes the latitudinal shape of VMF-function as displayed in Figure 3 of Molod et al. (2015) \cite molod_et_al_2015. It shows that the enhanced values of VMF in the equatorial region gives opportunity to simulate the QBO-like oscillations in the equatorial zonal winds and lead to more realistic simulations of the equatorial dynamics in GEOS-5 operational and MERRA-2 reanalysis products. For the first vertically extended version of FV3GFS in the stratosphere and mesosphere, this simplified function of VMF allows us to tune the model climate and to evaluate multi-year simulations of FV3GFS with the MERRA-2 and ERA-5 reanalysis products, along with temperature, ozone, and water vapor observations of current satellite missions. After delivery of the UGWP-code, the EMC group developed and tested approach to modulate the zonal mean NGW forcing by 3D-distributions of the total precipitation as a proxy for the excitation of NGWs by convection and the vertically-integrated  (surface - tropopause) Turbulent Kinetic Energy (TKE). The verification scores with updated NGW forcing, as reported elsewhere by EMC researchers, display noticeable improvements in the forecast scores produced by FV3GFS configuration extended into the mesosphere.
 !!
 !> \section arg_table_ugwpv1_gsldrag_run Argument Table
 !! \htmlinclude ugwpv1_gsldrag_run.html
 !!
-!> \section gen_ugwpv1_gsldrag CIRES UGWP Scheme General Algorithm
-!! @{
      subroutine ugwpv1_gsldrag_run(me, master, im, levs, ak, bk, ntrac, lonr, dtp,      &
           fhzero, kdt, ldiag3d, lssav, flag_for_gwd_generic_tend, do_gsl_drag_ls_bl,    &
           do_gsl_drag_ss, do_gsl_drag_tofd,                                             &
@@ -383,8 +378,8 @@ contains
     real(kind=kind_phys),    intent(in), dimension(:,:)     :: clx, oa4
 
     real(kind=kind_phys),    intent(in), dimension(:)       :: dx
-    real(kind=kind_phys),    intent(in), dimension(:), optional       :: varss,oc1ss
-    real(kind=kind_phys),    intent(in), dimension(:,:), optional     :: oa4ss,ol4ss
+    real(kind=kind_phys),    intent(in), dimension(:)       :: varss,oc1ss
+    real(kind=kind_phys),    intent(in), dimension(:,:)     :: oa4ss,ol4ss
 
 !=====
 !ccpp-style passing constants, I prefer to take them out from the "call-subr" list
@@ -413,7 +408,7 @@ contains
 
 !Output (optional):
 
-    real(kind=kind_phys), intent(out), dimension(:), optional  ::         &
+    real(kind=kind_phys), intent(out), dimension(:)  ::         &
                             du_ogwcol,  dv_ogwcol,  du_oblcol, dv_oblcol, &
                             du_osscol,  dv_osscol,  du_ofdcol, dv_ofdcol
 !
@@ -423,11 +418,11 @@ contains
     real(kind=kind_phys), intent(out), dimension(:)  :: dusfcg, dvsfcg
     real(kind=kind_phys), intent(out), dimension(:)  :: tau_ogw, tau_ngw, tau_oss
 
-    real(kind=kind_phys), intent(out) , dimension(:,:), optional ::         &
+    real(kind=kind_phys), intent(out) , dimension(:,:) ::         &
                           dudt_ogw, dvdt_ogw, dudt_obl, dvdt_obl, &
                           dudt_oss, dvdt_oss, dudt_ofd, dvdt_ofd
 
-    real(kind=kind_phys), intent(out) , dimension(:,:), optional :: dudt_ngw, dvdt_ngw, kdis_ngw, dtdt_ngw
+    real(kind=kind_phys), intent(out) , dimension(:,:) :: dudt_ngw, dvdt_ngw, kdis_ngw, dtdt_ngw
     real(kind=kind_phys), intent(out) , dimension(:,:) :: dudt_gw,  dvdt_gw, dtdt_gw, kdis_gw
 
     real(kind=kind_phys), intent(out) , dimension(:)   :: zogw, zlwb, zobl, zngw
@@ -762,6 +757,4 @@ contains
      dtdt  = dtdt  + dtdt_gw
 
     end subroutine ugwpv1_gsldrag_run
-!! @}
-!>@}
 end module ugwpv1_gsldrag

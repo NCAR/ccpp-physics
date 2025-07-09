@@ -1,4 +1,6 @@
 !>\file ugwp_driver_v0.F
+
+!> This module contains the UGWP v0 driver module
       module ugwp_driver_v0
       use cires_orowam2017
       contains
@@ -8,8 +10,7 @@
 !ugwp-v0 subroutines: GWDPS_V0 and fv3_ugwp_solv2_v0	
 !
 !=====================================================================
-!>\ingroup cires_ugwp_run_mod
-!>\defgroup ugwp_driverv0_mod GFS UGWP V0 Driver Module
+!>\defgroup ugwp_driverv0_mod UGWP V0 Driver Module
 !! This is the CIRES UGWP V0 driver module
 !!
 !! Note for the sub-grid scale orography scheme in UGWP-v0: Due to degraded forecast
@@ -920,8 +921,7 @@
 !===============================================================================
 !23456==============================================================================
 
-!>\ingroup cires_ugwp_run_mod
-!! A modification of the Scinocca (2003) \cite scinocca_2003 algorithm for 
+!> A modification of the Scinocca (2003) \cite scinocca_2003 algorithm for 
 !! NGWs with non-hydrostatic and rotational
 !!effects for GW propagations and background dissipation 
       subroutine fv3_ugwp_solv2_v0(klon, klev, dtime,

@@ -3,7 +3,8 @@
 
 
 !>\defgroup aathompson Aerosol-Aware Thompson MP Module
-!! This module contains the aerosol-aware Thompson microphysics scheme.
+
+!> This module contains the aerosol-aware Thompson microphysics scheme.
 module mp_thompson
 
       use mpi_f08
@@ -21,8 +22,6 @@ module mp_thompson
 
       private
 
-      logical :: is_initialized = .False.
-
       integer, parameter :: ext_ndiag3d = 37
 
    contains
@@ -31,7 +30,10 @@ module mp_thompson
 !! \section arg_table_mp_thompson_init Argument Table
 !! \htmlinclude mp_thompson_init.html
 !!
-      subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, con_eps,      &
+      subroutine mp_thompson_init(ncol, nlev, con_pi, con_t0c, con_rv,     &
+                                  con_cp, con_rgas, con_boltz, con_amd,    &
+                                  con_amw, con_avgd, con_hvap, con_hfus,   &
+                                  con_g, con_rd, con_eps,                  &
                                   restart, imp_physics,                    &
                                   imp_physics_thompson, convert_dry_rho,   &
                                   spechum, qc, qr, qi, qs, qg, ni, nr,     &
@@ -40,15 +42,20 @@ module mp_thompson
                                   nwfa, nifa, tgrs, prsl, phil, area,      &
                                   aerfld, mpicomm, mpirank, mpiroot,       &
                                   threads, ext_diag, diag3d,               &
-                                  errmsg, errflg)
-
+                                  is_initialized, errmsg, errflg)
+         use module_mp_thompson, only : PI, T_0, Rv, R, RoverRv, Cp
+         use module_mp_thompson, only : R_uni, k_b, M_w, M_a, N_avo, lvap0, lfus
+         
          implicit none
 
          ! Interface variables
          integer,                   intent(in   ) :: ncol
          integer,                   intent(in   ) :: nlev
-         real(kind_phys),           intent(in   ) :: con_g, con_rd, con_eps
+         real(kind_phys),           intent(in   ) :: con_pi, con_t0c, con_rv, con_cp, con_rgas, &
+                                                     con_boltz, con_amd, con_amw, con_avgd,     &
+                                                     con_hvap, con_hfus, con_g, con_rd, con_eps
          logical,                   intent(in   ) :: restart
+         logical,                   intent(inout) :: is_initialized
          integer,                   intent(in   ) :: imp_physics
          integer,                   intent(in   ) :: imp_physics_thompson
          ! Hydrometeors
@@ -104,6 +111,21 @@ module mp_thompson
 
          if (is_initialized) return
 
+         ! Set local Thompson MP module constants from host model
+         PI = con_pi
+         T_0 = con_t0c
+         Rv = con_Rv
+         R = con_rd
+         RoverRv = con_eps
+         Cp = con_cp
+         R_uni = con_rgas
+         k_b = con_boltz
+         M_w = con_amw*1.0E-3 !module_mp_thompson expects kg/mol
+         M_a = con_amd*1.0E-3 !module_mp_thompson expects kg/mol
+         N_avo = con_avgd
+         lvap0 = con_hvap
+         lfus = con_hfus
+         
          ! Consistency checks
          if (imp_physics/=imp_physics_thompson) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Thompson MP"
@@ -338,12 +360,12 @@ module mp_thompson
                               spp_prt_list, spp_var_list,          &
                               spp_stddev_cutoff,                   &
                               cplchm, pfi_lsan, pfl_lsan,          &
-                              errmsg, errflg)
+                              is_initialized, errmsg, errflg)
 
          implicit none
 
          ! Interface variables
-
+         logical,                   intent(inout) :: is_initialized
          ! Dimensions and constants
          integer,                   intent(in   ) :: ncol
          integer,                   intent(in   ) :: nlev
@@ -382,10 +404,10 @@ module mp_thompson
          real,                      intent(in   ) :: dt_inner
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
          real(kind_phys),           intent(inout) :: prcp(:)
-         real(kind_phys),           intent(inout), optional :: rain(:)
-         real(kind_phys),           intent(inout), optional :: graupel(:)
-         real(kind_phys),           intent(inout), optional :: ice(:)
-         real(kind_phys),           intent(inout), optional :: snow(:)
+         real(kind_phys),           intent(inout) :: rain(:)
+         real(kind_phys),           intent(inout) :: graupel(:)
+         real(kind_phys),           intent(inout) :: ice(:)
+         real(kind_phys),           intent(inout) :: snow(:)
          real(kind_phys),           intent(  out) :: sr(:)
          ! Radar reflectivity
          real(kind_phys),           intent(inout) :: refl_10cm(:,:)
@@ -413,7 +435,7 @@ module mp_thompson
          real(kind_phys),           intent(in), optional :: spp_wts_mp(:,:)
          real(kind_phys),           intent(in), optional :: spp_prt_list(:)
          character(len=10),         intent(in), optional :: spp_var_list(:)
-         real(kind_phys),           intent(in) :: spp_stddev_cutoff(:)
+         real(kind_phys),           intent(in), optional :: spp_stddev_cutoff(:)
 
          logical, intent (in) :: cplchm
          ! ice and liquid water 3d precipitation fluxes - only allocated if cplchm is .true.
@@ -861,64 +883,16 @@ module mp_thompson
            pfl_lsan(:,:) = pflls(:,:,1)
          end if
 
-         ! DH* Not really needed because they go out of scope ...
-         ! But having them in here seems to cause problems with Intel?
-         ! It looked like this is also nullifying the pointers passed
-         ! from the CCPP caps.
-         !unset_extended_diagnostic_pointers: if (ext_diag) then
-         !  !vts1       => null()
-         !  !txri       => null()
-         !  !txrc       => null()
-         !  prw_vcdc   => null()
-         !  prw_vcde   => null()
-         !  tpri_inu   => null()
-         !  tpri_ide_d => null()
-         !  tpri_ide_s => null()
-         !  tprs_ide   => null()
-         !  tprs_sde_d => null()
-         !  tprs_sde_s => null()
-         !  tprg_gde_d => null()
-         !  tprg_gde_s => null()
-         !  tpri_iha   => null()
-         !  tpri_wfz   => null()
-         !  tpri_rfz   => null()
-         !  tprg_rfz   => null()
-         !  tprs_scw   => null()
-         !  tprg_scw   => null()
-         !  tprg_rcs   => null()
-         !  tprs_rcs   => null()
-         !  tprr_rci   => null()
-         !  tprg_rcg   => null()
-         !  tprw_vcd_c => null()
-         !  tprw_vcd_e => null()
-         !  tprr_sml   => null()
-         !  tprr_gml   => null()
-         !  tprr_rcg   => null()
-         !  tprr_rcs   => null()
-         !  tprv_rev   => null()
-         !  tten3      => null()
-         !  qvten3     => null()
-         !  qrten3     => null()
-         !  qsten3     => null()
-         !  qgten3     => null()
-         !  qiten3     => null()
-         !  niten3     => null()
-         !  nrten3     => null()
-         !  ncten3     => null()
-         !  qcten3     => null()
-         !end if unset_extended_diagnostic_pointers
-         ! *DH
-
       end subroutine mp_thompson_run
 !>@}
 
 !> \section arg_table_mp_thompson_finalize Argument Table
 !! \htmlinclude mp_thompson_finalize.html
 !!
-      subroutine mp_thompson_finalize(errmsg, errflg)
+      subroutine mp_thompson_finalize(is_initialized, errmsg, errflg)
 
          implicit none
-
+         logical,                   intent(inout) :: is_initialized
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
 

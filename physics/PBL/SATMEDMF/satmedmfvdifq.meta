@@ -256,6 +256,30 @@
   type = real
   kind = kind_phys
   intent = in
+[def_1]
+  standard_name = square_of_vertical_shear_due_to_dynamics
+  long_name = square of vertical shear calculated from dynamics
+  units =  m2 s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[def_2]
+  standard_name = square_of_horizontal_shear_due_to_dynamics
+  long_name = square of horizontal shear calculated from dynamics
+  units =  m2 s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[def_3]
+  standard_name = horizontal_transfer_rate_of_tke_due_to_dynamics
+  long_name = rate of horizontal TKE transfer and pressure correlation calculated from dynamics
+  units =  m2 s-3
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [swh]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky shortwave heating rate
@@ -470,6 +494,13 @@
   dimensions = ()
   type = logical
   intent = in
+[sa3dtke]
+  standard_name = do_scale_aware_3d_tke
+  long_name = flag for scale-aware 3d tke scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [dusfc]
   standard_name = instantaneous_surface_x_momentum_flux
   long_name = x momentum flux
@@ -510,6 +541,14 @@
   type = real
   kind = kind_phys
   intent = out
+[tkeh]
+  standard_name = vertical_turbulent_kinetic_energy_at_interface
+  long_name = vertical turbulent kinetic energy at model layer interfaces
+  units = m2 s-2
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [dkt]
   standard_name = atmosphere_heat_diffusivity
   long_name = atmospheric heat diffusivity
@@ -521,6 +560,22 @@
 [dku]
   standard_name = atmosphere_momentum_diffusivity
   long_name = atmospheric momentum diffusivity
+  units = m2 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dku3d_h]
+  standard_name = horizontal_atmosphere_momentum_diffusivity_for_dynamics
+  long_name = horizontal atmospheric momentum diffusivity for dynamics
+  units = m2 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dku3d_e]
+  standard_name = horizontal_atmosphere_tke_diffusivity_for_dynamics
+  long_name = horizontal atmospheric tke diffusivity for dynamics
   units = m2 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -607,6 +662,13 @@
 [tc_pbl]
   standard_name = control_for_TC_applications_in_the_PBL_scheme
   long_name = control for TC applications in the PBL scheme
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+[use_lpt]
+  standard_name = control_for_using_LPT_for_TC_applications_in_the_PBL_scheme
+  long_name = control for using LPT in TC applications in the PBL scheme
   units = none
   dimensions = ()
   type = integer

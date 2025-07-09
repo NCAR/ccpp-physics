@@ -3,6 +3,8 @@
 !WRF:MODEL_LAYER:PHYSICS
 !
 !>\ingroup mynn_sfc
+!> This module contain routines to calculate stability parameters, kinematic siscosity
+!! in MYNN surface layer scheme
 MODULE module_sf_mynn
 
 !-------------------------------------------------------------------
@@ -313,15 +315,13 @@ CONTAINS
                                                                CH, &
                                                         FLHC,FLQC, &
                                                       GZ1OZ0,WSPD, &
-                                                        PSIM,PSIH
-      REAL(kind_phys), DIMENSION( ims:ime ), OPTIONAL            , &
-                            INTENT(INOUT)          ::        USTM, &
-                                                             CHS2, &
-                                                             CQS2, &
-                                                               LH, &
+                                                        PSIM,PSIH, &
+                                                        USTM,CHS2, &
+                                                        CQS2, WSTAR
+      REAL(kind_phys), DIMENSION( ims:ime ),                       &
+                            INTENT(INOUT)          ::          LH, &
                                                               ZOL, &
-                                                              MOL, &
-                                                            WSTAR
+                                                              MOL
 
       LOGICAL, DIMENSION( ims:ime ), INTENT(IN)    ::              &
 &                             wet,  dry,  icy,  flag_iter
@@ -617,13 +617,13 @@ CONTAINS
                                                            GZ1OZ0, &
                                                              WSPD, &
                                                              PSIM, &
-                                                             PSIH
-      REAL(kind_phys), DIMENSION( ims:ime ), OPTIONAL,             &
+                                                             PSIH, &
+                                                             USTM, &
+                                                        CHS2,CQS2
+      REAL(kind_phys), DIMENSION( ims:ime ),                       &
                             INTENT(INOUT)           ::        MOL, &
                                                               ZOL, &
-                                                               LH, &
-                                                        CHS2,CQS2, &
-                                                             USTM
+                                                               LH
 
       LOGICAL, DIMENSION( ims:ime ), INTENT(IN)    ::              &
      &                wet,     dry,     icy,    flag_iter
@@ -660,9 +660,8 @@ CONTAINS
 !--------------------------------------------
 !JOE-additinal output
       REAL(kind_phys), DIMENSION( ims:ime ),                       &
-     &                      INTENT(OUT)            ::       qstar
-      REAL(kind_phys), DIMENSION( ims:ime ), OPTIONAL,             &
-     &                      INTENT(OUT)            ::       wstar
+     &                      INTENT(OUT)            ::       qstar, &
+                                                            wstar
 
 !JOE-end
 
@@ -3173,19 +3172,18 @@ END SUBROUTINE SFCLAY1D_mynn
       END SUBROUTINE znot_m_v6
 !--------------------------------------------------------------------
 !>\ingroup mynn_sfc
-!!
-      SUBROUTINE znot_t_v6(uref, znott)
-
-      !$acc routine seq
-      IMPLICIT NONE
-!> Calculate scalar roughness over water with input 10-m wind
+!> Calculate scalar roughness over water with input 10-m wind 
 !! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
 !! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
 !!
 !!\author Bin Liu, NOAA/NCEP/EMC 2017
-!
+!   
 ! uref(m/s)   :   wind speed at 10-m height
 ! znott(meter):   scalar roughness scale over water
+      SUBROUTINE znot_t_v6(uref, znott)
+
+      !$acc routine seq
+      IMPLICIT NONE
 !
       REAL(kind_phys), INTENT(IN) :: uref
       REAL(kind_phys), INTENT(OUT):: znott
@@ -3240,17 +3238,16 @@ END SUBROUTINE SFCLAY1D_mynn
 
 !-------------------------------------------------------------------
 !>\ingroup mynn_sfc
-!!
-      SUBROUTINE znot_m_v7(uref, znotm)
-
-      !$acc routine seq
-      IMPLICIT NONE
 !> Calculate areodynamical roughness over water with input 10-m wind
 !! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
 !! For high winds, try to fit available observational data
 !! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
-!!
+!!   
 !!\author Bin Liu, NOAA/NCEP/EMC 2018
+      SUBROUTINE znot_m_v7(uref, znotm)
+
+      !$acc routine seq
+      IMPLICIT NONE
 !
 ! uref(m/s)   :   wind speed at 10-m height
 ! znotm(meter):   areodynamical roughness scale over water
@@ -3290,17 +3287,16 @@ END SUBROUTINE SFCLAY1D_mynn
       END SUBROUTINE znot_m_v7
 !--------------------------------------------------------------------
 !>\ingroup mynn_sfc
-!!
-      SUBROUTINE znot_t_v7(uref, znott)
-
-      !$acc routine seq
-      IMPLICIT NONE
 !> Calculate scalar roughness over water with input 10-m wind
 !! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
 !! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
 !! To be compatible with the slightly decreased Cd for higher wind speed
-!!
+!!    
 !!\author Bin Liu, NOAA/NCEP/EMC 2018
+      SUBROUTINE znot_t_v7(uref, znott)
+
+      !$acc routine seq
+      IMPLICIT NONE
 !
 ! uref(m/s)   :   wind speed at 10-m height
 ! znott(meter):   scalar roughness scale over water

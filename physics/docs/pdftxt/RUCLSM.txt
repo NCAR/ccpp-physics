@@ -79,7 +79,7 @@ Snow forms additional two layers on top of soil in RUC LSM
   - Outcome: reduced cold bias for areas with thin snow
 \image html ruc_lsm_mosaic.png "Figure 4: 'Mosaic' approach for patchy snow (Courtesy of T.G. Smirnova) " width=900
   - New: additional options to compute snow cover fraction (\p isncovr_opt =2 and 3, Niu and Yang (2007) \cite Niu_2007). These options allowed to reduce overprediction of number of grid cells fully covered with snow which further reduced cold-biases over snow. Figure 5 demonstrates that option 3 of snow cover fraction computation (\p isncovr_opt = 3) in the UFS-based regional model matches better the satellite data for the test case on 6 February 2022.
-- New: added an option to use of a new formulation of snow thermal conductivity (\p isncond_opt = 2, Sturm et al. (1997) \cite sturm_1997);
+- New: added an option to use of a new formulation of snow thermal conductivity (\p isncond_opt = 2, Sturm et al. (1997) \cite Sturm_1997);
 @image html https://user-images.githubusercontent.com/12705538/250180782-925303ec-7751-4d7e-be8f-b3f1323f35d4.png "Figure 5: Snow cover fraction from MODIS (a,b), Regional UFS-based system (RRFS) original (c), and modified with isncover_opt=3 (d), 6 February 2022. (Courtesy of T.G. Smirnova)"  width=900
 - Iterative snow melting algorithm;
 - Density of snow on the ground - a function of compaction parameter and snow depth and temperature;
@@ -102,21 +102,6 @@ and the right panel is observed snow accumulation. We can see that the new produ
 snow accumulation, and high amounts of snow in the product with 10:1 ratio are trimmed in central and southern Iowa where both observed and model 
 precipitation had a high content of sleet. There is even larger improvement in the Chicago area, where observed and model precipitation were almost 
 totally sleet. 
-
-\section v6_updates_ruc Physics Updates
-\version UFS-SRW v3.0.0 
-- Initialization of land and ice emissivity with consideration of partial snow cover
-- Initialization of land and ice albedo with consideration of partial snow cover
-- Initialization of water vapor mixing ratio over land and ice
-- Initialization of fractions of soil and vegetation types in a grid cell
-- Changes in the computation of a flag for sea ice: it is set to true only if \p flag_cice = .false. (uncoupled sea ice model)
-- Introduced separate variables for sea ice, for example: \p showfallac is replaced with \p snowfallac_ice
-- Added accommodation of fractional surface grid (land and ice fractions are possible within the grid cell)
-- Solar angle dependence of albedo for snow-free land
-- SPP option for stochastic perturbations for emissivity, albedo and vegetation fraction
-- Based on RRFS testing, the coefficient in the soil resistance formulation (Sakaguchi and Zeng (2009) \cite sakaguchi_and_zeng_2009)
-was increased from 0.7 to 1.0 to increase soil resistance to evaporation
-
 
 \section intra_ruclsm Intraphysics Communication
 - \ref arg_table_lsm_ruc_run

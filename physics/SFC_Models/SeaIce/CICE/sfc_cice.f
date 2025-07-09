@@ -11,22 +11,10 @@
 
       contains
 
-!> \defgroup sfc_sice for coupling to CICE
-!! @{
-!!  \section diagram Calling Hierarchy Diagram
-!!  \section intraphysics Intraphysics Communication
-!!
 !> \brief Brief description of the subroutine
-!!
 !! \section arg_table_sfc_cice_run Arguments
 !! \htmlinclude sfc_cice_run.html
 !!
-
-!!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
-!!  @{
-
 
 !!      use physcons, only : hvap => con_hvap,  cp => con_cp,           &
 !!    &                     rvrdm1 => con_fvirt, rd => con_rd
@@ -101,9 +89,11 @@
 
 !     real (kind=kind_phys), dimension(im), intent(in) :: u1, v1,       &
       real (kind=kind_phys), dimension(:), intent(in) ::                &
-     &       t1, q1, cm, ch, prsl1, wind, snowd
-
-      real (kind=kind_phys), dimension(:), intent(in), optional ::      &
+     &       t1, q1, cm, ch, prsl1, wind
+      real (kind=kind_phys), dimension(:), intent(in) ::                &
+     &       snowd 
+      
+      real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       dqsfc, dtsfc, dusfc, dvsfc
       logical, dimension(:), intent(in) :: flag_cice, flag_iter
 
@@ -163,5 +153,4 @@
       end subroutine sfc_cice_run
 !-----------------------------------
 
-!> @}
       end module sfc_cice

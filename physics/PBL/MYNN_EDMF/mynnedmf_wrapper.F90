@@ -140,7 +140,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,    & ! <=== ntlnc, ntinc
      &  dqdt_water_aer_num_conc,     dqdt_ice_aer_num_conc,& ! <=== ntwa, ntia
      &  dqdt_cccn,                                         & ! <=== ntccn
-     &  flag_for_pbl_generic_tend,                         &
+     &  tmf, flag_for_pbl_generic_tend,                    &
      &  dtend, dtidx, index_of_temperature,                &
      &  index_of_x_wind, index_of_y_wind, ntke,            &
      &  ntqv, ntcw, ntiw, ntsw,                            &
@@ -155,7 +155,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  icloud_bl, do_mynnsfclay,                          &
      &  imp_physics, imp_physics_gfdl,                     &
      &  imp_physics_thompson, imp_physics_wsm6,            &
-     &  imp_physics_fa,                                    &
+     &  imp_physics_fa, imfdeepcnv, imfdeepcnv_c3,         &
+     &  imfdeepcnv_samf,                                   &
      &  chem3d, frp, mix_chem, rrfs_sd, enh_mix,           &
      &  nchem, ndvel, vdep, smoke_dbg,                     &
      &  imp_physics_nssl, nssl_ccn_on,                     &
@@ -205,7 +206,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &       bl_mynn_output,                                &
      &       imp_physics, imp_physics_wsm6,                 &
      &       imp_physics_thompson, imp_physics_gfdl,        &
-     &       imp_physics_nssl, imp_physics_fa,              &
+     &       imp_physics_nssl, imp_physics_fa, imfdeepcnv,  &
+     &       imfdeepcnv_c3, imfdeepcnv_samf,                &
      &       spp_pbl,                                       &
      &       tke_budget
       real(kind_phys), intent(in) ::                        &
@@ -248,10 +250,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind_phys), dimension(:,:), intent(inout), optional ::        &
      &        dqdt_cloud_droplet_num_conc, dqdt_water_aer_num_conc,      &
      &        dqdt_ice_aer_num_conc
-      real(kind_phys), dimension(:,:), intent(inout), optional :: qke,   &
-     &        EL_PBL, Sh3D, Sm3D, qc_bl, qi_bl, cldfra_bl, dqdt_cccn
+      real(kind_phys), dimension(:,:), intent(inout) :: qke,             &
+     &        EL_PBL, Sh3D, Sm3D, qc_bl, qi_bl, cldfra_bl
+      real(kind_phys), dimension(:,:), intent(inout), optional ::        &
+     &        dqdt_cccn
       real(kind_phys), dimension(:,:), intent(inout) ::                  &
      &        qke_adv
+      real(kind_phys), dimension(:,:,:), intent(out) :: tmf  
      !These 10 arrays are only allocated when bl_mynn_output > 0
       real(kind_phys), dimension(:,:), intent(inout), optional ::        &
      &        edmf_a,edmf_w,edmf_qt,                                     &
@@ -270,9 +275,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        qgrs_cloud_droplet_num_conc,                               &
      &        qgrs_ice_aer_num_conc
       real(kind_phys), dimension(:,:), intent(in), optional :: qgrs_cccn
+      real(kind_phys), dimension(:,:), intent(out) ::                    &
+     &        Tsq, Qsq, Cov, exch_h, exch_m
       real(kind_phys), dimension(:,:), intent(out), optional ::          &
-     &        Tsq, Qsq, Cov, exch_h, exch_m, dqke, qWT, qSHEAR, qBUOY,   &
-     &        qDISS
+     &        dqke, qWT, qSHEAR, qBUOY, qDISS
       real(kind_phys), dimension(:), intent(in) :: xmu
       real(kind_phys), dimension(:,:), intent(in) :: htrsw, htrlw
       ! spp_wts_pbl only allocated if spp_pbl == 1
@@ -313,11 +319,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind_phys), dimension(:), intent(out) ::                      &
      &        ch,dtsfc1,dqsfc1,dusfc1,dvsfc1,                            &
      &        dtsfci_diag,dqsfci_diag,dusfci_diag,dvsfci_diag
-     real(kind_phys), dimension(:), intent(out), optional ::             &
+     real(kind_phys), dimension(:), intent(out) ::                       &
      &        maxMF,maxwidth,ztop_plume
       integer, dimension(:), intent(inout) ::                            &
      &        kpbl
-      integer, dimension(:), intent(inout), optional ::                  &
+      integer, dimension(:), intent(inout) ::                            &
      &        ktop_plume
 
       real(kind_phys), dimension(:), intent(inout), optional ::          &
@@ -555,6 +561,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           enddo
        enddo
 
+       do k=1,levs
+          do i=1,im
+             tmf(i,k,1)=0.
+          enddo
+       enddo
+       
+       
   ! Check incoming moist species to ensure non-negative values
   ! First, create height difference (dz)
       do k=1,levs
@@ -1028,6 +1041,15 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          deallocate(save_qke_adv)
        endif
 
+       if(imfdeepcnv == imfdeepcnv_c3 .or. imfdeepcnv == imfdeepcnv_samf)then
+          !LB: save PBL q-tendency for use in prognostic closure
+          do k=1,levs
+             do i=1,im
+                tmf(i,k,1)=dqdt_water_vapor(i,k)
+             enddo
+          enddo
+       endif
+       
   CONTAINS
 
     SUBROUTINE dtend_helper(itracer,field,mult)

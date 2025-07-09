@@ -1,16 +1,12 @@
-!> \defgroup SASHAL Mass-Flux Shallow Convection
-!! @{
-!!  \brief The Mass-Flux shallow convection scheme parameterizes the effect of shallow convection on the environment much like the \ref SAS scheme with a few key modifications. Perhaps most importantly, no quasi-equilibrium assumption is necessary since the shallow cloud base mass flux is parameterized from the surface buoyancy flux. Further, there are no convective downdrafts, the entrainment rate is greater than for deep convection, and the shallow convection is limited to not extend over the level where \f$p=0.7p_{sfc}\f$.
+!> \file shalcnv.F
+!!  Contains the entire SAS shallow convection scheme.
+
+!>  \brief The Mass-Flux shallow convection scheme parameterizes the effect of shallow convection on the environment much like the \ref SAS scheme with a few key modifications. Perhaps most importantly, no quasi-equilibrium assumption is necessary since the shallow cloud base mass flux is parameterized from the surface buoyancy flux. Further, there are no convective downdrafts, the entrainment rate is greater than for deep convection, and the shallow convection is limited to not extend over the level where \f$p=0.7p_{sfc}\f$.
 !!
 !!  This scheme was designed to replace the previous eddy-diffusivity approach to shallow convection with a mass-flux based approach as it is used for deep convection. Differences between the shallow and deep SAS schemes are presented in Han and Pan (2011) \cite han_and_pan_2011 . Like the deep scheme, it uses the working concepts put forth in Arakawa and Schubert (1974) \cite arakawa_and_schubert_1974 but includes modifications and simplifications from Grell (1993) \cite grell_1993 such as only one cloud type (the deepest possible, up to \f$p=0.7p_{sfc}\f$), rather than a spectrum based on cloud top heights or assumed entrainment rates, although it assumes no convective downdrafts. It contains many modifications associated with deep scheme as discussed in Han and Pan (2011) \cite han_and_pan_2011 , including the calculation of cloud top, a greater CFL-criterion-based maximum cloud base mass flux, and the inclusion of convective overshooting.
 !!
-!!  \section diagram Calling Hierarchy Diagram
+!!  \section diagram_sashal Calling Hierarchy Diagram
 !!  \image html Shallow_SAS_Flowchart.png "Diagram depicting how the SAS shallow convection scheme is called from the GSM physics time loop" height=2cm
-!!  \section intraphysics Intraphysics Communication
-!!  This space is reserved for a description of how this scheme uses information from other scheme types and/or how information calculated in this scheme is used in other scheme types.
-
-!> \file shalcnv.F
-!!  Contains the entire SAS shallow convection scheme.
       module shalcnv
 
       implicit none
@@ -80,17 +76,17 @@
 !!  \param[out] cnvw convective cloud water (kg/kg)
 !!  \param[out] cnvc convective cloud cover (unitless)
 !!
-!!  \section general General Algorithm
+!!  \section general_shalcnv General Algorithm
 !!  -# Compute preliminary quantities needed for the static and feedback control portions of the algorithm.
 !!  -# Perform calculations related to the updraft of the entraining/detraining cloud model ("static control").
 !!  -# Calculate the tendencies of the state variables (per unit cloud base mass flux) and the cloud base mass flux.
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
-!!  \section detailed Detailed Algorithm
+!!  \section detailed_shalcnv Detailed Algorithm
 !!
 !! \section arg_table_shalcnv_run Argument Table
 !! \htmlinclude shalcnv_run.html
 !!
-!!  @{
+!>  @{
       subroutine shalcnv_run(                                           &
      &     grav,cp,hvap,rv,fv,t0c,rd,cvap,cliq,eps,epsm1,               &
      &     im,km,jcap,delt,delp,prslp,psp,phil,qlc,qli,                 &
@@ -124,7 +120,7 @@
      &                                    u1(:,:),    v1(:,:),          &
      &                                    cnvw(:,:),  cnvc(:,:)
       real(kind=kind_phys), intent(out) :: rn(:), dt_mf(:,:)
-      real(kind=kind_phys), intent(out), optional :: ud_mf(:,:)
+      real(kind=kind_phys), intent(out) :: ud_mf(:,:)
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 !
@@ -1341,4 +1337,3 @@
 
       end module shalcnv
 !> @}
-!! @}

@@ -104,7 +104,7 @@ contains
         ,intent (in  )                      ::                         &
         tmf
      real(kind=kind_phys),    dimension (its:,kts:)                              &
-        ,intent (in  ), optional            ::                         &
+        ,intent (in  ), optional                      ::                         &
         qmicro, sigmain, forceqv_spechum
 
      real(kind=kind_phys),    dimension (its:)                                      &
@@ -139,7 +139,7 @@ contains
         dtime,tcrit,fv,r_d,betascu,betamcu,betadcu
 !$acc declare sigmaout
      real(kind=kind_phys),    dimension (its:,kts:)                              &
-        ,intent (out), optional           ::                           &
+        ,intent (out), optional                     ::                           &
         sigmaout
 
 
@@ -983,9 +983,9 @@ contains
             endif
          enddo
          call progsigma_calc(itf,ktf,flag_init,flag_restart,flag_shallow,  &
-              flag_mid,del,tmf,qmicro,dbyo,zdqca,omega_u,zeta,xlv,dtime,  &
-              forceqv_spechum,kbcon,ktop,cnvflg,betascu,betamcu,betadcu,   &
-              sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)
+            flag_mid,del,tmf,qmicro,dbyo,zdqca,omega_u,zeta,xlv,dtime,     &
+            forceqv_spechum,k22,kbcon,ktop,cnvflg,betascu,betamcu,betadcu, &
+            sigmind,sigminm,sigmins,sigmain,sigmaout,sigmab)
 
       endif
 

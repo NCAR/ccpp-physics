@@ -22,18 +22,18 @@
 !> \section arg_table_sgscloud_radpre_run Argument Table
 !! \htmlinclude sgscloud_radpre_run.html
 !!
-!!    cloud array description:                                          !
-!!          clouds(:,:,1)  -  layer total cloud fraction                !
-!!          clouds(:,:,2)  -  layer cloud liq water path                !
-!!          clouds(:,:,3)  -  mean effective radius for liquid cloud    !
-!!          clouds(:,:,4)  -  layer cloud ice water path                !
-!!          clouds(:,:,5)  -  mean effective radius for ice cloud       !
-!!          clouds(:,:,6)  -  layer rain drop water path                !
-!!          clouds(:,:,7)  -  mean effective radius for rain drop       !
-!!          clouds(:,:,8)  -  layer snow flake water path               !
-!!          clouds(:,:,9)  -  mean effective radius for snow flake
-!!
-!>\section sgscloud_radpre_mod  SGS Cloud Scheme Pre General Algorithm
+!    cloud array description:                                          !
+!          clouds(:,:,1)  -  layer total cloud fraction                !
+!          clouds(:,:,2)  -  layer cloud liq water path                !
+!          clouds(:,:,3)  -  mean effective radius for liquid cloud    !
+!          clouds(:,:,4)  -  layer cloud ice water path                !
+!          clouds(:,:,5)  -  mean effective radius for ice cloud       !
+!          clouds(:,:,6)  -  layer rain drop water path                !
+!          clouds(:,:,7)  -  mean effective radius for rain drop       !
+!          clouds(:,:,8)  -  layer snow flake water path               !
+!          clouds(:,:,9)  -  mean effective radius for snow flake
+!
+! \section sgscloud_radpre_mod  SGS Cloud Scheme Pre General Algorithm
       subroutine sgscloud_radpre_run(    &
            im,dt,fhswr,levs,             &
            flag_init,flag_restart,       &
@@ -55,7 +55,7 @@
            nlay, plyr, xlat, dz,de_lgth, &
            cldsa,mtopa,mbota,            &
            imp_physics, imp_physics_gfdl,&
-           imp_physics_fa,               &
+           imp_physics_fa, conv_cf_opt,  &
            iovr,                         &
            errmsg, errflg                )
 
@@ -75,7 +75,7 @@
       real(kind=kind_phys)             :: gfac
       integer,             intent(in)  :: im, levs, imfdeepcnv, imfdeepcnv_gf, &
            &  nlay, imfdeepcnv_sas, imfdeepcnv_c3, imp_physics, & 
-           &  imp_physics_gfdl, imp_physics_fa
+           &  imp_physics_gfdl, imp_physics_fa, conv_cf_opt
       logical,             intent(in)  :: flag_init, flag_restart, do_mynnedmf
 
       real(kind=kind_phys), dimension(:,:), intent(inout) :: qc, qi
@@ -119,9 +119,6 @@
       !Chaboureau and Bechtold (2002 and 2005)
       real :: a, f, sigq, qmq, qt, xl, th, thl, rsl, cpm, cb_cf
       real(kind=kind_phys) :: tlk
-
-      !Option to convective cloud fraction
-      integer, parameter :: conv_cf_opt = 0  !0: C-B, 1: X-R
 
       ! Initialize CCPP error handling variables
       errmsg = ''

@@ -60,7 +60,7 @@
      &                    sigmaf,vegtype,shdmax,ivegsrc,                &  !intent(in)
      &                    z0pert,ztpert,                                &  ! mg, sfc-perts !intent(in)
      &                    flag_iter,redrag,                             &  !intent(in)
-     &                    flag_lakefreeze,                              &  !intent(in)             
+     &                    flag_lakefreeze,lakefrac,fice,                &  !intent(in)             
      &                    u10m,v10m,sfc_z0_type,                        &  !hafs,z0 type !intent(in)
      &                    u1,v1,usfco,vsfco,icplocn2atm,                &  
      &                    wet,dry,icy,                                  &  !intent(in)
@@ -106,6 +106,8 @@
      &                    ps,t1,q1,z1,garea,prsl1,prslki,prsik1,prslk1, &
      &                    wind,sigmaf,shdmax,                           &
      &                    z0pert,ztpert ! mg, sfc-perts
+      real(kind=kind_phys), dimension(:), intent(in)    :: lakefrac
+      real(kind=kind_phys), dimension(:), intent(in)    :: fice
       real(kind=kind_phys), dimension(:), intent(in)    ::              &
      &                    tskin_wat, tskin_lnd, tskin_ice,              &
      &                    tsurf_wat, tsurf_lnd, tsurf_ice
@@ -340,7 +342,7 @@
 !  ---  outputs:
      &      rb_ice(i), fm_ice(i), fh_ice(i), fm10_ice(i), fh2_ice(i),
      &      cm_ice(i), ch_ice(i), stress_ice(i), ustar_ice(i))
-      endif ! Icy points
+          endif ! Icy points
 
 ! BWG: Everything from here to end of subroutine was after
 !      the stuff now put into "stability"
@@ -364,20 +366,8 @@
               windrel=sqrt((u1(i)-usfco(i))**2+(v1(i)-vsfco(i))**2) 
             endif
 
-            if (sfc_z0_type == -1) then    ! using wave model derived momentum roughness
-              tem1 = 0.11 * vis / ustar_wat(i)
-              z0 = tem1 +  0.01_kp * z0rl_wav(i)
-
-              if (redrag) then
-                z0max = max(min(z0, z0s_max),1.0e-7_kp)
-              else
-                z0max = max(min(z0,0.1_kp), 1.0e-7_kp)
-              endif
-              z0rl_wat(i) = 100.0_kp * z0max   ! cm
-            else
-              z0    = 0.01_kp * z0rl_wat(i)
-              z0max = max(zmin, min(z0,z1(i)))
-            endif
+            z0    = 0.01_kp * z0rl_wat(i)
+            z0max = max(zmin, min(z0,z1(i)))
 !
 !**  test xubin's new z0
 
@@ -416,52 +406,51 @@
 !
 !  update z0 over ocean
 !
-            if (sfc_z0_type >= 0) then
-              if (sfc_z0_type == 0) then
-!               z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
-                tem1 = 0.11 * vis / ustar_wat(i)
-                z0 = tem1 + (charnock/grav)*ustar_wat(i)*ustar_wat(i)
+            if ((sfc_z0_type == -1) .and.
+     &        (lakefrac(i) == 0.0 .and. fice(i) == 0.0) .and.
+     &        (z0rl_wav(i)>1.0e-7_kp .and. z0rl_wav(i)<0.1_kp)) then
+              ! using wave model derived momentum roughness
+              tem1 = 0.11 * vis / ustar_wat(i)
+              z0 = tem1 +  0.01_kp * z0rl_wav(i)
+
+              if (redrag) then
+                z0rl_wat(i) = 100.0_kp * max(min(z0,z0s_max),1.0e-7_kp)
+              else
+                z0rl_wat(i) = 100.0_kp * max(min(z0,0.1_kp), 1.e-7_kp)
+              endif
+
+            elseif ((sfc_z0_type == 0) .or.
+     &        ((sfc_z0_type == -1) .and.
+     &        (z0rl_wav(i)<=1.0e-7_kp .or. z0rl_wav(i)>=0.1_kp))) then
+!             z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
+              tem1 = 0.11 * vis / ustar_wat(i)
+              z0 = tem1 + (charnock/grav)*ustar_wat(i)*ustar_wat(i)
 
 
 ! mbek -- toga-coare flux algorithm
-!               z0 = (charnock / grav) * ustar(i)*ustar(i) +  arnu/ustar(i)
+!             z0 = (charnock / grav) * ustar(i)*ustar(i) +  arnu/ustar(i)
 !  new implementation of z0
-!               cc = ustar(i) * z0 / rnu
-!               pp = cc / (1. + cc)
-!               ff = grav * arnu / (charnock * ustar(i) ** 3)
-!               z0 = arnu / (ustar(i) * ff ** pp)
+!             cc = ustar(i) * z0 / rnu
+!             pp = cc / (1. + cc)
+!             ff = grav * arnu / (charnock * ustar(i) ** 3)
+!             z0 = arnu / (ustar(i) * ff ** pp)
 
-                if (redrag) then
-                  z0rl_wat(i) = 100.0_kp * max(min(z0, z0s_max),        &
-     &                                                 1.0e-7_kp)
-                else
-                  z0rl_wat(i) = 100.0_kp * max(min(z0,0.1_kp), 1.e-7_kp)
-                endif
-
-              elseif (sfc_z0_type == 6) then   ! wang
-                 call znot_m_v6(wind10m, z0)   ! wind, m/s, z0, m
-                 z0rl_wat(i) = 100.0_kp * z0   ! cm
-              elseif (sfc_z0_type == 7) then   ! wang
-                 call znot_m_v7(wind10m, z0)   ! wind, m/s, z0, m
-                 z0rl_wat(i) = 100.0_kp * z0   ! cm
+              if (redrag) then
+                z0rl_wat(i) = 100.0_kp * max(min(z0,z0s_max),1.0e-7_kp)
               else
-                 z0rl_wat(i) = 1.0e-4_kp
+                z0rl_wat(i) = 100.0_kp * max(min(z0,0.1_kp), 1.e-7_kp)
               endif
 
-           elseif (z0rl_wav(i) <= 1.0e-7_kp .or.
-     &             z0rl_wav(i) > 1.0_kp) then
-!            z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
-             tem1 = 0.11 * vis / ustar_wat(i)
-             z0 = tem1 + (charnock/grav)*ustar_wat(i)*ustar_wat(i)
-
-             if (redrag) then
-               z0rl_wat(i) = 100.0_kp * max(min(z0, z0s_max),1.0e-7_kp)
-             else
-               z0rl_wat(i) = 100.0_kp * max(min(z0,0.1_kp), 1.0e-7_kp)
-             endif
-
+            elseif (sfc_z0_type == 6) then   ! wang
+               call znot_m_v6(wind10m, z0)   ! wind, m/s, z0, m
+               z0rl_wat(i) = 100.0_kp * z0   ! cm
+            elseif (sfc_z0_type == 7) then   ! wang
+               call znot_m_v7(wind10m, z0)   ! wind, m/s, z0, m
+               z0rl_wat(i) = 100.0_kp * z0   ! cm
+            else
+               z0rl_wat(i) = 1.0e-4_kp
             endif
-
+!
           endif              ! end of if(open ocean)
 !
         endif                ! end of if(flagiter) loop
@@ -648,9 +637,8 @@
 !---------------------------------
 
 
-!! add fitted z0,zt curves for hurricane application (used in HWRF/HMON)
+!> add fitted z0,zt curves for hurricane application (used in HWRF/HMON)
 !! Weiguo Wang, 2019-0425
-
       SUBROUTINE znot_m_v6(uref, znotm)
       use machine , only : kind_phys
       IMPLICIT NONE
@@ -697,18 +685,19 @@
 
       END SUBROUTINE znot_m_v6
 
+!> Calculate scalar roughness over water with input 10-m wind
+!! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
+!! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
+!!
+!! Bin Liu, NOAA/NCEP/EMC 2017
+!
+!! uref(m/s)   :   wind speed at 10-m height
+!! znott(meter):   scalar roughness scale over water
       SUBROUTINE znot_t_v6(uref, znott)
       use machine , only : kind_phys
       IMPLICIT NONE
-! Calculate scalar roughness over water with input 10-m wind
-! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
-! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
-!
-! Bin Liu, NOAA/NCEP/EMC 2017
-!
-! uref(m/s)   :   wind speed at 10-m height
-! znott(meter):   scalar roughness scale over water
-!
+
+
 
       REAL(kind=kind_phys), INTENT(IN) :: uref
       REAL(kind=kind_phys), INTENT(OUT):: znott
@@ -762,19 +751,20 @@
       END SUBROUTINE znot_t_v6
 
 
+!> Calculate areodynamical roughness over water with input 10-m wind
+!! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
+!! For high winds, try to fit available observational data
+!! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
+!
+!! Bin Liu, NOAA/NCEP/EMC 2018
+!
+!! uref(m/s)   :   wind speed at 10-m height
+!! znotm(meter):   areodynamical roughness scale over water
       SUBROUTINE znot_m_v7(uref, znotm)
       use machine , only : kind_phys
       IMPLICIT NONE
-! Calculate areodynamical roughness over water with input 10-m wind
-! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
-! For high winds, try to fit available observational data
-! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
-!
-! Bin Liu, NOAA/NCEP/EMC 2018
-!
-! uref(m/s)   :   wind speed at 10-m height
-! znotm(meter):   areodynamical roughness scale over water
-!
+
+
 
       REAL(kind=kind_phys), INTENT(IN) :: uref
       REAL(kind=kind_phys), INTENT(OUT):: znotm
@@ -808,18 +798,20 @@
       endif
 
       END SUBROUTINE znot_m_v7
+
+!> Calculate scalar roughness over water with input 10-m wind
+!! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
+!! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
+!! To be compatible with the slightly decreased Cd for higher wind speed
+!!
+!! Bin Liu, NOAA/NCEP/EMC 2018
+!!
+!! uref(m/s)   :   wind speed at 10-m height
+!! znott(meter):   scalar roughness scale over water
       SUBROUTINE znot_t_v7(uref, znott)
       use machine , only : kind_phys
       IMPLICIT NONE
-! Calculate scalar roughness over water with input 10-m wind
-! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
-! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
-! To be compatible with the slightly decreased Cd for higher wind speed
-!
-! Bin Liu, NOAA/NCEP/EMC 2018
-!
-! uref(m/s)   :   wind speed at 10-m height
-! znott(meter):   scalar roughness scale over water
+
 !
 
       REAL(kind=kind_phys), INTENT(IN) :: uref
