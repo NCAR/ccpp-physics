@@ -340,6 +340,8 @@
      &,                                                   cnv_fice, cnv_ndrop    &
      &,                                                   cnv_nice, cf_upi
       real(kind=kind_phys), dimension(:)  , intent(in)  :: area,  cdrag
+      real(kind=kind_phys), dimension(:,:), intent(out) :: ten_t, ten_u, ten_v
+      real(kind=kind_phys), dimension(:,:,:), intent(out) :: ten_q, ten_cc
       real(kind=kind_phys), dimension(:)  , intent(out) :: rainc
       real(kind=kind_phys), dimension(:)  , intent(out) :: ddvel
       real(kind=kind_phys), dimension(:,:), intent(in)  :: rannum
