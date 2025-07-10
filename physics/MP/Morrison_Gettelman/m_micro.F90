@@ -150,7 +150,7 @@ end subroutine m_micro_init
      &,                         CNV_DQLDT_i, CLCN_i, u_i, v_i           &
      &,                         TAUGWX,   TAUGWY                        &
      &,                         TAUOROX,  TAUOROY, CNV_FICE_i           &
-     &,                         CNV_NDROP_i,CNV_NICE_i, q_i,            &
+     &,                         CNV_NDROP_i,CNV_NICE_i, q_i             &
      &,                         t_i ,    rn_o, sr_o                     &
      &,                         ncpl_i,   ncpi_i, fprcp, rnw_i,  snw_i  &
      &,                         qgl_i,    ncpr_i,  ncps_i,  ncgl_i      &
@@ -160,8 +160,11 @@ end subroutine m_micro_init
      &,                         naai_i, npccn_i, iccn                   &
      &,                         skip_macro                              &
      &,                         alf_fac, qc_min, pdfflag                &
-     &,                         kdt, xlat, xlon, rhc_i,                 &
-     &                          ten_t, ten_q, ten_qv, ten_ncpi, ten_ncpl, ten_rnw, ten_snw, ten_qgl, ten_ncpr, ten_ncps, ten_ncgl, ten_ql, ten_qi, errmsg, errflg)
+     &,                         kdt, xlat, xlon, rhc_i                  &
+     &,                         ten_t, ten_q, ten_qv, ten_ncpi          &
+     &,                         ten_ncpl, ten_rnw, ten_snw, ten_qgl     &
+     &,                         ten_ncpr, ten_ncps, ten_ncgl, ten_ql    &
+     &,                         ten_qi, errmsg, errflg)
 
 !      use funcphys,      only: fpvs                !< saturation vapor pressure for water-ice mixed
 !      use funcphys,      only: fpvsl, fpvsi, fpvs  !< saturation vapor pressure for water,ice & mixed
