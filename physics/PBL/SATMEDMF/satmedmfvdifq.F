@@ -514,15 +514,20 @@
         do i=1,im
           pix(i,k)   = psk(i) / prslk(i,k)
           theta(i,k) = t1(i,k) * pix(i,k)
+          qice(i,k) = 0.0
+          qliq(i,k) = 0.0
           if(ntiw > 0) then
             tem = max(q1(i,k,ntcw),qlmin)
             tem1 = max(q1(i,k,ntiw)+q1(i,k,5)+q1(i,k,6),qlmin)
+            qice(i,k) = tem1
+            qliq(i,k) = tem
             qlx(i,k) = tem + tem1
             ptem = hvap*tem + (hvap+hfus)*tem1
             slx(i,k)   = cp * t1(i,k) + phil(i,k) - ptem
           else
             qlx(i,k) = max(q1(i,k,ntcw),qlmin)
             slx(i,k)   = cp * t1(i,k) + phil(i,k) - hvap*qlx(i,k)
+            qliq(i,k) = qlx(i,k)
           endif
           tem2       = 1.+fv*max(q1(i,k,1),qmin)-qlx(i,k)
           thvx(i,k)  = theta(i,k) * tem2
