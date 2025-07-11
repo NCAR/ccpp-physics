@@ -4,9 +4,10 @@ on: [push, pull_request]
 
 jobs:
   ccpp-prebuild-FV3:
+    if: github.repository == 'NCAR/ccpp-physics' || github.repository == 'ufs-community/ccpp-physics'
 
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout current ccpp-physics code
@@ -38,11 +39,11 @@ jobs:
         git remote add remote_local $GIT_REMOTE_URL
         git fetch remote_local $GIT_REMOTE_BRANCH
         git checkout remote_local/$GIT_REMOTE_BRANCH
-    
-    - name: Set up Python 3.8.5
+
+    - name: Set up Python 3.10.13
       uses: actions/setup-python@v3
       with:
-        python-version: 3.8.5
+        python-version: 3.10.13
 
     - name: Add conda to system path
       run: |
