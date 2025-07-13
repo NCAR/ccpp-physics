@@ -26,12 +26,12 @@
      &       hvap, tgice, cp, eps, epsm1, rvrdm1, rd, ps, t1, q1,       &
      &       cm, ch, prsl1, prslki, prsik1, prslk1,                     &
      &       wind, thsfc_loc,                                           &
-!  ---  input/outputs:
+!  ---  outputs:
      &       hice, fice, tice, tsfc_wat, qss_i, qss_w,                  &
      &       cmm_i, cmm_w, chh_i, chh_w,                                &
      &       evap_i, evap_w, hflx_i, hflx_w, gflux,                     &
-     &       errmsg, errflg,                                            &
-     &       naux2d, aux2d)
+!  ---  inputs/outputs:
+     &       errmsg, errflg)
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -40,17 +40,23 @@
 !                                                                       !
 !    call sfc_data                                                      !
 !       inputs:                                                         !
-!        ( im, use_data, tsfco_dat                                      !
+!        ( im, use_data, tsfco_dat, mask_dat, tice_dat, hice_dat,       !
+!          fice_dat, hvap, tgice, cp, eps, epsm1, rvrdm1, rd, ps, t1,   !
+!          q1, cm, ch, prsl1, prslki, prsik1, prslk1, wind, thsfc_loc,  !
 !       outputs:                                                        !
-!          tsfc_wat )                                                   !
-!                                                                       !
+!          hice, fice, tice, tsfc_wat, qss_i, qss_w,                    !
+!          cmm_i, cmm_w, chh_i, chh_w, evap_i, evap_w, hflx_i, hflx_w,  !
+!          gflux,                                                       !
+!       input/outputs:                                                  !
+!          errmsg, errflg )                                             !
 !                                                                       !
 !  subprograms/functions called: fpvs                                   !
-!                                                                       !
 !                                                                       !
 !  program history log:                                                 !
 !    feb  2024  -- u. turuncoglu added initially to interact with       !
 !                  fv3 cdeps inline                                     !
+!    jan  2025  -- updated to calculate fluxes for both sea-ice and     !
+!                  open ocean conditions                                !
 !                                                                       !
 !  ====================  defination of variables  ====================  !
 !                                                                       !
@@ -59,9 +65,39 @@
 !     use_data - logical, =T if data provided by cdeps inline      1    !
 !     tsfco_dat- real, sea surface temperature ( k )               im   !
 !     mask_dat - data model mask                                   1    !
+!     tice_dat - real, sea-ice surface temperature                 im   !
+!     hice_dat - real, sea-ice thickness                           im   !
+!     fice_dat - real, sea-ice concentration                       im   !
+!     ps       - real, surface pressure                            im   !
+!     t1       - real, surface layer mean temperature ( k )        im   !
+!     q1       - real, surface layer mean specific humidity        im   !
+!     cm       - real, surface exchange coeff for momentum (m/s)   im   !
+!     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
+!     prsl1    - real, surface layer mean pressure                 im   !
+!     prslki   - real,                                             im   !
+!     prsik1   - real,                                             im   !
+!     prslk1   - real,                                             im   !
+!     wind     - real, wind speed (m/s)                            im   !
 !                                                                       !
 !  outputs:                                                             !
+!     hice     - real, sea-ice thickness                           im   !
+!     fice     - real, sea-ice concentration                       im   !
+!     tice     - real, sea-ice surface temperature                 im   !
 !     tsfc_wat - real, sea surface temperature ( k )               im   !
+!     qss_i    - real, specific humidity over ice                  im   !
+!     qss_w    - real, specific humidity over water                im   !
+!     cmm_i    - real, surface exchange coeff for mom over ice     im   !
+!     cmm_w    - real, surface exchange coeff for mom over water   im   !
+!     chh_i    - real, surface exchange coeff heat&moist over ice  im   !
+!     chh_w    - real, surface exchange coeff heat&moist over waterim   !
+!     evap_i   - real, evaperation from latent heat flux over ice  im   !
+!     evap_w   - real, evaperation from latent heat flux over waterim   !
+!     hflx_i   - real, sensible heat flux over ice                 im   !
+!     hflx_w   - real, sensible heat flux over water               im   !
+!     gflux    - real, gound heat flux (w/m**2)                    im   !
+!                                                                       !
+!  input/outputs:                                                       !
+!     errmsg, errflg                                                    !
 !                                                                       !
 ! ===================================================================== !
 !
@@ -89,8 +125,6 @@
 !  ---  input/outputs:
       real (kind=kind_phys), dimension(:), intent(inout) :: hice, fice, &
      & tice, tsfc_wat
-      integer, intent(in), optional :: naux2d
-      real(kind_phys), intent(inout), optional :: aux2d(:,:)
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(:), intent(inout) ::             &
@@ -119,30 +153,12 @@
       if (.not. use_data) return
 
       do i = 1, im
-
-         aux2d(i,1) = mask_dat(i) 
-         aux2d(i,2) = tice_dat(i)
-         aux2d(i,3) = hice_dat(i)
-         aux2d(i,4) = fice_dat(i)
-         aux2d(i,5) = tsfco_dat(i)
-
          if (mask_dat(i) > 0.0) then
             ! overwrite internal variables
             tice(i) = tice_dat(i)
             hice(i) = hice_dat(i)
             fice(i) = fice_dat(i) 
             tsfc_wat(i) = tsfco_dat(i)
-
-            aux2d(i,6) = cmm_i(i)
-            aux2d(i,7) = chh_i(i)
-            aux2d(i,8) = evap_i(i)
-            aux2d(i,9) = hflx_i(i)
-            aux2d(i,10) = qss_i(i)
-            aux2d(i,11) = cmm_w(i)
-            aux2d(i,12) = chh_w(i)
-            aux2d(i,13) = evap_w(i)
-            aux2d(i,14) = hflx_w(i)
-            aux2d(i,15) = qss_w(i)
 
             ! sfc_sice calculates fluxes only for islmsk == 2
             if (fice(i) > zero) then ! calculate fluxes over sea-ice
@@ -189,18 +205,6 @@
                qss_w(i) = qssw
                gflux(i) = zero
             end if
-
-            aux2d(i,16) = cmm_i(i)
-            aux2d(i,17) = chh_i(i)
-            aux2d(i,18) = evap_i(i)
-            aux2d(i,19) = hflx_i(i)
-            aux2d(i,20) = qss_i(i)
-            aux2d(i,21) = cmm_w(i)
-            aux2d(i,22) = chh_w(i)
-            aux2d(i,23) = evap_w(i)
-            aux2d(i,24) = hflx_w(i)
-            aux2d(i,25) = qss_w(i)
-
          end if
       end do
 !
