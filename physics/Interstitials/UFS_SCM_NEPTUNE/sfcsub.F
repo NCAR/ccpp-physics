@@ -3093,8 +3093,11 @@
               enddo
             enddo
           else
-            do i=1,imax
-              data(imax-i+1,jj) = work(i,j)
+            do j=1,jmax
+              jj = jmax - j + 1
+              do i=1,imax
+                data(imax-i+1,jj) = work(i,j)
+              enddo
             enddo
           endif
         else

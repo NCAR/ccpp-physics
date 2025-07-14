@@ -10,7 +10,7 @@ records \b &gfs_physics_nml. Some schemes have their own namelist records as des
 parameterizations. Its variables are defined in file GFS_typedefs.F90 in the host model.
 
 - Namelist \b &gfdl_cloud_microphysics_nml is only relevant when the GFDL microphysics is used, and its variables are defined in
-module_gfdl_cloud_microphys.F90.
+gfdl_cloud_microphys_mod.F90.
 
 - Namelist \b &cires_ugwp_nml specifies options for the use of CIRES Unified Gravity Wave Physics Version 0.
 

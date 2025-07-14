@@ -298,7 +298,7 @@ contains
         if (dmax >= tlim_okw) kex = kex+1 
         do k=klow+1, ktop
           dtot = abs(trig_okw(i,k))
-          if (dtot >= tlim_fgf ) kex = kex+1 
+          if (dtot >= tlim_okw ) kex = kex+1 
           if ( dtot >  dmax) then
             klev(i) = k
             dmax =  dtot
