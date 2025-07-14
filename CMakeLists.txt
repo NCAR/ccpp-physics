@@ -196,7 +196,12 @@ target_include_directories(ccpp_physics PUBLIC
 target_link_libraries(ccpp_physics PRIVATE MPI::MPI_Fortran)
 target_link_libraries(ccpp_physics PUBLIC w3emc::w3emc_d
                                           sp::sp_d
-                                          NetCDF::NetCDF_Fortran)
+                                          NetCDF::NetCDF_Fortran
+				             )
+#add FMS for FV3 only
+if(FV3)
+  target_link_libraries(ccpp_physics PUBLIC fms)
+endif()
 
 # Define where to install the library
 install(TARGETS ccpp_physics
