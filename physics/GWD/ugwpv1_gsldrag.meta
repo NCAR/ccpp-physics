@@ -2,7 +2,7 @@
   name = ugwpv1_gsldrag
   type = scheme
   dependencies = ../hooks/machine.F,drag_suite.F90
-  dependencies = cires_ugwpv1_module.F90,cires_ugwpv1_triggers.F90,cires_ugwpv1_initialize.F90,cires_ugwpv1_solv2.F90
+  dependencies = cires_ugwpv1_module.F90,cires_ugwpv1_triggers.F90,cires_ugwpv1_initialize.F90,cires_ugwpv1_solv2.F90,ecmwf_ngw.F90
   dependencies = cires_ugwpv1_sporo.F90,cires_ugwpv1_oro.F90 
 ########################################################################
 [ccpp-arg-table]
@@ -218,6 +218,13 @@
   dimensions = ()
   type = logical
   intent = in
+[do_ngw_ec]
+  standard_name = flag_for_ngw_ec
+  long_name = flag to activate ecmwf ngwd
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [do_ugwp_v1]
   standard_name = flag_for_ugwp_version_1
   long_name = flag to activate ver 1 CIRES UGWP
@@ -416,6 +423,13 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+[do_ngw_ec]
+  standard_name = flag_for_ngw_ec
+  long_name = flag to activate ecmwf ngwd
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [do_ugwp_v1]
   standard_name = flag_for_ugwp_version_1
