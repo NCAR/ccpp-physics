@@ -318,8 +318,8 @@ contains
            ten_qi(i,k)      = (qi1(i,kk) - gq0_ntiw(i,k))/dtp
            ten_qs(i,k)      = (qs1(i,kk) - gq0_ntsw(i,k))/dtp
            ten_qg(i,k)      = (qg1(i,kk) - gq0_ntgl(i,k))/dtp
-           ten_qa(i,k)      = (qa1(i,kk) - gq0_ntclamt(i,k))/dtp
-           ten_t(i,k)       = (pt(i,kk) - gt0(i,k))/dtp
+           ten_cldfrc(i,k)  = (qa1(i,kk) - gq0_ntclamt(i,k))/dtp
+           ten_t(i,k)       = (pt(i,kk)  - gt0(i,k))/dtp
            ten_u(i,k)       = (uin(i,kk) - gu0(i,k))/dtp
            ten_v(i,k)       = (vin(i,kk) - gv0(i,k))/dtp
            refl_10cm(i,k)   = refl(i,kk)
