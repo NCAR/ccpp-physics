@@ -398,7 +398,7 @@ module mp_tempo
                               is_initialized, ten_q, dspechum,     &
                               dqc, dqr, dqi, dqs, dqg, dni, dnr,   &
                               dnc, dnwfa, dnifa, dchw, dvh, dtgrs, &
-                              ten_u, ten_verrmsg, errflg)
+                              ten_u, ten_v, errmsg, errflg)
 
          implicit none
 
