@@ -18,7 +18,8 @@
       use module_h2ophys, only: ty_h2ophys
 
       use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm, iamin, iamax, jamin, jamax
-      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol, read_aerdataf
+      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol, read_aerdataf,           &
+                             read_aerdata_dl, aerinterpol_dl, read_aerdataf_dl
 
       use iccn_def,   only : ciplin, ccnin, ci_pres
       use iccninterp, only : read_cidata, setindxci, ciinterpol
@@ -78,7 +79,7 @@
 !>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
 !> @{
       subroutine GFS_phys_time_vary_init (                                                         &
-              me, master, ntoz, h2o_phys, iaerclm, iccn, iaermdl, iflip, im, levs,                 &
+              me, master, ntoz, h2o_phys, iaerclm, iaermdl, iccn, iflip, im, levs,                 &
               nx, ny, idate, xlat_d, xlon_d,                                                       &
               jindx1_o3, jindx2_o3, ddy_o3, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,                &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
@@ -227,7 +228,12 @@
            ntrcaer = ntrcaerm
            myerrflg = 0
            myerrmsg = 'read_aerdata failed without a message'
-           call read_aerdata (me,master,iflip,idate,myerrmsg,myerrflg)
+           if(iaermdl == 1) then
+             call read_aerdata (me,master,iflip,idate,myerrmsg,myerrflg)
+           elseif (iaermdl == 6) then
+             call read_aerdata_dl(me,master,iflip,                       &
+                                 idate,fhour, myerrmsg,myerrflg)
+           end if
            call copy_error(myerrmsg, myerrflg, errmsg, errflg)
          else if(iaermdl ==2 ) then
            do ix=1,ntrcaerm
@@ -351,7 +357,11 @@
 
          if (iaerclm) then
            ! This call is outside the OpenMP section, so it should access errmsg & errflg directly.
-           call read_aerdataf (me, master, iflip, idate, fhour, errmsg, errflg)
+           if(iaermdl==1) then
+             call read_aerdataf (me, master, iflip, idate, fhour, errmsg, errflg)
+           elseif (iaermdl==6) then
+             call read_aerdataf_dl (me, master, iflip, idate, fhour, errmsg, errflg)
+           end if
            ! If it is moved to an OpenMP section, it must use myerrmsg, myerrflg, and copy_error.
            if (errflg/=0) return
          end if
@@ -722,7 +732,7 @@
 
          ! Interface variables
          integer,              intent(in)    :: me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, &
-                                                nsswr, imfdeepcnv, iccn, nscyc, ntoz, iflip
+                                                nsswr, imfdeepcnv, iccn, nscyc, ntoz, iflip, iaermdl
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhswr, fhour
          logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm, cplflx
@@ -790,7 +800,7 @@
 
 !$OMP parallel num_threads(nthrds) default(none)                                         &
 !$OMP          shared(kdt,nsswr,lsswr,clstp,imfdeepcnv,cal_pre,random_clds)              &
-!$OMP          shared(fhswr,fhour,seed0,cnx,cny,nrcm,wrk,rannie,rndval)                  &
+!$OMP          shared(fhswr,fhour,seed0,cnx,cny,nrcm,wrk,rannie,rndval, iaermdl)         &
 !$OMP          shared(rann,im,isc,jsc,imap,jmap,ntoz,me,idate,jindx1_o3,jindx2_o3)       &
 !$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,master) &
 !$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
@@ -902,11 +912,19 @@
          if (iaerclm) then
            ! aerinterpol is using threading inside, don't
            ! move into OpenMP parallel section above
-           call aerinterpol (me, master, nthrds, im, idate, &
-                             fhour, iflip, jindx1_aer, jindx2_aer, &
-                             ddy_aer, iindx1_aer,           &
-                             iindx2_aer, ddx_aer,           &
-                             levs, prsl, aer_nm, errmsg, errflg)
+           if (iaermdl==1) then
+             call aerinterpol (me, master, nthrds, im, idate,        &
+                               fhour, iflip, jindx1_aer, jindx2_aer, &
+                               ddy_aer, iindx1_aer,                  &
+                               iindx2_aer, ddx_aer,                  &
+                               levs, prsl, aer_nm, errmsg, errflg)
+           else if (iaermdl==6) then
+             call aerinterpol_dl (me, master, nthrds, im, idate,       &
+                                 fhour, iflip, jindx1_aer, jindx2_aer, &
+                                 ddy_aer, iindx1_aer,                  &
+                                 iindx2_aer, ddx_aer,                  &
+                                 levs, prsl, aer_nm, errmsg, errflg)
+           endif
            if(errflg /= 0) then
              return
            endif

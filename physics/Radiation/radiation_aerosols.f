@@ -637,7 +637,7 @@
 !  ---  outputs:
      &     errflg, errmsg)
 
-        elseif ( iaermdl==1 .or. iaermdl==2 ) then  ! gocart clim/prog scheme
+        elseif ( iaermdl==1 .or. iaermdl==2 .or. iaermdl==6) then  ! gocart clim/prog scheme
 
           call gocart_aerinit                                           &
 !  ---  inputs:
@@ -726,7 +726,10 @@
         print *,' - Using OPAC-seasonal climatology for tropospheric',  &
      &          ' aerosol effect'
       elseif ( iaermdl == 1 ) then
-        print *,' - Using GOCART-climatology for tropospheric',         &
+        print *,' - Using MERRA2-climatology for tropospheric',         &
+     &          ' aerosol effect'
+      elseif ( iaermdl == 6 ) then
+        print *,' - Using MERRA2 3 hourly aerosol for tropospheric',         &
      &          ' aerosol effect'
       elseif ( iaermdl == 2 ) then
         print *,' - Using GOCART-prognostic aerosols for tropospheric', &
@@ -2405,7 +2408,7 @@
      &       )
 
 !
-          elseif ( iaermdl==1 .or. iaermdl==2) then ! use gocart aerosols
+          elseif ( iaermdl==1 .or. iaermdl==2 .or. iaermdl==6) then ! use gocart aerosols
 
           call aer_property_gocart                                        &
 !  ---  inputs:
