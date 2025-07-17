@@ -1,4 +1,6 @@
+#ifndef CCPP
 #define CCPP
+#endif
 !>  \file module_sf_noahmp_glacier.F90
 !!  This file contains the NoahMP Glacier scheme.
 
@@ -326,7 +328,7 @@ contains
                          isnow  ,snowh  ,sneqv   ,snice    ,snliq    ,stc    , & !inout
                          dzsnso ,sh2o   ,sice    ,ponding  ,zsnso    ,fsh    , & !inout
                          runsrf ,runsub ,qsnow   ,ponding1 ,ponding2 ,qsnbot , & !out
-			 fpice  ,esnow)                                          !out
+                         fpice  ,esnow)                                          !out
 
      if(opt_gla == 2) then
        edir = qvap - qdew
@@ -638,7 +640,7 @@ contains
 
     call tsnosoi_glacier (nsoil   ,nsnow   ,isnow   ,dt      ,tbot    , & !in
                           ssoil   ,snowh   ,zbot    ,zsnso   ,df      , & !in
-		          hcpct   ,                                     & !in
+                          hcpct   ,                                     & !in
                           stc     )                                       !inout
 
 ! adjusting snow surface temperature
@@ -1340,11 +1342,11 @@ contains
         end if
 
         csh = rhoair*cpair/rahb
-	if(snowh > 0.0 .or. opt_gla == 1) then
+        if(snowh > 0.0 .or. opt_gla == 1) then
           cev = rhoair*cpair/gamma/(rsurf+rawb)
-	else
-	  cev = 0.0   ! don't allow any sublimation of glacier in opt_gla=2
-	end if
+        else
+          cev = 0.0   ! don't allow any sublimation of glacier in opt_gla=2
+        end if
 
 ! surface fluxes and dtg
 
@@ -1730,7 +1732,7 @@ contains
 !>\ingroup NoahMP_LSM
   subroutine tsnosoi_glacier (nsoil   ,nsnow   ,isnow   ,dt      ,tbot    , & !in
                               ssoil   ,snowh   ,zbot    ,zsnso   ,df      , & !in
-			      hcpct   ,                                     & !in
+                              hcpct   ,                                     & !in
                               stc     )                                       !inout
 ! --------------------------------------------------------------------------------------------------
 !> compute snow (up to 3l) and soil (4l) temperature. note that snow temperatures
@@ -2222,11 +2224,11 @@ if (opt_gla == 1) then     ! operate on the ice layers
         if (heatr(1) > 0.) then
               xm(1) = heatr(1)*dt/hfus             
               hm(1) = heatr(1) 
-	      imelt(1) = 1                   
+              imelt(1) = 1                   
         else
               xm(1) = 0.
               hm(1) = 0.
-	      imelt(1) = 0                   
+              imelt(1) = 0                   
         endif
         qmelt   = max(0.,(temp1-sneqv))/dt
         xmf     = hfus*qmelt
@@ -2273,21 +2275,21 @@ if (opt_gla == 1) then     ! operate on the ice layers
     if (any(stc(1:4) > tfrz) .and. any(stc(1:4) < tfrz)) then
       do j = 1,nsoil
         if ( stc(j) > tfrz ) then                                       
-	  heatr(j) = (stc(j)-tfrz)/fact(j)
+          heatr(j) = (stc(j)-tfrz)/fact(j)
           do k = 1,nsoil
-	    if (j .ne. k .and. stc(k) < tfrz .and. heatr(j) > 0.1) then
-	      heatr(k) = (stc(k)-tfrz)/fact(k)
-	      if (abs(heatr(k)) > heatr(j)) then  ! layer absorbs all
-	        heatr(k) = heatr(k) + heatr(j)
-		stc(k) = tfrz + heatr(k)*fact(k)
-		heatr(j) = 0.0
+            if (j .ne. k .and. stc(k) < tfrz .and. heatr(j) > 0.1) then
+              heatr(k) = (stc(k)-tfrz)/fact(k)
+              if (abs(heatr(k)) > heatr(j)) then  ! layer absorbs all
+                heatr(k) = heatr(k) + heatr(j)
+                stc(k) = tfrz + heatr(k)*fact(k)
+                heatr(j) = 0.0
               else
-	        heatr(j) = heatr(j) + heatr(k)
-		heatr(k) = 0.0
-		stc(k) = tfrz
+                heatr(j) = heatr(j) + heatr(k)
+                heatr(k) = 0.0
+                stc(k) = tfrz
               end if
-	    end if
-	  end do
+            end if
+          end do
           stc(j) = tfrz + heatr(j)*fact(j)
         end if
       end do
@@ -2298,21 +2300,21 @@ if (opt_gla == 1) then     ! operate on the ice layers
     if (any(stc(1:4) > tfrz) .and. any(stc(1:4) < tfrz)) then
       do j = 1,nsoil
         if ( stc(j) < tfrz ) then                                       
-	  heatr(j) = (stc(j)-tfrz)/fact(j)
+          heatr(j) = (stc(j)-tfrz)/fact(j)
           do k = 1,nsoil
-	    if (j .ne. k .and. stc(k) > tfrz .and. heatr(j) < -0.1) then
-	      heatr(k) = (stc(k)-tfrz)/fact(k)
-	      if (heatr(k) > abs(heatr(j))) then  ! layer absorbs all
-	        heatr(k) = heatr(k) + heatr(j)
-		stc(k) = tfrz + heatr(k)*fact(k)
-		heatr(j) = 0.0
+            if (j .ne. k .and. stc(k) > tfrz .and. heatr(j) < -0.1) then
+              heatr(k) = (stc(k)-tfrz)/fact(k)
+              if (heatr(k) > abs(heatr(j))) then  ! layer absorbs all
+                heatr(k) = heatr(k) + heatr(j)
+                stc(k) = tfrz + heatr(k)*fact(k)
+                heatr(j) = 0.0
               else
-	        heatr(j) = heatr(j) + heatr(k)
-		heatr(k) = 0.0
-		stc(k) = tfrz
+                heatr(j) = heatr(j) + heatr(k)
+                heatr(k) = 0.0
+                stc(k) = tfrz
               end if
-	    end if
-	  end do
+            end if
+          end do
           stc(j) = tfrz + heatr(j)*fact(j)
         end if
       end do
@@ -2323,25 +2325,25 @@ if (opt_gla == 1) then     ! operate on the ice layers
     if (any(stc(1:4) > tfrz) .and. any(mice(1:4) > 0.)) then
       do j = 1,nsoil
         if ( stc(j) > tfrz ) then                                       
-	  heatr(j) = (stc(j)-tfrz)/fact(j)
+          heatr(j) = (stc(j)-tfrz)/fact(j)
           xm(j) = heatr(j)*dt/hfus                           
           do k = 1,nsoil
-	    if (j .ne. k .and. mice(k) > 0. .and. xm(j) > 0.1) then
-	      if (mice(k) > xm(j)) then  ! layer absorbs all
-	        mice(k) = mice(k) - xm(j)
-		xmf = xmf + hfus * xm(j)/dt
-		stc(k) = tfrz
-		xm(j) = 0.0
+            if (j .ne. k .and. mice(k) > 0. .and. xm(j) > 0.1) then
+              if (mice(k) > xm(j)) then  ! layer absorbs all
+                mice(k) = mice(k) - xm(j)
+                xmf = xmf + hfus * xm(j)/dt
+                stc(k) = tfrz
+                xm(j) = 0.0
               else
-	        xm(j) = xm(j) - mice(k)
-		xmf = xmf + hfus * mice(k)/dt
-		mice(k) = 0.0
-		stc(k) = tfrz
+                xm(j) = xm(j) - mice(k)
+                xmf = xmf + hfus * mice(k)/dt
+                mice(k) = 0.0
+                stc(k) = tfrz
               end if
               mliq(k) = max(0.,wmass0(k)-mice(k))
-	    end if
-	  end do
-	  heatr(j) = xm(j)*hfus/dt
+            end if
+          end do
+          heatr(j) = xm(j)*hfus/dt
           stc(j) = tfrz + heatr(j)*fact(j)
         end if
       end do
@@ -2352,25 +2354,25 @@ if (opt_gla == 1) then     ! operate on the ice layers
     if (any(stc(1:4) < tfrz) .and. any(mliq(1:4) > 0.)) then
       do j = 1,nsoil
         if ( stc(j) < tfrz ) then                                       
-	  heatr(j) = (stc(j)-tfrz)/fact(j)
+          heatr(j) = (stc(j)-tfrz)/fact(j)
           xm(j) = heatr(j)*dt/hfus                           
           do k = 1,nsoil
-	    if (j .ne. k .and. mliq(k) > 0. .and. xm(j) < -0.1) then
-	      if (mliq(k) > abs(xm(j))) then  ! layer absorbs all
-	        mice(k) = mice(k) - xm(j)
-		xmf = xmf + hfus * xm(j)/dt
-		stc(k) = tfrz
-		xm(j) = 0.0
+            if (j .ne. k .and. mliq(k) > 0. .and. xm(j) < -0.1) then
+              if (mliq(k) > abs(xm(j))) then  ! layer absorbs all
+                mice(k) = mice(k) - xm(j)
+                xmf = xmf + hfus * xm(j)/dt
+                stc(k) = tfrz
+                xm(j) = 0.0
               else
-	        xm(j) = xm(j) + mliq(k)
-		xmf = xmf - hfus * mliq(k)/dt
-		mice(k) = wmass0(k)
-		stc(k) = tfrz
+                xm(j) = xm(j) + mliq(k)
+                xmf = xmf - hfus * mliq(k)/dt
+                mice(k) = wmass0(k)
+                stc(k) = tfrz
               end if
               mliq(k) = max(0.,wmass0(k)-mice(k))
-	    end if
-	  end do
-	  heatr(j) = xm(j)*hfus/dt
+            end if
+          end do
+          heatr(j) = xm(j)*hfus/dt
           stc(j) = tfrz + heatr(j)*fact(j)
         end if
       end do
@@ -2402,7 +2404,7 @@ end if   ! opt_gla == 1
                             isnow  ,snowh  ,sneqv   ,snice    ,snliq    ,stc    , & !inout
                             dzsnso ,sh2o   ,sice    ,ponding  ,zsnso    ,fsh    , & !inout
                             runsrf ,runsub ,qsnow   ,ponding1 ,ponding2 ,qsnbot , & !out
-			    fpice  ,esnow)                                          !out
+                            fpice  ,esnow)                                          !out
 ! ----------------------------------------------------------------------  
 ! code history:
 ! initial code: guo-yue niu, oct. 2007
@@ -2573,7 +2575,7 @@ end if   ! opt_gla == 1
                                 ficeold ,zsoil   ,                           & !in
                                 isnow   ,snowh   ,sneqv    ,snice  ,snliq  , & !inout
                                 sh2o    ,sice    ,stc      ,dzsnso ,zsnso  , & !inout
-				fsh     ,                                    & !inout
+                                fsh     ,                                    & !inout
                                 qsnbot  ,snoflow ,ponding1 ,ponding2)          !out
 ! ----------------------------------------------------------------------
   implicit none
@@ -2630,14 +2632,23 @@ end if   ! opt_gla == 1
                             snliq  ,imelt  ,ficeold,                 & !in
                             isnow  ,dzsnso )                           !inout
 
+   if(isnow < 0) &        !when multi-layer
      call  combine_glacier (nsnow    ,nsoil  ,                         & !in
                             isnow    ,sh2o   ,stc    ,snice  ,snliq  , & !inout
                             dzsnso   ,sice   ,snowh  ,sneqv  ,         & !inout
                             ponding1 ,ponding2)                          !out
 
+   if(isnow < 0) &        !when multi-layer
      call   divide_glacier (nsnow  ,nsoil  ,                           & !in
                             isnow  ,stc    ,snice  ,snliq  ,dzsnso )     !inout
    end if
+
+   call  snowh2o_glacier (nsnow    ,nsoil    ,dt     ,qsnfro ,qsnsub , & !in 
+                          qrain    ,                                   & !in
+                          isnow    ,dzsnso   ,snowh  ,sneqv  ,snice  , & !inout
+                          snliq    ,sh2o     ,sice   ,stc    ,         & !inout
+                          ponding1 ,ponding2 ,fsh    ,                 & !inout
+                          qsnbot )                                       !out
 
 !set empty snow layers to zero
 
@@ -2649,16 +2660,9 @@ end if   ! opt_gla == 1
         zsnso(iz) = 0.
    enddo
 
-   call  snowh2o_glacier (nsnow    ,nsoil    ,dt     ,qsnfro ,qsnsub , & !in 
-                          qrain    ,                                   & !in
-                          isnow    ,dzsnso   ,snowh  ,sneqv  ,snice  , & !inout
-                          snliq    ,sh2o     ,sice   ,stc    ,         & !inout
-			  ponding1 ,ponding2 ,fsh    ,                 & !inout
-                          qsnbot )                                       !out
-
 !to obtain equilibrium state of snow in glacier region
        
-   if(sneqv > mwd .and. isnow /= 0) then   ! 100 mm -> maximum water depth
+   if(sneqv > mwd) then   ! 100 mm -> maximum water depth
       bdsnow      = snice(0) / dzsnso(0)
       snoflow     = (sneqv - mwd)
       snice(0)    = snice(0)  - snoflow 
@@ -2668,7 +2672,7 @@ end if   ! opt_gla == 1
 
 ! sum up snow mass for layered snow
 
-   if(isnow /= 0) then
+   if(isnow < 0) then
        sneqv = 0.
        snowh = 0.
        do iz = isnow+1,0
@@ -2744,7 +2748,7 @@ end if   ! opt_gla == 1
 
 ! creating a new layer
  
-    if(isnow == 0  .and. qsnow>0. .and. snowh >= 0.05) then
+    if(isnow == 0  .and. qsnow>0. .and. snowh >= 0.025) then
       isnow    = -1
       newnode  =  1
       dzsnso(0)= snowh
@@ -2902,8 +2906,8 @@ end if   ! opt_gla == 1
     real (kind=kind_phys)    :: zwice                 !< total ice mass in snow
     real (kind=kind_phys)    :: zwliq                 !< total liquid water in snow
     real (kind=kind_phys)    :: dzmin(3)              !< minimum of top snow layer
-    data dzmin /0.045, 0.05, 0.2/
-!    data dzmin /0.025, 0.025, 0.1/  ! mb: change limit
+!    data dzmin /0.045, 0.05, 0.2/
+    data dzmin /0.025, 0.025, 0.1/  ! mb: change limit
 !-----------------------------------------------------------------------
 
        isnow_old = isnow
@@ -2913,17 +2917,29 @@ end if   ! opt_gla == 1
              if(j /= 0) then
                 snliq(j+1) = snliq(j+1) + snliq(j)
                 snice(j+1) = snice(j+1) + snice(j)
+                dzsnso(j+1) = dzsnso(j+1) + dzsnso(j)
              else
                if (isnow_old < -1) then
                 snliq(j-1) = snliq(j-1) + snliq(j)
                 snice(j-1) = snice(j-1) + snice(j)
+                dzsnso(j-1) = dzsnso(j-1) + dzsnso(j)
                else
-                ponding1 = ponding1 + snliq(j)       ! isnow will get set to zero below
-                sneqv = snice(j)                     ! ponding will get added to ponding from
-                snowh = dzsnso(j)                    ! phasechange which should be zero here
-                snliq(j) = 0.0                       ! because there it was only calculated
-                snice(j) = 0.0                       ! for thin snow
-                dzsnso(j) = 0.0
+                 if(snice(j) >= 0.) then
+                  ponding1 = snliq(j)    ! isnow will get set to zero below; ponding1 will get
+                  sneqv = snice(j)       ! added to ponding from phasechange ponding should be
+                  snowh = dzsnso(j)      ! zero here because it was calculated for thin snow
+                 else   ! snice over-sublimated earlier
+                  ponding1 = snliq(j) + snice(j)
+                  if(ponding1 < 0.) then  ! if snice and snliq sublimates remove from soil
+                   sice(1) = max(0.0,sice(1)+ponding1/(dzsnso(1)*1000.))
+                   ponding1 = 0.0
+                  end if
+                  sneqv = 0.0
+                  snowh = 0.0
+                 end if
+                 snliq(j) = 0.0
+                 snice(j) = 0.0
+                 dzsnso(j) = 0.0
                endif
 !                sh2o(1) = sh2o(1)+snliq(j)/(dzsnso(1)*1000.)
 !                sice(1) = sice(1)+snice(j)/(dzsnso(1)*1000.)
@@ -2966,8 +2982,8 @@ end if   ! opt_gla == 1
 ! check the snow depth - all snow gone
 ! the liquid water assumes ponding on soil surface.
 
-!       if (snowh < 0.025 .and. isnow < 0 ) then ! mb: change limit
-       if (snowh < 0.05 .and. isnow < 0 ) then
+       if (snowh < 0.025 .and. isnow < 0 ) then ! mb: change limit
+!       if (snowh < 0.05 .and. isnow < 0 ) then
           isnow  = 0
           sneqv = zwice
           ponding2 = ponding2 + zwliq           ! limit of isnow < 0 means input ponding
@@ -3165,8 +3181,8 @@ end if   ! opt_gla == 1
                   zwliq, zwice, tsno(1))
 
              ! subdivide a new layer
-!             if (msno <= 2 .and. dz(2) > 0.20) then  ! mb: change limit
-             if (msno <= 2 .and. dz(2) > 0.10) then
+             if (msno <= 2 .and. dz(2) > 0.20) then  ! mb: change limit
+!             if (msno <= 2 .and. dz(2) > 0.10) then
                 msno = 3
                 dtdz = (tsno(1) - tsno(2))/((dz(1)+dz(2))/2.)
                 dz(2)    = dz(2)/2.
@@ -3293,6 +3309,7 @@ end if   ! opt_gla == 1
         sneqv  = sneqv - qsnsub*dt + qsnfro*dt
         propor = sneqv/temp
         snowh  = max(0.,propor * snowh)
+        snowh  = min(max(snowh,sneqv/500.0),sneqv/50.0)  ! limit adjustment to a reasonable density
       elseif(opt_gla == 2) then
         fsh = fsh - (qsnfro-qsnsub)*hsub
         qsnfro = 0.0

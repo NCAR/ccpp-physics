@@ -10,13 +10,19 @@
 !!
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
-      imp_physics_nssl, nssl_invertccn, nssl_ccn_on,                                                  &
+      imp_physics_nssl, imp_physics_tempo, nssl_invertccn, nssl_ccn_on,                                                  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,&
       index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nssl_cccn, nwfa, spechum, ldiag3d,     &
       qdiag3d, save_lnc, save_inc, ntk, ntke, otsptflag, errmsg, errflg)
 
       use machine,               only: kind_phys
-      use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
+      use module_mp_thompson_make_number_concentrations, only: &
+           make_IceNumber_thmpsn => make_IceNumber, &
+           make_DropletNumber_thmpsn => make_DropletNumber
+
+      use module_mp_tempo_utils, only: &
+           make_IceNumber_tempo => make_IceNumber, &
+           make_DropletNumber_tempo => make_DropletNumber
 
       implicit none
 
@@ -25,7 +31,7 @@
       logical, intent(in)     :: otsptflag(:)! on/off switch for tracer transport by updraft and
       integer,              intent(in   )                   :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw, &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,    &
-        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_nssl
+        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_nssl, imp_physics_tempo
 
       logical,                                  intent(in) :: ltaerosol, convert_dry_rho
       logical,                                  intent(in) :: nssl_ccn_on, nssl_invertccn
@@ -211,7 +217,8 @@
               enddo
           endif
 
-          if (imp_physics == imp_physics_thompson .and. (ntlnc>0 .or. ntinc>0)) then
+          if ((imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_tempo) .and. &
+               (ntlnc>0 .or. ntinc>0)) then
             if_convert_dry_rho: if (convert_dry_rho) then
               do k=1,levs
                 do i=1,im
@@ -225,7 +232,11 @@
                     qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k)) / (one-spechum(i,k))
                     !> - Convert number concentration from moist to dry
                     nc_mp(i,k) = gq0(i,k,ntlnc) / (one-spechum(i,k))
-                    nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                    if (imp_physics == imp_physics_thompson) then
+                       nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber_thmpsn(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                    else
+                       nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber_tempo(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                    endif
                     !> - Convert number concentrations from dry to moist
                     gq0(i,k,ntlnc) = nc_mp(i,k) / (one+qv_mp(i,k))
                   endif
@@ -233,8 +244,12 @@
                     !> - Convert moist mixing ratio to dry mixing ratio
                     qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k)) / (one-spechum(i,k))
                     !> - Convert number concentration from moist to dry
-                    ni_mp(i,k) = gq0(i,k,ntinc) / (one-spechum(i,k)) 
-                    ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                    ni_mp(i,k) = gq0(i,k,ntinc) / (one-spechum(i,k))
+                    if (imp_physics == imp_physics_thompson) then
+                       ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber_thmpsn(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                    else
+                       ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber_tempo(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                    endif
                     !> - Convert number concentrations from dry to moist
                     gq0(i,k,ntinc) = ni_mp(i,k) / (one+qv_mp(i,k))
                   endif
@@ -250,13 +265,21 @@
                     !> - Update cloud water mixing ratio
                     qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k))
                     !> - Update cloud water number concentration
-                    gq0(i,k,ntlnc) = max(zero, gq0(i,k,ntlnc) + make_DropletNumber(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                    if (imp_physics == imp_physics_thompson) then
+                       gq0(i,k,ntlnc) = max(zero, gq0(i,k,ntlnc) + make_DropletNumber_thmpsn(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                    else
+                       gq0(i,k,ntlnc) = max(zero, gq0(i,k,ntlnc) + make_DropletNumber_tempo(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                    endif
                   endif
                   if (ntinc>0) then
                     !> - Update cloud ice mixing ratio
                     qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k))
                     !> - Update cloud ice number concentration
-                    gq0(i,k,ntinc) = max(zero, gq0(i,k,ntinc) + make_IceNumber(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                    if (imp_physics == imp_physics_thompson) then
+                       gq0(i,k,ntinc) = max(zero, gq0(i,k,ntinc) + make_IceNumber_thmpsn(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                    else
+                       gq0(i,k,ntinc) = max(zero, gq0(i,k,ntinc) + make_IceNumber_tempo(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                    endif
                   endif
                 enddo
               enddo

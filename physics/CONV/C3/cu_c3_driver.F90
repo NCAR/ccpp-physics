@@ -657,7 +657,9 @@ contains
      enddo
      do i = its,itf
       if(mconv(i).lt.0.)mconv(i)=0.
-      if((dx(i)<6500.).and.do_mynnedmf.and.(maxMF(i).gt.0.))ierr(i)=555
+      if(do_mynnedmf) then
+        if((dx(i)<6500.).and.(maxMF(i).gt.0.))ierr(i)=555
+      endif
      enddo
 !$acc end kernels
      if (dx(its)<6500.) then
