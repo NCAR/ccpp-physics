@@ -714,7 +714,7 @@
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
             me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, cplflx,                     &
             nsswr, fhswr, lsswr, fhour,                                                             &
-            imfdeepcnv, cal_pre, random_clds, nscyc, ntoz, h2o_phys, iaerclm, iccn, clstp,          &
+            imfdeepcnv, cal_pre, random_clds, nscyc, ntoz, h2o_phys, iaerclm, iaermdl, iccn, clstp, &
             jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm, fn_nml,      &
