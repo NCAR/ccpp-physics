@@ -204,7 +204,7 @@ c  physical parameters
       parameter(betaw=.03,dxcrtc0=9.e3)
       parameter(h1=0.33333333)
 !  progsigma
-      parameter(dxcrtas=30.e3,sigmind=0.01,sigmins=0.03,sigminm=0.01)
+      parameter(dxcrtas=500.e3,sigmind=0.01,sigmins=0.03,sigminm=0.01)
 c  local variables and arrays
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
      &                     uo(im,km),      vo(im,km),     qeso(im,km),
