@@ -637,7 +637,7 @@
 !  ---  outputs:
      &     errflg, errmsg)
 
-        elseif ( iaermdl==1 .or. iaermdl==2 ) then  ! gocart clim/prog scheme
+        elseif ( iaermdl==1 .or. iaermdl==2 .or. iaermdl==6) then  ! gocart clim/prog scheme
 
           call gocart_aerinit                                           &
 !  ---  inputs:
@@ -726,7 +726,10 @@
         print *,' - Using OPAC-seasonal climatology for tropospheric',  &
      &          ' aerosol effect'
       elseif ( iaermdl == 1 ) then
-        print *,' - Using GOCART-climatology for tropospheric',         &
+        print *,' - Using MERRA2-climatology for tropospheric',         &
+     &          ' aerosol effect'
+      elseif ( iaermdl == 6 ) then
+        print *,' - Using MERRA2 3 hourly aerosol for tropospheric',         &
      &          ' aerosol effect'
       elseif ( iaermdl == 2 ) then
         print *,' - Using GOCART-prognostic aerosols for tropospheric', &
@@ -2405,7 +2408,7 @@
      &       )
 
 !
-          elseif ( iaermdl==1 .or. iaermdl==2) then ! use gocart aerosols
+          elseif ( iaermdl==1 .or. iaermdl==2 .or. iaermdl==6) then ! use gocart aerosols
 
           call aer_property_gocart                                        &
 !  ---  inputs:
@@ -2901,7 +2904,7 @@
 !  ---  map grid in longitude direction, lon from 0 to 355 deg resolution
 
 !       print *,' Seeking lon index for point i =',i
-        i3 = i1
+        i3 = 1
         lab_do_IMXAE : do while ( i3 <= IMXAE )
           tmp1 = dltg * (i3 - 1)
           dtmp = alon(i) - tmp1
@@ -2942,7 +2945,7 @@
 !  ---  map grid in latitude direction, lat from 90n to 90s in 5 deg resolution
 
 !       print *,' Seeking lat index for point i =',i
-        j3 = j1
+        j3 = 1
         lab_do_JMXAE : do while ( j3 <= JMXAE )
           tmp2 = 90.0 - dltg * (j3 - 1)
           dtmp = tmp2 - alat(i)

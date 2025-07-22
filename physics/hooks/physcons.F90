@@ -117,6 +117,7 @@
   real(kind=kind_phys),parameter:: con_amn2o  =44.013_kind_phys                    !< molecular wght of n2o (\f$g/mol\f$)
   real(kind=kind_phys),parameter:: con_thgni  =-38.15_kind_phys                    !< temperature the H.G.Nuc. ice starts
   real(kind=kind_phys),parameter:: karman     =0.4_kind_phys                       !< Von Karman constant
+  real(kind=kind_phys),parameter:: con_runiver=con_avgd*con_boltz
 
 !> minimum ice concentration
   real(kind=kind_phys),parameter:: cimin      =0.15                                !< minimum ice concentration
@@ -141,9 +142,28 @@
   real(kind=kind_phys),parameter:: rhosnow    = 100._kind_phys                     !< density of snow (kg/m^3)
   real(kind=kind_phys),parameter:: rhoair     = 1.28_kind_phys                     !< density of air near surface (kg/m^3)
   real(kind=kind_phys),parameter:: rholakeice = 0.917e3_kind_phys                  !< density of ice on lake (kg/m^3)
+  real(kind=kind_phys),parameter:: rhoair_IFS = 1._kind_phys                       !< reference air density (kg/m^3), ref: IFS
 
 ! Decorrelation length constant (km) for iovr = 4 or 5 and idcor = 0
   real(kind=kind_phys),parameter:: decorr_con = 2.50_kind_phys
+
+! for gfdlmp v3
+  real(kind=kind_phys), parameter :: visd  = 1.717e-5 ! dynamics viscosity of air at 0 deg C and 1000 hPa (Mason, 1971) (kg/m/s)
+  real(kind=kind_phys), parameter :: visk  = 1.35e-5  ! kinematic viscosity of air at 0 deg C  and 1000 hPa (Mason, 1971) (m^2/s)
+  real(kind=kind_phys), parameter :: vdifu = 2.25e-5  ! diffusivity of water vapor in air at 0 deg C  and 1000 hPa (Mason, 1971) (m^2/s)
+  real(kind=kind_phys), parameter :: tcond = 2.40e-2  ! thermal conductivity of air at 0 deg C  and 1000 hPa (Mason, 1971) (J/m/s/K)
+  real(kind=kind_phys), parameter :: cdg   = 3.15121  ! drag coefficient of graupel (Locatelli and Hobbs, 1974)
+  real(kind=kind_phys), parameter :: cdh   = 0.5      ! drag coefficient of hail (Heymsfield and Wright, 2014)
+  real(kind=kind_phys), parameter :: rhocw = 1.0e3    ! density of cloud water (kg/m^3)
+  real(kind=kind_phys), parameter :: rhoci = 9.17e2   ! density of cloud ice (kg/m^3)
+  real(kind=kind_phys), parameter :: rhocr = 1.0e3    ! density of rain (Lin et al. 1983) (kg/m^3)
+  real(kind=kind_phys), parameter :: rhocg = 4.0e2    ! density of graupel (Rutledge and Hobbs 1984) (kg/m^3)
+  real(kind=kind_phys), parameter :: rhoch = 9.17e2   ! density of hail (Lin et al. 1983) (kg/m^3)
+  real(kind=kind_phys), parameter :: qcmin = 1.0e-15  ! min value for cloud condensates (kg/kg)
+  real(kind=kind_phys), parameter :: qfmin = 1.0e-8   ! min value for sedimentation (kg/kg)
+  real(kind=kind_phys), parameter :: con_one      = 1_kind_phys
+  real(kind=kind_phys), parameter :: con_p001     = 0.001_kind_phys
+  real(kind=kind_phys), parameter :: con_secinday = 86400._kind_phys
 
 !........................................!
       end module physcons                !

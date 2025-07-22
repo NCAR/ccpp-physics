@@ -1,4 +1,6 @@
+#ifndef CCPP
 #define CCPP
+#endif
 !>  \file noahmpdrv.F90
 !!  This file contains the NoahMP land surface scheme driver.
 
@@ -1152,7 +1154,7 @@ end subroutine noahmpdrv_timestep_init
       call noahmp_options(idveg ,iopt_crs, iopt_btr , iopt_run, iopt_sfc,  &
                                  iopt_frz, iopt_inf , iopt_rad, iopt_alb,  &
                                  iopt_snf, iopt_tbot, iopt_stc, iopt_rsf,  &
-			         iopt_soil,iopt_pedo, iopt_crop,iopt_trs,  &
+                                 iopt_soil,iopt_pedo, iopt_crop,iopt_trs,  &
                                  iopt_diag,iopt_z0m)
 
       if ( vegetation_category == isice_table )  then
@@ -1177,7 +1179,7 @@ end subroutine noahmpdrv_timestep_init
           temperature_soil_bot ,forcing_height       ,snow_ice_frac_old    ,zsoil                , &
           thsfc_loc            ,prslkix              ,prsik1x              ,prslk1x              , &
           air_pressure_surface ,pblhx                ,iz0tlnd              ,itime                , &
-	  vegetation_frac      ,area_grid            ,psi_opt                                    , &
+          vegetation_frac      ,area_grid            ,psi_opt                                    , &
           con_fvirt            ,con_eps              ,con_epsm1            ,con_cp               , &
           snowfall             ,snow_water_equiv_old ,snow_albedo_old      ,                       &
           cm_noahmp            ,ch_noahmp            ,snow_levels          ,snow_water_equiv     , &
@@ -1205,34 +1207,34 @@ end subroutine noahmpdrv_timestep_init
 !
 
         snow_cover_fraction    = 1.0
-        temperature_leaf       = undefined  
-        canopy_ice             = undefined
-        canopy_liquid          = undefined
-        vapor_pres_canopy_air  = undefined
-        temperature_canopy_air = undefined
-        canopy_wet_fraction    = undefined
-        lake_water             = undefined
-        depth_water_table      = undefined
-        aquifer_water          = undefined
-        saturated_water        = undefined
-        leaf_carbon            = undefined
-        root_carbon            = undefined
-        stem_carbon            = undefined
-        wood_carbon            = undefined
-        soil_carbon_stable     = undefined
-        soil_carbon_fast       = undefined
-        leaf_area_index        = undefined
-        stem_area_index        = undefined
-        evaporation_canopy     = undefined
-        transpiration          = undefined
-        aquifer_water          = undefined
-        precip_adv_heat_total  = undefined
+        temperature_leaf       = temperature_radiative
+        canopy_ice             = 0.0
+        canopy_liquid          = 0.0
+        vapor_pres_canopy_air  = 2000.0
+        temperature_canopy_air = temperature_radiative
+        canopy_wet_fraction    = 0.0
+        lake_water             = 0.0
+        depth_water_table      = 0.0
+        aquifer_water          = 0.0
+        saturated_water        = 0.0
+        leaf_carbon            = 0.0
+        root_carbon            = 0.0
+        stem_carbon            = 0.0
+        wood_carbon            = 0.0
+        soil_carbon_stable     = 0.0
+        soil_carbon_fast       = 0.0
+        leaf_area_index        = 0.0
+        stem_area_index        = 0.0
+        evaporation_canopy     = 0.0
+        transpiration          = 0.0
+        aquifer_water          = 0.0
+        precip_adv_heat_total  = 0.0
         soil_moisture_wtd      = 0.0
         recharge               = 0.0
         deep_recharge          = 0.0
         eq_soil_water_vol      = soil_moisture_vol
-        transpiration_heat     = undefined
-        latent_heat_canopy     = undefined
+        transpiration_heat     = 0.0
+        latent_heat_canopy     = 0.0
         z0_total               = 0.002
         latent_heat_total      = latent_heat_ground
         t2mmp(i)               = temperature_bare_2m
@@ -1659,7 +1661,7 @@ end subroutine noahmpdrv_timestep_init
         parameters%den    =    den_table(vegtype)       !tree density (no. of trunks per m2)
         parameters%rc     =     rc_table(vegtype)       !tree crown radius (m)
         parameters%mfsno  =  mfsno_table(vegtype)       !snowmelt m parameter ()
-	parameters%scffac = scffac_table(vegtype)       !snow cover factor
+        parameters%scffac = scffac_table(vegtype)       !snow cover factor
         parameters%cbiom  =  cbiom_table(vegtype)       !canopy biomass heat capacity parameter (m)
         parameters%saim   =   saim_table(vegtype,:)     !monthly stem area index, one-sided
         parameters%laim   =   laim_table(vegtype,:)     !monthly leaf area index, one-sided

@@ -149,7 +149,7 @@ contains
   ! #########################################################################################
   ! Procedure (type-bound) for NRL stratospheric h2o photochemistry physics.
   ! #########################################################################################
-  subroutine run(this, dt, p, h2opltc, h2o)
+  subroutine run(this, dt, p, h2opltc, h2o, dqv_dt_prd, dqv_dt_qv)
     class(ty_h2ophys), intent(in) :: this
     real(kind_phys),   intent(in) :: &
          dt        ! Model timestep (sec)
@@ -159,6 +159,9 @@ contains
          h2opltc   ! h2o forcing data
     real(kind_phys), intent(inout), dimension(:,:) :: &
          h2o       ! h2o concentration (updated)
+    real(kind_phys), intent(inout), dimension(:, :), optional :: &
+         dqv_dt_prd, & ! Net production/loss effect
+         dqv_dt_qv     ! water vapor effect
     
     integer :: nCol, nLev, iCol, iLev, iCf, kmax, kmin, k
     logical, dimension(size(p,1)) :: flg
@@ -226,6 +229,15 @@ contains
              h2o(iCol,iLev)  = (h2oib(iCol) + (pltc(iCol,1)+pltc(iCol,3)*temp)*dt) / (1.0 + temp*dt)
           endif
        enddo
+
+       if (present(dqv_dt_prd)) dqv_dt_prd(:, iLev) = pltc(:, 1) * dt
+       if (present(dqv_dt_qv))  then
+          where (pltc(:, 2) .ne. 0)
+             dqv_dt_qv(:, iLev)  = (h2o(:, iLev) - pltc(:, 3)) * dt / pltc(:, 2)
+          elsewhere
+             dqv_dt_qv(:, iLev) = 0
+          end where
+       end if
     enddo
 
 

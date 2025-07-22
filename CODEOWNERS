@@ -36,9 +36,10 @@ physics/GWD/ugwpv1_gsldrag_post.*                                            @md
 physics/GWD/unified_ugwp*                                                    @mdtoyNOAA                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/MP/Ferrier_Aligo/module_MP_FER_HIRES.*                               @ericaligo-NOAA                           @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/MP/Ferrier_Aligo/mp_fer_hires.*                                      @ericaligo-NOAA                           @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/MP/GFDL/GFDL_parse_tracers.F90                                                                                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/MP/GFDL/gfdl_cloud_microphys.*                                       @RuiyuSun                                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/MP/GFDL/module_gfdl_cloud_microphys.*                                @RuiyuSun                                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/MP/GFDL/v1_2019/gfdl_cloud_microphys.*                               @RuiyuSun                                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/MP/GFDL/v1_2019/gfdl_cloud_microphys_mod.*                           @RuiyuSun                                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/MP/GFDL/v3_2022/gfdl_cloud_microphys_v3.*                            @RuiyuSun                                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/MP/GFDL/v3_2022/gfdl_cloud_microphys_v3_mod.*                        @RuiyuSun                                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/MP/GFDL/fv_sat_adj.*                                                 @RuiyuSun                                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/MP/GFDL/multi_gases.F90                                              @RuiyuSun                                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/MP/Morrison_Gettelman/aer_cloud.F                                    @AnningCheng-NOAA @andrewgettelman        @grantfirl @rhaesung @Qingfu-Liu @dustinswales
