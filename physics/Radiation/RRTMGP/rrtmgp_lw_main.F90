@@ -593,7 +593,7 @@ contains
        fluxlwDOWN_allsky(iCol:iCol2,:) = sum(flux_allsky%bnd_flux_dn, dim=3)
 
        ! Save fluxes for coupling
-       if (use_LW_jacobian) then
+       if (present(fluxlwUP_jac)) then
           fluxlwUP_jac(iCol:iCol2,:)    = fluxLW_up_jac
        endif
        fluxlwUP_radtime(iCol:iCol2,:)   = fluxlwUP_allsky(iCol:iCol2,:)
