@@ -429,7 +429,7 @@ contains
              do ix=1,rrtmgp_phys_blksz
                 ipseed_lw(ix) = lw_gas_props%get_ngpt() + iCol + ix - 1
              enddo
-          elseif (isubc_lw == 2) then ! use input array of permutaion seeds
+          elseif (isubc_lw == 2) then ! use input array of permutation seeds
              do ix=1,rrtmgp_phys_blksz
                 ipseed_lw(ix) = icseed_lw(iCol+ix-1)
              enddo

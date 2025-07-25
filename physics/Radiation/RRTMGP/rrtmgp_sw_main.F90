@@ -482,7 +482,7 @@ contains
                 do iblck = 1, rrtmgp_phys_blksz
                    ipseed_sw(iblck) = sw_gas_props%get_ngpt() + iCols(iblck)
                 enddo
-             elseif (isubc_sw == 2) then ! use input array of permutaion seeds
+             elseif (isubc_sw == 2) then ! use input array of permutation seeds
                 do iblck = 1, rrtmgp_phys_blksz
                    ipseed_sw(iblck) = icseed_sw(iCols(iblck))
                 enddo
