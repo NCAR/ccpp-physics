@@ -273,7 +273,7 @@
 [omegain]
   standard_name = prognostic_updraft_velocity_in_convection
   long_name = convective updraft velocity
-  units = frac
+  units = Pa s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
@@ -282,11 +282,11 @@
 [omegaout]
   standard_name = updraft_velocity_updated_by_physics
   long_name = convective updraft velocity updated by physics
-  units = frac
+  units = Pa s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = True
 [imp_physics]
   standard_name = control_for_microphysics_scheme
@@ -326,6 +326,13 @@
 [imp_physics_thompson]
   standard_name = identifier_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[imp_physics_tempo]
+  standard_name = identifier_for_tempo_microphysics_scheme
+  long_name = choice of TEMPO microphysics scheme
   units = flag
   dimensions = ()
   type = integer

@@ -182,7 +182,7 @@
         integer,parameter:: tmaskc=-272236544    !< tempering parameter
         integer,parameter:: mag01(0:1)=(/0,mata/)
         integer,parameter:: iseed=4357
-        integer,parameter:: nrest=n+6
+        integer,parameter:: nrest=n+4
 !  Defined types
         type random_stat                         !< Generator state 
           private
