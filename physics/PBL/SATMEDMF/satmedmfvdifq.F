@@ -280,7 +280,7 @@
      &                     elmh(im,km),ele_les(im,km),pftke(im),
      &                     dkq_les(im,km),pfl(im),pfdx(im),
      &                     dku_h(im,km),dkq_h(im,km),
-     &                     elmhfac,elmhmx,ckh,elm_les,dddmp,
+     &                     elmhfac,elmhmx,ckh,elm_les,
      &                     cpl1,cpl2,cpl3,cpl4,cpl5,cpl6,
      &                     cptke1,cptke2,cptke3
       integer ktkemax(im)
@@ -330,7 +330,7 @@
       parameter(cpl4=0.153,cpl5=0.278,cpl6=0.720)
       parameter(cptke1=0.07,cptke2=0.142,cptke3=0.071)
       parameter(dkmaxles=300.0,sclmin=500.,sclmax=2500.)
-      parameter(elmhfac=1.5,elmhmx=500.,ckh=0.4)
+      parameter(elmhfac=1.5,elmhmx=1000.,ckh=0.4)
 !
       if (tc_pbl == 0) then
         ck0 = 0.4
