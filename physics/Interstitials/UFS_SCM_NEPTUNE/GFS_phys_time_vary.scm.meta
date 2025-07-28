@@ -50,6 +50,13 @@
   dimensions = ()
   type = logical
   intent = in
+[iaermdl]
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = in
 [iccn]
   standard_name = control_for_ice_cloud_condensation_nuclei_forcing
   long_name = flag for IN and CCN forcing for morrison gettelman microphysics
@@ -1215,6 +1222,13 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+[iaermdl]
+  standard_name = control_for_aerosol_radiation_scheme
+  long_name = control of aerosol scheme in radiation
+  units = 1
+  dimensions = ()
+  type = integer
   intent = in
 [iccn]
   standard_name = control_for_ice_cloud_condensation_nuclei_forcing

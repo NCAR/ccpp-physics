@@ -222,7 +222,8 @@ contains
         dusfc(i)    = 0.0
         dvsfc(i)    = 0.0
         ipt(i) = 0 
-      enddo     
+      enddo
+      zlwb(:) = 0.0
  
 ! ----  for lm and gwd calculation points
 !cires_ugwp_initialize.F90:      real, parameter :: hpmax=2400.0, hpmin=25.0  
