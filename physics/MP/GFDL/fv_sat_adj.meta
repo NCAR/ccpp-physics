@@ -41,7 +41,7 @@
   standard_name = gas_constants_for_multi_gases_physics
   long_name = gas constants for multi gases physics
   units = J kg-1 K-1
-  dimensions = (con_zero:number_of_gases_for_multi_gases_physics)
+  dimensions = (constant_zero:number_of_gases_for_multi_gases_physics)
   type = real
   kind = kind_dyn
   intent = in
@@ -49,7 +49,7 @@
   standard_name = specific_heat_capacities_for_multi_gases_physics
   long_name = specific heat capacities for multi gases physics
   units = J kg-1 K-1
-  dimensions = (con_zero:number_of_gases_for_multi_gases_physics)
+  dimensions = (constant_zero:number_of_gases_for_multi_gases_physics)
   type = real
   kind = kind_dyn
   intent = in
