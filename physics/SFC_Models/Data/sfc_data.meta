@@ -157,7 +157,7 @@
   intent = in
 [ch]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_water
-  long_name = surface exchange coeff heat surface exchange coeff heat & moisture over ocean moisture over water
+  long_name = surface exchange coeff for heat and moisture over water
   units = none
   dimensions = (horizontal_loop_extent)
   type = real
