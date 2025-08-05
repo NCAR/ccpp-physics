@@ -7,6 +7,9 @@
       use mfpbltq_mod
       use tridi_mod
       use mfscuq_mod
+      !PCC_CANOPY_utilities
+      use canopy_utils_mod
+
       contains
 
 !> \defgroup module_satmedmfvdifq GFS TKE-EDMF PBL Module
@@ -74,7 +77,9 @@
 !! (mfscuq.f).
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
       subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,               &
-     &     ntiw,ntke,grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
+     &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
+!The following three variables are for SA-3D-TKE
+     &     def_1,def_2,def_3,sa3dtke,dku3d_h,dku3d_e,                   &
      &     dv,du,tdt,rtg,u1,v1,t1,q1,usfco,vsfco,icplocn2atm,           &
      &     swh,hlw,xmu,garea,zvfun,sigmaf,                              &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
@@ -82,10 +87,16 @@
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,tkeh,           &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
-     &     rlmx,elmx,sfc_rlm,tc_pbl,                                    &
+     &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            &
+!IVAI: canopy inputs from AQM                      
+     &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           &
+!IVAI
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
-     &     errmsg,errflg)
+     &     errmsg,errflg)                                               
+!IVAI: aux arrays
+!     &     naux2d,naux3d,aux2d,aux3d)
+
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -97,21 +108,30 @@
      &                        ntke, ntqv
       integer, intent(in)  :: sfc_rlm
       integer, intent(in)  :: tc_pbl
+      integer, intent(in)  :: use_lpt
       integer, intent(in)  :: kinver(:)
       integer, intent(out) :: kpbl(:)
       logical, intent(in)  :: gen_tend,ldiag3d
 !
-      real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
+      real(kind=kind_phys), intent(in) :: grav,pi,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
       real(kind=kind_phys), intent(in) :: rlmx, elmx
+!PCC CANOPY------------------------------------
+      logical, intent(in)  :: do_canopy, cplaqm
+!IVAI: canopy inputs
+      real(kind=kind_phys), optional, intent(in)  :: claie(:), cfch(:), &
+     &                     cfrt(:), cclu(:), cpopu(:)
+      !----------------------------------------------
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
      &                     tdt(:,:),    rtg(:,:,:),    tkeh(:,:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(:,:),     v1(:,:),                        &
      &                     usfco(:),    vsfco(:),                       &
      &                     t1(:,:),     q1(:,:,:),                      &
+!The following two variables are for SA-3D-TKE
+     &                     def_1(:,:),  def_2(:,:), def_3(:,:),         &
      &                     swh(:,:),    hlw(:,:),                       &
      &                     xmu(:),       garea(:),                      &
      &                     zvfun(:),     sigmaf(:),                     &
@@ -136,9 +156,16 @@
       real(kind=kind_phys), intent(out) ::                              &
      &                     dkt(:,:), dku(:,:)
 !
+      logical, intent(in)  :: sa3dtke !flag for SA-3D-TKE scheme
+
       logical, intent(in)  :: dspheat
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
+
+!For passing dku to the dyn_core (SA-3D-TKE scheme)
+       real(kind=kind_phys), intent(out) :: 
+     &            dku3d_h(:,:),dku3d_e(:,:)
+
 
 !          flag for tke dissipative heating
 !
@@ -248,6 +275,24 @@
      &                     tem,     tem1,   tem2,   tem3,
      &                     ptem,    ptem0,  ptem1,  ptem2
 !
+!The following variables are for SA-3D-TKE
+      integer kk
+      real(kind=kind_phys) thetal(im,km),dku_les(im,km),dkt_les(im,km),
+     &                     elm_les(im,km),ele_les(im,km),pftke(im),
+     &                     dkq_les(im,km),pfl(im),
+     &                     dku_h(im,km),dkq_h(im,km),dddmp,
+     &                     cpl1,cpl2,cpl3,cpl4,
+     &                     cpl5,cpl6,pfnl(im),cpnl1,cpnl2,cpnl3,cpnl4,
+     &                     cpnl5,cpnl6,cptke1,cptke2,cptke3,
+     &                     inv3
+
+      real(kind=kind_phys) ak(im,km),bk(im,km),ck(im,km),pk(im,km),
+     &                     f3(im,km),rizt(im,km)
+      real(kind=kind_phys) aa1,aa2,bb1,bb2,cc1,alpha1, alpha2, alpha3,
+     &                     alpha4,alpha5,ssh,ssm,gh,aa,bb,cc,dd
+      integer l_tkemax,kscl
+      real(kind=kind_phys) tkemax, scl, kmaxles, esmax
+
       real(kind=kind_phys) slfac
 !
       real(kind=kind_phys) vegflo, vegfup, z0lo, z0up, vc0, zc0
@@ -259,6 +304,40 @@
       real(kind=kind_phys) h1
 
       real(kind=kind_phys) bfac, mffac
+      
+      real(kind=kind_phys) qice(im,km),qliq(im,km)
+
+!PCC_CANOPY------------------------------------
+      integer COUNTCAN,KCAN
+      integer kount         !IVAI
+      real(kind=kind_phys) FCH,       MOL,   HOL, TLCAN,
+     &                     SIGMACAN,  RRCAN, BBCAN,
+     &                     AACAN,     ZCAN,  ZFL, BOTCAN,
+     &                     EDDYVEST1, EDDYVEST_INT
+
+      ! in canopy eddy diffusivity [ m**2/s ]
+      real(kind=kind_phys), allocatable  :: EDDYVESTX ( : )
+      ! in canopy layer [m]
+      real(kind=kind_phys), allocatable  :: ZCANX     ( : )
+      ! Declare local maximum canopy layers
+      integer, parameter :: MAXCAN = 1000
+      integer, parameter :: mvt   = 30 ! use 30 instead of 27
+      !Based on MODIS IGBP 20 Category Dataset
+      real :: fch_table(mvt)         !< top of canopy (m)
+       data   ( fch_table(i),i=1,mvt)   /
+     &          20.0, 20.0, 18.0, 16.0, 16.0, 1.10,
+     &          1.10, 13.0, 10.0, 1.00, 5.00, 2.00,
+     &          15.0, 1.50, 0.00, 0.00, 0.00, 4.00,
+     &          2.00, 0.50, 0.00, 0.00, 0.00, 0.00,
+     &          0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
+!----------------------------------------------
+
+!IVAI
+!      integer, intent(in) :: naux2d,naux3d
+!      real(kind_phys), intent(inout) :: aux2d(:,:)
+!      real(kind_phys), intent(inout) :: aux3d(:,:,:)
+!IVAI
+
 !!
       parameter(bfac=100.)
       parameter(wfac=7.0,cfac=4.5)
@@ -282,7 +361,25 @@
       parameter(ck1=0.15,ch1=0.15)
       parameter(cs0=0.4,csmf=0.5)
       parameter(rchck=1.5,ndt=20)
+      !The following variables are for SA-3D-TKE
+      parameter(cpl1=0.280,cpl2=0.870,cpl3=0.913)
+      parameter(cpl4=0.153,cpl5=0.278,cpl6=0.720)
+      parameter(cpnl1=0.243,cpnl2=0.936,cpnl3=1.11)
+      parameter(cpnl4=0.312,cpnl5=0.329,cpnl6=0.757)
+      parameter(cptke1=0.07,cptke2=0.142,cptke3=0.071)
+      parameter(aa1=0.92,aa2=0.74,bb1=16.6,bb2=10.1,cc1=0.08)
+      parameter(kmaxles=300.0,esmax=500.0,dddmp=0.1)
+      parameter(inv3=0.33333333)
+!      parameter(aa1=0.92,aa2=0.649,bb1=17.7,bb2=9.5,cc1=0.08)
 
+!PCC_CANOPY------------------------------------
+      if (do_canopy) then
+        if(.not.allocated(EDDYVESTX))
+     &    allocate( EDDYVESTX    ( MAXCAN ) )
+        if(.not.allocated(ZCANX))
+     &    allocate( ZCANX    ( MAXCAN ) )
+      endif
+!----------------------------------------------
       if (tc_pbl == 0) then
         ck0 = 0.4
         ch0 = 0.4
@@ -434,6 +531,9 @@
          hpbl(i) = 0.
          kpblx(i) = 1
          hpblx(i) = 0.
+         pfl(i)=1.0
+         pfnl(i)=1.0
+         pftke(i)=1.0
          pblflg(i)= .true.
          sfcflg(i)= .true.
          if(rbsoil(i) > 0.) sfcflg(i) = .false.
@@ -462,14 +562,16 @@
       enddo
 !
 !>  - Compute \f$\theta\f$(theta), and \f$q_l\f$(qlx), \f$\theta_e\f$(thetae),
-!! \f$\theta_v\f$(thvx),\f$\theta_{l,v}\f$ (thlvx) including ice water 
-      do k=1,km
+!! \f$\theta_v\f$(thvx),\f$\theta_{l,v}\f$ (thlvx) including ice water
+!The following is for SA-3D-TKE
+      if(sa3dtke) then
+       do k=1,km
         do i=1,im
           pix(i,k)   = psk(i) / prslk(i,k)
           theta(i,k) = t1(i,k) * pix(i,k)
           if(ntiw > 0) then
             tem = max(q1(i,k,ntcw),qlmin)
-            tem1 = max(q1(i,k,ntiw),qlmin)
+            tem1 = max(q1(i,k,ntiw)+q1(i,k,5)+q1(i,k,6),qlmin)
             qlx(i,k) = tem + tem1
             ptem = hvap*tem + (hvap+hfus)*tem1
             slx(i,k)   = cp * t1(i,k) + phil(i,k) - ptem
@@ -489,7 +591,41 @@
 !         gotvx(i,k) = g / tvx(i,k)
           gotvx(i,k) = g / thvx(i,k)
         enddo
-      enddo
+       enddo
+      else
+       do k=1,km
+        do i=1,im
+          pix(i,k)   = psk(i) / prslk(i,k)
+          theta(i,k) = t1(i,k) * pix(i,k)
+          qice(i,k) = 0.0
+          qliq(i,k) = 0.0
+          if(ntiw > 0) then
+            tem = max(q1(i,k,ntcw),qlmin)
+            tem1 = max(q1(i,k,ntiw),qlmin)
+            qice(i,k) = tem1
+            qliq(i,k) = tem
+            qlx(i,k) = tem + tem1
+            ptem = hvap*tem + (hvap+hfus)*tem1
+            slx(i,k)   = cp * t1(i,k) + phil(i,k) - ptem
+          else
+            qlx(i,k) = max(q1(i,k,ntcw),qlmin)
+            slx(i,k)   = cp * t1(i,k) + phil(i,k) - hvap*qlx(i,k)
+            qliq(i,k) = qlx(i,k)
+          endif
+          tem2       = 1.+fv*max(q1(i,k,1),qmin)-qlx(i,k)
+          thvx(i,k)  = theta(i,k) * tem2
+          tvx(i,k)   = t1(i,k) * tem2
+          qtx(i,k) = max(q1(i,k,1),qmin)+qlx(i,k)
+          thlx(i,k)  = theta(i,k) - pix(i,k)*elocp*qlx(i,k)
+          thlvx(i,k) = thlx(i,k) * (1. + fv * qtx(i,k))
+          svx(i,k)   = cp * tvx(i,k)
+          ptem1      = elocp * pix(i,k) * max(q1(i,k,1),qmin)
+          thetae(i,k)= theta(i,k) +  ptem1
+!         gotvx(i,k) = g / tvx(i,k)
+          gotvx(i,k) = g / thvx(i,k)
+        enddo
+       enddo
+      endif !sa3dtke
 
 !>  - Compute an empirical cloud fraction based on 
 !! Xu and Randall (1996) \cite xu_and_randall_1996
@@ -1016,14 +1152,18 @@
       call mfpbltq(im,im,km,kmpbl,ntcw,ntrac1,dt2,
      &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &    gdx,hpbl,kpbl,vpert,buou,wush,tkemean,vez0fun,xmf,
-     &    tcko,qcko,ucko,vcko,xlamue,bl_upfr)
+     &    tcko,qcko,ucko,vcko,xlamue,bl_upfr,
+!The following flag is for SA-3D-TKE (kyf)
+     &    sa3dtke)
 !>  - Call mfscuq(), which is a new mass-flux parameterization for 
 !!    stratocumulus-top-induced turbulence mixing. For details of the mfscuq subroutine, step into its documentation ::mfscuq
       call mfscuq(im,im,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,
      &    krad,mrad,radmin,buod,wush,tkemean,vez0fun,xmfd,
-     &    tcdo,qcdo,ucdo,vcdo,xlamde,bl_dnfr)
+     &    tcdo,qcdo,ucdo,vcdo,xlamde,bl_dnfr,
+!The following flag is for SA-3D-TKE (kyf)
+     &    sa3dtke)
 
       if (tc_pbl == 1) then
 !>  - unify mass fluxes with Cu
@@ -1170,7 +1310,7 @@
 !!   l_2=min(l_{up},l_{down})
 !!\f]
 !! and dissipation length scale \f$l_d\f$ is given by:
-!!\f[ 
+!!\f[
 !!   l_d=(l_{up}l_{down})^{1/2}
 !!\f]
 !!    where \f$l_{up}\f$ and \f$l_{down}\f$ are the distances that a parcel
@@ -1192,6 +1332,7 @@
 !
         enddo
       enddo
+
 !>  - Compute the surface layer length scale (\f$l_1\f$) following 
 !! Nakanishi (2001) \cite Nakanish_2001 (eqn 9 of Han et al.(2019) \cite Han_2019)
       do k = 1, km1
@@ -1244,7 +1385,59 @@
 !> ## Compute eddy diffusivities
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-      do k = 1, km1
+      if(sa3dtke) then
+       do k = 1, km1
+        do i = 1, im
+           tem = 0.5 * (elm(i,k) + elm(i,k+1))
+           tem = tem * sqrt(tkeh(i,k))
+           ri = max(bf(i,k)/(def_1(i,k)+def_2(i,k)),rimin)
+           if(k < kpbl(i)) then
+             if(pcnvflg(i)) then
+               dku(i,k) = ckz(i,k) * tem
+               dkt(i,k) = dku(i,k) / prn(i,k)
+             else
+               if(ri < 0.) then ! unstable regime
+                 dku(i,k) = ckz(i,k) * tem
+                 dkt(i,k) = dku(i,k) / prn(i,k)
+               else             ! stable regime
+                 dkt(i,k) = chz(i,k) * tem
+                 dku(i,k) = dkt(i,k) * prn(i,k)
+               endif
+             endif
+           else
+              if(ri < 0.) then ! unstable regime
+                dku(i,k) = ck1 * tem
+                dkt(i,k) = rchck * dku(i,k)
+              else             ! stable regime
+                dkt(i,k) = ch1 * tem
+                prnum = 1.0 + 2.1 * ri
+                prnum = min(prnum,prmax)
+                dku(i,k) = dkt(i,k) * prnum
+              endif
+           endif
+!
+           if(scuflg(i)) then
+             if(k >= mrad(i) .and. k < krad(i)) then
+                tem1 = ckz(i,k) * tem
+                ptem1 = tem1 / prscu
+                dku(i,k) = max(dku(i,k), tem1)
+                dkt(i,k) = max(dkt(i,k), ptem1)
+             endif
+           endif
+!
+           dkq(i,k) = prtke * dkt(i,k)
+!
+           dkt(i,k) = min(dkt(i,k),dkmax)
+           dkt(i,k) = max(dkt(i,k),xkzo(i,k))
+           dkq(i,k) = min(dkq(i,k),dkmax)
+           dkq(i,k) = max(dkq(i,k),xkzo(i,k))
+           dku(i,k) = min(dku(i,k),dkmax)
+           dku(i,k) = max(dku(i,k),xkzmo(i,k))
+!
+        enddo
+       enddo
+      else
+       do k = 1, km1
         do i = 1, im
            tem = 0.5 * (elm(i,k) + elm(i,k+1))
            tem = tem * sqrt(tkeh(i,k))
@@ -1293,7 +1486,322 @@
            dku(i,k) = max(dku(i,k),xkzmo(i,k))
 !
         enddo
+       enddo
+      endif !sa3dtke
+
+!The following is for SA-3D-TKE
+      if(sa3dtke) then
+! 1. compute LES component of km, kh, and kq (Deardorff 1980)
+! calculate thetal
+        do k=1,km
+          do i=1,im
+          pix(i,k)   = psk(i) / prslk(i,k)
+          theta(i,k) = t1(i,k) * pix(i,k)
+          tem=theta(i,k)/t1(i,k)
+          if(ntiw > 0) then
+            tem1=max(q1(i,k,ntcw),qlmin)+
+     &         max(q1(i,k,ntiw)+q1(i,k,5)+q1(i,k,6),qlmin)
+            thetal(i,k)=theta(i,k)-(hvap+hfus)/cp*tem*tem1
+          else
+            tem1=max(q1(i,k,ntcw),qlmin)
+            thetal(i,k)=theta(i,k)-hvap/cp*tem*tem1
+          endif
+          enddo
+        enddo
+
+        do k=1,km
+          do i=1,im
+            dku_les(i,k)  = 0.
+            dkt_les(i,k)  = 0.
+            dkq_les(i,k)  = 0.
+          enddo
+        enddo
+
+        do k = 1, km1
+          do i = 1, im
+            dz = zl(i,k+1) - zl(i,k)
+            tem=gotvx(i,1)*(thetal(i,k+1)-thetal(i,k))*rdzt(i,k)
+            tem1=(garea(i)*dz)**(inv3)
+! calculate LES mixing length
+            if(tem > 0.0) then
+              elm_les(i,k)=0.76*sqrt(tkeh(i,k))*tem**(-0.5)
+              elm_les(i,k)=min(elm_les(i,k),tem1)
+            else
+              elm_les(i,k)=tem1
+            endif
+            ele_les(i,k)=elm_les(i,k)
+! calculate km, kh, and kq for LES
+            dku_les(i,k)=0.1*elm_les(i,k)*sqrt(tkeh(i,k))
+            dkt_les(i,k)=(1.0+2.0*elm_les(i,k)/tem1)*dku_les(i,k)
+            dkq_les(i,k)=dkt_les(i,k)
+            dku_les(i,k) = min(dku_les(i,k),kmaxles)
+            dkt_les(i,k) = min(dkt_les(i,k),kmaxles)
+            dkq_les(i,k) = min(dkq_les(i,k),kmaxles)
+          enddo
+        enddo
+
+! 2. compute MS horizontal km
+        do k = 1, km1
+          do i = 1, im
+            tem1=sqrt(garea(i))
+            dku_h(i,k)=dddmp*tem1*sqrt(tkeh(i,k))
+          enddo
+            dku_h(i,km)=dku_h(i,km1)
+        enddo
+
+! calculate blending coefficients for km, kt, kq, and nonlocal mixing
+        do i = 1, im
+! finding scale of large eddies from TKE
+!         d/zi
+          scl=1000.
+          l_tkemax=10
+          kscl=10
+          tkemax=0.0
+          do k=1,km1
+          tkemax=max(tkemax,tkeh(i,k))
+          enddo
+          do k=1,km1
+            if (abs(tkeh(i,k)-tkemax)/tkemax < 1.0e-9) then
+              l_tkemax=k
+            endif
+          enddo
+          do k=l_tkemax,km1
+             if (tkeh(i,k)-0.5*tkemax > 0.0) then
+             kscl=k
+             endif
+          enddo
+             kscl=min(kscl,km1-10)
+          scl=zi(i,kscl+1)
+          scl=max(scl,esmax)
+          tem=gdx(i)/max(hpbl(i),scl)
+!          tem=gdx(i)/max(hpbl(i),esmax)
+
+!         partition function for local fluxes
+           pfl(i)=cpl1*(tem**2+cpl2*tem**0.5-cpl3)/
+     &             (tem**2+cpl4*tem**0.5+cpl5)+cpl6
+           pfl(i)=min(max(pfl(i),0.0),1.0)
+!         partition function for nonlocal fluxes
+           pfnl(i)=cpnl1*(tem**2+cpnl2*tem**(7./8.)-cpnl3)/
+     &             (tem**2+cpnl4*tem**(7./8.)+cpnl5)+cpnl6
+           pfnl(i)=min(max(pfnl(i),0.0),1.0)
+!         partition function for TKE
+           pftke(i)=(tem**2+cptke1*tem**(2./3.))/
+     &             (tem**2+cptke2*tem**(2./3.)+cptke3)
+           pftke(i)=min(max(pftke(i),0.0),1.0)
+        enddo
+
+!     blending LES and MS components of km,kt, and kq from in the
+!     vertical and horizontal direction
+      do k = 1,km
+      do i=1,im
+          dkq(i,k)=(1.0-pfl(i))*dkq_les(i,k)+pfl(i)*dkq(i,k)
+          dkt(i,k)=(1.0-pfl(i))*dkt_les(i,k)+pfl(i)*dkt(i,k)
+          dku(i,k)=(1.0-pfl(i))*dku_les(i,k)+pfl(i)*dku(i,k)
+          ri = max(bf(i,k)/(def_1(i,k)+def_2(i,k)),rimin)
+             if(ri < 0.) then ! unstable regime
+               prnum=1./rchck
+             else
+               prnum=1.0 + 2.1 * ri
+             endif
+          dkq_h(i,k)=(1.0-pfl(i))*dkq_les(i,k)+
+     &                      pfl(i)*dku_h(i,k)/prnum
+          dku_h(i,k)=(1.0-pfl(i))*dku_les(i,k)+pfl(i)*dku_h(i,k)
       enddo
+      enddo
+
+!     perform scale-aware for non-local transport
+      do k = 1, kmpbl
+        do i = 1, im
+          if (pcnvflg(i) .and. k < kpbl(i)) then
+             xmf(i,k) =  pfnl(i) * xmf(i,k)
+          endif
+        enddo
+      enddo
+      
+       do k = kmscu, 1, -1
+        do i = 1, im
+          if(scuflg(i) .and.
+     &      (k >= mrad(i) .and. k < krad(i))) then
+             xmfd(i,k) = pfnl(i) * xmfd(i,k)
+          endif
+        enddo
+      enddo
+
+      endif !sa3dtke
+
+!PCC_CANOPY------------------------------------
+      kount=0 !IVAI
+      if (do_canopy .and. cplaqm) then 
+
+!IVAI
+!        print*, 'SATMEDMFVDIFQ_RUN: CLAIE = ', claie(:)
+!        print*, 'SATMEDMFVDIFQ_RUN: CFCH = ' , cfch (:)
+!        print*, 'SATMEDMFVDIFQ_RUN: CFRT = ' , cfrt (:)
+!        print*, 'SATMEDMFVDIFQ_RUN: CCLU = ' , cclu (:)
+!        print*, 'SATMEDMFVDIFQ_RUN: CPOPU= ' , cpopu(:)
+! 2D aux arrays: canopy data in diffusion
+!        aux2d(:,1) = cfch (:)
+!        aux2d(:,2) = claie(:)
+!        aux2d(:,3) = cfrt(:)
+
+! 3D aux arrays: before canopy correction
+!        aux3d(:,:,1) = dkq(:,:)
+!        aux3d(:,:,2) = dkt(:,:)
+!        aux3d(:,:,3) = dku(:,:)
+!IVAI
+        do k = 1, km1-1
+          do i = 1, im
+
+!IVAI: AQM canopy Inputs
+!           FCH = fch_table(vegtype(i)) !top of canopy from look-up table
+            FCH = cfch(i)               !top of canopy from AQM canopy inputs
+            IF (k .EQ. 1) THEN !use model layer interfaces
+              KCAN = 1
+            ELSE
+              IF (   cfch(i) .GT. zi(i,k)
+     &         .AND. cfch(i) .LE. zi(i,k+1) ) THEN
+                KCAN = 1
+              ELSE
+                KCAN = 0
+              END IF
+            END IF
+
+            IF (KCAN .EQ. 1) THEN !canopy inside model layer
+!           Check for other Contiguous Canopy Grid Cell Conditions
+
+!           Not a contigous canopy cell
+            IF (   claie(i) .LT. 0.1
+     &        .OR. cfch (i) .LT. 0.5
+!IVAI: modified contiguous canopy condition
+!    &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.5
+     &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.75
+!IVAI
+     &        .OR. cpopu(i) .GT. 10000.0
+     &        .OR. (EXP(-0.5*claie(i)*cclu(i)) .GT. 0.45
+     &                          .AND. cfch(i)  .LT. 18.) ) THEN
+
+
+!TODO: Canopy Inputs
+!                        IF ( XCANOPYLAI .LT. 0.1  !from canopy inputs
+!                        IF ( lai(i) .LT. 0.1  !from LSM
+!     &                   .OR. FCH .LT. 0.5 ) THEN
+!     &                   .OR. MAX(0.0, 1.0 - XCANOPYFRT) .GT. 0.5
+!     &                   .OR. POPU .GT. 10000.0
+!     &                   .OR. EXP(-0.5*XCANOPYLAI*XCANOPYCLU).GT. 0.45
+!     &                      .AND. FCH .LT. 18.0 ) THEN 
+
+              dkt(i,k)= dkt(i,k)
+              dkq(i,k)= dkq(i,k)
+              dku(i,k)= dku(i,k)
+
+            ELSE ! There is a contiguous forest canopy, apply correction over canopy layers
+
+! Output contiguous canopy mask
+!              if (kount .EQ. 0 ) aux2d(i,5) = aux2d(i,5) + 1
+
+!Raupauch M. R. A Practical Lagrangian method for relating scalar
+!concentrations to
+! source distributions in vegetation canopies. Q. J. R. Meteor. Soc.
+! (1989), 115, pp 609-632
+              MOL  = zol(i)/zl(i,k)  !Monin-Obukhov Length in layer
+              HOL = FCH/MOL  !local canopy stability parameter (hc/MOL)
+              ZCAN = zi(i,k+1) ! Initialize each model layer top that contains canopy (m)
+                             ! Integrate across total model interface
+              ZFL = ZCAN     ! Set ZFL = ZCAN
+              COUNTCAN = 0   ! Initialize canopy layers
+
+              IF (k .EQ. 1) THEN  !Find bottom in each model layer
+                  BOTCAN = 0.5
+              ELSE
+                  BOTCAN = zi(i,k)
+              END IF
+
+              DO WHILE (ZCAN.GE.BOTCAN)
+                 ! TLCAN = Lagrangian timescale
+                 TLCAN = (FCH/ustar(i)) * (
+     &                   (0.256 * (ZCAN-(0.75*FCH))/FCH ) +
+     &                   (0.492*EXP((-0.256*ZCAN/FCH)/0.492)) )
+                 IF ( HOL .LT. -0.1 )  THEN  !STRONG UNSTABLE
+                  IF ( ZCAN/FCH .GT. 1.25 ) THEN !SIGMACAN = Eulerian vertical velocity variance
+                    SIGMACAN = 1.25*ustar(i)
+                  END IF
+                  IF ( ZCAN/FCH .GE. 0.175  
+     &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
+                      SIGMACAN = ustar(i) * ( 0.75 + 
+     &                         (0.5 * COS((PI/1.06818) *
+     &                         (1.25 - (ZCAN/FCH)))) )
+                  END IF
+                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
+                    SIGMACAN = 0.25*ustar(i)
+                  END IF
+                 END IF
+                 IF ( HOL .GE. -0.1  .AND. HOL .LT. 0.1 )   THEN !WEAKLY UNSTABLE to NEUTRAL
+                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
+                    SIGMACAN = 1.0*ustar(i)
+                  END IF
+                  IF ( ZCAN/FCH .GE. 0.175  
+     &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
+                    SIGMACAN = ustar(i) * ( 0.625 + 
+     &                       (0.375* COS((PI/1.06818) *
+     &                       (1.25 - (ZCAN/FCH)))) )
+                  END IF
+                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
+                    SIGMACAN = 0.25*ustar(i)
+                  END IF
+                 END IF
+                 IF ( HOL .GE.  0.1  .AND.  HOL .LT. 0.9 )   THEN !STABLE
+                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
+                    SIGMACAN = 0.25*(4.375 - (3.75*HOL))*ustar(i)
+                  END IF
+                  IF ( ZCAN/FCH .GE. 0.175  
+     &                 .AND. ZCAN/FCH .LE. 1.25 ) THEN
+                    RRCAN=4.375-(3.75*HOL)
+                    AACAN=(0.125*RRCAN) + 0.125
+                    BBCAN=(0.125*RRCAN) - 0.125
+                    SIGMACAN = ustar(i) * ( AACAN + 
+     &                             (BBCAN * COS((PI/1.06818) *
+     &                             (1.25 - (ZCAN/FCH)))) )
+                  END IF
+                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
+                    SIGMACAN = 0.25*ustar(i)
+                  END IF
+                 END IF
+                 IF ( HOL .GE.  0.9 ) THEN  !VERY STABLE
+                    SIGMACAN = 0.25*ustar(i)
+                 END IF
+                 IF ( ZCAN .EQ. ZFL )  THEN ! Each model layer that includes canopy
+                  EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN
+                 ELSE IF ( ZCAN .LE. FCH )  THEN !in-canopy layers and set arrays
+                  COUNTCAN = COUNTCAN + 1
+                  ZCANX (COUNTCAN)     = ZCAN
+                  EDDYVESTX (COUNTCAN) = (SIGMACAN*SIGMACAN)*TLCAN
+                 END IF
+                 ZCAN = ZCAN-0.5  !step down in-canopy resolution of 0.5m
+              END DO !end loop on canopy layers
+              EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)
+     &                                ),EDDYVESTX(COUNTCAN:1:-1)) / ZFL
+              dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
+              dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
+              dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
+
+!IVAI: Output contiguos canopy correction bottom layer and 3D
+!              if ( kount .EQ.  0)
+!     &           aux2d(i,4) = 1./EDDYVEST1  * EDDYVEST_INT
+!              aux3d(i,k,4) = 1./EDDYVEST1  * EDDYVEST_INT
+!IVAI
+
+            END IF   ! contigous canopy conditions
+
+            END IF   ! (KCAN .EQ. 1) model layer(s) containing canopy
+
+          enddo !i
+
+          kount = kount + 1 !IVAI
+
+        enddo !k
+
+      endif !do_canopy .and. cplaqm
+
 !> ## Compute TKE.
 !!  - Compute a minimum TKE deduced from background diffusivity for momentum.
 !
@@ -1317,7 +1825,129 @@
 !>  - Compute buoyancy and shear productions of TKE 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-      do k = 1, km1
+      if(sa3dtke) then
+       do k = 1, km1
+        do i = 1, im
+          if (k == 1) then
+            tem = -dkt(i,1) * bf(i,1)
+!           if(pcnvflg(i)) then
+!             ptem1 = xmf(i,1) * buou(i,1)
+!           else
+              ptem1 = 0.
+!           endif
+            if(scuflg(i) .and. mrad(i) == 1) then
+              ptem2 = xmfd(i,1) * buod(i,1)
+            else
+              ptem2 = 0.
+            endif
+            tem = tem + ptem1 + ptem2
+            buop = 0.5 * (gotvx(i,1) * sflux(i) + tem)
+!
+            tem1 = dku(i,1)*def_1(i,1)+dku_h(i,1)*def_2(i,1)
+!
+            tem = (u1(i,2)-u1(i,1))*rdzt(i,1)
+!           if(pcnvflg(i)) then
+!             ptem = xmf(i,1) * tem
+!             ptem1 = 0.5 * ptem * (u1(i,2)-ucko(i,2))
+!           else
+              ptem1 = 0.
+!           endif
+            if(scuflg(i) .and. mrad(i) == 1) then
+              ptem = ucdo(i,1)+ucdo(i,2)-u1(i,1)-u1(i,2)
+              ptem = 0.5 * tem * xmfd(i,1) * ptem
+            else
+              ptem = 0.
+            endif
+            ptem1 = ptem1 + ptem
+!
+            tem = (v1(i,2)-v1(i,1))*rdzt(i,1)
+!           if(pcnvflg(i)) then
+!             ptem = xmf(i,1) * tem
+!             ptem2 = 0.5 * ptem * (v1(i,2)-vcko(i,2))
+!           else
+              ptem2 = 0.
+!           endif
+            if(scuflg(i) .and. mrad(i) == 1) then
+              ptem = vcdo(i,1)+vcdo(i,2)-v1(i,1)-v1(i,2)
+              ptem = 0.5 * tem * xmfd(i,1) * ptem
+            else
+              ptem = 0.
+            endif
+            ptem2 = ptem2 + ptem
+!
+            tem2 = stress(i)*ustar(i)*phims(i)/(vk*zl(i,1))
+            shrp = 0.5 * (tem1 + ptem1 + ptem2 + tem2)
+          else
+            tem1 = -dkt(i,k-1) * bf(i,k-1)
+            tem2 = -dkt(i,k) * bf(i,k)
+            tem  = 0.5 * (tem1 + tem2)
+            if(pcnvflg(i) .and. k <= kpbl(i)) then
+              ptem = 0.5 * (xmf(i,k-1) + xmf(i,k))
+              ptem1 = ptem * buou(i,k)
+            else
+              ptem1 = 0.
+            endif
+            if(scuflg(i)) then
+              if(k >= mrad(i) .and. k < krad(i)) then
+                ptem0 = 0.5 * (xmfd(i,k-1) + xmfd(i,k))
+                ptem2 = ptem0 * buod(i,k)
+              else
+                ptem2 = 0.
+              endif
+            else
+              ptem2 = 0.
+            endif
+            buop = tem + ptem1 + ptem2
+!
+!         obtaining 3d shear production from dycore
+            tem1 = dku(i,k-1)*def_1(i,k-1)+dku_h(i,k-1)*def_2(i,k-1)
+            tem2 = dku(i,k)*def_1(i,k)+dku_h(i,k)*def_2(i,k)
+            tem  = 0.5*(tem1+tem2)
+            tem1 = (u1(i,k+1)-u1(i,k))*rdzt(i,k)
+            tem2 = (u1(i,k)-u1(i,k-1))*rdzt(i,k-1)
+            if(pcnvflg(i) .and. k <= kpbl(i)) then
+              ptem = xmf(i,k) * tem1 + xmf(i,k-1) * tem2
+              ptem1 = 0.5 * ptem * (u1(i,k)-ucko(i,k))
+            else
+              ptem1 = 0.
+            endif
+            if(scuflg(i)) then
+              if(k >= mrad(i) .and. k < krad(i)) then
+                ptem0 = xmfd(i,k) * tem1 + xmfd(i,k-1) * tem2
+                ptem2 = 0.5 * ptem0 * (ucdo(i,k)-u1(i,k))
+              else
+                ptem2 = 0.
+              endif
+            else
+              ptem2 = 0.
+            endif
+            shrp = tem + ptem1 + ptem2
+            tem1 = (v1(i,k+1)-v1(i,k))*rdzt(i,k)
+            tem2 = (v1(i,k)-v1(i,k-1))*rdzt(i,k-1)
+            if(pcnvflg(i) .and. k <= kpbl(i)) then
+              ptem = xmf(i,k) * tem1 + xmf(i,k-1) * tem2
+              ptem1 = 0.5 * ptem * (v1(i,k)-vcko(i,k))
+            else
+              ptem1 = 0.
+            endif
+            if(scuflg(i)) then
+              if(k >= mrad(i) .and. k < krad(i)) then
+                ptem0 = xmfd(i,k) * tem1 + xmfd(i,k-1) * tem2
+                ptem2 = 0.5 * ptem0 * (vcdo(i,k)-v1(i,k))
+              else
+                ptem2 = 0.
+              endif
+            else
+              ptem2 = 0.
+            endif
+            shrp = shrp + ptem1 + ptem2
+          endif
+!
+          prod(i,k) = buop + shrp
+        enddo
+       enddo
+      else
+       do k = 1, km1
         do i = 1, im
           if (k == 1) then
             tem = -dkt(i,1) * bf(i,1)
@@ -1434,14 +2064,41 @@
           endif
           prod(i,k) = buop + shrp
         enddo
-      enddo
+       enddo
+      endif !sa3dtke
 !
 !----------------------------------------------------------------------
 !>  - First predict tke due to tke production & dissipation(diss)  
 !
-      dtn = dt2 / float(ndt)
-      do n = 1, ndt
-      do k = 1,km1
+      if(sa3dtke) then
+!The following is for SA-3D-TKE
+       dtn = dt2 / float(ndt)
+       do n = 1, ndt
+       do k = 1,km1
+        do i=1,im
+           tem = sqrt(tke(i,k))
+!        calculating 3D TKE transport and pressure correlation
+           dz = zl(i,k+1) - zl(i,k)
+           ptem1 = ce0 / ele(i,k)
+           tem1=(garea(i)*dz)**(inv3)
+           tem2=0.19+0.51*ele_les(i,k)/tem1
+           ptem2= tem2 / ele_les(i,k)
+           ptem=(1.0-pftke(i))*ptem2+pftke(i)*ptem1
+           diss(i,k) = ptem * tke(i,k) * tem
+           tem1 = prod(i,k) + tke(i,k) / dtn
+           diss(i,k)=max(min(diss(i,k), tem1), 0.)
+           tem=2.0*def_3(i,k)
+           tem=min(tem,1.0)
+           tke(i,k) = tke(i,k) + dtn * (prod(i,k)-diss(i,k)+tem)
+!          tke(i,k) = max(tke(i,k), tkmin)
+           tke(i,k) = max(tke(i,k), tkmnz(i,k))
+        enddo
+       enddo
+       enddo
+      else
+       dtn = dt2 / float(ndt)
+       do n = 1, ndt
+       do k = 1,km1
         do i=1,im
            tem = sqrt(tke(i,k))
            ptem = ce0 / ele(i,k)
@@ -1452,8 +2109,9 @@
 !          tke(i,k) = max(tke(i,k), tkmin)
            tke(i,k) = max(tke(i,k), tkmnz(i,k))
         enddo
-      enddo
-      enddo
+       enddo
+       enddo
+      endif !sa3dtke
 !
 !>  - Compute updraft & downdraft properties for TKE
 !
@@ -1565,6 +2223,7 @@
           tkei(i,k) = 0.5 * (tke(i,k)+tke(i,k+1))
         enddo
       enddo
+
       do k=1,kps
         do i=1,im
           e_diff(i,k) = tke(i,k) - tke(i,k+1)
@@ -1667,6 +2326,7 @@
 !
         enddo
       enddo
+
 c
 !>  - Call tridit() to solve tridiagonal problem for TKE
 c
@@ -1818,6 +2478,10 @@ c
           rdz     = rdzt(i,k)
           tem1    = dsig * dkt(i,k) * rdz
           dsdzt   = tem1 * gocp
+          if (use_lpt > 0) then
+            dsdzt = dsdzt-tem1*elocp*(qliq(i,k+1)-qliq(i,k))*rdz
+     &        -(1+0.33/2.5)*tem1*elocp*(qice(i,k+1)-qice(i,k))*rdz
+          endif
           dsdz2   = tem1 * rdz
           au(i,k) = -dtodsd*dsdz2
           al(i,k) = -dtodsu*dsdz2
@@ -2416,10 +3080,23 @@ c
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !> ## Save PBL height for diagnostic purpose
 !
-      do i = 1, im
-         hpbl(i) = hpblx(i)
-         kpbl(i) = kpblx(i)
-      enddo
+      if(sa3dtke) then
+        do i = 1, im
+          hpbl(i) = hpblx(i)
+          kpbl(i) = kpblx(i)
+        enddo
+        do k = 1, km
+          do i = 1, im
+            dku3d_h(i,k)  = dku_h(i,k)   ! pass dku3d_h to dyn_core
+            dku3d_e(i,k)  = dkq_h(i,k)   ! pass dku3d_e to dyn_core
+          enddo
+        enddo
+      else
+        do i = 1, im
+          hpbl(i) = hpblx(i)
+          kpbl(i) = kpblx(i)
+        enddo
+      endif  !sa3dtke
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       return
