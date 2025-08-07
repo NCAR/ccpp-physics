@@ -2,7 +2,7 @@
   name = cires_ugwp
   type = scheme
 # DH* 20200804 - this is a result of the nasty hack to call gwdps from within ugwp-v0!
-  dependencies=cires_ugwp_triggers.F90,cires_ugwp_initialize.F90
+  dependencies=ugwp_common_v0.f90,cires_ugwp_triggers.F90,cires_ugwp_initialize.F90
   dependencies=cires_orowam2017.f,cires_ugwp_module.F90,gwdps.f,../hooks/machine.F,ugwp_driver_v0.F
 
 ########################################################################
@@ -822,7 +822,7 @@
   type = real
   kind = kind_phys
   intent = in
-[dqdt_tke] 
+[dqdt_tke]
   standard_name = process_split_cumulative_tendency_of_turbulent_kinetic_energy
   long_name = turbulent kinetic energy tendency due to model physics
   units = J s-1

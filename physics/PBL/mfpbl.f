@@ -47,10 +47,9 @@
 !!  @{
       subroutine mfpbl(im,ix,km,ntrac,delt,cnvflg,                      &
      &   zl,zm,thvx,q1,t1,u1,v1,hpbl,kpbl,                              &
-     &   sflx,ustar,wstar,xmf,tcko,qcko,ucko,vcko)
+     &   sflx,ustar,wstar,xmf,tcko,qcko,ucko,vcko,con_g,con_cp)
 !
       use machine , only : kind_phys
-      use physcons, grav => con_g, cp => con_cp
 !
       implicit none
 !
@@ -67,6 +66,8 @@
      &                     wstar(im),  xmf(im,km),                      &
      &                     tcko(im,km),qcko(im,km,ntrac),               &
      &                     ucko(im,km),vcko(im,km)
+      real(kind=kind_phys), intent(in) :: con_g
+      real(kind=kind_phys), intent(in) :: con_cp
 !
 c  local variables and arrays
 !
@@ -91,14 +92,25 @@ c  local variables and arrays
      &                     buo(im,km)
 !
       logical totflg, flg(im)
+      real(kind=kind_phys) :: grav
+      real(kind=kind_phys) :: cp
 !
+      grav = con_g
+      cp = con_cp
 c  physical parameters
-      parameter(g=grav)
-      parameter(gocp=g/cp)
+      g=grav
+      gocp=g/cp
 !     parameter(ce0=0.37,qmin=1.e-8,alp=1.0,pgcon=0.55)
-      parameter(ce0=0.38,qmin=1.e-8,alp=1.0,pgcon=0.55)
-      parameter(a1=0.08,b1=0.5,f1=0.15,c1=0.3,d1=2.58,tau=500.)
-      parameter(zfmin=1.e-8,h1=0.33333333)
+      ce0=0.38
+      qmin=1.e-8
+      alp=1.0
+      pgcon=0.55
+      a1=0.08
+      b1=0.5
+      f1=0.15
+c     1=0.3,d1=2.58,tau=500.
+      zfmin=1.e-8
+      h1=0.33333333
 !
 c-----------------------------------------------------------------------
 !
