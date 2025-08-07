@@ -1392,7 +1392,7 @@
 !-----------------------------------
       subroutine rswinit( me, rad_hr_units, inc_minor_gas, iswcliq,     &
            isubcsw, iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,&
-           iovr_exp, iovr_exprand, iswmode, con_cp, con_g,              &
+           iovr_exp, iovr_exprand, iswmode, con_g, con_cp,              &
            errflg, errmsg )
 
 !  ===================  program usage description  ===================  !
