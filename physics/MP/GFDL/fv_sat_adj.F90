@@ -46,7 +46,7 @@ module fv_sat_adj
 !     <td>is_master</td>
 !   </tr>
 !   <tr>
-!     <td>gfdl_cloud_microphys_mod</td>
+!     <td>module_gfdl_param</td>
 !     <td>ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt,
 !         tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r,
 !         rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land, tintqs</td>
@@ -61,10 +61,11 @@ module fv_sat_adj
                          cp_air => con_cp_dyn
     ! *DH
     use machine,                  only: kind_grid, kind_dyn
-    use gfdl_cloud_microphys_mod, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
-    use gfdl_cloud_microphys_mod, only: icloud_f, sat_adj0, t_sub, cld_min
-    use gfdl_cloud_microphys_mod, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
-    use gfdl_cloud_microphys_mod, only: rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land, tintqs
+    use module_gfdlmp_param, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
+    use module_gfdlmp_param, only: icloud_f, sat_adj0, t_sub, cld_min
+    use module_gfdlmp_param, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
+    use module_gfdlmp_param, only: rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land, tintqs
+
 #ifdef MULTI_GASES
     use ccpp_multi_gases_mod, only: multi_gases_init,     &
                                     multi_gases_finalize, &

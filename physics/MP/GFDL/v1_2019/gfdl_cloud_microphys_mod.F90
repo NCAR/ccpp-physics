@@ -40,7 +40,22 @@ module gfdl_cloud_microphys_mod
     ! use fms_mod, only: write_version_number, open_namelist_file, &
     ! check_nml_error, file_exist, close_file
 
+  ! -----------------------------------------------------------------------
    use module_mp_radar
+   use module_gfdlmp_param, only: read_gfdlmp_nml, mp_time, t_min, t_sub, &
+        tau_r2g, tau_smlt, tau_g2r, dw_land, dw_ocean, vi_fac, vr_fac,    &
+        vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vi_max, vs_max,      &
+        vg_max, vr_max, qs_mlt, qs0_crt, qi_gen, ql0_max, qi0_max,        &
+        qi0_crt, qr0_crt, fast_sat_adj, rh_inc, rh_ins, rh_inr, const_vi, &
+        const_vs, const_vg, const_vr, use_ccn, rthresh, ccn_l, ccn_o,     &
+        qc_crt, tau_g2v, tau_v2g, sat_adj0, c_piacr, tau_imlt, tau_v2l,   &
+        tau_l2v, tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci,       &
+        c_pgacs, z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, &
+        tice, rad_snow, rad_graupel, rad_rain, cld_min, use_ppm,          &
+        mono_prof, do_sedi_heat, sedi_transport, do_sedi_w, de_ice,       &
+        icloud_f, irain_f, mp_print, reiflag, rewmin, rewmax, reimin,     &
+        reimax, rermin, rermax, resmin, resmax, regmin, regmax, tintqs,   &
+        do_hail
 
    implicit none
 
@@ -146,21 +161,7 @@ module gfdl_cloud_microphys_mod
    real :: lv00                                            !< the same as lv0, except that cp_vap can be cp_vap or cv_vap
 
    ! cloud microphysics switchers
-
-   integer :: icloud_f = 0                                 !< cloud scheme
-   integer :: irain_f = 0                                  !< cloud water to rain auto conversion scheme
-
-   logical :: de_ice = .false.                             !< to prevent excessive build - up of cloud ice from external sources
-   logical :: sedi_transport = .true.                      !< transport of momentum in sedimentation
-   logical :: do_sedi_w = .false.                          !< transport of vertical motion in sedimentation
-   logical :: do_sedi_heat = .true.                        !< transport of heat in sedimentation
-   logical :: prog_ccn = .false.                           !< do prognostic ccn (yi ming's method)
-   logical :: do_qa = .true.                               !< do inline cloud fraction
-   logical :: rad_snow = .true.                            !< consider snow in cloud fraciton calculation
-   logical :: rad_graupel = .true.                         !< consider graupel in cloud fraction calculation
-   logical :: rad_rain = .true.                            !< consider rain in cloud fraction calculation
-   logical :: fix_negative = .false.                       !< fix negative water species
-    logical :: do_setup = .true. !< setup constants and parameters
+   logical :: do_setup = .true.                            !< setup constants and parameters
    logical :: p_nonhydro = .false.                         !< perform hydrosatic adjustment on air density
 
    real, allocatable :: table (:), table2 (:), table3 (:), tablew (:)
@@ -183,170 +184,8 @@ module gfdl_cloud_microphys_mod
    ! qs0_crt = 0.6e-3
    ! c_psaci = 0.1
    ! c_pgacs = 0.1
-
-   ! -----------------------------------------------------------------------
-   ! namelist parameters
-   ! -----------------------------------------------------------------------
-
-   real :: cld_min = 0.05                                  !< minimum cloud fraction
-   real :: tice = 273.16                                   !< set tice = 165. to trun off ice - phase phys (kessler emulator)
-
-   real :: t_min = 178.                                    !< min temp to freeze - dry all water vapor
-   real :: t_sub = 184.                                    !< min temp for sublimation of cloud ice
-   real :: mp_time = 150.                                  !< maximum micro - physics time step (sec)
-
-   ! relative humidity increment
-
-   real :: rh_inc = 0.25                                   !< rh increment for complete evaporation of cloud water and cloud ice
-   real :: rh_inr = 0.25                                   !< rh increment for minimum evaporation of rain
-   real :: rh_ins = 0.25                                   !< rh increment for sublimation of snow
-
-   ! conversion time scale
-
-   real :: tau_r2g = 900.                                  !< rain freezing during fast_sat
-   real :: tau_smlt = 900.                                 !< snow melting
-   real :: tau_g2r = 600.                                  !< graupel melting to rain
-   real :: tau_imlt = 600.                                 !< cloud ice melting
-   real :: tau_i2s = 1000.                                 !< cloud ice to snow auto-conversion
-   real :: tau_l2r = 900.                                  !< cloud water to rain auto-conversion
-   real :: tau_v2l = 150.                                  !< water vapor to cloud water (condensation)
-   real :: tau_l2v = 300.                                  !< cloud water to water vapor (evaporation)
-   real :: tau_g2v = 900.                                  !< graupel sublimation
-   real :: tau_v2g = 21600.                                !< graupel deposition -- make it a slow process
-
-   ! horizontal subgrid variability
-
-   real :: dw_land = 0.20                                  !< base value for subgrid deviation / variability over land
-   real :: dw_ocean = 0.10                                 !< base value for ocean
-
-   ! prescribed ccn
-
-   real :: ccn_o = 90.                                     !< ccn over ocean (cm^ - 3)
-   real :: ccn_l = 270.                                    !< ccn over land (cm^ - 3)
-
-   real :: rthresh = 10.0e-6                               !< critical cloud drop radius (micro m)
-
-   ! -----------------------------------------------------------------------
-   ! wrf / wsm6 scheme: qi_gen = 4.92e-11 * (1.e3 * exp (0.1 * tmp)) ** 1.33
-   ! optimized: qi_gen = 4.92e-11 * exp (1.33 * log (1.e3 * exp (0.1 * tmp)))
-   ! qi_gen ~ 4.808e-7 at 0 c; 1.818e-6 at - 10 c, 9.82679e-5 at - 40c
-   ! the following value is constructed such that qc_crt = 0 at zero c and @ - 10c matches
-   ! wrf / wsm6 ice initiation scheme; qi_crt = qi_gen * min (qi_lim, 0.1 * tmp) / den
-   ! -----------------------------------------------------------------------
-
-   real :: sat_adj0 = 0.90                                 !< adjustment factor (0: no, 1: full) during fast_sat_adj
-
-   real :: qc_crt = 5.0e-8                                 !< mini condensate mixing ratio to allow partial cloudiness
-
-   real :: qi_lim = 1.                                     !< cloud ice limiter to prevent large ice build up
-
-   real :: ql_mlt = 2.0e-3                                 !< max value of cloud water allowed from melted cloud ice
-   real :: qs_mlt = 1.0e-6                                 !< max cloud water due to snow melt
-
-   real :: ql_gen = 1.0e-3                                 !< max cloud water generation during remapping step if fast_sat_adj = .t.
-   real :: qi_gen = 1.82e-6                                !< max cloud ice generation during remapping step
-
-   ! cloud condensate upper bounds: "safety valves" for ql & qi
-
-   real :: ql0_max = 2.0e-3                                !< max cloud water value (auto converted to rain)
-   real :: qi0_max = 1.0e-4                                !< max cloud ice value (by other sources)
-
-   real :: qi0_crt = 1.0e-4                                !< cloud ice to snow autoconversion threshold (was 1.e-4);
-                                                           !! qi0_crt is highly dependent on horizontal resolution
-   real :: qr0_crt = 1.0e-4                                !< rain to snow or graupel/hail threshold
-                                                           ! lfo used * mixing ratio * = 1.e-4 (hail in lfo)
-   real :: qs0_crt = 1.0e-3                                !< snow to graupel density threshold (0.6e-3 in purdue lin scheme)
-
-   real :: c_paut = 0.55                                   !< autoconversion cloud water to rain (use 0.5 to reduce autoconversion)
-   real :: c_psaci = 0.02                                  !< accretion: cloud ice to snow (was 0.1 in zetac)
-   real :: c_piacr = 5.0                                   !< accretion: rain to ice:
-   real :: c_cracw = 0.9                                   !< rain accretion efficiency
-   real :: c_pgacs = 2.0e-3                                !< snow to graupel "accretion" eff. (was 0.1 in zetac)
-
-   ! decreasing clin to reduce csacw (so as to reduce cloud water --- > snow)
-
-   real :: alin = 842.0                                    !< "a" in lin1983
-   real :: clin = 4.8                                      !< "c" in lin 1983, 4.8 -- > 6. (to ehance ql -- > qs)
-
-   ! fall velocity tuning constants:
-
-   logical :: const_vi = .false.                           !< if .t. the constants are specified by v * _fac
-   logical :: const_vs = .false.                           !< if .t. the constants are specified by v * _fac
-   logical :: const_vg = .false.                           !< if .t. the constants are specified by v * _fac
-   logical :: const_vr = .false.                           !< if .t. the constants are specified by v * _fac
-
-   ! good values:
-
-   real :: vi_fac = 1.                                     !< if const_vi: 1 / 3
-   real :: vs_fac = 1.                                     !< if const_vs: 1.
-   real :: vg_fac = 1.                                     !< if const_vg: 2.
-   real :: vr_fac = 1.                                     !< if const_vr: 4.
-
-   ! upper bounds of fall speed (with variable speed option)
-
-   real :: vi_max = 0.5                                    !< max fall speed for ice
-   real :: vs_max = 5.0                                    !< max fall speed for snow
-   real :: vg_max = 8.0                                    !< max fall speed for graupel
-   real :: vr_max = 12.                                    !< max fall speed for rain
-
-   ! cloud microphysics switchers
-
-   logical :: fast_sat_adj = .false.                       !< has fast saturation adjustments
-   logical :: z_slope_liq = .true.                         !< use linear mono slope for autocconversions
-   logical :: z_slope_ice = .false.                        !< use linear mono slope for autocconversions
-   logical :: use_ccn = .false.                            !< must be true when prog_ccn is false
-   logical :: use_ppm = .false.                            !< use ppm fall scheme
-   logical :: mono_prof = .true.                           !< perform terminal fall with mono ppm scheme
-   logical :: mp_print = .false.                           !< cloud microphysics debugging printout
-   logical :: do_hail = .false.                            !< use hail parameters instead of graupel
-
-   ! real :: global_area = - 1.
-
+   
    real :: log_10, tice0, t_wfr
-
-    integer :: reiflag = 1
-    ! 1: Heymsfield and Mcfarquhar, 1996
-    ! 2: Wyser, 1998
-     
-    logical :: tintqs = .false. !< use temperature in the saturation mixing in PDF 
-
-    real :: rewmin = 5.0, rewmax = 10.0
-    real :: reimin = 10.0, reimax = 150.0
-    real :: rermin = 10.0, rermax = 10000.0
-    real :: resmin = 150.0, resmax = 10000.0
-    real :: regmin = 300.0, regmax = 10000.0
-    
-   ! -----------------------------------------------------------------------
-   ! namelist
-   ! -----------------------------------------------------------------------
-
-   namelist / gfdl_cloud_microphysics_nml /                                  &
-       mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land, dw_ocean, &
-       vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vi_max,  &
-       vs_max, vg_max, vr_max, qs_mlt, qs0_crt, qi_gen, ql0_max, qi0_max,    &
-       qi0_crt, qr0_crt, fast_sat_adj, rh_inc, rh_ins, rh_inr, const_vi,     &
-       const_vs, const_vg, const_vr, use_ccn, rthresh, ccn_l, ccn_o, qc_crt, &
-       tau_g2v, tau_v2g, sat_adj0, c_piacr, tau_imlt, tau_v2l, tau_l2v,      &
-       tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci, c_pgacs,           &
-       z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,        &
-       rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
-       do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
-       mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
-       resmin, resmax, regmin, regmax, tintqs, do_hail
-
-   public                                                                    &
-       mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land, dw_ocean, &
-       vi_fac, vr_fac, vs_fac, vg_fac, ql_mlt, do_qa, fix_negative, vi_max,  &
-       vs_max, vg_max, vr_max, qs_mlt, qs0_crt, qi_gen, ql0_max, qi0_max,    &
-       qi0_crt, qr0_crt, fast_sat_adj, rh_inc, rh_ins, rh_inr, const_vi,     &
-       const_vs, const_vg, const_vr, use_ccn, rthresh, ccn_l, ccn_o, qc_crt, &
-       tau_g2v, tau_v2g, sat_adj0, c_piacr, tau_imlt, tau_v2l, tau_l2v,      &
-       tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci, c_pgacs,           &
-       z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,        &
-       rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
-       do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
-       mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
-       resmin, resmax, regmin, regmax, tintqs, do_hail 
 
 contains
 
@@ -3596,30 +3435,20 @@ subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, lo
     errflg = 0
     errmsg = ''
 
-#ifdef INTERNAL_FILE_NML
-    read (input_nml_file, nml = gfdl_cloud_microphysics_nml)
-#else
-    inquire (file = trim (fn_nml), exist = exists)
-    if (.not. exists) then
-        write (6, *) 'gfdl - mp :: namelist file: ', trim (fn_nml), ' does not exist'
-        errflg = 1
-        errmsg = 'ERROR(gfdl_cloud_microphys_mod_init): namelist file '//trim (fn_nml)//' does not exist'
-        return
-    else
-        open (unit = nlunit, file = fn_nml, action = 'read' , status = 'old', iostat = ios)
-    endif
-    rewind (nlunit)
-    read (nlunit, nml = gfdl_cloud_microphysics_nml)
-    close (nlunit)
-#endif
+    ! -----------------------------------------------------------------------
+    ! Read namelist
+    ! -----------------------------------------------------------------------
+    call read_gfdlmp_nml(errmsg = errmsg, errflg = errflg, unit = nlunit,   &
+         input_nml_file = input_nml_file, fn_nml = fn_nml, version=1,       &
+         iostat = ios)
 
     ! write version number and namelist to log file
     if (me == master) then
         write (logunit, *) " ================================================================== "
-        write (logunit, *) "gfdl_cloud_microphys_mod"
-        write (logunit, nml = gfdl_cloud_microphysics_nml)
+        write (logunit, *) "gfdl_cloud_microphysics_nml"
     endif
 
+    !
     if (do_setup) then
         call setup_con
         call setupm
