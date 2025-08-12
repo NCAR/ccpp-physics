@@ -1,6 +1,14 @@
 ! ############################################################################################# 
 !> \file GFS_radiation_post.F90
-!! RRTMGP post-processing routine.
+!!
+!! Radiation post-processing routine.
+!!
+!! This module has two purposes:
+!! 1*) Perform coupling from the radiation scheme(s) to other physical parameterizations.
+!! 2) Compute diagnostics
+!!
+!! *For RRTMG,  this coupling is handled in the SCHEME.
+!! *For RRTMGP, this coupling is handled HERE (more on this below).
 !!
 ! ############################################################################################# 
 module GFS_radiation_post
@@ -18,19 +26,26 @@ contains
 !> \section arg_table_GFS_radiation_post_run Argument Table
 !! \htmlinclude GFS_radiation_post_run.html
 !!
-!! This routine needs to be called AFTER either the RRTMG (radlw_main.F90 and
-!! radsw_main.F90) or the RRTMGP (rrtmgp_lw_main.F90 and rrtmgp_sw_main.F90) radiaiton
-!! schemes in the CCPP enabled UFS.
+!! This routine needs to be called AFTER the RRTMG (radlw_main.F90 and radsw_main.F90)
+!! or the RRTMGP (rrtmgp_lw_main.F90 and rrtmgp_sw_main.F90) radiaiton schemes in the
+!! CCPP enabled UFS.
 !!
 !! For RRTMG, not much is done here, since the scheme outputs the fields needed by the
-!! UFS. For example, RRTMG provides the heating-rate profiles and spectrally binned
+!! UFS. For example, RRTMG provides the heating-rate profiles and has been modified to use 
+!! UFS native DDTs for storing the fluxes.
 !! fluxes.
 !!
-!! For RRTMGP:
-!! - The all-sky radiation tendency is computed, the clear-sky tendency is computed, if
-!!   requested
-!! - Surface and TOA fluxes are copied to fields that persist between radiation/physics.
+!! For RRTMGP*:
+!! - The all-sky radiation tendency is computed. The clear-sky tendency is computed, if
+!!   requested.
+!! - Surface and TOA fluxes are copied to UFS native DDTs that persist between radiation/physics
 !!   calls.
+!!
+!! *Note on RTE-RRTMGP implementation in CCPP
+!!  This is done in an attempt to make the CCPP enabled RRTMGP LW/SW drivers more host agnostic.
+!!  The drivers are outputting the same fields as RTE, flux profiles, maintaining the same scheme
+!!  interface at the lowest CCPP entrypoint, the "Scheme-level" interstitial. Any host specific
+!!  coupling to the scheme happens here, a layer above, within the "Suite-level" interstitial.
 !!
 !! For ALL Radiaiton Schemes:
 !! - Compute SW total cloud albedo
@@ -41,68 +56,74 @@ contains
   ! ###########################################################################################
   ! GFS_radiation_post_run
   ! ###########################################################################################
-  subroutine GFS_radiation_post_run (nCol, nLev, nDay, iSFC, iTOA, idxday, doLWrad, doSWrad,  &
-       lssav, do_lw_clrsky_hr, do_sw_clrsky_hr, do_RRTMGP, sfc_alb_nir_dir,                   &
+  subroutine GFS_radiation_post_run (nCol, nLev, nDay, nfxr, nspc1, iSFC, iTOA, idxday,       &
+       doLWrad, doSWrad, lssav, do_lw_clrsky_hr, do_sw_clrsky_hr, do_RRTMGP, sfc_alb_nir_dir, &
        sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, p_lev, tgrs, tsfa,              &
        fluxlwDOWN_clrsky, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,                &
        fluxswDOWN_clrsky, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky, scmpsw,        &
        fhlwr, fhswr, coszen, coszdg, raddt, aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw,  &
-       kb, kd, kt,                                                                            &
-       sfcdlw, sfculw, sfcflw, tsflw, htrlw, htrlwu, topflw, nirbmdi, nirdfdi, visbmdi,       &
-       visdfdi, nirbmui, nirdfui, visbmui, visdfui, sfcnsw, sfcdsw, htrsw, sfcfsw, topfsw,    &
-       htrswc, htrlwc, total_albedo, fluxr, errmsg, errflg)
+       kb, kd, kt, sfcdlw, sfculw, sfcflw, tsflw, htrlw, htrlwu, topflw, nirbmdi, nirdfdi,    &
+       visbmdi, visdfdi, nirbmui, nirdfui, visbmui, visdfui, sfcnsw, sfcdsw, htrsw, sfcfsw,   &
+       topfsw, htrswc, htrlwc, total_albedo, fluxr, errmsg, errflg)
 
     ! Inputs
     integer, intent(in) ::  &
          nCol,              & !< Horizontal loop extent 
          nLev,              & !< Number of vertical layers
          nDay,              & !< Number of daylit columns
+         nfxr,              & !< Number of variables stored in the fluxr array
+         nspc1,             & !< Number of species for output aerosol optical depth
          iSFC,              & !< Vertical index for surface level
          iTOA,              & !< Vertical index for TOA level
-         kb,                & !<
-         kd,                & !<
-         kt                   !<
+         kb,                & !< Vertical index difference between layer and lower bound (H/M/L diag)
+         kd,                & !< Vertical index difference between in/out and local  (H/M/L diag)
+         kt                   !< Vertical index difference between layer and upper bound (H/M/L diag)
     integer, intent(in), dimension(:) :: &
-         idxday               ! Index array for daytime points
+         idxday               !< Index array for daytime points
     logical, intent(in) :: & 
-         doLWrad,           & ! Logical flags for lw radiation calls
-         doSWrad,           & ! Logical flags for sw radiation calls
-         do_lw_clrsky_hr,   & ! Output clear-sky LW heating-rate?
-         do_sw_clrsky_hr,   & ! Output clear-sky SW heating-rate? 
-         do_RRTMGP,         & ! Flag for using RRTMGP scheme
-         lssav                ! Flag for radiation diagnostics
+         doLWrad,           & !< Logical flags for lw radiation calls
+         doSWrad,           & !< Logical flags for sw radiation calls
+         do_lw_clrsky_hr,   & !< Output clear-sky LW heating-rate?
+         do_sw_clrsky_hr,   & !< Output clear-sky SW heating-rate? 
+         do_RRTMGP,         & !< Flag for using RRTMGP scheme
+         lssav                !< Flag for radiation diagnostics
     real(kind_phys), intent(in) ::  &
-         fhlwr,             & !
-         fhswr,             & !
-         raddt
-    real(kind_phys), dimension(:), intent(in) ::  &
-         tsfa,              & ! Lowest model layer air temperature for radiation (K)
-         sfc_alb_nir_dir,   & ! Surface albedo (direct) 
-         sfc_alb_nir_dif,   & ! Surface albedo (diffuse)
-         sfc_alb_uvvis_dir, & ! Surface albedo (direct)
-         sfc_alb_uvvis_dif, & ! Surface albedo (diffuse)
-         coszen,            & !
-         coszdg               !
-    real(kind_phys), dimension(:,:), intent(in), optional :: &
-         p_lev,             & ! Pressure @ model layer-interfaces (Pa)
-         tgrs,              & ! Temperature @ model layer-centers (K)
-         fluxlwUP_allsky,   & ! RRTMGP longwave all-sky flux      (W/m2)
-         fluxlwDOWN_allsky, & ! RRTMGP longwave all-sky flux      (W/m2)
-         fluxlwUP_clrsky,   & ! RRTMGP longwave clear-sky flux    (W/m2)
-         fluxlwDOWN_clrsky, & ! RRTMGP longwave clear-sky flux    (W/m2)
-         fluxswUP_allsky,   & ! RRTMGP shortwave all-sky flux     (W/m2)
-         fluxswDOWN_allsky, & ! RRTMGP shortwave all-sky flux     (W/m2)
-         fluxswUP_clrsky,   & ! RRTMGP shortwave clear-sky flux   (W/m2)
-         fluxswDOWN_clrsky    ! RRTMGP shortwave clear-sky flux   (W/m2)
-    real(kind_phys), dimension(:,:), intent(in) ::  &
-         aerodp,            & !
-         cldsa,             & !
-         cldtausw,          & !
-         cldtaulw             !
-    integer, intent(in), dimension(:,:) :: &
-         mtopa,             & !
-         mbota                !
-    type(cmpfsw_type), dimension(:), intent(in) :: &
+         fhlwr,             & !< Frequency for longwave radiation  (sec)
+         fhswr,             & !< Frequency for shortwave radiation (sec)
+         raddt                !< Radiation time step               (sec)
+    real(kind_phys), dimension(nCol), intent(in) ::  &
+         tsfa,              & !< Lowest model layer air temperature for radiation (K)
+         sfc_alb_nir_dir,   & !< Surface albedo (direct) 
+         sfc_alb_nir_dif,   & !< Surface albedo (diffuse)
+         sfc_alb_uvvis_dir, & !< Surface albedo (direct)
+         sfc_alb_uvvis_dif, & !< Surface albedo (diffuse)
+         coszen,            & !< Mean cos of zenith angle over rad call period
+         coszdg               !< Daytime mean cosz over rad call period
+    real(kind_phys), dimension(nCol,nLev+1), intent(in) :: &
+         p_lev                !< Pressure @ model layer-interfaces (Pa)
+    real(kind_phys), dimension(nCol,nLev), intent(in) :: & 
+         tgrs                 !< Temperature @ model layer-centers (K)
+    real(kind_phys), dimension(nCol,nLev+1), intent(in), optional :: & 
+         fluxlwUP_allsky,   & !< RRTMGP longwave all-sky flux      (W/m2)
+         fluxlwDOWN_allsky, & !< RRTMGP longwave all-sky flux      (W/m2)
+         fluxlwUP_clrsky,   & !< RRTMGP longwave clear-sky flux    (W/m2)
+         fluxlwDOWN_clrsky, & !< RRTMGP longwave clear-sky flux    (W/m2)
+         fluxswUP_allsky,   & !< RRTMGP shortwave all-sky flux     (W/m2)
+         fluxswDOWN_allsky, & !< RRTMGP shortwave all-sky flux     (W/m2)
+         fluxswUP_clrsky,   & !< RRTMGP shortwave clear-sky flux   (W/m2)
+         fluxswDOWN_clrsky    !< RRTMGP shortwave clear-sky flux   (W/m2)
+    real(kind_phys), dimension(nCol,nspc1), intent(in) ::  &
+         aerodp               !< Vertical integrated optical depth for <nspc1> aerosol species
+    real(kind_phys), dimension(nCol,nLev), intent(in) ::  & 
+         cldtausw,          & !< .55mu band layer cloud optical depth (SW)
+         cldtaulw             !< 10mu  band layer cloud optical depth (LW)
+    real(kind_phys), dimension(nCol,5), intent(in) ::  &
+         cldsa                !< Fraction of clouds for High/Mid/Low diagnostics:
+                              !<   low(1), middle(2), high(3), total(4) and BL(5)
+    integer, intent(in), dimension(nCol,3) :: &
+         mtopa,             & !< Vertical indices for low, middle and high cloud tops  (H/M/L diag)
+         mbota                !< Vertical indices for low, middle and high cloud bases (H/M/L diag)
+    type(cmpfsw_type), dimension(nCol), intent(in) :: &
          scmpsw               !< 2D surface fluxes, components:
                               !!\n uvbfc - total sky downward uv-b flux at  (W/m2)
                               !!\n uvbf0 - clear sky downward uv-b flux at  (W/m2)
@@ -112,7 +133,7 @@ contains
                               !!\n visdf - downward uv+vis diffused flux    (W/m2)
 
     ! Outputs (mandatory)
-    real(kind_phys), dimension(:), intent(inout) :: &
+    real(kind_phys), dimension(nCol), intent(inout) :: &
          tsflw,             & !< LW sfc air temp during calculation (K)
          sfcdlw,            & !< LW sfc all-sky     downward flux   (W/m2)
          sfculw,            & !< LW sfc all-sky     upward   flux   (W/m2)
@@ -127,21 +148,21 @@ contains
          sfcnsw,            & !< SW sfc all-sky     net      flux   (W/m2) flux into ground
          sfcdsw               !< SW sfc all-sky     downward flux   (W/m2)
     real(kind_phys), dimension(:,:), intent(inout) :: &
-         htrlw,             & ! LW all-sky heating rate (K/s)
-         htrsw                ! SW all-sky heating rate (K/s)
+         htrlw,             & !< LW all-sky heating rate (K/s)
+         htrsw                !< SW all-sky heating rate (K/s)
     real(kind_phys), dimension(nCol), intent(inout) :: &
-         total_albedo         ! Total sky albedo at TOA (W/m2)
+         total_albedo         !< Total sky albedo at TOA (W/m2)
     real(kind_phys), dimension(:,:), intent(inout), optional :: &
          htrlwu               !< LW all-sky heating-rate updated in-between radiation calls.
-    type(sfcflw_type), dimension(:), intent(inout) :: &
+    type(sfcflw_type), dimension(nCol), intent(inout) :: &
          sfcflw               !< LW radiation fluxes at sfc
-    type(sfcfsw_type), dimension(:), intent(inout) :: &
+    type(sfcfsw_type), dimension(nCol), intent(inout) :: &
          sfcfsw               !< SW radiation fluxes at sfc
     type(topfsw_type), dimension(:), intent(inout) :: &
          topfsw               !< SW fluxes at top atmosphere
-    type(topflw_type), dimension(:), intent(inout) :: &
+    type(topflw_type), dimension(nCol), intent(inout) :: &
          topflw               !< LW  fluxes at top atmosphere
-    real(kind_phys), dimension(:,:), intent(inout) :: &
+    real(kind_phys), dimension(nCol,nfxr), intent(inout) :: &
          fluxr                !< LW/SW diagnostics
     character(len=*), intent(out) :: &
          errmsg               !< CCPP error message
@@ -154,7 +175,7 @@ contains
          htrswc               !< SW clear-sky heating rate (K/s)
 
     ! Local variables
-    integer :: i, j, k, itop, ibtc
+    integer :: i
     real(kind_phys) :: tem0d, tem1, tem2
     real(kind_phys), dimension(nDay, nLev) :: thetaTendClrSky, thetaTendAllSky
 
@@ -290,11 +311,11 @@ contains
              sfcdsw(i) = sfcfsw(i)%dnfxc
           enddo
        endif ! RRTMGP Shortwave Radiaiton
+    endif ! ALL Shortwave Radiation  
 
-       ! The total sky (with clouds) shortwave albedo
-       total_albedo = 0.0
-       where(topfsw(:)%dnfxc>0) total_albedo(:) = topfsw(:)%upfxc/topfsw(:)%dnfxc
-    endif ! ALL Shortwave Radiation
+    ! The total sky (with clouds) shortwave albedo
+    total_albedo = 0.0
+    where(topfsw(:)%dnfxc>0) total_albedo(:) = topfsw(:)%upfxc/topfsw(:)%dnfxc
 
     ! #########################################################################################
     ! Compute radiation diagnostics
@@ -302,7 +323,7 @@ contains
     if (lssav) then
        call GFS_radiation_diagnostics(doLWrad, doSWrad, fhlwr, fhswr, coszen, coszdg, raddt,  &
             aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, tgrs, kb, kd, kt, sfcflw, &
-            sfcfsw, topfsw, topflw, scmpsw, nDay, fluxr)
+            sfcfsw, topfsw, topflw, scmpsw, nCol, nDay, nLev, nfxr, nspc1, fluxr)
     endif
     
   end subroutine GFS_radiation_post_run
@@ -312,93 +333,91 @@ contains
   !
   ! For time averaged output quantities (including total-sky and clear-sky SW and LW fluxes at
   ! TOA and surface; conventional 3-domain cloud amount, cloud top and base pressure, and cloud
-  ! top temperature; aerosols AOD, etc.), store computed results in corresponding slots of array
-  ! <fluxr> with appropriate time weights.
+  ! top temperature; aerosols AOD, etc.), store computed results in corresponding slots of
+  ! array <fluxr> with appropriate time weights.
   !
   ! ###########################################################################################
   subroutine GFS_radiation_diagnostics(doLWrad, doSWrad, fhlwr, fhswr, coszen, coszdg, raddt, &
        aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, tgrs, kb, kd, kt, sfcflw,      &
-       sfcfsw, topfsw, topflw, scmpsw, nday, fluxr)
+       sfcfsw, topfsw, topflw, scmpsw, nCol, nDay, nLev, nfxr, nspc1, fluxr)
     ! Inputs
     logical,           intent(in) :: doLWrad, doSWrad
-    integer,           intent(in) :: kb, kd, kt, nDay, mtopa(:,:), mbota(:,:)
-    real(kind_phys),   intent(in) :: fhlwr, fhswr, coszen(:), coszdg(:), raddt, aerodp(:,:)
-    real(kind_phys),   intent(in) :: cldsa(:,:), cldtausw(:,:), cldtaulw(:,:), p_lev(:,:), tgrs(:,:)
-    type(cmpfsw_type), intent(in) :: scmpsw(:)
-    type(sfcflw_type), intent(in) :: sfcflw(:)
-    type(sfcfsw_type), intent(in) :: sfcfsw(:)
-    type(topfsw_type), intent(in) :: topfsw(:)
-    type(topflw_type), intent(in) :: topflw(:)
+    integer,           intent(in) :: nCol, nLev, nfxr, nspc1, nDay
+    real(kind_phys),   intent(in) :: fhlwr, fhswr, coszen(nCol), coszdg(nCol), raddt
+    real(kind_phys),   intent(in) :: aerodp(nCol,nspc1)
+    real(kind_phys),   intent(in) :: cldtausw(nCol,nLev), cldtaulw(nCol,nLev)
+    real(kind_phys),   intent(in) :: p_lev(nCol,nLev+1), tgrs(nCol,nLev)
+    type(cmpfsw_type), intent(in) :: scmpsw(nCol)
+    type(sfcflw_type), intent(in) :: sfcflw(nCol)
+    type(sfcfsw_type), intent(in) :: sfcfsw(nCol)
+    type(topfsw_type), intent(in) :: topfsw(nCol)
+    type(topflw_type), intent(in) :: topflw(nCol)
+    ! For High/Mid/Low cloud flux diagnsotics
+    integer,           intent(in) :: kb, kd, kt
+    integer,           intent(in) :: mtopa(nCol,3), mbota(nCol,3)
+    real(kind_phys),   intent(in) :: cldsa(nCol,5)
+    
     ! Outputs
-    real(kind_phys), intent(inout) :: fluxr(:,:)
+    real(kind_phys), intent(inout) :: fluxr(nCol,nfxr)
     ! Locals
-    integer :: i, j, k, nCol, itop, ibtc
+    integer :: i, j, k, itop, ibtc
     real(kind_phys) :: tem0d, tem1, tem2
-
-    nCol = size(coszen)
-
-    ! Save SW Aerosol optical-depth(s)
-    if (doSWrad) then
-       do i=1,nCol
-          !fluxr(i,34) = fluxr(i,34) + fhswr*aerodp(i,1)  ! total aod at 550nm
-          !fluxr(i,35) = fluxr(i,35) + fhswr*aerodp(i,2)  ! DU aod at 550nm
-          !fluxr(i,36) = fluxr(i,36) + fhswr*aerodp(i,3)  ! BC aod at 550nm
-          !fluxr(i,37) = fluxr(i,37) + fhswr*aerodp(i,4)  ! OC aod at 550nm
-          !fluxr(i,38) = fluxr(i,38) + fhswr*aerodp(i,5)  ! SU aod at 550nm
-          !fluxr(i,39) = fluxr(i,39) + fhswr*aerodp(i,6)  ! SS aod at 550nm
-          fluxr(i,34) = aerodp(i,1)  ! total aod at 550nm
-          fluxr(i,35) = aerodp(i,2)  ! DU aod at 550nm
-          fluxr(i,36) = aerodp(i,3)  ! BC aod at 550nm
-          fluxr(i,37) = aerodp(i,4)  ! OC aod at 550nm
-          fluxr(i,38) = aerodp(i,5)  ! SU aod at 550nm
-          fluxr(i,39) = aerodp(i,6)  ! SS aod at 550nm
-       enddo
-    endif
 
     ! Save LW toa and sfc fluxes
     if (doLWrad) then
        do i=1,nCol
           ! LW total-sky fluxes
-          fluxr(i,1 ) = fluxr(i,1 ) + fhlwr * topflw(i)%upfxc   ! total sky top lw up
-          fluxr(i,19) = fluxr(i,19) + fhlwr * sfcflw(i)%dnfxc   ! total sky sfc lw dn
-          fluxr(i,20) = fluxr(i,20) + fhlwr * sfcflw(i)%upfxc   ! total sky sfc lw up
+          fluxr(i,1 ) = fluxr(i,1 ) + fhlwr * topflw(i)%upfxc      ! total sky TOA LW up
+          fluxr(i,19) = fluxr(i,19) + fhlwr * sfcflw(i)%dnfxc      ! total sky SFC LW down
+          fluxr(i,20) = fluxr(i,20) + fhlwr * sfcflw(i)%upfxc      ! total sky SFC LW up
           ! LW clear-sky fluxes
-          fluxr(i,28) = fluxr(i,28) + fhlwr * topflw(i)%upfx0   ! clear sky top lw up
-          fluxr(i,30) = fluxr(i,30) + fhlwr * sfcflw(i)%dnfx0   ! clear sky sfc lw dn
-          fluxr(i,33) = fluxr(i,33) + fhlwr * sfcflw(i)%upfx0   ! clear sky sfc lw up
+          fluxr(i,28) = fluxr(i,28) + fhlwr * topflw(i)%upfx0      ! clear sky TOA LW up
+          fluxr(i,30) = fluxr(i,30) + fhlwr * sfcflw(i)%dnfx0      ! clear sky SFC LW down
+          fluxr(i,33) = fluxr(i,33) + fhlwr * sfcflw(i)%upfx0      ! clear sky SFC LW up
        enddo
-    endif
+    endif  ! END DOLWRAD
 
     ! Save SW toa and sfc fluxes with proper diurnal sw wgt. coszen=mean cosz over daylight
     ! part of sw calling interval, while coszdg= mean cosz over entire interval
     if (doSWrad) then
-       do i = 1, nCol
+       do i=1,nCol
+          ! Aerosol optical-depths
+          fluxr(i,34) = aerodp(i,1)  ! Total aod at 550nm
+          fluxr(i,35) = aerodp(i,2)  ! Dust aod at 550nm
+          fluxr(i,36) = aerodp(i,3)  ! Soot aod at 550nm
+          fluxr(i,37) = aerodp(i,4)  ! Waso aod at 550nm
+          fluxr(i,38) = aerodp(i,5)  ! Suso aod at 550nm
+          fluxr(i,39) = aerodp(i,6)  ! Salt aod at 550nm
+          
           if (coszen(i) > 0.) then
              ! SW total-sky fluxes
              tem0d = fhswr * coszdg(i) / coszen(i)
-             fluxr(i,2 ) = fluxr(i,2)  + topfsw(i)%upfxc * tem0d   ! total sky top sw up
-             fluxr(i,3 ) = fluxr(i,3)  + sfcfsw(i)%upfxc * tem0d   ! total sky sfc sw up
-             fluxr(i,4 ) = fluxr(i,4)  + sfcfsw(i)%dnfxc * tem0d   ! total sky sfc sw dn
+             fluxr(i,2 ) = fluxr(i,2)  + topfsw(i)%upfxc * tem0d   ! total sky TOA SW up
+             fluxr(i,3 ) = fluxr(i,3)  + sfcfsw(i)%upfxc * tem0d   ! total sky SFC SW up
+             fluxr(i,4 ) = fluxr(i,4)  + sfcfsw(i)%dnfxc * tem0d   ! total sky SFC SW down
              ! SW uv-b fluxes
-             fluxr(i,21) = fluxr(i,21) + scmpsw(i)%uvbfc * tem0d   ! total sky uv-b sw dn
-             fluxr(i,22) = fluxr(i,22) + scmpsw(i)%uvbf0 * tem0d   ! clear sky uv-b sw dn
+             fluxr(i,21) = fluxr(i,21) + scmpsw(i)%uvbfc * tem0d   ! total sky uv-b SW down
+             fluxr(i,22) = fluxr(i,22) + scmpsw(i)%uvbf0 * tem0d   ! clear sky uv-b SW down
              ! SW toa incoming fluxes
-             fluxr(i,23) = fluxr(i,23) + topfsw(i)%dnfxc * tem0d   ! top sw dn
+             fluxr(i,23) = fluxr(i,23) + topfsw(i)%dnfxc * tem0d   ! TOA SW down
              ! SW sfc flux components
-             fluxr(i,24) = fluxr(i,24) + scmpsw(i)%visbm * tem0d   ! uv/vis beam sw dn
-             fluxr(i,25) = fluxr(i,25) + scmpsw(i)%visdf * tem0d   ! uv/vis diff sw dn
-             fluxr(i,26) = fluxr(i,26) + scmpsw(i)%nirbm * tem0d   ! nir beam sw dn
-             fluxr(i,27) = fluxr(i,27) + scmpsw(i)%nirdf * tem0d   ! nir diff sw dn
+             fluxr(i,24) = fluxr(i,24) + scmpsw(i)%visbm * tem0d   ! uv/vis beam SW down
+             fluxr(i,25) = fluxr(i,25) + scmpsw(i)%visdf * tem0d   ! uv/vis diff SW down
+             fluxr(i,26) = fluxr(i,26) + scmpsw(i)%nirbm * tem0d   ! nir beam SW down
+             fluxr(i,27) = fluxr(i,27) + scmpsw(i)%nirdf * tem0d   ! nir diff SW down
              ! SW clear-sky fluxes
-             fluxr(i,29) = fluxr(i,29) + topfsw(i)%upfx0 * tem0d   ! clear sky top sw up
-             fluxr(i,31) = fluxr(i,31) + sfcfsw(i)%upfx0 * tem0d   ! clear sky sfc sw up
-             fluxr(i,32) = fluxr(i,32) + sfcfsw(i)%dnfx0 * tem0d   ! clear sky sfc sw dn
+             fluxr(i,29) = fluxr(i,29) + topfsw(i)%upfx0 * tem0d   ! clear sky TOA SW up
+             fluxr(i,31) = fluxr(i,31) + sfcfsw(i)%upfx0 * tem0d   ! clear sky SFC SW up
+             fluxr(i,32) = fluxr(i,32) + sfcfsw(i)%dnfx0 * tem0d   ! clear sky SFC SW down
           endif
        enddo
-    endif
+    endif  ! END DOSWRAD
 
-    ! Save total and boundary layer clouds
-    if (doSWrad .or. doLWrad) then
+    !
+    ! High/Mid/Low diagnostics
+    !
+    if (doLWrad .or. doSWrad) then
+       ! Save total and boundary layer clouds
        do i=1,nCol
           fluxr(i,17) = fluxr(i,17) + raddt * cldsa(i,4)
           fluxr(i,18) = fluxr(i,18) + raddt * cldsa(i,5)
@@ -419,8 +438,8 @@ contains
           enddo
        enddo
 
-       ! Anning adds optical depth and emissivity output
-       if (doSWrad .and. (nday > 0)) then
+       ! In-cloud (shortwave) optical depth at approx .55 um channel
+       if (doSWrad .and. (nDay > 0)) then
           do j = 1, 3
              do i = 1, nCol
                 tem0d = raddt * cldsa(i,j)
@@ -428,13 +447,14 @@ contains
                 ibtc  = mbota(i,j) - kd
                 tem1 = 0.
                 do k=ibtc,itop
-                   tem1 = tem1 + cldtausw(i,k)      ! approx .55 um channel
+                   tem1 = tem1 + cldtausw(i,k)
                 enddo
                 fluxr(i,43-j) = fluxr(i,43-j) + tem0d * tem1
              enddo
           enddo
-       endif ! ENDIF SW_RADIATION has sunlit columns 
+       endif  ! END DOSWRAD
 
+       ! In-cloud (longwave) optical depth at approx 10. um channel
        if (doLWrad) then
           do j = 1, 3
              do i = 1, nCol
@@ -443,14 +463,14 @@ contains
                 ibtc  = mbota(i,j) - kd
                 tem2 = 0.
                 do k=ibtc,itop
-                   tem2 = tem2 + cldtaulw(i,k)      ! approx 10. um channel
+                   tem2 = tem2 + cldtaulw(i,k)
                 enddo
                 fluxr(i,46-j) = fluxr(i,46-j) + tem0d * (1.0-exp(-tem2))
              enddo
           enddo
-       endif ! ENDIF LW_RADIATION
-    endif    ! ENDIF total and BL clouds.
-       
+       endif  ! END DOLWRAD
+    endif     ! END DOSWRAD OR DOLWRAD
 
   end subroutine GFS_radiation_diagnostics
+
 end module GFS_radiation_post

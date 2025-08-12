@@ -23,6 +23,20 @@
   dimensions = ()
   type = integer
   intent = in
+[nfxr]
+  standard_name = number_of_diagnostics_variables_for_radiation
+  long_name = number of variables stored in the fluxr array
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[nspc1]
+  standard_name = number_of_species_for_aerosol_optical_depth
+  long_name = number of species for output aerosol optical depth plus total
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [iSFC]
   standard_name = vertical_index_for_surface_in_RRTMGP
   long_name = index for surface layer in RRTMGP
@@ -134,14 +148,13 @@
   kind = kind_phys
   intent = in
 [p_lev]
-  standard_name = air_pressure_at_interface_for_RRTMGP
+  standard_name = air_pressure_at_interface
   long_name = air pressure level
   units = Pa
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
-  optional = True
 [tgrs]
   standard_name = air_temperature
   long_name = model layer mean temperature
@@ -501,6 +514,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [htrlwc]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_timestep
   long_name = longwave clear sky heating rate
@@ -509,6 +523,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = True
 [total_albedo]
   standard_name = total_sky_albedo
   long_name = total sky albedo at toa
