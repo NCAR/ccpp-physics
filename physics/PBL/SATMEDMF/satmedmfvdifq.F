@@ -75,12 +75,12 @@
 !! (mfpbltq.f), is represented using a mass flux approach (Siebesma et al.(2007) \cite Siebesma_2007 ).
 !! -# A mass-flux approach is also used to represent the stratocumulus-top-induced turbulence
 !! (mfscuq.f).
-!! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
+!! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm
       subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,               &
      &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
 !The following three variables are for SA-3D-TKE
      &     def_1,def_2,def_3,sa3dtke,dku3d_h,dku3d_e,                   &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,usfco,vsfco,icplocn2atm,           &
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,usfco,vsfco,use_oceanuv,           &
      &     swh,hlw,xmu,garea,zvfun,sigmaf,                              &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
@@ -88,12 +88,12 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,tkeh,           &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            &
-!IVAI: canopy inputs from AQM                      
+!IVAI: canopy inputs from AQM
      &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           &
 !IVAI
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
-     &     errmsg,errflg)                                               
+     &     errmsg,errflg)
 !IVAI: aux arrays
 !     &     naux2d,naux3d,aux2d,aux3d)
 
@@ -148,7 +148,7 @@
      &     dtend
       integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
      &       index_of_x_wind, index_of_y_wind, index_of_process_pbl
-      integer, intent(in) :: icplocn2atm
+      logical, intent(in) :: use_oceanuv
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(:),     dvsfc(:),                      &
      &                     dtsfc(:),     dqsfc(:),                      &
@@ -163,7 +163,7 @@
       integer,          intent(out) :: errflg
 
 !For passing dku to the dyn_core (SA-3D-TKE scheme)
-       real(kind=kind_phys), intent(out) :: 
+       real(kind=kind_phys), intent(out) ::
      &            dku3d_h(:,:),dku3d_e(:,:)
 
 
@@ -213,7 +213,7 @@
 !
       real(kind=kind_phys) elm(im,km),   ele(im,km),
      &                     ckz(im,km),   chz(im,km),
-     &                     diss(im,km-1),prod(im,km-1), 
+     &                     diss(im,km-1),prod(im,km-1),
      &                     bf(im,km-1),  shr2(im,km-1), wush(im,km),
      &                     xlamue(im,km-1), xlamde(im,km-1),
      &                     gotvx(im,km), rlam(im,km-1)
@@ -304,7 +304,7 @@
       real(kind=kind_phys) h1
 
       real(kind=kind_phys) bfac, mffac
-      
+
       real(kind=kind_phys) qice(im,km),qliq(im,km)
 
 !PCC_CANOPY------------------------------------
@@ -415,7 +415,7 @@
       km1 = km - 1
       kmpbl = km / 2
       kmscu = km / 2
-!>  - Compute physical height of the layer centers and interfaces from 
+!>  - Compute physical height of the layer centers and interfaces from
 !! the geopotential height (\p zi and \p zl)
       do k=1,km
         do i=1,im
@@ -443,7 +443,7 @@
       do i=1,im
         gdx(i) = sqrt(garea(i))
       enddo
-!>  - Initialize tke value at vertical layer centers and interfaces 
+!>  - Initialize tke value at vertical layer centers and interfaces
 !! from tracer (\p tke and \p tkeh)
       do k=1,km
         do i=1,im
@@ -547,11 +547,11 @@
            kcld(i)  = km1
          endif
       enddo
-!           
+!
 !>  - Compute a function for green vegetation fraction and surface roughness.
 !! Entrainment rate in updraft is a function of vegetation fraction and surface
 !! roughness length
-!       
+!
       do i = 1,im
         tem = (sigmaf(i) - vegflo) / (vegfup - vegflo)
         tem = min(max(tem, 0.), 1.)
@@ -627,7 +627,7 @@
        enddo
       endif !sa3dtke
 
-!>  - Compute an empirical cloud fraction based on 
+!>  - Compute an empirical cloud fraction based on
 !! Xu and Randall (1996) \cite xu_and_randall_1996
       do k = 1, km
         do i = 1, im
@@ -678,7 +678,7 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
-!>  - Initialize diffusion coefficients to 0 and calculate the total 
+!>  - Initialize diffusion coefficients to 0 and calculate the total
 !! radiative heating rate (dku, dkt, radx)
       do k=1,km
         do i=1,im
@@ -697,7 +697,7 @@
       enddo
 !>  - Compute stable/unstable PBL flag (pblflg) based on the total
 !! surface energy flux (\e false if the total surface energy flux
-!! is into the surface) 
+!! is into the surface)
       do i = 1,im
          sflux(i)  = heat(i) + evap(i)*fv*theta(i,1)
          if(.not.sfcflg(i) .or. sflux(i) <= 0.) pblflg(i)=.false.
@@ -708,12 +708,12 @@
 !!  - Compute critical bulk Richardson number (\f$Rb_{cr}\f$) (crb)
 !!  - For the unstable PBL, crb is a constant (0.25)
 !!  - For the stable boundary layer (SBL), \f$Rb_{cr}\f$ varies
-!!     with the surface Rossby number, \f$R_{0}\f$, as given by 
+!!     with the surface Rossby number, \f$R_{0}\f$, as given by
 !!     Vickers and Mahrt (2004) \cite Vickers_2004
 !!     \f[
 !!      Rb_{cr}=0.16(10^{-7}R_{0})^{-0.18}
 !!     \f]
-!!     \f[ 
+!!     \f[
 !!      R_{0}=\frac{U_{10}}{f_{0}z_{0}}
 !!     \f]
 !!     where \f$U_{10}\f$ is the wind speed at 10m above the ground surface,
@@ -744,7 +744,7 @@
          ustar(i) = sqrt(stress(i))
       enddo
 !
-!>  - Compute buoyancy \f$\frac{\partial \theta_v}{\partial z}\f$ (bf) 
+!>  - Compute buoyancy \f$\frac{\partial \theta_v}{\partial z}\f$ (bf)
 !! and the wind shear squared (shr2)
 !
       do k = 1, km1
@@ -965,7 +965,7 @@
 !
 !>  - The \f$z/L\f$ (zol) is used as the stability criterion for the PBL.Currently,
 !!    strong unstable (convective) PBL for \f$z/L < -0.02\f$ and weakly and moderately
-!!    unstable PBL for \f$0>z/L>-0.02\f$ 
+!!    unstable PBL for \f$0>z/L>-0.02\f$
 !>  - Compute the velocity scale \f$w_s\f$ (wscale) (eqn 22 of Han et al. 2019). It
 !!    is represented by the value scaled at the top of the surface layer:
 !!    \f[
@@ -1089,11 +1089,11 @@
       do i = 1, im
         if(scuflg(i) .and. kcld(i)==km1) scuflg(i)=.false.
       enddo
-!>  - Starting at the PBL top and going downward, if the level is less 
+!>  - Starting at the PBL top and going downward, if the level is less
 !!    than the cloud top, find the level of the minimum radiative heating
 !!    rate wihin the cloud. If the level of the minimum is the lowest model 
 !!    level or the minimum radiative heating rate is positive, then set
-!!    scuflg to F. 
+!!    scuflg to F.
       do i = 1, im
         flg(i)=scuflg(i)
       enddo
@@ -1119,7 +1119,7 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !> ## Compute components for mass flux mixing by large thermals
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!>  - If the PBL is convective, the updraft properties are initialized 
+!>  - If the PBL is convective, the updraft properties are initialized
 !!    to be the same as the state variables.
       do k = 1, km
         do i = 1, im
@@ -1155,7 +1155,7 @@
      &    tcko,qcko,ucko,vcko,xlamue,bl_upfr,
 !The following flag is for SA-3D-TKE (kyf)
      &    sa3dtke)
-!>  - Call mfscuq(), which is a new mass-flux parameterization for 
+!>  - Call mfscuq(), which is a new mass-flux parameterization for
 !!    stratocumulus-top-induced turbulence mixing. For details of the mfscuq subroutine, step into its documentation ::mfscuq
       call mfscuq(im,im,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
@@ -1333,7 +1333,7 @@
         enddo
       enddo
 
-!>  - Compute the surface layer length scale (\f$l_1\f$) following 
+!>  - Compute the surface layer length scale (\f$l_1\f$) following
 !! Nakanishi (2001) \cite Nakanish_2001 (eqn 9 of Han et al.(2019) \cite Han_2019)
       do k = 1, km1
         do i = 1, im
@@ -1617,7 +1617,7 @@
           endif
         enddo
       enddo
-      
+
        do k = kmscu, 1, -1
         do i = 1, im
           if(scuflg(i) .and.
@@ -1631,7 +1631,7 @@
 
 !PCC_CANOPY------------------------------------
       kount=0 !IVAI
-      if (do_canopy .and. cplaqm) then 
+      if (do_canopy .and. cplaqm) then
 
 !IVAI
 !        print*, 'SATMEDMFVDIFQ_RUN: CLAIE = ', claie(:)
@@ -1688,7 +1688,7 @@
 !     &                   .OR. MAX(0.0, 1.0 - XCANOPYFRT) .GT. 0.5
 !     &                   .OR. POPU .GT. 10000.0
 !     &                   .OR. EXP(-0.5*XCANOPYLAI*XCANOPYCLU).GT. 0.45
-!     &                      .AND. FCH .LT. 18.0 ) THEN 
+!     &                      .AND. FCH .LT. 18.0 ) THEN
 
               dkt(i,k)= dkt(i,k)
               dkq(i,k)= dkq(i,k)
@@ -1725,9 +1725,9 @@
                   IF ( ZCAN/FCH .GT. 1.25 ) THEN !SIGMACAN = Eulerian vertical velocity variance
                     SIGMACAN = 1.25*ustar(i)
                   END IF
-                  IF ( ZCAN/FCH .GE. 0.175  
+                  IF ( ZCAN/FCH .GE. 0.175
      &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                      SIGMACAN = ustar(i) * ( 0.75 + 
+                      SIGMACAN = ustar(i) * ( 0.75 +
      &                         (0.5 * COS((PI/1.06818) *
      &                         (1.25 - (ZCAN/FCH)))) )
                   END IF
@@ -1739,9 +1739,9 @@
                   IF ( ZCAN/FCH .GT. 1.25 ) THEN
                     SIGMACAN = 1.0*ustar(i)
                   END IF
-                  IF ( ZCAN/FCH .GE. 0.175  
+                  IF ( ZCAN/FCH .GE. 0.175
      &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                    SIGMACAN = ustar(i) * ( 0.625 + 
+                    SIGMACAN = ustar(i) * ( 0.625 +
      &                       (0.375* COS((PI/1.06818) *
      &                       (1.25 - (ZCAN/FCH)))) )
                   END IF
@@ -1753,12 +1753,12 @@
                   IF ( ZCAN/FCH .GT. 1.25 ) THEN
                     SIGMACAN = 0.25*(4.375 - (3.75*HOL))*ustar(i)
                   END IF
-                  IF ( ZCAN/FCH .GE. 0.175  
+                  IF ( ZCAN/FCH .GE. 0.175
      &                 .AND. ZCAN/FCH .LE. 1.25 ) THEN
                     RRCAN=4.375-(3.75*HOL)
                     AACAN=(0.125*RRCAN) + 0.125
                     BBCAN=(0.125*RRCAN) - 0.125
-                    SIGMACAN = ustar(i) * ( AACAN + 
+                    SIGMACAN = ustar(i) * ( AACAN +
      &                             (BBCAN * COS((PI/1.06818) *
      &                             (1.25 - (ZCAN/FCH)))) )
                   END IF
@@ -1822,7 +1822,7 @@
       enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!>  - Compute buoyancy and shear productions of TKE 
+!>  - Compute buoyancy and shear productions of TKE
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
       if(sa3dtke) then
@@ -2068,7 +2068,7 @@
       endif !sa3dtke
 !
 !----------------------------------------------------------------------
-!>  - First predict tke due to tke production & dissipation(diss)  
+!>  - First predict tke due to tke production & dissipation(diss)
 !
       if(sa3dtke) then
 !The following is for SA-3D-TKE
@@ -3045,10 +3045,10 @@ c
          enddo
       enddo
       do i = 1,im
-        if(icplocn2atm == 0) then
+        if(.not. use_oceanuv) then
           dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
           dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
-        else if (icplocn2atm ==1) then
+        else if (use_oceanuv) then
           spd1_m=sqrt( (u1(i,1)-usfco(i))**2+(v1(i,1)-vsfco(i))**2 )
           dusfc(i) = -1.*rho_a(i)*stress(i)*(u1(i,1)-usfco(i))/spd1_m
           dvsfc(i) = -1.*rho_a(i)*stress(i)*(v1(i,1)-vsfco(i))/spd1_m
