@@ -58,16 +58,17 @@ contains
   ! ###########################################################################################
   subroutine GFS_radiation_post_run(doLWrad, doSWrad, lssav, total_albedo, topfsw, fhlwr, fhswr,&
       coszen, coszdg, raddt, aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, tgrs, kb,  &
-      kd, kt, sfcflw, sfcfsw, topflw, scmpsw, nCol, nLev, nDay, nfxr, nspc1, fluxr, errmsg, errflg) 
-      ! (nCol, nLev, nDay, nfxr, nspc1, iSFC, iTOA, idxday,       &
-       ! doLWrad, doSWrad, lssav, do_lw_clrsky_hr, do_sw_clrsky_hr, do_RRTMGP, sfc_alb_nir_dir, &
+      kd, kt, sfcflw, sfcfsw, topflw, scmpsw, nCol, nLev, nDay, nfxr, nspc1, fluxr, do_RRTMGP,  &
+      do_lw_clrsky_hr, fluxlwUP_clrsky, fluxlwDOWN_clrsky, htrlwc, errmsg, errflg) 
+      ! (iSFC, iTOA, idxday,       &
+       !  do_sw_clrsky_hr, sfc_alb_nir_dir, &
        ! sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, p_lev, tgrs, tsfa,              &
        ! fluxlwDOWN_clrsky, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,                &
        ! fluxswDOWN_clrsky, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky, scmpsw,        &
        ! fhlwr, fhswr, coszen, coszdg, raddt, aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw,  &
        ! kb, kd, kt, sfcdlw, sfculw, sfcflw, tsflw, htrlw, htrlwu, topflw, nirbmdi, nirdfdi,    &
        ! visbmdi, visdfdi, nirbmui, nirdfui, visbmui, visdfui, sfcnsw, sfcdsw, htrsw, sfcfsw,   &
-       ! topfsw, htrswc, htrlwc, , fluxr, errmsg, errflg)
+       ! topfsw, htrswc, , fluxr, errmsg, errflg)
 
     ! Inputs
     integer, intent(in) :: &
@@ -95,10 +96,11 @@ contains
     logical, intent(in) :: & 
          doLWrad,           & !< Logical flags for lw radiation calls
          doSWrad,           & !< Logical flags for sw radiation calls
-         lssav                !< Flag for radiation diagnostics
-    !      do_lw_clrsky_hr,   & !< Output clear-sky LW heating-rate?
+         lssav,             & !< Flag for radiation diagnostics
+         do_RRTMGP,         & !< Flag for using RRTMGP scheme
+         do_lw_clrsky_hr!,   & !< Output clear-sky LW heating-rate?
     !      do_sw_clrsky_hr,   & !< Output clear-sky SW heating-rate? 
-    !      do_RRTMGP,         & !< Flag for using RRTMGP scheme
+    !      
     !      
     real(kind_phys), intent(in) ::  &
          fhlwr,             & !< Frequency for longwave radiation  (sec)
@@ -118,11 +120,12 @@ contains
          p_lev                !< Pressure @ model layer-interfaces (Pa)
     real(kind_phys), dimension(:,:), intent(in) :: & 
          tgrs                 !< Temperature @ model layer-centers (K)
+    real(kind_phys), dimension(:,:), intent(in), optional :: &
+         fluxlwUP_clrsky,   & !< RRTMGP longwave clear-sky flux    (W/m2)
+         fluxlwDOWN_clrsky!, & !< RRTMGP longwave clear-sky flux    (W/m2)
     ! real(kind_phys), dimension(nCol,nLev+1), intent(in), optional :: & 
     !      fluxlwUP_allsky,   & !< RRTMGP longwave all-sky flux      (W/m2)
     !      fluxlwDOWN_allsky, & !< RRTMGP longwave all-sky flux      (W/m2)
-    !      fluxlwUP_clrsky,   & !< RRTMGP longwave clear-sky flux    (W/m2)
-    !      fluxlwDOWN_clrsky, & !< RRTMGP longwave clear-sky flux    (W/m2)
     !      fluxswUP_allsky,   & !< RRTMGP shortwave all-sky flux     (W/m2)
     !      fluxswDOWN_allsky, & !< RRTMGP shortwave all-sky flux     (W/m2)
     !      fluxswUP_clrsky,   & !< RRTMGP shortwave clear-sky flux   (W/m2)
@@ -185,8 +188,8 @@ contains
          errflg               !< CCPP error code
 
     ! Outputs (optional)
-    ! real(kind_phys),dimension(:,:),intent(inout),optional  :: &
-    !      htrlwc,            & !< LW clear-sky heating-rate (K/s)
+    real(kind_phys),dimension(:,:),intent(inout),optional  :: &
+         htrlwc!,            & !< LW clear-sky heating-rate (K/s)
     !      htrswc               !< SW clear-sky heating rate (K/s)
 
     ! Local variables
@@ -204,16 +207,16 @@ contains
     ! #######################################################################################
     ! Longwave Radiation
     ! ####################################################################################### 
-    ! if (doLWRad) then
-    !    if (do_RRTMGP) then
-    !       ! Clear-sky heating-rate (optional)
-    !       if (do_lw_clrsky_hr) then
-    !          call check_error_msg('GFS_radiation_post',compute_heating_rate(  &
-    !               fluxlwUP_clrsky,   & ! IN  - RRTMGP upward longwave clear-sky flux profiles (W/m2)
-    !               fluxlwDOWN_clrsky, & ! IN  - RRTMGP downward longwave clear-sky flux profiles (W/m2)
-    !               p_lev,             & ! IN  - Pressure @ layer-interfaces (Pa)
-    !               htrlwc))             ! OUT - Longwave clear-sky heating rate (K/sec)
-    !       endif
+    if (doLWRad) then
+      if (do_RRTMGP) then
+        ! Clear-sky heating-rate (optional)
+        if (do_lw_clrsky_hr) then
+           call check_error_msg('GFS_radiation_post',compute_heating_rate(  &
+                fluxlwUP_clrsky,   & ! IN  - RRTMGP upward longwave clear-sky flux profiles (W/m2)
+                fluxlwDOWN_clrsky, & ! IN  - RRTMGP downward longwave clear-sky flux profiles (W/m2)
+                p_lev,             & ! IN  - Pressure @ layer-interfaces (Pa)
+                htrlwc))             ! OUT - Longwave clear-sky heating rate (K/sec)
+        endif
     ! 
     !       ! All-sky heating-rate (mandatory)
     !       call check_error_msg('GFS_radiation_post',compute_heating_rate(     &
@@ -243,8 +246,8 @@ contains
     ! 
     !       ! Heating-rate at radiation timestep, used for adjustment between radiation calls.
     !       htrlwu = htrlw
-    !    endif ! RRTMGP Longwave Radiaiton
-    ! endif    ! ALL Longwave Radiation
+      endif ! RRTMGP Longwave Radiaiton
+    endif    ! ALL Longwave Radiation
 
     ! #######################################################################################
     ! Shortwave Radiation
