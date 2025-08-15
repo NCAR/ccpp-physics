@@ -373,6 +373,173 @@
   kind = kind_phys
   intent = in
   optional = True
+[iSFC]
+  standard_name = vertical_index_for_surface_in_RRTMGP
+  long_name = index for surface layer in RRTMGP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[iTOA]
+  standard_name = vertical_index_for_TOA_in_RRTMGP
+  long_name = index for TOA layer in RRTMGP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[tsflw]
+  standard_name = air_temperature_at_surface_adjacent_layer_on_radiation_timestep
+  long_name = surface air temp during lw calculation
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[tsfa]
+  standard_name = surface_air_temperature_for_radiation
+  long_name = lowest model layer air temperature for radiation
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfcdlw]
+  standard_name = surface_downwelling_longwave_flux_on_radiation_timestep
+  long_name = total sky sfc downward lw flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[sfculw]
+  standard_name = surface_upwelling_longwave_flux_on_radiation_timestep
+  long_name = total sky sfc upward lw flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[htrlwu]
+  standard_name = updated_tendency_of_air_temperature_due_to_longwave_heating_on_physics_timestep
+  long_name = total sky longwave heating rate on physics time step
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[nirbmdi]
+  standard_name = surface_downwelling_direct_nir_shortwave_flux_on_radiation_timestep
+  long_name = sfc nir beam sw downward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[nirdfdi]
+  standard_name = surface_downwelling_diffuse_nir_shortwave_flux_on_radiation_timestep
+  long_name = sfc nir diff sw downward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[visbmdi]
+  standard_name = surface_downwelling_direct_uv_and_vis_shortwave_flux_on_radiation_timestep
+  long_name = sfc uv+vis beam sw downward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[visdfdi]
+  standard_name = surface_downwelling_diffuse_uv_and_vis_shortwave_flux_on_radiation_timestep
+  long_name = sfc uv+vis diff sw downward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[nirbmui]
+  standard_name = surface_upwelling_direct_nir_shortwave_flux_on_radiation_timestep
+  long_name = sfc nir beam sw upward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[nirdfui]
+  standard_name = surface_upwelling_diffuse_nir_shortwave_flux_on_radiation_timestep
+  long_name = sfc nir diff sw upward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[visbmui]
+  standard_name = surface_upwelling_direct_uv_and_vis_shortwave_flux_on_radiation_timestep
+  long_name = sfc uv+vis beam sw upward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[visdfui]
+  standard_name = surface_upwelling_diffuse_uv_and_vis_shortwave_flux_on_radiation_timestep
+  long_name = sfc uv+vis diff sw upward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[sfc_alb_nir_dir]
+  standard_name = surface_albedo_due_to_near_IR_direct
+  long_name = surface albedo due to near IR direct beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfc_alb_nir_dif]
+  standard_name = surface_albedo_due_to_near_IR_diffused
+  long_name = surface albedo due to near IR diffused beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfc_alb_uvvis_dir]
+  standard_name = surface_albedo_due_to_UV_and_VIS_direct
+  long_name = surface albedo due to UV+VIS direct beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfc_alb_uvvis_dif]
+  standard_name = surface_albedo_due_to_UV_and_VIS_diffused
+  long_name = surface albedo due to UV+VIS diffused beam
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[sfcnsw]
+  standard_name = surface_net_downwelling_shortwave_flux_on_radiation_timestep
+  long_name = total sky sfc netsw flx into ground
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+[sfcdsw]
+  standard_name = surface_downwelling_shortwave_flux_on_radiation_timestep
+  long_name = total sky sfc downward sw flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

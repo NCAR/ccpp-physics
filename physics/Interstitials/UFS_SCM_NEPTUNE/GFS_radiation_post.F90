@@ -61,28 +61,23 @@ contains
       kd, kt, sfcflw, sfcfsw, topflw, scmpsw, nCol, nLev, nDay, nfxr, nspc1, fluxr, do_RRTMGP,  &
       do_lw_clrsky_hr, fluxlwUP_clrsky, fluxlwDOWN_clrsky, htrlwc, fluxlwUP_allsky,             &
       fluxlwDOWN_allsky, htrlw, do_sw_clrsky_hr, htrswc, fluxswUP_clrsky, idxday,               &
-      fluxswDOWN_clrsky, htrsw, fluxswUP_allsky, fluxswDOWN_allsky, errmsg, errflg) 
-      ! (iSFC, iTOA,       &
-       ! sfc_alb_nir_dir, &
-       ! sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, tsfa,              &
-       ! scmpsw,        &
-       ! sfcdlw, sfculw, sfcflw, tsflw, htrlwu, topflw, nirbmdi, nirdfdi,    &
-       ! visbmdi, visdfdi, nirbmui, nirdfui, visbmui, visdfui, sfcnsw, sfcdsw, sfcfsw,   &
+      fluxswDOWN_clrsky, htrsw, fluxswUP_allsky, fluxswDOWN_allsky, iSFC, iTOA, tsflw, tsfa,    &
+      sfcdlw, sfculw, htrlwu, nirbmdi, nirdfdi, visbmdi, visdfdi, nirbmui, nirdfui, visbmui,    &
+      visdfui, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfcnsw,  &
+      sfcdsw, errmsg, errflg) 
 
     ! Inputs
     integer, intent(in) :: &
-           nCol,              & !< Horizontal loop extent 
-           nLev,              & !< Number of vertical layers
-           nDay,              & !< Number of daylit columns
-           nfxr,              & !< Number of variables stored in the fluxr array
-           nspc1,             & !< Number of species for output aerosol optical depth
-           kb,                & !< Vertical index difference between layer and lower bound (H/M/L diag)
-           kd,                & !< Vertical index difference between in/out and local  (H/M/L diag)
-           kt                   !< Vertical index difference between layer and upper bound (H/M/L diag)
-    ! integer, intent(in) ::  &
-    
-    !      iSFC,              & !< Vertical index for surface level
-    !      iTOA,              & !< Vertical index for TOA level
+         nCol,              & !< Horizontal loop extent 
+         nLev,              & !< Number of vertical layers
+         nDay,              & !< Number of daylit columns
+         nfxr,              & !< Number of variables stored in the fluxr array
+         nspc1,             & !< Number of species for output aerosol optical depth
+         kb,                & !< Vertical index difference between layer and lower bound (H/M/L diag)
+         kd,                & !< Vertical index difference between in/out and local  (H/M/L diag)
+         kt,                & !< Vertical index difference between layer and upper bound (H/M/L diag)
+         iSFC,              & !< Vertical index for surface level
+         iTOA                 !< Vertical index for TOA level
     integer, intent(in), dimension(:) :: &
          idxday               !< Index array for daytime points
     logical, intent(in) :: & 
@@ -92,7 +87,6 @@ contains
          do_RRTMGP,         & !< Flag for using RRTMGP scheme
          do_lw_clrsky_hr,   & !< Output clear-sky LW heating-rate?
          do_sw_clrsky_hr      !< Output clear-sky SW heating-rate? 
-     
     real(kind_phys), intent(in) ::  &
          fhlwr,             & !< Frequency for longwave radiation  (sec)
          fhswr,             & !< Frequency for shortwave radiation (sec)
@@ -100,13 +94,12 @@ contains
     real(kind_phys), dimension(:), intent(in) ::  &
          coszen,            & !< Mean cos of zenith angle over rad call period
          coszdg               !< Daytime mean cosz over rad call period
-    ! real(kind_phys), dimension(:), intent(in) ::  &
-    !      tsfa,              & !< Lowest model layer air temperature for radiation (K)
-    !      sfc_alb_nir_dir,   & !< Surface albedo (direct) 
-    !      sfc_alb_nir_dif,   & !< Surface albedo (diffuse)
-    !      sfc_alb_uvvis_dir, & !< Surface albedo (direct)
-    !      sfc_alb_uvvis_dif, & !< Surface albedo (diffuse)
-         
+    real(kind_phys), dimension(:), intent(in) ::  &
+         tsfa,              & !< Lowest model layer air temperature for radiation (K)
+         sfc_alb_nir_dir,   & !< Surface albedo (direct) 
+         sfc_alb_nir_dif,   & !< Surface albedo (diffuse)
+         sfc_alb_uvvis_dir, & !< Surface albedo (direct)
+         sfc_alb_uvvis_dif    !< Surface albedo (diffuse)
     real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev                !< Pressure @ model layer-interfaces (Pa)
     real(kind_phys), dimension(:,:), intent(in) :: & 
@@ -120,12 +113,6 @@ contains
          fluxswDOWN_clrsky, & !< RRTMGP shortwave clear-sky flux   (W/m2)
          fluxswUP_allsky,   & !< RRTMGP shortwave all-sky flux     (W/m2)
          fluxswDOWN_allsky    !< RRTMGP shortwave all-sky flux     (W/m2)
-    ! real(kind_phys), dimension(nCol,nLev+1), intent(in), optional :: & 
-    
-    
-    
-    
-    
     real(kind_phys), dimension(:,:), intent(in) ::  &
          aerodp               !< Vertical integrated optical depth for <nspc1> aerosol species
     real(kind_phys), dimension(:,:), intent(in) ::  & 
@@ -145,29 +132,28 @@ contains
                               !!\n nirdf - downward nir diffused flux       (W/m2)
                               !!\n visbm - downward uv+vis direct beam flux (W/m2)
                               !!\n visdf - downward uv+vis diffused flux    (W/m2)
-    ! 
-    ! ! Outputs (mandatory)
-    ! real(kind_phys), dimension(nCol), intent(inout) :: &
-    !      tsflw,             & !< LW sfc air temp during calculation (K)
-    !      sfcdlw,            & !< LW sfc all-sky     downward flux   (W/m2)
-    !      sfculw,            & !< LW sfc all-sky     upward   flux   (W/m2)
-    !      nirbmdi,           & !< SW sfc nir    beam downward flux   (W/m2)
-    !      nirdfdi,           & !< SW sfc nir    diff downward flux   (W/m2)
-    !      visbmdi,           & !< SW sfc uv+vis beam downward flux   (W/m2)
-    !      visdfdi,           & !< SW sfc uv+vis diff downward flux   (W/m2)
-    !      nirbmui,           & !< SW sfc nir    beam upward   flux   (W/m2)
-    !      nirdfui,           & !< SW sfc nir    diff upward   flux   (W/m2)
-    !      visbmui,           & !< SW sfc uv+vis beam upward   flux   (W/m2)
-    !      visdfui,           & !< SW sfc uv+vis diff upward   flux   (W/m2)
-    !      sfcnsw,            & !< SW sfc all-sky     net      flux   (W/m2) flux into ground
-    !      sfcdsw               !< SW sfc all-sky     downward flux   (W/m2)
+    ! Outputs (mandatory)
+    real(kind_phys), dimension(:), intent(inout) :: &
+         tsflw,             & !< LW sfc air temp during calculation (K)
+         sfcdlw,            & !< LW sfc all-sky     downward flux   (W/m2)
+         sfculw,            & !< LW sfc all-sky     upward   flux   (W/m2)
+         nirbmdi,           & !< SW sfc nir    beam downward flux   (W/m2)
+         nirdfdi,           & !< SW sfc nir    diff downward flux   (W/m2)
+         visbmdi,           & !< SW sfc uv+vis beam downward flux   (W/m2)
+         visdfdi,           & !< SW sfc uv+vis diff downward flux   (W/m2)
+         nirbmui,           & !< SW sfc nir    beam upward   flux   (W/m2)
+         nirdfui,           & !< SW sfc nir    diff upward   flux   (W/m2)
+         visbmui,           & !< SW sfc uv+vis beam upward   flux   (W/m2)
+         visdfui,           & !< SW sfc uv+vis diff upward   flux   (W/m2)
+         sfcnsw,            & !< SW sfc all-sky     net      flux   (W/m2) flux into ground
+         sfcdsw               !< SW sfc all-sky     downward flux   (W/m2)
     real(kind_phys), dimension(:,:), intent(inout) :: &
           htrlw,             & !< LW all-sky heating rate (K/s)
           htrsw                !< SW all-sky heating rate (K/s)
     real(kind_phys), dimension(:), intent(inout) :: &
          total_albedo         !< Total sky albedo at TOA (W/m2)
-    ! real(kind_phys), dimension(:,:), intent(inout), optional :: &
-    !      htrlwu               !< LW all-sky heating-rate updated in-between radiation calls.
+    real(kind_phys), dimension(:,:), intent(inout), optional :: &
+         htrlwu               !< LW all-sky heating-rate updated in-between radiation calls.
     type(sfcflw_type), dimension(:), intent(inout) :: &
          sfcflw               !< LW radiation fluxes at sfc
     type(sfcfsw_type), dimension(:), intent(inout) :: &
@@ -182,15 +168,13 @@ contains
          errmsg               !< CCPP error message
     integer, intent(out) :: &
          errflg               !< CCPP error code
-
     ! Outputs (optional)
     real(kind_phys),dimension(:,:),intent(inout),optional  :: &
          htrlwc,            & !< LW clear-sky heating-rate (K/s)
          htrswc               !< SW clear-sky heating rate (K/s)
 
     ! Local variables
-    ! integer :: i
-    ! real(kind_phys) :: tem0d, tem1, tem2
+    integer :: i
     real(kind_phys), dimension(nDay, nLev) :: thetaTendClrSky, thetaTendAllSky
 
     ! Initialize CCPP error handling variables
@@ -221,27 +205,26 @@ contains
              p_lev,                & ! IN  - Pressure @ layer-interfaces (Pa)
              htrlw))                 ! OUT - Longwave all-sky heating rate (K/sec)
     
-          ! (Copy fluxes from RRTMGP types into model radiation types.)
-    ! 
-    !       ! TOA fluxes
-    !       topflw(:)%upfxc = fluxlwUP_allsky(:,iTOA)
-    !       topflw(:)%upfx0 = fluxlwUP_clrsky(:,iTOA)
-    ! 
-    !       ! Surface fluxes
-    !       sfcflw(:)%upfxc = fluxlwUP_allsky(:,iSFC)
-    !       sfcflw(:)%upfx0 = fluxlwUP_clrsky(:,iSFC)
-    !       sfcflw(:)%dnfxc = fluxlwDOWN_allsky(:,iSFC)
-    !       sfcflw(:)%dnfx0 = fluxlwDOWN_clrsky(:,iSFC)
-    ! 
-    !       ! Save surface air temp for diurnal adjustment at model t-steps
-    !       tsflw (:) = tsfa(:)
-    ! 
-    !       ! Radiation fluxes for other physics processes
-    !       sfcdlw(:) = sfcflw(:)%dnfxc
-    !       sfculw(:) = sfcflw(:)%upfxc
-    ! 
-    !       ! Heating-rate at radiation timestep, used for adjustment between radiation calls.
-    !       htrlwu = htrlw
+        ! (Copy fluxes from RRTMGP types into model radiation types.) 
+        ! TOA fluxes
+        topflw(:)%upfxc = fluxlwUP_allsky(:,iTOA)
+        topflw(:)%upfx0 = fluxlwUP_clrsky(:,iTOA)
+
+        ! Surface fluxes
+        sfcflw(:)%upfxc = fluxlwUP_allsky(:,iSFC)
+        sfcflw(:)%upfx0 = fluxlwUP_clrsky(:,iSFC)
+        sfcflw(:)%dnfxc = fluxlwDOWN_allsky(:,iSFC)
+        sfcflw(:)%dnfx0 = fluxlwDOWN_clrsky(:,iSFC)
+
+        ! Save surface air temp for diurnal adjustment at model t-steps
+        tsflw(:) = tsfa(:)
+
+        ! Radiation fluxes for other physics processes
+        sfcdlw(:) = sfcflw(:)%dnfxc
+        sfculw(:) = sfcflw(:)%upfxc
+
+        ! Heating-rate at radiation timestep, used for adjustment between radiation calls.
+        htrlwu = htrlw
       endif ! RRTMGP Longwave Radiaiton
     endif    ! ALL Longwave Radiation
 
@@ -261,7 +244,7 @@ contains
                   thetaTendClrSky))                      ! OUT - Clear-sky heating-rate (K/sec)
              htrswc(idxday(1:nDay),:)=thetaTendClrSky !**NOTE** GP doesn't use radiation levels, it uses the model fields. Not sure if this is necessary
           endif
- 
+
           ! All-sky heating-rate (mandatory)
           htrsw(:,:) = 0._kind_phys
           call check_error_msg('GFS_radiation_post',compute_heating_rate(    &
@@ -270,60 +253,60 @@ contains
                p_lev(idxday(1:nDay),:),                & ! IN  - Pressure at model-interface (Pa)
                thetaTendAllSky))                         ! OUT - All-sky heating-rate (K/sec)
           htrsw(idxday(1:nDay),:) = thetaTendAllSky
-    ! 
-    !          ! (Copy fluxes from RRTMGP types into model radiation types.)
-    ! 
-    !          ! TOA fluxes
-    !          topfsw(:)%upfxc = fluxswUP_allsky(:,iTOA)
-    !          topfsw(:)%upfx0 = fluxswUP_clrsky(:,iTOA)
-    !          topfsw(:)%dnfxc = fluxswDOWN_allsky(:,iTOA)
-    ! 
-    !          ! Surface fluxes
-    !          sfcfsw(:)%upfxc = fluxswUP_allsky(:,iSFC)
-    !          sfcfsw(:)%upfx0 = fluxswUP_clrsky(:,iSFC)
-    !          sfcfsw(:)%dnfxc = fluxswDOWN_allsky(:,iSFC)
-    !          sfcfsw(:)%dnfx0 = fluxswDOWN_clrsky(:,iSFC)
-    ! 
-    !          ! Surface down and up spectral component fluxes
-    !          ! - Save two spectral bands' surface downward and upward fluxes for output.
-    !          do i=1,nCol
-    !             nirbmdi(i) = scmpsw(i)%nirbm
-    !             nirdfdi(i) = scmpsw(i)%nirdf
-    !             visbmdi(i) = scmpsw(i)%visbm
-    !             visdfdi(i) = scmpsw(i)%visdf
-    !             nirbmui(i) = scmpsw(i)%nirbm * sfc_alb_nir_dir(i)
-    !             nirdfui(i) = scmpsw(i)%nirdf * sfc_alb_nir_dif(i)
-    !             visbmui(i) = scmpsw(i)%visbm * sfc_alb_uvvis_dir(i)
-    !             visdfui(i) = scmpsw(i)%visdf * sfc_alb_uvvis_dif(i)
-    !          enddo
+
+          ! (Copy fluxes from RRTMGP types into model radiation types.)
+
+          ! TOA fluxes
+          topfsw(:)%upfxc = fluxswUP_allsky(:,iTOA)
+          topfsw(:)%upfx0 = fluxswUP_clrsky(:,iTOA)
+          topfsw(:)%dnfxc = fluxswDOWN_allsky(:,iTOA)
+
+          ! Surface fluxes
+          sfcfsw(:)%upfxc = fluxswUP_allsky(:,iSFC)
+          sfcfsw(:)%upfx0 = fluxswUP_clrsky(:,iSFC)
+          sfcfsw(:)%dnfxc = fluxswDOWN_allsky(:,iSFC)
+          sfcfsw(:)%dnfx0 = fluxswDOWN_clrsky(:,iSFC)
+
+          ! Surface down and up spectral component fluxes
+          ! - Save two spectral bands' surface downward and upward fluxes for output.
+          do i=1,nCol
+             nirbmdi(i) = scmpsw(i)%nirbm
+             nirdfdi(i) = scmpsw(i)%nirdf
+             visbmdi(i) = scmpsw(i)%visbm
+             visdfdi(i) = scmpsw(i)%visdf
+             nirbmui(i) = scmpsw(i)%nirbm * sfc_alb_nir_dir(i)
+             nirdfui(i) = scmpsw(i)%nirdf * sfc_alb_nir_dif(i)
+             visbmui(i) = scmpsw(i)%visbm * sfc_alb_uvvis_dir(i)
+             visdfui(i) = scmpsw(i)%visdf * sfc_alb_uvvis_dif(i)
+          enddo
         else  ! if_nday_block
           ! Dark everywhere
           htrsw(:,:) = 0.0
-    !          sfcfsw     = sfcfsw_type( 0.0, 0.0, 0.0, 0.0 )
-    !          topfsw     = topfsw_type( 0.0, 0.0, 0.0 )
-    !          do i=1,nCol
-    !             nirbmdi(i) = 0.0
-    !             nirdfdi(i) = 0.0
-    !             visbmdi(i) = 0.0
-    !             visdfdi(i) = 0.0
-    !             nirbmui(i) = 0.0
-    !             nirdfui(i) = 0.0
-    !             visbmui(i) = 0.0
-    !             visdfui(i) = 0.0
-    !          enddo
-    ! 
+          sfcfsw     = sfcfsw_type( 0.0, 0.0, 0.0, 0.0 )
+          topfsw     = topfsw_type( 0.0, 0.0, 0.0 )
+          do i=1,nCol
+             nirbmdi(i) = 0.0
+             nirdfdi(i) = 0.0
+             visbmdi(i) = 0.0
+             visdfdi(i) = 0.0
+             nirbmui(i) = 0.0
+             nirdfui(i) = 0.0
+             visbmui(i) = 0.0
+             visdfui(i) = 0.0
+          enddo
+
           if (do_sw_clrsky_hr) then
              htrswc(:,:) = 0
           endif
         endif                  ! end_if_nday
-    ! 
-    !       ! Radiation fluxes for other physics processes
-    !       ! *NOTE* For RRTMG, sfcnsw and sfcdsw are provided.
-    !       !        For RRTMGP, we compute them here.
-    !       do i=1,nCol
-    !          sfcnsw(i) = sfcfsw(i)%dnfxc - sfcfsw(i)%upfxc
-    !          sfcdsw(i) = sfcfsw(i)%dnfxc
-    !       enddo
+
+        ! Radiation fluxes for other physics processes
+        ! *NOTE* For RRTMG, sfcnsw and sfcdsw are provided.
+        !        For RRTMGP, we compute them here.
+        do i=1,nCol
+           sfcnsw(i) = sfcfsw(i)%dnfxc - sfcfsw(i)%upfxc
+           sfcdsw(i) = sfcfsw(i)%dnfxc
+        enddo
       endif ! RRTMGP Shortwave Radiaiton
     endif ! ALL Shortwave Radiation  
 
@@ -339,7 +322,7 @@ contains
             aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, tgrs, kb, kd, kt, sfcflw, &
             sfcfsw, topfsw, topflw, scmpsw, nCol, nDay, nLev, nfxr, nspc1, fluxr)
     endif
-    
+
   end subroutine GFS_radiation_post_run
   
   ! ###########################################################################################
