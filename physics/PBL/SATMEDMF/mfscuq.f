@@ -105,6 +105,7 @@ c  physical parameters
       eps = con_eps
       epsm1 = con_epsm1
       g = grav
+      cp = con_cp
       gocp = g/cp
       elocp = hvap/cp
       el2orc = hvap*hvap/(rv*cp)
