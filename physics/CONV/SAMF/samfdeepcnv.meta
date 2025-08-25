@@ -188,6 +188,14 @@
   type = real
   kind = kind_phys
   intent = in
+[cscale]
+  standard_name = scaling_conv_cloud_water_in_sas
+  long_name = scaling parameter for conv cloud water
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [delt]
   standard_name = timestep_for_physics
   long_name = physics time step
