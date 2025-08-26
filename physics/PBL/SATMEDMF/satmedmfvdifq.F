@@ -1617,7 +1617,7 @@
           endif
         enddo
       enddo
-       do k = kmscu, 1, -1
+      do k = kmscu, 1, -1
         do i = 1, im
           if(scuflg(i) .and.
      &      (k >= mrad(i) .and. k < krad(i))) then
