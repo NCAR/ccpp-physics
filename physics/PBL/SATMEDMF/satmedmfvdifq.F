@@ -1617,7 +1617,6 @@
           endif
         enddo
       enddo
-      
        do k = kmscu, 1, -1
         do i = 1, im
           if(scuflg(i) .and.
