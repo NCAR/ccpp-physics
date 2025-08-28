@@ -2616,7 +2616,7 @@ end if   ! opt_gla == 1
 ! local
   integer :: iz
   real (kind=kind_phys)    :: bdsnow  !< bulk density of snow (kg/m3)
-  real (kind=kind_phys),parameter :: mwd  = 100.   !< maximum water depth (mm)
+  real (kind=kind_phys),parameter :: mwd  = 600.   !< maximum water depth (mm)
 ! ----------------------------------------------------------------------
    snoflow = 0.0
    ponding1 = 0.0
@@ -2662,7 +2662,7 @@ end if   ! opt_gla == 1
 
 !to obtain equilibrium state of snow in glacier region
        
-   if(sneqv > mwd) then   ! 100 mm -> maximum water depth
+   if(sneqv > mwd) then   ! 600 mm -> maximum water depth
       bdsnow      = snice(0) / dzsnso(0)
       snoflow     = (sneqv - mwd)
       snice(0)    = snice(0)  - snoflow 
