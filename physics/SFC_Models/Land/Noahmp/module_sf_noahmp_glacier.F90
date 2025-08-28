@@ -2736,19 +2736,28 @@ end if   ! opt_gla == 1
 ! local
 
   integer :: newnode            !< 0-no new layers, 1-creating new layers
+  real (kind=kind_phys) :: snowhin_adj  !< new snow depth rate with minimum adj [m/s]
+  real (kind=kind_phys) :: qsnow_adj    !< new snow water rate with minimum adj [mm/s]
+  real (kind=kind_phys) :: snowh_def    !< snow depth deficit this timestep 
+  real (kind=kind_phys), parameter :: snow_depth_min = 0.2  ! 20cm
 ! ----------------------------------------------------------------------
     newnode  = 0
 
+    snowh_def = max(0.0,snow_depth_min - (snowh + snowhin*dt))  ! if > 0 add more snow
+
+    snowhin_adj = snowhin + snowh_def/dt
+    qsnow_adj   = qsnow   + snowh_def*120.0/dt  ! assume new snow density = 120
+
 ! shallow snow / no layer
 
-    if(isnow == 0 .and. qsnow > 0.)  then
-      snowh = snowh + snowhin * dt
-      sneqv = sneqv + qsnow * dt
+    if(isnow == 0 .and. qsnow_adj > 0.)  then
+      snowh = snowh + snowhin_adj * dt
+      sneqv = sneqv + qsnow_adj * dt
     end if
 
 ! creating a new layer
  
-    if(isnow == 0  .and. qsnow>0. .and. snowh >= 0.025) then
+    if(isnow == 0  .and. qsnow_adj>0. .and. snowh >= 0.025) then
       isnow    = -1
       newnode  =  1
       dzsnso(0)= snowh
@@ -2760,9 +2769,9 @@ end if   ! opt_gla == 1
 
 ! snow with layers
 
-    if(isnow <  0 .and. newnode == 0 .and. qsnow > 0.) then
-         snice(isnow+1)  = snice(isnow+1)   + qsnow   * dt
-         dzsnso(isnow+1) = dzsnso(isnow+1)  + snowhin * dt
+    if(isnow <  0 .and. newnode == 0 .and. qsnow_adj > 0.) then
+         snice(isnow+1)  = snice(isnow+1)   + qsnow_adj   * dt
+         dzsnso(isnow+1) = dzsnso(isnow+1)  + snowhin_adj * dt
     endif
 
 ! ----------------------------------------------------------------------
