@@ -15,7 +15,8 @@
       use module_h2ophys, only: ty_h2ophys
 
       use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm, iamin, iamax, jamin, jamax
-      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol, read_aerdataf
+      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol, read_aerdataf, &
+                             read_aerdata_dl, aerinterpol_dl, read_aerdataf_dl
 
       use iccn_def,   only : ciplin, ccnin, ci_pres
       use iccninterp, only : read_cidata, setindxci, ciinterpol
@@ -58,7 +59,7 @@
 !>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
 !! @{
       subroutine GFS_phys_time_vary_init (                                                         &
-              me, master, ntoz, h2o_phys, iaerclm, iccn, iflip, im, nx, ny, idate, xlat_d, xlon_d, &
+              me, master, ntoz, h2o_phys, iaerclm,iaermdl, iccn, iflip, im, nx, ny, idate, xlat_d, xlon_d, &
               jindx1_o3, jindx2_o3, ddy_o3, ozphys, h2ophys, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,        &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
@@ -77,7 +78,7 @@
          implicit none
 
          ! Interface variables
-         integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny
+         integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny, iaermdl
          logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
          integer,              intent(in)    :: idate(:), iopt_lake, iopt_lake_clm, iopt_lake_flake
          real(kind_phys),      intent(in)    :: fhour, lakefrac_threshold, lakedepth_threshold
@@ -208,7 +209,11 @@
                ! If iaerclm is .true., then ntrcaer == ntrcaerm
                ntrcaer = size(aer_nm, dim=3)
                ! Read aerosol climatology
-               call read_aerdata (me,master,iflip,idate,errmsg,errflg)
+               if(iaermdl==1) then
+                 call read_aerdata (me,master,iflip,idate,errmsg,errflg)
+               elseif(iaermdl==6) then
+                 call read_aerdata_dl (me,master,iflip,idate,fhour,errmsg,errflg)
+               end if
             endif
             if (errflg /= 0) return
          else
@@ -312,9 +317,12 @@
          endif
          
          if (errflg/=0) return
-
          if (iaerclm) then
-           call read_aerdataf (me, master, iflip, idate, fhour, errmsg, errflg)
+           if (iaermdl==1) then
+             call read_aerdataf (me, master, iflip, idate, fhour, errmsg, errflg)
+           elseif (iaermdl==6) then
+             call read_aerdataf_dl (me, master, iflip, idate, fhour, errmsg, errflg)
+           end if
            if (errflg/=0) return
          end if
 
@@ -646,7 +654,7 @@
 !! @{
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
             me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, nsswr, fhswr, lsswr, fhour, &
-            imfdeepcnv, cal_pre, random_clds, ozphys, h2ophys, ntoz, h2o_phys, iaerclm, iccn, clstp,         &
+            imfdeepcnv, cal_pre, random_clds, ozphys, h2ophys, ntoz, h2o_phys, iaerclm, iaermdl, iccn, clstp,         &
             jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm,              &
@@ -657,7 +665,7 @@
 
          ! Interface variables
          integer,              intent(in)    :: me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, &
-                                                nsswr, imfdeepcnv, iccn, ntoz, iflip
+                                                nsswr, imfdeepcnv, iccn, ntoz, iflip, iaermdl
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhswr, fhour
          logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm
@@ -769,23 +777,17 @@
          rjday = jdoy + jdat(5) / 24.
          if (rjday < ozphys%time(1)) rjday = rjday + 365.
 
-         n2 = ozphys%ntime + 1
-         do j=2,ozphys%ntime
-            if (rjday < ozphys%time(j)) then
-               n2 = j
-                      exit
-            endif
-         enddo
-         n1 = n2 - 1
-         if (n2 > ozphys%ntime) n2 = n2 - ozphys%ntime
-
 !> - Update ozone concentration.
          if (ntoz > 0) then
+            call find_photochemistry_index(ozphys%ntime, ozphys%time, rjday, n1, n2)
+
             call ozphys%update_o3prog(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
          endif
 
 !> - Update stratospheric h2o concentration.
          if (h2o_phys) then
+            call find_photochemistry_index(h2ophys%ntime, h2ophys%time, rjday, n1, n2)
+
             call h2ophys%update(jindx1_h, jindx2_h, ddy_h, rjday, n1, n2, h2opl)
          endif
 
@@ -809,13 +811,18 @@
          if (iaerclm) then
            ! aerinterpol is using threading inside, don't
            ! move into OpenMP parallel section above
-           call aerinterpol (me, master, nthrds, im, idate, &
-                             fhour, iflip, jindx1_aer, jindx2_aer, &
-                             ddy_aer, iindx1_aer,           &
-                             iindx2_aer, ddx_aer,           &
-                             levs, prsl, aer_nm, errmsg, errflg)
-           if(errflg /= 0) then
-             return
+           if (iaermdl==1) then
+             call aerinterpol (me, master, nthrds, im, idate, &
+                               fhour, iflip, jindx1_aer, jindx2_aer, &
+                               ddy_aer, iindx1_aer,           &
+                               iindx2_aer, ddx_aer,           &
+                               levs, prsl, aer_nm, errmsg, errflg)
+           elseif (iaermdl==6) then
+             call aerinterpol_dl (me, master, nthrds, im, idate, &
+                               fhour, iflip, jindx1_aer, jindx2_aer, &
+                               ddy_aer, iindx1_aer,           &
+                               iindx2_aer, ddx_aer,           &
+                               levs, prsl, aer_nm, errmsg, errflg)
            endif
          endif
          
@@ -834,6 +841,29 @@
          !   endif
          ! endif
 
+       contains
+         !> Find the time indexes on either side of current time
+         subroutine find_photochemistry_index(ntime, time, rjday, n1, n2)
+           implicit none
+           !> The number of times provided in the parameter file
+           integer, intent(in) :: ntime
+           !> The indexes of the parameters just before and after the
+           !! current time
+           integer, intent(out) :: n1, n2
+           !> The times provided in the parameter file
+           real, intent(in), dimension(ntime+1) :: time
+           !> The current time of year
+           real, intent(in) :: rjday
+           n2 = ntime + 1
+           do j=2,ntime
+              if (rjday < time(j)) then
+                 n2 = j
+                 exit
+              endif
+           enddo
+           n1 = n2 - 1
+           if (n2 > ntime) n2 = n2 - ntime
+         end subroutine find_photochemistry_index
       end subroutine GFS_phys_time_vary_timestep_init
 !! @}
 
