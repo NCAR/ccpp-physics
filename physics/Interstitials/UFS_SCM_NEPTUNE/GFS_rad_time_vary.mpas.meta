@@ -1,0 +1,114 @@
+[ccpp-table-properties]
+  name = GFS_rad_time_vary
+  type = scheme
+  relative_path = ../../
+  dependencies = hooks/machine.F,Radiation/mersenne_twister.f,Radiation/RRTMG/radcons.f90
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_rad_time_vary_timestep_init
+  type = scheme
+[lrseeds]
+  standard_name = do_host_provided_random_seeds
+  long_name = flag to use host-provided random seeds
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[rseeds]
+  standard_name = random_number_seeds_from_host
+  long_name = random number seeds from host
+  units = none
+  dimensions = (horizontal_dimension, number_of_host_provided_random_number_streams)
+  type = integer
+  intent = in
+  optional = True
+[lslwr]
+  standard_name = flag_for_calling_longwave_radiation
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lsswr]
+  standard_name = flag_for_calling_shortwave_radiation
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[isubc_lw]
+  standard_name = flag_for_lw_clouds_sub_grid_approximation
+  long_name = flag for lw clouds sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[isubc_sw]
+  standard_name = flag_for_sw_clouds_grid_approximation
+  long_name = flag for sw clouds sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+[icsdsw]
+  standard_name = random_number_seed_for_mcica_shortwave
+  long_name = random seeds for sub-column cloud generators sw
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = True
+[icsdlw]
+  standard_name = random_number_seed_for_mcica_longwave
+  long_name = random seeds for sub-column cloud generators lw
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = True
+[sec]
+  standard_name = forecast_time_in_seconds
+  long_name = seconds elapsed since model initialization
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[kdt]
+  standard_name = index_of_timestep
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ipsd0]
+  standard_name = initial_seed_for_mcica
+  long_name = initial permutaion seed for mcica radiation
+  units = 1
+  dimensions =  ()
+  type = integer
+  intent = in
+[ipsdlim]
+  standard_name = limit_for_initial_seed_for_mcica
+  long_name = limit for initial permutaion seed for mcica radiation
+  units = 1
+  dimensions =  ()
+  type = integer
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+
