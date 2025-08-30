@@ -5,7 +5,6 @@
 module cu_c3_driver
 
    ! DH* TODO: replace constants with arguments to cu_c3_driver_run
-   !use physcons  , g => con_g, cp => con_cp, xlv => con_hvap, r_v => con_rv
    use machine   , only: kind_phys
    use cu_c3_deep, only: cu_c3_deep_run,neg_check,fct1d3
    use cu_c3_sh  , only: cu_c3_sh_run
