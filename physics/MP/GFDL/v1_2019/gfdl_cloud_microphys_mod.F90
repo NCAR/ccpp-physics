@@ -3441,6 +3441,7 @@ subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, lo
     call read_gfdlmp_nml(errmsg = errmsg, errflg = errflg, unit = nlunit,   &
          input_nml_file = input_nml_file, fn_nml = fn_nml, version=1,       &
          iostat = ios)
+    if(errflg/=0) return
 
     ! write version number and namelist to log file
     if (me == master) then
