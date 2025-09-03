@@ -189,8 +189,8 @@
   kind = kind_phys
   intent = in
 [cscale]
-  standard_name = scaling_conv_cloud_water_in_sas
-  long_name = scaling parameter for conv cloud water
+  standard_name = multiplicative_tuning_parameter_for_convective_cloud_water
+  long_name = multiplicative tuning parameter for convective cloud_water
   units = none
   dimensions = ()
   type = real
