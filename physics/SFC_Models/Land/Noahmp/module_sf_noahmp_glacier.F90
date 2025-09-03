@@ -2650,6 +2650,23 @@ end if   ! opt_gla == 1
                           ponding1 ,ponding2 ,fsh    ,                 & !inout
                           qsnbot )                                       !out
 
+!reset the glacier to 2m depth with 600mm SWE
+
+   isnow = -3
+   snice(-2) = 15.0
+   snice(-1) = 60.0
+   snice( 0) = 525.0
+   snliq(-2) = 0.0
+   snliq(-1) = 0.0
+   snliq( 0) = 0.0
+   if(stc( 0) < 100.0) stc( 0) = stc( 1)  ! if the temperature is missing,
+   if(stc(-1) < 100.0) stc(-1) = stc( 0)  !  set to layer below
+   if(stc(-2) < 100.0) stc(-2) = stc(-1)  !  should not be necessary
+   dzsnso(-2)= 0.05
+   dzsnso(-1)= 0.20
+   dzsnso( 0)= 1.75
+   sneqv = 600.0
+
 !set empty snow layers to zero
 
    do iz = -nsnow+1, isnow
@@ -2736,28 +2753,19 @@ end if   ! opt_gla == 1
 ! local
 
   integer :: newnode            !< 0-no new layers, 1-creating new layers
-  real (kind=kind_phys) :: snowhin_adj  !< new snow depth rate with minimum adj [m/s]
-  real (kind=kind_phys) :: qsnow_adj    !< new snow water rate with minimum adj [mm/s]
-  real (kind=kind_phys) :: snowh_def    !< snow depth deficit this timestep 
-  real (kind=kind_phys), parameter :: snow_depth_min = 0.2  ! 20cm
 ! ----------------------------------------------------------------------
     newnode  = 0
 
-    snowh_def = max(0.0,snow_depth_min - (snowh + snowhin*dt))  ! if > 0 add more snow
-
-    snowhin_adj = snowhin + snowh_def/dt
-    qsnow_adj   = qsnow   + snowh_def*120.0/dt  ! assume new snow density = 120
-
 ! shallow snow / no layer
 
-    if(isnow == 0 .and. qsnow_adj > 0.)  then
-      snowh = snowh + snowhin_adj * dt
-      sneqv = sneqv + qsnow_adj * dt
+    if(isnow == 0 .and. qsnow > 0.)  then
+      snowh = snowh + snowhin * dt
+      sneqv = sneqv + qsnow * dt
     end if
 
 ! creating a new layer
  
-    if(isnow == 0  .and. qsnow_adj>0. .and. snowh >= 0.025) then
+    if(isnow == 0  .and. qsnow>0. .and. snowh >= 0.025) then
       isnow    = -1
       newnode  =  1
       dzsnso(0)= snowh
@@ -2769,9 +2777,9 @@ end if   ! opt_gla == 1
 
 ! snow with layers
 
-    if(isnow <  0 .and. newnode == 0 .and. qsnow_adj > 0.) then
-         snice(isnow+1)  = snice(isnow+1)   + qsnow_adj   * dt
-         dzsnso(isnow+1) = dzsnso(isnow+1)  + snowhin_adj * dt
+    if(isnow <  0 .and. newnode == 0 .and. qsnow > 0.) then
+         snice(isnow+1)  = snice(isnow+1)   + qsnow   * dt
+         dzsnso(isnow+1) = dzsnso(isnow+1)  + snowhin * dt
     endif
 
 ! ----------------------------------------------------------------------
