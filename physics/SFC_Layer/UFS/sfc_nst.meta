@@ -151,7 +151,7 @@
   kind = kind_phys
   intent = in
 [use_oceanuv]
-  standard_name = flag_for_control_of_air_sea_flux_computation_over_water
+  standard_name = do_air_sea_flux_computation_over_water
   long_name = air-sea flux option
   units = flag
   dimensions = ()

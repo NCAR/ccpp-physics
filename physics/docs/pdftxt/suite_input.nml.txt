@@ -727,7 +727,7 @@ show some variables in the namelist that must match the SDF.
                                                                           <li>negative when cplwav2atm=.true. - i.e. two way wave coupling
                                                                           </ul>
                                                                           <td>0
-<tr><td>use_oceanuv    <td>satmedmfvdifq, sfc_diff, sfc_diag, sfc_nst, sfc_ocean      <td>flag for air-sea flux options over ocean \n
+<tr><td>use_oceanuv    <td>satmedmfvdifq, sfc_diff, sfc_diag, sfc_nst, sfc_ocean      <td>flag for air-sea flux computation over water \n
                                       <ul>
                                       <td>0
 <tr><td>redrag          <td>sfc_diff          <td>flag for applying reduced drag coefficient for high wind over sea in GFS surface layer scheme  <td>.false.
