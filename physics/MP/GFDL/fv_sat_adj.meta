@@ -41,7 +41,7 @@
   standard_name = gas_constants_for_multi_gases_physics
   long_name = gas constants for multi gases physics
   units = J kg-1 K-1
-  dimensions = (constant_zero:number_of_gases_for_multi_gases_physics)
+  dimensions = (0:number_of_gases_for_multi_gases_physics)
   type = real
   kind = kind_dyn
   intent = in
@@ -49,7 +49,7 @@
   standard_name = specific_heat_capacities_for_multi_gases_physics
   long_name = specific heat capacities for multi gases physics
   units = J kg-1 K-1
-  dimensions = (constant_zero:number_of_gases_for_multi_gases_physics)
+  dimensions = (0:number_of_gases_for_multi_gases_physics)
   type = real
   kind = kind_dyn
   intent = in
@@ -289,7 +289,7 @@
   standard_name = atmosphere_energy_content_at_Lagrangian_surface
   long_name = atmosphere total energy at Lagrangian surface
   units = J m-2
-  dimensions = (starting_x_direction_index_domain:ending_x_direction_index_domain,starting_y_direction_index_domain:ending_y_direction_index_domain,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_domain:ending_x_direction_index_domain,starting_y_direction_index_domain:ending_y_direction_index_domain,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = out
@@ -304,7 +304,7 @@
   standard_name = gas_tracers_for_multi_gas_physics_at_Lagrangian_surface
   long_name = gas tracers for multi gas physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics,ccpp_constant_one:number_of_gases_for_multi_gases_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics,1:number_of_gases_for_multi_gases_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -312,7 +312,7 @@
   standard_name = water_vapor_specific_humidity_at_Lagrangian_surface
   long_name = water vapor specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -320,7 +320,7 @@
   standard_name = cloud_liquid_water_specific_humidity_at_Lagrangian_surface
   long_name = cloud liquid water specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -328,7 +328,7 @@
   standard_name = cloud_ice_specific_humidity_at_Lagrangian_surface
   long_name = cloud ice specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -336,7 +336,7 @@
   standard_name = cloud_rain_specific_humidity_at_Lagrangian_surface
   long_name = cloud rain specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -344,7 +344,7 @@
   standard_name = cloud_snow_specific_humidity_at_Lagrangian_surface
   long_name = cloud snow specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -352,7 +352,7 @@
   standard_name = cloud_graupel_specific_humidity_at_Lagrangian_surface
   long_name = cloud graupel specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -368,7 +368,7 @@
   standard_name = log_pressure_at_Lagrangian_surface
   long_name = logarithm of pressure at Lagrangian surface
   units = Pa
-  dimensions = (starting_x_direction_index_alloc2:ending_x_direction_index_alloc2,ccpp_constant_one:vertical_dimension_for_fast_physics_plus_one,starting_y_direction_index_alloc2:ending_y_direction_index_alloc2)
+  dimensions = (starting_x_direction_index_alloc2:ending_x_direction_index_alloc2,1:vertical_dimension_for_fast_physics_plus_one,starting_y_direction_index_alloc2:ending_y_direction_index_alloc2)
   type = real
   kind = kind_dyn
   intent = in
@@ -376,7 +376,7 @@
   standard_name = thickness_at_Lagrangian_surface
   long_name = thickness at Lagrangian_surface
   units = m
-  dimensions = (starting_x_direction_index_alloc2:ending_x_direction_index_alloc2,starting_y_direction_index_alloc2:ending_y_direction_index_alloc2,ccpp_constant_one:vertical_dimension_for_thickness_at_Lagrangian_surface)
+  dimensions = (starting_x_direction_index_alloc2:ending_x_direction_index_alloc2,starting_y_direction_index_alloc2:ending_y_direction_index_alloc2,1:vertical_dimension_for_thickness_at_Lagrangian_surface)
   type = real
   kind = kind_dyn
   intent = in
@@ -384,7 +384,7 @@
   standard_name = pressure_thickness_at_Lagrangian_surface
   long_name = pressure thickness at Lagrangian surface
   units = Pa
-  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = in
@@ -392,7 +392,7 @@
   standard_name = virtual_temperature_at_Lagrangian_surface
   long_name = virtual temperature at Lagrangian surface
   units = K
-  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -400,7 +400,7 @@
   standard_name = finite_volume_mean_edge_pressure_raised_to_the_power_of_kappa
   long_name = finite-volume mean edge pressure in Pa raised to the power of kappa
   units = 1
-  dimensions = (starting_x_direction_index_alloc2:ending_x_direction_index_alloc2,starting_y_direction_index_alloc2:ending_y_direction_index_alloc2,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc2:ending_x_direction_index_alloc2,starting_y_direction_index_alloc2:ending_y_direction_index_alloc2,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -408,7 +408,7 @@
   standard_name = cloud_condensed_water_specific_humidity_at_Lagrangian_surface
   long_name = cloud condensed water specific humidity updated by fast physics at Lagrangian surface
   units = kg kg-1
-  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_condensed_water_at_Lagrangian_surface)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_condensed_water_at_Lagrangian_surface)
   type = real
   kind = kind_dyn
   intent = inout
@@ -424,7 +424,7 @@
   standard_name = cappa_moist_gas_constant_at_Lagrangian_surface
   long_name = cappa(i,j,k) = rdgas / ( rdgas +  cvm(i)/(1.+r_vir*q(i,j,k,sphum)) )
   units = none
-  dimensions = (starting_x_direction_index_domain:ending_x_direction_index_domain,starting_y_direction_index_domain:ending_y_direction_index_domain,ccpp_constant_one:vertical_dimension_for_cappa_at_Lagrangian_surface)
+  dimensions = (starting_x_direction_index_domain:ending_x_direction_index_domain,starting_y_direction_index_domain:ending_y_direction_index_domain,1:vertical_dimension_for_cappa_at_Lagrangian_surface)
   type = real
   kind = kind_dyn
   intent = inout
@@ -440,7 +440,7 @@
   standard_name = tendency_of_air_temperature_at_Lagrangian_surface
   long_name = air temperature tendency due to fast physics at Lagrangian surface
   units = K s-1
-  dimensions = (starting_x_direction_index:ending_x_direction_index,starting_y_direction_index:ending_y_direction_index,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index:ending_x_direction_index,starting_y_direction_index:ending_y_direction_index,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = inout
@@ -469,7 +469,7 @@
   standard_name = cloud_fraction_at_Lagrangian_surface
   long_name = cloud fraction at Lagrangian surface
   units = none
-  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,1:vertical_dimension_for_fast_physics)
   type = real
   kind = kind_dyn
   intent = out
