@@ -11,6 +11,8 @@
       use machine , only : kind_io8,kind_io4
       implicit none
       save
+
+      external :: BAOPENR, ABORT, GETGBH, GETGB, SPLAT, BACLOSE
 !
 !  grib code for each parameter - used in subroutines sfccycle and setrmsk.
 !
@@ -52,8 +54,6 @@
       write(message,fmt='(a,a,i0)') trim(prefix), '-', index
       end function message
 
-      end module sfccyc_module
-
 !>\ingroup mod_GFS_phys_time_vary
 !! This subroutine reads or interpolates surface climatology data in analysis
 !! and forecast mode.
@@ -89,7 +89,6 @@
      &,                   ialb,isot,ivegsrc,tile_num_ch,i_index,j_index)
 !
       use machine , only : kind_io8,kind_io4
-      use sfccyc_module
       implicit none
       character(len=*),     intent(in) :: tile_num_ch
       integer,              intent(in) :: i_index(len), j_index(len),   &
@@ -2769,7 +2768,6 @@
       subroutine hmskrd(lugb,imsk,jmsk,fnmskh,                          &
      &                  kpds5,slmskh,gausm,blnmsk,bltmsk,me)
       use machine , only : kind_io8,kind_io4
-      use sfccyc_module, only : mdata, xdata, ydata
       implicit none
       integer kpds5,me,i,imsk,jmsk,lugb
 !
@@ -2802,7 +2800,6 @@
       subroutine fixrdg(lugb,idim,jdim,fngrib,                          &
      &                  kpds5,gdata,gaus,blno,blto,me)
       use machine      , only : kind_io8,kind_dbl_prec,kind_sngl_prec
-      use sfccyc_module, only : mdata
       implicit none
       integer lgrib,n,lskip,jret,j,ndata,lugi,jdim,idim,lugb,
      &        iret, me,kpds5,kdata,i
@@ -3127,7 +3124,6 @@
      &                 gauout,len,lmask,rslmsk,slmask                   &
      &,                outlat, outlon,me)
       use machine , only : kind_io8,kind_io4
-      use sfccyc_module , only : num_threads
       implicit none
       real (kind=kind_io8) wei4,wei3,wei2,sum2,sum1,sum3,wei1,sum4,     &
      &                     wsum,tem,wsumiv,sums,sumn,wi2j2,x,y,wi1j1,   &
@@ -4794,8 +4790,6 @@
      &                 irtvmn,irtvmx,irtslp,irtabs,                     &
      &                 irtvet,irtsot,irtsoc,irtalf, landice, me)    
       use machine , only : kind_io8,kind_io4
-      use sfccyc_module, only : veg_type_landice, soil_type_landice,    &
-     &                    num_threads, zero, one,soil_color_landice
       implicit none
       integer k,i,im,id,iy,len,lsoil,ih,irtacn,irtsmc,irtscv,irtais,    &
      &     irttg3,irtstc,irtalf,me,irtsot,irtsoc,irtveg,irtvet, irtzor, & !irtsoc:soil color
@@ -5514,7 +5508,6 @@
      &                  rla,rlo,len,mode,percrit,lgchek,me)
 !
       use machine , only : kind_io8,kind_io4
-      use sfccyc_module , only : num_threads
       implicit none
       integer, intent(in)              :: len, mode, me
       real (kind=kind_io8), intent(in) :: fldimx,fldimn,fldjmx,fldomn,  &
@@ -6260,7 +6253,6 @@
      &                   data,imax,jmax,rlnout,rltout,lmask,rslmsk      &
      &,                  gaus,blno, blto, kgds1, kpds4, lbms)
       use machine , only : kind_io8,kind_io4,kind_dbl_prec
-      use sfccyc_module
       implicit none
       real (kind=kind_io8) blno,blto,wlon,rnlat,crit,data_max
       integer i,j,ijmax,jgaul,igaul,kpds5,jmax,imax, kgds1, kspla
@@ -6746,7 +6738,6 @@
       subroutine ga2la(gauin,imxin,jmxin,regout,imxout,jmxout,          &
      &                 wlon,rnlat,rlnout,rltout,gaus,blno, blto)
       use machine , only : kind_io8,kind_io4,kind_dbl_prec
-      use sfccyc_module , only : num_threads
       implicit none
       integer i1,i2,j2,ishft,i,jj,j1,jtem,jmxout,imxin,jmxin,imxout,    &
      &        j,iret
@@ -8415,7 +8406,6 @@ cjfe
      &,                imsk, jmsk, slmskh, gaus,blno, blto              &
      &,                outlat, outlon, me)
       use machine ,      only : kind_io8,kind_dbl_prec,kind_sngl_prec
-      use sfccyc_module, only : mdata
       implicit none
       integer imax,jmax,ijmax,i,j,n,jret,inttyp,iret,imsk,              &
      &        jmsk,len,lugb,kpds5,mon,lskip,lgrib,ndata,lugi,me,kmami   &
@@ -8580,7 +8570,6 @@ cjfe
      &,                 imsk, jmsk, slmskh, gaus,blno, blto             &
      &,                 outlat, outlon, me)
       use machine      , only : kind_io8,kind_dbl_prec,kind_sngl_prec
-      use sfccyc_module, only : mdata
       implicit none
       integer nrepmx,nvalid,imo,iyr,idy,jret,ihr,nrept,lskip,lugi,      &
      &        lgrib,j,ndata,i,inttyp,jmax,imax,ijmax,ij,jday,len,iret,  &
@@ -8902,3 +8891,6 @@ cjfe
       return
       end
 !>@}
+
+      end module sfccyc_module
+
