@@ -162,7 +162,7 @@
   kind = kind_phys
   intent = in
   optional = True
-[con_xncmax]
+[con_xnc_max]
   standard_name = maximum_mass_number_concentration_of_cloud_liquid_water_particles_in_air_used_in_deposition_nucleation
   long_name = maximum mass number concentration of cloud liquid water particles in air
   units = kg-1
