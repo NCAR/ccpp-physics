@@ -153,12 +153,12 @@ module module_mp_thompson
    real(wp), parameter, private :: av_r = 4854.0
    real(wp), parameter, private :: bv_r = 1.0
    real(wp), parameter, private :: fv_r = 195.0
-   real(wp), parameter, private :: av_s = 40.0
-   real(wp), parameter, private :: bv_s = 0.55
+   real(wp), parameter          :: av_s = 40.0
+   real(wp), parameter          :: bv_s = 0.55
    real(wp), parameter, private :: fv_s = 100.0
    real(wp), parameter, private :: av_g = 442.0
    real(wp), parameter, private :: bv_g = 0.89
-   real(wp), parameter, private :: bv_i = 1.0
+   real(wp), parameter          :: bv_i = 1.0
    real(wp), parameter, private :: av_c = 0.316946E8
    real(wp), parameter, private :: bv_c = 2.0
 
@@ -223,7 +223,7 @@ module module_mp_thompson
    real(wp), parameter, private :: xm0i = R1
    real(wp), parameter, private :: D0c = 1.e-6
    real(wp), parameter, private :: D0r = 50.e-6
-   real(wp), parameter, private :: D0s = 300.e-6
+   real(wp), parameter          :: D0s = 300.e-6
    real(wp), parameter, private :: D0g = 350.e-6
    real(wp), private :: D0i, xm0s, xm0g
 
