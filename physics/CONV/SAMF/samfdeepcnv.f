@@ -82,7 +82,7 @@
      &    islimsk,garea,dot,ncloud,hpbl,ud_mf,dd_mf,dt_mf,cnvw,cnvc,    &
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
      &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
-     &    clam,c0s,c1,betal,betas,evef,pgcon,asolfac,                   &
+     &    clam,c0s,c1,betal,betas,evef,pgcon,asolfac,cscale,            &
      &    do_ca, ca_closure, ca_entr, ca_trigger, nthresh,ca_deep,      &
      &    rainevap,sigmain,sigmaout,omegain,omegaout,betadcu,betamcu,   &
      &    betascu,maxMF,do_mynnedmf,sigmab_coldstart,errmsg,errflg)
@@ -97,7 +97,7 @@
       integer, intent(in)  :: islimsk(:)
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap, eps, epsm1,   &
      &   fv, grav, hvap, rd, rv, t0c
-      real(kind=kind_phys), intent(in) ::  delt
+      real(kind=kind_phys), intent(in) ::  delt, cscale
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
      &   prslp(:,:),  garea(:), hpbl(:), dot(:,:), phil(:,:) 
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
@@ -219,7 +219,7 @@ cj
 !  parameters for prognostic sigma closure                                                                                                                                                      
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im),qadv(im,km),
-     &     sigmaoutx(im),tentr(im,km)
+     &     tentr(im,km)
       real(kind=kind_phys) gravinv,invdelt,sigmind,sigminm,sigmins
       parameter(sigmind=0.01,sigmins=0.03,sigminm=0.01)
       logical flag_shallow, flag_mid
@@ -3467,14 +3467,6 @@ c
         endif
       enddo
 c
-!
-      if(progsigma)then
-         do i = 1, im
-            sigmaoutx(i)=max(sigmaout(i,1),0.0)
-            sigmaoutx(i)=min(sigmaoutx(i),1.0)
-         enddo
-      endif
-c
 !> - Calculate convective cloud water.
       do k = 1, km
          do i = 1, im
@@ -3482,9 +3474,9 @@ c
                if (k >= kbcon(i) .and. k < ktcon(i)) then
                   cnvw(i,k) = cnvwt(i,k) * xmb(i) * dt2
                   if(progsigma)then
-                     cnvw(i,k) = cnvw(i,k) * sigmaoutx(i)
+                     cnvw(i,k) = cnvw(i,k) * cscale 
                   else
-                     cnvw(i,k) = cnvw(i,k) * sigmagfm(i)
+                     cnvw(i,k) = cnvw(i,k) * cscale
                   endif
                endif
             endif

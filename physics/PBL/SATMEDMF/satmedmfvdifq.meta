@@ -495,6 +495,13 @@
   type = real
   kind = kind_phys
   intent = in
+[tte_edmf]
+  standard_name = flag_for_scale_aware_TTE_moist_EDMF_PBL
+  long_name = flag for scale-aware TTE moist EDMF PBL scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [dspheat]
   standard_name = flag_TKE_dissipation_heating
   long_name = flag for using TKE dissipation heating
