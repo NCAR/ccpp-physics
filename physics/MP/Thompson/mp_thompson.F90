@@ -11,7 +11,7 @@ module mp_thompson
       use machine, only : kind_phys
 
       use module_mp_thompson, only : thompson_init, mp_gt_driver, thompson_finalize, calc_effectRad
-      use module_mp_thompson, only : naIN0, naIN1, naCCN0, naCCN1, eps, Nt_c_l, Nt_c_o
+      use module_mp_thompson, only : naIN0, naIN1, naCCN0, naCCN1, eps
       use module_mp_thompson, only : re_qc_min, re_qc_max, re_qi_min, re_qi_max, re_qs_min, re_qs_max
 
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber, make_RainNumber
@@ -34,6 +34,9 @@ module mp_thompson
                                   con_cp, con_rgas, con_boltz, con_amd,    &
                                   con_amw, con_avgd, con_hvap, con_hfus,   &
                                   con_g, con_rd, con_eps,                  &
+                                  con_Nt_c_l, con_Nt_c_o, con_av_i,        &
+                                  con_xnc_max, con_ssati_min, con_Nt_i_max,&
+                                  con_rr_min,                              &
                                   restart, imp_physics,                    &
                                   imp_physics_thompson, convert_dry_rho,   &
                                   spechum, qc, qr, qi, qs, qg, ni, nr,     &
@@ -45,6 +48,7 @@ module mp_thompson
                                   is_initialized, errmsg, errflg)
          use module_mp_thompson, only : PI, T_0, Rv, R, RoverRv, Cp
          use module_mp_thompson, only : R_uni, k_b, M_w, M_a, N_avo, lvap0, lfus
+         use module_mp_thompson, only : nt_c_l, nt_c_o, av_i, xnc_max, ssati_min, Nt_i_max, rr_min
          
          implicit none
 
@@ -54,6 +58,8 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: con_pi, con_t0c, con_rv, con_cp, con_rgas, &
                                                      con_boltz, con_amd, con_amw, con_avgd,     &
                                                      con_hvap, con_hfus, con_g, con_rd, con_eps
+         real(kind_phys), optional, intent(in   ) :: con_Nt_c_l, con_Nt_c_o, con_av_i, con_xnc_max, &
+                                                     con_ssati_min, con_Nt_i_max, con_rr_min
          logical,                   intent(in   ) :: restart
          logical,                   intent(inout) :: is_initialized
          integer,                   intent(in   ) :: imp_physics
@@ -126,6 +132,13 @@ module mp_thompson
          lvap0 = con_hvap
          lfus = con_hfus
          
+         if (present(con_nt_c_l)) nt_c_l = con_nt_c_l
+         if (present(con_nt_c_o)) nt_c_o = con_nt_c_o
+         if (present(con_xnc_max)) xnc_max = con_xnc_max
+         if (present(con_ssati_min)) ssati_min = con_ssati_min
+         if (present(con_Nt_i_max)) Nt_i_max = con_Nt_i_max
+         if (present(con_rr_min)) rr_min = con_rr_min
+         
          ! Consistency checks
          if (imp_physics/=imp_physics_thompson) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Thompson MP"
@@ -153,7 +166,10 @@ module mp_thompson
                             mpicomm=mpicomm, mpirank=mpirank, mpiroot=mpiroot, &
                             threads=threads, errmsg=errmsg, errflg=errflg)
          if (errflg /= 0) return
-
+         
+         ! override the value of av_i with the constant value
+         if (present(con_av_i)) av_i = con_av_i
+         
          ! For restart runs, the init is done here
          if (restart) then
            is_initialized = .true.
