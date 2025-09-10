@@ -48,7 +48,8 @@ module mp_thompson
                                   is_initialized, errmsg, errflg)
          use module_mp_thompson, only : PI, T_0, Rv, R, RoverRv, Cp
          use module_mp_thompson, only : R_uni, k_b, M_w, M_a, N_avo, lvap0, lfus
-         use module_mp_thompson, only : nt_c_l, nt_c_o, av_i, xnc_max, ssati_min, Nt_i_max, rr_min
+         use module_mp_thompson, only : av_i, av_s, D0s, bv_s, bv_i
+         use module_mp_thompson, only : nt_c_l, nt_c_o, xnc_max, ssati_min, Nt_i_max, rr_min
          
          implicit none
 
@@ -134,6 +135,15 @@ module mp_thompson
          
          if (present(con_nt_c_l)) nt_c_l = con_nt_c_l
          if (present(con_nt_c_o)) nt_c_o = con_nt_c_o
+         if (present(con_av_i)) then
+           if (con_av_i > 0.) then
+             av_i = con_av_i
+           else
+             av_i = av_s * D0s ** (bv_s - bv_i) ! Transition value of coefficient matching at crossover from cloud ice to snow
+           end if
+         else
+           av_i = av_s * D0s ** (bv_s - bv_i) ! Transition value of coefficient matching at crossover from cloud ice to snow
+         end if
          if (present(con_xnc_max)) xnc_max = con_xnc_max
          if (present(con_ssati_min)) ssati_min = con_ssati_min
          if (present(con_Nt_i_max)) Nt_i_max = con_Nt_i_max
@@ -166,9 +176,6 @@ module mp_thompson
                             mpicomm=mpicomm, mpirank=mpirank, mpiroot=mpiroot, &
                             threads=threads, errmsg=errmsg, errflg=errflg)
          if (errflg /= 0) return
-         
-         ! override the value of av_i with the constant value
-         if (present(con_av_i)) av_i = con_av_i
          
          ! For restart runs, the init is done here
          if (restart) then

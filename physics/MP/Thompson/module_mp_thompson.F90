@@ -479,9 +479,6 @@ module module_mp_thompson
          
          lsub = lvap0 + lfus
          olfus = 1./lfus
-         
-        ! Transition value of coefficient matching at crossover from cloud ice to snow
-         av_i = av_s * D0s ** (bv_s - bv_i)
 
 ! Set module variable is_aerosol_aware/merra2_aerosol_aware
          is_aerosol_aware = is_aerosol_aware_in
