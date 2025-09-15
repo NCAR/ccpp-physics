@@ -188,6 +188,14 @@
   type = real
   kind = kind_phys
   intent = in
+[cscale]
+  standard_name = multiplicative_tuning_parameter_for_convective_cloud_water
+  long_name = multiplicative tuning parameter for convective cloud_water
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [delt]
   standard_name = timestep_for_physics
   long_name = physics time step
