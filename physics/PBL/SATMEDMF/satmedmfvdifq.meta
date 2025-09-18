@@ -241,12 +241,12 @@
   type = real
   kind = kind_phys
   intent = in
-[icplocn2atm]
-  standard_name = control_for_air_sea_flux_computation_over_water
+[use_oceanuv]
+  standard_name = do_air_sea_flux_computation_over_water
   long_name = air-sea flux option
-  units = 1
+  units = flag
   dimensions = ()
-  type = integer
+  type = logical
   intent = in
 [t1]
   standard_name = air_temperature
@@ -494,6 +494,13 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+[tte_edmf]
+  standard_name = flag_for_scale_aware_TTE_moist_EDMF_PBL
+  long_name = flag for scale-aware TTE moist EDMF PBL scheme
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
 [dspheat]
   standard_name = flag_TKE_dissipation_heating
