@@ -199,7 +199,7 @@ target_link_libraries(ccpp_physics PUBLIC w3emc::w3emc_d
                                           NetCDF::NetCDF_Fortran
 				             )
 #add FMS for FV3 only
-if(FV3)
+if(FV3 OR MPAS)
   target_link_libraries(ccpp_physics PUBLIC fms)
 endif()
 

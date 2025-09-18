@@ -55,8 +55,8 @@
      &     t0c,delt,ntk,ntr,delp,first_time_step,restart,               & 
      &     tmf,qmicro,progsigma,progomega,                              &
      &     prslp,psp,phil,tkeh,qtr,dqtr,prevsq,q,q1,t1,u1,v1,fscav,     &
-     &     rn,kbot,ktop,kcnv,islimsk,garea, ten_t, ten_u, ten_v, ten_q, &
-     &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
+     &     rn,kbot,ktop,kcnv,islimsk,garea,cscale,ten_t, ten_u, ten_v,  &
+     &     ten_q, dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                &
      &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,                & 
      &     sigmain,sigmaout,omegain,omegaout,betadcu,betamcu,betascu,   &
      &     errmsg,errflg)
@@ -71,7 +71,7 @@
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap,               &
      &   eps, epsm1, fv, grav, hvap, rd, rv, t0c, betascu, betadcu,     &
      &   betamcu
-      real(kind=kind_phys), intent(in) ::  delt
+      real(kind=kind_phys), intent(in) ::  delt, cscale
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
      &   prslp(:,:), garea(:), hpbl(:), dot(:,:), phil(:,:),            &
      &   tmf(:,:,:), q(:,:)
@@ -170,7 +170,7 @@ cc
 !  parameters for prognostic sigma closure
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
-     &                     sigmab(im),qadv(im,km),sigmaoutx(im)
+     &                     sigmab(im),qadv(im,km)
       real(kind=kind_phys) gravinv,dxcrtas,invdelt,sigmind,sigmins,
      &                     sigminm
       logical flag_shallow,flag_mid
@@ -207,7 +207,7 @@ c  physical parameters
       parameter(betaw=.03,dxcrtc0=9.e3)
       parameter(h1=0.33333333)
 !  progsigma
-      parameter(dxcrtas=30.e3,sigmind=0.01,sigmins=0.03,sigminm=0.01)
+      parameter(dxcrtas=500.e3,sigmind=0.01,sigmins=0.03,sigminm=0.01)
 c  local variables and arrays
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
      &                     uo(im,km),      vo(im,km),     qeso(im,km),
@@ -2464,13 +2464,6 @@ cj
         endif
       enddo
 c
-      if(progsigma)then
-         do i = 1, im
-            sigmaoutx(i)=max(sigmaout(i,1),0.0)
-            sigmaoutx(i)=min(sigmaoutx(i),1.0)
-         enddo
-      endif
-      
 c     convective cloud water
       do k = 1, km
          do i = 1, im
@@ -2478,9 +2471,9 @@ c     convective cloud water
                if (k >= kbcon(i) .and. k < ktcon(i)) then
                   cnvw(i,k) = cnvwt(i,k) * xmb(i) * dt2
                   if (progsigma) then
-                     cnvw(i,k) = cnvw(i,k) * sigmaoutx(i)
+                     cnvw(i,k) = cnvw(i,k) * cscale
                   else
-                     cnvw(i,k) = cnvw(i,k) * sigmagfm(i)
+                     cnvw(i,k) = cnvw(i,k) * cscale
                   endif
                endif
             endif

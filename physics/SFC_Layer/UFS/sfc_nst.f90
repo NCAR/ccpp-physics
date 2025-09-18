@@ -26,7 +26,7 @@ contains
   !> \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
   subroutine sfc_nst_run                                          &
        ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,  &  ! --- inputs:
-       pi, tgice, sbc, ps, u1, v1, usfco, vsfco, icplocn2atm, t1, &
+       pi, tgice, sbc, ps, u1, v1, usfco, vsfco, use_oceanuv, t1, &
        q1, tref, cm, ch, lseaspray, fm, fm10,                     &
        prsl1, prslki, prsik1, prslk1, wet, use_lake_model, xlon,  &
        sinlat, stress,                                            &
@@ -85,8 +85,8 @@ contains
     !     ps       - real, surface pressure (pa)                       im   !
     !     u1, v1   - real, u/v component of surface layer wind (m/s)   im   !
     !     usfco, vsfco - real, u/v component of surface current (m/s)  im   !
-    !     icplocn2atm - integer, option to include ocean surface       1    !
-    !                       current in the computation of flux              ! 
+    !     use_oceanuv  - logical, option to include ocean surface      1    !
+    !                       current in the computation of flux              !
     !     t1       - real, surface layer mean temperature ( k )        im   !
     !     q1       - real, surface layer mean specific humidity        im   !
     !     tref     - real, reference/foundation temperature ( k )      im   !
@@ -170,8 +170,8 @@ contains
 
     !  ---  inputs:
     integer, intent(in) :: im, kdt, ipr, nstf_name1, nstf_name4, nstf_name5
-    integer, intent(in) :: icplocn2atm
-  
+    logical, intent(in) :: use_oceanuv
+
     real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps, &
          epsm1, rvrdm1, rd, rhw0, sbc, pi, tgice
     real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,  &
@@ -320,11 +320,11 @@ contains
 
           !  --- ...  rcp = rho cp ch v
 
-          if (icplocn2atm ==0) then
+          if (.not. use_oceanuv) then
             rch(i)     = rho_a(i) * cp * ch(i) * wind(i)
             cmm(i)     = cm (i)   * wind(i)
             chh(i)     = rho_a(i) * ch(i) * wind(i)
-          else if (icplocn2atm ==1) then
+          else if (use_oceanuv) then
             windrel= sqrt( (u1(i)-usfco(i))**2 + (v1(i)-vsfco(i))**2 )
             rch(i)     = rho_a(i) * cp * ch(i) * windrel
             cmm(i)     = cm (i)   * windrel
