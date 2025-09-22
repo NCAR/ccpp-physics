@@ -304,7 +304,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [tprcp]
   standard_name = nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_ice
   long_name = total precipitation amount in each time step over ice

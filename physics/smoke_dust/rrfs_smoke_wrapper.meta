@@ -392,7 +392,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [us3d]
   standard_name = x_wind_of_new_state
   long_name = updated x-direction wind
@@ -400,7 +400,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [vs3d]
   standard_name = y_wind_of_new_state
   long_name = updated y-direction wind
@@ -408,7 +408,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [spechum]
   standard_name = specific_humidity_of_new_state
   long_name = water vapor specific humidity updated by physics
@@ -416,7 +416,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [w]
   standard_name = lagrangian_tendency_of_air_pressure
   long_name = layer mean vertical velocity
@@ -439,7 +439,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_of_soil_internal_to_land_surface_scheme)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = True
 [tslb]
   standard_name = soil_temperature_for_land_surface_model
@@ -896,7 +896,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = True
 [hwp_ave]
   standard_name = hourly_wildfire_potential_average
@@ -939,7 +939,7 @@
  dimensions = (horizontal_loop_extent)
  type = real
  kind = kind_phys
- intent = out
+ intent = inout
  optional = True
 [lu_nofire_out]
  standard_name = sum_of_land_use_fractions_for_no_fire_pixels

@@ -391,7 +391,7 @@ module mp_thompson
          real(kind_phys), optional, intent(in   ) :: nwfa2d(:)
          real(kind_phys), optional, intent(in   ) :: nifa2d(:)
          real(kind_phys),           intent(in)    :: aerfld(:,:,:)
-         logical,         optional, intent(in   ) :: aero_ind_fdb
+         logical,                   intent(in   ) :: aero_ind_fdb
          ! State variables and timestep information
          real(kind_phys),           intent(inout) :: tgrs(:,:)
          real(kind_phys),           intent(in   ) :: prsl(:,:)

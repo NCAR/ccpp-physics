@@ -263,7 +263,7 @@ MODULE clm_lake
     !!
     SUBROUTINE clm_lake_run( &
          ! Model time and metadata:
-         flag_restart, im, km, me, master, fhour, IDATE, kdt,                     &
+         flag_restart, im, km, me, master, nlevs1, nlevs0, fhour, IDATE, kdt,     &
 
          ! Configuration and initialization:
          iopt_lake, iopt_lake_clm, min_lakeice, lakedepth_default, use_lakedepth, &
@@ -305,7 +305,7 @@ MODULE clm_lake
     ! Model time and metadata:
     !
     LOGICAL , INTENT (IN) :: flag_restart
-    INTEGER , INTENT (IN) :: im,km,me,master
+    INTEGER , INTENT (IN) :: im,km,me,master,nlevs0,nlevs1
     INTEGER, INTENT(IN) :: IDATE(4), kdt
     REAL(KIND_PHYS), INTENT(IN) :: fhour
     INTEGER, INTENT(IN) :: lkm
@@ -362,13 +362,13 @@ MODULE clm_lake
     
     real(kind_phys),    dimension( :,: ),  INTENT(inout)  :: t_lake3d,       &    
                                                                                   lake_icefrac3d
-    real(kind_phys),    dimension( :,-nlevsnow+1: )  ,INTENT(inout)            :: t_soisno3d,     &    
+    real(kind_phys),    dimension( :,nlevs1: )  ,INTENT(inout) :: t_soisno3d,     &    
                                                                                   h2osoi_ice3d,   &    
                                                                                   h2osoi_liq3d,   &    
                                                                                   h2osoi_vol3d,   &    
                                                                                   z3d,            &    
                                                                                   dz3d 
-    real(kind_phys),    dimension( :,-nlevsnow+0: )  ,INTENT(inout)  :: zi3d    
+    real(kind_phys),    dimension( :,nlevs0: )  ,INTENT(inout)  :: zi3d    
 
     REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT) :: clm_lakedepth
     REAL(KIND_PHYS),           DIMENSION( : )  ,INTENT(INOUT) :: input_lakedepth

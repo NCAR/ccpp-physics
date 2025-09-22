@@ -65,7 +65,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

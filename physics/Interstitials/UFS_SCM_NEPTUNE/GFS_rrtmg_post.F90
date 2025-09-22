@@ -19,7 +19,7 @@
 !! \htmlinclude GFS_rrtmg_post_run.html
 !!
       subroutine GFS_rrtmg_post_run (im, km, kmp1, lm, ltp, kt, kb, kd, nspc1, &
-              nfxr, nday, lsswr, lslwr, lssav, fhlwr, fhswr, raddt, coszen,    &
+              lmk,nfxr, nday, lsswr, lslwr, lssav, fhlwr, fhswr, raddt, coszen,&
               coszdg, prsi, tgrs, aerodp, cldsa, mtopa, mbota, clouds1,        &
               cldtaulw, cldtausw, sfcflw, sfcfsw, topflw, topfsw, scmpsw,      &
               fluxr, total_albedo, errmsg, errflg)
@@ -33,7 +33,7 @@
 
       ! Interface variables
       integer,              intent(in) :: im, km, kmp1, lm, ltp, kt, kb, kd,   &
-                                          nspc1, nfxr, nday
+                                          nspc1, nfxr, nday, lmk
       logical,              intent(in) :: lsswr, lslwr, lssav
       real(kind=kind_phys), intent(in) :: raddt, fhlwr, fhswr
             
@@ -45,9 +45,9 @@
       real(kind=kind_phys), dimension(im,NSPC1),  intent(in) :: aerodp
       real(kind=kind_phys), dimension(im,5),      intent(in) :: cldsa
       integer,              dimension(im,3),      intent(in) :: mbota, mtopa
-      real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: clouds1
-      real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: cldtausw
-      real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: cldtaulw
+      real(kind=kind_phys), dimension(im,lmk),    intent(in) :: clouds1
+      real(kind=kind_phys), dimension(im,lmk),    intent(in) :: cldtausw
+      real(kind=kind_phys), dimension(im,lmk),    intent(in) :: cldtaulw
       real(kind=kind_phys), dimension(im),        intent(inout) :: total_albedo
       
       type(sfcflw_type), dimension(im), intent(in) :: sfcflw

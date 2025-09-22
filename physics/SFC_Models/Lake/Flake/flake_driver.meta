@@ -182,7 +182,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [snwdph]
   standard_name = surface_snow_thickness_water_equivalent_over_ice
   long_name = water equivalent snow depth over ice
@@ -424,6 +424,13 @@
   dimensions = ()
   type = integer
   intent = in
+[use_lake_model]
+  standard_name = flag_for_using_lake_model
+  long_name = flag indicating lake points using a lake model
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
 [lakedepth]
   standard_name = lake_depth
   long_name = lake depth
@@ -463,7 +470,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [zm]
   standard_name = ocean_mixed_layer_thickness
   long_name = mixed layer thickness
@@ -471,7 +478,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [tref]
   standard_name = reference_sea_surface_temperature
   long_name = reference/foundation temperature
@@ -479,15 +486,15 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
-[tfco]
+  intent = inout
+[tsfco]
   standard_name = sea_surface_temperature
   long_name = sea surface temperature
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

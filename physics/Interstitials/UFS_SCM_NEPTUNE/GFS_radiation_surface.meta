@@ -327,7 +327,7 @@
   units = flag
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = inout
+  intent = in
 [alvsf]
   standard_name = vis_albedo_strong_cosz
   long_name = mean vis albedo with strong cosz dependency

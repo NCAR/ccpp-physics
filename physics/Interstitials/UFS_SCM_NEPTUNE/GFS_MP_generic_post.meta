@@ -228,7 +228,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [gq0]
   standard_name = tracer_concentration_of_new_state
   long_name = tracer concentration updated by physics

@@ -35,6 +35,13 @@
   dimensions = ()
   type = integer
   intent = in
+[lmk]
+  standard_name = adjusted_vertical_layer_dimension_for_radiation
+  long_name = adjusted number of vertical layers for radiation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [kd]
   standard_name = vertical_index_difference_between_inout_and_local
   long_name = vertical index difference between in/out and local

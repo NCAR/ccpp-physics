@@ -22,7 +22,7 @@
   units = none
   dimensions =  ()
   type = character
-  kind = len=128
+  kind = len=*
   intent = in
 [active_gases_array]
   standard_name = list_of_active_gases_used_by_RRTMGP
@@ -30,7 +30,7 @@
   units = none
   dimensions = (number_of_active_gases_used_by_RRTMGP)
   type = character
-  kind = len=128
+  kind = len=*
   intent = out
 [errmsg]
   standard_name = ccpp_error_message
@@ -361,7 +361,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [tsfg]
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
@@ -515,7 +514,7 @@
   units = count
   dimensions = ()
   type = integer
-  intent = inout
+  intent = out
 [idxday]
   standard_name = daytime_points
   long_name = daytime points

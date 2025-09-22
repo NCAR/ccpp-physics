@@ -362,7 +362,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = True
 [prsl]
   standard_name = air_pressure
