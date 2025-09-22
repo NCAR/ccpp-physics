@@ -32,7 +32,6 @@
   type = character
   kind = len=128
   intent = out
-  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -477,7 +476,6 @@
   type = character
   kind = len=*
   intent = in
-  optional = True
 [coszdg]
   standard_name = cosine_of_solar_zenith_angle_on_radiation_timestep
   long_name = daytime mean cosz over rad call period

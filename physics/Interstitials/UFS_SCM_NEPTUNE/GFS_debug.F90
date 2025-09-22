@@ -537,7 +537,7 @@
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%qrain   ', Sfcprop%qrain)
                      end if
                      ! CCPP/RUC only
-                     if (Model%lsm == Model%lsm_ruc) then
+                     if (Model%lsm == Model%ilsm_ruc) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%sh2o',            Sfcprop%sh2o)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%smois',           Sfcprop%smois)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%tslb',            Sfcprop%tslb)
@@ -557,14 +557,14 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d,    'Sfcprop%emis_ice',      Sfcprop%emis_ice)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d,    'Sfcprop%emis_wat',      Sfcprop%emis_wat)
                      ! NoahMP and RUC
-                     if (Model%lsm == Model%lsm_ruc .or. Model%lsm == Model%lsm_noahmp) then
+                     if (Model%lsm == Model%ilsm_ruc .or. Model%lsm == Model%ilsm_noahmp) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%albdirvis_lnd', Sfcprop%albdirvis_lnd)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%albdirnir_lnd', Sfcprop%albdirnir_lnd)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%albdifvis_lnd', Sfcprop%albdifvis_lnd)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%albdifnir_lnd', Sfcprop%albdifnir_lnd)
                      end if
                      ! RUC only
-                     if (Model%lsm == Model%lsm_ruc) then
+                     if (Model%lsm == Model%ilsm_ruc) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%albdirvis_ice', Sfcprop%albdirvis_ice)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%albdifvis_ice', Sfcprop%albdifvis_ice)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%albdirnir_ice', Sfcprop%albdirnir_ice)
@@ -712,7 +712,7 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%tdoms       ',    Diag%tdoms)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%trans       ',    Diag%trans)
                      ! CCPP/RUC only
-                     if (Model%lsm == Model%lsm_ruc) then
+                     if (Model%lsm == Model%ilsm_ruc) then
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%wetness  ',  Sfcprop%wetness)
                      else
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%wet1        ',  Diag%wet1)
@@ -918,7 +918,7 @@
                      end if
                      if (Model%do_RRTMGP) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%fluxlwUP_jac',      Coupling%fluxlwUP_jac)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%htrlw',             Coupling%htrlw)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%hrlw',              Coupling%hrlw)
                      end if
                      !
                      ! Grid
@@ -1138,23 +1138,23 @@
                  if (mpirank==impi .and. omprank==iomp) then
                      ! Print static variables
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ipr                 ', Interstitial%ipr                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%itc                 ', Interstitial%itc                     )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%itc                        ', Model%itc                            )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%latidxprnt          ', Interstitial%latidxprnt              )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%levi                ', Interstitial%levi                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lmk                 ', Interstitial%lmk                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lmp                 ', Interstitial%lmp                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nbdlw               ', Interstitial%nbdlw                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nbdsw               ', Interstitial%nbdsw                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nf_aelw             ', Interstitial%nf_aelw                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nf_aesw             ', Interstitial%nf_aesw                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nsamftrac           ', Interstitial%nsamftrac               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nscav               ', Interstitial%nscav                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nspc1               ', Interstitial%nspc1                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ntiwx               ', Interstitial%ntiwx                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nvdiff              ', Interstitial%nvdiff                  )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%lmk                        ', Model%lmk                            )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%lmp                        ', Model%lmp                            )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%nbdlw                      ', Model%nbdlw                          )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%nbdsw                      ', Model%nbdsw                          )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%nf_aelw                    ', Model%nf_aelw                        )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%nf_aesw                    ', Model%nf_aesw                        )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%nsamftrac                  ', Model%nsamftrac                      )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%nscav                      ', Model%nscav                          )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%nspc1                      ', Model%nspc1                          )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%ntiwx                      ', Model%ntiwx                          )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%nvdiff                     ', Model%nvdiff                         )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%phys_hydrostatic    ', Interstitial%phys_hydrostatic        )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%skip_macro          ', Interstitial%skip_macro              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%trans_aero          ', Interstitial%trans_aero              )
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%trans_aero                 ', Model%trans_aero                     )
                      ! Print all other variables
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjsfculw_land      ', Interstitial%adjsfculw_land          )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjsfculw_ice       ', Interstitial%adjsfculw_ice           )
@@ -1433,7 +1433,7 @@
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%qgl                 ', Interstitial%qgl                     )
                      end if
                      ! Noah MP
-                     if (Model%lsm == Model%lsm_noahmp) then
+                     if (Model%lsm == Model%ilsm_noahmp) then
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%t2mmp               ', Interstitial%t2mmp                   )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%q2mp                ', Interstitial%q2mp                    )
                      end if
@@ -1511,7 +1511,7 @@
          errmsg = ''
          errflg = 0
 
-         if (Model%kdt==1 .and. blkno==size(Model%blksz)) then
+         if (Model%kdt==1 .and. blkno==size(Model%chunks)) then
              if (Model%me==Model%master) write(0,*) "GFS_abort_run: ABORTING MODEL"
              call sleep(10)
              stop

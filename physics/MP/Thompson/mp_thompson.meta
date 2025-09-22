@@ -770,8 +770,8 @@
   type = integer
   intent = in
 [blkno]
-  standard_name = ccpp_block_number
-  long_name = number of block for explicit data blocking in CCPP
+  standard_name = ccpp_chunk_number
+  long_name = number of chunk for contiguous data in CCPP
   units = index
   dimensions = ()
   type = integer

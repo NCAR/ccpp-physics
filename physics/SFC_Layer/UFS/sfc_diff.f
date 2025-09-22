@@ -54,7 +54,7 @@
 !!\f]
 !! - Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
 !!
-      subroutine sfc_diff_run (im,rvrdm1,eps,epsm1,grav,                &  !intent(in)
+      subroutine sfc_diff_run (im,rvrdm1,eps,epsm1,grav,                &
      &                    ps,t1,q1,z1,garea,wind,                       &  !intent(in)
      &                    prsl1,prslki,prsik1,prslk1,                   &  !intent(in)
      &                    sigmaf,vegtype,shdmax,ivegsrc,                &  !intent(in)

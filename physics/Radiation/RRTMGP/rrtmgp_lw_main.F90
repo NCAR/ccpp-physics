@@ -40,7 +40,7 @@ contains
                                   !< clouds optical properties
          rrtmgp_lw_file_gas       !< RRTMGP file containing coefficients used to compute
                                   !< gaseous optical properties
-    character(len=*), dimension(:), intent(in), optional :: &
+    character(len=*), dimension(:), intent(in) :: &
          active_gases_array !< List of active gases from namelist as array)
     logical, intent(in) :: &
          doGP_cldoptics_PADE,   & !< Use RRTMGP cloud-optics: PADE approximation?

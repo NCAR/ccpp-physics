@@ -41,7 +41,7 @@ contains
          nGases       !< Number of active gases in RRTMGP
     character(len=*), intent(in) :: &
          active_gases !< List of active gases from namelist
-    character(len=*), dimension(:), intent(out), optional :: &
+    character(len=*), dimension(:), intent(out) :: &
          active_gases_array !< List of active gases from namelist as array
 
     ! Outputs
@@ -145,7 +145,7 @@ contains
          prsi                 !< Pressure at model-interfaces (Pa)
     real(kind_phys), dimension(:,:,:), intent(in) :: & 
          qgrs                 !< Tracer concentrations (kg/kg)
-    character(len=*), dimension(:), intent(in), optional :: &
+    character(len=*), dimension(:), intent(in) :: &
          active_gases_array   !< List of active gases from namelist as array
 
     ! Outputs

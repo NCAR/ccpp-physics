@@ -2,6 +2,8 @@
   name = GFS_diagtoscreen
   type = scheme
   dependencies = ../../hooks/machine.F
+  dependencies = ../../../../../scm/src/GFS_typedefs.F90,../../../../../scm/src/CCPP_typedefs.F90
+  module_name = GFS_diagtoscreen
 
 ########################################################################
 [ccpp-arg-table]
@@ -286,8 +288,8 @@
   type = integer
   intent = in
 [blkno]
-  standard_name = ccpp_block_number
-  long_name = number of block for explicit data blocking in CCPP
+  standard_name = ccpp_chunk_number
+  long_name = number of chunk for using array chunks in CCPP
   units = index
   dimensions = ()
   type = integer
@@ -313,6 +315,7 @@
   name = GFS_interstitialtoscreen
   type = scheme
   dependencies = ../../hooks/machine.F
+  module_name = GFS_interstitialtoscreen
 
 ########################################################################
 [ccpp-arg-table]
@@ -597,8 +600,8 @@
   type = integer
   intent = in
 [blkno]
-  standard_name = ccpp_block_number
-  long_name = number of block for explicit data blocking in CCPP
+  standard_name = ccpp_chunk_number
+  long_name = number of chunk for using array chunks in CCPP
   units = index
   dimensions = ()
   type = integer
@@ -624,6 +627,7 @@
   name = GFS_abort
   type = scheme
   dependencies = ../../hooks/machine.F
+  module_name = GFS_abort
 
 ########################################################################
 [ccpp-arg-table]
@@ -637,8 +641,8 @@
   type = GFS_control_type
   intent = in
 [blkno]
-  standard_name = ccpp_block_number
-  long_name = number of block for explicit data blocking in CCPP
+  standard_name = ccpp_chunk_number
+  long_name = number of chunk for using array chunks in CCPP
   units = index
   dimensions = ()
   type = integer
@@ -664,6 +668,7 @@
   name = GFS_checkland
   type = scheme
   dependencies = ../../hooks/machine.F
+  module_name = GFS_checkland
 
 ########################################################################
 [ccpp-arg-table]
@@ -684,8 +689,8 @@
   type = integer
   intent = in
 [blkno]
-  standard_name = ccpp_block_number
-  long_name = number of block for explicit data blocking in CCPP
+  standard_name = ccpp_chunk_number
+  long_name = number of chunk for using array chunks in CCPP
   units = index
   dimensions = ()
   type = integer
@@ -923,6 +928,7 @@
   name = GFS_checktracers
   type = scheme
   dependencies = ../../hooks/machine.F
+  module_name = GFS_checktracers
 
 ########################################################################
 [ccpp-arg-table]
@@ -1099,8 +1105,8 @@
   type = integer
   intent = in
 [blkno]
-  standard_name = ccpp_block_number
-  long_name = number of block for explicit data blocking in CCPP
+  standard_name = ccpp_chunk_number
+  long_name = number of chunk for using array chunks in CCPP
   units = index
   dimensions = ()
   type = integer
