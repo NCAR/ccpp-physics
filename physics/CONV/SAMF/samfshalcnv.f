@@ -58,7 +58,7 @@
      &     t0c,delt,ntk,ntr,delp,first_time_step,restart,               & 
      &     tmf,qmicro,progsigma,progomega,                              &
      &     prslp,psp,phil,tkeh,qtr,prevsq,q,q1,t1,u1,v1,fscav,          &
-     &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
+     &     rn,kbot,ktop,kcnv,islimsk,garea,cscale,                      &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
      &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,                & 
      &     sigmain,sigmaout,omegain,omegaout,betadcu,betamcu,betascu,   &
@@ -74,7 +74,7 @@
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap,               &
      &   eps, epsm1, fv, grav, hvap, rd, rv, t0c, betascu, betadcu,     &
      &   betamcu
-      real(kind=kind_phys), intent(in) ::  delt
+      real(kind=kind_phys), intent(in) ::  delt, cscale
       real(kind=kind_phys), intent(in) :: psp(:), delp(:,:),            &
      &   prslp(:,:), garea(:), hpbl(:), dot(:,:), phil(:,:),            &
      &   tmf(:,:,:), q(:,:)
@@ -170,7 +170,7 @@ cc
 !  parameters for prognostic sigma closure
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
-     &                     sigmab(im),qadv(im,km),sigmaoutx(im)
+     &                     sigmab(im),qadv(im,km)
       real(kind=kind_phys) gravinv,dxcrtas,invdelt,sigmind,sigmins,
      &                     sigminm
       logical flag_shallow,flag_mid
@@ -2444,13 +2444,6 @@ cj
         endif
       enddo
 c
-      if(progsigma)then
-         do i = 1, im
-            sigmaoutx(i)=max(sigmaout(i,1),0.0)
-            sigmaoutx(i)=min(sigmaoutx(i),1.0)
-         enddo
-      endif
-      
 c     convective cloud water
       do k = 1, km
          do i = 1, im
@@ -2458,9 +2451,9 @@ c     convective cloud water
                if (k >= kbcon(i) .and. k < ktcon(i)) then
                   cnvw(i,k) = cnvwt(i,k) * xmb(i) * dt2
                   if (progsigma) then
-                     cnvw(i,k) = cnvw(i,k) * sigmaoutx(i)
+                     cnvw(i,k) = cnvw(i,k) * cscale
                   else
-                     cnvw(i,k) = cnvw(i,k) * sigmagfm(i)
+                     cnvw(i,k) = cnvw(i,k) * cscale
                   endif
                endif
             endif
