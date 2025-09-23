@@ -1712,16 +1712,7 @@
           dku_h(i,km)=dku_h(i,km1)
           dkq_h(i,km)=dkq_h(i,km1)
         enddo
-      enddo
-      do k = kmscu, 1, -1
-        do i = 1, im
-          if(scuflg(i) .and.
-     &      (k >= mrad(i) .and. k < krad(i))) then
-             xmfd(i,k) = pfnl(i) * xmfd(i,k)
-          endif
-        enddo
-      enddo
-
+!
       endif !sa3dtke
 
 !PCC_CANOPY------------------------------------
