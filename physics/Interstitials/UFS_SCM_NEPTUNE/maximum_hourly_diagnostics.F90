@@ -238,13 +238,12 @@ contains
       integer, intent(in)               :: im,levs
       real (kind=kind_phys), intent(in) :: grav
       real (kind=kind_phys), intent(in),dimension(:,:)  :: phil,ref3D,tk
-      integer               :: i,k,ll,ipt,kpt
+      real (kind=kind_phys), intent(inout),dimension(:) :: refd,refd263k
+      ! Local
+      integer               :: i,k,ll
       real :: dbz1avg,zmidp1,zmidloc,refl,fact
       real, dimension(im,levs) :: z
-      real, dimension(im) :: zintsfc
-      real, dimension(:), intent(inout) :: refd,refd263k
-      REAL :: dbz1(2),dbzk,dbzk1
-      logical :: counter
+      REAL :: dbz1(2)
       do i=1,im
          do k=1,levs
             z(i,k)=phil(i,k)/grav
