@@ -785,8 +785,8 @@ contains
   do iz = isnow+1, 0
 !     tksno(iz) = 3.2217e-6*bdsnoi(iz)**2.           ! stieglitz(yen,1965)
 !    tksno(iz) = 2e-2+2.5e-6*bdsnoi(iz)*bdsnoi(iz)   ! anderson, 1976
-!    tksno(iz) = 0.35                                ! constant
-    tksno(iz) = 2.576e-6*bdsnoi(iz)**2. + 0.074    ! verseghy (1991)
+    tksno(iz) = 0.35                                ! constant
+!    tksno(iz) = 2.576e-6*bdsnoi(iz)**2. + 0.074    ! verseghy (1991)
 !    tksno(iz) = 2.22*(bdsnoi(iz)/1000.)**1.88      ! douvill(yen, 1981)
   enddo
 
@@ -982,8 +982,8 @@ contains
         cf1=((1.+sl1)/(1.+sl2*cosz)-sl1)
         fzen=amax1(cf1,0.)
 
-        albsni(1)=0.95*(1.-c1*fage)         
-        albsni(2)=0.65*(1.-c2*fage)        
+        albsni(1)=0.95  !*(1.-c1*fage)  ! remove aging over glaciers       
+        albsni(2)=0.65  !*(1.-c2*fage)  ! remove aging over glaciers 
 
         albsnd(1)=albsni(1)+0.4*fzen*(1.-albsni(1))    !  vis direct
         albsnd(2)=albsni(2)+0.4*fzen*(1.-albsni(2))    !  nir direct
@@ -2616,7 +2616,7 @@ end if   ! opt_gla == 1
 ! local
   integer :: iz
   real (kind=kind_phys)    :: bdsnow  !< bulk density of snow (kg/m3)
-  real (kind=kind_phys),parameter :: mwd  = 100.   !< maximum water depth (mm)
+  real (kind=kind_phys),parameter :: mwd  = 600.   !< maximum water depth (mm)
 ! ----------------------------------------------------------------------
    snoflow = 0.0
    ponding1 = 0.0
@@ -2650,6 +2650,23 @@ end if   ! opt_gla == 1
                           ponding1 ,ponding2 ,fsh    ,                 & !inout
                           qsnbot )                                       !out
 
+!reset the glacier to 2m depth with 600mm SWE
+
+   isnow = -3
+   snice(-2) = 15.0
+   snice(-1) = 60.0
+   snice( 0) = 525.0
+   snliq(-2) = 0.0
+   snliq(-1) = 0.0
+   snliq( 0) = 0.0
+   if(stc( 0) < 100.0) stc( 0) = stc( 1)  ! if the temperature is missing,
+   if(stc(-1) < 100.0) stc(-1) = stc( 0)  !  set to layer below
+   if(stc(-2) < 100.0) stc(-2) = stc(-1)  !  should not be necessary
+   dzsnso(-2)= 0.05
+   dzsnso(-1)= 0.20
+   dzsnso( 0)= 1.75
+   sneqv = 600.0
+
 !set empty snow layers to zero
 
    do iz = -nsnow+1, isnow
@@ -2662,7 +2679,7 @@ end if   ! opt_gla == 1
 
 !to obtain equilibrium state of snow in glacier region
        
-   if(sneqv > mwd) then   ! 100 mm -> maximum water depth
+   if(sneqv > mwd) then   ! 600 mm -> maximum water depth
       bdsnow      = snice(0) / dzsnso(0)
       snoflow     = (sneqv - mwd)
       snice(0)    = snice(0)  - snoflow 
