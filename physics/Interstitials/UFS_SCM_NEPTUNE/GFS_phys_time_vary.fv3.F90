@@ -533,10 +533,8 @@
                  endif
 
                  if (vegtyp == 15) then                      ! land ice in MODIS/IGBP
-                   if (weasd(ix) < 0.1_kind_phys) then
-                     weasd(ix) = 0.1_kind_phys
-                     snd       = 0.01_kind_phys
-                   endif
+                   weasd(ix) = 600.0_kind_phys   ! 600mm SWE for glacier
+                   snd       = 2.0_kind_phys     ! 2m snow depth for glacier
                  endif
 
                  if (snd < 0.025_kind_phys ) then
