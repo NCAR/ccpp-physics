@@ -58,8 +58,8 @@ contains
   ! ###########################################################################################
   subroutine GFS_radiation_post_run(doLWrad, doSWrad, lssav, total_albedo, topfsw, fhlwr, fhswr,&
       coszen, coszdg, raddt, aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, tgrs, kb,  &
-      kd, kt, sfcflw, sfcfsw, topflw, scmpsw, nCol, nLev, nDay, nfxr, nspc1, fluxr, do_RRTMGP,  &
-      do_lw_clrsky_hr, fluxlwUP_clrsky, fluxlwDOWN_clrsky, htrlwc, fluxlwUP_allsky,             &
+      kd, kt, sfcflw, sfcfsw, topflw, scmpsw, nCol, nLev, lmk, nDay, nfxr, nspc1, fluxr,        &
+      do_RRTMGP, do_lw_clrsky_hr, fluxlwUP_clrsky, fluxlwDOWN_clrsky, htrlwc, fluxlwUP_allsky,  &
       fluxlwDOWN_allsky, htrlw, do_sw_clrsky_hr, htrswc, fluxswUP_clrsky, idxday,               &
       fluxswDOWN_clrsky, htrsw, fluxswUP_allsky, fluxswDOWN_allsky, iSFC, iTOA, tsflw, tsfa,    &
       sfcdlw, sfculw, htrlwu, nirbmdi, nirdfdi, visbmdi, visdfdi, nirbmui, nirdfui, visbmui,    &
@@ -70,6 +70,7 @@ contains
     integer, intent(in) :: &
          nCol,              & !< Horizontal loop extent 
          nLev,              & !< Number of vertical layers
+         lmk,               & !< Number of vertical layers for radiation (adjusted)
          nDay,              & !< Number of daylit columns
          nfxr,              & !< Number of variables stored in the fluxr array
          nspc1,             & !< Number of species for output aerosol optical depth
@@ -320,7 +321,7 @@ contains
     if (lssav) then
        call GFS_radiation_diagnostics(doLWrad, doSWrad, fhlwr, fhswr, coszen, coszdg, raddt,  &
             aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, tgrs, kb, kd, kt, sfcflw, &
-            sfcfsw, topfsw, topflw, scmpsw, nCol, nDay, nLev, nfxr, nspc1, fluxr)
+            sfcfsw, topfsw, topflw, scmpsw, nCol, nDay, nLev, lmk, nfxr, nspc1, fluxr)
     endif
 
   end subroutine GFS_radiation_post_run
@@ -336,13 +337,13 @@ contains
   ! ###########################################################################################
   subroutine GFS_radiation_diagnostics(doLWrad, doSWrad, fhlwr, fhswr, coszen, coszdg, raddt, &
        aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, tgrs, kb, kd, kt, sfcflw,      &
-       sfcfsw, topfsw, topflw, scmpsw, nCol, nDay, nLev, nfxr, nspc1, fluxr)
+       sfcfsw, topfsw, topflw, scmpsw, nCol, nDay, nLev, lmk, nfxr, nspc1, fluxr)
     ! Inputs
     logical,           intent(in) :: doLWrad, doSWrad
-    integer,           intent(in) :: nCol, nLev, nfxr, nspc1, nDay
+    integer,           intent(in) :: nCol, nLev, lmk, nfxr, nspc1, nDay
     real(kind_phys),   intent(in) :: fhlwr, fhswr, coszen(nCol), coszdg(nCol), raddt
     real(kind_phys),   intent(in) :: aerodp(nCol,nspc1)
-    real(kind_phys),   intent(in) :: cldtausw(nCol,nLev), cldtaulw(nCol,nLev)
+    real(kind_phys),   intent(in) :: cldtausw(nCol,lmk), cldtaulw(nCol,lmk)
     real(kind_phys),   intent(in) :: p_lev(nCol,nLev+1), tgrs(nCol,nLev)
     type(cmpfsw_type), intent(in) :: scmpsw(nCol)
     type(sfcflw_type), intent(in) :: sfcflw(nCol)
