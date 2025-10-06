@@ -398,9 +398,7 @@
                                        Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
                                        nthreads, blkno, errmsg, errflg)
 
-#ifdef MPI
          use mpi_f08
-#endif
 #ifdef _OPENMP
          use omp_lib
 #endif
@@ -433,13 +431,8 @@
          errmsg = ''
          errflg = 0
 
-#ifdef MPI
          mpirank = Model%me
          mpisize = Model%ntasks
-#else
-         mpirank = 0
-         mpisize = 1
-#endif
 #ifdef _OPENMP
          omprank = OMP_GET_THREAD_NUM()
          ompsize = nthreads
@@ -451,9 +444,7 @@
 #ifdef _OPENMP
 !$OMP BARRIER
 #endif
-#ifdef MPI
 !         call MPI_BARRIER(Model%communicator,ierr)
-#endif
 
          do impi=0,mpisize-1
              do iomp=0,ompsize-1
@@ -950,17 +941,13 @@
 !$OMP BARRIER
 #endif
              end do
-#ifdef MPI
 !             call MPI_BARRIER(Model%communicator,ierr)
-#endif
          end do
 
 #ifdef _OPENMP
 !$OMP BARRIER
 #endif
-#ifdef MPI
 !         call MPI_BARRIER(Model%communicator,ierr)
-#endif
 
       end subroutine GFS_diagtoscreen_run
 
@@ -1076,9 +1063,7 @@
                                            Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
                                            nthreads, blkno, errmsg, errflg)
 
-#ifdef MPI
          use mpi_f08
-#endif
 #ifdef _OPENMP
          use omp_lib
 #endif
@@ -1111,13 +1096,8 @@
          errmsg = ''
          errflg = 0
 
-#ifdef MPI
          mpirank = Model%me
          call MPI_COMM_SIZE(Model%communicator, mpisize, ierr)
-#else
-         mpirank = 0
-         mpisize = 1
-#endif
 #ifdef _OPENMP
          omprank = OMP_GET_THREAD_NUM()
          ompsize = nthreads
@@ -1129,9 +1109,7 @@
 #ifdef _OPENMP
 !$OMP BARRIER
 #endif
-#ifdef MPI
 !         call MPI_BARRIER(Model%communicator,ierr)
-#endif
 
          do impi=0,mpisize-1
              do iomp=0,ompsize-1
@@ -1467,17 +1445,13 @@
 !$OMP BARRIER
 #endif
              end do
-#ifdef MPI
 !             call MPI_BARRIER(Model%communicator,ierr)
-#endif
          end do
 
 #ifdef _OPENMP
 !$OMP BARRIER
 #endif
-#ifdef MPI
 !         call MPI_BARRIER(Model%communicator,ierr)
-#endif
 
       end subroutine GFS_interstitialtoscreen_run
 
