@@ -12,7 +12,6 @@
       implicit none
       save
 
-      external :: BAOPENR, ABORT, GETGBH, GETGB, SPLAT, BACLOSE
 !
 !  grib code for each parameter - used in subroutines sfccycle and setrmsk.
 !
