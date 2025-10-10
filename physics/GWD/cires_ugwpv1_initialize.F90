@@ -60,8 +60,8 @@
 !      real(kind=kind_phys), parameter ::  fv   = rv/rd - 1.0    
 !      real(kind=kind_phys), parameter ::  arad = 6370.e3
         
-     end module ugwp_common
-     
+      contains
+
       subroutine init_nazdir(naz,  xaz,  yaz)
       
       use machine,     only : kind_phys
@@ -185,6 +185,8 @@
 ! 132  format( 2x, F8.3,' dis-scales:', 4(2x, E10.3))    
                                                           
      end subroutine init_global_gwdis
+
+  end module ugwp_common
 !
 ! ========================================================================
 ! Part 2 - sources
@@ -353,7 +355,7 @@
 !
      subroutine init_conv_gws(nwaves, nazdir, nstoch, effac, lonr, kxw)
 !
-     use ugwp_common,  only : pi2, arad
+     use ugwp_common,  only : pi2, arad, init_nazdir
 
      implicit none
      
@@ -433,8 +435,8 @@
      
      subroutine init_fjet_gws(nwaves, nazdir, nstoch, effac,lonr, kxw) 
 
-     use ugwp_common,  only : pi2, arad			      
-			      
+     use ugwp_common,  only : pi2, arad, init_nazdir
+
      implicit none
 
       integer :: nwaves, nazdir, nstoch
@@ -492,7 +494,7 @@
 
 			     
      subroutine init_okw_gws(nwaves, nazdir, nstoch, effac, lonr, kxw)
-     use ugwp_common,  only : pi2, arad
+     use ugwp_common,  only : pi2, arad, init_nazdir
 
      implicit none
 
