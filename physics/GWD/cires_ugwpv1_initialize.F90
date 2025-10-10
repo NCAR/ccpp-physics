@@ -16,7 +16,7 @@
     module ugwp_common
 !
      use machine,  only : kind_phys
-			 
+
      implicit none
      
       real(kind=kind_phys)   ::  pi, pi2, pih, rad_to_deg, deg_to_rad
@@ -65,7 +65,6 @@
       subroutine init_nazdir(naz,  xaz,  yaz)
       
       use machine,     only : kind_phys
-      use ugwp_common, only :  pi2
       
       implicit none
       
@@ -103,7 +102,6 @@
      subroutine init_global_gwdis(levs, zkm, pmb, kvg, ktg, krad, kion, me, master)
 !				      
      use machine ,      only : kind_phys 
-     use ugwp_common,   only : pih, pi  
      
      implicit none
      integer , intent(in)                 :: me, master
