@@ -767,7 +767,7 @@
         do i = 1, npts
           ipseed(i) = ipsdlw0 + i
         enddo
-      elseif ( isubclw == 2 ) then     ! use input array of permutaion seeds
+      elseif ( isubclw == 2 ) then     ! use input array of permutation seeds
         do i = 1, npts
           ipseed(i) = icseed(i)
         enddo
@@ -1435,7 +1435,7 @@
      &            'sub-column clouds approximation applied'
         elseif ( isubclw == 1 ) then
           print *,'   --- Using MCICA sub-colum clouds approximation ', &
-     &            'with a prescribed sequence of permutaion seeds'
+     &            'with a prescribed sequence of permutation seeds'
         elseif ( isubclw == 2 ) then
           print *,'   --- Using MCICA sub-colum clouds approximation ', &
      &            'with provided input array of permutation seeds'
