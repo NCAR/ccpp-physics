@@ -327,7 +327,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
             n_stc = n_stc+1
             soiltype = soiltyp(i)
             do l = 1, lsoil_incr
-              if (abs(stc_inc_flat(i,l)) > Land_IAU_Control%min_T_increment)
+              if (abs(stc_inc_flat(i,l)) > Land_IAU_Control%min_T_increment) then
                 !the following if case applies when updated stc > melting point, it handles both
                 !case 1: frz ==> frz, recalculate slc, smc remains
                 !case 2: unfrz ==> frz, recalculate slc, smc remains
