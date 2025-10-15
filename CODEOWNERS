@@ -154,11 +154,10 @@ physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rad_time_vary.fv3.*                   
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rad_time_vary.scm.*                                                          @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rrtmgp_cloud_mp.*                  @dustinswales @Qingfu-Liu                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rrtmgp_cloud_overlap.*             @dustinswales @Qingfu-Liu                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rrtmg_post.*                       @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/Interstitials/UFS_SCM_NEPTUNE/GFS_radiation_post.*                   @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rrtmgp_pre.*                       @dustinswales @Qingfu-Liu                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rrtmg_pre.*                        @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rrtmgp_setup.*                     @dustinswales @Qingfu-Liu                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rrtmgp_post.*                      @dustinswales @Qingfu-Liu                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rrtmg_setup.*                      @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_SCNV_generic_post.*                                                          @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_SCNV_generic_pre.*                                                           @grantfirl @rhaesung @Qingfu-Liu @dustinswales
