@@ -327,19 +327,21 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
             n_stc = n_stc+1
             soiltype = soiltyp(i)
             do l = 1, lsoil_incr
+              if (abs(stc_inc_flat(i,l)) > Land_IAU_Control%min_T_increment)
+                !the following if case applies when updated stc > melting point, it handles both
                 !case 1: frz ==> frz, recalculate slc, smc remains
                 !case 2: unfrz ==> frz, recalculate slc, smc remains
-                !both cases are considered in the following if case
                 if (stc(i,l) .LT. con_t0c )then
                   !recompute supercool liquid water,smc_anl remain unchanged
                   smp = con_hfus*(con_t0c-stc(i,l))/(con_g*stc(i,l)) !(m)
                   slc_new=maxsmc(soiltype)*(smp/satpsi(soiltype))**(-1./bb(soiltype))
                   slc(i,l) = max( min( slc_new, smc(i,l)), 0.0 )
                 endif
-                !case 3: frz ==> unfrz, melt all soil ice (if any)
+                !case 3: frz ==> unfrz (or unfrz ==> unfrz), melt all soil ice (if any) 
                 if (stc(i,l) .GT. con_t0c )then !do not rely on stc_bck
                   slc(i,l)=smc(i,l)
                 endif
+              endif
             enddo
         endif
       enddo    
@@ -355,10 +357,12 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
           n_slc = n_slc+1
           ! apply SM bounds (later: add upper SMC limit)
           do l = 1, lsoil_incr
-            ! noah-mp minimum is 1 mm per layer (in SMC)
-            ! no need to maintain frozen amount, would be v. small.
-            slc(i,l) = max( 0.001/dz(l), slc(i,l) )
-            smc(i,l) = max( 0.001/dz(l), smc(i,l) )
+            if (abs(slc_inc_flat(i, l)) > Land_IAU_Control%min_SLC_increment) then
+              ! noah-mp minimum is 1 mm per layer (in SMC)
+              ! no need to maintain frozen amount, would be v. small.
+              slc(i,l) = max( 0.001/dz(l), slc(i,l) )
+              smc(i,l) = max( 0.001/dz(l), smc(i,l) )
+            endif
           enddo
         endif
       enddo
@@ -367,9 +371,11 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
 
     deallocate(stc_updated, slc_updated)
     deallocate(mask_tile)
-  
-    write(*,'(a,i4,a,i8)') 'noahmpdrv_timestep_init rank ', Land_IAU_Control%me, ' # of cells with stc update ', nstcupd
-
+    
+    if(Land_IAU_Control%me == Land_IAU_Control%mpi_root .or. print_update_stats) then
+      write(*,'(a,i4,a,i8)') 'noahmpdrv_timestep_init rank ', Land_IAU_Control%me, ' # of cells with stc update ', nstcupd
+      write(*,'(a,i4,a,i8)') 'noahmpdrv_timestep_init rank ', Land_IAU_Control%me, ' # of cells with slc update ', nslcupd
+    endif
 
 end subroutine noahmpdrv_timestep_init
 
