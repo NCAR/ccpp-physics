@@ -430,7 +430,6 @@ c-----------------------------
          END DO
          
 !       if (me == 0) write(6,soil_veg)
-       return
        end subroutine set_soilveg
 
        end module set_soilveg_mod
