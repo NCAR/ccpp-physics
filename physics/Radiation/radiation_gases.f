@@ -281,9 +281,9 @@
 
           inquire (file=co2usr_file, exist=file_exist)
           if ( .not. file_exist ) then
+            print *,'   Can not find user CO2 data file: ',co2usr_file
             errflg = 1
-            errmsg = 'ERROR(gas_init): Cannot find user CO2 data file'//&
-     &               ': '//co2usr_file
+            errmsg = 'ERROR(gas_init): Can not find user CO2 data file'
             return
           else
             close (NICO2CN)
@@ -327,7 +327,7 @@
             else
               print *,' ICO2=',ico2flg,' is not a valid selection'
               errflg = 1
-              errmsg = 'ERROR(gas_init): ICO2 is not a valid selection'
+              errmsg = 'ERROR(gas_init): ICO2 is not valid'
               return
             endif    ! endif_ico2flg_block
 
@@ -349,16 +349,20 @@
           else
             print *,' ICO2=',ico2flg,' is not a valid selection'
             errflg = 1
-            errmsg = 'ERROR(gas_init): ICO2 is not a valid selection'
+            errmsg = 'ERROR(gas_init): ICO2 is not valid'
             return
           endif
 
           if ( ictmflg == -2 ) then
             inquire (file=co2cyc_file, exist=file_exist)
             if ( .not. file_exist ) then
+              if ( me == 0 ) then
+                print *,'   Can not find seasonal cycle CO2 data: ',    &
+     &               co2cyc_file
+              endif
               errflg = 1
-              errmsg = 'ERROR(gas_init): Cannot find seasonal cycle '// &
-     &             'CO2 data file: '//co2cyc_file
+              errmsg = 'ERROR(gas_init): Can not find seasonal cycle '//&
+     &             'CO2 data'
               return
             else
               allocate( co2cyc_sav(IMXCO2,JMXCO2,12) )
@@ -400,6 +404,8 @@
 
         endif   lab_ictm
       endif   lab_ico2
+
+      return
 !
 !...................................
       end subroutine gas_init
@@ -544,9 +550,11 @@
 
         inquire (file=co2gbl_file, exist=file_exist)
         if ( .not. file_exist ) then
+          print *,'   Requested co2 data file "',co2gbl_file,           &
+     &            '" not found'
           errflg = 1
           errmsg = 'ERROR(gas_update): Requested co2 data file not '//  &
-     &         'found: '//co2gbl_file
+     &         'found'
           return
         else
           close(NICO2CN)
@@ -640,9 +648,12 @@
             enddo   Lab_dowhile2
 
             if ( .not. file_exist ) then
+              if ( me == 0 ) then
+                print *,'   Can not find co2 data source file'
+              endif
               errflg = 1
-              errmsg = 'ERROR(gas_update): Cannot find co2 data '//     &
-     &             'source file: '//co2dat_file
+              errmsg = 'ERROR(gas_update): Can not find co2 data '//    &
+     &             'source file'
               return
             endif
           endif  Lab_if_ictm
@@ -756,6 +767,8 @@
         close ( NICO2CN )
 
       endif  Lab_if_idyr
+
+      return
 !
 !...................................
       end subroutine gas_update
@@ -921,7 +934,9 @@
           endif
         enddo
       endif
+
 !
+      return
 !...................................
       end subroutine getgases
 !-----------------------------------

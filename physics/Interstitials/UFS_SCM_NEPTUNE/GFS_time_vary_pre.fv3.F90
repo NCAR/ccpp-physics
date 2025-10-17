@@ -96,8 +96,7 @@
         real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
         real(kind=kind_dbl_prec)  :: rinc8(5)
 
-        integer :: w3kindreal, w3kindint
-        integer :: iw3jdn
+        integer ::  iw3jdn
         integer :: jd0, jd1
         real    :: fjd
 
@@ -114,17 +113,9 @@
 
         !--- jdat is being updated directly inside of FV3GFS_cap.F90
         !--- update calendars and triggers
-        call w3kind(w3kindreal, w3kindint)
-        !--- CCPP uses w3emc_d, therefore expecting the following values
-        if (w3kindreal == 8 .and. w3kindint==4) then
-           rinc8(1:5) = 0
-           call w3difdat(jdat,idat,4,rinc8)
-           sec = rinc8(4)
-        else
-           write(errmsg,'(*(a))') "FATAL ERROR: Invalid w3kindreal or w3kindint:", w3kindreal, w3kindint
-           errflg = 1
-           return
-        end if
+        rinc8(1:5) = 0
+        call w3difdat(jdat,idat,4,rinc8)
+        sec = rinc8(4)
         phour = sec/con_hr
         !--- set current bucket hour
         zhour = phour

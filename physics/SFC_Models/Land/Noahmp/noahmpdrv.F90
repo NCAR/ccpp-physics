@@ -110,16 +110,14 @@
 
         !--- initialize soil vegetation
         call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
-        if(errflg/=0) return
 
         !--- read in noahmp table
         call read_mp_table_parameters(errmsg, errflg)
-        if(errflg/=0) return
 
         ! initialize psih and psim 
+
         if ( do_mynnsfclay ) then
-          call psi_init(psi_opt,errmsg,errflg)
-          if(errflg/=0) return
+        call psi_init(psi_opt,errmsg,errflg)
         endif
 
         pores (:) = maxsmc (:)
@@ -371,9 +369,8 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
 
     deallocate(stc_inc_flat, slc_inc_flat, stc_updated, slc_updated)
     deallocate(mask_tile)
-    
-    !Remove non-warning, non-error log write
-    !write(*,'(a,i4,a,i8)') 'noahmpdrv_timestep_init rank ', Land_IAU_Control%me, ' # of cells with stc update ', nstcupd
+  
+    write(*,'(a,i4,a,i8)') 'noahmpdrv_timestep_init rank ', Land_IAU_Control%me, ' # of cells with stc update ', nstcupd
 
 
 end subroutine noahmpdrv_timestep_init

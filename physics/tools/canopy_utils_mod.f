@@ -1,8 +1,7 @@
        module canopy_utils_mod
-        
-        use machine, only : kind_phys 
-        
+
         implicit none
+
 
        contains
 
@@ -13,8 +12,8 @@
            !using the trapezoid
            !! approximation. Note that the mesh spacing of x does not
            !have to be uniform.
-           real(kind=kind_phys), intent(in)  :: x(:)                !! Variable x
-           real(kind=kind_phys), intent(in)  :: y(size(x))          !! Function y(x)
+           real, intent(in)  :: x(:)                !! Variable x
+           real, intent(in)  :: y(size(x))          !! Function y(x)
            real              :: IntegrateTrapezoid  !! Integral of y(x)dx
        ! Integrate using the trapezoidal rule
            associate(n => size(x))

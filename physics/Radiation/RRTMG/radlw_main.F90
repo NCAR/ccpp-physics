@@ -1830,6 +1830,7 @@
 
       endif   ! end if_isubclw_block
 
+      return
 ! ..................................
       end subroutine cldprop
 ! ----------------------------------
@@ -2102,6 +2103,7 @@
         enddo
       enddo
 
+      return
 ! ..................................
       end subroutine mcica_subcol
 ! ----------------------------------
@@ -2400,6 +2402,7 @@
 
       enddo   ! end do_k layer loop
 
+      return
 ! ..................................
       end subroutine setcoef
 ! ----------------------------------

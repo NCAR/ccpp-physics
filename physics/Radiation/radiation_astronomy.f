@@ -304,6 +304,7 @@
         endif
       endif       ! end if_isolar_block
 !
+      return
 !...................................
       end subroutine sol_init
 !-----------------------------------
@@ -432,6 +433,7 @@
 
           inquire (file=solar_fname, exist=file_exist)
           if ( .not. file_exist ) then
+            print *,' !!! ERROR! Can not find solar constant file!!!'
             errflg = 1
             errmsg = "ERROR(radiation_astronomy): solar constant file"//&
      &           " not found"
@@ -639,6 +641,7 @@
 
 !     if (me == 0) print*,'in sol_update completed sr solar'
 !
+      return
 !...................................
       end subroutine sol_update
 !-----------------------------------
@@ -802,6 +805,7 @@
       if (sun < 0.0) sun = sun + tpi
       sollag = sun - alp - 0.03255e0
 !
+      return
 !...................................
       end subroutine solar
 !-----------------------------------
@@ -900,6 +904,7 @@
         endif 
       enddo
 !
+      return
 !...................................
       end subroutine coszmn
 !-----------------------------------
@@ -1025,6 +1030,7 @@
      &       '  SOLAR CONSTANT',8X,F12.7,' (DISTANCE AJUSTED)'//)
 
 !
+      return
 !...................................
       end subroutine prtime
 !-----------------------------------

@@ -422,8 +422,6 @@
 !> - Call redprm() to set the land-surface paramters,
 !! including soil-type and veg-type dependent parameters.
       call redprm(errmsg, errflg)
-      if(errflg/=0) return
-
         if(ivegsrc == 1) then
 !only igbp type has urban
 !urban
@@ -1060,6 +1058,7 @@
 !     endif
 
 !
+      return
 !...................................
       end subroutine alcalc
 !-----------------------------------
@@ -1217,6 +1216,7 @@
 
       pc = (rr + delta) / (rr*(1.0 + rc*ch) + delta)
 !
+      return
 !...................................
       end subroutine canres
 !-----------------------------------
@@ -1279,6 +1279,7 @@
 
 !      sncond = 0.021 + 2.51 * sndens**2
 !
+      return
 !...................................
       end subroutine csnow
 !-----------------------------------
@@ -1558,6 +1559,7 @@
       flx1 = 0.0
       flx3 = 0.0
 !
+      return
 !...................................
       end subroutine nopac
 !-----------------------------------
@@ -1669,6 +1671,7 @@
       epsca = (a*rr + rad*delta) / (delta + rr)
       etp = epsca * rch / lsubc
 !
+      return
 !...................................
       end subroutine penman
 !-----------------------------------
@@ -1957,6 +1960,7 @@
       if (vegtyp == bare) shdfac = 0.0
 
       if (nroot > nsoil) then
+        write(*,*) 'warning: too many root layers'
         errflg = 1
         errmsg = 'ERROR(sflx.f): too many root layers'
         return
@@ -1973,6 +1977,7 @@
 
       slope = slope_data(slopetyp)
 !
+      return
 !...................................
       end subroutine redprm
 !-----------------------------------
@@ -2260,6 +2265,7 @@
 !     print*,'ch=',ch
 !     print*,'----------------------------'
 !
+      return
 !...................................
       end subroutine sfcdif
 !-----------------------------------
@@ -2330,6 +2336,7 @@
 !       sncovr = sneqv / (sneqv + 2.0*z0n)
 
 !
+      return
 !...................................
       end subroutine snfrac
 !-----------------------------------
@@ -2858,6 +2865,7 @@
       endif   ! end if_ice_block
 
 !
+      return
 !...................................
       end subroutine snopac
 !-----------------------------------
@@ -2936,6 +2944,7 @@
       snowhc = snowhc + hnewc
       snowh  = snowhc * 0.01
 !
+      return
 !...................................
       end subroutine snow_new
 !-----------------------------------
@@ -2987,6 +2996,7 @@
       z0 = (1.0 - sncovr)*z0 + sncovr*z0s
 
 !
+      return
 !...................................
       end subroutine snowz0
 !-----------------------------------
@@ -3125,6 +3135,7 @@
 
       df = ake * (thksat - thkdry) + thkdry
 !
+      return
 !...................................
       end subroutine tdfcnd
 !-----------------------------------
@@ -3280,6 +3291,7 @@
       eta1 = edir1 + ett1 + ec1
 
 !
+      return
 !...................................
       end subroutine evapo
 !-----------------------------------
@@ -3450,6 +3462,7 @@
       ssoil = df1*(stc(1) - t1) / (0.5*zsoil(1))
 
 !
+      return
 !...................................
       end subroutine shflx
 !-----------------------------------
@@ -3662,6 +3675,7 @@
 
 !     runof = runoff
 !
+      return
 !...................................
       end subroutine smflx
 !-----------------------------------
@@ -3823,6 +3837,7 @@
       snowh  = snowhc * 0.01
 
 !
+      return
 !...................................
       end subroutine snowpack
 !-----------------------------------
@@ -3897,6 +3912,7 @@
 
       edir1 = fx * ( 1.0 - shdfac ) * etp1
 !
+      return
 !...................................
       end subroutine devap
 !-----------------------------------
@@ -4058,6 +4074,7 @@
 
       endif   ! end if_tkelv_block
 !
+      return
 !...................................
       end subroutine frh2o
 !-----------------------------------
@@ -4431,6 +4448,7 @@
       enddo   ! end do_k_loop
 
 !
+      return
 !...................................
       end subroutine hrt
 !-----------------------------------
@@ -4605,6 +4623,7 @@
 
       enddo   ! end do_k_loop
 !
+      return
 !...................................
       end subroutine hrtice
 !-----------------------------------
@@ -4704,6 +4723,7 @@
         stcout(k) = stcin(k) + ci(k)
       enddo
 !
+      return
 !...................................
       end subroutine hstep
 !-----------------------------------
@@ -4806,6 +4826,7 @@
          p(kk) = p(kk)*p(kk+1) + delta(kk)
       enddo
 !
+      return
 !...................................
       end subroutine rosr12
 !-----------------------------------
@@ -4942,6 +4963,7 @@
       tsrc = -dh2o * lsubf * dz * (xh2o - sh2o) / dt
       sh2o = xh2o
 !
+      return
 !...................................
       end subroutine snksrc
 !-----------------------------------
@@ -5255,6 +5277,7 @@ c ----------------------------------------------------------------------
         endif
       enddo   ! end do_k_loop
 !
+      return
 !...................................
       end subroutine srt
 !-----------------------------------
@@ -5402,6 +5425,7 @@ c ----------------------------------------------------------------------
       if (cmc < 1.e-20) cmc = 0.0
       cmc = min( cmc, cmcmax )
 !
+      return
 !...................................
       end subroutine sstep
 !-----------------------------------
@@ -5473,6 +5497,7 @@ c ----------------------------------------------------------------------
 
       tbnd1 = tu + (tb-tu)*(zup-zsoil(k))/(zup-zb)
 !
+      return
 !...................................
       end subroutine tbnd
 !-----------------------------------
@@ -5581,6 +5606,7 @@ c ----------------------------------------------------------------------
 
       endif   ! end if_tup_block
 !
+      return
 !...................................
       end subroutine tmpavg
 !-----------------------------------
@@ -5713,6 +5739,7 @@ c ----------------------------------------------------------------------
 !     enddo
 
 !
+      return
 !...................................
       end subroutine transp
 !-----------------------------------
@@ -5796,6 +5823,7 @@ c ----------------------------------------------------------------------
       expon = (2.0 * bexp) + 3.0
       wcnd = dksat * factr2 ** expon
 !
+      return
 !...................................
       end subroutine wdfcnd
 !-----------------------------------

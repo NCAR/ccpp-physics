@@ -546,7 +546,6 @@
      &       snomlt, sncovr, rc, pc, rsmin, xlai, rcs, rct, rcq,        &
      &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax,      &
      &       errmsg, errflg )
-          if(errflg/=0) return
 
 !> - Noah LSM: prepare variables for return to parent model and unit conversion.
 !  -   6. output (o):
@@ -678,6 +677,7 @@
         endif     ! land
       enddo
 !
+      return
 !...................................
       end subroutine lsm_noah_run
 !-----------------------------

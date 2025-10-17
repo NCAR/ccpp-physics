@@ -1,5 +1,6 @@
 module mp_tempo_post
 
+   use mpi_f08
    use machine, only : kind_phys
 
    implicit none
@@ -52,7 +53,7 @@ contains
 !! \htmlinclude mp_tempo_post_run.html
 !!
    subroutine mp_tempo_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, ttendlim, &
-                                   kdt, errmsg, errflg)
+                                   kdt, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
       implicit none
 
@@ -65,7 +66,10 @@ contains
       real(kind_phys),                 intent(in)    :: dtp
       real(kind_phys),                 intent(in)    :: ttendlim
       integer,                         intent(in)    :: kdt
-
+      ! MPI information
+      type(MPI_Comm),   intent(in   ) :: mpicomm
+      integer,          intent(in   ) :: mpirank
+      integer,          intent(in   ) :: mpiroot
       ! CCPP error handling
       character(len=*), intent(  out) :: errmsg
       integer,          intent(  out) :: errflg

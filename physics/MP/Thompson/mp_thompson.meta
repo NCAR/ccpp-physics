@@ -135,69 +135,6 @@
   type = real
   kind = kind_phys
   intent = in
-[con_Nt_c_l]
-  standard_name = prescribed_number_concentration_of_cloud_liquid_water_particles_in_air_over_land
-  long_name = volumetric number concentration of cloud liquid water droplets in air over land points
-  units = m-3
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
-[con_Nt_c_o]
-  standard_name = prescribed_number_concentration_of_cloud_liquid_water_particles_in_air_over_ocean
-  long_name = volumetric number concentration of cloud liquid water droplets in air over ocean points
-  units = m-3
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
-[con_av_i]
-  standard_name = cloud_ice_to_snow_tuning_parameter
-  long_name = transition value of coefficient matching at crossover from cloud ice to snow
-  units = 1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
-[con_xnc_max]
-  standard_name = maximum_mass_number_concentration_of_cloud_liquid_water_particles_in_air_used_in_deposition_nucleation
-  long_name = maximum mass number concentration of cloud liquid water particles in air
-  units = kg-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
-[con_ssati_min]
-  standard_name = minimum_threshold_supersaturation_over_ice_for_deposition_nucleation
-  long_name = minimum supersaturation over ice threshold for deposition nucleation
-  units = fraction
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
-[con_Nt_i_max]
-  standard_name = maximum_threshold_number_concentration_of_cloud_ice_water_crystals_in_air
-  long_name = maximum threshold number concentration of cloud ice water crystals in air
-  units = m-3
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
-[con_rr_min]
-  standard_name = multiplicative_tuning_parameter_for_microphysical_sedimentation_minimum_threshold
-  long_name = multiplicative tuning parameter for microphysical sedimentation minimum threshold
-  units = 1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
 [restart]
   standard_name = flag_for_restart
   long_name = flag for restart (warmstart) or coldstart

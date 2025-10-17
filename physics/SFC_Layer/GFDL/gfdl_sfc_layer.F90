@@ -1149,7 +1149,6 @@
             zoc(i)  = -100.*znotm
             zot(i) =  -100* znott
           endif
-          if(errflg/=0) return
         endif
 !------------------------------------------------------------------------
 !     where necessary modify zo values over ocean.
@@ -1784,8 +1783,6 @@
         if ( iwavecpl .eq. 1 .and. zoc(i) .le. 0.0 ) then
           windmks = wind10(i) * 0.01
           call znot_wind10m(windmks,znott,znotm,icoef_sf,errmsg,errflg)
-          if(errflg/=0) return
-
           !Check if Charnock parameter ratio is received in a proper range.
           if ( alpha(i) .ge. 0.2 .and. alpha(i) .le. 5. ) then
             znotm = znotm*alpha(i)

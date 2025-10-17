@@ -1987,6 +1987,7 @@ end subroutine m_micro_init
          end do
        end do
 
+       return
        end subroutine gw_prof
 !> @}
 
@@ -2021,6 +2022,7 @@ end subroutine m_micro_init
          kcldtop = pver
          return
        endif
+
 
       end subroutine find_cldtop
 

@@ -73,19 +73,19 @@
       use surface_perturbation,      only: cdfnor,ppfbet
 
       ! For Thompson MP
-      use module_mp_thompson,        only: calc_effectRad_thompson     => calc_effectRad, &
-                                           Nt_c_l_thompson             => Nt_c_l,         &
-                                           Nt_c_o_thompson             => Nt_c_o,         &
-                                           re_qc_min_thompson          => re_qc_min,      &
-                                           re_qc_max_thompson          => re_qc_max,      &
-                                           re_qi_min_thompson          => re_qi_min,      &
-                                           re_qi_max_thompson          => re_qi_max,      &
-                                           re_qs_min_thompson          => re_qs_min,      &
-                                           re_qs_max_thompson          => re_qs_max
+      use module_mp_thompson,        only: calc_effectRad_thmpsn     => calc_effectRad, &
+                                           Nt_c_l_thmpsn             => Nt_c_l,         &
+                                           Nt_c_o_thmpsn             => Nt_c_o,         &
+                                           re_qc_min_thmpsn          => re_qc_min,      &
+                                           re_qc_max_thmpsn          => re_qc_max,      &
+                                           re_qi_min_thmpsn          => re_qi_min,      &
+                                           re_qi_max_thmpsn          => re_qi_max,      &
+                                           re_qs_min_thmpsn          => re_qs_min,      &
+                                           re_qs_max_thmpsn          => re_qs_max
       use module_mp_thompson_make_number_concentrations, only:       &
-                                           make_IceNumber_thompson     => make_IceNumber,     &
-                                           make_DropletNumber_thompson => make_DropletNumber, &
-                                           make_RainNumber_thompson    => make_RainNumber
+                                           make_IceNumber_thmpsn     => make_IceNumber,     &
+                                           make_DropletNumber_thmpsn => make_DropletNumber, &
+                                           make_RainNumber_thmpsn    => make_RainNumber
 
       use module_mp_tempo_params, only: &
            ty_tempo_cfg, &
@@ -792,13 +792,13 @@
                 qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
                 if(nint(slmsk(i)) == 1) then
                    if (imp_physics == imp_physics_thompson) then
-                      nc_mp (i,k) = Nt_c_l_thompson*orho(i,k)
+                      nc_mp (i,k) = Nt_c_l_thmpsn*orho(i,k)
                    else
                       nc_mp (i,k) = Nt_c_l_tempo*orho(i,k)
                    endif
                 else
                    if (imp_physics == imp_physics_thompson) then
-                      nc_mp (i,k) = Nt_c_o_thompson*orho(i,k)
+                      nc_mp (i,k) = Nt_c_o_thmpsn*orho(i,k)
                    else
                       nc_mp (i,k) = Nt_c_o_tempo*orho(i,k)
                    endif
@@ -923,14 +923,14 @@
             do i=1,im
                if ((ltaerosol .or. mraerosol) .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
                   if (imp_physics == imp_physics_thompson) then
-                     nc_mp(i,k) = make_DropletNumber_thompson(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
+                     nc_mp(i,k) = make_DropletNumber_thmpsn(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
                   else
                      nc_mp(i,k) = make_DropletNumber_tempo(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
                   endif
               endif
               if (qi_mp(i,k)>1.e-12 .and. ni_mp(i,k)<100.) then
                  if (imp_physics == imp_physics_thompson) then
-                    ni_mp(i,k) = make_IceNumber_thompson(qi_mp(i,k)*rho(i,k), tlyr(i,k)) * orho(i,k)
+                    ni_mp(i,k) = make_IceNumber_thmpsn(qi_mp(i,k)*rho(i,k), tlyr(i,k)) * orho(i,k)
                  else
                     ni_mp(i,k) = make_IceNumber_tempo(qi_mp(i,k)*rho(i,k), tlyr(i,k)) * orho(i,k)
                  endif
@@ -946,18 +946,18 @@
             !     it will raise the low limit from 5 to 10, but the high limit will remain 125.
 
             if (imp_physics == imp_physics_thompson) then
-               call calc_effectRad_thompson(tlyr(i,:), plyr(i,:)*100., qv_mp(i,:), qc_mp(i,:),   &
+               call calc_effectRad_thmpsn(tlyr(i,:), plyr(i,:)*100., qv_mp(i,:), qc_mp(i,:),   &
                     nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
                     effrl(i,:), effri(i,:), effrs(i,:), islmsk, 1, lm )
                ! Scale Thompson's effective radii from meter to micron
                do k=1,lm
-                  effrl(i,k) = MAX(re_qc_min_thompson, MIN(effrl(i,k), re_qc_max_thompson))*1.e6
-                  effri(i,k) = MAX(re_qi_min_thompson, MIN(effri(i,k), re_qi_max_thompson))*1.e6
-                  effrs(i,k) = MAX(re_qs_min_thompson, MIN(effrs(i,k), re_qs_max_thompson))*1.e6
+                  effrl(i,k) = MAX(re_qc_min_thmpsn, MIN(effrl(i,k), re_qc_max_thmpsn))*1.e6
+                  effri(i,k) = MAX(re_qi_min_thmpsn, MIN(effri(i,k), re_qi_max_thmpsn))*1.e6
+                  effrs(i,k) = MAX(re_qs_min_thmpsn, MIN(effrs(i,k), re_qs_max_thmpsn))*1.e6
                end do
-               effrl(i,lmk) = re_qc_min_thompson*1.e6
-               effri(i,lmk) = re_qi_min_thompson*1.e6
-               effrs(i,lmk) = re_qs_min_thompson*1.e6
+               effrl(i,lmk) = re_qc_min_thmpsn*1.e6
+               effri(i,lmk) = re_qi_min_thmpsn*1.e6
+               effrs(i,lmk) = re_qs_min_thmpsn*1.e6
             else
                call calc_effectRad_tempo(t1d=tlyr(i,:), p1d=plyr(i,:)*100., qv1d=qv_mp(i,:), qc1d=qc_mp(i,:),   &
                     nc1d=nc_mp(i,:), qi1d=qi_mp(i,:), ni1d=ni_mp(i,:), qs1d=qs_mp(i,:), &
