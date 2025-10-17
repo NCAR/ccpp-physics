@@ -715,10 +715,9 @@
               print*,'ZSLU,ZSLT,RLMO,ZU,ZT=',ZSLU,ZSLT,RLMO,ZU,ZT
               print*,'A,B,DTHV,DU2,RIB=',A,B,DTHV,DU2,RIB
               errflg = 1
-              errmsg = 'ERROR(SFCDIF): '
+              errmsg = 'ERROR(SFCDIF): in module_SF_JSFC.F90'
               return
             end if
-
 
 
             AKMS=MAX(USTARK/SIMM,CXCHS)
@@ -871,9 +870,6 @@
 !              print*,'ELFC,AKHS,DTHV,USTAR=',ELFC,AKHS,DTHV,USTAR
 !              stop
 !            end if
-
-
-
 
 !
             RZ=(ZETAT-ZTMIN2)/DZETA2
