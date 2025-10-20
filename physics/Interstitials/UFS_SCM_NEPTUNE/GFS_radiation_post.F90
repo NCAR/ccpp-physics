@@ -33,7 +33,6 @@ contains
 !! For RRTMG, not much is done here, since the scheme outputs the fields needed by the
 !! UFS. For example, RRTMG provides the heating-rate profiles and has been modified to use 
 !! UFS native DDTs for storing the fluxes.
-!! fluxes.
 !!
 !! For RRTMGP*:
 !! - The all-sky radiation tendency is computed. The clear-sky tendency is computed, if
