@@ -27,7 +27,7 @@ contains
 !! \htmlinclude GFS_radiation_post_run.html
 !!
 !! This routine needs to be called AFTER the RRTMG (radlw_main.F90 and radsw_main.F90)
-!! or the RRTMGP (rrtmgp_lw_main.F90 and rrtmgp_sw_main.F90) radiaiton schemes in the
+!! or the RRTMGP (rrtmgp_lw_main.F90 and rrtmgp_sw_main.F90) radiation schemes in the
 !! CCPP enabled UFS.
 !!
 !! For RRTMG, not much is done here, since the scheme outputs the fields needed by the
