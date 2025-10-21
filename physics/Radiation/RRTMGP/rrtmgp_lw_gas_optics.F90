@@ -6,8 +6,7 @@
 !! The second routine is a ccpp scheme within the "radiation loop", where the longwave
 !! optical prperties (optical-depth) are computed for clear-sky conditions (no aerosols).
 module rrtmgp_lw_gas_optics
-  use machine,               only: kind_phys
-  use mo_rte_kind,           only: wl
+  use mo_rte_kind,           only: wl,wp
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations, only: ty_gas_concs  
   use radiation_tools,       only: check_error_msg
@@ -35,18 +34,18 @@ module rrtmgp_lw_gas_optics
        minor_limits_gpt_upperLW             !< Beginning and ending gpoint for each minor interval in upper atmosphere
   integer, dimension(:,:,:), allocatable :: &
        key_speciesLW                        !< Key species pair for each band
-  real(kind_phys) :: &
+  real(wp) :: &
        press_ref_tropLW,                  & !< Reference pressure separating the lower and upper atmosphere [Pa]
        temp_ref_pLW,                      & !< Standard spectroscopic reference pressure [Pa]
        temp_ref_tLW                         !< Standard spectroscopic reference temperature [K]
-  real(kind_phys), dimension(:), allocatable :: &
+  real(wp), dimension(:), allocatable :: &
        press_refLW,                       & !< Pressures for reference atmosphere; press_ref(# reference layers) [Pa]
        temp_refLW                           !< Temperatures for reference atmosphere; temp_ref(# reference layers) [K]
-  real(kind_phys), dimension(:,:), allocatable :: &
+  real(wp), dimension(:,:), allocatable :: &
        band_limsLW,                       & !< Beginning and ending wavenumber [cm -1] for each band
        totplnkLW,                         & !< Integrated Planck function by band
        optimal_angle_fitLW
-  real(kind_phys), dimension(:,:,:), allocatable :: &
+  real(wp), dimension(:,:,:), allocatable :: &
        vmr_refLW,                         & !< volume mixing ratios for reference atmospherer
        kminor_lowerLW,                    & !< (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
                                             !< [nTemp x nEta x nContributors] array)
@@ -54,7 +53,7 @@ module rrtmgp_lw_gas_optics
                                             !< [nTemp x nEta x nContributors] array)
        rayl_lowerLW,                      & !< Not used in LW, rather allocated(rayl_lower) is used
        rayl_upperLW                         !< Not used in LW, rather allocated(rayl_upper) is used
-  real(kind_phys), dimension(:,:,:,:), allocatable :: &
+  real(wp), dimension(:,:,:,:), allocatable :: &
        kmajorLW,                          & !< Stored absorption coefficients due to major absorbing gases
        planck_fracLW                        !< Planck fractions   
   character(len=32),  dimension(:), allocatable :: &
@@ -349,9 +348,15 @@ contains
     ! #######################################################################################
 
     ! Real scalars
+#ifdef RTE_USE_SP
+    call mpi_bcast(press_ref_tropLW, 1,      MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(temp_ref_pLW,     1,      MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(temp_ref_tLW,     1,      MPI_REAL,             mpiroot, mpicomm, mpierr)
+#else
     call mpi_bcast(press_ref_tropLW, 1,      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(temp_ref_pLW,     1,      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(temp_ref_tLW,     1,      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
 
     ! Integer arrays
     call mpi_bcast(kminor_start_lowerLW,               &
@@ -368,6 +373,28 @@ contains
          size(key_speciesLW),                MPI_INTEGER,          mpiroot, mpicomm, mpierr)
 
     ! Real arrays
+#ifdef RTE_USE_SP
+    call mpi_bcast(press_refLW,                        &
+         size(press_refLW),                  MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(temp_refLW,                         &
+         size(temp_refLW),                   MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(band_limsLW,                        &
+         size(band_limsLW),                  MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(totplnkLW,                          &
+         size(totplnkLW),                    MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(optimal_angle_fitLW,                &
+         size(optimal_angle_fitLW),          MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(vmr_refLW,                          &
+         size(vmr_refLW),                    MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(kminor_lowerLW,                     &
+         size(kminor_lowerLW),               MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(kminor_upperLW,                     &
+         size(kminor_upperLW),               MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(kmajorLW,                           &
+         size(kmajorLW),                     MPI_REAL,             mpiroot, mpicomm, mpierr)
+    call mpi_bcast(planck_fracLW,                      &
+         size(planck_fracLW),                MPI_REAL,             mpiroot, mpicomm, mpierr)
+#else
     call mpi_bcast(press_refLW,                        &
          size(press_refLW),                  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(temp_refLW,                         &
@@ -388,7 +415,7 @@ contains
          size(kmajorLW),                     MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(planck_fracLW,                      &
          size(planck_fracLW),                MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-
+#endif
 
     ! Characters
     do iChar=1,nabsorbersLW

@@ -878,7 +878,7 @@
         do i = 1, npts
           ipseed(i) = ipsdsw0 + i
         enddo
-      elseif ( isubcsw == 2 ) then     ! use input array of permutaion seeds
+      elseif ( isubcsw == 2 ) then     ! use input array of permutation seeds
         do i = 1, npts
           ipseed(i) = icseed(i)
         enddo
