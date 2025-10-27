@@ -2082,7 +2082,7 @@
       integer :: i, k, id, nf
 
 !  ---  constant values
-      real (kind=kind_phys), parameter :: xrc3 = 100.
+      real (kind=kind_phys), parameter :: xrc3 = 2000.
       real (kind=kind_phys), parameter :: snow2ice = 0.25
       real (kind=kind_phys), parameter :: coef_t = 0.025
 !
@@ -3866,7 +3866,7 @@
               onemrh= max( 1.e-10, 1.0-rhly(i,k) )
               clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
 
-              tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
+              tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
               if (lmfdeep2) then
                 tem1  = xrc3 / tem1
               else
