@@ -252,7 +252,6 @@ contains
 #ifndef INTERNAL_FILE_NML
       inquire (file=trim(fn_nml),exist=exists)
       if (.not. exists) then
-        write(6,*) 'gcycle:: namelist file: ',trim(fn_nml),' does not exist'
         errflg = 1
         errmsg = 'ERROR(gcycle): namelist file: ',trim(fn_nml),' does not exist.'
         return
@@ -360,7 +359,6 @@ contains
 !
 !     if (Model%me .eq. 0) print*,'executed gcycle during hour=',fhour
 !
-      RETURN
-      END
+      end subroutine gcycle
 
 end module gcycle_mod
