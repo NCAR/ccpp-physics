@@ -151,6 +151,7 @@ module  cires_ugwpv1_module
 !  input_nml_file ='input.nml'=fn_nml   ..... OLD_namelist and cdmvgwd(4) Corrected Bug Oct 4
 !
     use  netcdf
+    use  ugwp_common,       only :  init_global_gwdis 
     use  ugwp_oro_init,     only :  init_oro_gws
     use  ugwp_conv_init,    only :  init_conv_gws
     use  ugwp_fjet_init,    only :  init_fjet_gws
