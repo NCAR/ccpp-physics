@@ -23,8 +23,8 @@ contains
 !! \htmlinclude GFS_surface_composites_post_run.html
 !!
    subroutine GFS_surface_composites_post_run (                                                                                   &
-      im, kice, km, rd, rvrdm1, cplflx, cplwav2atm, cpl_fire, frac_grid, flag_cice, thsfc_loc, islmsk, dry, wet, icy, wind, t1, q1, prsl1,  &
-      landfrac, lakefrac, oceanfrac, zorl, zorlo, zorll, zorli, garea, frac_ice,                                                  &
+      im, kice, km, rd, rvrdm1, cplflx, cplwav2atm, cpl_fire, frac_grid, flag_cice, thsfc_loc, islmsk, dry, wet, icy,             &
+      use_cdeps_data, mask_dat, wind, t1, q1, prsl1, landfrac, lakefrac, oceanfrac, zorl, zorlo, zorll, zorli, garea, frac_ice,   &
       cd, cd_wat, cd_lnd, cd_ice, cdq, cdq_wat, cdq_lnd, cdq_ice, rb, rb_wat, rb_lnd, rb_ice, stress, stress_wat, stress_lnd,     &
       stress_ice, ffmm, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh, ffhh_wat, ffhh_lnd, ffhh_ice, uustar, uustar_wat, uustar_lnd,         &
       uustar_ice, fm10, fm10_wat, fm10_lnd, fm10_ice, fh2, fh2_wat, fh2_lnd, fh2_ice, tsurf_wat, tsurf_lnd, tsurf_ice,            &
@@ -240,7 +240,14 @@ contains
           if (icy(i)) then
             !tisfc(i) = tisfc(i)           ! over lake or ocean ice when uncoupled
           elseif (wet(i)) then
-            tisfc(i) = tsfc_wat(i)       ! over lake or ocean when uncoupled
+            !don't overwrite surface skin temperature over ice when using CDEPS inline over the mask
+            if (use_cdeps_data) then
+              if (mask_dat(i) <= 0.0) then
+                tisfc(i) = tsfc_wat(i)       ! over lake or ocean when uncoupled
+              endif
+            else
+              tisfc(i) = tsfc_wat(i)       ! over lake or ocean when uncoupled
+            endif
           else
             tisfc(i) = tsfcl(i)       ! over land
           endif
@@ -256,9 +263,18 @@ contains
 !             tisfc(i) = tsfc(i)
 !           endif
 !         endif
+          
           if (.not. icy(i)) then
-            hice(i)  = zero
-            cice(i)  = zero
+            !don't overwrite sea ice thickness/fraction when using CDEPS inline over the mask
+            if (use_cdeps_data) then
+              if (mask_dat(i) <= 0.0) then
+                hice(i)  = zero
+                cice(i)  = zero
+              endif
+            else
+              hice(i)  = zero
+              cice(i)  = zero
+            endif
           endif
         enddo
 
@@ -339,7 +355,14 @@ contains
             tsfco(i)  = tsfc_wat(i) ! over lake (and ocean when uncoupled)
             tsfc(i)   = tsfco(i)
             tsfcl(i)  = tsfc(i)
-            tisfc(i)  = tsfc(i)
+            !don't overwrite surface skin temperature over ice when using CDEPS inline over the mask
+            if (use_cdeps_data) then
+              if (mask_dat(i) <= 0.0) then
+                tisfc(i)  = tsfc(i)
+              endif
+            else
+              tisfc(i)  = tsfc(i)
+            endif
             cmm(i)    = cmm_wat(i)
             chh(i)    = chh_wat(i)
             gflx(i)   = gflx_wat(i)
@@ -349,8 +372,16 @@ contains
             evap(i)   = evap_wat(i)
             hflx(i)   = hflx_wat(i)
             qss(i)    = qss_wat(i)
-            hice(i)   = zero
-            cice(i)   = zero
+            !don't overwrite sea ice thickness/fraction when using CDEPS inline over the mask
+            if (use_cdeps_data) then
+              if (mask_dat(i) <= 0.0) then
+                hice(i)  = zero
+                cice(i)  = zero
+              endif
+            else
+              hice(i)  = zero
+              cice(i)  = zero
+            endif
      end subroutine composite_wet
 
      subroutine composite_icy(is_clm)

@@ -21,7 +21,8 @@ contains
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
    subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, iopt_lake, iopt_lake_clm,                               &
-                                 flag_cice, cplflx, cplice, cplwav2atm, lsm, lsm_ruc,                                     &
+                                 flag_cice, cplflx, cplice, cplwav2atm, lsm, lsm_ruc, use_cdeps_data, mask_dat,           &
+                                 tsfco_dat, tice_dat, hice_dat, fice_dat,                                                 &
                                  landfrac, lakefrac, lakedepth, oceanfrac, frland,                                        &
                                  dry, icy, lake, use_lake_model, wet, hice, cice, zorlo, zorll, zorli,                    &
                                  snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat, tgrs1,                         &
@@ -35,15 +36,18 @@ contains
 
       ! Interface variables
       integer,                             intent(in   ) :: im, lkm, kdt, lsm, lsm_ruc, iopt_lake, iopt_lake_clm
-      logical,                             intent(in   ) :: cplflx, cplice, cplwav2atm, frac_grid
+      logical,                             intent(in   ) :: cplflx, cplice, cplwav2atm, frac_grid, use_cdeps_data
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, lake, wet
       integer, dimension(:),              intent(in   )  :: use_lake_model
       real(kind=kind_phys), dimension(:), intent(in   )  :: landfrac, lakefrac, lakedepth, oceanfrac
+      real(kind=kind_phys), dimension(:), intent(in   ), optional  :: mask_dat
+      real(kind=kind_phys), dimension(:), intent(in   ), optional :: fice_dat, hice_dat, tsfco_dat, tice_dat
       real(kind=kind_phys), dimension(:), intent(inout)  :: cice, hice
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
-      real(kind=kind_phys), dimension(:), intent(in   )  :: snowd, tprcp, uustar, weasd, qss, tisfc
-
+      real(kind=kind_phys), dimension(:), intent(in   )  :: snowd, tprcp, uustar, weasd, qss
+      real(kind=kind_phys), dimension(:), intent(inout)  :: tisfc
+      
       real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl
       real(kind=kind_phys), dimension(:), intent(inout)  :: tgrs1
       real(kind=kind_phys), dimension(:), intent(inout)  :: snowd_lnd, snowd_ice, tprcp_wat,            &
@@ -72,7 +76,18 @@ contains
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
+      
+      if (use_cdeps_data) then
+        do i=1,im
+          if (mask_dat(i) > 0.0) then
+            tisfc(i) = tice_dat(i)
+            hice(i)  = hice_dat(i) !changes below - set to zero if frac_grid AND [(cice <= minimum and oceanfrac > 0) OR (oceanfrac == 0 and cice < minimum) OR frland == 1] or not frac_grid AND (islmsk == 1) or (oceanfrac > 0 and cice < minimum) or (not ocean or land and cice < minimum)
+            cice(i)  = fice_dat(i) !changes below - same circumstances as hice
+            tsfc_wat(i) = tsfco_dat(i) !changes below
+          endif
+        enddo
+      endif
+      
        do i=1,im
          if(use_lake_model(i) > 0) then
              wet(i) = .true.
@@ -224,9 +239,15 @@ contains
 
         if (wet(i)) then                   ! Water
           uustar_wat(i) = uustar(i)
+          if (use_cdeps_data) then
+            if (mask_dat(i) <= 0.0) then
+              tsfc_wat(i) = tsfco(i)
+            endif
+          else
             tsfc_wat(i) = tsfco(i)
-           tsurf_wat(i) = tsfco(i)
-               zorlo(i) = max(1.0e-5, min(one, zorlo(i)))
+          endif
+          tsurf_wat(i) = tsfco(i)
+          zorlo(i) = max(1.0e-5, min(one, zorlo(i)))
         ! DH*
         else
           zorlo(i) = huge
