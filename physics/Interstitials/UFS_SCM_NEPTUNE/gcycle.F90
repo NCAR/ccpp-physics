@@ -27,6 +27,7 @@ contains
 !
 !
     use machine,      only: kind_phys, kind_io8
+    use sfccyc_module, only: sfccycle
     implicit none
 
     integer,              intent(in)    :: me, nthrds, nx, ny, isc, jsc, nsst, &
