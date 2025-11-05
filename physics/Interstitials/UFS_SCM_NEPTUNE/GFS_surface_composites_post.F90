@@ -39,7 +39,7 @@ contains
 
       integer,                              intent(in) :: im, kice, km, lkm, iopt_lake, iopt_lake_clm
       logical,                              intent(in) :: cplflx, frac_grid, cplwav2atm, frac_ice, cpl_fire
-      logical,                              intent(in) :: lheatstrg
+      logical,                              intent(in) :: lheatstrg, use_cdeps_data
       logical, dimension(:),                intent(in) :: flag_cice, dry, icy
       logical, dimension(:),                intent(in) :: wet
       integer, dimension(:),                intent(in) :: islmsk, use_lake_model
@@ -51,7 +51,7 @@ contains
         snowd_lnd, snowd_ice, tprcp_wat, tprcp_lnd, tprcp_ice, evap_wat, evap_lnd, evap_ice, hflx_wat, hflx_lnd,                &
         hflx_ice, qss_wat, qss_lnd, qss_ice, tsfc_wat, zorlo, zorll, zorli, garea
 
-      real(kind=kind_phys), dimension(:),   intent(in), optional :: hflx_fire, evap_fire
+      real(kind=kind_phys), dimension(:),   intent(in), optional :: hflx_fire, evap_fire, mask_dat
       real(kind=kind_phys), dimension(:),   intent(inout) :: zorl, cd, cdq, rb, stress, ffmm, ffhh, uustar, fm10,               &
         fh2, cmm, chh, gflx, ep1d, weasd, snowd, tprcp, evap, hflx, qss, tsfc, tsfco, tsfcl, tisfc
 
