@@ -110,7 +110,7 @@ set(SCHEMES_RTERRTMGP ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-r
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte-frontend/mo_optical_props.F90)
 
 # List of files that need to be compiled without OpenMP (currently a copy of SCHEMES_RTERRTMGP)
-set(SCHEMES_OPENMP_OFF $SCHEMES_RTERRTMGP)
+set(SCHEMES_OPENMP_OFF ${SCHEMES_RTERRTMGP})
 
 # List of files that need to be compiled with different precision
 set(SCHEMES_DYNAMICS)
@@ -195,7 +195,7 @@ endif()
 
 set(CMAKE_Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_INSTALL_INCLUDEDIR})
 
-add_library(ccpp_physics STATIC ${SCHEMES} ${SCHEMES_OPENMP_OFF} ${SCHEMES_DYNAMICS} ${CAPS})
+add_library(ccpp_physics STATIC ${SCHEMES} ${SCHEMES_RTERRTMGP} ${SCHEMES_OPENMP_OFF} ${SCHEMES_DYNAMICS} ${CAPS})
 
 set_target_properties(ccpp_physics PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR})
