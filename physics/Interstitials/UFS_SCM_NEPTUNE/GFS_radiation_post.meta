@@ -4,6 +4,7 @@
   relative_path	= ../../
   dependencies = hooks/machine.F,Radiation/radiation_aerosols.f
   dependencies = Radiation/RRTMG/radlw_param.f,Radiation/radiation_tools.F90,Radiation/RRTMGP/rte-rrtmgp/extensions/mo_heating_rates.F90
+  dependencies = Radiation/RRTMGP/rte-rrtmgp/rte-frontend/mo_rte_kind.F90
 
 ########################################################################
 [ccpp-arg-table]
