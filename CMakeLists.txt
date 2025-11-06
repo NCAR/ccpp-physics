@@ -81,8 +81,8 @@ get_filename_component(LOCAL_CURRENT_SOURCE_DIR ${FULL_PATH_TO_CMAKELISTS} DIREC
 
 #------------------------------------------------------------------------------
 
-# List of files that need to be compiled without OpenMP
-set(SCHEMES_OPENMP_OFF ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/gas-optics/mo_gas_optics.F90
+# List of files that should be compiled with RTE-RRTMGP compilation flags
+set(SCHEMES_RTERRTMGP ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/gas-optics/mo_gas_optics.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/gas-optics/mo_gas_optics_constants.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/gas-optics/mo_gas_concentrations.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/gas-optics/mo_gas_optics_util_string.F90
@@ -109,6 +109,9 @@ set(SCHEMES_OPENMP_OFF ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte-frontend/mo_rte_kind.F90
                        ${LOCAL_CURRENT_SOURCE_DIR}/physics/Radiation/RRTMGP/rte-rrtmgp/rte-frontend/mo_optical_props.F90)
 
+# List of files that need to be compiled without OpenMP (currently a copy of SCHEMES_RTERRTMGP)
+set(SCHEMES_OPENMP_OFF $SCHEMES_RTERRTMGP)
+
 # List of files that need to be compiled with different precision
 set(SCHEMES_DYNAMICS)
 
@@ -122,6 +125,14 @@ if(SCHEMES_DYNAMICS)
   SET_PROPERTY(SOURCE ${SCHEMES_DYNAMICS}
                APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_DYNAMICS} ${OpenMP_Fortran_FLAGS}")
   list(REMOVE_ITEM SCHEMES ${SCHEMES_DYNAMICS})
+endif()
+
+# Remove files that need to be compiled with different flags for RTE-RRTMGP from list
+# of files with standard compiler flags, and assign special flags
+if(SCHEMES_RTERRTMGP)
+  SET_PROPERTY(SOURCE ${SCHEMES_RTERRTMGP}
+               APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_RTERRTMGP}")
+  list(REMOVE_ITEM SCHEMES ${SCHEMES_RTERRTMGP})
 endif()
 
 # Remove files that need to be compiled without OpenMP from list
