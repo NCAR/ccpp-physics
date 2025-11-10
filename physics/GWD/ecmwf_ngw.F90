@@ -247,9 +247,9 @@ contains
 !        ZGAUSSB=0.25_kind_phys
 !         ZGAUSSB=0.3_kind_phys
 !          ZGAUSSB=0.35_kind_phys
-          ZGAUSSB=0.38_kind_phys
+!         ZGAUSSB=0.38_kind_phys
 !        ZGAUSSB=-0.25_kind_phys
-!        ZGAUSSB=0.5_kind_phys
+         ZGAUSSB=0.5_kind_phys
 !        ZGAUSSB=0.3_kind_phys
       GCSTAR=1.0_kind_phys
 
@@ -658,7 +658,7 @@ contains
      &  /(2*GGAUSSA*GGAUSSA))+ZGAUSS(JL)
 
        ZGELATDEG=xlatd(JL)-50.0_kind_phys
-       ZGAUSS(JL)= 0.0022_kind_phys*EXP((-ZGELATDEG*ZGELATDEG)&
+       ZGAUSS(JL)= 0.1_kind_phys*EXP((-ZGELATDEG*ZGELATDEG)&
      &  /(2*10.*10.))+ZGAUSS(JL)
 
 
