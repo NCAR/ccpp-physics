@@ -642,7 +642,8 @@ contains
 
        ZGELATDEG=xlatd(JL)-Z50S
        ZGAUSS(JL)=ZGAUSSB*EXP((-ZGELATDEG*ZGELATDEG)&
-     &  /(2*GGAUSSA*GGAUSSA))
+!    &  /(2*GGAUSSA*GGAUSSA))
+     &  /(2*20.*20.))
 
 !       ZGELATDEG=xlatd(JL)
 !       ZGAUSS(JL)=-0.1_kind_phys*EXP((-ZGELATDEG*ZGELATDEG)&
