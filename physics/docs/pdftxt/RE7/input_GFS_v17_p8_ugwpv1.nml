@@ -105,7 +105,6 @@
   do_shum              = .false.
   do_skeb              = .false.
   do_RRTMGP            = .false.
-  doGP_cldoptics_LUT   = .true.
   doGP_lwscat          = .true.
   active_gases         = 'h2o_co2_o3_n2o_ch4_o2'
   ngases               = 6
