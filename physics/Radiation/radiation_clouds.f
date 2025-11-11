@@ -1092,7 +1092,8 @@
      &        cldtot )                                                  & !  ---  outputs 
         else
           call cloud_fraction_mass_flx_1                                &
-     &      ( IX, NLAY, lmfdeep2, xr_con, xr_exp, plyr, clwf, rhly, qstl, & !  ---  inputs
+     &      ( IX, NLAY, lmfdeep2, xr_con, xr_exp, plyr, clwf, rhly,     &
+     &        qstl,                                                     & !  ---  inputs
      &        cldtot ) 
         endif  
 
@@ -2200,7 +2201,8 @@
      &        cldtot )                                                  & !  ---  outputs
         else
           call cloud_fraction_mass_flx_2                                &
-     &      ( IX, NLAY, lmfdeep2, xr_con, xr_exp, plyr, clwf, rhly, qstl, & !  ---  inputs
+     &      ( IX, NLAY, lmfdeep2, xr_con, xr_exp, plyr, clwf, rhly,     &
+     &        qstl,                                                     & !  ---  inputs
      &        cldtot )
         endif
 
