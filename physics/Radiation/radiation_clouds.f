@@ -357,7 +357,7 @@
      &       effrl_inout, effri_inout, effrs_inout,                     &
      &       lwp_ex, iwp_ex, lwp_fc, iwp_fc,                            &
      &       dzlay, latdeg, julian, yearlen, gridkm, top_at_1, si,      &
-     &       con_ttp, con_pi, con_g, con_rd, con_thgni,                 &
+     &       xr_con, xr_exp, con_ttp, con_pi, con_g, con_rd, con_thgni, &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice,          &    !  ---  outputs:
      &       cld_rwp, cld_rerain, cld_swp, cld_resnow,                  &    
      &       clds, mtop, mbot, de_lgth, alpha                           &    
@@ -552,7 +552,7 @@
      &       delp, dz, effrl, effri, effrr, effrs, dzlay, clouds1
 
       real (kind=kind_phys), intent(in) :: sup, dcorr_con, con_ttp,     &
-     &     con_pi, con_g, con_rd, con_thgni 
+     &     con_pi, con_g, con_rd, con_thgni, xr_con, xr_exp
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk, si
 
@@ -588,10 +588,6 @@
      &       tem1, tem2, tem3
 
       integer :: i, k, id, nf
-
-!  ---  constant values
-!     real (kind=kind_phys), parameter :: xrc3 = 200.
-      real (kind=kind_phys), parameter :: xrc3 = 100.
 
 !
 !===> ... begin here
@@ -640,7 +636,7 @@
           call progcld_zhao_carr (plyr ,plvl, tlyr, tvly, qlyr,         & !  ---  inputs
      &                    qstl, rhly, ccnd(1:IX,1:NLAY,1), xlat, xlon,  &
      &                    slmsk, dz, delp, IX, NLAY, NLP1, uni_cld,     &
-     &                    lmfshal, lmfdeep2,                            &
+     &                    lmfshal, lmfdeep2, xr_con, xr_exp,            &
      &                    cldcov, effrl, effri, effrr, effrs, effr_in,  &
      &                    dzlay,                                        &
      &                    cldtot, cldcnv, lcrick, lcnorm, con_ttp,      & ! inout
@@ -694,7 +690,7 @@
           call progcld_fer_hires (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,   &  !  --- inputs
      &                    tracer1,xlat,xlon,slmsk,dz,delp,              &
      &                    ntrac-1, ntcw-1,ntiw-1,ntrw-1,                &
-     &                    IX,NLAY,NLP1, icloud, uni_cld,                &
+     &                    IX,NLAY,NLP1, icloud, xr_con, xr_exp, uni_cld,&
      &                    lmfshal, lmfdeep2,                            &
      &                    cldcov(:,1:NLAY),effrl_inout(:,:),            &
      &                    effri_inout(:,:), effrs_inout(:,:),           &
@@ -733,7 +729,8 @@
      &                   rhly,tracer1,xlat,xlon,slmsk,dz,delp,          &
      &                   ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
      &                   ntsw-1,ntgl-1,con_ttp,xr_cnvcld,               &
-     &                   IX, NLAY, NLP1, uni_cld, lmfshal, lmfdeep2,    &
+     &                   IX, NLAY, NLP1, xr_con, xr_exp, uni_cld,       &
+     &                   lmfshal, lmfdeep2,                             &
      &                   cldcov(:,1:NLAY), cnvw, effrl_inout,           &
      &                   effri_inout, effrs_inout,                      &
      &                   lwp_ex, iwp_ex, lwp_fc, iwp_fc,                &
@@ -808,7 +805,8 @@
      &                   rhly,tracer1,xlat,xlon,slmsk,dz,delp,          &
      &                   ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
      &                   ntsw-1,ntgl-1,con_ttp,xr_cnvcld,               &
-     &                   IX, NLAY, NLP1, uni_cld, lmfshal, lmfdeep2,    &
+     &                   IX, NLAY, NLP1, xr_con, xr_exp, uni_cld,       &
+     &                   lmfshal, lmfdeep2,                             &
      &                   cldcov(:,1:NLAY), cnvw, effrl, effri, effrs,   &
      &                   lwp_ex, iwp_ex, lwp_fc, iwp_fc,                &
      &                   dzlay,                                         &
@@ -887,7 +885,7 @@
       subroutine progcld_zhao_carr                                      &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp, IX, NLAY, NLP1,                   &
-     &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
+     &       uni_cld, lmfshal, lmfdeep2, xr_con, xr_exp, cldcov,        &
      &       effrl,effri,effrr,effrs,effr_in,                           &
      &       dzlay, cldtot, cldcnv, lcrick, lcnorm, con_ttp,            &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp,                     & !  ---  outputs
@@ -979,7 +977,7 @@
 
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
-      real (kind=kind_phys), intent(in) :: con_ttp
+      real (kind=kind_phys), intent(in) :: con_ttp, xr_con, xr_exp
 
 !  --- inputs/outputs
 
@@ -995,10 +993,6 @@
      &       tem1, tem2, tem3
 
       integer :: i, k, id, nf
-
-!  ---  constant values
-!     real (kind=kind_phys), parameter :: xrc3 = 200.
-      real (kind=kind_phys), parameter :: xrc3 = 100.
 
 !
 !===> ... begin here
@@ -1094,11 +1088,11 @@
 
         if (.not. lmfshal) then
           call cloud_fraction_XuRandall                                 &
-     &      ( IX, NLAY, plyr, clwf, rhly, qstl,                         & !  ---  inputs
+     &      ( IX, NLAY, xr_con, xr_exp, plyr, clwf, rhly, qstl,         & !  ---  inputs
      &        cldtot )                                                  & !  ---  outputs 
         else
           call cloud_fraction_mass_flx_1                                &
-     &      ( IX, NLAY, lmfdeep2, xrc3, plyr, clwf, rhly, qstl,         & !  ---  inputs
+     &      ( IX, NLAY, lmfdeep2, xr_con, xr_exp, plyr, clwf, rhly, qstl, & !  ---  inputs
      &        cldtot ) 
         endif  
 
@@ -1719,7 +1713,7 @@
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &
      &       ntrac,ntcw,ntiw,ntrw,                                      &
-     &       IX, NLAY, NLP1, icloud,                                    &
+     &       IX, NLAY, NLP1, icloud, xr_con, xr_exp,                    &
      &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
      &       re_cloud,re_ice,re_snow,                                   &
      &       dzlay, cldtot, cldcnv, lcnorm,                             &
@@ -1802,6 +1796,7 @@
 
       logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, lcnorm
 
+      real (kind=kind_phys), intent(in) :: xr_con, xr_exp
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, tvly, qlyr, qstl, rhly, cldcov, delp, dz, dzlay
 
@@ -1827,10 +1822,6 @@
      &       tem1, tem2, tem3
 
       integer :: i, k, id, nf
-
-!  ---  constant values
-!     real (kind=kind_phys), parameter :: xrc3 = 200.
-      real (kind=kind_phys), parameter :: xrc3 = 100.
 
 !
 !===> ... begin here
@@ -1902,12 +1893,13 @@
 
         if (.not. lmfshal) then
           call cloud_fraction_XuRandall                                 &
-     &      ( IX, NLAY, plyr, clwf, rhly, qstl,                         & !  ---  inputs
+     &      ( IX, NLAY, xr_con, xr_exp, plyr, clwf, rhly, qstl,         & !  ---  inputs
      &        cldtot )                                                  & !  ---  outputs
         else
           call cloud_fraction_mass_flx_1                                &
-     &      ( IX, NLAY, lmfdeep2, xrc3, plyr, clwf, rhly, qstl,         & !  ---  inputs
-     &        cldtot )
+     &      ( IX, NLAY, lmfdeep2, xr_con, xr_exp, plyr, clwf, rhly,     &
+     &        qstl,                                                     & !  ---  inputs
+     &        cldtot )                                                  & !  ---  outputs
         endif
 
       endif                                ! if (uni_cld) then
@@ -1965,7 +1957,7 @@
      &     ( plyr,plvl,tlyr,qlyr,qstl,rhly,clw,                         &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &
      &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,con_ttp,                    &
-     &       xr_cnvcld, IX, NLAY, NLP1,                                 &
+     &       xr_cnvcld, IX, NLAY, NLP1, xr_con, xr_exp,                 &
      &       uni_cld, lmfshal, lmfdeep2, cldcov, cnvw,                  &
      &       re_cloud,re_ice,re_snow,                                   &
      &       lwp_ex, iwp_ex, lwp_fc, iwp_fc,                            &
@@ -2065,7 +2057,7 @@
 
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
-      real (kind=kind_phys), intent(in) :: con_ttp
+      real (kind=kind_phys), intent(in) :: con_ttp, xr_con, xr_exp
 !  --- inputs/outputs
 
       real (kind=kind_phys), dimension(:,:), intent(inout) ::            &
@@ -2082,7 +2074,6 @@
       integer :: i, k, id, nf
 
 !  ---  constant values
-      real (kind=kind_phys), parameter :: xrc3 = 2000.
       real (kind=kind_phys), parameter :: snow2ice = 0.25
       real (kind=kind_phys), parameter :: coef_t = 0.025
 !
@@ -2205,11 +2196,11 @@
 
         if (.not. lmfshal) then
           call cloud_fraction_XuRandall                                 &
-     &      ( IX, NLAY, plyr, clwf, rhly, qstl,                         & !  ---  inputs
+     &      ( IX, NLAY, xr_con, xr_exp, plyr, clwf, rhly, qstl,         & !  ---  inputs
      &        cldtot )                                                  & !  ---  outputs
         else
           call cloud_fraction_mass_flx_2                                &
-     &      ( IX, NLAY, lmfdeep2, xrc3, plyr, clwf, rhly, qstl,         & !  ---  inputs
+     &      ( IX, NLAY, lmfdeep2, xr_con, xr_exp, plyr, clwf, rhly, qstl, & !  ---  inputs
      &        cldtot )
         endif
 
@@ -3739,11 +3730,12 @@
 
 !> This subroutine computes the Xu-Randall cloud fraction scheme.
       subroutine cloud_fraction_XuRandall                               &
-     &     ( IX, NLAY, plyr, clwf, rhly, qstl,                          & !  ---  inputs
+     &     ( IX, NLAY, xr_con, xr_exp, plyr, clwf, rhly, qstl,          & !  ---  inputs
      &       cldtot )                                                   & !  ---  outputs
  
 !  ---  inputs:
       integer, intent(in) :: IX, NLAY
+      real (kind=kind_phys), intent(in) :: xr_con, xr_exp
       real (kind=kind_phys), dimension(:,:), intent(in) :: plyr, clwf,  &
      &                                                     rhly, qstl  
 
@@ -3768,11 +3760,11 @@
             onemrh= max( 1.e-10, 1.0-rhly(i,k) )
             clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
 
-            tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
-            tem1  = 2000.0 / tem1
+            tem1  = min(max((onemrh*qstl(i,k))**xr_exp,0.0001),1.0)
+            tem1  = xr_con / tem1
 
             value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
-            tem2  = sqrt( sqrt(rhly(i,k)) )
+            tem2  = sqrt(sqrt(rhly(i,k)))
 
             cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
           endif
@@ -3783,12 +3775,12 @@
  
 !>
       subroutine cloud_fraction_mass_flx_1                              &
-     &     ( IX, NLAY, lmfdeep2, xrc3, plyr, clwf, rhly, qstl,          & !  ---  inputs
+     &     ( IX, NLAY, lmfdeep2, xrc3, xr_exp, plyr, clwf, rhly, qstl,  & !  ---  inputs
      &       cldtot )                                                   & !  ---  outputs
  
 !  ---  inputs:
       integer, intent(in) :: IX, NLAY
-      real (kind=kind_phys), intent(in)                 :: xrc3
+      real (kind=kind_phys), intent(in)                 :: xrc3, xr_exp
       real (kind=kind_phys), dimension(:,:), intent(in) :: plyr, clwf,  &
      &                                                     rhly, qstl  
       logical, intent(in) :: lmfdeep2
@@ -3814,7 +3806,7 @@
             onemrh= max( 1.e-10, 1.0-rhly(i,k) )
             clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
 !
-            tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
+            tem1  = min(max((onemrh*qstl(i,k))**xr_exp,0.0001),1.0)  !jhan
             if (lmfdeep2) then
               tem1  = xrc3 / tem1
             else
@@ -3833,12 +3825,12 @@
  
 !>
       subroutine cloud_fraction_mass_flx_2                              &
-     &     ( IX, NLAY, lmfdeep2, xrc3, plyr, clwf, rhly, qstl,          & !  ---  inputs
+     &     ( IX, NLAY, lmfdeep2, xrc3, xr_exp, plyr, clwf, rhly, qstl,  & !  ---  inputs
      &       cldtot )                                                   & !  ---  outputs
  
 !  ---  inputs:
       integer, intent(in) :: IX, NLAY
-      real (kind=kind_phys), intent(in)                 :: xrc3
+      real (kind=kind_phys), intent(in)                 :: xrc3, xr_exp
       real (kind=kind_phys), dimension(:,:), intent(in) :: plyr, clwf,  &
      &                                                     rhly, qstl  
       logical, intent(in) :: lmfdeep2
@@ -3866,7 +3858,7 @@
               onemrh= max( 1.e-10, 1.0-rhly(i,k) )
               clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
 
-              tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
+              tem1  = min(max((onemrh*qstl(i,k))**xr_exp,0.0001),1.0)
               if (lmfdeep2) then
                 tem1  = xrc3 / tem1
               else
