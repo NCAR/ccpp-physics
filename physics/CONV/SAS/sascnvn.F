@@ -974,9 +974,9 @@
       if(totflg) return
 !!
 !
-!  estimate the onvective overshooting as the level
+!  Estimate the convective overshooting as the level
 !    where the [aafac * cloud work function] becomes zero,
-!    which is the final cloud top
+!    which is the final cloud top.
 !
 !> - Continue calculating the cloud work function past the point of neutral buoyancy to represent overshooting according to Han and Pan (2011) \cite han_and_pan_2011 . Convective overshooting stops when \f$ cA_u < 0\f$ where \f$c\f$ is currently 10%, or when 10% of the updraft cloud work function has been consumed by the stable buoyancy force.
       do i = 1, im
@@ -1001,7 +1001,7 @@
      &                 dz1 * (g / (cp * to(i,k)))
      &                 * dbyo(i,k) / (1. + gamma)
      &                 * rfact            
-!NRL MNM: Limit overshooting not to be deeper than the actual cloud
+!NRL MNM: Limit overshooting not to be deeper than half the actual cloud
               tem  = 0.5 * (zi(i,ktcon(i))-zi(i,kbcon(i)))
               tem1 = zi(i,k)-zi(i,ktcon(i))
               if(aa2(i) < 0. .or. tem1 >= tem) then
