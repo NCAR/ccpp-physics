@@ -348,7 +348,7 @@
      &       alvsf,alnsf,alvwf,alnwf,facsf,facwf,fice,tisfc,            &
      &       lsmalbdvis, lsmalbdnir, lsmalbivis, lsmalbinir,            &
      &       icealbdvis, icealbdnir, icealbivis, icealbinir,            &
-     &       IMAX, NF_ALBD, albPpert, pertalb, fracl, fraco, fraci, icy,&
+     &       IMAX, albPpert, pertalb, fracl, fraco, fraci, icy,         &
      &       ialbflg, con_ttp,                                          &
      &       sfcalb                                                     & !  ---  outputs:
      &     )
@@ -413,7 +413,7 @@
       implicit none
 
 !  ---  inputs
-      integer, intent(in) :: IMAX, NF_ALBD, ialbflg
+      integer, intent(in) :: IMAX, ialbflg
       integer, intent(in) :: lsm, lsm_noahmp, lsm_ruc
       logical, intent(in) :: use_cice_alb, frac_grid
 
@@ -434,8 +434,7 @@
      &       icy
 
 !  ---  outputs
-      real (kind=kind_phys), dimension(IMAX,NF_ALBD), intent(out) ::    &
-     &       sfcalb
+      real (kind=kind_phys), dimension(:,:), intent(out) :: sfcalb
 
 !  ---  locals:
       real (kind=kind_phys) :: asnvb, asnnb, asnvd, asnnd, asevb        &
@@ -803,8 +802,6 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
-      use set_soilveg_ruc_mod,  only: set_soilveg_ruc
-      use namelist_soilveg_ruc
 
       implicit none
 

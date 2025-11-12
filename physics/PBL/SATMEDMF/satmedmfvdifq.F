@@ -3051,16 +3051,18 @@ c
 !           dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
       enddo
-      do i = 1,im
-        if(.not. use_oceanuv) then
-          dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
-          dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
-        else if (use_oceanuv) then
+      if (use_oceanuv) then
+        do i = 1,im
           spd1_m=sqrt( (u1(i,1)-usfco(i))**2+(v1(i,1)-vsfco(i))**2 )
           dusfc(i) = -1.*rho_a(i)*stress(i)*(u1(i,1)-usfco(i))/spd1_m
           dvsfc(i) = -1.*rho_a(i)*stress(i)*(v1(i,1)-vsfco(i))/spd1_m
-        endif
-      enddo
+        enddo
+      else
+        do i = 1,im
+          dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
+          dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
+        enddo
+      endif
 !
       if(ldiag3d .and. .not. gen_tend) then
         idtend = dtidx(index_of_x_wind,index_of_process_pbl)
