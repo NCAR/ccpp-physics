@@ -1403,7 +1403,7 @@
      &     dusfc_can,dvsfc_can,dtsfc_can,dqsfc_can,hpbl_can,            & ! Out
      &     dkt,     dku,     tkeh_can3,                                 & ! Out/Out:tkeh_can
      &     dkt_can,dku_can,                                             & ! In: canopy inputs
-     &     kinver,xkzmcan_m,xkzmcan_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
+     &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            &
 !IVAI: canopy inputs from AQM
      &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           &
