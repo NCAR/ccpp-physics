@@ -228,8 +228,6 @@ contains
     call mpi_bcast(lut_ssaiceLW,   size(lut_ssaiceLW),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(lut_asyiceLW,   size(lut_asyiceLW),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
 #endif
-    
-#endif
 
     ! #######################################################################################
     !   

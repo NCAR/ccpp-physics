@@ -152,8 +152,7 @@ contains
     ! (ONLY master processor(0), if MPI enabled) 
     !
     ! #######################################################################################
-    if (mpirank .eq. mpiroot) then
-#endif 
+    if (mpirank .eq. mpiroot) then 
        write (*,*) 'Reading RRTMGP shortwave cloud data (LUT) ... '
        status = nf90_inq_varid(ncid,'radliq_lwr',varID)
        status = nf90_get_var(ncid,varID,radliq_lwrSW)
@@ -225,7 +224,6 @@ contains
     call mpi_bcast(lut_asyiceSW,   size(lut_asyiceSW),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
 #endif
 
-#endif
     ! #######################################################################################
     !   
     ! Initialize RRTMGP DDT's...
