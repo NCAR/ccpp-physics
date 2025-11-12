@@ -198,8 +198,7 @@
       real(kind=kind_phys), intent(in) :: grav,pi,rd,cp,rv,hvap,hfus,fv,&
      &                                    eps,epsm1,                    &
      &                                    con_rocp                       !IVAI
-      real(kind=kind_phys), intent(in) :: delt, xkzmcan_m, xkzmcan_h,   &
-     &                                    xkzm_s
+      real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
       real(kind=kind_phys), intent(in) :: rlmx, elmx
 !PCC CANOPY------------------------------------
@@ -425,8 +424,8 @@
 !PCC_CANOPY------------------------------------
 
 ! InOut: list sat_canopy call
-!      integer, parameter :: ntoz = 7 
-!      integer, parameter :: nto3 = 11
+      integer, parameter :: ntoz = 7 
+      integer, parameter :: nto3 = 10
       real(kind=kind_phys) ::
      &                     dv_can (im,km), du_can (im,km),              & ! size (km)
      &                     tdt_can(im,km), rtg_can(im,km,ntrac)           ! size (km)
@@ -709,8 +708,8 @@
 !       aux3d(:,:, 2) =                q1(:,:, ntoz) ! ntoz=7 kg kg-1    ~ 1e-07 kg kg-1 (~100 ug kg-1)
 !       aux3d(:,:, 2) = FORWARD_CONV * q1(:,:, ntoz) ! ntoz=7 ???        ~ 6e-05
 
-! nto3=11 "o3cpl" tracer
-!       aux3d(:,:, 7) = q1(:,:, nto3) ! nto3=11 kg kg-1 ~ 1e-07
+! nto3=10 "o3cpl" tracer
+!       aux3d(:,:, 7) = q1(:,:, nto3) ! nto3=10 kg kg-1 ~ 1e-07
 
 ! "sgs_tke"
 !       aux3d(:,:,2) = q1(:,:, 8   ) ! n= 8    "sgs_tke"
@@ -1168,13 +1167,16 @@
 ! ================================
 
 ! 3D aux arrays
-! ntoz=7  "o3mr"
-! nto3=11 "o3cpl" CMAQ ozone
-!  NO2 ??
+! ntoz=7  "o3mr" GFS ozone tracer
+! ...
+! n=11    "no3" cplaqm 
+! nto3=10 "o3" cplaqm ozone
+! n=9     "no"  cplaqm
+! n=8     "no2" cplaqm
 
 ! Output pbl diags
 !GOOD      aux3d(:,:, 6) = q1_can (:,1:km, ntoz) ! ntoz=7  "o3mr"  tracer "resolved_to_canopy"
-!GOOD      aux3d(:,:, 4) = q1_can (:,1:km, nto3) ! nto3=11 "o3cpl" tracer "resolved_to_canopy"
+!GOOD      aux3d(:,:, 4) = q1_can (:,1:km, nto3) ! nto3=10 "o3cpl" tracer "resolved_to_canopy"
 !GOOD      aux3d(:,:, 2) = q1_can (:,1:km, ntqv) ! ntqv=1  humidity       "resolved_to_canopy" 
 
 ! Humidity 
@@ -1235,11 +1237,11 @@
 
 ! 2D aux arrays
 !        aux2d(:, 1) =    Q1_2M(:, ntoz)        ! "resolved_to_canopy" ntoz=7
-!        aux2d(:, 2) =    Q1_2M(:, nto3)        ! "resolved_to_canopy" nto3=11 
+!        aux2d(:, 2) =    Q1_2M(:, nto3)        ! "resolved_to_canopy" nto3=10
 
 
 !       if ( kount .EQ. 0) print*, 'CAN_SATMEDMF: NTO3 = ',
-!    &     ntoz, nto3   ! 7 11
+!    &     ntoz, nto3   ! 7 10
 !    &    ntqv, ntcw,ntrw, ntiw,
 !    &    ntke, ntrac1
 !
@@ -1350,7 +1352,7 @@
           idtend = dtidx(100+ntoz,index_of_process_pbl)
 !         aux3d(:,:, 4) = dtend(:,:,idtend)    ! dtend_o3  kg kg-1 s-1 ~1.E-08
 
-! Output pbl tendency of nto3=11 "o3cpl" tracer
+! Output pbl tendency of nto3=10 "o3cpl" tracer
           idtend = dtidx(100+nto3,index_of_process_pbl)
 !         aux3d(:,:, 2) = dtend(:,:,idtend)    ! dtend_o3cpl  kg kg-1 s-1
 
@@ -1364,9 +1366,11 @@
 
 ! pbl tracers tendencies
           aux3d(:,:, 7) = rtg (:,:, ntqv  )
-          aux3d(:,:, 5) = rtg (:,:, 10  )  ! n=10    "no"  
-          aux3d(:,:, 3) = rtg (:,:, nto3)  ! nto3=11 "o3"  
-          aux3d(:,:, 1) = rtg (:,:, 9   )  ! n=9     "no2" 
+
+!         aux3d(:,:, 5) = rtg (:,:, 9   )  ! n=11    "no3"
+          aux3d(:,:, 5) = rtg (:,:, 9   )  ! n=9     "no"  
+          aux3d(:,:, 3) = rtg (:,:, nto3)  ! nto3=10 "o3"  
+          aux3d(:,:, 1) = rtg (:,:, 8   )  ! n=8     "no2" 
 
 ! pbl thermo-dynamics & TKE tendencies
 !          aux3d(:,:, 5) = du (:,:)
@@ -1529,7 +1533,7 @@
 !         aux3d(:,:, 8) = rtg_can  (:,:, ntke ) ! ntke=198 TKE
 
          aux3d(:,:, 6) = rtg_can  (:,:, 9   )  ! n=9  "no"
-         aux3d(:,:, 4) = rtg_can  (:,:, 10  )  ! n=10  "o3"  cplaqm ?? nto3=11 ??
+         aux3d(:,:, 4) = rtg_can  (:,:, 10  )  ! n=10  "o3" cplaqm 
          aux3d(:,:, 2) = rtg_can  (:,:, 8   )  ! n=8  "no2"
 
 ! prod / qcko(:,:,ntke) / tke / qcdo(:,:,ntke)
@@ -1561,7 +1565,7 @@ c
 
 ! Before "canopy_to_resolved"
 !          aux3d(:,:,6) = Q2_MOD(:,:, ntoz) ! ntoz=7 "o3mr"   before "canopy_to_resolved" GOOD
-!          aux3d(:,:,4) = Q2_MOD(:,:, nto3) ! nto3=11 "o3cpl" before "canopy_to_resolved" GOOD
+!          aux3d(:,:,4) = Q2_MOD(:,:, nto3) ! nto3=10 "o3cpl" before "canopy_to_resolved" GOOD
 !          aux3d(:,:,2) = Q2_MOD(:,:, ntqv) ! ntqv=1 humidity before "canopy_to_resolved" GOOD
 
 ! Air Density after diffusion model layers
@@ -1599,7 +1603,7 @@ c
 
 ! Ozone cplaqm after diffusion on canopy layers, other tracers are below
           q2_can3 (:,:, nto3) = q1_can3(:,:, nto3) +
-     &                         rtg_can (:,:, nto3) * dt2 ! nto3=11
+     &                         rtg_can (:,:, nto3) * dt2 ! nto3=10
 
 ! TKE after diffusion on canopy layers, other tracers are below
           q2_can3(:,:, ntke) = q1_can3(:,:, ntke) + 
@@ -1611,7 +1615,7 @@ c
 
 ! GOOD
 !          aux3d(:,:, 6) = q2_can3(:,:, ntoz)  ! ntoz=7   "o3mr" GFS tracer
-!          aux3d(:,:, 4) = q2_can3(:,:, nto3)  ! nto3=11  "o3" cplaqm tracer
+!          aux3d(:,:, 4) = q2_can3(:,:, nto3)  ! nto3=10  "o3" cplaqm tracer
 !          aux3d(:,:, 2) = q2_can3(:,:, ntqv)  ! ntqv=1   humidity
 
 ! Other tendencies above
@@ -1683,7 +1687,7 @@ c
 
 ! GOOD
 !          aux3d(:,:, 6) = q2_can (:,:, ntoz)  ! ntoz=7   "o3mr" GFS tracer  GOOD
-!          aux3d(:,:, 4) = q2_can (:,:, nto3)  ! nto3=11  "o3" cplaqm tracer GOOD
+!          aux3d(:,:, 4) = q2_can (:,:, nto3)  ! nto3=10  "o3" cplaqm tracer GOOD
 !          aux3d(:,:, 2) = q2_can (:,:, ntqv)  ! ntqv=1   humidity           GOOD
 
           do i = 1, im
@@ -1702,7 +1706,7 @@ c
               idtend = dtidx(100+ntoz,index_of_process_pbl)
 !             aux3d(i,:, 4) = dtend_can(i, 1:km,idtend)     ! dtend_o3     kg kg-1 s-1 ~5E-09
 
-! Output pbl tendency of nto3=11 "o3cpl" tracer
+! Output pbl tendency of nto3=10 "o3cpl" tracer
 ! NB. dtend_o3cpl_pbl ~ ~5.E-10 !!! E-3 different from dtend here !!!
               idtend = dtidx(100+nto3,index_of_process_pbl)
 !             aux3d(i,:, 2) = dtend_can(i, 1:km,idtend)     ! dtend_o3cpl kg kg-1 s-1 ~2.E-04
@@ -1806,13 +1810,13 @@ c
 !       q2_2m (:, :) = q1_2m(:, :) +
 !     &                        rtg_2m(:,1:km, :) * dt2   ! before "canopy_to_resolved"
 
-!        aux2d(:, 6) = rtg_2m(:, 10  )         ! after diffusion n=10    "no"
-!        aux2d(:, 4) = rtg_2m(:, nto3)         ! after diffusion nto3=11 "o3"
-!        aux2d(:, 2) = rtg_2m(:, 9   )         ! after diffusion n=9     "no2"
+!        aux2d(:, 6) = rtg_2m(:, 9   )         ! after diffusion n=9     "no"
+!        aux2d(:, 4) = rtg_2m(:, nto3)         ! after diffusion nto3=10 "o3"
+!        aux2d(:, 2) = rtg_2m(:, 8   )         ! after diffusion n=8     "no2"
 
-!        aux2d(:, 6) = Q2_2m (:, 10  )         ! after diffusion n=10    "no"
-!        aux2d(:, 4) = Q2_2m (:, nto3)         ! after diffusion nto3=11 "o3"
-!        aux2d(:, 2) = Q2_2m (:, 9   )         ! after diffusion n=9     "no2"
+!        aux2d(:, 6) = Q2_2m (:, 9   )         ! after diffusion n=9     "no"
+!        aux2d(:, 4) = Q2_2m (:, nto3)         ! after diffusion nto3=10 "o3"
+!        aux2d(:, 2) = Q2_2m (:, 8   )         ! after diffusion n=8     "no2"
 
 ! 2-m diag is always 1cy layer 
         aux2d(:, 6) = Q1_can(:,1, 9   )         ! after diffusion n=9     "no"
@@ -1827,7 +1831,7 @@ c
 
 ! GOOD
 !       aux3d(:,:,6) = Q2_MOD(:,:, ntoz) ! ntoz=7  after "canopy_to_resolved" GOOD
-!       aux3d(:,:,4) = Q2_MOD(:,:, nto3) ! nto3=11 after "canopy_to_resolved" GOOD
+!       aux3d(:,:,4) = Q2_MOD(:,:, nto3) ! nto3=10 after "canopy_to_resolved" GOOD
 !       aux3d(:,:,2) = Q2_MOD(:,:, ntqv) ! ntqv=1  after "canopy_to_resolved" GOOD
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2003,9 +2007,9 @@ c
 ! Selected chemical tracers tendencies
 !Sep3          rtg_mod(i,k, ntoz) = (q2_mod(i,k, ntoz) - q1(i,k, ntoz))*rdt ! ntoz=7 after "canopy_to_resolved"
 !Sep3           !... n=8 "sgs_tke" do NOT update !!
-!Sep3           rtg_mod(i,k, 9   ) = (q2_mod(i,k, 9   ) - q1(i,k, 9   ))*rdt ! n=9 no2 after "canopy_to_resolved"
-!Sep3           rtg_mod(i,k, 10  ) = (q2_mod(i,k, 10  ) - q1(i,k, 10  ))*rdt ! n=10 no after "canopy_to_resolved"
-!Sep3           rtg_mod(i,k, nto3) = (q2_mod(i,k, nto3) - q1(i,k, nto3))*rdt ! nto3=11 "o3"  after "canopy_to_resolved"
+!Sep3           rtg_mod(i,k, 8   ) = (q2_mod(i,k, 8   ) - q1(i,k, 8   ))*rdt ! n=8     "no2" after "canopy_to_resolved"
+!Sep3           rtg_mod(i,k, 9   ) = (q2_mod(i,k, 9   ) - q1(i,k, 9   ))*rdt ! n=9     "no"  after "canopy_to_resolved"
+!Sep3           rtg_mod(i,k, nto3) = (q2_mod(i,k, nto3) - q1(i,k, nto3))*rdt ! nto3=10 "o3"  after "canopy_to_resolved"
 
 !!!!!!!!!!!!!!!!!!!!!
 ! Canopy columns
@@ -2019,9 +2023,9 @@ c
 ! n =< 8 are cloud tracers DO NOT update
 !!!!!!!!!!!!!!
 !            rtg(i,k, ntoz) = rtg_mod(i,k, ntoz)  ! ntoz=7  O3-GFS
-!Sep3            rtg(i,k, 9   ) = rtg_mod(i,k, 9   )  ! n=9     NO2
-!Sep3            rtg(i,k, 10  ) = rtg_mod(i,k, 10  )  ! n=10    NO
-!Sep3            rtg(i,k, nto3) = rtg_mod(i,k, nto3)  ! nto3=11 O3
+!Sep3            rtg(i,k, 8   ) = rtg_mod(i,k, 8   )  ! n=8     NO2
+!Sep3            rtg(i,k, 9   ) = rtg_mod(i,k, 9   )  ! n=9     NO
+!Sep3            rtg(i,k, nto3) = rtg_mod(i,k, nto3)  ! nto3=10 O3
 
 ! TKE half layers
 !            tkeh(i,k) = tkeh_can3(i,k)
@@ -2078,9 +2082,9 @@ c
 
 ! Output 2D pbl diags
 ! 1hy model layer concentrations to compare with 2m diags output from "phot" routine
-        aux2d(:,  5) = q1 (:,1, 9   )  ! n=10    "no"  after "canopy_to_resolved"
-        aux2d(:,  3) = q1 (:,1, 10  )  ! nto3=11 "o3"  after "canopy_to_resolved"
-        aux2d(:,  1) = q1 (:,1, 8   )  ! n=9     "no2" after "canopy_to_resolved"
+        aux2d(:,  5) = q1 (:,1, 9   )  ! n=9     "no"  after "canopy_to_resolved"
+        aux2d(:,  3) = q1 (:,1, 10  )  ! nto3=10 "o3"  after "canopy_to_resolved"
+        aux2d(:,  1) = q1 (:,1, 8   )  ! n=8     "no2" after "canopy_to_resolved"
 
       endif !if(do_canopy)
 
