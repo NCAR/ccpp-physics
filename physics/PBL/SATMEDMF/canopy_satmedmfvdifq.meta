@@ -760,7 +760,7 @@
   type = real
   kind = kind_phys
   intent = in
-[xkzmn_h]
+[xkzm_h]
   standard_name = atmosphere_heat_diffusivity_due_to_background
   long_name = background value of heat diffusivity
   units = m2 s-1
