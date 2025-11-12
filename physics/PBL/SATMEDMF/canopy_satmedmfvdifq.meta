@@ -753,16 +753,16 @@
   type = integer
   intent = in
 [xkzm_m]
-  standard_name = atmosphere_momentum_diffusivity_in_canopy_due_to_background
-  long_name = background value of momentum diffusivity in canopy
+  standard_name = atmosphere_momentum_diffusivity_due_to_background
+  long_name = background value of momentum diffusivity
   units = m2 s-1
   dimensions = ()
   type = real
   kind = kind_phys
   intent = in
 [xkzmn_h]
-  standard_name = atmosphere_heat_diffusivity_in_canopy_due_to_background
-  long_name = background value of heat diffusivity in canopy
+  standard_name = atmosphere_heat_diffusivity_due_to_background
+  long_name = background value of heat diffusivity
   units = m2 s-1
   dimensions = ()
   type = real
