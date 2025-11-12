@@ -752,8 +752,7 @@
   dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
-### IVAI
-[xkzmcan_m]
+[xkzm_m]
   standard_name = atmosphere_momentum_diffusivity_in_canopy_due_to_background
   long_name = background value of momentum diffusivity in canopy
   units = m2 s-1
@@ -761,7 +760,7 @@
   type = real
   kind = kind_phys
   intent = in
-[xkzmcan_h]
+[xkzmn_h]
   standard_name = atmosphere_heat_diffusivity_in_canopy_due_to_background
   long_name = background value of heat diffusivity in canopy
   units = m2 s-1
@@ -769,7 +768,6 @@
   type = real
   kind = kind_phys
   intent = in
-### IVAI
 [xkzm_s]
   standard_name = sigma_pressure_threshold_at_upper_extent_of_background_diffusion
   long_name = sigma level threshold for background diffusivity

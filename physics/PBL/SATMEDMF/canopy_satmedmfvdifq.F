@@ -166,7 +166,7 @@
      &     dkt,dku,tkeh,                                                & ! inout: dkt,dku, tkeh
      &     dkt_can,dku_can,                                             & ! out
 !kinver=GFS_Interstitial 2d 
-     &     kinver,xkzmcan_m,xkzmcan_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          & ! in 
+     &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          & ! in 
      &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            & ! in
 !IVAI: canopy inputs from AQM                      
      &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           & ! in
