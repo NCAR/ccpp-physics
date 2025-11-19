@@ -246,7 +246,6 @@ contains
           else
             tsfc_wat(i) = tsfco(i)
           endif
-          tsurf_wat(i) = tsfco(i)
           zorlo(i) = max(1.0e-5, min(one, zorlo(i)))
         ! DH*
         else
