@@ -1,11 +1,11 @@
 [ccpp-table-properties]
-  name = canopy_satmedmfvdifq
+  name = canopy_driver
   type = scheme
   dependencies = ../../tools/funcphys.f90,../../tools/canopy_utils_mod.f,../../hooks/machine.F,../mfpbltq.f,mfscuq.f,../tridi.f,canopy_mask.F90,canopy_levs.F90,canopy_transfer.F90,satmedmfvdifq_can.F
 
 ########################################################################
 [ccpp-arg-table]
-  name = canopy_satmedmfvdifq_init
+  name = canopy_driver_init
   type = scheme
 [satmedmf]
   standard_name = flag_for_scale_aware_TKE_moist_EDMF_PBL
@@ -46,7 +46,7 @@
 
 #####################################################################
 [ccpp-arg-table]
-  name = canopy_satmedmfvdifq_run
+  name = canopy_driver_run
   type = scheme
 [im]
   standard_name = horizontal_loop_extent
@@ -97,21 +97,45 @@
   dimensions = ()
   type = integer
   intent = in
-# IVAI
-#[ntoz]
-#  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
-#  long_name = tracer index for ozone mixing ratio
-#  units = index
-#  dimensions = ()
-#  type = integer
-#  intent = in
-#[nto3]
-#  standard_name = index_for_ozone_chemical_tracer_in_tracer_concentration_array
-#  long_name = tracer index for ozone chemical tracer
-#  units = index
-#  dimensions = ()
-#  type = integer
-#  intent = in
+# IVAI: 
+# ntchm           !< number of prognostic chemical tracers (advected)
+[ntchm]
+  standard_name = number_of_chemical_tracers
+  long_name = number of chemical tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+#ntchs           !< tracer index for first prognostic chemical tracer
+[ntchs]
+  standard_name = index_of_first_chemical_tracer_in_tracer_concentration_array
+  long_name = tracer index for first chemical tracer
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+# ntche           !< tracer index for last prognostic chemical tracer
+[ntche]
+  standard_name = index_for_last_chemical_tracer
+  long_name = tracer index for last chemical tracer
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntoz]
+  standard_name = index_of_ozone_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for ozone mixing ratio
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[nto3]
+  standard_name = index_for_ozone_chemical_tracer_in_tracer_concentration_array
+  long_name = tracer index for ozone chemical tracer
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [ndtend]
   standard_name = cumulative_change_of_state_variables_outer_index_max
   long_name = last dimension of array of diagnostic tendencies for state variables

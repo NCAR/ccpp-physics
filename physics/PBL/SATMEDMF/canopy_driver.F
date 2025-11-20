@@ -1,7 +1,7 @@
-!> \file canopy_satmedmfvdifq.F
+!> \file canopy_driver.F
 
 !> This file contains ...
-      module canopy_satmedmfvdifq
+      module canopy_driver
       use mfpbltq_mod
       use tridi_mod
       use mfscuq_mod
@@ -44,7 +44,7 @@
 
       contains
 
-!> \defgroup module_canopy_satmedmfvdifq GFS TKE-EDMF PBL Module
+!> \defgroup module_canopy_driver GFS TKE-EDMF PBL Module
 !! This file contains the CCPP-compliant SATMEDMF scheme (updated version) which
 !! computes subgrid vertical turbulence mixing using scale-aware TKE-based moist
 !! eddy-diffusion mass-flux (TKE-EDMF) parameterization (by Jongil Han).
@@ -61,10 +61,10 @@
 !! with additional improvements on MF working with Cu schemes
 !! Xiaomin Chen, 5/2/2022
 !!
-!> \section arg_table_canopy_satmedmfvdifq_init Argument Table
-!! \htmlinclude canopy_satmedmfvdifq_init.html
+!> \section arg_table_canopy_driver_init Argument Table
+!! \htmlinclude canopy_driver_init.html
 !!
-      subroutine canopy_satmedmfvdifq_init (satmedmf,                          &
+      subroutine canopy_driver_init (satmedmf,                          &
      &                               isatmedmf,isatmedmf_vdifq,         &
      &                               errmsg,errflg)
 
@@ -92,13 +92,13 @@
         return
       end if
 
-      end subroutine canopy_satmedmfvdifq_init
+      end subroutine canopy_driver_init
 
-!> \section arg_table_canopy_satmedmfvdifq_run Argument Table
-!! \htmlinclude canopy_satmedmfvdifq_run.html
+!> \section arg_table_canopy_driver_run Argument Table
+!! \htmlinclude canopy_driver_run.html
 !!
-!!\section gen_canopy_satmedmfvdifq GFS canopy_satmedmfvdifq General Algorithm
-!! canopy_satmedmfvdifq_run() computes subgrid vertical turbulence mixing
+!!\section gen_canopy_driver GFS canopy_driver General Algorithm
+!! canopy_driver_run() computes subgrid vertical turbulence mixing
 !! using the scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization of
 !! Han and Bretherton (2019) \cite Han_2019 .
 !! -# The local turbulent mixing is represented by an eddy-diffusivity scheme which 
@@ -107,9 +107,9 @@
 !! (mfpbltq.f), is represented using a mass flux approach (Siebesma et al.(2007) \cite Siebesma_2007 ).
 !! -# A mass-flux approach is also used to represent the stratocumulus-top-induced turbulence
 !! (mfscuq.f).
-!! \section detail_satmedmfvidfq GFS canopy_satmedmfvdifq Detailed Algorithm 
-      subroutine canopy_satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,        &
-     &     ntiw,ntke,                                                   &
+!! \section detail_canopy GFS canopy_driver Detailed Algorithm 
+      subroutine canopy_driver_run(im,km,ntrac,ntcw,ntrw,               &
+     &     ntiw,ntke,ntchm,ntchs,ntche, ntoz,nto3,                      &
      &     ndtend,                                                      & !add ndtend
      &     con_rocp,                                                    & 
      &     grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                     &
@@ -186,8 +186,8 @@
 !
 !----------------------------------------------------------------------
       integer, intent(in)  :: im, km,                                   &
-     &                        ntrac, ntcw, ntrw, ntiw, ntke,            &
-     &                        ntqv, ndtend                              & !IVAI 
+     &                        ntrac, ntcw, ntrw, ntiw, ntke, ntqv,      &
+     &                        ntchm,ntchs,ntche, ntoz,nto3, ndtend      & !IVAI 
       integer, intent(in)  :: sfc_rlm
       integer, intent(in)  :: tc_pbl
       integer, intent(in)  :: use_lpt
@@ -424,8 +424,6 @@
 !PCC_CANOPY------------------------------------
 
 ! InOut: list sat_canopy call
-      integer, parameter :: ntoz = 7 
-      integer, parameter :: nto3 = 10
       real(kind=kind_phys) ::
      &                     dv_can (im,km), du_can (im,km),              & ! size (km)
      &                     tdt_can(im,km), rtg_can(im,km,ntrac)           ! size (km)
@@ -675,44 +673,10 @@
 ! Initialize canopy layers concentrtions with values before diffusion
       if (do_canopy .and. cplaqm) then
 
-!         print*,'can_satmedmf: km, nkc  = ', km, nkc          ! =64, 3       NB. nkt not yet defined at this point
-!         print*,'can_satmedmf: rtg size = ', size(rtg), ntrac ! =201728, 197
-
-!        print*,'can_satmedmf: dtend size = ', size(dtend), ndtend ! 12288  12
-!        print*,'can_satmedmf: dtidx size = ', size(dtidx),
-!     &                                        index_of_process_pbl ! 5436  1
-! 16 x 64 levs = 1024
-! 16 x 65 levs = 1040
-! 16 x 67 levs = 1072
-! 16 x 68 levs = 1088
-!        print*,'can_satmedmf: phii size = ', size(phii), size(phii_can) ! 1040        1088
-!        print*,'can_satmedmf: phil size = ', size(phil), size(phil_can) ! 1024        1072
-
-!        print*,'can_satmedmf: u1 size = ', size(u1),   size(u1_can)     ! 1024        1072
-!
-!          201728 (16x64x197) ntrac1=197
-! size(q1)=202752 (16x64x198) ntrac =198
-!         print*,'can_satmedmf: q1  size = ', size(q1)  ! q1(ix,km,ntrac1 or ntrac?)
-
-! 1024  1072
-!        print*,'can_satmedmf: prslk size = ', size(prslk), 
-!     &                                        size(prslk_can)
-! 1024  1072
-!        print*,'can_satmedmf: prsl  size = ', size(prsl), size(prsl_can)
-
-! ntqv=1 kg kg-1
-!       aux3d(:,:,2) =                   q1(:,:, ntqv) ! ntqv=1 kg kg-1 ~ 0.02 (1-20.0E-3)
-!       aux3d(:,:,2) = FORWARD_CONV_WV * q1(:,:, ntqv) ! ntqv=1 ppmv    ~ 10-30 ppmv
-! 
-! kg kg-1 -> ppmv "o3mr"
-!       aux3d(:,:, 2) =                q1(:,:, ntoz) ! ntoz=7 kg kg-1    ~ 1e-07 kg kg-1 (~100 ug kg-1)
-!       aux3d(:,:, 2) = FORWARD_CONV * q1(:,:, ntoz) ! ntoz=7 ???        ~ 6e-05
-
-! nto3=10 "o3cpl" tracer
-!       aux3d(:,:, 7) = q1(:,:, nto3) ! nto3=10 kg kg-1 ~ 1e-07
-
-! "sgs_tke"
-!       aux3d(:,:,2) = q1(:,:, 8   ) ! n= 8    "sgs_tke"
+! NTRAC1 = 196  ntchm = 189  (9, 197) chemical tracers advected
+!         print*,'can_driver: NTRAC1  = ', NTRAC1,ntchm,ntchs,ntche,
+!     &                                    ntoz, ! ntoz=7
+!     &                                    nto3  ! nto3=11 (index 10 is O3 in PBL)
 
         do k = 1,km
           do i = 1,im
@@ -799,7 +763,7 @@
         
 
 ! 16  16
-!         print*,'can_satmedmf: CANMSK = ', size(canmsk), size(FRT_mask)
+!         print*,'can_driver: CANMSK = ', size(canmsk), size(FRT_mask)
 
          canmsk(:) = FRT_mask(:)
 
@@ -829,17 +793,17 @@
 
 
 
-!             print*,'can_satmedmf: WDIR = ' , i,k,
+!             print*,'can_driver: WDIR = ' , i,k,
 !     &                                      wind_dir_to_degrees,
 !     &                                    wind_dir_from_degrees
 
-!             print*,'can_satmedmfv: U1 = ' , i,k,
+!             print*,'can_driver: U1 = ' , i,k,
 !     &               u1(i,k),
 !     &              ws1(i,k) * sin(wind_dir_to_rad(i,k)),      ! u1
 !     &              ws1(i,k) * sin(wind_dir_from_rad),    ! u1
 !     &              ws1(i,k) * sin(wind_dir_cardinal_rad) ! u1
 
-!             print*,'can_satmedmf: V1 = ' , i,k,
+!             print*,'can_driver: V1 = ' , i,k,
 !     &               v1(i,k),
 !     &              ws1(i,k) * cos(wind_dir_to_rad(i,k)),      ! v1
 !     &              ws1(i,k) * cos(wind_dir_from_rad),    ! v1
@@ -1050,7 +1014,7 @@
 
 ! Print del
 ! Center, lower, upper interface
-!               print*,'can_satmedmf: PRSL, PRSI = ', i, k,              
+!               print*,'can_driver: PRSL, PRSI = ', i, k,              
 !     &                                   prsl(i, k),
 !     &                                   prsi(i, k),      prsi(i, k +1), 
 !     &                                    del(i, k)                     
@@ -1060,7 +1024,7 @@
 
 
 ! Center, lower, upper interface
-!               print*,'can_satmedmf: PRSL_C PRSI_C = ', i, kc,        
+!               print*,'can_driver: PRSL_C PRSI_C = ', i, kc,        
 !    &                               prsl_can(i, kc), prslk_can(i,kc), 
 !    &                               prsi_can(i, kc), prsi_can(i, kc+1),
 !    &                                del_can(i, kc)                    
@@ -1068,11 +1032,11 @@
 
 ! Print dz
 ! Center, lower, upper interface
-!               print*,'can_satmedmf: ZL, ZI, ZM = ', i, k,
+!               print*,'can_driver: ZL, ZI, ZM = ', i, k,
 !     &                       zl(i, k),      zi(i, k),      zm(i, k), 
 !     &                       dz
 ! Center, lower, upper interface
-!               print*,'can_satmedmf: ZL_C, ZI_C, ZM_C =', i, kc, 
+!               print*,'can_driver: ZL_C, ZI_C, ZM_C =', i, kc, 
 !     &                   zl_can(i, kc), zi_can(i, kc), zm_can(i, kc),
 !     &                   dz_can(i, kc)
             end do ! k = 1,km
@@ -1080,7 +1044,7 @@
             do kc = 1,nkc
 
 ! Center, lower, upper interface
-!               print*,'can_satmedmf: PRSL_CAN PRSI_CAN =',i,kc,
+!               print*,'can_driver: PRSL_CAN PRSI_CAN =',i,kc,
 !     &                              prsl_can(i, kc), prslk_can(i,kc), 
 !     &                              prsi_can(i, kc), prsi_can(i, kc+1),
 !     &                               del_can(i, kc)
@@ -1095,7 +1059,7 @@
 !   97892.5615950123        97574.2952071220 318.266387890370
 
 ! Center, lower, upper interface
-!               print*,'can_satmedmf: ZL_CAN, ZI_CAN, ZM_CAN =',i,kc,
+!               print*,'can_driver: ZL_CAN, ZI_CAN, ZM_CAN =',i,kc,
 !     &                   zl_can(i, kc), zi_can(i, kc), zm_can(i, kc),
 !     &                   dz_can(i, kc)
 
@@ -1111,9 +1075,9 @@
              u1_can(i,k) = ws1_can(i,k) * sin(wind_dir_to_rad(i,k))      ! m/s
              v1_can(i,k) = ws1_can(i,k) * cos(wind_dir_to_rad(i,k))      ! m/s
 
-!             print*,'can_satmedmf: U1_CAN = ' , i,k, u1_can(i,k),      ! m/s
+!             print*,'can_driver: U1_CAN = ' , i,k, u1_can(i,k),      ! m/s
 !     &                                                u1    (i,k)
-!             print*,'can_satmedmf: V1_CAN = ' , i,k, v1_can(i,k),      ! m/s
+!             print*,'can_driver: V1_CAN = ' , i,k, v1_can(i,k),      ! m/s
 !     &                                                v1    (i,k)
 
             end do
@@ -1126,9 +1090,9 @@
              u1_can(i,kc) = ws1_can(i,kc) * sin(wind_dir_to_rad(i,1))    ! m/s
              v1_can(i,kc) = ws1_can(i,kc) * cos(wind_dir_to_rad(i,1))    ! m/s
 
-!             print*,'can_satmedmf: U1_CAN = ' , i,kc, u1_can(i,kc),    ! m/s
+!             print*,'can_driver: U1_CAN = ' , i,kc, u1_can(i,kc),    ! m/s
 !     &                                                 u1    (i,1 )
-!             print*,'can_satmedmf: V1_CAN = ' , i,kc, v1_can(i,kc),    ! m/s
+!             print*,'can_driver: V1_CAN = ' , i,kc, v1_can(i,kc),    ! m/s
 !     &                                                 v1    (i,1 )
             end do
          end do
@@ -1166,21 +1130,6 @@
 !
 ! ================================
 
-! 3D aux arrays
-! ntoz=7  "o3mr" GFS ozone tracer
-! ...
-! n=11    "no3" cplaqm 
-! nto3=10 "o3" cplaqm ozone
-! n=9     "no"  cplaqm
-! n=8     "no2" cplaqm
-
-! Output pbl diags
-!GOOD      aux3d(:,:, 6) = q1_can (:,1:km, ntoz) ! ntoz=7  "o3mr"  tracer "resolved_to_canopy"
-!GOOD      aux3d(:,:, 4) = q1_can (:,1:km, nto3) ! nto3=10 "o3cpl" tracer "resolved_to_canopy"
-!GOOD      aux3d(:,:, 2) = q1_can (:,1:km, ntqv) ! ntqv=1  humidity       "resolved_to_canopy" 
-
-! Humidity 
-! Do NOT use "resolved_to_canopy" humidity from "canopy_transfer" q1_can(:,:,ntqv)
 ! Comment out to use 2-m interpolated value from "canopy_levs" qv_can(:,:)
 !          q1_can (:,1:km, ntqv) = qv_can(:,1:km) ! ntqv=1
 
@@ -1201,67 +1150,13 @@
          dkt_can (:,1:km)     = dkt_can3(:,1:km) ! "canopy_levs"
 
 ! "Resolved_to_Canopy" trasfer only on mass tracers (ntrac1)
-! All mass tracer except TKE (ntke) 
+! All chemical & cloud tracers (except TKE ntke=198) 
          q1_can3(:,1:km, 1:ntrac1) = q1_can(:,1:km, 1:ntrac1) ! ntrac1 "resolved_to_canopy"
 
-! "resolved_to_canopy" humidity
+! Humidity "resolved_to_canopy" 
          q1_can3(:,1:km, ntqv)     = q1_can(:,1:km, ntqv)     ! ntqv=1 "resolved_to_canopy"
 
-! kg kg-1 -> ppmv
-!        aux3d(:,:,4) =  FORWARD_CONV * Q1_MOD(:,1:km, ntoz)  ! 7=ntoz "o3mr"
-
-!        aux3d(:,:,1) =   frctr2c (k, 1,i)     ! "resolved_to_canopy"
-
-! Output pbl diags
-!GOOD    aux3d(:,:, 6) = q1_can3(:,:, ntoz) ! 
-!GOOD    aux3d(:,:, 4) = q1_can3(:,:, nto3) !
-!GOOD    aux3d(:,:, 2) = q1_can3(:,:, ntqv) !
-
-! massair_can        !layers in reverse order!
-!    1       is top    resolved model layer
-!    nkc+1   is nkc-layers below model top
-!    km      is bottom model  layer resolved
-!    km+1    is top    canopy   layer
-!    km+nkc  is bottom canopy layer
-!
-!       aux3d(:,:,2) =   massair_can(1:im, nkc+1:nkt) ! "resolved_to_canopy"
-!
-! mmr_o3_can: layers in reverse order!
-!        aux3d(:,:,2) =   mmr_o3_can (1:im, nkc+1:nkt) ! "resolved_to_canopy"
-
-! massair ~E+8 E+10  !layers in reverse order!
-!    1  is top    resolved model layer
-!    km is bottom resolved model layer
-!
-!       aux3d(:,:,1) =   massair    (1:im, 1:km) ! "resolved_to_canopy"
-
-! 2D aux arrays
-!        aux2d(:, 1) =    Q1_2M(:, ntoz)        ! "resolved_to_canopy" ntoz=7
-!        aux2d(:, 2) =    Q1_2M(:, nto3)        ! "resolved_to_canopy" nto3=10
-
-
-!       if ( kount .EQ. 0) print*, 'CAN_SATMEDMF: NTO3 = ',
-!    &     ntoz, nto3   ! 7 10
-!    &    ntqv, ntcw,ntrw, ntiw,
-!    &    ntke, ntrac1
-!
-!        print*, 'CAN_SATMEDMF: CLAIE = ', claie(:)
-!        print*, 'CAN_SATMEDMF: CFCH = ' , cfch (:)
-!        print*, 'CAN_SATMEDMF: CFRT = ' , cfrt (:)
-!        print*, 'CAN_SATMEDMF: CCLU = ' , cclu (:)
-!        print*, 'CAN_SATMEDMF: CPOPU= ' , cpopu(:)
-! 2D aux arrays: canopy data in diffusion
-!        aux2d(:,1) = cfch (:)
-!        aux2d(:,2) = claie(:)
-!        aux2d(:,3) = cfrt(:)
-
-
-! Output 3D pbl diags
-!         aux3d(:,:, 6) = dku_can  (:,1:km) ! km ! out GOOD
-!         aux3d(:,:, 4) = dkt_can  (:,1:km) ! km ! out GOOD
-
       endif !do_canopy .and. cplaqm
-
 
       if (do_canopy .and. cplaqm) then
 
@@ -1269,8 +1164,8 @@
 ! dtend(im,km,ndtend)
 
 ! 3D arrays on model layers
-        dkt_mod(:,:) = dkt(:,:)
-        dku_mod(:,:) = dku(:,:)
+         dkt_mod(:,:) = dkt(:,:)
+         dku_mod(:,:) = dku(:,:)
 
 ! 3D array on combined canopy plus resolved model layers
 
@@ -1278,115 +1173,57 @@
 ! This should be nkt layers...       dv_can(:,nkc+1:nkt) = dv(:,1:km) ! nkt combined canopy plus resolved layers
 
 ! Sub-Canopy
-        swh_can(:, nkc+1:km ) = swh(:,1:km)
-        swh_can(:, 3 )        = swh(:,1   )
-        swh_can(:, 2 )        = swh(:,1   )
-        swh_can(:, 1 )        = swh(:,1   )
+         swh_can(:, nkc+1:km ) = swh(:,1:km)
+         swh_can(:, 3 )        = swh(:,1   )
+         swh_can(:, 2 )        = swh(:,1   )
+         swh_can(:, 1 )        = swh(:,1   )
 
-        hlw_can(:, nkc+1:km ) = hlw(:,1:km)
-        hlw_can(:, 3 )        = hlw(:,1   )
-        hlw_can(:, 2 )        = hlw(:,1   )
-        hlw_can(:, 1 )        = hlw(:,1   )
+         hlw_can(:, nkc+1:km ) = hlw(:,1:km)
+         hlw_can(:, 3 )        = hlw(:,1   )
+         hlw_can(:, 2 )        = hlw(:,1   )
+         hlw_can(:, 1 )        = hlw(:,1   )
 
 ! Output pbl diags
 !        aux3d(:,:, 2) = q1_can (:,1:km, ntke)
 
-      do k = km, 1, -1 ! top to 1hy model layer
-         ! nkc+km is top (nkt) combined
-         ! nkc+1  is bot       combined
-         kc= nkc+k     ! top (nkt) to nkc+1 combined canopy plus resolved model layer
-! Ex. var_can(:,kc)    = var(:,k)
-! ...
-      end do
-
 ! Subset combined layers (minus top nkc layers)
-      do k = km-nkc, 1, -1 ! top to 1hy model layer
-        ! km     is top combined subset
-        ! nkc+1  is bot combined
-        kc= nkc+k     ! 4th from top (nkt) to nkc+1 combined canopy plus resolved model layer
-
-!Oct23   u1_can3 (:,kc) = u1 (:,k) !TESTING
-!Oct23   v1_can3 (:,kc) = v1 (:,k) !TESTING
-!Oct23   t1_can3 (:,kc) = t1 (:,k) !TESTING
+         do k = km-nkc, 1, -1 ! top to 1hy model layer
+           ! km     is top combined subset
+           ! nkc+1  is bot combined
+           kc= nkc+k     ! 4th from top (nkt) to nkc+1 combined canopy plus resolved model layer
 
 ! Sub-canopy values of TKE ("canopy_transfer" only does mass trasnfer to mass conc. tracers)
-! set to 1hy model layer
-!        q1_can3 (:,kc, 1:ntrac1) = q1(:,k, 1:ntrac1) ! TESTING
 ! TKE
-        q1_can3 (:,kc, ntke    ) = q1(:,k, ntke    ) ! ntke always on
-      end do
+           q1_can3 (:,kc, ntke    ) = q1(:,k, ntke    ) ! ntke always on
+         end do
 
-      do kc = 1, nkc ! 3-nkc canopy layers
-!Oct23   u1_can3 (:,kc) = u1 (:,1) !TESTING
-!Oct23   v1_can3 (:,kc) = v1 (:,1) !TESTING
-!Oct23   t1_can3 (:,kc) = t1 (:,1) !TESTING
+         do kc = 1, nkc ! 3-nkc canopy layers
 
 ! Sub-canopy values of TKE ("canopy_transfer" only does mass trasnfer to mass conc. tracers)
 ! set to 1hy model layer
-        q1_can3(:,kc, ntke    ) = q1(:,1, ntke    ) ! ntke always on
-      end do
+           q1_can3(:,kc, ntke    ) = q1(:,1, ntke    ) ! ntke always on
 
-!      aux3d(:,:, 6) = q1_can3(:,:, ntoz)
-!      aux3d(:,:, 4) = q1_can3(:,:, nto3)
-!      aux3d(:,:, 2) = q1_can3(:,:, ntqv)
-
-
-! Output canopy pbl tendency of QV
-        if(ldiag3d) then
+         end do
 
 !!! BEFORE SAT CANOPY CALL!!
 
-! Output pbl diffusivities
-!          aux3d(:,:, 5) = dku (:,1:km) ! InOut  GOOD
-!          aux3d(:,:, 3) = dkt (:,1:km) ! InOut  GOOD
-!          aux3d(:,:, 1) = tkeh(:,1:km) ! InOut  GOOD
-
-! Output pbl tendency of ntqv=1
-! NB. dtend_qv_pbl ~ 1e-06 !!! E-3 different from dtend here !!!
-          idtend = dtidx(100+ntqv,index_of_process_pbl)
-!         aux3d(:,:, 6) = dtend(:,:,idtend)  ! dtend_qv  kg kg-1 s-1 ~ 3.E-03 
-
-! Output pbl tendency of ntoz=7 "o3mr" tracer
-! NB. dtend_o3_pbl ~ 1.e-12 @t+01h  !!! E-3 different from dtend here !!!
-!                  ~ 3.E-12 @t+06h
-          idtend = dtidx(100+ntoz,index_of_process_pbl)
-!         aux3d(:,:, 4) = dtend(:,:,idtend)    ! dtend_o3  kg kg-1 s-1 ~1.E-08
-
-! Output pbl tendency of nto3=10 "o3cpl" tracer
-          idtend = dtidx(100+nto3,index_of_process_pbl)
-!         aux3d(:,:, 2) = dtend(:,:,idtend)    ! dtend_o3cpl  kg kg-1 s-1
-
-! Output pbl diags
-!         aux3d(:,:, 4) = del      (:,1:km)
-!         aux3d(:,:, 6) = prsi     (:,1:km)
-! phii & phill output?
-
-! Output pbl tendencies 
-!          aux3d(:,:, 7) = rtg (:,:, ntoz  )
-
 ! pbl tracers tendencies
-          aux3d(:,:, 7) = rtg (:,:, ntqv  )
+         aux3d(:,:, 7) = rtg (:,:, ntqv  )
 
-!         aux3d(:,:, 5) = rtg (:,:, 9   )  ! n=11    "no3"
-          aux3d(:,:, 5) = rtg (:,:, 9   )  ! n=9     "no"  
-          aux3d(:,:, 3) = rtg (:,:, nto3)  ! nto3=10 "o3"  
-          aux3d(:,:, 1) = rtg (:,:, 8   )  ! n=8     "no2" 
+!        aux3d(:,:, 5) = rtg (:,:, 9   )  ! n=11   "no3"
+         aux3d(:,:, 5) = rtg (:,:, 9   )  ! n=9    "no"  
+         aux3d(:,:, 3) = rtg (:,:, 10  )  ! n=10   "o3"  
+         aux3d(:,:, 1) = rtg (:,:, 8   )  ! n=8    "no2" 
 
-! pbl thermo-dynamics & TKE tendencies
-!          aux3d(:,:, 5) = du (:,:)
-!          aux3d(:,:, 3) = tdt(:,:)
-!          aux3d(:,:, 1) = rtg(:,:, ntke)
+! pbl met & TKE tendencies
+!        aux3d(:,:, 5) = du (:,:)
+!        aux3d(:,:, 3) = tdt(:,:)
+!        aux3d(:,:, 1) = rtg(:,:, ntke)
 
-        endif
-
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!        IF (.FALSE.) THEN
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
 !>  - Call satmedmfvdifq_can(), which is ...
 !!    to take into account ...
-        CALL satmedmfvdifq_can(im,km,ntrac,ntcw,ntrw,                   &
+         CALL satmedmfvdifq_can(im,km,ntrac,ntcw,ntrw,                  &
      &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,           &
 !The following three variables are for SA-3D-TKE
      &     def_1,def_2,def_3,sa3dtke,dum3d_h,dum3d_e,                   &
@@ -1421,91 +1258,77 @@
 !IVAI: aux arrays
      &     naux2d,naux3d,aux2d,aux3d)
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!        END IF !(.FALSE.)
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 ! Set non-canopy columns to resolved values
 ! NB. Only vars not ALREADY defined in non-canopy columns
-        do i = 1,im
-        IF (FRT_MASK(i) <=  0.) THEN
+         do i = 1,im
+         IF (FRT_MASK(i) <=  0.) THEN
 
 ! Non-canopy columns 
-!          kpbl_can(i) = kpbl(i) ! kpbl zero before original sat call 
-          hpbl_can(i) = hpbl(i)
+!           kpbl_can(i) = kpbl(i) ! kpbl zero before original sat call 
+            hpbl_can(i) = hpbl(i)
 
 ! Non-canopy columns
-          dusfc_can(i) = dusfc(i) ! dusfc is zero before the main sat call
-          dvsfc_can(i) = dvsfc(i) ! dvsfc is zero before the main sat call
-          dtsfc_can(i) = dtsfc(i) ! dtsfc is zero before the main sat call
-          dqsfc_can(i) = dqsfc(i) ! dqsfc is zero before the main sat call
+            dusfc_can(i) = dusfc(i) ! dusfc is zero before the main sat call
+            dvsfc_can(i) = dvsfc(i) ! dvsfc is zero before the main sat call
+            dtsfc_can(i) = dtsfc(i) ! dtsfc is zero before the main sat call
+            dqsfc_can(i) = dqsfc(i) ! dqsfc is zero before the main sat call
 
-        END IF !(FRT_MASK)
-        end do
+         END IF !(FRT_MASK)
+         end do
 
 ! Set non-canopy columns to resolved values
 ! NB. Only vars not ALREADY defined in non-canopy columns
 
-        do k = 1, km-nkc
-          ! km     is top combined subset
-          ! nkc+1  is bot combined
-          kc= nkc+k     ! 4th from top (nkt) to nkc+1 combined canopy plus resolved model layer
+         do k = 1, km-nkc
+           ! km     is top combined subset
+           ! nkc+1  is bot combined
+           kc= nkc+k     ! 4th from top (nkt) to nkc+1 combined canopy plus resolved model layer
 
-          do i = 1,im
-          IF (FRT_MASK(i) <=  0.) THEN
+           do i = 1,im
+           IF (FRT_MASK(i) <=  0.) THEN
 
 ! Tendencies
-            DU_CAN  (i,kc)    = DU  (i,k)       ! m s-2
-            DV_CAN  (i,kc)    = DV  (i,k)       ! m s-2
-            TDT_CAN (i,kc)    = TDT (i,k)       ! K s-1
+             DU_CAN  (i,kc)    = DU  (i,k)       ! m s-2
+             DV_CAN  (i,kc)    = DV  (i,k)       ! m s-2
+             TDT_CAN (i,kc)    = TDT (i,k)       ! K s-1
 
 ! TKE half layers non-canopy columns
-            TKEH_CAN3(i,kc)   = TKEH(i,k)
+             TKEH_CAN3(i,kc)   = TKEH(i,k)
 
 ! TKE Tendency non-canopy columns, other tracers below
-            RTG_CAN (i,kc, ntke) = RTG (i,k, ntke ) !         s-1
+             RTG_CAN (i,kc, ntke) = RTG (i,k, ntke ) !         s-1
 
 ! All tendencies except TKE non-canopy columns
-            RTG_CAN (i,kc, 1:ntrac1) = RTG (i,k, 1:ntrac1) ! kg kg-1 s-1
+             RTG_CAN (i,kc, 1:ntrac1) = RTG (i,k, 1:ntrac1) ! kg kg-1 s-1
 
-          END IF ! (FRT_MASK)
-          end do ! i=1,im
-        end do ! k = 1, km-nkc
+           END IF ! (FRT_MASK)
+           end do ! i=1,im
+         end do ! k = 1, km-nkc
 
 ! Canopy layers non-canopy columns
-        do kc = 1, nkc ! 3-nkc canopy layers
-          do i = 1,im
-          IF (FRT_MASK(i) <=  0.) THEN
+         do kc = 1, nkc ! 3-nkc canopy layers
+           do i = 1,im
+           IF (FRT_MASK(i) <=  0.) THEN
 
 ! Tendencies momentum and heat
-            DU_CAN  (i,kc)    = DU  (i,1)       ! m s-2
-            DV_CAN  (i,kc)    = DV  (i,1)       ! m s-2
-            TDT_CAN (i,kc)    = TDT (i,1)       ! K s-1
+             DU_CAN  (i,kc)    = DU  (i,1)       ! m s-2
+             DV_CAN  (i,kc)    = DV  (i,1)       ! m s-2
+             TDT_CAN (i,kc)    = TDT (i,1)       ! K s-1
 
 ! TKE half layers 
-            TKEH_CAN3(i,kc)    = TKEH(i,1)
+             TKEH_CAN3(i,kc)    = TKEH(i,1)
 
 ! Tendency TKE 
-            RTG_CAN (i,kc, ntke) = RTG (i,1, ntke) ! kg kg-1 s-1
+             RTG_CAN (i,kc, ntke) = RTG (i,1, ntke) ! kg kg-1 s-1
 
 ! Tendencies all tracers non-canopy columns
-            RTG_CAN (i,kc, 1:ntrac1) = RTG (i,1, 1:ntrac1) ! kg kg-1 s-1
+             RTG_CAN (i,kc, 1:ntrac1) = RTG (i,1, 1:ntrac1) ! kg kg-1 s-1
 
-          ENDIF ! (FRT_MASK)
-          end do  ! do i=1,im
-        end do ! kc=1,nkc
-
-! Output canopy pbl tendency of QV
-        if (ldiag3d) then
+           ENDIF ! (FRT_MASK)
+           end do  ! do i=1,im
+         end do ! kc=1,nkc
 
 ! Output 2D pbl diags
-!          aux2d(:, 6) = aux2d_06 (:)
-
-!         aux2d(:, 6) = dvsfc_can(:)  ! GOOD
-!         aux2d(:, 4) = dtsfc_can(:)  ! GOOD
-!         aux2d(:, 2) = dqsfc_can(:)  ! GOOD
-
-!         aux2d(:, 6) = float(kpbl_can(:))  ! GOOD
 !         aux2d(:, 4) = hpbl_can (:)        ! GOOD
 
 ! Output 3D pbl diags
@@ -1525,27 +1348,15 @@
 !         aux3d(:,:, 6) = dv_can   (:,:)     ! 
 !         aux3d(:,:, 4) = ws_can   (:,:).. ??     ! wind speed tendency
 !         aux3d(:,:, 4) = tdt_can  (:,:)     ! heat tendency
-!         aux3d(:,:, 2) = rtg_can  (:,:, ntke)  ! ntke=198 TKE
 
 !         aux3d(:,:, 8) = rtg_can  (:,:, ntoz)  ! ntoz=7 "o3mr" 
 
-         aux3d(:,:, 8) = rtg_can  (:,:, ntqv ) ! ntqv=1   humidity
-!         aux3d(:,:, 8) = rtg_can  (:,:, ntke ) ! ntke=198 TKE
+         aux3d(:,:, 8) = rtg_can  (:,:, ntke ) ! ntke=198 TKE
+!         aux3d(:,:, 8) = rtg_can  (:,:, ntqv ) ! ntqv=1   humidity
 
          aux3d(:,:, 6) = rtg_can  (:,:, 9   )  ! n=9  "no"
          aux3d(:,:, 4) = rtg_can  (:,:, 10  )  ! n=10  "o3" cplaqm 
          aux3d(:,:, 2) = rtg_can  (:,:, 8   )  ! n=8  "no2"
-
-! prod / qcko(:,:,ntke) / tke / qcdo(:,:,ntke)
-!         aux3d(:,:, 6) = aux3d_06 (:,:) ! dv_can/ ntoz q_diff/q_half/rtg_can(ntoz)
-!         aux3d(:,:, 4) = aux3d_04 (:,:) ! tdt_can / nto3 q_diff/q_half/rtg_can(nto3)
-!         aux3d(:,:, 2) = aux3d_02 (:,:) ! rtg_qv_can / ntke        e_half/rtg_can(ntke)
-
-!         aux3d(:,:, 4) = del_can  (:,1:km) ! GOOD
-!         aux3d(:,:, 6) = prsi_can (:,1:km)
-!         aux3d(:,:, 6) = prsl_can (:,1:km) ! GOOD
-!         aux3d(:,:, 6) = prslk_can(:,1:km)
-
 
 c
 !> - Apply the tendencies of heat and moisture on canopy layers
@@ -1553,25 +1364,20 @@ c
 c
 
 ! Air temperature on original model layers after diffusion
-          t2    (:,1:km)    = t1    (:,1:km) + 
+         t2    (:,1:km)    = t1    (:,1:km) + 
      &                        tdt   (:,1:km) * dt2      ! before "canopy_to_resolved"
 
 ! All tracers (TKE included) on original model layers after diffusion for use in "canopy_to_resolved"
-          q2    (:,1:km, :) = q1    (:,1:km, :) +
+         q2    (:,1:km, :) = q1    (:,1:km, :) +
      &                        rtg   (:,1:km, :) * dt2   ! before "canopy_to_resolved"
-          q2_mod (:,1:km, :) = q2   (:,1:km, :)         ! before "canopy_to_resolved"
+         q2_mod (:,1:km, :) = q2   (:,1:km, :)         ! before "canopy_to_resolved"
 
-          rtg_mod(:,1:km, :) = rtg  (:,1:km, :)         ! before "canopy_to_resolved"
-
-! Before "canopy_to_resolved"
-!          aux3d(:,:,6) = Q2_MOD(:,:, ntoz) ! ntoz=7 "o3mr"   before "canopy_to_resolved" GOOD
-!          aux3d(:,:,4) = Q2_MOD(:,:, nto3) ! nto3=10 "o3cpl" before "canopy_to_resolved" GOOD
-!          aux3d(:,:,2) = Q2_MOD(:,:, ntqv) ! ntqv=1 humidity before "canopy_to_resolved" GOOD
+         rtg_mod(:,1:km, :) = rtg  (:,1:km, :)         ! before "canopy_to_resolved"
 
 ! Air Density after diffusion model layers
-          rho2 (:,1:km) = prsl (:,1:km)/
-     &                  (rd*t2 (:,1:km)*
-     &           (1.+fv*max(q2 (:,1:km, ntqv),qmin))) ! ntqv=1 before "canopy_to_resolved"
+         rho2 (:,1:km) = prsl (:,1:km)/
+     &                 (rd*t2 (:,1:km)*
+     &          (1.+fv*max(q2 (:,1:km, ntqv),qmin))) ! ntqv=1 before "canopy_to_resolved"
 
 ! Output pbl diags
 !          aux3d(:,:, 5) = t2   (:,1:km )
@@ -1579,43 +1385,43 @@ c
 !          aux3d(:,:, 1) = rho2 (:,1:km )
 
 ! U-Wind/V-Wind after diffusion  original model layers
-          u2_can  (:,1:km) = u1_can(:,1:km) + du_can(:,1:km) * dt2
-          v2_can  (:,1:km) = v1_can(:,1:km) + dv_can(:,1:km) * dt2
+         u2_can  (:,1:km) = u1_can(:,1:km) + du_can(:,1:km) * dt2
+         v2_can  (:,1:km) = v1_can(:,1:km) + dv_can(:,1:km) * dt2
 
 ! Wind Speed after diffusion on canopy layers
-          ws2_can (:,1:km) = sqrt(u2_can(:,1:km)**2+v2_can(:,1:km)**2)
+         ws2_can (:,1:km) = sqrt(u2_can(:,1:km)**2+v2_can(:,1:km)**2)
 
-          wsdt_can(:,1:km) = (ws2_can(:,1:km) - ws1_can(:,1:km)) * rdt
+         wsdt_can(:,1:km) = (ws2_can(:,1:km) - ws1_can(:,1:km)) * rdt
 
 ! Air Temperature after diffusion canopy layers
-          t2_can  (:,1:km) = t1_can3(:,1:km) + 
-     &                      tdt_can (:,1:km) * dt2        ! after diffusion & before "canopy_to_resolved"
+         t2_can  (:,1:km) = t1_can3(:,1:km) + 
+     &                     tdt_can (:,1:km) * dt2        ! after diffusion & before "canopy_to_resolved"
 
 ! Humidity after diffusion other tracers are below
-          q2_can3 (:,:, ntqv) = q1_can3(:,:, ntqv) + 
+         q2_can3 (:,:, ntqv) = q1_can3(:,:, ntqv) + 
      &                         rtg_can (:,:, ntqv) * dt2 ! ntqv=1
 ! Apply minimum value on humidity qmin  before doing canopy_transfer & update tendency
-          q2_can3 (:,:, ntqv) = max(q2_can3(:,:, ntqv),qmin)
+         q2_can3 (:,:, ntqv) = max(q2_can3(:,:, ntqv),qmin)
 
 ! Ozone GFS after diffusion, other tracers are below
-          q2_can3 (:,:, ntoz) = q1_can3(:,:, ntoz) + 
+         q2_can3 (:,:, ntoz) = q1_can3(:,:, ntoz) + 
      &                         rtg_can (:,:, ntoz) * dt2  ! ntoz=7
 
 ! Ozone cplaqm after diffusion on canopy layers, other tracers are below
-          q2_can3 (:,:, nto3) = q1_can3(:,:, nto3) +
+         q2_can3 (:,:, nto3) = q1_can3(:,:, nto3) +
      &                         rtg_can (:,:, nto3) * dt2 ! nto3=10
 
 ! TKE after diffusion on canopy layers, other tracers are below
-          q2_can3(:,:, ntke) = q1_can3(:,:, ntke) + 
+         q2_can3(:,:, ntke) = q1_can3(:,:, ntke) + 
      &                        rtg_can (:,:, ntke) * dt2 ! ntke=198
 
 
 ! size(nkt) after  diffsion
-          rtg2_can (:,1:km, :) = rtg_can (:,1:km, :)
+         rtg2_can (:,1:km, :) = rtg_can (:,1:km, :)
 
 ! GOOD
 !          aux3d(:,:, 6) = q2_can3(:,:, ntoz)  ! ntoz=7   "o3mr" GFS tracer
-!          aux3d(:,:, 4) = q2_can3(:,:, nto3)  ! nto3=10  "o3" cplaqm tracer
+!          aux3d(:,:, 4) = q2_can3(:,:, 10  )  ! n=10     "o3" cplaqm tracer
 !          aux3d(:,:, 2) = q2_can3(:,:, ntqv)  ! ntqv=1   humidity
 
 ! Other tendencies above
@@ -1627,57 +1433,56 @@ c
 !..       aux3d(:,:, 4) = t2_can3(:,1:km)         ! temperature
 
 
-! All tracers on bombined layers after diffusion, for use in "canopy_to_resolved"
-!        Over-writing update of selected tracers (ntqv/ntoz/nto3) above !!!
+! All tracers on combined layers after diffusion, for use in "canopy_to_resolved"
 !           
 ! Top 3 combined layers NOT calculated in "sat_can": fill with top 3 model layers
-          q2_can (:,km+nkc ,   ntke  ) = q2 (:,km   ,   ntke  )  ! after diffusion
-          q2_can (:,km+2   ,   ntke  ) = q2 (:,km-1 ,   ntke  )  ! after diffusion
-          q2_can (:,km+1   ,   ntke  ) = q2 (:,km-2 ,   ntke  )  ! after diffusion
+         q2_can (:,km+nkc ,   ntke  ) = q2 (:,km   ,   ntke  )  ! after diffusion
+         q2_can (:,km+2   ,   ntke  ) = q2 (:,km-1 ,   ntke  )  ! after diffusion
+         q2_can (:,km+1   ,   ntke  ) = q2 (:,km-2 ,   ntke  )  ! after diffusion
 
 ! Top 3 combined layers NOT calculated in "sat_can": fill with top 3 model layers
-          q2_can (:,km+nkc , 1:ntrac1) = q2 (:,km   , 1:ntrac1)  ! after diffusion
-          q2_can (:,km+2   , 1:ntrac1) = q2 (:,km-1 , 1:ntrac1)  ! after diffusion
-          q2_can (:,km+1   , 1:ntrac1) = q2 (:,km-2 , 1:ntrac1)  ! after diffusion
+         q2_can (:,km+nkc , 1:ntrac1) = q2 (:,km   , 1:ntrac1)  ! after diffusion
+         q2_can (:,km+2   , 1:ntrac1) = q2 (:,km-1 , 1:ntrac1)  ! after diffusion
+         q2_can (:,km+1   , 1:ntrac1) = q2 (:,km-2 , 1:ntrac1)  ! after diffusion
 
 ! Top 3 combined layers NOT calculated in "sat_can": fill with top 3 model layers
-          rtg2_can (:,km+nkc , 1:ntrac1) = rtg (:,km   , 1:ntrac1)  ! after diffusion
-          rtg2_can (:,km+2   , 1:ntrac1) = rtg (:,km-1 , 1:ntrac1)  ! after diffusion
-          rtg2_can (:,km+1   , 1:ntrac1) = rtg (:,km-2 , 1:ntrac1)  ! after diffusion
+         rtg2_can (:,km+nkc , 1:ntrac1) = rtg (:,km   , 1:ntrac1)  ! after diffusion
+         rtg2_can (:,km+2   , 1:ntrac1) = rtg (:,km-1 , 1:ntrac1)  ! after diffusion
+         rtg2_can (:,km+1   , 1:ntrac1) = rtg (:,km-2 , 1:ntrac1)  ! after diffusion
 
 ! Subset (1:km) combined layers out of total ntk layers (NB. dim(:,nkt,:) <= dim(:,km,:) 
-          q2_can (:,1:km, 1:ntrac1) = q1_can3(:,1:km, 1:ntrac1) +
-     &                               rtg_can (:,1:km, 1:ntrac1) * dt2
+         q2_can (:,1:km, 1:ntrac1) = q1_can3(:,1:km, 1:ntrac1) +
+     &                              rtg_can (:,1:km, 1:ntrac1) * dt2
 
 ! Apply minimum value on humidity qmin before "canopy_to_resolved" and the tendency update
-!          q2_can (:,:, ntqv) = max(q2_can (:,:, ntqv), qmin   )  ! ntqv=1
+!         q2_can (:,:, ntqv) = max(q2_can (:,:, ntqv), qmin   )  ! ntqv=1
 
 ! Apply minimum value on chemical conc  before "canopy_to_resolved" 
-          q2_can (:,:, ntoz) = max(q2_can (:,:, ntoz), concmin)  ! ntoz=7
+         q2_can (:,:, ntoz) = max(q2_can (:,:, ntoz), concmin)  ! ntoz=7
 
 ! Apply minimum value on "sgs_tke"
-          q2_can (:,:, 8   ) = max(q2_can (:,:, 8   ), tkmin) ! n=8    "sgs_tke"
+         q2_can (:,:, 8   ) = max(q2_can (:,:, 8   ), tkmin) ! n=8    "sgs_tke"
 
 ! Apply minimum value on chemical conc  before "canopy_to_resolved"
-          q2_can (:,:, 9:ntrac1 ) = max(q2_can (:,:, 9:ntrac1), concmin)
+         q2_can (:,:, 9:ntrac1 ) = max(q2_can (:,:, 9:ntrac1), concmin)
 
 ! Top 3 combined layers set to resolved 
 !    NB. Q2_can tracers array & t2_can  after diffusion only updated 1:km
-          rho2_can (:,km+nkc) = prsl (:,km  )/          ! after diffusion
-     &                        (rd*t2 (:,km  )*
-     &                 (1.+fv*max(q2 (:,km  , ntqv),qmin))) ! ntqv=1
-          rho2_can (:,km+2  ) = prsl (:,km-1)/          ! after diffusion
-     &                        (rd*t2 (:,km-1)*
-     &                 (1.+fv*max(q2 (:,km-1, ntqv),qmin))) ! ntqv=1
+         rho2_can (:,km+nkc) = prsl (:,km  )/          ! after diffusion
+     &                       (rd*t2 (:,km  )*
+     &                (1.+fv*max(q2 (:,km  , ntqv),qmin))) ! ntqv=1
+         rho2_can (:,km+2  ) = prsl (:,km-1)/          ! after diffusion
+     &                       (rd*t2 (:,km-1)*
+     &                (1.+fv*max(q2 (:,km-1, ntqv),qmin))) ! ntqv=1
 
-          rho2_can (:,km+1  ) = prsl (:,km-2)/          ! after diffusion
-     &                        (rd*t2 (:,km-2)*
-     &                 (1.+fv*max(q2 (:,km-2, ntqv),qmin))) ! ntqv=1   
+         rho2_can (:,km+1  ) = prsl (:,km-2)/          ! after diffusion
+     &                       (rd*t2 (:,km-2)*
+     &                (1.+fv*max(q2 (:,km-2, ntqv),qmin))) ! ntqv=1   
 
 ! Air density after diffusion on canopy layers
-          rho2_can(:,1:km   ) = prsl_can(:,1:km)/           ! after diffusion
-     &                        (rd*t2_can(:,1:km)*
-     &                (1.+fv*max(q2_can3(:,1:km, ntqv),qmin))) ! ntqv=1
+         rho2_can(:,1:km   ) = prsl_can(:,1:km)/           ! after diffusion
+     &                       (rd*t2_can(:,1:km)*
+     &               (1.+fv*max(q2_can3(:,1:km, ntqv),qmin))) ! ntqv=1
 
 
 ! GOOD
@@ -1687,35 +1492,8 @@ c
 
 ! GOOD
 !          aux3d(:,:, 6) = q2_can (:,:, ntoz)  ! ntoz=7   "o3mr" GFS tracer  GOOD
-!          aux3d(:,:, 4) = q2_can (:,:, nto3)  ! nto3=10  "o3" cplaqm tracer GOOD
+!          aux3d(:,:, 4) = q2_can (:,:, 10  )  ! n   =10  "o3" cplaqm tracer GOOD
 !          aux3d(:,:, 2) = q2_can (:,:, ntqv)  ! ntqv=1   humidity           GOOD
-
-          do i = 1, im
-
-! Canopy Columns
-            if (FRT_mask(i) > 0.) THEN
-
-! Output pbl tendency of QV
-! NB. dtend_qv_pbl ~ 1e-06 !!! E-3 different from dtend here !!!
-              idtend = dtidx(100+ntqv,index_of_process_pbl)
-!             aux3d(i,:, 6) = dtend_can(i, 1:km,idtend)     ! dtend_qv  kg kg-1 s-1 ~ +/- 0.005
-
-! Output pbl tendency of ntoz=7 "o3mr" tracer
-! NB. dtend_o3_pbl ~ 1.e-12  @t+01h  !!! E-3 different from dtend here !!!
-!                  ~ 5.E-12 @t+06h
-              idtend = dtidx(100+ntoz,index_of_process_pbl)
-!             aux3d(i,:, 4) = dtend_can(i, 1:km,idtend)     ! dtend_o3     kg kg-1 s-1 ~5E-09
-
-! Output pbl tendency of nto3=10 "o3cpl" tracer
-! NB. dtend_o3cpl_pbl ~ ~5.E-10 !!! E-3 different from dtend here !!!
-              idtend = dtidx(100+nto3,index_of_process_pbl)
-!             aux3d(i,:, 2) = dtend_can(i, 1:km,idtend)     ! dtend_o3cpl kg kg-1 s-1 ~2.E-04
-
-            endif
-
-          enddo
-
-        endif !(ldiag3d)
 
       endif !do_canopy .and. cplaqm
 !IVAI
@@ -1857,7 +1635,7 @@ c
 
             IF (KCAN == 1 ) THEN !canopy inside model layer
 
-!              print*,'can_satmedmf: kcan:', kcan, k, kc, i, ZINT05
+!              print*,'canopy_driver: kcan:', kcan, k, kc, i, ZINT05
 
               ZINT05 = zi(i,k+1) ! Initialize each model layer top that contains canopy (m)
                                ! Integrate across total model interface
@@ -1873,7 +1651,7 @@ c
                  IF ( ZINT05 > zi_can(i, kc+1) ) THEN 
 
 !                   dtend_can (i,k) = du_can(i,kc)
-                   print*,'can_satmedmf: ABOVE kc= ',k, kc, ZINT05, 
+                   print*,'canopy_driver: ABOVE kc= ',k, kc, ZINT05, 
      &               zi_can(i, kc+1), du_can(i, kc)    ! du dv tdt rtg
 
 !                   dtendX(COUNTCAN) = dtend_can(i,kc)
@@ -1883,7 +1661,7 @@ c
      &                     ZINT05 <= zi_can(i,kc+1) )       THEN 
 
 !                   dtend_can (i,k) = du_can(i,kc)
-                   print*,'can_satmedmf: BETWEEN kc= ',k, kc, ZINT05, 
+                   print*,'canopy_driver: BETWEEN kc= ',k, kc, ZINT05, 
      &                zi_can(i, kc+1), du_can(i,kc)   ! du dv tdt rtg
 
 !                   COUNTCAN = COUNTCAN + 1
@@ -1894,7 +1672,7 @@ c
                  ELSE IF ( ZINT05 < zi_can(i,kc) )  THEN ! 
 
 !                   dtend_can (i,k) = du_can(i,kc)
-                   print*,'can_satmedmf: BELOW kc= ',kc, kc, ZINT05, 
+                   print*,'canopy_driver: BELOW kc= ',kc, kc, ZINT05, 
      &                zi_can(i, kc+1), du_can(i,k)    ! du dv tdt rtg
 
 !                   COUNTCAN = COUNTCAN + 1
@@ -2042,11 +1820,18 @@ c
 ! n=9   "no"
 ! n=10  "o3" 
 ! ...
-! n=197
+! NTRAC1 = 196
+! ---NO PBL TEND --------
+! n=197 ntche
 ! n=198 ntke
+! ... 
+! n=202 cld_amt
 ! -----------------------
-!Oct25   DO n = 9, NTRAC1
-        DO n = 8, NTRAC1
+!    NTRAC1 = 196
+!    ntchs = 9 ntche = 197 (same as ntrac)
+!Oct25   DO n = 9, NTRAC1  (9, 196)
+!        DO n =  8, NTRAC1     ! Nov11 GOOD
+        DO n =  ntchs-1, ntche-1 ! 9, ntche-1==NTRAC1
 
 ! Update all model layers
         do k = 1,km
@@ -2073,8 +1858,8 @@ c
 
 !        aux3d(:,:,7) = rtg_mod (:,:, ntoz) ! after "canopy_to_resolved"
 
-!        aux3d(:,:,7) = rtg_mod (:,1, ntke)  ! ntke=198 "TKE"      after "canopy_to_resolved"
-        aux3d(:,:,7) = rtg_mod (:,:, ntqv)  ! ntqv=1   "humidity" after "canopy_to_resolved"
+        aux3d(:,:,7) = rtg_mod (:,:, ntke)  ! ntke=198 "TKE"      after "canopy_to_resolved"
+!        aux3d(:,:,7) = rtg_mod (:,:, ntqv)  ! ntqv=1   "humidity" after "canopy_to_resolved"
 
         aux3d(:,:,5) = rtg_mod (:,:, 9   )  ! n=9     "no"  after "canopy_to_resolved"
         aux3d(:,:,3) = rtg_mod (:,:, 10  )  ! n=10    "o3"  after "canopy_to_resolved"
@@ -2091,6 +1876,6 @@ c
 !IVAI
 
       return
-      end subroutine canopy_satmedmfvdifq_run
+      end subroutine canopy_driver_run
 !> @}
-      end module canopy_satmedmfvdifq
+      end module canopy_driver
