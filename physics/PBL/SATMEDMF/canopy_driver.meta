@@ -143,30 +143,7 @@
   dimensions = ()
   type = integer
   intent = in
-#[con_amd]
-#  standard_name = molecular_weight_of_dry_air
-#  long_name = molecular wght of dry air
-#  units = g mol-1
-#  dimensions = ()
-#  type = real
-#  kind = kind_phys
-#  intent = in
-#[con_amw]
-#  standard_name = molecular_weight_of_water_vapor
-#  long_name = molecular wght of water vapor
-#  units = g mol-1
-#  dimensions = ()
-#  type = real
-#  kind = kind_phys
-#  intent = in
-#[con_amo3]
-#  standard_name = molecular_weight_of_ozone
-#  long_name = molecular wght of water vapor
-#  units = g mol-1
-#  dimensions = ()
-#  type = real
-#  kind = kind_phys
-#  intent = in
+# IVAI
 [con_rocp]
   standard_name = ratio_of_gas_constant_dry_air_to_specific_heat_of_dry_air_at_constant_pressure
   long_name = (rd/cp)
@@ -264,8 +241,8 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
-#  intent = inout # Oct5
+##  intent = in
+  intent = inout
 [du]
   standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = updated tendency of the x wind
@@ -273,8 +250,8 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
-#  intent = inout # Oct5
+##  intent = in
+  intent = inout
 [tdt]
   standard_name = process_split_cumulative_tendency_of_air_temperature
   long_name = updated tendency of the temperature
@@ -282,8 +259,8 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
-#  intent = inout # Oct5
+##  intent = in
+  intent = inout 
 [rtg]
   standard_name = tendency_of_vertically_diffused_tracer_concentration
   long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
@@ -292,40 +269,6 @@
   type = real
   kind = kind_phys
   intent = inout
-#  intent = inout
-### IVAI
-#[dv_can]
-#  standard_name = process_split_cumulative_tendency_of_y_wind_in_canopy
-#  long_name = updated tendency of the y wind in canopy
-#  units = m s-2
-#  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-#  type = real
-#  kind = kind_phys
-#  intent = inout
-#[du_can]
-#  standard_name = process_split_cumulative_tendency_of_x_wind_in_canopy
-#  long_name = updated tendency of the x wind in canopy
-#  units = m s-2
-#  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-#  type = real
-#  kind = kind_phys
-#  intent = inout
-#[tdt_can]
-#  standard_name = process_split_cumulative_tendency_of_air_temperature_in_canopy
-#  long_name = updated tendency of the temperature in canopy
-#  units = K s-1
-#  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-#  type = real
-#  kind = kind_phys
-#  intent = inout
-#[rtg_can]
-#  standard_name = tendency_of_vertically_diffused_tracer_concentration_in_canopy
-#  long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme in canopy
-#  units = kg kg-1 s-1
-#  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
-#  type = real
-#  kind = kind_phys
-#  intent = inout
 ### IVAI
 [u1]
   standard_name = x_wind
@@ -911,25 +854,6 @@
   intent = out
   optional = True
 ### IVAI
-#[phil_can]
-#  standard_name = geopotential_at_canopy_layers
-#  long_name = geopotential at canopy layers
-#  units = m2 s-2
-#  dimensions = (horizontal_loop_extent,canopy_vertical_levels_dimension)
-#  type = real
-#  kind = kind_phys
-#  intent = inout
-#  optional = True
-#[phii_can]
-#  standard_name = geopotential_at_interface_of_canopy_layers
-#  long_name = geopotential at canopy layer interfaces
-#  units = m2 s-2
-#  dimensions = (horizontal_loop_extent,canopy_vertical_interface_dimension)
-#  type = real
-#  kind = kind_phys
-#  intent = inout
-#  optional = True
-#IVAI
 [sfc_rlm]
   standard_name = choice_of_near_surface_mixing_length_in_boundary_layer_mass_flux_scheme
   long_name = choice of near surface mixing length in boundary layer mass flux scheme
