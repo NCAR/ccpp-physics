@@ -51,7 +51,7 @@ contains
       real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl
       real(kind=kind_phys), dimension(:), intent(inout)  :: tgrs1
       real(kind=kind_phys), dimension(:), intent(inout)  :: snowd_lnd, snowd_ice, tprcp_wat,            &
-                    tprcp_lnd, tprcp_ice, tsfc_wat, tsurf_wat,tsurf_lnd, tsurf_ice,                     &
+                    tprcp_lnd, tprcp_ice, tsfc_wat, tsurf_wat, tsurf_lnd, tsurf_ice,                    &
                     uustar_wat, uustar_lnd, uustar_ice, weasd_lnd, weasd_ice,                           &
                     qss_wat, qss_lnd, qss_ice, ep1d_ice, gflx_ice
       real(kind=kind_phys),                intent(in   ) :: tgice
@@ -81,9 +81,11 @@ contains
         do i=1,im
           if (mask_dat(i) > 0.0) then
             tisfc(i) = tice_dat(i)
-            hice(i)  = hice_dat(i) !changes below - set to zero if frac_grid AND [(cice <= minimum and oceanfrac > 0) OR (oceanfrac == 0 and cice < minimum) OR frland == 1] or not frac_grid AND (islmsk == 1) or (oceanfrac > 0 and cice < minimum) or (not ocean or land and cice < minimum)
-            cice(i)  = fice_dat(i) !changes below - same circumstances as hice
-            tsfc_wat(i) = tsfco_dat(i) !changes below
+            tsurf_ice(i) = tice_dat(i)
+            hice(i)  = hice_dat(i)
+            cice(i)  = fice_dat(i)
+            tsfc_wat(i) = tsfco_dat(i)
+            tsurf_wat(i) = tsfco_dat(i)
           endif
         enddo
       endif
@@ -271,10 +273,10 @@ contains
           if(lsm /= lsm_ruc .and. .not.is_clm) then
             weasd_ice(i) = weasd(i)
           endif
-           tsurf_ice(i) = tisfc(i)
-            ep1d_ice(i) = zero
-            gflx_ice(i) = zero
-               zorli(i) = max(1.0e-5, min(one, zorli(i)))
+          tsurf_ice(i) = tisfc(i)
+          ep1d_ice(i) = zero
+          gflx_ice(i) = zero
+          zorli(i) = max(1.0e-5, min(one, zorli(i)))
         ! DH*
         else
           zorli(i) = huge
