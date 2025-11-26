@@ -1,6 +1,6 @@
 [submodule "physics/Radiation/RRTMGP/rte-rrtmgp"]
   path = physics/Radiation/RRTMGP/rte-rrtmgp
-  url = https://github.com/earth-system-radiation/rte-rrtmgp
+  url = https://github.com/NCAR/rte-rrtmgp
   branch = main
 [submodule "physics/MP/TEMPO/TEMPO"]
   path = physics/MP/TEMPO/TEMPO

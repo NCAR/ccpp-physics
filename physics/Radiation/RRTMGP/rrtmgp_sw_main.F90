@@ -6,10 +6,8 @@ module rrtmgp_sw_main
   use mpi_f08
   use machine,                only: kind_phys, kind_dbl_prec
   use mo_optical_props,       only: ty_optical_props_2str
-  use mo_cloud_optics,        only: ty_cloud_optics
   use module_radsw_parameters, only: cmpfsw_type
   use mo_rte_sw,              only: rte_sw
-  use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations,  only: ty_gas_concs
   use mo_fluxes_byband,       only: ty_fluxes_byband
   use radiation_tools,        only: check_error_msg
@@ -21,6 +19,7 @@ module rrtmgp_sw_main
                                     eps, oneminus, ftiny
   use mersenne_twister,       only: random_setseed, random_number, random_stat
   use rrtmgp_sampling,        only: sampled_mask, draw_samples
+  use mo_rte_kind,            only: rte_wp => wp
   implicit none
 
   public rrtmgp_sw_main_init, rrtmgp_sw_main_run
@@ -31,8 +30,8 @@ contains
 !! \htmlinclude rrtmgp_sw_main_init.html
 !!
   subroutine rrtmgp_sw_main_init(rrtmgp_root_dir, rrtmgp_sw_file_gas, rrtmgp_sw_file_clouds,&
-       active_gases_array, doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm,       &
-       mpirank, mpiroot, nLay, rrtmgp_phys_blksz, errmsg, errflg)
+       active_gases_array, nrghice, mpicomm, mpirank, mpiroot, nLay, rrtmgp_phys_blksz,     &
+       errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
@@ -41,9 +40,6 @@ contains
          rrtmgp_sw_file_gas       !< RRTMGP file containing cloud-optics data
     character(len=*), dimension(:), intent(in) :: &
          active_gases_array       !< List of active gases from namelist as array)
-    logical, intent(in) :: &
-         doGP_cldoptics_PADE,   & !< Use RRTMGP cloud-optics: PADE approximation?
-         doGP_cldoptics_LUT       !< Use RRTMGP cloud-optics: LUTs?
     integer, intent(inout) :: &
          nrghice                  !< Number of ice-roughness categories
     type(MPI_Comm),intent(in) :: &
@@ -69,8 +65,7 @@ contains
 
     ! RRTMGP shortwave cloud-optics initialization
     call rrtmgp_sw_cloud_optics_init(rrtmgp_root_dir, rrtmgp_sw_file_clouds,               &
-         doGP_cldoptics_PADE, doGP_cldoptics_LUT, nrghice, mpicomm, mpirank, mpiroot,      &
-         errmsg, errflg)
+         nrghice, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
   end subroutine rrtmgp_sw_main_init
 
@@ -189,13 +184,13 @@ contains
          tau_prec, asy_prec, ssa_prec, asyw, ssaw, za1, za2, flux_dir, flux_dif
     real(kind_phys), dimension(rrtmgp_phys_blksz) :: zcf0, zcf1
     real(kind_dbl_prec), dimension(sw_gas_props%get_ngpt()) :: rng1D
-    real(kind_dbl_prec), dimension(sw_gas_props%get_ngpt(),nLay,rrtmgp_phys_blksz) :: rng3D,rng3D2
+    real(rte_wp), dimension(sw_gas_props%get_ngpt(),nLay,rrtmgp_phys_blksz) :: rng3D,rng3D2
     real(kind_dbl_prec), dimension(sw_gas_props%get_ngpt()*nLay) :: rng2D
     logical, dimension(rrtmgp_phys_blksz,nLay,sw_gas_props%get_ngpt()) :: maskMCICA
     logical :: cloudy_column, clear_column, doGP_sgs_pbl, doGP_sgs_cnv
-    real(kind_phys), dimension(sw_gas_props%get_nband(),rrtmgp_phys_blksz) :: &
+    real(rte_wp), dimension(sw_gas_props%get_nband(),rrtmgp_phys_blksz) :: &
          sfc_alb_dir, sfc_alb_dif
-    real(kind_phys), dimension(rrtmgp_phys_blksz,nLay+1,sw_gas_props%get_nband()),target :: &
+    real(rte_wp), dimension(rrtmgp_phys_blksz,nLay+1,sw_gas_props%get_nband()),target :: &
          fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_dir_clrsky, fluxSW_dn_allsky, &
          fluxSW_dn_clrsky, fluxSW_dn_dir_allsky
     integer :: iBand, ibd, ibd_uv, iCol, iGas, iLay, ix, ix2, iblck
@@ -205,7 +200,7 @@ contains
     real(kind_phys), dimension(2), parameter :: &
          nIR_uvvis_bnd = (/12850,16000/), &
          uvb_bnd       = (/29000,38000/)
-    real(kind_phys), dimension(rrtmgp_phys_blksz,sw_gas_props%get_ngpt()) :: toa_src_sw
+    real(rte_wp), dimension(rrtmgp_phys_blksz,sw_gas_props%get_ngpt()) :: toa_src_sw
 
     type(ty_gas_concs)          :: gas_concs
     type(ty_optical_props_2str) :: sw_optical_props_accum, sw_optical_props_aerosol_local,    &
@@ -315,11 +310,11 @@ contains
           cldtausw = 0._kind_phys
 
           ! ty_fluxes_byband
-          fluxSW_up_allsky            = 0._kind_phys
-          fluxSW_dn_allsky            = 0._kind_phys
-          fluxSW_dn_dir_allsky        = 0._kind_phys
-          fluxSW_up_clrsky            = 0._kind_phys
-          fluxSW_dn_clrsky            = 0._kind_phys
+          fluxSW_up_allsky            = 0._rte_wp
+          fluxSW_dn_allsky            = 0._rte_wp
+          fluxSW_dn_dir_allsky        = 0._rte_wp
+          fluxSW_up_clrsky            = 0._rte_wp
+          fluxSW_dn_clrsky            = 0._rte_wp
           flux_allsky%bnd_flux_up     => fluxSW_up_allsky
           flux_allsky%bnd_flux_dn     => fluxSW_dn_allsky
           flux_allsky%bnd_flux_dn_dir => fluxSW_dn_dir_allsky
@@ -332,17 +327,17 @@ contains
           !
           ! ###################################################################################
           call check_error_msg('rrtmgp_sw_main_set_vmr_o2',  &
-               gas_concs%set_vmr(trim(active_gases_array(istr_o2)), vmr_o2(iCols,:)))
+               gas_concs%set_vmr(trim(active_gases_array(istr_o2)), real(vmr_o2(iCols,:),  kind=rte_wp)))
           call check_error_msg('rrtmgp_sw_main_set_vmr_co2', &
-               gas_concs%set_vmr(trim(active_gases_array(istr_co2)),vmr_co2(iCols,:)))
+               gas_concs%set_vmr(trim(active_gases_array(istr_co2)),real(vmr_co2(iCols,:), kind=rte_wp)))
           call check_error_msg('rrtmgp_sw_main_set_vmr_ch4', &
-               gas_concs%set_vmr(trim(active_gases_array(istr_ch4)),vmr_ch4(iCols,:)))
+               gas_concs%set_vmr(trim(active_gases_array(istr_ch4)),real(vmr_ch4(iCols,:), kind=rte_wp)))
           call check_error_msg('rrtmgp_sw_main_set_vmr_n2o', &
-               gas_concs%set_vmr(trim(active_gases_array(istr_n2o)),vmr_n2o(iCols,:)))
+               gas_concs%set_vmr(trim(active_gases_array(istr_n2o)),real(vmr_n2o(iCols,:), kind=rte_wp)))
           call check_error_msg('rrtmgp_sw_main_set_vmr_h2o', &
-               gas_concs%set_vmr(trim(active_gases_array(istr_h2o)),vmr_h2o(iCols,:)))
+               gas_concs%set_vmr(trim(active_gases_array(istr_h2o)),real(vmr_h2o(iCols,:), kind=rte_wp)))
           call check_error_msg('rrtmgp_sw_main_set_vmr_o3',  &
-               gas_concs%set_vmr(trim(active_gases_array(istr_o3)), vmr_o3(iCols,:)))
+               gas_concs%set_vmr(trim(active_gases_array(istr_o3)), real(vmr_o3(iCols,:),  kind=rte_wp)))
 
           ! ###################################################################################
           !
@@ -351,13 +346,13 @@ contains
           ! ###################################################################################
 
           call check_error_msg('rrtmgp_sw_main_gas_optics',sw_gas_props%gas_optics(&
-               p_lay(iCols,:),          & ! IN  - Pressure @ layer-centers (Pa)
-               p_lev(iCols,:),          & ! IN  - Pressure @ layer-interfaces (Pa)
-               t_lay(iCols,:),          & ! IN  - Temperature @ layer-centers (K)
-               gas_concs,               & ! IN  - RRTMGP DDT: trace gas volumne mixing-ratios
-               sw_optical_props_accum,  & ! OUT - RRTMGP DDT: Shortwave optical properties, by
-                                          !                   spectral point (tau,ssa,g)
-               toa_src_sw))               ! OUT - TOA incident shortwave radiation (spectral)
+               real(p_lay(iCols,:), kind=rte_wp),          & ! IN  - Pressure @ layer-centers (Pa)
+               real(p_lev(iCols,:), kind=rte_wp),          & ! IN  - Pressure @ layer-interfaces (Pa)
+               real(t_lay(iCols,:), kind=rte_wp),          & ! IN  - Temperature @ layer-centers (K)
+               gas_concs,                                  & ! IN  - RRTMGP DDT: trace gas volumne mixing-ratios
+               sw_optical_props_accum,                     & ! OUT - RRTMGP DDT: Shortwave optical properties, by
+                                                             !                   spectral point (tau,ssa,g)
+               toa_src_sw))                                  ! OUT - TOA incident shortwave radiation (spectral)
           ! Scale incident flux
           do iblck = 1, rrtmgp_phys_blksz
              toa_src_sw(iblck,:) = toa_src_sw(iblck,:)*solcon / sum(toa_src_sw(iblck,:))
@@ -401,24 +396,24 @@ contains
           if (cloudy_column) then
              ! Gridmean/mp-clouds
              call check_error_msg('rrtmgp_sw_main_cloud_optics',sw_cloud_props%cloud_optics(&
-                  cld_lwp(iCols,:),                     & ! IN  - Cloud liquid water path
-                  cld_iwp(iCols,:),                     & ! IN  - Cloud ice water path
-                  cld_reliq(iCols,:),                   & ! IN  - Cloud liquid effective radius
-                  cld_reice(iCols,:),                   & ! IN  - Cloud ice effective radius
-                  sw_optical_props_cloudsByBand))         ! OUT - RRTMGP DDT: Shortwave optical properties, 
-                                                          !       in each band (tau,ssa,g)
+                  real(cld_lwp(iCols,:),  kind=rte_wp),         & ! IN  - Cloud liquid water path
+                  real(cld_iwp(iCols,:),  kind=rte_wp),         & ! IN  - Cloud ice water path
+                  real(cld_reliq(iCols,:),kind=rte_wp),         & ! IN  - Cloud liquid effective radius
+                  real(cld_reice(iCols,:),kind=rte_wp),         & ! IN  - Cloud ice effective radius
+                  sw_optical_props_cloudsByBand))                 ! OUT - RRTMGP DDT: Shortwave optical properties, 
+                                                                  !       in each band (tau,ssa,g)
              cldtausw(iCols,:) = sw_optical_props_cloudsByBand%tau(:,:,11)
           
              ! Include convective clouds?
              if (doGP_sgs_cnv) then
                 ! Compute
                 call check_error_msg('rrtmgp_sw_main_cnv_cloud_optics',sw_cloud_props%cloud_optics(&
-                     cld_cnv_lwp(iCols,:),              & ! IN  - Convective cloud liquid water path (g/m2)
-                     cld_cnv_iwp(iCols,:),              & ! IN  - Convective cloud ice water path (g/m2)
-                     cld_cnv_reliq(iCols,:),            & ! IN  - Convective cloud liquid effective radius (microns)
-                     cld_cnv_reice(iCols,:),            & ! IN  - Convective cloud ice effective radius (microns)
-                     sw_optical_props_cnvcloudsByBand))   ! OUT - RRTMGP DDT containing convective cloud radiative properties
-                                                          !       in each band
+                     real(cld_cnv_lwp(iCols,:),  kind=rte_wp),  & ! IN  - Convective cloud liquid water path (g/m2)
+                     real(cld_cnv_iwp(iCols,:),  kind=rte_wp),  & ! IN  - Convective cloud ice water path (g/m2)
+                     real(cld_cnv_reliq(iCols,:),kind=rte_wp),  & ! IN  - Convective cloud liquid effective radius (microns)
+                     real(cld_cnv_reice(iCols,:),kind=rte_wp),  & ! IN  - Convective cloud ice effective radius (microns)
+                     sw_optical_props_cnvcloudsByBand))           ! OUT - RRTMGP DDT containing convective cloud radiative properties
+                                                                  !       in each band
                 ! Increment
                 call check_error_msg('rrtmgp_sw_main_increment_cnvclouds_to_clouds',&
                      sw_optical_props_cnvcloudsByBand%increment(sw_optical_props_cloudsByBand))
@@ -428,12 +423,12 @@ contains
              if (doGP_sgs_pbl) then
                 ! Compute
                 call check_error_msg('rrtmgp_sw_main_pbl_cloud_optics',sw_cloud_props%cloud_optics(&
-                     cld_pbl_lwp(iCols,:),              & ! IN  - PBL cloud liquid water path (g/m2)
-                     cld_pbl_iwp(iCols,:),              & ! IN  - PBL cloud ice water path (g/m2)
-                     cld_pbl_reliq(iCols,:),            & ! IN  - PBL cloud liquid effective radius (microns)
-                     cld_pbl_reice(iCols,:),            & ! IN  - PBL cloud ice effective radius (microns)
-                     sw_optical_props_pblcloudsByBand))   ! OUT - RRTMGP DDT containing PBL cloud radiative properties
-                                                          !       in each band
+                     real(cld_pbl_lwp(iCols,:),   kind=rte_wp), & ! IN  - PBL cloud liquid water path (g/m2)
+                     real(cld_pbl_iwp(iCols,:),   kind=rte_wp), & ! IN  - PBL cloud ice water path (g/m2)
+                     real(cld_pbl_reliq(iCols,:), kind=rte_wp), & ! IN  - PBL cloud liquid effective radius (microns)
+                     real(cld_pbl_reice(iCols,:), kind=rte_wp), & ! IN  - PBL cloud ice effective radius (microns)
+                     sw_optical_props_pblcloudsByBand))           ! OUT - RRTMGP DDT containing PBL cloud radiative properties
+                                                                  !       in each band
                 ! Increment
                 call check_error_msg('rrtmgp_sw_main_increment_pblclouds_to_clouds',&
                      sw_optical_props_pblcloudsByBand%increment(sw_optical_props_cloudsByBand))
@@ -487,7 +482,7 @@ contains
                 do iblck = 1, rrtmgp_phys_blksz
                    ipseed_sw(iblck) = sw_gas_props%get_ngpt() + iCols(iblck)
                 enddo
-             elseif (isubc_sw == 2) then ! use input array of permutaion seeds
+             elseif (isubc_sw == 2) then ! use input array of permutation seeds
                 do iblck = 1, rrtmgp_phys_blksz
                    ipseed_sw(iblck) = icseed_sw(iCols(iblck))
                 enddo
@@ -513,7 +508,7 @@ contains
              ! Cloud-overlap.
              ! Maximum-random, random or maximum.
              if (iovr == iovr_maxrand .or. iovr == iovr_rand .or. iovr == iovr_max) then
-                call sampled_mask(real(rng3D, kind=kind_phys), cld_frac(iCols,:), maskMCICA)
+                call sampled_mask(rng3D, real(cld_frac(iCols,:), kind=rte_wp), maskMCICA)
              endif
              ! Exponential decorrelation length overlap
              if (iovr == iovr_dcorr) then
@@ -524,13 +519,14 @@ contains
                    rng3D2(:,:,iblck) = reshape(source = rng2D,shape=[sw_gas_props%get_ngpt(),nLay])
                 enddo
                 !
-                call sampled_mask(real(rng3D, kind=kind_phys), cld_frac(iCols,:), maskMCICA,                    &
-                     overlap_param = cloud_overlap_param(iCols,1:nLay-1), randoms2 = real(rng3D2, kind=kind_phys))
+                call sampled_mask(rng3D, real(cld_frac(iCols,:), kind=rte_wp), &
+                     maskMCICA, overlap_param = real(cloud_overlap_param(iCols,1:nLay-1), kind=rte_wp),&
+                     randoms2 = rng3D2)
              endif
              ! Exponential or Exponential-random
              if (iovr == iovr_exp .or. iovr == iovr_exprand) then
-                call sampled_mask(real(rng3D, kind=kind_phys), cld_frac(iCols,:), maskMCICA,  &
-                     overlap_param = cloud_overlap_param(iCols,1:nLay-1))
+                call sampled_mask(rng3D, real(cld_frac(iCols,:), kind=rte_wp), &
+                     maskMCICA, overlap_param = real(cloud_overlap_param(iCols,1:nLay-1), kind=rte_wp))
              endif
              ! Sampling. Map band optical depth to each g-point using McICA
              call check_error_msg('rrtmgp_sw_main_cloud_sampling',&
@@ -553,13 +549,13 @@ contains
           ! Compute clear-sky fluxes (Yes for no-clouds. Optional for cloudy scenes)
           if (clear_column .or. doSWclrsky) then
              call check_error_msg('rrtmgp_sw_main_rte_sw_clrsky',rte_sw(     &
-                  sw_optical_props_accum,    & ! IN  - optical-properties
-                  top_at_1,                  & ! IN  - veritcal ordering flag
-                  coszen(iCols),             & ! IN  - Cosine of solar zenith angle
-                  toa_src_sw,                & ! IN  - incident solar flux at TOA
-                  sfc_alb_dir,               & ! IN  - Shortwave surface albedo (direct)
-                  sfc_alb_dif,               & ! IN  - Shortwave surface albedo (diffuse)
-                  flux_clrsky))                ! OUT - Fluxes, clear-sky, 3D (1,nLay,nBand) 
+                  sw_optical_props_accum,           & ! IN  - optical-properties
+                  top_at_1,                         & ! IN  - veritcal ordering flag
+                  real(coszen(iCols), kind=rte_wp), & ! IN  - Cosine of solar zenith angle
+                  toa_src_sw,                       & ! IN  - incident solar flux at TOA
+                  sfc_alb_dir,                      & ! IN  - Shortwave surface albedo (direct)
+                  sfc_alb_dif,                      & ! IN  - Shortwave surface albedo (diffuse)
+                  flux_clrsky))                       ! OUT - Fluxes, clear-sky, 3D (1,nLay,nBand) 
              
              ! Store fluxes
              fluxswUP_clrsky(iCols,:)   = sum(flux_clrsky%bnd_flux_up, dim=3)
@@ -612,13 +608,13 @@ contains
 
              ! Compute fluxes
              call check_error_msg('rrtmgp_sw_main_rte_sw_allsky',rte_sw(     &
-                  sw_optical_props_accum,    & ! IN  - optical-properties
-                  top_at_1,                  & ! IN  - veritcal ordering flag
-                  coszen(iCols),             & ! IN  - Cosine of solar zenith angle
-                  toa_src_sw,                & ! IN  - incident solar flux at TOA
-                  sfc_alb_dir,               & ! IN  - Shortwave surface albedo (direct)
-                  sfc_alb_dif,               & ! IN  - Shortwave surface albedo (diffuse)
-                  flux_allsky))                ! OUT - Fluxes, clear-sky, 3D (1,nLay,nBand)
+                  sw_optical_props_accum,           & ! IN  - optical-properties
+                  top_at_1,                         & ! IN  - veritcal ordering flag
+                  real(coszen(iCols), kind=rte_wp), & ! IN  - Cosine of solar zenith angle
+                  toa_src_sw,                       & ! IN  - incident solar flux at TOA
+                  sfc_alb_dir,                      & ! IN  - Shortwave surface albedo (direct)
+                  sfc_alb_dif,                      & ! IN  - Shortwave surface albedo (diffuse)
+                  flux_allsky))                       ! OUT - Fluxes, clear-sky, 3D (1,nLay,nBand)
              
              ! Store fluxes
              fluxswUP_allsky(iCols,:)   = sum(flux_allsky%bnd_flux_up, dim=3)

@@ -14,7 +14,7 @@
      &                    lsm,lsm_ruc,grav,cp,eps,epsm1,con_rocp,       &
      &                    con_karman,                                   &
      &                    shflx,cdq,wind,                               &
-     &                    usfco,vsfco,icplocn2atm,                      &
+     &                    usfco,vsfco,use_oceanuv,                      &
      &                    zf,ps,u1,v1,t1,q1,prslki,evap,fm,fh,fm10,fh2, &
      &                    ust,tskin,qsurf,thsfc_loc,diag_flux,diag_log, &
      &                    use_lake_model,iopt_lake,iopt_lake_clm,       &
@@ -29,7 +29,7 @@
 !
       integer, intent(in) :: im, lsm, lsm_ruc, iopt_lake, iopt_lake_clm
       logical, intent(in) :: use_lake2m
-      integer, intent(in) :: icplocn2atm
+      logical, intent(in) :: use_oceanuv
       logical, intent(in) :: thsfc_loc  ! Flag for reference pot. temp.
       logical, intent(in) :: diag_flux  ! Flag for flux method in 2-m diagnostics
       logical, intent(in) :: diag_log   ! Flag for 2-m log diagnostics under stable conditions
@@ -73,7 +73,7 @@
       errflg = 0
 
       !--
-      testptlat = 35.3_kind_phys 
+      testptlat = 35.3_kind_phys
       testptlon = 273.0_kind_phys
       !--
       debug_print = .false.
@@ -89,13 +89,14 @@
 
       do i = 1, im
         f10m(i) = fm10(i) / fm(i)
-        if (icplocn2atm ==0) then
-          u10m(i) = f10m(i) * u1(i)
-          v10m(i) = f10m(i) * v1(i)
-        else if (icplocn2atm ==1) then
+        if (use_oceanuv) then
           u10m(i) = usfco(i)+f10m(i) * (u1(i)-usfco(i))
           v10m(i) = vsfco(i)+f10m(i) * (v1(i)-vsfco(i))
+        else
+          u10m(i) = f10m(i) * u1(i)
+          v10m(i) = f10m(i) * v1(i)
         endif
+        
         have_2m = use_lake_model(i)>0 .and. use_lake2m .and.            &
      &                iopt_lake==iopt_lake_clm
         if(have_2m) then
@@ -181,9 +182,9 @@
             !no alternatives (yet) for unstable conditions
               Q2_alt = q2m(i)
             ENDIF
-            !-- Note: use of alternative diagnostics will make 
+            !-- Note: use of alternative diagnostics will make
             !   it cooler and drier with stable stratification
-            t2m(i) = T2_alt  
+            t2m(i) = T2_alt
             q2m(i) = Q2_alt
            endif ! log method for stable regime
 
@@ -216,7 +217,7 @@
          dpt2m(i) = 243.5_kind_dbl_prec/( ( 17.67_kind_dbl_prec /       &
      &             log(tem/611.2_kind_dbl_prec) ) - one) + con_t0c
          dpt2m(i) = min(dpt2m(i),t2m(i))
-       
+
 
          if (debug_print) then
          !-- diagnostics for a test point with known lat/lon

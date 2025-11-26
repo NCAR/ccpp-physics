@@ -62,7 +62,7 @@
      &                    flag_iter,redrag,                             &  !intent(in)
      &                    flag_lakefreeze,lakefrac,fice,                &  !intent(in)             
      &                    u10m,v10m,sfc_z0_type,                        &  !hafs,z0 type !intent(in)
-     &                    u1,v1,usfco,vsfco,icplocn2atm,                &  
+     &                    u1,v1,usfco,vsfco,use_oceanuv,                &  
      &                    wet,dry,icy,                                  &  !intent(in)
      &                    thsfc_loc,                                    &  !intent(in)
      &                    tskin_wat, tskin_lnd, tskin_ice,              &  !intent(in)
@@ -87,13 +87,13 @@
       integer, parameter  :: kp = kind_phys
       integer, intent(in) :: im, ivegsrc
       integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
-      integer, intent(in) :: icplocn2atm ! option for including ocean current in the computation of flux
+      logical, intent(in) :: use_oceanuv ! option for including ocean current in the computation of flux
 
       integer, dimension(:), intent(in) :: vegtype
 
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
       logical, dimension(:), intent(in) :: flag_iter, dry, icy
-      logical, dimension(:), intent(in) :: flag_lakefreeze 
+      logical, dimension(:), intent(in) :: flag_lakefreeze
       logical, dimension(:), intent(inout) :: wet
 
       logical, intent(in) :: thsfc_loc ! Flag for reference pressure in theta calculation
@@ -298,7 +298,7 @@
               tvs   = half * (tsurf_ice(i)+tskin_ice(i)) * virtfac
             else ! Use potential temperature referenced to 1000 hPa
               tvs   = half * (tsurf_ice(i)+tskin_ice(i))/prsik1(i)
-     &                     * virtfac 
+     &                     * virtfac
             endif
 
             z0max = max(zmin, min(0.01_kp * z0rl_ice(i), z1(i)))
@@ -348,7 +348,7 @@
 !      the stuff now put into "stability"
 
           if (wet(i)) then ! Some open ocean
-  
+
             zvfun(i) = zero
 
             if(thsfc_loc) then ! Use local potential temperature
@@ -358,12 +358,12 @@
      &                          * virtfac
             endif
 
-            if (icplocn2atm == 0) then 
+            if (use_oceanuv) then
+              wind10m=sqrt((u10m(i)-usfco(i))**2+(v10m(i)-vsfco(i))**2)
+              windrel=sqrt((u1(i)-usfco(i))**2+(v1(i)-vsfco(i))**2)
+            else
               wind10m=sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
               windrel=wind(i)
-            else if (icplocn2atm ==1) then
-              wind10m=sqrt((u10m(i)-usfco(i))**2+(v10m(i)-vsfco(i))**2)
-              windrel=sqrt((u1(i)-usfco(i))**2+(v1(i)-vsfco(i))**2) 
             endif
 
             z0    = 0.01_kp * z0rl_wat(i)
@@ -499,8 +499,8 @@
           z1i = one / z1
 
 !
-!  set background diffusivities with one for gdx >= xkgdx and 
-!   as a function of horizontal grid size for gdx < xkgdx 
+!  set background diffusivities with one for gdx >= xkgdx and
+!   as a function of horizontal grid size for gdx < xkgdx
 !   (i.e., gdx/xkgdx for gdx < xkgdx)
 !
           if(gdx >= xkgdx) then
@@ -645,7 +645,7 @@
 ! For high winds, try to fit available observational data
 !
 ! Bin Liu, NOAA/NCEP/EMC 2017
-! 
+!
 ! uref(m/s)   :   wind speed at 10-m height
 ! znotm(meter):   areodynamical roughness scale over water
 !
@@ -665,10 +665,10 @@
      &      p31 =  1.255457892775006e+00, p30 = -1.663993561652530e+01,
 
      &      p40 =  4.579369142033410e-04
-  
+
 
        if (uref >= 0.0 .and.  uref <= 6.5 ) then
-        znotm = exp(p10 + uref * (p11 + uref * (p12 + uref*p13))) 
+        znotm = exp(p10 + uref * (p11 + uref * (p12 + uref*p13)))
        elseif (uref > 6.5 .and. uref <= 15.7) then
         znotm = p20 + uref * (p21 + uref * (p22 + uref * (p23
      &              + uref * (p24 + uref * p25))))
@@ -729,16 +729,16 @@
          znott = p10 + uref * (p11 + uref * (p12 + uref * (p13
      &               + uref * (p14 + uref * p15))))
       elseif (uref > 15.4 .and. uref <= 21.6) then
-         znott = p20 + uref * (p21 + uref * (p22 + uref * (p23 
+         znott = p20 + uref * (p21 + uref * (p22 + uref * (p23
      &               + uref * (p24 + uref * p25))))
       elseif (uref > 21.6 .and. uref <= 42.2) then
-         znott = p30 + uref * (p31 + uref * (p32 + uref * (p33 
+         znott = p30 + uref * (p31 + uref * (p32 + uref * (p33
      &               + uref * (p34 + uref * p35))))
       elseif ( uref > 42.2 .and. uref <= 53.3) then
-         znott = p40 + uref * (p41 + uref * (p42 + uref * (p43 
+         znott = p40 + uref * (p41 + uref * (p42 + uref * (p43
      &               + uref * (p44 + uref * p45))))
       elseif ( uref > 53.3 .and. uref <= 80.0) then
-         znott = p50 + uref * (p51 + uref * (p52 + uref * (p53 
+         znott = p50 + uref * (p51 + uref * (p52 + uref * (p53
      &               + uref * (p54 + uref * (p55 + uref * p56)))))
       elseif ( uref > 80.0) then
          znott = p60

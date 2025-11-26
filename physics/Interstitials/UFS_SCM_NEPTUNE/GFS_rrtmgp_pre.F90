@@ -251,7 +251,7 @@ contains
     enddo
 
     ! Temperature at layer-interfaces          
-    call cmp_tlev(nCol,nLev,lw_gas_props%get_press_min(),p_lay,t_lay,p_lev,tsfc,t_lev)
+    call cmp_tlev(nCol,nLev,real(lw_gas_props%get_press_min(),kind=kind_phys),p_lay,t_lay,p_lev,tsfc,t_lev)
     do iLev=1,nLev+1
        do iCol=1,nCol
           if (t_lev(iCol,iLev) .le. lw_gas_props%get_temp_min()) t_lev(iCol,iLev) = &
