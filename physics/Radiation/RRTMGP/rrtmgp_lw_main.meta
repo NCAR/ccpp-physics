@@ -116,7 +116,7 @@
   type = logical
   intent = in
 [doLWclrsky]
-  standard_name = flag_for_tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep_assuming_clear_sky
+  standard_name = flag_for_output_of_tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep_assuming_clear_sky
   long_name = flag to output lw heating rate (Radtend%lwhc)
   units = flag
   dimensions = ()
