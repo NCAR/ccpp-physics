@@ -715,19 +715,21 @@ MODULE clm_lake
                 hflx_wat(i)     = eflx_sh_tot(c)/(rho0*cpair) ! kinematic_surface_upward_sensible_heat_flux_over_water
                 gflx_wat(I)     = eflx_gnet(c)              ![W/m/m]   upward_heat_flux_in_soil_over_water
                 ep1d_water(i)   = eflx_lh_tot(c)            ![W/m/m]   surface_upward_potential_latent_heat_flux_over_water
-                tsurf_water(I)  = t_grnd(c)                 ![K]       surface skin temperature after iteration over water
-                tsurf_ice(i)    = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
                 !don't overwrite surface skin temperature over ice, sea ice area fraction, skin temperature over water when using CDEPS inline over the mask
                 if (use_cdeps_data) then
                   if (mask_dat(i) <= 0.0) then
                     tsfc_wat(i)     = t_grnd(c)                 ![K]       surface skin temperature over water
                     tisfc(i)        = t_grnd(c)
                     fice(i)         = lake_icefrac3d(i,1)       ! sea_ice_area_fraction_of_sea_area_fraction
+                    tsurf_water(I)  = t_grnd(c)                 ![K]       surface skin temperature after iteration over water
+                    tsurf_ice(i)    = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
                   endif
                 else
                   tsfc_wat(i)     = t_grnd(c)                 ![K]       surface skin temperature over water
                   tisfc(i)        = t_grnd(c)
                   fice(i)         = lake_icefrac3d(i,1)       ! sea_ice_area_fraction_of_sea_area_fraction
+                  tsurf_water(I)  = t_grnd(c)                 ![K]       surface skin temperature after iteration over water
+                  tsurf_ice(i)    = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
                 endif
                 tsfc(i)         = t_grnd(c)
                 lake_t2m(I)     = t_ref2m(c)                ![K]       temperature_at_2m_from_clm_lake
@@ -769,14 +771,15 @@ MODULE clm_lake
 !                    uustar_ice(i) = uustar_water(i)           ! surface_friction_velocity_over_ice
                   endif
 
-                  tsurf_ice(i)  = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
                   !don't overwrite surface skin temperature over ice when using CDEPS inline over the mask
                   if (use_cdeps_data) then
                     if (mask_dat(i) <= 0.0) then
                       tisfc(i)        = t_grnd(c)
+                      tsurf_ice(i)  = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
                     endif
                   else
                     tisfc(i)        = t_grnd(c)
+                    tsurf_ice(i)  = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
                   endif
                   tsfc(i)       = t_grnd(c)                 ! surface_skin_temperature_over_ice
                   weasdi(i)     = h2osno(c)                 ! water_equivalent_accumulated_snow_depth_over_ice
@@ -828,11 +831,12 @@ MODULE clm_lake
                   if (use_cdeps_data) then
                     if (mask_dat(i) <= 0.0) then
                       tisfc(i)        = t_grnd(c)
+                      tsurf_ice(i)    = tisfc(i)
                     endif
                   else
                     tisfc(i)        = t_grnd(c)
+                    tsurf_ice(i) = tisfc(i)
                   endif
-                  tsurf_ice(i) = tisfc(i)
                   tsfc(i) = t_grnd(c)
                   !don't overwrite sea ice thickness when using CDEPS inline over the mask
                   if (use_cdeps_data) then
