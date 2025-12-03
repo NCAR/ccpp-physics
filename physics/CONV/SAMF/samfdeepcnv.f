@@ -1110,8 +1110,8 @@ c
           if(cnvflg(i).and.
      &      (k > kbcon(i) .and. k < kmax(i))) then
               tem = qeso(i,k)/qeso(i,kbcon(i))
-              fent1(i,k) = tem**2
-              fent2(i,k) = tem**3
+              fent1(i,k) = min(tem**2, 3.0)
+              fent2(i,k) = min(tem**3, 5.2)
           endif
         enddo
       enddo
