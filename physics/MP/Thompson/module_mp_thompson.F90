@@ -1045,7 +1045,8 @@ module module_mp_thompson
                               tprr_rcs, tprv_rev, tten3, qvten3,      &
                               qrten3, qsten3, qgten3, qiten3, niten3, &
                               nrten3, ncten3, qcten3,                 &
-                              pfils, pflls)
+                              pfils, pflls,                           &
+                              tc_rain, tc_snow)
 
          implicit none
 
@@ -1114,6 +1115,8 @@ module module_mp_thompson
                            tprr_rcs, tprv_rev, tten3, qvten3,      &
                            qrten3, qsten3, qgten3, qiten3, niten3, &
                            nrten3, ncten3, qcten3
+         ! TC adjustment
+         real(wp), INTENT (IN) :: tc_rain, tc_snow
 
    !..Local variables
          real(wp), dimension(kts:kte):: &
@@ -1483,7 +1486,8 @@ module module_mp_thompson
                            tprr_rcs1, tprv_rev1,                            &
                            tten1, qvten1, qrten1, qsten1,                   &
                            qgten1, qiten1, niten1, nrten1, ncten1, qcten1,  &
-                           pfil1, pfll1)
+                           pfil1, pfll1,                                    &
+                           tc_rain, tc_snow)
 
                pcp_ra(i,j) = pcp_ra(i,j) + pptrain
                pcp_sn(i,j) = pcp_sn(i,j) + pptsnow
@@ -1903,7 +1907,8 @@ module module_mp_thompson
                         tprr_rcs1, tprv_rev1,                            &
                         tten1, qvten1, qrten1, qsten1,                   &
                         qgten1, qiten1, niten1, nrten1, ncten1, qcten1,  &
-                        pfil1, pfll1) 
+                        pfil1, pfll1,                                    &
+                        tc_rain, tc_snow)
 
 #ifdef MPI
       use mpi_f08
@@ -1941,6 +1946,8 @@ module module_mp_thompson
                           tprr_rcs1, tprv_rev1, tten1, qvten1,       &
                           qrten1, qsten1, qgten1, qiten1, niten1,    &
                           nrten1, ncten1, qcten1
+      ! TC adjustment
+      real(wp), intent(in) :: tc_rain, tc_snow
 
 #if ( WRF_CHEM == 1 )
       real(wp), dimension(kts:kte), intent(inout) :: &
@@ -2035,6 +2042,7 @@ module module_mp_thompson
       logical :: debug_flag
       integer :: nu_c
 
+      real(wp) :: ymaxw, ytmp1   ! tc djustment tmp variable
 !+---+
 
       debug_flag = .false.
@@ -3773,6 +3781,15 @@ module module_mp_thompson
       enddo
 
       if (ANY(L_qr .eqv. .true.)) then
+         ymaxw=maxval(w1d)
+         ytmp1=tc_rain
+         ! if <0, tc adjustment is w-dependent
+         if (tc_rain < 0) then
+            ytmp1=1.0
+            ! Linearly increase with max W, up to 0.1 for Maxw>=5m/s, only for +W
+            if (ymaxw >= 0.5) ytmp1=abs(tc_rain)+min((ymaxw-0.5)/(5.0-0.5),1.0)*0.1
+         endif
+
          do k = kte, kts, -1
             vtr = 0.
             rhof(k) = SQRT(RHO_NOT/rho(k))
@@ -3781,7 +3798,7 @@ module module_mp_thompson
                lamr = (am_r*crg(3)*org2*nr(k)/rr(k))**obmr
                vtr = rhof(k)*av_r*crg(6)*org3 * lamr**cre(3)                 &
                            *((lamr+fv_r)**(-cre(6)))
-               vtrk(k) = vtr
+               vtrk(k) = vtr*ytmp1
 ! First below is technically correct:
 !         vtr = rhof(k)*av_r*crg(5)*org2 * lamr**cre(2)                 &
 !                     *((lamr+fv_r)**(-cre(5)))
@@ -3789,7 +3806,7 @@ module module_mp_thompson
 ! Goal: less prominent size sorting
                vtr = rhof(k)*av_r*crg(7)/crg(12) * lamr**cre(12)             &
                            *((lamr+fv_r)**(-cre(7)))
-               vtnrk(k) = vtr
+               vtnrk(k) = vtr*ytmp1
             else
                vtrk(k) = vtrk(k+1)
                vtnrk(k) = vtnrk(k+1)
@@ -3873,6 +3890,14 @@ module module_mp_thompson
 !+---+-----------------------------------------------------------------+
 
        if (ANY(L_qs .eqv. .true.)) then
+         ymaxw=maxval(w1d)
+         ytmp1=tc_snow
+         ! if <0, tc adjustment is w-dependent
+         if (tc_snow < 0) then
+            ytmp1=1.0
+            ! Linearly increase with max W, up to 0.1 for Maxw>=5m/s, only for +W
+            if (ymaxw >= 0.5) ytmp1= abs(tc_snow)+min((ymaxw-0.5)/(5.0-0.5),1.0)*0.1
+         endif
          nstep = 0
          do k = kte, kts, -1
             vts = 0.
@@ -3890,6 +3915,7 @@ module module_mp_thompson
                t3_vts = Kap0*csg(1)*ils1**cse(1)
                t4_vts = Kap1*Mrat**mu_s*csg(7)*ils2**cse(7)
                vts = rhof(k)*av_s * (t1_vts+t2_vts)/(t3_vts+t4_vts)
+               vts=vts*ytmp1
                if (prr_sml(k) .gt. 0.0) then
       !           vtsk(k) = max(vts*vts_boost(k),                             &
       !    &                vts*((vtrk(k)-vts*vts_boost(k))/(temp(k)-T_0)))

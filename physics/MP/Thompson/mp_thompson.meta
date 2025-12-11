@@ -943,6 +943,22 @@
   dimensions = ()
   type = logical
   intent = inout
+[tc_rain]
+  standard_name = tc_adjustment_rain_fall_speed
+  long_name = tc adjustment rain fall speed
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[tc_snow]
+  standard_name = tc_adjustment_snow_fall_speed
+  long_name = tc adjustment snow fall speed
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
