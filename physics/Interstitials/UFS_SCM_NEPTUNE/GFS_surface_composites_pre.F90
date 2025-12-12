@@ -205,6 +205,20 @@ contains
                 write(0,1013) i,tsfco(i),slmsk(i),cice(i),islmsk(i),islmsk_cice(i),oceanfrac(i),cplice,icy(i),cplflx
                 tsfco(i) = tgrs1(i)
               endif
+              !Set icy conditions according to CDEPS GL (Oceanfrac > 0)
+              if (use_cdeps_data) then
+                if (mask_dat(i) > 0.0) then
+                  if (cice(i) >= min_lakeice) then
+                    icy(i) = .true.
+                    islmsk(i) = 2 
+                  else
+                    icy(i) = .false.
+                    cice(i) = zero
+                    hice(i) = zero
+                    islmsk(i) = 0
+                  endif
+                endif
+              endif
             else ! Not ocean and not land
               is_clm = lkm>0 .and. iopt_lake==iopt_lake_clm .and. use_lake_model(i)>0
               if (cice(i) >= min_lakeice) then
