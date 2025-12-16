@@ -16,14 +16,21 @@
   name = GFS_phys_time_vary_init
   type = scheme
 
-[me]
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = MPI_Comm
+  intent = in
+[mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
   units = index
   dimensions = ()
   type = integer
   intent = in
-[master]
+[mpiroot]
   standard_name = mpi_root
   long_name = master MPI-rank
   units = index
@@ -1096,14 +1103,21 @@
 [ccpp-arg-table]
   name = GFS_phys_time_vary_timestep_init
   type = scheme
-[me]
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = MPI_Comm
+  intent = in
+[mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
   units = index
   dimensions = ()
   type = integer
   intent = in
-[master]
+[mpiroot]
   standard_name = mpi_root
   long_name = master MPI-rank
   units = index
