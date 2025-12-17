@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmg_pre
   type = scheme
-  relative_path = ../../
+  dependencies_path = ../../
   dependencies = tools/funcphys.f90,hooks/machine.F
   dependencies = MP/TEMPO/TEMPO/module_mp_tempo_params.F90,MP/TEMPO/TEMPO/module_mp_tempo_utils.F90
   dependencies = MP/Thompson/module_mp_thompson.F90,MP/Thompson/module_mp_thompson_make_number_concentrations.F90
