@@ -620,10 +620,6 @@
 
 !      deallocate (kappa_par)
 
-
-
-2033    return
-
        END subroutine aerosol_activate
 !
 
@@ -808,7 +804,6 @@
        AerPr_base_clean%dpg(9:11) = DPGI_aux(9:11)
        AerPr_base_clean%sig(9:11) = SIGI_aux(9:11)
 
-       RETURN
 !
        END SUBROUTINE AerConversion_base
 
@@ -920,7 +915,6 @@
          end do
        end do
 
-       RETURN
 !
        END SUBROUTINE AerConversion
 
@@ -1013,7 +1007,6 @@
          end do
        end do
 
-       RETURN
 !
        END SUBROUTINE AerConversion1
 
@@ -1382,7 +1375,6 @@
 
 ! *** end of subroutine ccnspec ****************************************
 !
-       return
        end subroutine ccnspec
 
 
@@ -1469,7 +1461,6 @@
          smax = smax*scal
        endif
 !
-       return
 !
 ! *** end of subroutine pdfactiv ****************************************
 !
@@ -1591,7 +1582,6 @@
        smax = x3
 
        ndroplet=ndrpl
-       return
 !
 ! *** end of subroutine activate ****************************************
 !
@@ -1678,7 +1668,6 @@
        summa = summa + nd(j)
 999     continue
 !
-       return
        end subroutine sintegral
 
 !=======================================================================
@@ -1732,7 +1721,6 @@
 
        end if
 !
-       return
 !
 ! *** end of subroutine props *******************************************
 !
@@ -1783,7 +1771,6 @@
 !
 ! end of function vpres
 !
-       return
        end function vpres
 
 
@@ -1819,7 +1806,6 @@
        tpars = t-273.15d0
        sft = 0.0761-1.55e-4*tpars
 !
-       return
        end function sft
 
 
@@ -1859,7 +1845,6 @@
        w(i)=2.d0*xl/((1.d0-z*z)*pp*pp)
        w(n+1-i)=w(i)
  12    continue
-       return
        end subroutine gauleg
 
 !C=======================================================================
@@ -1885,7 +1870,6 @@
        else
        erf = axx
        endif
-       RETURN
        END FUNCTION
 
 
@@ -1907,7 +1891,6 @@
 !      else
 !        erf=gammp(.5d0,x**2)
 !      endif
-!      return
 
 !      end function erf
 
@@ -1934,7 +1917,6 @@
        ser=ser+cof(j)/x
  11    continue
        gammln=tmp+log(stp*ser)
-       return
        end function gammln
 
 
@@ -1955,7 +1937,6 @@
 !       call gcf(gammcf,a,x,gln)
 !       gammp=1.d0-gammcf
 !     endif
-!     return
 !     end function gammp
 
 
@@ -1996,7 +1977,6 @@
 !1    continue
 !     pause 'a too large, itmax too small'
 !     gammcf=exp(-x+a*log(x)-gln)*g
-!     return
 !     end subroutine gcf
 
 
@@ -2030,7 +2010,6 @@
 !1    continue
 !     pause 'a too large, itmax too small'
 !     gamser=sum*exp(-x+a*log(x)-gln)
-!     return
 !     end subroutine gser
 
 ! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -2146,7 +2125,6 @@
        end if
 
 
-       return
        END subroutine IceParam
 
 
@@ -2239,7 +2217,6 @@
        nhet=sum3*(vmax_ice-vmin_ice)*0.5d0
        nlim=sum4*(vmax_ice-vmin_ice)*0.5d0
        sc_ice=sum5*(vmax_ice-vmin_ice)*0.5d0
-       RETURN
 
 
        END subroutine nice_Vdist
@@ -2591,8 +2568,6 @@
        sc_ice=min(shom_ice+1.0, sc_ice)
 
 
-       return
-
        END subroutine nice_param
 !*************************************************************
        real*8 function FINDSMAX(SX,DSH,
@@ -2670,7 +2645,6 @@
 
        VPRESWATER_ice=EXP(VPRESWATER_ice)
 
-       return
        END function VPRESWATER_ice
 
 !*************************************************************
@@ -2690,7 +2664,6 @@
        VPRESICE = A(0)+(A(1)/T)+(A(2)*LOG(T))+(A(3)*T)
        VPRESICE=EXP(VPRESICE)
 
-       return
        END function VPRESICE
 
 !*************************************************************
@@ -2711,7 +2684,7 @@
      & A(4))**2)))
 
        DHSUB_ice=1000d0*DHSUB_ice/18d0
-       return
+
        END function DHSUB_ice
 
 !*************************************************************
@@ -2730,7 +2703,7 @@
        TTEMP=T-273d0
 
        DENSITYICE= 1000d0*(A(0)+(A(1)*TTEMP)+(A(2)*TTEMP*TTEMP))
-       return
+
        END function DENSITYICE
 
 !*************************************************************
@@ -2768,7 +2741,7 @@
 
        WATDENSITY=WATDENSITY*1000d0
        WATDENSITY_ice=WATDENSITY
-       return
+
        END function WATDENSITY_ice
 
 
@@ -2914,8 +2887,6 @@
        del1bc_ice=cubicint_ice(Tc, T0bc, T0bc+5d0, 1d0, hbc)
        end if
 
-       RETURN
-
        END SUBROUTINE prop_ice
 
 !*************************************************************
@@ -2936,8 +2907,6 @@
        dp=EXP(-0.5d0*(x-miuv_ice)*(x-miuv_ice)/sigmav_ice/sigmav_ice) /
      &sigmav_ice/sq2pi_par/(normv_ice + 0.001)
 
-
-       RETURN
 
 
        END SUBROUTINE gausspdf
@@ -3967,7 +3936,6 @@
 
       if( X_2 <= X_1) stop 91919
 
-      return
       end function
 
 
@@ -3999,10 +3967,7 @@
 
       if( X_2 <= X_1) stop 91919
 
-      return
       end function
-
-
 
 
 

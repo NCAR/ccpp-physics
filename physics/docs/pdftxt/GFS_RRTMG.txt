@@ -110,7 +110,7 @@ Summary of the major changes:
 + \b rrtmg_lw_pre: \ref arg_table_rrtmg_lw_pre_run
 + \b rrtmg_lw: \ref arg_table_rrtmg_lw_run
 + \b rrtmg_lw_post: \ref arg_table_rrtmg_lw_post_run
-+ \b GFS_rrtmg_post: \ref arg_table_GFS_rrtmg_post_run
++ \b GFS_radiation_post: \ref arg_table_GFS_radiation_post_run
 
 \section  gen_al_rrtmg General Algorithm
  + \ref gen_lwrad

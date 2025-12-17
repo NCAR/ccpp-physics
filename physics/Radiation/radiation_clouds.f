@@ -330,7 +330,6 @@
          endif
       endif
 !
-      return
 !...................................
       end subroutine cld_init
 !-----------------------------------
@@ -879,7 +878,6 @@
      &       clds, mtop, mbot                                           &
      &     )
 
-      return
 !...................................
       end subroutine radiation_clouds_prop
 
@@ -1176,7 +1174,6 @@
         enddo
       enddo
 !
-      return
 !...................................
       end subroutine progcld_zhao_carr
 !-----------------------------------
@@ -1470,7 +1467,6 @@
         enddo
       enddo
 !
-      return
 !...................................
       end subroutine progcld_zhao_carr_pdf
 !-----------------------------------
@@ -1712,7 +1708,6 @@
         enddo
       enddo
 !
-      return
 !...................................
       end subroutine progcld_gfdl_lin
 !-----------------------------------
@@ -1960,7 +1955,6 @@
         enddo
       enddo
 !
-      return
 !...................................
       end subroutine progcld_fer_hires
 !...................................
@@ -2088,7 +2082,7 @@
       integer :: i, k, id, nf
 
 !  ---  constant values
-      real (kind=kind_phys), parameter :: xrc3 = 100.
+      real (kind=kind_phys), parameter :: xrc3 = 2000.
       real (kind=kind_phys), parameter :: snow2ice = 0.25
       real (kind=kind_phys), parameter :: coef_t = 0.025
 !
@@ -2273,8 +2267,6 @@
           cld_resnow(i,k) = res(i,k)
         enddo
       enddo
-
-      return
 
 !............................................
       end subroutine progcld_thompson_wsm6
@@ -2560,8 +2552,6 @@
          iwp_ex(i) = iwp_ex(i)*1.E-3
       enddo
 !
-      return
-
 !............................................
       end subroutine progcld_thompson
 !............................................
@@ -2847,7 +2837,6 @@
         enddo
       enddo
 !
-      return
 !...................................
       end subroutine progclduni
 !-----------------------------------
@@ -3306,7 +3295,6 @@
       endif                                     ! end_if_top_at_1
 
 !
-      return
 !...................................
       end subroutine gethml
 !-----------------------------------
@@ -3878,7 +3866,7 @@
               onemrh= max( 1.e-10, 1.0-rhly(i,k) )
               clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
 
-              tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
+              tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
               if (lmfdeep2) then
                 tem1  = xrc3 / tem1
               else

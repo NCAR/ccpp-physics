@@ -80,7 +80,7 @@
  + \b GFS RRTMGP aerosol interface: \ref arg_table_rrtmgp_aerosol_optics_run
  + \b GFS RRTMGP-Longwave radiation driver: \ref arg_table_rrtmgp_lw_main_run
  + \b GFS RRTMGP-Shortwave radiation driver: \ref arg_table_rrtmgp_sw_main_run
- + \b GFS RRTMGP post-processing, for both Longwave and Shortwave: \ref arg_table_GFS_rrtmgp_post_run
+ + \b GFS RRTMGP post-processing, for both Longwave and Shortwave: \ref arg_table_GFS_radiation_post_run
 
 
 */

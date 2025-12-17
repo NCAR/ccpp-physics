@@ -2,12 +2,13 @@
   name = rrtmgp_lw_main
   type = scheme
   dependencies = ../../hooks/machine.F,../radiation_tools.F90,../mersenne_twister.f
-  dependencies = rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90,rte-rrtmgp/extensions/mo_fluxes_byband.F90
-  dependencies = rte-rrtmgp/rte/mo_rte_kind.F90,rte-rrtmgp/rrtmgp/mo_gas_concentrations.F90,rte-rrtmgp/rte/mo_optical_props.F90
-  dependencies = rte-rrtmgp/rte/mo_source_functions.F90,rte-rrtmgp/rte/mo_rte_lw.F90,rte-rrtmgp/rte/mo_fluxes.F90
-  dependencies = rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90, rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90
+  dependencies = rte-rrtmgp/rrtmgp-frontend/mo_gas_optics_rrtmgp.F90,rte-rrtmgp/extensions/mo_fluxes_byband.F90
+  dependencies = rte-rrtmgp/rte-frontend/mo_rte_kind.F90,rte-rrtmgp/gas-optics/mo_gas_concentrations.F90,rte-rrtmgp/rte-frontend/mo_optical_props.F90
+  dependencies = rte-rrtmgp/rte-frontend/mo_source_functions.F90,rte-rrtmgp/rte-frontend/mo_rte_lw.F90,rte-rrtmgp/rte-frontend/mo_fluxes.F90
+  dependencies = rte-rrtmgp/rte-kernels/mo_fluxes_broadband_kernels.F90,rte-rrtmgp/rte-kernels/mo_rte_solver_kernels.F90
   dependencies = rrtmgp_lw_gas_optics.F90, rrtmgp_lw_cloud_optics.F90,rrtmgp_sampling.F90
   dependencies = ../../Interstitials/UFS_SCM_NEPTUNE/GFS_rrtmgp_pre.F90
+  dependencies = rte-rrtmgp/rte-frontend/mo_rte_kind.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -37,20 +38,6 @@
   type = character
   intent = in
   kind = len=128
-[doGP_cldoptics_PADE]
-  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
-  long_name = logical flag to control cloud optics scheme.
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[doGP_cldoptics_LUT]
-  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
-  long_name = logical flag to control cloud optics scheme.
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [nrghice]
   standard_name = number_of_ice_roughness_categories
   long_name = number of ice-roughness categories in RRTMGP calculation

@@ -441,25 +441,21 @@
       LPARAM =.FALSE.
 
          IF (DEFINED_SOIL .GT. MAX_SOILTYP) THEN
-            WRITE(0,*) 'Warning: DEFINED_SOIL too large in namelist'
             errflg = 1
             errmsg = 'ERROR(set_soilveg_ruc):  DEFINED_SOIL too large in namelist'
             return
          ENDIF
          IF (DEFINED_VEG .GT. MAX_VEGTYP) THEN
-            WRITE(0,*) 'Warning: DEFINED_VEG too large in namelist'
             errflg = 1
             errmsg = 'ERROR(set_soilveg_ruc):  DEFINED_VEG too large in namelist'
             return
          ENDIF
          IF (DEFINED_SLOPE .GT. MAX_SLOPETYP) THEN
-            WRITE(0,*) 'Warning: DEFINED_SLOPE too large in namelist'
             errflg = 1
             errmsg = 'ERROR(set_soilveg_ruc):  DEFINED_SLOPE too large in namelist'
             return
          ENDIF
          
 !       if (me == 0) write(6,soil_veg_ruc)
-       return
        end subroutine set_soilveg_ruc
        end module set_soilveg_ruc_mod

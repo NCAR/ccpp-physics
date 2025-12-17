@@ -212,7 +212,7 @@
                if(iaermdl==1) then
                  call read_aerdata (me,master,iflip,idate,errmsg,errflg)
                elseif(iaermdl==6) then
-                 call read_aerdata_dl (me,master,iflip,idate,errmsg,errflg)
+                 call read_aerdata_dl (me,master,iflip,idate,fhour,errmsg,errflg)
                end if
             endif
             if (errflg /= 0) return
@@ -816,13 +816,13 @@
                                fhour, iflip, jindx1_aer, jindx2_aer, &
                                ddy_aer, iindx1_aer,           &
                                iindx2_aer, ddx_aer,           &
-                               levs, prsl, aer_nm)
+                               levs, prsl, aer_nm, errmsg, errflg)
            elseif (iaermdl==6) then
              call aerinterpol_dl (me, master, nthrds, im, idate, &
                                fhour, iflip, jindx1_aer, jindx2_aer, &
                                ddy_aer, iindx1_aer,           &
                                iindx2_aer, ddx_aer,           &
-                               levs, prsl, aer_nm)
+                               levs, prsl, aer_nm, errmsg, errflg)
            endif
          endif
          

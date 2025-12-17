@@ -986,88 +986,9 @@
 
       private
 
-      public GFS_interstitialtoscreen_init, GFS_interstitialtoscreen_timestep_init, GFS_interstitialtoscreen_run
+      public GFS_interstitialtoscreen_run
 
       contains
-
-!> \section arg_table_GFS_interstitialtoscreen_init Argument Table
-!! \htmlinclude GFS_interstitialtoscreen_init.html
-!!
-      subroutine GFS_interstitialtoscreen_init (Model, Statein, Stateout, Sfcprop, Coupling,     &
-                                                Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
-                                                errmsg, errflg)
-
-         implicit none
-
-         !--- interface variables
-         type(GFS_control_type),      intent(in)  :: Model
-         type(GFS_statein_type),      intent(in)  :: Statein
-         type(GFS_stateout_type),     intent(in)  :: Stateout
-         type(GFS_sfcprop_type),      intent(in)  :: Sfcprop
-         type(GFS_coupling_type),     intent(in)  :: Coupling
-         type(GFS_grid_type),         intent(in)  :: Grid
-         type(GFS_tbd_type),          intent(in)  :: Tbd
-         type(GFS_cldprop_type),      intent(in)  :: Cldprop
-         type(GFS_radtend_type),      intent(in)  :: Radtend
-         type(GFS_diag_type),         intent(in)  :: Diag
-         type(GFS_interstitial_type), intent(in)  :: Interstitial(:)
-         character(len=*),            intent(out) :: errmsg
-         integer,                     intent(out) :: errflg
-
-         !--- local variables
-         integer :: i
-
-         ! Initialize CCPP error handling variables
-         errmsg = ''
-         errflg = 0
-
-         do i=1,size(Interstitial)
-           call GFS_interstitialtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling,        &
-                                              Grid, Tbd, Cldprop, Radtend, Diag, Interstitial(i), &
-                                              size(Interstitial), -999, errmsg, errflg)
-         end do
-
-      end subroutine GFS_interstitialtoscreen_init
-
-!> \section arg_table_GFS_interstitialtoscreen_timestep_init Argument Table
-!! \htmlinclude GFS_interstitialtoscreen_timestep_init.html
-!!
-      subroutine GFS_interstitialtoscreen_timestep_init (Model, Statein, Stateout, Sfcprop, Coupling,     &
-                                                         Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
-                                                         errmsg, errflg)
-
-         implicit none
-
-         !--- interface variables
-         type(GFS_control_type),      intent(in)  :: Model
-         type(GFS_statein_type),      intent(in)  :: Statein
-         type(GFS_stateout_type),     intent(in)  :: Stateout
-         type(GFS_sfcprop_type),      intent(in)  :: Sfcprop
-         type(GFS_coupling_type),     intent(in)  :: Coupling
-         type(GFS_grid_type),         intent(in)  :: Grid
-         type(GFS_tbd_type),          intent(in)  :: Tbd
-         type(GFS_cldprop_type),      intent(in)  :: Cldprop
-         type(GFS_radtend_type),      intent(in)  :: Radtend
-         type(GFS_diag_type),         intent(in)  :: Diag
-         type(GFS_interstitial_type), intent(in)  :: Interstitial(:)
-         character(len=*),            intent(out) :: errmsg
-         integer,                     intent(out) :: errflg
-
-         !--- local variables
-         integer :: i
-
-         ! Initialize CCPP error handling variables
-         errmsg = ''
-         errflg = 0
-
-
-         do i=1,size(Interstitial)
-           call GFS_interstitialtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling,        &
-                                              Grid, Tbd, Cldprop, Radtend, Diag, Interstitial(i), &
-                                              size(Interstitial), -999, errmsg, errflg)
-         end do
-
-      end subroutine GFS_interstitialtoscreen_timestep_init
 
 !> \section arg_table_GFS_interstitialtoscreen_run Argument Table
 !! \htmlinclude GFS_interstitialtoscreen_run.html

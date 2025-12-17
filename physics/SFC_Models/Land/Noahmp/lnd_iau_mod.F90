@@ -81,6 +81,7 @@ module land_iau_mod
       logical              :: upd_slc
       logical              :: do_stcsmc_adjustment  !do moisture/temperature adjustment for consistency after increment add
       real(kind=kind_phys) :: min_T_increment
+      real(kind=kind_phys) :: min_SLC_increment
  
       integer              :: me              !< MPI rank designator
       integer              :: mpi_root        !< MPI rank of master atmosphere processor
@@ -132,11 +133,11 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file, me, 
    logical               :: land_iau_upd_slc = .false.
    logical               :: land_iau_do_stcsmc_adjustment = .false.
    real(kind=kind_phys)  :: land_iau_min_T_increment = 0.0001
-  
+   real(kind=kind_phys)  :: land_iau_min_SLC_increment = 0.000001
+
    NAMELIST /land_iau_nml/ do_land_iau, land_iau_delthrs, land_iau_inc_files, land_iau_fhrs,   &  
-                        land_iau_filter_increments, &  
-                        lsoil_incr, land_iau_upd_stc, land_iau_upd_slc, land_iau_do_stcsmc_adjustment, land_iau_min_T_increment                                    
-   
+                        land_iau_filter_increments, lsoil_incr, land_iau_upd_stc, land_iau_upd_slc, &
+                        land_iau_do_stcsmc_adjustment, land_iau_min_T_increment, land_iau_min_SLC_increment                                    
    !Errors messages handled through CCPP error handling variables
    errmsg = ''
    errflg = 0
@@ -209,6 +210,7 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file, me, 
    Land_IAU_Control%upd_slc = land_iau_upd_slc
    Land_IAU_Control%do_stcsmc_adjustment = land_iau_do_stcsmc_adjustment
    Land_IAU_Control%min_T_increment = land_iau_min_T_increment
+   Land_IAU_Control%min_SLC_increment = land_iau_min_SLC_increment
 
    allocate(Land_IAU_Control%blksz(nblks))
    allocate(Land_IAU_Control%blk_strt_indx(nblks))
@@ -622,6 +624,7 @@ subroutine read_iau_forcing_fv3(Land_IAU_Control, wk3_stc, wk3_slc, errmsg, errf
    
    !set too small increments to zero
    where(abs(wk3_stc) < Land_IAU_Control%min_T_increment) wk3_stc = 0.0
+   where(abs(wk3_slc) < Land_IAU_Control%min_SLC_increment) wk3_slc = 0.0
 
    status =nf90_close(ncid) 
    call netcdf_err(status, 'closing file '//trim(fname), errflg, errmsg) 

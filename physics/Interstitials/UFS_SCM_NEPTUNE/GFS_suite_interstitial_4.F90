@@ -17,8 +17,8 @@
 
       use machine,               only: kind_phys
       use module_mp_thompson_make_number_concentrations, only: &
-           make_IceNumber_thmpsn => make_IceNumber, &
-           make_DropletNumber_thmpsn => make_DropletNumber
+           make_IceNumber_thompson => make_IceNumber, &
+           make_DropletNumber_thompson => make_DropletNumber
 
       use module_mp_tempo_utils, only: &
            make_IceNumber_tempo => make_IceNumber, &
