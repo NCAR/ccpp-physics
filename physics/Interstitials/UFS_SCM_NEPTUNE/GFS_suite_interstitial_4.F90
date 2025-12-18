@@ -247,7 +247,7 @@
                   !> - Convert number concentration from moist to dry
                   nc_mp(i,k) = gq0(i,k,ntlnc) / (one-spechum(i,k))
                   if (imp_physics == imp_physics_thompson) then
-                    nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber_thmpsn(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                    nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber_thompson(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
                   else
                     nc_mp(i,k) = max(zero, nc_mp(i,k) + make_DropletNumber_tempo(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
                   endif
@@ -260,7 +260,7 @@
                   !> - Convert number concentration from moist to dry
                   ni_mp(i,k) = gq0(i,k,ntinc) / (one-spechum(i,k)) 
                   if (imp_physics == imp_physics_thompson) then
-                    ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber_thmpsn(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                    ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber_thompson(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
                   else
                     ni_mp(i,k) = max(zero, ni_mp(i,k) + make_IceNumber_tempo(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
                   endif
@@ -280,7 +280,7 @@
                   qc_mp(i,k) = (gq0(i,k,ntcw)-save_qc(i,k))
                   !> - Update cloud water number concentration
                   if (imp_physics == imp_physics_thompson) then
-                    new_lnc(i,k) = max(zero, new_lnc(i,k) + make_DropletNumber_thmpsn(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
+                    new_lnc(i,k) = max(zero, new_lnc(i,k) + make_DropletNumber_thompson(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
                   else
                     new_lnc(i,k) = max(zero, new_lnc(i,k) + make_DropletNumber_tempo(qc_mp(i,k) * rho, nwfa(i,k)*rho) * orho)
                   endif
@@ -290,7 +290,7 @@
                   qi_mp(i,k) = (gq0(i,k,ntiw)-save_qi(i,k))
                   !> - Update cloud ice number concentration
                   if (imp_physics == imp_physics_thompson) then
-                    new_inc(i,k) = max(zero, new_inc(i,k) + make_IceNumber_thmpsn(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
+                    new_inc(i,k) = max(zero, new_inc(i,k) + make_IceNumber_thompson(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
                   else
                     new_inc(i,k) = max(zero, new_inc(i,k) + make_IceNumber_tempo(qi_mp(i,k) * rho, save_tcp(i,k)) * orho)
                   endif
