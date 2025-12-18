@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_phys_time_vary
   type = scheme
-  relative_path = ../../
+  dependencies_path = ../../
   dependencies = hooks/machine.F
   dependencies = Interstitials/UFS_SCM_NEPTUNE/iccn_def.F,Interstitials/UFS_SCM_NEPTUNE/iccninterp.F90
   dependencies = Interstitials/UFS_SCM_NEPTUNE/sfcsub.F,Radiation/mersenne_twister.f

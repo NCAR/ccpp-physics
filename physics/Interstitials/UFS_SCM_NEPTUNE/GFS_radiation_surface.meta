@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_radiation_surface
   type = scheme
-  relative_path = ../../
+  dependencies_path = ../../
   dependencies = Radiation/radiation_surface.f
   dependencies = SFC_Models/Land/RUC/set_soilveg_ruc.F90,SFC_Models/Land/RUC/namelist_soilveg_ruc.F90
   dependencies = hooks/machine.F

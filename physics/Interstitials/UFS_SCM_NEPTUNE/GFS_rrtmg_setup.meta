@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmg_setup
   type = scheme
-  relative_path = ../../
+  dependencies_path = ../../
   dependencies = hooks/machine.F
   dependencies = Radiation/radiation_aerosols.f
   dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_clouds.f,Radiation/radiation_gases.f

@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rad_time_vary
   type = scheme
-  relative_path = ../../
+  dependencies_path = ../../
   dependencies = hooks/machine.F,Radiation/mersenne_twister.f,Radiation/RRTMG/radcons.f90
 
 ########################################################################
