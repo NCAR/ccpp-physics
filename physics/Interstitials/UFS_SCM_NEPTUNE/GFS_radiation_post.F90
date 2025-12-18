@@ -80,7 +80,9 @@ contains
          kd,                & !< Vertical index difference between in/out and local  (H/M/L diag)
          kt,                & !< Vertical index difference between layer and upper bound (H/M/L diag)
          iSFC,              & !< Vertical index for surface level
-         iTOA                 !< Vertical index for TOA level
+         iTOA,              & !< Vertical index for TOA level
+         tend_opt_swrad,    &
+         tend_opt_lwrad
     integer, intent(in), dimension(:) :: &
          idxday               !< Index array for daytime points
     logical, intent(in) :: & 
@@ -89,14 +91,12 @@ contains
          lssav,             & !< Flag for radiation diagnostics
          do_RRTMGP,         & !< Flag for using RRTMGP scheme
          do_lw_clrsky_hr,   & !< Output clear-sky LW heating-rate?
-         do_sw_clrsky_hr,   & !< Output clear-sky SW heating-rate?
-         tend_opt_swrad,    &
-         tend_opt_lwrad 
+         do_sw_clrsky_hr     !< Output clear-sky SW heating-rate?
     real(kind_phys), intent(in) ::  &
          fhlwr,             & !< Frequency for longwave radiation  (sec)
          fhswr,             & !< Frequency for shortwave radiation (sec)
          raddt,             & !< Radiation time step               (sec)
-         delt               & !< physics timestep
+         delt                 !< physics timestep
     real(kind_phys), dimension(:), intent(in) ::  &
          coszen,            & !< Mean cos of zenith angle over rad call period
          coszdg               !< Daytime mean cosz over rad call period
