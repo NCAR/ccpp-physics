@@ -164,6 +164,7 @@ module lsm_ruc
 
       !--- initialize soil vegetation
       call set_soilveg_ruc(me, isot, ivegsrc, nlunit, errmsg, errflg)
+      if(errflg/=0) return
 
       pores (:) = maxsmc (:)
       resid (:) = drysmc (:)
@@ -213,6 +214,7 @@ module lsm_ruc
                     zs, dzs, smc, slc, stc,                     & ! in
                     sh2o, smfrkeep, tslb, smois,                & ! out
                     wetness, errmsg, errflg)
+      if(errflg/=0) return
 
       if (lsm_cold_start) then
         do i  = 1, im ! i - horizontal loop
@@ -327,7 +329,7 @@ module lsm_ruc
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, delt, kdt, im, nlev, lsm_ruc, lsm,       &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
-     &       imp_physics_nssl, do_mynnsfclay,                           &
+     &       imp_physics_nssl, do_mynnsfclay, use_cdeps_data, mask_dat, &
      &       exticeden, lsoil_ruc, lsoil, mosaic_lu, mosaic_soil,       &
      &       isncond_opt, isncovr_opt, nlcat, nscat,                    &
      &       rdlai, xlat_d, xlon_d,                                     &
@@ -407,6 +409,7 @@ module lsm_ruc
       logical, dimension(:),  intent(in) :: flag_cice
       logical,                intent(in) :: frac_grid
       logical,                intent(in) :: do_mynnsfclay
+      logical,                intent(in) :: use_cdeps_data
       logical,                intent(in) :: exticeden
 
       logical,                intent(in) :: rdlai
@@ -420,6 +423,7 @@ module lsm_ruc
 
       real (kind_phys), dimension(:), intent(in)    :: zs
       real (kind_phys), dimension(:), intent(in)    :: srflag
+      real (kind_phys), dimension(:), intent(in), optional  :: mask_dat
       real (kind_phys), dimension(:), intent(inout) ::                   &
      &      laixy, tsnow_lnd, sfcqv_lnd, sfcqc_lnd, sfcqc_ice, sfcqv_ice,&
      &      tsnow_ice
@@ -1616,13 +1620,19 @@ module lsm_ruc
           else ! flag_guess
             if(debug_print) write (0,*)'iter run', i,j, tskin_ice(i),tsurf_ice(i)
             tskin_lnd(i) = tsurf_lnd(i)
-            tskin_ice(i) = tsurf_ice(i)
+            !don't overwrite surface skin temperature over ice when using CDEPS inline over the mask
+            if (use_cdeps_data) then
+              if (mask_dat(i) <= 0.0) then
+                tskin_ice(i) = tsurf_ice(i)
+              endif
+            else
+              tskin_ice(i) = tsurf_ice(i)
+            endif
           endif ! flag_guess
         endif ! flag
       enddo  ! i
       enddo  ! j
 !
-      return
 !...................................
       end subroutine lsm_ruc_run
 !-----------------------------------
@@ -2021,6 +2031,5 @@ module lsm_ruc
       endif ! debug_print
 
       end subroutine rucinit
-
 
 end module lsm_ruc
