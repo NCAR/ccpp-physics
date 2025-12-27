@@ -83,6 +83,13 @@
   dimensions = ()
   type = integer
   intent = in
+[num_diag_buckets]
+  standard_name = number_of_diagnostic_buckets
+  long_name = number of diagnostic bucket reset periods
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [delt]
   standard_name = timestep_for_physics
   long_name = physics timestep
@@ -406,7 +413,7 @@
   standard_name = accumulated_lwe_thickness_of_precipitation_amount_in_bucket
   long_name = accumulated total precipitation in bucket
   units = m
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_loop_extent,number_of_diagnostic_buckets)
   type = real
   kind = kind_phys
   intent = inout
@@ -414,7 +421,7 @@
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket
   long_name = cumulative convective precipitation in bucket
   units = m
-  dimensions = (horizontal_loop_extent)
+  dimensions = (horizontal_loop_extent,number_of_diagnostic_buckets)
   type = real
   kind = kind_phys
   intent = inout

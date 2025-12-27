@@ -8,9 +8,7 @@ module rrtmgp_sw_cloud_optics
   use rrtmgp_sw_gas_optics,     only: sw_gas_props
   use radiation_tools,          only: check_error_msg
   use netcdf
-#ifdef MPI
   use mpi_f08
-#endif
 
   implicit none
   
@@ -84,9 +82,7 @@ contains
     ! (ONLY master processor(0), if MPI enabled)
     !
     ! #######################################################################################
-#ifdef MPI
     if (mpirank .eq. mpiroot) then
-#endif
        write (*,*) 'Reading RRTMGP shortwave cloud-optics metadata ... '
 
        ! Open file
@@ -111,7 +107,6 @@ contains
        status = nf90_inquire_dimension(ncid, dimid, len=nBoundSW)
        status = nf90_inq_dimid(ncid, 'pair', dimid)
        status = nf90_inquire_dimension(ncid, dimid, len=nPairsSW) 
-#ifdef MPI
     endif ! On master processor
 
     ! Other processors waiting...
@@ -131,14 +126,11 @@ contains
     call mpi_bcast(nCoeff_ssa_gSW,     1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
     call mpi_bcast(nBoundSW,           1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
     call mpi_bcast(nPairsSW,           1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-#endif
     
     ! Has the number of ice-roughnes categories been provided from the namelist?
     ! If so, override nrghice from cloud-optics file
     if (nrghice .ne. 0) nrghice_fromfileSW = nrghice
-#ifdef MPI
     call mpi_bcast(nrghice_fromfileSW, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-#endif
 
     ! #######################################################################################
     !
@@ -160,9 +152,7 @@ contains
     ! (ONLY master processor(0), if MPI enabled) 
     !
     ! #######################################################################################
-#ifdef MPI
-    if (mpirank .eq. mpiroot) then
-#endif 
+    if (mpirank .eq. mpiroot) then 
        write (*,*) 'Reading RRTMGP shortwave cloud data (LUT) ... '
        status = nf90_inq_varid(ncid,'radliq_lwr',varID)
        status = nf90_get_var(ncid,varID,radliq_lwrSW)
@@ -190,7 +180,6 @@ contains
        ! Close file
        status = nf90_close(ncid)       
 
-#ifdef MPI
     endif ! Master process
 
     ! Other processors waiting...
@@ -235,7 +224,6 @@ contains
     call mpi_bcast(lut_asyiceSW,   size(lut_asyiceSW),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
 #endif
 
-#endif
     ! #######################################################################################
     !   
     ! Initialize RRTMGP DDT's...
