@@ -62,9 +62,7 @@ module module_mp_thompson
    use machine, only: wp => kind_phys, sp => kind_sngl_prec, dp => kind_dbl_prec
    use module_mp_radar
 
-#ifdef MPI
-      use mpi_f08
-#endif
+   use mpi_f08
 
    implicit none
 
@@ -1910,9 +1908,7 @@ module module_mp_thompson
                         pfil1, pfll1,                                    &
                         tc_rain, tc_snow)
 
-#ifdef MPI
       use mpi_f08
-#endif
 
       implicit none
 
@@ -4430,9 +4426,7 @@ module module_mp_thompson
 
       good = 0
         INQUIRE(FILE=qr_acr_qg_file, EXIST=lexist)
-#ifdef MPI
         call MPI_BARRIER(mpi_communicator,ierr)
-#endif
         IF ( lexist ) THEN
           OPEN(63,file=qr_acr_qg_file,form="unformatted",err=1234)
 !sms$serial begin
@@ -4605,9 +4599,7 @@ module module_mp_thompson
 
       good = 0
         INQUIRE(FILE=qr_acr_qs_file, EXIST=lexist)
-#ifdef MPI
         call MPI_BARRIER(mpi_communicator,ierr)
-#endif
         IF ( lexist ) THEN
           !write(0,*) "ThompMP: read "//qr_acr_qs_file//" instead of computing"
           OPEN(63,file=qr_acr_qs_file,form="unformatted",err=1234)
@@ -4866,9 +4858,7 @@ module module_mp_thompson
 
       good = 0
         INQUIRE(FILE=freeze_h2o_file,EXIST=lexist)
-#ifdef MPI
         call MPI_BARRIER(mpi_communicator,ierr)
-#endif
         IF ( lexist ) THEN
           !write(0,*) "ThompMP: read "//freeze_h2o_file//" instead of computing"
           OPEN(63,file=freeze_h2o_file,form="unformatted",err=1234)
