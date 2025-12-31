@@ -107,7 +107,7 @@ module  cires_ugwpv0_module
 !>This subroutine initializes CIRES UGWP 
    subroutine cires_ugwpv0_mod_init (me, master, nlunit, input_nml_file, logunit, &
               fn_nml, lonr, latr, levs, ak, bk, pref, dtp, cdmvgwd, cgwf,    &
-              pa_rf_in, tau_rf_in)
+              pa_rf_in, tau_rf_in, errmsg, errflg)
 
     use  ugwpv0_oro_init,     only :  init_oro_gws_v0
     use  ugwpv0_wmsdis_init,  only :  initsolv_wmsdis_v0, ilaunch
@@ -129,7 +129,11 @@ module  cires_ugwpv0_module
     real,                 intent (in) :: cdmvgwd(2), cgwf(2)             ! "scaling" controls for "old" GFS-GW schemes
     real,                 intent (in) :: pa_rf_in, tau_rf_in
 
+    character(len=*),     intent(inout) :: errmsg
+    integer,              intent(inout) :: errflg
+
     integer :: ios
+    character(len=256) :: msg
     logical :: exists
     real    :: dxsg
     integer :: k
@@ -142,10 +146,16 @@ module  cires_ugwpv0_module
     inquire (file =trim (fn_nml) , exist = exists)
 
     if (.not. exists) then
-       if (me == master) &
-        write (6, *) 'separate ugwp :: namelist file: ', trim (fn_nml), ' does not exist'
+       write(errmsg,*) 'separate ugwp :: namelist file: ', trim (fn_nml), ' does not exist'
+       errflg = 1
+       return
     else
-        open (unit = nlunit, file = trim(fn_nml), action = 'read', status = 'old', iostat = ios)
+       open (unit = nlunit, file = trim(fn_nml), action = 'read', status = 'old', iostat = ios, iomsg = msg)
+       if (ios /= 0) then
+          write(errmsg,*) 'ERROR: cannot open namelist file ', trim(fn_nml), ' iostat=', ios, ' msg="' // trim(msg) // '"'
+          errflg = 1
+          return
+       endif
     endif
     rewind (nlunit)
     read   (nlunit, nml = cires_ugwp_nml)
