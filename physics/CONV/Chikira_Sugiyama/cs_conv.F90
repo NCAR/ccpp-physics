@@ -250,7 +250,7 @@ module cs_conv
 !
    real(kind_phys) GDT(IJSDIM,KMAX)           !< temperature [K]
    real(kind_phys) GDQ(IJSDIM,KMAX,NTR)       !< tracers including moisture [kg/kg]  !DDsigmadiag
-   real(kind_phys) new_clw(IJSDIM,KMAX,NTR)   !< temporary new convectively-transported tracer array used for calculating tendencies
+   real(kind_phys) new_clw(IJSDIM,KMAX,nn)    !< temporary new convectively-transported tracer array used for calculating tendencies
    real(kind_phys) GDU(IJSDIM,KMAX)           !< zonal wind [m/s]
    real(kind_phys) GDV(IJSDIM,KMAX)           !< meridional wind [m/s]
    real(kind_phys) GDTM(IJSDIM,KMAX+1)        !< temperature at boundaries of layers [K]
