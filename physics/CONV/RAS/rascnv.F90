@@ -1057,7 +1057,7 @@
           do l=1,k
 !##### GJF - change to tendencies
             ten_t(ipt,l) = (toi(l) - tin(ipt,l))/dt
-            ten_q(ipt,l) = (qoi(l) - qin(ipt,l))/dt
+            ten_q(ipt,l,1) = (qoi(l) - qin(ipt,l))/dt
             ten_u(ipt,l) = (uvi(l,ntr+1) - uin(ipt,l))/dt
             ten_v(ipt,l) = (uvi(l,ntr+2) - vin(ipt,l))/dt
             !tin(ipt,l) = toi(l)                   ! Temperature
