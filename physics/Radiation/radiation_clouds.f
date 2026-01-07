@@ -1275,15 +1275,21 @@
 
         if (.not. lmfshal) then
           xrc3 = xr_con
-          call cloud_fraction_XuRandall                                 &
-     &      ( IX, NLAY, xrc3, xr_exp, plyr, clwf, rhly, qstl,           & !  ---  inputs
-     &        cldtot )                                                    !  ---  outputs
+          do k = 1, NLAY-1
+          do i = 1, IX
+             cldtot(i,k) = cld_frac_XuRandall(plyr(i,k), qstl(i,k),     &    
+     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.) 
+          end do
+          end do
         else
           xrc3 = 100.
           if (lmfdeep2) xrc3 = xr_con
-          call cloud_fraction_XuRandall                                 &
-     &      ( IX, NLAY, xrc3, xr_exp, plyr, clwf, rhly, qstl,           & !  ---  inputs
-     &        cldtot )
+          do k = 1, NLAY-1
+          do i = 1, IX
+             cldtot(i,k) = cld_frac_XuRandall(plyr(i,k), qstl(i,k),     &    
+     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.) 
+          end do
+          end do
         endif
 
       endif                                ! if (uni_cld) then
@@ -1459,6 +1465,8 @@
 
       integer :: i, k, id, nf
 
+      logical :: cond_cfrac_onRH
+
 !  ---  constant values
       real (kind=kind_phys), parameter :: snow2ice = 0.25
       real (kind=kind_phys), parameter :: coef_t = 0.025
@@ -1582,15 +1590,23 @@
 
         if (.not. lmfshal) then
           xrc3 = xr_con
-          call cloud_fraction_XuRandall                                 &
-     &      ( IX, NLAY, xrc3, xr_exp, plyr, clwf, rhly, qstl,           & !  ---  inputs
-     &        cldtot )                                                    !  ---  outputs
+          do k = 1, NLAY-1
+          do i = 1, IX
+             cldtot(i,k) = cld_frac_XuRandall(plyr(i,k), qstl(i,k),     &    
+     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.) 
+          end do
+          end do
         else
           xrc3 = 100.
           if (lmfdeep2) xrc3 = xr_con
-          call cloud_fraction_XuRandall                                 &
-     &      ( IX, NLAY, xrc3, xr_exp, plyr, clwf, rhly, qstl,           & !  ---  inputs
-     &        cldtot, cond_cfrac_onRH = .true.)
+          cond_cfrac_onRH = .true.
+          do k = 1, NLAY-1
+          do i = 1, IX
+             cldtot(i,k) = cld_frac_XuRandall(plyr(i,k), qstl(i,k),     &    
+     &          rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.,                 &
+     &          cond_cfrac_onRH) 
+          end do
+          end do
         endif
 
       endif                                ! if (uni_cld) then
@@ -3119,54 +3135,56 @@
 
       END SUBROUTINE adjust_cloudFinal
 
-!> This subroutine computes the Xu-Randall cloud fraction scheme.
-      subroutine cloud_fraction_XuRandall                               &
-     &     ( IX, NLAY, xrc3, xr_exp, plyr, clwf, rhly, qstl,            & !  ---  inputs
-     &       cldtot, cond_cfrac_onRH)                                     !  ---  outputs
- 
-!  ---  inputs:
-      integer, intent(in) :: IX, NLAY
-      real (kind=kind_phys), intent(in) :: xrc3, xr_exp
-      real (kind=kind_phys), dimension(:,:), intent(in) :: plyr, clwf,  &
-     &                                                     rhly, qstl  
-      logical, intent(in), optional :: cond_cfrac_onRH
+!> This function computes the cloud-fraction following
+!! Xu-Randall(1996) \cite xu_and_randall_1996
+!!
+      function cld_frac_XuRandall(p_lay, qs_lay, relhum, cld_mr, alpha, & !  ---  inputs 
+     &                            lambda, factor, cond_cfrac_onRH)
+        implicit none
+        ! Inputs
+        logical, intent(in), optional ::                                &
+     &     cond_cfrac_onRH    ! If true, cloud-fracion set to unity when rh>99%
 
-!  ---  outputs
-      real (kind=kind_phys), dimension(:,:), intent(inout) :: cldtot
+        real(kind_phys), intent(in) ::                                  &
+     &     p_lay,                                                       & !< Pressure (100Pa)
+     &     qs_lay,                                                      & !< Saturation vapor-pressure (Pa)
+     &     relhum,                                                      & !< Relative humidity
+     &     cld_mr,                                                      & !< Total cloud mixing ratio
+     &     alpha,                                                       & !< Scheme parameter (default=100)
+     &     lambda,                                                      &
+     &     factor                                    ! factor=1.0 for RRTMGP, factor=0 for RRTMG
 
-!  ---  local variables:
+        ! Outputs
+        real(kind_phys) :: cld_frac_XuRandall
 
-       real (kind=kind_phys) :: clwmin, clwm, clwt, onemrh, value,      &
-     &       tem1, tem2
-       integer :: i, k
+        ! Locals
+        real(kind_phys) :: clwt, clwm, onemrh, tem1, tem2, tem3
 
-!> - Compute layer cloud fraction.
+!        ! Parameters
+!        real(kind_phys) :: &
+!           lambda = 0.50  ! , & 
+!           P      = 0.25
 
-        clwmin = 0.0
-        do k = 1, NLAY-1
-        do i = 1, IX
-          clwt = 1.0e-6 * (plyr(i,k)*0.001)
-
-          if (clwf(i,k) > clwt) then
-            if(present(cond_cfrac_onRH) .and. rhly(i,k) > 0.99) then
-              cldtot(i,k) = 1.
-            else
-              onemrh= max( 1.e-10, 1.0-rhly(i,k) )
-              clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
-
-              tem1  = min(max((onemrh*qstl(i,k))**xr_exp,0.0001),1.0)
-              tem1  = xrc3 / tem1
-
-              value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
-              tem2  = sqrt( sqrt(rhly(i,k)) )
-
-              cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
-            endif
+        clwt = 1.0e-6 * (p_lay*0.001)
+        clwm = clwt * factor
+        if (cld_mr > clwt) then
+          if(present(cond_cfrac_onRH) .and. relhum > 0.99) then
+            cld_frac_XuRandall = 1.
+          else
+            onemrh = max(1.e-10, 1.0 - relhum)
+            tem1   = alpha/min(max((onemrh*qs_lay)**lambda,0.0001),1.0)
+            tem2   = max(min(tem1*(cld_mr - clwm), 50.0 ), 0.0 )
+            tem3   = sqrt(sqrt(relhum)) ! This assumes "p" = 0.25. Identical, but cheaper than relhum**p
+          !
+            cld_frac_XuRandall = max( tem3*(1.0-exp(-tem2)), 0.0 )
           endif
-        enddo
-        enddo
+        else
+          cld_frac_XuRandall = 0.0
+        endif
 
-      end subroutine cloud_fraction_XuRandall 
+        return
+      end function
+
 !........................................!
       end module module_radiation_clouds
 !>@}
