@@ -72,20 +72,20 @@
         use machine,               only: kind_phys, kind_dbl_prec, kind_sngl_prec
 
         implicit none
-        
+
         integer,                          intent(in)    :: idate(:)
         integer,                          intent(in)    :: jdat(:), idat(:)
         integer,                          intent(in)    :: nsswr, nslwr, me,     &
                                                            master, nscyc
         logical,                          intent(in)    :: debug
         real(kind=kind_phys),             intent(in)    :: dtp
-        
+
         integer,                          intent(out)   :: kdt, yearlen, ipt
         logical,                          intent(out)   :: lprnt, lssav, lsswr,  &
                                                            lslwr
         real(kind=kind_phys),             intent(out)   :: sec, phour, zhour,    &
                                                            fhour, julian, solhr
-        
+
         character(len=*),                 intent(out)   :: errmsg
         integer,                          intent(out)   :: errflg
 
@@ -120,22 +120,23 @@
            call w3difdat(jdat,idat,4,rinc8)
            sec = rinc8(4)
         else
-           write(errmsg,'(*(a))') "FATAL ERROR: Invalid w3kindreal or w3kindint:", w3kindreal, w3kindint
+           write(errmsg,'(a,2i4)') "FATAL ERROR: Invalid w3kindreal or w3kindint:", w3kindreal, w3kindint
            errflg = 1
            return
         end if
         phour = sec/con_hr
+
         !--- set current bucket hour
         zhour = phour
         fhour = (sec + dtp)/con_hr
         kdt   = nint((sec + dtp)/dtp)
-        
-        !GJF* These calculations were originally in GFS_physics_driver.F90 for 
-        !     NoahMP. They were moved to this routine since they only depends 
-        !     on time (not space). Note that this code is included as-is from 
-        !     GFS_physics_driver.F90, but it may be simplified by using more 
-        !     NCEP W3 library calls (e.g., see W3DOXDAT, W3FS13 for Julian day 
-        !     of year and W3DIFDAT to determine the integer number of days in 
+
+        !GJF* These calculations were originally in GFS_physics_driver.F90 for
+        !     NoahMP. They were moved to this routine since they only depend
+        !     on time (not space). Note that this code is included as-is from
+        !     GFS_physics_driver.F90, but it may be simplified by using more
+        !     NCEP W3 library calls (e.g., see W3DOXDAT, W3FS13 for Julian day
+        !     of year and W3DIFDAT to determine the integer number of days in
         !     a given year). *GJF
         ! Julian day calculation (fcst day of the year)
         ! we need yearln and julian to
@@ -148,7 +149,7 @@
         fjd    = float(jdat(5))/24.0 + float(jdat(6))/1440.0
 
         julian = float(jd1-jd0) + fjd
-        
+
         !
         ! Year length
         !
