@@ -104,6 +104,8 @@
 !! emissivity for LW radiation.  
       module module_radiation_surface
 !
+      use mpi_f08
+      use mpiutil,           only : ccpp_bcast
       use machine,           only : kind_phys
       use module_iounitdef,  only : NIRADSF
       use surface_perturbation, only : ppfbet
@@ -139,7 +141,8 @@
 !>\section gen_sfc_init sfc_init General Algorithm
 !-----------------------------------
       subroutine sfc_init                                               &
-     &     ( me, ialbflg, iemsflg, semis_file, con_pi, errmsg, errflg )!  ---  inputs/outputs:
+     &     ( mpicomm, mpirank, mpiroot, ialbflg, iemsflg, semis_file,   &
+     &       con_pi, errmsg, errflg ) !  ---  inputs/outputs:
 !
 !  ===================================================================  !
 !                                                                       !
@@ -172,7 +175,9 @@
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: me, ialbflg, iemsflg
+      type(MPI_Comm), intent(in) :: mpicomm
+      integer, intent(in) :: mpirank, mpiroot
+      integer, intent(in) :: ialbflg, iemsflg
       real(kind=kind_phys), intent(in) :: con_pi
       character(len=26), intent(in) :: semis_file
 !  ---  outputs: ( none )
@@ -192,8 +197,7 @@
 !
       ! Module
       rad2dg = 180.0 / con_pi
-
-      if ( me == 0 ) print *, VTAGSFC   ! print out version tag
+      if ( mpirank==mpiroot ) print *, VTAGSFC   ! print out version tag
 
 !> - Initialization of surface albedo section
 !! \n GFS_typedefs::ialbflg
@@ -202,13 +206,13 @@
 
       if ( ialbflg == 1 ) then
 
-        if ( me == 0 ) then
+        if ( mpirank==mpiroot ) then
           print *,' - Using MODIS based land surface albedo for sw'
         endif
 
       elseif ( ialbflg == 2 ) then      ! use albedo from land model
 
-        if ( me == 0 ) then
+        if ( mpirank==mpiroot ) then
           print *,' - Using Albedo From Land Model'
         endif
 
@@ -236,30 +240,28 @@
 
 !  ---  check to see if requested emissivity data file existed
 
-        inquire (file=semis_file, exist=file_exist)
+        read_and_broadcast: if (mpirank==mpiroot) then
+          inquire (file=semis_file, exist=file_exist)
 
-        if ( .not. file_exist ) then
-          if ( me == 0 ) then
+          if ( .not. file_exist ) then
             print *,' - Using Varying Surface Emissivity for lw'
             print *,'   Requested data file "',semis_file,'" not found!'
-          endif
-          errmsg = 'module_radiation_surface: surface emissivity
+            errmsg = 'module_radiation_surface: surface emissivity
      & file not provided'
-          errflg = 1
-          return
+            errflg = 1
+            return
 
-        else
-          close(NIRADSF)
-          open (NIRADSF,file=semis_file,form='formatted',status='old')
-          rewind NIRADSF
+          else
+            close(NIRADSF)
+            open (NIRADSF,file=semis_file,form='formatted',status='old')
+            rewind NIRADSF
 
-          read (NIRADSF,12) cline
-  12      format(a80)
+            read (NIRADSF,12) cline
+  12        format(a80)
 
-          read (NIRADSF,14) idxems
-  14      format(80i1)
+            read (NIRADSF,14) idxems
+  14        format(80i1)
 
-          if ( me == 0 ) then
             print *,' - Using Varying Surface Emissivity for lw'
             print *,'   Opened data file: ',semis_file
             print *, cline
@@ -267,14 +269,15 @@
 !           ia = IMXEMS / 5
 !           ja = JMXEMS / 5
 !           print *, idxems(1:IMXEMS:ia,1:JMXEMS:ja)
-          endif
+            close(NIRADSF)
+          endif    ! end if_file_exist_block
+        endif read_and_broadcast
 
-          close(NIRADSF)
-        endif    ! end if_file_exist_block
+        call ccpp_bcast(idxems, mpiroot, mpicomm, errflg)
 
       elseif ( iemslw == 2 ) then        ! use emiss from land model
 
-        if ( me == 0 ) then
+        if ( mpirank==mpiroot ) then
           print *,' - Using Surface Emissivity From Land Model'
         endif
 

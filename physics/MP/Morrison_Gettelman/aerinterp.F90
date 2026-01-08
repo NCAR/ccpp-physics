@@ -7,6 +7,7 @@
 !! aerosol data for MG microphysics.
 module aerinterp
 
+    use mpi_f08
     implicit none
 
     private read_netfaer, read_netfaer_dl, fdnx_fname
@@ -36,13 +37,15 @@ contains
 
       END function netcdf_check
 !!!!!!!
-      SUBROUTINE read_aerdata_dl (me, master, iflip, idate, FHOUR, errmsg, errflg)
-      use machine, only: kind_phys, kind_io4,  kind_dbl_prec
+      SUBROUTINE read_aerdata_dl (mpicomm, mpirank, mpiroot, iflip, idate, fhour, errmsg, errflg)
+      use machine, only: kind_phys, kind_dbl_prec
+      use mpiutil, only: ccpp_bcast
       use aerclm_def
       use netcdf
 
 !--- in/out
-      integer, intent(in) :: me, master, iflip, idate(4)
+      type(MPI_Comm), intent(in) :: mpicomm
+      integer, intent(in) :: mpirank, mpiroot, iflip, idate(4)
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
       real(kind=kind_phys), intent(in) :: fhour
@@ -51,6 +54,7 @@ contains
       integer      :: i, j, k, n, ii, imon, klev
       character    :: fname*50, mn*2, vname*10, dy*2, myr*4
       logical      :: file_exist
+      integer      :: ierr
       integer :: dimids(NF90_MAX_VAR_DIMS)
       integer :: dimlen(NF90_MAX_VAR_DIMS)
       integer  IDAT(8),JDAT(8)
@@ -63,13 +67,13 @@ contains
 
 !
 !! ===================================================================
-      if (me == master) then
+      read_and_broadcast_1: if (mpirank==mpiroot) then
          if ( iflip == 0 )  then             ! data from toa to sfc
           print *, "GFS is top-down"
          else
           print *, "GFS is bottom-up"
          endif
-      endif
+
 !!  found first day needed to interpolated
       IDAT = 0
       IDAT(1) = IDATE(4)
@@ -133,9 +137,13 @@ contains
       levsw = dimlen(3)
       tsaer = dimlen(4)
 
-      if(me==master) then
-         print *, 'MERRA2 dim: ',dimlen(1:ndims)
-      endif
+      print *, 'MERRA2 dim: ',dimlen(1:ndims)
+      endif read_and_broadcast_1
+
+      call ccpp_bcast(lonsaer, mpiroot, mpicomm, ierr)
+      call ccpp_bcast(latsaer, mpiroot, mpicomm, ierr)
+      call ccpp_bcast(levsw,   mpiroot, mpicomm, ierr)
+      call ccpp_bcast(tsaer,   mpiroot, mpicomm, ierr)
 
 ! allocate arrays
 
@@ -146,6 +154,7 @@ contains
       endif
 
 ! construct lat/lon array
+      read_and_broadcast_2: if (mpirank==mpiroot) then
       varid = -1
       if(.not.netcdf_check(nf90_inq_varid(ncid, 'lat', varid), &
            errmsg, errflg, 'find id of lat var')) then
@@ -179,15 +188,21 @@ contains
       if(.not.netcdf_check(nf90_close(ncid), errmsg, errflg, 'close '//trim(fname))) then
         return
       endif
+      endif read_and_broadcast_2
+
+      call ccpp_bcast(aer_lat, mpiroot, mpicomm, ierr)
+      call ccpp_bcast(aer_lon, mpiroot, mpicomm, ierr)
+      call ccpp_bcast(aer_t, mpiroot, mpicomm, ierr)
       END SUBROUTINE read_aerdata_dl
 !
 !**********************************************************************
-      SUBROUTINE read_aerdataf_dl ( me, master, iflip, idate, FHOUR, errmsg, errflg)
+      SUBROUTINE read_aerdataf_dl (mpicomm, mpirank, mpiroot, iflip, idate, fhour, errmsg, errflg)
       use machine, only: kind_phys, kind_dbl_prec
       use aerclm_def
 
 !--- in/out
-      integer, intent(in) :: me, master, iflip, idate(4)
+      type(MPI_Comm), intent(in) :: mpicomm
+      integer, intent(in) :: mpirank, mpiroot, iflip, idate(4)
       character(len=*), intent(inout) :: errmsg
       integer, intent(inout) :: errflg
       real(kind=kind_phys), intent(in) :: fhour
@@ -242,20 +257,20 @@ contains
       enddo
       if(fd_upb) then
         t1sv = aer_t(j-1)
-        call read_netfaer_dl(fname_dl, j-1, iflip, 1, errmsg, errflg)
-        call read_netfaer_dl(fname_dl, n2sv, iflip, 2, errmsg, errflg)
+        call read_netfaer_dl(mpicomm, mpirank, mpiroot, fname_dl, j-1, iflip, 1, errmsg, errflg)
+        call read_netfaer_dl(mpicomm, mpirank, mpiroot, fname_dl, n2sv, iflip, 2, errmsg, errflg)
       else
         t1sv = aer_t(tsaer)
-        call read_netfaer_dl(fname_dl, tsaer, iflip, 1, errmsg, errflg)
+        call read_netfaer_dl(mpicomm, mpirank, mpiroot, fname_dl, tsaer, iflip, 1, errmsg, errflg)
         n2sv=1
         t2sv=1440.
         call fdnx_fname (jdat(1), jdat(2),jdat(3),fname_dl)
-        call read_netfaer_dl(fname_dl, n2sv, iflip, 2, errmsg, errflg)
+        call read_netfaer_dl(mpicomm, mpirank, mpiroot, fname_dl, n2sv, iflip, 2, errmsg, errflg)
       end if
       END SUBROUTINE read_aerdataf_dl
 !**********************************************************************
 !
-      SUBROUTINE aerinterpol_dl( me,master,nthrds,npts,IDATE,FHOUR,iflip, jindx1,jindx2, &
+      SUBROUTINE aerinterpol_dl(mpicomm, mpirank, mpiroot,nthrds,npts,IDATE,FHOUR,iflip, jindx1,jindx2, &
                              ddy,iindx1,iindx2,ddx,lev,prsl,aerout, errmsg,errflg)
 !
       use machine, only: kind_phys, kind_dbl_prec
@@ -272,7 +287,9 @@ contains
 !
 
       integer  JINDX1(npts), JINDX2(npts), iINDX1(npts), iINDX2(npts)
-      integer  me,idate(4), master, nthrds
+      type(MPI_Comm), intent(in) :: mpicomm
+      integer, intent(in) :: mpirank, mpiroot
+      integer  idate(4), nthrds
       integer  IDAT(8),JDAT(8)
 !
       real(kind=kind_phys) DDY(npts), ddx(npts),ttt
@@ -302,7 +319,7 @@ contains
 !     rjday is the minutes in a day
       rjday =  jdat(5)*60+jdat(6)+jdat(7)/60.
       if(rjday >= t2sv .or. jdat(3).ne.n1sv) then !!need to either to read in a record or open a new file
-        call read_netfaer_dl(fname_dl,n2sv, iflip, 1, errmsg, errflg)
+        call read_netfaer_dl(mpicomm, mpirank, mpiroot, fname_dl,n2sv, iflip, 1, errmsg, errflg)
       end if
 !! ===================================================================
       if(jdat(3).ne.n1sv) then  ! a new day is produced from n2sv=1440
@@ -314,7 +331,7 @@ contains
          write(mn,'(i2.2)') jdat(2)
          write(dy,'(i2.2)') jdat(3)
          fname_dl="merra2_"//myr//mn//dy//".nc"
-         call read_netfaer_dl(fname_dl,n2sv, iflip, 2, errmsg, errflg)
+         call read_netfaer_dl(mpicomm, mpirank, mpiroot, fname_dl,n2sv, iflip, 2, errmsg, errflg)
       else if (rjday >= t2sv) then
         if(t2sv < aer_t(tsaer)) then 
           n1sv=jdat(3)
@@ -325,14 +342,14 @@ contains
           write(mn,'(i2.2)') jdat(2)
           write(dy,'(i2.2)') jdat(3)
           fname_dl="merra2_"//myr//mn//dy//".nc"
-          call read_netfaer_dl(fname_dl,n2sv, iflip, 2, errmsg, errflg)
+          call read_netfaer_dl(mpicomm, mpirank, mpiroot, fname_dl,n2sv, iflip, 2, errmsg, errflg)
         else !! need to read a new file
           n1sv=jdat(3)
           t1sv=aer_t(tsaer)
           n2sv=1
           t2sv=1440.
           call fdnx_fname (jdat(1), jdat(2),jdat(3),fname_dl)
-          call read_netfaer_dl(fname_dl, n2sv, iflip, 2, errmsg, errflg)
+          call read_netfaer_dl(mpicomm, mpirank, mpiroot, fname_dl, n2sv, iflip, 2, errmsg, errflg)
         end if
       end if
 !
@@ -422,13 +439,15 @@ contains
       RETURN
       END SUBROUTINE aerinterpol_dl
 
-      SUBROUTINE read_aerdata (me, master, iflip, idate, errmsg, errflg)
-      use machine, only: kind_phys, kind_io4
+      SUBROUTINE read_aerdata (mpicomm, mpirank, mpiroot, iflip, idate, errmsg, errflg)
+      use machine, only: kind_phys
+      use mpiutil, only: ccpp_bcast
       use aerclm_def
       use netcdf
 
 !--- in/out
-      integer, intent(in) :: me, master, iflip, idate(4)
+      type(MPI_Comm), intent(in) :: mpicomm
+      integer, intent(in) :: mpirank, mpiroot, iflip, idate(4)
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
@@ -437,6 +456,7 @@ contains
       integer      :: i, j, k, n, ii, imon, klev
       character    :: fname*50, myr*4, mn*2, dy*2,vname*10
       logical      :: file_exist
+      integer      :: ierr
       integer :: dimids(NF90_MAX_VAR_DIMS)
       integer :: dimlen(NF90_MAX_VAR_DIMS)
 
@@ -445,13 +465,12 @@ contains
 
 !
 !! ===================================================================
-      if (me == master) then
+      read_and_broadcast_1: if (mpirank==mpiroot) then
          if ( iflip == 0 )  then             ! data from toa to sfc
           print *, "GFS is top-down"
          else
           print *, "GFS is bottom-up"
          endif
-      endif
 !
 !! ===================================================================
 !! check if one file exist
@@ -500,9 +519,12 @@ contains
       latsaer = dimlen(2)
       levsw = dimlen(3)
 
-      if(me==master) then
-         print *, 'MERRA2 dim: ',dimlen(1:ndims)
-      endif
+      print *, 'MERRA2 dim: ',dimlen(1:ndims)
+      endif read_and_broadcast_1
+
+      call ccpp_bcast(lonsaer, mpiroot, mpicomm, ierr)
+      call ccpp_bcast(latsaer, mpiroot, mpicomm, ierr)
+      call ccpp_bcast(levsw,   mpiroot, mpicomm, ierr)
 
 ! allocate arrays
 
@@ -512,6 +534,7 @@ contains
       endif
 
 ! construct lat/lon array
+      read_and_broadcast_2: if (mpirank==mpiroot) then
       varid = -1
       if(.not.netcdf_check(nf90_inq_varid(ncid, 'lat', varid), &
            errmsg, errflg, 'find id of lat var')) then
@@ -535,15 +558,20 @@ contains
       if(.not.netcdf_check(nf90_close(ncid), errmsg, errflg, 'close '//trim(fname))) then
         return
       endif
+      endif read_and_broadcast_2
+
+      call ccpp_bcast(aer_lat, mpiroot, mpicomm, ierr)
+      call ccpp_bcast(aer_lon, mpiroot, mpicomm, ierr)
       END SUBROUTINE read_aerdata
 !
 !**********************************************************************
-      SUBROUTINE read_aerdataf ( me, master, iflip, idate, FHOUR, errmsg, errflg)
+      SUBROUTINE read_aerdataf (mpicomm, mpirank, mpiroot, iflip, idate, FHOUR, errmsg, errflg)
       use machine, only: kind_phys, kind_dbl_prec
       use aerclm_def
 
 !--- in/out
-      integer, intent(in) :: me, master, iflip, idate(4)
+      type(MPI_Comm), intent(in) :: mpicomm
+      integer, intent(in) :: mpirank, mpiroot, iflip, idate(4)
       character(len=*), intent(inout) :: errmsg
       integer, intent(inout) :: errflg
       real(kind=kind_phys), intent(in) :: fhour
@@ -590,9 +618,9 @@ contains
       n1 = n2 - 1
       if (n2 > 12) n2 = n2 -12
 !! ===================================================================
-      call read_netfaer(n1, iflip, 1, errmsg, errflg)
+      call read_netfaer(mpicomm, mpirank, mpiroot, n1, iflip, 1, errmsg, errflg)
       if(errflg/=0) return
-      call read_netfaer(n2, iflip, 2, errmsg, errflg)
+      call read_netfaer(mpicomm, mpirank, mpiroot, n2, iflip, 2, errmsg, errflg)
       if(errflg/=0) return
 !! ===================================================================
       n1sv=n1
@@ -601,7 +629,7 @@ contains
       END SUBROUTINE read_aerdataf
 !
       SUBROUTINE setindxaer(npts,dlat,jindx1,jindx2,ddy,dlon,           &
-                            iindx1,iindx2,ddx,me,master)
+                            iindx1,iindx2,ddx)
 !
       USE MACHINE,  ONLY: kind_phys
       use aerclm_def, only: aer_lat, jaero=>latsaer,                    &
@@ -609,7 +637,6 @@ contains
 !
       implicit none
 !
-      integer me, master
       integer npts, JINDX1(npts),JINDX2(npts),IINDX1(npts),IINDX2(npts)
       real(kind=kind_phys) dlat(npts),DDY(npts),dlon(npts),DDX(npts)
 !
@@ -658,7 +685,8 @@ contains
 !**********************************************************************
 !**********************************************************************
 !
-      SUBROUTINE aerinterpol( me,master,nthrds,npts,IDATE,FHOUR,iflip, jindx1,jindx2, &
+      SUBROUTINE aerinterpol(mpicomm,mpirank,mpiroot,nthrds,npts, &
+                             IDATE,FHOUR,iflip, jindx1,jindx2, &
                              ddy,iindx1,iindx2,ddx,lev,prsl,aerout, errmsg,errflg)
 !
       use machine, only: kind_phys, kind_dbl_prec
@@ -675,7 +703,9 @@ contains
 !
 
       integer  JINDX1(npts), JINDX2(npts), iINDX1(npts), iINDX2(npts)
-      integer  me,idate(4), master, nthrds
+      type(MPI_Comm), intent(in) :: mpicomm
+      integer  mpirank, mpiroot
+      integer  idate(4), nthrds
       integer  IDAT(8),JDAT(8)
 !
       real(kind=kind_phys) DDY(npts), ddx(npts),ttt
@@ -716,12 +746,12 @@ contains
 !     need to read a new month 
       if (n1.ne.n1sv) then
 #ifdef DEBUG
-        if (me == master) write(*,*)"read in a new month MERRA2", n2
+        if (mpirank==mpiroot) write(*,*)"read in a new month MERRA2", n2
 #endif
 !! ===================================================================
-        call read_netfaer(n1, iflip, 1, errmsg, errflg)
+        call read_netfaer(mpicomm, mpirank, mpiroot, n1, iflip, 1, errmsg, errflg)
         if(errflg/=0) return
-        call read_netfaer(n2, iflip, 2, errmsg, errflg)
+        call read_netfaer(mpicomm, mpirank, mpiroot, n2, iflip, 2, errmsg, errflg)
         if(errflg/=0) return
 !! ===================================================================
         n1sv=n1
@@ -853,11 +883,13 @@ contains
       RETURN
       END SUBROUTINE fdnx_fname
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      subroutine read_netfaer_dl(fname, nf, iflip,nt, errmsg,errflg)
+      subroutine read_netfaer_dl(mpicomm, mpirank, mpiroot, fname, nf, iflip, nt, errmsg, errflg)
       use machine, only: kind_phys, kind_io4
+      use mpiutil, only: ccpp_bcast
       use aerclm_def
       use netcdf
+      type(MPI_Comm), intent(in) :: mpicomm
+      integer, intent(in) :: mpirank, mpiroot
       integer, intent(in) :: iflip, nf, nt
       character,intent(in)   :: fname*50
       integer, intent(out) :: errflg
@@ -868,8 +900,10 @@ contains
       real(kind=kind_io4),allocatable,dimension(:,:,:,:):: buffx
       real(kind=kind_io4),allocatable,dimension(:,:)   :: pres_tmp
       integer lstart(4), lcount(4)
+      integer ierr
 
 !! ===================================================================
+      read_and_broadcast: if (mpirank==mpiroot) then
       allocate (buff(lonsaer, latsaer, levsw))
       allocate (pres_tmp(lonsaer, levsw))
       allocate (buffx(lonsaer, latsaer, levsw, 1))
@@ -958,14 +992,22 @@ contains
       if(.not.netcdf_check(nf90_close(ncid), errmsg, errflg, 'close '//trim(fname))) then
         return
       endif
+
       deallocate (buff, pres_tmp)
       deallocate (buffx)
+      endif read_and_broadcast
+      
+      call ccpp_bcast(aer_pres, mpiroot, mpicomm, ierr)
+      call ccpp_bcast(aerin,    mpiroot, mpicomm, ierr)
       END SUBROUTINE read_netfaer_dl
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      subroutine read_netfaer(nf, iflip,nt, errmsg,errflg)
+      subroutine read_netfaer(mpicomm, mpirank, mpiroot, nf, iflip, nt, errmsg, errflg)
       use machine, only: kind_phys, kind_io4
+      use mpiutil, only: ccpp_bcast
       use aerclm_def
       use netcdf
+      type(MPI_Comm), intent(in) :: mpicomm
+      integer, intent(in) :: mpirank, mpiroot
       integer, intent(in) :: iflip, nf, nt
       integer, intent(out) :: errflg
       character(*), intent(out) :: errmsg
@@ -974,8 +1016,10 @@ contains
       real(kind=kind_io4),allocatable,dimension(:,:,:) :: buff
       real(kind=kind_io4),allocatable,dimension(:,:,:,:):: buffx
       real(kind=kind_io4),allocatable,dimension(:,:)   :: pres_tmp
+      integer :: ierr
       
 !! ===================================================================
+      read_and_broadcast: if (mpirank==mpiroot) then
       allocate (buff(lonsaer, latsaer, levsw))
       allocate (pres_tmp(lonsaer, levsw))
       allocate (buffx(lonsaer, latsaer, levsw, 1))
@@ -1067,6 +1111,10 @@ contains
       endif
       deallocate (buff, pres_tmp)
       deallocate (buffx)
+      endif read_and_broadcast
+      
+      call ccpp_bcast(aer_pres, mpiroot, mpicomm, ierr)
+      call ccpp_bcast(aerin,    mpiroot, mpicomm, ierr)
       END SUBROUTINE read_netfaer
 
 end module aerinterp

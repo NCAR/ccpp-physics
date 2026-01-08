@@ -2,6 +2,7 @@
   name = GFS_rrtmg_setup
   type = scheme
   dependencies_path = ../../
+  dependencies = mpiutil.F90
   dependencies = hooks/machine.F
   dependencies = Radiation/radiation_aerosols.f
   dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
@@ -233,9 +234,23 @@
   dimensions =  ()
   type = logical
   intent = in
-[me]
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = MPI_Comm
+  intent = in
+[mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
   units = index
   dimensions = ()
   type = integer
@@ -440,9 +455,23 @@
   dimensions = ()
   type = logical
   intent = in
-[me]
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = MPI_Comm
+  intent = in
+[mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
   units = index
   dimensions = ()
   type = integer
