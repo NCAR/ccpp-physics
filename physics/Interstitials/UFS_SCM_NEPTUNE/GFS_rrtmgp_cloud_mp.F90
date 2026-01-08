@@ -346,8 +346,7 @@ contains
          cld_cnv_frac     !< Convective cloud-fraction (1)
     ! Local
     integer :: iCol, iLay
-    real(kind_phys) :: tem1, deltaP, clwc, qc, qi, play_pa
-    real(kind_phys) :: lambda = 0.50 
+    real(kind_phys) :: tem1, deltaP, clwc, qc, qi
 
     tem1 = 1.0e5/con_g
     do iLay = 1, nLev
@@ -372,10 +371,9 @@ contains
              !eff radius cloud ice (microns), from Mishra et al. (2014, JGR Atmos, fig 6b) 
              if(qi > 1.E-8) cld_cnv_reice(iCol,iLay) = max(173.45 + 2.14*(t_lay(iCol,iLay)-273.15), 20.)
       
-             ! Xu-Randall (1996) cloud-fraction.
-             play_pa = p_lay(iCol,iLay) *0.01
-             cld_cnv_frac(iCol,iLay) = cld_frac_XuRandall(play_pa, qs_lay(iCol,iLay),        &
-                  relhum(iCol,iLay), qc+qi, alpha0, lambda, 1.0)
+             ! Xu-Randall (1996) cloud-fraction, lambda = 0.5
+             cld_cnv_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay)*0.01,    &
+                qs_lay(iCol,iLay), relhum(iCol,iLay), qc+qi, alpha0, 0.5, 1.0)   
           endif
        enddo
     enddo
@@ -491,8 +489,7 @@ contains
          cld_cnv_frac     !< Convective cloud-fraction
     ! Local
     integer :: iCol, iLay
-    real(kind_phys) :: tem0, tem1, deltaP, clwc, play_pa
-    real(kind_phys) :: lambda = 0.50
+    real(kind_phys) :: tem0, tem1, deltaP, clwc
 
     tem0 = 1.0e5/con_g
     do iLay = 1, nLev
@@ -506,10 +503,10 @@ contains
              cld_cnv_reliq(iCol,iLay) = reliq_def
              cld_cnv_reice(iCol,iLay) = reice_def
 
-             ! Xu-Randall (1996) cloud-fraction.
-             play_pa = p_lay(iCol,iLay) * 0.01
-             cld_cnv_frac(iCol,iLay) = cld_frac_XuRandall(play_pa, qs_lay(iCol,iLay),  &
-               relhum(iCol,iLay), cnv_mixratio(iCol,iLay), alpha0, lambda, 1.0)
+             ! Xu-Randall (1996) cloud-fraction, lambda = 0.5
+             cld_cnv_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay)*0.01,  &
+               qs_lay(iCol,iLay), relhum(iCol,iLay), cnv_mixratio(iCol,iLay),     &
+               alpha0, 0.5, 1.0)
           endif
        enddo
     enddo
@@ -710,8 +707,7 @@ contains
          cld_rwp              !< Cloud rain water path
 
     ! Local variables
-    real(kind_phys) :: tem1, pfac, cld_mr, deltaP, tem2, play_pa
-    real(kind_phys) :: lambda = 0.50
+    real(kind_phys) :: tem1, pfac, cld_mr, deltaP, tem2
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
     integer :: iCol,iLay,l
 
@@ -743,11 +739,12 @@ contains
           cld_swp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,4) * tem1 * deltaP)
        
           ! Xu-Randall (1996) cloud-fraction. **Additionally, Conditioned on relative-humidity**
+          ! lambda = 0.5
           cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +          &
                cld_condensate(iCol,iLay,3) + cld_condensate(iCol,iLay,4)
-          play_pa = p_lay(iCol,iLay) * 0.01
-          cld_frac(iCol,iLay) = cld_frac_XuRandall(play_pa, qs_lay(iCol,iLay),          &
-               relhum(iCol,iLay), cld_mr, alpha0, lambda, 1.0, cond_cfrac_onRH)
+          cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay)*0.01,               &
+               qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0,                    &
+               0.5, 1.0, cond_cfrac_onRH)
        enddo
     enddo
 
