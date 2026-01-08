@@ -2,7 +2,7 @@
   name = GFS_rrtmg_setup
   type = scheme
   dependencies_path = ../../
-  dependencies = mpiutil.F90
+  dependencies = tools/mpiutil.F90
   dependencies = hooks/machine.F
   dependencies = Radiation/radiation_aerosols.f
   dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
