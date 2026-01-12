@@ -47,11 +47,10 @@ contains
       real(kind=kind_phys), dimension(:), intent(  out)  :: frland
       real(kind=kind_phys), dimension(:), intent(in   )  :: snowd, tprcp, uustar, weasd, qss
       real(kind=kind_phys), dimension(:), intent(inout)  :: tisfc
-      
       real(kind=kind_phys), dimension(:), intent(inout)  :: tsfc, tsfco, tsfcl
       real(kind=kind_phys), dimension(:), intent(inout)  :: tgrs1
       real(kind=kind_phys), dimension(:), intent(inout)  :: snowd_lnd, snowd_ice, tprcp_wat,            &
-                    tprcp_lnd, tprcp_ice, tsfc_wat, tsurf_wat, tsurf_lnd, tsurf_ice,                    &
+                    tprcp_lnd, tprcp_ice, tsfc_wat, tsurf_wat,tsurf_lnd, tsurf_ice,                     &
                     uustar_wat, uustar_lnd, uustar_ice, weasd_lnd, weasd_ice,                           &
                     qss_wat, qss_lnd, qss_ice, ep1d_ice, gflx_ice
       real(kind=kind_phys),                intent(in   ) :: tgice
@@ -89,7 +88,7 @@ contains
           endif
         enddo
       endif
-      
+
        do i=1,im
          if(use_lake_model(i) > 0) then
              wet(i) = .true.
@@ -258,10 +257,12 @@ contains
           if (use_cdeps_data) then
             if (mask_dat(i) <= 0.0) then
               tsfc_wat(i) = tsfco(i)
-            endif
+              tsurf_wat(i) = tsfco(i)
+            endif  
           else
             tsfc_wat(i) = tsfco(i)
-          endif
+            tsurf_wat(i) = tsfco(i)
+          endif 
           zorlo(i) = max(1.0e-5, min(one, zorlo(i)))
         ! DH*
         else
