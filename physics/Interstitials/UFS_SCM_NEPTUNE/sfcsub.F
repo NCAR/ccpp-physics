@@ -456,45 +456,9 @@
      &     vmnfcsd, vmxfcsd, slpfcsd, absfcsd
       real (kind=kind_io8), allocatable, dimension(:,:) ::              &
      &                                        smcfcsd, stcfcsd, albfcsd
-!  input and output surface fields (bges) file names
 !  sigma level 1 temperature for dead start
       real (kind=kind_io8) sig1t(len)
       character*32 label
-!     output file  ... primary surface file for radiation and forecast
-!       rec.  1    label
-!       rec.  2    date record
-!       rec.  3    tsf
-!       rec.  4    soilm(lsoil)
-!       rec.  5    snow
-!       rec.  6    soilt(lsoil)
-!       rec.  7    tg3
-!       rec.  8    zor
-!       rec.  9    cv
-!       rec. 10    cvb
-!       rec. 11    cvt
-!       rec. 12    albedo (four types)
-!       rec. 13    slimsk
-!       rec. 14    vegetation cover
-!       rec. 14    plantr                         -----> skip this record
-!       rec. 15    f10m                           -----> canopy
-!       rec. 16    canopy water content (cnpanl)  -----> f10m
-!       rec. 17    vegetation type
-!       rec. 18    soil type
-!       rec. 18    soil color ? add later?
-!       rec. 19    zeneith angle dependent vegetation fraction (two types)
-!       rec. 20    uustar
-!       rec. 21    ffmm
-!       rec. 22    ffhh
-!       rec. 23    sih(one category only)
-!       rec. 24    sic
-!       rec. 25    tprcp
-!       rec. 26    srflag
-!       rec. 27    swd
-!       rec. 28    slc (lsoil)
-!       rec. 29    vmn
-!       rec. 30    vmx
-!       rec. 31    slp
-!       rec. 32    abs
 
 !  debug only
 !   ldebug=.true. creates bges files for climatology and analysis
@@ -3169,6 +3133,12 @@
         do i=1,len
           scvanl(i)=0.
         enddo
+! need to determine if the snow data is on the gaussian grid
+! or not.  if gaussian, then data is a depth, not liq equiv
+! depth. if not gaussian, then data is from hua-lu's
+! program and is a liquid equiv.  need to communicate
+! this to routine fixrda via the 3rd argument which is
+! the grib parameter id number.
         call baopenr(lugb,fnsnoa,iret)
         if (iret .ne. 0) then
           write(6,*) 'FATAL ERROR: in opening file ',trim(fnsnoa)
@@ -5133,13 +5103,11 @@
       enddo
       ijmax  = imax*jmax
       rslmsk = 0.
-! TG3 MODS BEGIN
       if(kpds5 == kpdtsf .and. imax == 138 .and. jmax == 116
      &   .and. kpds4 == 128) then
          lmask = .false.
 
       elseif(kpds5 == kpdtsf) then
-! TG3 MODS END
 !  surface temperature
         lmask = .false.
         call ga2la(slmask,igaul,jgaul,rslmsk,imax,jmax,wlon,rnlat
