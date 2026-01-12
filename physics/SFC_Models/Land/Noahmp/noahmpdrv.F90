@@ -197,6 +197,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
 
   real(kind=kind_phys)                     :: smp !< for computing supercooled water 
   real(kind=kind_phys)                     :: hc_incr
+  real(kind=kind_phys), parameter :: tfreez_noahmp=273.16 ! tfreez used in NoahMP to determine frozen ground
 
   !  --- Initialize CCPP error handling variables
   errmsg = ''
@@ -270,7 +271,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
       soil_freeze=.false.
       soil_ice=.false.
       do k = 1, lsoil_incr
-        if ( stc(ij,k) < con_t0c)  soil_freeze=.true.
+        if ( stc(ij,k) < tfreez_noahmp )  soil_freeze=.true.
         if ( smc(ij,k) - slc(ij,k) > 0.001 )  soil_ice=.true.
 
         if (Land_IAU_Control%upd_stc) then
@@ -306,14 +307,15 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
                 !the following if case applies when updated stc > melting point, it handles both
                 !case 1: frz ==> frz, recalculate slc, smc remains
                 !case 2: unfrz ==> frz, recalculate slc, smc remains
-                if (stc(i,l) .LT. con_t0c )then
+                if (stc(i,l) .LE. tfreez_noahmp )then
                   !recompute supercool liquid water,smc_anl remain unchanged
-                  smp = con_hfus*(con_t0c-stc(i,l))/(con_g*stc(i,l)) !(m)
+                  smp = con_hfus*(tfreez_noahmp-stc(i,l))/(con_g*stc(i,l)) !(m)
                   slc_new=maxsmc(soiltype)*(smp/satpsi(soiltype))**(-1./bb(soiltype))
                   slc(i,l) = max( min( slc_new, smc(i,l)), 0.0 )
                 endif
-                !case 3: frz ==> unfrz (or unfrz ==> unfrz), melt all soil ice (if any) 
-                if (stc(i,l) .GT. con_t0c )then !do not rely on stc_bck
+                !case 3: frz ==> unfrz melt all soil ice (if any)
+                if ( stc(i,l) .GT. tfreez_noahmp  .and. &
+                     stc(i,l) - stc_inc_flat(i,l)*delt .LE. tfreez_noahmp ) then
                   slc(i,l)=smc(i,l)
                 endif
               endif
