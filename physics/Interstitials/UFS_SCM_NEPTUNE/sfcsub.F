@@ -64,18 +64,18 @@
 !!\param nst_anl
 !!
 
-      subroutine sfccycle(lugb,len,lsoil,sig1t,deltsfc                    &
-     &,                   iy,im,id,ih,fh,rla,rlo                          &
-     &,                   slmskl,slmskw,orog,orog_uf,use_ufo,nst_anl      &
-     &,                   sihfcs,sicfcs,sitfcs                            &
-     &,                   swdfcs,slcfcs                                   &
-     &,                   vmnfcs,vmxfcs,slpfcs,absfcs                     &
-     &,                   tsffcs,snofcs,zorfcs,albfcs,tg3fcs              &
-     &,                   cnpfcs,smcfcs,stcfcs,slifcs,aisfcs              &
-     &,                   vegfcs,vetfcs,sotfcs,socfcs,alffcs              & 
-     &,                   cvfcs,cvbfcs,cvtfcs,me,nthrds,nlunit            &
-     &,                   sz_nml,input_nml_file                           &
-     &,                   min_ice                                         &
+      subroutine sfccycle(lugb,len,lsoil,sig1t,deltsfc                  &
+     &,                   iy,im,id,ih,fh,rla,rlo                        &
+     &,                   slmskl,slmskw,orog,orog_uf,use_ufo,nst_anl    &
+     &,                   sihfcs,sicfcs,sitfcs                          &
+     &,                   swdfcs,slcfcs                                 &
+     &,                   vmnfcs,vmxfcs,slpfcs,absfcs                   &
+     &,                   tsffcs,snofcs,zorfcs,albfcs,tg3fcs            &
+     &,                   cnpfcs,smcfcs,stcfcs,slifcs,aisfcs            &
+     &,                   vegfcs,vetfcs,sotfcs,socfcs,alffcs            &
+     &,                   cvfcs,cvbfcs,cvtfcs,me,nthrds,nlunit          &
+     &,                   sz_nml,input_nml_file                         &
+     &,                   min_ice                                       &
      &,                   ialb,isot,ivegsrc,tile_num_ch,i_index,j_index)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -114,17 +114,17 @@
      &                     vetsmn,vetimx,vetimn,vetjmx,vetjmn,          &
      &                     sotlmx,sotlmn,sotomx,sotomn,sotsmx,          &
      &                     sotsmn,sotimx,sotimn,sotjmx,sotjmn,          &
-     &                     soclmx,soclmn,socomx,socomn,socsmx,          & 
-     &                     socsmn,socimx,socimn,socjmx,socjmn,          & 
+     &                     soclmx,soclmn,socomx,socomn,socsmx,          &
+     &                     socsmn,socimx,socimn,socjmx,socjmn,          &
      &                     alslmx,alslmn,alsomx,alsomn,alssmx,          &
      &                     alssmn,alsimx,alsimn,alsjmx,alsjmn,          &
      &                     epstsf,epsalb,epssno,epswet,epszor,          &
      &                     epssmc,epsscv,eptsfc,                        &
      &                     epstg3,epsais,epsveg,epsvet,                 &
-     &                     epssot,epssoc,epsalf,qctsfs,qcsnos,qctsfi,   & 
+     &                     epssot,epssoc,epsalf,qctsfs,qcsnos,qctsfi,   &
      &                     aislim,snwmin,snwmax,cplrl,cplrs,            &
      &                     cvegl,czors,csnol,csnos,czorl,csots,         &
-     &                     csotl,csocs,csocl,cvwgs,cvetl,cvets,calfs,   & 
+     &                     csotl,csocs,csocl,cvwgs,cvetl,cvets,calfs,   &
      &                     fcalfl,fcalfs,ccvt,ccnp,ccv,ccvb,            &
      &                     calbl,calfl,calbs,ctsfs,grboro,              &
      &                     grbmsk,ctsfl,deltf,caisl,caiss,              &
@@ -133,7 +133,7 @@
      &                     faiss,fsnol,bltmsk,falbs,cvegs,percrit,      &
      &                     deltsfc,critp2,critp3,blnmsk,critp1,         &
      &                     fcplrl,fcplrs,fczors,fvets,fsotl,fsots,      &
-     &                     fsocl,fsocs,                                 & 
+     &                     fsocl,fsocs,                                 &
      &                     fvetl,fplrs,fvegl,fvegs,fcsnol,fcsnos,       &
      &                     fczorl,fcalbs,fctsfl,fctsfs,fcalbl,          &
      &                     falfs,falfl,fh,crit,zsca,ztsfc,tem1,tem2     &
@@ -397,7 +397,7 @@
 !  climatology surface fields (last character 'c' or 'clm' indicate climatology)
       character*500 fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc           &
      &,             fnplrc,fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc           &
-     &,             fnvegc,fnvetc,fnsotc,fnsocc                         & 
+     &,             fnvegc,fnvetc,fnsotc,fnsocc                         &
      &,             fnvmnc,fnvmxc,fnslpc,fnabsc, fnalbc2
       real (kind=kind_io8) tsfclm(len), wetclm(len),   snoclm(len)      &
      &,    zorclm(len), albclm(len,4), aisclm(len)                      &
@@ -418,7 +418,7 @@
      &,    tg3anl(len), acnanl(len),   cnpanl(len)                      &
      &,    cvanl (len), cvbanl(len),   cvtanl(len)                      &
      &,    scvanl(len), tsfan2(len),   veganl(len)                      &
-     &,    vetanl(len), sotanl(len),   socanl(len)                      & 
+     &,    vetanl(len), sotanl(len),   socanl(len)                      &
      &,    alfanl(len,2), slianl(len)                                   &
      &,    smcanl(len,lsoil), stcanl(len,lsoil)                         &
      &,    sihanl(len), sicanl(len)                                     &
@@ -1798,7 +1798,7 @@
      &            zorfcsd(len), slifcsd(len), aisfcsd(len),             &
      &            cnpfcsd(len), vegfcsd(len), vetfcsd(len),             &
      &            sotfcsd(len), socfcsd(len),sihfcsd(len),              &
-     &            sicfcsd(len),                                         & 
+     &            sicfcsd(len),                                         &
      &            vmnfcsd(len), vmxfcsd(len), slpfcsd(len),             &
      &            absfcsd(len))
          allocate (smcfcsd(len,lsoil), stcfcsd(len,lsoil),              &
@@ -1870,7 +1870,7 @@
         call monitr('absdif',absfcsd,slianl,snoanl,len)
        endif
        deallocate (tsffcsd, snofcsd, tg3fcsd, zorfcsd, slifcsd,         &
-     &             aisfcsd, cnpfcsd, vegfcsd, vetfcsd, sotfcsd,socfcsd, & 
+     &             aisfcsd, cnpfcsd, vegfcsd, vetfcsd, sotfcsd,socfcsd, &
      &             sihfcsd, sicfcsd, vmnfcsd, vmxfcsd, slpfcsd,         &
      &             absfcsd)
         deallocate (smcfcsd, stcfcsd, albfcsd)
@@ -2659,7 +2659,7 @@
 
               if (num_threads == 1) then
                 print*,'no matching mask found ',i,i1,j1,ix,jx          &
-     &,                ' slmask=',slmask(i),' me=',me                   & 
+     &,                ' slmask=',slmask(i),' me=',me                   &
      &,                ' outlon=',outlon(i),' outlat=',outlat(i)
      &,                'set to default value.'
               endif
@@ -2861,7 +2861,7 @@
      &     cnpanl(len),                                                 &
      &     smcanl(len,lsoil),stcanl(len,lsoil),                         &
      &     slianl(len),scvanl(len),veganl(len),                         &
-     &     vetanl(len),sotanl(len),socanl(len),alfanl(len,2) &
+     &     vetanl(len),sotanl(len),socanl(len),alfanl(len,2)            &
      &,    sihanl(len),sicanl(len)                                      &
      &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
       real (kind=kind_io8) tsfclm(len),tsfcl2(len),wetclm(len),         &
@@ -3587,7 +3587,7 @@
      &     cnpanl(len),                                                 &
      &     smcanl(len,lsoil),stcanl(len,lsoil),                         &
      &     slianl(len),veganl(len),                                     &
-     &     vetanl(len),sotanl(len),socanl(len),alfanl(len,2) &
+     &     vetanl(len),sotanl(len),socanl(len),alfanl(len,2)            &
      &,    sihanl(len),sicanl(len)                                      &
      &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
       write(6,*) '  this is a dead start run, tsfc over land is',       &
@@ -3818,17 +3818,17 @@
      &                 tsffcs,wetfcs,snofcs,zorfcs,albfcs,aisfcs,       &
      &                 cvfcs ,cvbfcs,cvtfcs,                            &
      &                 cnpfcs,smcfcs,stcfcs,slifcs,vegfcs,              &
-     &                 vetfcs,sotfcs,socfcs,alffcs, &
+     &                 vetfcs,sotfcs,socfcs,alffcs,                     &
      &                 sihanl,sicanl,                                   &
      &                 vmnanl,vmxanl,slpanl,absanl,                     &
      &                 tsfanl,tsfan2,wetanl,snoanl,zoranl,albanl,aisanl,&
      &                 cvanl ,cvbanl,cvtanl,                            &
      &                 cnpanl,smcanl,stcanl,slianl,veganl,              &
-     &                 vetanl,sotanl,socanl,alfanl, &
+     &                 vetanl,sotanl,socanl,alfanl,                     &
      &                 ctsfl,calbl,caisl,csnol,csmcl,czorl,cstcl,cvegl, &
      &                 ctsfs,calbs,caiss,csnos,csmcs,czors,cstcs,cvegs, &
      &                 ccv,ccvb,ccvt,ccnp,cvetl,cvets,csotl,csots,      &
-     &                 csocl,csocs, &
+     &                 csocl,csocs,                                     &
      &                 calfl,calfs,                                     &
      &                 csihl,csihs,csicl,csics,                         &
      &                 cvmnl,cvmns,cvmxl,cvmxs,cslpl,cslps,cabsl,cabss, &
@@ -3843,7 +3843,7 @@
      &        irtalb,irtsno,irttsf,irtwet,j                             &
      &,       irtvmn,irtvmx,irtslp,irtabs
       logical, intent(in)  :: landice
-      real (kind=kind_io8) rvegs,rvets,rzors,raiss,rsnos,rsots,rsocs, &
+      real (kind=kind_io8) rvegs,rvets,rzors,raiss,rsnos,rsots,rsocs,   &
      &                     rcnp,rcvt,rcv,rcvb,rsnol,rzorl,raisl,ralbl,  &
      &                 ralfl,rvegl,ralbs,ralfs,rtsfs,rvetl,rsotl,rsocl, &
      &                     qzors,qvegs,qsnos,qalfs,qaiss,qvets,qcvt,    &
@@ -3852,7 +3852,7 @@
      &                     qvetl,rtsfl,calbs,caiss,ctsfs,czorl,cvegl,   &
      &                     csnos,ccvb,ccvt,ccv,czors,cvegs,caisl,csnol, &
      &                     calbl,fh,ctsfl,ccnp,csots,calfl,csotl,cvetl, &
-     &                     csocl,csocs, &
+     &                     csocl,csocs,                                 &
      &                     cvets,calfs,deltsfc,                         &
      &                     csihl,csihs,csicl,csics,                     &
      &                     rsihl,rsihs,rsicl,rsics,                     &
@@ -3868,7 +3868,7 @@
      &     cnpfcs(len),                                                 &
      &     smcfcs(len,lsoil),stcfcs(len,lsoil),                         &
      &     slifcs(len), vegfcs(len),                                    &
-     &     vetfcs(len), sotfcs(len),socfcs(len),   alffcs(len,2) &
+     &     vetfcs(len), sotfcs(len),socfcs(len),   alffcs(len,2)        &
      &,    sihfcs(len), sicfcs(len)                                     &
      &,    vmnfcs(len),vmxfcs(len),slpfcs(len),absfcs(len)
       real (kind=kind_io8) tsfanl(len),tsfan2(len),                     &
@@ -3878,7 +3878,7 @@
      &     cnpanl(len),                                                 &
      &     smcanl(len,lsoil),stcanl(len,lsoil),                         &
      &     slianl(len), veganl(len),                                    &
-     &     vetanl(len), sotanl(len),socanl(len), alfanl(len,2) &
+     &     vetanl(len), sotanl(len),socanl(len), alfanl(len,2)          &
      &,    sihanl(len),sicanl(len)                                      &
      &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
       real (kind=kind_io8) csmcl(lsoil), csmcs(lsoil),                  &
@@ -4223,7 +4223,7 @@
 
 !>\ingroup mod_sfcsub
       subroutine newice(slianl,slifcs,tsfanl,tsffcs,len,lsoil,          &
-     &                  sihnew,sicnew,sihanl,sicanl, &
+     &                  sihnew,sicnew,sihanl,sicanl,                    &
      &                  albanl,snoanl,zoranl,smcanl,stcanl,             &
      &                  albsea,snosea,zorsea,smcsea,smcice,             &
      &                  tsfmin,tsfice,albice,zorice,tgice,              &
@@ -5675,7 +5675,7 @@ cjfe
      &                 vmnclm,vmxclm,slpclm,absclm,                     &
      &                 kpdtsf,kpdwet,kpdsno,kpdzor,kpdalb,kpdais,       &
      &                 kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,       &
-     &                 kpdvet,kpdsot,kpdsoc,kpdalf,tsfcl0,              & 
+     &                 kpdvet,kpdsot,kpdsoc,kpdalf,tsfcl0,              &
      &                 kpdvmn,kpdvmx,kpdslp,kpdabs,                     &
      &                 deltsfc, lanom                                   &
      &,                imsk, jmsk, slmskh, outlat, outlon               &
@@ -5692,7 +5692,7 @@ cjfe
      &        jy,mon1,is2,isx,kpd9,is1,l,nn,mon2,mon,is,kpdsno,         &
      &        kpdzor,kpdtsf,kpdwet,kpdscv,kpdacn,kpdais,kpdtg3,im,id,   &
      &        lugb,iy,len,lsoil,ih,kpdsmc,iprnt,me,m1,m2,k1,k2,         &
-     &        kpdvet,kpdsot,kpdsoc,kpdstc,kpdveg,jmsk,imsk,j,ialb       & 
+     &        kpdvet,kpdsot,kpdsoc,kpdstc,kpdveg,jmsk,imsk,j,ialb       &
      &,       kpdvmn,kpdvmx,kpdslp,kpdabs,landice_cat
       integer kpdalb(4), kpdalf(2)
       character*500 fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,          &
@@ -5707,7 +5707,7 @@ cjfe
      &     cnpclm(len),                                                 &
      &     smcclm(len,lsoil),stcclm(len,lsoil),                         &
      &     sliclm(len),scvclm(len),vegclm(len),                         &
-     &     vetclm(len),sotclm(len),socclm(len),alfclm(len,2)            & 
+     &     vetclm(len),sotclm(len),socclm(len),alfclm(len,2)            &
      &,    vmnclm(len),vmxclm(len),slpclm(len),absclm(len)
       real (kind=kind_io8) slmskh(imsk,jmsk)
       real (kind=kind_io8) outlat(len), outlon(len)
