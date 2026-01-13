@@ -16,8 +16,6 @@
      &   thlx,thvx,thlvx,gdx,thetae,
      &   krad,mrad,radmin,buo,wush,tkemean,vez0fun,xmfd,
      &   tcdo,qcdo,ucdo,vcdo,xlamdeq,a1,
-!The following flag is for SA-3D-TKE (kyf)
-     &   sa3dtke,
 ! the following are constants being passed in
      &   con_g, con_cp, con_rv, con_hvap, con_fvirt, con_eps, con_epsm1)
 !
