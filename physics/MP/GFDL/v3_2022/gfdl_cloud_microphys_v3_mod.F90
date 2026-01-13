@@ -59,31 +59,6 @@ module gfdl_cloud_microphys_v3_mod
        ss_fac, gs_fac, rh_fac_evap, rh_fac_cond, snow_grauple_combine, do_psd_water_num,  &
        do_psd_ice_num, vdiffflag, rewfac, reifac, cp_heating, nconds, do_evap_timescale,  &
        delay_cond_evap, do_subgrid_proc, fast_fr_mlt, fast_dep_sub, qi_gen, tice
-  use physcons, only:  grav      => con_g,       &
-                       rgrav     => con_1ovg,    &
-                       pi        => con_pi,      &
-                       boltzmann => con_boltz,   &
-                       avogadro  => con_sbc,     &
-                       rdgas     => con_rd,      &
-                       rvgas     => con_rv,      &
-                       zvir      => con_fvirt,   &
-                       runiver   => con_runiver, &
-                       cp_air    => con_cp,      &
-                       c_ice     => con_csol,    &
-                       !c_liq     => con_cliq,    &
-                       !e00       => con_psat,    &
-                       hlv       => con_hvap,    &
-                       hlf       => con_hfus,    &
-                       rho0      => rhoair_IFS,  &
-                       rhos      => rhosnow,     &
-                       one_r8    => con_one,     &
-                       con_amd, con_amw, visd,   &
-                       visk, vdifu, tcond, cdg,  &
-                       cdh, rhow => rhocw,       &
-                       rhoi => rhoci,            &
-                       rhor => rhocr,            &
-                       rhog => rhocg,            &
-                       rhoh => rhoch, qcmin, qfmin
     private
 
     ! -----------------------------------------------------------------------
@@ -137,6 +112,39 @@ module gfdl_cloud_microphys_v3_mod
 
     logical :: tables_are_initialized = .false. ! initialize satuation tables
 
+    real(kind_phys) :: grav = 1.0E30
+    real(kind_phys) :: rgrav = 1.0E30
+    real(kind_phys) :: pi = 1.0E30
+    real(kind_phys) :: boltzmann = 1.0E30
+    real(kind_phys) :: avogadro = 1.0E30
+    real(kind_phys) :: rdgas = 1.0E30
+    real(kind_phys) :: rvgas = 1.0E30
+    real(kind_phys) :: zvir = 1.0E30
+    real(kind_phys) :: runiver = 1.0E30
+    real(kind_phys) :: cp_air = 1.0E30
+    real(kind_phys) :: c_ice = 1.0E30
+    real(kind_phys) :: hlv = 1.0E30
+    real(kind_phys) :: hlf = 1.0E30
+    real(kind_phys) :: rho0 = 1.0E30
+    real(kind_phys) :: rhos = 1.0E30
+    real(kind_phys) :: one_r8 = 1.0E30
+    real(kind_phys) :: con_amd = 1.0E30
+    real(kind_phys) :: con_amw = 1.0E30
+    real(kind_phys) :: visd = 1.0E30
+    real(kind_phys) :: visk = 1.0E30
+    real(kind_phys) :: vdifu = 1.0E30
+    real(kind_phys) :: tcond = 1.0E30
+    real(kind_phys) :: cdg = 1.0E30
+    real(kind_phys) :: cdh = 1.0E30
+    real(kind_phys) :: rhow = 1.0E30
+    real(kind_phys) :: rhoi = 1.0E30
+    real(kind_phys) :: rhor = 1.0E30
+    real(kind_phys) :: rhog = 1.0E30
+    real(kind_phys) :: rhoh = 1.0E30
+    real(kind_phys) :: qcmin = 1.0E30
+    real(kind_phys) :: qfmin = 1.0E30
+
+
     ! -----------------------------------------------------------------------
     ! Physical constants that differ from physcons
     ! -----------------------------------------------------------------------
@@ -146,14 +154,14 @@ module gfdl_cloud_microphys_v3_mod
     ! -----------------------------------------------------------------------
     ! derived physics constants
     ! -----------------------------------------------------------------------
-    real(kind_phys), parameter :: mmd = con_amd*1e-3 ! (g/mol) -> (kg/mol)
-    real(kind_phys), parameter :: mmv = con_amw*1e-3 ! (g/mol) -> (kg/mol)
-    real(kind_phys), parameter :: cv_air = cp_air - rdgas
-    real(kind_phys), parameter :: cp_vap = 4.0 * rvgas
-    real(kind_phys), parameter :: cv_vap = 3.0 * rvgas
-    real(kind_phys), parameter :: dc_vap = cp_vap - c_liq
-    real(kind_phys), parameter :: dc_ice = c_liq - c_ice
-    real(kind_phys), parameter :: d2_ice = cp_vap - c_ice
+    real(kind_phys) :: mmd = 1.0E30
+    real(kind_phys) :: mmv = 1.0E30
+    real(kind_phys) :: cv_air = 1.0E30
+    real(kind_phys) :: cp_vap = 1.0E30
+    real(kind_phys) :: cv_vap = 1.0E30
+    real(kind_phys) :: dc_vap = 1.0E30
+    real(kind_phys) :: dc_ice = 1.0E30
+    real(kind_phys) :: d2_ice = 1.0E30
 
     ! -----------------------------------------------------------------------
     ! predefined parameters
@@ -207,7 +215,15 @@ contains
 ! =======================================================================
 
 subroutine gfdl_cloud_microphys_v3_mod_init (me, master, nlunit, input_nml_file, logunit, &
-        fn_nml, hydrostatic, errmsg, errflg)
+        fn_nml, hydrostatic, con_g, con_1ovg, &
+        con_pi, con_boltz, con_sbc, con_rd, &
+        con_rv, con_fvirt, con_runiver, con_cp, &
+        con_csol, con_hvap, con_hfus, con_rhoair_IFS, &
+        con_rhosnow, con_one, con_amd_in, con_amw_in, &
+        con_visd, con_visk, con_vdifu, con_tcond, &
+        con_cdg, con_cdh, con_rhocw, con_rhoci, &
+        con_rhocr, con_rhocg, con_rhoch, con_qcmin, &
+        con_qfmin, errmsg, errflg)
 
     implicit none
 
@@ -223,8 +239,39 @@ subroutine gfdl_cloud_microphys_v3_mod_init (me, master, nlunit, input_nml_file,
     character (len = 64), intent (in) :: fn_nml
     character (len = *),  intent (in) :: input_nml_file (:)
     logical,              intent (in) :: hydrostatic
-    character(len=*),     intent(out) :: errmsg
-    integer,              intent(out) :: errflg
+    real(kind_phys),      intent(in) :: con_g
+    real(kind_phys),      intent(in) :: con_1ovg
+    real(kind_phys),      intent(in) :: con_pi
+    real(kind_phys),      intent(in) :: con_boltz
+    real(kind_phys),      intent(in) :: con_sbc
+    real(kind_phys),      intent(in) :: con_rd
+    real(kind_phys),      intent(in) :: con_rv
+    real(kind_phys),      intent(in) :: con_fvirt
+    real(kind_phys),      intent(in) :: con_runiver
+    real(kind_phys),      intent(in) :: con_cp
+    real(kind_phys),      intent(in) :: con_csol
+    real(kind_phys),      intent(in) :: con_hvap
+    real(kind_phys),      intent(in) :: con_hfus
+    real(kind_phys),      intent(in) :: con_rhoair_IFS
+    real(kind_phys),      intent(in) :: con_rhosnow
+    real(kind_phys),      intent(in) :: con_one
+    real(kind_phys),      intent(in) :: con_amd_in
+    real(kind_phys),      intent(in) :: con_amw_in
+    real(kind_phys),      intent(in) :: con_visd
+    real(kind_phys),      intent(in) :: con_visk
+    real(kind_phys),      intent(in) :: con_vdifu
+    real(kind_phys),      intent(in) :: con_tcond
+    real(kind_phys),      intent(in) :: con_cdg
+    real(kind_phys),      intent(in) :: con_cdh
+    real(kind_phys),      intent(in) :: con_rhocw
+    real(kind_phys),      intent(in) :: con_rhoci
+    real(kind_phys),      intent(in) :: con_rhocr
+    real(kind_phys),      intent(in) :: con_rhocg
+    real(kind_phys),      intent(in) :: con_rhoch
+    real(kind_phys),      intent(in) :: con_qcmin
+    real(kind_phys),      intent(in) :: con_qfmin
+    character(len=*),    intent(out) :: errmsg
+    integer,             intent(out) :: errflg
 
 
     ! -----------------------------------------------------------------------
@@ -237,6 +284,48 @@ subroutine gfdl_cloud_microphys_v3_mod_init (me, master, nlunit, input_nml_file,
     ! Initialize CCPP error-handling
     errflg = 0
     errmsg = ''
+
+    ! Initialize CCPP module level constants
+    grav = con_g
+    rgrav = con_1ovg
+    pi = con_pi
+    boltzmann = con_boltz
+    avogadro = con_sbc
+    rdgas = con_rd
+    rvgas = con_rv
+    zvir = con_fvirt
+    runiver = con_runiver
+    cp_air = con_cp
+    c_ice = con_csol
+    hlv = con_hvap
+    hlf = con_hfus
+    rho0 = con_rhoair_IFS
+    rhos = con_rhosnow
+    one_r8 = con_one
+    rhow = con_rhocw
+    rhoi = con_rhoci
+    rhor = con_rhocr
+    rhog = con_rhocg
+    rhoh = con_rhoch
+    con_amd = con_amd_in
+    con_amw = con_amw_in
+    visd = con_visd
+    visk = con_visk
+    vdifu = con_vdifu
+    tcond = con_tcond
+    cdg = con_cdg
+    cdh = con_cdh
+    qcmin = con_qcmin
+    qfmin = con_qfmin
+
+    mmd = con_amd*1e-3 ! (g/mol) -> (kg/mol)
+    mmv = con_amw*1e-3 ! (g/mol) -> (kg/mol)
+    cv_air = cp_air - rdgas
+    cp_vap = 4.0 * rvgas
+    cv_vap = 3.0 * rvgas
+    dc_vap = cp_vap - c_liq
+    dc_ice = c_liq - c_ice
+    d2_ice = cp_vap - c_ice
 
     ! -----------------------------------------------------------------------
     ! Read namelist
@@ -1243,7 +1332,7 @@ subroutine mpdrv (hydrostatic, ua, va, wa, delp, pt, qv, ql, qr, qi, qs, qg, &
             qs (i, k) = qsz (k)
             qg (i, k) = qgz (k)
             qa (i, k) = qaz (k)
-   
+
             ! -----------------------------------------------------------------------
             ! calculate some more variables needed outside
             ! -----------------------------------------------------------------------
@@ -1612,10 +1701,10 @@ subroutine mp_full (ks, ke, ntimes, tz, qv, ql, qr, qi, qs, qg, dp, dz, u, v, w,
             ! -----------------------------------------------------------------------
             ! temperature sentive high vertical resolution processes
             ! -----------------------------------------------------------------------
-         
+
             call subgrid_z_proc (ks, ke, den, denfac, dts, rh_adj, tz, qv, ql, &
                 qr, qi, qs, qg, dp, ccn, cin, cond, dep, reevap, sub, last_step)
-         
+
             condensation = condensation + cond * convt
             deposition = deposition + dep * convt
             evaporation = evaporation + reevap * convt
@@ -5778,7 +5867,7 @@ subroutine cld_eff_rad (is, ie, ks, ke, lsm, p, delp, t, qv, qw, qi, qr, qs, qg,
                          (8.0 + (14.0 - 8.0) * min (1.0, max (0.0, - tc / 30.0))) * &
                          (1.0 - abs (mask - 1.0))
                     rew (i, k) = rew (i, k) + (14.0 - rew (i, k)) * &
-                        min (1.0, max (0.0, snowd (i) / 1000.0)) ! snowd is in mm 
+                        min (1.0, max (0.0, snowd (i) / 1000.0)) ! snowd is in mm
                     rew (i, k) = max (rewmin, min (rewmax, rew (i, k)))
                 else
                     qcw (i, k) = 0.0
@@ -6052,7 +6141,7 @@ subroutine rad_ref (is, ie, js, je, qv, qr, qs, qg, pt, delp, &
 
     real(kind_phys), intent (in), dimension (is:ie, js:je, npz) :: pt, delp
 
-    real(kind_phys), intent (in), dimension (is:ie, js:je, npz) :: qv, qr, qs, qg 
+    real(kind_phys), intent (in), dimension (is:ie, js:je, npz) :: qv, qr, qs, qg
 
     !real(kind_phys), intent (in), dimension (is:ie, npz + 1, js:je) :: peln
 
