@@ -88,6 +88,20 @@
   type = character
   kind = len=*
   intent = in
+[is_init_gas_optics]
+  standard_name = flag_for_rrmtgp_lw_gas_optics_initialization
+  long_name = flag carrying scheme initialization status
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = inout
+[is_init_cloud_optics]
+  standard_name = flag_for_rrmtgp_lw_cloud_optics_initialization
+  long_name = flag carrying scheme initialization status
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

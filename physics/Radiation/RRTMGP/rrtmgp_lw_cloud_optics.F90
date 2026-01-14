@@ -48,7 +48,7 @@ contains
   ! ######################################################################################
 !>
   subroutine rrtmgp_lw_cloud_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_clouds,         &
-       nrghice, mpicomm, mpirank, mpiroot, errmsg, errflg)
+       nrghice, mpicomm, mpirank, mpiroot, is_initialized, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
@@ -64,9 +64,11 @@ contains
          mpiroot               !< Master MPI rank
 
     ! Outputs
-    character(len=*), intent(out) :: &
+    logical,          intent(inout) :: &
+         is_initialized        !< Initialization flag
+    character(len=*), intent(  out) :: &
          errmsg                !< Error message
-    integer,          intent(out) :: &
+    integer,          intent(  out) :: &
          errflg                !< Error code
 
     ! Local variables
@@ -76,6 +78,8 @@ contains
     ! Initialize
     errmsg = ''
     errflg = 0
+
+    if (is_initialized) return
 
     ! Filenames are set in the physics_nml
     lw_cloud_props_file = trim(rrtmgp_root_dir)//trim(rrtmgp_lw_file_clouds)
@@ -240,6 +244,8 @@ contains
             lut_exticeLW, lut_ssaiceLW, lut_asyiceLW))
 
     call check_error_msg('lw_cloud_optics_init',lw_cloud_props%set_ice_roughness(nrghice))
- 
+
+    is_initialized = .true.
+
   end subroutine rrtmgp_lw_cloud_optics_init
 end module rrtmgp_lw_cloud_optics

@@ -31,7 +31,7 @@ contains
 !!
   subroutine rrtmgp_lw_main_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, rrtmgp_lw_file_clouds,&
        active_gases_array, nrghice, mpicomm, mpirank, mpiroot, nLay, rrtmgp_phys_blksz,     &
-       errmsg, errflg)
+       is_init_gas_optics, is_init_cloud_optics, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
@@ -53,9 +53,12 @@ contains
          nLay
 
     ! Outputs
-    character(len=*), intent(out) :: &
+    logical,          intent(inout) :: &
+         is_init_gas_optics,    & !< Initialization flag
+         is_init_cloud_optics     !< Initialization flag
+    character(len=*), intent(  out) :: &
          errmsg                   !< CCPP error message
-    integer,          intent(out) :: &
+    integer,          intent(  out) :: &
          errflg                   !< CCPP error code
 
     ! Initialize CCPP error handling variables 
@@ -64,11 +67,11 @@ contains
 
     ! RRTMGP longwave gas-optics (k-distribution) initialization
     call rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas,                  &
-         active_gases_array, mpicomm, mpirank, mpiroot, errmsg, errflg)
+         active_gases_array, mpicomm, mpirank, mpiroot, is_init_gas_optics, errmsg, errflg)
 
     ! RRTMGP longwave cloud-optics initialization
     call rrtmgp_lw_cloud_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_clouds,             &
-         nrghice, mpicomm, mpirank, mpiroot, errmsg, errflg)
+         nrghice, mpicomm, mpirank, mpiroot, is_init_cloud_optics, errmsg, errflg)
 
   end subroutine rrtmgp_lw_main_init
 
