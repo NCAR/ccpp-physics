@@ -2,7 +2,7 @@
 [ccpp-table-properties]
   name = GFS_surface_composites_post
   type = scheme
-  relative_path = ../../
+  dependencies_path = ../../
   dependencies = hooks/machine.F,SFC_Layer/UFS/sfc_diff.f
 
 ########################################################################

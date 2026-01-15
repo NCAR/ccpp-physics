@@ -8,7 +8,7 @@ Explicitly state what tests were run on these changes, or if any are still pendi
 ## Dependencies:
 Add any links to parent PRs (e.g. SCM and/or UFS PRs) or submodules (e.g. rte-rrtmgp). For example:
 - NCAR/ccpp-framework#<pr_number>
-- NOAA-EMC/fv3atm#<pr_number>
+- NOAA-EMC/ufsatm#<pr_number>
 - ufs-community/ufs-weather-model/#<pr_number>
 
 ## Documentation:

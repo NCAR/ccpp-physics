@@ -24,7 +24,7 @@
         cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl,     &
         snow_cpl, pwat, frzr, frzrb, frozr, frozrb, tsnowp, tsnowpb, rhonewsn1, exticeden,                                &
         drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,                             &
-        graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp,                                           &
+        graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, num_diag_buckets,                         &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d,dqdt_qmicro, lssav, num_dfi_radar,       &
         fh_dfi_radar,index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour, prevsq,      &
         iopt_lake, iopt_lake_clm, lkm, use_lake_model, errmsg, errflg)
@@ -39,6 +39,7 @@
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, cpllnd, progsigma, exticeden
       integer, intent(in) :: index_of_temperature,index_of_process_mp,use_lake_model(:)
       integer, intent(in) :: imfshalcnv,imfshalcnv_gf,imfdeepcnv,imfdeepcnv_gf,imfdeepcnv_samf
+      integer, intent(in) :: num_diag_buckets
       integer, dimension (:), intent(in) :: htop
       real(kind=kind_phys),                    intent(in)    :: fh_dfi_radar(:), fhour, con_t0c
       real(kind=kind_phys),                    intent(in)    :: radar_tten_limits(:)
@@ -58,8 +59,9 @@
 
       real(kind=kind_phys), dimension(:),      intent(in   ) :: sr
       real(kind=kind_phys), dimension(:),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,  &
-                                                                srflag, cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, &
-                                                                totprcpb, toticeb, totsnwb, totgrpb, pwat
+                                                                srflag, cnvprcp, totprcp, totice, totsnw, totgrp, &
+                                                                toticeb, totsnwb, totgrpb, pwat
+      real(kind=kind_phys), dimension(:,:),    intent(inout) :: cnvprcpb, totprcpb
       real(kind=kind_phys), dimension(:),      intent(inout), optional :: rain_cpl, rainc_cpl, snow_cpl
 
       real(kind=kind_phys), dimension(:,:,:),   intent(inout), optional :: dtend
@@ -101,7 +103,7 @@
       real(kind=kind_phys), parameter :: p850    = 85000.0_kind_phys
       ! *DH
 
-      integer :: i, k, ic, itrac, idtend, itime, idtend_radar, idtend_mp
+      integer :: i, k, ic, itrac, idtend, itime, idtend_radar, idtend_mp, ib
 
       real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       real(kind=kind_phys) :: crain, csnow, onebg, tem, total_precip, tem1, tem2, ttend
@@ -451,7 +453,7 @@
 
       if_save_fields: if (lssav) then
 !        if (Model%me == 0) print *,'in phys drive, kdt=',Model%kdt, &
-!          'totprcpb=', Diag%totprcpb(1),'totprcp=',Diag%totprcp(1), &
+!          'totprcpb=', Diag%totprcpb(1,1),'totprcp=',Diag%totprcp(1), &
 !          'rain=',Diag%rain(1)
         do i=1,im
           cnvprcp (i) = cnvprcp (i) + rainc(i)
@@ -460,11 +462,15 @@
           totsnw  (i) = totsnw  (i) + snow(i)
           totgrp  (i) = totgrp  (i) + graupel(i)
 
-          cnvprcpb(i) = cnvprcpb(i) + rainc(i)
-          totprcpb(i) = totprcpb(i) + rain(i)
           toticeb (i) = toticeb (i) + ice(i)
           totsnwb (i) = totsnwb (i) + snow(i)
           totgrpb (i) = totgrpb (i) + graupel(i)
+        enddo
+        do ib=1,num_diag_buckets
+          do i=1,im
+            cnvprcpb(i,ib) = cnvprcpb(i,ib) + rainc(i)
+            totprcpb(i,ib) = totprcpb(i,ib) + rain(i)
+          enddo
         enddo
 
         if_tendency_diagnostics: if (ldiag3d) then

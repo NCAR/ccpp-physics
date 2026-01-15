@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_phys_time_vary
   type = scheme
-  relative_path = ../../
+  dependencies_path = ../../
   dependencies = hooks/machine.F
   dependencies = Interstitials/UFS_SCM_NEPTUNE/iccn_def.F,Interstitials/UFS_SCM_NEPTUNE/iccninterp.F90
   dependencies = Interstitials/UFS_SCM_NEPTUNE/sfcsub.F,Radiation/mersenne_twister.f
@@ -78,6 +78,13 @@
   dimensions = ()
   type = integer
   intent = in
+[levs]
+  standard_name = vertical_layer_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [nx]
   standard_name = number_of_points_in_x_direction_for_this_MPI_rank
   long_name = number of points in x direction for this MPI rank
@@ -114,20 +121,6 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
-[ozphys]
-  standard_name = dataset_for_ozone_physics
-  long_name = dataset for NRL ozone physics
-  units = mixed
-  dimensions = ()
-  type = ty_ozphys
-  intent = in
-[h2ophys]
-  standard_name = dataset_for_h2o_photochemistry_physics
-  long_name = dataset for NRL h2o photochemistry physics
-  units = mixed
-  dimensions = ()
-  type = ty_h2ophys
   intent = in
 [jindx1_o3]
   standard_name = lower_latitude_index_of_ozone_forcing_for_interpolation
@@ -252,7 +245,7 @@
   dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
   type = real
   kind = kind_phys
-  intent = in
+  intent = out
 [jindx1_ci]
   standard_name = lower_latitude_index_of_cloud_nuclei_forcing_for_interpolation
   long_name = interpolation low index for ice and cloud condensation nuclei in the y direction
@@ -1034,6 +1027,27 @@
   type = real
   kind = kind_phys
   intent = in
+[ozphys]
+  standard_name = dataset_for_ozone_physics
+  long_name = dataset for NRL ozone physics
+  units = mixed
+  dimensions = ()
+  type = ty_ozphys
+  intent = in
+[h2ophys]
+  standard_name = dataset_for_h2o_photochemistry_physics
+  long_name = dataset for NRL h2o photochemistry physics
+  units = mixed
+  dimensions = ()
+  type = ty_h2ophys
+  intent = in
+[is_initialized]
+  standard_name = flag_for_gfs_phys_time_vary_interstitial_initialization
+  long_name = flag carrying interstitial initialization status
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1054,6 +1068,13 @@
 [ccpp-arg-table]
   name = GFS_phys_time_vary_finalize
   type = scheme
+[is_initialized]
+  standard_name = flag_for_gfs_phys_time_vary_interstitial_initialization
+  long_name = flag carrying interstitial initialization status
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = inout
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1479,6 +1500,13 @@
   type = real
   kind = kind_phys
   intent = inout
+[nthrds]
+  standard_name = number_of_openmp_threads
+  long_name = number of OpenMP threads available for physics schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
 [do_ugwp_v1]
   standard_name = flag_for_ugwp_version_1
   long_name = flag to activate ver 1 CIRES UGWP
@@ -1542,33 +1570,13 @@
   dimensions = ()
   type = ty_h2ophys
   intent = in
-[nthrds]
-  standard_name = number_of_openmp_threads
-  long_name = number of OpenMP threads available for physics schemes
-  units = count
+[is_initialized]
+  standard_name = flag_for_gfs_phys_time_vary_interstitial_initialization
+  long_name = flag carrying interstitial initialization status
+  units = flag
   dimensions = ()
-  type = integer
+  type = logical
   intent = in
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-[errflg]
-  standard_name = ccpp_error_code
-  long_name = error code for error handling in CCPP
-  units = 1
-  dimensions = ()
-  type = integer
-  intent = out
-
-########################################################################
-[ccpp-arg-table]
-  name = GFS_phys_time_vary_timestep_finalize
-  type = scheme
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

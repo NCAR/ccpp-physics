@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_pre
   type = scheme
-  relative_path	= ../../
+  dependencies_path	= ../../
   dependencies = tools/funcphys.f90,hooks/machine.F,Radiation/radiation_aerosols.f,photochem/module_ozphys.F90
   dependencies = Radiation/RRTMG/iounitdef.f,Radiation/radiation_astronomy.f,Radiation/radiation_gases.f,Radiation/radiation_tools.F90
 

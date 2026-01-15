@@ -320,15 +320,15 @@ contains
 
           !  --- ...  rcp = rho cp ch v
 
-          if (.not. use_oceanuv) then
-            rch(i)     = rho_a(i) * cp * ch(i) * wind(i)
-            cmm(i)     = cm (i)   * wind(i)
-            chh(i)     = rho_a(i) * ch(i) * wind(i)
-          else if (use_oceanuv) then
+          if (use_oceanuv) then
             windrel= sqrt( (u1(i)-usfco(i))**2 + (v1(i)-vsfco(i))**2 )
             rch(i)     = rho_a(i) * cp * ch(i) * windrel
             cmm(i)     = cm (i)   * windrel
             chh(i)     = rho_a(i) * ch(i) * windrel
+          else
+            rch(i)     = rho_a(i) * cp * ch(i) * wind(i)
+            cmm(i)     = cm (i)   * wind(i)
+            chh(i)     = rho_a(i) * ch(i) * wind(i)
           endif
 
           !> - Calculate latent and sensible heat flux over open water with tskin.

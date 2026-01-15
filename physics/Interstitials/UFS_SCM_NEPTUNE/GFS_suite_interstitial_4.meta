@@ -2,7 +2,7 @@
 [ccpp-table-properties]
   name = GFS_suite_interstitial_4
   type = scheme
-  relative_path = ../../
+  dependencies_path = ../../
   dependencies = hooks/machine.F
   dependencies = MP/TEMPO/TEMPO/module_mp_tempo_utils.F90
   dependencies = MP/Thompson/module_mp_thompson_make_number_concentrations.F90

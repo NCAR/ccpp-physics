@@ -40,9 +40,7 @@ module mp_nssl
                               
 
         use module_mp_nssl_2mom, only: nssl_2mom_init, nssl_2mom_init_const
-#ifdef MPI 
         use mpi_f08
-#endif
 
         implicit none
 
@@ -179,9 +177,7 @@ module mp_nssl
           IF ( .not. missing_vars .and. Any( qr > qmin .and. crw == 0.0 ) ) missing_vars = .true.
           IF ( .not. missing_vars .and. Any( qh > qmin .and. (chw == 0.0 .or. vh == 0.0) ) ) missing_vars = .true.
           
-#ifdef MPI 
           call MPI_Allreduce(missing_vars, missing_vars_global, 1, MPI_LOGICAL, MPI_LOR, mpicomm, ierr)
-#endif
 
            is_initialized = .true.
            return

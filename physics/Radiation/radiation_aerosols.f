@@ -1190,6 +1190,15 @@
         allocate ( ssarhd (NRHLEV,NCM2,NSWLWBD) )
         allocate ( asyrhd (NRHLEV,NCM2,NSWLWBD) )
         allocate ( extstra(            NSWLWBD) )
+        extrhi  = f_zero
+        scarhi  = f_zero
+        ssarhi  = f_zero
+        asyrhi  = f_zero
+        extrhd  = f_zero
+        scarhd  = f_zero
+        ssarhd  = f_zero
+        asyrhd  = f_zero
+        extstra = f_zero
       endif
 
 !>  - ending wave num for 61 aerosol spectral bands
@@ -1285,7 +1294,9 @@
           endif
         enddo
 
-!$omp parallel do private(ib,mb,ii,iw1,iw2,iw,sumsol,fac,tmp,ibs,ibe)
+! Turn off OpenMP due to b4b differences with Intel LLVM 2025.2+
+! https://github.com/NCAR/ccpp-physics/issues/1170
+!!! !$omp parallel do private(ib,mb,ii,iw1,iw2,iw,sumsol,fac,tmp,ibs,ibe)
         do ib = 1, NSWBND
           mb = ib + NSWSTR - 1
           ii = 1
@@ -1372,8 +1383,9 @@
             endif
           enddo
         endif
-
-!$omp parallel do private(ib,ii,iw1,iw2,iw,mb,sumir,fac,tmp,ibs,ibe)
+! Turn off OpenMP due to b4b differences with Intel LLVM 2025.2+
+! https://github.com/NCAR/ccpp-physics/issues/1170
+!!! !$omp parallel do private(ib,ii,iw1,iw2,iw,mb,sumir,fac,tmp,ibs,ibe)
         do ib = 1, NLWBND
           ii = 1
           if ( NLWBND == 1 ) then
@@ -2280,33 +2292,11 @@
       errmsg = ''
       errflg = 0
 
-      do m = 1, NF_AESW
-        do j = 1, NBDSW
-          do k = 1, NLAY
-            do i = 1, IMAX
-              aerosw(i,k,j,m) = f_zero
-            enddo
-          enddo
-        enddo
-      enddo
-
-      do m = 1, NF_AELW
-        do j = 1, NBDLW
-          do k = 1, NLAY
-            do i = 1, IMAX
-              aerolw(i,k,j,m) = f_zero
-            enddo
-          enddo
-        enddo
-      enddo
-
+      aerosw = f_zero
+      aerolw = f_zero
 !     sumodp = f_zero
-      do i = 1, IMAX
-       do k = 1, NSPC1
-         aerodp(i,k) = f_zero
-       enddo
-      enddo
-      ext550(:,:) = f_zero
+      aerodp = f_zero
+      ext550 = f_zero
 
       if ( .not. (lsswr .or. lslwr) ) then
         return
@@ -2408,7 +2398,6 @@
      &       )
         endif     ! end if_iaerflg_block
         if(errflg/=0) return
-
 
 !  ---  check print
 !       do m = 1, NBDSW

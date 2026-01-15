@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_cloud_overlap
   type = scheme
-  relative_path = ../../
+  dependencies_path = ../../
   dependencies = hooks/machine.F
   dependencies = Radiation/radiation_tools.F90,Radiation/radiation_cloud_overlap.F90
 

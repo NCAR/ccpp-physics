@@ -256,14 +256,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[cnvprcpb]
-  standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket
-  long_name = cumulative convective precipitation in bucket
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
 [cnvw_phy_f3d]
   standard_name = convective_cloud_condensate_mixing_ratio
   long_name = convective cloud water mixing ratio in the phy_f3d array
