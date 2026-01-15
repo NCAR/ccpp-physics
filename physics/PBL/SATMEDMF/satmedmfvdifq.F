@@ -326,12 +326,14 @@
       real(kind=kind_phys) FCH,       MOL,   HOL, TLCAN,
      &                     SIGMACAN,  RRCAN, BBCAN,
      &                     AACAN,     ZCAN,  ZFL, BOTCAN,
+     &                     ZZ_INT,  ! IVAI
      &                     EDDYVEST1, EDDYVEST_INT
 
       ! in canopy eddy diffusivity [ m**2/s ]
       real(kind=kind_phys), allocatable  :: EDDYVESTX ( : )
       ! in canopy layer [m]
       real(kind=kind_phys), allocatable  :: ZCANX     ( : )
+      real(kind=kind_phys), allocatable  :: ZOOOX     ( : ) ! IVAI
       ! Declare local maximum canopy layers
       integer, parameter :: MAXCAN = 1000
       integer, parameter :: mvt   = 30 ! use 30 instead of 27
@@ -386,6 +388,10 @@
      &    allocate( EDDYVESTX    ( MAXCAN ) )
         if(.not.allocated(ZCANX))
      &    allocate( ZCANX    ( MAXCAN ) )
+!IVAI
+        if(.not.allocated(ZOOOX)) 
+     &    allocate( ZOOOX    ( MAXCAN ) )
+!IVAI
       endif
 !----------------------------------------------
       if (tc_pbl == 0) then
@@ -1716,15 +1722,14 @@
       endif !sa3dtke
 
 !PCC_CANOPY------------------------------------
-      kount=0 !IVAI
       if (do_canopy .and. cplaqm) then
 
 !IVAI
-!        print*, 'SATMEDMFVDIFQ_RUN: CLAIE = ', claie(:)
-!        print*, 'SATMEDMFVDIFQ_RUN: CFCH = ' , cfch (:)
-!        print*, 'SATMEDMFVDIFQ_RUN: CFRT = ' , cfrt (:)
-!        print*, 'SATMEDMFVDIFQ_RUN: CCLU = ' , cclu (:)
-!        print*, 'SATMEDMFVDIFQ_RUN: CPOPU= ' , cpopu(:)
+!        print*, 'SATMEDMF_RUN: CLAIE = ', claie(:)
+!        print*, 'SATMEDMF_RUN: CFCH = ' , cfch (:)
+!        print*, 'SATMEDMF_RUN: CFRT = ' , cfrt (:)
+!        print*, 'SATMEDMF_RUN: CCLU = ' , cclu (:)
+!        print*, 'SATMEDMF_RUN: CPOPU= ' , cpopu(:)
 ! 2D aux arrays: canopy data in diffusion
 !        aux2d(:,1) = cfch (:)
 !        aux2d(:,2) = claie(:)
@@ -1736,6 +1741,10 @@
 !        aux3d(:,:,3) = dku(:,:)
 !IVAI
         do k = 1, km1-1
+
+          kount=0 !IVAI
+          ZOOOX(:) = 1.  ! IVAI
+
           do i = 1, im
 
 !IVAI: AQM canopy Inputs
@@ -1758,27 +1767,16 @@
 !           Not a contigous canopy cell
             IF (   claie(i) .LT. 0.1
      &        .OR. cfch (i) .LT. 0.5
-!IVAI: modified contiguous canopy condition
-!    &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.5
      &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.75
-!IVAI
      &        .OR. cpopu(i) .GT. 10000.0
      &        .OR. (EXP(-0.5*claie(i)*cclu(i)) .GT. 0.45
      &                          .AND. cfch(i)  .LT. 18.) ) THEN
 
-
-!TODO: Canopy Inputs
-!                        IF ( XCANOPYLAI .LT. 0.1  !from canopy inputs
-!                        IF ( lai(i) .LT. 0.1  !from LSM
-!     &                   .OR. FCH .LT. 0.5 ) THEN
-!     &                   .OR. MAX(0.0, 1.0 - XCANOPYFRT) .GT. 0.5
-!     &                   .OR. POPU .GT. 10000.0
-!     &                   .OR. EXP(-0.5*XCANOPYLAI*XCANOPYCLU).GT. 0.45
-!     &                      .AND. FCH .LT. 18.0 ) THEN
-
-              dkt(i,k)= dkt(i,k)
-              dkq(i,k)= dkq(i,k)
-              dku(i,k)= dku(i,k)
+! IVAI: turn OFF the integrated canopy effect
+!              dkt(i,k)= dkt(i,k)
+!              dkq(i,k)= dkq(i,k)
+!              dku(i,k)= dku(i,k)
+! IVAI
 
             ELSE ! There is a contiguous forest canopy, apply correction over canopy layers
 
@@ -1797,7 +1795,7 @@
               COUNTCAN = 0   ! Initialize canopy layers
 
               IF (k .EQ. 1) THEN  !Find bottom in each model layer
-                  BOTCAN = 0.5
+                  BOTCAN = 0.0 !  0.5 IVAI (Jan10)
               ELSE
                   BOTCAN = zi(i,k)
               END IF
@@ -1855,26 +1853,75 @@
                  IF ( HOL .GE.  0.9 ) THEN  !VERY STABLE
                     SIGMACAN = 0.25*ustar(i)
                  END IF
-                 IF ( ZCAN .EQ. ZFL )  THEN ! Each model layer that includes canopy
-                  EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN
-                 ELSE IF ( ZCAN .LE. FCH )  THEN !in-canopy layers and set arrays
-                  COUNTCAN = COUNTCAN + 1
-                  ZCANX (COUNTCAN)     = ZCAN
-                  EDDYVESTX (COUNTCAN) = (SIGMACAN*SIGMACAN)*TLCAN
+!
+                 IF ( ZCAN .EQ. ZFL )  ! THEN ! Each model layer that includes canopy
+     &              EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN ! Model-layer top diffusivity
+! IVAI
+! Average In-Canopy diffusivity gives larger canopy correction (2022)
+!                IF ( ZCAN .LE. FCH )  THEN          ! Average In-Canopy   diffusivity (2022) 
+! Average model-layer diffusivity gives smaller canopy correction (pre-2022) & Jan9, 2026
+                 IF ( ZCAN .LE. ZFL )  THEN         ! Average model-layer diffusivity (2026)
+
+                   COUNTCAN = COUNTCAN + 1
+                   ZCANX     (COUNTCAN) = ZCAN
+                   EDDYVESTX (COUNTCAN) = (SIGMACAN*SIGMACAN)*TLCAN
+! IVAI
+!                  if( kount.EQ.0) print*,'satmedmf_run: EDVY_CAN= ', 
+!    &                                             k, i, COUNTCAN,
+!    &                                                  ZCAN, ZFL, FCH, 
+!    &                                        EDDYVESTX (COUNTCAN)
+!
                  END IF
+!
                  ZCAN = ZCAN-0.5  !step down in-canopy resolution of 0.5m
+!
               END DO !end loop on canopy layers
-              EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)
-     &                                ),EDDYVESTX(COUNTCAN:1:-1)) / ZFL
+
+! IVAI
+            IF (COUNTCAN > 0 ) THEN
+
+              IF (COUNTCAN .EQ. 1) THEN
+                 ZZ_INT= ZCANX(COUNTCAN)  ! FCH (set to FCH if COUNTCAN is 1)
+              ELSE
+                 ZZ_INT= IntegrateTrapezoid(
+     &                  ZCANX(COUNTCAN:1:-1), ZOOOX(COUNTCAN:1:-1))
+              END IF
+!
+!             if( kount.EQ.0) print*,'satmedmf_run: ZZ_INT=',
+!    &                                      k, i, COUNTCAN ,
+!    &                                    ZZ_INT, ZFL, FCH
+! 
+              if ( ZZ_INT .LE.0. ) print*,'satmedmf_run: ZZ_INT < 0',
+     &                                              k, i, COUNTCAN ,
+     &                                           ZFL,  FCH, ZZ_INT ,
+     &                                              ZCANX(COUNTCAN)
+!
+              IF (COUNTCAN .EQ. 1) THEN
+                 EDDYVEST_INT = EDDYVESTX(COUNTCAN)
+              ELSE
+
+                 EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)
+     &                                ),EDDYVESTX(COUNTCAN:1:-1)) / 
+     &                                  ZZ_INT ! ZFL (Jan9) !IVAI
+              END IF
+!
+              if ( EDDYVEST_INT .LE.0. )
+     &           print*,'satmedmf_run: EDVY_INT < 0',
+     &                                              k, i, COUNTCAN ,
+     &                                      ZFL, FCH, EDDYVEST_INT ,
+     &                                          EDDYVESTX(COUNTCAN),
+     &                                              ZCANX(COUNTCAN)
+!
+! Comment out to turn OFF the integrated canopy effect
               dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
               dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
               dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
 
-!IVAI: Output contiguos canopy correction bottom layer and 3D
-!              if ( kount .EQ.  0)
-!     &           aux2d(i,4) = 1./EDDYVEST1  * EDDYVEST_INT
+! Output pbl diags
 !              aux3d(i,k,4) = 1./EDDYVEST1  * EDDYVEST_INT
 !IVAI
+
+            END IF ! (COUNTCAN > 0)
 
             END IF   ! contigous canopy conditions
 

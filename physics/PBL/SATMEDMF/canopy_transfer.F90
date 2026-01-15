@@ -246,12 +246,6 @@
          dens3(II) = DENS(i,k)  ! kg/m**3
 !! Heights of the original model layers for the canopy columns are extracted to the zmom array.
 
-         ! Paul's chem_tr is our conc3 = vmr_resolved (q1_mod)
-         ! conc3(1)     is top model layer
-         ! conc3(km) is 1st (bottom) model layer
-         ! conc3(II) = Q1 (i, k, S)           ! kg kg-1
-         conc3(II) = Q1_MOD(i, k, 11)        ! nto3=1 kg kg-1 "non-canopy columns"
-
       end do
 
 !  Calculate mass of air in model levels
@@ -263,22 +257,9 @@
                              (zmom(k) - zmom(k + 1))
       end do
 
-! ...fetch gas mass mixing ratios [kg kg-1] and convert to [ug kg-1]
-         ! Paul's conc is our mmr_resolved
-      do k = 1, km
-         mmr_resolved(k) = REVERSE_CONV * conc3(k)      ! ug kg-1
-      end do
-
-!  (1) Convert the original model domain values in the current column to mass from mass mixing ratio:
-!  mass_resolved = Mass mixing ratio * (density) / (volume of original model layer)  (ug)
-!      do k = 1, km
-!         mass_resolved(k) = mmr_resolved(k) * massair(i, k) ! ug
-!      end do
-
 !  First, carry over original model values for the matching layers
       do k = 1, km ! from bottom to top of resolved model layers
          massair_can(i, k) = massair(i, k) ! full layer height [m]
-!         mmr_o3_can (i, k) = mmr_resolved(k) ! "non-canopy columns"
 
 !        print*,'NO-CANOPY: massair ', i,k, &
 !                massair_can(i, k)
@@ -286,7 +267,6 @@
 
       do kc = 1, nkc       ! from top to bottom of canopy layers
          massair_can(i, km+kc) = massair(i, km)
-!         mmr_o3_can (i, km+kc) = mmr_resolved(km) ! "non-canopy columns"
 
 !         print*,'NO-CANOPY: massair ', i,km+kc, &
 !                 massair_can(i, km+kc)

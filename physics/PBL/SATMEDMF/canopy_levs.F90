@@ -4,21 +4,21 @@
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
    subroutine canopy_levs_init(im, ix, km,         &
-              ntrac1,  ntoz,                        &
+              ntrac1,  ntqv, ntke,                 &
               zi, zl, zm,                          & ! in: 3D meters
               prsl, prsi,                          & ! in: 3D (Pa)
               dv, du, tdt, rtg,                    & ! in: 3D
-              U1, V1, T1, Q1,                       & ! in: 3D " 4D q1(ix,km,ntrac1) kg kg-1
-              dens, dkt, dku,                      &  ! in 3D
-              dtend,                               &  ! in 4D
-              zmom_can3, zmid_can3,                &  !out 3D
-              sigmom_can, sigmid_can,              &  !out
-              ZH_CAN, ZF_CAN,                      &  !out
-              PRSL_CAN, PRSI_CAN,                  &  !out
-              dv_can, du_can, tdt_can, rtg_can,    & ! out: 3D
-              T1_CAN, QV_CAN, DENS_CAN,            &  !out
-              WS_CAN, DKT_CAN, DKU_CAN,            &  !out
-              Q1_MOD, Q1_CAN, Q1_2M,               &  !out
+              U1, V1, T1, Q1,                      & ! in: 3D " 4D q1(ix,km,ntrac1) kg kg-1
+              dens, dkt, dku,                      & ! in: 3D
+              dtend,                               & ! in: 4D
+              zmom_can3, zmid_can3,                & !out: 3D
+              sigmom_can, sigmid_can,              & !out
+              ZH_CAN, ZF_CAN,                      & !out
+              PRSL_CAN, PRSI_CAN,                  & !out
+              dv_can, du_can, tdt_can, rtg_can,    & !out: 3D
+              T1_CAN, QV_CAN, DENS_CAN,            & !out
+              WS_CAN, DKT_CAN, DKU_CAN,            & !out
+              Q1_CAN, Q1_2M,                       & !out
               DTEND_CAN )
 
    use machine , only : kind_phys
@@ -30,7 +30,7 @@
 
 !...Arguments:
 ! ntrac1 = ntrac - 1
-   integer, intent(in)  :: im, ix, km, ntrac1, ntoz
+   integer, intent(in)  :: im, ix, km, ntrac1, ntqv, ntke
 
    real(kind=kind_phys), intent(in) ::  zi(:,:),   zl(:,:),   zm(:,:), &
                                       prsi(:,:), prsl(:,:)
@@ -45,31 +45,33 @@
    real(kind=kind_phys), intent(in) :: Q1(:,:,:)  ! consider only gas-phase species (NO aerosol species)
 
    real(kind=kind_phys), intent(out) ::  &
+! tendencies
+             DTEND_CAN (:, :, :)     , & ! dim(km , ndtend)
+             dv_can    (:, :)        , & ! dim(km)
+             du_can    (:, :)        , & ! dim(km)
+             tdt_can   (:, :)        , & ! dim(km)
+! tendencies all gas-phase species & TKE
+             RTG_CAN   (:, :, :)     , & ! dim(km )
+
 ! met3d arrays
-             ZH_CAN    (:, :)        , &
-             ZF_CAN    (:, :)        , &
-             dv_can    (:, :)        , &
-             du_can    (:, :)        , &
-             tdt_can   (:, :)        , &
-             T1_CAN    (:, :)        , &
-             QV_CAN    (:, :)        , &
-             PRSL_CAN  (:, :)        , & ! prsl_can (:, nkt)
-             PRSI_CAN  (:, :)        , & ! prsi_can (:, nkt+1)
-             DENS_CAN  (:, :)        , &
-             WS_CAN    (:, :)        , &
-             DKT_CAN   (:, :)        , &
-             DKU_CAN   (:, :)        , &
+             ZH_CAN    (:, :)        , & ! dim(nkt)
+             ZF_CAN    (:, :)        , & ! dim(nkt)
+             T1_CAN    (:, :)        , & ! dim(nkt)
+             QV_CAN    (:, :)        , & ! dim(nkt)
+             WS_CAN    (:, :)        , & ! dim(nkt)
+             PRSL_CAN  (:, :)        , & ! dim(nkt)
+             PRSI_CAN  (:, :)        , & ! dim(nkt+1)
+             DENS_CAN  (:, :)        , & ! dim(nkt)
+             DKT_CAN   (:, :)        , & ! dim(nkt)
+             DKU_CAN   (:, :)        , & ! dim(nkt)
 ! all gas-phase species array
-             RTG_CAN  (:, :, :),   &
-             Q1_MOD   (:, :, :),   &
-             Q1_CAN   (:, :, :),   &  ! q1_can(im, nkt, ntrac)
-             Q1_2M    (:, :)   ,   &
-             DTEND_CAN(:, :, :),  &   ! dtend_can(im, nkt , ndtend)
+             Q1_CAN    (:, :, :)     , & ! dim(nkt)
+             Q1_2M     (:, :)        , & ! dim(nkt)
 ! canopy layers height arrays
-             zmom_can3 (:, :)  , & ! zmom_can  (im, nkt)
-             zmid_can3 (:, :)  , & ! zmid_can  (im, nkt)
-             sigmom_can(:, :)  , & !~ zm (im, km) or zi (im, km+1)
-             sigmid_can(:, :)      !~ zl
+             zmom_can3 (:, :)        , & ! dim(nkt+1)    ! Paul's sigmcan(:,nkt)
+             zmid_can3 (:, :)        , & ! dim(nkt)      ! Paul's sigtcan(:,nkt)
+             sigmom_can(:, :)        , & ! dim(nkt) ~ prsi(:,km+1)
+             sigmid_can(:, :)            ! dim(nkt) ~ prsl(:,km)
 
 !...local variables
 
@@ -78,7 +80,7 @@
 
    integer        :: k, kc
 
-! Initialize with values before diffusion
+! Initialize with values before in-canopy diffusion
 
 ! Layers height
    zmom_can3(:,:) = 0.
@@ -94,8 +96,6 @@
    dtend_can(:, :, : ) = 0.0
 
 ! Tracers
-   Q1_MOD   (:,:,:) = Q1(:,:,:) ! kg kg-1
-
    Q1_2M (:,           :) = Q1(:,1,    :)       ! kg kg-1
 
 ! Subset (km combined layers minus top nkc layers)
@@ -104,11 +104,13 @@
      ! nkc+1  is bot combined
      kc= nkc+k     ! 4th from top (nkt) to nkc+1 combined canopy plus resolved model layer
 
+! Tendencies
      DU_CAN  (:,kc)    = DU  (:,k)       ! m s-2
      DV_CAN  (:,kc)    = DV  (:,k)       ! m s-2
      TDT_CAN (:,kc)    = TDT (:,k)       ! K s-1
 
      RTG_CAN (:,kc, 1:ntrac1) = RTG (:,k, 1:ntrac1) ! kg kg-1 s-1
+     RTG_CAN (:,kc,   ntke  ) = RTG (:,k,   ntke  ) ! J   s-1 s-1
 
    end do
 
@@ -118,22 +120,31 @@
      ! nkc+1  is bot       combined
      kc= nkc+k     ! top (nkt) to nkc+1 combined canopy plus resolved model layer
 
+! Height
      zh_can  (:,kc) = zl  (:,k)
      zf_can  (:,kc) = zm  (:,k)
 
+! Pressure & temperature
      prsl_can(:,kc) = prsl(:,k)  ! km  combined canopy plus resolved layers
      prsi_can(:,kc) = prsi(:,k)  ! km  combined canopy plus resolved layers
      T1_CAN  (:,kc) = T1  (:,k)
      DENS_CAN(:,kc) = DENS(:,k)
 
+! Diffusivities
      DKT_CAN (:,kc) = DKT    (:,k)       ! m2 s-1
      DKU_CAN (:,kc) = DKU    (:,k)       ! m2 s-1
+
+! Wind
      WS_CAN  (:,kc) = sqrt(u1(:,k)**2+v1(:,k)**2)       ! m s-1
 
+! Mass tracers
      Q1_CAN  (:,kc, 1:ntrac1) = Q1 (:,k, 1:ntrac1) ! all tracers ntrac1
 
+! TKE tracer
+     Q1_CAN  (:,kc,   ntke  ) = Q1 (:,k,   ntke  ) ! ntke=198  TKE tracer
+
 ! Humidity
-     QV_CAN(:,kc) = Q1(:,k, 1) ! ntqv=1
+     QV_CAN(:,kc) = Q1(:,k, ntqv) ! ntqv=1
 
    end do
    prsi_can(:,nkt+1 ) = prsi(:,km+1)  ! km  combined canopy plus resolved layers
@@ -141,27 +152,39 @@
 ! Canopy layers
    do kc = 1, nkc ! 3-nkc canopy layers
 
+! Tendencies
      DU_CAN  (:,kc)    = DU  (:,1)       ! m s-2
      DV_CAN  (:,kc)    = DV  (:,1)       ! m s-2
      TDT_CAN (:,kc)    = TDT (:,1)       ! K s-1
 
      RTG_CAN (:,kc, 1:ntrac1) = RTG (:,1, 1:ntrac1) ! kg kg-1 s-1
+     RTG_CAN (:,kc,   ntke  ) = RTG (:,1,   ntke  ) ! J   s-1 s-1
 
+! Height
      zh_can  (:,kc) = zl  (:,1)
      zf_can  (:,kc) = zm  (:,1)
 
+! Pressure & temperature
      prsl_can(:,kc) = prsl(:,1)  ! km  combined canopy plus resolved layers
      prsi_can(:,kc) = prsi(:,1)  ! km  combined canopy plus resolved layers
      T1_CAN  (:,kc) = T1  (:,1)
      DENS_CAN(:,kc) = DENS(:,1)
 
+! Diffusivities
      DKT_CAN (:,kc) = DKT    (:,1)       ! m2 s-1
      DKU_CAN (:,kc) = DKU    (:,1)       ! m2 s-1
+
+! Wind
      WS_CAN  (:,kc) = sqrt(u1(:,1)**2+v1(:,1)**2)       ! m s-1
 
+! Mass tracers
      Q1_CAN  (:,kc, 1:ntrac1) = Q1 (:,1, 1:ntrac1) ! all tracers ntrac1
 
-     QV_CAN  (:,kc) = Q1(:,1, 1) ! ntqv=1
+! TKE tracer
+     Q1_CAN  (:,kc,   ntke  ) = Q1 (:,1,   ntke  ) ! ntke=198  TKE tracer
+
+! Water vapor
+     QV_CAN  (:,kc) = Q1(:,1, ntqv) ! ntqv=1
 
    end do
 
@@ -171,10 +194,10 @@
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
    subroutine canopy_levs_run(im, ix, km,           &
-              ntrac1, ntoz,                          & ! in
+              ntrac1, ntqv, ntke,                   & ! in
               RDGAS, PI,                            & ! in ?? units ??
               zi, zl, zm,                           & ! in: 1D    zm(i,k) = zi(i,k+1)
-              prsl, prsi, psfc,                      & ! in: 3D 3D 2D  (Pa)
+              prsl, prsi, psfc,                     & ! in: 3D 3D 2D  (Pa)
               cfch,                                 & ! in: 2D
               garea, u10m, v10m, fm,fh,             & ! in: 2D
               rbsoil,                               & ! in: 2D
@@ -192,7 +215,7 @@
               dv_can, du_can, tdt_can, rtg_can,    & ! out: 3D
               T1_CAN,  QV_CAN, DENS_CAN,            & ! out 3D
               WS_CAN, DKT_CAN,  DKU_CAN,            & ! out 3D
-              Q1_MOD, Q1_CAN, Q1_2M)            !out
+              Q1_CAN, Q1_2M)            !out
 
    use machine , only : kind_phys
 ! Allocated in mfpbltq_mod:  q1(ix,km,ntrac1)  t1(ix,km) u1(ix,km), v1(ix,km)
@@ -207,7 +230,7 @@
 
 !...Arguments:
 
-   integer, intent(in)  :: im, ix, km, ntrac1, ntoz
+   integer, intent(in)  :: im, ix, km, ntrac1, ntqv, ntke
    real(kind=kind_phys), intent(in) :: RDGAS, PI
 ! NB. zi   (im, km+1), zl   (im, km),  zm(im,km)
 !     prsi (im, km+1), prsl (im, km)
@@ -234,30 +257,31 @@
                kcan3  (:, :)
 
    real(kind=kind_phys), intent(out) ::  &
+! tendencies
+             dv_can    (:, :)        , & ! dim(km)
+             du_can    (:, :)        , & ! dim(km)
+             tdt_can   (:, :)        , & ! dim(km)
+! tendencies all gas-phase species & TKE
+             RTG_CAN   (:, :, :)     , & ! dim(km )
 ! met3d arrays
-             ZH_CAN    (:, :)        , &
-             ZF_CAN    (:, :)        , &
-             dv_can    (:, :)        , &
-             du_can    (:, :)        , &
-             tdt_can   (:, :)        , &
-             T1_CAN    (:, :)        , &
-             QV_CAN    (:, :)        , &
-             WS_CAN    (:, :)        , &
-             PRSL_CAN  (:, :)        , & ! prsl_can (:, nkt)
-             PRSI_CAN  (:, :)        , & ! prsi_can (:, nkt+1)
-             DENS_CAN  (:, :)        , &
-             DKT_CAN   (:, :)        , &
-             DKU_CAN   (:, :)        , &
+             ZH_CAN    (:, :)        , & ! dim(nkt)
+             ZF_CAN    (:, :)        , & ! dim(nkt)
+             T1_CAN    (:, :)        , & ! dim(nkt)
+             QV_CAN    (:, :)        , & ! dim(nkt)
+             WS_CAN    (:, :)        , & ! dim(nkt)
+             PRSL_CAN  (:, :)        , & ! dim(nkt)
+             PRSI_CAN  (:, :)        , & ! dim(nkt+1)
+             DENS_CAN  (:, :)        , & ! dim(nkt)
+             DKT_CAN   (:, :)        , & ! dim(nkt)
+             DKU_CAN   (:, :)        , & ! dim(nkt)
 ! all gas-phase species array
-             RTG_CAN  (:, :, :),   &
-             Q1_MOD (:, :, :),   &
-             Q1_CAN (:, :, :),   &
-             Q1_2M  (:, :)   ,   &
+             Q1_CAN    (:, :, :)     , & ! dim(nkt)
+             Q1_2M     (:, :)        , & ! dim(nkt)
 ! canopy layers height arrays
-             zmom_can3 (:, :)  , & ! zmom_can  (im, nkt+1)    ! Paul's sigmcan(:,nkt)
-             zmid_can3 (:, :)  , & ! zmid_can  (im, nkt)      ! Paul's sigtcan(:,nkt)
-             sigmom_can(:, :)  , & ! sigmom_can(im, nkt) ~ prsi(:,km+1)
-             sigmid_can(:, :)      ! sigmid_can(im, nkt) ~ prsl(:,km)
+             zmom_can3 (:, :)        , & ! dim(nkt+1)    ! Paul's sigmcan(:,nkt)
+             zmid_can3 (:, :)        , & ! dim(nkt)      ! Paul's sigtcan(:,nkt)
+             sigmom_can(:, :)        , & ! dim(nkt) ~ prsi(:,km+1)
+             sigmid_can(:, :)            ! dim(nkt) ~ prsl(:,km)
 
 !...Local arrays:
 
@@ -332,8 +356,6 @@
 ! Initializations
 
 ! NB. mfpbltq_mod: q1(ix,km,ntrac1) kg kg-1
-   Q1_MOD (:,:,:) = Q1(:,:,:)       ! kg kg-1
-
    Q1_2M (:,   :) = Q1(:,1,:)       ! kg kg-1
 
 ! Subset (km combined layers minus top nkc layers)
@@ -346,7 +368,9 @@
      DU_CAN  (:,kc)    = DU  (:,k)       ! m s-2
      DV_CAN  (:,kc)    = DV  (:,k)       ! m s-2
      TDT_CAN (:,kc)    = TDT (:,k)       ! K s-1
+
      RTG_CAN (:,kc, 1:ntrac1) = RTG (:,k, 1:ntrac1) ! kg kg-1 s-1
+     RTG_CAN (:,kc,   ntke  ) = RTG (:,k,   ntke  ) ! J   s-1 s-1
 
    end do
 
@@ -356,19 +380,27 @@
      ! nkc+1  is bot       combined
      kc= nkc+k     ! top (nkt) to nkc+1 combined canopy plus resolved model layer
 
+! Pressure & Temperature
      prsl_can(:,kc) = prsl(:,k)  ! km  combined canopy plus resolved layers
      prsi_can(:,kc) = prsi(:,k)  ! km  combined canopy plus resolved layers
      T1_CAN  (:,kc) = T1  (:,k)
      DENS_CAN(:,kc) = DENS(:,k)
 
+! Diffusivities
      DKT_CAN (:,kc) = DKT    (:,k)       ! m2 s-1
      DKU_CAN (:,kc) = DKU    (:,k)       ! m2 s-1
+
+! Wind
      WS_CAN  (:,kc) = sqrt(u1(:,k)**2+v1(:,k)**2)       ! m s-1
 
-     Q1_CAN  (:,kc, :) = Q1 (:,k, :) ! all tracers ntrac1
+! Mass tracers
+     Q1_CAN  (:,kc, 1:ntrac1) = Q1 (:,k, 1:ntrac1) ! all tracers ntrac1
 
-! Humidity
-     QV_CAN(:,kc) = Q1(:,k, 1) ! ntqv=1
+! TKE tracer
+     Q1_CAN  (:,kc,   ntke  ) = Q1 (:,k,   ntke  ) ! ntke=198  TKE tracer
+
+! Water vapor
+     QV_CAN(:,kc) = Q1(:,k, ntqv) ! ntqv=1
 
    end do
    prsi_can(:,nkt+1 ) = prsi(:,km+1)  ! km  combined canopy plus resolved layers
@@ -379,7 +411,9 @@
      DU_CAN  (:,kc)    = DU  (:,1)       ! m s-2
      DV_CAN  (:,kc)    = DV  (:,1)       ! m s-2
      TDT_CAN (:,kc)    = TDT (:,1)       ! K s-1
-     RTG_CAN (:,kc, :) = RTG (:,1, :) ! kg kg-1 s-1
+
+     RTG_CAN (:,kc, 1:ntrac1) = RTG (:,1, 1:ntrac1) ! kg kg-1 s-1
+     RTG_CAN (:,kc,   ntke  ) = RTG (:,1,   ntke  ) ! J   s-1 s-1
 
      prsl_can(:,kc) = prsl(:,1)  ! km  combined canopy plus resolved layers
      prsi_can(:,kc) = prsi(:,1)  ! km  combined canopy plus resolved layers
@@ -390,9 +424,14 @@
      DKU_CAN (:,kc) = DKU    (:,1)       ! m2 s-1
      WS_CAN  (:,kc) = sqrt(u1(:,1)**2+v1(:,1)**2)       ! m s-1
 
-     Q1_CAN  (:,kc, :) = Q1 (:,1, :) ! all tracers ntrac1
+! Mass tracers
+     Q1_CAN  (:,kc, 1:ntrac1) = Q1 (:,1, 1:ntrac1) ! all tracers ntrac1
 
-     QV_CAN  (:,kc) = Q1(:,1, 1) ! ntqv=1
+! TKE tracer
+     Q1_CAN  (:,kc,   ntke  ) = Q1 (:,1,   ntke  ) ! ntke=198  TKE tracer
+
+! Water vapor
+     QV_CAN  (:,kc) = Q1(:,1, ntqv) ! ntqv=1
 
    end do
 

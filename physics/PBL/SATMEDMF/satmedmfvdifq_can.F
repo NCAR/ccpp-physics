@@ -361,8 +361,8 @@
         if(.not.allocated(ZCANX))
      &    allocate( ZCANX    ( MAXCAN ) )
 
-!      print*,'satmedmfq: ntrac = ', ntrac,ntcw,ntrw,ntiw,ntke
-!      print*,'satmedmfq: rtg size = ', size(rtg), size (dtend), ntrac
+!      print*,'satmedmf_can: ntrac = ', ntrac,ntcw,ntrw,ntiw,ntke
+!      print*,'satmedmf_can: rtg size = ', size(rtg), size (dtend), ntrac
       endif
 !----------------------------------------------
       if (tc_pbl == 0) then
@@ -1702,19 +1702,19 @@
 !        aux3d(:,:,3) = dkt(:,:) ! Out
 
 ! 3-Layer Sub-Canopy effect
-        dku(:,1:km) = dku_can(:,1:km)
-        dkt(:,1:km) = dkt_can(:,1:km)
+        dku(:,1:km) = dku_can(:,1:km)        
+        dkt(:,1:km) = dkt_can(:,1:km)        
         dkq(:,1:km) = prtke * dkt_can(:,1:km)
 
 ! Output 3D pbl diags
 !        aux3d(:,:,6) = dku_can(:,1:km) ! In
 !        aux3d(:,:,4) = dkt_can(:,1:km) ! In
 !
-!        print*, 'SATMEDMFVDIFQ_RUN: CLAIE = ', claie(:)
-!        print*, 'SATMEDMFVDIFQ_RUN: CFCH = ' , cfch (:)
-!        print*, 'SATMEDMFVDIFQ_RUN: CFRT = ' , cfrt (:)
-!        print*, 'SATMEDMFVDIFQ_RUN: CCLU = ' , cclu (:)
-!        print*, 'SATMEDMFVDIFQ_RUN: CPOPU= ' , cpopu(:)
+!        print*, 'satmedmf_can: CLAIE = ', claie(:)
+!        print*, 'satmedmf_can: CFCH = ' , cfch (:)
+!        print*, 'satmedmf_can: CFRT = ' , cfrt (:)
+!        print*, 'satmedmf_can: CCLU = ' , cclu (:)
+!        print*, 'satmedmf_can: CPOPU= ' , cpopu(:)
 ! 2D aux arrays: canopy data in diffusion
 !        aux2d(:,1) = cfch (:)
 !        aux2d(:,2) = claie(:)
@@ -2457,6 +2457,12 @@ c
      &        (f1(1:im,1:km)-q1(1:im,1:km,ntke))*rdt
          endif
       endif
+! IVAI
+!     aux3d(:,:, 7) = q1(:,:,ntke)   ! Jan12
+
+!     aux3d(:,:, 8) = f1 (:,:)       ! Jan12
+!     aux3d(:,:, 6) = rtg(:,:, ntke) ! after diffusion Jan12
+! IVAI
 c
 !> ## Compute tridiagonal matrix elements for heat and moisture
 c
