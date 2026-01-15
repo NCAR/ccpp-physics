@@ -2022,15 +2022,15 @@ c
 
           IF (FRT_MASK(i) >  0.) THEN
 ! Tendency Wind components
-              du (i,k) = du_mod (i,k)            ! <<<<<<<========== UPDATE UU  TEND =========>>>>>>>
-              dv (i,k) = dv_mod (i,k)            ! <<<<<<<========== UPDATE VV  TEND =========>>>>>>>
+!             du (i,k) = du_mod (i,k)            ! <<<<<<<========== UPDATE UU  TEND =========>>>>>>>
+!             dv (i,k) = dv_mod (i,k)            ! <<<<<<<========== UPDATE VV  TEND =========>>>>>>>
 ! Tendency Temperature
-              tdt(i,k) = tdt_mod(i,k)            ! <<<<<<<========== UPDATE TT  TEND =========>>>>>>>
+!             tdt(i,k) = tdt_mod(i,k)            ! <<<<<<<========== UPDATE TT  TEND =========>>>>>>>
 ! Tendency TKE (ntke=198)
-              rtg(i,k, ntke) = rtg_mod(i,k, ntke) ! <<<<<<<========== UPDATE TKE TEND =========>>>>>>>
+!             rtg(i,k, ntke) = rtg_mod(i,k, ntke) ! <<<<<<<========== UPDATE TKE TEND =========>>>>>>>
 
 ! TKE half layers
-              tkeh(i,k) = tkeh_mod(i,k)           ! <<<<<<<========== UPDATE TKEH     =========>>>>>>>
+!             tkeh(i,k) = tkeh_mod(i,k)           ! <<<<<<<========== UPDATE TKEH     =========>>>>>>>
 
           ENDIF ! Contiguous canopy
           enddo ! i
@@ -2049,7 +2049,7 @@ c
               IF (FRT_MASK(i) >  0.) THEN
 ! Humidity & Clouds
 ! Jan6           rtg(i,k, n)    = rtg_mod(i,k, n)      ! <<<<<<<========== UPDATE MET TEND =========>>>>>>>
-                 rtg(i,k, ntqv) = rtg_mod(i,k, ntqv)   ! <<<<<<<========== UPDATE VAP TEND =========>>>>>>>
+!                rtg(i,k, ntqv) = rtg_mod(i,k, ntqv)   ! <<<<<<<========== UPDATE VAP TEND =========>>>>>>>
               ENDIF ! Contiguous canopy
               enddo ! i
            enddo !k
