@@ -65,7 +65,6 @@
      &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            &
 !IVAI: canopy inputs from AQM
      &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           &
-!     &     canmsk,                                                      & ! In IVAI
 !IVAI
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
@@ -1728,8 +1727,6 @@
         do k = 1, km1-1
           do i = 1, im
 
-!IVAI: AQM canopy Inputs
-!           FCH = fch_table(vegtype(i)) !top of canopy from look-up table
             FCH = cfch(i)               !top of canopy from AQM canopy inputs
             IF (k .EQ. 1) THEN !use model layer interfaces
               KCAN = 1
@@ -1744,37 +1741,13 @@
 
             IF (KCAN .EQ. 1) THEN !canopy inside model layer
 !           Check for other Contiguous Canopy Grid Cell Conditions
-
-!           Not a contigous canopy cell
-!            IF (canmsk(i) <= 0.) THEN
-! Replace multiple canopy criteria with canmsk, initialized in "canopy_mask"
             IF (   claie(i) .LT. 0.1
      &        .OR. cfch (i) .LT. 0.5
-!IVAI: modified contiguous canopy condition
-!    &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.5
      &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.75
-!IVAI
      &        .OR. cpopu(i) .GT. 10000.0
      &        .OR. (EXP(-0.5*claie(i)*cclu(i)) .GT. 0.45
      &                          .AND. cfch(i)  .LT. 18.) ) THEN
 
-
-!TODO: Canopy Inputs
-!                        IF ( XCANOPYLAI .LT. 0.1  !from canopy inputs
-!                        IF ( lai(i) .LT. 0.1  !from LSM
-!     &                   .OR. FCH .LT. 0.5 ) THEN
-!     &                   .OR. MAX(0.0, 1.0 - XCANOPYFRT) .GT. 0.5
-!     &                   .OR. POPU .GT. 10000.0
-!     &                   .OR. EXP(-0.5*XCANOPYLAI*XCANOPYCLU).GT. 0.45
-!     &                      .AND. FCH .LT. 18.0 ) THEN
-
-! IVAI: Turn OFF the integrated canopy effect
-!              dkt(i,k)= dkt(i,k)
-!              dkq(i,k)= dkq(i,k)
-!              dku(i,k)= dku(i,k)
-! IVAI
-
-!            ELSE IF (canmsk(i) > 0.) THEN
             ELSE ! There is a contiguous forest canopy, apply correction over canopy layers
 
 ! Output contiguous canopy mask

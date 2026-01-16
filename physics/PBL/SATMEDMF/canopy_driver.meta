@@ -843,17 +843,6 @@
   kind = kind_phys
   intent = in
   optional = True
-### IVAI GFS_sfcprop%
-[canmsk]
-  standard_name = forest_canopy_mask
-  long_name = contiguous forest canopy mask for 3-layer canopy model
-  units = none
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = True
-### IVAI
 [sfc_rlm]
   standard_name = choice_of_near_surface_mixing_length_in_boundary_layer_mass_flux_scheme
   long_name = choice of near surface mixing length in boundary layer mass flux scheme

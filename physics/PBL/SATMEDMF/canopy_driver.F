@@ -168,8 +168,6 @@
      &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            & ! in
 !IVAI: canopy inputs from AQM                      
      &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           & ! in
-     &     canmsk,                                                      & ! out
-!IVAI
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       & ! inout: dtend (.ldiag3d.)
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg,                                               &
@@ -207,10 +205,6 @@
 ! 2D
      &       claie(:) , cfch(:),                                        &
      &       cfrt(:)  , cclu(:), cpopu(:)
-
-      real(kind=kind_phys), optional, intent(out)  ::
-! 2D
-     &       canmsk(:)
 
       !----------------------------------------------
       real(kind=kind_phys), intent(inout) ::                            & 
@@ -735,16 +729,6 @@
 ! Temporary 2D output
 !         aux2d(:, 1) = FRT_mask(:)
         
-
-! 16  16
-!         print*,'can_driver: CANMSK = ', size(canmsk), size(FRT_mask)
-
-         canmsk(:) = FRT_mask(:)
-
-! Output 2D diags
-!         aux2d(:, 1) = canmsk(:)
-
-
 ! Wind direction, degrees
 ! ATAN2(Y, X) computes the principal value of the argument function of the complex number X + i Y.
 !  This function can be used to transform from Cartesian into polar coordinates and allows to determine the angle in the correct quadrant.
@@ -2049,7 +2033,7 @@ c
               IF (FRT_MASK(i) >  0.) THEN
 ! Humidity & Clouds
 ! Jan6           rtg(i,k, n)    = rtg_mod(i,k, n)      ! <<<<<<<========== UPDATE MET TEND =========>>>>>>>
-!                rtg(i,k, ntqv) = rtg_mod(i,k, ntqv)   ! <<<<<<<========== UPDATE VAP TEND =========>>>>>>>
+                 rtg(i,k, ntqv) = rtg_mod(i,k, ntqv)   ! <<<<<<<========== UPDATE VAP TEND =========>>>>>>>
               ENDIF ! Contiguous canopy
               enddo ! i
            enddo !k
