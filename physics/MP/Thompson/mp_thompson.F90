@@ -383,7 +383,7 @@ module mp_thompson
                               spp_prt_list, spp_var_list,          &
                               spp_stddev_cutoff,                   &
                               cplchm, pfi_lsan, pfl_lsan,          &
-                              tc_rain, tc_snow,                    &
+                              fs_fac_rain, fs_fac_snow,            &
                               is_initialized, errmsg, errflg)
 
          implicit none
@@ -466,8 +466,8 @@ module mp_thompson
          real(kind=kind_phys), intent(inout), dimension(:,:), optional :: pfi_lsan
          real(kind=kind_phys), intent(inout), dimension(:,:), optional :: pfl_lsan
 
-         ! TC adjustment
-         real(kind_phys),           intent(in) :: tc_rain, tc_snow
+         ! fall speed adjustment
+         real(kind_phys),           intent(in), optional :: fs_fac_rain, fs_fac_snow
 
          ! Local variables
 
@@ -781,7 +781,7 @@ module mp_thompson
                               qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
                               qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
                               qcten3=qcten3, pfils=pfils, pflls=pflls,                       &
-                              tc_rain=tc_rain, tc_snow=tc_snow)
+                              fs_fac_rain=fs_fac_rain, fs_fac_snow=fs_fac_snow)
          else if (merra2_aerosol_aware) then
              call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                                nc=nc, nwfa=nwfa, nifa=nifa,                                   &
@@ -824,7 +824,7 @@ module mp_thompson
                                qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
                                qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
                                qcten3=qcten3, pfils=pfils, pflls=pflls,                       &
-                               tc_rain=tc_rain, tc_snow=tc_snow)
+                               fs_fac_rain=fs_fac_rain, fs_fac_snow=fs_fac_snow)
          else
             call mp_gt_driver(qv=qv, qc=qc, qr=qr, qi=qi, qs=qs, qg=qg, ni=ni, nr=nr,        &
                               tt=tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
@@ -865,7 +865,7 @@ module mp_thompson
                               qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
                               qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
                               qcten3=qcten3, pfils=pfils, pflls=pflls,                       &
-                              tc_rain=tc_rain, tc_snow=tc_snow)
+                              fs_fac_rain=fs_fac_rain, fs_fac_snow=fs_fac_snow)
          end if
          if (errflg/=0) return
 
