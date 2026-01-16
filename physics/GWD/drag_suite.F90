@@ -1119,8 +1119,8 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
             ! wind direction (similar to above)
             dtfac_meso = 1.0
             if (prsl(i,k).le.plolevmeso) then
-               if (taud_ms(i,k).ne.0.)                                  &
-                  dtfac_meso = min(dtfac_meso,facmeso*abs(velco(i,k)    &
+               if (taud_ms(i,k).ne.0.)                                          &
+                  dtfac_meso = min(dtfac_meso,facmeso*abs(velco(i,min(k,km-1))  &
                      /(deltim*rcs*taud_ms(i,k))))
             end if
 
@@ -2551,20 +2551,17 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
             endif
          enddo
 !
+         do k = kts,km
+
             ! Check if well into mesosphere -- if so, perform similar reduction of
             ! velocity tendency due to mesoscale GWD to prevent sudden reversal of
             ! wind direction (similar to above)
-         dtfac_meso = 1.0
-         do k = kts,km-1
-
+            dtfac_meso = 1.0
             if (prsl(i,k).le.plolevmeso) then 
-               if (taud_ls(i,k).ne.0.)                                  &    
-                  dtfac_meso = min(dtfac_meso,facmeso*abs(velco(i,k)    &    
+               if (taud_ls(i,k).ne.0.)                                          &
+                  dtfac_meso = min(dtfac_meso,facmeso*abs(velco(i,min(k,km-1))  &
                      /(deltim*rcs*taud_ls(i,k))))
             end if
-          enddo
-
-         do k = kts,km
 
             taud_ls(i,k)  = taud_ls(i,k)*dtfac(i)*dtfac_meso*           &    
                                ls_taper(i) *(1.-rstoch(i))
