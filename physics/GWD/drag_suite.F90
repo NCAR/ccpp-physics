@@ -2564,7 +2564,7 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
             end if
           enddo
 
-         do k = kts,km-1
+         do k = kts,km
 
             taud_ls(i,k)  = taud_ls(i,k)*dtfac(i)*dtfac_meso*           &    
                                ls_taper(i) *(1.-rstoch(i))
