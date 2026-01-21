@@ -7130,9 +7130,6 @@ cjfe
         if(ihr.gt.0.and.ihr.le.12) then
           ihr=0
           go to 50
-        elseif(ihr.eq.12) then
-          ihr=0
-          go to 50
         elseif(ihr.gt.0.and.ihr.le.23) then
           ihr=12
           go to 50
