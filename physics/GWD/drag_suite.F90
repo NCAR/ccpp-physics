@@ -1691,7 +1691,6 @@ endif
                             bvf2,rdelks,wtkbj,tem,gfobnv,hd,fro,  &
                             rim,temc,tem1,efact,temv,dtaux,dtauy, &
                             dtauxb,dtauyb,eng0,eng1,dtfac_meso
-   real(kind=kind_phys) ::  denfac
 !
    logical              ::  ldrag(im),icrilv(im),                 &
                             flag(im)
@@ -1775,7 +1774,6 @@ endif
    fdir   = mdir / (2.0*pi)
    invgrcs = 1._kind_phys/g*rcs
    kpblmax = km / 2 ! maximum pbl height : # of vertical levels / 2
-   denfac = 1.0
 
    do i=1,im
       if (slmsk(i)==1. .or. slmsk(i)==2.) then !sea/land/ice mask (=0/1/2) in FV3
