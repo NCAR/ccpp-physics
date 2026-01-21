@@ -106,8 +106,8 @@ module  cires_ugwpv0_module
 ! -----------------------------------------------------------------------
 !>This subroutine initializes CIRES UGWP 
    subroutine cires_ugwpv0_mod_init (me, master, nlunit, input_nml_file, logunit, &
-              fn_nml, lonr, latr, levs, ak, bk, pref, dtp, cdmvgwd, cgwf,    &
-              pa_rf_in, tau_rf_in)
+              fn_nml, lonr, levs, ak, bk, pref, dtp, cdmvgwd, cgwf,    &
+              pa_rf_in, tau_rf_in, errmsg, errflg)
 
     use  ugwpv0_oro_init,     only :  init_oro_gws_v0
     use  ugwpv0_wmsdis_init,  only :  initsolv_wmsdis_v0, ilaunch
@@ -123,7 +123,6 @@ module  cires_ugwpv0_module
     character(len=64),    intent (in) :: fn_nml
     integer,              intent (in) :: lonr
     integer,              intent (in) :: levs
-    integer,              intent (in) :: latr
     real,                 intent (in) :: ak(levs+1), bk(levs+1), pref
     real,                 intent (in) :: dtp
     real,                 intent (in) :: cdmvgwd(2), cgwf(2)             ! "scaling" controls for "old" GFS-GW schemes

@@ -63,7 +63,7 @@ contains
 !! \htmlinclude unified_ugwp_init.html
 !!
     subroutine unified_ugwp_init (me, master, nlunit, input_nml_file, logunit, &
-                fn_nml2, jdat, lonr, latr, levs, ak, bk, dtp, cdmbgwd, cgwf,   &
+                fn_nml2, jdat, lonr, levs, ak, bk, dtp, cdmbgwd, cgwf,   &
                 con_pi, con_rerth, pa_rf_in, tau_rf_in, con_p0, do_ugwp,       &
                 do_ugwp_v0, do_ugwp_v0_orog_only, do_ugwp_v0_nst_only,         &
                 do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd, gwd_opt,  &
@@ -80,7 +80,6 @@ contains
     integer,              intent (in) :: jdat(:)
     integer,              intent (in) :: lonr
     integer,              intent (in) :: levs
-    integer,              intent (in) :: latr
     real(kind=kind_phys), intent (in) :: ak(:), bk(:)
     real(kind=kind_phys), intent (in) :: dtp
     real(kind=kind_phys), intent (in) :: cdmbgwd(:), cgwf(:) ! "scaling" controls for "old" GFS-GW schemes
@@ -137,7 +136,7 @@ contains
        ! if (do_ugwp .or. cdmbgwd(3) > 0.0) then (deactivate effect of do_ugwp)
        if (cdmbgwd(3) > 0.0) then
         call cires_ugwpv0_mod_init(me, master, nlunit, input_nml_file, logunit, &
-                                fn_nml2, lonr, latr, levs, ak, bk, con_p0, dtp, &
+                                fn_nml2, lonr, levs, ak, bk, con_p0, dtp, &
                                 cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in)
        else
          write(errmsg,'(*(a))') "Logic error: cires_ugwp_mod_init called but &

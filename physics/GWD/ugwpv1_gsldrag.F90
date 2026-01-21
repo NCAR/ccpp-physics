@@ -69,7 +69,7 @@ contains
 !!
     subroutine ugwpv1_gsldrag_init  (                                          &
                 me, master, nlunit, input_nml_file, logunit,                   &
-                fn_nml2, jdat, lonr, latr, levs, ak, bk, dtp,                  &
+                fn_nml2, jdat, lonr, levs, ak, bk, dtp,                        &
                 con_pi, con_rerth, con_p0,                                     &
                 con_g, con_omega,  con_cp, con_rd, con_rv,con_fvirt,           &
                 do_ugwp,do_ugwp_v0, do_ugwp_v0_orog_only, do_gsl_drag_ls_bl,   &
@@ -90,7 +90,6 @@ contains
     integer,              intent (in) :: jdat(:)
     integer,              intent (in) :: lonr
     integer,              intent (in) :: levs
-    integer,              intent (in) :: latr
     real(kind=kind_phys), intent (in) :: ak(:), bk(:)
     real(kind=kind_phys), intent (in) :: dtp
 
@@ -234,7 +233,7 @@ contains
 
     if ( do_ugwp_v1 ) then
        call cires_ugwpv1_init (me, master, nlunit, logunit, jdat, con_pi,      &
-                               con_rerth, fn_nml2, input_nml_file, lonr, latr, &
+                               con_rerth, fn_nml2, input_nml_file, lonr,       &
                                levs, ak, bk, con_p0, dtp, errmsg, errflg)
        if (errflg/=0) return
     end if

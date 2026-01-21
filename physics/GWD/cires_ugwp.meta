@@ -60,13 +60,6 @@
   dimensions = ()
   type = integer
   intent = in
-[latr]
-  standard_name = number_of_latitude_points
-  long_name = number of global points in y-dir (j) along the meridian
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels

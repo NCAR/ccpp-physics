@@ -141,11 +141,11 @@ module  cires_ugwpv1_module
 ! non-ccpp ....  
 !
 !  subroutine cires_ugwp_init_v1 (me, master, nlunit, logunit, jdat_gfs, fn_nml2,   &
-!              lonr, latr, levs, ak, bk, pref, dtp)      
+!              lonr, levs, ak, bk, pref, dtp)      
 !-----------------------------------------------------------------------------------
 
   subroutine cires_ugwpv1_init (me, master, nlunit, logunit, jdat_gfs, con_pi,  &
-              con_rerth, fn_nml2, input_nml_file, lonr, latr, levs, ak, bk,     &
+              con_rerth, fn_nml2, input_nml_file, lonr, levs, ak, bk,           &
               pref, dtp, errmsg, errflg)
 !
 !  input_nml_file ='input.nml'=fn_nml   ..... OLD_namelist and cdmvgwd(4) Corrected Bug Oct 4
@@ -170,7 +170,6 @@ module  cires_ugwpv1_module
     integer, intent (in) :: logunit
     integer, intent (in) :: lonr
     integer, intent (in) :: levs
-    integer, intent (in) :: latr
     integer, intent (in) :: jdat_gfs(8)
     real(kind=kind_phys),    intent (in) :: ak(levs+1), bk(levs+1), pref
     real(kind=kind_phys),    intent (in) :: dtp
@@ -247,8 +246,6 @@ module  cires_ugwpv1_module
 !
 ! init global background dissipation for ugwp -> 4d-variable for fv3wam linked with pbl-vert_diff
 !
-!
-!   allocate(fcor(latr), fcor2(latr)  )
 !
     allocate( kvg(levs+1),   ktg(levs+1)  )
     allocate( krad(levs+1),  kion(levs+1) )
