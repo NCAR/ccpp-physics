@@ -684,8 +684,8 @@
 [ugwp_seq_update]
   standard_name = do_ugwp_sequential_update
   long_name = flag for ugwp sequential update
-  units = flag 
-  dimensions = () 
+  units = flag
+  dimensions = ()
   type = logical
   intent = in
 [cdmbgwd]
@@ -1081,7 +1081,7 @@
   type = real
   kind = kind_phys
   intent = in
-[dqdt_tke] 
+[dqdt_tke]
   standard_name = process_split_cumulative_tendency_of_turbulent_kinetic_energy
   long_name = turbulent kinetic energy tendency due to model physics
   units = J s-1
@@ -1220,18 +1220,18 @@
 [do_gwd_opt_psl]
   standard_name = do_gsl_drag_suite_with_psl_gwd_option
   long_name = flag to activate PSL drag suite - mesoscale GWD and blocking
-  units = flag 
-  dimensions = () 
+  units = flag
+  dimensions = ()
   type = logical
-  intent = in 
+  intent = in
 [psl_gwd_dx_factor]
   standard_name = effective_grid_spacing_of_psl_gwd_suite
   long_name = multiplication of grid spacing
   units = 1
-  dimensions = () 
-  type = real 
+  dimensions = ()
+  type = real
   kind = kind_phys
-  intent = in 
+  intent = in
 [gwd_opt]
   standard_name = control_for_drag_suite_gravity_wave_drag
   long_name = flag to choose gwd scheme

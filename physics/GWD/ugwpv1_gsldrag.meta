@@ -3,7 +3,7 @@
   type = scheme
   dependencies = ../hooks/machine.F,drag_suite.F90
   dependencies = cires_ugwpv1_module.F90,cires_ugwpv1_triggers.F90,cires_ugwpv1_initialize.F90,cires_ugwpv1_solv2.F90,ecmwf_ngw.F90
-  dependencies = cires_ugwpv1_sporo.F90,cires_ugwpv1_oro.F90 
+  dependencies = cires_ugwpv1_sporo.F90,cires_ugwpv1_oro.F90
 ########################################################################
 [ccpp-arg-table]
   name = ugwpv1_gsldrag_init
@@ -771,7 +771,7 @@
   units = mixed
   dimensions = (horizontal_loop_extent)
   type = real
-  kind = kind_phys  
+  kind = kind_phys
   intent = in
 [dudt_ogw]
   standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
@@ -1166,5 +1166,3 @@
   dimensions = ()
   type = integer
   intent = out
-
-  
