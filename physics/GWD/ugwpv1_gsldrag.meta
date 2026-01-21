@@ -1037,7 +1037,6 @@
   type = real
   kind = kind_phys
   intent = out
-  intent = out
 [dudt]
   standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = zonal wind tendency due to model physics

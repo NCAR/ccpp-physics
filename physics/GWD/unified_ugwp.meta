@@ -854,7 +854,6 @@
   type = real
   kind = kind_phys
   intent = out
-  intent = out
 [gw_dudt]
   standard_name = tendency_of_x_wind_due_to_gravity_wave_drag
   long_name = zonal wind tendency due to UGWP

@@ -63,11 +63,6 @@ contains
     character(len=*), intent (in) :: fn_nml2
     !character(len=*), parameter   :: fn_nml='input.nml'
 
-    integer :: ios
-    logical :: exists
-    real    :: dxsg
-    integer :: k
-
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
 

@@ -48,7 +48,7 @@ module unified_ugwp
 
     public unified_ugwp_init, unified_ugwp_run, unified_ugwp_finalize
 
-    logical :: is_initialized = .False.
+    logical :: is_initialized = .false.
 
 contains
 
@@ -93,11 +93,6 @@ contains
 
     character(len=*), intent (in) :: fn_nml2
     !character(len=*), parameter   :: fn_nml='input.nml'
-
-    integer :: ios
-    logical :: exists
-    real    :: dxsg
-    integer :: k
 
     integer,          intent(in)  :: gwd_opt
     character(len=*), intent(out) :: errmsg
