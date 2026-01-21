@@ -98,11 +98,10 @@
      &                     asolfac, evef, pgcon
       logical,          intent(in)  :: hwrf_samfshal,first_time_step,   &
      &     restart,progsigma,progomega
+      real(kind_phys), intent(in) :: cat_adj_shal
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-      ! for HAFS
-      real(kind_phys),           intent(in) :: cat_adj_shal
 !
 !  local variables
       integer              i,j,indx, k, kk, km1, n
@@ -1996,7 +1995,6 @@ c
            tauadv = gdx(i) / umean(i)
            advfac(i) = tauadv / dtconv(i)
            advfac(i) = min(cat_adj_shal*advfac(i), 1.)
-           !advfac(i) = min(0.85*advfac(i), 1.)  !shin
         endif
       enddo
 c
