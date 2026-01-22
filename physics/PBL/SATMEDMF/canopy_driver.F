@@ -2033,7 +2033,7 @@ c
               IF (FRT_MASK(i) >  0.) THEN
 ! Humidity & Clouds
 ! Jan6           rtg(i,k, n)    = rtg_mod(i,k, n)      ! <<<<<<<========== UPDATE MET TEND =========>>>>>>>
-                 rtg(i,k, ntqv) = rtg_mod(i,k, ntqv)   ! <<<<<<<========== UPDATE VAP TEND =========>>>>>>>
+!                rtg(i,k, ntqv) = rtg_mod(i,k, ntqv)   ! <<<<<<<========== UPDATE VAP TEND =========>>>>>>>
               ENDIF ! Contiguous canopy
               enddo ! i
            enddo !k

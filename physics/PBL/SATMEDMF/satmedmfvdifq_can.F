@@ -1719,143 +1719,6 @@
 !        aux2d(:,2) = claie(:)
 !        aux2d(:,3) = cfrt(:)
 
-! 3D aux arrays: before canopy correction
-!        aux3d(:,:,1) = dkq(:,:)
-!        aux3d(:,:,2) = dkt(:,:)
-!        aux3d(:,:,3) = dku(:,:)
-!IVAI
-        do k = 1, km1-1
-          do i = 1, im
-
-            FCH = cfch(i)               !top of canopy from AQM canopy inputs
-            IF (k .EQ. 1) THEN !use model layer interfaces
-              KCAN = 1
-            ELSE
-              IF (   cfch(i) .GT. zi(i,k)
-     &         .AND. cfch(i) .LE. zi(i,k+1) ) THEN
-                KCAN = 1
-              ELSE
-                KCAN = 0
-              END IF
-            END IF
-
-            IF (KCAN .EQ. 1) THEN !canopy inside model layer
-!           Check for other Contiguous Canopy Grid Cell Conditions
-            IF (   claie(i) .LT. 0.1
-     &        .OR. cfch (i) .LT. 0.5
-     &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.75
-     &        .OR. cpopu(i) .GT. 10000.0
-     &        .OR. (EXP(-0.5*claie(i)*cclu(i)) .GT. 0.45
-     &                          .AND. cfch(i)  .LT. 18.) ) THEN
-
-            ELSE ! There is a contiguous forest canopy, apply correction over canopy layers
-
-! Output contiguous canopy mask
-!              if (kount .EQ. 0 ) aux2d(i,5) = aux2d(i,5) + 1
-
-!Raupauch M. R. A Practical Lagrangian method for relating scalar
-!concentrations to
-! source distributions in vegetation canopies. Q. J. R. Meteor. Soc.
-! (1989), 115, pp 609-632
-              MOL  = zol(i)/zl(i,k)  !Monin-Obukhov Length in layer
-              HOL = FCH/MOL  !local canopy stability parameter (hc/MOL)
-              ZCAN = zi(i,k+1) ! Initialize each model layer top that contains canopy (m)
-                             ! Integrate across total model interface
-              ZFL = ZCAN     ! Set ZFL = ZCAN
-              COUNTCAN = 0   ! Initialize canopy layers
-
-              IF (k .EQ. 1) THEN  !Find bottom in each model layer
-                  BOTCAN = 0.5
-              ELSE
-                  BOTCAN = zi(i,k)
-              END IF
-
-              DO WHILE (ZCAN.GE.BOTCAN)
-                 ! TLCAN = Lagrangian timescale
-                 TLCAN = (FCH/ustar(i)) * (
-     &                   (0.256 * (ZCAN-(0.75*FCH))/FCH ) +
-     &                   (0.492*EXP((-0.256*ZCAN/FCH)/0.492)) )
-                 IF ( HOL .LT. -0.1 )  THEN  !STRONG UNSTABLE
-                  IF ( ZCAN/FCH .GT. 1.25 ) THEN !SIGMACAN = Eulerian vertical velocity variance
-                    SIGMACAN = 1.25*ustar(i)
-                  END IF
-                  IF ( ZCAN/FCH .GE. 0.175
-     &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                      SIGMACAN = ustar(i) * ( 0.75 +
-     &                         (0.5 * COS((PI/1.06818) *
-     &                         (1.25 - (ZCAN/FCH)))) )
-                  END IF
-                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
-                    SIGMACAN = 0.25*ustar(i)
-                  END IF
-                 END IF
-                 IF ( HOL .GE. -0.1  .AND. HOL .LT. 0.1 )   THEN !WEAKLY UNSTABLE to NEUTRAL
-                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
-                    SIGMACAN = 1.0*ustar(i)
-                  END IF
-                  IF ( ZCAN/FCH .GE. 0.175
-     &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                    SIGMACAN = ustar(i) * ( 0.625 +
-     &                       (0.375* COS((PI/1.06818) *
-     &                       (1.25 - (ZCAN/FCH)))) )
-                  END IF
-                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
-                    SIGMACAN = 0.25*ustar(i)
-                  END IF
-                 END IF
-                 IF ( HOL .GE.  0.1  .AND.  HOL .LT. 0.9 )   THEN !STABLE
-                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
-                    SIGMACAN = 0.25*(4.375 - (3.75*HOL))*ustar(i)
-                  END IF
-                  IF ( ZCAN/FCH .GE. 0.175
-     &                 .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                    RRCAN=4.375-(3.75*HOL)
-                    AACAN=(0.125*RRCAN) + 0.125
-                    BBCAN=(0.125*RRCAN) - 0.125
-                    SIGMACAN = ustar(i) * ( AACAN +
-     &                             (BBCAN * COS((PI/1.06818) *
-     &                             (1.25 - (ZCAN/FCH)))) )
-                  END IF
-                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
-                    SIGMACAN = 0.25*ustar(i)
-                  END IF
-                 END IF
-                 IF ( HOL .GE.  0.9 ) THEN  !VERY STABLE
-                    SIGMACAN = 0.25*ustar(i)
-                 END IF
-                 IF ( ZCAN .EQ. ZFL )  THEN ! Each model layer that includes canopy
-                  EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN
-                 ELSE IF ( ZCAN .LE. FCH )  THEN !in-canopy layers and set arrays
-                  COUNTCAN = COUNTCAN + 1
-                  ZCANX (COUNTCAN)     = ZCAN
-                  EDDYVESTX (COUNTCAN) = (SIGMACAN*SIGMACAN)*TLCAN
-                 END IF
-                 ZCAN = ZCAN-0.5  !step down in-canopy resolution of 0.5m
-              END DO !end loop on canopy layers
-              EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)
-     &                                ),EDDYVESTX(COUNTCAN:1:-1)) / ZFL
-! IVAI: turn OFF the integrated canopy effect
-!              dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
-!              dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
-!              dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
-! IVAI
-
-!IVAI: Output contiguos canopy correction bottom layer and 3D
-!              if ( kount .EQ.  0)
-!     &           aux2d(i,4) = 1./EDDYVEST1  * EDDYVEST_INT
-!              aux3d(i,k,4) = 1./EDDYVEST1  * EDDYVEST_INT
-!IVAI
-
-            END IF   ! contigous canopy conditions
-
-            END IF   ! (KCAN .EQ. 1) model layer(s) containing canopy
-
-          enddo !i
-
-          kount = kount + 1 !IVAI
-
-        enddo !k
-
       endif !do_canopy .and. cplaqm
 
 !> ## Compute TKE.
@@ -3035,16 +2898,18 @@ c
 !           dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
       enddo
-      do i = 1,im
-        if(.not. use_oceanuv) then
-          dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
-          dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
-        else if (use_oceanuv) then
+      if (use_oceanuv) then
+        do i = 1,im
           spd1_m=sqrt( (u1(i,1)-usfco(i))**2+(v1(i,1)-vsfco(i))**2 )
           dusfc(i) = -1.*rho_a(i)*stress(i)*(u1(i,1)-usfco(i))/spd1_m
           dvsfc(i) = -1.*rho_a(i)*stress(i)*(v1(i,1)-vsfco(i))/spd1_m
-        endif
-      enddo
+        enddo
+      else
+        do i = 1,im
+          dusfc(i) = -1.*rho_a(i)*stress(i)*u1(i,1)/spd1(i)
+          dvsfc(i) = -1.*rho_a(i)*stress(i)*v1(i,1)/spd1(i)
+        enddo
+      endif
 !
       if(ldiag3d .and. .not. gen_tend) then
         idtend = dtidx(index_of_x_wind,index_of_process_pbl)

@@ -1772,12 +1772,6 @@
      &        .OR. (EXP(-0.5*claie(i)*cclu(i)) .GT. 0.45
      &                          .AND. cfch(i)  .LT. 18.) ) THEN
 
-! IVAI: turn OFF the integrated canopy effect
-!              dkt(i,k)= dkt(i,k)
-!              dkq(i,k)= dkq(i,k)
-!              dku(i,k)= dku(i,k)
-! IVAI
-
             ELSE ! There is a contiguous forest canopy, apply correction over canopy layers
 
 ! Output contiguous canopy mask
@@ -1913,9 +1907,9 @@
      &                                              ZCANX(COUNTCAN)
 !
 ! Comment out to turn OFF the integrated canopy effect
-!             dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
-!             dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
-!             dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
+              dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
+              dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
+              dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
 
 ! Output pbl diags
 !              aux3d(i,k,4) = 1./EDDYVEST1  * EDDYVEST_INT
