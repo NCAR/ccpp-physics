@@ -551,8 +551,8 @@
   type = real
   intent = in
 [cat_adj_shal]
-  standard_name = Adjustment_for_convective_advection_time_for_shallow
-  long_name = Adjustment for convective advection time for shallow
+  standard_name = adjustment_for_convective_advection_time_for_shallow
+  long_name = adjustment for convective advection time for shallow
   units = none
   dimensions = ()
   type = real
