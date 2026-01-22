@@ -635,6 +635,22 @@
   dimensions = ()
   type = logical
   intent = in
+[use_cdeps_data]
+  standard_name = do_cdeps_inline
+  long_name = flag for using data provided by CDEPS inline (default false)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[mask_dat]
+  standard_name = land_sea_mask_from_data
+  long_name = landmask
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
 [exticeden]
   standard_name = do_external_surface_frozen_precipitation_density
   long_name = flag for calculating frozen precip ice density outside of the LSM
