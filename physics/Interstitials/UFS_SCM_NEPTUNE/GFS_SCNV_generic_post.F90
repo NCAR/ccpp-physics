@@ -11,7 +11,7 @@
       subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, qdiag3d, &
         frain, gu0, gv0, gt0, gq0, save_u, save_v, save_t, save_q,                 &
         clw, shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw, nsamftrac,    &
-        rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                      &
+        rainc, cnvprcp, cnvw_phy_f3d, cnvc_phy_f3d,                                &
         dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,      &
         index_of_process_scnv, ntqv, flag_for_scnv_generic_tend,                   &
         ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,ntsigma,                &
@@ -41,7 +41,7 @@
       logical, intent(in) :: shcnvcw
       real(kind=kind_phys), dimension(:), intent(in) :: rain1
       real(kind=kind_phys), dimension(:, :), intent(in) :: cnvw, cnvc
-      real(kind=kind_phys), dimension(:), intent(inout) :: rainc, cnvprcp, cnvprcpb
+      real(kind=kind_phys), dimension(:), intent(inout) :: rainc, cnvprcp
       ! The following arrays may not be allocated, depending on certain flags and microphysics schemes.
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
       ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays

@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmg_pre
   type = scheme
-  relative_path = ../../
+  dependencies_path = ../../
   dependencies = tools/funcphys.f90,hooks/machine.F
   dependencies = MP/TEMPO/TEMPO/module_mp_tempo_params.F90,MP/TEMPO/TEMPO/module_mp_tempo_utils.F90
   dependencies = MP/Thompson/module_mp_thompson.F90,MP/Thompson/module_mp_thompson_make_number_concentrations.F90
@@ -746,6 +746,22 @@
   standard_name = tunable_parameter_for_ice_supersaturation
   long_name = ice supersaturation parameter for PDF clouds
   units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[xr_con]
+  standard_name = multiplicative_tuning_parameter_for_Xu_Randall_cloud_fraction
+  long_name = multiplicative tuning parameter for Xu Randall cloud fraction
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[xr_exp]
+  standard_name = exponent_tuning_parameter_for_Xu_Randall_cloud_fraction
+  long_name = exponent tuning parameter for Xu Randall cloud fraction
+  units = 1
   dimensions = ()
   type = real
   kind = kind_phys

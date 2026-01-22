@@ -2,7 +2,7 @@
 [ccpp-table-properties]
   name = GFS_surface_composites_post
   type = scheme
-  relative_path = ../../
+  dependencies_path = ../../
   dependencies = hooks/machine.F,SFC_Layer/UFS/sfc_diff.f
 
 ########################################################################
@@ -144,6 +144,22 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
+[use_cdeps_data]
+  standard_name = do_cdeps_inline
+  long_name = flag for using data provided by CDEPS inline (default false)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[mask_dat]
+  standard_name = land_sea_mask_from_data
+  long_name = landmask
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
