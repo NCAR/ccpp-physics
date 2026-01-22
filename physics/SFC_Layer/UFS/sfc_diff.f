@@ -358,12 +358,12 @@
      &                          * virtfac
             endif
 
-            if (.not. use_oceanuv) then
-              wind10m=sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
-              windrel=wind(i)
-            else if (use_oceanuv) then
+            if (use_oceanuv) then
               wind10m=sqrt((u10m(i)-usfco(i))**2+(v10m(i)-vsfco(i))**2)
               windrel=sqrt((u1(i)-usfco(i))**2+(v1(i)-vsfco(i))**2)
+            else
+              wind10m=sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
+              windrel=wind(i)
             endif
 
             z0    = 0.01_kp * z0rl_wat(i)

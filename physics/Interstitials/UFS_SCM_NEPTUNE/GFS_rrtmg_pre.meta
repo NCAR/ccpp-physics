@@ -750,6 +750,22 @@
   type = real
   kind = kind_phys
   intent = in
+[xr_con]
+  standard_name = multiplicative_tuning_parameter_for_Xu_Randall_cloud_fraction
+  long_name = multiplicative tuning parameter for Xu Randall cloud fraction
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[xr_exp]
+  standard_name = exponent_tuning_parameter_for_Xu_Randall_cloud_fraction
+  long_name = exponent tuning parameter for Xu Randall cloud fraction
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [con_eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv

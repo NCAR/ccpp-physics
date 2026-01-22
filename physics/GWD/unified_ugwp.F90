@@ -244,7 +244,7 @@ contains
 !! \htmlinclude unified_ugwp_run.html
 !!
 ! \section det_unified_ugwp GFS Unified GWP Scheme Detailed Algorithm
-     subroutine unified_ugwp_run(me, master, im, levs, ak,bk, ntrac, dtp, fhzero, kdt, &
+     subroutine unified_ugwp_run(me, master, im, levs, ak,bk, ntrac, dtp, kdt,         &
          lonr, oro, oro_uf, hprime, nmtvr, oc, theta, sigma, gamma, elvmax, clx, oa4,  &
          varss,oc1ss,oa4ss,ol4ss,dx,dusfc_ms,dvsfc_ms,dusfc_bl,dvsfc_bl,dusfc_ss,      &
          dvsfc_ss,dusfc_fd,dvsfc_fd,dtaux2d_ms,dtauy2d_ms,dtaux2d_bl,dtauy2d_bl,       &
@@ -290,7 +290,7 @@ contains
     real(kind=kind_phys),    intent(in),    dimension(:,:)  :: del, ugrs, vgrs, tgrs, prsl, prslk, phil
     real(kind=kind_phys),    intent(in),    dimension(:,:)  :: prsi, phii
     real(kind=kind_phys),    intent(in),    dimension(:,:)  :: q1
-    real(kind=kind_phys),    intent(in) :: dtp, fhzero, cdmbgwd(:), alpha_fd
+    real(kind=kind_phys),    intent(in) :: dtp, cdmbgwd(:), alpha_fd
     integer, intent(in) :: jdat(:)
     logical, intent(in) :: do_tofd, ldiag_ugwp, ugwp_seq_update
 

@@ -12,9 +12,7 @@ module rrtmgp_lw_cloud_optics
   use rrtmgp_lw_gas_optics,     only: lw_gas_props
   use radiation_tools,          only: check_error_msg
   use netcdf
-#ifdef MPI
   use mpi_f08
-#endif
 
   implicit none
 
@@ -88,9 +86,7 @@ contains
     ! (ONLY master processor(0), if MPI enabled)
     !
     ! #######################################################################################
-#ifdef MPI
     if (mpirank .eq. mpiroot) then
-#endif
        write (*,*) 'Reading RRTMGP longwave cloud-optics metadata ... '
 
        ! Open file
@@ -116,7 +112,6 @@ contains
        status = nf90_inq_dimid(ncid, 'pair', dimid)
        status = nf90_inquire_dimension(ncid, dimid, len=npairsLW)
 
-#ifdef MPI
     endif ! On master processor
 
     ! Other processors waiting...
@@ -136,14 +131,11 @@ contains
     call mpi_bcast(nCoeff_ssa_gLW,     1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
     call mpi_bcast(nBoundLW,           1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
     call mpi_bcast(nPairsLW,           1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-#endif
 
     ! Has the number of ice-roughnesses to use been provided from the namelist?
     ! If so, override nrghice from cloud-optics file
     if (nrghice .ne. 0) nrghice_fromfileLW = nrghice
-#ifdef MPI
     call mpi_bcast(nrghice_fromfileLW, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-#endif
 
     ! #######################################################################################
     !
@@ -165,9 +157,7 @@ contains
     ! (ONLY master processor(0), if MPI enabled) 
     !
     ! #######################################################################################
-#ifdef MPI
     if (mpirank .eq. mpiroot) then
-#endif
        ! Read in fields from file
        write (*,*) 'Reading RRTMGP longwave cloud data (LUT) ... '
        status = nf90_inq_varid(ncid,'radliq_lwr',varID)
@@ -195,7 +185,6 @@ contains
           
        ! Close file
        status = nf90_close(ncid)       
-#ifdef MPI
     endif ! Master process
 
     ! Other processors waiting...
@@ -238,8 +227,6 @@ contains
     call mpi_bcast(lut_exticeLW,   size(lut_exticeLW),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(lut_ssaiceLW,   size(lut_ssaiceLW),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(lut_asyiceLW,   size(lut_asyiceLW),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
-#endif
-    
 #endif
 
     ! #######################################################################################

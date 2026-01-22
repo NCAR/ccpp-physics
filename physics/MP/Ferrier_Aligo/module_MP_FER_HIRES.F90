@@ -108,9 +108,7 @@
 !
 !-----------------------------------------------------------------------------
 
-#ifdef MPI
-     USE mpi_f08
-#endif
+      USE mpi_f08
       USE machine
 !MZ
 !MZ     USE MODULE_CONSTANTS,ONLY : PI, CP, EPSQ, GRAV=>G, RHOL=>RHOWATER, &
@@ -2447,9 +2445,7 @@ ENDIF
 !
 !-----------------------------------------------------------------------
 !
-#ifdef MPI
       use mpi_f08
-#endif
       IMPLICIT NONE
 !
 !------------------------------------------------------------------------- 
@@ -2507,9 +2503,7 @@ ENDIF
       if (.NOT. ALLOCATED(vsnowi)) ALLOCATE(vsnowi(MDImin:MDImax))
       if (.NOT. ALLOCATED(vel_rf)) ALLOCATE(vel_rf(2:9,0:Nrime))
 
-#ifdef MPI
       call MPI_BARRIER(MPI_COMM_COMP,ierr)
-#endif
 
       only_root_reads: if (MPIRANK==MPIROOT) then
         force_read_ferhires = .true.
@@ -2567,7 +2561,6 @@ ENDIF
         ENDIF
       endif only_root_reads
 !
-#ifdef MPI
         CALL MPI_BCAST(VENTR1,SIZE(VENTR1),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
         CALL MPI_BCAST(VENTR2,SIZE(VENTR2),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
         CALL MPI_BCAST(ACCRR, SIZE(ACCRR), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
@@ -2580,7 +2573,6 @@ ENDIF
         CALL MPI_BCAST(MASSI, SIZE(MASSI), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
         CALL MPI_BCAST(VSNOWI,SIZE(VSNOWI),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
         CALL MPI_BCAST(VEL_RF,SIZE(VEL_RF),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
-#endif
 
 !
 !--- Calculates coefficients for growth rates of ice nucleated in water

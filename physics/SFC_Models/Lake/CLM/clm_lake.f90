@@ -268,6 +268,7 @@ MODULE clm_lake
          ! Configuration and initialization:
          iopt_lake, iopt_lake_clm, min_lakeice, lakedepth_default, use_lakedepth, &
          dtp, use_lake_model, clm_lake_initialized, frac_grid, frac_ice, lkm,     &
+         use_cdeps_data, mask_dat,                                                &
 
          ! Atmospheric model state inputs:
          tg3, pgr, zlvl, gt0, prsi, phii, qvcurr, gu0, gv0, xlat_d, xlon_d,       &
@@ -318,7 +319,9 @@ MODULE clm_lake
     LOGICAL, INTENT(IN) :: use_lakedepth
     INTEGER, DIMENSION(:), INTENT(IN) :: use_lake_model
     REAL(KIND_PHYS), INTENT(INOUT) :: clm_lake_initialized(:)
-    LOGICAL, INTENT(IN) :: frac_grid, frac_ice
+    LOGICAL, INTENT(IN) :: frac_grid, frac_ice, use_cdeps_data
+    REAL(KIND_PHYS), INTENT(IN), OPTIONAL :: mask_dat(:)
+
 
     !
     ! Atmospheric model state inputs:
@@ -712,16 +715,27 @@ MODULE clm_lake
                 hflx_wat(i)     = eflx_sh_tot(c)/(rho0*cpair) ! kinematic_surface_upward_sensible_heat_flux_over_water
                 gflx_wat(I)     = eflx_gnet(c)              ![W/m/m]   upward_heat_flux_in_soil_over_water
                 ep1d_water(i)   = eflx_lh_tot(c)            ![W/m/m]   surface_upward_potential_latent_heat_flux_over_water
-                tsurf_water(I)  = t_grnd(c)                 ![K]       surface skin temperature after iteration over water
-                tsurf_ice(i)    = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
-                tsfc_wat(i)     = t_grnd(c)                 ![K]       surface skin temperature over water
-                tisfc(i)        = t_grnd(c)
+                !don't overwrite surface skin temperature over ice, sea ice area fraction, skin temperature over water when using CDEPS inline over the mask
+                if (use_cdeps_data) then
+                  if (mask_dat(i) <= 0.0) then
+                    tsfc_wat(i)     = t_grnd(c)                 ![K]       surface skin temperature over water
+                    tisfc(i)        = t_grnd(c)
+                    fice(i)         = lake_icefrac3d(i,1)       ! sea_ice_area_fraction_of_sea_area_fraction
+                    tsurf_water(I)  = t_grnd(c)                 ![K]       surface skin temperature after iteration over water
+                    tsurf_ice(i)    = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
+                  endif
+                else
+                  tsfc_wat(i)     = t_grnd(c)                 ![K]       surface skin temperature over water
+                  tisfc(i)        = t_grnd(c)
+                  fice(i)         = lake_icefrac3d(i,1)       ! sea_ice_area_fraction_of_sea_area_fraction
+                  tsurf_water(I)  = t_grnd(c)                 ![K]       surface skin temperature after iteration over water
+                  tsurf_ice(i)    = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
+                endif
                 tsfc(i)         = t_grnd(c)
                 lake_t2m(I)     = t_ref2m(c)                ![K]       temperature_at_2m_from_clm_lake
                 lake_q2m(I)     = q_ref2m(c)                ! [frac] specific_humidity_at_2m_from_clm_lake
                 albedo(i)       = ( 0.6 * lake_icefrac3d(i,1) ) + &  ! mid_day_surface_albedo_over_lake
                                   ( (1.0-lake_icefrac3d(i,1)) * 0.08)
-                fice(i)         = lake_icefrac3d(i,1)       ! sea_ice_area_fraction_of_sea_area_fraction
                 !uustar_water(i) = ustar_out(c)              ! surface_friction_velocity_over_water
                 zorlw(i) = z0mg(c)                          ! surface_roughness_length_over_water
 
@@ -757,8 +771,16 @@ MODULE clm_lake
 !                    uustar_ice(i) = uustar_water(i)           ! surface_friction_velocity_over_ice
                   endif
 
-                  tsurf_ice(i)  = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
-                  tisfc(i)      = t_grnd(c)                 ! surface_skin_temperature_over_ice
+                  !don't overwrite surface skin temperature over ice when using CDEPS inline over the mask
+                  if (use_cdeps_data) then
+                    if (mask_dat(i) <= 0.0) then
+                      tisfc(i)        = t_grnd(c)
+                      tsurf_ice(i)  = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
+                    endif
+                  else
+                    tisfc(i)        = t_grnd(c)
+                    tsurf_ice(i)  = t_grnd(c)                 ! surface_skin_temperature_after_iteration_over_ice
+                  endif
                   tsfc(i)       = t_grnd(c)                 ! surface_skin_temperature_over_ice
                   weasdi(i)     = h2osno(c)                 ! water_equivalent_accumulated_snow_depth_over_ice
                   snodi(i)      = snowdp(c)*1.e3            ! surface_snow_thickness_water_equivalent_over_ice
@@ -777,12 +799,25 @@ MODULE clm_lake
                   zorli(i) = z0mg(c)                        ! surface_roughness_length_over_ice
 
                   ! Assume that, if a layer has ice, the entire layer thickness is ice.
-                  hice(I) = 0                               ! sea_ice_thickness
-                  do k=1,nlevlake
-                    if(lake_icefrac3d(i,k)>0) then
-                      hice(i) = hice(i) + dz_lake(c,k)
+                  !don't overwrite sea ice thickness when using CDEPS inline over the mask
+                  if (use_cdeps_data) then
+                    if (mask_dat(i) <= 0.0) then
+                      hice(I) = 0                               ! sea_ice_thickness
+                      do k=1,nlevlake
+                        if(lake_icefrac3d(i,k)>0) then
+                          hice(i) = hice(i) + dz_lake(c,k)
+                        endif
+                      end do
                     endif
-                  end do
+                  else
+                    hice(I) = 0                               ! sea_ice_thickness
+                    do k=1,nlevlake
+                      if(lake_icefrac3d(i,k)>0) then
+                        hice(i) = hice(i) + dz_lake(c,k)
+                      endif
+                    end do
+                  endif
+                  
                 else ! Not an ice point
                   ! On non-icy lake points, set variables relevant to
                   ! lake ice to reasonable defaults.  Let LSM fill in
@@ -792,17 +827,40 @@ MODULE clm_lake
                   snodi(i) = 0
                   weasd(i) = 0
                   snowd(i) = 0
-                  tisfc(i) = t_grnd(c)
-                  tsurf_ice(i) = tisfc(i)
+                  !don't overwrite surface skin temperature over ice when using CDEPS inline over the mask
+                  if (use_cdeps_data) then
+                    if (mask_dat(i) <= 0.0) then
+                      tisfc(i)        = t_grnd(c)
+                      tsurf_ice(i)    = tisfc(i)
+                    endif
+                  else
+                    tisfc(i)        = t_grnd(c)
+                    tsurf_ice(i) = tisfc(i)
+                  endif
                   tsfc(i) = t_grnd(c)
-                  hice(i) = 0
-                  fice(i) = 0
+                  !don't overwrite sea ice thickness when using CDEPS inline over the mask
+                  if (use_cdeps_data) then
+                    if (mask_dat(i) <= 0.0) then
+                      hice(i) = 0
+                      fice(i) = 0
+                    endif
+                  else
+                    hice(i) = 0
+                    fice(i) = 0
+                  endif
                 endif ice_point
 
                 if(snl2d(i)<0) then
                   ! If there is snow, ice surface temperature should be snow temperature.
                   lake_t_snow(i) = t_grnd(c)                ! surface_skin_temperature_over_ice
-                  tisfc(i) = lake_t_snow(i)                 ! temperature_of_snow_on_lake
+                  !don't overwrite surface skin temperature over ice when using CDEPS inline over the mask
+                  if (use_cdeps_data) then
+                    if (mask_dat(i) <= 0.0) then
+                      tisfc(i) = lake_t_snow(i)                 ! temperature_of_snow_on_lake
+                    endif
+                  else
+                    tisfc(i) = lake_t_snow(i)                 ! temperature_of_snow_on_lake
+                  endif
                   snow_points = snow_points+1
                 else
                   lake_t_snow(i) = -9999

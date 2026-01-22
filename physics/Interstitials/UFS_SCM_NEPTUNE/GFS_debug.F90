@@ -398,9 +398,7 @@
                                        Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
                                        nthreads, blkno, errmsg, errflg)
 
-#ifdef MPI
          use mpi_f08
-#endif
 #ifdef _OPENMP
          use omp_lib
 #endif
@@ -433,13 +431,8 @@
          errmsg = ''
          errflg = 0
 
-#ifdef MPI
          mpirank = Model%me
          mpisize = Model%ntasks
-#else
-         mpirank = 0
-         mpisize = 1
-#endif
 #ifdef _OPENMP
          omprank = OMP_GET_THREAD_NUM()
          ompsize = nthreads
@@ -451,9 +444,7 @@
 #ifdef _OPENMP
 !$OMP BARRIER
 #endif
-#ifdef MPI
 !         call MPI_BARRIER(Model%communicator,ierr)
-#endif
 
          do impi=0,mpisize-1
              do iomp=0,ompsize-1
@@ -950,17 +941,13 @@
 !$OMP BARRIER
 #endif
              end do
-#ifdef MPI
 !             call MPI_BARRIER(Model%communicator,ierr)
-#endif
          end do
 
 #ifdef _OPENMP
 !$OMP BARRIER
 #endif
-#ifdef MPI
 !         call MPI_BARRIER(Model%communicator,ierr)
-#endif
 
       end subroutine GFS_diagtoscreen_run
 
@@ -997,9 +984,7 @@
                                            Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
                                            nthreads, blkno, errmsg, errflg)
 
-#ifdef MPI
          use mpi_f08
-#endif
 #ifdef _OPENMP
          use omp_lib
 #endif
@@ -1032,13 +1017,8 @@
          errmsg = ''
          errflg = 0
 
-#ifdef MPI
          mpirank = Model%me
          call MPI_COMM_SIZE(Model%communicator, mpisize, ierr)
-#else
-         mpirank = 0
-         mpisize = 1
-#endif
 #ifdef _OPENMP
          omprank = OMP_GET_THREAD_NUM()
          ompsize = nthreads
@@ -1050,31 +1030,17 @@
 #ifdef _OPENMP
 !$OMP BARRIER
 #endif
-#ifdef MPI
 !         call MPI_BARRIER(Model%communicator,ierr)
-#endif
 
          do impi=0,mpisize-1
              do iomp=0,ompsize-1
                  if (mpirank==impi .and. omprank==iomp) then
                      ! Print static variables
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ipr                 ', Interstitial%ipr                     )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%itc                 ', Interstitial%itc                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%latidxprnt          ', Interstitial%latidxprnt              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%levi                ', Interstitial%levi                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lmk                 ', Interstitial%lmk                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lmp                 ', Interstitial%lmp                     )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nbdlw               ', Interstitial%nbdlw                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nbdsw               ', Interstitial%nbdsw                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nf_aelw             ', Interstitial%nf_aelw                 )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nf_aesw             ', Interstitial%nf_aesw                 )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nsamftrac           ', Interstitial%nsamftrac               )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nscav               ', Interstitial%nscav                   )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nspc1               ', Interstitial%nspc1                   )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ntiwx               ', Interstitial%ntiwx                   )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nvdiff              ', Interstitial%nvdiff                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%phys_hydrostatic    ', Interstitial%phys_hydrostatic        )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%skip_macro          ', Interstitial%skip_macro              )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%trans_aero          ', Interstitial%trans_aero              )
                      ! Print all other variables
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%adjsfculw_land      ', Interstitial%adjsfculw_land          )
@@ -1114,7 +1080,6 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cmm_land            ', Interstitial%cmm_land                )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cmm_water           ', Interstitial%cmm_water               )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cnvc                ', Interstitial%cnvc                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cnvw                ', Interstitial%cnvw                    )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ctei_r              ', Interstitial%ctei_r                  )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ctei_rml            ', Interstitial%ctei_rml                )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%cumabs              ', Interstitial%cumabs                  )
@@ -1167,7 +1132,6 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fm10_ice            ', Interstitial%fm10_ice                )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fm10_land           ', Interstitial%fm10_land               )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fm10_water          ', Interstitial%fm10_water              )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%frain               ', Interstitial%frain                   )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%frland              ', Interstitial%frland                  )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fscav               ', Interstitial%fscav                   )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%fswtr               ', Interstitial%fswtr                   )
@@ -1388,17 +1352,13 @@
 !$OMP BARRIER
 #endif
              end do
-#ifdef MPI
 !             call MPI_BARRIER(Model%communicator,ierr)
-#endif
          end do
 
 #ifdef _OPENMP
 !$OMP BARRIER
 #endif
-#ifdef MPI
 !         call MPI_BARRIER(Model%communicator,ierr)
-#endif
 
       end subroutine GFS_interstitialtoscreen_run
 

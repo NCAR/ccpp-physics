@@ -183,14 +183,15 @@
             q0(i)    = max( q1(i), qmin )
             rho(i)   = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0(i)))
 
-            if (.not. use_oceanuv) then
-              tem      = ch(i) * wind(i)
-              cmm(i)   = cm(i) * wind(i)
-            else if (use_oceanuv) then
+            if (use_oceanuv) then
               windrel(i)=sqrt( (u1(i)-usfco(i))**2+(v1(i)-vsfco(i))**2 )
               tem      = ch(i) * windrel(i)
               cmm(i)   = cm(i) * windrel(i)
+            else
+              tem      = ch(i) * wind(i)
+              cmm(i)   = cm(i) * wind(i)
             endif
+
             chh(i)   = rho(i) * tem
 
             hflx(i)  = dtsfc_med(i)
@@ -207,16 +208,17 @@
 
 !  --- ...    rcp  = rho cp ch v
 
-            if (.not. use_oceanuv) then
-              rch      = rho(i) * cp * ch(i) * wind(i)
-              tem      = ch(i) * wind(i)
-              cmm(i)   = cm(i) * wind(i)
-            else if (use_oceanuv) then
+            if (use_oceanuv) then
               windrel(i)=sqrt( (u1(i)-usfco(i))**2+(v1(i)-vsfco(i))**2 )
               rch      = rho(i) * cp * ch(i) * windrel(i)
               tem      = ch(i) * windrel(i)
               cmm(i)   = cm(i) * windrel(i)
+            else
+              rch      = rho(i) * cp * ch(i) * wind(i)
+              tem      = ch(i) * wind(i)
+              cmm(i)   = cm(i) * wind(i)
             endif
+
             chh(i)   = rho(i) * tem
 
 !> - Calcualte sensible and latent heat flux over open water

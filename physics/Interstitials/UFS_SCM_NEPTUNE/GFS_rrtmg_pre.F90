@@ -33,7 +33,8 @@
         iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con, idcor_hogan,     &
         idcor_oreopoulos, dcorr_con, julian, yearlen, lndp_var_list, lsswr,    &
         lslwr, ltaerosol, mraerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf,&
-        lmfshal, lcnorm, lmfdeep2, lcrick, fhswr, fhlwr, solhr, sup, con_eps,  &
+        lmfshal, lcnorm, lmfdeep2, lcrick, fhswr, fhlwr, solhr, sup, xr_con,   &
+        xr_exp, con_eps,                                                       &
         epsm1, fvirt, rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat,   &
         tsfc, slmsk, prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in,       &
         pert_clds, sppt_wts, sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx,     &
@@ -159,7 +160,7 @@
       integer,              intent(in) :: spp_rad
       real(kind_phys),      intent(in), optional :: spp_wts_rad(:,:)
 
-      real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp, dcorr_con
+      real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp, dcorr_con, xr_con, xr_exp
       real(kind=kind_phys), intent(in) :: con_eps, epsm1, fvirt, rog, rocp, con_rd, con_pi, con_g, con_ttp, con_thgni
 
       real(kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlat, xlon,    &
@@ -1051,7 +1052,7 @@
      &       effrl_inout, effri_inout, effrs_inout,                     &
      &       lwp_ex, iwp_ex, lwp_fc, iwp_fc,                            &
      &       dzb, xlat_d, julian, yearlen, gridkm, top_at_1, si,        &
-     &       con_ttp, con_pi, con_g, con_rd, con_thgni,                 &
+     &       xr_con, xr_exp, con_ttp, con_pi, con_g, con_rd, con_thgni, &
      &       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice,          &    !  ---  outputs:
      &       cld_rwp, cld_rerain, cld_swp, cld_resnow,                  &    !  ---  outputs:
      &       cldsa, mtopa, mbota, de_lgth, alpha                        &    !  ---  outputs:

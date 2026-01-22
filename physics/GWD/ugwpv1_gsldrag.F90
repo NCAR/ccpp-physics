@@ -304,7 +304,7 @@ contains
 !! \htmlinclude ugwpv1_gsldrag_run.html
 !!
      subroutine ugwpv1_gsldrag_run(me, master, im, levs, ak, bk, ntrac, lonr, dtp,      &
-          fhzero, kdt, ldiag3d, lssav, flag_for_gwd_generic_tend, do_gsl_drag_ls_bl,    &
+          kdt, ldiag3d, lssav, flag_for_gwd_generic_tend, do_gsl_drag_ls_bl,            &
           do_gsl_drag_ss, do_gsl_drag_tofd,                                             &
           do_gwd_opt_psl, psl_gwd_dx_factor,                                            &
           do_ngw_ec, do_ugwp_v1,  do_ugwp_v1_orog_only,                                 &
@@ -366,7 +366,7 @@ contains
     logical,  intent (in) :: do_ugwp_v1_w_gsldrag                              ! combination of ORO and NGW schemes
 
     integer,                 intent(in) :: me, master, im, levs, ntrac,lonr
-    real(kind=kind_phys),    intent(in) :: dtp, fhzero
+    real(kind=kind_phys),    intent(in) :: dtp
     real(kind=kind_phys),    intent(in) :: ak(:), bk(:)
     integer,                 intent(in) :: kdt, jdat(:)
 ! option  for psl gwd

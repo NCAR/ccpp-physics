@@ -331,14 +331,6 @@
   type = real
   kind = kind_phys
   intent = in
-[fhzero]
-  standard_name = period_of_diagnostics_reset
-  long_name = hours between clearing of diagnostic buckets
-  units = h
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
 [kdt]
   standard_name = index_of_timestep
   long_name = current forecast iteration
