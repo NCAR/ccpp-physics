@@ -39,7 +39,7 @@ contains
 !! \htmlinclude cires_ugwp_init.html
 !!
     subroutine cires_ugwp_init (me, master, nlunit, input_nml_file, logunit, &
-                fn_nml2, lonr, latr, levs, ak, bk, dtp, cdmbgwd, cgwf,       &
+                fn_nml2, lonr, levs, ak, bk, dtp, cdmbgwd, cgwf,       &
                 pa_rf_in, tau_rf_in, con_p0, gwd_opt,do_ugwp, errmsg, errflg)
 
 !----  initialization of cires_ugwp
@@ -52,7 +52,6 @@ contains
     integer,              intent (in) :: logunit
     integer,              intent (in) :: lonr
     integer,              intent (in) :: levs
-    integer,              intent (in) :: latr
     real(kind=kind_phys), intent (in) :: ak(:), bk(:)
     real(kind=kind_phys), intent (in) :: dtp
     real(kind=kind_phys), intent (in) :: cdmbgwd(:), cgwf(:) ! "scaling" controls for "old" GFS-GW schemes
@@ -64,11 +63,6 @@ contains
     character(len=*), intent (in) :: fn_nml2
     !character(len=*), parameter   :: fn_nml='input.nml'
 
-    integer :: ios
-    logical :: exists
-    real    :: dxsg
-    integer :: k
-
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
 
@@ -77,18 +71,18 @@ contains
     errflg = 0
 
     if (is_initialized) return
-    
+
     ! Consistency checks
     if (gwd_opt/=1) then
       write(errmsg,'(*(a))') "Logic error: namelist choice of gravity wave &
       & drag is different from cires_ugwp scheme"
       errflg = 1
       return
-    end if  
+    end if
 
     if (do_ugwp .or. cdmbgwd(3) > 0.0) then
       call cires_ugwpv0_mod_init (me, master, nlunit, input_nml_file, logunit, &
-                                fn_nml2, lonr, latr, levs, ak, bk, con_p0, dtp, &
+                                fn_nml2, lonr, levs, ak, bk, con_p0, dtp, &
                                 cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in, &
                                 errmsg, errflg)
       if (errflg/=0) return
@@ -107,7 +101,6 @@ contains
     is_initialized = .true.
 
     end subroutine cires_ugwp_init
-
 
 ! -----------------------------------------------------------------------
 ! finalize of cires_ugwp   (_finalize)
@@ -138,7 +131,6 @@ contains
 
     end subroutine cires_ugwp_finalize
 
-
 ! -----------------------------------------------------------------------
 !    originally from ugwp_driver_v0.f
 !    driver of cires_ugwp   (_driver)
@@ -149,45 +141,45 @@ contains
 ! -----------------------------------------------------------------------
 !>@brief These subroutines and modules execute the CIRES UGWP Version 0.
 !> \section gen_cires_ugwp CIRES UGWP V0 Scheme General Algorithm
-!! The physics of Non-Orographic Gravity Waves (NGWs) in the UGWP framework 
-!!(Yudin et al. 2018 \cite yudin_et_al_2018) is represented by four GW-solvers, introduced in 
-!!Lindzen (1981) \cite lindzen_1981, Hines (1997) \cite hines_1997, Alexander 
-!!and Dunkerton (1999) \cite alexander_and_dunkerton_1999, and Scinocca (2003) \cite scinocca_2003. 
-!!A major modification of these GW solvers was introduced with the addition of the 
-!!background dissipation of temperature and winds to the saturation criteria for wave breaking. 
-!!This feature is important in the mesosphere and thermosphere for WAM applications and it 
-!!considers appropriate scale-dependent dissipation of waves near the model top lid providing 
-!!the momentum and energy conservation in the vertical column physics (Shaw and 
-!!Shepherd (2009) \cite shaw_and_shepherd_2009). In the UGWP-v0 scheme, a modification of the 
-!!Scinocca (2003) \cite scinocca_2003 algorithm for NGWs with non-hydrostatic and rotational 
-!!effects for GW propagations and background dissipation is contained in the subroutine 
-!!fv3_ugwp_solv2_v0. Future development plans for the UGWP scheme include additional GW-solvers 
-!!to be implemented along with physics-based triggering of waves and stochastic approaches 
-!!for selection of GW modes characterized by horizontal phase velocities, azimuthal 
+!! The physics of Non-Orographic Gravity Waves (NGWs) in the UGWP framework
+!!(Yudin et al. 2018 \cite yudin_et_al_2018) is represented by four GW-solvers, introduced in
+!!Lindzen (1981) \cite lindzen_1981, Hines (1997) \cite hines_1997, Alexander
+!!and Dunkerton (1999) \cite alexander_and_dunkerton_1999, and Scinocca (2003) \cite scinocca_2003.
+!!A major modification of these GW solvers was introduced with the addition of the
+!!background dissipation of temperature and winds to the saturation criteria for wave breaking.
+!!This feature is important in the mesosphere and thermosphere for WAM applications and it
+!!considers appropriate scale-dependent dissipation of waves near the model top lid providing
+!!the momentum and energy conservation in the vertical column physics (Shaw and
+!!Shepherd (2009) \cite shaw_and_shepherd_2009). In the UGWP-v0 scheme, a modification of the
+!!Scinocca (2003) \cite scinocca_2003 algorithm for NGWs with non-hydrostatic and rotational
+!!effects for GW propagations and background dissipation is contained in the subroutine
+!!fv3_ugwp_solv2_v0. Future development plans for the UGWP scheme include additional GW-solvers
+!!to be implemented along with physics-based triggering of waves and stochastic approaches
+!!for selection of GW modes characterized by horizontal phase velocities, azimuthal
 !!directions and magnitude of the vertical momentum flux (VMF).
 !!
-!! In UGWP-v0, the specification for the VMF function is adopted from the 
-!! GEOS-5 global atmosphere model of GMAO NASA/GSFC, as described in 
-!! Molod et al. (2015) \cite molod_et_al_2015 and employed in the MERRRA-2 
-!! reanalysis (Gelaro et al., 2017 \cite gelaro_et_al_2017). The Fortran 
-!! subroutine slat_geos5_tamp_v0() describes the latitudinal shape of 
-!! VMF-function as displayed in Figure 3 of Molod et al. (2015) 
-!! \cite molod_et_al_2015. It shows that the enhanced values of 
-!! VMF in the equatorial region gives opportunity to simulate the 
-!! QBO-like oscillations in the equatorial zonal winds and lead to more 
-!! realistic simulations of the equatorial dynamics in GEOS-5 operational 
-!! and MERRA-2 reanalysis products. For the first vertically extended 
-!! version of FV3GFS in the stratosphere and mesosphere, this simplified 
-!! function of VMF allows us to tune the model climate and to evaluate 
-!! multi-year simulations of FV3GFS with the MERRA-2 and ERA-5 reanalysis 
-!! products, along with temperature, ozone, and water vapor observations 
-!! of current satellite missions. After delivery of the UGWP-code, the 
-!! EMC group developed and tested approach to modulate the zonal mean 
-!! NGW forcing by 3D-distributions of the total precipitation as a proxy 
-!! for the excitation of NGWs by convection and the vertically-integrated  
-!! (surface - tropopause) Turbulent Kinetic Energy (TKE). The verification 
-!! scores with updated NGW forcing, as reported elsewhere by EMC researchers, 
-!! display noticeable improvements in the forecast scores produced by 
+!! In UGWP-v0, the specification for the VMF function is adopted from the
+!! GEOS-5 global atmosphere model of GMAO NASA/GSFC, as described in
+!! Molod et al. (2015) \cite molod_et_al_2015 and employed in the MERRRA-2
+!! reanalysis (Gelaro et al., 2017 \cite gelaro_et_al_2017). The Fortran
+!! subroutine slat_geos5_tamp_v0() describes the latitudinal shape of
+!! VMF-function as displayed in Figure 3 of Molod et al. (2015)
+!! \cite molod_et_al_2015. It shows that the enhanced values of
+!! VMF in the equatorial region gives opportunity to simulate the
+!! QBO-like oscillations in the equatorial zonal winds and lead to more
+!! realistic simulations of the equatorial dynamics in GEOS-5 operational
+!! and MERRA-2 reanalysis products. For the first vertically extended
+!! version of FV3GFS in the stratosphere and mesosphere, this simplified
+!! function of VMF allows us to tune the model climate and to evaluate
+!! multi-year simulations of FV3GFS with the MERRA-2 and ERA-5 reanalysis
+!! products, along with temperature, ozone, and water vapor observations
+!! of current satellite missions. After delivery of the UGWP-code, the
+!! EMC group developed and tested approach to modulate the zonal mean
+!! NGW forcing by 3D-distributions of the total precipitation as a proxy
+!! for the excitation of NGWs by convection and the vertically-integrated
+!! (surface - tropopause) Turbulent Kinetic Energy (TKE). The verification
+!! scores with updated NGW forcing, as reported elsewhere by EMC researchers,
+!! display noticeable improvements in the forecast scores produced by
 !! FV3GFS configuration extended into the mesosphere.
 !!
 !> \section arg_table_cires_ugwp_run Argument Table
@@ -337,7 +329,6 @@ contains
 
      endif ! do_ugwp
 
-
     if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
       idtend = dtidx(index_of_x_wind,index_of_process_orographic_gwd)
       if(idtend>=1) then
@@ -352,7 +343,6 @@ contains
          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdtdt*dtp
       endif
     endif
-    
 
     if (cdmbgwd(3) > 0.0) then
 
