@@ -312,7 +312,7 @@ contains
       do k=1,levs
         kk = levs-k+1
         do i=1,im
-           ten_qv(i,k)      = (qv1(i,kk) - gq0(i,kk))/dtp
+           ten_qv(i,k)      = (qv1(i,kk) - gq0(i,k))/dtp
            ten_ql(i,k)      = (ql1(i,kk) - gq0_ntcw(i,k))/dtp
            ten_qr(i,k)      = (qr1(i,kk) - gq0_ntrw(i,k))/dtp
            ten_qi(i,k)      = (qi1(i,kk) - gq0_ntiw(i,k))/dtp
