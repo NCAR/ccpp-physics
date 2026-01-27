@@ -868,8 +868,6 @@
 
 !  ---  locals:
       real (kind=kind_phys) :: coszn, cns, solang, rstp
-      real (kind=kind_phys) :: alat1, alon1, xlon1, xlon2
-      real (kind=kind_phys) :: pi2, rad2deg, sindh
 
       integer :: istsun(IM), i, it, j, lat
 
@@ -877,10 +875,7 @@
 
       solang = pid12 * (solhr - f12)         ! solar angle at present time
       rstp = 1.0 / float(nstp)
-      rad2deg = 15. / pid12
-      pi2 = pid12 * 12.
 
-!      print*,'qliu test=',nstp,IM,anginc*rad2deg
       do i = 1, IM
         coszen(i) = 0.0
         istsun(i) = 0
@@ -889,22 +884,8 @@
       do it = 1, nstp
         cns = solang + (float(it)-0.5)*anginc + sollag
         do i = 1, IM
-          xlon1 = cns+xlon(i)
-          if(xlon1.gt.pi2)then
-             xlon1=xlon1-2.*pi2
-          else if(xlon1.lt.(0.-pi2))then
-             xlon1=xlon1+2.*pi2
-          end if
-          xlon2 = xlon1 + anginc
-          if(xlon2.gt.pi2)xlon2 = xlon1
-          sindh = (sin(xlon2)-sin(xlon1))/anginc
-!          if(abs(alon1).gt.175.)then
-!            print*,'Qingfu,lat,lon=',alat1,alon1,xlon(i)*rad2deg,i,it
-!          endif
-          
           coszn     = sindec * sinlat(i) + cosdec * coslat(i)           &
-     &                                   * sindh
-!     &                                   * cos(cns+xlon(i))
+     &                                   * cos(cns+xlon(i))
           coszen(i) = coszen(i) + max(0.0, coszn)
           if (coszn > czlimt) istsun(i) = istsun(i) + 1
         enddo
