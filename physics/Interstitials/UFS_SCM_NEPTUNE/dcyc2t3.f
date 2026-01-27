@@ -265,6 +265,7 @@
      &     flxlwdn_adj
       real(kind=kind_phys) :: fluxlwnet_adj,fluxlwnet,dT_sfc,           &
      &fluxlwDOWN_jac,lfnc,c1
+      real(kind=kind_phys) :: pi2, xlon1, xlon2, sindh
       ! Length scale for flux-adjustment scaling
       real(kind=kind_phys), parameter ::                                &
      &     L = 1.
@@ -291,15 +292,17 @@
       nstp = max(6, nint(tem1))
       nstl = max(1, nint(nstp/tem1))
       pid12  = con_pi / hour12
+      pi2 = con_pi
 !
 !  --- ...  sw time-step adjustment for current cosine of zenith angle
 !           ----------------------------------------------------------
-      if (nstl == 1) then
-        cns = pid12 * (solhr + deltim*f7200 - hour12) + slag
-        do i = 1, IM
-          xcosz(i) = sdec*sinlat(i) + cdec*coslat(i)*cos(cns+xlon(i))
-        enddo
-      elseif (nstl == nstp) then
+!      if (nstl == 1) then
+!        cns = pid12 * (solhr + deltim*f7200 - hour12) + slag
+!        do i = 1, IM
+!          xcosz(i) = sdec*sinlat(i) + cdec*coslat(i)*cos(cns+xlon(i))
+!        enddo
+!      elseif (nstl == nstp) then
+      if (nstl == nstp) then
         do i = 1, IM
           xcosz(i) = coszen(i)
         enddo
@@ -314,7 +317,17 @@
         do it=1,nstl
           cns = solang + (float(it)-0.5_kind_phys)*anginc + slag
           do i = 1, IM
-            coszn    = sdec*sinlat(i) + cdec*coslat(i)*cos(cns+xlon(i))
+            xlon1 = cns+xlon(i)
+            if(xlon1.gt.pi2)then
+               xlon1=xlon1-2.*pi2
+            else if(xlon1.lt.(0.-pi2))then
+               xlon1=xlon1+2.*pi2
+            end if
+            xlon2 = xlon1 + anginc
+            if(xlon2.gt.pi2)xlon2 = xlon1
+            sindh = (sin(xlon2)-sin(xlon1))/anginc
+!            coszn    = sdec*sinlat(i) + cdec*coslat(i)*cos(cns+xlon(i))
+            coszn    = sdec*sinlat(i) + cdec*coslat(i)*sindh
             xcosz(i) = xcosz(i) + max(zero, coszn)
             if (coszn > czlimt) istsun(i) = istsun(i) + 1
           enddo
@@ -367,6 +380,7 @@
           xmu(i) = zero
         endif
 
+        print*,'qingfu, xmu=', i, xmu(i)
 !>  - adjust \a sfc net and downward SW fluxes for zenith angle changes.
 !      note: sfc emiss effect will not be appied here
 
