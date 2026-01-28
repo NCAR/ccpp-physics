@@ -230,6 +230,7 @@
      &       find_cloudLayers, adjust_cloudIce, adjust_cloudH2O,        &
      &       adjust_cloudFinal, gethml
 
+      public cld_frac_XuRandall
 ! =================
       contains
 ! =================
