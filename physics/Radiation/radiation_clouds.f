@@ -28,7 +28,6 @@
 !            ntrac, ntcw, ntiw, ntrw, ntsw, ntgl, ntclamt,             !
 !            imp_physics, imp_physics_nssl, imp_physics_fer_hires,     !
 !            imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, !
-!            imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,         !
 !            imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,  !
 !            iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,     !
 !            idcor_hogan, idcor_oreopoulos,                            !
@@ -103,8 +102,7 @@
 !        boundary (include bl-cld). h,m,l clds domain boundaries are   !
 !        adjusted for better agreement with observations.              !
 !      jan 2011,   yu-tai hou        - changed virtual temperature     !
-!        as input variable instead of originally computed inside the   !
-!        two prognostic cld schemes 'progcld_zhao_carr'                !
+!        as input variable                                             !
 !      aug 2012,   yu-tai hou        - modified subroutine cld_init    !
 !        to pass all fixed control variables at the start. and set     !
 !        their correponding internal module variables to be used by    !
@@ -338,7 +336,6 @@
      &       imp_physics, imp_physics_nssl, imp_physics_fer_hires,      &
      &       imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,  &
      &       imp_physics_tempo,                                         &
-     &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
      &       imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,   &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
      &       idcor_hogan, idcor_oreopoulos, lcrick, lcnorm,             &
@@ -357,8 +354,7 @@
 
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
-! subprogram:    radiation_clouds_prop    computes cloud related quantities using    !
-!   zhao/moorthi's prognostic cloud microphysics scheme.                !
+! subprogram:    radiation_clouds_prop    computes cloud related quantities !
 !                                                                       !
 ! abstract:  this program computes cloud fractions from cloud           !
 !   condensates, calculates liquid/ice cloud droplet effective radius,  !
@@ -427,8 +423,6 @@
 !   imp_physics_gfdl          : GFDL microphysics scheme                !
 !   imp_physics_thompson      : Thompson microphysics scheme            !
 !   imp_physics_wsm6          : WSMG     microphysics scheme            !
-!   imp_physics_zhao_carr     : Zhao-Carr microphysics scheme           !
-!   imp_physics_zhao_carr_pdf : Zhao-Carr microphysics scheme with PDF clouds
 !   imp_physics_mg  :  Morrison-Gettelman microphysics scheme           !
 !   iovr            : choice of cloud-overlap                           !
 !   iovr_rand       : flag of cloud-overlap: random (=0)                !
@@ -513,8 +507,6 @@
      &     imp_physics_thompson,        ! Flag for thompsonscheme
      &     imp_physics_tempo,           ! Flag for TEMPO scheme
      &     imp_physics_wsm6,            ! Flag for wsm6 scheme
-     &     imp_physics_zhao_carr,       ! Flag for zhao-carr scheme
-     &     imp_physics_zhao_carr_pdf,   ! Flag for zhao-carr+PDF scheme
      &     imp_physics_mg               ! Flag for MG scheme
 
       integer,              intent(in)  ::                               &

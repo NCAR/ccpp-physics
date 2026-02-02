@@ -131,13 +131,6 @@
   dimensions = ()
   type = integer
   intent = in
-[imp_physics_zhao_carr]
-  standard_name = identifier_for_zhao_carr_microphysics_scheme
-  long_name = choice of Zhao-Carr microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [ipsd0]
   standard_name = initial_seed_for_mcica
   long_name = initial permutation seed for mcica radiation

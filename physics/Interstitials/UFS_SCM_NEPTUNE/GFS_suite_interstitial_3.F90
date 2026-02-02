@@ -17,7 +17,6 @@
                ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc,    &
                xlon, xlat, gt0, gq0, sigmain,sigmaout,qmicro,           &
                omegain,omegaout,imp_physics, imp_physics_mg,            &
-               imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,        &
                imp_physics_gfdl, imp_physics_thompson, dtidx, ntlnc,    &
                imp_physics_wsm6, imp_physics_fer_hires, prsi, ntinc,    &
                imp_physics_nssl, imp_physics_tempo,                     &
@@ -33,7 +32,7 @@
       ! interface variables
       logical, intent(in)     :: otsptflag(:)!  on/off switch for tracer transport (size ntrac)
       integer,              intent(in   )                   :: im, levs, nn, ntrac, ntcw, ntiw, ntclamt, ntrw, ntsw,&
-        ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,   &
+        ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg,                          &
         imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires,  &
         imp_physics_nssl, imp_physics_tempo, me, index_of_process_conv_trans
       integer,              intent(in   ), dimension(:)     :: islmsk, kpbl, kinver
@@ -57,7 +56,6 @@
       real(kind=kind_phys), intent(inout   ), dimension(:,:), optional :: sigmain, omegain
       real(kind=kind_phys), intent(inout   ), dimension(:,:), optional :: sigmaout, qmicro, omegaout
       real(kind=kind_phys), intent(inout), dimension(:,:)   :: rhc, save_qc
-      ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), intent(inout), dimension(:,:)   :: save_qi
       real(kind=kind_phys), intent(inout), dimension(:,:)   :: save_tcp
       real(kind=kind_phys), intent(inout), dimension(:,:,:) :: clw
@@ -192,19 +190,7 @@
         rhc(:,:) = 1.0
       endif
 
-      if (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_zhao_carr_pdf) then   ! zhao-carr microphysics
-        !GF* move to GFS_MP_generic_pre (from gscond/precpd)
-        ! do i=1,im
-        !   psautco_l(i) = Model%psautco(1)*work1(i) + Model%psautco(2)*work2(i)
-        !   prautco_l(i) = Model%prautco(1)*work1(i) + Model%prautco(2)*work2(i)
-        ! enddo
-        !*GF
-        do k=1,levs
-          do i=1,im
-            clw(i,k,1) = gq0(i,k,ntcw)
-          enddo
-        enddo
-      elseif (imp_physics == imp_physics_gfdl) then
+     if (imp_physics == imp_physics_gfdl) then
         clw(1:im,:,1) = gq0(1:im,:,ntcw)
      elseif (imp_physics == imp_physics_thompson .or. &
           imp_physics == imp_physics_tempo) then

@@ -27,8 +27,7 @@
         ntss3, ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl, ntchm,          &
         imp_physics,imp_physics_nssl, nssl_ccn_on, nssl_invertccn,             &
         imp_physics_thompson, imp_physics_tempo, imp_physics_gfdl,             &
-        imp_physics_zhao_carr,                                                 &
-        imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
+        imp_physics_mg, imp_physics_wsm6,                                      &
         imp_physics_fer_hires, iovr, iovr_rand, iovr_maxrand, iovr_max,        &
         iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con, idcor_hogan,     &
         idcor_oreopoulos, dcorr_con, julian, yearlen, lndp_var_list, lsswr,    &
@@ -124,8 +123,6 @@
                                            imp_physics_thompson,               &
                                            imp_physics_tempo,                  &
                                            imp_physics_gfdl,                   &
-                                           imp_physics_zhao_carr,              &
-                                           imp_physics_zhao_carr_pdf,          &
                                            imp_physics_mg, imp_physics_wsm6,   &
                                            imp_physics_nssl,                   &
                                            imp_physics_fer_hires,              &
@@ -725,7 +722,7 @@
 
 !      if (ntcw > 0) then                            ! prognostic cloud schemes
         ccnd = 0.0_kind_phys
-        if (ncnd == 1) then                          ! Zhao_Carr_Sundqvist
+        if (ncnd == 1) then                          
           do k=1,LMK
             do i=1,IM
               ccnd(i,k,1) = tracer1(i,k,ntcw)        ! liquid water/ice
@@ -994,15 +991,13 @@
 !  --- add suspended convective cloud water to grid-scale cloud water
 !      only for cloud fraction & radiation computation
 !      it is to enhance cloudiness due to suspended convec cloud water
-!      for zhao/moorthi's (imp_phys=99) &
-!          ferrier's (imp_phys=5) microphysics schemes
+!      for ferrier's (imp_phys=5) microphysics schemes
 
-        if ((num_p3d == 4) .and. (npdf3d == 3)) then       ! same as imp_physics = imp_physics_zhao_carr_pdf
+        if ((num_p3d == 4) .and. (npdf3d == 3)) then     
           do k=1,lm
             k1 = k + kd
             do i=1,im
               !GJF: this is not consistent with GFS_typedefs,
-              !     but it looks like the Zhao-Carr-PDF scheme is not in the CCPP
               deltaq(i,k1) = 0.0!Tbd%phy_f3d(i,k,5)      !GJF: this variable is not in phy_f3d anymore
               cnvw  (i,k1) = cnvw_in(i,k)
               cnvc  (i,k1) = cnvc_in(i,k)
@@ -1027,10 +1022,6 @@
           enddo
         endif
 
-        if (imp_physics == imp_physics_zhao_carr) then
-          ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
-        endif
-
 !> - Call radiation_clouds_prop() to calculate cloud properties.
         call radiation_clouds_prop                                      &
      &     ( plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,                  &    !  ---  inputs:
@@ -1041,7 +1032,6 @@
      &       imp_physics, imp_physics_nssl, imp_physics_fer_hires,      &
      &       imp_physics_gfdl, imp_physics_thompson,                    &
      &       imp_physics_wsm6, imp_physics_tempo,                       &
-     &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
      &       imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,   &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
      &       idcor_hogan, idcor_oreopoulos, lcrick, lcnorm,             &
