@@ -21,7 +21,7 @@ contains
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
    subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, iopt_lake, iopt_lake_clm,                               &
-                                 flag_cice, cplflx, cplice, cplwav2atm, lsm, lsm_ruc,                                     &
+                                 flag_cice, cplflx, cplice, cplwav2atm, lsm, ilsm_ruc,                                    &
                                  landfrac, lakefrac, lakedepth, oceanfrac, frland,                                        &
                                  dry, icy, lake, use_lake_model, wet, hice, cice, zorlo, zorll, zorli,                    &
                                  snowd,            snowd_lnd, snowd_ice, tprcp, tprcp_wat, tgrs1,                         &
@@ -34,7 +34,7 @@ contains
       implicit none
 
       ! Interface variables
-      integer,                             intent(in   ) :: im, lkm, kdt, lsm, lsm_ruc, iopt_lake, iopt_lake_clm
+      integer,                             intent(in   ) :: im, lkm, kdt, lsm, ilsm_ruc, iopt_lake, iopt_lake_clm
       logical,                             intent(in   ) :: cplflx, cplice, cplwav2atm, frac_grid
       logical, dimension(:),              intent(inout)  :: flag_cice
       logical,              dimension(:), intent(inout)  :: dry, icy, lake, wet
@@ -234,7 +234,7 @@ contains
         endif
         if (dry(i)) then                   ! Land
           uustar_lnd(i) = uustar(i)
-           if(lsm /= lsm_ruc) weasd_lnd(i) = weasd(i)
+           if(lsm /= ilsm_ruc) weasd_lnd(i) = weasd(i)
            tsurf_lnd(i) = tsfcl(i)
         ! DH*
         else
@@ -248,7 +248,7 @@ contains
         endif
         if (icy(i)) then                   ! Ice
           is_clm = lkm>0 .and. iopt_lake==iopt_lake_clm .and. use_lake_model(i)>0
-          if(lsm /= lsm_ruc .and. .not.is_clm) then
+          if(lsm /= ilsm_ruc .and. .not.is_clm) then
             weasd_ice(i) = weasd(i)
           endif
            tsurf_ice(i) = tisfc(i)
@@ -284,7 +284,7 @@ contains
             endif
           endif
         enddo
-      elseif(lsm /= lsm_ruc) then ! do not do snow initialization  with RUC lsm
+      elseif(lsm /= ilsm_ruc) then ! do not do snow initialization  with RUC lsm
         do i=1,im
           if (icy(i)) then
             if (kdt == 1 .or. (.not. cplflx .or. lakefrac(i) > zero)) then

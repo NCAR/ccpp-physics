@@ -11,7 +11,7 @@
 !> \section arg_table_rrtmg_lw_post_run Argument Table
 !! \htmlinclude rrtmg_lw_post_run.html
 !!
-      subroutine rrtmg_lw_post_run (im, levs, ltp, lm, kd, lslwr, lwhtr,       &
+      subroutine rrtmg_lw_post_run (im, levs, ltp, lm, lmk, kd, lslwr, lwhtr,  &
                  tsfa, htlwc, htlw0, sfcflw, tsflw, sfcdlw, htrlw, lwhc,       &
                  errmsg, errflg)
     
@@ -20,11 +20,11 @@
       
       implicit none
       
-      integer,                                     intent(in) :: im, levs, ltp, lm, kd
+      integer,                                     intent(in) :: im, lmk, levs, ltp, lm, kd
       logical,                                     intent(in) :: lslwr, lwhtr
       real(kind=kind_phys), dimension(im),         intent(in) ::  tsfa
-      real(kind=kind_phys), dimension(im, LM+LTP), intent(in) ::  htlwc
-      real(kind=kind_phys), dimension(im, LM+LTP), intent(in) ::  htlw0
+      real(kind=kind_phys), dimension(im, LMK),    intent(in) ::  htlwc
+      real(kind=kind_phys), dimension(im, LMK),    intent(in) ::  htlw0
       
       type(sfcflw_type), dimension(im),            intent(in) :: sfcflw
       

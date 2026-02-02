@@ -11,6 +11,9 @@
       module shinhongvdif
       contains
 
+!> \section arg_table_shinhongvdif_init Argument Table
+!! \htmlinclude shinhongvdif_init.html 
+!!
       subroutine shinhongvdif_init (shinhong,errmsg,errflg)
 
       logical,              intent(in)  :: shinhong

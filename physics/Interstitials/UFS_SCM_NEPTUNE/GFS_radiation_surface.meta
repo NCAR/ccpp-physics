@@ -320,7 +320,7 @@
   units = flag
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = inout
+  intent = in
 [alvsf]
   standard_name = vis_albedo_strong_cosz
   long_name = mean vis albedo with strong cosz dependency
@@ -376,7 +376,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [semis_ice]
   standard_name = surface_longwave_emissivity_over_ice
   long_name = surface lw emissivity in fraction over ice
@@ -384,7 +384,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [semis_wat]
   standard_name = surface_longwave_emissivity_over_water
   long_name = surface lw emissivity in fraction over water

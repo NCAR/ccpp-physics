@@ -592,7 +592,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [rain]
   standard_name = lwe_thickness_of_explicit_rain_amount
   long_name = explicit rain fall on physics timestep
@@ -600,7 +600,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [graupel]
   standard_name = lwe_thickness_of_graupel_amount
   long_name = graupel fall on physics timestep
@@ -608,7 +608,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [ice]
   standard_name = lwe_thickness_of_ice_amount
   long_name = ice fall on physics timestep
@@ -616,7 +616,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [snow]
   standard_name = lwe_thickness_of_snow_amount
   long_name = snow fall on physics timestep
@@ -624,7 +624,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [sr]
   standard_name = ratio_of_snowfall_to_rainfall
   long_name = ratio of snowfall to large-scale rainfall
@@ -640,7 +640,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [do_radar_ref]
   standard_name = flag_for_radar_reflectivity
   long_name = flag for radar reflectivity

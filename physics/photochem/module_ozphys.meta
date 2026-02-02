@@ -6,19 +6,3 @@
 [ccpp-arg-table]
   name = ty_ozphys
   type = ddt
-
-########################################################################
-[ccpp-table-properties]
-  name = module_ozphys
-  type = module
-  dependencies = machine.F,funcphys.f90
-
-[ccpp-arg-table]
-  name = module_ozphys
-  type = module
-[ty_ozphys]
-  standard_name = ty_ozphys
-  long_name = definition of type ty_ozphys
-  units = DDT
-  dimensions = ()
-  type = ty_ozphys

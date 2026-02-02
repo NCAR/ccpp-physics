@@ -38,7 +38,7 @@ contains
          rrtmgp_root_dir,       & !< RTE-RRTMGP root directory
          rrtmgp_sw_file_clouds, & !< RRTMGP file containing K-distribution data
          rrtmgp_sw_file_gas       !< RRTMGP file containing cloud-optics data
-    character(len=*), dimension(:), intent(in), optional :: &
+    character(len=*), dimension(:), intent(in) :: &
          active_gases_array       !< List of active gases from namelist as array)
     integer, intent(inout) :: &
          nrghice                  !< Number of ice-roughness categories

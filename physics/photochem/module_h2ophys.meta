@@ -6,20 +6,4 @@
 [ccpp-arg-table]
   name = ty_h2ophys
   type = ddt
-
-########################################################################
-[ccpp-table-properties]
-  name = module_h2ophys
-  type = module
-  dependencies = machine.F
-
-[ccpp-arg-table]
-  name = module_h2ophys
-  type = module
-[ty_h2ophys]
-  standard_name = ty_h2ophys
-  long_name = definition of type ty_h2ophys
-  units = DDT
-  dimensions = ()
-  type = ty_h2ophys
   

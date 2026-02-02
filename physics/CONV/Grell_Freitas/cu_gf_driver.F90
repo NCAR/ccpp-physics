@@ -129,7 +129,7 @@ contains
    integer, dimension (:), intent(out) :: hbot,htop,kcnv
    integer, dimension (:), intent(in)  :: xland
    real(kind=kind_phys),    dimension (:), intent(in) :: pbl
-   real(kind=kind_phys),    dimension (:), intent(in) :: maxMF
+   real(kind=kind_phys),    dimension (:), intent(in), optional :: maxMF
 !$acc declare copyout(hbot,htop,kcnv)
 !$acc declare copyin(xland,pbl)
    integer, dimension (im) :: tropics

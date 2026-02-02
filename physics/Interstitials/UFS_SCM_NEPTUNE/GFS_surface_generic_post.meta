@@ -168,7 +168,7 @@
   dimensions = ()
   type = integer
   intent = in
-[lsm_noahmp]
+[ilsm_noahmp]
   standard_name = identifier_for_noahmp_land_surface_scheme
   long_name = flag for NOAH MP land surface model
   units = flag
@@ -454,7 +454,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = True
 [epi]
   standard_name = instantaneous_surface_potential_evaporation
