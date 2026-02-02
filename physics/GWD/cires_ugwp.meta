@@ -60,13 +60,6 @@
   dimensions = ()
   type = integer
   intent = in
-[latr]
-  standard_name = number_of_latitude_points
-  long_name = number of global points in y-dir (j) along the meridian
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [levs]
   standard_name = vertical_layer_dimension
   long_name = number of vertical levels
@@ -822,7 +815,7 @@
   type = real
   kind = kind_phys
   intent = in
-[dqdt_tke] 
+[dqdt_tke]
   standard_name = process_split_cumulative_tendency_of_turbulent_kinetic_energy
   long_name = turbulent kinetic energy tendency due to model physics
   units = J s-1
