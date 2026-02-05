@@ -47,26 +47,26 @@
 !! -# A mass-flux approach is also used to represent the stratocumulus-top-induced turbulence
 !! (mfscuq.f).
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm
-      subroutine satmedmfvdifq_can(im,km,ntrac,ntcw,ntrw,               &
-     &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
+      subroutine satmedmfvdifq_can(im,km,ntrac,ntcw,ntrw,
+     &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,
 !The following three variables are for SA-3D-TKE
-     &     def_1,def_2,def_3,sa3dtke,dku3d_h,dku3d_e,                   &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,usfco,vsfco,use_oceanuv,           &
-     &     swh,hlw,xmu,garea,zvfun,sigmaf,                              &
-     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
-     &     tsea,heat,evap,stress,spd1,kpbl,                             &
-     &     prsi,del,prsl,prslk,phii,phil,delt,tte_edmf,                 &
-     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,tkeh,           &
+     &     def_1,def_2,def_3,sa3dtke,dku3d_h,dku3d_e,
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,usfco,vsfco,use_oceanuv,
+     &     swh,hlw,xmu,garea,zvfun,sigmaf,
+     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,
+     &     tsea,heat,evap,stress,spd1,kpbl,
+     &     prsi,del,prsl,prslk,phii,phil,delt,tte_edmf,
+     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,tkeh,
 !IVAI
-     &     dkt_can, dku_can,                                            & ! In IVAI
+     &     dkt_can, dku_can, ! In IVAI
 !IVAI
-     &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
-     &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            &
+     &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,
+     &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,
 !IVAI: canopy inputs from AQM
-     &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           &
+     &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,
 !IVAI
-     &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
-     &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
+     &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,
+     &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,
      &     errmsg,errflg,
 !IVAI: aux arrays
      &     naux2d,naux3d,aux2d,aux3d)
@@ -85,7 +85,7 @@
       implicit none
 !
 !----------------------------------------------------------------------
-      integer, intent(in)  :: im, km, ntrac, ntcw, ntrw, ntiw,          &
+      integer, intent(in)  :: im, km, ntrac, ntcw, ntrw, ntiw,
      &                        ntke, ntqv
       integer, intent(in)  :: sfc_rlm
       integer, intent(in)  :: tc_pbl
@@ -94,7 +94,7 @@
       integer, intent(out) :: kpbl(:)
       logical, intent(in)  :: gen_tend,ldiag3d
 !
-      real(kind=kind_phys), intent(in) :: grav,pi,rd,cp,rv,hvap,hfus,fv,   &
+      real(kind=kind_phys), intent(in) :: grav,pi,rd,cp,rv,hvap,hfus,fv,
      &                                    eps,epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
@@ -102,40 +102,40 @@
 !PCC CANOPY------------------------------------
       logical, intent(in)  :: do_canopy, cplaqm
 !IVAI: canopy inputs
-      real(kind=kind_phys), optional, intent(in)  :: claie(:), cfch(:), &
+      real(kind=kind_phys), optional, intent(in)  :: claie(:), cfch(:),
      &                     cfrt(:), cclu(:), cpopu(:),
      &                  dkt_can(:,:),      dku_can(:,:)
       !----------------------------------------------
-      real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
+      real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),
      &                     tdt(:,:),    rtg(:,:,:),    tkeh(:,:)
-      real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(:,:),     v1(:,:),                        &
-     &                     usfco(:),    vsfco(:),                       &
-     &                     t1(:,:),     q1(:,:,:),                      &
+      real(kind=kind_phys), intent(in) ::
+     &                     u1(:,:),     v1(:,:),
+     &                     usfco(:),    vsfco(:),
+     &                     t1(:,:),     q1(:,:,:),
 !The following two variables are for SA-3D-TKE
-     &                     def_1(:,:),  def_2(:,:), def_3(:,:),         &
-     &                     swh(:,:),    hlw(:,:),                       &
-     &                     xmu(:),       garea(:),                      &
-     &                     zvfun(:),     sigmaf(:),                     &
-     &                     psk(:),       rbsoil(:),                     &
-     &                     zorl(:),      tsea(:),                       &
-     &                     u10m(:),      v10m(:),                       &
-     &                     fm(:),        fh(:),                         &
-     &                     evap(:),      heat(:),                       &
-     &                     stress(:),    spd1(:),                       &
-     &                     prsi(:,:), del(:,:),                         &
-     &                     prsl(:,:),   prslk(:,:),                     &
+     &                     def_1(:,:),  def_2(:,:), def_3(:,:),
+     &                     swh(:,:),    hlw(:,:),
+     &                     xmu(:),       garea(:),
+     &                     zvfun(:),     sigmaf(:),
+     &                     psk(:),       rbsoil(:),
+     &                     zorl(:),      tsea(:),
+     &                     u10m(:),      v10m(:),
+     &                     fm(:),        fh(:),
+     &                     evap(:),      heat(:),
+     &                     stress(:),    spd1(:),
+     &                     prsi(:,:), del(:,:),
+     &                     prsl(:,:),   prslk(:,:),
      &                     phii(:,:), phil(:,:)
-      real(kind=kind_phys), intent(inout), dimension(:,:,:), optional ::&
+      real(kind=kind_phys), intent(inout), dimension(:,:,:), optional ::
      &     dtend
-      integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
+      integer, intent(in) :: dtidx(:,:), index_of_temperature,
      &       index_of_x_wind, index_of_y_wind, index_of_process_pbl
       logical, intent(in) :: use_oceanuv
-      real(kind=kind_phys), intent(out) ::                              &
-     &                     dusfc(:),     dvsfc(:),                      &
-     &                     dtsfc(:),     dqsfc(:),                      &
+      real(kind=kind_phys), intent(out) ::
+     &                     dusfc(:),     dvsfc(:),
+     &                     dtsfc(:),     dqsfc(:),
      &                     hpbl(:)
-      real(kind=kind_phys), intent(out) ::                              &
+      real(kind=kind_phys), intent(out) ::
      &                     dkt(:,:), dku(:,:)
 
 !
@@ -2273,7 +2273,7 @@ c
       if(ldiag3d .and. present(dtend)) then
          idtend = dtidx(ntke+100,index_of_process_pbl)
          if(idtend>0) then
-            dtend(1:im,1:km,idtend) = dtend(1:im,1:km,idtend) +         &
+            dtend(1:im,1:km,idtend) = dtend(1:im,1:km,idtend) +
      &        (f1(1:im,1:km)-q1(1:im,1:km,ntke))*rdt
          endif
       endif

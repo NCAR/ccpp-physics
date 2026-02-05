@@ -2,7 +2,7 @@
    contains
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-   subroutine canopy_transfer_init( im, ix, km,             & !in
+   subroutine canopy_transfer_init( im, ix, km, nkc, nkt,   & !in
               massair_can, massair,                       & !out
               mmr_o3_can,                           & !inout
               nfrct, ifrct,                               & !out
@@ -23,13 +23,12 @@
 !=============================================================================
 
    use machine , only : kind_phys
-   use canopy_mask_mod   ! nkc, nkt
 
    IMPLICIT NONE
 
 !...Arguments:
 
-   integer, intent(in)  :: im, ix, km
+   integer, intent(in)  :: im, ix, km, nkc, nkt
 
    integer, intent(out) ::       &
                 nfrct  (:, :)  , &
@@ -65,7 +64,7 @@
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-   subroutine canopy_transfer_run( im, ix, km,        &
+   subroutine canopy_transfer_run( im, ix, km, nkc, nkt, &
               ntrac1, ntoz,                         &
               GAREA,                                &
               zi, zl, zm,                           &
@@ -114,14 +113,13 @@
    use machine , only : kind_phys
 ! Allocated in mfpbltq_mod:  q1(ix,km,ntrac1)  t1(ix,km) u1(ix,km), v1(ix,km)
    use mfpbltq_mod
-   use canopy_mask_mod
    use canopy_levs_mod
 
    IMPLICIT NONE
 
 !...Arguments:
 
-   integer, intent(in)  :: im, ix, km, ntrac1, ntoz
+   integer, intent(in)  :: im, ix, km, nkc, nkt, ntrac1, ntoz
    integer, intent(in)  :: flag
    real(kind=kind_phys), intent(in) :: zi(:,:), zl(:,:), zm(:,:) ! zi(im,km+1),  zl(im,km),   zm(im,km)
    real(kind=kind_phys), intent(in) :: GAREA(:)
@@ -492,7 +490,7 @@
 !
 !  Check:  total mass in the column should be the same
          if (local_dbg) then
-             call canopy_mass_check(mass_canopy, mass_resolved, i, flag, errmsg, errflg)
+             call canopy_mass_check(mass_canopy, mass_resolved, i, flag, nkc, nkt, errmsg, errflg)
              if (errflg /= 0) return
          end if
 !
@@ -639,7 +637,7 @@
 !
 !  Check:  total mass in the column should be the same
             if (local_dbg) then
-               call canopy_mass_check(mass_canopy, mass_resolved, i, flag, errmsg, errflg)
+               call canopy_mass_check(mass_canopy, mass_resolved, i, flag, nkc, nkt, errmsg, errflg)
                if (errflg /= 0) return
             end if
 !
@@ -720,9 +718,9 @@
 
    contains
 
-   subroutine canopy_mass_check(mass_canopy, mass_model, i, flag, errmsg, errflg)
+   subroutine canopy_mass_check(mass_canopy, mass_model, i, flag, nkc, nkt, errmsg, errflg)
       implicit none
-      integer(kind=4),   intent(in) :: flag, i
+      integer(kind=4),   intent(in) :: flag, i, nkc, nkt
       real(kind=kind_phys),      intent(in) :: mass_canopy(nkt), mass_model(km)
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
