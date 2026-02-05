@@ -343,6 +343,7 @@
    real(kind=kind_phys),    parameter :: rimin=-100.
    real(kind=kind_phys),    parameter :: karman=0.4            ! von karman constant
    real(kind=kind_phys),    parameter :: THRESHOLD = 1.e06 ! MOL threshold, similar to mach_plumerise
+   real(kind=kind_phys),    parameter :: epsilon = 1.e-10
 
    real(kind=kind_phys)    :: zm2, zr, td, hd, ddel
    real(kind=kind_phys)    :: uh, uspr, wndr, sigw, tl, ktr, kur
@@ -1004,7 +1005,7 @@
 !  Level is above first resolved model level
 
             k2 = klower_can(kc)
-            zm2 = (zcan3(kc) - z2(k2-1)) / (z2(k2) - z2(k2-1))
+            zm2 = (zcan3(kc) - z2(k2-1)) / max(z2(k2) - z2(k2-1), epsilon)
 
             td = ( ta3(k2)  - ta3(k2-1)) * zm2
             hd = ( qv3(k2)  - qv3(k2-1)) * zm2
@@ -1017,7 +1018,7 @@
             if (zcan3(kc) - z2(km+1) >= 2.0) then
             !  Level is below first resolved model level but above screen height
 
-               zm2 = (zcan3(kc) - z2(km+1) - 2.0) / (z2(km) - z2(km+1) - 2.0)
+               zm2 = (zcan3(kc) - z2(km+1) - 2.0) / max(z2(km) - z2(km+1) - 2.0, epsilon)
 
                td = (ta3(km)  - T2M( i ) )  * zm2
                hd = (qv3(km)  - Q2M( i ) )  * zm2
@@ -1115,15 +1116,15 @@
          ! Paul's zt is our zmid (i.e. zmid(km) is zt(i,chm_nk))
          ! Paul's hc is our hcan
             uspr = ustar(i) / karman * &
-                   log((zmid3(km) - z2(km+1) - 0.75 * hcan) / &
-                   (0.07530 * hcan))
+                   log(max((zmid3(km) - z2(km+1) - 0.75 * hcan) / &
+                   (0.07530 * hcan), epsilon))
          else
             uspr = uh * exp(- 2.0 * ( 1.0 - zr))
          end if
 !  wndr is the ratio of the wind to Raupach's average us(), eqn 51.
 !  This is used to scale the wind speed with height values from eqn 51 to the current grid square
          ! Paul's WS(nk) is our spd1, wind speed at lowest model level m s-1
-         wndr = spd1(i) / uspr
+         wndr = spd1(i) / max(uspr, epsilon)
 !  Using Raupach's formulae for wind speed, multiplied by the above ratio, for the canopy layers:
 !
          zr = (zcan3(kc) - z2(km+1)) / hcan
@@ -1188,14 +1189,14 @@
            end if
          end if
 
-         tl = hcan / ustar(i)  * &
+         tl = hcan / max(ustar(i), epsilon)  * &
               (0.256 * ((zmid3(km) - z2(km+1) - 0.75 * hcan) / hcan) + &
                0.492 * exp (-(0.256 * ((zmid3(km) - z2(km+1)) / hcan) / 0.492)))
 ! ktr is the ratio of the resolved model diffusivity at the lowest resolved
 ! model level to that derived by Raupach's formula
 !
-         ktr =  dkt3(km) / (sigw * sigw * tl)
-         kur =  dku3(km) / (sigw * sigw * tl)
+         ktr =  dkt3(km) / max(sigw * sigw * tl, epsilon)
+         kur =  dku3(km) / max(sigw * sigw * tl, epsilon)
 !
 !  Use Raupach's formulae for diffusivity, multiplied by the above ratio, for the canopy layers:
 !
@@ -1219,7 +1220,7 @@
            end if
          end if
 !
-         tl = hcan / ustar(i) *  &
+         tl = hcan / max(ustar(i), epsilon) *  &
               (0.256 * ( (zcan3(kc) - z2(km+1) - 0.75 * hcan) / hcan) + &
               (0.492 * exp (-(0.256 * (zcan3(kc) - z2(km+1)) / hcan) / 0.492) ) )
 

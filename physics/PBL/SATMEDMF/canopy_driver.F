@@ -558,6 +558,7 @@
       parameter(ck1=0.15,ch1=0.15)
       parameter(cs0=0.4,csmf=0.5)
       parameter(rchck=1.5,ndt=20)
+      real(kind=kind_phys), parameter :: epsilon = 1.e-10
 
       if (tc_pbl == 0) then
         ck0 = 0.4
@@ -737,7 +738,7 @@
              ws1(i,k) = sqrt(u1(i,k)**2+v1(i,k)**2)
 
              wind_dir_to_rad(i,k) =
-     &                       atan2(u1(i,k)/ws1(i,k),v1(i,k)/ws1(i,k))   ! to radians
+     &                       atan2(u1(i,k),v1(i,k))   ! to radians
            enddo
          enddo
 
@@ -1558,41 +1559,41 @@ c
      &                ZI05 <= zi_can3(i,kc+1) ) THEN
 
                    kc_can   = kc
-                   FZI05    = 1./(zi_can3 (i,kc+1) - zi_can3 (i,kc)) *
+                   FZI05    = 1./max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) * &
      &                           (ZI05             - zi_can3 (i,kc))
 
-                   TTCORR   = (t2_can3 (i,kc+1) - t2_can3 (i,kc))/
-     &                        (zi_can3 (i,kc+1) - zi_can3 (i,kc)) *
+                   TTCORR   = (t2_can3 (i,kc+1) - t2_can3 (i,kc))/ &
+     &                        max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) * &
      &                        (ZI05             - zi_can3 (i,kc))
 
 ! U-Wind/V-Wind after diffusion on canopy layers
-                   UUCAN  =  u2_can3 (i,kc  ) +
-     &                      (u2_can3 (i,kc+1) - u2_can3 (i,kc))/
-     &                      (zi_can3 (i,kc+1) - zi_can3 (i,kc)) *
+                   UUCAN  =  u2_can3 (i,kc  ) + &
+     &                      (u2_can3 (i,kc+1) - u2_can3 (i,kc))/ &
+     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) * &
      &                      (ZI05             - zi_can3 (i,kc))
 
-                   VVCAN  =  v2_can3 (i,kc  ) +
-     &                      (v2_can3 (i,kc+1) - v2_can3 (i,kc))/
-     &                      (zi_can3 (i,kc+1) - zi_can3 (i,kc)) *
+                   VVCAN  =  v2_can3 (i,kc  ) + &
+     &                      (v2_can3 (i,kc+1) - v2_can3 (i,kc))/ &
+     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) * &
      &                      (ZI05             - zi_can3 (i,kc))
 ! Temperature after diffusion on canopy layers
-                   TTCAN  =  t2_can3 (i,kc  ) +
-     &                      (t2_can3 (i,kc+1) - t2_can3 (i,kc))/
-     &                      (zi_can3 (i,kc+1) - zi_can3 (i,kc)) *
+                   TTCAN  =  t2_can3 (i,kc  ) + &
+     &                      (t2_can3 (i,kc+1) - t2_can3 (i,kc))/ &
+     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) * &
      &                      (ZI05             - zi_can3 (i,kc))
 
 
 ! TKE after diffusion on canopy layers
-                   TKECAN =  q2_can3 (i,kc, ntke) +
-     &                      (q2_can3 (i,kc+1, ntke) -
-     &                       q2_can3 (i,kc  , ntke))/
-     &                      (zi_can3 (i,kc+1) - zi_can3 (i,kc)) *
+                   TKECAN =  q2_can3 (i,kc, ntke) + &
+     &                      (q2_can3 (i,kc+1, ntke) - &
+     &                       q2_can3 (i,kc  , ntke))/ &
+     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) * &
      &                      (ZI05             - zi_can3 (i,kc))
 
 ! TKE half layers
-                   TKEHCAN =  tkeh_can (i,kc  ) +
-     &                      (tkeh_can (i,kc+1) - tkeh_can (i,kc))/
-     &                      (  zi_can3(i,kc+1) -   zi_can3(i,kc)) *
+                   TKEHCAN =  tkeh_can (i,kc  ) + &
+     &                      (tkeh_can (i,kc+1) - tkeh_can (i,kc))/ &
+     &                      max(zi_can3(i,kc+1) - zi_can3(i,kc), epsilon) * &
      &                      (ZI05              -   zi_can3(i,kc))
 
                  END IF !  "zi_can3(kc) < ZI05 <= zi_can3(kc+1)"
@@ -1634,31 +1635,31 @@ c
               UU_INT = IntegrateTrapezoid(
      &                   ZCANX(COUNTCAN:1:-1) ,
      &                     UUX(COUNTCAN:1:-1) ) /
-     &                     ZZ_INT
+     &                     max(ZZ_INT, epsilon)
 
 ! V-wind
               VV_INT = IntegrateTrapezoid(
      &                   ZCANX(COUNTCAN:1:-1) ,
      &                     VVX(COUNTCAN:1:-1) ) /
-     &                     ZZ_INT
+     &                     max(ZZ_INT, epsilon)
 
 ! Temp
               TT_INT = IntegrateTrapezoid(
      &                   ZCANX(COUNTCAN:1:-1) ,
      &                    TTX(COUNTCAN:1:-1)   ) /
-     &                    ZZ_INT
+     &                    max(ZZ_INT, epsilon)
 
 ! TKE
               TKE_INT = IntegrateTrapezoid(
      &                    ZCANX(COUNTCAN:1:-1) ,
      &                     TKEX(COUNTCAN:1:-1)  ) /
-     &                     ZZ_INT
+     &                     max(ZZ_INT, epsilon)
 
 ! TKEH
               TKEH_INT= IntegrateTrapezoid(
      &                    ZCANX(COUNTCAN:1:-1) ,
      &                    TKEHX(COUNTCAN:1:-1) ) /
-     &                    ZZ_INT
+     &                    max(ZZ_INT, epsilon)
 
 ! Sum
               TT_SUM = sum(  TTX(COUNTCAN:1:-1))/COUNTCAN
