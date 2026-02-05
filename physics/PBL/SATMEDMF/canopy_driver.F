@@ -682,7 +682,7 @@
 !      nkt=km+nkc defined in "canopy_mask_init"
       nkt1 = nkt - 1
 
-        CALL canopy_levs_init( im, im, km,
+        CALL canopy_levs_init( im, im, km, nkc, nkt,
      &       ntrac-1, ntqv, ntke,                 ! in
      &       zi, zl, zm, !in: 3D
      &       prsl, prsi, !in: 3D
@@ -782,8 +782,9 @@
 ! NLAYS+3= bottom canopy layer at 0.2*CH
 ! =================
 
-         CALL canopy_levs_run(im, im, km,          ! in
+         CALL canopy_levs_run(im, im, km, nkc, nkt, ! in
      &       ntrac1, ntqv, ntke,                   ! in
+     &       errmsg, errflg,                       ! out
      &       RD, PI,                               ! in gry gas constant
      &       zi, zl, zm,                           ! in
      &       prsl, prsi, pgr,                      ! in  (Pa)
@@ -805,6 +806,8 @@
      &        T1_CAN3,     QV_CAN3, rho1_CAN3,     ! out 3D: 2-m interpolated T1 QV rho1
      &       WS1_CAN3,    DKT_CAN3,  DKU_CAN3,     ! out 3D: 10-m interpolated WS1
      &        Q1_CAN3,  Q1_2M)                     ! inout kg kg-1
+
+         if (errflg /= 0) return
 
 ! ================
 ! Out: 
@@ -1107,7 +1110,7 @@
          phii_can  (:,1:km+1) = phii_can3(:,1:km+1)
          phil_can  (:,1:km)   = phil_can3(:,1:km)
 
-! NB. Using 10-m iterpoalted values creates shear and gives very high TKE tendencies (Dec26, 2025)
+! NB. Using 10-m interpolated values creates shear and gives very high TKE tendencies (Dec26, 2025)
 !        u1_can (:,1:km)     =   u1_can3 (:,1:km) ! Dec26 10-m interpolated
 !        v1_can (:,1:km)     =   v1_can3 (:,1:km) ! Dec26 10-m interpolated
 !        ws1_can(:,1:km)     =  ws1_can3 (:,1:km) ! Dec26 10-m interpolated
@@ -1169,7 +1172,7 @@
          do kc = 1, nkc ! 3-nkc canopy layers
 
 ! Sub-canopy values of TKE  set to 1hy model layer
-! ("canopy_transfer" only does mass trasnfer to mass conc. tracers)
+! ("canopy_transfer" only does mass transfer to mass conc. tracers)
             q1_can (:,kc, ntke    ) = q1(:,1, ntke    ) ! ntke always on
 
 !Sub-canopy values of wind components  set to 1hy model layer

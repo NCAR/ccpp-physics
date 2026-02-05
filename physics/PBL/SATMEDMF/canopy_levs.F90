@@ -3,7 +3,7 @@
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-   subroutine canopy_levs_init(im, ix, km,         &
+   subroutine canopy_levs_init(im, ix, km, nkc, nkt, &
               ntrac1,  ntqv, ntke,                 &
               zi, zl, zm,                          & ! in: 3D meters
               prsl, prsi,                          & ! in: 3D (Pa)
@@ -24,13 +24,12 @@
    use machine , only : kind_phys
 ! Allocated in mfpbltq_mod:  q1(ix,km,ntrac1)  t1(ix,km) u1(ix,km), v1(ix,km)
    use mfpbltq_mod
-   use canopy_mask_mod
 
    IMPLICIT NONE
 
 !...Arguments:
 ! ntrac1 = ntrac - 1
-   integer, intent(in)  :: im, ix, km, ntrac1, ntqv, ntke
+   integer, intent(in)  :: im, ix, km, nkc, nkt, ntrac1, ntqv, ntke
 
    real(kind=kind_phys), intent(in) ::  zi(:,:),   zl(:,:),   zm(:,:), &
                                       prsi(:,:), prsl(:,:)
@@ -193,8 +192,9 @@
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-   subroutine canopy_levs_run(im, ix, km,           &
+   subroutine canopy_levs_run(im, ix, km, nkc, nkt, &
               ntrac1, ntqv, ntke,                   & ! in
+              errmsg, errflg,                       & ! out
               RDGAS, PI,                            & ! in ?? units ??
               zi, zl, zm,                           & ! in: 1D    zm(i,k) = zi(i,k+1)
               prsl, prsi, psfc,                     & ! in: 3D 3D 2D  (Pa)
@@ -222,7 +222,6 @@
    use mfpbltq_mod
 !   use physcons, grav => con_g, cp => con_cp, &
 !                   rd => con_rd
-   use canopy_mask_mod
 
    IMPLICIT NONE
 
@@ -230,7 +229,7 @@
 
 !...Arguments:
 
-   integer, intent(in)  :: im, ix, km, ntrac1, ntqv, ntke
+   integer, intent(in)  :: im, ix, km, nkc, nkt, ntrac1, ntqv, ntke
    real(kind=kind_phys), intent(in) :: RDGAS, PI
 ! NB. zi   (im, km+1), zl   (im, km),  zm(im,km)
 !     prsi (im, km+1), prsl (im, km)
@@ -251,6 +250,9 @@
    real(kind=kind_phys), intent(in) :: dens(:,:), dkt(:,:), dku(:,:)
 
    real(kind=kind_phys), intent(in) :: FRT_mask(:)
+
+   character(len=*), intent(out) :: errmsg
+   integer,          intent(out) :: errflg
 
    integer, intent(out) ::          &
                kmod   (:, :)      , &
@@ -284,9 +286,6 @@
              sigmid_can(:, :)            ! dim(nkt) ~ prsl(:,km)
 
 !...Local arrays:
-
-   character(256) :: errmsg
-   integer        :: errflg
 
    integer(kind=4) :: kcan_top
    real   (kind=kind_phys) :: hcan
@@ -349,6 +348,10 @@
    logical(kind=4)                         :: local_dbg
 
    local_dbg = (.false.)
+
+! Initialize CCPP error handling variables
+   errmsg = ''
+   errflg = 0
 
    kmod (:,:) = -999
    kcan3(:,:) = -999
@@ -715,7 +718,7 @@
 ! Top canopy layer height (km+1) is higher than the bottom model layer height (km)
       if (zmid_can3(i, km) < zmid_can3 (i,km+1)) then
 !
-!  Non-trivial case:  the ancilliary and original array levels intermingle.
+!  Non-trivial case:  the ancillary and original array levels intermingle.
 !  Sort the combined height array to get the right order of the the heights:
 !
 !  zmid_can is the height locations of the combined array, which needs to be  sorted:
@@ -737,9 +740,9 @@
             end do
          end do
          if (flag_error) then
-!           write(errmsg,*) 'NKC+1 passes insufficient to sort canopy array '
-!           write(errmsg,*) 'in can_levs_defn.F90.  Scream and die.'
-! ABORT!
+            write(errmsg,fmt='(*(a))') 'NKC+1 passes insufficient to sort canopy array ' // &
+                                       'in canopy_levs.F90.  Scream and die.'
+            errflg = 1
             return
          end if
       end if
@@ -793,15 +796,17 @@
       if (local_dbg) then
       do kc = 1, nkc
          if (kcan3(i,kc) < 1) then
-!           write(errmsg,*) 'get_can_levs: kcan undefined: ', kc, kcan3(i,kc)
-            !ABORT
+            write(errmsg,fmt='(*(a,i0,a,i0))') 'get_can_levs: kcan undefined: kc=', kc, &
+                                              ' kcan3=', kcan3(i,kc)
+            errflg = 1
             return
          end if
       end do
       do k = 1,km
          if (kmod(i,k) < 1) then
-!           write(errmsg,*) 'get_can_levs: kmod undefined: ',k, kmod(i,k)
-            !ABORT
+            write(errmsg,fmt='(*(a,i0,a,i0))') 'get_can_levs: kmod undefined: k=', k, &
+                                              ' kmod=', kmod(i,k)
+            errflg = 1
             return
          end if
       end do
@@ -819,7 +824,7 @@
 ! Note that these changes only exist inside the chemistry part of GEM-MACH and do not affect the model physics
 !!!
 !!! Create the momentum height (layer interface) array.  The original momentum layers are used above the canopy height.
-!!! Below the canopy height, the "momentum"layers are assumed to be ½ way between the thermodynamiclayers.
+!!! Below the canopy height, the "momentum"layers are assumed to be ½ way between the thermodynamic layers.
 
 ! Default case:  all added canopy thermodynamic layers are below the lowest resolved model thermodynamic layer
 ! kcan_top is either 2nd or 3rd (63 or 62) resolved model layer
@@ -959,17 +964,9 @@
 !
 !
          if (klower_can(kc) < 1) then
-!           write(errmsg,*) 'get_can_levs:  klower_can is unassigned at i, kc: ', i, kc
-!           write(errmsg,*) 'get_can_levs:  zcan3(kc): ',zcan3(kc)
-            do kk = kcan_top, km+1
-!              write(errmsg,*) 'get_can_levs: kk z2(kk) which should bracket the above zcan3: ',kk, z2(kk)
-            end do
-            do kk = 1, km+1
-!              write(errmsg,*) 'get_can_levs:  kk z2(kk) full set of z2 values: ', kk, z2(kk)
-            end do
-            do kk = 1,nkc
-!              write(errmsg,*) 'get_can_levs:  kc zcan3(kc) hcan fr(kc) for full set of zcan3 values: ',kk, zcan3(kk), hcan, can_frac(kk)
-            end do
+            write(errmsg,fmt='(*(a,i0,a,i0))') 'get_can_levs:  klower_can is unassigned at i, kc: ', &
+                                              i, kc
+            errflg = 1
             return
          end if
       end do
@@ -986,8 +983,9 @@
       if ((klower_can(kc) /= klower_can(kc)) .or. &
           (klower_can(kc) <= 0)              .or. &
           (klower_can(kc) > km+ 1) ) then
-!        write(errmsg,*) 'get_can_levs: klower_can after creation NaN or <=0 or >km+1 : ', &
-!                      kc, klower_can(kk)
+         write(errmsg,fmt='(*(a,i0))') 'get_can_levs: klower_can after creation NaN or <=0 or >km+1 : kc=', &
+                                       kc
+         errflg = 1
          return
       end if
    end do
@@ -1044,7 +1042,7 @@
 
 !
 !  Next, do a sort of all of the variables in the original METV3D array into canopy.  Note that
-!  the declaration of the met arrays for the new canopy subdomain has occurred earlie in the code.
+!  the declaration of the met arrays for the new canopy subdomain has occurred earlier in the code.
 !  Three-D variables are a bit more complicated, in that one must make decisions regarding
 !  the values of the met variables in the canopy region.
 !  The code which follows is based on chm_load_metvar.ftn90
@@ -1183,30 +1181,9 @@
 ! Several checks for suspicious values:
       do kk = 1,nkt
          if ( ta_can3(kk) < 150.0) then
-            write(errmsg,*) 'get_can_levs:  suspicious temperature detected in get_can_levs after creation (kk value): ',&
-                        i, kk, ta_can3(kk)
-            do kc = 1, nkc
-               write(errmsg,*) 'get_can_levs: value of zcan(kc) z2(km+1) and difference  at this value of ic for kk: ',&
-                            kc,' are: ',zcan3(kc),z2(km+1), zcan3(kc)-z2(km+1)
-            end do
-
-            do k = 1, nkt
-               write(errmsg,*) 'get_can_levs: value of zmid_can for = ', i,' at k = ',k,' is: ',zmid_can3(i,k)
-            end do
-
-            do kc = 1,nkc
-               write(errmsg,*) 'get_can_levs:  values of kcan zcan and original zcan for = ', i,' at kc = ',kc,' are: ',&
-                           kcan3(i,kc), zcan3(kc), hcan * can_frac(kc)
-            end do
-
-            do k = 1,km
-               write(errmsg,*) 'get_can_levs:  value of kmod and z for = ', i,' at k = ',k,' are: ',kmod(i,k), zmid3(k)
-            end do
-
-            do kc = 1,nkc
-               write(errmsg,*) 'get_can_levs: value of klower_can at this grid point for kc: ',kc,' is: ',klower_can(kc)
-            end do
-
+            write(errmsg,fmt='(*(a,i0,a,i0,a,f10.4))') 'get_can_levs:  suspicious temperature detected in get_can_levs after creation: i=', &
+                        i, ' kk=', kk, ' ta_can3=', ta_can3(kk)
+            errflg = 1
             return
          end if
       end do
@@ -1238,7 +1215,7 @@
          ! Paul's zt is our zmid (i.e. zmid(km) is zt(i,chm_nk))
          ! Paul's hc is our hcan
             uspr = ustar(i) / karman * &
-                   alog((zmid3(km) - z2(km+1) - 0.75 * hcan) / &
+                   log((zmid3(km) - z2(km+1) - 0.75 * hcan) / &
                    (0.07530 * hcan))
          else
             uspr = uh * exp(- 2.0 * ( 1.0 - zr))
@@ -1251,7 +1228,7 @@
 !
          zr = (zcan3(kc) - z2(km+1)) / hcan
          if (zr >= 1.0) then
-            uspr = alog((zcan3(kc) - z2(km+1) - 0.75 * hcan) / &
+            uspr = log((zcan3(kc) - z2(km+1) - 0.75 * hcan) / &
                    (0.07530 * hcan)) * ustar(i)
          else
             uspr = uh * exp(- 2.0 * (1.0 - (zcan3(kc) - z2(km+1)) / hcan))
@@ -1358,11 +1335,9 @@
 !
    if (local_dbg) then
       do kc = 1, nkc
-         flag_error = .false.
          if (kcan3(i, kc) == 0) then
-            write(6,*) 'kcan zero inside canopy_levs at i kc = ', &
-                        i, kc
-            flag_error = .true.
+            write(errmsg,fmt='(*(a,i0,a,i0))') 'kcan zero inside canopy_levs at i=', i, ' kc=', kc
+            errflg = 1
             return
          end if
       end do
