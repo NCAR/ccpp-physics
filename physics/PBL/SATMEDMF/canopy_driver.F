@@ -1561,42 +1561,49 @@ c
      &                ZI05 <= zi_can3(i,kc+1) ) THEN
 
                    kc_can   = kc
-                   FZI05    = 1./max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) *
-     &                           (ZI05             - zi_can3 (i,kc))
+                   FZI05    = 1./max(zi_can3 (i,kc+1) - 
+     &                           zi_can3 (i,kc), epsilon) *
+     &                           (ZI05 - zi_can3 (i,kc))
 
                    TTCORR   = (t2_can3 (i,kc+1) - t2_can3 (i,kc))/
-     &                        max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) *
-     &                        (ZI05             - zi_can3 (i,kc))
+     &                        max(zi_can3 (i,kc+1) - 
+     &                        zi_can3 (i,kc), epsilon) *
+     &                        (ZI05    - zi_can3 (i,kc))
 
 ! U-Wind/V-Wind after diffusion on canopy layers
                    UUCAN  =  u2_can3 (i,kc  ) +
      &                      (u2_can3 (i,kc+1) - u2_can3 (i,kc))/
-     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) *
-     &                      (ZI05             - zi_can3 (i,kc))
+     &                      max(zi_can3 (i,kc+1) - 
+     &                      zi_can3 (i,kc), epsilon) *
+     &                      (ZI05      - zi_can3 (i,kc))
 
                    VVCAN  =  v2_can3 (i,kc  ) +
      &                      (v2_can3 (i,kc+1) - v2_can3 (i,kc))/
-     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) *
+     &                      max(zi_can3 (i,kc+1) - 
+     &                      zi_can3 (i,kc), epsilon) *
      &                      (ZI05             - zi_can3 (i,kc))
 ! Temperature after diffusion on canopy layers
                    TTCAN  =  t2_can3 (i,kc  ) +
      &                      (t2_can3 (i,kc+1) - t2_can3 (i,kc))/
-     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) *
-     &                      (ZI05             - zi_can3 (i,kc))
+     &                      max(zi_can3 (i,kc+1) - 
+     &                      zi_can3 (i,kc), epsilon) *
+     &                      (ZI05      - zi_can3 (i,kc))
 
 
 ! TKE after diffusion on canopy layers
                    TKECAN =  q2_can3 (i,kc, ntke) +
      &                      (q2_can3 (i,kc+1, ntke) -
      &                       q2_can3 (i,kc  , ntke))/
-     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) *
-     &                      (ZI05             - zi_can3 (i,kc))
+     &                      max(zi_can3 (i,kc+1) - 
+     &                      zi_can3 (i,kc), epsilon) *
+     &                      (ZI05      - zi_can3 (i,kc))
 
 ! TKE half layers
                    TKEHCAN =  tkeh_can (i,kc  ) +
      &                      (tkeh_can (i,kc+1) - tkeh_can (i,kc))/
-     &                      max(zi_can3(i,kc+1) - zi_can3(i,kc), epsilon) *
-     &                      (ZI05              -   zi_can3(i,kc))
+     &                      max(zi_can3(i,kc+1) - 
+     &                      zi_can3(i,kc), epsilon) *
+     &                      (ZI05      -   zi_can3(i,kc))
 
                  END IF !  "zi_can3(kc) < ZI05 <= zi_can3(kc+1)"
 
