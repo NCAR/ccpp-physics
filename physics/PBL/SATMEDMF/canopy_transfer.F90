@@ -251,7 +251,6 @@
 !!! Paul's zmom is our zmom
 ! zmom(1)     = ZFULL(km) is top    model  layer height
 ! zmom(km) = ZFULL(1)     is bottom model  layer height
-         ! zmom (II) = zi(i,k)    ! ZFULL(i,k) Mar24 2025 replace zi with zm
          zmom (II) = zm(i,k)    ! ZFULL(i,k)
          dens3(II) = DENS(i,k)  ! kg/m**3
 !! Heights of the original model layers for the canopy columns are extracted to the zmom array.
@@ -312,7 +311,6 @@
 !!! Paul's zmom is our zmom
 ! zmom(1)     = ZFULL(km) is top    model  layer height
 ! zmom(km) = ZFULL(1)     is bottom model  layer height
-         ! zmom (II) = zi(i,k)    ! ZFULL(i,k) Mar24 2025 replace zi with zm
          zmom (II) = zm(i,k)    ! ZFULL(i,k)
          dens3(II) = DENS(i,k)  ! kg/m**3
 !! Heights of the original model layers for the canopy columns are extracted to the zmom array.
@@ -431,8 +429,6 @@
             ! conc3(km) is 1st (bottom) model layer
             ! Paul's chem_tr is our conc3 = vmr_resolved
 ! NB. mfpbltq_mod: q1(ix,km,ntrac1) kg kg-1
-            ! conc3(II) = q1(i, k, S)
-! Oct9:     ! conc3(II) = Q1_MOD(i, k, S)               ! kg kg-1
             ! Paul's chem_tr is our vmr_resolved =conc3
             vmr_resolved(II) = Q1_MOD(i, k, S)          ! kg kg-1
          end do
@@ -518,7 +514,7 @@
             ! zmid(1)     = ZM(km) is top    model  layer height
             ! zmid(km) = ZM(1)     is bottom model  layer height
             ! Paul's zt (or ZPLUS) is our zmid
-            zmid(II) = ZL(i,k) ! mid layer height [m] !Sep17: = ZM(i,k)
+            zmid(II) = ZL(i,k) ! mid layer height [m]
 !!! Heights of the original model layers for the canopy columns are extracted to the zmid array.
          end do
 

@@ -5,6 +5,7 @@
 
    subroutine canopy_levs_init(im, ix, km, nkc, nkt, &
               ntrac1,  ntqv, ntke,                 &
+              errmsg,  errflg,                     &
               zi, zl, zm,                          & ! in: 3D meters
               prsl, prsi,                          & ! in: 3D (Pa)
               dv, du, tdt, rtg,                    & ! in: 3D
@@ -72,12 +73,16 @@
              sigmom_can(:, :)        , & ! dim(nkt) ~ prsi(:,km+1)
              sigmid_can(:, :)            ! dim(nkt) ~ prsl(:,km)
 
+   character(len=*), intent(out) :: errmsg
+   integer,          intent(out) :: errflg
+
 !...local variables
 
-   character(256) :: errmsg
-   integer        :: errflg
-
    integer        :: k, kc
+
+! Initialize CCPP error handling variables
+   errmsg = ''
+   errflg = 0
 
 ! Initialize with values before in-canopy diffusion
 
@@ -477,7 +482,6 @@
 ! zmom(1)     = ZFULL(km) is top    model  layer height
 ! zmom(km) = ZFULL(1)     is bottom model  layer height
          ! NB. zm(:,k) = zi(:,k+1)
-         ! zmom3(II) = zi(i,k) ! ZFULL(i,k) Mar24, 2025 replace zi with zm
          zmom3(II) = zm(i,k) ! ZFULL(i,k)
 !! Heights of the original model layers for the canopy columns are extracted to the zmom array.
 
@@ -546,8 +550,6 @@
    ! Continuous forest canopy
    ELSE IF (FRT_mask(i) > 0.) THEN
 
-!      print*, 'CANOPY_LEVS: ZOL ILMO= ', i, zol(i), ilmo(i)
-
       hcan = cfch( i )
 !!! Extract the canopy height (FCH)
 
@@ -561,8 +563,6 @@
 !!! NB. zcan3(1) is hc, top of canopy
 !!!     zcan3(2) is 0.5 * hc
 !!!     zcan3(3) is 0.2 * hc (bottom canopy level)
-
-!        print*,'canopy_levs: ZCAN = ', i, kc, zcan3(kc)
       end do
 
 ! 1 = bottom (1st) model layer
@@ -591,7 +591,6 @@
 ! 3  1.751135612532654E-003
 ! 2  9.570774376723687E-004
 ! 1  3.757488135785848E-004 (top model )
-!        print*,'canopy_levs: sigmid2= ', i, II, sigmid2(II)
       end do
       sigmid2(km+1) = 1.0
 
@@ -601,7 +600,6 @@
 ! zmom(1)     = ZFULL(km) is top    model  layer height
 ! zmom(km) = ZFULL(1)     is bottom model  layer height
          ! NB. zm(:,k) = zi(:,k+1)
-         ! zmom(II) = zi(i,k) ! ZFULL(i,k) Mar24, 2025 replace zi with zm
          zmom3(II) = zm(i,k) ! ZFULL(i,k)
 !! Heights of the original model layers for the canopy columns are extracted to the zmom array.
 
@@ -636,9 +634,6 @@
 ! 3  1.367636992545316E-003 137.789993286133
 ! 2  6.376847405122714E-004 64.2470016479492
 ! 1  1.985103504149681E-004 20.0000000000000 mb (top model layer)
-!
-!         print*,'canopy_levs: sigmom3= ', i, II, sigmom3(II),prsi3 (II)
-
       end do
 
 !!! Find the resolved model level which lies above the top of the forest canopy,
@@ -655,7 +650,6 @@
          end if
       end do
 ! kcan_top = 62 or 63
-!      print*,'canopy_levs: kcan_top = ', i, kcan_top
 
 ! MV2D_ILMO: Aggregated Inverse of Monin-Obukhov length
 !  Setup of Monin-Obhukov Length similar to plumerise for upper limit:
@@ -750,15 +744,6 @@
 !
 !  Heights in zmid_can should now be monotonically decreasing.
 
-! Print
-!      do k = nkt, 1, -1 ! sfc to top model layer
-! 67   3.71699981689453
-! 66   9.29249954223633
-! 65   18.5849990844727
-! 64   22.5893670351600
-!         print*,'canopy_levs: zmid_can = ', i, k, zmid_can3(i, k)
-!      end do
-
 !  Next, identify the locations of the vertical levels in the combined
 !  array relative to the resolved model array and canopy array
 !
@@ -824,7 +809,7 @@
 ! Note that these changes only exist inside the chemistry part of GEM-MACH and do not affect the model physics
 !!!
 !!! Create the momentum height (layer interface) array.  The original momentum layers are used above the canopy height.
-!!! Below the canopy height, the "momentum"layers are assumed to be ½ way between the thermodynamic layers.
+!!! Below the canopy height, the "momentum" layers are assumed to be ½ way between the thermodynamic layers.
 
 ! Default case:  all added canopy thermodynamic layers are below the lowest resolved model thermodynamic layer
 ! kcan_top is either 2nd or 3rd (63 or 62) resolved model layer
@@ -851,7 +836,6 @@
       end do  inner0
 
 ! ka is 63 or 64
-!      print*,'canopy_levs: ka = ', i, ka(i)
 
 ! ka  is the lower-most layer for which the combined layer zmom_can = zmom resolved model layer
       ! Paul's zmom is our zmom
@@ -861,19 +845,6 @@
          zmom_can3(i,k) = (zmid_can3(i,k-1) + zmid_can3(i,k)) * 0.5
 
       end do
-! Oct31:      zmom_can3(i, nkt+ 1) = 0.
-
-
-! Print
-!      do k = nkt, 1, -1 ! sfc to top model layer
-! 67   6.62900018692017
-! 66   14.2050004005432
-! 65   21.0653651654053
-! 64   46.3814595935061  1hy
-! 63   99.2328891021972  2hy
-!         print*,'canopy_levs: zmom_can = ', i, k, zmom_can3(i, k), zmom3 (k)
-!      end do
-
 !########################################################################
 
 ! create original model arrays of z and sigma-t which include the surface, to
@@ -899,10 +870,6 @@
 ! 62  0.985167158577051       125.175103771062 m
 ! 63  0.991717417180879        70.5363577077242
 ! 64  0.997329666888429        22.4844313034714
-!
-!         print*,'canopy_levs: sigmid_can = ', i, kk, sigmid_can(i, kk), &
-!                                                      zmid_can3(i, kk)
-
       end do
       klower_can(:) = -999
       z2(km+1) = 0.0
@@ -912,28 +879,6 @@
       do kc = 1, nkc   ! from top to bottom canopy layers
          do k2 = kcan_top, km+1  ! from resolved model layer above the canopy to top model layer
             if (zcan3(kc) > z2(k2) .and. zcan3(kc) <= z2(k2-1)) then
-
-! k2 is either 64 or 65
-! 64  0.997509580701422 0.991549245511511       5.960335189910571E-003
-!    23.4420505707344 73.6016275069086        -50.1595769361742
-!    23.6420505707344                         -49.9595769361742
-!
-! 64  0.997359509095134 0.991637283835972       5.722225259162883E-003
-!    23.5479167685719  73.9801156184914       -50.4321988499195
-!    23.7479167685719                         -50.2321988499195
-!
-! 65   1.00000000000000        0.997352976969389       2.647023030610929E-003
-!      0.000000000000000E+000 22.3611756580077       -22.3611756580077
-!      2.73199996948242                              -19.6291756885253
-!
-! 65   1.00000000000000         0.997352976969389       2.647023030610929E-003
-!      0.000000000000000E+000  22.3611756580077       -22.3611756580077
-!     13.6599998474121                                 -8.70117581059563
-!
-!               print*, 'canopy_levs: sigmid_can (1) = ', i, k2,         &
-!                sigmid2(k2), sigmid2(k2-1), sigmid2(k2) - sigmid2(k2-1),&
-!                     z2(k2),      z2(k2-1),      z2(k2) -      z2(k2-1),&
-!                  zcan3(kc),                  zcan3(kc) -      z2(k2-1)
 
 ! Interpolate in sigma
                sigmid_can(i, kcan3(i,kc)) = sigmid2(k2-1)  +          &
@@ -947,22 +892,6 @@
 
          end do ! do k2=kcan_top, km+1
 
-! Print
-!
-! kcan3    sigmid_can             zmid_can3
-! 65 0.999628269764443        3.13000011444092
-! 66 0.999814134882221        1.56500005722046
-! 67 0.999925653952889       0.626000022888184
-!
-! 65 0.997117582813635        24.1049995422363
-! 66 0.998648976933277        11.8999996185303
-! 67 0.999459590773311        4.75999984741211
-!
-!          print*,'canopy_levs: sigmid_can (2) = ', i, kc, kcan3(i,kc),  &
-!                                            sigmid_can(i, kcan3(i,kc)), &
-!                                             zmid_can3(i, kcan3(i,kc))
-!
-!
          if (klower_can(kc) < 1) then
             write(errmsg,fmt='(*(a,i0,a,i0))') 'get_can_levs:  klower_can is unassigned at i, kc: ', &
                                               i, kc
@@ -1014,30 +943,11 @@
          end if
       end do inner2
 ! ka  is the last layer for which sigmom_can= sigmom3(k)
-      sigmom_can(i, ka(i)) = sigmom3(ka(i))   ! Jul23: sigmid2(ka(i))
+      sigmom_can(i, ka(i)) = sigmom3(ka(i))
       do k = ka(i)+1,nkt
          sigmom_can(i, k) = (sigmid_can(i, k-1) + sigmid_can(i, k)) * 0.5
       end do
-! Jul24, 2025
       sigmom_can(i, nkt+1) = 1.0
-
-! Print
-!      do k = 1,nkt+1 ! from top to bottom
-
-! 1  1.985103504149681E-004  prsi3(1) = 20.0000000000000 mb
-! 2  6.376847405122714E-004
-! ...
-!
-! 62  0.981799237332539
-! 63  0.988632335800729
-! 64  0.994671160237943
-! 65  0.997541255229605
-! 66  0.998374138576117
-! 67  0.999241264668854
-! 68  1.0   set to 1.0 above
-!
-!        print*,'canopy_levs: sigmom_can =',i, k, sigmom_can(i, k)
-!      end do ! nkt+1
 
 
 !
@@ -1074,8 +984,6 @@
 !             64    --> in kcan3 loop: 64 97551.5096832975
 ! 64          65    97574.2952071220        98097.0373946220
 !
-!      print*,'canopy_levs: prsi_can3 kmod=', i, k, kk, prsi_can3(kk), prsi3(k+1)
-
    end do ! km
 
 !----------------------------------------------------------------------------
@@ -1134,14 +1042,6 @@
 ! get pressure from sigma levels in Pa
          prsl_can3(kk) = sigmid_can(i, kk) * psfc(i)  ! ~zl mid-layers centers
          prsi_can3(kk) = sigmom_can(i, kk) * psfc(i)  ! ~zm/zi layers interfaces
-
-! Print
-! 1 64 97551.5096832975
-!   65 --> in kmod loop : 65    97574.2952071220
-! 2 66 97892.5615950123
-! 3 67 97999.3464530241
-!
-!         print*,'canopy_levs: prsi_can3 kcan3=', i, kc, kk, prsi_can3(kk)
 
 
 ! aqm_methods: dens: buffer(k) = stateIn % prl(c,r,l) / ( rdgas * stateIn % temp(c,r,l) )
@@ -1296,7 +1196,6 @@
 !
          ktr =  dkt3(km) / (sigw * sigw * tl)
          kur =  dku3(km) / (sigw * sigw * tl)
-!         print*, 'CANOPY_LEVS: KTR= ', i, ktr, dkt3(km), kk, kc
 !
 !  Use Raupach's formulae for diffusivity, multiplied by the above ratio, for the canopy layers:
 !
@@ -1327,10 +1226,6 @@
          dkt_can3(kk)  = (sigw * sigw * tl) * ktr
          dku_can3(kk)  = (sigw * sigw * tl) * kur
 
-!  DKT_CAN=0.178022242775362      54.2361811640303        1.11225899578581               64           1
-!  DKT_CAN=7.201550034628344E-002 47.9798060091286       0.161019598920152               66           2
-!  DKT_CAN=3.982132984178101E-002 46.0438951730293       4.724674166464671E-002          67           3
-!        print*, 'CANOPY_LEVS: DKT_CAN= ', i, sigw, tl, dkt_can3(kk), kk, kc
       end do ! kc = 1,nkc
 !
    if (local_dbg) then
@@ -1364,37 +1259,11 @@
          DKT_CAN (i,II) = dkt_can3 (k)
          DKU_CAN (i,II) = dku_can3 (k)
 
-! Pressure at layers centers
-! 1   37.9003337896498 96.3881049029277
-! 2   96.3881049029277 176.687747254452
-! 3   176.687747254452 267.236282600406
-! ...
-! 63   99570.0993392892 100118.892141721
-! 64   100118.892141721 100129.946869981
-! 65   100129.946869981 100257.714673645
-! 66   100257.714673645 100341.141349630
-! 67   100341.141349630
-!         print*,'canopy_levs: prsl_can3 =',i,k, &
-!                                  prsl_can3(k),  prsl_can3(k+1)
       end do ! k = 1, nkt
 
 ! Pressure at layers interfaces
       do k = 1, nkt+1  ! from top to bottom of combined layers
          II = (nkt+1) + 1 - k  ! from bottom to top of combined layer
-
-! Pressure at layers interfaces:
-! 1    20.0000000000000
-! 2    64.2470016479492
-! 3   137.789993286133
-! 4   221.957992553711
-! ...
-! 65   97574.2952071220
-! 66   97892.5615950123
-! 67   97999.3464530241
-! 68   98097.0373946220
-!
-!         print*,'canopy_levs: prsi_can3 =',i,k, &
-!                                  prsi_can3(k)
 
 ! (km+1) (68=nkc+km +1) prsi3( 1)   Top    model layer upper interface  prsi_can3(1)
 ! (km)   (67=nkc+km   ) prsi3( 2)
