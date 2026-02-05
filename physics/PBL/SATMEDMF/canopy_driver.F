@@ -677,7 +677,10 @@
 
         CALL canopy_mask_init( im, im, km, ! nkt, 
      &     claie, cfch, cfrt, cclu, cpopu, !in:
-     &     FRT_MASK) !out: nkt defined here!
+     &     FRT_MASK,                      !out: nkt defined here!
+     &     errmsg, errflg)
+
+        if (errflg /= 0) return
 
 !      nkt=km+nkc defined in "canopy_mask_init"
       nkt1 = nkt - 1
@@ -709,7 +712,10 @@
      &        massair_can3, massair,                  !out
      &        mmr_o3_can3,                            !inout
      &        nfrct, ifrct,                          !out
-     &        frctr2c, frctc2r )                     !out
+     &        frctr2c, frctc2r,                      !out
+     &        errmsg, errflg )
+
+        if (errflg /= 0) return
 
 
       endif ! (do_canopy .and. cplaqm)
@@ -724,7 +730,10 @@
 
         CALL canopy_mask_run( im, im, km,           !in
      &     claie, cfch, cfrt, cclu, cpopu,           !in
-     &     FRT_MASK) !out
+     &     FRT_MASK,                                !out
+     &     errmsg, errflg)
+
+        if (errflg /= 0) return
 
 ! Temporary 2D output
 !         aux2d(:, 1) = FRT_mask(:)
@@ -1085,7 +1094,10 @@
      &     massair_can3, massair,                  !inout
      &      mmr_o3_can3,                            !inout
      &        nfrct, ifrct,                          !inout
-     &        frctr2c, frctc2r )                     !inout
+     &        frctr2c, frctc2r,                      !inout
+     &        errmsg, errflg )
+
+         if (errflg /= 0) return
 
 ! ==============
 !  Input:
@@ -1605,7 +1617,10 @@ c
      &        massair_can3, massair,                 !inout
      &        mmr_o3_can3,                           !inout
      &        nfrct, ifrct,                          !inout
-     &        frctr2c, frctc2r )                     !inout
+     &        frctr2c, frctc2r,                      !inout
+     &        errmsg, errflg )
+
+        if (errflg /= 0) return
 
 ! ==============
 !  Input:

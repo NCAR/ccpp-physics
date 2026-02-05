@@ -6,9 +6,10 @@
               massair_can, massair,                       & !out
               mmr_o3_can,                           & !inout
               nfrct, ifrct,                               & !out
-              frctr2c, frctc2r )                            !out
+              frctr2c, frctc2r,                           & !out
+              errmsg, errflg )
 
-!  Input/Output variables, original horizontal coordinate
+!  Input/Output variables, original Horizontal coordinate
 !
 !  Local variables:
 !  massair_can(:,nkt)  :  mass of air in canopy layers (kg)
@@ -41,10 +42,14 @@
              frctr2c   (:, :, :)  , &
              frctc2r   (:, :, :)
 
+   character(len=*), intent(out) :: errmsg
+   integer,          intent(out) :: errflg
+
 !...local variables
 
-   character(256)   :: errmsg
-   integer          :: errflg
+! Initialize CCPP error handling variables
+   errmsg = ''
+   errflg = 0
 
    massair_can(:,:) = 0.
    massair    (:,:) = 0.
@@ -74,7 +79,8 @@
               massair_can, massair,                 & !inout
               mmr_o3_can,                           & !inout
               nfrct, ifrct,                               & !inout
-              frctr2c, frctc2r )                            !inout
+              frctr2c, frctc2r,                           & !inout
+              errmsg, errflg )
 
 ! Arguments:
 ! Input variables
@@ -88,7 +94,7 @@
 !  flag                               : 0 -> resolved_to_canopy
 !                                       1 -> canopy_to_resolved
 !
-!  Input/Output variables, original horizontal coordinate
+!  Input/Output variables, original Horizontal coordinate
 !  Q1_CAN(:,nkt, NSPCSD)     :  Chemical tracers concentrations kg kg-1 combined canopy and resolved model layers
 !  Q1_MOD(:,km,  NSPCSD)     :  Chemical tracers concentrations kg kg-1 on model levels (copy of CONC)
 !  Q1    (:,km,  NSPCSD)     :  Chemical tracers concentrations kg kg-1 on model levels
@@ -160,6 +166,9 @@
              frctr2c   (:, :, :)  , &
              frctc2r   (:, :, :)
 
+   character(len=*), intent(out) :: errmsg
+   integer,          intent(out) :: errflg
+
 !...Local arrays:
 
    real(kind=kind_phys) ::               &
@@ -185,9 +194,6 @@
               conc_can3    (nkc)
 
 !...local variables
-
-   character(256) :: errmsg
-   integer        :: errflg
 
    INTEGER          :: i, S, IS
 
@@ -218,6 +224,10 @@
 
    logical(kind=4)                         :: local_dbg
    local_dbg = .true.
+
+! Initialize CCPP error handling variables
+   errmsg = ''
+   errflg = 0
 
    conc_can3(:)=0.
    conc3    (:)=0.
@@ -260,17 +270,10 @@
 !  First, carry over original model values for the matching layers
       do k = 1, km ! from bottom to top of resolved model layers
          massair_can(i, k) = massair(i, k) ! full layer height [m]
-
-!        print*,'NO-CANOPY: massair ', i,k, &
-!                massair_can(i, k)
       end do
 
       do kc = 1, nkc       ! from top to bottom of canopy layers
          massair_can(i, km+kc) = massair(i, km)
-
-!         print*,'NO-CANOPY: massair ', i,km+kc, &
-!                 massair_can(i, km+kc)
-
       end do ! kc = 1, nkc
 !!!!! Non-Canopy columns !!!!!
 
@@ -302,9 +305,6 @@
          ! Paul's massaircan is our massair_can
          massair_can(i, k) = dens_can3(k) * GAREA (i) * &
                               (zmom_can(i, k) - zmom_can(i, k + 1))
-
-!         print*,'CANOPY: massair ', i,k, &
-!                 massair_can(i, k)
       end do
 
       do k = 1, km       ! from bottom to top
@@ -452,12 +452,6 @@
 
             ! Paul's tracers_can is our conc_can3 array
             conc_can3 (kc) = vmr_canopy(k)    ! kg kg-1
-! 1 65 1.533844653065992E-006
-! 2 66 2.708248508836621E-006
-! 3 67 3.587152542863898E-006 (surface)
-!            print*, 'CANOPY_TRANSFER C2R (1): ', i,S, kcan3(i, kc), kc, &
-!              zmom_can(i, k)
-!              vmr_canopy (k)
          end do
 
 !  (1) We start off by converting these mass mixing ratio [kg kg-1] to mass in [ug]:
@@ -479,12 +473,6 @@
 
 ! ...fetch gas mass mix. ratios [kg kg-1] and convert to [ug kg-1]
             mmr_canopy(kc) = REVERSE_CONV * conc_can3(k)  ! ug kg-1
-
-! Print
-! 1 65  1.533844653065992E-006
-! 2 66  2.708248508836621E-006
-! 3 67  3.587152542863898E-006 (surface)
-!           print*, 'CANOPY_TRANSFER C2R (2): ', i,S, k, kc, conc_can3(k), mmr_canopy(kc)
          end do
 
 ! (2) Array "mass_canopy" now holds the mass of the tracer in each of the combined levels.
@@ -504,27 +492,11 @@
             end do
          end do
 
-! Print
-         IF(.FALSE.) THEN ! print
-         IF ( KOUNT < 3 )  THEN
-            do k = 1, km
-               if (k > 62) &
-                 print*,'CANOPY_TRANS C2R: S ', S, k, &
-                 mass_resolved(k), mass_canopy(k),   &
-              massair(i, k), massair_can(i, k)
-            end do
-            print*,'CANOPY_TRANS C2R: S ', S, k, &
-            mass_canopy(km+1), mass_canopy(km+2), mass_canopy(nkt), &
-            massair_can(i, km+1), massair_can(i, km+2), massair_can(i, nkt)
-         END IF ! KOUNT
-         END IF ! .FALSE.
-! End Print
-
 !
 !  Check:  total mass in the column should be the same
          if (local_dbg) then
-             call canopy_mass_check(mass_canopy, mass_resolved, i, flag)
-             if (chm_error_l) return
+             call canopy_mass_check(mass_canopy, mass_resolved, i, flag, errmsg, errflg)
+             if (errflg /= 0) return
          end if
 !
 !  (3) The masses in [ug] need to be converted back to [kg kg-1]
@@ -548,12 +520,6 @@
             ! Paul's zt (or ZPLUS) is our zmid
             zmid(II) = ZL(i,k) ! mid layer height [m] !Sep17: = ZM(i,k)
 !!! Heights of the original model layers for the canopy columns are extracted to the zmid array.
-! 1 64 22.3616486708995 22.3616486708995
-! 2 63 70.1488792392710 70.1488792392710
-! ...
-! 63 4 48881.3729854680 48881.3729854680
-! 64 1 56228.5649260134 56228.5649260134
-!            print*,'CANOPY_TRANSFER C2R ZMID: ', i, k, II, ZL(i,k), zmid(II)
          end do
 
 !
@@ -574,8 +540,6 @@
                mmr_diag =  mmr_canopy(nkt) ! ug kg-1
                vmr_resolved      (km + 1)      = FORWARD_CONV * mmr_canopy(nkt) ! kg kg-1
 
-!               print*,'CANOPY_TRANSFER C2R 2M: SPC ', i, S,  k, nkt, &
-!                 vmr_resolved(km + 1), zmid(k), zmid(k-1)
             else
 ! Diagnostic height 2m is always above the lowest model hybrid level ~42m
 ! The lines below never executed
@@ -586,16 +550,7 @@
                           (diag_hgt -    zmid(kk + 1))        ! ug kg-1
                vmr_resolved      (km + 1)      = FORWARD_CONV * mmr_diag       ! kg kg-1
 
-! NB. Diagnostic height 2m is always above the lowest model hybrid level ~42m
-!               print*,'CANOPY_TRANSFER C2R 2M: SPC ', i, S, kk, nkt, &
-!                               vmr_resolved (km + 1), &
-!                  mmr_canopy(kk), mmr_canopy(kk + 1), &
-!                        zmid(kk),       zmid(kk + 1), diag_hgt
             end if
-
-!                 mmr_canopy(kk) -mmr_canopy(kk + 1), &
-!                       zmid(kk) -      zmid(kk + 1), &
-!                       diag_hgt -      zmid(kk + 1), &
 
 ! Flip back resolved layers arrays for gas-phase integration (hrdriver)
          do k = 1, km           ! from top to bottom
@@ -619,7 +574,7 @@
 
    END DO  !I = 1, im !I-index
 
-!  Done transfering from combined canopy + resolved scale back to resolved scale.  :)
+!  Done transferring from combined canopy + resolved scale back to resolved scale.  :)
 !
 ! ========================================================================
    else ! if (flag == 0) then (canopy_transfer == "resolved_to_canopy") then
@@ -687,8 +642,8 @@
 !
 !  Check:  total mass in the column should be the same
             if (local_dbg) then
-               call canopy_mass_check(mass_canopy, mass_resolved, i, flag)
-               if (chm_error_l) return
+               call canopy_mass_check(mass_canopy, mass_resolved, i, flag, errmsg, errflg)
+               if (errflg /= 0) return
             end if
 !
             do k = 1, nkt
@@ -701,24 +656,6 @@
                if(S == 11) mmr_o3_can(i,k) = frctr2c(k, 2, i)
             end do
 
-! Print
-         IF(.FALSE.) THEN ! Print
-         IF ( KOUNT < 3 )  THEN
-            do k = 1, km
-               if (k > 62) &
-               print*,'CANOPY_TRANSFER R2C: SPC ', S, k, &
-                 mass_resolved(k),    mass_canopy(k),    &
-                    massair(i, k), massair_can(i, k),    &
-                 frctr2c(k, 1, i),  frctr2c(k, 2, i)
-            end do
-            print*,'CANOPY_TRANSFER R2C: SPC ', S, k, &
-              mass_canopy(km+1),    mass_canopy(km+2),   mass_canopy(nkt), &
-           massair_can(i, km+1), massair_can(i, km+2),massair_can(i, nkt), &
-                  frctr2c(km+1, 1, i),  frctr2c(km+2, 1, i), frctr2c(nkt, 1, i), &
-                  frctr2c(km+1, 2, i),  frctr2c(km+2, 2, i), frctr2c(nkt, 2, i)
-         END IF ! KOUNT
-         END IF ! .FALSE.
-! End Print
 
 !
 !  (3) Replace the original model layer values with the corresponding canopy layer values, when
@@ -772,10 +709,6 @@
 
       end do !species index loop S (formerly isp)
 
-! Print
-!     print*, 'RESOLVED_TO_CANOPY: 1HY 1-2-3CY = ', Q1_MOD(i,1, 4), & ! O3 = 4
-!       Q1_CAN(i,1, 4), Q1_CAN(i,2, 4), Q1_CAN(i,3, 4)
-
 ! Print up to KOUNT number of canopy columns
       KOUNT = KOUNT + 1
 
@@ -790,10 +723,12 @@
 
    contains
 
-   subroutine canopy_mass_check(mass_canopy, mass_model, i, flag)
+   subroutine canopy_mass_check(mass_canopy, mass_model, i, flag, errmsg, errflg)
       implicit none
       integer(kind=4),   intent(in) :: flag, i
       real(kind=kind_phys),      intent(in) :: mass_canopy(nkt), mass_model(km)
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 
       character(len=18) :: mode_transfer
       real(kind=kind_phys) :: masstotcan, masstotres, massrat
@@ -817,22 +752,10 @@
       if (masstotres > 0.0) then
          massrat = masstotcan / masstotres
          if (massrat > 1.001 .or. massrat < 0.999) then
-            write(*, *) 'Conversion of mass in ccpp_canopy_transfer not conserved'
-            write(*, *) 'during ', mode_transfer, 'evaluation.  Stopping '
-            write(*, *) 'code with masstotcan = ',masstotcan,' and masstotres = ', &
-                              masstotres
-            write(*, *) 'Values of mass_canopy: ',(mass_canopy(k), k=1, nkt)
-            write(*, *) 'Values of mass_resolved: ',(mass_model(k), k=1, km)
-            do k = 1, nkt
-               write(*, *) 'canopy layer ',k,'has ',nfrct(k, i),' contributions'
-               do kk = 1, nfrct(k, i)
-                  write(*, *) 'Resolved # ',ifrct(k,kk,i),' with mass: ',mass_model(ifrct(k,kk,i)),&
-                             ' contributes ',frctr2c(k,kk,i),' to canopy layer ',k,&
-                             ' with mass_canopy ',mass_canopy(k)
-               end do
-            end do
-
-            chm_error_l = .true.
+            write(errmsg,fmt='(*(a,f10.4,a,f10.4))') 'Conversion of mass in ccpp_canopy_transfer not conserved ' // &
+                              'during ' // mode_transfer // ' evaluation. masstotcan = ', masstotcan, &
+                              ' and masstotres = ', masstotres
+            errflg = 1
             return
          end if
       end if
@@ -851,26 +774,21 @@
 
       do k = km , 1, -1
          if (sum2can(k) < 0.999 .or. sum2can(k) > 1.001) then
-            write(*, *) 'layer mismatch in canopy level setup in resolved to canopy indexing'
-            write(*, 20) 'sum of non-zero contributions from column ',i, &
-               ' layer ',k,' is ',sum2can(k),' (should be unity).'
-            chm_error_l = .true.
+            write(errmsg,fmt='(*(a,i0,a,i0,a,f10.4))') 'layer mismatch in canopy level setup in resolved to canopy indexing: ' // &
+               'column ', i, ' layer ', k, ' sum=', sum2can(k)
+            errflg = 1
             return
          end if
       end do
       do k = nkt, 1, -1
          if (sum2res(k) < 0.999 .or. sum2res(k) > 1.001) then
-            write(*, *) 'layer mismatch in canopy level setup in canopy to resolved indexing'
-            write(*, 20) 'sum of non-zero contributions from column ',i, &
-               ' layer ',k,' is ',sum2res(k),' (should be unity).'
-            write(*, *) 'k nfrct(k i) frctc2r'
-            write(*, *) k, nfrct(k,i),(frctc2r(k,kk,i), kk = 1,nfrct(k,i))
-            chm_error_l = .true.
+            write(errmsg,fmt='(*(a,i0,a,i0,a,f10.4))') 'layer mismatch in canopy level setup in canopy to resolved indexing: ' // &
+               'column ', i, ' layer ', k, ' sum=', sum2res(k)
+            errflg = 1
             return
          end if
       end do
 
- 20   format(a42, i6, a7, i3, a5, 1pe10.3, a18)
 !
    return
    end subroutine canopy_mass_check
