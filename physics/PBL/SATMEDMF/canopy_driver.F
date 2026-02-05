@@ -434,10 +434,6 @@
      &                   t2  (im,km), 
      &                   u2  (im,km), v2(im,km), ws2(im,km),
      &                   rho2(im,km), duv(im,km)
-      real(kind=kind_phys) :: wind_dir_to_degrees,  
-     &                   wind_dir_from_degrees, wind_dir_from_rad, 
-     &                   wind_dir_cardinal, wind_dir_cardinal_rad
-
       integer
      &         kcan1, kc_can,
      &         kc, nkt1                ,
@@ -741,15 +737,7 @@
              ws1(i,k) = sqrt(u1(i,k)**2+v1(i,k)**2)
 
              wind_dir_to_rad(i,k) =
-!    &                       atan2(v1(i,k)/ws1(i,k),u1(i,k)/ws1(i,k))   ! to radians
      &                       atan2(u1(i,k)/ws1(i,k),v1(i,k)/ws1(i,k))   ! to radians
-
-             wind_dir_to_degrees = wind_dir_to_rad(i,k) * 180./pi       ! to degrees
-             wind_dir_from_degrees = wind_dir_to_degrees + 180.         ! from degrees
-             wind_dir_cardinal = 90. - wind_dir_from_degrees            ! cardinal degrees
-
-             wind_dir_from_rad = wind_dir_from_degrees * pi/180.        ! from radians
-             wind_dir_cardinal_rad = wind_dir_cardinal * pi/180.        ! cardinal radians
            enddo
          enddo
 
