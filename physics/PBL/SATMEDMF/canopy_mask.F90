@@ -4,18 +4,12 @@
 
    implicit none
 
-! Vertical arrays
-   integer :: nkt
-   integer, parameter :: nkc = 3 ! # of canopy layers for shading effects
-
-   public :: nkt  ! # of resolved model layers plus canopy layers
-
    public :: canopy_mask_init, canopy_mask_run
 
    contains
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-   subroutine canopy_mask_init(im, ix, km, &! nkt,    &
+   subroutine canopy_mask_init(im, ix, km, nkc, nkt, &
            claie, cfch, cfrt, cclu, cpopu, &  !in:
            FRT_mask,                       &  ! out
            errmsg,errflg)
@@ -24,6 +18,8 @@
 
 ! Horizontal arrays
    integer  :: im, ix, km  ! horizontal & vertical domain specifications
+   integer, intent(in)  :: nkc
+   integer, intent(out) :: nkt
 
    real(kind=kind_phys) :: claie(im), cfch(im), cfrt(im), &
                             cclu(im),cpopu(im)
@@ -51,7 +47,7 @@
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-   subroutine canopy_mask_run (im, ix, km, &  !in:
+   subroutine canopy_mask_run (im, ix, km, nkc, nkt, &  !in:
            claie, cfch, cfrt, cclu, cpopu, &  !in:
            FRT_mask,                       &  !out:
            errmsg,errflg)
@@ -62,6 +58,7 @@
 
 ! Horizontal arrays
    integer  :: im, ix, km  ! horizontal & vertical domain specifications
+   integer, intent(in) :: nkc, nkt
 
    real(kind=kind_phys) :: claie(im), cfch(im),  cfrt(im), &
                                       cclu(im), cpopu(im)

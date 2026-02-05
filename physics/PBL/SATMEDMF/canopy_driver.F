@@ -62,8 +62,8 @@
 !> \section arg_table_canopy_driver_init Argument Table
 !! \htmlinclude canopy_driver_init.html
 !!
-      subroutine canopy_driver_init (satmedmf,                          &
-     &                               isatmedmf,isatmedmf_vdifq,         &
+      subroutine canopy_driver_init (satmedmf,
+     &                               isatmedmf,isatmedmf_vdifq,
      &                               errmsg,errflg)
 
       logical, intent(in   ) :: satmedmf
@@ -106,13 +106,13 @@
 !! -# A mass-flux approach is also used to represent the stratocumulus-top-induced turbulence
 !! (mfscuq.f).
 !! \section detail_canopy GFS canopy_driver Detailed Algorithm 
-      subroutine canopy_driver_run(im,km,ntrac,ntcw,ntrw,               &
-     &     ntiw,ntke,ntchm,ntchs,ntche, ntoz,nto3,                      &
-     &     ndtend,                                                      & !add ndtend
-     &     con_rocp,                                                    & 
-     &     grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                     &
+      subroutine canopy_driver_run(im,km,ntrac,ntcw,ntrw,
+     &     ntiw,ntke,ntchm,ntchs,ntche, ntoz,nto3,
+     &     ndtend,                                                        !add ndtend
+     &     con_rocp,
+     &     grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,
 !The following three variables are for SA-3D-TKE
-     &     def_1,def_2,def_3,sa3dtke,dku3d_h,dku3d_e,                   &
+     &     def_1,def_2,def_3,sa3dtke,dku3d_h,dku3d_e,
 !  dv=GFS_Interstitial(cdata%thrd_no)%dvdt
 !  du=GFS_Interstitial(cdata%thrd_no)%dudt
 ! tdt=GFS_Interstitial(cdata%thrd_no)%dtdt
@@ -122,25 +122,25 @@
 !  v1=GFS_Statein%vgrs
 !  t1=GFS_Statein%tgrs
 !  q1=GFS_Interstitial(cdata%thrd_no)%vdftra
-     &     dv,du,tdt,rtg,                                               & ! inout: dv,du,tdt,rtg
+     &     dv,du,tdt,rtg,                                                 ! inout: dv,du,tdt,rtg
 !  dv=GFS_Interstitial(cdata%thrd_no)%dvdt_can
 !  du=GFS_Interstitial(cdata%thrd_no)%dudt_can
 ! tdt=GFS_Interstitial(cdata%thrd_no)%dtdt_can
 ! rtg=GFS_Interstitial(cdata%thrd_no)%dvdftra_can
-     &     u1,v1,t1,q1,usfco,vsfco,use_oceanuv,                         & ! in
+     &     u1,v1,t1,q1,usfco,vsfco,use_oceanuv,                           ! in
 ! swh=GFS_Radtend%htrsw
 ! hlw=GFS_Radtend%htrlw
-     &     swh,hlw,xmu,garea,zvfun,sigmaf,                              & ! in
+     &     swh,hlw,xmu,garea,zvfun,sigmaf,                                ! in
 ! u10m=GFS_Intdiag%u10m
 ! v10m=GFS_Intdiag%v10m
 ! t2m=GFS_Sfcprop%t2m
 ! q2m=GFS_Sfcprop%q2m
 ! fm=GFS_Sfcprop%ffmm
 ! fh=GFS_Sfcprop%ffhh
-     &     psk,rbsoil,zorl,u10m,v10m,t2m, q2m,fm,fh,                    &
+     &     psk,rbsoil,zorl,u10m,v10m,t2m, q2m,fm,fh,
 !  kpbl=GFS_Interstitial(cdata%thrd_no)%kpbl 2D
      &     tsea,heat,evap,stress,spd1,
-     &     kpbl,                                                        & ! inout: kpbl
+     &     kpbl,                                                          ! inout: kpbl
 !  pgr=GFS_Statein%pgr ???
      &     pgr, 
 !  del=GFS_Interstitial(cdata%thrd_no)%del
@@ -149,7 +149,7 @@
 ! prslk=GFS_Statein%prslk
 ! phii=GFS_Statein%phii
 ! phil=GFS_Statein%phil
-     &     prsi,del,prsl,prslk,phii,phil,delt,tte_edmf,                 &
+     &     prsi,del,prsl,prslk,phii,phil,delt,tte_edmf,
 !dusfc=GFS_Interstitial(cdata%thrd_no)%dusfc1
 !dvsfc=GFS_Interstitial(cdata%thrd_no)%dvsfc1
 !dtsfc=GFS_Interstitial(cdata%thrd_no)%dtsfc1
@@ -158,18 +158,18 @@
 !  dkt=GFS_Intdiag%dkt
 !  dku=GFS_Intdiag%dku
 ! tkeh=GFS_Interstitial(cdata%thrd_no)%tkeh
-     &     dspheat,                                                     & ! in
-     &     dusfc,dvsfc,dtsfc,dqsfc,hpbl,                                & ! in: dusfc,dvsfc,dtsfc,dqsfc,hpbl
-     &     dkt,dku,tkeh,                                                & ! inout: dkt,dku, tkeh
-     &     dkt_can,dku_can,                                             & ! out
+     &     dspheat,                                                       ! in
+     &     dusfc,dvsfc,dtsfc,dqsfc,hpbl,                                  ! in: dusfc,dvsfc,dtsfc,dqsfc,hpbl
+     &     dkt,dku,tkeh,                                                  ! inout: dkt,dku, tkeh
+     &     dkt_can,dku_can,                                               ! out
 !kinver=GFS_Interstitial 2d 
-     &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          & ! in 
-     &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            & ! in
+     &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,            ! in
+     &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                              ! in
 !IVAI: canopy inputs from AQM                      
-     &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           & ! in
-     &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       & ! inout: dtend (.ldiag3d.)
-     &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
-     &     errmsg,errflg,                                               &
+     &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,             ! in
+     &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,         ! inout: dtend (.ldiag3d.)
+     &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,
+     &     errmsg,errflg,
 !IVAI: aux arrays
      &     naux2d,naux3d,aux2d,aux3d)
 
@@ -180,9 +180,9 @@
       implicit none
 !
 !----------------------------------------------------------------------
-      integer, intent(in)  :: im, km,                                   &
-     &                        ntrac, ntcw, ntrw, ntiw, ntke, ntqv,      &
-     &                        ntchm,ntchs,ntche, ntoz,nto3, ndtend      & !IVAI 
+      integer, intent(in)  :: im, km,
+     &                        ntrac, ntcw, ntrw, ntiw, ntke, ntqv,
+     &                        ntchm,ntchs,ntche, ntoz,nto3, ndtend        !IVAI
       integer, intent(in)  :: sfc_rlm
       integer, intent(in)  :: tc_pbl
       integer, intent(in)  :: use_lpt
@@ -190,8 +190,8 @@
       integer, intent(inout)  :: kpbl(:)
       logical, intent(in)  :: gen_tend,ldiag3d
 !
-      real(kind=kind_phys), intent(in) :: grav,pi,rd,cp,rv,hvap,hfus,fv,&
-     &                                    eps,epsm1,                    &
+      real(kind=kind_phys), intent(in) :: grav,pi,rd,cp,rv,hvap,hfus,fv,
+     &                                    eps,epsm1,
      &                                    con_rocp                       !IVAI
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
@@ -202,49 +202,49 @@
 !IVAI: canopy inputs
       real(kind=kind_phys), optional, intent(in)  ::
 ! 2D
-     &       claie(:) , cfch(:),                                        &
+     &       claie(:) , cfch(:),
      &       cfrt(:)  , cclu(:), cpopu(:)
 
       !----------------------------------------------
-      real(kind=kind_phys), intent(inout) ::                            & 
-     &                      dv(:,:),     du(:,:),                       &
+      real(kind=kind_phys), intent(inout) ::
+     &                      dv(:,:),     du(:,:),
      &                     tdt(:,:),   tkeh(:,:),
      &                     rtg(:,:,:)
-      real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(:,:),     v1(:,:),                        &
-     &                     usfco(:),    vsfco(:),                       &
-     &                     t1(:,:),     q1(:,:,:),                      &
+      real(kind=kind_phys), intent(in) ::
+     &                     u1(:,:),     v1(:,:),
+     &                     usfco(:),    vsfco(:),
+     &                     t1(:,:),     q1(:,:,:),
 !The following two variables are for SA-3D-TKE
-     &                     def_1(:,:),  def_2(:,:), def_3(:,:),         &
-     &                     swh(:,:),    hlw(:,:),                       &
-     &                     xmu(:),       garea(:),                      &
-     &                     zvfun(:),     sigmaf(:),                     &
-     &                     psk(:),       rbsoil(:),                     &
-     &                     zorl(:),      tsea(:),                       &
-     &                     u10m(:),      v10m(:),                       &
-     &                     t2m(:),       q2m(:),                        & !IVAI
-     &                     fm(:),        fh(:),                         &
-     &                     evap(:),      heat(:),                       &
-     &                     stress(:),    spd1(:),                       &
-     &                     pgr(:),                                      & !IVAI: pgr=surface air pressure
-     &                     prsi(:,:), del(:,:),                         &
-     &                     prsl(:,:),   prslk(:,:),                     &
+     &                     def_1(:,:),  def_2(:,:), def_3(:,:),
+     &                     swh(:,:),    hlw(:,:),
+     &                     xmu(:),       garea(:),
+     &                     zvfun(:),     sigmaf(:),
+     &                     psk(:),       rbsoil(:),
+     &                     zorl(:),      tsea(:),
+     &                     u10m(:),      v10m(:),
+     &                     t2m(:),       q2m(:),                          !IVAI
+     &                     fm(:),        fh(:),
+     &                     evap(:),      heat(:),
+     &                     stress(:),    spd1(:),
+     &                     pgr(:),                                        !IVAI: pgr=surface air pressure
+     &                     prsi(:,:), del(:,:),
+     &                     prsl(:,:),   prslk(:,:),
      &                     phii(:,:), phil(:,:)
 
-      real(kind=kind_phys), intent(inout), dimension(:,:,:), optional ::&
+      real(kind=kind_phys), intent(inout), dimension(:,:,:), optional ::
      &     dtend
 
-      integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
+      integer, intent(in) :: dtidx(:,:), index_of_temperature,
      &       index_of_x_wind, index_of_y_wind, index_of_process_pbl
       logical, intent(in) :: use_oceanuv
-      real(kind=kind_phys), intent(in) ::                               &
-     &                     dusfc(:),     dvsfc(:),                      &
-     &                     dtsfc(:),     dqsfc(:)                       &
+      real(kind=kind_phys), intent(in) ::
+     &                     dusfc(:),     dvsfc(:),
+     &                     dtsfc(:),     dqsfc(:)
       real(kind=kind_phys), intent(inout) ::
      &                     hpbl(:) ! use resolved hpbl in non-canopy columns
-      real(kind=kind_phys), intent(inout) ::                            &
+      real(kind=kind_phys), intent(inout) ::
      &                     dkt(:,:), dku(:,:)
-      real(kind=kind_phys), intent(out) ::                              &
+      real(kind=kind_phys), intent(out) ::
      &                     dkt_can(:,:), dku_can(:,:)
 
       logical, intent(in)  :: sa3dtke !flag for SA-3D-TKE scheme
@@ -410,8 +410,8 @@
 !PCC_CANOPY------------------------------------
 
       real(kind=kind_phys) ::
-     &                      dv_can(im,km),  du_can(im,km),              & ! size (km)
-     &                     duv_can(im,km),                              & ! size (km)
+     &                      dv_can(im,km),  du_can(im,km),                ! size (km)
+     &                     duv_can(im,km),                                ! size (km)
      &                     tdt_can(im,km), rtg_can(im,km,ntrac)           ! size (km)
 
       real(kind=kind_phys) :: 
@@ -422,8 +422,8 @@
      &        aux3d_02(im,km), aux3d_04(im,km), aux3d_06(im,km)
 
 ! Out: list sat_canopy call
-      real(kind=kind_phys) :: dusfc_can(im),  dvsfc_can(im),            &
-     &                        dtsfc_can(im),  dqsfc_can(im),            &
+      real(kind=kind_phys) :: dusfc_can(im),  dvsfc_can(im),
+     &                        dtsfc_can(im),  dqsfc_can(im),
      &                         hpbl_can(im), 
      &       aux2d_02(im),     aux2d_04(im), aux2d_06(im)
 
@@ -434,6 +434,8 @@
      &                   t2  (im,km), 
      &                   u2  (im,km), v2(im,km), ws2(im,km),
      &                   rho2(im,km), duv(im,km)
+      integer, parameter :: nkc = 3
+      integer :: nkt
       integer
      &         kcan1, kc_can,
      &         kc, nkt1                ,
@@ -584,6 +586,7 @@
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+      nkt = km + nkc
 
 !> ## Compute preliminary variables from input arguments
       dt2  = delt
@@ -661,19 +664,18 @@
 !       q2m_vmr(:) = q2m(:)
 
 
-        CALL canopy_mask_init( im, im, km, ! nkt, 
+        CALL canopy_mask_init( im, im, km, nkc, nkt,
      &     claie, cfch, cfrt, cclu, cpopu, !in:
      &     FRT_MASK,                      !out: nkt defined here!
      &     errmsg, errflg)
 
         if (errflg /= 0) return
 
-!      nkt=km+nkc defined in "canopy_mask_init"
       nkt1 = nkt - 1
 
         CALL canopy_levs_init( im, im, km, nkc, nkt,
      &       ntrac-1, ntqv, ntke,                 ! in
-     &       errmsg, errflg,                      &
+     &       errmsg, errflg,
      &       zi, zl, zm, !in: 3D
      &       prsl, prsi, !in: 3D
      &       dv, du, tdt, rtg,                    ! in: 3D
@@ -698,7 +700,7 @@
 !      Q1_CAN3(:,1:3,NTRAC-1) <= Q1(:,1,NTRAC-1) ! ALL CANOPY & NON-CANOPY COLUMNS !
 ! ===============
 
-        CALL canopy_transfer_init(im, im, km,        !in
+        CALL canopy_transfer_init(im, im, km, nkc, nkt, !in
      &        massair_can3, massair,                  !out
      &        mmr_o3_can3,                            !inout
      &        nfrct, ifrct,                          !out
@@ -718,7 +720,7 @@
 
 ! NB. Call canopy routines after eddy diffusivities are calculated!!!
 
-        CALL canopy_mask_run( im, im, km,           !in
+        CALL canopy_mask_run( im, im, km, nkc, nkt, !in
      &     claie, cfch, cfrt, cclu, cpopu,           !in
      &     FRT_MASK,                                !out
      &     errmsg, errflg)
@@ -972,7 +974,7 @@
 ! flag = 0 "resolved_to_canopy"
 !===============================================================================
 
-         CALL canopy_transfer_run(im, im, km,        !in
+         CALL canopy_transfer_run(im, im, km, nkc, nkt, !in
      &        ntrac1, ntoz,                          !in
      &        garea,                                 !in
      &        zi, zl, zm,                            !in
@@ -1110,33 +1112,33 @@
 !
 !>  - Call satmedmfvdifq_can(), which is ...
 !!    to take into account ...
-         CALL satmedmfvdifq_can(im,km,ntrac,ntcw,ntrw,                  &
-     &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,           &
+         CALL satmedmfvdifq_can(im,km,ntrac,ntcw,ntrw,
+     &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,
 !The following three variables are for SA-3D-TKE
-     &     def_1,def_2,def_3,sa3dtke,dum3d_h,dum3d_e,                   &
-     &     dv_can,du_can,tdt_can,rtg_can,                               & ! InOut
-     &     u1_can,v1_can,t1_can, q1_can,                                & ! In: canopy inputs
-     &     usfco,vsfco,use_oceanuv,                                     &
-     &     swh_can,hlw_can,                                             & ! In: canopy inputs
-     &     xmu,garea,zvfun,sigmaf,                                      &
-     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
+     &     def_1,def_2,def_3,sa3dtke,dum3d_h,dum3d_e,
+     &     dv_can,du_can,tdt_can,rtg_can,                                 ! InOut
+     &     u1_can,v1_can,t1_can, q1_can,                                  ! In: canopy inputs
+     &     usfco,vsfco,use_oceanuv,
+     &     swh_can,hlw_can,                                               ! In: canopy inputs
+     &     xmu,garea,zvfun,sigmaf,
+     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,
      &     tsea,heat,evap,stress,spd1,
-     &     kpbl_can,                                                    & ! Out
-     &     prsi_can,del_can,prsl_can,prslk_can,phii_can,phil_can,       & ! In: canopy inputs
-     &     delt,tte_edmf,                                               &
+     &     kpbl_can,                                                      ! Out
+     &     prsi_can,del_can,prsl_can,prslk_can,phii_can,phil_can,         ! In: canopy inputs
+     &     delt,tte_edmf,
      &     dspheat,
-     &     dusfc_can,dvsfc_can,dtsfc_can,dqsfc_can,hpbl_can,            & ! Out
-     &     dkt,     dku,     tkeh_can,                                  & ! Out/Out:tkeh_can
-     &     dkt_can,dku_can,                                             & ! In: canopy inputs
-     &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
-     &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            &
+     &     dusfc_can,dvsfc_can,dtsfc_can,dqsfc_can,hpbl_can,              ! Out
+     &     dkt,     dku,     tkeh_can,                                    ! Out/Out:tkeh_can
+     &     dkt_can,dku_can,                                               ! In: canopy inputs
+     &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,
+     &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,
 !IVAI: canopy inputs from AQM
-     &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           &
+     &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,
 !IVAI
      &     ntqv,
-     &     dtend_can,                                                   & !inout: dtend (.ldiag3d.)
-     &     dtidx,index_of_temperature,index_of_x_wind,                  &
-     &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
+     &     dtend_can,                                                     !inout: dtend (.ldiag3d.)
+     &     dtidx,index_of_temperature,index_of_x_wind,
+     &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,
      &     errmsg,errflg, 
 !IVAI: aux arrays
      &     naux2d,naux3d,aux2d,aux3d)
@@ -1416,7 +1418,7 @@ c
 
 !!!??????split "canopy_to_resolved" and "resolved_to_canopy" as separate routines !!!!!!!!!
 
-        CALL canopy_transfer_run(im, im, km,         !in
+        CALL canopy_transfer_run(im, im, km, nkc, nkt, !in
      &        ntrac1, ntoz,                          !in
      &        garea,                                 !in
      &        zi, zl, zm,                            !in
@@ -1559,41 +1561,41 @@ c
      &                ZI05 <= zi_can3(i,kc+1) ) THEN
 
                    kc_can   = kc
-                   FZI05    = 1./max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) * &
+                   FZI05    = 1./max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) *
      &                           (ZI05             - zi_can3 (i,kc))
 
-                   TTCORR   = (t2_can3 (i,kc+1) - t2_can3 (i,kc))/ &
-     &                        max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) * &
+                   TTCORR   = (t2_can3 (i,kc+1) - t2_can3 (i,kc))/
+     &                        max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) *
      &                        (ZI05             - zi_can3 (i,kc))
 
 ! U-Wind/V-Wind after diffusion on canopy layers
-                   UUCAN  =  u2_can3 (i,kc  ) + &
-     &                      (u2_can3 (i,kc+1) - u2_can3 (i,kc))/ &
-     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) * &
+                   UUCAN  =  u2_can3 (i,kc  ) +
+     &                      (u2_can3 (i,kc+1) - u2_can3 (i,kc))/
+     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) *
      &                      (ZI05             - zi_can3 (i,kc))
 
-                   VVCAN  =  v2_can3 (i,kc  ) + &
-     &                      (v2_can3 (i,kc+1) - v2_can3 (i,kc))/ &
-     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) * &
+                   VVCAN  =  v2_can3 (i,kc  ) +
+     &                      (v2_can3 (i,kc+1) - v2_can3 (i,kc))/
+     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) *
      &                      (ZI05             - zi_can3 (i,kc))
 ! Temperature after diffusion on canopy layers
-                   TTCAN  =  t2_can3 (i,kc  ) + &
-     &                      (t2_can3 (i,kc+1) - t2_can3 (i,kc))/ &
-     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) * &
+                   TTCAN  =  t2_can3 (i,kc  ) +
+     &                      (t2_can3 (i,kc+1) - t2_can3 (i,kc))/
+     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) *
      &                      (ZI05             - zi_can3 (i,kc))
 
 
 ! TKE after diffusion on canopy layers
-                   TKECAN =  q2_can3 (i,kc, ntke) + &
-     &                      (q2_can3 (i,kc+1, ntke) - &
-     &                       q2_can3 (i,kc  , ntke))/ &
-     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) * &
+                   TKECAN =  q2_can3 (i,kc, ntke) +
+     &                      (q2_can3 (i,kc+1, ntke) -
+     &                       q2_can3 (i,kc  , ntke))/
+     &                      max(zi_can3 (i,kc+1) - zi_can3 (i,kc), epsilon) *
      &                      (ZI05             - zi_can3 (i,kc))
 
 ! TKE half layers
-                   TKEHCAN =  tkeh_can (i,kc  ) + &
-     &                      (tkeh_can (i,kc+1) - tkeh_can (i,kc))/ &
-     &                      max(zi_can3(i,kc+1) - zi_can3(i,kc), epsilon) * &
+                   TKEHCAN =  tkeh_can (i,kc  ) +
+     &                      (tkeh_can (i,kc+1) - tkeh_can (i,kc))/
+     &                      max(zi_can3(i,kc+1) - zi_can3(i,kc), epsilon) *
      &                      (ZI05              -   zi_can3(i,kc))
 
                  END IF !  "zi_can3(kc) < ZI05 <= zi_can3(kc+1)"
