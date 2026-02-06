@@ -1942,7 +1942,7 @@ module module_mp_thompson
                           tprr_rcs1, tprv_rev1, tten1, qvten1,       &
                           qrten1, qsten1, qgten1, qiten1, niten1,    &
                           nrten1, ncten1, qcten1
-      ! TC adjustment
+      ! Fall speed adjustment
       real(wp), intent(in), optional :: fs_fac_rain, fs_fac_snow
 
 #if ( WRF_CHEM == 1 )
