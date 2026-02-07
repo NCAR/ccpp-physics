@@ -18,8 +18,7 @@
 
 ! Horizontal arrays
    integer  :: im, ix, km  ! horizontal & vertical domain specifications
-   integer, intent(in)  :: nkc
-   integer, intent(out) :: nkt
+   integer, intent(in)  :: nkc, nkt
 
    real(kind=kind_phys) :: claie(im), cfch(im), cfrt(im), &
                             cclu(im),cpopu(im)
@@ -39,8 +38,6 @@
 ! Initializations
 
    FRT_mask(:)=0.0
-
-   nkt= km + nkc   ! # of resolved model layers plus canopy layers
 
    return
    end subroutine canopy_mask_init

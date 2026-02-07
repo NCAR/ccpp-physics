@@ -3,9 +3,8 @@
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-   subroutine canopy_levs_init(im, ix, km, nkc, nkt, &
+   subroutine canopy_levs_init(im, ix, km, nkc, nkt,   &
               ntrac1,  ntqv, ntke,                 &
-              errmsg,  errflg,                     &
               zi, zl, zm,                          & ! in: 3D meters
               prsl, prsi,                          & ! in: 3D (Pa)
               dv, du, tdt, rtg,                    & ! in: 3D
@@ -20,11 +19,12 @@
               T1_CAN, QV_CAN, DENS_CAN,            & !out
               WS_CAN, DKT_CAN, DKU_CAN,            & !out
               Q1_CAN, Q1_2M,                       & !out
-              DTEND_CAN )
+              DTEND_CAN,                           &
+              errmsg,errflg )                        !out
 
    use machine , only : kind_phys
-! Allocated in mfpbltq_mod:  q1(ix,km,ntrac1)  t1(ix,km) u1(ix,km), v1(ix,km)
    use mfpbltq_mod
+   use canopy_mask_mod
 
    IMPLICIT NONE
 
@@ -41,8 +41,7 @@
    real(kind=kind_phys), intent(in) :: dtend(:,:,:)
 
 ! ** Q1 is concentration field (including gas and aerosol variables) mass mixing ratio kg kg-1
-!   NB. mfpbltq_mod: q1(ix,km,ntrac1)
-   real(kind=kind_phys), intent(in) :: Q1(:,:,:)  ! consider only gas-phase species (NO aerosol species)
+   real(kind=kind_phys), intent(in) :: Q1(:,:,:)
 
    real(kind=kind_phys), intent(out) ::  &
 ! tendencies
@@ -199,7 +198,6 @@
 
    subroutine canopy_levs_run(im, ix, km, nkc, nkt, &
               ntrac1, ntqv, ntke,                   & ! in
-              errmsg, errflg,                       & ! out
               RDGAS, PI,                            & ! in ?? units ??
               zi, zl, zm,                           & ! in: 1D    zm(i,k) = zi(i,k+1)
               prsl, prsi, psfc,                     & ! in: 3D 3D 2D  (Pa)
@@ -217,16 +215,15 @@
               sigmom_can, sigmid_can,               & ! out 3D sigmom_can(:, nkt)  sigmid_can(im, nkt)
               ZH_CAN, ZF_CAN,                       & ! out 3D
               PRSL_CAN, PRSI_CAN,                   & ! out 3D prsi_can (:, nkt+1)
-              dv_can, du_can, tdt_can, rtg_can,    & ! out: 3D
+              dv_can, du_can, tdt_can, rtg_can,     & ! out: 3D
               T1_CAN,  QV_CAN, DENS_CAN,            & ! out 3D
               WS_CAN, DKT_CAN,  DKU_CAN,            & ! out 3D
-              Q1_CAN, Q1_2M)            !out
+              Q1_CAN, Q1_2M,                        &  !out
+              errmsg,errflg)
 
    use machine , only : kind_phys
-! Allocated in mfpbltq_mod:  q1(ix,km,ntrac1)  t1(ix,km) u1(ix,km), v1(ix,km)
    use mfpbltq_mod
-!   use physcons, grav => con_g, cp => con_cp, &
-!                   rd => con_rd
+   use canopy_mask_mod
 
    IMPLICIT NONE
 
@@ -248,16 +245,12 @@
                                         t2m(:),   q2m(:),   fm(:),   fh(:),  &
                                      rbsoil(:)
 
-! Allocated in mfpbltq_mod:  q1(ix,km,ntrac1)  t1(ix,km) u1(ix,km), v1(ix,km)
 !     ** Q1 is concentration field (including gas and aerosol variables) kg kg-1
    real(kind=kind_phys), intent(in) :: u1(:,:), v1(:,:), t1(:,:), q1(:,:,:)
 
    real(kind=kind_phys), intent(in) :: dens(:,:), dkt(:,:), dku(:,:)
 
    real(kind=kind_phys), intent(in) :: FRT_mask(:)
-
-   character(len=*), intent(out) :: errmsg
-   integer,          intent(out) :: errflg
 
    integer, intent(out) ::          &
                kmod   (:, :)      , &
@@ -289,6 +282,9 @@
              zmid_can3 (:, :)        , & ! dim(nkt)      ! Paul's sigtcan(:,nkt)
              sigmom_can(:, :)        , & ! dim(nkt) ~ prsi(:,km+1)
              sigmid_can(:, :)            ! dim(nkt) ~ prsl(:,km)
+
+   character(len=*), intent(out) :: errmsg
+   integer,          intent(out) :: errflg
 
 !...Local arrays:
 
@@ -353,11 +349,11 @@
 
    logical(kind=4)                         :: local_dbg
 
-   local_dbg = (.false.)
-
 ! Initialize CCPP error handling variables
    errmsg = ''
    errflg = 0
+
+   local_dbg = (.false.)
 
    kmod (:,:) = -999
    kcan3(:,:) = -999
@@ -551,6 +547,8 @@
    ! Continuous forest canopy
    ELSE IF (FRT_mask(i) > 0.) THEN
 
+!      print*, 'CANOPY_LEVS: ZOL ILMO= ', i, zol(i), ilmo(i)
+
       hcan = cfch( i )
 !!! Extract the canopy height (FCH)
 
@@ -564,6 +562,8 @@
 !!! NB. zcan3(1) is hc, top of canopy
 !!!     zcan3(2) is 0.5 * hc
 !!!     zcan3(3) is 0.2 * hc (bottom canopy level)
+
+!        print*,'canopy_levs: ZCAN = ', i, kc, zcan3(kc)
       end do
 
 ! 1 = bottom (1st) model layer
@@ -585,13 +585,10 @@
 ! 65 1.0   (surface) !! Set to 1 here !!
 ! 64  0.997329666888429  (1hy model layer)
 ! 63  0.994572224115356
-! 62  0.987953350646348
-! 61  0.980671961372880
 !  ...
-! 4  2.651067835355327E-003
-! 3  1.751135612532654E-003
 ! 2  9.570774376723687E-004
 ! 1  3.757488135785848E-004 (top model )
+!        print*,'canopy_levs: sigmid2= ', i, II, sigmid2(II)
       end do
       sigmid2(km+1) = 1.0
 
@@ -630,11 +627,12 @@
 !
 ! 65  1.00000000000000  93074.3428508980 mb (km+1) surface bottom model layer interface
 ! 64  0.994671010591796 92578.3506636700 mb
-! 63  0.988632406984791 92016.3116012109
 ! ...
-! 3  1.367636992545316E-003 137.789993286133
 ! 2  6.376847405122714E-004 64.2470016479492
 ! 1  1.985103504149681E-004 20.0000000000000 mb (top model layer)
+!
+!         print*,'canopy_levs: sigmom3= ', i, II, sigmom3(II),prsi3 (II)
+
       end do
 
 !!! Find the resolved model level which lies above the top of the forest canopy,
@@ -651,6 +649,7 @@
          end if
       end do
 ! kcan_top = 62 or 63
+!      print*,'canopy_levs: kcan_top = ', i, kcan_top
 
 ! MV2D_ILMO: Aggregated Inverse of Monin-Obukhov length
 !  Setup of Monin-Obhukov Length similar to plumerise for upper limit:
@@ -782,16 +781,18 @@
       if (local_dbg) then
       do kc = 1, nkc
          if (kcan3(i,kc) < 1) then
-            write(errmsg,fmt='(*(a,i0,a,i0))') 'get_can_levs: kcan undefined: kc=', kc, &
-                                              ' kcan3=', kcan3(i,kc)
+!           write(errmsg,fmt='(*(a,i0,a,i0))') 'canopy_levs: kcan undefined: kc=', kc, &
+!                                             ' kcan3=', kcan3(i,kc)
+            write(errmsg,*) 'canopy_levs: kcan undefined: ', kc, kcan3(i,kc)
             errflg = 1
             return
          end if
       end do
       do k = 1,km
          if (kmod(i,k) < 1) then
-            write(errmsg,fmt='(*(a,i0,a,i0))') 'get_can_levs: kmod undefined: k=', k, &
-                                              ' kmod=', kmod(i,k)
+!           write(errmsg,fmt='(*(a,i0,a,i0))') 'canopy_levs: kmod undefined: k=', k, &
+!                                             ' kmod=', kmod(i,k)
+            write(errmsg,*) 'cannopy_levs: kmod undefined: ',k, kmod(i,k)
             errflg = 1
             return
          end if
@@ -837,6 +838,7 @@
       end do  inner0
 
 ! ka is 63 or 64
+!      print*,'canopy_levs: ka = ', i, ka(i)
 
 ! ka  is the lower-most layer for which the combined layer zmom_can = zmom resolved model layer
       ! Paul's zmom is our zmom
@@ -846,6 +848,7 @@
          zmom_can3(i,k) = (zmid_can3(i,k-1) + zmid_can3(i,k)) * 0.5
 
       end do
+
 !########################################################################
 
 ! create original model arrays of z and sigma-t which include the surface, to
@@ -868,9 +871,12 @@
 ! 1  3.875425449149410E-004 54904.9550581240 m
 ! 2  9.844331193192971E-004 47732.0690652646 m
 ! ...
-! 62  0.985167158577051       125.175103771062 m
 ! 63  0.991717417180879        70.5363577077242
 ! 64  0.997329666888429        22.4844313034714
+!
+!         print*,'canopy_levs: sigmid_can = ', i, kk, sigmid_can(i, kk), &
+!                                                      zmid_can3(i, kk)
+
       end do
       klower_can(:) = -999
       z2(km+1) = 0.0
@@ -880,6 +886,11 @@
       do kc = 1, nkc   ! from top to bottom canopy layers
          do k2 = kcan_top, km+1  ! from resolved model layer above the canopy to top model layer
             if (zcan3(kc) > z2(k2) .and. zcan3(kc) <= z2(k2-1)) then
+
+!               print*, 'canopy_levs: sigmid_can (1) = ', i, k2,         &
+!                sigmid2(k2), sigmid2(k2-1), sigmid2(k2) - sigmid2(k2-1),&
+!                     z2(k2),      z2(k2-1),      z2(k2) -      z2(k2-1),&
+!                  zcan3(kc),                  zcan3(kc) -      z2(k2-1)
 
 ! Interpolate in sigma
                sigmid_can(i, kcan3(i,kc)) = sigmid2(k2-1)  +          &
@@ -893,10 +904,28 @@
 
          end do ! do k2=kcan_top, km+1
 
+!        print*,'canopy_levs: sigmid_can (2) = ', i, kc, kcan3(i,kc),  &
+!                                          sigmid_can(i, kcan3(i,kc)), &
+!                                           zmid_can3(i, kcan3(i,kc))
+!
          if (klower_can(kc) < 1) then
-            write(errmsg,fmt='(*(a,i0,a,i0))') 'get_can_levs:  klower_can is unassigned at i, kc: ', &
-                                              i, kc
+!            write(errmsg,fmt='(*(a,i0,a,i0))') 'canopy_levs:  klower_can is unassigned at i, kc: ', &
+!                                              i, kc
             errflg = 1
+
+            write(errmsg,*) 'canopy_levs:  klower_can is unassigned at i, kc: ', i, kc
+            write(errmsg,*) 'canopy_levs:  zcan3(kc): ',zcan3(kc)
+!
+            do kk = kcan_top, km+1
+               write(errmsg,*) 'canopy_levs: kk z2(kk) which should bracket the above zcan3: ',kk, z2(kk)
+            end do
+            do kk = 1, km+1
+               write(errmsg,*) 'canopy_levs:  kk z2(kk) full set of z2 values: ', kk, z2(kk)
+            end do
+            do kk = 1,nkc
+               write(errmsg,*) 'canopy_levs:  kc zcan3(kc) hcan fr(kc) for full set of zcan3 values: ',kk, zcan3(kk), hcan, can_frac(kk)
+            end do
+
             return
          end if
       end do
@@ -913,9 +942,8 @@
       if ((klower_can(kc) /= klower_can(kc)) .or. &
           (klower_can(kc) <= 0)              .or. &
           (klower_can(kc) > km+ 1) ) then
-         write(errmsg,fmt='(*(a,i0))') 'get_can_levs: klower_can after creation NaN or <=0 or >km+1 : kc=', &
-                                       kc
-         errflg = 1
+!        write(errmsg,*) 'canopy_levs: klower_can after creation NaN or <=0 or >km+1 : ', &
+!                      kc, klower_can(kk)
          return
       end if
    end do
@@ -950,8 +978,6 @@
       end do
       sigmom_can(i, nkt+1) = 1.0
 
-
-!
 !  Next, do a sort of all of the variables in the original METV3D array into canopy.  Note that
 !  the declaration of the met arrays for the new canopy subdomain has occurred earlier in the code.
 !  Three-D variables are a bit more complicated, in that one must make decisions regarding
@@ -977,14 +1003,14 @@
 ! i = 1
 ! 1   20.0000000000000
 ! 2   64.2470016479492
-! 3   137.789993286133
 !...
 
-! 62          62    96311.7483321220        96981.9123946220
 ! 63          63    96981.9123946220        97574.2952071220
 !             64    --> in kcan3 loop: 64 97551.5096832975
 ! 64          65    97574.2952071220        98097.0373946220
 !
+!      print*,'canopy_levs: prsi_can3 kmod=', i, k, kk, prsi_can3(kk), prsi3(k+1)
+
    end do ! km
 
 !----------------------------------------------------------------------------
@@ -1005,7 +1031,8 @@
 !  Level is above first resolved model level
 
             k2 = klower_can(kc)
-            zm2 = (zcan3(kc) - z2(k2-1)) / max(z2(k2) - z2(k2-1), epsilon)
+            zm2 = (zcan3(kc) - z2(k2-1)) / (z2(k2) - z2(k2-1))
+!           zm2 = (zcan3(kc) - z2(k2-1)) / max(z2(k2) - z2(k2-1), epsilon)
 
             td = ( ta3(k2)  - ta3(k2-1)) * zm2
             hd = ( qv3(k2)  - qv3(k2-1)) * zm2
@@ -1018,7 +1045,8 @@
             if (zcan3(kc) - z2(km+1) >= 2.0) then
             !  Level is below first resolved model level but above screen height
 
-               zm2 = (zcan3(kc) - z2(km+1) - 2.0) / max(z2(km) - z2(km+1) - 2.0, epsilon)
+               zm2 = (zcan3(kc) - z2(km+1) - 2.0) / (z2(km) - z2(km+1) - 2.0)
+!              zm2 = (zcan3(kc) - z2(km+1) - 2.0) / max(z2(km) - z2(km+1) - 2.0, epsilon)
 
                td = (ta3(km)  - T2M( i ) )  * zm2
                hd = (qv3(km)  - Q2M( i ) )  * zm2
@@ -1043,6 +1071,14 @@
 ! get pressure from sigma levels in Pa
          prsl_can3(kk) = sigmid_can(i, kk) * psfc(i)  ! ~zl mid-layers centers
          prsi_can3(kk) = sigmom_can(i, kk) * psfc(i)  ! ~zm/zi layers interfaces
+
+! Print
+! 1 64 97551.5096832975
+!   65 --> in kmod loop : 65    97574.2952071220
+! 2 66 97892.5615950123
+! 3 67 97999.3464530241
+!
+!         print*,'canopy_levs: prsi_can3 kcan3=', i, kc, kk, prsi_can3(kk)
 
 
 ! aqm_methods: dens: buffer(k) = stateIn % prl(c,r,l) / ( rdgas * stateIn % temp(c,r,l) )
@@ -1082,9 +1118,32 @@
 ! Several checks for suspicious values:
       do kk = 1,nkt
          if ( ta_can3(kk) < 150.0) then
-            write(errmsg,fmt='(*(a,i0,a,i0,a,f10.4))') 'get_can_levs:  suspicious temperature detected in get_can_levs after creation: i=', &
-                        i, ' kk=', kk, ' ta_can3=', ta_can3(kk)
+            write(errmsg,*) 'canopy_levs:  suspicious temperature detected in canopy_levs after creation (kk value): ',&
+                        i, kk, ta_can3(kk)
             errflg = 1
+
+            do kc = 1, nkc
+               write(errmsg,*) 'canopy_levs: value of zcan(kc) z2(km+1) and difference  at this value of ic for kk: ',&
+                            kc,' are: ',zcan3(kc),z2(km+1), zcan3(kc)-z2(km+1)
+            end do
+
+            do k = 1, nkt
+               write(errmsg,*) 'canopy_levs: value of zmid_can for = ', i,' at k = ',k,' is: ',zmid_can3(i,k)
+            end do
+
+            do kc = 1,nkc
+               write(errmsg,*) 'canopy_levs:  values of kcan zcan and original zcan for = ', i,' at kc = ',kc,' are: ',&
+                           kcan3(i,kc), zcan3(kc), hcan * can_frac(kc)
+            end do
+
+            do k = 1,km
+               write(errmsg,*) 'canopy_levs:  value of kmod and z for = ', i,' at k = ',k,' are: ',kmod(i,k), zmid3(k)
+            end do
+
+            do kc = 1,nkc
+               write(errmsg,*) 'canopy_levs: value of klower_can at this grid point for kc: ',kc,' is: ',klower_can(kc)
+            end do
+
             return
          end if
       end do
@@ -1116,15 +1175,18 @@
          ! Paul's zt is our zmid (i.e. zmid(km) is zt(i,chm_nk))
          ! Paul's hc is our hcan
             uspr = ustar(i) / karman * &
-                   log(max((zmid3(km) - z2(km+1) - 0.75 * hcan) / &
-                   (0.07530 * hcan), epsilon))
+                   log((zmid3(km) - z2(km+1) - 0.75 * hcan) / &
+                   (0.07530 * hcan))
+!                  log(max((zmid3(km) - z2(km+1) - 0.75 * hcan) / &
+!                  (0.07530 * hcan), epsilon))
          else
             uspr = uh * exp(- 2.0 * ( 1.0 - zr))
          end if
 !  wndr is the ratio of the wind to Raupach's average us(), eqn 51.
 !  This is used to scale the wind speed with height values from eqn 51 to the current grid square
          ! Paul's WS(nk) is our spd1, wind speed at lowest model level m s-1
-         wndr = spd1(i) / max(uspr, epsilon)
+         wndr = spd1(i) / uspr
+!        wndr = spd1(i) / max(uspr, epsilon)
 !  Using Raupach's formulae for wind speed, multiplied by the above ratio, for the canopy layers:
 !
          zr = (zcan3(kc) - z2(km+1)) / hcan
@@ -1189,14 +1251,19 @@
            end if
          end if
 
-         tl = hcan / max(ustar(i), epsilon)  * &
+!        tl = hcan / max(ustar(i), epsilon)  * &
+         tl = hcan / ustar(i)  * &
               (0.256 * ((zmid3(km) - z2(km+1) - 0.75 * hcan) / hcan) + &
                0.492 * exp (-(0.256 * ((zmid3(km) - z2(km+1)) / hcan) / 0.492)))
 ! ktr is the ratio of the resolved model diffusivity at the lowest resolved
 ! model level to that derived by Raupach's formula
 !
-         ktr =  dkt3(km) / max(sigw * sigw * tl, epsilon)
-         kur =  dku3(km) / max(sigw * sigw * tl, epsilon)
+         ktr =  dkt3(km) / (sigw * sigw * tl)
+         kur =  dku3(km) / (sigw * sigw * tl)
+!        ktr =  dkt3(km) / max(sigw * sigw * tl, epsilon)
+!        kur =  dku3(km) / max(sigw * sigw * tl, epsilon)
+
+!         print*, 'CANOPY_LEVS: KTR= ', i, ktr, dkt3(km), kk, kc
 !
 !  Use Raupach's formulae for diffusivity, multiplied by the above ratio, for the canopy layers:
 !
@@ -1220,13 +1287,15 @@
            end if
          end if
 !
-         tl = hcan / max(ustar(i), epsilon) *  &
+!        tl = hcan / max(ustar(i), epsilon) *  &
+         tl = hcan / ustar(i) *  &
               (0.256 * ( (zcan3(kc) - z2(km+1) - 0.75 * hcan) / hcan) + &
               (0.492 * exp (-(0.256 * (zcan3(kc) - z2(km+1)) / hcan) / 0.492) ) )
 
          dkt_can3(kk)  = (sigw * sigw * tl) * ktr
          dku_can3(kk)  = (sigw * sigw * tl) * kur
 
+!        print*, 'CANOPY_LEVS: DKT_CAN= ', i, sigw, tl, dkt_can3(kk), kk, kc
       end do ! kc = 1,nkc
 !
    if (local_dbg) then
@@ -1260,11 +1329,30 @@
          DKT_CAN (i,II) = dkt_can3 (k)
          DKU_CAN (i,II) = dku_can3 (k)
 
+! Pressure at layers centers
+! 1   37.9003337896498 96.3881049029277
+! 2   96.3881049029277 176.687747254452
+! ...
+! 65   100129.946869981 100257.714673645
+! 66   100257.714673645 100341.141349630
+! 67   100341.141349630
+!         print*,'canopy_levs: prsl_can3 =',i,k, &
+!                                  prsl_can3(k),  prsl_can3(k+1)
       end do ! k = 1, nkt
 
 ! Pressure at layers interfaces
       do k = 1, nkt+1  ! from top to bottom of combined layers
          II = (nkt+1) + 1 - k  ! from bottom to top of combined layer
+
+! Pressure at layers interfaces:
+! 1    20.0000000000000
+! 2    64.2470016479492
+! ...
+! 67   97999.3464530241
+! 68   98097.0373946220
+!
+!         print*,'canopy_levs: prsi_can3 =',i,k, &
+!                                  prsi_can3(k)
 
 ! (km+1) (68=nkc+km +1) prsi3( 1)   Top    model layer upper interface  prsi_can3(1)
 ! (km)   (67=nkc+km   ) prsi3( 2)
