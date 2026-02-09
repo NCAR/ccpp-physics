@@ -4,42 +4,34 @@
 
    implicit none
 
-! Vertical arrays
-   integer :: nkt
-   integer, parameter :: nkc = 3 ! # of canopy layers for shading effects
-
-   public :: nkt  ! # of resolved model layers plus canopy layers
-
    public :: canopy_mask_init, canopy_mask_run
 
    contains
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-   subroutine canopy_mask_init(im, ix, km, &! nkt,    &
+   subroutine canopy_mask_init(im, ix, km, nkc, nkt, &
            claie, cfch, cfrt, cclu, cpopu, &  !in:
-           FRT_mask)                          ! out
-!          errmsg,errflg)
+           FRT_mask,                       &  ! out
+           errmsg,errflg)
 
    implicit none
 
-! Horisontal arrays
+! Horizontal arrays
    integer  :: im, ix, km  ! horizontal & vertical domain specifications
+   integer, intent(in)  :: nkc, nkt
 
    real(kind=kind_phys) :: claie(im), cfch(im), cfrt(im), &
                             cclu(im),cpopu(im)
    real(kind=kind_phys) :: FRT_mask(im)
 
-!...local variables
+   character(len=*), intent(out) :: errmsg
+   integer,          intent(out) :: errflg
 
-   character(256) :: errmsg
-   integer          :: errflg
+!...local variables
 
 ! Initialize CCPP error handling variables
    errmsg = ''
    errflg = 0
-
-   write(errmsg,fmt='(*(a))') 'canopy_mask_init: '
-   write(errmsg,*), 'canopy_mask_init: im = ', im
 
 !...Allocate and initialize new canopy arrays
 
@@ -47,36 +39,38 @@
 
    FRT_mask(:)=0.0
 
-   nkt= km + nkc   ! # of resolved model layers plus canopy layers
-   write(errmsg,*), 'canopy_mask_init: nkc, nct, km  = ', nkc, nkt, km
-
    return
    end subroutine canopy_mask_init
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-   subroutine canopy_mask_run (im, ix, km, &  !in:
+   subroutine canopy_mask_run (im, ix, km, nkc, nkt, &  !in:
            claie, cfch, cfrt, cclu, cpopu, &  !in:
-           FRT_mask)                          !out:
-!          errmsg,errflg)
+           FRT_mask,                       &  !out:
+           errmsg,errflg)
 
    implicit none
 
 !...Arguments:
 
-! Horisontal arrays
+! Horizontal arrays
    integer  :: im, ix, km  ! horizontal & vertical domain specifications
+   integer, intent(in) :: nkc, nkt
 
    real(kind=kind_phys) :: claie(im), cfch(im),  cfrt(im), &
                                       cclu(im), cpopu(im)
    real(kind=kind_phys) :: FRT_mask(im)
 
+   character(len=*), intent(out) :: errmsg
+   integer,          intent(out) :: errflg
+
 !...local variables
 
    integer i,is,k,n
 
-   character(256) :: errmsg
-   integer          :: errflg
+! Initialize CCPP error handling variables
+   errmsg = ''
+   errflg = 0
 
    do i=1,im
 
@@ -91,20 +85,15 @@
          .AND. cfch(i)  .LT. 18.) ) THEN
 
          FRT_mask(i) = -1.0
-!        ni_nocan = ni_nocan + 1
 
       ! Continuous forest canopy
       ELSE
-
-         write(errmsg,5003), i, claie(i), cfch (i), cfrt(i), cpopu(i), cclu(i)
 
          FRT_mask(i) = 1.0
 
       END IF ! Forest Canopy Mask
 
    end do ! i=1,im
-
-5003  format(' canopy_mask_run: LAI FCH FRT POPU = ',1X,I5,5(F12.4,1X))
 
    return
    end subroutine canopy_mask_run
