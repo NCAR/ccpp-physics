@@ -67,9 +67,9 @@
 !IVAI
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,
-     &     errmsg,errflg,
+     &     errmsg,errflg)
 !IVAI: aux arrays
-     &     naux2d,naux3d,aux2d,aux3d)
+!    &     naux2d,naux3d,aux2d,aux3d)
 
 !
       use machine  , only : kind_phys
@@ -318,9 +318,9 @@
 !----------------------------------------------
 
 !IVAI
-      integer, intent(in) :: naux2d,naux3d
-      real(kind_phys), intent(inout) :: aux2d(:,:)
-      real(kind_phys), intent(inout) :: aux3d(:,:,:)
+!     integer, intent(in) :: naux2d,naux3d
+!     real(kind_phys), intent(inout) :: aux2d(:,:)
+!     real(kind_phys), intent(inout) :: aux3d(:,:,:)
 !IVAI
 
 !!

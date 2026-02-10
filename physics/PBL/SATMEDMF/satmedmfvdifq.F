@@ -1764,7 +1764,7 @@
             IF (KCAN .EQ. 1) THEN !canopy inside model layer
 !           Check for other Contiguous Canopy Grid Cell Conditions
 
-!           Not a contigous canopy cell
+!           Not a contiguous canopy cell
             IF (   claie(i) .LT. 0.1
      &        .OR. cfch (i) .LT. 0.5
      &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.75
@@ -1917,7 +1917,7 @@
 
             END IF ! (COUNTCAN > 0)
 
-            END IF   ! contigous canopy conditions
+            END IF   ! contiguous canopy conditions
 
             END IF   ! (KCAN .EQ. 1) model layer(s) containing canopy
 

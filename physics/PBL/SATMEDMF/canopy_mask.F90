@@ -9,7 +9,7 @@
    contains
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-   subroutine canopy_mask_init(im, ix, km, nkc, nkt, &
+   subroutine canopy_mask_init(im, km, nkc, nkt, &
            claie, cfch, cfrt, cclu, cpopu, &  !in:
            FRT_mask,                       &  ! out
            errmsg,errflg)
@@ -17,7 +17,7 @@
    implicit none
 
 ! Horizontal arrays
-   integer  :: im, ix, km  ! horizontal & vertical domain specifications
+   integer  :: im, km  ! horizontal & vertical domain specifications
    integer, intent(in)  :: nkc, nkt
 
    real(kind=kind_phys) :: claie(im), cfch(im), cfrt(im), &
@@ -44,7 +44,7 @@
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-   subroutine canopy_mask_run (im, ix, km, nkc, nkt, &  !in:
+   subroutine canopy_mask_run (im, km, nkc, nkt, &  !in:
            claie, cfch, cfrt, cclu, cpopu, &  !in:
            FRT_mask,                       &  !out:
            errmsg,errflg)
@@ -54,7 +54,7 @@
 !...Arguments:
 
 ! Horizontal arrays
-   integer  :: im, ix, km  ! horizontal & vertical domain specifications
+   integer  :: im, km  ! horizontal & vertical domain specifications
    integer, intent(in) :: nkc, nkt
 
    real(kind=kind_phys) :: claie(im), cfch(im),  cfrt(im), &
@@ -66,7 +66,7 @@
 
 !...local variables
 
-   integer i,is,k,n
+   integer i
 
 ! Initialize CCPP error handling variables
    errmsg = ''
@@ -74,7 +74,7 @@
 
    do i=1,im
 
-      !NOT a Continuos forest canopy
+      !NOT a Continuous forest canopy
       if (    claie(i) .LT. 0.1                      &
          .OR. cfch (i) .LT. 0.5                      &
 !IVAI: modified contiguous canopy condition

@@ -128,8 +128,9 @@
      &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,             ! in
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,         ! inout: dtend (.ldiag3d.)
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,
-     &     errmsg,errflg,
-     &     naux2d,naux3d,aux2d,aux3d)
+     &     errmsg,errflg)
+! IVAI: aux diag arrays
+!    &     naux2d,naux3d,aux2d,aux3d)
 
 !
       use machine  , only : kind_phys
@@ -219,11 +220,10 @@
        real(kind=kind_phys), intent(in) ::
      &            dku3d_h(:,:),dku3d_e(:,:)
 
-      integer, intent(in) :: naux2d,naux3d
-      real(kind_phys), intent(inout) :: aux2d(:,:)
-      real(kind_phys), intent(inout) :: aux3d(:,:,:)
+!     integer, intent(in) :: naux2d,naux3d
+!     real(kind_phys), intent(inout) :: aux2d(:,:)
+!     real(kind_phys), intent(inout) :: aux3d(:,:,:)
 
-!          flag for tke dissipative heating
 !
 !----------------------------------------------------------------------
 !***
@@ -364,22 +364,20 @@
 !PCC_CANOPY------------------------------------
 
       real(kind=kind_phys) ::
-     &                      dv_can(im,km),  du_can(im,km),                ! size (km)
-     &                     duv_can(im,km),                                ! size (km)
-     &                     tdt_can(im,km), rtg_can(im,km,ntrac)           ! size (km)
+     &                      dv_can(im,km),  du_can(im,km),
+     &                     duv_can(im,km),
+     &                     tdt_can(im,km), rtg_can(im,km,ntrac)
 
       real(kind=kind_phys) :: 
      &                        dum3d_h (im, km)  , dum3d_e(im, km), 
      &                       tkeh_mod (im, km)
  
-      real(kind=kind_phys) ::  dtend_can(im, km , ndtend), 
-     &        aux3d_02(im,km), aux3d_04(im,km), aux3d_06(im,km)
+      real(kind=kind_phys) ::  dtend_can(im, km , ndtend)
 
 ! Out: list sat_canopy call
       real(kind=kind_phys) :: dusfc_can(im),  dvsfc_can(im),
      &                        dtsfc_can(im),  dqsfc_can(im),
-     &                         hpbl_can(im), 
-     &       aux2d_02(im),     aux2d_04(im), aux2d_06(im)
+     &                         hpbl_can(im)
 
       integer              ::  kpbl_can(im)
 
@@ -599,11 +597,11 @@
 !         endif
 !      enddo
 
-! Initialize canopy layers concentrtions with values before diffusion
+! Initialize canopy layers concentrations with values before diffusion
       if (do_canopy .and. cplaqm) then
 
 ! TKE
-        aux3d(:,:, 7) = q1(:,:, ntke) ! ntke=198 "tke"
+!       aux3d(:,:, 7) = q1(:,:, ntke) ! ntke=198 "tke"
 
         do k = 1,km
           do i = 1,im
@@ -614,14 +612,14 @@
           enddo
         enddo
 
-        CALL canopy_mask_init( im, im, km, nkc, nkt,
+        CALL canopy_mask_init( im, km, nkc, nkt,
      &     claie, cfch, cfrt, cclu, cpopu, ! in:
      &     FRT_MASK,                       ! out 
      &     errmsg, errflg)
 
         if (errflg /= 0) return
 
-        CALL canopy_levs_init( im, im, km, nkc, nkt,
+        CALL canopy_levs_init( im, km, nkc, nkt,
      &       ntrac-1, ntqv, ntke,                 ! in
      &       zi, zl, zm,                          ! in 3D
      &       prsl, prsi,                          ! in 3D
@@ -648,9 +646,9 @@
 !      Q1_CAN3(:,1:3,NTRAC-1) <= Q1(:,1,NTRAC-1) ! ALL CANOPY & NON-CANOPY COLUMNS !
 ! ===============
 
-        CALL canopy_transfer_init(im, im, km, nkc, nkt, !in
-     &        massair_can3, massair,                  !out
-     &        mmr_o3_can3,                            !inout
+        CALL canopy_transfer_init(im, km, nkc, nkt,  !in
+     &        massair_can3, massair,                 !out
+     &        mmr_o3_can3,                           !inout
      &        nfrct, ifrct,                          !out
      &        frctr2c, frctc2r,                      !out
      &        errmsg, errflg )
@@ -906,7 +904,7 @@
 ! flag = 0 "resolved_to_canopy"
 !===============================================================================
 
-         CALL canopy_transfer_run(im, im, km, nkc, nkt, !in
+         CALL canopy_transfer_run(im, km, nkc, nkt,  !in
      &        ntrac1, ntoz,                          !in
      &        garea,                                 !in
      &        zi, zl, zm,                            !in
@@ -1043,8 +1041,8 @@
 ! duv is below after u2 & v2
 
 ! Output pbl diags 2D
-           aux2d(:, 3) = float(kpbl(:)) ! before canopy
-           aux2d(:, 1) = hpbl(:)        ! before canopy
+!          aux2d(:, 3) = float(kpbl(:)) ! before canopy
+!          aux2d(:, 1) = hpbl(:)        ! before canopy
 
          endif
 
@@ -1076,8 +1074,9 @@
      &     dtend_can,                                                     !inout: dtend (.ldiag3d.)
      &     dtidx,index_of_temperature,index_of_x_wind,
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,
-     &     errmsg,errflg, 
-     &     naux2d,naux3d,aux2d,aux3d)
+     &     errmsg,errflg) 
+! IVAI: aux diag arrays
+!     &     naux2d,naux3d,aux2d,aux3d)
 
 ! Set non-canopy columns to resolved values
 ! NB. Only vars not ALREADY defined in non-canopy columns
@@ -1098,8 +1097,8 @@
          end do
 
 ! Output 2D pbl diags
-        aux2d(:, 4) = float(kpbl_can(:))  ! after canopy
-        aux2d(:, 2) = hpbl_can (:)        ! after canopy
+!       aux2d(:, 4) = float(kpbl_can(:))  ! after canopy
+!       aux2d(:, 2) = hpbl_can (:)        ! after canopy
 
 ! Output 3D pbl diags
 !       aux3d(:,:, 6) = dku_can  (:,1:km) !
@@ -1258,9 +1257,9 @@ c
          q2_can (:,:, ntqv) = max(q2_can (:,:, ntqv),qmin)            ! after diffusion (km)
 
 ! Output pbl diags
-        aux3d(:,:, 6) = rtg_can (:,:, ntke) ! after diffusion
+!       aux3d(:,:, 6) = rtg_can (:,:, ntke) ! after diffusion
 
-        aux3d(:,:, 4) = tdt_can (:,:)       ! after diffusion
+!       aux3d(:,:, 4) = tdt_can (:,:)       ! after diffusion
 !       aux3d(:,:, 2) =  dv_can (:,:)       ! after diffusion 
 !       aux3d(:,:, 2) =  du_can (:,:)       ! after diffusion 
 !
@@ -1314,7 +1313,7 @@ c
           duv_can (:,1:km) = (ws2_can3(:,1:km) - ws1_can (:,1:km)) * rdt ! ws1_can is using 1hy model layer u1&v1(:,1)
 
 ! Output pbl diags
-          aux3d(:,:, 2) =  duv_can (:,1:km)   ! after diffusion
+!         aux3d(:,:, 2) =  duv_can (:,1:km)   ! after diffusion
 
 ! Output pbl diags
 !         aux3d(:,:, 4) =   t2_can3(:,1:km)   ! after diffusion
@@ -1337,7 +1336,7 @@ c
           q2_can  (:,:, ntke) = max(q2_can  (:,:, ntke), tkmin)           ! after diffusion (km)
 
 ! Output pbl diags
-          aux3d(:,:, 8) = q2_can3 (:,1:km, ntke)  ! ntke=198  after diffusion
+!         aux3d(:,:, 8) = q2_can3 (:,1:km, ntke)  ! ntke=198  after diffusion
 
 ! Apply minimum value on humidity qmin before "canopy_to_resolved" and the tendency update
           q2_can3 (:,:, ntqv) = max(q2_can3 (:,:, ntqv), qmin   )  ! ntqv=1
@@ -1381,7 +1380,7 @@ c
 ! Gather tracer concentration from canopy layers into model resolved layers (flag = 1)
 !===============================================================================
 
-        CALL canopy_transfer_run(im, im, km, nkc, nkt, !in
+        CALL canopy_transfer_run(im, km, nkc, nkt,   !in
      &        ntrac1, ntoz,                          !in
      &        garea,                                 !in
      &        zi, zl, zm,                            !in
@@ -1444,13 +1443,13 @@ c
         q2_mod(:,:, ntqv) = max(q2_mod(:,:, ntqv),qmin)
 
 ! Output 2D pbl diags
-!        aux2d(:, 6) = rtg_2m(:, 11  )         ! after diffusion n=11 "no"
-!        aux2d(:, 4) = rtg_2m(:, 12  )         ! after diffusion n=12 "o3"
-!        aux2d(:, 2) = rtg_2m(:, 10  )         ! after diffusion n=10 "no2"
+!       aux2d(:, 6) = rtg_2m(:, 11  )         ! after diffusion n=11 "no"
+!       aux2d(:, 4) = rtg_2m(:, 12  )         ! after diffusion n=12 "o3"
+!       aux2d(:, 2) = rtg_2m(:, 10  )         ! after diffusion n=10 "no2"
 
-!        aux2d(:, 6) = Q2_2m (:, 11  )         ! after diffusion n=11 "no"
-!        aux2d(:, 4) = Q2_2m (:, 12  )         ! after diffusion n=12 "o3"
-!        aux2d(:, 2) = Q2_2m (:, 10  )         ! after diffusion n=10 "no2"
+!       aux2d(:, 6) = Q2_2m (:, 11  )         ! after diffusion n=11 "no"
+!       aux2d(:, 4) = Q2_2m (:, 12  )         ! after diffusion n=12 "o3"
+!       aux2d(:, 2) = Q2_2m (:, 10  )         ! after diffusion n=10 "no2"
 
 ! 2-m diag is always 1cy layer
 ! GFSv16 - GFDL misrophysics
@@ -1676,7 +1675,7 @@ c
 
             END IF  ! (KCAN .EQ. 1) model layer(s) containing canopy
 
-          END IF  ! contigous canopy conditions
+          END IF  ! contiguous canopy conditions
           enddo   ! i = 1, im
 
           kount = kount + 1
@@ -1751,24 +1750,23 @@ c
 
 ! Output 3D pbl diags
 
-        aux3d(:,:, 7) =tkeh_mod(:,:)        ! after "canopy_to_resolved" !
+!       aux3d(:,:, 7) =tkeh_mod(:,:)        ! after "canopy_to_resolved" !
 
-        aux3d(:,:, 5) = rtg_mod(:,:, ntke)  ! after "canopy_to_resolved" !
+!       aux3d(:,:, 5) = rtg_mod(:,:, ntke)  ! after "canopy_to_resolved" !
 
-! aux3d(:,:, 2,4) formerly
-        aux3d(:,:, 3) = tdt_mod(:,:)        ! after "canopy_to_resolved" !
+!       aux3d(:,:, 3) = tdt_mod(:,:)        ! after "canopy_to_resolved" !
 !       aux3d(:,:, 2) =  dv_mod(:,:)        ! after "canopy_to_resolved" !
 !       aux3d(:,:, 2) =  du_mod(:,:)        ! after "canopy_to_resolved" !
-        aux3d(:,:, 1) = duv_mod(:,:)        ! after "canopy_to_resolved" !
+!       aux3d(:,:, 1) = duv_mod(:,:)        ! after "canopy_to_resolved" !
 
 ! Output 3D pbl diags
-!        aux3d(:,:,7) = rtg_mod (:,:, ntoz) ! after "canopy_to_resolved"
+!       aux3d(:,:,7) = rtg_mod (:,:, ntoz) ! after "canopy_to_resolved"
 
-!        aux3d(:,:,7) = rtg_mod (:,:, ntqv)  ! ntqv=1   "humidity" after "canopy_to_resolved"
+!       aux3d(:,:,7) = rtg_mod (:,:, ntqv)  ! ntqv=1   "humidity" after "canopy_to_resolved"
 
-!        aux3d(:,:,5) = rtg_mod (:,:, 11  )  ! n=11    "no"  after "canopy_to_resolved"
-!        aux3d(:,:,3) = rtg_mod (:,:, 12  )  ! n=12    "o3"  after "canopy_to_resolved"
-!        aux3d(:,:,1) = rtg_mod (:,:, 10  )  ! n=10    "no2" after "canopy_to_resolved"
+!       aux3d(:,:,5) = rtg_mod (:,:, 11  )  ! n=11    "no"  after "canopy_to_resolved"
+!       aux3d(:,:,3) = rtg_mod (:,:, 12  )  ! n=12    "o3"  after "canopy_to_resolved"
+!       aux3d(:,:,1) = rtg_mod (:,:, 10  )  ! n=10    "no2" after "canopy_to_resolved"
 
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -97,8 +97,6 @@
   dimensions = ()
   type = integer
   intent = in
-# IVAI: 
-# ntchm           !< number of prognostic chemical tracers (advected)
 [ntchm]
   standard_name = number_of_chemical_tracers
   long_name = number of chemical tracers
@@ -106,7 +104,6 @@
   dimensions = ()
   type = integer
   intent = in
-#ntchs           !< tracer index for first prognostic chemical tracer
 [ntchs]
   standard_name = index_of_first_chemical_tracer_in_tracer_concentration_array
   long_name = tracer index for first chemical tracer
@@ -114,7 +111,6 @@
   dimensions = ()
   type = integer
   intent = in
-# ntche           !< tracer index for last prognostic chemical tracer
 [ntche]
   standard_name = index_for_last_chemical_tracer
   long_name = tracer index for last chemical tracer
@@ -143,7 +139,6 @@
   dimensions = ()
   type = integer
   intent = in
-# IVAI
 [con_rocp]
   standard_name = ratio_of_gas_constant_dry_air_to_specific_heat_of_dry_air_at_constant_pressure
   long_name = (rd/cp)
@@ -152,7 +147,6 @@
   type = real
   kind = kind_phys
   intent = in
-# IVAI
 [grav]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -233,7 +227,6 @@
   type = real
   kind = kind_phys
   intent = in
-###IVAI
 [dv]
   standard_name = process_split_cumulative_tendency_of_y_wind
   long_name = updated tendency of the y wind
@@ -241,7 +234,6 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-##  intent = in
   intent = inout
 [du]
   standard_name = process_split_cumulative_tendency_of_x_wind
@@ -250,7 +242,6 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-##  intent = in
   intent = inout
 [tdt]
   standard_name = process_split_cumulative_tendency_of_air_temperature
@@ -259,7 +250,6 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-##  intent = in
   intent = inout 
 [rtg]
   standard_name = tendency_of_vertically_diffused_tracer_concentration
@@ -269,7 +259,6 @@
   type = real
   kind = kind_phys
   intent = inout
-### IVAI
 [u1]
   standard_name = x_wind
   long_name = x component of layer wind
@@ -325,7 +314,6 @@
   type = real
   kind = kind_phys
   intent = in
-# IVAI
 [def_1]
   standard_name = square_of_vertical_shear_due_to_dynamics
   long_name = square of vertical shear calculated from dynamics
@@ -350,7 +338,6 @@
   type = real
   kind = kind_phys
   intent = in
-# IVAI
 [swh]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky shortwave heating rate
@@ -517,9 +504,7 @@
   units = index
   dimensions = (horizontal_loop_extent)
   type = integer
-#  intent = out
   intent = inout
-### IVAI
 [pgr]
   standard_name = surface_air_pressure
   long_name = surface pressure
@@ -528,7 +513,6 @@
   type = real
   kind = kind_phys
   intent = in
-### IVAI
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -613,7 +597,6 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-#  intent = out
   intent = in
 [dvsfc]
   standard_name = instantaneous_surface_y_momentum_flux
@@ -622,7 +605,6 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-#  intent = out
   intent = in
 [dtsfc]
   standard_name = instantaneous_surface_upward_sensible_heat_flux
@@ -631,7 +613,6 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-#  intent = out
   intent = in
 [dqsfc]
   standard_name = instantaneous_surface_upward_latent_heat_flux
@@ -640,7 +621,6 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-#  intent = out
   intent = in
 [hpbl]
   standard_name = atmosphere_boundary_layer_thickness
@@ -649,7 +629,6 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-#  intent = out
   intent = inout
 [tkeh]
   standard_name = vertical_turbulent_kinetic_energy_at_interface
@@ -658,7 +637,6 @@
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
-#  intent = inout  # Oct5
   intent = inout
 [dkt]
   standard_name = atmosphere_heat_diffusivity
@@ -676,7 +654,6 @@
   type = real
   kind = kind_phys
   intent = inout
-###IVAI
 [dkt_can]
   standard_name = atmosphere_heat_diffusivity_in_canopy
   long_name = atmospheric heat diffusivity in canopy
@@ -693,7 +670,6 @@
   type = real
   kind = kind_phys
   intent = out
-###IVAI
 [dku3d_h]
   standard_name = horizontal_atmosphere_momentum_diffusivity_for_dynamics
   long_name = horizontal atmospheric momentum diffusivity for dynamics
@@ -701,7 +677,6 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-#  intent = out
   intent = in
 [dku3d_e]
   standard_name = horizontal_atmosphere_tke_diffusivity_for_dynamics
@@ -710,7 +685,6 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-#  intent = out
   intent = in
 [kinver]
   standard_name = index_of_highest_temperature_inversion
@@ -797,7 +771,6 @@
   dimensions = ()
   type = logical
   intent = in
-#IVAI
 [claie]
   standard_name = canopy_leaf_area_index
   long_name = canopy leaf area index
@@ -944,7 +917,6 @@
   dimensions = ()
   type = integer
   intent = out
-#IVAI
 [naux2d]
   standard_name = number_of_xy_dimensioned_auxiliary_arrays
   long_name = number of 2d auxiliary arrays to output (for debugging)

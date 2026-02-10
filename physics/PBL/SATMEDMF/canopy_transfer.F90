@@ -2,7 +2,7 @@
    contains
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-   subroutine canopy_transfer_init( im, ix, km, nkc, nkt,   & !in
+   subroutine canopy_transfer_init( im, km, nkc, nkt,   & !in
               massair_can, massair,                       & !out
               mmr_o3_can,                           & !inout
               nfrct, ifrct,                               & !out
@@ -29,7 +29,7 @@
 
 !...Arguments:
 
-   integer, intent(in)  :: im, ix, km, nkc, nkt
+   integer, intent(in)  :: im, km, nkc, nkt
 
    integer, intent(out) ::       &
                 nfrct  (:, :)  , &
@@ -65,7 +65,7 @@
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-   subroutine canopy_transfer_run( im, ix, km, nkc, nkt, &
+   subroutine canopy_transfer_run( im, km, nkc, nkt, &
               ntrac1, ntoz,                         &
               GAREA,                                &
               zi, zl, zm,                           &
@@ -120,7 +120,7 @@
 
 !...Arguments:
 
-   integer, intent(in)  :: im, ix, km, nkc, nkt, ntrac1, ntoz
+   integer, intent(in)  :: im, km, nkc, nkt, ntrac1, ntoz
    integer, intent(in)  :: flag
    real(kind=kind_phys), intent(in) :: zi(:,:), zl(:,:), zm(:,:) ! zi(im,km+1),  zl(im,km),   zm(im,km)
    real(kind=kind_phys), intent(in) :: GAREA(:)
