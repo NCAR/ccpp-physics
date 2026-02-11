@@ -425,8 +425,8 @@ contains
         do k=1,km
           k1=km-k+1
           do j=1,lq
-            ten_u(i,k) = pvom(j,k1)
-            ten_v(i,k) = pvol(j,k1)
+            ten_u(j,k) = pvom(j,k1)
+            ten_v(j,k) = pvol(j,k1)
           end do
         end do
       endif
