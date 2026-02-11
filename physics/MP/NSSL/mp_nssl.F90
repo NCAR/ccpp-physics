@@ -291,7 +291,7 @@ module mp_nssl
          real(kind_phys),           intent(  out) :: ten_chw(:,:)
          real(kind_phys),           intent(  out), optional :: ten_chl(:,:)
          real(kind_phys),           intent(  out) :: ten_vh(:,:)
-         real(kind_phys),           intent(  out) :: ten_vhl(:,:)
+         real(kind_phys),           intent(  out), optional :: ten_vhl(:,:)
          real(kind_phys),           intent(  out), optional :: ten_zrw(:,:)
          real(kind_phys),           intent(  out), optional :: ten_zhw(:,:)
          real(kind_phys),           intent(  out), optional :: ten_zhl(:,:)
@@ -405,7 +405,9 @@ module mp_nssl
         if ( nssl_3moment ) then
           ten_zrw = 0.0
           ten_zhw = 0.0
-          ten_zhl = 0.0
+          if (nssl_hail_on) then
+            ten_zhl = 0.0
+          end if
         end if
         
         new_t = tgrs
