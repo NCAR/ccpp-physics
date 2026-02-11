@@ -3,7 +3,7 @@
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-   subroutine canopy_levs_init(im, ix, km, nkc, nkt,   &
+   subroutine canopy_levs_init(im, km, nkc, nkt,   &
               ntrac1,  ntqv, ntke,                 &
               zi, zl, zm,                          & ! in: 3D meters
               prsl, prsi,                          & ! in: 3D (Pa)
@@ -30,7 +30,7 @@
 
 !...Arguments:
 ! ntrac1 = ntrac - 1
-   integer, intent(in)  :: im, ix, km, nkc, nkt, ntrac1, ntqv, ntke
+   integer, intent(in)  :: im, km, nkc, nkt, ntrac1, ntqv, ntke
 
    real(kind=kind_phys), intent(in) ::  zi(:,:),   zl(:,:),   zm(:,:), &
                                       prsi(:,:), prsl(:,:)
@@ -196,7 +196,7 @@
 
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-   subroutine canopy_levs_run(im, ix, km, nkc, nkt, &
+   subroutine canopy_levs_run(im, km, nkc, nkt, &
               ntrac1, ntqv, ntke,                   & ! in
               RDGAS, PI,                            & ! in ?? units ??
               zi, zl, zm,                           & ! in: 1D    zm(i,k) = zi(i,k+1)
@@ -231,7 +231,7 @@
 
 !...Arguments:
 
-   integer, intent(in)  :: im, ix, km, nkc, nkt, ntrac1, ntqv, ntke
+   integer, intent(in)  :: im, km, nkc, nkt, ntrac1, ntqv, ntke
    real(kind=kind_phys), intent(in) :: RDGAS, PI
 ! NB. zi   (im, km+1), zl   (im, km),  zm(im,km)
 !     prsi (im, km+1), prsl (im, km)

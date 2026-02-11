@@ -665,8 +665,8 @@
 
 ! NB. Call canopy routines after eddy diffusivities are calculated!!!
 
-        CALL canopy_mask_run( im, im, km, nkc, nkt, !in
-     &     claie, cfch, cfrt, cclu, cpopu,           !in
+        CALL canopy_mask_run( im, km, nkc, nkt,     !in
+     &     claie, cfch, cfrt, cclu, cpopu,          !in
      &     FRT_MASK,                                !out
      &     errmsg, errflg)
 
@@ -703,7 +703,7 @@
 ! NLAYS+3= bottom canopy layer at 0.2*CH
 ! =================
 
-         CALL canopy_levs_run(im, im, km, nkc, nkt, ! in
+         CALL canopy_levs_run(im, km, nkc, nkt, ! in
      &       ntrac1, ntqv, ntke,                   ! in
      &       RD, PI,                               ! in gry gas constant
      &       zi, zl, zm,                           ! in
