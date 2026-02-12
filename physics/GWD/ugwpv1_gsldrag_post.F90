@@ -23,7 +23,7 @@ contains
          du_ogwcol, dv_ogwcol, du_oblcol, dv_oblcol, du_osscol,       &
          dv_osscol, du_ofdcol, dv_ofdcol, du3_ogwcol, dv3_ogwcol,     &
          du3_oblcol, dv3_oblcol, du3_osscol, dv3_osscol, du3_ofdcol,  &
-         dv3_ofdcol, dtdt, dudt, dvdt, errmsg, errflg)
+         dv3_ofdcol, errmsg, errflg)
 
         use machine,                only: kind_phys
 
@@ -60,8 +60,6 @@ contains
         real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_oblcol, dv3_oblcol
         real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_osscol, dv3_osscol
         real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_ofdcol, dv3_ofdcol
-	
-        real(kind=kind_phys), intent(inout), dimension(:,:) :: dtdt, dudt, dvdt
 
         character(len=*),        intent(out) :: errmsg
         integer,                 intent(out) :: errflg
