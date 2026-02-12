@@ -540,6 +540,7 @@ contains
                  cdmbgwd,alpha_fd,me,master,                         &
                  lprnt,ipr,rdxzb,dx,gwd_opt,                         &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
+                 flag_for_gwd_generic_tend,                          &
                  dtend, dtidx, index_of_process_orographic_gwd,      &
                  index_of_temperature, index_of_x_wind,              &
                  index_of_y_wind, ldiag3d, ldiag_ugwp,               &
