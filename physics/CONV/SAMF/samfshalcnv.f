@@ -59,7 +59,7 @@
      &     ten_q, dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                &
      &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,                & 
      &     sigmain,sigmaout,omegain,omegaout,betadcu,betamcu,betascu,   &
-     &     errmsg,errflg)
+     &     cat_adj_shal,errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -101,8 +101,10 @@
      &                     asolfac, evef, pgcon
       logical,          intent(in)  :: hwrf_samfshal,first_time_step,   &
      &     restart,progsigma,progomega
+      real(kind_phys), intent(in) :: cat_adj_shal
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
+
 !
 !  local variables
       integer              i,j,indx, k, kk, km1, n
@@ -2012,7 +2014,7 @@ c
            umean(i) = max(umean(i), 1.)
            tauadv = gdx(i) / umean(i)
            advfac(i) = tauadv / dtconv(i)
-           advfac(i) = min(advfac(i), 1.)
+           advfac(i) = min(cat_adj_shal*advfac(i), 1.)
         endif
       enddo
 c
