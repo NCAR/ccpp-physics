@@ -93,7 +93,7 @@
 
       END IF ! Forest Canopy Mask
 
-   end do ! i=1,im
+   end do
 
    return
    end subroutine canopy_mask_run

@@ -98,14 +98,10 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,tkeh,           &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            &
-!IVAI: canopy inputs from AQM
      &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           &
-!IVAI
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg)
-!IVAI: aux arrays
-!     &     naux2d,naux3d,aux2d,aux3d)
 
 !
       use machine  , only : kind_phys
@@ -130,7 +126,6 @@
       real(kind=kind_phys), intent(in) :: rlmx, elmx
 !PCC CANOPY------------------------------------
       logical, intent(in)  :: do_canopy, cplaqm
-!IVAI: canopy inputs
       real(kind=kind_phys), optional, intent(in)  :: claie(:), cfch(:), &
      &                     cfrt(:), cclu(:), cpopu(:)
       !----------------------------------------------
@@ -322,18 +317,18 @@
 
 !PCC_CANOPY------------------------------------
       integer COUNTCAN,KCAN
-      integer kount         !IVAI
+      integer kount 
       real(kind=kind_phys) FCH,       MOL,   HOL, TLCAN,
      &                     SIGMACAN,  RRCAN, BBCAN,
      &                     AACAN,     ZCAN,  ZFL, BOTCAN,
-     &                     ZZ_INT,  ! IVAI
+     &                     ZZ_INT,
      &                     EDDYVEST1, EDDYVEST_INT
 
       ! in canopy eddy diffusivity [ m**2/s ]
       real(kind=kind_phys), allocatable  :: EDDYVESTX ( : )
       ! in canopy layer [m]
       real(kind=kind_phys), allocatable  :: ZCANX     ( : )
-      real(kind=kind_phys), allocatable  :: ZOOOX     ( : ) ! IVAI
+      real(kind=kind_phys), allocatable  :: ZOOOX     ( : )
       ! Declare local maximum canopy layers
       integer, parameter :: MAXCAN = 1000
       integer, parameter :: mvt   = 30 ! use 30 instead of 27
@@ -346,14 +341,6 @@
      &          2.00, 0.50, 0.00, 0.00, 0.00, 0.00,
      &          0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
 !----------------------------------------------
-
-!IVAI
-!      integer, intent(in) :: naux2d,naux3d
-!      real(kind_phys), intent(inout) :: aux2d(:,:)
-!      real(kind_phys), intent(inout) :: aux3d(:,:,:)
-!IVAI
-
-!!
       parameter(bfac=100.)
       parameter(wfac=7.0)
       parameter(gamcrt=3.,gamcrq=0.,sfcfrac=0.1)
@@ -381,17 +368,15 @@
       parameter(cptke1=0.07,cptke2=0.142,cptke3=0.071)
       parameter(dkmaxles=300.0,sclmin=500.,sclmax=2500.)
       parameter(elmhfac=1.5,elmhmx=1000.,ckh=0.4)
-!
+
 !PCC_CANOPY------------------------------------
       if (do_canopy) then
         if(.not.allocated(EDDYVESTX))
      &    allocate( EDDYVESTX    ( MAXCAN ) )
         if(.not.allocated(ZCANX))
      &    allocate( ZCANX    ( MAXCAN ) )
-!IVAI
         if(.not.allocated(ZOOOX)) 
      &    allocate( ZOOOX    ( MAXCAN ) )
-!IVAI
       endif
 !----------------------------------------------
       if (tc_pbl == 0) then
@@ -403,7 +388,7 @@
         ch0 = 0.55
         ce0 = 0.12
       endif
-!
+
       if(tte_edmf) then
         cfac  = 3.0
         prmax = 6.0
@@ -417,14 +402,10 @@
         ck1   = 0.15
         ch1   = 0.15
       endif
-!
+
       gravi = 1.0 / grav
       g = grav
       gocp = g / cp
-!     cont=cp/g
-!     conq=hvap/g
-!     conw=1.0/g  ! for del in pa
-!!    parameter(cont=1000.*cp/g,conq=1000.*hvap/g,conw=1000./g) !kpa
       elocp  = hvap / cp
       el2orc = hvap * hvap / (rv * cp)
 !
@@ -1724,22 +1705,6 @@
 !PCC_CANOPY------------------------------------
       if (do_canopy .and. cplaqm) then
 
-!IVAI
-!        print*, 'SATMEDMF_RUN: CLAIE = ', claie(:)
-!        print*, 'SATMEDMF_RUN: CFCH = ' , cfch (:)
-!        print*, 'SATMEDMF_RUN: CFRT = ' , cfrt (:)
-!        print*, 'SATMEDMF_RUN: CCLU = ' , cclu (:)
-!        print*, 'SATMEDMF_RUN: CPOPU= ' , cpopu(:)
-! 2D aux arrays: canopy data in diffusion
-!        aux2d(:,1) = cfch (:)
-!        aux2d(:,2) = claie(:)
-!        aux2d(:,3) = cfrt(:)
-
-! 3D aux arrays: before canopy correction
-!        aux3d(:,:,1) = dkq(:,:)
-!        aux3d(:,:,2) = dkt(:,:)
-!        aux3d(:,:,3) = dku(:,:)
-!IVAI
         do k = 1, km1-1
 
           kount=0 !IVAI
@@ -1747,8 +1712,6 @@
 
           do i = 1, im
 
-!IVAI: AQM canopy Inputs
-!           FCH = fch_table(vegtype(i)) !top of canopy from look-up table
             FCH = cfch(i)               !top of canopy from AQM canopy inputs
             IF (k .EQ. 1) THEN !use model layer interfaces
               KCAN = 1
@@ -1774,9 +1737,6 @@
 
             ELSE ! There is a contiguous forest canopy, apply correction over canopy layers
 
-! Output contiguous canopy mask
-!              if (kount .EQ. 0 ) aux2d(i,5) = aux2d(i,5) + 1
-
 !Raupauch M. R. A Practical Lagrangian method for relating scalar
 !concentrations to
 ! source distributions in vegetation canopies. Q. J. R. Meteor. Soc.
@@ -1789,7 +1749,7 @@
               COUNTCAN = 0   ! Initialize canopy layers
 
               IF (k .EQ. 1) THEN  !Find bottom in each model layer
-                  BOTCAN = 0.0 !  0.5 IVAI (Jan10)
+                  BOTCAN = 0.0    ! 0.5 (Jan10)
               ELSE
                   BOTCAN = zi(i,k)
               END IF
@@ -1847,10 +1807,10 @@
                  IF ( HOL .GE.  0.9 ) THEN  !VERY STABLE
                     SIGMACAN = 0.25*ustar(i)
                  END IF
-!
+
                  IF ( ZCAN .EQ. ZFL )  ! THEN ! Each model layer that includes canopy
      &              EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN ! Model-layer top diffusivity
-! IVAI
+
 ! Average In-Canopy diffusivity gives larger canopy correction (2022)
 !                IF ( ZCAN .LE. FCH )  THEN          ! Average In-Canopy   diffusivity (2022) 
 ! Average model-layer diffusivity gives smaller canopy correction (pre-2022) & Jan9, 2026
@@ -1859,19 +1819,13 @@
                    COUNTCAN = COUNTCAN + 1
                    ZCANX     (COUNTCAN) = ZCAN
                    EDDYVESTX (COUNTCAN) = (SIGMACAN*SIGMACAN)*TLCAN
-! IVAI
-!                  if( kount.EQ.0) print*,'satmedmf_run: EDVY_CAN= ', 
-!    &                                             k, i, COUNTCAN,
-!    &                                                  ZCAN, ZFL, FCH, 
-!    &                                        EDDYVESTX (COUNTCAN)
-!
+
                  END IF
-!
+
                  ZCAN = ZCAN-0.5  !step down in-canopy resolution of 0.5m
-!
+
               END DO !end loop on canopy layers
 
-! IVAI
             IF (COUNTCAN > 0 ) THEN
 
               IF (COUNTCAN .EQ. 1) THEN
@@ -1880,40 +1834,20 @@
                  ZZ_INT= IntegrateTrapezoid(
      &                  ZCANX(COUNTCAN:1:-1), ZOOOX(COUNTCAN:1:-1))
               END IF
-!
-!             if( kount.EQ.0) print*,'satmedmf_run: ZZ_INT=',
-!    &                                      k, i, COUNTCAN ,
-!    &                                    ZZ_INT, ZFL, FCH
-! 
-              if ( ZZ_INT .LE.0. ) print*,'satmedmf_run: ZZ_INT < 0',
-     &                                              k, i, COUNTCAN ,
-     &                                           ZFL,  FCH, ZZ_INT ,
-     &                                              ZCANX(COUNTCAN)
-!
+ 
               IF (COUNTCAN .EQ. 1) THEN
                  EDDYVEST_INT = EDDYVESTX(COUNTCAN)
               ELSE
 
                  EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)
      &                                ),EDDYVESTX(COUNTCAN:1:-1)) / 
-     &                                  ZZ_INT ! ZFL (Jan9) !IVAI
+     &                                  ZZ_INT
               END IF
-!
-              if ( EDDYVEST_INT .LE.0. )
-     &           print*,'satmedmf_run: EDVY_INT < 0',
-     &                                              k, i, COUNTCAN ,
-     &                                      ZFL, FCH, EDDYVEST_INT ,
-     &                                          EDDYVESTX(COUNTCAN),
-     &                                              ZCANX(COUNTCAN)
-!
+
 ! Comment out to turn OFF the integrated canopy effect
               dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
               dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
               dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
-
-! Output pbl diags
-!              aux3d(i,k,4) = 1./EDDYVEST1  * EDDYVEST_INT
-!IVAI
 
             END IF ! (COUNTCAN > 0)
 
@@ -1923,7 +1857,7 @@
 
           enddo !i
 
-          kount = kount + 1 !IVAI
+          kount = kount + 1 
 
         enddo !k
 
@@ -2005,7 +1939,7 @@
               ptem = 0.
             endif
             ptem2 = ptem2 + ptem
-!
+
             tem2 = stress(i)*ustar(i)*phims(i)/(vk*zl(i,1))
             shrp = 0.5 * (tem1 + ptem1 + ptem2 + tem2)
           else
