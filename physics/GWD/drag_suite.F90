@@ -217,6 +217,7 @@
      &           g, cp, rd, rv, fv, pi, imx, cdmbgwd, alpha_fd,         &
      &           me, master, lprnt, ipr, rdxzb, dx, gwd_opt,            &
      &           do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,   &
+     &           flag_for_gwd_generic_tend,                             &
      &           dtend, dtidx, index_of_process_orographic_gwd,         &
      &           index_of_temperature, index_of_x_wind,                 &
      &           index_of_y_wind, ldiag3d, ldiag_ugwp, ugwp_seq_update, & 
@@ -325,7 +326,7 @@
    real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV,    &
      &                                 cdmbgwd(:), alpha_fd
    real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
-   logical, intent(in) :: ldiag3d
+   logical, intent(in) :: ldiag3d, flag_for_gwd_generic_tend
    integer, intent(in) :: dtidx(:,:), index_of_temperature,      &
      &  index_of_process_orographic_gwd, index_of_x_wind, index_of_y_wind
 
@@ -542,7 +543,7 @@
    dtdt(:,:)  = 0.
    dqdt(:,:,:)= 0.
    
-   if(ldiag3d) then
+   if(ldiag3d .and. .not. flag_for_gwd_generic_tend) then
       udtend = dtidx(index_of_x_wind,index_of_process_orographic_gwd)
       vdtend = dtidx(index_of_y_wind,index_of_process_orographic_gwd)
       Tdtend = dtidx(index_of_temperature,index_of_process_orographic_gwd)
@@ -1433,7 +1434,7 @@ endif
      &           g, cp, rd, rv, fv, pi, imx, cdmbgwd, alpha_fd,         &
      &           me, master, lprnt, ipr, rdxzb, dx, gwd_opt,            &
      &           do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,   &
-     &           psl_gwd_dx_factor,                                     &
+     &           psl_gwd_dx_factor, flag_for_gwd_generic_tend,          &
      &           dtend, dtidx, index_of_process_orographic_gwd,         &
      &           index_of_temperature, index_of_x_wind,                 &
      &           index_of_y_wind, ldiag3d, ldiag_ugwp, ugwp_seq_update, &
@@ -1543,7 +1544,7 @@ endif
    real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV,    &
      &                                 cdmbgwd(:), alpha_fd
    real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
-   logical, intent(in) :: ldiag3d
+   logical, intent(in) :: ldiag3d, flag_for_gwd_generic_tend
    integer, intent(in) :: dtidx(:,:), index_of_temperature,      &
      &  index_of_process_orographic_gwd, index_of_x_wind, index_of_y_wind
 
@@ -1768,7 +1769,7 @@ endif
    dvdt(:,:)  = 0.
    dtdt(:,:)  = 0.
    
-   if(ldiag3d) then
+   if(ldiag3d .and. .not. flag_for_gwd_generic_tend) then
       udtend = dtidx(index_of_x_wind,index_of_process_orographic_gwd)
       vdtend = dtidx(index_of_y_wind,index_of_process_orographic_gwd)
       Tdtend = dtidx(index_of_temperature,index_of_process_orographic_gwd)
