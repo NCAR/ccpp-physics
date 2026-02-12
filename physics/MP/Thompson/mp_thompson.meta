@@ -943,7 +943,24 @@
   dimensions = ()
   type = logical
   intent = inout
-<<<<<<< HEAD
+[fs_fac_rain]
+  standard_name = multiplicative_tuning_parameter_for_rain_fall_speed
+  long_name = multiplicative tuning parameter for rain fall speed
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[fs_fac_snow]
+  standard_name = multiplicative_tuning_parameter_for_snow_fall_speed
+  long_name = multiplicative tuning parameter_for snow fall speed
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
 [ten_q]
   standard_name = tendency_of_tracer_concentration
   long_name = tendency of tracer concentration calculated by one physics scheme
@@ -1067,26 +1084,6 @@
   type = real
   kind = kind_phys
   intent = out
-=======
-[fs_fac_rain]
-  standard_name = multiplicative_tuning_parameter_for_rain_fall_speed
-  long_name = multiplicative tuning parameter for rain fall speed
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
-[fs_fac_snow]
-  standard_name = multiplicative_tuning_parameter_for_snow_fall_speed
-  long_name = multiplicative tuning parameter_for snow fall speed
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = True
->>>>>>> ufs/dev
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
