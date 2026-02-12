@@ -613,11 +613,8 @@
               ll = kp1 -l
               tem = ccin(ipt,ll,1)                                      &
      &            * MAX(ZERO, MIN(ONE, (TCR-toi(L))*TCRF))
-!##### GJF - change to something else             
               qli_l(ll) = ccin(ipt,ll,1) - tem
               qii_l(ll) = tem
-              !ccin(ipt,ll,2) = ccin(ipt,ll,1) - tem
-              !ccin(ipt,ll,1) = tem
             enddo
           endif
           if (advcld) then
@@ -625,8 +622,6 @@
               ll = kp1 -l ! Input variables are bottom to top!
               QII(L) = qii_l(ll)
               QLI(L) = qli_l(ll)
-              !QII(L) = ccin(ipt,ll,1)
-              !QLI(L) = ccin(ipt,ll,2)
             enddo
           endif
           KBL  = MAX(MIN(k, kp1-KPBL(ipt)), k/2)
@@ -665,19 +660,14 @@
             do l=1,k
               tem = ccin(ipt,l,1)                                       &
      &            * MAX(ZERO, MIN(ONE, (TCR-toi(L))*TCRF))
-!##### GJF - change to something else              
               qli_l(l) = ccin(ipt,l,1) - tem
               qii_l(l) = tem
-              !ccin(ipt,l,2) = ccin(ipt,l,1) - tem
-              !ccin(ipt,l,1) = tem
             enddo
           endif
           if (advcld) then
             do l=1,k
               qii(l) = qii_l(l)
               qli(l) = qli_l(l)
-              !QII(L) = ccin(ipt,l,1)
-              !QLI(L) = ccin(ipt,l,2)
             enddo
           endif
 !
@@ -988,24 +978,16 @@
         if (flipv) then
           do l=1,k
             ll = kp1 - l
-!##### GJF - change to tendencies
             ten_t(ipt,ll) = (toi(l) - tin(ipt,ll))/dt
             ten_q(ipt,ll,1) = (qoi(l) - qin(ipt,ll))/dt
             ten_u(ipt,ll) = (uvi(l,ntr+1) - uin(ipt,ll))/dt
-            ten_v(ipt,ll) = (uvi(l,ntr+1) - vin(ipt,ll))/dt
-            !tin(ipt,ll) = toi(l)                  ! Temperature
-            !qin(ipt,ll) = qoi(l)                  ! Specific humidity
-            !uin(ipt,ll) = uvi(l,ntr+1)            ! U momentum
-            !vin(ipt,ll) = uvi(l,ntr+2)            ! V momentum
+            ten_v(ipt,ll) = (uvi(l,ntr+2) - vin(ipt,ll))/dt
 
 !!        for 2M microphysics, always output these variables
             if (mp_phys == mp_phys_mg) then
               if (advcld) then
-!##### GJF - adjust to match ccin changes above                
                 QLCN(ipt,ll)     = max(qli(l)-qli_l(ll), zero)
                 QICN(ipt,ll)     = max(qii(l)-qii_l(ll), zero)
-                !QLCN(ipt,ll)     = max(qli(l)-ccin(ipt,ll,2), zero)
-                !QICN(ipt,ll)     = max(qii(l)-ccin(ipt,ll,1), zero)
                 CNV_FICE(ipt,ll) = QICN(ipt,ll)                         &
      &                           / max(1.0e-10_kp,QLCN(ipt,ll)+QICN(ipt,ll))
               else
@@ -1022,30 +1004,22 @@
             endif
 
             if (ntr > 0) then
-!##### GJF - change to tendencies
               do n=1,ntr
-                ten_cc(ipt,ll,n+2) = (uvi(l,n) - ccin(ipt,ll,n+2))
-                !ccin(ipt,ll,n+2) = uvi(l,n)           ! Tracers
+                ten_cc(ipt,ll,n+2) = (uvi(l,n) - ccin(ipt,ll,n+2))/dt
               enddo
             endif
           enddo
           if (advcld) then
             do l=1,k
               ll  = kp1 - l
-!##### GJF - change to tendencies              
               ten_cc(ipt,ll,1) = (qii(l) - ccin(ipt,ll,1))/dt
               ten_cc(ipt,ll,2) = (qli(l) - ccin(ipt,ll,2))/dt
-              !ccin(ipt,ll,1) = qii(l)          ! Cloud ice
-              !ccin(ipt,ll,2) = qli(l)          ! Cloud water
             enddo
           else
             do l=1,k
               ll  = kp1 - l
-!##### GJF - change to tendencies              
               ten_cc(ipt,ll,1) = cli(l)/dt
               ten_cc(ipt,ll,2) = clw(l)/dt
-              !ccin(ipt,ll,1) = ccin(ipt,ll,1) + cli(l)
-              !ccin(ipt,ll,2) = ccin(ipt,ll,2) + clw(l)
             enddo
           endif
 !
@@ -1055,24 +1029,16 @@
         else
 
           do l=1,k
-!##### GJF - change to tendencies
             ten_t(ipt,l) = (toi(l) - tin(ipt,l))/dt
             ten_q(ipt,l,1) = (qoi(l) - qin(ipt,l))/dt
             ten_u(ipt,l) = (uvi(l,ntr+1) - uin(ipt,l))/dt
             ten_v(ipt,l) = (uvi(l,ntr+2) - vin(ipt,l))/dt
-            !tin(ipt,l) = toi(l)                   ! Temperature
-            !qin(ipt,l) = qoi(l)                   ! Specific humidity
-            !uin(ipt,l) = uvi(l,ntr+1)             ! U momentum
-            !vin(ipt,l) = uvi(l,ntr+2)             ! V momentum
 
 !!        for 2M microphysics, always output these variables
             if (mp_phys == mp_phys_mg) then
               if (advcld) then
-!##### GJF - change to match change to ccin above                
                 QLCN(ipt,l)     = max(qli(l)-qli_l(l), zero)
                 QICN(ipt,l)     = max(qii(l)-qii_l(l), zero)
-                !QLCN(ipt,l)     = max(qli(l)-ccin(ipt,l,2), zero)
-                !QICN(ipt,l)     = max(qii(l)-ccin(ipt,l,1), zero)
                 CNV_FICE(ipt,l) = QICN(ipt,l)                           &
      &                          / max(1.0e-10_kp,QLCN(ipt,l)+QICN(ipt,l))
               else
@@ -1092,28 +1058,20 @@
             endif
 
             if (ntr > 0) then
-!##### GJF - change to tendencies              
               do n=1,ntr
                 ten_cc(ipt,l,n+2) = (uvi(l,n) - ccin(ipt,l,n+2))/dt
-                !ccin(ipt,l,n+2) = uvi(l,n)           ! Tracers
               enddo
             endif
           enddo
           if (advcld) then
-!##### GJF - change to tendencies            
             do l=1,k
               ten_cc(ipt,l,1) = (qii(l) - ccin(ipt,l,1))/dt
               ten_cc(ipt,l,2) = (qli(l) - ccin(ipt,l,2))/dt
-              !ccin(ipt,l,1) = qii(l)          ! Cloud ice
-              !ccin(ipt,l,2) = qli(l)          ! Cloud water
             enddo
           else
-!##### GJF - change to tendencies            
             do l=1,k
               ten_cc(ipt,l,1) = cli(l)/dt
               ten_cc(ipt,l,2) = clw(l)/dt
-              !ccin(ipt,l,1) = ccin(ipt,l,1) + cli(l)
-              !ccin(ipt,l,2) = ccin(ipt,l,2) + clw(l)
             enddo
           endif
         endif
