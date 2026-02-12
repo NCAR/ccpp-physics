@@ -638,17 +638,17 @@ contains
       if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
         idtend = dtidx(index_of_x_wind,index_of_process_nonorographic_gwd)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdudt*dtp
+          dtend(:,:,idtend) = dtend(:,:,idtend) + dudt_ngw(:,:)*dtp
         endif
         
         idtend = dtidx(index_of_y_wind,index_of_process_nonorographic_gwd)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdvdt*dtp
+          dtend(:,:,idtend) = dtend(:,:,idtend) + dvdt_ngw(:,:)*dtp
         endif
 
         idtend = dtidx(index_of_temperature,index_of_process_nonorographic_gwd)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdtdt*dtp
+          dtend(:,:,idtend) = dtend(:,:,idtend) + dtdt_ngw(:,:)*dtp
         endif
       endif
 
