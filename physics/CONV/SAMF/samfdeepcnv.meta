@@ -762,6 +762,14 @@
   type = real
   kind = kind_phys
   intent = out
+[cat_adj_deep]
+  standard_name = adjustment_for_convective_advection_time_for_deep
+  long_name = adjustment for convective advection time for deep
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
