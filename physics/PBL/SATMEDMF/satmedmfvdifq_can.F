@@ -57,14 +57,10 @@
      &     tsea,heat,evap,stress,spd1,kpbl,
      &     prsi,del,prsl,prslk,phii,phil,delt,tte_edmf,
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,tkeh,
-!IVAI
-     &     dkt_can, dku_can, ! In IVAI
-!IVAI
+     &     dkt_can, dku_can,
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,
      &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,
-!IVAI: canopy inputs from AQM
-     &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,
-!IVAI
+     &     do_canopy, cplaqm, 
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,
      &     errmsg,errflg)
@@ -80,7 +76,6 @@
 !
       !PCC_CANOPY_utilities
       use canopy_utils_mod
-      use canopy_mask_mod
 !
       implicit none
 !
@@ -101,9 +96,7 @@
       real(kind=kind_phys), intent(in) :: rlmx, elmx
 !PCC CANOPY------------------------------------
       logical, intent(in)  :: do_canopy, cplaqm
-!IVAI: canopy inputs
-      real(kind=kind_phys), optional, intent(in)  :: claie(:), cfch(:),
-     &                     cfrt(:), cclu(:), cpopu(:),
+      real(kind=kind_phys), optional, intent(in)  :: 
      &                  dkt_can(:,:),      dku_can(:,:)
       !----------------------------------------------
       real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),
@@ -293,28 +286,7 @@
       real(kind=kind_phys) qice(im,km),qliq(im,km)
 
 !PCC_CANOPY------------------------------------
-      integer COUNTCAN,KCAN
       integer kount         !IVAI
-      real(kind=kind_phys) FCH,       MOL,   HOL, TLCAN,
-     &                     SIGMACAN,  RRCAN, BBCAN,
-     &                     AACAN,     ZCAN,  ZFL, BOTCAN,
-     &                     EDDYVEST1, EDDYVEST_INT
-
-      ! in canopy eddy diffusivity [ m**2/s ]
-      real(kind=kind_phys), allocatable  :: EDDYVESTX ( : )
-      ! in canopy layer [m]
-      real(kind=kind_phys), allocatable  :: ZCANX     ( : )
-      ! Declare local maximum canopy layers
-      integer, parameter :: MAXCAN = 1000
-      integer, parameter :: mvt   = 30 ! use 30 instead of 27
-      !Based on MODIS IGBP 20 Category Dataset
-      real :: fch_table(mvt)         !< top of canopy (m)
-       data   ( fch_table(i),i=1,mvt)   /
-     &          20.0, 20.0, 18.0, 16.0, 16.0, 1.10,
-     &          1.10, 13.0, 10.0, 1.00, 5.00, 2.00,
-     &          15.0, 1.50, 0.00, 0.00, 0.00, 4.00,
-     &          2.00, 0.50, 0.00, 0.00, 0.00, 0.00,
-     &          0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
 !----------------------------------------------
 
 !IVAI
@@ -354,10 +326,8 @@
 !
 !PCC_CANOPY------------------------------------
       if (do_canopy) then
-        if(.not.allocated(EDDYVESTX))
-     &    allocate( EDDYVESTX    ( MAXCAN ) )
-        if(.not.allocated(ZCANX))
-     &    allocate( ZCANX    ( MAXCAN ) )
+! Initialize layer thickness in non-canopy columns
+         rdzt(:,:) = 0.0 ! IVAI
       endif
 !----------------------------------------------
       if (tc_pbl == 0) then
@@ -1700,7 +1670,7 @@
         if (present(dku_can)) dku(:,1:km) = dku_can(:,1:km)
         if (present(dkt_can)) then
            dkt(:,1:km) = dkt_can(:,1:km)
-           dkq(:,1:km) = prtke * dkt_can(:,1:km)
+           dkq(:,1:km-1) = prtke * dkt_can(:,1:km-1)
         endif
 
       endif !do_canopy .and. cplaqm

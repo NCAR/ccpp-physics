@@ -23,7 +23,6 @@
 !=============================================================================
 
    use machine , only : kind_phys
-   use canopy_mask_mod
 
    IMPLICIT NONE
 
@@ -31,16 +30,16 @@
 
    integer, intent(in)  :: im, km, nkc, nkt
 
-   integer, intent(out) ::       &
-                nfrct  (:, :)  , &
-                ifrct  (:, :, :)
+   integer, intent(out) ::                &
+                nfrct  (km+nkc,    im)  , &
+                ifrct  (km+nkc, 2, im)
 
    real(kind=kind_phys), intent(out) ::  &
-            massair_can(:, :), &
-            massair    (:, :), &
-            mmr_o3_can (:, :), &
-             frctr2c   (:, :, :)  , &
-             frctc2r   (:, :, :)
+            massair_can(im, km+nkc)    , &
+            massair    (im, km)        , &
+            mmr_o3_can (im, km+nkc)    , &
+             frctr2c   (km+nkc, 2, im) , &
+             frctc2r   (km+nkc, 2, im)
 
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
@@ -66,20 +65,20 @@
 !:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
    subroutine canopy_transfer_run( im, km, nkc, nkt, &
-              ntrac1, ntoz,                         &
-              GAREA,                                &
-              zi, zl, zm,                           &
-              Q1, DENS,   &  !in: kg kg-1
-              FLAG,         &  !in
-              FRT_MASK,     &  !in
-              kmod, kcan3,  &  !in
-              zmom_can, zmid_can,  & ! in
-              PRES_CAN, DENS_CAN, & !in
-              Q1_MOD, Q1_CAN, Q1_2M,                & !inout kg kg-1
-              massair_can, massair,                 & !inout
-              mmr_o3_can,                           & !inout
-              nfrct, ifrct,                               & !inout
-              frctr2c, frctc2r,                           & !inout
+              ntrac, ntoz,                           &
+              GAREA,                                 &
+              zi, zl, zm,                            &
+              Q1, DENS,                              & !in: kg kg-1
+              FLAG,                                  & !in
+              FRT_MASK,                              & !in
+              kmod, kcan3,                           & !in
+              zmom_can, zmid_can,                    & !in
+              PRES_CAN, DENS_CAN,                    & !in
+              Q1_MOD, Q1_CAN, Q1_2M,                 & !inout kg kg-1
+              massair_can, massair,                  & !inout
+              mmr_o3_can,                            & !inout
+              nfrct, ifrct,                          & !inout
+              frctr2c, frctc2r,                      & !inout
               errmsg, errflg )
 
 ! Arguments:
@@ -112,65 +111,52 @@
 !=============================================================================
 
    use machine , only : kind_phys
-   use mfpbltq_mod
-   use canopy_mask_mod
-   use canopy_levs_mod
 
    IMPLICIT NONE
 
 !...Arguments:
 
-   integer, intent(in)  :: im, km, nkc, nkt, ntrac1, ntoz
+   integer, intent(in)  :: im, km, nkc, nkt, ntrac, ntoz
    integer, intent(in)  :: flag
-   real(kind=kind_phys), intent(in) :: zi(:,:), zl(:,:), zm(:,:) ! zi(im,km+1),  zl(im,km),   zm(im,km)
-   real(kind=kind_phys), intent(in) :: GAREA(:)
+   real(kind=kind_phys), intent(in) :: zi(im, km+1),  zl(im, km),   zm(im, km)
+   real(kind=kind_phys), intent(in) :: GAREA(im)
 
 ! ** Q1 is concentration field (including gas and aerosol variables) mass mixing ratio kg kg-1
-   real(kind=kind_phys), intent(in) ::  Q1(:,:,:)
+   real(kind=kind_phys), intent(in) ::   Q1(im, km, ntrac)
 
-   real(kind=kind_phys), intent(in) ::  DENS(:,:)
+   real(kind=kind_phys), intent(in) :: DENS(im, km)
 
-   integer, intent(in) ::           &
-               kmod   (:, :)      , &
-               kcan3  (:, :)
+   integer, intent(in) :: kmod   (im, km), kcan3  (im, nkc)
 
-   real(kind=kind_phys), intent(inout) ::     &
-              zmom_can  (:, :)     , &
-              zmid_can  (:, :)
+   real(kind=kind_phys), intent(inout) :: zmom_can  (im, nkt) , &
+                                          zmid_can  (im, nkt)
 
-   real(kind=kind_phys), intent(in) ::  &
-             FRT_MASK  (:)           , &
+   real(kind=kind_phys), intent(in) ::  FRT_MASK  (im)        , &
 ! met3d arrays
-             PRES_CAN  (:, :)        , &
-             DENS_CAN  (:, :)
+                                        PRES_CAN  (im, nkt)   , &
+                                        DENS_CAN  (im, nkt)
 
 ! all gas-phase species array
-   real(kind=kind_phys), intent(inout) ::  &
-             Q1_MOD (:, :, :),   &
-             Q1_CAN (:, :, :)
-   real(kind=kind_phys), intent(inout) ::  &
-             Q1_2M  (:, :)
+   real(kind=kind_phys), intent(inout) ::  Q1_MOD (im,  km, ntrac), &
+                                           Q1_CAN (im, nkt, ntrac)
+   real(kind=kind_phys), intent(inout) ::  Q1_2M  (im,      ntrac)
 
-   integer, intent(inout) ::           &
-                nfrct  (:, :)        , &
-                ifrct  (:, :, :)
+   integer, intent(inout) ::  nfrct  (km+nkc,    im) , &
+                              ifrct  (km+nkc, 2, im)
 
-   real(kind=kind_phys), intent(inout) ::  &
-              massair_can(:, :)   , &
-              massair    (:, :)   , &
-              mmr_o3_can (:, :)   , &
-             frctr2c   (:, :, :)  , &
-             frctc2r   (:, :, :)
+   real(kind=kind_phys), intent(inout) ::  massair_can(im, km+nkc), &
+                                           massair    (im, km)    , &
+                                           mmr_o3_can (im, km+nkc), &
+                                           frctr2c (km+nkc, 2, im), &
+                                           frctc2r (km+nkc, 2, im)
 
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
 !...Local arrays:
 
-   real(kind=kind_phys) ::               &
-                                zmid     (km)  , &
-                                zmom     (km)  , & ! Same as zfull !
-                                sigmom   (km)  , &
+   real(kind=kind_phys) ::      zmid     (km)  , &
+                                zmom     (km+1), & ! Same as zfull !
                                 z2       (km+1), &
                                 sigmid2  (km+1), &
                                 zcan3    (nkc)  ,&
@@ -422,7 +408,7 @@
 !   Assigned/Initilized in canopy_levs FIRSTIME
 
 !...fetch all species in units kg kg-1 mass mixing ratio
-      do S = 1, ntrac1          ! ntrac1= 197 (ntrac=ntke=198)
+      do S = 1, ntrac-1          ! ntrac1= 197 (ntrac=ntke=198)
 
 ! Flip resolved layer arrays into a new array for use here
          do k = 1, km        ! from bottom to top
@@ -593,7 +579,7 @@
    IF (FRT_mask(i) > 0.) THEN
 
 !...fetch all species and convert to kg kg-1 mass mixing ratio
-      DO S = 1, NTRAC1  ! ntrac1= 197 (ntrac=ntke=198)
+      DO S = 1, NTRAC-1  ! ntrac1= 197 (ntrac=ntke=198)
 !     DO ISP = 1, 1     ! ntqv=1 ntoz=7 nto3=11
 
          ! S = CGRID_INDEX( ISP )

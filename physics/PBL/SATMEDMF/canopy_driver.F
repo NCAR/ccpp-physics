@@ -8,10 +8,10 @@
       use canopy_utils_mod
       use satmedmfvdifq_can_mod
 
-      use canopy_mask_mod, only : canopy_mask_init, canopy_mask_run
-      use canopy_levs_mod, only : canopy_levs_init, canopy_levs_run
-      use canopy_transfer_mod, only : canopy_transfer_init, 
-     &                                canopy_transfer_run
+      use canopy_mask_mod !Feb13: , only : canopy_mask_init, canopy_mask_run
+      use canopy_levs_mod !Feb13: , only : canopy_levs_init, canopy_levs_run
+      use canopy_transfer_mod !Feb13: , only : canopy_transfer_init, 
+!Feb13:     &                                canopy_transfer_run
 
       contains
 
@@ -53,7 +53,7 @@
 !!
       subroutine canopy_driver_run(im,km,ntrac,ntcw,ntrw,
      &     ntiw,ntke,ntchm,ntchs,ntche, ntoz,nto3,
-     &     ndtend,                                                        !add ndtend
+     &     ndtend,                                                        ! in 
      &     con_rocp,
      &     grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,
 !The following three variables are for SA-3D-TKE
@@ -379,7 +379,7 @@
 !     km+nkc=nkt is bottom canopy layer
      &       zmom_can3 (im, km+nkc)        ,  ! dim(im, nkt+1)
      &       zmid_can3 (im, km+nkc)        ,
-     &     sigmom_can3 (im, km+nkc)        ,  ! ~zm (nkt) or ~zi (nkt+1)
+     &     sigmom_can3 (im, km+nkc+1)      ,  ! ~zm (nkt) or ~zi (nkt+1)
      &     sigmid_can3 (im, km+nkc)        ,  ! ~zl
      &    massair_can3 (im, km+nkc)        ,
      &    massair      (im, km)         ,
@@ -522,30 +522,32 @@
         if (errflg /= 0) return
 
         CALL canopy_levs_init( im, km, nkc, nkt,
-     &       ntrac-1, ntqv, ntke,                 ! in
+     &       ntrac, ntqv, ntke, ! ndtend,         ! in
      &       zi, zl, zm,                          ! in 3D
      &       prsl, prsi,                          ! in 3D
      &       dv, du, tdt, rtg,                    ! in 3D
      &       u1, v1, t1, q1,                      ! in 3D / 4D
      &       rho1, dkt, dku,                      ! in 3D
-     &       dtend, 
+!     &       dtend, 
      &     zmom_can3,   zmid_can3,                !out 3D
      &   sigmom_can3, sigmid_can3,                !out 3D
-     &       ZL_CAN3,     ZM_CAN3,                !out 3D ZH_CAN, ZF_CAN rename half- and full-layer height
+     &       ZL_CAN3,     ZM_CAN3,                !out 3D ZL=half- and ZM=full-layer height
      &     PRSL_CAN3,   PRSI_CAN3,                !out 3D set to zero
      &       dv_can, du_can, tdt_can, rtg_can,    !out 3D size (km)
      &       T1_CAN3,     QV_CAN3,rho1_CAN3,      !out 3D set to zero
      &      WS1_CAN3,    DKT_CAN3, DKU_CAN3,      !out 3D set to WS DKT
      &       Q1_CAN3, Q1_2M,                      !out 4D set to Q1
-     &       DTEND_CAN,
+!     &       DTEND_CAN,
      &       errmsg, errflg)
+
+! Zero in-canopy tendencies
+        dtend_can(:, :, : ) = 0.0
 
         if (errflg /= 0) return
 
 ! ================
-! In;  Q1 (im,km,NTRAC-1)
-! Out:
-!      Q1_CAN3(:,1:3,NTRAC-1) <= Q1(:,1,NTRAC-1) ! ALL CANOPY & NON-CANOPY COLUMNS !
+! In;  Q1     (:,km ,NTRAC)
+! Out: Q1_CAN3(:,1:3,NTRAC) <= Q1(:,1,NTRAC) ! ALL CANOPY & NON-CANOPY COLUMNS !
 ! ===============
 
         CALL canopy_transfer_init(im, km, nkc, nkt,  !in
@@ -572,7 +574,7 @@
      &     FRT_MASK,                                !out
      &     errmsg, errflg)
 
-        if (errflg /= 0) return
+!       if (errflg /= 0) return
 
 ! Wind direction, degrees
 ! ATAN2(Y, X) computes the principal value of the argument function of the complex number X + i Y.
@@ -602,8 +604,8 @@
 ! NLAYS+3= bottom canopy layer at 0.2*CH
 ! =================
 
-         CALL canopy_levs_run(im, km, nkc, nkt, ! in
-     &       ntrac1, ntqv, ntke,                   ! in
+         CALL canopy_levs_run(im, km, nkc, nkt,    ! in
+     &       ntrac, ntqv, ntke,                    ! in
      &       RD, PI,                               ! in gry gas constant
      &       zi, zl, zm,                           ! in
      &       prsl, prsi, pgr,                      ! in  (Pa)
@@ -619,7 +621,7 @@
      &       kmod, kcan3,                          ! out
      &      zmom_can3,   zmid_can3,                ! out
      &    sigmom_can3, sigmid_can3,                ! out
-     &        ZL_CAN3,     ZM_CAN3,                ! out: zl=ZH_CAN, zm=ZF_CAN rename half- and full-layer height
+     &        ZL_CAN3,     ZM_CAN3,                ! out: zl_can=half- and zm_can=full-layer height
      &      PRSL_CAN3,   PRSI_CAN3,                ! out: mean layer pressure; air pressure at model layer interfaces
      &       dv_can, du_can, tdt_can, rtg_can,     ! out: 3D size (km)
      &        T1_CAN3,     QV_CAN3, rho1_CAN3,     ! out 3D: 2-m interpolated T1 QV rho1
@@ -696,7 +698,7 @@
              IF (FRT_MASK(i) >  0.) THEN
                del_can3(i,kc) = prsi_can3(i, kc) - prsi_can3(i, kc+1)
 
-! Non-canopy columns set to del
+! Non-canopy columns set to del(1)
             ELSE IF (FRT_MASK(i) <=  0.) THEN
               del_can3(i,kc) = del(i,1) 
 
@@ -719,25 +721,34 @@
 ! so zm(i,k) = zi(i,k+1) = zl_can3(i,k) + dz_can3(i,k)/2
 !      zm (:,k) = zi(:,k+1), so zm_can (i, k) = zi_can3(i,k+1)  (k=1,km) 
 
+! In-Canopy layers: kc = 1, 2, 3
+         zi_can3(:, 1) = 0.
+         do kc = 1, nkc
+           do i = 1,im
+             ! kc+1 = 2, 3, 4
+             zi_can3(i,kc+1) = zm_can3(i, kc)
+             dz_can3(i,kc)   = zi_can3(i, kc+1) - zi_can3(i, kc)
+           end do
+         end do
+
 ! Above canopy layers
          do k = 1,km
            do i = 1,im
              ! kc = 4,5,6.. 67
              kc = nkc + k
-! dim zi_can3(im, nkt+1)
+
+             ! kc+1 = 5,6,7 ...68
              zi_can3(i,kc+1) = zm_can3(i, kc)                    ! upper  interface
+
+!             print*,'canopy_driver: zm_can3= ',i, kc,  ! 5
+!     &                                 zm_can3(i, kc),
+!     &                                 zi_can3(i, kc)
+
              dz_can3(i,kc)   = zi_can3(i, kc+1) - zi_can3(i, kc)
            end do
          end do
 
-! Canopy layers: kc = 1, 2, 3
-         zi_can3(:, 1) = 0.
-         do kc = 1, nkc
-           do i = 1,im
-             zi_can3(i,kc+1) = zm_can3(i, kc)
-             dz_can3(i,kc)   = zi_can3(i, kc+1) - zi_can3(i, kc)
-           end do
-         end do
+
 
 !>  - Compute geopotential physical height of the layer centers and interfaces from
 !! the physical height (\p zi and \p zl)
@@ -785,18 +796,18 @@
 !===============================================================================
 
          CALL canopy_transfer_run(im, km, nkc, nkt,  !in
-     &        ntrac1, ntoz,                          !in
+     &        ntrac, ntoz,                           !in
      &        garea,                                 !in
      &        zi, zl, zm,                            !in
      &        q1, rho1,                              !in kg kg-1
      &        0,                                     !in 0 = "resolved_to_canopy"
      &        FRT_MASK,                              !in
      &        kmod, kcan3,                           !in
-     &        zmom_can3, zmid_can3,                  ! in
+     &        zmom_can3, zmid_can3,                  !in
      &        PRSL_CAN3, rho1_CAN3,                  !in:    before diffusion
      &        Q1_MOD, Q1_CAN3, Q1_2M,                !inout: kg kg-1 before diffusion
-     &     massair_can3, massair,                  !inout
-     &      mmr_o3_can3,                            !inout
+     &        massair_can3, massair,                 !inout
+     &        mmr_o3_can3,                           !inout
      &        nfrct, ifrct,                          !inout
      &        frctr2c, frctc2r,                      !inout
      &        errmsg, errflg )
@@ -805,12 +816,12 @@
 
 ! ==============
 !  Input:
-!   Q1    (:,:, NLAYS, ntrac1) :  Chemical tracers conc. ppmv on model levels
+!   Q1    (:,:, NLAYS, ntrac) :  Chemical tracers conc. ppmv on model levels
 !
 !  Output:
-!   Q1_CAN3(:,:, NLAYT, ntrac1) :  Chemical tracers conc. ppmv on combined canopy+resolved layers
+!   Q1_CAN3(:,:, NLAYT, ntrac) :  Chemical tracers conc. ppmv on combined canopy+resolved layers
 !                                    ! CANOPY COLUMNS ONLY !
-!   Q1_2M (:,:       , ntrac1) :  2M Chemical tracers conc. ppmv Diagnostics
+!   Q1_2M (:,:       , ntrac) :  2M Chemical tracers conc. ppmv Diagnostics
 !
 ! ================================
 
@@ -821,10 +832,19 @@
          prsi_can  (:,1:km+1) =  prsi_can3 (:,1:km+1)
          prsl_can  (:,1:km)   =  prsl_can3 (:,1:km)
          prslk_can (:,1:km)   = prslk_can3 (:,1:km) 
-         del_can   (:,1:km)   =   del_can3 (:,1:km)
 
-         phii_can  (:,1:km+1) = phii_can3(:,1:km+1)
-         phil_can  (:,1:km)   = phil_can3(:,1:km)
+      do i = 1,im
+      IF (FRT_MASK(i) >  0.) THEN
+         del_can   (i,1:km)   =  del_can3(i,1:km)
+         phii_can  (i,1:km+1) = phii_can3(i,1:km+1)
+         phil_can  (i,1:km)   = phil_can3(i,1:km)
+! Set Non-Canopy columns to resolved layer thickness
+      ELSE IF (FRT_MASK(i) <=  0.) THEN
+         del_can   (i,1:km)   = del (i,1:km)
+         phii_can  (i,1:km+1) = phii(i,1:km+1)
+         phil_can  (i,1:km)   = phil(i,1:km)
+      ENDIF
+      enddo
 
 ! NB. Using 10-m interpolated values creates shear and gives very high TKE tendencies
 
@@ -849,12 +869,12 @@
 ! This should be nkt layers...       dv_can(:,nkc+1:nkt) = dv(:,1:km) ! nkt combined canopy plus resolved layers
 
 ! Sub-Canopy
-         swh_can (:, nkc+1:km ) = swh(:,1:km)
+         swh_can (:, nkc+1:km ) = swh(:,1:km-nkc)
          swh_can (:, 3 )        = swh(:,1   )
          swh_can (:, 2 )        = swh(:,1   )
          swh_can (:, 1 )        = swh(:,1   )
 
-         hlw_can (:, nkc+1:km ) = hlw(:,1:km)
+         hlw_can (:, nkc+1:km ) = hlw(:,1:km-nkc)
          hlw_can (:, 3 )        = hlw(:,1   )
          hlw_can (:, 2 )        = hlw(:,1   )
          hlw_can (:, 1 )        = hlw(:,1   )
@@ -912,10 +932,8 @@
      &     dkt_can,dku_can,                                               ! In: canopy inputs
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,
      &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,
-     &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,
-     &     ntqv,
-     &     dtend_can,                                                     !inout: dtend (.ldiag3d.)
-     &     dtidx,index_of_temperature,index_of_x_wind,
+     &     do_canopy, cplaqm,           
+     &     ntqv, dtend_can, dtidx,index_of_temperature,index_of_x_wind,   !inout: dtend (.ldiag3d.)
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,
      &     errmsg,errflg) 
 
