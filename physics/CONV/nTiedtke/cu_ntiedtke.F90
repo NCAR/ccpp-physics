@@ -256,6 +256,8 @@ contains
    ten_u = 0.0
    ten_v = 0.0
    ten_q = 0.0
+   dclw_i = 0.0
+   dclw_l = 0.0
 
       km1 = km + 1
       ztmst=dt
