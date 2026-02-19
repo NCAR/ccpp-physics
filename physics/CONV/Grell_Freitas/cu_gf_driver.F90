@@ -1069,8 +1069,8 @@ contains
         new_qv_spechum = qv/(1.0_kind_phys+qv)
         cnvw_moist = cnvw/(1.0_kind_phys+qv)
 !$acc end kernels
-        do i=its,itf
-          do k=kts,kstop
+        do i=its,ite
+          do k=kts,kte
             ten_q(i,k,ntqv) = (new_qv_spechum(i,k) - qv_spechum(i,k))/dt
           end do
         end do
