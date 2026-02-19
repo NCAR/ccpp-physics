@@ -1,0 +1,62 @@
+name: Doxygen GitHub Pages Deploy Action
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ccpp-scidoc-doxygen:
+    if: github.repository == 'NCAR/ccpp-physics' || github.repository == 'ufs-community/ccpp-physics'
+  deploy:
+    runs-on: ubuntu-latest
+
+
+    steps:
+
+    - name: Checkout current ccpp-physics code
+      uses: actions/checkout@v3
+
+    - name: Store remote-URL for current ccpp-physics code
+      run: echo "GIT_REMOTE_URL=`git remote get-url origin`" >> $GITHUB_ENV
+
+    - name: Store branch name for current ccpp-physics code
+      run: echo "GIT_REMOTE_BRANCH=`git rev-parse --abbrev-ref HEAD`" >> $GITHUB_ENV
+
+    - name: Store hash for HEAD of current ccpp-physics code
+      run: echo "GIT_REMOTE_HASH=`git rev-parse HEAD`" >> $GITHUB_ENV
+
+    - name: Checkout latest ccpp-physics code
+      run: git clone https://github.com/NCAR/ccpp-physics.git
+
+    - name: Initialize submodules
+      run: |
+        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics
+        git submodule update --init --recursive
+
+    - name: Update ccpp-physics hash 
+      if: github.event.pull_request == false
+      run: |
+        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics
+        echo $GIT_REMOTE_URL
+        echo $GIT_REMOTE_BRANCH
+        echo ${{github.repository}}
+        echo ${{ github.event.pull_request.head.sha }}
+        echo $GITHUB_SHA
+        git remote add remote_local $GIT_REMOTE_URL
+        git fetch remote_local $GIT_REMOTE_BRANCH
+        git checkout remote_local/$GIT_REMOTE_BRANCH
+
+    - name: Set up Doxygen
+      uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Run ccpp_prebuild.py
+      run: |
+        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/
+        git status
+        mkdir -p /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/docs
+        ./doxygen ccpp_doxyfile
+
+
