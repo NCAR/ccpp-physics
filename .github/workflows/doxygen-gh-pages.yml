@@ -49,14 +49,14 @@ jobs:
 
     - name: Set up Doxygen
       uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        #with:
+        #  github_token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Run ccpp_prebuild.py
+    - name: Run doxygen
       run: |
-        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/
-        git status
-        mkdir -p /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/docs
+        #cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/
+        #git status
+        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/docs
         ./doxygen ccpp_doxyfile
 
 
