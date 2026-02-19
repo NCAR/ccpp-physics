@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  ccpp-scidoc-doxygen:
-    if: github.repository == 'NCAR/ccpp-physics' || github.repository == 'ufs-community/ccpp-physics'
+  #ccpp-scidoc-doxygen:
+  #  if: github.repository == 'NCAR/ccpp-physics' || github.repository == 'ufs-community/ccpp-physics'
   deploy:
     runs-on: ubuntu-latest
 
