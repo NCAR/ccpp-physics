@@ -15,7 +15,9 @@ jobs:
     steps:
 
     - name: Checkout current ccpp-physics code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Store remote-URL for current ccpp-physics code
       run: echo "GIT_REMOTE_URL=`git remote get-url origin`" >> $GITHUB_ENV
@@ -49,8 +51,6 @@ jobs:
 
     - name: Set up Doxygen
       uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
-        #with:
-        #  github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Run doxygen
       run: |
