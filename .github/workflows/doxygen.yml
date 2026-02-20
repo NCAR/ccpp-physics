@@ -12,8 +12,9 @@ jobs:
       contents: write
       pages: write
       id-token: write
-      
-
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
 
@@ -70,7 +71,7 @@ jobs:
       with:
           path: ${{ github.workspace }}/dist
           artifact_name: dist
-        continue-on-error: true    
+          continue-on-error: true    
         
     - name: Deploy to GitHub Pages
       id: deployment
