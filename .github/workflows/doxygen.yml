@@ -66,12 +66,12 @@ jobs:
     - name: Setup Pages
       uses: actions/configure-pages@v5
     - name: Upload artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
-        name: _site
-        path: _site
+        name: doxy-html
+        path: doc/html
     - name: list files
-      run: ls -la doc/
+      run: ls -la doc/html/
 
     - name: Deploy to GitHub Pages
       id: deployment
