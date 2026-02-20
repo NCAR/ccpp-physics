@@ -55,16 +55,4 @@ jobs:
       uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
 
 
-     - name: "Doxygen"
-       run: |
-         sudo apt-get install -y doxygen
-         doxygen Doxyfile
-
-    - name: Run doxygen
-      run: |
-        #cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/
-        #git status
-        #cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/docs
-        #./doxygen ccpp_doxyfile
-
 
