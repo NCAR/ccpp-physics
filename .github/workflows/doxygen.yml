@@ -66,9 +66,9 @@ jobs:
     - name: Setup Pages
       uses: actions/configure-pages@v5
     - name: Upload artifact
-      uses: actions/upload-artifact@v6
+      id: deployment
+      uses: actions/upload-pages-artifact@v3
       with:
-        name: doxy-html
         path: doc/html
     - name: list files
       run: ls -la doc/html/
