@@ -6,7 +6,7 @@ on:
       - dox 
 
 jobs:
-  deploy:
+  #deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
