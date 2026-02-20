@@ -7,6 +7,7 @@ on:
 
 jobs:
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -62,16 +63,7 @@ jobs:
         working-directory: '.'
         doxyfile-path: './physics/docs/ccpp_doxyfile'
         enable-latex: true
-    
-    - name: Setup Pages
-      uses: actions/configure-pages@v5
-
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v4
-      with:
-          path: ${{ github.workspace }}/dist
-          artifact_name: dist
-      continue-on-error: true
+  
     
     - name: Deploy to GitHub Pages
       id: deployment
