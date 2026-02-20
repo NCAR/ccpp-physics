@@ -6,7 +6,7 @@ on:
       - dox 
 
 jobs:
-  #deploy:
+  deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -58,16 +58,8 @@ jobs:
         working-directory: '.'
         doxyfile-path: './physics/docs/ccpp_doxyfile'
         enable-latex: true
-
-  # Deployment job
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        
+    - name: Deploy to GitHub Pages
+        #id: deployment
+      uses: actions/deploy-pages@v4
 
