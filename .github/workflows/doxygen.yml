@@ -63,16 +63,16 @@ jobs:
         enable-latex: true
     
     - name: Setup Pages
-        uses: actions/configure-pages@v5
+      uses: actions/configure-pages@v5
 
     - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
+      uses: actions/upload-pages-artifact@v3
+      with:
           path: ${{ github.workspace }}/dist
           artifact_name: dist
         continue-on-error: true    
         
     - name: Deploy to GitHub Pages
-        id: deployment
+      id: deployment
       uses: actions/deploy-pages@v4
 
