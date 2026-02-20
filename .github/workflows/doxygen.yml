@@ -52,8 +52,13 @@ jobs:
         git remote add remote_local $GIT_REMOTE_URL
         git fetch remote_local $GIT_REMOTE_BRANCH
         git checkout remote_local/$GIT_REMOTE_BRANCH
-        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/docs
-        cp ccpp_doxyfile Doxyfile
+        #cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/docs
+        #cp ccpp_doxyfile Doxyfile
+
+    - name: Install MacTex
+      run: |
+        brew install --cask mactex-no-framework
+       
         
     - name: Set up Doxygen
       #uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
