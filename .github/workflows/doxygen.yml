@@ -55,8 +55,8 @@ jobs:
       #uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
       uses: mattnotmitt/doxygen-action@v1.12.0
       with:
-         working-directory: './'
-         doxyfile-path: './'
+         working-directory: 'physics/docs/doc'
+         doxyfile-path: 'physics/docs'
          enable-latex: true
 
 
