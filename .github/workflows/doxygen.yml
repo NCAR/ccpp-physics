@@ -71,7 +71,7 @@ jobs:
         name: _site
         path: _site
     - name: list files
-      run: ls -la _site
+      run: ls -la
 
     - name: Deploy to GitHub Pages
       id: deployment
