@@ -61,7 +61,7 @@ jobs:
         sudo apt-get install -y texlive-bibtex-extra perl 
        
         
-    - name: Set up Doxygen
+    - name: Set up and run Doxygen
       #uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
       uses: mattnotmitt/doxygen-action@v1.12.0
       with:

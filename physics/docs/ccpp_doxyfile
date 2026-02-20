@@ -48,7 +48,7 @@ PROJECT_NAME           = "CCPP SciDoc v7.0.0"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = v7.0.0
+PROJECT_NUMBER         = v8.0.0
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -61,7 +61,7 @@ PROJECT_BRIEF          = "Common Community Physics Package Developed at DTC"
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           = img/dtc_logo.png
+PROJECT_LOGO           = ./physics/docs/img/dtc_logo.png
 
 # With the PROJECT_ICON tag one can specify an icon that is included in the tabs
 # when the HTML document is shown. Doxygen will copy the logo to the output
@@ -814,7 +814,7 @@ FILE_VERSION_FILTER    =
 # DoxygenLayout.xml, Doxygen will parse it automatically even if the LAYOUT_FILE
 # tag is left empty.
 
-LAYOUT_FILE            = ccpp_dox_layout.xml
+LAYOUT_FILE            = ./physics/docs/ccpp_dox_layout.xml
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
@@ -824,7 +824,7 @@ LAYOUT_FILE            = ccpp_dox_layout.xml
 # LATEX_BIB_STYLE. To use this feature you need bibtex and perl available in the
 # search path. See also \cite for info how to create references.
 
-CITE_BIB_FILES         = library.bib
+CITE_BIB_FILES         = ./physics/docs/library.bib
 
 # The EXTERNAL_TOOL_PATH tag can be used to extend the search path (PATH
 # environment variable) so that external tools such as latex and gs can be
@@ -840,7 +840,7 @@ CITE_BIB_FILES         = library.bib
 # launching external tools will then become
 # PATH=/Library/TeX/texbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
 
-EXTERNAL_TOOL_PATH     =
+EXTERNAL_TOOL_PATH     = /usr/bin
 
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages
@@ -1147,7 +1147,7 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = img
+IMAGE_PATH             = ./physics/docs/img
 
 # The INPUT_FILTER tag can be used to specify a program that Doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
