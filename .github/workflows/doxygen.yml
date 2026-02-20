@@ -6,7 +6,7 @@ on:
       - dox 
 
 jobs:
-  #deploy:
+  deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -48,9 +48,11 @@ jobs:
         git remote add remote_local $GIT_REMOTE_URL
         git fetch remote_local $GIT_REMOTE_BRANCH
         git checkout remote_local/$GIT_REMOTE_BRANCH
-
-#    - name: Set up Doxygen
-#      uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
+        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/
+        ln -sf ccpp_doxyfile Doxyfile
+        
+    - name: Set up Doxygen
+      uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
 
 
      - name: "Doxygen"
