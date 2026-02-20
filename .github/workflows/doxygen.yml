@@ -49,8 +49,14 @@ jobs:
         git fetch remote_local $GIT_REMOTE_BRANCH
         git checkout remote_local/$GIT_REMOTE_BRANCH
 
-    - name: Set up Doxygen
-      uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
+#    - name: Set up Doxygen
+#      uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
+
+
+     - name: "Doxygen"
+       run: |
+         sudo apt-get install -y doxygen
+         doxygen Doxyfile
 
     - name: Run doxygen
       run: |
