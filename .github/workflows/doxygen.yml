@@ -60,8 +60,4 @@ jobs:
          enable-latex: true
 
 
-    - name: Generate docs
-      run: doxygen Doxyfile
-
-
 
