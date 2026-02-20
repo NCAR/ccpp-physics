@@ -55,13 +55,10 @@ jobs:
         #cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/docs
         #cp ccpp_doxyfile Doxyfile
 
-#    - name: Install MacTex
-#      run: |
-#        sudo apt-get update
-#        sudo apt-get install -y texlive-bibtex-extra perl 
        
-    - name: Install LaTeX and BibTeX dependencies (essential for BibTeX support)
-      run: sudo apt-get update && sudo apt-get install -y texlive-bibtex-extra
+    - name: Install Perl and BibTeX dependencies (essential for BibTeX support)
+      run: sudo apt-get update && sudo apt-get install -y perl perl-modules
+      run: sudo apt-get install -y texlive-bibtex-extra
 
         
     - name: Set up and run Doxygen
