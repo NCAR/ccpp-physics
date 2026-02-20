@@ -56,7 +56,8 @@ jobs:
       uses: mattnotmitt/doxygen-action@v1.12.0
       with:
          working-directory: './'
-         doxyfile-path: '/home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/docs'
+         doxyfile-path: './'
+         enable-latex: true
 
 
     - name: Generate docs
