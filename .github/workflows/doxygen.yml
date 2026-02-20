@@ -52,7 +52,15 @@ jobs:
         cp ccpp_doxyfile Doxyfile
         
     - name: Set up Doxygen
-      uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
+      #uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
+      uses: mattnotmitt/doxygen-action@v1.12.1
+      with:
+         working-directory: './'
+         doxyfile-path: '/home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/docs'
+
+
+    - name: Generate docs
+      run: doxygen Doxyfile
 
 
 
