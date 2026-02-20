@@ -1378,7 +1378,7 @@ HTML_HEADER            = ./physics/docs/_doxygen/header.html
 # that Doxygen normally uses.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_FOOTER            = ./_doxygen/footer.html
+HTML_FOOTER            = ./physics/docs/_doxygen/footer.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1408,11 +1408,11 @@ HTML_STYLESHEET        =
 # documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  = ./_doxygen/doxygen-awesome.css \
-                         ./_doxygen/doxygen-awesome-sidebar-only.css \
-                         ./_doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css \
-                         ./_doxygen/doxygen-awesome-ccpp.css \
-                         ./_doxygen/custom.css
+HTML_EXTRA_STYLESHEET  = ./physics/docs/_doxygen/doxygen-awesome.css \
+                         ./physics/docs/_doxygen/doxygen-awesome-sidebar-only.css \
+                         ./physics/docs/_doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css \
+                         ./physics/docs/_doxygen/doxygen-awesome-ccpp.css \
+                         ./physics/docs/_doxygen/custom.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1422,8 +1422,8 @@ HTML_EXTRA_STYLESHEET  = ./_doxygen/doxygen-awesome.css \
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       = ./_doxygen/doxygen-awesome-darkmode-toggle.js \
-                         ./_doxygen/doxygen-awesome-ccpp.js
+HTML_EXTRA_FILES       = ./physics/docs/_doxygen/doxygen-awesome-darkmode-toggle.js \
+                         ./physics/docs/_doxygen/doxygen-awesome-ccpp.js
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
 # should be rendered with a dark or light theme.
