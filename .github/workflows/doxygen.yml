@@ -56,7 +56,7 @@ jobs:
       run: |
         #cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/
         #git status
-        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/docs
-        ./doxygen ccpp_doxyfile
+        #cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/docs
+        #./doxygen ccpp_doxyfile
 
 
