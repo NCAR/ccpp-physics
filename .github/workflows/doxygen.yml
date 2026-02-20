@@ -57,7 +57,8 @@ jobs:
 
     - name: Install MacTex
       run: |
-        brew install --cask mactex-no-framework
+        sudo apt-get update
+        sudo apt-get install -y texlive-bibtex-extra perl 
        
         
     - name: Set up Doxygen
