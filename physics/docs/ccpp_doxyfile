@@ -1173,7 +1173,7 @@ IMAGE_PATH             = ./physics/docs/img
 # need to set EXTENSION_MAPPING for the extension otherwise the files are not
 # properly processed by Doxygen.
 
-INPUT_FILTER           = "/usr/bin/perl" "/usr/local/bin/doxygen-filter-perl"
+INPUT_FILTER           = "/usr/local/bin/doxygen-filter-perl"
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern
 # basis. Doxygen will compare the file name with each pattern and apply the
