@@ -52,8 +52,6 @@ jobs:
         git remote add remote_local $GIT_REMOTE_URL
         git fetch remote_local $GIT_REMOTE_BRANCH
         git checkout remote_local/$GIT_REMOTE_BRANCH
-        #cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics/docs
-        #cp ccpp_doxyfile Doxyfile
 
        
     - name: Install Perl and BibTeX dependencies (essential for BibTeX support)
