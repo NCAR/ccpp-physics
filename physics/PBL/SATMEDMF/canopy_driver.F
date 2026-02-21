@@ -377,7 +377,7 @@
 !     1   is top    resolved layer
 !     km  is bottom model hybrid layer
 !     km+nkc=nkt is bottom canopy layer
-     &       zmom_can3 (im, km+nkc)        ,  ! dim(im, nkt+1)
+     &       zmom_can3 (im, km+nkc+1)      ,  ! dim(im, nkt+1)
      &       zmid_can3 (im, km+nkc)        ,
      &     sigmom_can3 (im, km+nkc+1)      ,  ! ~zm (nkt) or ~zi (nkt+1)
      &     sigmid_can3 (im, km+nkc)        ,  ! ~zl

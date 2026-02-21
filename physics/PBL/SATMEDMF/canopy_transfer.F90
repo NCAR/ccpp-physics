@@ -128,7 +128,7 @@
 
    integer, intent(in) :: kmod   (im, km), kcan3  (im, nkc)
 
-   real(kind=kind_phys), intent(inout) :: zmom_can  (im, nkt) , &
+   real(kind=kind_phys), intent(inout) :: zmom_can  (im, nkt+1) , &
                                           zmid_can  (im, nkt)
 
    real(kind=kind_phys), intent(in) ::  FRT_MASK  (im)        , &
@@ -513,9 +513,9 @@
 !  kk'th layer is the layer above the inlet height
             kk = nkt
             do k = nkt, nkt-8, -1
-               ! Paul's zt (MV3D_ZPLUS) is our zmid
-               if (diag_hgt <= zmid(k-1) .and. &
-                  diag_hgt > zmid(k)) then
+               ! Paul's zt_can (MV3D_ZPLUS) is our zmid
+               if (diag_hgt <= zmid_can(i, k-1) .and. &
+                  diag_hgt > zmid_can(i, k)) then
                   kk = k - 1
                end if
             end do
@@ -529,11 +529,11 @@
 ! Diagnostic height 2m is always above the lowest model hybrid level ~42m
 ! The lines below never executed
                mmr_diag =  &
-                        mmr_canopy(kk) +                    &
-                       (mmr_canopy(kk) - mmr_canopy(kk + 1)) / &
-!                         max(zmid(kk) -    zmid(kk + 1), epsilon) * &
-                             (zmid(kk) -    zmid(kk + 1)) * &
-                          (diag_hgt -    zmid(kk + 1))        ! ug kg-1
+                        mmr_canopy(kk) +                        &
+                       (mmr_canopy(kk) -  mmr_canopy(kk + 1)) / &
+!                  max(zmid_can(i, kk) - zmid_can(i, kk + 1), epsilon) * &
+                      (zmid_can(i, kk) - zmid_can(i, kk + 1)) * &
+                          (diag_hgt    - zmid_can(i, kk + 1))        ! ug kg-1
                vmr_resolved      (km + 1)      = FORWARD_CONV * mmr_diag       ! kg kg-1
 
             end if

@@ -65,8 +65,8 @@
              Q1_CAN    (im, nkt, ntrac) , & ! dim(nkt)
              Q1_2M     (im,      ntrac) , & !
 ! canopy layers height arrays
-             zmom_can3 (im, nkt)        , & ! dim(nkt+1)    ! Paul's sigmcan(:,nkt)
-             zmid_can3 (im, nkt)        , & ! dim(nkt)      ! Paul's sigtcan(:,nkt)
+             zmom_can3 (im, nkt+1)      , & ! dim(nkt+1)    ! Paul's sigmcan(:,nkt+1)
+             zmid_can3 (im, nkt)        , & ! dim(nkt)      ! Paul's sigtcan(:,nkt+1)
              sigmom_can(im, nkt+1)      , & ! dim(nkt) ~ prsi(:,km+1)
              sigmid_can(im, nkt)            ! dim(nkt) ~ prsl(:,km)
 
@@ -206,8 +206,8 @@
               DENS, dkt, dku,                       & ! in  3D
               FRT_MASK,                             & ! in  2D
               kmod, kcan3,                          & ! out
-              zmom_can3, zmid_can3,                 & ! out    zmom_can3 (:, nkt)   zmid_can3(im, nkt)
-              sigmom_can, sigmid_can,               & ! out 3D sigmom_can(:, nkt)  sigmid_can(im, nkt)
+              zmom_can3, zmid_can3,                 & ! out      zmom_can3(:, nkt+1)    zmid_can3(im, nkt)
+              sigmom_can, sigmid_can,               & ! out 3D sigmom_can (:, nkt+1)  sigmid_can (im, nkt)
               ZL_CAN, ZM_CAN,                       & ! out 3D
               PRSL_CAN, PRSI_CAN,                   & ! out 3D prsi_can (:, nkt+1)
               dv_can, du_can, tdt_can, rtg_can,     & ! out: 3D
@@ -271,7 +271,7 @@
              Q1_CAN    (im, nkt, ntrac) , &
              Q1_2M     (im,      ntrac) , &
 ! canopy layers height arrays
-             zmom_can3 (im, nkt)        , & ! Paul's sigmcan(:,nkt)
+             zmom_can3 (im, nkt+1)      , & ! Paul's sigmcan(:,nkt)
              zmid_can3 (im, nkt)        , & ! Paul's sigtcan(:,nkt)
              sigmom_can(im, nkt+1)      , & ! ~ prsi(:,km+1)
              sigmid_can(im, nkt)            ! ~ prsl(:,km)
