@@ -42,13 +42,13 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "CCPP SciDoc v8.0.0"
+PROJECT_NAME           = "CCPP SciDoc v7.0.X"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = v8.0.0
+PROJECT_NUMBER         = v7.0.0
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -1173,7 +1173,7 @@ IMAGE_PATH             = ./physics/docs/img
 # need to set EXTENSION_MAPPING for the extension otherwise the files are not
 # properly processed by Doxygen.
 
-INPUT_FILTER           = "/usr/local/bin/doxygen-filter-perl"
+INPUT_FILTER           = 
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern
 # basis. Doxygen will compare the file name with each pattern and apply the
@@ -1186,7 +1186,7 @@ INPUT_FILTER           = "/usr/local/bin/doxygen-filter-perl"
 # need to set EXTENSION_MAPPING for the extension otherwise the files are not
 # properly processed by Doxygen.
 
-FILTER_PATTERNS        = *.pl=doxygen-filter-perl
+FILTER_PATTERNS        = 
 
 # If the FILTER_SOURCE_FILES tag is set to YES, the input filter (if set using
 # INPUT_FILTER) will also be used to filter the input files that are used for
@@ -2809,7 +2809,7 @@ INTERACTIVE_SVG        = YES
 # found. If left blank, it is assumed the dot tool can be found in the path.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_PATH               = /opt/homebrew/bin
+DOT_PATH               = 
 
 # The DOTFILE_DIRS tag can be used to specify one or more directories that
 # contain dot files that are included in the documentation (see the \dotfile
