@@ -59,7 +59,12 @@ jobs:
     - name: Install Perl and BibTeX dependencies (essential for BibTeX support)
       run: sudo apt-get update && sudo apt-get install -y perl perl-modules texlive-bibtex-extra
 
-        
+    - name: Verify Perl installation
+      run: which perl
+ 
+    - name: Verify bibtex installation
+      run: which bibtex 
+
     - name: Set up and run Doxygen
       #uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
       #with:
