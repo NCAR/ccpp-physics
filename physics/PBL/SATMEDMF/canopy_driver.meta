@@ -662,6 +662,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [dku_can]
   standard_name = atmosphere_momentum_diffusivity_in_canopy
   long_name = atmospheric momentum diffusivity in canopy
@@ -670,6 +671,7 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = True
 [dku3d_h]
   standard_name = horizontal_atmosphere_momentum_diffusivity_for_dynamics
   long_name = horizontal atmospheric momentum diffusivity for dynamics

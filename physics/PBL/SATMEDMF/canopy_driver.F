@@ -147,7 +147,7 @@
      &                     hpbl(:) ! use resolved hpbl in non-canopy columns
       real(kind=kind_phys), intent(inout) ::
      &                     dkt(:,:), dku(:,:)
-      real(kind=kind_phys), intent(out) ::
+      real(kind=kind_phys), optional, intent(out) ::
      &                     dkt_can(:,:), dku_can(:,:)
 
       logical, intent(in)  :: sa3dtke !flag for SA-3D-TKE scheme
