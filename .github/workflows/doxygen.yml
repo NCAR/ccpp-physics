@@ -87,7 +87,11 @@ jobs:
 
     - name: Verify Doxygen version
       run: doxygen --version
-
+   
+    - name: update doxyfile
+      run: |
+        cd physics/docs
+        doxygen -u ccpp_doxyfile
 
     - name: Run Doxygen
       run: |
