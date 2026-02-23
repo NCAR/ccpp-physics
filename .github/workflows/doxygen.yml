@@ -97,15 +97,18 @@ jobs:
       run: |
         cd physics/docs
         doxygen ccpp_doxyfile
+
+    - name: Find html output
+      run: find . -type d -name html
   
     - name: Setup Pages
       uses: actions/configure-pages@v5
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: doc/html
+        path: physics/docs/doc/html
     - name: list files
-      run: ls -la doc/html/
+      run: ls -la physics/docs/doc/html/
 
     - name: Deploy to GitHub Pages
       id: deployment
