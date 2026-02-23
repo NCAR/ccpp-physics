@@ -63,16 +63,26 @@ jobs:
     - name: Verify bibtex installation
       run: which bibtex 
 
-    - name: Set up and run Doxygen
-      #uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
-      #with:
-      #  config_file: ./physics/docs/ccpp_doxyfile
-      #  folder: ./
-      uses: mattnotmitt/doxygen-action@v1.12.0
-      with:
-        working-directory: '.'
-        doxyfile-path: './physics/docs/ccpp_doxyfile'
-        enable-latex: true
+#    - name: Set up and run Doxygen
+#      #uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
+#      #with:
+#      #  config_file: ./physics/docs/ccpp_doxyfile
+#      #  folder: ./
+#      uses: mattnotmitt/doxygen-action@v1.12.0
+#      with:
+#        working-directory: '.'
+#        doxyfile-path: './physics/docs/ccpp_doxyfile'
+#        enable-latex: true
+
+    - name: Install Doxygen + Graphviz + LaTeX
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen graphviz perl texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-bibtex-extra
+
+    - name: Run Doxygen
+      run: |
+        cd physics/docs
+        doxygen ccpp_doxyfile
   
     - name: Setup Pages
       uses: actions/configure-pages@v5
