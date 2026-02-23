@@ -958,50 +958,50 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ./physics/docs/pdftxt/mainpage.txt \
-                         ./physics/docs/pdftxt/ccppv7_phy_updates.txt \
-                         ./physics/docs/pdftxt/all_schemes_list.txt \
-                         ./physics/docs/pdftxt/GFS_v16_suite.txt \
-                         ./physics/docs/pdftxt/GFS_v16_RRTMGP_suite.txt \
-                         ./physics/docs/pdftxt/GFS_v17_p8_ugwpv1_suite.txt \
-                         ./physics/docs/pdftxt/HRRR_gf_suite.txt \
-                         ./physics/docs/pdftxt/WoFS_v0_suite.txt \
-                         ./physics/docs/pdftxt/RRFS_SGSCLOUD.txt \
-                         ./physics/docs/pdftxt/GFS_RRTMG.txt \
-                         ./physics/docs/pdftxt/GFS_RRTMGP.txt \
-                         ./physics/docs/pdftxt/GFS_SFCLYR.txt \
-                         ./physics/docs/pdftxt/MYNN_SFCLAYER.txt \
-                         ./physics/docs/pdftxt/GFS_NSST.txt \
-                         ./physics/docs/pdftxt/GFS_OCEAN.txt \
-                         ./physics/docs/pdftxt/NOAH_LSM.txt \
-                         ./physics/docs/pdftxt/GFS_SFCSICE.txt \
-                         ./physics/docs/pdftxt/GFS_SATMEDMFVDIFQ.txt \
-                         ./physics/docs/pdftxt/NOAHMP_LSM.txt \
-                         ./physics/docs/pdftxt/UGWPv0.txt \
-                         ./physics/docs/pdftxt/GFS_ugwpv1.txt \
-                         ./physics/docs/pdftxt/GFS_UGWPV1_ORO.txt \
-                         ./physics/docs/pdftxt/GFS_GWDPS.txt \
-                         ./physics/docs/pdftxt/GFS_OZPHYS.txt \
-                         ./physics/docs/pdftxt/GFS_H2OPHYS.txt \
-                         ./physics/docs/pdftxt/GFS_SAMFdeep.txt \
-                         ./physics/docs/pdftxt/GFS_SAMFshal.txt \
-                         ./physics/docs/pdftxt/GFDL_cloud.txt \
-                         ./physics/docs/pdftxt/NSSLMICRO.txt \
-                         ./physics/docs/pdftxt/MYNN_EDMF.txt \
-                         ./physics/docs/pdftxt/CU_GF_deep.txt \
-                         ./physics/docs/pdftxt/RUCLSM.txt \
-                         ./physics/docs/pdftxt/CLM_LAKE.txt \
-                         ./physics/docs/pdftxt/THOMPSON.txt \
-                         ./physics/docs/pdftxt/suite_input.nml.txt \
-                         ./physics/docs/pdftxt/acronyms.txt     \
-                         ./physics/MP \
-                         ./physics/CONV \
-                         ./physics/GWD \
-                         ./physics/SFC_Layer \
-                         ./physics/PBL \
-                         ./physics/SFC_Models \
-                         ./physics/photochem \
-                         ./physics/Radiation
+INPUT                  = pdftxt/mainpage.txt \
+                         pdftxt/ccppv7_phy_updates.txt \
+                         pdftxt/all_schemes_list.txt \
+                         pdftxt/GFS_v16_suite.txt \
+                         pdftxt/GFS_v16_RRTMGP_suite.txt \
+                         pdftxt/GFS_v17_p8_ugwpv1_suite.txt \
+                         pdftxt/HRRR_gf_suite.txt \
+                         pdftxt/WoFS_v0_suite.txt \
+                         pdftxt/RRFS_SGSCLOUD.txt \
+                         pdftxt/GFS_RRTMG.txt \
+                         pdftxt/GFS_RRTMGP.txt \
+                         pdftxt/GFS_SFCLYR.txt \
+                         pdftxt/MYNN_SFCLAYER.txt \
+                         pdftxt/GFS_NSST.txt \
+                         pdftxt/GFS_OCEAN.txt \
+                         pdftxt/NOAH_LSM.txt \
+                         pdftxt/GFS_SFCSICE.txt \
+                         pdftxt/GFS_SATMEDMFVDIFQ.txt \
+                         pdftxt/NOAHMP_LSM.txt \
+                         pdftxt/UGWPv0.txt \
+                         pdftxt/GFS_ugwpv1.txt \
+                         pdftxt/GFS_UGWPV1_ORO.txt \
+                         pdftxt/GFS_GWDPS.txt \
+                         pdftxt/GFS_OZPHYS.txt \
+                         pdftxt/GFS_H2OPHYS.txt \
+                         pdftxt/GFS_SAMFdeep.txt \
+                         pdftxt/GFS_SAMFshal.txt \
+                         pdftxt/GFDL_cloud.txt \
+                         pdftxt/NSSLMICRO.txt \
+                         pdftxt/MYNN_EDMF.txt \
+                         pdftxt/CU_GF_deep.txt \
+                         pdftxt/RUCLSM.txt \
+                         pdftxt/CLM_LAKE.txt \
+                         pdftxt/THOMPSON.txt \
+                         pdftxt/suite_input.nml.txt \
+                         pdftxt/acronyms.txt     \
+                         ../MP \
+                         ../CONV \
+                         ../GWD \
+                         ../SFC_Layer \
+                         ../PBL \
+                         ../SFC_Models \
+                         ../photochem \
+                         ../Radiation
 
 # This tag can be used to specify the character encoding of the source files
 # that Doxygen parses. Internally Doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1147,7 +1147,7 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = ./physics/docs/img
+IMAGE_PATH             = img
 
 # The INPUT_FILTER tag can be used to specify a program that Doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
@@ -1378,7 +1378,7 @@ HTML_HEADER            = _doxygen/header.html
 # that Doxygen normally uses.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_FOOTER            = ./physics/docs/_doxygen/footer.html
+HTML_FOOTER            = _doxygen/footer.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading style
 # sheet that is used by each HTML page. It can be used to fine-tune the look of
@@ -1408,11 +1408,11 @@ HTML_STYLESHEET        =
 # documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  = ./physics/docs/_doxygen/doxygen-awesome.css \
-                         ./physics/docs/_doxygen/doxygen-awesome-sidebar-only.css \
-                         ./physics/docs/_doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css \
-                         ./physics/docs/_doxygen/doxygen-awesome-ccpp.css \
-                         ./physics/docs/_doxygen/custom.css
+HTML_EXTRA_STYLESHEET  = _doxygen/doxygen-awesome.css \
+                         _doxygen/doxygen-awesome-sidebar-only.css \
+                         _doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css \
+                         _doxygen/doxygen-awesome-ccpp.css \
+                         _doxygen/custom.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -1422,8 +1422,8 @@ HTML_EXTRA_STYLESHEET  = ./physics/docs/_doxygen/doxygen-awesome.css \
 # files will be copied as-is; there are no commands or markers available.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_FILES       = ./physics/docs/_doxygen/doxygen-awesome-darkmode-toggle.js \
-                         ./physics/docs/_doxygen/doxygen-awesome-ccpp.js
+HTML_EXTRA_FILES       = _doxygen/doxygen-awesome-darkmode-toggle.js \
+                         _doxygen/doxygen-awesome-ccpp.js
 
 # The HTML_COLORSTYLE tag can be used to specify if the generated HTML output
 # should be rendered with a dark or light theme.
