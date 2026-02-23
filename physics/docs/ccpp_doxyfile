@@ -814,7 +814,7 @@ FILE_VERSION_FILTER    =
 # DoxygenLayout.xml, Doxygen will parse it automatically even if the LAYOUT_FILE
 # tag is left empty.
 
-LAYOUT_FILE            = /home/runner/work/ccpp-physics/ccpp-physics/physics/doc/ccpp_dox_layout.xml
+LAYOUT_FILE            = /home/runner/work/ccpp-physics/ccpp-physics/physics/docs/ccpp_dox_layout.xml
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
@@ -824,7 +824,7 @@ LAYOUT_FILE            = /home/runner/work/ccpp-physics/ccpp-physics/physics/doc
 # LATEX_BIB_STYLE. To use this feature you need bibtex and perl available in the
 # search path. See also \cite for info how to create references.
 
-CITE_BIB_FILES         = /home/runner/work/ccpp-physics/ccpp-physics/physics/doc/library.bib
+CITE_BIB_FILES         = /home/runner/work/ccpp-physics/ccpp-physics/physics/docs/library.bib
 
 # The EXTERNAL_TOOL_PATH tag can be used to extend the search path (PATH
 # environment variable) so that external tools such as latex and gs can be
