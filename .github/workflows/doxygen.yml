@@ -3,7 +3,7 @@ name: Doxygen GitHub Pages Deploy Action
 on:
   push:
     branches:
-      - dox 
+      - main
 
 jobs:
   deploy:
@@ -53,15 +53,6 @@ jobs:
         git fetch remote_local $GIT_REMOTE_BRANCH
         git checkout remote_local/$GIT_REMOTE_BRANCH
 
-       
-#    - name: Install Perl and BibTeX dependencies (essential for BibTeX support)
-#      run: sudo apt-get update && sudo apt-get install -y perl perl-modules texlive-bibtex-extra
-
-#    - name: Verify Perl installation
-#      run: which perl
- 
-#    - name: Verify bibtex installation
-#      run: which bibtex 
 
 #    - name: Set up and run Doxygen
 #      #uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
