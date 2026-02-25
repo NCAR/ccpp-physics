@@ -85,7 +85,8 @@
      &    clam,c0s,c1,betal,betas,evef,pgcon,asolfac,cscale,            &
      &    do_ca, ca_closure, ca_entr, ca_trigger, nthresh,ca_deep,      &
      &    rainevap,sigmain,sigmaout,omegain,omegaout,betadcu,betamcu,   &
-     &    betascu,maxMF,do_mynnedmf,sigmab_coldstart,errmsg,errflg)
+     &    betascu,maxMF,do_mynnedmf,sigmab_coldstart,cat_adj_deep,      &
+     &    errmsg,errflg)
 
 !
       use machine , only : kind_phys
@@ -137,6 +138,7 @@
       real(kind=kind_phys), intent(in) :: clam,  c0s,  c1,              &
      &                     betal,   betas,   asolfac,                   &
      &                     evef,  pgcon
+      real(kind_phys), intent(in) :: cat_adj_deep
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
@@ -2952,7 +2954,7 @@ c
            umean(i) = max(umean(i), 1.)
            tauadv = gdx(i) / umean(i)
            advfac(i) = tauadv / dtconv(i)
-           advfac(i) = min(advfac(i), 1.)
+           advfac(i) = min(cat_adj_deep*advfac(i), 1.)
         endif
       enddo
       
