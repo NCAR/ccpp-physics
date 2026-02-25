@@ -128,7 +128,6 @@ physics/SFC_Models/Ocean/UFS/sfc_ocean.*                                     @He
 physics/SFC_Models/SeaIce/CICE/sfc_cice.*                                    @wd20xw                                   @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/SFC_Models/SeaIce/CICE/sfc_sice.*                                    @wd20xw                                   @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/hooks/machine.*                                                                                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/hooks/physcons.F90                                                                                             @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/photochem/module_h2ophys.*                                           @Qingfu-Liu                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/photochem/module_ozphys.*                                            @dustinswales                             @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/smoke_dust/*                                                         @haiqinli                                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
@@ -149,7 +148,7 @@ physics/Interstitials/UFS_SCM_NEPTUNE/GFS_PBL_generic_pre.*                     
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_phys_time_vary.fv3.*                                                         @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_phys_time_vary.scm.*                                                         @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_physics_post.*                                                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/Interstitials/UFS_SCM_NEPTUNE/GFS_radiation_surface.*                                                          @grantfirl @rhaesung @Qingfu-Liu @dustinswales 
+physics/Interstitials/UFS_SCM_NEPTUNE/GFS_radiation_surface.*                                                          @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rad_time_vary.fv3.*                                                          @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rad_time_vary.scm.*                                                          @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rrtmgp_cloud_mp.*                  @dustinswales @Qingfu-Liu                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales

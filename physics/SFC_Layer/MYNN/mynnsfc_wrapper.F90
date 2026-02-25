@@ -19,9 +19,14 @@
 !! \htmlinclude mynnsfc_wrapper_init.html
 !!
       subroutine mynnsfc_wrapper_init(do_mynnsfclay, &
-       &                             errmsg, errflg)
+           con_cp, con_g, con_rd, con_rv, &
+           con_rocp, con_hvap, con_hfus, con_fvirt, &
+           con_eps, errmsg, errflg)
 
          logical,          intent(in)  :: do_mynnsfclay
+         real(kind_phys), intent(in) :: con_cp, con_g, con_rd, con_rv
+         real(kind_phys), intent(in) :: con_rocp, con_hvap, con_hfus, con_fvirt
+         real(kind_phys), intent(in) :: con_eps
          character(len=*), intent(out) :: errmsg
          integer, intent(out) :: errflg
 
@@ -29,12 +34,17 @@
          errmsg = ''
          errflg = 0
 
+        ! Initialize sf_mynn
+        call sf_mynn_init(con_cp, con_g, con_rd, con_rv, &
+             con_rocp, con_hvap, con_hfus, con_fvirt, &
+             con_eps)
+
         ! Consistency checks
         if (.not. do_mynnsfclay) then
           write(errmsg,fmt='(*(a))') 'Logic error: do_mynnsfclay = .false.'
           errflg = 1
           return
-        end if 
+        end if
 
          ! initialize tables for psih and psim (stable and unstable)
          CALL PSI_INIT(psi_opt,errmsg,errflg)
@@ -70,6 +80,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &   tsurf_wat, tsurf_lnd, tsurf_ice,  &  !intent(in)
      &    qsfc_wat,  qsfc_lnd,  qsfc_ice,  &  !intent(in)
      &              snowh_lnd, snowh_ice,  &  !intent(in)
+     &              con_g, con_cp,         &  !intent(in)
      &     znt_wat,   znt_lnd,   znt_ice,  &  !intent(inout)
      &     ust_wat,   ust_lnd,   ust_ice,  &  !intent(inout)
      &      cm_wat,    cm_lnd,    cm_ice,  &  !intent(inout)
@@ -94,8 +105,6 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 
 ! should be moved to inside the mynn:
       use machine , only : kind_phys
-      use physcons, only : cp     => con_cp,              &
-     &                     grav   => con_g
 
 !      USE module_sf_mynn, only : SFCLAY_mynn
 !tgs - info on iterations:
@@ -111,8 +120,6 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !-------------------------------------------------------------------
       implicit none
 !-------------------------------------------------------------------
-!  ---  derive more constant parameters:
-      real(kind_phys), parameter :: g_inv=1./grav
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -151,7 +158,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &                    tskin_wat, tskin_lnd, tskin_ice,  &
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,  &
      &                               snowh_lnd, snowh_ice
-
+      real(kind_phys), intent(in) :: con_cp, con_g
       real(kind_phys), dimension(:), intent(inout) ::       &
      &                      znt_wat,   znt_lnd,   znt_ice,  &
      &                      ust_wat,   ust_lnd,   ust_ice,  &
@@ -186,6 +193,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 
      real(kind_phys), dimension(im,levs) ::                 &
     &        dz, th, qv
+     real(kind_phys) :: cp, grav, g_inv
 
 !MYNN-1D
       INTEGER :: k, i
@@ -206,6 +214,10 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      cp = con_cp
+      grav = con_g
+      g_inv=1./grav
 
 !      if (lprnt) then
 !         write(0,*)"=============================================="
@@ -307,7 +319,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              z0pert=z0pert,ztpert=ztpert,                                     & !intent(in)
              redrag=redrag,sfc_z0_type=sfc_z0_type,                           & !intent(in)
              itimestep=itimestep,iter=iter,flag_iter=flag_iter,               &
-             flag_restart=flag_restart,                                       & 
+             flag_restart=flag_restart,                                       &
                          wet=wet,              dry=dry,              icy=icy, &  !intent(in)
              tskin_wat=tskin_wat,  tskin_lnd=tskin_lnd,  tskin_ice=tskin_ice, &  !intent(in)
              tsurf_wat=tsurf_wat,  tsurf_lnd=tsurf_lnd,  tsurf_ice=tsurf_ice, &  !intent(in)

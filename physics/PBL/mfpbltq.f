@@ -1,29 +1,27 @@
 !>\file mfpbltq.f
-!! This file contains the subroutine that computes mass flux and 
+!! This file contains the subroutine that computes mass flux and
 !! updraft parcel properties for
 !! thermals driven by surface heating
 
 !> This module contains the subroutine that calculates mass flux and
-!! updraft parcel properties for thermals driven by surface heating 
+!! updraft parcel properties for thermals driven by surface heating
 !! for use in the TKE-EDMF PBL scheme (updated version).
       module mfpbltq_mod
       contains
 !>\ingroup module_satmedmfvdifq
 !! This subroutine computes mass flux and updraft parcel properties for
-!! thermals driven by surface heating. 
-!!\section mfpbltq_gen GFS mfpblt General Algorithm 
+!! thermals driven by surface heating.
+!!\section mfpbltq_gen GFS mfpblt General Algorithm
 !> @{
       subroutine mfpbltq(im,ix,km,kmpbl,ntcw,ntrac1,delt,
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &   gdx,hpbl,kpbl,vpert,buo,wush,tkemean,vez0fun,xmf,
-     &   tcko,qcko,ucko,vcko,xlamueq,a1)
+     &   tcko,qcko,ucko,vcko,xlamueq,a1,
+! The following are constants being passed in by argument
+     &   con_g,con_cp,con_rv,con_hvap,con_fvirt,con_eps,con_epsm1)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, grav => con_g, cp => con_cp
-     &,             rv => con_rv, hvap => con_hvap
-     &,             fv => con_fvirt
-     &,             eps => con_eps, epsm1 => con_epsm1
 !
       implicit none
 !
@@ -37,11 +35,13 @@
      &                     plyr(im,km),pix(im,km),thlx(im,km),
      &                     thvx(im,km),zl(im,km), zm(im,km),
      &                     gdx(im),    hpbl(im),  vpert(im),
-     &                     buo(im,km), wush(im,km), 
+     &                     buo(im,km), wush(im,km),
      &                     tkemean(im),vez0fun(im),xmf(im,km),
      &                     tcko(im,km),qcko(im,km,ntrac1),
      &                     ucko(im,km),vcko(im,km),
      &                     xlamueq(im,km-1)
+      real(kind=kind_phys), intent(in) :: con_g,con_cp,con_rv,con_hvap
+      real(kind=kind_phys), intent(in) :: con_fvirt,con_eps,con_epsm1
 !
 c  local variables and arrays
 !
@@ -72,12 +72,10 @@ c  local variables and arrays
       real(kind=kind_phys) xlamavg(im),   sigma(im),
      &                     scaldfunc(im), sumx(im)
 !
+      real(kind=kind_phys) :: grav, cp, rv, hvap, fv, eps, epsm1
       logical totflg, flg(im)
 !
 !  physical parameters
-      parameter(g=grav)
-      parameter(gocp=g/cp)
-      parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
       parameter(ce0=0.4,cm=1.0,cq=1.0,tkcrt=2.,cmxfac=5.)
       parameter(qmin=1.e-8,qlmin=1.e-12)
       parameter(alp=1.5,vpertmax=3.0,pgcon=0.55)
@@ -85,6 +83,18 @@ c  local variables and arrays
 !
 !************************************************************************
 !!
+      grav = con_g
+      cp = con_cp
+      rv = con_rv
+      hvap = con_hvap
+      fv = con_fvirt
+      eps = con_eps
+      epsm1 = con_epsm1
+      g=grav
+      gocp=g/cp
+      elocp=hvap/cp
+      el2orc=hvap*hvap/(rv*cp)
+
       totflg = .true.
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))
@@ -117,11 +127,11 @@ c  local variables and arrays
       enddo
 !
 !> - Compute entrainment rate
-!     
+!
 !  if tkemean>tkcrt, ce0t=sqrt(tkemean/tkcrt)*ce0
 !
       do i=1,im
-        if(cnvflg(i)) then 
+        if(cnvflg(i)) then
           ce0t(i) = ce0 * vez0fun(i)
           if(tkemean(i) > tkcrt) then
             tem = sqrt(tkemean(i)/tkcrt)
@@ -198,7 +208,7 @@ c  local variables and arrays
         enddo
       enddo
 !
-!> - Compute updraft velocity square(wu2, eqn 13 in 
+!> - Compute updraft velocity square(wu2, eqn 13 in
 !! Han et al.(2019) \cite Han_2019)
 !
 !     tem = 1.-2.*f1
@@ -284,7 +294,7 @@ c  local variables and arrays
           if(kpbl(i) <= 1) cnvflg(i)=.false.
         endif
       enddo
-! 
+!
 !> - Update entrainment rate
 !
       do i=1,im
@@ -305,7 +315,7 @@ c  local variables and arrays
               tem = max((hpbl(i)-zm(i,k)+delz(i)) ,delz(i))
               ptem1 = 1./tem
               xlamue(i,k) = ce0t(i) * (ptem+ptem1)
-            else 
+            else
               xlamue(i,k) = xlamax(i)
             endif
 !
@@ -359,7 +369,7 @@ c  local variables and arrays
         endif
       enddo
 !
-!> - Compute scale-aware function based on 
+!> - Compute scale-aware function based on
 !! Arakawa and Wu (2013) \cite arakawa_and_wu_2013
 !
       do i = 1, im
@@ -468,7 +478,7 @@ c  local variables and arrays
              dz   = zl(i,k) - zl(i,k-1)
              tem  = 0.5 * xlamueq(i,k-1) * dz
              factor = 1. + tem
-! 
+!
              qcko(i,k,n) = ((1.-tem)*qcko(i,k-1,n)+tem*
      &                    (q1(i,k,n)+q1(i,k-1,n)))/factor
           endif
@@ -489,7 +499,7 @@ c  local variables and arrays
              dz   = zl(i,k) - zl(i,k-1)
              tem  = 0.5 * xlamueq(i,k-1) * dz
              factor = 1. + tem
-! 
+!
              qcko(i,k,n) = ((1.-tem)*qcko(i,k-1,n)+tem*
      &                    (q1(i,k,n)+q1(i,k-1,n)))/factor
           endif

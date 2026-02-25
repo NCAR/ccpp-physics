@@ -1,29 +1,26 @@
 !>\file mfpblt.f
 !! This file contains the subroutine that calculates mass flux and
-!! updraft parcel properties for thermals driven by surface heating 
+!! updraft parcel properties for thermals driven by surface heating
 !! for use in the TKE-EDMF PBL scheme.
 
 !> This module contains the subroutine that calculates mass flux and
-!! updraft parcel properties for thermals driven by surface heating 
+!! updraft parcel properties for thermals driven by surface heating
 !! for use in the TKE-EDMF PBL scheme.
       module mfpblt_mod
       contains
 
 !> This subroutine computes mass flux and updraft parcel properties for
-!! thermals driven by surface heating. 
-!!\section mfpblt_gen GFS mfpblt General Algorithm 
+!! thermals driven by surface heating.
+!!\section mfpblt_gen GFS mfpblt General Algorithm
 !> @{
       subroutine mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,delt,                &
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,                   &
      &   gdx,hpbl,kpbl,vpert,buo,xmf,                                   &
-     &   tcko,qcko,ucko,vcko,xlamue)
+     &   tcko,qcko,ucko,vcko,xlamue,                                    &
+     &   con_g,con_cp,con_rv,con_hvap,con_fvirt,con_eps,con_epsm1)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, grav => con_g, cp => con_cp                         &
-     &,             rv => con_rv, hvap => con_hvap                      &
-     &,             fv => con_fvirt                                     &
-     &,             eps => con_eps, epsm1 => con_epsm1
 !
       implicit none
 !
@@ -64,6 +61,9 @@ c  local variables and arrays
       real(kind=kind_phys) rbdn(im), rbup(im), hpblx(im),
      &                     xlamuem(im,km-1)
 !
+      real(kind=kind_phys), intent(in) :: con_g,con_cp,con_rv,con_hvap
+      real(kind=kind_phys), intent(in) :: con_fvirt,con_eps,con_epsm1
+
       real(kind=kind_phys) wu2(im,km), thlu(im,km),
      &                     qtx(im,km), qtu(im,km)
 !
@@ -73,9 +73,6 @@ c  local variables and arrays
       logical totflg, flg(im)
 !
 !  physical parameters
-      parameter(g=grav)
-      parameter(gocp=g/cp)
-      parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
       parameter(ce0=0.4,cm=1.0)
       parameter(qmin=1.e-8,qlmin=1.e-12)
       parameter(alp=1.0,pgcon=0.55)
@@ -83,6 +80,18 @@ c  local variables and arrays
 !
 !************************************************************************
 !!
+      grav = con_g
+      cp = con_cp
+      rv = con_rv
+      hvap = con_hvap
+      fv = con_fvirt
+      eps = con_eps
+      epsm1 = con_epsm1
+      g=grav
+      gocp=g/cp
+      elocp=hvap/cp
+      el2orc=hvap*hvap/(rv*cp)
+
       totflg = .true.
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))
@@ -124,7 +133,7 @@ c  local variables and arrays
               tem = max((hpbl(i)-zm(i,k)+dz) ,dz)
               ptem1 = 1./tem
               xlamue(i,k) = ce0 * (ptem+ptem1)
-            else 
+            else
               xlamue(i,k) = ce0 / dz
             endif
             xlamuem(i,k) = cm * xlamue(i,k)
@@ -168,7 +177,7 @@ c  local variables and arrays
         enddo
       enddo
 !
-!> - Compute updraft velocity square(wu2, eqn 13 in 
+!> - Compute updraft velocity square(wu2, eqn 13 in
 !! Han et al.(2019) \cite Han_2019)
 !
 !     tem = 1.-2.*f1
@@ -241,7 +250,7 @@ c  local variables and arrays
            hpblx(i) = zm(i,k-1) + rbint*(zm(i,k)-zm(i,k-1))
         endif
       enddo
-! 
+!
       do i = 1,im
         if(cnvflg(i)) then
           if(kpbl(i) > kpblx(i)) then
@@ -262,7 +271,7 @@ c  local variables and arrays
               tem = max((hpbl(i)-zm(i,k)+dz) ,dz)
               ptem1 = 1./tem
               xlamue(i,k) = ce0 * (ptem+ptem1)
-            else 
+            else
               xlamue(i,k) = ce0 / dz
             endif
             xlamuem(i,k) = cm * xlamue(i,k)
@@ -320,7 +329,7 @@ c  local variables and arrays
         endif
       enddo
 !
-!> - Compute scale-aware function based on 
+!> - Compute scale-aware function based on
 !! Arakawa and Wu (2013) \cite arakawa_and_wu_2013
 !
       do i = 1, im
@@ -423,7 +432,7 @@ c  local variables and arrays
              dz   = zl(i,k) - zl(i,k-1)
              tem  = 0.5 * xlamue(i,k-1) * dz
              factor = 1. + tem
-! 
+!
              qcko(i,k,n) = ((1.-tem)*qcko(i,k-1,n)+tem*
      &                    (q1(i,k,n)+q1(i,k-1,n)))/factor
           endif
@@ -444,7 +453,7 @@ c  local variables and arrays
              dz   = zl(i,k) - zl(i,k-1)
              tem  = 0.5 * xlamue(i,k-1) * dz
              factor = 1. + tem
-! 
+!
              qcko(i,k,n) = ((1.-tem)*qcko(i,k-1,n)+tem*
      &                    (q1(i,k,n)+q1(i,k-1,n)))/factor
           endif

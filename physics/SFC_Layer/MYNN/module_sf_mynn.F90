@@ -63,18 +63,6 @@ MODULE module_sf_mynn
 !NOTE: This code was primarily tested in combination with the RUC LSM.
 !      Performance with the Noah (or other) LSM is relatively unknown.
 !-------------------------------------------------------------------
-!Include host model constants
-      use physcons, only : cp     => con_cp,     & !=7*Rd/2
-     &                     grav   => con_g,      & !=9.81
-     &                     Rd     => con_rd,     & !=287.
-     &                     Rv     => con_rv,     & !=461.6
-!     &                     cpv    => con_cvap,   & !=4*Rv
-     &                     rovcp  => con_rocp,   & !=Rd/cp
-     &                     xlv    => con_hvap,   & !2.5e6
-     &                     xlf    => con_hfus,   & !3.5e5
-     &                     ep1    => con_fvirt,  & !Rv/Rd - 1
-     &                     ep2    => con_eps       !Rd/Rv
-
 !use kind_phys for real-types
     use machine , only : kind_phys
 
@@ -82,9 +70,19 @@ MODULE module_sf_mynn
   IMPLICIT NONE
 !-------------------------------------------------------------------
 !Drive and/or define more constant:
-  real(kind_phys), parameter :: ep3           = 1.-ep2
-  real(kind_phys), parameter :: g_inv         = 1.0/grav
-  real(kind_phys), parameter :: rvovrd        = Rv/Rd
+  real(kind_phys) :: cp = 1.0E30_kind_phys
+  real(kind_phys) :: grav = 1.0E30_kind_phys
+  real(kind_phys) :: Rd = 1.0E30_kind_phys
+  real(kind_phys) :: Rv = 1.0E30_kind_phys
+  real(kind_phys) :: rovcp = 1.0E30_kind_phys
+  real(kind_phys) :: xlv = 1.0E30_kind_phys
+  real(kind_phys) :: xlf = 1.0E30_kind_phys
+  real(kind_phys) :: ep1 = 1.0E30_kind_phys
+  real(kind_phys) :: ep2 = 1.0E30_kind_phys
+  real(kind_phys) :: ep3 = 1.0E30_kind_phys
+  real(kind_phys) :: g_inv = 1.0E30_kind_phys
+  real(kind_phys) :: rvovrd = 1.0E30_kind_phys
+
   real(kind_phys), parameter :: wmin          = 0.1    ! Minimum wind speed
   real(kind_phys), parameter :: karman        = 0.4
   real(kind_phys), parameter :: SVP1          = 0.6112
@@ -111,6 +109,29 @@ MODULE module_sf_mynn
 !$acc declare create(psim_stab, psim_unstab, psih_stab, psih_unstab)
 
 CONTAINS
+
+  subroutine sf_mynn_init(con_cp, con_g, con_rd, con_rv, &
+       con_rocp, con_hvap, con_hfus, con_fvirt, &
+       con_eps)
+     real(kind_phys), intent(in) :: con_cp, con_g, con_rd, con_rv
+     real(kind_phys), intent(in) :: con_rocp, con_hvap, con_hfus, con_fvirt
+     real(kind_phys), intent(in) :: con_eps
+!Include host model constants
+     cp = con_cp
+     grav = con_g
+     Rd = con_rd
+     Rv = con_rv
+     rovcp = con_rocp
+     xlv = con_hvap
+     xlf = con_hfus
+     ep1 = con_fvirt
+     ep2 = con_eps
+
+     ep3 = 1.-ep2
+     g_inv = 1.0/grav
+     rvovrd = Rv/Rd
+   end subroutine sf_mynn_init
+
 
 !-------------------------------------------------------------------
 !-------------------------------------------------------------------
@@ -3156,12 +3177,12 @@ END SUBROUTINE SFCLAY1D_mynn
       END SUBROUTINE znot_m_v6
 !--------------------------------------------------------------------
 !>\ingroup mynn_sfc
-!> Calculate scalar roughness over water with input 10-m wind 
+!> Calculate scalar roughness over water with input 10-m wind
 !! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
 !! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
 !!
 !!\author Bin Liu, NOAA/NCEP/EMC 2017
-!   
+!
 ! uref(m/s)   :   wind speed at 10-m height
 ! znott(meter):   scalar roughness scale over water
       SUBROUTINE znot_t_v6(uref, znott)
@@ -3226,7 +3247,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
 !! For high winds, try to fit available observational data
 !! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
-!!   
+!!
 !!\author Bin Liu, NOAA/NCEP/EMC 2018
       SUBROUTINE znot_m_v7(uref, znotm)
 
@@ -3275,7 +3296,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
 !! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
 !! To be compatible with the slightly decreased Cd for higher wind speed
-!!    
+!!
 !!\author Bin Liu, NOAA/NCEP/EMC 2018
       SUBROUTINE znot_t_v7(uref, znott)
 

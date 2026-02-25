@@ -26,7 +26,7 @@
 
       implicit none
       integer,              intent(in) :: lsm
-      integer,              intent(in) :: lsm_noah      
+      integer,              intent(in) :: lsm_noah
 
       integer,              intent(in)  :: me, isot, ivegsrc, nlunit
 
@@ -38,7 +38,7 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-      
+
       ! Consistency checks
       if (lsm/=lsm_noah) then
         write(errmsg,'(*(a))') 'Logic error: namelist choice of ',
@@ -59,7 +59,7 @@
         errflg = 1
         return
       end if
-      
+
       !--- initialize soil vegetation
       call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
 
@@ -202,7 +202,7 @@
 !  ====================    end of description    =====================  !
 
 !>\defgroup Noah_LSM GFS Noah LSM Model
-!!  This is Noah LSM driver module, with the functionality of 
+!!  This is Noah LSM driver module, with the functionality of
 !! preparing variables to run Noah LSM gfssflx(), calling Noah LSM and post-processing
 !! variables for return to the parent model suite including unit conversion, as well
 !! as diagnotics calculation.
@@ -221,7 +221,7 @@
      &       bexppert, xlaipert, vegfpert,pertvegf,                     &  ! sfc perts, mgehne
      &       albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,        &  
      &       adjvisbmd, adjnirbmd, adjvisdfd, adjnirdfd, rhonewsn1,     &  
-     &       exticeden,                                                 &
+     &       exticeden, con_csol, con_t0c,                              &
 !  ---  in/outs:
      &       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
      &       canopy, trans, tsurf, zorl,                                &
@@ -253,7 +253,7 @@
      &                  -1.0_kind_phys, -2.0_kind_phys /
 
 !  ---  input:
-      integer, intent(in) :: im, km, isot, ivegsrc 
+      integer, intent(in) :: im, km, isot, ivegsrc
       real (kind=kind_phys), intent(in) :: grav, cp, hvap, rd, eps,     &
      &       epsm1, rvrdm1
       real (kind=kind_phys), intent(in) :: pertvegf
@@ -273,7 +273,7 @@
       logical, dimension(:), intent(in) :: flag_iter, flag_guess, land
 
       logical, intent(in) :: lheatstrg, exticeden
-
+      real (kind=kind_phys),  intent(in) :: con_csol, con_t0c
 !  ---  in/out:
       real (kind=kind_phys), dimension(:), intent(inout) :: weasd,      &
      &       snwdph, tskin, tprcp, srflag, canopy, trans, tsurf, zorl
@@ -285,17 +285,16 @@
       real (kind=kind_phys), dimension(:), intent(inout) :: sncovr1,    &
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
      &       evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2
-      real (kind=kind_phys), dimension(:), intent(inout) :: lai, rca
       real (kind=kind_phys), dimension(:), intent(inout), optional ::   &
-     &       wet1
-      
+     &       wet1, lai, rca
+
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: rch, rho,                 &
      &       q0, qs1, theta1,       weasd_old, snwdph_old,              &
-     &       tprcp_old, srflag_old, tskin_old, canopy_old              
+     &       tprcp_old, srflag_old, tskin_old, canopy_old
 
       real (kind=kind_phys), dimension(km) :: et, sldpth, stsoil,       &
      &       smsoil, slsoil
@@ -313,7 +312,7 @@
      &       snomlt, sncovr, soilw, soilm, ssoil, tsea, th2, tbot,      &
      &       xlai, zlvl, swdn, tem, z0, bexpp, xlaip, vegfp,            &
      &       mv, sv, alphav, betav, vegftmp, cpinv, hvapi, elocp,       &
-     &       rhonewsn 
+     &       rhonewsn
       integer :: couple, ice, nsoil, nroot, slope, stype, vtype
       integer :: i, k, iflag
 !
@@ -418,7 +417,7 @@
           solnet = adjvisbmd(i)*(1-albdvis_lnd(i))                       &
      &            +adjnirbmd(i)*(1-albdnir_lnd(i))                       &
      &            +adjvisdfd(i)*(1-albivis_lnd(i))                       &
-     &            +adjnirdfd(i)*(1-albinir_lnd(i))  
+     &            +adjnirdfd(i)*(1-albinir_lnd(i))
 
           sfcems = sfcemis(i)
 
@@ -523,7 +522,7 @@
 !> - Apply perturbation of soil type b parameter and leave area index.
           bexpp  = bexppert(i)                   ! sfc perts, mgehne
           xlaip  = xlaipert(i)                   ! sfc perts, mgehne
-!> - New snow depth variables 
+!> - New snow depth variables
           rhonewsn = rhonewsn1(i)
 !> - Call Noah LSM gfssflx().
 
@@ -535,6 +534,7 @@
      &       vtype, stype, slope, shdmin1d, alb, snoalb1d,              &
      &       rhonewsn, exticeden,                                       &
      &       bexpp, xlaip,                                              & ! sfc-perts, mgehne
+     &       cp, con_csol, con_t0c,                                     &
      &       lheatstrg,                                                 &
 !  ---  input/outputs:
      &       tbot, cmc, tsea, stsoil, smsoil, slsoil, sneqv, chx, cmx,  &

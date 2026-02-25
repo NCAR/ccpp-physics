@@ -5,7 +5,6 @@
 module cu_gf_driver
 
    ! DH* TODO: replace constants with arguments to cu_gf_driver_run
-   !use physcons  , g => con_g, cp => con_cp, xlv => con_hvap, r_v => con_rv
    use machine   , only: kind_phys
    use cu_gf_deep, only: cu_gf_deep_run,neg_check,fct1d3
    use cu_gf_sh  , only: cu_gf_sh_run
@@ -68,7 +67,7 @@ contains
                dfi_radar_max_intervals,ldiag3d,qci_conv,do_cap_suppress,        &
                maxupmf,maxMF,do_mynnedmf,ichoice_in,ichoicem_in,ichoice_s_in,   &
                spp_cu_deep,spp_wts_cu_deep,nchem,chem3d,fscav,wetdpc_deep,      &
-               do_smoke_transport,kdt,errmsg,errflg)
+               do_smoke_transport,kdt,qamin,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -163,6 +162,8 @@ contains
    real(kind_phys), dimension(:,:,:), intent(inout), optional :: chem3d
    real(kind_phys), dimension(:,:), intent(inout), optional   :: wetdpc_deep
 !$acc declare copy(cactiv,cactiv_m,chem3d,wetdpc_deep)
+
+   real(kind_phys), intent(in) :: qamin
 
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
@@ -331,11 +332,11 @@ contains
        rand_mom(:)    = 0.
        rand_vmas(:)   = 0.
        rand_clos(:,:) = 0.
-     else 
+     else
        do i=1,im
          spp_wts_cu_deep_tmp=min(max(-1.0_kind_phys, spp_wts_cu_deep(i,1)),1.0_kind_phys)
-         rand_mom(i)    = spp_wts_cu_deep_tmp 
-         rand_vmas(i)   = spp_wts_cu_deep_tmp 
+         rand_mom(i)    = spp_wts_cu_deep_tmp
+         rand_vmas(i)   = spp_wts_cu_deep_tmp
          rand_clos(i,:) = spp_wts_cu_deep_tmp
        end do
      end if
@@ -351,7 +352,7 @@ contains
      kte=km
      ktf=kte-1
 !$acc kernels
-! 
+!
      tropics(:)=0
 !
 !> - Set tuning constants for radiation coupling
@@ -494,7 +495,7 @@ contains
 !$acc end kernels
      ierrc(:)=" "
 !$acc kernels
-     
+
 
      kbcon(:)=0
      kbcons(:)=0
@@ -771,7 +772,8 @@ contains
                                ! betwee -1 and +1
               ,do_cap_suppress_here,cap_suppress_j &
               ,k22m          &
-              ,jminm,kdt,mc_thresh)
+              ,jminm,kdt,mc_thresh &
+              ,qamin)
 !$acc kernels
             do i=its,itf
              do k=kts,ktf
@@ -857,7 +859,8 @@ contains
                                ! betwee -1 and +1
               ,do_cap_suppress_here,cap_suppress_j &
               ,k22          &
-              ,jmin,kdt,mc_thresh)
+              ,jmin,kdt,mc_thresh &
+              ,qamin)
           jpr=0
           ipr=0
 !$acc kernels

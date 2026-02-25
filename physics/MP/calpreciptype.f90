@@ -11,30 +11,32 @@ contains
                                xlat,xlon,                           &
                                gt0,gq0,prsl,prsi,prec,              & !input
                                phii,tskin,                          & !input
+                               con_g, con_eps, con_epsm1,           & !input
+                               con_epsq, con_fvirt, con_rog,        & !input
                                domr,domzr,domip,doms)  !output
 
 !$$$  subprogram documentation block
-!                .      .    .     
+!                .      .    .
 ! subprogram:    calpreciptype      compute dominant precip type
 !   prgrmmr: chuang         org: w/np2      date: 2008-05-28
-!          
-!     
+!
+!
 ! abstract:
 !     this routine computes precipitation type.
-!   . it is adopted from post but was made into a column to used by gfs model    
-!     
+!   . it is adopted from post but was made into a column to used by gfs model
+!
 !  --------------------------------------------------------------------
       use funcphys, only : fpvs,ftdp,fpkap,ftlcl,stma,fthe
-      use physcons
       use machine , only : kind_phys
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       implicit none
 !
-      real(kind=kind_phys),   parameter :: pthresh = 0.0, oneog = 1.0/con_g
+      real(kind=kind_phys),   parameter :: pthresh = 0.0
+      real(kind=kind_phys) :: oneog
       integer,parameter :: nalg    = 5
-!     
+!
 !     declare variables.
-!     
+!
       integer,intent(in) :: kdt,nrcm,im,ix,lm,lp1
       real(kind=kind_phys),intent(in)    :: xlat(im),xlon(im)
       real(kind=kind_phys),intent(in)    :: randomno(ix,nrcm)
@@ -42,7 +44,9 @@ contains
       real(kind=kind_phys),dimension(ix,lm), intent(in)  :: gt0,gq0,prsl
       real(kind=kind_phys),dimension(ix,lp1),intent(in)  :: prsi,phii
       real(kind=kind_phys),dimension(im),    intent(out) :: domr,domzr,domip,doms
-      
+      real(kind=kind_phys),intent(in)    :: con_g, con_eps, con_epsm1
+      real(kind=kind_phys),intent(in)    :: con_epsq, con_fvirt, con_rog
+
       integer,             dimension(nalg) :: sleet,rain,freezr,snow
       real(kind=kind_phys),dimension(lm)   :: t,q,pmid
       real(kind=kind_phys),dimension(lp1)  :: pint,zint
@@ -53,14 +57,15 @@ contains
                            time_vert,time_ncep,time_ramer,time_bourg,time_revised,&
                            time_dominant,btim,timef,ranl(2)
 
-!     
+      oneog = 1.0/con_g
+!
 !     computes wet bulb here since two algorithms use it
 !      lp1=lm+1
 ! convert geopotential to height
 !      do l=1,lp1
 !        zint(l)=zint(l)/con_g
 !      end do
-! don't forget to flip 3d arrays around because gfs counts from bottom up      
+! don't forget to flip 3d arrays around because gfs counts from bottom up
 
       allocate ( twet(lm),rh(lm),td(lm) )
 
@@ -96,11 +101,11 @@ contains
               else
                 twet(k1) = t(k1)
               endif
-!           endif 
+!           endif
             es     = min(fpvs(t(k1)), pmid(k1))
             qc     = con_eps*es / (pmid(k1)+con_epsm1*es)
             rh(k1) = max(con_epsq,q(k1)) / qc
-  
+
             k1       = lp1-k+1
             pint(k1) = prsi(i,k)
             zint(k1) = phii(i,k) * oneog
@@ -108,7 +113,7 @@ contains
           enddo
           pint(1) = prsi(i,lp1)
           zint(1) = phii(i,lp1) * oneog
- 
+
 !-------------------------------------------------------------------------------
 !	 if(kdt>15.and.kdt<20) time_vert = time_vert + (timef() - btim)
 ! debug print statement
@@ -123,10 +128,10 @@ contains
 !          pmid(l),pint(l),zint(l),twet(l)
 !         end do
 !	 print*,'debug in calpreciptype: lp1,pint,z ', lp1,pint(lp1),zint(lp1)
-!        end if  
-! end debug print statement		
-!        call wetbulb(lm,con_rocp,con_epsq,t,q,pmid,twet)       
-!        if(kdt>10.and.kdt<20)btim = timef() 
+!        end if
+! end debug print statement
+!        call wetbulb(lm,con_rocp,con_epsq,t,q,pmid,twet)
+!        if(kdt>10.and.kdt<20)btim = timef()
 !-------------------------------------------------------------------------------
 !
 !     instantaneous precipitation type.
@@ -153,7 +158,7 @@ contains
 !          rh(l)=max(con_epsq,q(l))/qc
 !	  pv   = pmid(l)*q(l)/(con_eps-con_epsm1*q(l))
 !	  td(l)=ftdp(pv)
-!        end do	
+!        end do
 !        if(kdt>10.and.kdt<20)btim = timef()
 
 !     write(0,*)' i=',i,' lm=',lm,' lp1=',lp1,' t=',t(1),q(1),pmid(1) &
@@ -194,12 +199,12 @@ contains
         rain(4)   = iwx/8
 !
 ! explicit algorithm (under 18 not admitted without parent or guardian)
- 
+
         snow(5)   = 0
         sleet(5)  = 0
         freezr(5) = 0
         rain(5)   = 0
-!               
+!
          call calwxt_dominant(nalg,rain(1),freezr(1),sleet(1),         &
                             snow(1),domr(i),domzr(i),domip(i),doms(i))
 
@@ -211,17 +216,17 @@ contains
         end if
       enddo ! end loop for i
 
-      deallocate (twet,rh,td)        
+      deallocate (twet,rh,td)
       return
       end
 
-!> This subroutine computes precipitation type using a decision tree approach that uses 
-!! variables such as integrated wet bulb temperatue below freezing and lowest layer 
+!> This subroutine computes precipitation type using a decision tree approach that uses
+!! variables such as integrated wet bulb temperatue below freezing and lowest layer
 !! temperature (Baldwin et al. 1994 \cite baldwin_et_al_1994)
       subroutine calwxt(lm,lp1,t,q,pmid,pint,              &
                         d608,rog,epsq,zint,iwx,twet)
       use machine , only : kind_phys
-! 
+!
 !     file: calwxt.f
 !     written: 11 november 1993, michael baldwin
 !     revisions:
@@ -229,7 +234,7 @@ contains
 !               12 june 1998-conversion to 2-d (t black)
 !     01-10-25  h chuang - modified to process hybrid model output
 !     02-01-15  mike baldwin - wrf version
-!                              
+!
 !
 !     routine to compute precipitation type using a decision tree
 !     approach that uses variables such as integrated wet bulb temp
@@ -238,7 +243,7 @@ contains
 !     see baldwin and contorno preprint from 13th weather analysis
 !     and forecasting conference for more details
 !     (or baldwin et al, 10th nwp conference preprint)
-! 
+!
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       implicit none
 !
@@ -264,18 +269,18 @@ contains
 !    internal:
 !
 !     real(kind=kind_phys), allocatable :: twet(:)
-      real(kind=kind_phys), parameter :: d00=0.0 
+      real(kind=kind_phys), parameter :: d00=0.0
       integer karr,licee
       real(kind=kind_phys)    tcold,twarm
 
 !    subroutines called:
 !     wetbulb
-!     
+!
 !
 !     initialize weather type array to zero (ie, off).
 !     we do this since we want iwx to represent the
 !     instantaneous weather type on return.
-!     
+!
 !
 !     allocate local storage
 !
@@ -374,7 +379,7 @@ contains
 !     pintk1 is the pressure at the bottom of the layer
 !     pintk2 is the pressure at the top of the layer
 !
-!     areap4 is the area of twet above -4 c below highest sat lyr 
+!     areap4 is the area of twet above -4 c below highest sat lyr
 !
         areas8 = d00
         areap4 = d00
@@ -482,14 +487,14 @@ contains
 !     +    ptyp) !  output(2) phase 2=rain, 3=frzg, 4=solid,
 !                                               6=ip     jc  9/16/99
 !      use params_mod
-!      use ctlblk_mod 
+!      use ctlblk_mod
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       use machine , only : kind_phys
       implicit none
 !
       real(kind=kind_phys),parameter :: twice=266.55,rhprcp=0.80,deltag=1.02,             &
      &                  emelt=0.045,rlim=0.04,slim=0.85
-      real(kind=kind_phys),parameter :: twmelt=273.15,tz=273.15,efac=1.0 ! specify in params now 
+      real(kind=kind_phys),parameter :: twmelt=273.15,tz=273.15,efac=1.0 ! specify in params now
 !
       integer*4 i, k1, lll, k2, toodry
 !
@@ -518,7 +523,7 @@ contains
 !        qc=pq0/p(l) * exp(a2*(t(l)-a3)/(t(l)-a4))
 !gsm forcing q (qtmp) to be positive to deal with negative q values
 !       causing problems later in this subroutine
-!        qtmp=max(h1m12,q(l))	
+!        qtmp=max(h1m12,q(l))
 !        rhqtmp(lev)=qtmp/qc
         rhq(lev) = rh(l)
         pq(lev)  = pmid(l) * 0.01
@@ -672,7 +677,7 @@ contains
         dpk     = log(pq(k1)/ptop)       !lin   dpk=pq(k1)-ptop
 !       mye     = emelt*(1.0-(1.0-rhavg)*efac)
         mye     = emelt * rhavg ** efac
-        icefrac = icefrac + dpk * dtavg / mye           
+        icefrac = icefrac + dpk * dtavg / mye
       else                 ! mix where tw curve crosses twmelt in layer
         if (twq(k1) == twtop) go to 40   ! both equal twmelt, nothing h
         wgt1    = (twmelt-twq(k1)) / (twtop-twq(k1))
@@ -683,7 +688,7 @@ contains
 !       mye     = emelt*(1.0-(1.0-rhavg)*efac)
         mye     = emelt * rhavg ** efac
         icefrac = icefrac + dpk * dtavg / mye
-        icefrac = min(1.0,max(icefrac,0.0))   
+        icefrac = min(1.0,max(icefrac,0.0))
         if (icefrac <= 0.0) then
 !           goto 1020
             if (twq(k1) > twice) go to 40    ! cannot commence freezin
@@ -735,12 +740,12 @@ contains
 !gsm   algorithms to provide an answer, i will not declare a
 !gsm   type from the ramer in this situation and allow the
 !gsm   other algorithms to make the call.
-      
-           ptyp = 0       !  don't know 
+
+           ptyp = 0       !  don't know
 !          ptyp = 5       !  mix
         else
 !          ptyp = 5       !  mix
-           ptyp = 0       !  don't know 
+           ptyp = 0       !  don't know
         end if
       end if
 
@@ -871,8 +876,8 @@ contains
 !                                       and layer lmh = bottom
 !
 !$$$
-!>this routine computes precipitation type using a decision tree 
-!! approach that uses the so-called "energy method" of Bourgouin(2000) 
+!>this routine computes precipitation type using a decision tree
+!! approach that uses the so-called "energy method" of Bourgouin(2000)
 !! \cite bourgouin_2000.
 !of aes (canada) 1992
       subroutine calwxt_bourg(lm,lp1,rn,g,t,q,pmid,pint,zint,ptype)
@@ -894,7 +899,7 @@ contains
 !     initialize weather type array to zero (ie, off).
 !     we do this since we want ptype to represent the
 !     instantaneous weather type on return.
-!     
+!
       ptype = 0
       psfck = pint(lm+1)
 
@@ -918,7 +923,7 @@ contains
       lhiwrm = lm + 1
       do l = lm, 1, -1
 ! gsm  added 250 mb check to prevent stratospheric warming situations
-!       from counting as warm layers aloft      
+!       from counting as warm layers aloft
           if (t(l) >= 273.15 .and. pmid(l) > 25000.) lhiwrm = l
       end do
 
@@ -942,7 +947,7 @@ contains
       ifrzl  = 0
       areane = 0.0
       areape = 0.0
-      surfw  = 0.0                                         
+      surfw  = 0.0
 
       do l = lm, 1, -1
         if (ifrzl == 0 .and. t(l) <= 273.15) ifrzl = 1
@@ -961,7 +966,7 @@ contains
         endif
         pintk1 = pintk2
       enddo
-      
+
 !
 !     decision tree time
 !
@@ -1043,11 +1048,11 @@ contains
 !! approach that uses variables such as integrated wet bulb temperature
 !! below freezing and lowest layer temperature (Baldwin et al.1994
 !! \cite baldwin_et_al_1994). Since the original version of the algorithm
-!! has a high bias for freezing rain and sleet, the revised version is 
+!! has a high bias for freezing rain and sleet, the revised version is
 !! to balance that bias with a version more likely to predict snow.
        subroutine calwxt_revised(lm,lp1,t,q,pmid,pint,         &
                                  d608,rog,epsq,zint,twet,iwx)
-! 
+!
 !     file: calwxt.f
 !     written: 11 november 1993, michael baldwin
 !     revisions:
@@ -1057,8 +1062,8 @@ contains
 !     02-01-15  mike baldwin - wrf version
 !     05-07-07  binbin zhou  - add prec for rsm
 !     05-08-24  geoff manikin - modified the area requirements
-!                to make an alternate algorithm 
-!                              
+!                to make an alternate algorithm
+!
 !
 !     routine to compute precipitation type using a decision tree
 !     approach that uses variables such as integrated wet bulb temp
@@ -1088,7 +1093,7 @@ contains
 
       integer,intent(in)             :: lm,lp1
       real(kind=kind_phys),dimension(lm),intent(in)  ::  t,q,pmid,twet
-      real(kind=kind_phys),dimension(lp1),intent(in) ::  pint,zint 
+      real(kind=kind_phys),dimension(lp1),intent(in) ::  pint,zint
       real(kind=kind_phys),intent(in)                ::  d608,rog,epsq
 !    output:
 !      iwx - instantaneous weather type.
@@ -1101,7 +1106,7 @@ contains
       integer, intent(out) ::  iwx
 !    internal:
 !
-      real(kind=kind_phys), parameter :: d00=0.0  
+      real(kind=kind_phys), parameter :: d00=0.0
       integer karr,licee
       real(kind=kind_phys)    tcold,twarm
 !
@@ -1111,12 +1116,12 @@ contains
 
 !    subroutines called:
 !     wetbulb
-!     
+!
 !
 !     initialize weather type array to zero (ie, off).
 !     we do this since we want iwx to represent the
 !     instantaneous weather type on return.
-!     
+!
 !
 !     allocate local storage
 !
@@ -1206,7 +1211,7 @@ contains
 !     pintk1 is the pressure at the bottom of the layer
 !     pintk2 is the pressure at the top of the layer
 !
-!     areap4 is the area of twet above -4 c below highest sat lyr 
+!     areap4 is the area of twet above -4 c below highest sat lyr
 !     areap0 is the area of twet above 0 c below highest sat lyr
 !
         areas8 = d00
@@ -1214,7 +1219,7 @@ contains
         areap0 = d00
         surfw  = d00
         surfc  = d00
-        
+
 !
         do l=lmhk,lice,-1
           dzkl  = zint(l)-zint(l+1)
@@ -1301,15 +1306,15 @@ contains
       return
       end
 !
-!> This subroutine takes the precipitation type solutions from 
+!> This subroutine takes the precipitation type solutions from
 !! different algorithms and sums them up to give a dominant type.
 !!
 !>\section gen_calwxt_dominant GFS calwxt_dominant General Algorithm
        subroutine calwxt_dominant(nalg,rain,freezr,sleet,snow, &
      &                            domr,domzr,domip,doms)
 !
-!     written: 24 august 2005, g manikin 
-!      
+!     written: 24 august 2005, g manikin
+!
 !     this routine takes the precip type solutions from different
 !       algorithms and sums them up to give a dominant type
 !
@@ -1354,13 +1359,13 @@ contains
           if (totsn >= totr) then
             doms = 1
           else
-            domr = 1 
+            domr = 1
           endif
         elseif (totzr >= totr) then
           domzr = 1
         else
           domr = 1
-        endif 
+        endif
       else if (totip > totzr) then
         if (totip >= totr) then
           domip = 1

@@ -79,7 +79,6 @@
 !                                                                          !
 !    external modules referenced:                                          !
 !                                                                          !
-!       'module physcons'                                                  !
 !       'mersenne_twister'                                                 !
 !                                                                          !
 !    compilation sequence is:                                              !
@@ -255,7 +254,7 @@
 !       apr 2012,  b. ferrier and y. hou -- added conversion factor to fu's!
 !                    cloud-snow optical property scheme.                   !
 !       nov 2012,  yu-tai hou        -- modified control parameters thru   !
-!                     module 'physparam'.                                  !  
+!                     module 'physparam'.                                  !
 !       FEB 2017    A.Cheng   - add odpth output, effective radius input   !
 !       jun 2018,  h-m lin/y-t hou   -- added new option of cloud overlap  !
 !                     method 'de-correlation-length' for mcica application !
@@ -273,12 +272,10 @@
 !!!!!                         end descriptions                         !!!!!
 !!!!!  ==============================================================  !!!!!
 
-!> This module contains the CCPP-compliant NCEP's modifications of the 
+!> This module contains the CCPP-compliant NCEP's modifications of the
 !! rrtmg-lw radiation code from aer inc.
-      module rrtmg_lw 
+      module rrtmg_lw
 !
-      use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
-     &                             con_amw, con_amo3
       use mersenne_twister, only : random_setseed, random_number,       &
      &                             random_stat
       use machine,          only : kind_phys,                           &
@@ -315,10 +312,6 @@
       real (kind=kind_phys), parameter :: tblint  = ntbl       ! lookup table conversion factor
       real (kind=kind_phys), parameter :: f_zero  = 0.0
       real (kind=kind_phys), parameter :: f_one   = 1.0
-
-!  ...  atomic weights for conversion from mass to volume mixing ratios
-      real (kind=kind_phys), parameter :: amdw    = con_amd/con_amw
-      real (kind=kind_phys), parameter :: amdo3   = con_amd/con_amo3
 
 !  ...  band indices
       integer, dimension(nbands) :: nspa, nspb
@@ -430,7 +423,8 @@
      &       HLW0,HLWB,FLXPRF,                                          &   !  ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
      &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
-     &       cld_od, errmsg, errflg                                     &
+     &       cld_od, con_g, con_amd, con_amw, con_amo3,                 &
+     &       con_avgd, errmsg, errflg  &
      &     )
 
 !  ====================  defination of variables  ====================  !
@@ -637,6 +631,8 @@
      &       aeraod, aerssa
       logical, intent(in) :: lslwr, top_at_1
 
+      real(kind=kind_phys), intent(in) :: con_g, con_amd, con_amw, con_amo3
+      real(kind=kind_phys) :: con_avgd
 !  ---  outputs:
       real (kind=kind_phys), dimension(:,:), intent(inout) :: hlwc
       real (kind=kind_phys), dimension(:,:), intent(inout) ::           &
@@ -706,6 +702,9 @@
       integer :: iend                ! ending band of calculation
       integer :: iout                ! output option flag (inactive)
 
+!  ...  atomic weights for conversion from mass to volume mixing ratios
+      real (kind=kind_phys) :: amdw
+      real (kind=kind_phys) :: amdo3
 
 !
 !===> ... begin here
@@ -713,6 +712,9 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      amdw    = con_amd/con_amw
+      amdo3   = con_amd/con_amo3
 
 !mz*
 ! For passing in cloud physical properties; cloud optics parameterized
@@ -1313,7 +1315,7 @@
 !> \ingroup module_radlw_main
 !> \brief This subroutine performs calculations necessary for the initialization
 !! of the longwave model, which includes non-varying model variables, conversion
-!! factors, and look-up tables  
+!! factors, and look-up tables
 !!
 !! Lookup tables are computed for use in the lw
 !! radiative transfer, and input absorption coefficient data for each
@@ -1322,7 +1324,7 @@
 !!\section rlwinit_gen rlwinit General Algorithm
       subroutine rlwinit( me, rad_hr_units, inc_minor_gas, ilwcliq,     &
            isubclw, iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,&
-           iovr_exp, iovr_exprand, errflg, errmsg )
+           iovr_exp, iovr_exprand, con_g, con_cp, errflg, errmsg )
 
 !  ===================  program usage description  ===================  !
 !                                                                       !
@@ -1394,7 +1396,7 @@
            iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr, iovr_exp,     &
            iovr_exprand
       logical, intent(in) :: inc_minor_gas
-
+      real(kind=kind_phys), intent(in) :: con_g, con_cp
 !  ---  outputs:
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -1521,8 +1523,8 @@
 !!\param nlay            number of layer number
 !!\param nlp1            number of veritcal levels
 !!\param ipseed          permutation seed for generating random numbers (isubclw>0)
-!!\param dz              layer thickness (km) 
-!!\param de_lgth         layer cloud decorrelation length (km)  
+!!\param dz              layer thickness (km)
+!!\param de_lgth         layer cloud decorrelation length (km)
 !!\param iovr            cloud overlapping control flag
 !!\param alpha           EXP/ER cloud overlap decorrelation parameter
 !!\param cldfmc          cloud fraction for each sub-column
@@ -1904,7 +1906,7 @@
      &    )
 
 !> - Sub-column set up according to overlapping assumption:
-!!  - For random overlap, pick a random value at every level 
+!!  - For random overlap, pick a random value at every level
 !!  - For max-random overlap, pick a random value at every level
 !!  - For maximum overlap, pick same random numebr at every level
 
@@ -2046,13 +2048,13 @@
 !       For exponential cloud overlap, the correlation is applied across layers
 !       without regard to the configuration of clear and cloudy layers.
 
-!       For exponential-random cloud overlap, a new exponential transition is 
-!       performed within each group of adjacent cloudy layers and blocks of 
-!       cloudy layers with clear layers between them are correlated randomly. 
+!       For exponential-random cloud overlap, a new exponential transition is
+!       performed within each group of adjacent cloudy layers and blocks of
+!       cloudy layers with clear layers between them are correlated randomly.
 !
-!       NOTE: The code below is identical for case (4) and (5) because the 
-!       distinction in the vertical correlation between EXP and ER is already 
-!       built into the specification of alpha (in subroutine get_alpha_exper). 
+!       NOTE: The code below is identical for case (4) and (5) because the
+!       distinction in the vertical correlation between EXP and ER is already
+!       built into the specification of alpha (in subroutine get_alpha_exper).
 
 !  ---  setup 2 sets of random numbers
 
@@ -2077,7 +2079,7 @@
           enddo
 
 !  ---  then working upward from the surface:
-!       if a random number (from an independent set: cdfun2) is smaller than 
+!       if a random number (from an independent set: cdfun2) is smaller than
 !       alpha, then use the previous layer's number, otherwise use a new random
 !       number (keep the originally assigned one in cdfunc for that layer).
 
@@ -3830,7 +3832,7 @@
 !!\param fracs            planck fractions
 !!\param tautot           total optical depth (gas+aerosols)
 !>\section taumol_gen taumol General Algorithm
-!! subprograms called:  taugb## (## = 01 -16) 
+!! subprograms called:  taugb## (## = 01 -16)
       subroutine taumol                                                 &
      &     ( laytrop,pavel,coldry,colamt,colbrd,wx,tauaer,              & !  ---  inputs
      &       rfrate,fac00,fac01,fac10,fac11,jp,jt,jt1,                  &
@@ -6893,58 +6895,58 @@
       integer(kind=im) :: lay                         ! Layer index
       integer(kind=im) :: ib                          ! spectral band index
       integer(kind=im) :: ig                          ! g-point interval index
-      integer(kind=im) :: index                                                                                     
-      integer(kind=im) :: icb(nbands)                                                                               
+      integer(kind=im) :: index
+      integer(kind=im) :: icb(nbands)
       real(kind=rb) , dimension(2) :: absice0
       real(kind=rb) , dimension(2,5) :: absice1
       real(kind=rb) , dimension(43,16) :: absice2
       real(kind=rb) , dimension(46,16) :: absice3
       real(kind=rb) :: absliq0
       real(kind=rb) , dimension(58,16) :: absliq1
-                                                                                                                    
-      real(kind=rb) :: abscoice(ngptlw)               ! ice absorption coefficients                                 
-      real(kind=rb) :: abscoliq(ngptlw)               ! liquid absorption coefficients                              
-      real(kind=rb) :: abscosno(ngptlw)               ! snow absorption coefficients                                
-      real(kind=rb) :: cwp                            ! cloud water path                                            
-      real(kind=rb) :: radice                         ! cloud ice effective size (microns)                          
-      real(kind=rb) :: factor                         !                                                             
-      real(kind=rb) :: fint                           !                                                             
-      real(kind=rb) :: radliq                         ! cloud liquid droplet radius (microns)                       
-      real(kind=rb) :: radsno                         ! cloud snow effective size (microns)                         
-      real(kind=rb), parameter :: eps = 1.e-6_rb      ! epsilon                                                     
-      real(kind=rb), parameter :: cldmin = 1.e-20_rb  ! minimum value for cloud quantities                          
-                                                                                                                    
-! ------- Definitions -------                                                                                       
-                                                                                                                    
-!     Explanation of the method for each value of INFLAG.  Values of                                                
-!     0 or 1 for INFLAG do not distingish being liquid and ice clouds.                                              
-!     INFLAG = 2 does distinguish between liquid and ice clouds, and                                                
-!     requires further user input to specify the method to be used to                                               
-!     compute the aborption due to each.                                                                            
-!     INFLAG = 0:  For each cloudy layer, the cloud fraction and (gray)                                             
-!                  optical depth are input.                                                                         
-!     INFLAG = 1:  For each cloudy layer, the cloud fraction and cloud                                              
-!                  water path (g/m2) are input.  The (gray) cloud optical                                           
-!                  depth is computed as in CCM2.                                                                    
-!     INFLAG = 2:  For each cloudy layer, the cloud fraction, cloud                                                 
-!                  water path (g/m2), and cloud ice fraction are input.                                             
-!       ICEFLAG = 0:  The ice effective radius (microns) is input and the                                           
-!                     optical depths due to ice clouds are computed as in CCM3.                                     
-!       ICEFLAG = 1:  The ice effective radius (microns) is input and the                                           
-!                     optical depths due to ice clouds are computed as in                                           
-!                     Ebert and Curry, JGR, 97, 3831-3836 (1992).  The                                              
-!                     spectral regions in this work have been matched with                                          
-!                     the spectral bands in RRTM to as great an extent                                              
-!                     as possible:                                                                                  
-!                     E&C 1      IB = 5      RRTM bands 9-16                                                        
-!                     E&C 2      IB = 4      RRTM bands 6-8                                                         
-!                     E&C 3      IB = 3      RRTM bands 3-5                                                         
-!                     E&C 4      IB = 2      RRTM band 2                                                            
-!                     E&C 5      IB = 1      RRTM band 1                                                            
+
+      real(kind=rb) :: abscoice(ngptlw)               ! ice absorption coefficients
+      real(kind=rb) :: abscoliq(ngptlw)               ! liquid absorption coefficients
+      real(kind=rb) :: abscosno(ngptlw)               ! snow absorption coefficients
+      real(kind=rb) :: cwp                            ! cloud water path
+      real(kind=rb) :: radice                         ! cloud ice effective size (microns)
+      real(kind=rb) :: factor                         !
+      real(kind=rb) :: fint                           !
+      real(kind=rb) :: radliq                         ! cloud liquid droplet radius (microns)
+      real(kind=rb) :: radsno                         ! cloud snow effective size (microns)
+      real(kind=rb), parameter :: eps = 1.e-6_rb      ! epsilon
+      real(kind=rb), parameter :: cldmin = 1.e-20_rb  ! minimum value for cloud quantities
+
+! ------- Definitions -------
+
+!     Explanation of the method for each value of INFLAG.  Values of
+!     0 or 1 for INFLAG do not distingish being liquid and ice clouds.
+!     INFLAG = 2 does distinguish between liquid and ice clouds, and
+!     requires further user input to specify the method to be used to
+!     compute the aborption due to each.
+!     INFLAG = 0:  For each cloudy layer, the cloud fraction and (gray)
+!                  optical depth are input.
+!     INFLAG = 1:  For each cloudy layer, the cloud fraction and cloud
+!                  water path (g/m2) are input.  The (gray) cloud optical
+!                  depth is computed as in CCM2.
+!     INFLAG = 2:  For each cloudy layer, the cloud fraction, cloud
+!                  water path (g/m2), and cloud ice fraction are input.
+!       ICEFLAG = 0:  The ice effective radius (microns) is input and the
+!                     optical depths due to ice clouds are computed as in CCM3.
+!       ICEFLAG = 1:  The ice effective radius (microns) is input and the
+!                     optical depths due to ice clouds are computed as in
+!                     Ebert and Curry, JGR, 97, 3831-3836 (1992).  The
+!                     spectral regions in this work have been matched with
+!                     the spectral bands in RRTM to as great an extent
+!                     as possible:
+!                     E&C 1      IB = 5      RRTM bands 9-16
+!                     E&C 2      IB = 4      RRTM bands 6-8
+!                     E&C 3      IB = 3      RRTM bands 3-5
+!                     E&C 4      IB = 2      RRTM band 2
+!                     E&C 5      IB = 1      RRTM band 1
 !       ICEFLAG = 2:  The ice effective radius (microns) is input and the
 !                     optical properties due to ice clouds are computed from
 !                     the optical properties stored in the RT code,
-!                     STREAMER v3.0 (Reference: Key. J., Streamer 
+!                     STREAMER v3.0 (Reference: Key. J., Streamer
 !                     User's Guide, Cooperative Institute for
 !                     Meteorological Satellite Studies, 2001, 96 pp.).
 !                     Valid range of values for re are between 5.0 and
@@ -6959,20 +6961,20 @@
 !                    140.0 micron.
 !       LIQFLAG = 0:  The optical depths due to water clouds are computed as
 !                     in CCM3.
-!       LIQFLAG = 1:  The water droplet effective radius (microns) is input 
-!                     and the optical depths due to water clouds are computed 
+!       LIQFLAG = 1:  The water droplet effective radius (microns) is input
+!                     and the optical depths due to water clouds are computed
 !                     as in Hu and Stamnes, J., Clim., 6, 728-742, (1993).
 !                     The values for absorption coefficients appropriate for
-!                     the spectral bands in RRTM have been obtained for a 
-!                     range of effective radii by an averaging procedure 
+!                     the spectral bands in RRTM have been obtained for a
+!                     range of effective radii by an averaging procedure
 !                     based on the work of J. Pinto (private communication).
-!                     Linear interpolation is used to get the absorption 
+!                     Linear interpolation is used to get the absorption
 !                     coefficients for the input effective radius.
 
       data icb /1,2,3,3,3,4,4,4,5, 5, 5, 5, 5, 5, 5, 5/
 ! Everything below is for INFLAG = 2.
 
-! ABSICEn(J,IB) are the parameters needed to compute the liquid water 
+! ABSICEn(J,IB) are the parameters needed to compute the liquid water
 ! absorption coefficient in spectral region IB for ICEFLAG=n.  The units
 ! of ABSICEn(1,IB) are m2/g and ABSICEn(2,IB) has units (microns (m2/g)).
 ! For ICEFLAG = 0.
@@ -7027,57 +7029,57 @@
 ! band 4
        1.804566e-01_rb,1.168987e-01_rb,8.680442e-02_rb,6.910060e-02_rb,5.738174e-02_rb, &
        4.902332e-02_rb,4.274585e-02_rb,3.784923e-02_rb,3.391734e-02_rb,3.068690e-02_rb, &
-       2.798301e-02_rb,2.568480e-02_rb,2.370600e-02_rb,2.198337e-02_rb,2.046940e-02_rb, &   
-       1.912777e-02_rb,1.793016e-02_rb,1.685420e-02_rb,1.588193e-02_rb,1.499882e-02_rb, &   
-       1.419293e-02_rb,1.345440e-02_rb,1.277496e-02_rb,1.214769e-02_rb,1.156669e-02_rb, &   
-       1.102694e-02_rb,1.052412e-02_rb,1.005451e-02_rb,9.614854e-03_rb,9.202335e-03_rb, &   
-       8.814470e-03_rb,8.449077e-03_rb,8.104223e-03_rb,7.778195e-03_rb,7.469466e-03_rb, &   
-       7.176671e-03_rb,6.898588e-03_rb,6.634117e-03_rb,6.382264e-03_rb,6.142134e-03_rb, &   
-       5.912913e-03_rb,5.693862e-03_rb,5.484308e-03_rb/)                                    
-      absice2(:,5) = (/ &                                                                   
-! band 5                                                                                    
-       2.131806e-01_rb,1.311372e-01_rb,9.407171e-02_rb,7.299442e-02_rb,5.941273e-02_rb, &   
-       4.994043e-02_rb,4.296242e-02_rb,3.761113e-02_rb,3.337910e-02_rb,2.994978e-02_rb, &   
-       2.711556e-02_rb,2.473461e-02_rb,2.270681e-02_rb,2.095943e-02_rb,1.943839e-02_rb, &   
-       1.810267e-02_rb,1.692057e-02_rb,1.586719e-02_rb,1.492275e-02_rb,1.407132e-02_rb, &   
-       1.329989e-02_rb,1.259780e-02_rb,1.195618e-02_rb,1.136761e-02_rb,1.082583e-02_rb, &   
-       1.032552e-02_rb,9.862158e-03_rb,9.431827e-03_rb,9.031157e-03_rb,8.657217e-03_rb, &   
-       8.307449e-03_rb,7.979609e-03_rb,7.671724e-03_rb,7.382048e-03_rb,7.109032e-03_rb, &   
-       6.851298e-03_rb,6.607615e-03_rb,6.376881e-03_rb,6.158105e-03_rb,5.950394e-03_rb, &   
-       5.752942e-03_rb,5.565019e-03_rb,5.385963e-03_rb/)                                    
-      absice2(:,6) = (/ &                                                                   
-! band 6                                                                                    
-       1.546177e-01_rb,1.039251e-01_rb,7.910347e-02_rb,6.412429e-02_rb,5.399997e-02_rb, &   
-       4.664937e-02_rb,4.104237e-02_rb,3.660781e-02_rb,3.300218e-02_rb,3.000586e-02_rb, &   
-       2.747148e-02_rb,2.529633e-02_rb,2.340647e-02_rb,2.174723e-02_rb,2.027731e-02_rb, &   
-       1.896487e-02_rb,1.778492e-02_rb,1.671761e-02_rb,1.574692e-02_rb,1.485978e-02_rb, &   
-       1.404543e-02_rb,1.329489e-02_rb,1.260066e-02_rb,1.195636e-02_rb,1.135657e-02_rb, &   
-       1.079664e-02_rb,1.027257e-02_rb,9.780871e-03_rb,9.318505e-03_rb,8.882815e-03_rb, &   
-       8.471458e-03_rb,8.082364e-03_rb,7.713696e-03_rb,7.363817e-03_rb,7.031264e-03_rb, &   
-       6.714725e-03_rb,6.413021e-03_rb,6.125086e-03_rb,5.849958e-03_rb,5.586764e-03_rb, &   
-       5.334707e-03_rb,5.093066e-03_rb,4.861179e-03_rb/)                                    
-      absice2(:,7) = (/ &                                                                   
-! band 7                                                                                    
-       7.583404e-02_rb,6.181558e-02_rb,5.312027e-02_rb,4.696039e-02_rb,4.225986e-02_rb, &   
-       3.849735e-02_rb,3.538340e-02_rb,3.274182e-02_rb,3.045798e-02_rb,2.845343e-02_rb, &   
-       2.667231e-02_rb,2.507353e-02_rb,2.362606e-02_rb,2.230595e-02_rb,2.109435e-02_rb, &   
-       1.997617e-02_rb,1.893916e-02_rb,1.797328e-02_rb,1.707016e-02_rb,1.622279e-02_rb, &   
-       1.542523e-02_rb,1.467241e-02_rb,1.395997e-02_rb,1.328414e-02_rb,1.264164e-02_rb, &   
-       1.202958e-02_rb,1.144544e-02_rb,1.088697e-02_rb,1.035218e-02_rb,9.839297e-03_rb, &   
-       9.346733e-03_rb,8.873057e-03_rb,8.416980e-03_rb,7.977335e-03_rb,7.553066e-03_rb, &   
-       7.143210e-03_rb,6.746888e-03_rb,6.363297e-03_rb,5.991700e-03_rb,5.631422e-03_rb, &   
-       5.281840e-03_rb,4.942378e-03_rb,4.612505e-03_rb/)                                    
-      absice2(:,8) = (/ &                                                                   
-! band 8                                                                                    
-       9.022185e-02_rb,6.922700e-02_rb,5.710674e-02_rb,4.898377e-02_rb,4.305946e-02_rb, &   
-       3.849553e-02_rb,3.484183e-02_rb,3.183220e-02_rb,2.929794e-02_rb,2.712627e-02_rb, &   
-       2.523856e-02_rb,2.357810e-02_rb,2.210286e-02_rb,2.078089e-02_rb,1.958747e-02_rb, &   
-       1.850310e-02_rb,1.751218e-02_rb,1.660205e-02_rb,1.576232e-02_rb,1.498440e-02_rb, &   
-       1.426107e-02_rb,1.358624e-02_rb,1.295474e-02_rb,1.236212e-02_rb,1.180456e-02_rb, &   
-       1.127874e-02_rb,1.078175e-02_rb,1.031106e-02_rb,9.864433e-03_rb,9.439878e-03_rb, &   
-       9.035637e-03_rb,8.650140e-03_rb,8.281981e-03_rb,7.929895e-03_rb,7.592746e-03_rb, &   
-       7.269505e-03_rb,6.959238e-03_rb,6.661100e-03_rb,6.374317e-03_rb,6.098185e-03_rb, &   
-       5.832059e-03_rb,5.575347e-03_rb,5.327504e-03_rb/)                                    
+       2.798301e-02_rb,2.568480e-02_rb,2.370600e-02_rb,2.198337e-02_rb,2.046940e-02_rb, &
+       1.912777e-02_rb,1.793016e-02_rb,1.685420e-02_rb,1.588193e-02_rb,1.499882e-02_rb, &
+       1.419293e-02_rb,1.345440e-02_rb,1.277496e-02_rb,1.214769e-02_rb,1.156669e-02_rb, &
+       1.102694e-02_rb,1.052412e-02_rb,1.005451e-02_rb,9.614854e-03_rb,9.202335e-03_rb, &
+       8.814470e-03_rb,8.449077e-03_rb,8.104223e-03_rb,7.778195e-03_rb,7.469466e-03_rb, &
+       7.176671e-03_rb,6.898588e-03_rb,6.634117e-03_rb,6.382264e-03_rb,6.142134e-03_rb, &
+       5.912913e-03_rb,5.693862e-03_rb,5.484308e-03_rb/)
+      absice2(:,5) = (/ &
+! band 5
+       2.131806e-01_rb,1.311372e-01_rb,9.407171e-02_rb,7.299442e-02_rb,5.941273e-02_rb, &
+       4.994043e-02_rb,4.296242e-02_rb,3.761113e-02_rb,3.337910e-02_rb,2.994978e-02_rb, &
+       2.711556e-02_rb,2.473461e-02_rb,2.270681e-02_rb,2.095943e-02_rb,1.943839e-02_rb, &
+       1.810267e-02_rb,1.692057e-02_rb,1.586719e-02_rb,1.492275e-02_rb,1.407132e-02_rb, &
+       1.329989e-02_rb,1.259780e-02_rb,1.195618e-02_rb,1.136761e-02_rb,1.082583e-02_rb, &
+       1.032552e-02_rb,9.862158e-03_rb,9.431827e-03_rb,9.031157e-03_rb,8.657217e-03_rb, &
+       8.307449e-03_rb,7.979609e-03_rb,7.671724e-03_rb,7.382048e-03_rb,7.109032e-03_rb, &
+       6.851298e-03_rb,6.607615e-03_rb,6.376881e-03_rb,6.158105e-03_rb,5.950394e-03_rb, &
+       5.752942e-03_rb,5.565019e-03_rb,5.385963e-03_rb/)
+      absice2(:,6) = (/ &
+! band 6
+       1.546177e-01_rb,1.039251e-01_rb,7.910347e-02_rb,6.412429e-02_rb,5.399997e-02_rb, &
+       4.664937e-02_rb,4.104237e-02_rb,3.660781e-02_rb,3.300218e-02_rb,3.000586e-02_rb, &
+       2.747148e-02_rb,2.529633e-02_rb,2.340647e-02_rb,2.174723e-02_rb,2.027731e-02_rb, &
+       1.896487e-02_rb,1.778492e-02_rb,1.671761e-02_rb,1.574692e-02_rb,1.485978e-02_rb, &
+       1.404543e-02_rb,1.329489e-02_rb,1.260066e-02_rb,1.195636e-02_rb,1.135657e-02_rb, &
+       1.079664e-02_rb,1.027257e-02_rb,9.780871e-03_rb,9.318505e-03_rb,8.882815e-03_rb, &
+       8.471458e-03_rb,8.082364e-03_rb,7.713696e-03_rb,7.363817e-03_rb,7.031264e-03_rb, &
+       6.714725e-03_rb,6.413021e-03_rb,6.125086e-03_rb,5.849958e-03_rb,5.586764e-03_rb, &
+       5.334707e-03_rb,5.093066e-03_rb,4.861179e-03_rb/)
+      absice2(:,7) = (/ &
+! band 7
+       7.583404e-02_rb,6.181558e-02_rb,5.312027e-02_rb,4.696039e-02_rb,4.225986e-02_rb, &
+       3.849735e-02_rb,3.538340e-02_rb,3.274182e-02_rb,3.045798e-02_rb,2.845343e-02_rb, &
+       2.667231e-02_rb,2.507353e-02_rb,2.362606e-02_rb,2.230595e-02_rb,2.109435e-02_rb, &
+       1.997617e-02_rb,1.893916e-02_rb,1.797328e-02_rb,1.707016e-02_rb,1.622279e-02_rb, &
+       1.542523e-02_rb,1.467241e-02_rb,1.395997e-02_rb,1.328414e-02_rb,1.264164e-02_rb, &
+       1.202958e-02_rb,1.144544e-02_rb,1.088697e-02_rb,1.035218e-02_rb,9.839297e-03_rb, &
+       9.346733e-03_rb,8.873057e-03_rb,8.416980e-03_rb,7.977335e-03_rb,7.553066e-03_rb, &
+       7.143210e-03_rb,6.746888e-03_rb,6.363297e-03_rb,5.991700e-03_rb,5.631422e-03_rb, &
+       5.281840e-03_rb,4.942378e-03_rb,4.612505e-03_rb/)
+      absice2(:,8) = (/ &
+! band 8
+       9.022185e-02_rb,6.922700e-02_rb,5.710674e-02_rb,4.898377e-02_rb,4.305946e-02_rb, &
+       3.849553e-02_rb,3.484183e-02_rb,3.183220e-02_rb,2.929794e-02_rb,2.712627e-02_rb, &
+       2.523856e-02_rb,2.357810e-02_rb,2.210286e-02_rb,2.078089e-02_rb,1.958747e-02_rb, &
+       1.850310e-02_rb,1.751218e-02_rb,1.660205e-02_rb,1.576232e-02_rb,1.498440e-02_rb, &
+       1.426107e-02_rb,1.358624e-02_rb,1.295474e-02_rb,1.236212e-02_rb,1.180456e-02_rb, &
+       1.127874e-02_rb,1.078175e-02_rb,1.031106e-02_rb,9.864433e-03_rb,9.439878e-03_rb, &
+       9.035637e-03_rb,8.650140e-03_rb,8.281981e-03_rb,7.929895e-03_rb,7.592746e-03_rb, &
+       7.269505e-03_rb,6.959238e-03_rb,6.661100e-03_rb,6.374317e-03_rb,6.098185e-03_rb, &
+       5.832059e-03_rb,5.575347e-03_rb,5.327504e-03_rb/)
       absice2(:,9) = (/ &
 ! band 9
        1.294087e-01_rb,8.788217e-02_rb,6.728288e-02_rb,5.479720e-02_rb,4.635049e-02_rb, &
@@ -7095,79 +7097,79 @@
        4.171159e-02_rb,3.638480e-02_rb,3.226692e-02_rb,2.898717e-02_rb,2.631256e-02_rb, &
        2.408925e-02_rb,2.221156e-02_rb,2.060448e-02_rb,1.921325e-02_rb,1.799699e-02_rb, &
        1.692456e-02_rb,1.597177e-02_rb,1.511961e-02_rb,1.435289e-02_rb,1.365933e-02_rb, &
-       1.302890e-02_rb,1.245334e-02_rb,1.192576e-02_rb,1.144037e-02_rb,1.099230e-02_rb, &   
-       1.057739e-02_rb,1.019208e-02_rb,9.833302e-03_rb,9.498395e-03_rb,9.185047e-03_rb, &   
-       8.891237e-03_rb,8.615185e-03_rb,8.355325e-03_rb,8.110267e-03_rb,7.878778e-03_rb, &   
-       7.659759e-03_rb,7.452224e-03_rb,7.255291e-03_rb,7.068166e-03_rb,6.890130e-03_rb, &   
-       6.720536e-03_rb,6.558794e-03_rb,6.404371e-03_rb/)                                    
-      absice2(:,11) = (/ &                                                                  
-! band 11                                                                                   
-       1.656227e-01_rb,1.032129e-01_rb,7.487359e-02_rb,5.871431e-02_rb,4.828355e-02_rb, &   
-       4.099989e-02_rb,3.562924e-02_rb,3.150755e-02_rb,2.824593e-02_rb,2.560156e-02_rb, &   
-       2.341503e-02_rb,2.157740e-02_rb,2.001169e-02_rb,1.866199e-02_rb,1.748669e-02_rb, &   
-       1.645421e-02_rb,1.554015e-02_rb,1.472535e-02_rb,1.399457e-02_rb,1.333553e-02_rb, &   
-       1.273821e-02_rb,1.219440e-02_rb,1.169725e-02_rb,1.124104e-02_rb,1.082096e-02_rb, &   
-       1.043290e-02_rb,1.007336e-02_rb,9.739338e-03_rb,9.428223e-03_rb,9.137756e-03_rb, &   
-       8.865964e-03_rb,8.611115e-03_rb,8.371686e-03_rb,8.146330e-03_rb,7.933852e-03_rb, &   
-       7.733187e-03_rb,7.543386e-03_rb,7.363597e-03_rb,7.193056e-03_rb,7.031072e-03_rb, &   
-       6.877024e-03_rb,6.730348e-03_rb,6.590531e-03_rb/)                                    
-      absice2(:,12) = (/ &                                                                  
-! band 12                                                                                   
-       9.194591e-02_rb,6.446867e-02_rb,4.962034e-02_rb,4.042061e-02_rb,3.418456e-02_rb, &   
-       2.968856e-02_rb,2.629900e-02_rb,2.365572e-02_rb,2.153915e-02_rb,1.980791e-02_rb, &   
-       1.836689e-02_rb,1.714979e-02_rb,1.610900e-02_rb,1.520946e-02_rb,1.442476e-02_rb, &   
-       1.373468e-02_rb,1.312345e-02_rb,1.257858e-02_rb,1.209010e-02_rb,1.164990e-02_rb, &   
-       1.125136e-02_rb,1.088901e-02_rb,1.055827e-02_rb,1.025531e-02_rb,9.976896e-03_rb, &   
-       9.720255e-03_rb,9.483022e-03_rb,9.263160e-03_rb,9.058902e-03_rb,8.868710e-03_rb, &   
-       8.691240e-03_rb,8.525312e-03_rb,8.369886e-03_rb,8.224042e-03_rb,8.086961e-03_rb, &   
-       7.957917e-03_rb,7.836258e-03_rb,7.721400e-03_rb,7.612821e-03_rb,7.510045e-03_rb, &   
-       7.412648e-03_rb,7.320242e-03_rb,7.232476e-03_rb/)           
+       1.302890e-02_rb,1.245334e-02_rb,1.192576e-02_rb,1.144037e-02_rb,1.099230e-02_rb, &
+       1.057739e-02_rb,1.019208e-02_rb,9.833302e-03_rb,9.498395e-03_rb,9.185047e-03_rb, &
+       8.891237e-03_rb,8.615185e-03_rb,8.355325e-03_rb,8.110267e-03_rb,7.878778e-03_rb, &
+       7.659759e-03_rb,7.452224e-03_rb,7.255291e-03_rb,7.068166e-03_rb,6.890130e-03_rb, &
+       6.720536e-03_rb,6.558794e-03_rb,6.404371e-03_rb/)
+      absice2(:,11) = (/ &
+! band 11
+       1.656227e-01_rb,1.032129e-01_rb,7.487359e-02_rb,5.871431e-02_rb,4.828355e-02_rb, &
+       4.099989e-02_rb,3.562924e-02_rb,3.150755e-02_rb,2.824593e-02_rb,2.560156e-02_rb, &
+       2.341503e-02_rb,2.157740e-02_rb,2.001169e-02_rb,1.866199e-02_rb,1.748669e-02_rb, &
+       1.645421e-02_rb,1.554015e-02_rb,1.472535e-02_rb,1.399457e-02_rb,1.333553e-02_rb, &
+       1.273821e-02_rb,1.219440e-02_rb,1.169725e-02_rb,1.124104e-02_rb,1.082096e-02_rb, &
+       1.043290e-02_rb,1.007336e-02_rb,9.739338e-03_rb,9.428223e-03_rb,9.137756e-03_rb, &
+       8.865964e-03_rb,8.611115e-03_rb,8.371686e-03_rb,8.146330e-03_rb,7.933852e-03_rb, &
+       7.733187e-03_rb,7.543386e-03_rb,7.363597e-03_rb,7.193056e-03_rb,7.031072e-03_rb, &
+       6.877024e-03_rb,6.730348e-03_rb,6.590531e-03_rb/)
+      absice2(:,12) = (/ &
+! band 12
+       9.194591e-02_rb,6.446867e-02_rb,4.962034e-02_rb,4.042061e-02_rb,3.418456e-02_rb, &
+       2.968856e-02_rb,2.629900e-02_rb,2.365572e-02_rb,2.153915e-02_rb,1.980791e-02_rb, &
+       1.836689e-02_rb,1.714979e-02_rb,1.610900e-02_rb,1.520946e-02_rb,1.442476e-02_rb, &
+       1.373468e-02_rb,1.312345e-02_rb,1.257858e-02_rb,1.209010e-02_rb,1.164990e-02_rb, &
+       1.125136e-02_rb,1.088901e-02_rb,1.055827e-02_rb,1.025531e-02_rb,9.976896e-03_rb, &
+       9.720255e-03_rb,9.483022e-03_rb,9.263160e-03_rb,9.058902e-03_rb,8.868710e-03_rb, &
+       8.691240e-03_rb,8.525312e-03_rb,8.369886e-03_rb,8.224042e-03_rb,8.086961e-03_rb, &
+       7.957917e-03_rb,7.836258e-03_rb,7.721400e-03_rb,7.612821e-03_rb,7.510045e-03_rb, &
+       7.412648e-03_rb,7.320242e-03_rb,7.232476e-03_rb/)
       absice2(:,13) = (/ &
-! band 13                                                                                   
-       1.437021e-01_rb,8.872535e-02_rb,6.392420e-02_rb,4.991833e-02_rb,4.096790e-02_rb, &   
-       3.477881e-02_rb,3.025782e-02_rb,2.681909e-02_rb,2.412102e-02_rb,2.195132e-02_rb, &   
-       2.017124e-02_rb,1.868641e-02_rb,1.743044e-02_rb,1.635529e-02_rb,1.542540e-02_rb, &   
-       1.461388e-02_rb,1.390003e-02_rb,1.326766e-02_rb,1.270395e-02_rb,1.219860e-02_rb, &   
-       1.174326e-02_rb,1.133107e-02_rb,1.095637e-02_rb,1.061442e-02_rb,1.030126e-02_rb, &   
-       1.001352e-02_rb,9.748340e-03_rb,9.503256e-03_rb,9.276155e-03_rb,9.065205e-03_rb, &   
-       8.868808e-03_rb,8.685571e-03_rb,8.514268e-03_rb,8.353820e-03_rb,8.203272e-03_rb, &   
-       8.061776e-03_rb,7.928578e-03_rb,7.803001e-03_rb,7.684443e-03_rb,7.572358e-03_rb, &   
-       7.466258e-03_rb,7.365701e-03_rb,7.270286e-03_rb/)                                    
-      absice2(:,14) = (/ &                                                                  
-! band 14                                                                                   
-       1.288870e-01_rb,8.160295e-02_rb,5.964745e-02_rb,4.703790e-02_rb,3.888637e-02_rb, &   
-       3.320115e-02_rb,2.902017e-02_rb,2.582259e-02_rb,2.330224e-02_rb,2.126754e-02_rb, &   
-       1.959258e-02_rb,1.819130e-02_rb,1.700289e-02_rb,1.598320e-02_rb,1.509942e-02_rb, &   
-       1.432666e-02_rb,1.364572e-02_rb,1.304156e-02_rb,1.250220e-02_rb,1.201803e-02_rb, &   
-       1.158123e-02_rb,1.118537e-02_rb,1.082513e-02_rb,1.049605e-02_rb,1.019440e-02_rb, &   
-       9.916989e-03_rb,9.661116e-03_rb,9.424457e-03_rb,9.205005e-03_rb,9.001022e-03_rb, &   
-       8.810992e-03_rb,8.633588e-03_rb,8.467646e-03_rb,8.312137e-03_rb,8.166151e-03_rb, &   
-       8.028878e-03_rb,7.899597e-03_rb,7.777663e-03_rb,7.662498e-03_rb,7.553581e-03_rb, &   
-       7.450444e-03_rb,7.352662e-03_rb,7.259851e-03_rb/)                                    
-      absice2(:,15) = (/ &                                                                  
-! band 15                                                                                   
-       8.254229e-02_rb,5.808787e-02_rb,4.492166e-02_rb,3.675028e-02_rb,3.119623e-02_rb, &   
-       2.718045e-02_rb,2.414450e-02_rb,2.177073e-02_rb,1.986526e-02_rb,1.830306e-02_rb, &   
-       1.699991e-02_rb,1.589698e-02_rb,1.495199e-02_rb,1.413374e-02_rb,1.341870e-02_rb, &   
-       1.278883e-02_rb,1.223002e-02_rb,1.173114e-02_rb,1.128322e-02_rb,1.087900e-02_rb, &   
-       1.051254e-02_rb,1.017890e-02_rb,9.873991e-03_rb,9.594347e-03_rb,9.337044e-03_rb, &   
-       9.099589e-03_rb,8.879842e-03_rb,8.675960e-03_rb,8.486341e-03_rb,8.309594e-03_rb, &   
-       8.144500e-03_rb,7.989986e-03_rb,7.845109e-03_rb,7.709031e-03_rb,7.581007e-03_rb, &   
-       7.460376e-03_rb,7.346544e-03_rb,7.238978e-03_rb,7.137201e-03_rb,7.040780e-03_rb, &   
-       6.949325e-03_rb,6.862483e-03_rb,6.779931e-03_rb/)                                    
-      absice2(:,16) = (/ &                                                                  
-! band 16                                                                                   
-       1.382062e-01_rb,8.643227e-02_rb,6.282935e-02_rb,4.934783e-02_rb,4.063891e-02_rb, &   
-       3.455591e-02_rb,3.007059e-02_rb,2.662897e-02_rb,2.390631e-02_rb,2.169972e-02_rb, &   
-       1.987596e-02_rb,1.834393e-02_rb,1.703924e-02_rb,1.591513e-02_rb,1.493679e-02_rb, &   
-       1.407780e-02_rb,1.331775e-02_rb,1.264061e-02_rb,1.203364e-02_rb,1.148655e-02_rb, &   
-       1.099099e-02_rb,1.054006e-02_rb,1.012807e-02_rb,9.750215e-03_rb,9.402477e-03_rb, &   
-       9.081428e-03_rb,8.784143e-03_rb,8.508107e-03_rb,8.251146e-03_rb,8.011373e-03_rb, &   
-       7.787140e-03_rb,7.577002e-03_rb,7.379687e-03_rb,7.194071e-03_rb,7.019158e-03_rb, &   
-       6.854061e-03_rb,6.697986e-03_rb,6.550224e-03_rb,6.410138e-03_rb,6.277153e-03_rb, &   
-       6.150751e-03_rb,6.030462e-03_rb,5.915860e-03_rb/)                                    
-                                                                                           
-! ICEFLAG = 3; Fu parameterization. Particle size 5 - 140 micron in 
+! band 13
+       1.437021e-01_rb,8.872535e-02_rb,6.392420e-02_rb,4.991833e-02_rb,4.096790e-02_rb, &
+       3.477881e-02_rb,3.025782e-02_rb,2.681909e-02_rb,2.412102e-02_rb,2.195132e-02_rb, &
+       2.017124e-02_rb,1.868641e-02_rb,1.743044e-02_rb,1.635529e-02_rb,1.542540e-02_rb, &
+       1.461388e-02_rb,1.390003e-02_rb,1.326766e-02_rb,1.270395e-02_rb,1.219860e-02_rb, &
+       1.174326e-02_rb,1.133107e-02_rb,1.095637e-02_rb,1.061442e-02_rb,1.030126e-02_rb, &
+       1.001352e-02_rb,9.748340e-03_rb,9.503256e-03_rb,9.276155e-03_rb,9.065205e-03_rb, &
+       8.868808e-03_rb,8.685571e-03_rb,8.514268e-03_rb,8.353820e-03_rb,8.203272e-03_rb, &
+       8.061776e-03_rb,7.928578e-03_rb,7.803001e-03_rb,7.684443e-03_rb,7.572358e-03_rb, &
+       7.466258e-03_rb,7.365701e-03_rb,7.270286e-03_rb/)
+      absice2(:,14) = (/ &
+! band 14
+       1.288870e-01_rb,8.160295e-02_rb,5.964745e-02_rb,4.703790e-02_rb,3.888637e-02_rb, &
+       3.320115e-02_rb,2.902017e-02_rb,2.582259e-02_rb,2.330224e-02_rb,2.126754e-02_rb, &
+       1.959258e-02_rb,1.819130e-02_rb,1.700289e-02_rb,1.598320e-02_rb,1.509942e-02_rb, &
+       1.432666e-02_rb,1.364572e-02_rb,1.304156e-02_rb,1.250220e-02_rb,1.201803e-02_rb, &
+       1.158123e-02_rb,1.118537e-02_rb,1.082513e-02_rb,1.049605e-02_rb,1.019440e-02_rb, &
+       9.916989e-03_rb,9.661116e-03_rb,9.424457e-03_rb,9.205005e-03_rb,9.001022e-03_rb, &
+       8.810992e-03_rb,8.633588e-03_rb,8.467646e-03_rb,8.312137e-03_rb,8.166151e-03_rb, &
+       8.028878e-03_rb,7.899597e-03_rb,7.777663e-03_rb,7.662498e-03_rb,7.553581e-03_rb, &
+       7.450444e-03_rb,7.352662e-03_rb,7.259851e-03_rb/)
+      absice2(:,15) = (/ &
+! band 15
+       8.254229e-02_rb,5.808787e-02_rb,4.492166e-02_rb,3.675028e-02_rb,3.119623e-02_rb, &
+       2.718045e-02_rb,2.414450e-02_rb,2.177073e-02_rb,1.986526e-02_rb,1.830306e-02_rb, &
+       1.699991e-02_rb,1.589698e-02_rb,1.495199e-02_rb,1.413374e-02_rb,1.341870e-02_rb, &
+       1.278883e-02_rb,1.223002e-02_rb,1.173114e-02_rb,1.128322e-02_rb,1.087900e-02_rb, &
+       1.051254e-02_rb,1.017890e-02_rb,9.873991e-03_rb,9.594347e-03_rb,9.337044e-03_rb, &
+       9.099589e-03_rb,8.879842e-03_rb,8.675960e-03_rb,8.486341e-03_rb,8.309594e-03_rb, &
+       8.144500e-03_rb,7.989986e-03_rb,7.845109e-03_rb,7.709031e-03_rb,7.581007e-03_rb, &
+       7.460376e-03_rb,7.346544e-03_rb,7.238978e-03_rb,7.137201e-03_rb,7.040780e-03_rb, &
+       6.949325e-03_rb,6.862483e-03_rb,6.779931e-03_rb/)
+      absice2(:,16) = (/ &
+! band 16
+       1.382062e-01_rb,8.643227e-02_rb,6.282935e-02_rb,4.934783e-02_rb,4.063891e-02_rb, &
+       3.455591e-02_rb,3.007059e-02_rb,2.662897e-02_rb,2.390631e-02_rb,2.169972e-02_rb, &
+       1.987596e-02_rb,1.834393e-02_rb,1.703924e-02_rb,1.591513e-02_rb,1.493679e-02_rb, &
+       1.407780e-02_rb,1.331775e-02_rb,1.264061e-02_rb,1.203364e-02_rb,1.148655e-02_rb, &
+       1.099099e-02_rb,1.054006e-02_rb,1.012807e-02_rb,9.750215e-03_rb,9.402477e-03_rb, &
+       9.081428e-03_rb,8.784143e-03_rb,8.508107e-03_rb,8.251146e-03_rb,8.011373e-03_rb, &
+       7.787140e-03_rb,7.577002e-03_rb,7.379687e-03_rb,7.194071e-03_rb,7.019158e-03_rb, &
+       6.854061e-03_rb,6.697986e-03_rb,6.550224e-03_rb,6.410138e-03_rb,6.277153e-03_rb, &
+       6.150751e-03_rb,6.030462e-03_rb,5.915860e-03_rb/)
+
+! ICEFLAG = 3; Fu parameterization. Particle size 5 - 140 micron in
 ! increments of 3 microns.
 ! units = m2/g
 ! Hexagonal Ice Particle Parameterization
@@ -7231,9 +7233,9 @@
        1.301260e-02_rb,1.254781e-02_rb,1.210941e-02_rb,1.169468e-02_rb,1.130118e-02_rb, &
        1.092675e-02_rb,1.056945e-02_rb,1.022757e-02_rb,9.899560e-03_rb,9.584021e-03_rb, &
        9.279705e-03_rb,8.985479e-03_rb,8.700322e-03_rb,8.423306e-03_rb,8.153590e-03_rb, &
-       7.890412e-03_rb/)                                                             
-      absice3(:,6) = (/ &                                                            
-! band 6                                                                             
+       7.890412e-03_rb/)
+      absice3(:,6) = (/ &
+! band 6
        1.145369e-01_rb,1.174566e-01_rb,9.917866e-02_rb,8.332990e-02_rb,7.104263e-02_rb, &
        6.153370e-02_rb,5.405472e-02_rb,4.806281e-02_rb,4.317918e-02_rb,3.913795e-02_rb, &
        3.574916e-02_rb,3.287437e-02_rb,3.041067e-02_rb,2.828017e-02_rb,2.642292e-02_rb, &
@@ -7243,9 +7245,9 @@
        1.293447e-02_rb,1.252685e-02_rb,1.213939e-02_rb,1.176968e-02_rb,1.141555e-02_rb, &
        1.107508e-02_rb,1.074655e-02_rb,1.042839e-02_rb,1.011923e-02_rb,9.817799e-03_rb, &
        9.522962e-03_rb,9.233688e-03_rb,8.949041e-03_rb,8.668171e-03_rb,8.390301e-03_rb, &
-       8.114723e-03_rb/)                                                             
-      absice3(:,7) = (/ &                                                            
-! band 7                                                                             
+       8.114723e-03_rb/)
+      absice3(:,7) = (/ &
+! band 7
        1.222345e-02_rb,5.344230e-02_rb,5.523465e-02_rb,5.128759e-02_rb,4.676925e-02_rb, &
        4.266150e-02_rb,3.910561e-02_rb,3.605479e-02_rb,3.342843e-02_rb,3.115052e-02_rb, &
        2.915776e-02_rb,2.739935e-02_rb,2.583499e-02_rb,2.443266e-02_rb,2.316681e-02_rb, &
@@ -7255,9 +7257,9 @@
        1.191172e-02_rb,1.149171e-02_rb,1.108936e-02_rb,1.070341e-02_rb,1.033271e-02_rb, &
        9.976220e-03_rb,9.633021e-03_rb,9.302273e-03_rb,8.983216e-03_rb,8.675161e-03_rb, &
        8.377478e-03_rb,8.089595e-03_rb,7.810986e-03_rb,7.541170e-03_rb,7.279706e-03_rb, &
-       7.026186e-03_rb/)                                                             
-      absice3(:,8) = (/ &                                                            
-! band 8                                                                             
+       7.026186e-03_rb/)
+      absice3(:,8) = (/ &
+! band 8
        6.711058e-02_rb,6.918198e-02_rb,6.127484e-02_rb,5.411944e-02_rb,4.836902e-02_rb, &
        4.375293e-02_rb,3.998077e-02_rb,3.683587e-02_rb,3.416508e-02_rb,3.186003e-02_rb, &
        2.984290e-02_rb,2.805671e-02_rb,2.645895e-02_rb,2.501733e-02_rb,2.370689e-02_rb, &
@@ -7267,9 +7269,9 @@
        1.173682e-02_rb,1.129925e-02_rb,1.088393e-02_rb,1.048961e-02_rb,1.011516e-02_rb, &
        9.759543e-03_rb,9.421813e-03_rb,9.101089e-03_rb,8.796559e-03_rb,8.507464e-03_rb, &
        8.233098e-03_rb,7.972798e-03_rb,7.725942e-03_rb,7.491940e-03_rb,7.270238e-03_rb, &
-       7.060305e-03_rb/)                                                             
-      absice3(:,9) = (/ &                                                            
-! band 9                                                                             
+       7.060305e-03_rb/)
+      absice3(:,9) = (/ &
+! band 9
        1.236780e-01_rb,9.222386e-02_rb,7.383997e-02_rb,6.204072e-02_rb,5.381029e-02_rb, &
        4.770678e-02_rb,4.296928e-02_rb,3.916131e-02_rb,3.601540e-02_rb,3.335878e-02_rb, &
        3.107493e-02_rb,2.908247e-02_rb,2.732282e-02_rb,2.575276e-02_rb,2.433968e-02_rb, &
@@ -7279,9 +7281,9 @@
        1.208808e-02_rb,1.167094e-02_rb,1.127862e-02_rb,1.090979e-02_rb,1.056323e-02_rb, &
        1.023786e-02_rb,9.932665e-03_rb,9.646744e-03_rb,9.379250e-03_rb,9.129409e-03_rb, &
        8.896500e-03_rb,8.679856e-03_rb,8.478852e-03_rb,8.292904e-03_rb,8.121463e-03_rb, &
-       7.964013e-03_rb/)                                                             
-      absice3(:,10) = (/ &                                                           
-! band 10                                                                            
+       7.964013e-03_rb/)
+      absice3(:,10) = (/ &
+! band 10
        1.655966e-01_rb,1.134205e-01_rb,8.714344e-02_rb,7.129241e-02_rb,6.063739e-02_rb, &
        5.294203e-02_rb,4.709309e-02_rb,4.247476e-02_rb,3.871892e-02_rb,3.559206e-02_rb, &
        3.293893e-02_rb,3.065226e-02_rb,2.865558e-02_rb,2.689288e-02_rb,2.532221e-02_rb, &
@@ -7291,9 +7293,9 @@
        1.239992e-02_rb,1.198486e-02_rb,1.159647e-02_rb,1.123323e-02_rb,1.089375e-02_rb, &
        1.057679e-02_rb,1.028124e-02_rb,1.000607e-02_rb,9.750376e-03_rb,9.513303e-03_rb, &
        9.294082e-03_rb,9.092003e-03_rb,8.906412e-03_rb,8.736702e-03_rb,8.582314e-03_rb, &
-       8.442725e-03_rb/)                                                             
-      absice3(:,11) = (/ &                                                           
-! band 11                                                                            
+       8.442725e-03_rb/)
+      absice3(:,11) = (/ &
+! band 11
        1.775615e-01_rb,1.180046e-01_rb,8.929607e-02_rb,7.233500e-02_rb,6.108333e-02_rb, &
        5.303642e-02_rb,4.696927e-02_rb,4.221206e-02_rb,3.836768e-02_rb,3.518576e-02_rb, &
        3.250063e-02_rb,3.019825e-02_rb,2.819758e-02_rb,2.643943e-02_rb,2.487953e-02_rb, &
@@ -7303,9 +7305,9 @@
        1.229321e-02_rb,1.189350e-02_rb,1.151915e-02_rb,1.116859e-02_rb,1.084042e-02_rb, &
        1.053338e-02_rb,1.024636e-02_rb,9.978326e-03_rb,9.728357e-03_rb,9.495613e-03_rb, &
        9.279327e-03_rb,9.078798e-03_rb,8.893383e-03_rb,8.722488e-03_rb,8.565568e-03_rb, &
-       8.422115e-03_rb/)                                                             
-      absice3(:,12) = (/ &                                                           
-! band 12                                                                            
+       8.422115e-03_rb/)
+      absice3(:,12) = (/ &
+! band 12
        9.465447e-02_rb,6.432047e-02_rb,5.060973e-02_rb,4.267283e-02_rb,3.741843e-02_rb, &
        3.363096e-02_rb,3.073531e-02_rb,2.842405e-02_rb,2.651789e-02_rb,2.490518e-02_rb, &
        2.351273e-02_rb,2.229056e-02_rb,2.120335e-02_rb,2.022541e-02_rb,1.933763e-02_rb, &
@@ -7315,9 +7317,9 @@
        1.112148e-02_rb,1.081609e-02_rb,1.052642e-02_rb,1.025178e-02_rb,9.991540e-03_rb, &
        9.745130e-03_rb,9.512038e-03_rb,9.291797e-03_rb,9.083980e-03_rb,8.888195e-03_rb, &
        8.704081e-03_rb,8.531306e-03_rb,8.369560e-03_rb,8.218558e-03_rb,8.078032e-03_rb, &
-       7.947730e-03_rb/)                                                             
-      absice3(:,13) = (/ &                                                           
-! band 13                                                                            
+       7.947730e-03_rb/)
+      absice3(:,13) = (/ &
+! band 13
        1.560311e-01_rb,9.961097e-02_rb,7.502949e-02_rb,6.115022e-02_rb,5.214952e-02_rb, &
        4.578149e-02_rb,4.099731e-02_rb,3.724174e-02_rb,3.419343e-02_rb,3.165356e-02_rb, &
        2.949251e-02_rb,2.762222e-02_rb,2.598073e-02_rb,2.452322e-02_rb,2.321642e-02_rb, &
@@ -7327,9 +7329,9 @@
        1.204183e-02_rb,1.167164e-02_rb,1.132567e-02_rb,1.100281e-02_rb,1.070207e-02_rb, &
        1.042258e-02_rb,1.016352e-02_rb,9.924197e-03_rb,9.703953e-03_rb,9.502199e-03_rb, &
        9.318400e-03_rb,9.152066e-03_rb,9.002749e-03_rb,8.870038e-03_rb,8.753555e-03_rb, &
-       8.652951e-03_rb/)                                                             
-      absice3(:,14) = (/ &                                                           
-! band 14                                                                            
+       8.652951e-03_rb/)
+      absice3(:,14) = (/ &
+! band 14
        1.559547e-01_rb,9.896700e-02_rb,7.441231e-02_rb,6.061469e-02_rb,5.168730e-02_rb, &
        4.537821e-02_rb,4.064106e-02_rb,3.692367e-02_rb,3.390714e-02_rb,3.139438e-02_rb, &
        2.925702e-02_rb,2.740783e-02_rb,2.578547e-02_rb,2.434552e-02_rb,2.305506e-02_rb, &
@@ -7339,9 +7341,9 @@
        1.205973e-02_rb,1.169780e-02_rb,1.135989e-02_rb,1.104492e-02_rb,1.075192e-02_rb, &
        1.048004e-02_rb,1.022850e-02_rb,9.996611e-03_rb,9.783753e-03_rb,9.589361e-03_rb, &
        9.412924e-03_rb,9.253977e-03_rb,9.112098e-03_rb,8.986903e-03_rb,8.878039e-03_rb, &
-       8.785184e-03_rb/)                                                             
-      absice3(:,15) = (/ &                                                           
-! band 15                                                                            
+       8.785184e-03_rb/)
+      absice3(:,15) = (/ &
+! band 15
        1.102926e-01_rb,7.176622e-02_rb,5.530316e-02_rb,4.606056e-02_rb,4.006116e-02_rb, &
        3.579628e-02_rb,3.256909e-02_rb,3.001360e-02_rb,2.791920e-02_rb,2.615617e-02_rb, &
        2.464023e-02_rb,2.331426e-02_rb,2.213817e-02_rb,2.108301e-02_rb,2.012733e-02_rb, &
@@ -7351,9 +7353,9 @@
        1.145348e-02_rb,1.114612e-02_rb,1.085730e-02_rb,1.058633e-02_rb,1.033263e-02_rb, &
        1.009564e-02_rb,9.874895e-03_rb,9.669960e-03_rb,9.480449e-03_rb,9.306014e-03_rb, &
        9.146339e-03_rb,9.001138e-03_rb,8.870154e-03_rb,8.753148e-03_rb,8.649907e-03_rb, &
-       8.560232e-03_rb/)                                                             
+       8.560232e-03_rb/)
       absice3(:,16) = (/ &
-! band 16                                                                            
+! band 16
        1.688344e-01_rb,1.077072e-01_rb,7.994467e-02_rb,6.403862e-02_rb,5.369850e-02_rb, &
        4.641582e-02_rb,4.099331e-02_rb,3.678724e-02_rb,3.342069e-02_rb,3.065831e-02_rb, &
        2.834557e-02_rb,2.637680e-02_rb,2.467733e-02_rb,2.319286e-02_rb,2.188299e-02_rb, &
@@ -7363,16 +7365,16 @@
        1.149683e-02_rb,1.116436e-02_rb,1.085153e-02_rb,1.055701e-02_rb,1.027961e-02_rb, &
        1.001831e-02_rb,9.772141e-03_rb,9.540280e-03_rb,9.321966e-03_rb,9.116517e-03_rb, &
        8.923315e-03_rb,8.741803e-03_rb,8.571472e-03_rb,8.411860e-03_rb,8.262543e-03_rb, &
-       8.123136e-03_rb/)                       
+       8.123136e-03_rb/)
 
-! For LIQFLAG = 0.                                                                   
-      absliq0 = 0.0903614_rb                                                         
-                                                                                     
-! For LIQFLAG = 1.  In each band, the absorption                                     
-! coefficients are listed for a range of effective radii from 2.5                    
-! to 59.5 microns in increments of 1.0 micron.                                       
-      absliq1(:, 1) = (/ &                                                           
-! band  1                                                                            
+! For LIQFLAG = 0.
+      absliq0 = 0.0903614_rb
+
+! For LIQFLAG = 1.  In each band, the absorption
+! coefficients are listed for a range of effective radii from 2.5
+! to 59.5 microns in increments of 1.0 micron.
+      absliq1(:, 1) = (/ &
+! band  1
        1.64047e-03_rb, 6.90533e-02_rb, 7.72017e-02_rb, 7.78054e-02_rb, 7.69523e-02_rb, &
        7.58058e-02_rb, 7.46400e-02_rb, 7.35123e-02_rb, 7.24162e-02_rb, 7.13225e-02_rb, &
        6.99145e-02_rb, 6.66409e-02_rb, 6.36582e-02_rb, 6.09425e-02_rb, 5.84593e-02_rb, &
@@ -7384,9 +7386,9 @@
        2.47189e-02_rb, 2.40678e-02_rb, 2.34418e-02_rb, 2.28392e-02_rb, 2.22586e-02_rb, &
        2.16986e-02_rb, 2.11580e-02_rb, 2.06356e-02_rb, 2.01305e-02_rb, 1.96417e-02_rb, &
        1.91682e-02_rb, 1.87094e-02_rb, 1.82643e-02_rb, 1.78324e-02_rb, 1.74129e-02_rb, &
-       1.70052e-02_rb, 1.66088e-02_rb, 1.62231e-02_rb/)                              
-      absliq1(:, 2) = (/ &                                                           
-! band  2                                                                            
+       1.70052e-02_rb, 1.66088e-02_rb, 1.62231e-02_rb/)
+      absliq1(:, 2) = (/ &
+! band  2
        2.19486e-01_rb, 1.80687e-01_rb, 1.59150e-01_rb, 1.44731e-01_rb, 1.33703e-01_rb, &
        1.24355e-01_rb, 1.15756e-01_rb, 1.07318e-01_rb, 9.86119e-02_rb, 8.92739e-02_rb, &
        8.34911e-02_rb, 7.70773e-02_rb, 7.15240e-02_rb, 6.66615e-02_rb, 6.23641e-02_rb, &
@@ -7398,9 +7400,9 @@
        2.08834e-02_rb, 2.03051e-02_rb, 1.97536e-02_rb, 1.92271e-02_rb, 1.87239e-02_rb, &
        1.82425e-02_rb, 1.77816e-02_rb, 1.73399e-02_rb, 1.69162e-02_rb, 1.65094e-02_rb, &
        1.61187e-02_rb, 1.57430e-02_rb, 1.53815e-02_rb, 1.50334e-02_rb, 1.46981e-02_rb, &
-       1.43748e-02_rb, 1.40628e-02_rb, 1.37617e-02_rb/)                              
-      absliq1(:, 3) = (/ &                                                           
-! band  3                                                                            
+       1.43748e-02_rb, 1.40628e-02_rb, 1.37617e-02_rb/)
+      absliq1(:, 3) = (/ &
+! band  3
        2.95174e-01_rb, 2.34765e-01_rb, 1.98038e-01_rb, 1.72114e-01_rb, 1.52083e-01_rb, &
        1.35654e-01_rb, 1.21613e-01_rb, 1.09252e-01_rb, 9.81263e-02_rb, 8.79448e-02_rb, &
        8.12566e-02_rb, 7.44563e-02_rb, 6.86374e-02_rb, 6.36042e-02_rb, 5.92094e-02_rb, &
@@ -7412,9 +7414,9 @@
        1.96561e-02_rb, 1.91239e-02_rb, 1.86161e-02_rb, 1.81311e-02_rb, 1.76673e-02_rb, &
        1.72234e-02_rb, 1.67981e-02_rb, 1.63903e-02_rb, 1.59989e-02_rb, 1.56230e-02_rb, &
        1.52615e-02_rb, 1.49138e-02_rb, 1.45791e-02_rb, 1.42565e-02_rb, 1.39455e-02_rb, &
-       1.36455e-02_rb, 1.33559e-02_rb, 1.30761e-02_rb/)                              
-      absliq1(:, 4) = (/ &                                                           
-! band  4                                                                            
+       1.36455e-02_rb, 1.33559e-02_rb, 1.30761e-02_rb/)
+      absliq1(:, 4) = (/ &
+! band  4
        3.00925e-01_rb, 2.36949e-01_rb, 1.96947e-01_rb, 1.68692e-01_rb, 1.47190e-01_rb, &
        1.29986e-01_rb, 1.15719e-01_rb, 1.03568e-01_rb, 9.30028e-02_rb, 8.36658e-02_rb, &
        7.71075e-02_rb, 7.07002e-02_rb, 6.52284e-02_rb, 6.05024e-02_rb, 5.63801e-02_rb, &
@@ -7426,9 +7428,9 @@
        1.91711e-02_rb, 1.86625e-02_rb, 1.81769e-02_rb, 1.77126e-02_rb, 1.72683e-02_rb, &
        1.68426e-02_rb, 1.64344e-02_rb, 1.60427e-02_rb, 1.56664e-02_rb, 1.53046e-02_rb, &
        1.49565e-02_rb, 1.46214e-02_rb, 1.42985e-02_rb, 1.39871e-02_rb, 1.36866e-02_rb, &
-       1.33965e-02_rb, 1.31162e-02_rb, 1.28453e-02_rb/)                              
-      absliq1(:, 5) = (/ &                                                           
-! band  5                                                                            
+       1.33965e-02_rb, 1.31162e-02_rb, 1.28453e-02_rb/)
+      absliq1(:, 5) = (/ &
+! band  5
        2.64691e-01_rb, 2.12018e-01_rb, 1.78009e-01_rb, 1.53539e-01_rb, 1.34721e-01_rb, &
        1.19580e-01_rb, 1.06996e-01_rb, 9.62772e-02_rb, 8.69710e-02_rb, 7.87670e-02_rb, &
        7.29272e-02_rb, 6.70920e-02_rb, 6.20977e-02_rb, 5.77732e-02_rb, 5.39910e-02_rb, &
@@ -7440,9 +7442,9 @@
        1.89917e-02_rb, 1.84984e-02_rb, 1.80269e-02_rb, 1.75755e-02_rb, 1.71431e-02_rb, &
        1.67283e-02_rb, 1.63303e-02_rb, 1.59478e-02_rb, 1.55801e-02_rb, 1.52262e-02_rb, &
        1.48853e-02_rb, 1.45568e-02_rb, 1.42400e-02_rb, 1.39342e-02_rb, 1.36388e-02_rb, &
-       1.33533e-02_rb, 1.30773e-02_rb, 1.28102e-02_rb/)                              
-      absliq1(:, 6) = (/ &                                                           
-! band  6                                                                            
+       1.33533e-02_rb, 1.30773e-02_rb, 1.28102e-02_rb/)
+      absliq1(:, 6) = (/ &
+! band  6
        8.81182e-02_rb, 1.06745e-01_rb, 9.79753e-02_rb, 8.99625e-02_rb, 8.35200e-02_rb, &
        7.81899e-02_rb, 7.35939e-02_rb, 6.94696e-02_rb, 6.56266e-02_rb, 6.19148e-02_rb, &
        5.83355e-02_rb, 5.49306e-02_rb, 5.19642e-02_rb, 4.93325e-02_rb, 4.69659e-02_rb, &
@@ -7454,9 +7456,9 @@
        1.94280e-02_rb, 1.89501e-02_rb, 1.84913e-02_rb, 1.80506e-02_rb, 1.76270e-02_rb, &
        1.72196e-02_rb, 1.68276e-02_rb, 1.64500e-02_rb, 1.60863e-02_rb, 1.57357e-02_rb, &
        1.53975e-02_rb, 1.50710e-02_rb, 1.47558e-02_rb, 1.44511e-02_rb, 1.41566e-02_rb, &
-       1.38717e-02_rb, 1.35960e-02_rb, 1.33290e-02_rb/)                              
-      absliq1(:, 7) = (/ &                                                           
-! band  7                                                                            
+       1.38717e-02_rb, 1.35960e-02_rb, 1.33290e-02_rb/)
+      absliq1(:, 7) = (/ &
+! band  7
        4.32174e-02_rb, 7.36078e-02_rb, 6.98340e-02_rb, 6.65231e-02_rb, 6.41948e-02_rb, &
        6.23551e-02_rb, 6.06638e-02_rb, 5.88680e-02_rb, 5.67124e-02_rb, 5.38629e-02_rb, &
        4.99579e-02_rb, 4.86289e-02_rb, 4.70120e-02_rb, 4.52854e-02_rb, 4.35466e-02_rb, &
@@ -7468,9 +7470,9 @@
        1.90824e-02_rb, 1.86174e-02_rb, 1.81706e-02_rb, 1.77411e-02_rb, 1.73281e-02_rb, &
        1.69307e-02_rb, 1.65483e-02_rb, 1.61801e-02_rb, 1.58254e-02_rb, 1.54835e-02_rb, &
        1.51538e-02_rb, 1.48358e-02_rb, 1.45288e-02_rb, 1.42322e-02_rb, 1.39457e-02_rb, &
-       1.36687e-02_rb, 1.34008e-02_rb, 1.31416e-02_rb/)                              
-      absliq1(:, 8) = (/ &                                                           
-! band  8                                                                            
+       1.36687e-02_rb, 1.34008e-02_rb, 1.31416e-02_rb/)
+      absliq1(:, 8) = (/ &
+! band  8
        1.41881e-01_rb, 7.15419e-02_rb, 6.30335e-02_rb, 6.11132e-02_rb, 6.01931e-02_rb, &
        5.92420e-02_rb, 5.78968e-02_rb, 5.58876e-02_rb, 5.28923e-02_rb, 4.84462e-02_rb, &
        4.60839e-02_rb, 4.56013e-02_rb, 4.45410e-02_rb, 4.31866e-02_rb, 4.17026e-02_rb, &
@@ -7482,9 +7484,9 @@
        1.88056e-02_rb, 1.83564e-02_rb, 1.79241e-02_rb, 1.75079e-02_rb, 1.71070e-02_rb, &
        1.67207e-02_rb, 1.63482e-02_rb, 1.59890e-02_rb, 1.56424e-02_rb, 1.53077e-02_rb, &
        1.49845e-02_rb, 1.46722e-02_rb, 1.43702e-02_rb, 1.40782e-02_rb, 1.37955e-02_rb, &
-       1.35219e-02_rb, 1.32569e-02_rb, 1.30000e-02_rb/)                              
-      absliq1(:, 9) = (/ &                                                           
-! band  9                                                                            
+       1.35219e-02_rb, 1.32569e-02_rb, 1.30000e-02_rb/)
+      absliq1(:, 9) = (/ &
+! band  9
        6.72726e-02_rb, 6.61013e-02_rb, 6.47866e-02_rb, 6.33780e-02_rb, 6.18985e-02_rb, &
        6.03335e-02_rb, 5.86136e-02_rb, 5.65876e-02_rb, 5.39839e-02_rb, 5.03536e-02_rb, &
        4.71608e-02_rb, 4.63630e-02_rb, 4.50313e-02_rb, 4.34526e-02_rb, 4.17876e-02_rb, &
@@ -7496,9 +7498,9 @@
        1.83944e-02_rb, 1.79578e-02_rb, 1.75378e-02_rb, 1.71335e-02_rb, 1.67440e-02_rb, &
        1.63687e-02_rb, 1.60069e-02_rb, 1.56579e-02_rb, 1.53210e-02_rb, 1.49958e-02_rb, &
        1.46815e-02_rb, 1.43778e-02_rb, 1.40841e-02_rb, 1.37999e-02_rb, 1.35249e-02_rb, &
-       1.32585e-02_rb, 1.30004e-02_rb, 1.27502e-02_rb/)                              
-      absliq1(:,10) = (/ &                                                           
-! band 10                                                                            
+       1.32585e-02_rb, 1.30004e-02_rb, 1.27502e-02_rb/)
+      absliq1(:,10) = (/ &
+! band 10
        7.97040e-02_rb, 7.63844e-02_rb, 7.36499e-02_rb, 7.13525e-02_rb, 6.93043e-02_rb, &
        6.72807e-02_rb, 6.50227e-02_rb, 6.22395e-02_rb, 5.86093e-02_rb, 5.37815e-02_rb, &
        5.14682e-02_rb, 4.97214e-02_rb, 4.77392e-02_rb, 4.56961e-02_rb, 4.36858e-02_rb, &
@@ -7510,9 +7512,9 @@
        1.83483e-02_rb, 1.79043e-02_rb, 1.74778e-02_rb, 1.70678e-02_rb, 1.66735e-02_rb, &
        1.62941e-02_rb, 1.59286e-02_rb, 1.55766e-02_rb, 1.52371e-02_rb, 1.49097e-02_rb, &
        1.45937e-02_rb, 1.42885e-02_rb, 1.39936e-02_rb, 1.37085e-02_rb, 1.34327e-02_rb, &
-       1.31659e-02_rb, 1.29075e-02_rb, 1.26571e-02_rb/)                              
-      absliq1(:,11) = (/ &                                                           
-! band 11                                                                            
+       1.31659e-02_rb, 1.29075e-02_rb, 1.26571e-02_rb/)
+      absliq1(:,11) = (/ &
+! band 11
        1.49438e-01_rb, 1.33535e-01_rb, 1.21542e-01_rb, 1.11743e-01_rb, 1.03263e-01_rb, &
        9.55774e-02_rb, 8.83382e-02_rb, 8.12943e-02_rb, 7.42533e-02_rb, 6.70609e-02_rb, &
        6.38761e-02_rb, 5.97788e-02_rb, 5.59841e-02_rb, 5.25318e-02_rb, 4.94132e-02_rb, &
@@ -7524,9 +7526,9 @@
        1.84317e-02_rb, 1.79679e-02_rb, 1.75238e-02_rb, 1.70983e-02_rb, 1.66901e-02_rb, &
        1.62983e-02_rb, 1.59219e-02_rb, 1.55599e-02_rb, 1.52115e-02_rb, 1.48761e-02_rb, &
        1.45528e-02_rb, 1.42411e-02_rb, 1.39402e-02_rb, 1.36497e-02_rb, 1.33690e-02_rb, &
-       1.30976e-02_rb, 1.28351e-02_rb, 1.25810e-02_rb/)                              
-      absliq1(:,12) = (/ &                                                           
-! band 12                                                                            
+       1.30976e-02_rb, 1.28351e-02_rb, 1.25810e-02_rb/)
+      absliq1(:,12) = (/ &
+! band 12
        3.71985e-02_rb, 3.88586e-02_rb, 3.99070e-02_rb, 4.04351e-02_rb, 4.04610e-02_rb, &
        3.99834e-02_rb, 3.89953e-02_rb, 3.74886e-02_rb, 3.54551e-02_rb, 3.28870e-02_rb, &
        3.32576e-02_rb, 3.22444e-02_rb, 3.12384e-02_rb, 3.02584e-02_rb, 2.93146e-02_rb, &
@@ -7538,10 +7540,10 @@
        1.56842e-02_rb, 1.53840e-02_rb, 1.50920e-02_rb, 1.48080e-02_rb, 1.45318e-02_rb, &
        1.42631e-02_rb, 1.40016e-02_rb, 1.37472e-02_rb, 1.34996e-02_rb, 1.32586e-02_rb, &
        1.30239e-02_rb, 1.27954e-02_rb, 1.25728e-02_rb, 1.23559e-02_rb, 1.21445e-02_rb, &
-       1.19385e-02_rb, 1.17376e-02_rb, 1.15417e-02_rb/)                              
+       1.19385e-02_rb, 1.17376e-02_rb, 1.15417e-02_rb/)
 
-      absliq1(:,13) = (/ &                                                           
-! band 13                                                                            
+      absliq1(:,13) = (/ &
+! band 13
        3.11868e-02_rb, 4.48357e-02_rb, 4.90224e-02_rb, 4.96406e-02_rb, 4.86806e-02_rb, &
        4.69610e-02_rb, 4.48630e-02_rb, 4.25795e-02_rb, 4.02138e-02_rb, 3.78236e-02_rb, &
        3.74266e-02_rb, 3.60384e-02_rb, 3.47074e-02_rb, 3.34434e-02_rb, 3.22499e-02_rb, &
@@ -7553,9 +7555,9 @@
        1.62956e-02_rb, 1.59624e-02_rb, 1.56393e-02_rb, 1.53259e-02_rb, 1.50219e-02_rb, &
        1.47268e-02_rb, 1.44404e-02_rb, 1.41624e-02_rb, 1.38925e-02_rb, 1.36302e-02_rb, &
        1.33755e-02_rb, 1.31278e-02_rb, 1.28871e-02_rb, 1.26530e-02_rb, 1.24253e-02_rb, &
-       1.22038e-02_rb, 1.19881e-02_rb, 1.17782e-02_rb/)                              
-      absliq1(:,14) = (/ &                                                           
-! band 14                                                                            
+       1.22038e-02_rb, 1.19881e-02_rb, 1.17782e-02_rb/)
+      absliq1(:,14) = (/ &
+! band 14
        1.58988e-02_rb, 3.50652e-02_rb, 4.00851e-02_rb, 4.07270e-02_rb, 3.98101e-02_rb, &
        3.83306e-02_rb, 3.66829e-02_rb, 3.50327e-02_rb, 3.34497e-02_rb, 3.19609e-02_rb, &
        3.13712e-02_rb, 3.03348e-02_rb, 2.93415e-02_rb, 2.83973e-02_rb, 2.75037e-02_rb, &
@@ -7567,9 +7569,9 @@
        1.50936e-02_rb, 1.48146e-02_rb, 1.45429e-02_rb, 1.42782e-02_rb, 1.40203e-02_rb, &
        1.37691e-02_rb, 1.35243e-02_rb, 1.32858e-02_rb, 1.30534e-02_rb, 1.28270e-02_rb, &
        1.26062e-02_rb, 1.23909e-02_rb, 1.21810e-02_rb, 1.19763e-02_rb, 1.17766e-02_rb, &
-       1.15817e-02_rb, 1.13915e-02_rb, 1.12058e-02_rb/)                              
-      absliq1(:,15) = (/ &                                                           
-! band 15                                                                            
+       1.15817e-02_rb, 1.13915e-02_rb, 1.12058e-02_rb/)
+      absliq1(:,15) = (/ &
+! band 15
        5.02079e-03_rb, 2.17615e-02_rb, 2.55449e-02_rb, 2.59484e-02_rb, 2.53650e-02_rb, &
        2.45281e-02_rb, 2.36843e-02_rb, 2.29159e-02_rb, 2.22451e-02_rb, 2.16716e-02_rb, &
        2.11451e-02_rb, 2.05817e-02_rb, 2.00454e-02_rb, 1.95372e-02_rb, 1.90567e-02_rb, &
@@ -7581,9 +7583,9 @@
        1.20881e-02_rb, 1.19131e-02_rb, 1.17412e-02_rb, 1.15723e-02_rb, 1.14063e-02_rb, &
        1.12434e-02_rb, 1.10834e-02_rb, 1.09264e-02_rb, 1.07722e-02_rb, 1.06210e-02_rb, &
        1.04725e-02_rb, 1.03269e-02_rb, 1.01839e-02_rb, 1.00436e-02_rb, 9.90593e-03_rb, &
-       9.77080e-03_rb, 9.63818e-03_rb, 9.50800e-03_rb/)                              
-      absliq1(:,16) = (/ &                                                           
-! band 16                                                                            
+       9.77080e-03_rb, 9.63818e-03_rb, 9.50800e-03_rb/)
+      absliq1(:,16) = (/ &
+! band 16
        5.64971e-02_rb, 9.04736e-02_rb, 8.11726e-02_rb, 7.05450e-02_rb, 6.20052e-02_rb, &
        5.54286e-02_rb, 5.03503e-02_rb, 4.63791e-02_rb, 4.32290e-02_rb, 4.06959e-02_rb, &
        3.74690e-02_rb, 3.52964e-02_rb, 3.33799e-02_rb, 3.16774e-02_rb, 3.01550e-02_rb, &
@@ -7595,7 +7597,7 @@
        1.41532e-02_rb, 1.38734e-02_rb, 1.36028e-02_rb, 1.33410e-02_rb, 1.30875e-02_rb, &
        1.28420e-02_rb, 1.26041e-02_rb, 1.23735e-02_rb, 1.21497e-02_rb, 1.19325e-02_rb, &
        1.17216e-02_rb, 1.15168e-02_rb, 1.13177e-02_rb, 1.11241e-02_rb, 1.09358e-02_rb, &
-       1.07525e-02_rb, 1.05741e-02_rb, 1.04003e-02_rb/)                              
+       1.07525e-02_rb, 1.05741e-02_rb, 1.04003e-02_rb/)
 
 !jm not thread safe      hvrclc = '$Revision: 1.8 $'
 
@@ -7676,52 +7678,52 @@
 !     &          ,ig, lay, ciwpmc(ig,lay), radice
 !                         errflg = 1
 !                         return
-!                     end if                                                                      
-                     ncbands = 16                                                                
-                     factor = (min(max(radice,5.0_rb),140._rb) - 2._rb)/3._rb                    
-                     index = int(factor)                                                         
-                     if (index .eq. 46) index = 45                                               
-                     fint = factor - float(index)                                                
-                     ib = ngb(ig)                                                                
+!                     end if
+                     ncbands = 16
+                     factor = (min(max(radice,5.0_rb),140._rb) - 2._rb)/3._rb
+                     index = int(factor)
+                     if (index .eq. 46) index = 45
+                     fint = factor - float(index)
+                     ib = ngb(ig)
                      abscoice(ig) =                                     &
      &                   absice3(index,ib) + fint *                     &
-     &                   (absice3(index+1,ib) - (absice3(index,ib)))                             
-                     abscosno(ig) = 0.0_rb                                                       
-                                                                                                 
-               endif                                                                             
-                                                                                                 
-!..Incorporate additional effects due to snow.                                                   
-               if (cswpmc(ig,lay).gt.0.0_rb .and. iceflag .eq. 5) then                           
-                  radsno = resnmc(lay)                                                           
-!                  if (radsno .lt. 5.0_rb .or. radsno .gt. 140.0_rb) then                         
+     &                   (absice3(index+1,ib) - (absice3(index,ib)))
+                     abscosno(ig) = 0.0_rb
+
+               endif
+
+!..Incorporate additional effects due to snow.
+               if (cswpmc(ig,lay).gt.0.0_rb .and. iceflag .eq. 5) then
+                  radsno = resnmc(lay)
+!                  if (radsno .lt. 5.0_rb .or. radsno .gt. 140.0_rb) then
 !                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
-!     &         'ERROR: SNOW GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'   &                        
-!     &         ,ig, lay, cswpmc(ig,lay), radsno                                                  
+!     &         'ERROR: SNOW GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'   &
+!     &         ,ig, lay, cswpmc(ig,lay), radsno
 !                         errflg = 1
 !                         return
-!                     end if                                                                      
-                     ncbands = 16                                                                
-                     factor = (min(max(radsno,5.0_rb),140.0_rb) - 2._rb)/3._rb                   
-                     index = int(factor)                                                         
-                     if (index .eq. 46) index = 45                                               
-                     fint = factor - float(index)                                                
-                     ib = ngb(ig)                                                                
+!                     end if
+                     ncbands = 16
+                     factor = (min(max(radsno,5.0_rb),140.0_rb) - 2._rb)/3._rb
+                     index = int(factor)
+                     if (index .eq. 46) index = 45
+                     fint = factor - float(index)
+                     ib = ngb(ig)
                      abscosno(ig) =                                     &
      &                   absice3(index,ib) + fint *                     &
-     &                  (absice3(index+1,ib) - (absice3(index,ib)))                             
-               endif                                                                             
-                                                                                                 
-                                                                                                 
-                                                                                                 
-! Calculation of absorption coefficients due to water clouds.                                    
-               if (clwpmc(ig,lay) .eq. 0.0_rb) then                                              
-                  abscoliq(ig) = 0.0_rb                                                          
-                                                                                                 
-               elseif (liqflag .eq. 0) then                                                      
-                   abscoliq(ig) = absliq0                                                        
-                                                                                                 
-               elseif (liqflag .eq. 1) then                                                      
-                  radliq = relqmc(lay)                        
+     &                  (absice3(index+1,ib) - (absice3(index,ib)))
+               endif
+
+
+
+! Calculation of absorption coefficients due to water clouds.
+               if (clwpmc(ig,lay) .eq. 0.0_rb) then
+                  abscoliq(ig) = 0.0_rb
+
+               elseif (liqflag .eq. 0) then
+                   abscoliq(ig) = absliq0
+
+               elseif (liqflag .eq. 1) then
+                  radliq = relqmc(lay)
 !                  if (radliq .lt. 2.5_rb .or. radliq .gt. 60._rb) then
 !                     write(errmsg,'(a,i5,i5,f8.2,f8.2)' )              &
 !&                         'ERROR: LIQUID EFFECTIVE SIZE OUT OF BOUNDS' &
@@ -7729,27 +7731,27 @@
 !                     errflg = 1
 !                     return
 !                  end if
-                  index = int(min(max(radliq,2.5_rb),60._rb) - 1.5_rb)                           
-                  if (index .eq. 0) index = 1                                                    
-                  if (index .eq. 58) index = 57                                                  
-                  fint = radliq - 1.5_rb - float(index)                                          
-                  ib = ngb(ig)                                                                   
+                  index = int(min(max(radliq,2.5_rb),60._rb) - 1.5_rb)
+                  if (index .eq. 0) index = 1
+                  if (index .eq. 58) index = 57
+                  fint = radliq - 1.5_rb - float(index)
+                  ib = ngb(ig)
                   abscoliq(ig) =                                        &
      &                  absliq1(index,ib) + fint *                      &
-     &                  (absliq1(index+1,ib) - (absliq1(index,ib)))                              
-               endif                                                                             
-                                                                                                 
+     &                  (absliq1(index+1,ib) - (absliq1(index,ib)))
+               endif
+
                taucmc(ig,lay) = ciwpmc(ig,lay) * abscoice(ig) +         &
      &                           clwpmc(ig,lay) * abscoliq(ig) +        &
-     &                           cswpmc(ig,lay) * abscosno(ig)                                    
-                                                                                                 
-            endif                                                                                
-         endif                                                                                   
-         enddo                                                                                   
-      enddo                                                                                      
-                                                                                                 
-      end subroutine cldprmc                                                                     
-                                                                    
+     &                           cswpmc(ig,lay) * abscosno(ig)
+
+            endif
+         endif
+         enddo
+      enddo
+
+      end subroutine cldprmc
+
 !> @}
 !........................................!$
       end module rrtmg_lw                !$

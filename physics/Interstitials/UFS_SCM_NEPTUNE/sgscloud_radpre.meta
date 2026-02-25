@@ -3,7 +3,7 @@
   type = scheme
   dependencies_path = ../../
   dependencies = tools/funcphys.f90,hooks/machine.F
-  dependencies = hooks/physcons.F90,Radiation/RRTMG/radcons.f90
+  dependencies = Radiation/RRTMG/radcons.f90
   dependencies = Radiation/radiation_clouds.f,MP/module_mp_radar.F90,MP/Thompson/module_mp_thompson.F90
 
 ########################################################################
@@ -276,7 +276,7 @@
   type = integer
   intent = in
 [conv_cf_opt]
-  standard_name = option_for_convection_scheme_cloud_fraction_computation 
+  standard_name = option_for_convection_scheme_cloud_fraction_computation
   long_name = option for convection scheme cloud fraction computation
   units = flag
   dimensions = ()
@@ -419,7 +419,7 @@
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
-  intent = in 
+  intent = in
 [xlat]
   standard_name = latitude
   long_name = grid latitude

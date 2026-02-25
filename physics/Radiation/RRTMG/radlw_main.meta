@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rrtmg_lw
   type = scheme
-  dependencies = ../../hooks/machine.F,../mersenne_twister.f,../../hooks/physcons.F90,radlw_datatb.f,radlw_param.f
+  dependencies = ../../hooks/machine.F,../mersenne_twister.f,radlw_datatb.f,radlw_param.f
 
 ########################################################################
 [ccpp-arg-table]
@@ -425,6 +425,46 @@
   long_name = mean effective radius for snow flake
   units = um
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_amd]
+  standard_name = molecular_weight_of_dry_air
+  long_name = molecular weight of dry air
+  units = g mol-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_amw]
+  standard_name = molecular_weight_of_water_vapor
+  long_name = molecular weight of water vapor
+  units = g mol-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_amo3]
+  standard_name = molecular_weight_of_ozone
+  long_name = molecular weight of ozone
+  units = g mol-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_avgd]
+  standard_name = avogadro_consant
+  long_name = Avogadro constant
+  units = mol-1
+  dimensions = ()
   type = real
   kind = kind_phys
   intent = in

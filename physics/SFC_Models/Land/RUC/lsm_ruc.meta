@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = lsm_ruc
   type = scheme
-  dependencies = ../../../hooks/machine.F,../../../hooks/physcons.F90
+  dependencies = ../../../hooks/machine.F
   dependencies = module_sf_ruclsm.F90,module_soil_pre.F90,namelist_soilveg_ruc.F90,set_soilveg_ruc.F90
 
 ########################################################################
@@ -496,6 +496,78 @@
   type = real
   intent = out
   kind = kind_phys
+[rhowater]
+  standard_name = fresh_liquid_water_density_at_0c
+  long_name = density of liquid water
+  units = kg m-3
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degrees Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_hfus]
+  standard_name = latent_heat_of_fusion_of_water_at_0C
+  long_name = latent heat of fusion
+  units = J kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_hvap]
+  standard_name = latent_heat_of_vaporization_of_water_at_0C
+  long_name = latent heat of vaporization/sublimation (hvap)
+  units = J kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_rv]
+  standard_name = gas_constant_water_vapor
+  long_name = ideal gas constant for water vapor
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_csol]
+  standard_name = specific_heat_of_ice_at_constant_pressure
+  long_name = specific heat of ice at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent  = in
+[con_tice]
+  standard_name = freezing_point_temperature_of_seawater
+  long_name = freezing point temperature of seawater
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent  = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1122,6 +1194,14 @@
   type = real
   kind = kind_phys
   intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degrees Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [stbolt]
   standard_name = stefan_boltzmann_constant
   long_name = Stefan-Boltzmann constant
@@ -1148,7 +1228,7 @@
   intent = inout
 [semis_lnd]
   standard_name = surface_longwave_emissivity_over_land
-  long_name = surface lw emissivity in fraction over land 
+  long_name = surface lw emissivity in fraction over land
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
