@@ -1,0 +1,107 @@
+name: Doxygen GitHub Pages Deploy Action
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+
+    - name: Checkout current ccpp-physics code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Store remote-URL for current ccpp-physics code
+      run: echo "GIT_REMOTE_URL=`git remote get-url origin`" >> $GITHUB_ENV
+
+    - name: Store branch name for current ccpp-physics code
+      run: echo "GIT_REMOTE_BRANCH=`git rev-parse --abbrev-ref HEAD`" >> $GITHUB_ENV
+
+    - name: Store hash for HEAD of current ccpp-physics code
+      run: echo "GIT_REMOTE_HASH=`git rev-parse HEAD`" >> $GITHUB_ENV
+
+    - name: Checkout latest ccpp-physics code
+      run: git clone https://github.com/NCAR/ccpp-physics.git
+
+    - name: Initialize submodules
+      run: |
+        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics
+        git submodule update --init --recursive
+
+    - name: Update ccpp-physics hash 
+      if: github.event.pull_request == false
+      run: |
+        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics
+        echo $GIT_REMOTE_URL
+        echo $GIT_REMOTE_BRANCH
+        echo ${{github.repository}}
+        echo ${{ github.event.pull_request.head.sha }}
+        echo $GITHUB_SHA
+        git remote add remote_local $GIT_REMOTE_URL
+        git fetch remote_local $GIT_REMOTE_BRANCH
+        git checkout remote_local/$GIT_REMOTE_BRANCH
+
+
+#    - name: Set up and run Doxygen
+#      #uses: DenverCoder1/doxygen-github-pages-action@v2.0.0
+#      #with:
+#      #  config_file: ./physics/docs/ccpp_doxyfile
+#      #  folder: ./
+#      uses: mattnotmitt/doxygen-action@v1.12.0
+#      with:
+#        working-directory: '.'
+#        doxyfile-path: './physics/docs/ccpp_doxyfile'
+#        enable-latex: true
+
+    - name: Install Doxygen + Graphviz + LaTeX
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen graphviz perl texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-bibtex-extra
+
+    - name: Verify Perl installation
+      run: which perl
+
+    - name: Verify bibtex installation
+      run: which bibtex
+
+    - name: Verify Doxygen version
+      run: doxygen --version
+   
+    - name: update doxyfile
+      run: |
+        cd physics/docs
+        doxygen -u ccpp_doxyfile
+
+    - name: Run Doxygen
+      run: |
+        cd physics/docs
+        doxygen ccpp_doxyfile
+
+    - name: Find html output
+      run: find . -type d -name html
+  
+    - name: Setup Pages
+      uses: actions/configure-pages@v5
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: physics/docs/doc/html
+    - name: list files
+      run: ls -la physics/docs/doc/html/
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4.0.5
+
