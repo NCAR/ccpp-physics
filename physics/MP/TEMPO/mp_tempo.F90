@@ -1099,11 +1099,15 @@ module mp_tempo
          if (is_hail_aware) then
            dchw = (new_chw - chw)/dtp
            dvh  = (new_vh - vh)/dtp
+           
+           deallocate (new_chw, new_vh)
          end if
          if (is_aerosol_aware .or. merra2_aerosol_aware) then
            dnc = (new_nc - nc)/dtp
            dnwfa = (new_nwfa - nwfa)/dtp
            dnifa = (new_nifa - nifa)/dtp
+           
+           deallocate(new_nc, new_nwfa, new_nifa)
          end if
          
          ! DH* Not really needed because they go out of scope ...

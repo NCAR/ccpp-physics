@@ -375,7 +375,11 @@ contains
               refl_10cm(i,k)   = max(-35.,refl(i,kk))
            enddo 
          enddo 
-      endif 
+      endif
+      
+      if(effr_in) then
+         deallocate(new_qv, new_ql, new_qi, new_qr, new_qs, new_qg, new_qa, new_t)
+      end if
 
    end subroutine gfdl_cloud_microphys_v3_run
 
