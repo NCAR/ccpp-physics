@@ -287,10 +287,10 @@ module mp_fer_hires
 !aligo
        DO K = 1, LM
        DO I= IMS, IME
-         cwm(i,k) = cwm(i,k)/(1.0_kind_phys-new_q(i,k))
-         new_qr(i,k) = new_qr(i,k)/(1.0_kind_phys-new_q(i,k))
-         new_qi(i,k) = new_qi(i,k)/(1.0_kind_phys-new_q(i,k))
-         new_ql(i,k) = new_ql(i,k)/(1.0_kind_phys-new_q(i,k))
+         cwm(i,k) = cwm(i,k)/(1.0_kind_phys-new_qv(i,k))
+         new_qr(i,k) = new_qr(i,k)/(1.0_kind_phys-new_qv(i,k))
+         new_qi(i,k) = new_qi(i,k)/(1.0_kind_phys-new_qv(i,k))
+         new_ql(i,k) = new_ql(i,k)/(1.0_kind_phys-new_qv(i,k))
        ENDDO
        ENDDO
 !aligo
@@ -299,7 +299,7 @@ module mp_fer_hires
             CALL FER_HIRES(                                             &
                    DT=DT,RHgrd=RHGRD                                    &
                   ,PRSI=prsi,P_PHY=p_phy,T_PHY=new_t                    &
-                  ,Q=new_q,QT=cwm                                       &
+                  ,Q=new_qv,QT=cwm                                      &
                   ,LOWLYR=LOWLYR,SR=SR,TRAIN_PHY=train_phy              &
                   ,F_ICE_PHY=F_ICE,F_RAIN_PHY=F_RAIN                    &
                   ,F_RIMEF_PHY=F_RIMEF                                  &
@@ -318,9 +318,9 @@ module mp_fer_hires
 ! - Convert dry qc,qr,qi back to wet mixing ratio
     DO K = 1, LM
      DO I= IMS, IME
-        new_ql(i,k) = new_ql(i,k)/(1.0_kind_phys+new_q(i,k))
-        new_qi(i,k) = new_qi(i,k)/(1.0_kind_phys+new_q(i,k))
-        new_qr(i,k) = new_qr(i,k)/(1.0_kind_phys+new_q(i,k))
+        new_ql(i,k) = new_ql(i,k)/(1.0_kind_phys+new_qv(i,k))
+        new_qi(i,k) = new_qi(i,k)/(1.0_kind_phys+new_qv(i,k))
+        new_qr(i,k) = new_qr(i,k)/(1.0_kind_phys+new_qv(i,k))
      ENDDO
     ENDDO
 
