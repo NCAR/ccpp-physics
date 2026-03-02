@@ -55,18 +55,14 @@
           do i=1,im
             new_qr = gq0_rain(i,k) + dtp*ten_qr(i,k)
             !zero out qr when tendencies are applied if after-application value is small or negative
-            if (new_qr < 0) then
-              ten_qr(i,k) = new_qr/dtp 
-            else if (new_qr < qsmall) then
-              ten_qr(i,k) = ten_qr(i,k) - new_qr/dtp
+            if (new_qr < qsmall) then
+              ten_qr(i,k) = -gq0_rain(i,k)/dtp 
             end if
             
             new_qs = gq0_snow(i,k) + dtp*ten_qs(i,k)
             !zero out qs when tendencies are applied if after-application value is small or negative
-            if (new_qs < 0) then
-              ten_qs(i,k) = new_qs/dtp 
-            else if (new_qs < qsmall) then
-              ten_qs(i,k) = ten_qs(i,k) - new_qs/dtp
+            if (new_qs < qsmall) then
+              ten_qs(i,k) = -gq0_snow(i,k)/dtp 
             end if
           enddo
         enddo
@@ -81,27 +77,21 @@
           do i=1,im
             new_qr = gq0_rain(i,k) + dtp*ten_qr(i,k)
             !zero out qr when tendencies are applied if after-application value is small or negative
-            if (new_qr < 0) then
-              ten_qr(i,k) = new_qr/dtp 
-            else if (new_qr < qsmall) then
-              ten_qr(i,k) = ten_qr(i,k) - new_qr/dtp
+            if (new_qr < qsmall) then
+              ten_qr(i,k) = -gq0_rain(i,k)/dtp 
             end if
             
             new_qs = gq0_snow(i,k) + dtp*ten_qs(i,k)
             !zero out qs when tendencies are applied if after-application value is small or negative
-            if (new_qs < 0) then
-              ten_qs(i,k) = new_qs/dtp 
-            else if (new_qs < qsmall) then
-              ten_qs(i,k) = ten_qs(i,k) - new_qs/dtp
+            if (new_qs < qsmall) then
+              ten_qs(i,k) = -gq0_snow(i,k)/dtp 
             end if
             
             
             new_qg = gq0_graupel(i,k) + dtp*ten_qg(i,k)
             !zero out qg when tendencies are applied if after-application value is small or negative
-            if (new_qg < 0) then
-              ten_qg(i,k) = new_qg/dtp 
-            else if (new_qg < qsmall) then
-              ten_qg(i,k) = ten_qg(i,k) - new_qg/dtp
+            if (new_qg < qsmall) then
+              ten_qg(i,k) = -gq0_graupel(i,k)/dtp 
             end if
           enddo
         enddo
