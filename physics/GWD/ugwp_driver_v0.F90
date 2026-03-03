@@ -209,10 +209,6 @@ module ugwp_driver_v0
 !     sigmin = 2.*hpmin/dsmax      !dxres ! Moorthi - this will not reproduce
       sigmin = 2.*hpmin/dxres      !dxres
 
-
-
-      kxridge = float(IMX)/arad * cdmbgwd(2)
-
       do i=1,im
         idxzb(i)    = 0
         zmtb(i)     = 0.0
@@ -223,7 +219,6 @@ module ugwp_driver_v0
         dusfc(i)    = 0.0
         dvsfc(i)    = 0.0
         tau_tofd(i) = 0.0
-!
         ipt(i) = 0
         sigma(i) = max(vsigma(i), sigmin)
         gamma(i) = max(vgamma(i), gammin)
@@ -246,13 +241,9 @@ module ugwp_driver_v0
       npt = 0
       do i = 1,im
         if ( elvmaxd(i) >= hminmt .and. hprime(i)  >= hpmin ) then
-
           npt      = npt + 1
           ipt(npt) = i
-!         arhills(i) = 1.0
-!
           sigres = max(sigmin, sigma(i))
-!         if (sigma(i) < sigmin) sigma(i)=  sigmin
           dxres = sqrt(sparea(i))
           if (2.*hprime(i)/sigres > dxres) sigres=2.*hprime(i)/dxres
           aelps = min(2.*hprime(i)/sigres, 0.5*dxres)
@@ -277,12 +268,9 @@ module ugwp_driver_v0
 
           selps      = belps*belps*gamma(i)*4.    ! ellipse area of the el-c hill
           nhills     = min(nhilmax, sparea(i)/selps)
-!         arhills(i) = max(nhills, 1.0)
 
+!      if (kdt==1 ) write(6,333) nint(nhills)+1,xlatd(i), hprime(i),aelps*1.e-3, belps*1.e-3, sigma(i),gamma(i)
 !333   format( ' nhil: ', I6, 4(2x, F9.3), 2(2x, E9.3))
-!      if (kdt==1 ) &
-!       write(6,333) nint(nhills)+1,xlatd(i), hprime(i),aelps*1.e-3, &
-!         belps*1.e-3, sigma(i),gamma(i)
 
         endif
       enddo
@@ -308,13 +296,14 @@ module ugwp_driver_v0
 
       KMM1 = km - 1 ;  KMM2   = km - 2 ; KMLL   = kmm1
       LCAP = km     ;  LCAPP1 = LCAP + 1 
+      cdmb4 = 0.25*cdmb 
 
       DO I = 1, npt
         j = ipt(i)
         ELVMAX(J) = min (ELVMAXd(J)*0. + sigfac * hprime(j), hncrit)
         izlow(i)  = 1          ! surface-level
       ENDDO
-!
+
       DO K = 1, kmm1
         DO I = 1, npt
           j = ipt(i)
@@ -322,16 +311,13 @@ module ugwp_driver_v0
           zlowH   = sigfacs* hprime(j) 
           pkp1log =  phil(j,k+1) * rgrav
           pklog   =  phil(j,k)   * rgrav
-!         if (( ELVMAX(j) <= pkp1log) .and. (ELVMAX(j).ge.pklog) ) &
-!            iwklm(I)  =  MAX(iwklm(I), k+1 ) 
-          if (( ztopH <= pkp1log) .and. (zTOPH >= pklog) ) &
-              iwklm(I)  =  MAX(iwklm(I), k+1 )
-!
-          if (zlowH <= pkp1log .and. zlowH >= pklog) &
-              izlow(I)  =  MAX(izlow(I),k)
+!         if (( ELVMAX(j) <= pkp1log) .and. (ELVMAX(j).ge.pklog) ) iwklm(I)  =  MAX(iwklm(I), k+1 )
+          if (( ztopH <= pkp1log) .and. (zTOPH >= pklog) ) iwklm(I)  =  MAX(iwklm(I), k+1 )
+
+          if (zlowH <= pkp1log .and. zlowH >= pklog)  izlow(I)  =  MAX(izlow(I),k)
         ENDDO
       ENDDO
-!
+
       DO K = 1,km
         DO I =1,npt
           J         = ipt(i)
@@ -355,7 +341,7 @@ module ugwp_driver_v0
 !          TI        = 2.0 / (T1(J,K)+T1(J,K+1))
 !          BVF2      = Grav*(GOCP+RDZ*(VTJ(I,K+1)-VTJ(I,K)))* TI
 !          RI_N(I,K) = MAX(BVF2/SHR2,RIMIN)   ! Richardson number
-!
+
           BVF2 = grav2 * RDZ * (VTK(I,K+1)-VTK(I,K)) &
                              / (VTK(I,K+1)+VTK(I,K))
           bnv2(i,k+1) = max( BVF2, bnv2min )
@@ -372,7 +358,7 @@ module ugwp_driver_v0
         bnv2(i,k) = bnv2(i,k+1)
       ENDDO
 !
-! level iwklm =>phil(j,k)/g < sigfac * hprime(j) < phil(j,k+1)/g
+! level iwklm => phil(j,k)/g < sigfac * hprime(j) < phil(j,k+1)/g
 !
       DO I = 1, npt
         J   = ipt(i)
@@ -394,44 +380,40 @@ module ugwp_driver_v0
         DO K = k_zlow, iwklm(I)-1                        ! Kreflm(I)= iwklm(I)-1
           J       = ipt(i)                               ! laye-aver Rho, U, V
           RDELKS  = DEL(J,K) * DELKS(I)
-          UBAR(I) = UBAR(I)  + RDELKS * U1(J,K)          ! trial Mean U below
-          VBAR(I) = VBAR(I)  + RDELKS * V1(J,K)          ! trial Mean V below
-          ROLL(I) = ROLL(I)  + RDELKS * RO(I,K)          ! trial Mean RO below
-!
+          UBAR(I) = UBAR(I)  + RDELKS * U1(J,K)
+          VBAR(I) = VBAR(I)  + RDELKS * V1(J,K)
+          ROLL(I) = ROLL(I)  + RDELKS * RO(I,K)
           BNV2bar(I) = BNV2bar(I) + .5*(BNV2(I,K)+BNV2(I,K+1))* RDELKS
         ENDDO
       ENDDO
-!
+
       DO I = 1, npt
         J = ipt(i)
 !
 ! integrate from Ztoph = sigfac*hprime  down to Zblk if exists
-! find ph_blk, dz_blk like in LM-97 and IFS
+! find ph_blk, dz_blk as introduced in LM-97 and IFS
 !
         ph_blk =0.  
         DO K = iwklm(I), 1, -1
           PHIANG   =  atan2(V1(J,K),U1(J,K))*RAD_TO_DEG
-          ANG(I,K) = ( THETA(J) - PHIANG )
+          ANG(I,K) = THETA(J) - PHIANG
           if ( ANG(I,K) >  90. ) ANG(I,K) = ANG(I,K) - 180.
           if ( ANG(I,K) < -90. ) ANG(I,K) = ANG(I,K) + 180.
           ANG(I,K) = ANG(I,K) * DEG_TO_RAD
           UDS(I,K) = MAX(SQRT(U1(J,K)*U1(J,K) + V1(J,K)*V1(J,K)), velmin)
-!
+
           IF (IDXZB(I) == 0 ) then
             dz_blk = ( PHII(J,K+1) - PHII(J,K) ) *rgrav
-            PE(I)  =  PE(I) + BNV2(I,K) *  &
-               ( ELVMAX(J) - phil(J,K)*rgrav ) * dz_blk
-
+            PE(I)  =  PE(I) + BNV2(I,K) * ( ELVMAX(J) - phil(J,K)*rgrav ) * dz_blk
             UP(I)  =  max(UDS(I,K) * cos(ANG(I,K)), velmin)  
             EK(I)  = 0.5 *  UP(I) * UP(I) 
-
             ph_blk = ph_blk + dz_blk*sqrt(BNV2(I,K))/UP(I)
 
 ! --- Dividing Stream lime  is found when PE =exceeds EK. oper-l GFS
 !           IF ( PE(I) >=  EK(I) ) THEN
             IF ( ph_blk >=  fcrit_gfs ) THEN
                IDXZB(I) = K
-               zmtb (J) = PHIL(J, K)*rgrav
+               zmtb (J) = PHIL(J, K) * rgrav
                RDXZB(J) = real(k, kind=kind_phys)
             ENDIF
 
@@ -468,10 +450,9 @@ module ugwp_driver_v0
 !
 ! --- The drag for mtn blocked flow
 !
-      cdmb4 = 0.25*cdmb 
       DO I = 1, npt
         J = ipt(i)
-!
+
         IF ( IDXZB(I) > 0 ) then
 ! (4.16)-IFS
           gam2 = gamma(j)*gamma(j)
@@ -479,42 +460,36 @@ module ugwp_driver_v0
           CGAM =       0.48*gamma(j) + 0.30*gam2
           DO K = IDXZB(I)-1, 1, -1
 
+! empirical height dep-nt "blocking" length from LM-1997/IFS
+!	  
             ZLEN = SQRT( ( PHIL(J,IDXZB(I)) - PHIL(J,K) ) / &
                          ( PHIL(J,K ) + Grav * hprime(J) ) )
 
             tem     = cos(ANG(I,K))
             COSANG2 = tem * tem
             SINANG2 = 1.0 - COSANG2 
-!
-!  cos =1 sin =0 =>   1/R= gam     ZR = 2.-gam 
-!  cos =0 sin =1 =>   1/R= 1/gam   ZR = 2.- 1/gam
-!
             rdem = COSANG2      +  GAM2 * SINANG2
             rnom = COSANG2*GAM2 +         SINANG2
 !
 ! metOffice Dec 2010
 ! correction of H. Wells & A. Zadra for the
-! aspect ratio  of the hill seen by MF
+! aspect ratio  of the elliptical hill seen by mean flow
 ! (1/R , R-inverse below: 2-R)
 
             rdem = max(rdem, 1.e-6)
             R    = sqrt(rnom/rdem)
             ZR   =  MAX( 2. - R, 0. )
-
             sigres = max(sigmin, sigma(J))
             if (hprime(J)/sigres > dxres) sigres = hprime(J)/dxres
             mtbridge = ZR * sigres*ZLEN / hprime(J)
 ! (4.15)-IFS
-!           DBTMP = CDmb4 * mtbridge * &
-!                   MAX(cos(ANG(I,K)), gamma(J)*sin(ANG(I,K)))
-! (4.16)-IFS
-            DBTMP  = CDmb4*mtbridge*(bgam* COSANG2 +cgam* SINANG2)
+!           DBTMP = CDmb4 * mtbridge * MAX(cos(ANG(I,K)), gamma(J)*sin(ANG(I,K)))
+            dbtmp  = cdmb4*mtbridge*(bgam * cosang2 + cgam * sinang2) ! (4.16)-IFS
             DB(I,K)= DBTMP * UDS(I,K)
           ENDDO
-!
+
         endif
       ENDDO
-!
 !.............................
 !.............................
 ! end  mtn blocking section
@@ -591,7 +566,7 @@ module ugwp_driver_v0
         ENDDO
       ENDDO
 !
-! orographic asymmetry parameter (OA), and (CLX)
+! orographic asymmetry parameters (oa), and (clx)  [Kim & Arakawa Kim & Doyle]
       DO I = 1,npt
         J      = ipt(i)
         wdir   = atan2(UBAR(I),VBAR(I)) + pi
@@ -922,8 +897,6 @@ module ugwp_driver_v0
          tau_ogw(j)  = -rgrav * tau_ogw(j)
          tau_tofd(J) = -rgrav * tau_tofd(j)
        ENDDO
-
-       RETURN
 
       end subroutine gwdps_v0
 
@@ -1499,7 +1472,6 @@ module ugwp_driver_v0
        enddo
 !
 !--------------------------------------------------------------------------- 
-       return
        end subroutine fv3_ugwp_solv2_v0
       
-      end module ugwp_driver_v0
+end module ugwp_driver_v0
