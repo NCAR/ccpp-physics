@@ -70,6 +70,58 @@
   dimensions = ()
   type = integer
   intent = in
+[use_cdeps_data]
+  standard_name = do_cdeps_inline
+  long_name = flag for using data provided by CDEPS inline (default false)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[mask_dat]
+  standard_name = land_sea_mask_from_data
+  long_name = landmask
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[tsfco_dat]
+  standard_name = sea_surface_temperature_from_data
+  long_name = sfc temperature
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[tice_dat]
+  standard_name = surface_skin_temperature_over_ice_from_data
+  long_name = surface skin temperature over ice
+  units = K
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[hice_dat]
+  standard_name = sea_ice_thickness_from_data
+  long_name = sea-ice thickness
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[fice_dat]
+  standard_name = sea_ice_area_fraction_of_sea_area_fraction_from_data
+  long_name = sea-ice concentration [0,1]
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
 [landfrac]
   standard_name = land_area_fraction
   long_name = fraction of horizontal grid area occupied by land
@@ -366,7 +418,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [tsurf_wat]
   standard_name = surface_skin_temperature_after_iteration_over_water
   long_name = surface skin temperature after iteration over water
