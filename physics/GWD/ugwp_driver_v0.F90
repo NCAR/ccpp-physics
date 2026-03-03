@@ -1,15 +1,10 @@
-!>\file ugwp_driver_v0.F
+!>\file ugwp_driver_v0.F90
 
 !> This module contains the UGWP v0 driver module
-      module ugwp_driver_v0
+module ugwp_driver_v0
       use cires_orowam2017
       contains
 !
-!=====================================================================
-!
-!ugwp-v0 subroutines: GWDPS_V0 and fv3_ugwp_solv2_v0	
-!
-!=====================================================================
 !>\defgroup ugwp_driverv0_mod UGWP V0 Driver Module
 !! This is the CIRES UGWP V0 driver module
 !!
@@ -39,7 +34,6 @@
           zmtb, zogw, tau_mtb, tau_ogw, tau_tofd, &
           dudt_mtb, dudt_ogw, dudt_tms, errmsg,errflg  )
 !----------------------------------------
-! ugwp_v0
 !
 ! modified/revised version of gwdps.f (with bug fixes, tofd, appropriate
 !   computation of reference level for OGW + COORDE diagnostics
@@ -66,43 +60,13 @@
 !----------------------------------------
       implicit none
       integer, parameter  :: kp = kind_phys
+!----------------------------------------
+! internal parameters
+!----------------------------------------        
       character(len=8)    :: strsolver='PSS-1986'  ! current operational solver or  'WAM-2017'
-      integer, intent(in) :: im, km, imx, kdt
-      integer, intent(in) :: me, master
-      logical, intent(in) :: do_tofd
-      real(kind=kind_phys), parameter  :: sigfac = 3, sigfacS = 0.5
-      real(kind=kind_phys)             :: ztopH,zlowH,ph_blk, dz_blk
-      integer, intent(in)              :: KPBL(IM)    ! Index for the PBL top layer!
-      real(kind=kind_phys), intent(in) :: dtp         !  time step
-      real(kind=kind_phys), intent(in) :: cdmbgwd(2)
-          
-      real(kind=kind_phys), intent(in), dimension(im,km) :: &
-                                        u1,  v1,   t1,    q1, &
-                                        del, prsl, prslk, phil
-      real(kind=kind_phys), intent(in),dimension(im,km+1):: prsi, phii
-      real(kind=kind_phys), intent(in) :: xlatd(im),sinlat(im), coslat(im)
-      real(kind=kind_phys), intent(in) :: sparea(im)
-
-      real(kind=kind_phys), intent(in) :: OC(IM), OA4(im,4), CLX4(im,4)
-      real(kind=kind_phys), intent(in) :: HPRIME(IM),  sgh30(IM)
-      real(kind=kind_phys), intent(in) :: ELVMAXD(IM), THETA(IM)
-      real(kind=kind_phys), intent(in) :: vSIGMA(IM),  vGAMMA(IM)
-      real(kind=kind_phys)             :: SIGMA(IM),   GAMMA(IM)
-
+      real(kind=kind_phys), parameter :: sigfac = 3                 ! N*hprime height of Subgrid Hill over which SSO-flo      
+      real(kind=kind_phys), parameter :: sigfacs = 0.5              ! M*hprime height is the low boundary of the hill 
       
-!output -phys-tend
-      real(kind=kind_phys),dimension(im,km),intent(out) :: &
-                            Pdvdt,    Pdudt,    Pkdis, Pdtdt, &
-! output - diag-coorde, &
-                           dudt_mtb, dudt_ogw, dudt_tms
-!                     
-      real(kind=kind_phys),dimension(im) :: RDXZB,   zmtb,    zogw, &
-                                            tau_ogw, tau_mtb, tau_tofd, &
-                                            dusfc,   dvsfc
-
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-!
 !---------------------------------------------------------------------
 ! # of permissible sub-grid orography hills for "any" resolution  < 25
 !    correction for "elliptical" hills based on shilmin-area =sgrid/25
@@ -114,44 +78,87 @@
 !     cleff = 2.5*0.5e-5 * sqrt(192./768.) => Lh_eff = 1004. km
 !      6*dx = 240 km 8*dx = 320. ~ 3-5 more effective
 !---------------------------------------------------------------------
-      real(kind=kind_phys)            :: gammin = 0.00999999_kp
-      real(kind=kind_phys), parameter :: nhilmax = 25.0_kp
-      real(kind=kind_phys), parameter :: sso_min = 3000.0_kp
+      real(kind=kind_phys)            :: gammin = 0.00999999       ! a/b = gammma_min =1% <====>      
+      real(kind=kind_phys), parameter :: nhilmax = 25.             ! max number of SSO-hills in grid-box
+      real(kind=kind_phys), parameter :: sso_min = 3000.           ! min-lenghth of the hill, GTOP30 ~dx~1 km
       logical, parameter              :: do_adjoro = .true.
+
+      integer, intent(in) :: im, km, imx, kdt
+      integer, intent(in) :: me, master
+      logical, intent(in) :: do_tofd
+      real(kind=kind_phys)             :: ztopH,zlowH,ph_blk, dz_blk
+      integer, intent(in)              :: KPBL(IM)    ! Index for the PBL top layer!
+      real(kind=kind_phys), intent(in) :: dtp         !  time step
+      real(kind=kind_phys), intent(in) :: cdmbgwd(2)
+          
+      real(kind=kind_phys), intent(in), dimension(im,km) :: &
+                                        u1,  v1,   t1, q1, del, prsl, prslk, phil
+
+      real(kind=kind_phys), intent(in),dimension(im,km+1):: prsi, phii
+      real(kind=kind_phys), intent(in) :: xlatd(im),sinlat(im), coslat(im)
+      real(kind=kind_phys), intent(in) :: sparea(im)
+
+      real(kind=kind_phys), intent(in) :: OC(IM), OA4(im,4), CLX4(im,4)
+      real(kind=kind_phys), intent(in) :: HPRIME(IM),  sgh30(IM)
+      real(kind=kind_phys), intent(in) :: ELVMAXD(IM), THETA(IM)
+      real(kind=kind_phys), intent(in) :: vSIGMA(IM),  vGAMMA(IM)
+      real(kind=kind_phys)             :: SIGMA(IM),   GAMMA(IM)
+
+!    
+!output -phys-tend
 !
+      real(kind=kind_phys),dimension(im,km),intent(out) :: &
+                            Pdvdt,    Pdudt,    Pkdis, Pdtdt
+! output - diag-coorde
+      real(kind=kind_phys),dimension(im,km),intent(out) :: &
+                           dudt_mtb, dudt_ogw, dudt_tms
+                     
+      real(kind=kind_phys),dimension(im) :: RDXZB,   zmtb,    zogw, &
+                                            tau_ogw, tau_mtb, tau_tofd, &
+                                            dusfc,   dvsfc
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+!
+!
+! locals vars for SSO
+!
+
+      real(kind=kind_phys), dimension(im)    :: oa,  clx
       real(kind=kind_phys)            :: shilmin, sgrmax, sgrmin
       real(kind=kind_phys)            :: belpmin, dsmin,  dsmax
-!     real(kind=kind_phys)            :: arhills(im)              ! not used why do we need?
-      real(kind=kind_phys)            :: xlingfs
 
 !
-! locals
-! mean flow
-      real(kind=kind_phys), dimension(im,km) :: RI_N, BNV2, RO, &
-                                                VTK, VTJ, VELCO
+! locals        mean flow  ...etc
+!
+      real(kind=kind_phys), dimension(im,km) :: RI_N, BNV2, RO
+      real(kind=kind_phys), dimension(im,km) :: VTK, VTJ, VELCO
+!==================      
 !mtb
-      real(kind=kind_phys), dimension(im)    :: OA,  CLX , elvmax, wk, &
-                                                PE, EK, UP
-
+!==================      
+      real(kind=kind_phys), dimension(im)    :: elvmax, wk
+      real(kind=kind_phys), dimension(im)    :: PE, EK, UP
       real(kind=kind_phys), dimension(im,km) :: DB, ANG, UDS
 
       real(kind=kind_phys) :: ZLEN, DBTMP, R, PHIANG, DBIM, ZR
       real(kind=kind_phys) :: ENG0, ENG1, COSANG2, SINANG2
       real(kind=kind_phys) :: bgam, cgam, gam2, rnom, rdem
-!
+
+!==================
 ! TOFD
 !     Some constants now in "use ugwp_oro_init" +   "use ugwp_common"
 !
 !==================
       real(kind=kind_phys)   :: unew, vnew,  zpbl,  sigflt, zsurf
-      real(kind=kind_phys), dimension(km)    :: utofd1, vtofd1, &
-                                                epstofd1, krf_tofd1, &
-                                                up1, vp1, zpm
+      real(kind=kind_phys), dimension(km)    :: utofd1, vtofd1
+      real(kind=kind_phys), dimension(km)    :: epstofd1, krf_tofd1
+      real(kind=kind_phys), dimension(km)    :: up1, vp1, zpm
       real(kind=kind_phys),dimension(im, km) :: axtms, aytms
-!
+!==================
 ! OGW
-!
-      LOGICAL ICRILV(IM)
+!==================
+      real(kind=kind_phys)            :: xlingfs
+      logical                         :: icrilv(im)
 !
       real(kind=kind_phys), dimension(im) :: XN, YN, UBAR, VBAR, ULOW, &
                      ROLL,  bnv2bar, SCOR, DTFAC, XLINV, DELKS, DELKS1
@@ -159,8 +166,7 @@
       real(kind=kind_phys) :: TAUP(IM,km+1), TAUD(IM,km)
       real(kind=kind_phys) :: taub(im), taulin(im), heff, hsat, hdis
 
-      integer, dimension(im) :: kref, idxzb, ipt, kreflm, &
-                                iwklm, iwk, izlow
+      integer, dimension(im) :: kref, idxzb, ipt, kreflm, iwklm, iwk, izlow
 !
 !check what we need
 !
@@ -183,6 +189,7 @@
 ! Initialize CCPP error handling variables
        errmsg = ''
        errflg = 0      
+!===========================
 !
       rcpdt = 1.0 / (cpd*dtp)
       grav2 = grav + grav
