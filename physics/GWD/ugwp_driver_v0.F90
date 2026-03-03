@@ -35,9 +35,9 @@
           PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DTP,KDT, &
           sgh30, HPRIME,OC,OA4,CLX4,THETA,vSIGMA,vGAMMA,ELVMAXD, &
           DUSFC, DVSFC,  xlatd, sinlat, coslat, sparea, &
-          cdmbgwd, me, master, rdxzb, con_g, con_omega, &
+          cdmbgwd, me, master, rdxzb, &
           zmtb, zogw, tau_mtb, tau_ogw, tau_tofd, &
-          dudt_mtb, dudt_ogw, dudt_tms)
+          dudt_mtb, dudt_ogw, dudt_tms, errmsg,errflg  )
 !----------------------------------------
 ! ugwp_v0
 !
@@ -89,7 +89,6 @@
       real(kind=kind_phys), intent(in) :: vSIGMA(IM),  vGAMMA(IM)
       real(kind=kind_phys)             :: SIGMA(IM),   GAMMA(IM)
 
-      real(kind=kind_phys), intent(in) :: con_g, con_omega
       
 !output -phys-tend
       real(kind=kind_phys),dimension(im,km),intent(out) :: &
@@ -100,6 +99,9 @@
       real(kind=kind_phys),dimension(im) :: RDXZB,   zmtb,    zogw, &
                                             tau_ogw, tau_mtb, tau_tofd, &
                                             dusfc,   dvsfc
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 !
 !---------------------------------------------------------------------
 ! # of permissible sub-grid orography hills for "any" resolution  < 25
@@ -178,6 +180,9 @@
                    npt,   kbps, kbpsp1,kbpsm1, &
                    kmps,  idir, nwd,  klcap, kp1, kmpbl, kmll, &
                    k_mtb, k_zlow, ktrial, klevm1, i, j, k
+! Initialize CCPP error handling variables
+       errmsg = ''
+       errflg = 0      
 !
       rcpdt = 1.0 / (cpd*dtp)
       grav2 = grav + grav
