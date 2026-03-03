@@ -2,8 +2,8 @@
 
 !> This module contains the UGWP v0 driver module
 module ugwp_driver_v0
-      use cires_orowam2017
-      contains
+  use cires_orowam2017
+  contains
 !
 !>\defgroup ugwp_driverv0_mod UGWP V0 Driver Module
 !! This is the CIRES UGWP V0 driver module
@@ -59,7 +59,6 @@ module ugwp_driver_v0
       
 !----------------------------------------
       implicit none
-      integer, parameter  :: kp = kind_phys
 !----------------------------------------
 ! internal parameters
 !----------------------------------------        
@@ -168,24 +167,28 @@ module ugwp_driver_v0
 
       integer, dimension(im) :: kref, idxzb, ipt, kreflm, iwklm, iwk, izlow
 !
-!check what we need
+! local real scalars     
 !
-      real(kind=kind_phys) :: bnv,  fr, ri_gw, &
-                              brvf,   tem,   tem1,  tem2, temc, temv, &
-                              ti,     rdz,   dw2,   shr2, bvf2, &
-                              rdelks, efact, coefm, gfobnv, &
-                              scork,  rscor, hd,    fro,  sira, &
-                              dtaux,  dtauy, pkp1log, pklog, &
-                              grav2, rcpdt, windik, wdir, &
-                              sigmin, dxres,sigres,hdxres, &
-                              cdmb4, mtbridge, &
-                              kxridge, inv_b2eff, zw1, zw2, &
-                              belps, aelps, nhills, selps
+      real(kind=kind_phys) :: bnv,  fr, ri_gw
+      real(kind=kind_phys) :: brvf,   tem,   tem1,  tem2, temc, temv
+      real(kind=kind_phys) :: ti,     rdz,   dw2,   shr2, bvf2
+      real(kind=kind_phys) :: rdelks, efact, coefm, gfobnv
+      real(kind=kind_phys) :: scork,  rscor, hd,    fro,  sira
+      real(kind=kind_phys) :: dtaux,  dtauy, pkp1log, pklog
+      real(kind=kind_phys) :: grav2, rcpdt, windik, wdir
+      real(kind=kind_phys) :: sigmin, dxres,sigres,hdxres, cdmb4, mtbridge
+      real(kind=kind_phys) :: kxridge, inv_b2eff, zw1, zw2
+      real(kind=kind_phys) :: belps, aelps, nhills, selps
 
-      integer ::          kmm1, kmm2, lcap, lcapp1, &
-                   npt,   kbps, kbpsp1,kbpsm1, &
-                   kmps,  idir, nwd,  klcap, kp1, kmpbl, kmll, &
-                   k_mtb, k_zlow, ktrial, klevm1, i, j, k
+!      
+! local integers
+!     
+      integer ::   kmm1, kmm2, lcap, lcapp1
+      integer ::   npt,   kbps, kbpsp1,kbpsm1
+      integer ::   kmps,  idir, nwd,  klcap, kp1, kmpbl, kmll
+      integer ::   k_mtb, k_zlow, ktrial, klevm1
+      integer ::   i, j, k
+!      
 ! Initialize CCPP error handling variables
        errmsg = ''
        errflg = 0      
@@ -200,7 +203,7 @@ module ugwp_driver_v0
       dsmax  = sqrt(sgrmax)   ; dsmin  = sqrt(sgrmin)
 
       dxres   = pi2*arad/float(IMX)
-      hdxres  = 0.5_kp*dxres
+      hdxres  = 0.5*dxres
 !     shilmin = sgrmin/nhilmax            ! not used - Moorthi
 
 !     gammin = min(sso_min/dsmax, 1.)     ! Moorthi - with this results are not reproducible
@@ -314,7 +317,7 @@ module ugwp_driver_v0
 !         if (( ELVMAX(j) <= pkp1log) .and. (ELVMAX(j).ge.pklog) ) iwklm(I)  =  MAX(iwklm(I), k+1 )
           if (( ztopH <= pkp1log) .and. (zTOPH >= pklog) ) iwklm(I)  =  MAX(iwklm(I), k+1 )
 
-          if (zlowH <= pkp1log .and. zlowH >= pklog)  izlow(I)  =  MAX(izlow(I),k)
+          if (zlowH <= pkp1log .and. zlowH >= pklog) izlow(I)  =  MAX(izlow(I),k)
         ENDDO
       ENDDO
 
@@ -482,9 +485,8 @@ module ugwp_driver_v0
             sigres = max(sigmin, sigma(J))
             if (hprime(J)/sigres > dxres) sigres = hprime(J)/dxres
             mtbridge = ZR * sigres*ZLEN / hprime(J)
-! (4.15)-IFS
-!           DBTMP = CDmb4 * mtbridge * MAX(cos(ANG(I,K)), gamma(J)*sin(ANG(I,K)))
-            dbtmp  = cdmb4*mtbridge*(bgam * cosang2 + cgam * sinang2) ! (4.16)-IFS
+!           dbtmp = cdmb4*mtbridge*max(cos(ang(i,k)), gamma(j)*sin(ang(i,k)))   ! (4.15)-ifs 	
+            dbtmp = cdmb4*mtbridge*(bgam * cosang2 + cgam * sinang2)            ! (4.16)-ifs
             DB(I,K)= DBTMP * UDS(I,K)
           ENDDO
 
