@@ -294,8 +294,9 @@ contains
            ugrs, vgrs, tgrs, qgrs(:,:,1), kpbl, prsi,del,prsl, prslk, phii, phil, &
            dtp, kdt, sgh30, hprime, oc, oa4, clx, theta, sigma, gamma, elvmax,    &
            dusfcg, dvsfcg, xlat_d, sinlat, coslat, area, cdmbgwd(1:2),            &
-           me, master, rdxzb, con_g, con_omega, zmtb, zogw, tau_mtb, tau_ogw,     &
-           tau_tofd, dudt_mtb, dudt_ogw, dudt_tms)
+           me, master, rdxzb, zmtb, zogw, tau_mtb, tau_ogw,                       &
+           tau_tofd, dudt_mtb, dudt_ogw, dudt_tms,                                &
+           errmsg, errflg)
 
      else                                    ! calling old GFS gravity wave drag as is
 
