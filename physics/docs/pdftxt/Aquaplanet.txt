@@ -1,0 +1,11 @@
+/**
+\page Aquaplanet_page Aquaplanet
+
+This page documents the CCPP science for the idealized atmosphere-only Aquaplanet capability. 
+It focuses on the physics and parameterizations used in this HSD capability. For complete details 
+about the case setup, workflows, and usage within the Unified Weather Model (UWM), see the 
+[UWM HSD Users Guide](https://ufs-weather-model.readthedocs.io/en/develop/Aquaplanet.html).
+
+The following suite is used by the Aquaplanet case: \n
+\subpage GFS_v17_p8_ugwpv1_aquaplanet_page
+*/
