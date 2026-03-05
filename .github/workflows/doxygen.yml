@@ -74,6 +74,8 @@ jobs:
       run: |
         cd v7-tag/physics/docs
         doxygen ccpp_doxyfile
+        mkdir -p physics/docs/html/V7
+        cp -r v7-tag/physics/docs/html/V7/* physics/docs/html/V7/
 
     - name: Build HSD docs
       run: |
