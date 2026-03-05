@@ -78,15 +78,8 @@ jobs:
         cd physics/docs
         doxygen ccpp_doxyfile
 
-#    - name: update doxyfile
-#      run: |
-#        cd physics/docs
-#        doxygen -u ccpp_doxyfile
-
-#    - name: Run Doxygen for V7 docs
-#      run: |
-#        cd physics/docs
-#        doxygen ccpp_doxyfile
+    - name: List html folder contents
+      run: ls -R physics/docs/html
 
     - name: Setup Pages
       uses: actions/configure-pages@v5
