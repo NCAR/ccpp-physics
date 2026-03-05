@@ -63,11 +63,16 @@ jobs:
         which bibtex
         doxygen --version
 
+- name: Checkout V7 tag
+  uses: actions/checkout@v4
+  with:
+    fetch-depth: 0
+    ref: v7.0.0
+    path: v7-tag
+
     - name: Build V7 docs
       run: |
-        git fetch --tags
-        git worktree add ../v7-tag v7.0.0
-        cd ../v7-tag/physics/docs
+        cd v7-tag/physics/docs
         doxygen ccpp_doxyfile
 
     - name: Build HSD docs
