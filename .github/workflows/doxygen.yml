@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - scidocs_hsd_aqua
-  workflow_dispatch:
+#  workflow_dispatch:
 
 jobs:
   deploy:
