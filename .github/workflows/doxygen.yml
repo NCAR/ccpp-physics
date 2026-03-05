@@ -63,24 +63,21 @@ jobs:
         which bibtex
         doxygen --version
 
-    - name: Checkout V7 tag
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        ref: v7.0.0
-        path: v7-tag
-
-    - name: Build V7 docs
-      run: |
-        cd v7-tag/physics/docs
-        doxygen ccpp_doxyfile
-        mkdir -p physics/docs/html/V7
-        cp -r html/V7/* physics/docs/html/V7/
-
     - name: Build HSD docs
       run: |
         cd physics/docs
         doxygen ccpphsd_doxyfile
+
+    - name: Checkout V7 tag
+      run: |
+        fetch-depth: 0
+        git fetch --tags
+        git checkout v7.0.0
+
+    - name: Build V7 docs
+      run: |
+        cd physics/docs
+        doxygen ccpp_doxyfile
 
 #    - name: update doxyfile
 #      run: |
