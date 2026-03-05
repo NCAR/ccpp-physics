@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - scidocs_hsd_aqua
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -24,64 +25,65 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Store remote-URL for current ccpp-physics code
-      run: echo "GIT_REMOTE_URL=`git remote get-url origin`" >> $GITHUB_ENV
+#    - name: Store remote-URL for current ccpp-physics code
+#      run: |
+#        echo "GIT_REMOTE_URL=`git remote get-url origin`" >> $GITHUB_ENV
+#        echo "GIT_REMOTE_BRANCH=`git rev-parse --abbrev-ref HEAD`" >> $GITHUB_ENV
+#        echo "GIT_REMOTE_HASH=`git rev-parse HEAD`" >> $GITHUB_ENV
 
-    - name: Store branch name for current ccpp-physics code
-      run: echo "GIT_REMOTE_BRANCH=`git rev-parse --abbrev-ref HEAD`" >> $GITHUB_ENV
+#    - name: Checkout latest ccpp-physics code
+#      run: git clone https://github.com/NCAR/ccpp-physics.git
 
-    - name: Store hash for HEAD of current ccpp-physics code
-      run: echo "GIT_REMOTE_HASH=`git rev-parse HEAD`" >> $GITHUB_ENV
+#    - name: Initialize submodules
+#      run: |
+#        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics
+#        git submodule update --init --recursive
 
-    - name: Checkout latest ccpp-physics code
-      run: git clone https://github.com/NCAR/ccpp-physics.git
-
-    - name: Initialize submodules
-      run: |
-        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics
-        git submodule update --init --recursive
-
-    - name: Update ccpp-physics hash 
-      if: github.event.pull_request == false
-      run: |
-        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics
-        echo $GIT_REMOTE_URL
-        echo $GIT_REMOTE_BRANCH
-        echo ${{github.repository}}
-        echo ${{ github.event.pull_request.head.sha }}
-        echo $GITHUB_SHA
-        git remote add remote_local $GIT_REMOTE_URL
-        git fetch remote_local $GIT_REMOTE_BRANCH
-        git checkout remote_local/$GIT_REMOTE_BRANCH
+#    - name: Update ccpp-physics hash 
+#      if: github.event.pull_request == false
+#      run: |
+#        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics
+#        echo $GIT_REMOTE_URL
+#        echo $GIT_REMOTE_BRANCH
+#        echo ${{github.repository}}
+#        echo ${{ github.event.pull_request.head.sha }}
+#        echo $GITHUB_SHA
+#        git remote add remote_local $GIT_REMOTE_URL
+#        git fetch remote_local $GIT_REMOTE_BRANCH
+#        git checkout remote_local/$GIT_REMOTE_BRANCH
 
     - name: Install Doxygen + Graphviz + LaTeX
       run: |
         sudo apt-get update
         sudo apt-get install -y doxygen graphviz perl texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-bibtex-extra
 
-    - name: Verify Perl installation
-      run: which perl
-
-    - name: Verify bibtex installation
-      run: which bibtex
-
-    - name: Verify Doxygen version
-      run: doxygen --version
-   
-    - name: update doxyfile
+    - name: Verify installations
       run: |
-        cd physics/docs
-        doxygen -u ccpp_doxyfile
+        which perl
+        which bibtex
+        doxygen --version
 
-    - name: Run Doxygen for V7 docs
+    - name: Build V7 docs
       run: |
-        cd physics/docs
+        git fetch --tags
+        git worktree add ../v7-tag v7.0.0
+        cd ../v7-tag/physics/docs
         doxygen ccpp_doxyfile
 
-    - name: Run Doxygen for HSD docs
+    - name: Build HSD docs
       run: |
         cd physics/docs
         doxygen ccpphsd_doxyfile
+
+#    - name: update doxyfile
+#      run: |
+#        cd physics/docs
+#        doxygen -u ccpp_doxyfile
+
+#    - name: Run Doxygen for V7 docs
+#      run: |
+#        cd physics/docs
+#        doxygen ccpp_doxyfile
 
     - name: Setup Pages
       uses: actions/configure-pages@v5
