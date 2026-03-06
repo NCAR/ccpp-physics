@@ -76,8 +76,7 @@ jobs:
     - name: Build V7 docs
       run: |
         cd physics/docs
-#        doxygen ccpp_doxyfile
-         doxygen -D OUTPUT_DIRECTORY=$GITHUB_WORKSPACE/physics/docs/html -D HTML_OUTPUT=V7 ccpp_doxyfile
+        doxygen -D OUTPUT_DIRECTORY=$GITHUB_WORKSPACE/physics/docs/html -D HTML_OUTPUT=V7 ccpp_doxyfile
 
     - name: List html folder contents
       run: ls -R physics/docs/html
