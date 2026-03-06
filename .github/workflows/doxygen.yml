@@ -59,7 +59,7 @@ jobs:
         <!DOCTYPE html>
         <html>
         <head>
-            <title>CCPP Physics Documentation</title>
+            <title>CCPP Physics Scientific Documentation</title>
             <style>
                 body {
                     font-family: Arial, sans-serif;
@@ -92,11 +92,11 @@ jobs:
             <div class="container">
                 <h1>CCPP Physics Documentation</h1>
 
-                <p>Select a documentation version:</p>
+                <p>The Common Community Physics Package (CCPP) provides scientific documentation for the physics suites and parameterizations used across a variety of atmospheric modeling applications. The documentation describes the scientific basis, configuration options, and implementation details for the parameterizations included in the CCPP physics suites for different modeling systems and use cases.</p>
 
                 <a href="./V7/">CCPP Physics V7 Scientific Documentation</a>
 
-                <a href="./HSD/">CCPP Physics Host-Model Scientific Documentation (HSD)</a>
+                <a href="./HSD/">CCPP Physics Heirerarchical System Development (HSD) Scientific Documentation</a>
 
             </div>
         </body>
