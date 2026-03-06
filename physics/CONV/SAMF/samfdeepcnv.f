@@ -221,7 +221,7 @@ cj
 !  parameters for prognostic sigma closure                                                                                                                                                      
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im),qadv(im,km),
-     &     wc_ref(im)
+     &     wc_eff(im)
       real(kind=kind_phys) gravinv,invdelt,sigmind,sigminm,sigmins,
      &     wc_min 
       logical flag_shallow, flag_mid

@@ -169,7 +169,7 @@ cc
 !  parameters for prognostic sigma closure
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
-     &                     sigmab(im),qadv(im,km),wc_ref(im)
+     &                     sigmab(im),qadv(im,km),wc_eff(im)
       real(kind=kind_phys) gravinv,dxcrtas,invdelt,sigmind,sigmins,
      &                     sigminm,wc_min
       logical flag_shallow,flag_mid
