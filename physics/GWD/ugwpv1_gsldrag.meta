@@ -3,7 +3,7 @@
   type = scheme
   dependencies = ../hooks/machine.F,drag_suite.F90
   dependencies = cires_ugwpv1_module.F90,cires_ugwpv1_triggers.F90,cires_ugwpv1_initialize.F90,cires_ugwpv1_solv2.F90,ecmwf_ngw.F90
-  dependencies = cires_ugwpv1_sporo.F90,cires_ugwpv1_oro.F90 
+  dependencies = cires_ugwpv1_sporo.F90,cires_ugwpv1_oro.F90
 ########################################################################
 [ccpp-arg-table]
   name = ugwpv1_gsldrag_init
@@ -62,13 +62,6 @@
 [lonr]
   standard_name = number_of_equatorial_longitude_points
   long_name = number of global points in x-dir (i) along the equator
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[latr]
-  standard_name = number_of_latitude_points
-  long_name = number of global points in y-dir (j) along the meridian
   units = count
   dimensions = ()
   type = integer
@@ -778,7 +771,7 @@
   units = mixed
   dimensions = (horizontal_loop_extent)
   type = real
-  kind = kind_phys  
+  kind = kind_phys
   intent = in
 [dudt_ogw]
   standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
@@ -1044,7 +1037,6 @@
   type = real
   kind = kind_phys
   intent = out
-  intent = out
 [dudt]
   standard_name = process_split_cumulative_tendency_of_x_wind
   long_name = zonal wind tendency due to model physics
@@ -1173,5 +1165,3 @@
   dimensions = ()
   type = integer
   intent = out
-
-  

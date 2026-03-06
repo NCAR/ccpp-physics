@@ -1043,7 +1043,8 @@ module module_mp_thompson
                               tprr_rcs, tprv_rev, tten3, qvten3,      &
                               qrten3, qsten3, qgten3, qiten3, niten3, &
                               nrten3, ncten3, qcten3,                 &
-                              pfils, pflls)
+                              pfils, pflls,                           &
+                              fs_fac_rain, fs_fac_snow)
 
          implicit none
 
@@ -1112,6 +1113,8 @@ module module_mp_thompson
                            tprr_rcs, tprv_rev, tten3, qvten3,      &
                            qrten3, qsten3, qgten3, qiten3, niten3, &
                            nrten3, ncten3, qcten3
+         ! Fall speed adjustment
+         real(wp), INTENT (IN), optional  :: fs_fac_rain, fs_fac_snow
 
    !..Local variables
          real(wp), dimension(kts:kte):: &
@@ -1481,7 +1484,8 @@ module module_mp_thompson
                            tprr_rcs1, tprv_rev1,                            &
                            tten1, qvten1, qrten1, qsten1,                   &
                            qgten1, qiten1, niten1, nrten1, ncten1, qcten1,  &
-                           pfil1, pfll1)
+                           pfil1, pfll1,                                    &
+                           fs_fac_rain, fs_fac_snow)
 
                pcp_ra(i,j) = pcp_ra(i,j) + pptrain
                pcp_sn(i,j) = pcp_sn(i,j) + pptsnow
@@ -1901,7 +1905,8 @@ module module_mp_thompson
                         tprr_rcs1, tprv_rev1,                            &
                         tten1, qvten1, qrten1, qsten1,                   &
                         qgten1, qiten1, niten1, nrten1, ncten1, qcten1,  &
-                        pfil1, pfll1) 
+                        pfil1, pfll1,                                    &
+                        fs_fac_rain, fs_fac_snow)
 
       use mpi_f08
 
@@ -1937,6 +1942,8 @@ module module_mp_thompson
                           tprr_rcs1, tprv_rev1, tten1, qvten1,       &
                           qrten1, qsten1, qgten1, qiten1, niten1,    &
                           nrten1, ncten1, qcten1
+      ! Fall speed adjustment
+      real(wp), intent(in), optional :: fs_fac_rain, fs_fac_snow
 
 #if ( WRF_CHEM == 1 )
       real(wp), dimension(kts:kte), intent(inout) :: &
@@ -2031,6 +2038,7 @@ module module_mp_thompson
       logical :: debug_flag
       integer :: nu_c
 
+      real(wp) :: fallspeed_adjustment_factor
 !+---+
 
       debug_flag = .false.
@@ -3769,6 +3777,9 @@ module module_mp_thompson
       enddo
 
       if (ANY(L_qr .eqv. .true.)) then
+         fallspeed_adjustment_factor=1.0
+         if ( present(fs_fac_rain) ) fallspeed_adjustment_factor=fs_fac_rain
+
          do k = kte, kts, -1
             vtr = 0.
             rhof(k) = SQRT(RHO_NOT/rho(k))
@@ -3777,7 +3788,7 @@ module module_mp_thompson
                lamr = (am_r*crg(3)*org2*nr(k)/rr(k))**obmr
                vtr = rhof(k)*av_r*crg(6)*org3 * lamr**cre(3)                 &
                            *((lamr+fv_r)**(-cre(6)))
-               vtrk(k) = vtr
+               vtrk(k) = vtr*fallspeed_adjustment_factor
 ! First below is technically correct:
 !         vtr = rhof(k)*av_r*crg(5)*org2 * lamr**cre(2)                 &
 !                     *((lamr+fv_r)**(-cre(5)))
@@ -3785,7 +3796,7 @@ module module_mp_thompson
 ! Goal: less prominent size sorting
                vtr = rhof(k)*av_r*crg(7)/crg(12) * lamr**cre(12)             &
                            *((lamr+fv_r)**(-cre(7)))
-               vtnrk(k) = vtr
+               vtnrk(k) = vtr*fallspeed_adjustment_factor
             else
                vtrk(k) = vtrk(k+1)
                vtnrk(k) = vtnrk(k+1)
@@ -3869,6 +3880,9 @@ module module_mp_thompson
 !+---+-----------------------------------------------------------------+
 
        if (ANY(L_qs .eqv. .true.)) then
+         fallspeed_adjustment_factor=1.0
+         if ( present(fs_fac_snow) ) fallspeed_adjustment_factor=fs_fac_snow
+
          nstep = 0
          do k = kte, kts, -1
             vts = 0.
@@ -3886,6 +3900,7 @@ module module_mp_thompson
                t3_vts = Kap0*csg(1)*ils1**cse(1)
                t4_vts = Kap1*Mrat**mu_s*csg(7)*ils2**cse(7)
                vts = rhof(k)*av_s * (t1_vts+t2_vts)/(t3_vts+t4_vts)
+               vts=vts*fallspeed_adjustment_factor
                if (prr_sml(k) .gt. 0.0) then
       !           vtsk(k) = max(vts*vts_boost(k),                             &
       !    &                vts*((vtrk(k)-vts*vts_boost(k))/(temp(k)-T_0)))

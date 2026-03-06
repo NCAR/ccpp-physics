@@ -943,6 +943,24 @@
   dimensions = ()
   type = logical
   intent = inout
+[fs_fac_rain]
+  standard_name = multiplicative_tuning_parameter_for_rain_fall_speed
+  long_name = multiplicative tuning parameter for rain fall speed
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[fs_fac_snow]
+  standard_name = multiplicative_tuning_parameter_for_snow_fall_speed
+  long_name = multiplicative tuning parameter_for snow fall speed
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -170,6 +170,9 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file, me, 
          write(iosstr, '(I0)') ios         
          errmsg = 'lnd_iau_mod_set_control: I/O error code '//trim(iosstr)//' at land_iau namelist read'  
          errflg = 1
+#ifndef INTERNAL_FILE_NML
+         close(nlunit)
+#endif
          return
     end if 
        
@@ -179,6 +182,9 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file, me, 
           WRITE(6, * ) 'lnd_iau_mod_set_control: Warning! EoF ('//trim(iosstr)//') while reading land_iau namelist,' &
                   // ' likely because land_iau_nml was not found in input.nml. It will be set to default.' 
         endif
+#ifndef INTERNAL_FILE_NML
+        close(nlunit)
+#endif
    endif
 
    if (me == mpi_root) then
