@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - scidocs_hsd_aqua
-#  workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -24,33 +24,6 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-
-#    - name: Store remote-URL for current ccpp-physics code
-#      run: |
-#        echo "GIT_REMOTE_URL=`git remote get-url origin`" >> $GITHUB_ENV
-#        echo "GIT_REMOTE_BRANCH=`git rev-parse --abbrev-ref HEAD`" >> $GITHUB_ENV
-#        echo "GIT_REMOTE_HASH=`git rev-parse HEAD`" >> $GITHUB_ENV
-
-#    - name: Checkout latest ccpp-physics code
-#      run: git clone https://github.com/NCAR/ccpp-physics.git
-
-#    - name: Initialize submodules
-#      run: |
-#        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics
-#        git submodule update --init --recursive
-
-#    - name: Update ccpp-physics hash 
-#      if: github.event.pull_request == false
-#      run: |
-#        cd /home/runner/work/ccpp-physics/ccpp-physics/ccpp-physics/physics
-#        echo $GIT_REMOTE_URL
-#        echo $GIT_REMOTE_BRANCH
-#        echo ${{github.repository}}
-#        echo ${{ github.event.pull_request.head.sha }}
-#        echo $GITHUB_SHA
-#        git remote add remote_local $GIT_REMOTE_URL
-#        git fetch remote_local $GIT_REMOTE_BRANCH
-#        git checkout remote_local/$GIT_REMOTE_BRANCH
 
     - name: Install Doxygen + Graphviz + LaTeX
       run: |
@@ -80,8 +53,55 @@ jobs:
         mkdir -p html/V7
         mv doc/html/* html/V7/
 
-    - name: List html folder contents
-      run: ls -R physics/docs/html
+    - name: Create landing page
+      run: |
+        cat << 'EOF' > physics/docs/html/index.html
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>CCPP Physics Documentation</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 40px;
+                    background-color: #f5f5f5;
+                }
+                h1 {
+                    color: #003366;
+                }
+                .container {
+                    background: white;
+                    padding: 30px;
+                    border-radius: 8px;
+                    max-width: 800px;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                }
+                a {
+                    display: block;
+                    margin: 15px 0;
+                    font-size: 18px;
+                    color: #0066cc;
+                    text-decoration: none;
+                }
+                a:hover {
+                    text-decoration: underline;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>CCPP Physics Documentation</h1>
+
+                <p>Select a documentation version:</p>
+
+                <a href="./V7/">CCPP Physics V7 Scientific Documentation</a>
+
+                <a href="./HSD/">CCPP Physics Host-Model Scientific Documentation (HSD)</a>
+
+            </div>
+        </body>
+        </html>
+        EOF
 
     - name: Setup Pages
       uses: actions/configure-pages@v5
