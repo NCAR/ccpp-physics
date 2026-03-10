@@ -3098,6 +3098,11 @@ c
       endif  !sa3dtke
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      if (do_canopy) then
+        if(allocated(EDDYVESTX)) deallocate(EDDYVESTX)
+        if(allocated(ZCANX)) deallocate(ZCANX)
+      endif
+      
       return
       end subroutine satmedmfvdifq_run
 !> @}
