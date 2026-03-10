@@ -289,7 +289,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        RUBLTEN, RVBLTEN, RTHBLTEN, RQVBLTEN,                      &
      &        RQCBLTEN, RQNCBLTEN, RQIBLTEN, RQNIBLTEN, RQSBLTEN,        &
      &        RQNWFABLTEN, RQNIFABLTEN, RQNBCABLTEN, adj_t
-      real(kind_phys), allocatable :: old_ozone(:,:)
 
 !smoke/chem arrays
       real(kind_phys), dimension(:), intent(inout), optional :: frp
@@ -573,10 +572,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             enddo
           enddo
         endif
-       if(ldiag3d .and. dtidx(100+ntoz,index_of_process_pbl)>1) then
-         allocate(old_ozone(im,levs))
-         old_ozone = ozone
-       endif
 
        do k=1,levs
           do i=1,im
@@ -828,11 +823,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           call dtend_helper(index_of_temperature,dtdt)
           if(ldiag3d) then
             call dtend_helper(100+ntoz,dqdt_ozone)
-            ! idtend = dtidx(100+ntoz,index_of_process_pbl)
-            ! if(idtend>=1) then
-            !   dtend(:,:,idtend) = dtend(:,:,idtend) + (ozone-old_ozone)
-            !   deallocate(old_ozone)
-            ! endif
           endif
         endif accum_duvt3dt
         !Update T, U and V:
