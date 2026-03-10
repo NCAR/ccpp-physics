@@ -186,6 +186,7 @@ contains
     integer :: i, k, n
     real(rte_wp), dimension(nDay, nLev) :: thetaTendClrSkySW, thetaTendAllSkySW
     real(rte_wp), dimension(nCol, nLev) :: thetaTendClrSkyLW, thetaTendAllSkyLW
+    real(kind_phys), dimension(nCol, nLev) :: save_t
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -245,7 +246,8 @@ contains
     !htrlw is calculated in rrtmg_lw_post if using RRTMG and above if using RRTMGP
     ten_t = htrlw
     
-    !remove tendency code from rrtmg_sw_post and rrtmg_lw_post
+    !save temperature to give to GFS_radiation_diagnostics
+    save_t = gt0
     
     !This may belong in a separate GFS_radsw_post routine rather than here, although it would need to be created
     case_LWRAD_ten: select case (tend_opt_lwrad)
@@ -393,7 +395,7 @@ contains
     ! #########################################################################################
     if (lssav) then
        call GFS_radiation_diagnostics(doLWrad, doSWrad, fhlwr, fhswr, coszen, coszdg, raddt,  &
-            aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, gt0, kb, kd, kt, sfcflw, &
+            aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, save_t, kb, kd, kt, sfcflw, &
             sfcfsw, topfsw, topflw, scmpsw, nCol, nDay, nLev, lmk, nfxr, nspc1, fluxr)
     endif
     
