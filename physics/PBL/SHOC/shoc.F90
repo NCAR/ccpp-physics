@@ -166,7 +166,7 @@ subroutine shoc_run (nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_
         do k=1,nzm
           do i=1,nx
             ten_q(i,k,ntlnc) = (ncpl(i,k) - gq0(i,k,ntlnc))/dtp
-            gq0(i,k,ntinc) = ncpi(i,k)
+            ten_q(i,k,ntinc) = (ncpi(i,k) - gq0(i,k,ntinc))/dtp
           enddo
         enddo
       endif
