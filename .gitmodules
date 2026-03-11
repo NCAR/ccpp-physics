@@ -6,3 +6,7 @@
   path = physics/MP/TEMPO/TEMPO
   url = https://github.com/NCAR/TEMPO
   branch = main
+[submodule "physics/SFC_Layer/MYNN/MYNN"]
+  path = physics/SFC_Layer/MYNN/MYNN
+  url = https://github.com/NCAR/MYNN-SFC
+  branch = main
