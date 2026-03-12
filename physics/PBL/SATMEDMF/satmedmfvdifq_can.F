@@ -1,4 +1,4 @@
-!> \file satmedmfvdifq.F
+!> \file satmedmfvdifq_can.F
 
 !> This file contains the CCPP-compliant SATMEDMF scheme (updated version) which
 !! computes subgrid vertical turbulence mixing using scale-aware TKE-based moist
@@ -7,16 +7,11 @@
 !! if(tte_edmf=.true.), the TKE-EDMF parameterization becomes
 !! TTE(total turbulent energy)-based moist (TTE-EDMF) parameterization
 !!
-      module satmedmfvdifq
-      use mfpbltq_mod
-      use tridi_mod
-      use mfscuq_mod
-      !PCC_CANOPY_utilities
-      use canopy_utils_mod
+      module satmedmfvdifq_can_mod
 
       contains
 
-!> \defgroup module_satmedmfvdifq GFS TKE-EDMF PBL Module
+!> \defgroup module_satmedmfvdifq_can GFS TKE-EDMF PBL Module
 !! This file contains the CCPP-compliant SATMEDMF scheme (updated version) which
 !! computes subgrid vertical turbulence mixing using scale-aware TKE-based moist
 !! eddy-diffusion mass-flux (TKE-EDMF) parameterization (by Jongil Han).
@@ -24,94 +19,68 @@
 !! \brief This subroutine contains all of the logic for the
 !! scale-aware TKE-based moist eddy-diffusion mass-flux (TKE-EDMF, updated version) scheme.
 !! For local turbulence mixing, a TKE closure model is used.
-!! Updated version of satmedmfvdif.f (May 2019) to have better low level
+!! Updated version of satmedmfvdif.f to have better low level
 !! inversion, to reduce the cold bias in lower troposphere,
 !! and to reduce the negative wind speed bias in upper troposphere
 !!
 !! Incorporate the LES-based changes for TC simulation
 !! (Chen et al.,2022 \cite Chen_2022)
-!! with additional improvements on MF working with Cu schemes
-!! Xiaomin Chen, 5/2/2022
+!! with additional improvements on MF working with Cu schemes.
 !!
 !! Incorporate the TTE-EDMF; if (tte_edmf=.true.),
 !!  TKE-EDMF scheme becomes TTE-EDMF scheme and the variable 'te'
 !!  is read as TTE; if (tte_edmf=.false.), the variable 'te' is
-!!  read as TKE, 5/22/2025
+!!  read as TKE.
 !!
 !!
-!> \section arg_table_satmedmfvdifq_init Argument Table
-!! \htmlinclude satmedmfvdifq_init.html
-!!
-      subroutine satmedmfvdifq_init (satmedmf,                          &
-     &                               isatmedmf,isatmedmf_vdifq,         &
-     &                               errmsg,errflg)
-
-      logical, intent(in   ) :: satmedmf
-      integer, intent(in) :: isatmedmf,isatmedmf_vdifq
-
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-
-! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
-
-! Consistency checks
-      if (.not. satmedmf) then
-        write(errmsg,fmt='(*(a))') 'Logic error: satmedmf = .false.'
-        errflg = 1
-        return
-      end if
-
-      if (.not. isatmedmf==isatmedmf_vdifq) then
-        write(errmsg,fmt='(*(a))') 'Logic error: satmedmfvdif is ',
-     &                   'called, but isatmedmf/=isatmedmf_vdifq.'
-        errflg = 1
-        return
-      end if
-
-      end subroutine satmedmfvdifq_init
-
-!> \section arg_table_satmedmfvdifq_run Argument Table
-!! \htmlinclude satmedmfvdifq_run.html
+!> \section arg_table_satmedmfvdifq_can Argument Table
+!! \htmlinclude satmedmfvdifq_can.html
 !!
 !!\section gen_satmedmfvdifq GFS satmedmfvdifq General Algorithm
-!! satmedmfvdifq_run() computes subgrid vertical turbulence mixing
+!! satmedmfvdifq_can() computes subgrid vertical turbulence mixing
 !! using the scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization of
 !! Han and Bretherton (2019) \cite Han_2019 .
-!! -# The local turbulent mixing is represented by an eddy-diffusivity scheme which 
+!! -# The local turbulent mixing is represented by an eddy-diffusivity scheme which
 !! is a function of a prognostic TKE.
-!! -# For the convective boundary layer, nonlocal transport by large eddies 
+!! -# For the convective boundary layer, nonlocal transport by large eddies
 !! (mfpbltq.f), is represented using a mass flux approach (Siebesma et al.(2007) \cite Siebesma_2007 ).
 !! -# A mass-flux approach is also used to represent the stratocumulus-top-induced turbulence
 !! (mfscuq.f).
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm
-      subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,               &
-     &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
+      subroutine satmedmfvdifq_can(im,km,ntrac,ntcw,ntrw,
+     &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,
 !The following three variables are for SA-3D-TKE
-     &     def_1,def_2,def_3,sa3dtke,dku3d_h,dku3d_e,                   &
-     &     rtg,u1,v1,t1,q1,usfco,vsfco,use_oceanuv,                     &
-     &     swh,hlw,xmu,garea,zvfun,sigmaf,                              &
-     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
-     &     tsea,heat,evap,stress,spd1,kpbl,                             &
-     &     prsi,del,prsl,prslk,phii,phil,delt,tte_edmf,                 &
-     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,tkeh,           &
-     &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
-     &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            &
-     &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           &
-     &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
-     &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
-     &     ten_t, ten_u, ten_v,                                         &
+     &     def_1,def_2,def_3,sa3dtke,dku3d_h,dku3d_e,
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,usfco,vsfco,use_oceanuv,
+     &     swh,hlw,xmu,garea,zvfun,sigmaf,
+     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,
+     &     tsea,heat,evap,stress,spd1,kpbl,
+     &     prsi,del,prsl,prslk,phii,phil,delt,tte_edmf,
+     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,tkeh,
+     &     dkt_can, dku_can,
+     &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,
+     &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,
+     &     do_canopy, cplaqm, 
+     &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,
+     &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,
      &     errmsg,errflg)
+!IVAI: aux arrays
+!    &     naux2d,naux3d,aux2d,aux3d)
 
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
+      use mfpbltq_mod
+      use tridi_mod
+      use mfscuq_mod
+!
+      !PCC_CANOPY_utilities
+      use canopy_utils_mod
 !
       implicit none
 !
 !----------------------------------------------------------------------
-      integer, intent(in)  :: im, km, ntrac, ntcw, ntrw, ntiw,          &
+      integer, intent(in)  :: im, km, ntrac, ntcw, ntrw, ntiw,
      &                        ntke, ntqv
       integer, intent(in)  :: sfc_rlm
       integer, intent(in)  :: tc_pbl
@@ -120,45 +89,46 @@
       integer, intent(out) :: kpbl(:)
       logical, intent(in)  :: gen_tend,ldiag3d
 !
-      real(kind=kind_phys), intent(in) :: grav,pi,rd,cp,rv,hvap,hfus,fv,   &
+      real(kind=kind_phys), intent(in) :: grav,pi,rd,cp,rv,hvap,hfus,fv,
      &                                    eps,epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
       real(kind=kind_phys), intent(in) :: rlmx, elmx
 !PCC CANOPY------------------------------------
       logical, intent(in)  :: do_canopy, cplaqm
-      real(kind=kind_phys), optional, intent(in)  :: claie(:), cfch(:), &
-     &                     cfrt(:), cclu(:), cpopu(:)
+      real(kind=kind_phys), optional, intent(in)  :: 
+     &                  dkt_can(:,:),      dku_can(:,:)
       !----------------------------------------------
-      real(kind=kind_phys), intent(inout) :: rtg(:,:,:),    tkeh(:,:)
-      real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(:,:),     v1(:,:),                        &
-     &                     usfco(:),    vsfco(:),                       &
-     &                     t1(:,:),     q1(:,:,:),                      &
+      real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),
+     &                     tdt(:,:),    rtg(:,:,:),    tkeh(:,:)
+      real(kind=kind_phys), intent(in) ::
+     &                     u1(:,:),     v1(:,:),
+     &                     usfco(:),    vsfco(:),
+     &                     t1(:,:),     q1(:,:,:),
 !The following two variables are for SA-3D-TKE
-     &                     def_1(:,:),  def_2(:,:), def_3(:,:),         &
-     &                     swh(:,:),    hlw(:,:),                       &
-     &                     xmu(:),       garea(:),                      &
-     &                     zvfun(:),     sigmaf(:),                     &
-     &                     psk(:),       rbsoil(:),                     &
-     &                     zorl(:),      tsea(:),                       &
-     &                     u10m(:),      v10m(:),                       &
-     &                     fm(:),        fh(:),                         &
-     &                     evap(:),      heat(:),                       &
-     &                     stress(:),    spd1(:),                       &
-     &                     prsi(:,:), del(:,:),                         &
-     &                     prsl(:,:),   prslk(:,:),                     &
+     &                     def_1(:,:),  def_2(:,:), def_3(:,:),
+     &                     swh(:,:),    hlw(:,:),
+     &                     xmu(:),       garea(:),
+     &                     zvfun(:),     sigmaf(:),
+     &                     psk(:),       rbsoil(:),
+     &                     zorl(:),      tsea(:),
+     &                     u10m(:),      v10m(:),
+     &                     fm(:),        fh(:),
+     &                     evap(:),      heat(:),
+     &                     stress(:),    spd1(:),
+     &                     prsi(:,:), del(:,:),
+     &                     prsl(:,:),   prslk(:,:),
      &                     phii(:,:), phil(:,:)
-      real(kind=kind_phys), intent(inout), dimension(:,:,:), optional ::&
+      real(kind=kind_phys), intent(inout), dimension(:,:,:), optional ::
      &     dtend
-      integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
+      integer, intent(in) :: dtidx(:,:), index_of_temperature,
      &       index_of_x_wind, index_of_y_wind, index_of_process_pbl
       logical, intent(in) :: use_oceanuv
-      real(kind=kind_phys), intent(out) ::                              &
-     &                     dusfc(:),     dvsfc(:),                      &
-     &                     dtsfc(:),     dqsfc(:),                      &
+      real(kind=kind_phys), intent(out) ::
+     &                     dusfc(:),     dvsfc(:),
+     &                     dtsfc(:),     dqsfc(:),
      &                     hpbl(:)
-      real(kind=kind_phys), intent(out) ::                              &
+      real(kind=kind_phys), intent(out) ::
      &                     dkt(:,:), dku(:,:)
 
 !
@@ -166,11 +136,9 @@
 !
 !  flag for tke dissipative heating
       logical, intent(in)  :: dspheat
-      real(kind=kind_phys), intent(out) :: ten_t(:,:),                  &
-     &                                     ten_u(:,:), ten_v(:,:)
 !  flag for TTE-EDMF scheme
       logical, intent(in)  :: tte_edmf
-!     
+!
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -278,7 +246,7 @@
      &                     rdt,     rdz,    qmin,   qlmin,
      &                     rimin,   rbcr,   rbint,  tdzmin,
      &                     rlmn,    rlmn0,  rlmn1,  rlmn2,
-     &                     qtend,
+     &                     ttend,   utend,  vtend,  qtend,
      &                     zfac,    zfmin,  vk,     spdk2,
      &                     tkmin,   tkbmx,  disste, xkgdx,
      &                     xkinv1,  xkinv2,
@@ -318,31 +286,16 @@
       real(kind=kind_phys) qice(im,km),qliq(im,km)
 
 !PCC_CANOPY------------------------------------
-      integer COUNTCAN,KCAN
-      integer kount 
-      real(kind=kind_phys) FCH,       MOL,   HOL, TLCAN,
-     &                     SIGMACAN,  RRCAN, BBCAN,
-     &                     AACAN,     ZCAN,  ZFL, BOTCAN,
-     &                     ZZ_INT,
-     &                     EDDYVEST1, EDDYVEST_INT
-
-      ! in canopy eddy diffusivity [ m**2/s ]
-      real(kind=kind_phys), allocatable  :: EDDYVESTX ( : )
-      ! in canopy layer [m]
-      real(kind=kind_phys), allocatable  :: ZCANX     ( : )
-      real(kind=kind_phys), allocatable  :: ZOOOX     ( : )
-      ! Declare local maximum canopy layers
-      integer, parameter :: MAXCAN = 1000
-      integer, parameter :: mvt   = 30 ! use 30 instead of 27
-      !Based on MODIS IGBP 20 Category Dataset
-      real :: fch_table(mvt)         !< top of canopy (m)
-       data   ( fch_table(i),i=1,mvt)   /
-     &          20.0, 20.0, 18.0, 16.0, 16.0, 1.10,
-     &          1.10, 13.0, 10.0, 1.00, 5.00, 2.00,
-     &          15.0, 1.50, 0.00, 0.00, 0.00, 4.00,
-     &          2.00, 0.50, 0.00, 0.00, 0.00, 0.00,
-     &          0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
+      integer kount         !IVAI
 !----------------------------------------------
+
+!IVAI
+!     integer, intent(in) :: naux2d,naux3d
+!     real(kind_phys), intent(inout) :: aux2d(:,:)
+!     real(kind_phys), intent(inout) :: aux3d(:,:,:)
+!IVAI
+
+!!
       parameter(bfac=100.)
       parameter(wfac=7.0)
       parameter(gamcrt=3.,gamcrq=0.,sfcfrac=0.1)
@@ -370,15 +323,11 @@
       parameter(cptke1=0.07,cptke2=0.142,cptke3=0.071)
       parameter(dkmaxles=300.0,sclmin=500.,sclmax=2500.)
       parameter(elmhfac=1.5,elmhmx=1000.,ckh=0.4)
-
+!
 !PCC_CANOPY------------------------------------
       if (do_canopy) then
-        if(.not.allocated(EDDYVESTX))
-     &    allocate( EDDYVESTX    ( MAXCAN ) )
-        if(.not.allocated(ZCANX))
-     &    allocate( ZCANX    ( MAXCAN ) )
-        if(.not.allocated(ZOOOX)) 
-     &    allocate( ZOOOX    ( MAXCAN ) )
+! Initialize layer thickness in non-canopy columns
+         rdzt(:,:) = 0.0 ! IVAI
       endif
 !----------------------------------------------
       if (tc_pbl == 0) then
@@ -390,7 +339,7 @@
         ch0 = 0.55
         ce0 = 0.12
       endif
-
+!
       if(tte_edmf) then
         cfac  = 3.0
         prmax = 6.0
@@ -404,10 +353,14 @@
         ck1   = 0.15
         ch1   = 0.15
       endif
-
+!
       gravi = 1.0 / grav
       g = grav
       gocp = g / cp
+!     cont=cp/g
+!     conq=hvap/g
+!     conw=1.0/g  ! for del in pa
+!!    parameter(cont=1000.*cp/g,conq=1000.*hvap/g,conw=1000./g) !kpa
       elocp  = hvap / cp
       el2orc = hvap * hvap / (rv * cp)
 !
@@ -1705,163 +1658,20 @@
       endif !sa3dtke
 
 !PCC_CANOPY------------------------------------
+      kount=0 !IVAI
       if (do_canopy .and. cplaqm) then
 
-        do k = 1, km1-1
+!IVAI
+! Output 3D pbl diags
+!        aux3d(:,:,5) = dku(:,:) ! Out
+!        aux3d(:,:,3) = dkt(:,:) ! Out
 
-          kount=0 !IVAI
-          ZOOOX(:) = 1.  ! IVAI
-
-          do i = 1, im
-
-            FCH = cfch(i)               !top of canopy from AQM canopy inputs
-            IF (k .EQ. 1) THEN !use model layer interfaces
-              KCAN = 1
-            ELSE
-              IF (   cfch(i) .GT. zi(i,k)
-     &         .AND. cfch(i) .LE. zi(i,k+1) ) THEN
-                KCAN = 1
-              ELSE
-                KCAN = 0
-              END IF
-            END IF
-
-            IF (KCAN .EQ. 1) THEN !canopy inside model layer
-!           Check for other Contiguous Canopy Grid Cell Conditions
-
-!           Not a contiguous canopy cell
-            IF (   claie(i) .LT. 0.1
-     &        .OR. cfch (i) .LT. 0.5
-     &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.75
-     &        .OR. cpopu(i) .GT. 10000.0
-     &        .OR. (EXP(-0.5*claie(i)*cclu(i)) .GT. 0.45
-     &                          .AND. cfch(i)  .LT. 18.) ) THEN
-
-            ELSE ! There is a contiguous forest canopy, apply correction over canopy layers
-
-!Raupauch M. R. A Practical Lagrangian method for relating scalar
-!concentrations to
-! source distributions in vegetation canopies. Q. J. R. Meteor. Soc.
-! (1989), 115, pp 609-632
-              MOL  = zol(i)/zl(i,k)  !Monin-Obukhov Length in layer
-              HOL = FCH/MOL  !local canopy stability parameter (hc/MOL)
-              ZCAN = zi(i,k+1) ! Initialize each model layer top that contains canopy (m)
-                             ! Integrate across total model interface
-              ZFL = ZCAN     ! Set ZFL = ZCAN
-              COUNTCAN = 0   ! Initialize canopy layers
-
-              IF (k .EQ. 1) THEN  !Find bottom in each model layer
-                  BOTCAN = 0.0    ! 0.5 (Jan10)
-              ELSE
-                  BOTCAN = zi(i,k)
-              END IF
-
-              DO WHILE (ZCAN.GE.BOTCAN)
-                 ! TLCAN = Lagrangian timescale
-                 TLCAN = (FCH/ustar(i)) * (
-     &                   (0.256 * (ZCAN-(0.75*FCH))/FCH ) +
-     &                   (0.492*EXP((-0.256*ZCAN/FCH)/0.492)) )
-                 IF ( HOL .LT. -0.1 )  THEN  !STRONG UNSTABLE
-                  IF ( ZCAN/FCH .GT. 1.25 ) THEN !SIGMACAN = Eulerian vertical velocity variance
-                    SIGMACAN = 1.25*ustar(i)
-                  END IF
-                  IF ( ZCAN/FCH .GE. 0.175
-     &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                      SIGMACAN = ustar(i) * ( 0.75 +
-     &                         (0.5 * COS((PI/1.06818) *
-     &                         (1.25 - (ZCAN/FCH)))) )
-                  END IF
-                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
-                    SIGMACAN = 0.25*ustar(i)
-                  END IF
-                 END IF
-                 IF ( HOL .GE. -0.1  .AND. HOL .LT. 0.1 )   THEN !WEAKLY UNSTABLE to NEUTRAL
-                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
-                    SIGMACAN = 1.0*ustar(i)
-                  END IF
-                  IF ( ZCAN/FCH .GE. 0.175
-     &               .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                    SIGMACAN = ustar(i) * ( 0.625 +
-     &                       (0.375* COS((PI/1.06818) *
-     &                       (1.25 - (ZCAN/FCH)))) )
-                  END IF
-                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
-                    SIGMACAN = 0.25*ustar(i)
-                  END IF
-                 END IF
-                 IF ( HOL .GE.  0.1  .AND.  HOL .LT. 0.9 )   THEN !STABLE
-                  IF ( ZCAN/FCH .GT. 1.25 ) THEN
-                    SIGMACAN = 0.25*(4.375 - (3.75*HOL))*ustar(i)
-                  END IF
-                  IF ( ZCAN/FCH .GE. 0.175
-     &                 .AND. ZCAN/FCH .LE. 1.25 ) THEN
-                    RRCAN=4.375-(3.75*HOL)
-                    AACAN=(0.125*RRCAN) + 0.125
-                    BBCAN=(0.125*RRCAN) - 0.125
-                    SIGMACAN = ustar(i) * ( AACAN +
-     &                             (BBCAN * COS((PI/1.06818) *
-     &                             (1.25 - (ZCAN/FCH)))) )
-                  END IF
-                  IF ( ZCAN/FCH .LT. 0.175 )  THEN
-                    SIGMACAN = 0.25*ustar(i)
-                  END IF
-                 END IF
-                 IF ( HOL .GE.  0.9 ) THEN  !VERY STABLE
-                    SIGMACAN = 0.25*ustar(i)
-                 END IF
-
-                 IF ( ZCAN .EQ. ZFL )  ! THEN ! Each model layer that includes canopy
-     &              EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN ! Model-layer top diffusivity
-
-! Average In-Canopy diffusivity gives larger canopy correction (2022)
-!                IF ( ZCAN .LE. FCH )  THEN          ! Average In-Canopy   diffusivity (2022) 
-! Average model-layer diffusivity gives smaller canopy correction (pre-2022) & Jan9, 2026
-                 IF ( ZCAN .LE. ZFL )  THEN         ! Average model-layer diffusivity (2026)
-
-                   COUNTCAN = COUNTCAN + 1
-                   ZCANX     (COUNTCAN) = ZCAN
-                   EDDYVESTX (COUNTCAN) = (SIGMACAN*SIGMACAN)*TLCAN
-
-                 END IF
-
-                 ZCAN = ZCAN-0.5  !step down in-canopy resolution of 0.5m
-
-              END DO !end loop on canopy layers
-
-            IF (COUNTCAN > 0 ) THEN
-
-              IF (COUNTCAN .EQ. 1) THEN
-                 ZZ_INT= ZCANX(COUNTCAN)  ! FCH (set to FCH if COUNTCAN is 1)
-              ELSE
-                 ZZ_INT= IntegrateTrapezoid(
-     &                  ZCANX(COUNTCAN:1:-1), ZOOOX(COUNTCAN:1:-1))
-              END IF
- 
-              IF (COUNTCAN .EQ. 1) THEN
-                 EDDYVEST_INT = EDDYVESTX(COUNTCAN)
-              ELSE
-
-                 EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)
-     &                                ),EDDYVESTX(COUNTCAN:1:-1)) / 
-     &                                  ZZ_INT
-              END IF
-
-! Comment out to turn OFF the integrated canopy effect
-              dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
-              dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
-              dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
-
-            END IF ! (COUNTCAN > 0)
-
-            END IF   ! contiguous canopy conditions
-
-            END IF   ! (KCAN .EQ. 1) model layer(s) containing canopy
-
-          enddo !i
-
-          kount = kount + 1 
-
-        enddo !k
+! 3-Layer Sub-Canopy effect
+        if (present(dku_can)) dku(:,1:km) = dku_can(:,1:km)
+        if (present(dkt_can)) then
+           dkt(:,1:km) = dkt_can(:,1:km)
+           dkq(:,1:km-1) = prtke * dkt_can(:,1:km-1)
+        endif
 
       endif !do_canopy .and. cplaqm
 
@@ -1941,7 +1751,7 @@
               ptem = 0.
             endif
             ptem2 = ptem2 + ptem
-
+!
             tem2 = stress(i)*ustar(i)*phims(i)/(vk*zl(i,1))
             shrp = 0.5 * (tem1 + ptem1 + ptem2 + tem2)
           else
@@ -2430,10 +2240,10 @@ c
             rtg(i,k,ntke) = rtg(i,k,ntke)+qtend
          enddo
       enddo
-      if(ldiag3d) then
+      if(ldiag3d .and. present(dtend)) then
          idtend = dtidx(ntke+100,index_of_process_pbl)
          if(idtend>0) then
-            dtend(1:im,1:km,idtend) = dtend(1:im,1:km,idtend) +         &
+            dtend(1:im,1:km,idtend) = dtend(1:im,1:km,idtend) +
      &        (f1(1:im,1:km)-q1(1:im,1:km,ntke))*rdt
          endif
       endif
@@ -2865,9 +2675,10 @@ c
 c
       do  k = 1,km
          do i = 1,im
-            ten_t(i,k)   = (f1(i,k)-t1(i,k))*rdt
-            qtend        = (f2(i,k)-q1(i,k,1))*rdt
-            rtg(i,k,1)   = rtg(i,k,1)+qtend
+            ttend      = (f1(i,k)-t1(i,k))*rdt
+            qtend      = (f2(i,k)-q1(i,k,1))*rdt
+            tdt(i,k)   = tdt(i,k)+ttend
+            rtg(i,k,1) = rtg(i,k,1)+qtend
 !           dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
 !           dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
@@ -2878,12 +2689,13 @@ c
         dqsfc(i) = rho_a(i) * hvap * evap(i)
       enddo
 !
-      if(ldiag3d .and. .not. gen_tend) then
+      if(ldiag3d .and. .not. gen_tend .and. present(dtend)) then
         idtend = dtidx(index_of_temperature,index_of_process_pbl)
         if(idtend>=1) then
           do  k = 1,km
             do i = 1,im
-              dtend(i,k,idtend) = dtend(i,k,idtend)+ten_t(i,k)*delt
+              ttend      = (f1(i,k)-t1(i,k))*rdt
+              dtend(i,k,idtend) = dtend(i,k,idtend)+ttend*delt
             enddo
           enddo
         endif
@@ -2909,7 +2721,7 @@ c
             enddo
           enddo
         enddo
-        if(ldiag3d .and. .not. gen_tend) then
+        if(ldiag3d .and. .not. gen_tend .and. present(dtend)) then
           ! Send tendencies for all tracers that were selected.
           do n = 2, ntrac1
             is = (n-1) * km
@@ -2926,6 +2738,14 @@ c
             endif
           enddo
         endif
+!IVAI
+!        aux3d(:,:, 7) = rtg(:,:, ntoz) ! ntoz=7 "o3mr" GFS
+
+!        aux3d(:,:, 5) = rtg(:,:, 11)   ! n=11   "no3"
+!        aux3d(:,:, 5) = rtg(:,:, 9 )   ! n=9    "no"
+!        aux3d(:,:, 3) = rtg(:,:, 10)   ! n=10   "o3"
+!        aux3d(:,:, 1) = rtg(:,:, 8 )   ! n=8    "no2"
+!IVAI
       endif
 !
 !> ## Add TKE dissipative heating to temperature tendency
@@ -2935,16 +2755,17 @@ c
           do i = 1,im
 !           tem = min(diss(i,k), dspmax)
 !           ttend = tem / cp
-            ten_t(i,k) = ten_t(i,k) + dspfac * diss(i,k) / cp
+            ttend = diss(i,k) / cp
+            tdt(i,k) = tdt(i,k) + dspfac * ttend
           enddo
         enddo
-        if(ldiag3d .and. .not. gen_tend) then
+        if(ldiag3d .and. .not. gen_tend .and. present(dtend)) then
           idtend = dtidx(index_of_temperature,index_of_process_pbl)
           if(idtend>=1) then
             do k = 1,km1
               do i = 1,im
-                dtend(i,k,idtend) = dtend(i,k,idtend)+              
-     &                              (dspfac * diss(i,k) / cp)*delt
+                ttend = diss(i,k) / cp
+                dtend(i,k,idtend) = dtend(i,k,idtend)+dspfac*ttend*delt
               enddo
             enddo
           endif
@@ -3017,8 +2838,10 @@ c
 c
       do k = 1,km
          do i = 1,im
-            ten_u(i,k) = (f1(i,k)-u1(i,k))*rdt
-            ten_v(i,k) = (f2(i,k)-v1(i,k))*rdt
+            utend = (f1(i,k)-u1(i,k))*rdt
+            vtend = (f2(i,k)-v1(i,k))*rdt
+            du(i,k)  = du(i,k)+utend
+            dv(i,k)  = dv(i,k)+vtend
 !           dusfc(i) = dusfc(i)+conw*del(i,k)*utend
 !           dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
@@ -3036,12 +2859,13 @@ c
         enddo
       endif
 !
-      if(ldiag3d .and. .not. gen_tend) then
+      if(ldiag3d .and. .not. gen_tend .and. present(dtend)) then
         idtend = dtidx(index_of_x_wind,index_of_process_pbl)
         if(idtend>=1) then
           do k = 1,km
             do i = 1,im
-              dtend(i,k,idtend) = dtend(i,k,idtend) + ten_u(i,k)*delt
+              utend = (f1(i,k)-u1(i,k))*rdt
+              dtend(i,k,idtend) = dtend(i,k,idtend) + utend*delt
             enddo
           enddo
         endif
@@ -3050,7 +2874,8 @@ c
         if(idtend>=1) then
           do k = 1,km
             do i = 1,im
-              dtend(i,k,idtend) = dtend(i,k,idtend) + ten_v(i,k)*delt
+              vtend = (f2(i,k)-v1(i,k))*rdt
+              dtend(i,k,idtend) = dtend(i,k,idtend) + vtend*delt
             enddo
           enddo
         endif
@@ -3073,12 +2898,7 @@ c
       endif  !sa3dtke
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      if (do_canopy) then
-        if(allocated(EDDYVESTX)) deallocate(EDDYVESTX)
-        if(allocated(ZCANX)) deallocate(ZCANX)
-      endif
-      
       return
-      end subroutine satmedmfvdifq_run
+      end subroutine satmedmfvdifq_can
 !> @}
-      end module satmedmfvdifq
+      end module satmedmfvdifq_can_mod

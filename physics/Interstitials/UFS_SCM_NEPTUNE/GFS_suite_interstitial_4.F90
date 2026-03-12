@@ -11,7 +11,7 @@
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_nssl, imp_physics_tempo, nssl_invertccn, nssl_ccn_on,                                                  &
-      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,&
+      convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,                        &
       index_of_process_conv_trans, index_of_process_dcnv, index_of_process_scnv, gq0, clw, prsl, save_tcp, con_rd, con_eps, nssl_cccn, nwfa, spechum, ldiag3d,&
       qdiag3d, ntk, ntke, otsptflag, errmsg, errflg)
 
@@ -31,14 +31,14 @@
       logical, intent(in)     :: otsptflag(:)! on/off switch for tracer transport by updraft and
       integer,              intent(in   )                   :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw, &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,    &
-        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_nssl, imp_physics_tempo
+        imp_physics_nssl, imp_physics_tempo
 
       logical,                                  intent(in) :: ltaerosol, convert_dry_rho
       logical,                                  intent(in) :: nssl_ccn_on, nssl_invertccn
 
       real(kind=kind_phys), intent(in   )                   :: con_pi, dtf
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qc
-      ! save_qi is not allocated for Zhao-Carr MP
+
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qi
 
       ! dtend and dtidx are only allocated if ldiag3d
@@ -96,9 +96,7 @@
             endif
          endif
          if(ntcw>0) then
-            if (imp_physics == imp_physics_zhao_carr     .or. &
-                 imp_physics == imp_physics_zhao_carr_pdf .or. &
-                 imp_physics == imp_physics_gfdl) then
+            if (imp_physics == imp_physics_gfdl) then
                idtend=dtidx(100+ntcw,index_of_process_conv_trans)
                idtend_deep=dtidx(100+ntcw,index_of_process_dcnv)
                idtend_shal=dtidx(100+ntcw,index_of_process_scnv)
