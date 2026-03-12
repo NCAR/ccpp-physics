@@ -48,7 +48,7 @@ contains
   ! ######################################################################################
 !>
   subroutine rrtmgp_lw_cloud_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_clouds,         &
-       nrghice, mpicomm, mpirank, mpiroot, errmsg, errflg)
+       nrghice, mpicomm, mpirank, mpiroot1, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
@@ -61,7 +61,8 @@ contains
          mpicomm               !< MPI communicator
     integer, intent(in) :: & 
          mpirank,            & !< Current MPI rank
-         mpiroot               !< Master MPI rank
+         mpiroot1              !< Master MPI rank
+    integer :: mpiroot
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -77,6 +78,7 @@ contains
     errmsg = ''
     errflg = 0
 
+    mpiroot = 0
     ! Filenames are set in the physics_nml
     lw_cloud_props_file = trim(rrtmgp_root_dir)//trim(rrtmgp_lw_file_clouds)
 
