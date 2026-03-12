@@ -42,7 +42,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "CCPP SciDoc v7.0.0"
+PROJECT_NAME           = "CCPP SciDoc v7.0.x"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -814,7 +814,7 @@ FILE_VERSION_FILTER    =
 # DoxygenLayout.xml, Doxygen will parse it automatically even if the LAYOUT_FILE
 # tag is left empty.
 
-LAYOUT_FILE            = ccpp_dox_layout.xml
+LAYOUT_FILE            = /home/runner/work/ccpp-physics/ccpp-physics/physics/docs/ccpp_dox_layout.xml
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
@@ -824,7 +824,7 @@ LAYOUT_FILE            = ccpp_dox_layout.xml
 # LATEX_BIB_STYLE. To use this feature you need bibtex and perl available in the
 # search path. See also \cite for info how to create references.
 
-CITE_BIB_FILES         = library.bib
+CITE_BIB_FILES         = /home/runner/work/ccpp-physics/ccpp-physics/physics/docs/library.bib
 
 # The EXTERNAL_TOOL_PATH tag can be used to extend the search path (PATH
 # environment variable) so that external tools such as latex and gs can be
@@ -840,7 +840,7 @@ CITE_BIB_FILES         = library.bib
 # launching external tools will then become
 # PATH=/Library/TeX/texbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
 
-EXTERNAL_TOOL_PATH     =
+EXTERNAL_TOOL_PATH     = /usr/bin
 
 #---------------------------------------------------------------------------
 # Configuration options related to warning and progress messages
@@ -1127,7 +1127,7 @@ EXCLUDE_SYMBOLS        =
 # command).
 
 EXAMPLE_PATH           = pdftxt/RE7 \
-                         doc/html
+                         pdftxt
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
 # EXAMPLE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp and
@@ -1173,7 +1173,7 @@ IMAGE_PATH             = img
 # need to set EXTENSION_MAPPING for the extension otherwise the files are not
 # properly processed by Doxygen.
 
-INPUT_FILTER           =
+INPUT_FILTER           = 
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern
 # basis. Doxygen will compare the file name with each pattern and apply the
@@ -1186,7 +1186,7 @@ INPUT_FILTER           =
 # need to set EXTENSION_MAPPING for the extension otherwise the files are not
 # properly processed by Doxygen.
 
-FILTER_PATTERNS        =
+FILTER_PATTERNS        = 
 
 # If the FILTER_SOURCE_FILES tag is set to YES, the input filter (if set using
 # INPUT_FILTER) will also be used to filter the input files that are used for
@@ -2809,7 +2809,7 @@ INTERACTIVE_SVG        = YES
 # found. If left blank, it is assumed the dot tool can be found in the path.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-DOT_PATH               = /opt/homebrew/bin
+DOT_PATH               = 
 
 # The DOTFILE_DIRS tag can be used to specify one or more directories that
 # contain dot files that are included in the documentation (see the \dotfile
