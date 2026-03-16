@@ -780,7 +780,7 @@
 ! Note that these changes only exist inside the chemistry part of GEM-MACH and do not affect the model physics
 !!!
 !!! Create the momentum height (layer interface) array.  The original momentum layers are used above the canopy height.
-!!! Below the canopy height, the "momentum" layers are assumed to be ½ way between the thermodynamic layers.
+!!! Below the canopy height, the "momentum" layers are assumed to be 1/2 way between the thermodynamic layers.
 
 ! Default case:  all added canopy thermodynamic layers are below the lowest resolved model thermodynamic layer
 ! kcan_top is either 2nd or 3rd (63 or 62) resolved model layer
