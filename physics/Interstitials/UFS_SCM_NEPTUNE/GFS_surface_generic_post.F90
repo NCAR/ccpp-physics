@@ -117,7 +117,7 @@
           v1(i)     = vgrs_1(i)
         enddo
 
-        if (cplflx .or. cplchm .or. cplwav) then
+        if (cplflx .or. cplchm .or. cplwav .or. cpl_fire) then
           do i=1,im
             u10mi_cpl(i) = u10m(i)
             v10mi_cpl(i) = v10m(i)
