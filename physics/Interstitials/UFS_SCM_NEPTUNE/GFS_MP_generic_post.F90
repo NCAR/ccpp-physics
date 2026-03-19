@@ -415,7 +415,7 @@
            idtend_mp = dtidx(index_of_temperature,index_of_process_mp)
            if(idtend_radar>0 .or. idtend_mp>0) then
               if(idtend_mp>0) then
-                 dtend(:,1:2,idtend_mp) = dtend(:,1:2,idtend_mp) + (gt0(:,1:2)-save_t(:,1:2))*frain
+                 dtend(:,1:2,idtend_mp) = dtend(:,1:2,idtend_mp) + ten_t(:,1:2)*dtp*frain
               endif
               do k=3,levs-2 ! Avoid model top and bottom in case DA forgets to
                  do i=1,im
@@ -425,12 +425,12 @@
                           dtend(i,k,idtend_radar) = dtend(i,k,idtend_radar) + (gt0(i,k)-save_t(i,k)) * frain
                        endif
                     else if(idtend_mp>0) then
-                       dtend(i,k,idtend_mp) = dtend(i,k,idtend_mp) + (gt0(i,k)-save_t(i,k)) * frain
+                       dtend(i,k,idtend_mp) = dtend(i,k,idtend_mp) + ten_t(i,k)*dtp*frain
                     endif
                  enddo
               enddo
               if(idtend_mp>0) then
-                 dtend(:,levs-1:levs,idtend_mp) = dtend(:,levs-1:levs,idtend_mp) + (gt0(:,levs-1:levs)-save_t(:,levs-1:levs))*frain
+                 dtend(:,levs-1:levs,idtend_mp) = dtend(:,levs-1:levs,idtend_mp) + ten_t(:,levs-1:levs)*dtp*frain
               endif
            endif
         endif
@@ -539,11 +539,14 @@
         if_tendency_diagnostics: if (ldiag3d) then
            idtend = dtidx(index_of_temperature,index_of_process_mp)
            if(idtend>=1) then
-              do k=1,levs
-                 do i=1,im
-                    dtend(i,k,idtend) = dtend(i,k,idtend) + (gt0(i,k)-save_t(i,k)) * frain
-                 enddo
-              enddo
+              !don't overwrite radar tendencies calculated above when radar temperature tendencies are active
+              if(itime>num_dfi_radar) then
+                do k=1,levs
+                  do i=1,im 
+                    dtend(i,k,idtend) = dtend(i,k,idtend) + ten_t(i,k)*dtp*frain
+                  enddo
+                enddo
+              endif
            endif
            if_tracer_diagnostics: if (qdiag3d) then
               dtend_q: do itrac=1,ntrac
