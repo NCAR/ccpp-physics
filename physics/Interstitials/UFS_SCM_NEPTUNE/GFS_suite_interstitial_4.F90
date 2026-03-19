@@ -11,7 +11,7 @@
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_nssl, imp_physics_tempo, nssl_invertccn, nssl_ccn_on,                                                  &
-      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,&
+      convert_dry_rho, dtf, save_qc, save_qi, con_pi, dtidx, dtend,                        &
       index_of_process_conv_trans, gq0, clw, prsl, save_tcp, con_rd, con_eps, nssl_cccn, nwfa, spechum, ldiag3d,     &
       qdiag3d, save_lnc, save_inc, ntk, ntke, otsptflag, errmsg, errflg)
 
@@ -31,14 +31,13 @@
       logical, intent(in)     :: otsptflag(:)! on/off switch for tracer transport by updraft and
       integer,              intent(in   )                   :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw, &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, ntccn, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,    &
-        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_nssl, imp_physics_tempo
+        imp_physics_nssl, imp_physics_tempo
 
       logical,                                  intent(in) :: ltaerosol, convert_dry_rho
       logical,                                  intent(in) :: nssl_ccn_on, nssl_invertccn
 
       real(kind=kind_phys), intent(in   )                   :: con_pi, dtf
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qc
-      ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qi, save_lnc, save_inc
 
       ! dtend and dtidx are only allocated if ldiag3d
@@ -75,12 +74,10 @@
       errflg = 0
 
       ! This code was previously in GFS_SCNV_generic_post, but it really belongs
-      ! here, because it fixes the convective transportable_tracers mess for Zhao-Carr
-      ! and GFDL MP from GFS_suite_interstitial_3. This whole code around clw(:,:,2)
-      ! being set to -999 for Zhao-Carr MP (which doesn't have cloud ice) and GFDL-MP
-      ! (which does have cloud ice, but for some reason it was decided to code it up
-      ! in the same way as for Zhao-Carr, nowadays unnecessary and confusing) needs
-      ! to be cleaned up. The convection schemes doing something different internally
+      ! here, because it fixes the convective transportable_tracers mess for 
+      ! GFDL MP from GFS_suite_interstitial_3. This whole code around clw(:,:,2)
+      ! being set to -999 for GFDL-MP
+      ! The convection schemes doing something different internally
       ! based on clw(i,k,2) being -999.0 or not is not a good idea.
       do k=1,levs
         do i=1,im
@@ -96,9 +93,7 @@
             endif
          endif
          if(ntcw>0) then
-            if (imp_physics == imp_physics_zhao_carr     .or. &
-                 imp_physics == imp_physics_zhao_carr_pdf .or. &
-                 imp_physics == imp_physics_gfdl) then
+            if (imp_physics == imp_physics_gfdl) then
                idtend=dtidx(100+ntcw,index_of_process_conv_trans)
                if(idtend>=1) then
                   dtend(:,:,idtend) = dtend(:,:,idtend) + clw(:,:,1)+clw(:,:,2) - gq0(:,:,ntcw)
@@ -155,9 +150,7 @@
       if (ntcw > 0) then
 
 !  for microphysics
-        if (imp_physics == imp_physics_zhao_carr     .or. &
-            imp_physics == imp_physics_zhao_carr_pdf .or. &
-            imp_physics == imp_physics_gfdl) then
+        if (imp_physics == imp_physics_gfdl) then
            gq0(1:im,:,ntcw) = clw(1:im,:,1) + clw(1:im,:,2)
 
         elseif (ntiw > 0) then
