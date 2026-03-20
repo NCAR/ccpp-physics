@@ -252,7 +252,6 @@ c  cloud water
       real(kind=kind_phys) tf, tcr, tcrf
       parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
 
-
 c-----------------------------------------------------------------------
 !
 ! Initialize CCPP error handling variables
@@ -274,8 +273,10 @@ c-----------------------------------------------------------------------
 
       if (progsigma) then
          dxcrt=10.e3
+         dxcrtas=500.e3
       else
          dxcrt=15.e3
+         dxcrtas=500.e3
       endif
 
 c-----------------------------------------------------------------------
