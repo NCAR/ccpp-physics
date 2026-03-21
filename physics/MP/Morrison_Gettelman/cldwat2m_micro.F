@@ -4745,11 +4745,10 @@ checked up to here moorthi
        end do
 
        if (dtm < dttol .and. dqm < dqtol) then
-       go to 10
+       exit
        endif
 
        end do
-      10 continue
 
        error_found = .false.
        if (dtm > dttol .or. dqm > dqtol) then
@@ -5023,11 +5022,10 @@ checked up to here moorthi
        end do
 
        if (dtm < dttol .and. dqm < dqtol) then
-       go to 10
+       exit
        endif
 
        end do
-      10 continue
 
        error_found = .false.
        if (dtm > dttol .or. dqm > dqtol) then
@@ -5439,7 +5437,8 @@ checked up to here moorthi
              Y    = Y + ONE
          ELSE
            RES=XINF
-           GOTO 900
+           GAMMA = RES
+           RETURN
          ENDIF
        ENDIF
 !----------------------------------------------------------------------
@@ -5453,7 +5452,8 @@ checked up to here moorthi
            RES = ONE/Y
          ELSE
            RES = XINF
-           GOTO 900
+           GAMMA = RES
+           RETURN
          ENDIF
        ELSEIF(Y.LT.TWELVE)THEN
          Y1 = Y
@@ -5510,7 +5510,8 @@ checked up to here moorthi
            RES = EXP(SUM)
          ELSE
            RES = XINF
-           GOTO 900
+           GAMMA = RES
+           RETURN
          ENDIF
        ENDIF
 !----------------------------------------------------------------------
@@ -5518,7 +5519,7 @@ checked up to here moorthi
 !----------------------------------------------------------------------
        IF(PARITY) RES = -RES
        IF(FACT.NE.ONE) RES = FACT/RES
-900    GAMMA = RES
+       GAMMA = RES
 !D900 DGAMMA = RES
        RETURN
 ! ---------- LAST LINE OF GAMMA ----------
