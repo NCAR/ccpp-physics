@@ -2950,7 +2950,7 @@
                   k_cldb = k2+1
                   exit inner_search
                endif
-            ENDDO inner_search
+            END DO inner_search
             in_cloud = .false.
          endif
          if ((k_cldt - k_cldb + 1) .ge. 2) then
@@ -2980,7 +2980,7 @@
                   k_cldb = k2+1
                   exit inner_loop2
                endif
-            ENDDO inner_loop2
+            END DO inner_loop2
             in_cloud = .false.
          endif
          if ((k_cldt - k_cldb + 1) .ge. 2) then
@@ -2993,8 +2993,7 @@
             k = k_cldb
          endif
          k = k - 1
-      ENDDO
-
+      END DO outer_loop
 
       END SUBROUTINE find_cloudLayers
 
