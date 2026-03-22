@@ -30,7 +30,7 @@ physics/GWD/drag_suite.*                                                     @md
 physics/GWD/gwdc.*                                                           @Songyou184                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/gwdps.*                                                          @Songyou184                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/rayleigh_damp.*                                                  @yangfanglin                              @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/GWD/ugwp_driver_v0.F                                                 @mdtoyNOAA                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/GWD/ugwp_driver_v0.F90                                               @mdtoyNOAA                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/ugwpv1_gsldrag.*                                                 @mdtoyNOAA @BoYang-NOAA                   @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/ugwpv1_gsldrag_post.*                                            @mdtoyNOAA @BoYang-NOAA                   @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/unified_ugwp*                                                    @mdtoyNOAA                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
@@ -102,7 +102,7 @@ physics/SFC_Layer/GFDL/gfdl_sfc_layer.*                                      @Zh
 physics/SFC_Layer/GFDL/module_sf_exchcoef.f90                                @ZhanZhang-NOAA                           @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/SFC_Layer/MYJ/myjsfc_wrapper.*                                       @Qingfu-Liu                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/SFC_Layer/MYJ/module_SF_JSFC.F90                                     @Qingfu-Liu                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/SFC_Layer/MYNN/mynnsfc_wrapper.*                                     @joeolson42                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/SFC_Layer/MYNN/MYNN/module_sf_mynnsfc.*                              @joeolson42                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/SFC_Layer/MYNN/module_sf_mynn.F90                                    @joeolson42                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/SFC_Layer/UFS/date_def.f                                             @XuLi-NOAA                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/SFC_Layer/UFS/module_nst*                                            @XuLi-NOAA                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
@@ -149,7 +149,7 @@ physics/Interstitials/UFS_SCM_NEPTUNE/GFS_PBL_generic_pre.*                     
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_phys_time_vary.fv3.*                                                         @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_phys_time_vary.scm.*                                                         @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_physics_post.*                                                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/Interstitials/UFS_SCM_NEPTUNE/GFS_radiation_surface.*                                                          @grantfirl @rhaesung @Qingfu-Liu @dustinswales 
+physics/Interstitials/UFS_SCM_NEPTUNE/GFS_radiation_surface.*                                                          @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rad_time_vary.fv3.*                                                          @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rad_time_vary.scm.*                                                          @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/GFS_rrtmgp_cloud_mp.*                  @dustinswales @Qingfu-Liu                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
