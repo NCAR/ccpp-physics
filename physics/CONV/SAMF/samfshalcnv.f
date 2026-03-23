@@ -1555,7 +1555,7 @@ c
          do k = 2, km1
             do i = 1, im
                if (cnvflg(i)) then
-                  if(k >= kbcon1(i) .and. k < ktcon(i)) then
+                  if(k > kbcon1(i) .and. k < ktcon(i)) then
                      dz    = zi(i,k) - zi(i,k-1)
                      tem  = 0.25 * bb1 * (drag(i,k-1)+drag(i,k)) * dz
                      tem1 = 0.5 * bb2 * (buo(i,k-1)+buo(i,k))
@@ -1573,7 +1573,7 @@ c
          do k = 2, km1
             do i = 1, im
                if (cnvflg(i)) then
-                  if(k >= kbcon1(i) .and. k < ktcon(i)) then
+                  if(k > kbcon1(i) .and. k < ktcon(i)) then
                      rho = po(i,k)*100. / (rd * to(i,k))
                      omega_u(i,k)=-1.0*sqrt(wu2(i,k))*rho*grav
                      omega_u(i,k)=MAX(omega_u(i,k),-80.)
