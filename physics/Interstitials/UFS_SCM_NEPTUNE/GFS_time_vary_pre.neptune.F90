@@ -1,4 +1,4 @@
-!> \file GFS_time_vary_pre.scm.F90
+!> \file GFS_time_vary_pre.neptune.F90
 !!  Contains code related to GFS physics suite setup (generic part of time_vary_step)
 
    module GFS_time_vary_pre
@@ -15,6 +15,9 @@
 
       contains
 
+!>\defgroup gfs_time_vary_pre_mod  GFS Time Vary Pre Module
+!! This module contains code related to GFS physics suite setup.
+!> @{
 !> \section arg_table_GFS_time_vary_pre_init Argument Table
 !! \htmlinclude GFS_time_vary_pre_init.html
 !!
@@ -65,9 +68,9 @@
 !> \section arg_table_GFS_time_vary_pre_timestep_init Argument Table
 !! \htmlinclude GFS_time_vary_pre_timestep_init.html
 !!
-      subroutine GFS_time_vary_pre_timestep_init (jdat, idat, dtp, nsswr, &
-        nslwr, idate, debug, me, master, nscyc, sec, phour, zhour, fhour, kdt,   &
-        julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
+      subroutine GFS_time_vary_pre_timestep_init (jdat, idat, dtp, nsswr,                        &
+                  nslwr, nhfrad, idate, debug, me, master, nscyc, sec, phour, zhour, fhour,      &
+                  kdt, julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
 
         use machine,               only: kind_phys, kind_dbl_prec, kind_sngl_prec
 
@@ -76,7 +79,7 @@
         integer,                          intent(in)    :: idate(:)
         integer,                          intent(in)    :: jdat(:), idat(:)
         integer,                          intent(in)    :: nsswr, nslwr, me,     &
-                                                           master, nscyc
+                                                           master, nscyc, nhfrad
         logical,                          intent(in)    :: debug
         real(kind=kind_phys),             intent(in)    :: dtp
 
@@ -110,8 +113,7 @@
            return
         end if
 
-        !--- jdat is being updated directly inside of the time integration
-        !--- loop of scm.F90
+        !--- jdat is being updated by the host model
         !--- update calendars and triggers
         call w3kind(w3kindreal, w3kindint)
         !--- CCPP uses w3emc_d, therefore expecting the following values
@@ -177,6 +179,12 @@
         !--- allow for radiation to be called on every physics time step, if needed
         if (nsswr == 1)  lsswr = .true.
         if (nslwr == 1)  lslwr = .true.
+        !--- allow for radiation to be called on every physics time step
+        !    for the first nhfrad timesteps (for spinup, coldstarts only)
+        if (kdt <= nhfrad) then
+           lsswr = .true.
+           lslwr = .true.
+        end if
 
         !--- set the solar hour based on a combination of phour and time initial hour
         solhr  = mod(phour+idate(1),con_24)
@@ -195,5 +203,5 @@
         endif
 
       end subroutine GFS_time_vary_pre_timestep_init
-
+!> @}
     end module GFS_time_vary_pre
