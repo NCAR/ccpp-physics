@@ -381,7 +381,7 @@
   intent = in
 [qlls_i]
   standard_name = cloud_liquid_water_mixing_ratio
-  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) updated by physics
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -397,7 +397,7 @@
   intent = in
 [qils_i]
   standard_name = cloud_ice_mixing_ratio
-  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -485,7 +485,7 @@
   intent = in
 [u_i]
   standard_name = x_wind
-  long_name = zonal wind updated by physics
+  long_name = zonal wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -493,7 +493,7 @@
   intent = in
 [v_i]
   standard_name = y_wind
-  long_name = meridional wind updated by physics
+  long_name = meridional wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -557,7 +557,7 @@
   intent = in
 [q_i]
   standard_name = specific_humidity
-  long_name = water vapor specific humidity updated by physics
+  long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -565,7 +565,7 @@
   intent = in
 [t_i]
   standard_name = air_temperature
-  long_name = temperature updated by physics
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -589,7 +589,7 @@
   intent = out
 [ncpl_i]
   standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air
-  long_name = number concentration of cloud droplets updated by physics
+  long_name = number concentration of cloud droplets
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -597,7 +597,7 @@
   intent = in
 [ncpi_i]
   standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air
-  long_name = number concentration of ice updated by physics
+  long_name = number concentration of ice
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -612,7 +612,7 @@
   intent = in
 [rnw_i]
   standard_name = rain_mixing_ratio
-  long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) updated by physics
+  long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -620,7 +620,7 @@
   intent = in
 [snw_i]
   standard_name = snow_mixing_ratio
-  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) updated by physics
+  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -628,7 +628,7 @@
   intent = in
 [qgl_i]
   standard_name = graupel_mixing_ratio
-  long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
+  long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -636,7 +636,7 @@
   intent = in
 [ncpr_i]
   standard_name = mass_number_concentration_of_rain
-  long_name = number concentration of rain updated by physics
+  long_name = number concentration of rain
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -644,7 +644,7 @@
   intent = in
 [ncps_i]
   standard_name = mass_number_concentration_of_snow
-  long_name = number concentration of snow updated by physics
+  long_name = number concentration of snow
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -652,7 +652,7 @@
   intent = in  
 [ncgl_i]
   standard_name = mass_number_concentration_of_graupel
-  long_name = number concentration of graupel updated by physics
+  long_name = number concentration of graupel
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real

@@ -38,7 +38,7 @@
   intent = in
 [gq0_ice]
   standard_name = cloud_ice_mixing_ratio
-  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -46,7 +46,7 @@
   intent = in
 [gq0_rain]
   standard_name = rain_mixing_ratio
-  long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) updated by physics
+  long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -54,7 +54,7 @@
   intent = in
 [gq0_snow]
   standard_name = snow_mixing_ratio
-  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) updated by physics
+  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -62,7 +62,7 @@
   intent = in
 [gq0_graupel]
   standard_name = graupel_mixing_ratio
-  long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
+  long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real

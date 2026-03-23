@@ -78,7 +78,7 @@
   intent = in
 [tmf]
   standard_name = tendency_of_vertically_diffused_tracer_concentration
-  long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
+  long_name = tendency of the tracers due to vertical diffusion in PBL scheme
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
   type = real
@@ -300,7 +300,7 @@
   intent = in
 [q1]
   standard_name = specific_humidity
-  long_name = updated vapor specific humidity
+  long_name = vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -308,7 +308,7 @@
   intent = in
 [t1]
   standard_name = air_temperature
-  long_name = updated temperature
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -316,7 +316,7 @@
   intent = in
 [u1]
   standard_name = x_wind
-  long_name = updated x-direction wind
+  long_name = x-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -324,7 +324,7 @@
   intent = in
 [v1]
   standard_name = y_wind
-  long_name = updated y-direction wind
+  long_name = y-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -507,7 +507,7 @@
   kind = kind_phys
   intent = inout
 [sigmain]
-  standard_name = physics_timestep_initial_prognostic_updraft_area_fraction_in_convection
+  standard_name = physics_timestep_initial_updraft_area_fraction
   long_name = convective updraft area fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -517,7 +517,7 @@
   optional = True
 [sigmaout]
   standard_name = updraft_area_fraction
-  long_name = convective updraft area fraction updated by physics
+  long_name = convective updraft area fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -525,7 +525,7 @@
   intent = inout
   optional = True
 [omegain]
-  standard_name = prognostic_updraft_velocity_in_convection
+  standard_name = physics_timestep_initial_updraft_velocity
   long_name = convective updraft velocity
   units = Pa s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -534,7 +534,7 @@
   intent = in
   optional = True
 [omegaout]
-  standard_name = updraft_velocity_updated_by_physics
+  standard_name = updraft_velocity
   long_name = convective updraft velocity updated by physics
   units = Pa s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

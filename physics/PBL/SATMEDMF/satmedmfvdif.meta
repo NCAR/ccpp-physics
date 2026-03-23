@@ -165,7 +165,7 @@
   intent = in
 [rtg]
   standard_name = tendency_of_vertically_diffused_tracer_concentration
-  long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
+  long_name = tendency of the tracers due to vertical diffusion in PBL scheme
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
   type = real

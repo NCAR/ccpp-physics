@@ -290,7 +290,7 @@
   intent = in
 [gu0]
   standard_name = x_wind
-  long_name = zonal wind updated by physics
+  long_name = zonal wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -298,7 +298,7 @@
   intent = inout
 [gv0]
   standard_name = y_wind
-  long_name = meridional wind updated by physics
+  long_name = meridional wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -306,7 +306,7 @@
   intent = inout
 [gt0]
   standard_name = air_temperature
-  long_name = temperature updated by physics
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -314,7 +314,7 @@
   intent = inout
 [gq0_wv]
   standard_name = specific_humidity
-  long_name = water vapor specific humidity updated by physics
+  long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -331,7 +331,7 @@
   optional = True
 [gq0_cw]
   standard_name = cloud_liquid_water_mixing_ratio
-  long_name = cloud condensed water mixing ratio updated by physics
+  long_name = cloud condensed water mixing ratio
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -339,7 +339,7 @@
   intent = inout
 [gq0_rw]
   standard_name = rain_mixing_ratio
-  long_name = moist mixing ratio of rain updated by physics
+  long_name = moist mixing ratio of rain
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -347,7 +347,7 @@
   intent = inout
 [gq0_sw]
   standard_name = snow_mixing_ratio
-  long_name = moist mixing ratio of snow updated by physics
+  long_name = moist mixing ratio of snow
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -355,7 +355,7 @@
   intent = inout
 [gq0_iw]
   standard_name = cloud_ice_mixing_ratio
-  long_name = moist mixing ratio of cloud ice updated by physics
+  long_name = moist mixing ratio of cloud ice
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -363,7 +363,7 @@
   intent = inout
 [gq0_gl]
   standard_name = graupel_mixing_ratio
-  long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
+  long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real

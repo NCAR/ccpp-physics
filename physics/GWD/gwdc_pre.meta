@@ -93,7 +93,7 @@
   intent = in
 [gt0]
   standard_name = air_temperature
-  long_name = updated air temperature
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real

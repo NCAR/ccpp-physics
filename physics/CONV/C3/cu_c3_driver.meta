@@ -233,7 +233,7 @@
   optional = True
 [tmf]
   standard_name = tendency_of_vertically_diffused_tracer_concentration
-  long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
+  long_name = tendency of the tracers due to vertical diffusion in PBL scheme
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
   type = real
@@ -249,7 +249,7 @@
   intent = in
   optional = True
 [sigmain]
-  standard_name = physics_timestep_initial_prognostic_updraft_area_fraction_in_convection
+  standard_name = physics_timestep_initial_updraft_area_fraction
   long_name = convective updraft area fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -259,7 +259,7 @@
   optional = True
 [sigmaout]
   standard_name = updraft_area_fraction
-  long_name = convective updraft area fraction updated by physics
+  long_name = convective updraft area fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -315,7 +315,7 @@
   intent = out
 [qv_spechum]
   standard_name = specific_humidity
-  long_name = water vapor specific humidity updated by physics
+  long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -323,7 +323,7 @@
   intent = in
 [t]
   standard_name = air_temperature
-  long_name = updated temperature
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -339,7 +339,7 @@
   intent = out
 [us]
   standard_name = x_wind
-  long_name = updated x-direction wind
+  long_name = x-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -347,7 +347,7 @@
   intent = in
 [vs]
   standard_name = y_wind
-  long_name = updated y-direction wind
+  long_name = y-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real

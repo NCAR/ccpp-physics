@@ -419,7 +419,7 @@
   intent = in
 [qhl]
   standard_name = hail_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of hail updated by physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of hail
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -428,7 +428,7 @@
   optional = True
 [cccn]
   standard_name = cloud_condensation_nuclei_number_concentration
-  long_name = number concentration of cloud condensation nuclei updated by physics
+  long_name = number concentration of cloud condensation nuclei
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -437,7 +437,7 @@
   optional = True
 [cccna]
   standard_name = activated_cloud_condensation_nuclei_number_concentration
-  long_name = number concentration of activated cloud condensation nuclei updated by physics
+  long_name = number concentration of activated cloud condensation nuclei
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real

@@ -336,7 +336,7 @@
   intent = in
 [tin]
   standard_name = air_temperature
-  long_name = updated temperature
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -344,7 +344,7 @@
   intent = in
 [qin]
   standard_name = specific_humidity
-  long_name = updated vapor specific humidity
+  long_name = vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -352,7 +352,7 @@
   intent = in
 [uin]
   standard_name = x_wind
-  long_name = updated x-direction wind
+  long_name = x-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -360,7 +360,7 @@
   intent = in
 [vin]
   standard_name = y_wind
-  long_name = updated y-direction wind
+  long_name = y-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real

@@ -194,7 +194,7 @@
   intent = in
 [gq0]
   standard_name = specific_humidity
-  long_name = water vapor specific humidity updated by physics
+  long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -202,7 +202,7 @@
   intent = in
 [gq0_ntcw]
   standard_name = cloud_liquid_water_mixing_ratio
-  long_name = cloud condensed water mixing ratio updated by physics
+  long_name = cloud condensed water mixing ratio
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -210,7 +210,7 @@
   intent = in
 [gq0_ntrw]
   standard_name = rain_mixing_ratio
-  long_name = moist mixing ratio of rain updated by physics
+  long_name = moist mixing ratio of rain
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -218,7 +218,7 @@
   intent = in
 [gq0_ntiw]
   standard_name = cloud_ice_mixing_ratio
-  long_name = moist mixing ratio of cloud ice updated by physics
+  long_name = moist mixing ratio of cloud ice
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -226,7 +226,7 @@
   intent = in
 [gq0_ntsw]
   standard_name = snow_mixing_ratio
-  long_name = moist mixing ratio of snow updated by physics
+  long_name = moist mixing ratio of snow
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -234,7 +234,7 @@
   intent = in
 [gq0_ntgl]
   standard_name = graupel_mixing_ratio
-  long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
+  long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -242,7 +242,7 @@
   intent = in
 [gq0_ntclamt]
   standard_name = cloud_area_fraction_in_atmosphere_layer
-  long_name = cloud fraction updated by physics
+  long_name = cloud fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -250,7 +250,7 @@
   intent = in
 [gt0]
   standard_name = air_temperature
-  long_name = air temperature updated by physics
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -258,7 +258,7 @@
   intent = in
 [gu0]
   standard_name = x_wind
-  long_name = zonal wind updated by physics
+  long_name = zonal wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -266,7 +266,7 @@
   intent = in
 [gv0]
   standard_name = y_wind
-  long_name = meridional wind updated by physics
+  long_name = meridional wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
