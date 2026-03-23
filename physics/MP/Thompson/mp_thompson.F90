@@ -995,7 +995,7 @@ module mp_thompson
            dnwfa = (new_nwfa - nwfa)/dtp
            dnifa = (new_nifa - nifa)/dtp
            
-           deallocate(new_nc, new_nwfa, nifa)
+           deallocate(new_nc, new_nwfa, new_nifa)
          end if
          
       end subroutine mp_thompson_run
