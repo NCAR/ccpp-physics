@@ -9,10 +9,10 @@
 !! \htmlinclude GFS_DCNV_generic_post_run.html
 !!
     subroutine GFS_DCNV_generic_post_run (im, levs, tracers_total, otsptflag,     &
-      imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_zhao_carr, &
-      imp_physics_zhao_carr_pdf, imp_physics_nssl, imp_physics_wsm6, imp_physics_mg, imp_physics_fer_hires, tend_opt_dcnv, lssav, ldiag3d, qdiag3d, ras, &
-      cscnv, frain, rain1, dtf, cld1d, gu0, gv0, gt0, ten_t, ten_u, ten_v, ten_q, &
-      dudt, dvdt, dtdt, dqdt, &
+      imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl,      &
+      imp_physics_wsm6, imp_physics_mg, imp_physics_fer_hires, tend_opt_dcnv,     &
+      lssav, ldiag3d, qdiag3d, ras, cscnv, frain, rain1, dtf, cld1d, gu0, gv0,    &
+      gt0, ten_t, ten_u, ten_v, ten_q, dudt, dvdt, dtdt, dqdt,                    &
       delt, ud_mf, dd_mf, dt_mf, con_g, npdf3d, num_p3d, ncnvcld3d, nsamftrac,    &
       rainc, cldwrk, upd_mf, dwn_mf, det_mf, dtend, dtidx, index_of_process_dcnv, &
       index_of_temperature, index_of_x_wind, index_of_y_wind, ntqv, gq0,          &
@@ -27,7 +27,7 @@
       implicit none
 
       integer, intent(in) :: im, levs, nsamftrac, tracers_total, tend_opt_dcnv
-      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_nssl, imp_physics_wsm6, imp_physics_mg, imp_physics_fer_hires
+      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_nssl, imp_physics_wsm6, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: lssav, ldiag3d, qdiag3d, ras, cscnv
       logical, intent(in) :: flag_for_dcnv_generic_tend
       logical, dimension(:), intent(in) :: otsptflag
@@ -84,9 +84,7 @@
         enddo
       endif
       if (ntcw > 0) then
-        if (imp_physics == imp_physics_zhao_carr     .or. &
-            imp_physics == imp_physics_zhao_carr_pdf .or. &
-            imp_physics == imp_physics_gfdl) then
+        if (imp_physics == imp_physics_gfdl) then
           ten_q(1:im,:,ntcw) = dclw(1:im,:,1) + dclw(1:im,:,2)
         elseif (ntiw > 0) then
           ten_q(1:im,:,ntiw) = dclw(1:im,:,1)
@@ -167,13 +165,7 @@
           endif
         enddo
       endif ! end if_ras or cfscnv or samf
-      if (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_zhao_carr_pdf) then   ! zhao-carr microphysics
-        do k=1,levs
-          do i=1,im
-            clw(i,k,1) = gq0(i,k,ntcw)
-          enddo
-        enddo
-      elseif (imp_physics == imp_physics_gfdl) then
+      if (imp_physics == imp_physics_gfdl) then
         clw(1:im,:,1) = gq0(1:im,:,ntcw)
       elseif (imp_physics == imp_physics_thompson) then
         do k=1,levs
