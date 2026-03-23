@@ -187,9 +187,9 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
 
   integer                       :: lsoil_incr
   integer, allocatable          :: mask_tile(:)
-  integer,allocatable           :: stc_updated(:), slc_updated(:)
+  integer,allocatable           :: stc_updated(:)
   logical                       :: soil_freeze, soil_ice
-  integer                       :: soiltype, n_stc, n_slc
+  integer                       :: soiltype
   real(kind=kind_phys)          :: slc_new
 
   integer                  :: i, j, ij, l, k, ib
@@ -197,10 +197,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
 
   real(kind=kind_phys)                     :: smp !< for computing supercooled water 
   real(kind=kind_phys)                     :: hc_incr
-
-  integer                  :: nother, nsnowupd
-  integer                  :: nstcupd, nslcupd, nfrozen, nfrozen_upd
-  logical                  :: print_update_stats = .False.
+  real(kind=kind_phys), parameter :: tfreez_noahmp=273.16 ! tfreez used in NoahMP to determine frozen ground
 
   !  --- Initialize CCPP error handling variables
   errmsg = ''
@@ -223,7 +220,7 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
   endif
 
   if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) then 
-    print*, "adding land iau increments " 
+    print*, "adding land iau increments"
   endif
 
   if (Land_IAU_Control%lsoil .ne. km) then
@@ -236,11 +233,9 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
   allocate(stc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
   allocate(slc_inc_flat(Land_IAU_Control%nx * Land_IAU_Control%ny, km))  !GFS_Control%ncols
   allocate(stc_updated(Land_IAU_Control%nx * Land_IAU_Control%ny)) 
-  allocate(slc_updated(Land_IAU_Control%nx * Land_IAU_Control%ny)) 
 
   !copy background stc
   stc_updated = 0
-  slc_updated = 0
   ib = 1
   do j = 1, Land_IAU_Control%ny   
     do k = 1, km    
@@ -260,53 +255,37 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
   lensfc = Land_IAU_Control%nx * Land_IAU_Control%ny   
 
   if(Land_IAU_Control%me == Land_IAU_Control%mpi_root) print*,' adjusting first ', lsoil_incr, ' surface layers only, delt ', delt
-  ! initialize variables for counts statitics to be zeros
-  nother = 0 ! grid cells not land
-  nsnowupd = 0  ! grid cells with snow (temperature not yet updated)
-  nstcupd = 0 ! grid cells that are updated stc
-  nslcupd = 0 ! grid cells that are updated slc
-  nfrozen = 0 ! not update as frozen soil
-  nfrozen_upd = 0 ! not update as frozen soil
 
-!TODO---if only fv3 increment files are used, this can be read from file
   allocate(mask_tile(lensfc))
   call calculate_landinc_mask(weasd, vegtype, soiltyp, lensfc, isice_table, mask_tile)  
                               
-  !IAU increments are in units of 1/sec     !Land_IAU_Control%dtp
-  !* only updating soil temp for now 
+  dz(1) = -zsoil(1)
+  do k = 2, km
+        dz(k) = -zsoil(k) + zsoil(k-1)
+  enddo
+  !IAU increments are in units of 1/sec
   ij_loop : do ij = 1, lensfc
     ! mask: 1  - soil, 2 - snow, 0 - land-ice, -1 - not land
     if (mask_tile(ij) == 1) then
      
       soil_freeze=.false.
       soil_ice=.false.
-      do k = 1, lsoil_incr   ! k = 1, km
-        if ( stc(ij,k) < con_t0c)  soil_freeze=.true.
+      do k = 1, lsoil_incr
+        if ( stc(ij,k) < tfreez_noahmp )  soil_freeze=.true.
         if ( smc(ij,k) - slc(ij,k) > 0.001 )  soil_ice=.true.
 
         if (Land_IAU_Control%upd_stc) then
-          stc(ij,k) = stc(ij,k) + stc_inc_flat(ij,k)*delt !Land_IAU_Control%dtp
-          if (k==1) then
-              stc_updated(ij) = 1
-              nstcupd = nstcupd + 1
-          endif
+          if (k==1) stc_updated(ij) = 1
+          stc(ij,k) = stc(ij,k) + stc_inc_flat(ij,k)*delt
         endif
 
-        if ( (stc(ij,k) < con_t0c) .and. (.not. soil_freeze) .and. (k==1) ) nfrozen_upd = nfrozen_upd + 1
-
-        ! do not do updates if this layer or any above is frozen
+        ! do not do SLC updates if this layer or any above is frozen
         if ( (.not. soil_freeze ) .and. (.not. soil_ice ) ) then
           if (Land_IAU_Control%upd_slc) then
-            if (k==1) then
-                nslcupd = nslcupd + 1
-                slc_updated(ij) = 1
-            endif
-            ! apply zero limit here (higher, model-specific limits are later)
-            slc(ij,k) = max(slc(ij,k) + slc_inc_flat(ij,k)*delt, 0.0)
-            smc(ij,k) = max(smc(ij,k) + slc_inc_flat(ij,k)*delt, 0.0) 
+            ! if soil moisture is <0.1 mm in layer, prevent DA from further reducing it 
+            slc(ij,k) = max(slc(ij,k) + slc_inc_flat(ij,k)*delt, min(0.0001/dz(k), slc(ij,k)))
+            smc(ij,k) = max(smc(ij,k) + slc_inc_flat(ij,k)*delt, min(0.0001/dz(k), smc(ij,k)))
           endif
-        else
-          if (k==1) nfrozen = nfrozen+1
         endif       
       enddo
     endif ! if soil/snow point
@@ -318,27 +297,25 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
         errmsg = 'FATAL ERROR in noahmpdrv_timestep_init: problem in set_soilveg_noahmp'
         return
   endif
-  n_stc = 0
-  n_slc = 0  
   if (Land_IAU_Control%do_stcsmc_adjustment) then
     if (Land_IAU_Control%upd_stc) then
       do i=1,lensfc
         if (stc_updated(i) == 1 ) then ! soil-only location
-            n_stc = n_stc+1
             soiltype = soiltyp(i)
             do l = 1, lsoil_incr
               if (abs(stc_inc_flat(i,l)) > Land_IAU_Control%min_T_increment) then
                 !the following if case applies when updated stc > melting point, it handles both
                 !case 1: frz ==> frz, recalculate slc, smc remains
                 !case 2: unfrz ==> frz, recalculate slc, smc remains
-                if (stc(i,l) .LT. con_t0c )then
+                if (stc(i,l) .LE. tfreez_noahmp )then
                   !recompute supercool liquid water,smc_anl remain unchanged
-                  smp = con_hfus*(con_t0c-stc(i,l))/(con_g*stc(i,l)) !(m)
+                  smp = con_hfus*(tfreez_noahmp-stc(i,l))/(con_g*stc(i,l)) !(m)
                   slc_new=maxsmc(soiltype)*(smp/satpsi(soiltype))**(-1./bb(soiltype))
                   slc(i,l) = max( min( slc_new, smc(i,l)), 0.0 )
                 endif
-                !case 3: frz ==> unfrz (or unfrz ==> unfrz), melt all soil ice (if any) 
-                if (stc(i,l) .GT. con_t0c )then !do not rely on stc_bck
+                !case 3: frz ==> unfrz melt all soil ice (if any)
+                if ( stc(i,l) .GT. tfreez_noahmp  .and. &
+                     stc(i,l) - stc_inc_flat(i,l)*delt .LE. tfreez_noahmp ) then
                   slc(i,l)=smc(i,l)
                 endif
               endif
@@ -347,34 +324,10 @@ subroutine noahmpdrv_timestep_init (itime, fhour, delt, km,  ncols,         &
       enddo    
     endif 
 
-    if (Land_IAU_Control%upd_slc) then
-      dz(1) = -zsoil(1)
-      do l = 2, km 
-          dz(l) = -zsoil(l) + zsoil(l-1) 
-      enddo 
-      do i=1,lensfc
-        if (slc_updated(i) == 1 ) then 
-          n_slc = n_slc+1
-          ! apply SM bounds (later: add upper SMC limit)
-          do l = 1, lsoil_incr
-            if (abs(slc_inc_flat(i, l)) > Land_IAU_Control%min_SLC_increment) then
-              ! noah-mp minimum is 1 mm per layer (in SMC)
-              ! no need to maintain frozen amount, would be v. small.
-              slc(i,l) = max( 0.001/dz(l), slc(i,l) )
-              smc(i,l) = max( 0.001/dz(l), smc(i,l) )
-            endif
-          enddo
-        endif
-      enddo
-    endif
   endif
-
-    deallocate(stc_inc_flat, slc_inc_flat, stc_updated, slc_updated)
-    deallocate(mask_tile)
+  deallocate(stc_inc_flat, slc_inc_flat, stc_updated)
+  deallocate(mask_tile)
     
-    !Remove non-warning, non-error log write
-    !write(*,'(a,i4,a,i8)') 'noahmpdrv_timestep_init rank ', Land_IAU_Control%me, ' # of cells with stc update ', nstcupd
-
 
 end subroutine noahmpdrv_timestep_init
 
