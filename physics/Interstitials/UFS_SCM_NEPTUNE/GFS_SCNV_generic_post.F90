@@ -8,7 +8,7 @@
 !> \section arg_table_GFS_SCNV_generic_post_run Argument Table
 !! \htmlinclude GFS_SCNV_generic_post_run.html
 !!
-      subroutine GFS_SCNV_generic_post_run (im, levs, tracers_total, otsptflag, imp_physics, imp_physics_gfdl, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, tend_opt_scnv, lssav, ldiag3d, qdiag3d, &
+      subroutine GFS_SCNV_generic_post_run (im, levs, tracers_total, otsptflag, imp_physics, imp_physics_gfdl, tend_opt_scnv, lssav, ldiag3d, qdiag3d, &
         frain, gu0, gv0, gt0, gq0, dudt, dvdt, dtdt, dqdt, ten_t, ten_u, ten_v, ten_q, delt,              &
         clw, dclw, shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw, nsamftrac,    &
         rainc, cnvprcp, cnvw_phy_f3d, cnvc_phy_f3d,                      &
@@ -23,7 +23,7 @@
       implicit none
 
       integer, intent(in) :: im, levs, ntqv, nsamftrac, tracers_total, tend_opt_scnv
-      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
+      integer, intent(in) :: imp_physics, imp_physics_gfdl
       integer, intent(in) :: ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,ntsigma,ntrac
       logical, intent(in) :: lssav, ldiag3d, qdiag3d, flag_for_scnv_generic_tend
       logical, dimension(:), intent(in) :: otsptflag
@@ -78,9 +78,7 @@
         enddo
       endif
       if (ntcw > 0) then
-        if (imp_physics == imp_physics_zhao_carr     .or. &
-            imp_physics == imp_physics_zhao_carr_pdf .or. &
-            imp_physics == imp_physics_gfdl) then
+        if (imp_physics == imp_physics_gfdl) then
            ten_q(1:im,:,ntcw) = dclw(1:im,:,1) + dclw(1:im,:,2)
         elseif (ntiw > 0) then
           ten_q(1:im,:,ntiw) = dclw(1:im,:,1)
