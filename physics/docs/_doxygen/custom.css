@@ -55,3 +55,14 @@ html.dark-mode .bordered_image object[type="image/svg+xml"] /* doxygen 1.9.3 */ 
 .title_screenshot .caption {
     display: none;
 }
+
+.ccpp-backlink {
+  padding: 0.5em 1em;
+  background-color: var(--page-background-color);
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.ccpp-backlink a {
+  text-decoration: none;
+  font-weight: 500;
+}

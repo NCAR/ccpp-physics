@@ -61,42 +61,21 @@ jobs:
         <head>
             <title>CCPP Physics Scientific Documentation</title>
             <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    margin: 40px;
-                    background-color: #f5f5f5;
-                }
-                h1 {
-                    color: #003366;
-                }
-                .container {
-                    background: white;
-                    padding: 30px;
-                    border-radius: 8px;
-                    max-width: 800px;
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                }
-                a {
-                    display: block;
-                    margin: 15px 0;
-                    font-size: 18px;
-                    color: #0066cc;
-                    text-decoration: none;
-                }
-                a:hover {
-                    text-decoration: underline;
-                }
+                <link rel="stylesheet" href="_doxygen/doxygen-awesome.css">
+                <link rel="stylesheet" href="_doxygen/doxygen-awesome-sidebar-only.css">
+                <link rel="stylesheet" href="_doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css">
+                <link rel="stylesheet" href="_doxygen/doxygen-awesome-ccpp.css">
             </style>
         </head>
         <body>
             <div class="container">
-                <h1>CCPP Physics Documentation</h1>
+                <h1>CCPP Physics Scientific Documentation</h1>
 
                 <p>The Common Community Physics Package (CCPP) provides scientific documentation for the physics suites and parameterizations used across a variety of atmospheric modeling applications. The documentation describes the scientific basis, configuration options, and implementation details for the parameterizations included in the CCPP physics suites for different modeling systems and use cases.</p>
 
                 <a href="./V7/">CCPP Physics V7 Scientific Documentation</a>
 
-                <a href="./HSD/">CCPP Physics Heirerarchical System Development (HSD) Scientific Documentation</a>
+                <a href="./HSD/">CCPP Physics Hierarchical System Development (HSD) Scientific Documentation</a>
 
             </div>
         </body>
