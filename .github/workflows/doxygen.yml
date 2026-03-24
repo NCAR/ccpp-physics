@@ -53,10 +53,6 @@ jobs:
         mkdir -p html/V7
         mv doc/html/* html/V7/
 
-    - name: Copy Doxygen assets into HTML output
-      run: |
-        cp -r physics/docs/_doxygen physics/docs/html/
-
     - name: Create landing page
       run: |
         cat << 'EOF' > physics/docs/html/index.html
@@ -64,10 +60,6 @@ jobs:
         <html>
         <head>
             <title>CCPP Physics Scientific Documentation</title>
-            <link rel="stylesheet" href="_doxygen/doxygen-awesome.css">
-            <link rel="stylesheet" href="_doxygen/doxygen-awesome-sidebar-only.css">
-            <link rel="stylesheet" href="_doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css">
-            <link rel="stylesheet" href="_doxygen/doxygen-awesome-ccpp.css">
             <style>
             </style>
         </head>
@@ -76,11 +68,12 @@ jobs:
                 <h1>CCPP Physics Scientific Documentation</h1>
 
                 <p>The Common Community Physics Package (CCPP) provides scientific documentation for the physics suites and parameterizations used across a variety of atmospheric modeling applications. The documentation describes the scientific basis, configuration options, and implementation details for the parameterizations included in the CCPP physics suites for different modeling systems and use cases.</p>
+                <ul style="list-style-type: none; padding-left: 0;">
+                  <li><a href="./V7/">CCPP Physics V7 Scientific Documentation</a></li>
+                  <li><a href="./HSD/">CCPP Physics Hierarchical System Development (HSD) Scientific Documentation</a></li>
+                </ul>
 
-                <a href="./V7/">CCPP Physics V7 Scientific Documentation</a>
-
-                <a href="./HSD/">CCPP Physics Hierarchical System Development (HSD) Scientific Documentation</a>
-
+                <p>For more information about the CCPP including Release Information, Technical Documentation, and Code, please visit the <a href="https://dtcenter.org/software-tools/common-community-physics-package-ccpp" target="_blank" CCPP Website>, hosted by the Developmental Testbed Center (DTC).</p>
             </div>
         </body>
         </html>
