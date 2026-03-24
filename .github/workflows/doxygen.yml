@@ -60,11 +60,11 @@ jobs:
         <html>
         <head>
             <title>CCPP Physics Scientific Documentation</title>
+            <link rel="stylesheet" href="_doxygen/doxygen-awesome.css">
+            <link rel="stylesheet" href="_doxygen/doxygen-awesome-sidebar-only.css">
+            <link rel="stylesheet" href="_doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css">
+            <link rel="stylesheet" href="_doxygen/doxygen-awesome-ccpp.css">
             <style>
-                <link rel="stylesheet" href="_doxygen/doxygen-awesome.css">
-                <link rel="stylesheet" href="_doxygen/doxygen-awesome-sidebar-only.css">
-                <link rel="stylesheet" href="_doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css">
-                <link rel="stylesheet" href="_doxygen/doxygen-awesome-ccpp.css">
             </style>
         </head>
         <body>
