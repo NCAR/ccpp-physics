@@ -3644,13 +3644,13 @@ endif
 !$acc end kernels
 
 !$acc parallel loop
-       do 27 i=its,itf
+      i_loop: do i=its,itf
       kbcon(i)=1
 !
 ! reset iloop for mid level convection
       if(cap_max(i).gt.200 .and. imid.eq.1)iloop(i)=5
 !
-      if(ierr(i).ne.0)go to 27
+      if(ierr(i).ne.0) cycle i_loop
       start_level(i)=k22(i)
       kbcon(i)=k22(i)+1
       if(iloop(i).eq.5)kbcon(i)=k22(i)
@@ -3666,28 +3666,26 @@ endif
         enddo
        !==
 
-      go to 32
- 31   continue
-      kbcon(i)=kbcon(i)+1
-      if(kbcon(i).gt.kbmax(i)+2)then
-         if(iloop(i).ne.4)then
+      find_kbcon: do
+        hetest = hcot(i,kbcon(i)) !hkb(i) ! he_cup(i,k22(i))
+        if(hetest.lt.hes_cup(i,kbcon(i))) then
+          kbcon(i)=kbcon(i)+1
+          if(kbcon(i).gt.kbmax(i)+2)then
+          if(iloop(i).ne.4)then
                 ierr(i)=3
 #ifndef _OPENACC
                 ierrc(i)="could not find reasonable kbcon in cup_kbcon"
 #endif
          endif
-        go to 27
-      endif
- 32   continue
-      hetest=hcot(i,kbcon(i)) !hkb(i) ! he_cup(i,k22(i))
-      if(hetest.lt.hes_cup(i,kbcon(i)))then
-        go to 31
+        cycle i_loop
+        endif
+        cycle find_kbcon
       endif
 
 !     cloud base pressure and max moist static energy pressure
 !     i.e., the depth (in mb) of the layer of negative buoyancy
-      if(kbcon(i)-k22(i).eq.1)go to 27
-      if(iloop(i).eq.5 .and. (kbcon(i)-k22(i)).le.2)go to 27
+      if(kbcon(i)-k22(i).eq.1) cycle i_loop
+      if(iloop(i).eq.5 .and. (kbcon(i)-k22(i)).le.2) cycle i_loop
       pbcdif=-p_cup(i,kbcon(i))+p_cup(i,k22(i))
       plus=max(25.,cap_max(i)-float(iloop(i)-1)*cap_inc(i))
       if(iloop(i).eq.4)plus=cap_max(i)
@@ -3696,7 +3694,7 @@ endif
       if(iloop(i).eq.5)plus=150.
         if(iloop(i).eq.5.and.cap_max(i).gt.200)pbcdif=-p_cup(i,kbcon(i))+cap_max(i)
       if(pbcdif.le.plus)then
-        go to 27
+        cycle i_loop
       elseif(pbcdif.gt.plus)then
         k22(i)=k22(i)+1
         kbcon(i)=k22(i)+1
@@ -3725,12 +3723,13 @@ endif
                 ierrc(i)="could not find reasonable kbcon in cup_kbcon"
 #endif
             endif
-            go to 27
+            cycle i_loop
         endif
-        go to 32
+        cycle find_kbcon
       endif
- 27   continue
  !$acc end parallel
+      end do find_kbcon
+      end do i_loop
 
    end subroutine cup_kbcon
 
@@ -4774,16 +4773,15 @@ endif
         ktopdby(i)=maxloc(dby(:),1)
         kklev=maxloc(dbm(:),1)
 !$acc loop seq
+        kfinalzu=ktf-2
+        ktop(i)=kfinalzu
         do k=maxloc(dby(:),1)+1,ktf-2
           if(dby(k).lt.dbythresh*maxval(dby))then
               kfinalzu=k  - 1
               ktop(i)=kfinalzu
-              go to 412
+              exit
           endif
         enddo
-        kfinalzu=ktf-2
-        ktop(i)=kfinalzu
-412     continue
         ktop(i)=ktopdby(i) ! HCB
         kklev=min(kklev+3,ktop(i)-2)
 !
@@ -5731,10 +5729,9 @@ endif
               kfinalzu = k - 1
               ktop(i)  = kfinalzu
               !print*,'hco4=',k,kfinalzu,ktop(i),kbcon(i)+1;call flush(6)
-              go to 412
+              exit
           endif
         enddo
-        412    continue
        else
          do k=start_level(i)+1,ktf-2
           !~ print*,'hco31=',k,dby(k),dbythresh*maxval(dby)
