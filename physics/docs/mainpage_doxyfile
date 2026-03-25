@@ -1,5 +1,5 @@
 PROJECT_NAME = "CCPP Physics Scientific Documentation"
-OUTPUT_DIRECTORY = html
+OUTPUT_DIRECTORY = 
 GENERATE_HTML = YES
 RECURSIVE = NO
 
