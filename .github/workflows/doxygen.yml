@@ -36,11 +36,6 @@ jobs:
         which bibtex
         doxygen --version
 
-    - name: Build landing page
-      run: |
-        cd physics/docs
-        doxygen mainpage_doxyfile
-
     - name: Build HSD docs
       run: |
         cd physics/docs
@@ -71,6 +66,11 @@ jobs:
         doxygen ccppsrw_doxyfile
         mkdir -p ../../../physics/docs/html/SRWv3
         mv doc/html/* ../../../physics/docs/html/SRWv3/
+
+    - name: Build landing page
+      run: |
+        cd $GITHUB_WORKSPACE/physics/docs
+        doxygen mainpage_doxyfile
 
     - name: Setup Pages
       uses: actions/configure-pages@v5
