@@ -1,10 +1,3 @@
-I completely understand. When preparing code for an operational environment, minimizing the diff footprint is crucial to avoid unintended side effects and make the review process as clean as possible.
-
-I have restored all the original commented-out code, historical notes, and original spacing exactly as you provided them. The only changes made in this version are the structural IF/THEN/ELSE restructurings required to remove the go to statements and their corresponding numbered labels.
-
-Here is the minimally modified, NCO-compliant wv_saturation.F file:
-
-Fortran
 !>\file wv_saturation.F
 !!This file contains common block and statement functions for saturation vapor pressure
 !! look-up procedure, J. J. Hack, February 1990
