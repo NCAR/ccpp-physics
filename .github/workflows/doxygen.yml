@@ -67,32 +67,10 @@ jobs:
         mkdir -p ../../../physics/docs/html/SRWv3
         mv doc/html/* ../../../physics/docs/html/SRWv3/
 
-    - name: Create landing page
+    - name: Build landing page
       run: |
-        cat << 'EOF' > physics/docs/html/index.html
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>CCPP Physics Scientific Documentation</title>
-            <style>
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1>CCPP Physics Scientific Documentation</h1>
-
-                <p>The Common Community Physics Package (CCPP) provides scientific documentation for the physics suites and parameterizations used across a variety of atmospheric modeling applications. The documentation describes the scientific basis, configuration options, and implementation details for the parameterizations included in the CCPP physics suites for different modeling systems and use cases.</p>
-                <ul style="list-style-type: none; padding-left: 0;">
-                  <li><a href="./V7/">CCPP Physics V7 Scientific Documentation</a></li>
-                  <li><a href="./HSD/">CCPP Physics Hierarchical System Development (HSD) Scientific Documentation</a></li>
-                  <li><a href="./SRWv3/">CCPP Physics SRW v3 Scientific Documentation</a></li>
-                </ul>
-
-                <p>For more information about the CCPP including Release Information, Technical Documentation, and Code, please visit the <a href="https://dtcenter.org/software-tools/common-community-physics-package-ccpp" target="_blank"> CCPP Website</a>, hosted by the Developmental Testbed Center (DTC).</p>
-            </div>
-        </body>
-        </html>
-        EOF
+        cd physics/docs
+        doxygen mainpage_doxyfile
 
     - name: Setup Pages
       uses: actions/configure-pages@v5

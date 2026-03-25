@@ -1,0 +1,12 @@
+PROJECT_NAME = "CCPP Physics Scientific Documentation"
+OUTPUT_DIRECTORY = html
+GENERATE_HTML = YES
+RECURSIVE = NO
+
+USE_MDFILE_AS_MAINPAGE = mainpage.md
+
+INPUT = mainpage.md
+
+HTML_EXTRA_STYLESHEET = _doxygen/doxygen-awesome.css \
+                       _doxygen/doxygen-awesome-sidebar-only.css \
+                       _doxygen/doxygen-awesome-ccpp.css
