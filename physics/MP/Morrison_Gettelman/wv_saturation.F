@@ -1163,7 +1163,7 @@
        end if
        return
 !
-      end subroutine vqsatd
+      end subroutine vqsatd2
 
 
 ! Below routine is by Sungsu
