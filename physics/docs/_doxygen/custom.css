@@ -55,3 +55,7 @@ html.dark-mode .bordered_image object[type="image/svg+xml"] /* doxygen 1.9.3 */ 
 .title_screenshot .caption {
     display: none;
 }
+
+#side-nav {
+  min-height: 100vh;
+}
