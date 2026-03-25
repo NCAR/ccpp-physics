@@ -2162,7 +2162,7 @@ REAL(KIND=KFPT),DIMENSION(1:JTBL):: &
       END IF
 !
 ! Update spline coefficients iff new interval
-      IF (K1.EQ.1 .OR. K.NEQ.KOLD) THEN
+      IF (K1.EQ.1 .OR. K.NE.KOLD) THEN
       K=KOLD
 !
       Y2K=Y2(K)
