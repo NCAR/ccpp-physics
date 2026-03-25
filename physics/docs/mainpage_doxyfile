@@ -3,6 +3,8 @@ OUTPUT_DIRECTORY =
 GENERATE_HTML = YES
 RECURSIVE = NO
 
+PROJECT_LOGO = img/dtc_logo.png
+
 USE_MDFILE_AS_MAINPAGE = mainpage.md
 
 INPUT = mainpage.md
