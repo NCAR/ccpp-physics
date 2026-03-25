@@ -67,10 +67,17 @@ jobs:
         mkdir -p ../../../physics/docs/html/SRWv3
         mv doc/html/* ../../../physics/docs/html/SRWv3/
 
+    - name: Checkout main branch again for landing page
+      uses: actions/checkout@v4
+      with:
+        ref: scidocs_hsd_aqua
+        path: main_repo
+
     - name: Build landing page
       run: |
-        cd $GITHUB_WORKSPACE/physics/docs
+        cd main_repo/physics/docs
         doxygen mainpage_doxyfile
+        cp -r html/* $GITHUB_WORKSPACE/physics/docs/html/
 
     - name: Setup Pages
       uses: actions/configure-pages@v5
