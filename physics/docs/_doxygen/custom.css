@@ -56,18 +56,17 @@ html.dark-mode .bordered_image object[type="image/svg+xml"] /* doxygen 1.9.3 */ 
     display: none;
 }
 
-html, body {
-  height: 100%;
+#landing-page ~ #side-nav {
+  display: none !important;
 }
 
-#side-nav {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  height: auto !important;
+#landing-page {
+  width: 100%;
 }
 
-#nav-tree {
-  height: 100% !important;
-  overflow-y: auto;
+#landing-page ~ #doc-content,
+#landing-page ~ #main-content,
+#landing-page ~ #content {
+  margin-left: 0 !important;
+  width: 100% !important;
 }
