@@ -730,20 +730,18 @@ contains
         do k=kts,ktf
           if(zo_cup(i,k).gt.zkbmax+z1(i))then
             kbmax(i)=k
-            go to 25
+            exit
           endif
         enddo
- 25     continue
 !
 !> - Compute the level where detrainment for downdraft starts (\p kdet)
 !
         do k=kts,ktf
           if(zo_cup(i,k).gt.z_detr+z1(i))then
             kdet(i)=k
-            go to 26
+            exit
           endif
         enddo
- 26     continue
 !
         endif
       enddo
@@ -999,7 +997,7 @@ contains
 !$acc end parallel
 
 !$acc kernels
-      do 37 i=its,itf
+      do i=its,itf
          kzdown(i)=0
          if(ierr(i).eq.0)then
             zktop=(zo_cup(i,ktop(i))-z1(i))*.6
@@ -1010,11 +1008,11 @@ contains
               if(zo_cup(i,k).gt.zktop)then
                  kzdown(i)=k
                  kzdown(i)=min(kzdown(i),kstabi(i)-1)  !
-                 go to 37
+                 exit
               endif
               enddo
          endif
- 37   continue
+       end do
 !$acc end kernels
 
 !
@@ -2708,8 +2706,8 @@ contains
         edtc(i,1)=0.
        enddo
        do kk = kts,ktf-1
-         do 62 i=its,itf
-          if(ierr(i).ne.0)go to 62
+         do i=its,itf
+          if(ierr(i).ne.0) cycle
           if (kk .le. min0(ktop(i),ktf) .and. kk .ge. kbcon(i)) then
              vws(i) = vws(i)+                                        &
               (abs((us(i,kk+1)-us(i,kk))/(z(i,kk+1)-z(i,kk)))        &
@@ -2718,7 +2716,7 @@ contains
             sdp(i) = sdp(i) + p(i,kk) - p(i,kk+1)
           endif
           if (kk .eq. ktf-1)vshear(i) = 1.e3 * vws(i) / sdp(i)
-   62   continue
+         end do
        end do
       do i=its,itf
          if(ierr(i).eq.0)then
