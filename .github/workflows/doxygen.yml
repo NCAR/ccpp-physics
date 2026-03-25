@@ -53,6 +53,20 @@ jobs:
         mkdir -p html/V7
         mv doc/html/* html/V7/
 
+    - name: Checkout ufs-community SRWv3 branch
+      uses: actions/checkout@v4
+      with:
+        repository: ufs-community/ccpp-physics
+        ref: release/srw-v3
+        path: srw_repo
+
+    - name: Build SRWv3 docs
+      run: |
+        cd srw_repo/physics/docs
+        doxygen ccppsrw_doxyfile
+        mkdir -p ../../../physics/docs/html/SRWv3
+        mv doc/html/* ../../../physics/docs/html/SRWv3/
+
     - name: Create landing page
       run: |
         cat << 'EOF' > physics/docs/html/index.html
@@ -71,6 +85,7 @@ jobs:
                 <ul style="list-style-type: none; padding-left: 0;">
                   <li><a href="./V7/">CCPP Physics V7 Scientific Documentation</a></li>
                   <li><a href="./HSD/">CCPP Physics Hierarchical System Development (HSD) Scientific Documentation</a></li>
+                  <li><a href="./SRWv3/">CCPP Physics SRW v3 Scientific Documentation</a></li>
                 </ul>
 
                 <p>For more information about the CCPP including Release Information, Technical Documentation, and Code, please visit the <a href="https://dtcenter.org/software-tools/common-community-physics-package-ccpp" target="_blank"> CCPP Website</a>, hosted by the Developmental Testbed Center (DTC).</p>
