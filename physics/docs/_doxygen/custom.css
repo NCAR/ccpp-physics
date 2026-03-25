@@ -55,18 +55,3 @@ html.dark-mode .bordered_image object[type="image/svg+xml"] /* doxygen 1.9.3 */ 
 .title_screenshot .caption {
     display: none;
 }
-
-#landing-page ~ #side-nav {
-  display: none !important;
-}
-
-#landing-page {
-  width: 100%;
-}
-
-#landing-page ~ #doc-content,
-#landing-page ~ #main-content,
-#landing-page ~ #content {
-  margin-left: 0 !important;
-  width: 100% !important;
-}

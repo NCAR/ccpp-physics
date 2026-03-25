@@ -5,10 +5,27 @@ RECURSIVE = NO
 
 PROJECT_LOGO = img/dtc_logo.png
 
+LAYOUT_FILE = ccpp_dox_layout.xml
+
+HTML_HEADER = _doxygen/header.html
+HTML_FOOTER = _doxygen/footer.html
+
 USE_MDFILE_AS_MAINPAGE = mainpage.md
 
 INPUT = mainpage.md
 
 HTML_EXTRA_STYLESHEET = _doxygen/doxygen-awesome.css \
                        _doxygen/doxygen-awesome-sidebar-only.css \
-                       _doxygen/doxygen-awesome-ccpp.css
+                       _doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css \
+                       _doxygen/doxygen-awesome-ccpp.css \
+                       _doxygen/custom.css
+
+HTML_EXTRA_FILES       = _doxygen/doxygen-awesome-darkmode-toggle.js \
+                         _doxygen/doxygen-awesome-ccpp.js
+
+HTML_COLORSTYLE        = LIGHT
+HTML_COLORSTYLE_HUE    = 209
+HTML_COLORSTYLE_SAT    = 255
+HTML_COLORSTYLE_GAMMA  = 113
+
+FULL_SIDEBAR           = YES
