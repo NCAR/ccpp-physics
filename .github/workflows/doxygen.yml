@@ -77,7 +77,8 @@ jobs:
       run: |
         cd main_repo/physics/docs
         doxygen mainpage_doxyfile
-        ls -R html
+        ls -R main_repo/physics/docs
+        ls -R main_repo/physics/docs/html
         cp -r html/index.html $GITHUB_WORKSPACE/physics/docs/html/index.html
 
     - name: Setup Pages
