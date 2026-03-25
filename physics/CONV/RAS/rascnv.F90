@@ -1076,15 +1076,6 @@
       RETURN
       end subroutine rascnv_run
 
-You made the right call. While the two-pass loop is the fastest way to remove a backward goto, it creates a pseudo-state-machine that can confuse future developers.
-
-Using Option 2 (the CONTAINS method) is the gold standard for NCO modernization. It breaks a monolithic, 800-line routine into logical, readable pieces. Because internal subroutines share the host's variable scope, we don't have to write a massive argument list—it just cleanly encapsulates the math.
-
-I have implemented this. Notice that I added one new logical variable at the top (abort_cloud) to handle the case where the internal subroutine needs to instruct the main host subroutine to RETURN completely.
-
-Here is the fully modernized, modularized CLOUD subroutine:
-
-Fortran
 !>\ingroup rascnv_schm
       SUBROUTINE CLOUD(                                                 &
      &                  K, KP1, KD, NTRC, KBLMX, kblmn                  &
@@ -1123,6 +1114,37 @@ Fortran
 !===>    DETRAINING AT LEVEL KD.
 !
 !***********************************************************************
+!
+!
+!===>  TOI(K)     INOUT   TEMPERATURE             KELVIN
+!===>  QOI(K)     INOUT   SPECIFIC HUMIDITY       NON-DIMENSIONAL
+!===>  ROI(K,NTRC)INOUT   TRACER                  ARBITRARY
+!===>  QLI(K)     INOUT   LIQUID WATER            NON-DIMENSIONAL
+!===>  QII(K)     INOUT   ICE                     NON-DIMENSIONAL
+
+!===>  PRS(KP1)   INPUT   PRESSURE @ EDGES        MB
+!===>  PRSM(K)    INPUT   PRESSURE @ LAYERS       MB
+!===>  SGCS(K)    INPUT   Local sigma
+!===>  PHIH(KP1)  INPUT   GEOPOTENTIAL @ EDGES  IN MKS units
+!===>  PHIL(K)    INPUT   GEOPOTENTIAL @ LAYERS IN MKS units
+!===>  PRJ(KP1)   INPUT   (P/P0)^KAPPA  @ EDGES   NON-DIMENSIONAL
+!===>  PRJM(K)    INPUT   (P/P0)^KAPPA  @ LAYERS  NON-DIMENSIONAL
+
+!===>  K          INPUT   THE RISE & THE INDEX OF THE SUBCLOUD LAYER
+!===>  KD         INPUT   DETRAINMENT LEVEL ( 1<= KD < K )          
+!===>  NTRC       INPUT   NUMBER OF TRACERS. MAY BE ZERO.
+!===>  kblmx      INPUT   highest level the pbl can take
+!===>  kblmn      INPUT   lowest  level the pbl can take
+!===>  DPD        INPUT   Critical normalized pressure (i.e. sigma) at the cloud top
+!                         No downdraft calculation if the cloud top pressure is higher
+!                         than DPD*PRS(KP1)
+!
+!===>  TCU(K  )   UPDATE  TEMPERATURE TENDENCY       DEG
+!===>  QCU(K  )   UPDATE  WATER VAPOR TENDENCY       (G/G)
+!===>  RCU(K,NTRC)UPDATE  TRACER TENDENCIES          ND
+!===>  PCU(K)     UPDATE  PRECIP @ BASE OF LAYER     KG/M^2
+!===>  FLX(K  )   UPDATE  MASS FLUX @ TOP OF LAYER   KG/M^2
+!===>  CUP        UPDATE  PRECIPITATION AT THE SURFACE KG/M^2
 !
       IMPLICIT NONE
 !
