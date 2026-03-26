@@ -4858,7 +4858,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 !******************************************************************************
         cotso(1)=zero
         rhtso(1)=TSO(NZS)
-        DO 33 K=1,NZS2
+        DO K=1,NZS2
           KN=NZS-K
           K1=2*KN-3
           X1=DTDZS(K1)*THDIF(KN-1)
@@ -4868,7 +4868,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
           DENOM=1.+X1+X2-X2*cotso(K)
           cotso(K+1)=X1/DENOM
           rhtso(K+1)=(FT+X2*rhtso(K))/DENOM
-   33  CONTINUE
+        END DO
 
 !************************************************************************
 !--- THE HEAT BALANCE EQUATION (Smirnova et al., 1996, EQ. 21,26)
