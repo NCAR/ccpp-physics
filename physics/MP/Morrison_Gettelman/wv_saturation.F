@@ -593,7 +593,8 @@
            tterm = 0.0_kp
            end if
            desdt = hltalt*es(i)/(rgasv*t(i)*t(i)) + tterm*trinv
-           gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
+           gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) 
+     &              - omeps*es(i)))
            if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
          end do
        end if
