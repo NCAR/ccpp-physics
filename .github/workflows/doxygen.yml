@@ -4,8 +4,11 @@ on:
   push:
     branches:
       - main
+<<<<<<< HEAD
+=======
 <<<<<<< scidocs_hsd_aqua
       - scidocs_hsd_aqua
+>>>>>>> d28777c64d31502c45189c8baa235640b5ccad61
   workflow_dispatch:
 =======
 >>>>>>> dox
@@ -27,6 +30,7 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        submodules: recursive
 
 <<<<<<< scidocs_hsd_aqua
     - name: Install Doxygen + Graphviz + LaTeX
@@ -46,16 +50,18 @@ jobs:
         doxygen ccpphsd_doxyfile
 
     - name: Checkout V7 tag
-      run: |
-        git fetch --tags
-        git checkout v7.0.0
+      uses: actions/checkout@v4
+      with:
+        ref: v7.0.0
+        path: v7_repo
+        submodules: recursive
 
     - name: Build V7 docs
       run: |
-        cd physics/docs
+        cd v7_repo/physics/docs
         doxygen ccpp_doxyfile
-        mkdir -p html/V7
-        mv doc/html/* html/V7/
+        mkdir -p ../../../physics/docs/html/V7
+        mv doc/html/* ../../../physics/docs/html/V7/
 
     - name: Checkout ufs-community SRWv3 branch
       uses: actions/checkout@v4
@@ -63,6 +69,7 @@ jobs:
         repository: ufs-community/ccpp-physics
         ref: release/srw-v3
         path: srw_repo
+        submodules:recursive
 
     - name: Build SRWv3 docs
       run: |
