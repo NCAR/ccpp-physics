@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - scidocs_hsd_aqua
   workflow_dispatch:
 
 jobs:
