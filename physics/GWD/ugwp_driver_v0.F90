@@ -1,15 +1,10 @@
-!>\file ugwp_driver_v0.F
+!>\file ugwp_driver_v0.F90
 
 !> This module contains the UGWP v0 driver module
-      module ugwp_driver_v0
-      use cires_orowam2017
-      contains
+module ugwp_driver_v0
+  use cires_orowam2017
+  contains
 !
-!=====================================================================
-!
-!ugwp-v0 subroutines: GWDPS_V0 and fv3_ugwp_solv2_v0	
-!
-!=====================================================================
 !>\defgroup ugwp_driverv0_mod UGWP V0 Driver Module
 !! This is the CIRES UGWP V0 driver module
 !!
@@ -30,16 +25,15 @@
 
 !>Modified/revised version of gwdps.f with bug fixes, tofd, appropriate
 !! computation of reference level for OGW+COORDE diagnostics.
-      SUBROUTINE GWDPS_V0(IM,  km,    imx, do_tofd,
-     &    Pdvdt, Pdudt, Pdtdt, Pkdis, U1,V1,T1,Q1,KPBL,
-     &    PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DTP,KDT,
-     &    sgh30, HPRIME,OC,OA4,CLX4,THETA,vSIGMA,vGAMMA,ELVMAXD,
-     &    DUSFC, DVSFC,  xlatd, sinlat, coslat, sparea,
-     &    cdmbgwd, me, master, rdxzb, con_g, con_omega,
-     &    zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,
-     &    dudt_mtb, dudt_ogw, dudt_tms)
+      SUBROUTINE GWDPS_V0(IM,  km,    imx, do_tofd, &
+          Pdvdt, Pdudt, Pdtdt, Pkdis, U1,V1,T1,Q1,KPBL, &
+          PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DTP,KDT, &
+          sgh30, HPRIME,OC,OA4,CLX4,THETA,vSIGMA,vGAMMA,ELVMAXD, &
+          DUSFC, DVSFC,  xlatd, sinlat, coslat, sparea, &
+          cdmbgwd, me, master, rdxzb, &
+          zmtb, zogw, tau_mtb, tau_ogw, tau_tofd, &
+          dudt_mtb, dudt_ogw, dudt_tms, errmsg,errflg  )
 !----------------------------------------
-! ugwp_v0
 !
 ! modified/revised version of gwdps.f (with bug fixes, tofd, appropriate
 !   computation of reference level for OGW + COORDE diagnostics
@@ -47,61 +41,31 @@
 !---------------------------------------- 
 
       USE MACHINE ,      ONLY : kind_phys
-      use ugwp_common_v0,only : rgrav,   grav,  cpd, rd, rv, rcpd, rcpd2
-     &,                         pi,      rad_to_deg, deg_to_rad, pi2
-     &,                         rdi,     gor,    grcp, gocp,  fv, gr2
-     &,                         bnv2min, dw2min, velmin, arad
+      use ugwp_common_v0,only : rgrav,   grav,  cpd, rd, rv, rcpd, rcpd2, &
+                                pi,      rad_to_deg, deg_to_rad, pi2, &
+                                rdi,     gor,    grcp, gocp,  fv, gr2, &
+                                bnv2min, dw2min, velmin, arad
  
-      use ugwpv0_oro_init, only : rimin,  ric,     efmin,     efmax
-     &,                         hpmax,  hpmin,   sigfaci => sigfac
-     &,                         dpmin,  minwnd,  hminmt,    hncrit
-     &,                         RLOLEV, GMAX,    VELEPS,    FACTOP
-     &,                         FRC,    CE,      CEOFRC,    frmax, CG
-     &,                         FDIR,   MDIR,    NWDIR
-     &,                         cdmb,   cleff,   fcrit_gfs, fcrit_mtb
-     &,                         n_tofd, ze_tofd, ztop_tofd
+      use ugwpv0_oro_init, only : rimin,  ric,     efmin,     efmax, &
+                                  hpmax,  hpmin,   sigfaci => sigfac, &
+                                  dpmin,  minwnd,  hminmt,    hncrit, &
+                                  RLOLEV, GMAX,    VELEPS,    FACTOP, &
+                                  FRC,    CE,      CEOFRC,    frmax, CG, &
+                                  FDIR,   MDIR,    NWDIR, &
+                                  cdmb,   cleff,   fcrit_gfs, fcrit_mtb, &
+                                  n_tofd, ze_tofd, ztop_tofd
 
       use cires_ugwpv0_module, only : kxw,  max_kdis, max_axyz
       
 !----------------------------------------
       implicit none
-      integer, parameter  :: kp = kind_phys
+!----------------------------------------
+! internal parameters
+!----------------------------------------        
       character(len=8)    :: strsolver='PSS-1986'  ! current operational solver or  'WAM-2017'
-      integer, intent(in) :: im, km, imx, kdt
-      integer, intent(in) :: me, master
-      logical, intent(in) :: do_tofd
-      real(kind=kind_phys), parameter  :: sigfac = 3, sigfacS = 0.5
-      real(kind=kind_phys)             :: ztopH,zlowH,ph_blk, dz_blk
-      integer, intent(in)              :: KPBL(IM)    ! Index for the PBL top layer!
-      real(kind=kind_phys), intent(in) :: dtp         !  time step
-      real(kind=kind_phys), intent(in) :: cdmbgwd(2)
-          
-      real(kind=kind_phys), intent(in), dimension(im,km) ::
-     &                                   u1,  v1,   t1,    q1,
-     &                                   del, prsl, prslk, phil
-      real(kind=kind_phys), intent(in),dimension(im,km+1):: prsi, phii
-      real(kind=kind_phys), intent(in) :: xlatd(im),sinlat(im),
-     &                                    coslat(im)
-      real(kind=kind_phys), intent(in) :: sparea(im)
-
-      real(kind=kind_phys), intent(in) :: OC(IM), OA4(im,4), CLX4(im,4)
-      real(kind=kind_phys), intent(in) :: HPRIME(IM),  sgh30(IM)
-      real(kind=kind_phys), intent(in) :: ELVMAXD(IM), THETA(IM)
-      real(kind=kind_phys), intent(in) :: vSIGMA(IM),  vGAMMA(IM)
-      real(kind=kind_phys)             :: SIGMA(IM),   GAMMA(IM)
-
-      real(kind=kind_phys), intent(in) :: con_g, con_omega
+      real(kind=kind_phys), parameter :: sigfac = 3                 ! N*hprime height of Subgrid Hill over which SSO-flo      
+      real(kind=kind_phys), parameter :: sigfacs = 0.5              ! M*hprime height is the low boundary of the hill 
       
-!output -phys-tend
-      real(kind=kind_phys),dimension(im,km),intent(out) ::
-     &                      Pdvdt,    Pdudt,    Pkdis, Pdtdt
-! output - diag-coorde
-     &,                     dudt_mtb, dudt_ogw, dudt_tms
-!                     
-      real(kind=kind_phys),dimension(im) :: RDXZB,   zmtb,    zogw
-     &,                                     tau_ogw, tau_mtb, tau_tofd
-     &,                                     dusfc,   dvsfc
-!
 !---------------------------------------------------------------------
 ! # of permissible sub-grid orography hills for "any" resolution  < 25
 !    correction for "elliptical" hills based on shilmin-area =sgrid/25
@@ -113,72 +77,122 @@
 !     cleff = 2.5*0.5e-5 * sqrt(192./768.) => Lh_eff = 1004. km
 !      6*dx = 240 km 8*dx = 320. ~ 3-5 more effective
 !---------------------------------------------------------------------
-      real(kind=kind_phys)            :: gammin = 0.00999999_kp
-      real(kind=kind_phys), parameter :: nhilmax = 25.0_kp
-      real(kind=kind_phys), parameter :: sso_min = 3000.0_kp
+      real(kind=kind_phys)            :: gammin = 0.00999999       ! a/b = gammma_min =1% <====>      
+      real(kind=kind_phys), parameter :: nhilmax = 25.             ! max number of SSO-hills in grid-box
+      real(kind=kind_phys), parameter :: sso_min = 3000.           ! min-lenghth of the hill, GTOP30 ~dx~1 km
       logical, parameter              :: do_adjoro = .true.
+
+      integer, intent(in) :: im, km, imx, kdt
+      integer, intent(in) :: me, master
+      logical, intent(in) :: do_tofd
+      real(kind=kind_phys)             :: ztopH,zlowH,ph_blk, dz_blk
+      integer, intent(in)              :: KPBL(IM)    ! Index for the PBL top layer!
+      real(kind=kind_phys), intent(in) :: dtp         !  time step
+      real(kind=kind_phys), intent(in) :: cdmbgwd(2)
+          
+      real(kind=kind_phys), intent(in), dimension(im,km) :: &
+                                        u1,  v1,   t1, q1, del, prsl, prslk, phil
+
+      real(kind=kind_phys), intent(in),dimension(im,km+1):: prsi, phii
+      real(kind=kind_phys), intent(in) :: xlatd(im),sinlat(im), coslat(im)
+      real(kind=kind_phys), intent(in) :: sparea(im)
+
+      real(kind=kind_phys), intent(in) :: OC(IM), OA4(im,4), CLX4(im,4)
+      real(kind=kind_phys), intent(in) :: HPRIME(IM),  sgh30(IM)
+      real(kind=kind_phys), intent(in) :: ELVMAXD(IM), THETA(IM)
+      real(kind=kind_phys), intent(in) :: vSIGMA(IM),  vGAMMA(IM)
+      real(kind=kind_phys)             :: SIGMA(IM),   GAMMA(IM)
+
+!    
+!output -phys-tend
 !
+      real(kind=kind_phys),dimension(im,km),intent(out) :: &
+                            Pdvdt,    Pdudt,    Pkdis, Pdtdt
+! output - diag-coorde
+      real(kind=kind_phys),dimension(im,km),intent(out) :: &
+                           dudt_mtb, dudt_ogw, dudt_tms
+                     
+      real(kind=kind_phys),dimension(im) :: RDXZB,   zmtb,    zogw, &
+                                            tau_ogw, tau_mtb, tau_tofd, &
+                                            dusfc,   dvsfc
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+!
+!
+! locals vars for SSO
+!
+
+      real(kind=kind_phys), dimension(im)    :: oa,  clx
       real(kind=kind_phys)            :: shilmin, sgrmax, sgrmin
       real(kind=kind_phys)            :: belpmin, dsmin,  dsmax
-!     real(kind=kind_phys)            :: arhills(im)              ! not used why do we need?
-      real(kind=kind_phys)            :: xlingfs
 
 !
-! locals
-! mean flow
+! locals        mean flow  ...etc
+!
       real(kind=kind_phys), dimension(im,km) :: RI_N, BNV2, RO
-     &,                                         VTK, VTJ, VELCO
+      real(kind=kind_phys), dimension(im,km) :: VTK, VTJ, VELCO
+!==================      
 !mtb
-      real(kind=kind_phys), dimension(im)    :: OA,  CLX , elvmax, wk
-     &,                                         PE, EK, UP
-
+!==================      
+      real(kind=kind_phys), dimension(im)    :: elvmax, wk
+      real(kind=kind_phys), dimension(im)    :: PE, EK, UP
       real(kind=kind_phys), dimension(im,km) :: DB, ANG, UDS
 
       real(kind=kind_phys) :: ZLEN, DBTMP, R, PHIANG, DBIM, ZR
       real(kind=kind_phys) :: ENG0, ENG1, COSANG2, SINANG2
       real(kind=kind_phys) :: bgam, cgam, gam2, rnom, rdem
-!
+
+!==================
 ! TOFD
 !     Some constants now in "use ugwp_oro_init" +   "use ugwp_common"
 !
 !==================
       real(kind=kind_phys)   :: unew, vnew,  zpbl,  sigflt, zsurf
       real(kind=kind_phys), dimension(km)    :: utofd1, vtofd1
-     &,                                         epstofd1, krf_tofd1
-     &,                                         up1, vp1, zpm
+      real(kind=kind_phys), dimension(km)    :: epstofd1, krf_tofd1
+      real(kind=kind_phys), dimension(km)    :: up1, vp1, zpm
       real(kind=kind_phys),dimension(im, km) :: axtms, aytms
-!
+!==================
 ! OGW
+!==================
+      real(kind=kind_phys)            :: xlingfs
+      logical                         :: icrilv(im)
 !
-      LOGICAL ICRILV(IM)
-!
-      real(kind=kind_phys), dimension(im) :: XN, YN, UBAR, VBAR, ULOW,
-     &               ROLL,  bnv2bar, SCOR, DTFAC, XLINV, DELKS, DELKS1
+      real(kind=kind_phys), dimension(im) :: XN, YN, UBAR, VBAR, ULOW, &
+                     ROLL,  bnv2bar, SCOR, DTFAC, XLINV, DELKS, DELKS1
 !
       real(kind=kind_phys) :: TAUP(IM,km+1), TAUD(IM,km)
       real(kind=kind_phys) :: taub(im), taulin(im), heff, hsat, hdis
 
-      integer, dimension(im) :: kref, idxzb, ipt, kreflm,
-     &                          iwklm, iwk, izlow
+      integer, dimension(im) :: kref, idxzb, ipt, kreflm, iwklm, iwk, izlow
 !
-!check what we need
+! local real scalars     
 !
       real(kind=kind_phys) :: bnv,  fr, ri_gw
-     &,                       brvf,   tem,   tem1,  tem2, temc, temv
-     &,                       ti,     rdz,   dw2,   shr2, bvf2
-     &,                       rdelks, efact, coefm, gfobnv
-     &,                       scork,  rscor, hd,    fro,  sira
-     &,                       dtaux,  dtauy, pkp1log, pklog
-     &,                       grav2, rcpdt, windik, wdir
-     &,                       sigmin, dxres,sigres,hdxres
-     &,                       cdmb4, mtbridge
-     &,                       kxridge, inv_b2eff, zw1, zw2
-     &,                       belps, aelps, nhills, selps
+      real(kind=kind_phys) :: brvf,   tem,   tem1,  tem2, temc, temv
+      real(kind=kind_phys) :: ti,     rdz,   dw2,   shr2, bvf2
+      real(kind=kind_phys) :: rdelks, efact, coefm, gfobnv
+      real(kind=kind_phys) :: scork,  rscor, hd,    fro,  sira
+      real(kind=kind_phys) :: dtaux,  dtauy, pkp1log, pklog
+      real(kind=kind_phys) :: grav2, rcpdt, windik, wdir
+      real(kind=kind_phys) :: sigmin, dxres,sigres,hdxres, cdmb4, mtbridge
+      real(kind=kind_phys) :: kxridge, inv_b2eff, zw1, zw2
+      real(kind=kind_phys) :: belps, aelps, nhills, selps
 
-      integer ::          kmm1, kmm2, lcap, lcapp1
-     &,            npt,   kbps, kbpsp1,kbpsm1
-     &,            kmps,  idir, nwd,  klcap, kp1, kmpbl, kmll
-     &,            k_mtb, k_zlow, ktrial, klevm1, i, j, k
+!      
+! local integers
+!     
+      integer ::   kmm1, kmm2, lcap, lcapp1
+      integer ::   npt,   kbps, kbpsp1,kbpsm1
+      integer ::   kmps,  idir, nwd,  klcap, kp1, kmpbl, kmll
+      integer ::   k_mtb, k_zlow, ktrial, klevm1
+      integer ::   i, j, k
+!      
+! Initialize CCPP error handling variables
+       errmsg = ''
+       errflg = 0      
+!===========================
 !
       rcpdt = 1.0 / (cpd*dtp)
       grav2 = grav + grav
@@ -189,7 +203,7 @@
       dsmax  = sqrt(sgrmax)   ; dsmin  = sqrt(sgrmin)
 
       dxres   = pi2*arad/float(IMX)
-      hdxres  = 0.5_kp*dxres
+      hdxres  = 0.5*dxres
 !     shilmin = sgrmin/nhilmax            ! not used - Moorthi
 
 !     gammin = min(sso_min/dsmax, 1.)     ! Moorthi - with this results are not reproducible
@@ -197,10 +211,6 @@
 
 !     sigmin = 2.*hpmin/dsmax      !dxres ! Moorthi - this will not reproduce
       sigmin = 2.*hpmin/dxres      !dxres
-
-
-
-      kxridge = float(IMX)/arad * cdmbgwd(2)
 
       do i=1,im
         idxzb(i)    = 0
@@ -212,7 +222,6 @@
         dusfc(i)    = 0.0
         dvsfc(i)    = 0.0
         tau_tofd(i) = 0.0
-!
         ipt(i) = 0
         sigma(i) = max(vsigma(i), sigmin)
         gamma(i) = max(vgamma(i), gammin)
@@ -235,13 +244,9 @@
       npt = 0
       do i = 1,im
         if ( elvmaxd(i) >= hminmt .and. hprime(i)  >= hpmin ) then
-
           npt      = npt + 1
           ipt(npt) = i
-!         arhills(i) = 1.0
-!
           sigres = max(sigmin, sigma(i))
-!         if (sigma(i) < sigmin) sigma(i)=  sigmin
           dxres = sqrt(sparea(i))
           if (2.*hprime(i)/sigres > dxres) sigres=2.*hprime(i)/dxres
           aelps = min(2.*hprime(i)/sigres, 0.5*dxres)
@@ -266,12 +271,9 @@
 
           selps      = belps*belps*gamma(i)*4.    ! ellipse area of the el-c hill
           nhills     = min(nhilmax, sparea(i)/selps)
-!         arhills(i) = max(nhills, 1.0)
 
+!      if (kdt==1 ) write(6,333) nint(nhills)+1,xlatd(i), hprime(i),aelps*1.e-3, belps*1.e-3, sigma(i),gamma(i)
 !333   format( ' nhil: ', I6, 4(2x, F9.3), 2(2x, E9.3))
-!      if (kdt==1 )
-!     & write(6,333) nint(nhills)+1,xlatd(i), hprime(i),aelps*1.e-3,
-!     &   belps*1.e-3, sigma(i),gamma(i)
 
         endif
       enddo
@@ -297,13 +299,14 @@
 
       KMM1 = km - 1 ;  KMM2   = km - 2 ; KMLL   = kmm1
       LCAP = km     ;  LCAPP1 = LCAP + 1 
+      cdmb4 = 0.25*cdmb 
 
       DO I = 1, npt
         j = ipt(i)
         ELVMAX(J) = min (ELVMAXd(J)*0. + sigfac * hprime(j), hncrit)
         izlow(i)  = 1          ! surface-level
       ENDDO
-!
+
       DO K = 1, kmm1
         DO I = 1, npt
           j = ipt(i)
@@ -311,16 +314,13 @@
           zlowH   = sigfacs* hprime(j) 
           pkp1log =  phil(j,k+1) * rgrav
           pklog   =  phil(j,k)   * rgrav
-!         if (( ELVMAX(j) <= pkp1log) .and. (ELVMAX(j).ge.pklog) )
-!     &      iwklm(I)  =  MAX(iwklm(I), k+1 ) 
-          if (( ztopH <= pkp1log) .and. (zTOPH >= pklog) )
-     &        iwklm(I)  =  MAX(iwklm(I), k+1 )
-!
-          if (zlowH <= pkp1log .and. zlowH >= pklog)
-     &        izlow(I)  =  MAX(izlow(I),k)
+!         if (( ELVMAX(j) <= pkp1log) .and. (ELVMAX(j).ge.pklog) ) iwklm(I)  =  MAX(iwklm(I), k+1 )
+          if (( ztopH <= pkp1log) .and. (zTOPH >= pklog) ) iwklm(I)  =  MAX(iwklm(I), k+1 )
+
+          if (zlowH <= pkp1log .and. zlowH >= pklog) izlow(I)  =  MAX(izlow(I),k)
         ENDDO
       ENDDO
-!
+
       DO K = 1,km
         DO I =1,npt
           J         = ipt(i)
@@ -344,9 +344,9 @@
 !          TI        = 2.0 / (T1(J,K)+T1(J,K+1))
 !          BVF2      = Grav*(GOCP+RDZ*(VTJ(I,K+1)-VTJ(I,K)))* TI
 !          RI_N(I,K) = MAX(BVF2/SHR2,RIMIN)   ! Richardson number
-!
-          BVF2 = grav2 * RDZ * (VTK(I,K+1)-VTK(I,K))
-     &                       / (VTK(I,K+1)+VTK(I,K))
+
+          BVF2 = grav2 * RDZ * (VTK(I,K+1)-VTK(I,K)) &
+                             / (VTK(I,K+1)+VTK(I,K))
           bnv2(i,k+1) = max( BVF2, bnv2min )
           ! https://github.com/NCAR/ccpp-physics/issues/1103
           !RI_N(I,K+1) = Bnv2(i,k)/SHR2        ! Richardson number consistent with BNV2
@@ -361,7 +361,7 @@
         bnv2(i,k) = bnv2(i,k+1)
       ENDDO
 !
-! level iwklm =>phil(j,k)/g < sigfac * hprime(j) < phil(j,k+1)/g
+! level iwklm => phil(j,k)/g < sigfac * hprime(j) < phil(j,k+1)/g
 !
       DO I = 1, npt
         J   = ipt(i)
@@ -383,45 +383,40 @@
         DO K = k_zlow, iwklm(I)-1                        ! Kreflm(I)= iwklm(I)-1
           J       = ipt(i)                               ! laye-aver Rho, U, V
           RDELKS  = DEL(J,K) * DELKS(I)
-          UBAR(I) = UBAR(I)  + RDELKS * U1(J,K)          ! trial Mean U below
-          VBAR(I) = VBAR(I)  + RDELKS * V1(J,K)          ! trial Mean V below
-          ROLL(I) = ROLL(I)  + RDELKS * RO(I,K)          ! trial Mean RO below
-!
+          UBAR(I) = UBAR(I)  + RDELKS * U1(J,K)
+          VBAR(I) = VBAR(I)  + RDELKS * V1(J,K)
+          ROLL(I) = ROLL(I)  + RDELKS * RO(I,K)
           BNV2bar(I) = BNV2bar(I) + .5*(BNV2(I,K)+BNV2(I,K+1))* RDELKS
         ENDDO
       ENDDO
-!
+
       DO I = 1, npt
         J = ipt(i)
 !
 ! integrate from Ztoph = sigfac*hprime  down to Zblk if exists
-! find ph_blk, dz_blk like in LM-97 and IFS
+! find ph_blk, dz_blk as introduced in LM-97 and IFS
 !
         ph_blk =0.  
         DO K = iwklm(I), 1, -1
           PHIANG   =  atan2(V1(J,K),U1(J,K))*RAD_TO_DEG
-          ANG(I,K) = ( THETA(J) - PHIANG )
+          ANG(I,K) = THETA(J) - PHIANG
           if ( ANG(I,K) >  90. ) ANG(I,K) = ANG(I,K) - 180.
           if ( ANG(I,K) < -90. ) ANG(I,K) = ANG(I,K) + 180.
           ANG(I,K) = ANG(I,K) * DEG_TO_RAD
-          UDS(I,K) = 
-     &        MAX(SQRT(U1(J,K)*U1(J,K) + V1(J,K)*V1(J,K)), velmin)
-!
+          UDS(I,K) = MAX(SQRT(U1(J,K)*U1(J,K) + V1(J,K)*V1(J,K)), velmin)
+
           IF (IDXZB(I) == 0 ) then
             dz_blk = ( PHII(J,K+1) - PHII(J,K) ) *rgrav
-            PE(I)  =  PE(I) + BNV2(I,K) * 
-     &         ( ELVMAX(J) - phil(J,K)*rgrav ) * dz_blk
-
+            PE(I)  =  PE(I) + BNV2(I,K) * ( ELVMAX(J) - phil(J,K)*rgrav ) * dz_blk
             UP(I)  =  max(UDS(I,K) * cos(ANG(I,K)), velmin)  
             EK(I)  = 0.5 *  UP(I) * UP(I) 
-
             ph_blk = ph_blk + dz_blk*sqrt(BNV2(I,K))/UP(I)
 
 ! --- Dividing Stream lime  is found when PE =exceeds EK. oper-l GFS
 !           IF ( PE(I) >=  EK(I) ) THEN
             IF ( ph_blk >=  fcrit_gfs ) THEN
                IDXZB(I) = K
-               zmtb (J) = PHIL(J, K)*rgrav
+               zmtb (J) = PHIL(J, K) * rgrav
                RDXZB(J) = real(k, kind=kind_phys)
             ENDIF
 
@@ -458,10 +453,9 @@
 !
 ! --- The drag for mtn blocked flow
 !
-      cdmb4 = 0.25*cdmb 
       DO I = 1, npt
         J = ipt(i)
-!
+
         IF ( IDXZB(I) > 0 ) then
 ! (4.16)-IFS
           gam2 = gamma(j)*gamma(j)
@@ -469,42 +463,35 @@
           CGAM =       0.48*gamma(j) + 0.30*gam2
           DO K = IDXZB(I)-1, 1, -1
 
-            ZLEN = SQRT( ( PHIL(J,IDXZB(I)) - PHIL(J,K) ) /
-     &                   ( PHIL(J,K ) + Grav * hprime(J) ) )
+! empirical height dep-nt "blocking" length from LM-1997/IFS
+!	  
+            ZLEN = SQRT( ( PHIL(J,IDXZB(I)) - PHIL(J,K) ) / &
+                         ( PHIL(J,K ) + Grav * hprime(J) ) )
 
             tem     = cos(ANG(I,K))
             COSANG2 = tem * tem
             SINANG2 = 1.0 - COSANG2 
-!
-!  cos =1 sin =0 =>   1/R= gam     ZR = 2.-gam 
-!  cos =0 sin =1 =>   1/R= 1/gam   ZR = 2.- 1/gam
-!
             rdem = COSANG2      +  GAM2 * SINANG2
             rnom = COSANG2*GAM2 +         SINANG2
 !
 ! metOffice Dec 2010
 ! correction of H. Wells & A. Zadra for the
-! aspect ratio  of the hill seen by MF
+! aspect ratio  of the elliptical hill seen by mean flow
 ! (1/R , R-inverse below: 2-R)
 
             rdem = max(rdem, 1.e-6)
             R    = sqrt(rnom/rdem)
             ZR   =  MAX( 2. - R, 0. )
-
             sigres = max(sigmin, sigma(J))
             if (hprime(J)/sigres > dxres) sigres = hprime(J)/dxres
             mtbridge = ZR * sigres*ZLEN / hprime(J)
-! (4.15)-IFS
-!           DBTMP = CDmb4 * mtbridge *
-!     &             MAX(cos(ANG(I,K)), gamma(J)*sin(ANG(I,K)))
-! (4.16)-IFS
-            DBTMP  = CDmb4*mtbridge*(bgam* COSANG2 +cgam* SINANG2)
+!           dbtmp = cdmb4*mtbridge*max(cos(ang(i,k)), gamma(j)*sin(ang(i,k)))   ! (4.15)-ifs 	
+            dbtmp = cdmb4*mtbridge*(bgam * cosang2 + cgam * sinang2)            ! (4.16)-ifs
             DB(I,K)= DBTMP * UDS(I,K)
           ENDDO
-!
+
         endif
       ENDDO
-!
 !.............................
 !.............................
 ! end  mtn blocking section
@@ -581,7 +568,7 @@
         ENDDO
       ENDDO
 !
-! orographic asymmetry parameter (OA), and (CLX)
+! orographic asymmetry parameters (oa), and (clx)  [Kim & Arakawa Kim & Doyle]
       DO I = 1,npt
         J      = ipt(i)
         wdir   = atan2(UBAR(I),VBAR(I)) + pi
@@ -602,8 +589,8 @@
       DO  K = 1, kmm1
         DO  I = 1,npt
           J            = ipt(i)
-          VELCO(I,K)   = 0.5 * ((U1(J,K)+U1(J,K+1))*XN(I)
-     &                       +  (V1(J,K)+V1(J,K+1))*YN(I))
+          VELCO(I,K)   = 0.5 * ((U1(J,K)+U1(J,K+1))*XN(I) &
+                             +  (V1(J,K)+V1(J,K+1))*YN(I))
         ENDDO
       ENDDO
 !
@@ -650,17 +637,16 @@
         inv_b2eff =  0.5*sigres/heff
         kxridge   =  1.0 / sqrt(sparea(J))
         XLINV(I)  = XLINGFS    !or max(kxridge, inv_b2eff)  ! 6.28/Lx ..0.5*sigma(j)/heff = 1./Lridge  
-        taulin(i) = 0.5*ROLL(I)*XLINV(I)*BNV*ULOW(I)*
-     &                 heff*heff
+        taulin(i) = 0.5*ROLL(I)*XLINV(I)*BNV*ULOW(I)* heff*heff
 
         if ( FR > fcrit_gfs ) then
-          TAUB(I)  = XLINV(I) * ROLL(I) * ULOW(I) * ULOW(I)
-     &             * ULOW(I)  * GFOBNV  * EFACT       ! nonlinear FLUX Tau0...XLINV(I)
+          TAUB(I)  = XLINV(I) * ROLL(I) * ULOW(I) * ULOW(I) &
+                   * ULOW(I)  * GFOBNV  * EFACT       ! nonlinear FLUX Tau0...XLINV(I)
 !
         else
 !	 
-          TAUB(I)  = XLINV(I) * ROLL(I) * ULOW(I) * ULOW(I)
-     &             * ULOW(I)  * GFOBNV  * EFACT  
+          TAUB(I)  = XLINV(I) * ROLL(I) * ULOW(I) * ULOW(I) &
+                   * ULOW(I)  * GFOBNV  * EFACT  
 !     
 !         TAUB(I)  = taulin(i)                             !  linear flux for FR <= fcrit_gfs
 !   
@@ -699,8 +685,8 @@
           DO I = 1, npt
 !
             IF (K >= kref(I)) THEN
-              ICRILV(I) = ICRILV(I) .OR. ( RI_N(I,K) < RIC)
-     &                              .OR. (VELCO(I,K) <= 0.0)
+              ICRILV(I) = ICRILV(I) .OR. ( RI_N(I,K) < RIC) &
+                                    .OR. (VELCO(I,K) <= 0.0)
             ENDIF
           ENDDO
 !
@@ -720,8 +706,8 @@
                 BRVF = SQRT(BNV2(I,K))        ! Brent-Vaisala Frequency interface
 !               TEM1 = XLINV(I)*(RO(I,KP1)+RO(I,K))*BRVF*VELCO(I,K)*0.5
 
-                TEM1 = XLINV(I)*(RO(I,KP1)+RO(I,K))*BRVF*0.5
-     &                         * max(VELCO(I,K), velmin)
+                TEM1 = XLINV(I)*(RO(I,KP1)+RO(I,K))*BRVF*0.5 &
+                               * max(VELCO(I,K), velmin)
                 HD   = SQRT(TAUP(I,K) / TEM1)
                 FRO  = BRVF * HD * TEMV
 !
@@ -735,8 +721,8 @@
 !    CHECK STABILITY TO EMPLOY THE 'dynamical SATURATION HYPOTHESIS'
 !    OF PALMER,Shutts, Swinbank 1986
 !                                       ----------------------
-                IF (RI_GW <= RIC .AND.
-     &             (OA(I) <= 0. .OR.  kp1 >= kref(i) )) THEN
+                IF (RI_GW <= RIC .AND. &
+                   (OA(I) <= 0. .OR.  kp1 >= kref(i) )) THEN
                    TEMC = 2.0 + 1.0 / TEM2
                    HD   = VELCO(I,K) * (2.*SQRT(TEMC)-TEMC) / BRVF
                    TAUP(I,KP1) = TEM1 * HD * HD
@@ -801,10 +787,10 @@
 !       XLINV(I) = max(kxridge, inv_b2eff)           ! 0.5*sigma(j)/heff = 1./Lridge
         dtfac(:) =  1.0
        
-        call oro_wam_2017(im, km, npt, ipt, kref, kdt, me, master,
-     &       dtp, dxres, taub, u1, v1, t1, xn, yn, bnv2, ro, prsi,prsL,
-     &       del, sigma, hprime, gamma, theta,
-     &       sinlat, xlatd, taup, taud, pkdis)
+        call oro_wam_2017(im, km, npt, ipt, kref, kdt, me, master, &
+             dtp, dxres, taub, u1, v1, t1, xn, yn, bnv2, ro, prsi,prsL, &
+             del, sigma, hprime, gamma, theta, &
+             sinlat, xlatd, taup, taud, pkdis)
      
       endif            !  oro_wam_2017 - LINSATDIS-solver of WAM-2017
 !
@@ -830,8 +816,8 @@
             vp1(k) = v1(j,k)
           enddo
 
-          call ugwpv0_tofd1d(km, sigflt, elvmaxd(j), zsurf, zpbl,
-     &        up1, vp1, zpm,  utofd1, vtofd1, epstofd1, krf_tofd1)
+          call ugwpv0_tofd1d(km, sigflt, elvmaxd(j), zsurf, zpbl, &
+              up1, vp1, zpm,  utofd1, vtofd1, epstofd1, krf_tofd1)
 
           do k=1,km
             axtms(j,k) = utofd1(k)
@@ -914,8 +900,6 @@
          tau_tofd(J) = -rgrav * tau_tofd(j)
        ENDDO
 
-       RETURN
-
       end subroutine gwdps_v0
 
 
@@ -926,11 +910,11 @@
 !> A modification of the Scinocca (2003) \cite scinocca_2003 algorithm for 
 !! NGWs with non-hydrostatic and rotational
 !!effects for GW propagations and background dissipation 
-      subroutine fv3_ugwp_solv2_v0(klon, klev, dtime,
-     &           tm1 , um1, vm1, qm1,
-     &           prsl, prsi,   philg, xlatd, sinlat, coslat,
-     &           pdudt, pdvdt, pdtdt, dked, tau_ngw,
-     &           mpi_id, master, kdt)
+      subroutine fv3_ugwp_solv2_v0(klon, klev, dtime, &
+                 tm1 , um1, vm1, qm1, &
+                 prsl, prsi,   philg, xlatd, sinlat, coslat, &
+                 pdudt, pdvdt, pdtdt, dked, tau_ngw, &
+                 mpi_id, master, kdt)
 !
 
 
@@ -942,19 +926,19 @@
 !
       use machine,          only : kind_phys
 
-      use ugwp_common_v0 ,  only : rgrav,      grav,  cpd,    rd,  rv
-     &,                            omega2,     rcpd2,  pi,    pi2, fv
-     &,                            rad_to_deg, deg_to_rad
-     &,                            rdi,        gor,    grcp,   gocp
-     &,                            bnv2min,    dw2min, velmin, gr2
+      use ugwp_common_v0 ,  only : rgrav,      grav,  cpd,    rd,  rv, &
+                                   omega2,     rcpd2,  pi,    pi2, fv, &
+                                   rad_to_deg, deg_to_rad, &
+                                   rdi,        gor,    grcp,   gocp, &
+                                   bnv2min,    dw2min, velmin, gr2
 !
-      use ugwpv0_wmsdis_init, only : hpscale, rhp2,    bv2min,   gssec
-     &,                            v_kxw,   v_kxw2,  tamp_mpa, zfluxglob
-     &,                            maxdudt, gw_eff,  dked_min
-     &,                            nslope,  ilaunch, zmsi
-     &,                            zci,     zdci,    zci4, zci3, zci2
-     &,                            zaz_fct, zcosang, zsinang
-     &,                            nwav,    nazd,    zcimin, zcimax      
+      use ugwpv0_wmsdis_init, only : hpscale, rhp2,    bv2min,   gssec, &
+                                   v_kxw,   v_kxw2,  tamp_mpa, zfluxglob, &
+                                   maxdudt, gw_eff,  dked_min, &
+                                   nslope,  ilaunch, zmsi, &
+                                   zci,     zdci,    zci4, zci3, zci2, &
+                                   zaz_fct, zcosang, zsinang, &
+                                   nwav,    nazd,    zcimin, zcimax      
 !
       implicit none
 !23456
@@ -1048,9 +1032,9 @@
 
 
 !      real  :: rcpd, grav2cpd
-       real, parameter ::  rcpdl    = cpd/grav     ! 1/[g/cp]  == cp/g
-     &,                    grav2cpd = grav/rcpdl   ! g*(g/cp)= g^2/cp
-     &,                    cpdi     = one/cpd
+       real, parameter ::  rcpdl    = cpd/grav, &   ! 1/[g/cp]  == cp/g
+                           grav2cpd = grav/rcpdl, & ! g*(g/cp)= g^2/cp
+                           cpdi     = one/cpd
 
        real :: expdis, fdis
 !      real :: fmode, expdis, fdis
@@ -1103,12 +1087,12 @@
            zdelp          = phil(jl,jk)-phil(jl,jk-1)      !>0 ...... dz-meters
            v_zmet(jl,jk)  = zdelp + zdelp
            delpi(jl,jk)  = grav / (prsi(jl,jk-1) - prsi(jl,jk))
-           vueff(jl,jk)   =
-     &     2.e-5_kp*exp( (phil(jl,jk)+phil(jl,jk-1))*rhp2)+dked_min
+           vueff(jl,jk)   = &
+           2.e-5_kp*exp( (phil(jl,jk)+phil(jl,jk-1))*rhp2)+dked_min
 !
 !          zbn2(jl,jk)    =  grav2cpd/zthm1(jl,jk)
-           zbn2(jl,jk)    =  grav2cpd*zthm1
-     &                    * (one+rcpdl*(tm1(jl,jk)-tm1(jl,jk-1))/zdelp)
+           zbn2(jl,jk)    =  grav2cpd*zthm1 &
+                          * (one+rcpdl*(tm1(jl,jk)-tm1(jl,jk-1))/zdelp)
            zbn2(jl,jk)    = max(min(zbn2(jl,jk), gssec), bv2min)
            zbvfhm1(jl,jk) = sqrt(zbn2(jl,jk))       ! bn = sqrt(bn2)
          enddo
@@ -1136,16 +1120,16 @@
 !       ------------------------------------------------------------------------------------------
         do iazi=1, nazd
           do jl=1,klon
-            zul(jl,iazi) = zcosang(iazi) * zuhm1(jl,ilaunch)
-     &                   + zsinang(iazi) * zvhm1(jl,ilaunch)
+            zul(jl,iazi) = zcosang(iazi) * zuhm1(jl,ilaunch) &
+                         + zsinang(iazi) * zvhm1(jl,ilaunch)
           enddo
         enddo
 !
          do jk=ilaunch, klev-1     ! from z-launch up   model level from which gw spectrum is launched
            do iazi=1, nazd
              do jl=1,klon
-               zu = zcosang(iazi)*zuhm1(jl,jk)
-     &            + zsinang(iazi)*zvhm1(jl,jk)
+               zu = zcosang(iazi)*zuhm1(jl,jk) &
+                  + zsinang(iazi)*zvhm1(jl,jk)
                zui(jl,jk,iazi) =  zu - zul(jl,iazi)
              enddo
           enddo
@@ -1172,8 +1156,8 @@
 !n4
             zbvfl4 = zbvfl(jl) * zbvfl(jl)
             zbvfl4 = zbvfl4 * zbvfl4
-            zflux(jl,inc,1) = zfct(jl,ilaunch)*zbvfl4*zcin
-     &                      / (zbvfl4+zcin4)
+            zflux(jl,inc,1) = zfct(jl,ilaunch)*zbvfl4*zcin &
+                            / (zbvfl4+zcin4)
           enddo
          enddo
       elseif(nslope == 2) then               ! s=2 case
@@ -1185,8 +1169,8 @@
             zbvfl4 = zbvfl(jl) * zbvfl(jl)
             zbvfl4 = zbvfl4    * zbvfl4
             zcpeak = zbvfl(jl) * zmsi
-            zflux(jl,inc,1) = zfct(jl,ilaunch)*
-     &                     zbvfl4*zcin*zcpeak/(zbvfl4*zcpeak+zcin4*zcin)
+            zflux(jl,inc,1) = zfct(jl,ilaunch)* &
+                           zbvfl4*zcin*zcpeak/(zbvfl4*zcpeak+zcin4*zcin)
           enddo
         enddo
       elseif(nslope == -1) then              ! s=-1 case
@@ -1196,8 +1180,8 @@
           zcin2 = zci2(inc)
           do jl=1,klon
             zbvfl2 = zbvfl(jl)*zbvfl(jl)
-            zflux(jl,inc,1) = zfct(jl,ilaunch)*zbvfl2*zcin
-     &                      / (zbvfl2+zcin2)
+            zflux(jl,inc,1) = zfct(jl,ilaunch)*zbvfl2*zcin &
+                            / (zbvfl2+zcin2)
           enddo
         enddo
       elseif(nslope == 0) then               ! s=0 case
@@ -1208,8 +1192,8 @@
            zcin3 = zci3(inc)
           do jl=1,klon
             zbvfl3 = zbvfl(jl)**3
-            zflux(jl,inc,1) = zfct(jl,ilaunch)*zbvfl3*zcin
-     &                      / (zbvfl3+zcin3)
+            zflux(jl,inc,1) = zfct(jl,ilaunch)*zbvfl3*zcin &
+                            / (zbvfl3+zcin3)
           enddo
         enddo
 
@@ -1289,8 +1273,8 @@
 !             zatmp = minvel + sign(minvel,zcin-zci_min(jl,iazi))
 !             zacc(jl,inc,iazi) = zact(jl,inc,iazi)-zatmp
 !             zact(jl,inc,iazi) = zatmp
-              zact(jl,inc,iazi) =  minvel
-     &                          + sign(minvel,zci(inc)-zci_min(jl,iazi))
+              zact(jl,inc,iazi) =  minvel &
+                                + sign(minvel,zci(inc)-zci_min(jl,iazi))
             enddo
           enddo
 !
@@ -1300,8 +1284,8 @@
 !         do inc=1, nwav
 !           zcinc = zdci(inc)
 !           do jl=1,klon
-!             zdfl(jl,jk,iazi) = zdfl(jl,jk,iazi) +
-!    &                zacc(jl,inc,iazi)*zflux(jl,inc,iazi)*zcinc
+!             zdfl(jl,jk,iazi) = zdfl(jl,jk,iazi) + &
+!                     zacc(jl,inc,iazi)*zflux(jl,inc,iazi)*zcinc
 !           enddo
 !         enddo
 ! --------------------------------------------
@@ -1312,8 +1296,8 @@
 !           if(zdfl(jl,jk,iazi) > epsln ) then
 !             zatmp = zcrt(jl,jk,iazi)
 !             do inc=1, nwav
-!                 zatmp = zatmp + zci(inc) *
-!    &                    zacc(jl,inc,iazi)*zflux(jl,inc,iazi)*zdci(inc)
+!                 zatmp = zatmp + zci(inc) * &
+!                         zacc(jl,inc,iazi)*zflux(jl,inc,iazi)*zdci(inc)
 !             enddo
 !
 !             zcrt(jl,jk,iazi)  = zatmp / zdfl(jl,jk,iazi)
@@ -1405,15 +1389,15 @@
 !      later sum over selected azimuths as "non-negative" scalars)
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
               if (jk > ilaunch)then
-!               zdelp = grav/(prsi(jl,jk-1)-prsi(jl,jk))*
-!    &                 abs(zcin-zui(jl,jk,iazi)) *zcinc
+!               zdelp = grav/(prsi(jl,jk-1)-prsi(jl,jk))* &
+!                      abs(zcin-zui(jl,jk,iazi)) *zcinc
                 zdelp = delpi(jl,jk) * abs(zcin-zui(jl,jk,iazi)) *zcinc
                 vm_zflx_mode = zact(jl,inc,iazi)* zflux_z(jl,inc,jk-1)
 
-                if (vc_zflx_mode > vm_zflx_mode)
-     &              vc_zflx_mode = vm_zflx_mode ! no-flux increase
-                zdfdz_v( jl,jk,iazi) = zdfdz_v( jl,jk,iazi) +
-     &                             (vm_zflx_mode-vc_zflx_mode)*zdelp    ! heating >0
+                if (vc_zflx_mode > vm_zflx_mode) &
+                    vc_zflx_mode = vm_zflx_mode ! no-flux increase
+                zdfdz_v( jl,jk,iazi) = zdfdz_v( jl,jk,iazi) + &
+                                   (vm_zflx_mode-vc_zflx_mode)*zdelp    ! heating >0
 !
 !
                endif
@@ -1490,7 +1474,6 @@
        enddo
 !
 !--------------------------------------------------------------------------- 
-       return
        end subroutine fv3_ugwp_solv2_v0
       
-      end module ugwp_driver_v0
+end module ugwp_driver_v0

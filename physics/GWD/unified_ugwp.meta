@@ -3,7 +3,7 @@
   type = scheme
   dependencies = ../hooks/machine.F
   dependencies = cires_ugwp_triggers.F90,cires_ugwp_initialize.F90
-  dependencies = cires_orowam2017.f,cires_ugwp_module.F90,gwdps.f,ugwp_driver_v0.F
+  dependencies = cires_orowam2017.f,cires_ugwp_module.F90,gwdps.f,ugwp_driver_v0.F90
   dependencies = drag_suite.F90
 
 ########################################################################
