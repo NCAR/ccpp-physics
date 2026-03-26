@@ -1011,7 +1011,7 @@ contains
 !$acc end parallel
 
 !$acc kernels
-      do 37 i=its,itf
+      do i=its,itf
          kzdown(i)=0
          if(ierr(i).eq.0)then
             zktop=(zo_cup(i,ktop(i))-z1(i))*.6
@@ -3630,7 +3630,7 @@ endif
 !$acc end kernels
 
 !$acc parallel loop
-       do 27 i=its,itf
+      do i=its,itf
       kbcon(i)=1
 !
 ! reset iloop for mid level convection
@@ -3652,7 +3652,7 @@ endif
         enddo
        !==
 
-      find_kbcon_loop: do
+       find_kbcon_loop: do
 
         hetest=hcot(i,kbcon(i)) !hkb(i) ! he_cup(i,k22(i))
         if(hetest.lt.hes_cup(i,kbcon(i)))then
@@ -3947,7 +3947,7 @@ endif
         ,intent (in  )                   ::                                   &
         dt
      real(kind=kind_phys) :: names,scalef,thresh,qmem,qmemf,qmem2,qtest,qmem1
-     integer :: icheck
+     integer :: icheck, i, k
 !
 ! first do check on vertical heating rate
 !
