@@ -1543,7 +1543,7 @@
 !
 ! *** perform bisection *************************************************
 !
-   do i=1,maxit_par
+       do i=1,maxit_par
        x3 = 0.5*(x1+x2)
 !
        if (ntot .gt. zero_par) then
@@ -1566,7 +1566,7 @@
        niter = i
 
 
-   end do
+       end do
 !
 ! *** converged ; return ************************************************
 !

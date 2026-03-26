@@ -458,14 +458,15 @@
                hltalt = hlatvp
              end if
              if (lflg) then
-               tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)      &
+               tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)
      &                  + tc*pcf(5))))
              else
                tterm = 0.0_kp
              end if
-               desdt = hltalt*es(i,k)/(rgasv*t(i,k)*t(i,k)) + tterm*trinv
-               gam(i,k) = hltalt*qs(i,k)*p(i,k)*desdt/(cp*es(i,k)*(p(i,k) &
-     &                  - omeps*es(i,k)))
+               desdt = hltalt*es(i,k)/(rgasv*t(i,k)*t(i,k))
+     &                 + tterm*trinv
+               gam(i,k) = hltalt*qs(i,k)*p(i,k)*desdt/
+     &                    (cp*es(i,k)*(p(i,k) - omeps*es(i,k)))
              if (qs(i,k) == 1.0_kp) gam(i,k) = 0.0_kp
            end do
          end do
@@ -560,7 +561,8 @@
            hltalt = hlatvp
            end if
            desdt = hltalt*es(i)/(rgasv*t(i)*t(i))
-           gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
+           gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i)
+     &              - omeps*es(i)))
            if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
          end do
        else
@@ -585,7 +587,7 @@
            hltalt = hlatvp
            end if
            if (lflg) then
-           tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)         &
+           tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)
      &                + tc*pcf(5))))
            else
            tterm = 0.0_kp
@@ -716,7 +718,7 @@
 
 
 
-       polysvp = 10._kp**(-9.09718_kp*(273.16_kp/t-1._kp)-3.56654_kp* &
+       polysvp = 10._kp**(-9.09718_kp*(273.16_kp/t-1._kp)-3.56654_kp*   &
      & log10(273.16_kp/t)+0.876793_kp*(1._kp-t/273.16_kp)+              &
      & log10(6.1071_kp))*100._kp
 
@@ -725,7 +727,7 @@
 
 
        if (typ.eq.0) then
-       polysvp = 10._kp**(-7.90298_kp*(373.16_kp/t-1._kp)+ 5.02808_kp* &
+       polysvp = 10._kp**(-7.90298_kp*(373.16_kp/t-1._kp)+ 5.02808_kp*   &
      &log10(373.16_kp/t)- 1.3816e-7_kp*(10._kp**(11.344_kp*(1._kp-t/     &
      &373.16_kp))-1._kp)+ 8.1328e-3_kp*(10._kp**(-3.49149_kp*(373.16_kp/ &
      &t-1._kp))-1._kp)+ log10(1013.246_kp))*100._kp
@@ -1120,7 +1122,8 @@
            hltalt = hlatvp
            end if
            desdt = hltalt*es(i)/(rgasv*t(i)*t(i))
-           gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
+           gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i)             &
+     &              - omeps*es(i)))
            if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
 
            dqsdt(i) = (cp/hltalt)*gam(i)
@@ -1154,7 +1157,8 @@
            tterm = 0.0_kp
          end if
          desdt  = hltalt*es(i)/(rgasv*t(i)*t(i)) + tterm*trinv
-         gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
+         gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i)                  &
+     &             - omeps*es(i)))
          if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
 
          dqsdt(i) = (cp/hltalt)*gam(i)
@@ -1461,7 +1465,7 @@
        t=max(123.0_kp, tx)
 
        es = exp(54.842763_kp - (6763.22_kp / t) - (4.210_kp * log(t)) + &
-     & (0.000367_kp * t) + (tanh(0.0415_kp * (t - 218.8_kp)) * &
+     & (0.000367_kp * t) + (tanh(0.0415_kp * (t - 218.8_kp)) *          &
      & (53.878_kp - (1331.22_kp / t) - (9.44523_kp * log(t)) +          &
      & 0.014025_kp * t)))
 
@@ -1476,7 +1480,7 @@
        t=min(274.0_kp, tx)
 
 
-       es = exp(9.550426_kp - (5723.265_kp / t) + (3.53068_kp * &
+       es = exp(9.550426_kp - (5723.265_kp / t) + (3.53068_kp *         &
      & log(t)) - (0.00728332_kp * t))
 
       end function MurphyKoop_svp_ice

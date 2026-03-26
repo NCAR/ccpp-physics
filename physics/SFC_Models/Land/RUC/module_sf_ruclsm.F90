@@ -2325,7 +2325,7 @@ CONTAINS
        if (I .LT. 1) then
          I = 1
          R = 1._kind_dbl_prec
-       else if (I .GT. 5000)
+       else if (I .GT. 5000) then
          I = 5000
          R = 5001._kind_dbl_prec
        end if
