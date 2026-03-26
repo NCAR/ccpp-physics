@@ -61,7 +61,7 @@ jobs:
         repository: ufs-community/ccpp-physics
         ref: release/srw-v3
         path: srw_repo
-        submodules:recursive
+        submodules: recursive
 
     - name: Build SRWv3 docs
       run: |
