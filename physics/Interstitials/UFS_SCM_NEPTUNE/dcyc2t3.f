@@ -139,10 +139,10 @@
 !!                             list for sea-ice model
 !!-     mar  2008  y. hou     - add cosine of zenith angle as output for
 !!                             sunshine duration time calc.
-!!-     sep  2008  y. hou     - separate net sw and downward lw in slrad,
+!!-     sep  2008  y. hou     - separate net sw and downward lw in slrad
 !!                changed the sign of sfc net sw to consistent with
 !!                 other parts of the mdl (positive value defines from
-!!                 atmos to the ground). rename output fluxes as adjusted
+!!                 atmos to the ground).rename output fluxes as adjusted
 !!                 fluxes. other minor changes such as renaming some of
 !!                 passing argument names to be consistent with calling
 !!                 program.
@@ -157,7 +157,7 @@
 !!                 spectral component fluxes
 !!-     Oct  2014  y. hous s. moorthi - add emissivity contribution to
 !!                             upward longwave flux
-!!-     Mar  2019  s. moorthi - modify xmu calculation in a time centered
+!!-     Mar  2019  s. moorthi -modify xmu calculation in a time centered
 !!                             way and add more accuracy when physics
 !!                             time step is close to radiation time step
 !> \section arg_table_dcyc2t3_run Argument Table
@@ -202,7 +202,8 @@
      &                                   hour12 = 12.0_kind_phys,       &
      &                                   f3600  = one/3600.0_kind_phys, &
      &                                   f7200  = one/7200.0_kind_phys, &
-     &                                   czlimt = 0.0001_kind_phys        ! ~ cos(89.99427)
+     &                                   czlimt = 0.0001_kind_phys        
+                                                  ! ~ cos(89.99427)
 
 !  ---  inputs:
       integer, intent(in) :: im, levs, ntrac, tend_opt_rad_scaler
@@ -339,7 +340,8 @@
           enddo
         enddo
         do i = 1, IM
-          if (istsun(i) > 0) xcosz(i) = xcosz(i) / istsun(i)  ! mean cosine of solar zenith angle at current time
+          ! mean cosine of solar zenith angle at current time
+          if (istsun(i) > 0) xcosz(i) = xcosz(i) / istsun(i)
         enddo
       endif
 !
@@ -349,8 +351,9 @@
          tem1 = tf(i) / tsflw(i)
          tem2 = tem1 * tem1
          adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
-!!  - adjust \a sfc downward LW flux to account for t changes in the lowest model layer.
-!! compute 4th power of the ratio of \c tf in the lowest model layer over the mean value \c tsflw.
+!!  - adjust \a sfc downward LW flux to account for t changes in the 
+!!    lowest model layer. compute 4th power of the ratio of \c tf in the
+!!    lowest model layer over the mean value \c tsflw.
          if (dry(i)) then
             tem2 = tsfc_lnd(i) * tsfc_lnd(i)
             adjsfculw_lnd(i) =  sfcemis_lnd(i) * con_sbc * tem2 * tem2
@@ -366,7 +369,8 @@
             adjsfculw_wat(i) =  sfcemis_wat(i) * con_sbc *
      &                        tem2 * tem2
      &                        + (one - sfcemis_wat(i)) * adjsfcdlw(i)
-!>  - replace upward longwave flux provided by the mediator (zero over lakes)
+!>  - replace upward longwave flux provided by the mediator 
+!!    (zero over lakes)
             if (use_med_flux) then
                if (sfculw_med(i) > f_eps) then
                   adjsfculw_wat(i) = sfculw_med(i)
@@ -405,18 +409,21 @@
       enddo
 
       ! Adjust the LW and SW heating-rates.
-      ! For LW, optionally scale using the Jacobian of the upward LW flux. *RRTMGP ONLY*
-      ! For SW, adjust heating rates with zenith angle change.
+      ! For LW, optionally scale using the Jacobian of the upward LW 
+      ! flux. *RRTMGP ONLY* For SW, adjust heating rates with zenith 
+      ! angle change.
       if (use_LW_jacobian) then
-         ! Compute adjusted net LW flux foillowing Hogan and Bozzo 2015 (10.1002/2015MS000455)
-         ! Here we assume that the profile of the downwelling LW Jaconiam has the same shape
-         ! as the upwelling, but scaled and offset.
-         ! The scaling factor is 0.2
+         ! Compute adjusted net LW flux following Hogan and Bozzo 2015
+         ! (10.1002/2015MS000455)
+         ! Here we assume that the profile of the downwelling LW 
+         ! Jacobian has the same shape as the upwelling, but scaled 
+         ! and offset. The scaling factor is 0.2
          ! The profile of the downwelling Jacobian (J) is offset so that
          !     J_dn_sfc / J_up_sfc = scaling_factor
          !     J_dn_toa / J_up_sfc = 0
          !
-         ! Optionally, the flux adjustment can be damped with height using a logistic function
+         ! Optionally, the flux adjustment can be damped with height 
+         ! using a logistic function
          ! fx ~ L / (1 + exp(-k*dp)), where dp = p - p0
          ! L  = 1, fix scale between 0-1.      - Fixed
          ! k  = 1 / pressure decay length (Pa) - Controlled by namelist
@@ -441,8 +448,8 @@
                htrlw(i,k) = fluxlwnet_adj * con_g /                     &
      &              (con_cp * (p_lev(i,k+1) - p_lev(i,k)))
 
-               ! Add radiative heating rates to physics heating rate. Optionally, scaled w/ height
-               ! using a logistic function
+               ! Add radiative heating rates to physics heating rate. 
+               ! Optionally, scaled w/ height using a logistic function
                if (damp_LW_fluxadj) then
                   lfnc = L / (1+exp(-(p_lev(i,k) - lfnc_p0)/lfnc_k))
                else
@@ -493,8 +500,8 @@
             end do
           end do
         case (2) !add tendencies to sum
-                  !Accumulated tendency = accumulated tendency + current tendency
-                  !Current state unchanged
+        !Accumulated tendency = accumulated tendency + current tendency
+        !Current state unchanged
           do k=1,levs
             do i=1,im
               dtdt(i,k) = dtdt(i,k) + ten_t(i,k)
@@ -506,8 +513,9 @@
             end do
           end do
         case (3) !add tendencies to sum and apply
-                  !Current state = current state + dt*(accumulated tendency + current tendency)
-                  !Accumulated tendency = 0
+        !Current state = current state + dt*(
+        !                accumulated tendency + current tendency)
+        !Accumulated tendency = 0
           do k=1,levs
             do i=1,im
               gt0(i,k) = gt0(i,k) + delt*(dtdt(i,k) + ten_t(i,k))
@@ -524,8 +532,9 @@
             end do
           end do
         case (4) !Current state unchanged
-                  !Accumulated tendency unchanged
-                  !Current tendency unchanged (but will be overwritten during next primary scheme)
+        !Accumulated tendency unchanged
+        !Current tendency unchanged (but will be overwritten during 
+        !                            next primary scheme)
           exit case_rad_scaler_ten
         case default
           errflg = 1
