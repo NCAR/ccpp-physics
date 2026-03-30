@@ -1270,6 +1270,7 @@
         szeta(i)  = zeta(istb(i))
         ifz(i)    = 1
       enddo
+      endif
 
 !------------------------------------------------------------------------
 !     begin wegstein iteration for "zeta" at stable points using
@@ -1443,8 +1444,6 @@
         wind10(istb(i)) = wind10(istb(i)) / 1.944
        enddo
 
-       endif ! End of stable points block
-
 !------------------------------------------------------------------------
 !     unstable points
 !------------------------------------------------------------------------
@@ -1464,6 +1463,7 @@
         uzetam(i) = 1.0e+30
         ugzm  (i) = 0.0e+00
       enddo
+      endif
 
 !------------------------------------------------------------------------
 !     begin wegstein iteration for "zeta" at unstable points using
@@ -1557,6 +1557,7 @@
         enddo
 
         if (all(ifz(1:iq) == 0)) exit unstable_iter
+      end do unstable_iter
 
 
       if (any(ifz(1:iq) .GE. 1)) then
