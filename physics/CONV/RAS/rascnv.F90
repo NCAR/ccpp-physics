@@ -1087,14 +1087,15 @@
      &,                 TOI, QOI, ROI,  QLI, QII, KPBL, DSFC            &
      &,                 TCU, QCU, RCU, PCU, FLX, FLXD, CUP, WFNC,fscav_ &
      &,                 trcmin, ntk, c0, qw0, c0i, qi0, dlq_fac)
+!    &,                 ctei)
 
 !
 !***********************************************************************
 !******************** Relaxed  Arakawa-Schubert ************************
 !****************** Plug Compatible Scalar Version *********************
 !************************ SUBROUTINE CLOUD  ****************************
-!************************ October 2004     ****************************
-!******************** VERSION 2.0  (modified) *************************
+!************************  October 2004     ****************************
+!********************  VERSION 2.0  (modified) *************************
 !************* Shrinivas.Moorthi@noaa.gov (301) 683-3718  ***** ********
 !***********************************************************************
 !*References:
@@ -1114,7 +1115,6 @@
 !===>    DETRAINING AT LEVEL KD.
 !
 !***********************************************************************
-!
 !
 !===>  TOI(K)     INOUT   TEMPERATURE             KELVIN
 !===>  QOI(K)     INOUT   SPECIFIC HUMIDITY       NON-DIMENSIONAL
@@ -1151,17 +1151,27 @@
       real (kind=kind_phys), parameter :: RHMAX=1.0_kp                   & ! MAX RELATIVE HUMIDITY
      &,                                   QUAD_LAM=1.0_kp                & ! MASK FOR QUADRATIC LAMBDA
      &,                                   RHRAM=0.05_kp                  & ! PBL RELATIVE HUMIDITY RAMP
+!    &,                                   RHRAM=0.15_kp                 !& ! PBL RELATIVE HUMIDITY RAMP
      &,                                   HCRITD=4000.0_kp               & ! Critical Moist Static Energy for Deep clouds
+!    &,                                   HCRITS=2000.0_kp               & ! Critical Moist Static Energy for Shallow clouds
      &,                                   HCRITS=2500.0_kp               & ! Critical Moist Static Energy for Shallow clouds
      &,                                   pcrit_lcl=250.0_kp             & ! Critical pressure difference between boundary layer top
-                                                                           ! layer top and lifting condensation level (hPa)
+                                                                          ! layer top and lifting condensation level (hPa)
+!    &,                                   hpert_fac=1.01_kp             !& ! Perturbation on hbl when ctei=.true.
+!    &,                                   hpert_fac=1.005_kp            !& ! Perturbation on hbl when ctei=.true.
      &,                                   qudfac=quad_lam*half           &
      &,                                   shalfac=3.0_kp                 &
+!    &,                                   qudfac=quad_lam*pt25, shalfac=3.0_kp       !& !  Yogesh's
+!    &,                                   c0ifac=0.07_kp                 & ! following Han et al, 2016 MWR
+!    &,                                   c0ifac=0.001_kp                & ! following Han et al, 2017 Weather and Forecasting
      &,                                   c0ifac=0.0_kp                  &
      &,                                   dpnegcr  = 150.0_kp
+!    &,                                   dpnegcr  = 100.0_kp
+!    &,                                   dpnegcr  = 200.0_kp
 !
       real(kind=kind_phys), parameter :: ERRMIN=0.0001_kp                &
      &,                                  ERRMI2=0.1_kp*ERRMIN            &
+!    &,                                  rainmin=1.0e-9_kp              !&
      &,                                  rainmin=1.0e-8_kp               &
      &,                                  oneopt9=one/0.09_kp             &
      &,                                  oneopt4=one/0.04_kp
@@ -1171,6 +1181,7 @@
 !
 !  INPUT ARGUMENTS
 
+!     LOGICAL REVAP, WRKFUN, CALKBL, CRTFUN, CALCUP, ctei
       LOGICAL REVAP, WRKFUN, CALKBL, CRTFUN, CALCUP
       logical vsmooth, aw_scal
       INTEGER K, KP1, KD, NTRC, kblmx, kblmn, ntk
@@ -1212,8 +1223,7 @@
 
       real(kind=kind_phys) fscav_(ntrc)
 
-      ! --- CHANGED: Added abort_cloud flag to handle internal subroutine exits
-      LOGICAL ep_wfn, cnvflg, LOWEST, DDFT, UPDRET, abort_cloud
+      LOGICAL ep_wfn, cnvflg, LOWEST, DDFT, UPDRET
 
       real(kind=kind_phys) ALM,   DET,    HCC,  CLP                     &
      &,                    HSU,   HSD,    QTL,  QTV                     &
@@ -1241,6 +1251,8 @@
      &,                    ACTEVAP,AREARAT,DELTAQ,MASS,MASSINV,POTEVAP  &
      &,                    TEQ,QSTEQ,DQDT,QEQ                           &
      &,                    CLFRAC, DT,      clvfr, delzkm, fnoscav, delp
+!    &,                    CLFRAC, DT, clf, clvfr, delzkm, fnoscav, delp
+!    &,                    almin1, almin2
 
       INTEGER I, L,  N,  KD1, II, iwk, idh, lcon                        &
      &,       IT, KM1, KTEM, KK, KK1, LM1, LL, LP1, kbls, kmxh          &
@@ -1248,6 +1260,9 @@
 !
 !***********************************************************************
 !
+!     almin2 = 0.2 * sqrt(pi/area)
+!     almin1 = almin2
+
       KM1 = K  - 1
       KD1 = KD + 1
 
@@ -1364,6 +1379,9 @@
       HOL(L) = HOL(L) + ETA(L)
       HST(L) = HST(L) + ETA(L)
 !
+!     To determine KBL internally -- If KBL is defined externally
+!     the following two loop should be skipped
+!
       if (sgcs(kd) < 0.5_kp) then
          hcrit = hcritd
       elseif (sgcs(kd) > 0.65_kp) then
@@ -1398,6 +1416,7 @@
            hmax = hol(kmax)
          elseif (kmax < k) then
            do l=kmax+1,k
+!            if (abs(hol(kmax)-hol(l)) > half * hcrit) then
              if (abs(hol(kmax)-hol(l)) >        hcrit) then
                kmxb = l - 1
                exit
@@ -1439,11 +1458,18 @@
            enddo
          endif
 
+!        if (klcl == kd .or. klcl < ktem) return
+
+!        This is to handle mid-level convection from quasi-uniform h
+
          if (kmax < kmxb) then
            kmax   = max(kd1, min(kmxb,k))
            kmaxm1 = kmax - 1
            kmaxp1 = kmax + 1
          endif
+
+
+!        if (prl(Kmaxp1) - prl(klcl) > 250.0 ) return
 
          ii  = max(kbl,kd1)
          kbl = max(klcl,kd1)
@@ -1459,7 +1485,26 @@
 
          if (prl(kbl) - prl(klcl) > pcrit_lcl) return
 !
+!        KBL  = min(kmax, MAX(KBL,KBLMX))
          KBL  = min(kblmn, MAX(KBL,KBLMX))
+!        kbl  = min(kblh,kbl)
+!!!
+!        tem1 = max(prl(kP1)-prl(k),                                    &
+!    &                     min((prl(kbl) - prl(kd))*0.05, 10.0))
+!!   &                     min((prl(kbl) - prl(kd))*0.05, 20.0))
+!!   &                     min((prl(kbl) - prl(kd))*0.05, 30.0))
+!        if (prl(kp1)-prl(kbl) < tem1) then
+!          KTEM = MAX(KD+1, KBLMX)
+!          do l=k,KTEM,-1
+!            tem = prl(kp1) - prl(l)
+!            if (tem > tem1) then
+!              kbl = min(kbl,l)
+!              exit
+!            endif
+!          enddo
+!        endif
+!        if (kbl == kblmx .and. kmax >= km1) kbl = k - 1
+!!!
 
          KPBL = KBL
 
@@ -1471,6 +1516,7 @@
       KB1 = KBL - 1
 !
       if (PRL(Kmaxp1)-PRL(KBL) > bldmax .or. kb1 <= kd ) then
+!    &          .or. PRL(Kmaxp1)-PRL(KBL) < bldmin) then
         return
       endif
 !
@@ -1483,6 +1529,7 @@
       ZET(KBL) = zero
 !
       shal_fac = one
+!     if (prl(kbl)-prl(kd) < 300.0 .and. kmax == k) shal_fac = shalfac
       if (prl(kbl)-prl(kd) < 350.0_kp .and. kmax == k) shal_fac = shalfac
       DO L=Kmax,KD,-1
         IF (L >= KBL) THEN
@@ -1515,16 +1562,22 @@
          TX1 = TX1 + QST(L) * TEM
       ENDDO
 
+!     if (ctei .and. sgcs(kd) > 0.65) then
+!        hbl = hbl * hpert_fac
+!        qbl = qbl * hpert_fac
+!     endif
+
 !                                   Find Min value of HOL in TX2
       TX2 = HOL(KD)
       IDH = KD1
       DO L=KD1,KB1
         IF (HOL(L) < TX2) THEN
            TX2 = HOL(L)
-           IDH = L              ! Level of minimum moist static energy!
+           IDH = L             ! Level of minimum moist static energy!
         ENDIF
       ENDDO
       IDH = 1
+!     IDH = MAX(KD1, IDH)
       IDH = MAX(KD, IDH)       ! Moorthi May, 31, 2019
 !
       TEM1 = HBL - HOL(KD)
@@ -1540,7 +1593,7 @@
       enddo
 !
       if (lcon == kd .or. kbl <= kd .or. prl(kbl)-prsm(lcon) > 150.0_kp) &
-     &                                  return
+     &                                    return
 !
       TX1    = RHFACS - QBL / TX1       !     Average RH
 
@@ -1562,9 +1615,11 @@
           ENDDO
         ENDDO
 !
+!       if (ntk > 0 .and. aw_scal) then
         if (ntk > 0) then
           if (rbl(ntk) > zero) then
             wcbase = min(two, max(wcbase, sqrt(twoo3*rbl(ntk))))
+!           wcbase = min(one, max(wcbase, sqrt(twoo3*rbl(ntk))))
           endif
         endif
 
@@ -1584,7 +1639,7 @@
         TEM1     = (TX3 + TEM) * half
         ST2      = (GAF(L)+GAF(LP1)) * half
 !
-        FCO(LP1) =             TEM1 + ST2 * HBL
+        FCO(LP1) =            TEM1 + ST2 * HBL
 
         RNN(LP1) = ZET(LP1) * TEM1 + ST2 * TX4
         GMH(LP1) = XI(LP1)  * TEM1 + ST2 * TX5
@@ -1606,7 +1661,7 @@
       TEM1     = (TX3 + TEM) * half
       ST2      = (GAF(L)+GAF(LP1)) * half
 !
-      FCO(LP1) =             TEM1 + ST2 * HBL
+      FCO(LP1) =            TEM1 + ST2 * HBL
       RNN(LP1) = ZET(LP1) * TEM1 + ST2 * TX4
       GMH(LP1) = XI(LP1)  * TEM1 + ST2 * TX5
 !
@@ -1614,7 +1669,7 @@
       RNN(L)   = TEM * ZET(L) + (TX4 + ETA(L)*HOL(L)) * GAF(L)
       GMH(L)   = TEM * XI(L)  + (TX5 + GMS(L)*HOL(L)) * GAF(L)
 !
-!    Replace FCO for the Bottom
+!   Replace FCO for the Bottom
 !
       FCO(KBL) = QBL
       RNN(KBL) = zero
@@ -1665,11 +1720,271 @@
       qw00 = qw0
       qi00 = qi0
       ii = 0
-      abort_cloud = .false.
+  777 continue
+!
+      ep_wfn = .false.
+      RNN(KBL) = zero
+      TX3      = bkc(kb1) * (QIB + QLB)
+      TX4      = zero
+      TX5      = zero
+      DO L=KB1,KD1,-1
+        TEM    = BKC(L-1)       * AKC(L)
+        TX3    = (TX3 + FCO(L)) * TEM
+        TX4    = (TX4 + RNN(L)) * TEM
+        TX5    = (TX5 + GMH(L)) * TEM
+      ENDDO
+      IF (KD < KB1) THEN
+         HSD   = HST(KD1) + LTL(KD1) *  NU *(QOL(KD1)-QST(KD1))
+      ELSE
+         HSD   = HBL
+      ENDIF
+!
+      TX3 = (TX3 + FCO(KD)) * AKC(KD)
+      TX4 = (TX4 + RNN(KD)) * AKC(KD)
+      TX5 = (TX5 + GMH(KD)) * AKC(KD)
+      ALM = ALHF*QIL(KD) - LTL(KD) * VTF(KD)
+!
+      HSU = HST(KD) + LTL(KD) * NU * (QOL(KD)-QST(KD))
+!
+!===> VERTICAL INTEGRALS NEEDED TO COMPUTE THE ENTRAINMENT PARAMETER
+!
+      TX1 = ALM * TX4
+      TX2 = ALM * TX5
 
-      ! --- CHANGED: First pass to evaluate the workfunction and mass flux
-      call evaluate_workfunction()
-      if (abort_cloud) return
+      DO L=KD,KB1
+        TAU = HOL(L) - HSU
+        TX1 = TX1 + TAU * ETA(L)
+        TX2 = TX2 + TAU * GMS(L)
+      ENDDO
+!
+!     MODIFY HSU TO INCLUDE CLOUD LIQUID WATER AND ICE TERMS
+!
+      HSU    = HSU - ALM * TX3
+!
+      CLP    = ZERO
+      ALM    = -100.0_kp
+      HOS    = HOL(KD)
+      QOS    = QOL(KD)
+      QIS    = CIL(KD)
+      QLS    = CLL(KD)
+
+      cnvflg = HBL > HSU .and. abs(tx1) > 1.0e-4_kp
+
+!***********************************************************************
+
+      ST1 = HALF*(HSU + HSD)
+
+      IF (cnvflg) THEN
+!
+!  STANDARD CASE:
+!   CLOUD CAN BE NEUTRALLY BOUYANT AT MIDDLE OF LEVEL KD W/ +VE LAMBDA.
+!   EPP < .25 IS REQUIRED TO HAVE REAL ROOTS.
+!
+        clp = one
+        st2 = hbl - hsu
+!
+        if (tx2 == zero) then
+          alm = - st2 / tx1
+          if (alm > almax) alm = -100.0_kp
+        else
+          x00 = tx2 + tx2
+          epp = tx1 * tx1 - (x00+x00)*st2
+          if (epp > zero) then
+            x00  = one / x00
+            tem  = sqrt(epp)
+            tem1 = (-tx1-tem)*x00
+            tem2 = (-tx1+tem)*x00
+            if (tem1 > almax) tem1 = -100.0_kp
+            if (tem2 > almax) tem2 = -100.0_kp
+            alm  = max(tem1,tem2)
+
+          endif
+        endif
+!
+!  CLIP CASE:
+!   NON-ENTRAINIG CLOUD DETRAINS IN LOWER HALF OF TOP LAYER.
+!   NO CLOUDS ARE ALLOWED TO DETRAIN BELOW THE TOP LAYER.
+!
+      ELSEIF (HBL <= HSU .AND. HBL > ST1) THEN
+        ALM = ZERO
+!       CLP = (HBL-ST1) / (HSU-ST1)    ! commented on Jan 16, 2010
+      ENDIF
+!
+      cnvflg = .TRUE.
+      IF (ALMIN1 > zero) THEN
+        IF (ALM >= ALMIN1) cnvflg = .FALSE.
+      ELSE
+        LOWEST = KD == KB1
+        IF ( (ALM > ZERO) .OR.                                          &
+     &     (.NOT. LOWEST .AND. ALM == ZERO) ) cnvflg = .FALSE.
+      ENDIF
+!
+!===>  IF NO SOUNDING MEETS SECOND CONDITION, RETURN
+!
+      IF (cnvflg) THEN
+         IF (ii > 0 .or. (qw00 == zero .and. qi00 == zero)) RETURN
+         CLP = one
+         ep_wfn = .true.
+         GO TO 888
+      ENDIF
+!
+      st1s = ONE
+      IF(CLP > ZERO .AND. CLP < ONE) THEN
+        ST1     = HALF*(ONE+CLP)
+        ST2     = ONE - ST1
+        st1s    = st1
+        hstkd   = hst(kd)
+        qstkd   = qst(kd)
+        ltlkd   = ltl(kd)
+        q0ukd   = q0u(kd)
+        q0dkd   = q0d(kd)
+        dlbkd   = dlb(kd)
+        qrbkd   = qrb(kd)
+!
+        HST(KD) = HST(KD)*ST1 + HST(KD1)*ST2
+        HOS     = HOL(KD)*ST1 + HOL(KD1)*ST2
+        QST(KD) = QST(KD)*ST1 + QST(KD1)*ST2
+        QOS     = QOL(KD)*ST1 + QOL(KD1)*ST2
+        QLS     = CLL(KD)*ST1 + CLL(KD1)*ST2
+        QIS     = CIL(KD)*ST1 + CIL(KD1)*ST2
+        LTL(KD) = LTL(KD)*ST1 + LTL(KD1)*ST2
+!
+        DLB(KD) = DLB(KD)*CLP
+        qrb(KD) = qrb(KD)*CLP
+        ETA(KD) = ETA(KD)*CLP
+        GMS(KD) = GMS(KD)*CLP
+        Q0U(KD) = Q0U(KD)*CLP
+        Q0D(KD) = Q0D(KD)*CLP
+      ENDIF
+!
+!
+!***********************************************************************
+!
+!    Critical workfunction is included in this version
+!
+      ACR  = zero
+      TEM  = PRL(KD1) - (PRL(KD1)-PRL(KD)) * CLP * HALF
+      tx1  = PRL(KBL) - TEM
+      tx2  = min(900.0_kp, max(tx1,100.0_kp))
+      tem1 = log(tx2*0.01_kp) * oneolog10
+      tem2 = one - tem1
+      if ( kdt == 1 ) then
+!       rel_fac = (dt * facdt)  / (tem1*12.0_kp + tem2*3.0)
+        rel_fac = (dt * facdt)  / (tem1*6.0_kp + tem2*adjts_s)
+      else
+        rel_fac = (dt * facdt) / (tem1*adjts_d + tem2*adjts_s)
+      endif
+!
+!     rel_fac = max(zero, min(one,rel_fac))
+      rel_fac = max(zero, min(half,rel_fac))
+      
+      IF (CRTFUN) THEN
+        iwk = tem*0.02_kp - 0.999999999_kp
+        iwk = MAX(1, MIN(iwk, 16))
+        ACR = tx1 * (AC(iwk) + tem * AD(iwk)) * CCWF
+      ENDIF
+!
+!===>  NORMALIZED MASSFLUX
+!
+!  ETA IS THE THICKNESS COMING IN AND normalized  MASS FLUX GOING OUT.
+!  GMS IS THE THICKNESS SQUARE ; IT IS LATER REUSED FOR GAMMA_S
+!
+!     ETA(K) = ONE
+
+      DO L=KB1,KD,-1
+        ETA(L)  = ETA(L+1) + ALM * (ETA(L) + ALM * GMS(L))
+        ETAI(L) = one / ETA(L)
+      ENDDO
+      ETAI(KBL) = one
+!
+!===>  CLOUD WORKFUNCTION
+!
+      WFN    = ZERO
+      AKM    = ZERO
+      DET    = ZERO
+      HCC    = HBL
+      cnvflg = .FALSE.
+      QTL    = QST(KB1) - GAF(KB1)*HST(KB1)
+      TX1    = HBL
+!
+      qtv    = qbl
+      det    = qlb + qib
+!
+      tx2    = zero
+      dpneg  = zero
+!
+      DO L=KB1,KD1,-1
+         lm1 = l - 1
+         lp1 = l + 1
+         DEL_ETA = ETA(L) - ETA(LP1)
+         HCCP = HCC + DEL_ETA*HOL(L)
+!
+         QTLP = QST(LM1) - GAF(LM1)*HST(LM1)
+         QTVP = half * ((QTLP+QTL)*ETA(L)                               &
+     &               + (GAF(L)+GAF(LM1))*HCCP)
+         ST1  = ETA(L)*Q0U(L) + ETA(LP1)*Q0D(L)
+         DETP = (BKC(L)*DET - (QTVP-QTV)                                &
+     &        + DEL_ETA*(QOL(L)+CLL(L)+CIL(L)) + ST1)  * AKC(L)
+
+         TEM1   = AKT(L)   - QLL(L)
+         TEM2   = QLL(LP1) - BKC(L)
+         RNS(L) = TEM1*DETP  + TEM2*DET - ST1
+
+         qtp    = half * (qil(L)+qil(LM1))
+         tem2   = min(qtp*(detp-eta(l)*qw00),                           &
+     &               (one-qtp)*(detp-eta(l)*qi00))
+         st1    = min(tx2,tem2)
+         tx2    = tem2
+!
+         IF (rns(l) < zero .or. st1 < zero) ep_wfn = .TRUE.
+         IF (DETP <= ZERO) cnvflg = .TRUE.
+
+         ST1  = HST(L) - LTL(L)*NU*(QST(L)-QOL(L))
+
+
+         TEM2 = HCCP   + DETP   * QTP * ALHF
+!
+         ST2  = LTL(L) * VTF(L)
+         TEM5 = CLL(L) + CIL(L)
+         TEM3 = (TX1  - ETA(LP1)*ST1 - ST2*(DET-TEM5*eta(lp1))) * DLB(L)
+         TEM4 = (TEM2 - ETA(L  )*ST1 - ST2*(DETP-TEM5*eta(l)))  * DLT(L)
+!
+         ST1  = TEM3 + TEM4
+
+         WFN = WFN + ST1       
+         AKM = AKM - min(ST1,ZERO)
+
+         if (st1 < zero .and. wfn < zero) then
+           dpneg = dpneg + prl(lp1) - prl(l)
+         endif
+
+         BUY(L) = half * (tem3/(eta(lp1)*qrb(l)) + tem4/(eta(l)*qrt(l)))
+!
+         HCC = HCCP
+         DET = DETP
+         QTL = QTLP
+         QTV = QTVP
+         TX1 = TEM2
+
+      ENDDO
+
+      DEL_ETA = ETA(KD) - ETA(KD1)
+      HCCP    = HCC + DEL_ETA*HOS
+!
+      QTLP    = QST(KD) - GAF(KD)*HST(KD)
+      QTVP    = QTLP*ETA(KD) + GAF(KD)*HCCP
+      ST1     = ETA(KD)*Q0U(KD) + ETA(KD1)*Q0D(KD)
+      DETP    = (BKC(KD)*DET - (QTVP-QTV)                               &
+     &        + DEL_ETA*(QOS+QLS+QIS) + ST1) * AKC(KD)
+!
+      TEM1    = AKT(KD)  - QLL(KD)
+      TEM2    = QLL(KD1) - BKC(KD)
+      RNS(KD) = TEM1*DETP  + TEM2*DET - ST1
+!
+      IF (rns(kd) < zero) ep_wfn = .TRUE.
+      IF (DETP   <= ZERO) cnvflg = .TRUE.
+!
+  888 continue
 
       if (ep_wfn) then
         IF ((qw00 == zero .and. qi00 == zero)) RETURN
@@ -1697,15 +2012,12 @@
           qw00 = zero
           qi00 = zero
 
-          ! --- CHANGED: Second pass to re-evaluate the workfunction
-          call evaluate_workfunction()
-          if (abort_cloud) return
-          
-          if (ep_wfn) cnvflg = .true.
+          go to 777
         else
           cnvflg = .true.
         endif
       endif
+!
 !
 !     ST1 = 0.5 * (HST(KD)  - LTL(KD)*NU*(QST(KD)-QOS)                  &
 !    &          +  HST(KD1) - LTL(KD1)*NU*(QST(KD1)-QOL(KD1)))
@@ -1747,6 +2059,16 @@
 !
       IF (.NOT. CALCUP) RETURN
 !
+! This is for not LL - 20050601
+!     IF (ALMIN2 .NE. zero) THEN
+!       IF (ALMIN1 .NE. ALMIN2) ST1 = one / max(ONE_M10,(ALMIN2-ALMIN1))
+!       IF (ALM < ALMIN2) THEN
+!          CLP = CLP * max(zero, min(one,(0.3 + 0.7*(ALM-ALMIN1)*ST1)))
+!!         CLP = CLP * max(0.0, min(1.0,(0.2 + 0.8*(ALM-ALMIN1)*ST1)))
+!!         CLP = CLP * max(0.0, min(1.0,(0.1 + 0.9*(ALM-ALMIN1)*ST1)))
+!       ENDIF
+!     ENDIF
+!
       CLP = CLP * RHC
       dlq = zero
       tem = one / (one + dlq_fac)
@@ -1779,10 +2101,11 @@
      &              K,   KP1,    KD                                     &
      &,             TLA, ALFIND, wcbase                                 &
      &,             TOL, QOL, HOL,   PRL, QST, HST, GAM, GAF            &
+!    &,             TOL, QOL, HOL,   PRL, QST, HST, GAM, GAF, HBL, QBL  &
      &,             QRB, QRT, BUY,   KBL, IDH, ETA, RNN, ETAI           &
      &,             ALM, WFN, TRAIN, DDFT                               &
      &,             ETD, HOD, QOD,   EVP, DOF, CLDFR, ETZ               &
-     &,             GMS, GSD, GHD,   wvl)                
+     &,             GMS, GSD, GHD,   wvl)               
 
       ENDIF
 !
@@ -1805,14 +2128,18 @@
 
 !
 !===> CALCULATE GAMMAS  i.e. TENDENCIES PER UNIT CLOUD BASE MASSFLUX
-!            Includes downdraft terms!
+!           Includes downdraft terms!
 
       avh = zero
 
 !
 !     Fraction of detrained condensate evaporated
 !
+!     tem1 = max(ZERO, min(HALF, (prl(kd)-FOUR_P2)*ONE_M2))
+!     tem1 = max(ZERO, min(HALF, (prl(kd)-300.0)*0.005))
       tem1 = zero
+!     tem1 = 1.0
+!     if (kd1 == kbl) tem1 = 0.0
 !
       tem2 = one - tem1
       TEM  = DET * QIL(KD)
@@ -1887,7 +2214,7 @@
          QIL(LM1) = QIL(LM1) + TEM1 * PRI(LM1)
          QLL(LM1) = QLL(LM1) + TEM3 * PRI(LM1)
 !
-         avh = avh + gmh(lm1)*(prs(l)-prs(lm1))
+        avh = avh + gmh(lm1)*(prs(l)-prs(lm1))
 
       ENDDO
 !
@@ -1975,6 +2302,11 @@
       QBL = QBL * PRISM
       QLB = QLB * PRISM
       QIB = QIB * PRISM
+
+!     if (ctei .and. sgcs(kd) > 0.65) then
+!        hbl = hbl * hpert_fac
+!        qbl = qbl * hpert_fac
+!     endif
  
 !***********************************************************************
 
@@ -2049,6 +2381,8 @@
 !===>   RELAXATION AND CLIPPING FACTORS
 !
       AMB  = AMB * CLP * rel_fac
+
+!!!   if (DDFT) AMB = MIN(AMB, ONE/CLDFRD)
        
 !===>   SUB-CLOUD LAYER DEPTH LIMIT ON MASS FLUX
 
@@ -2063,11 +2397,33 @@
 !
       if (amb > zero) then
 
+!
+!       if (wvl(kd) > zero) then
+!         tx1 = one - amb * eta(kd) / (rho(kd)*wvl(kd))
+!         sigf(kd) =  max(zero, min(one, tx1 * tx1))
+!       endif
         if (aw_scal) then
           tx1 = (0.2_kp / max(alm, 1.0e-5_kp))
           tx2 = one - min(one, pi * tx1 * tx1 / area)
 
           tx2 = tx2 * tx2 
+
+! comnet out the following for now - 07/23/18
+!         do l=kd1,kbl
+!           lp1 = min(K, l+1)
+!           if (wvl(l) > zero .and. wvl(lp1) > zero) then
+!             tx1     = one - amb *  (eta(l)+eta(lp1))
+!    &                      / ((wvl(l)+wvl(lp1))*rho(l)*grav)
+!             sigf(l) = max(zero, min(one, tx1 * tx1))
+!           else
+!             sigf(l) = min(one,tx2)
+!           endif
+!           sigf(l) = max(sigf(l), tx2)
+!         enddo
+!         sigf(kd) = sigf(kd1)
+!         if (kbl < k) then
+!           sigf(kbl+1:k) = sigf(kbl)
+!         endif
           sigf(kd:k) = tx2
         else
           sigf(kd:k) = one
@@ -2120,6 +2476,8 @@
           QCD(L)  = QCD(L) + (GHD(L)-GSD(L)) * TX2 * sigf(l)
 !
           avq = avq + (st1 + (QLL(L)+QIL(L))*tx3) * delp
+!         avq = avq + st1 * (prs(l+1)-prs(l))
+!         avr = avr + (QLL(L) + QIL(L)*(1+alhf/alhl))
           avr = avr + (QLL(L) + QIL(L)) * delp * sigf(l) * gravcon
 
 !      Correction for negative condensate!
@@ -2142,7 +2500,25 @@
 
         ENDDO
         avr = avr * amb
+!
+!      Correction for negative condensate!
+!     if (advcld) then
+!       do l=kd,k
+!         if (qli(l) < zero) then
+!           qoi(l) = qoi(l) + qli(l)
+!           toi(l) = toi(l) - (alhl/cp) * qli(l)
+!           qli(l) = zero
+!         endif
+!         if (qii(l) < zero) then
+!           qoi(l) = qoi(l) + qii(l)
+!           toi(l) = toi(l) - ((alhl+alhf)/cp) * qii(l)
+!           qii(l) = zero
+!         endif
+!       enddo
+!     endif
 
+!
+!
         TX1 = zero
         TX2 = zero
 !
@@ -2162,6 +2538,7 @@
          cldfrd = clfrac
 !
          DO L=KD,KBL         ! Testing on 20070926
+!                                                 for L=KD,K
            IF (L >= IDH .AND. DDFT) THEN
              tem    = amb * sigf(l)
              TX2    = TX2 + tem * RNN(L)
@@ -2258,7 +2635,7 @@
                 TEM = ETZI(LM1)
                 IF (ETD(L)  > ETD(LM1)) THEN
                  HOD(L) = (ETD(LM1)*(HOD(LM1)-HOL(LM1))                 &
-     &                    +  ETD(L)  *(HOL(LM1)-HB) +  ETZ(LM1)*HB) * TEM
+     &                   +  ETD(L)  *(HOL(LM1)-HB) +  ETZ(LM1)*HB) * TEM
                 ELSE
                  HOD(L) = (ETD(LM1)*(HOD(LM1)-HB) + ETZ(LM1)*HB) * TEM
                 ENDIF
@@ -2266,7 +2643,7 @@
                 HOD(L) = HB
               ENDIF
             ENDDO
-              
+             
             DO L=KB1,KD,-1
               HCC = HCC + (ETA(L)-ETA(L+1))*HOL(L)
             ENDDO
@@ -2319,283 +2696,11 @@
               endif
               
             ENDDO
-          ENDDO                           ! Tracer loop NTRC
+          ENDDO                             ! Tracer loop NTRC
         endif
       endif             ! amb > zero
 
       RETURN
-      
-      CONTAINS 
-      
-        ! --- CHANGED: Internal subroutine replacing the GOTO 777/888 structure
-        subroutine evaluate_workfunction()
-            ep_wfn = .false.
-            RNN(KBL) = zero
-            TX3      = bkc(kb1) * (QIB + QLB)
-            TX4      = zero
-            TX5      = zero
-            DO L=KB1,KD1,-1
-              TEM    = BKC(L-1)       * AKC(L)
-              TX3    = (TX3 + FCO(L)) * TEM
-              TX4    = (TX4 + RNN(L)) * TEM
-              TX5    = (TX5 + GMH(L)) * TEM
-            ENDDO
-            IF (KD < KB1) THEN
-               HSD   = HST(KD1) + LTL(KD1) * NU *(QOL(KD1)-QST(KD1))
-            ELSE
-               HSD   = HBL
-            ENDIF
-      !
-            TX3 = (TX3 + FCO(KD)) * AKC(KD)
-            TX4 = (TX4 + RNN(KD)) * AKC(KD)
-            TX5 = (TX5 + GMH(KD)) * AKC(KD)
-            ALM = ALHF*QIL(KD) - LTL(KD) * VTF(KD)
-      !
-            HSU = HST(KD) + LTL(KD) * NU * (QOL(KD)-QST(KD))
-      !
-      !===> VERTICAL INTEGRALS NEEDED TO COMPUTE THE ENTRAINMENT PARAMETER
-      !
-            TX1 = ALM * TX4
-            TX2 = ALM * TX5
-
-            DO L=KD,KB1
-              TAU = HOL(L) - HSU
-              TX1 = TX1 + TAU * ETA(L)
-              TX2 = TX2 + TAU * GMS(L)
-            ENDDO
-      !
-      !     MODIFY HSU TO INCLUDE CLOUD LIQUID WATER AND ICE TERMS
-      !
-            HSU    = HSU - ALM * TX3
-      !
-            CLP    = ZERO
-            ALM    = -100.0_kp
-            HOS    = HOL(KD)
-            QOS    = QOL(KD)
-            QIS    = CIL(KD)
-            QLS    = CLL(KD)
-
-            cnvflg = HBL > HSU .and. abs(tx1) > 1.0e-4_kp
-
-      !***********************************************************************
-
-            ST1 = HALF*(HSU + HSD)
-
-            IF (cnvflg) THEN
-      !
-      !  STANDARD CASE:
-      !   CLOUD CAN BE NEUTRALLY BOUYANT AT MIDDLE OF LEVEL KD W/ +VE LAMBDA.
-      !   EPP < .25 IS REQUIRED TO HAVE REAL ROOTS.
-      !
-              clp = one
-              st2 = hbl - hsu
-      !
-              if (tx2 == zero) then
-                alm = - st2 / tx1
-                if (alm > almax) alm = -100.0_kp
-              else
-                x00 = tx2 + tx2
-                epp = tx1 * tx1 - (x00+x00)*st2
-                if (epp > zero) then
-                  x00  = one / x00
-                  tem  = sqrt(epp)
-                  tem1 = (-tx1-tem)*x00
-                  tem2 = (-tx1+tem)*x00
-                  if (tem1 > almax) tem1 = -100.0_kp
-                  if (tem2 > almax) tem2 = -100.0_kp
-                  alm  = max(tem1,tem2)
-
-                endif
-              endif
-      !
-      !  CLIP CASE:
-      !   NON-ENTRAINIG CLOUD DETRAINS IN LOWER HALF OF TOP LAYER.
-      !   NO CLOUDS ARE ALLOWED TO DETRAIN BELOW THE TOP LAYER.
-      !
-            ELSEIF (HBL <= HSU .AND. HBL > ST1) THEN
-              ALM = ZERO
-      !       CLP = (HBL-ST1) / (HSU-ST1)    ! commented on Jan 16, 2010
-            ENDIF
-      !
-            cnvflg = .TRUE.
-            IF (ALMIN1 > zero) THEN
-              IF (ALM >= ALMIN1) cnvflg = .FALSE.
-            ELSE
-              LOWEST = KD == KB1
-              IF ( (ALM > ZERO) .OR.                                          &
-           &       (.NOT. LOWEST .AND. ALM == ZERO) ) cnvflg = .FALSE.
-            ENDIF
-      !
-      !===>  IF NO SOUNDING MEETS SECOND CONDITION, RETURN
-      !
-            IF (cnvflg) THEN
-               IF (ii > 0 .or. (qw00 == zero .and. qi00 == zero)) THEN
-                  abort_cloud = .true.
-                  RETURN
-               ENDIF
-               CLP = one
-               ep_wfn = .true.
-               RETURN   ! Cleanly skips mass flux/WFN calcs and hands back to host
-            ENDIF
-      !
-            st1s = ONE
-            IF(CLP > ZERO .AND. CLP < ONE) THEN
-              ST1      = HALF*(ONE+CLP)
-              ST2      = ONE - ST1
-              st1s     = st1
-              hstkd    = hst(kd)
-              qstkd    = qst(kd)
-              ltlkd    = ltl(kd)
-              q0ukd    = q0u(kd)
-              q0dkd    = q0d(kd)
-              dlbkd    = dlb(kd)
-              qrbkd    = qrb(kd)
-      !
-              HST(KD) = HST(KD)*ST1 + HST(KD1)*ST2
-              HOS     = HOL(KD)*ST1 + HOL(KD1)*ST2
-              QST(KD) = QST(KD)*ST1 + QST(KD1)*ST2
-              QOS     = QOL(KD)*ST1 + QOL(KD1)*ST2
-              QLS     = CLL(KD)*ST1 + CLL(KD1)*ST2
-              QIS     = CIL(KD)*ST1 + CIL(KD1)*ST2
-              LTL(KD) = LTL(KD)*ST1 + LTL(KD1)*ST2
-      !
-              DLB(KD) = DLB(KD)*CLP
-              qrb(KD) = qrb(KD)*CLP
-              ETA(KD) = ETA(KD)*CLP
-              GMS(KD) = GMS(KD)*CLP
-              Q0U(KD) = Q0U(KD)*CLP
-              Q0D(KD) = Q0D(KD)*CLP
-            ENDIF
-      !
-      !
-      !***********************************************************************
-      !
-      !    Critical workfunction is included in this version
-      !
-            ACR  = zero
-            TEM  = PRL(KD1) - (PRL(KD1)-PRL(KD)) * CLP * HALF
-            tx1  = PRL(KBL) - TEM
-            tx2  = min(900.0_kp, max(tx1,100.0_kp))
-            tem1 = log(tx2*0.01_kp) * oneolog10
-            tem2 = one - tem1
-            if ( kdt == 1 ) then
-      !       rel_fac = (dt * facdt)  / (tem1*12.0_kp + tem2*3.0)
-              rel_fac = (dt * facdt)  / (tem1*6.0_kp + tem2*adjts_s)
-            else
-              rel_fac = (dt * facdt) / (tem1*adjts_d + tem2*adjts_s)
-            endif
-      !
-      !       rel_fac = max(zero, min(one,rel_fac))
-            rel_fac = max(zero, min(half,rel_fac))
-            
-            IF (CRTFUN) THEN
-              iwk = tem*0.02_kp - 0.999999999_kp
-              iwk = MAX(1, MIN(iwk, 16))
-              ACR = tx1 * (AC(iwk) + tem * AD(iwk)) * CCWF
-            ENDIF
-      !
-      !===>  NORMALIZED MASSFLUX
-      !
-      !  ETA IS THE THICKNESS COMING IN AND normalized  MASS FLUX GOING OUT.
-      !  GMS IS THE THICKNESS SQUARE ; IT IS LATER REUSED FOR GAMMA_S
-      !
-      !     ETA(K) = ONE
-
-            DO L=KB1,KD,-1
-              ETA(L)  = ETA(L+1) + ALM * (ETA(L) + ALM * GMS(L))
-              ETAI(L) = one / ETA(L)
-            ENDDO
-            ETAI(KBL) = one
-      !
-      !===>  CLOUD WORKFUNCTION
-      !
-            WFN    = ZERO
-            AKM    = ZERO
-            DET    = ZERO
-            HCC    = HBL
-            cnvflg = .FALSE.
-            QTL    = QST(KB1) - GAF(KB1)*HST(KB1)
-            TX1    = HBL
-      !
-            qtv    = qbl
-            det    = qlb + qib
-      !
-            tx2    = zero
-            dpneg  = zero
-      !
-            DO L=KB1,KD1,-1
-               lm1 = l - 1
-               lp1 = l + 1
-               DEL_ETA = ETA(L) - ETA(LP1)
-               HCCP = HCC + DEL_ETA*HOL(L)
-      !
-               QTLP = QST(LM1) - GAF(LM1)*HST(LM1)
-               QTVP = half * ((QTLP+QTL)*ETA(L)                                &
-            &                 + (GAF(L)+GAF(LM1))*HCCP)
-               ST1  = ETA(L)*Q0U(L) + ETA(LP1)*Q0D(L)
-               DETP = (BKC(L)*DET - (QTVP-QTV)                                 &
-            &         + DEL_ETA*(QOL(L)+CLL(L)+CIL(L)) + ST1)  * AKC(L)
-
-               TEM1   = AKT(L)  - QLL(L)
-               TEM2   = QLL(LP1) - BKC(L)
-               RNS(L) = TEM1*DETP  + TEM2*DET - ST1
-
-               qtp    = half * (qil(L)+qil(LM1))
-               tem2   = min(qtp*(detp-eta(l)*qw00),                            &
-            &               (one-qtp)*(detp-eta(l)*qi00))
-               st1    = min(tx2,tem2)
-               tx2    = tem2
-      !
-               IF (rns(l) < zero .or. st1 < zero) ep_wfn = .TRUE.
-               IF (DETP <= ZERO) cnvflg = .TRUE.
-
-               ST1  = HST(L) - LTL(L)*NU*(QST(L)-QOL(L))
-
-
-               TEM2 = HCCP   + DETP   * QTP * ALHF
-      !
-               ST2  = LTL(L) * VTF(L)
-               TEM5 = CLL(L) + CIL(L)
-               TEM3 = (TX1  - ETA(LP1)*ST1 - ST2*(DET-TEM5*eta(lp1))) * DLB(L)
-               TEM4 = (TEM2 - ETA(L  )*ST1 - ST2*(DETP-TEM5*eta(l)))  * DLT(L)
-      !
-               ST1  = TEM3 + TEM4
-
-               WFN = WFN + ST1        
-               AKM = AKM - min(ST1,ZERO)
-
-               if (st1 < zero .and. wfn < zero) then
-                 dpneg = dpneg + prl(lp1) - prl(l)
-               endif
-
-               BUY(L) = half * (tem3/(eta(lp1)*qrb(l)) + tem4/(eta(l)*qrt(l)))
-      !
-               HCC = HCCP
-               DET = DETP
-               QTL = QTLP
-               QTV = QTVP
-               TX1 = TEM2
-
-            ENDDO
-
-            DEL_ETA = ETA(KD) - ETA(KD1)
-            HCCP    = HCC + DEL_ETA*HOS
-      !
-            QTLP    = QST(KD) - GAF(KD)*HST(KD)
-            QTVP    = QTLP*ETA(KD) + GAF(KD)*HCCP
-            ST1     = ETA(KD)*Q0U(KD) + ETA(KD1)*Q0D(KD)
-            DETP    = (BKC(KD)*DET - (QTVP-QTV)                                &
-            &         + DEL_ETA*(QOS+QLS+QIS) + ST1) * AKC(KD)
-      !
-            TEM1    = AKT(KD)  - QLL(KD)
-            TEM2    = QLL(KD1) - BKC(KD)
-            RNS(KD) = TEM1*DETP  + TEM2*DET - ST1
-      !
-            IF (rns(kd) < zero) ep_wfn = .TRUE.
-            IF (DETP  <= ZERO) cnvflg = .TRUE.
-
-        end subroutine evaluate_workfunction
-
       end subroutine cloud
 
 !>\ingroup rascnv_schm
