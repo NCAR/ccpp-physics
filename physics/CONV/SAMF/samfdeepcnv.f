@@ -220,10 +220,9 @@ cj
 !
 !  parameters for prognostic sigma closure                                                                                                                                                      
       real(kind=kind_phys) omega_u(im,km),zdqca(im,km),tmfq(im,km),
-     &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im),qadv(im,km),
-     &     tentr(im,km)
-      real(kind=kind_phys) gravinv,invdelt,sigmind,sigminm,sigmins
-      parameter(sigmind=0.01,sigmins=0.03,sigminm=0.01)
+     &     omegac(im),zeta(im,km),dbyo1(im,km),sigmab(im),qadv(im,km)
+      real(kind=kind_phys) gravinv,invdelt,sigmind,sigminm,sigmins,
+     &     wc_min, wc_eff 
       logical flag_shallow, flag_mid
 c  physical parameters
 !     parameter(grav=grav,asolfac=0.958)
@@ -347,6 +346,21 @@ c-----------------------------------------------------------------------
 !************************************************************************
 !
 !
+!   - Initialize parameters related to prognostic closure
+      if (progsigma) then
+         if (progomega) then
+            sigmind  = 0.03
+            sigmins  = 0.03
+            sigminm = 0.03
+            wc_min = 0.2
+         else
+            sigmind  = 0.01
+            sigmins  = 0.03
+            sigminm = 0.03
+            wc_min = 0.2
+         endif
+      endif
+      
       km1 = km - 1
 !>  - Initialize column-integrated and other single-value-per-column variable arrays.
 c
@@ -1137,7 +1151,6 @@ c
         do i=1,im
           if(cnvflg(i) .and.
      &       (k > kbcon(i) .and. k < kmax(i))) then
-              tentr(i,k)=xlamue(i,k)*fent1(i,k)
               tem = cxlamet(i) * frh(i,k) * fent2(i,k)
               xlamue(i,k) = xlamue(i,k)*fent1(i,k) + tem
               tem1 = cxlamdt(i) * frh(i,k)
@@ -1788,11 +1801,11 @@ c
       if (progomega) then
          call progomega_calc(first_time_step,restart,im,km,
      &        kbcon1,ktcon,omegain,delt,del,zi,cnvflg,omegaout,
-     &        grav,buo,drag,wush,tentr,bb1,bb2)
+     &        grav,buo,drag,wush,bb1,bb2)
          do k = 1, km
             do i = 1, im
                if (cnvflg(i)) then
-                  if(k > kbcon1(i) .and. k < ktcon(i)) then
+                  if(k >= kbcon1(i) .and. k < ktcon(i)) then
                      omega_u(i,k)=omegaout(i,k)
                      omega_u(i,k)=MAX(omega_u(i,k),-80.)
 !     Convert to m/s for use in convective time-scale:
@@ -1878,7 +1891,7 @@ c
          do k = 2, km1
             do i = 1, im
                if (cnvflg(i)) then
-                  if(k > kbcon1(i) .and. k < ktcon(i)) then
+                  if(k >= kbcon1(i) .and. k < ktcon(i)) then
                      dp = 1000. * del(i,k)
                      tem = 0.5 * (omega_u(i,k) + omega_u(i,k-1))
                      omegac(i) = omegac(i) + tem * dp
@@ -2907,27 +2920,25 @@ c
 !  compute convective turn-over time
 !
 !> - Following Bechtold et al. (2008) \cite bechtold_et_al_2008, the convective adjustment time (dtconv) is set to be proportional to the convective turnover time, which is computed using the mean updraft velocity (wc) and the cloud depth. It is also proportional to the grid size (gdx).
-      if(hwrf_samfdeep) then
-       do i= 1, im
-        if(cnvflg(i)) then
-          tem = zi(i,ktcon1(i)) - zi(i,kbcon1(i))
-          dtconv(i) = tem / wc(i)
-          dtconv(i) = max(dtconv(i),dtmin)
-          dtconv(i) = min(dtconv(i),dtmax)
-        endif
-       enddo
-      else
-       do i= 1, im
-        if(cnvflg(i)) then
-          tem = zi(i,ktcon1(i)) - zi(i,kbcon1(i))
-          dtconv(i) = tem / wc(i)
-          tfac = 1. + gdx(i) / 75000.
-          dtconv(i) = tfac * dtconv(i)
-          dtconv(i) = max(dtconv(i),dtmin)
-          dtconv(i) = min(dtconv(i),dtmax)
-        endif
-       enddo
-      endif
+      do i = 1, im
+         if (cnvflg(i)) then
+            tem = zi(i,ktcon1(i)) - zi(i,kbcon1(i))
+            if (progomega) then
+               wc_eff = max(wc(i), wc_min)
+               dtconv(i) = tem / wc_eff
+            else
+               dtconv(i) = tem / wc(i)
+            endif
+         !grid spacing scaling (disabled for HWRF SAMF deep)
+            if (.not. hwrf_samfdeep) then
+               tfac = 1. + gdx(i) / 75000.
+               dtconv(i) = tfac * dtconv(i)
+            endif  
+         !bounds
+            dtconv(i) = max(dtconv(i), dtmin)
+            dtconv(i) = min(dtconv(i), dtmax)
+         endif
+      enddo
 !
 !> - Calculate advective time scale (tauadv) using a mean cloud layer wind speed.
       do i= 1, im
