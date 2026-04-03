@@ -25,7 +25,7 @@
 
       integer,                              intent(in)    :: im, levr, levs,   &
                                                              ltp, nday, lm, kd
-      logical,                              intent(in)    :: lsswr, swhtr
+      logical,                              intent(in)    :: lsswr, swhtr 
       real(kind=kind_phys), dimension(:),   intent(in)    :: sfcalb1, sfcalb2, &
                                                              sfcalb3, sfcalb4
       real(kind=kind_phys), dimension(:,:), intent(in)    :: htswc, htsw0
@@ -45,7 +45,7 @@
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! Local variables
-      integer :: i, k1, k
+      integer :: i, k1, k, n
 
       ! Initialize CCPP error handling variables
       errmsg = ''

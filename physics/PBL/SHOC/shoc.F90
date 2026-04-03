@@ -39,7 +39,7 @@ subroutine shoc_run (nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_
                      con_pi, con_fvirt, con_eps, dtp, prsl, delp, phii, phil, u, v, omega, rhc, &
                      supice, pcrit,  cefac, cesfac, tkef1, dis_opt, hflx, evap, prnum,          &
                      gt0, gq0, ntrac, ntqv, ntcw, ntiw, ntrw, ntsw, ntgl, ntlnc, ntinc,         &
-                     cld_sgs, tke, tkh, wthv_sec, errmsg, errflg)
+                     cld_sgs, tke, tkh, wthv_sec, ten_t, ten_u, ten_v, ten_q, errmsg, errflg)
 
     implicit none
 
@@ -52,10 +52,12 @@ subroutine shoc_run (nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_
     real(kind=kind_phys), intent(in), dimension(:,:)   :: prsl, delp, phil, u, v, omega, rhc, prnum
     real(kind=kind_phys), intent(in), dimension(:,:) :: phii
    !
-    real(kind=kind_phys), intent(inout), dimension(:,:) :: gt0, tke, tkh, wthv_sec
+    real(kind=kind_phys), intent(in), dimension(:,:) :: gt0
+    real(kind=kind_phys), intent(inout), dimension(:,:) :: tke, tkh, wthv_sec
     real(kind=kind_phys), intent(inout), dimension(:,:) :: cld_sgs
-    real(kind=kind_phys), intent(inout), dimension(:,:,:) :: gq0
-
+    real(kind=kind_phys), intent(in), dimension(:,:,:) :: gq0
+   real(kind=kind_phys), intent(out), dimension(:,:) :: ten_t, ten_u, ten_v
+   real(kind=kind_phys), intent(out), dimension(:,:,:) :: ten_q
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
@@ -64,6 +66,7 @@ subroutine shoc_run (nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_
    integer :: i, k
 
    real(kind=kind_phys) :: tem
+   real(kind=kind_phys), dimension(nx,nzm) :: air_T, qwv
    real(kind=kind_phys), dimension(nx,nzm) :: qi   ! local array of suspended cloud ice
    real(kind=kind_phys), dimension(nx,nzm) :: qc   ! local array of suspended cloud water
    real(kind=kind_phys), dimension(nx,nzm) :: qsnw ! local array of suspended snowq
@@ -76,6 +79,11 @@ subroutine shoc_run (nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_
 
     errmsg = ''
     errflg = 0
+    
+    ten_t = 0.0
+    ten_u = 0.0
+    ten_v = 0.0
+    ten_q = 0.0
 
     if (ntiw < 0) then   ! this is valid only for Zhao-Carr scheme
       do k=1,nzm
@@ -126,33 +134,46 @@ subroutine shoc_run (nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_
     !     phy_f3d(1,1,ntot3d-2) - shoc determined sgs clouds
     !     phy_f3d(1,1,ntot3d-1) - shoc determined diffusion coefficients
     !     phy_f3d(1,1,ntot3d  ) - shoc determined  w'theta'
-
+    
+    air_T = gt0
+    qwv = gq0(:,:,ntqv)
+    
     call shoc_work (nx, nx, nzm, nzm+1, dtp, prsl, delp,                                &
-                    phii, phil, u, v, omega, gt0, gq0(:,:,1), qi, qc, qsnw, qrn,        &
+                    phii, phil, u, v, omega, air_T, qwv, qi, qc, qsnw, qrn,             &
                     rhc, supice, pcrit, cefac, cesfac, tkef1, dis_opt,                  &
                     cld_sgs, tke, hflx, evap, prnum, tkh, wthv_sec,                     &
                     ntlnc, ncpl, ncpi,                                                  &
                     con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi,          &
                     con_fvirt, con_eps)
 
+    do k=1,nzm
+       do i=1,nx
+         ten_t(i,k) = (air_T(i,k) - gt0(i,k))/dtp
     if (ntiw < 0) then   ! this is valid only for Zhao-Carr scheme
       do k=1,nzm
          do i=1,nx
-           gq0(i,k,ntcw) = qc(i,k) + qi(i,k)
+           ten_q(i,k,ntcw) = ((qc(i,k) + qi(i,k)) - (gq0(i,k,ntcw) + gq0(i,k,ntiw)))/dtp
          enddo
        enddo
     else
       do k=1,nzm
         do i=1,nx
-          gq0(i,k,ntcw) = qc(i,k)
-          gq0(i,k,ntiw) = qi(i,k)
+          ten_q(i,k,ntcw) = (qc(i,k) - gq0(i,k,ntcw))/dtp
+          ten_q(i,k,ntiw) = (qi(i,k) - gq0(i,k,ntiw))/dtp
         enddo
       enddo
       if (ntlnc > 0) then
         do k=1,nzm
           do i=1,nx
-            gq0(i,k,ntlnc) = ncpl(i,k)
-            gq0(i,k,ntinc) = ncpi(i,k)
+            ten_q(i,k,ntlnc) = (ncpl(i,k) - gq0(i,k,ntlnc))/dtp
+            ten_q(i,k,ntinc) = (ncpi(i,k) - gq0(i,k,ntinc))/dtp
+          enddo
+        enddo
+      endif
+      if (ntinc > 0) then
+        do k=1,nzm
+          do i=1,nx
+            ten_q(i,k,ntinc) = (ncpi(i,k) - gq0(i,k,ntinc))/dtp
           enddo
         enddo
       endif
