@@ -41,12 +41,30 @@ jobs:
         cd physics/docs
         doxygen ccpphsd_doxyfile
 
-    - name: Checkout V7 tag
+    - name: Checkout CCPP V7 tag
       uses: actions/checkout@v4
       with:
         ref: v7.0.0
         path: v7_repo
         submodules: recursive
+
+    - name: Checkout SCM V7
+      uses: actions/checkout@v4
+      with:
+        repository: NCAR/ccpp-scm
+        ref: v7.0.0
+        path: scm_v7
+
+    - name: Generate metadata tables (SCM V7)
+      run: |
+        cd scm_v7
+
+        export PYTHONPATH=$(pwd)/ccpp/framework/scripts:$(pwd)/ccpp/framework/scripts/parse_tools
+
+        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py
+
+        mkdir -p ../v7_repo/physics/docs/html/V7
+        mv *.html ../v7_repo/physics/docs/html/V7
 
     - name: Build V7 docs
       run: |
