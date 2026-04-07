@@ -63,7 +63,7 @@ jobs:
 
     - name: Build V7 docs
       run: |
-        cd ccpp/physics/physics/docs
+        cd v7_repo/ccpp/physics/physics/docs
         doxygen ccpp_doxyfile
         mv doc/html/* html/V7/
 
