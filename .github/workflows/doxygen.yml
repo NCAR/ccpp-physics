@@ -58,14 +58,14 @@ jobs:
 
         ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py
 
-        mkdir -p physics/docs/html/V7
-        mv ccpp/physics/physics/docs/*.html ../ccpp/physics/docs/html/V7
+        mkdir -p ccpp/physics/physics/docs/html/V7
+        mv ccpp/physics/physics/docs/*.html ccpp/physics/physics/docs/html/V7
 
     - name: Build V7 docs
       run: |
-        cd v7_repo/physics/docs
+        cd ccpp/physics/physics/docs
         doxygen ccpp_doxyfile
-        mv doc/html/* ../../../physics/docs/html/V7/
+        mv doc/html/* html/V7/
 
     - name: Checkout ufs-community SRWv3 branch
       uses: actions/checkout@v4
