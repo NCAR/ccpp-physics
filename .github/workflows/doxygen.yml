@@ -47,12 +47,14 @@ jobs:
       with:
         repository: NCAR/ccpp-scm
         ref: v7.0.1
-        path: v7_repo
+        path: scm_repo
         submodules: recursive
 
     - name: Generate metadata tables (SCM V7)
       run: |
-        cd v7_repo
+        pwd
+        cd scm_repo
+        ls
 
         export PYTHONPATH=$(pwd)/ccpp/framework/scripts:$(pwd)/ccpp/framework/scripts/parse_tools
 
@@ -63,7 +65,7 @@ jobs:
 
     - name: Build V7 docs
       run: |
-        cd v7_repo/ccpp/physics/physics/docs
+        cd scm_repo/ccpp/physics/physics/docs
         doxygen ccpp_doxyfile
         mv doc/html/* html/V7/
 
