@@ -55,6 +55,7 @@ jobs:
         repository: NCAR/ccpp-scm
         ref: v7.0.0
         path: scm_v7
+        submodules: recursive
 
     - name: Generate metadata tables (SCM V7)
       run: |
