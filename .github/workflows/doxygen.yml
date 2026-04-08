@@ -31,6 +31,11 @@ jobs:
         which bibtex
         doxygen --version
 
+    - name: Checkout current ccpp-physics code
+      uses: actions/checkout@v4
+      with:
+        path: ccpp_repo
+
     - name: Checkout CCPP SCM main
       uses: actions/checkout@v4
       with:
@@ -51,11 +56,6 @@ jobs:
         doxygen ccpphsd_doxyfile
         mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/HSD
 
-    - name: Stash ccpp_prebuild_config scripts
-      run: |
-        mv scm_repo/ccpp/physics/physics/docs/pdftxt/RE7/ccpp_prebuild_config.py $GITHUB_WORKSPACE/physics/docs/ccpp_prebuild_config_v7.py
-        mv scm_repo/ccpp/physics/physics/docs/pdftxt/RE300/ccpp_prebuild_config.py $GITHUB_WORKSPACE/physics/docs/ccpp_prebuild_config_srwv3.py
-
     - name: Switch physics submodule to v7 branch
       run: |
         cd scm_repo/ccpp/physics
@@ -68,7 +68,7 @@ jobs:
         cd scm_repo
         mkdir -p $GITHUB_WORKSPACE/physics/docs/html/V7
         export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
-   #     ./ccpp/framework/scripts/metadata2html.py -c $GITHUB_WORKSPACE/physics/docs/ccpp_prebuild_config_v7.py -o $GITHUB_WORKSPACE/physics/docs/html/V7
+        ./ccpp/framework/scripts/metadata2html.py -c $GITHUB_WORKSPACE/ccpp_repo/physics/docs/pdftxt/RE7/ccpp_prebuild_config.py -o $GITHUB_WORKSPACE/physics/docs/html/V7
 
     - name: Build v7 docs
       run: |
@@ -88,7 +88,7 @@ jobs:
         cd scm_repo
         mkdir -p $GITHUB_WORKSPACE/physics/docs/html/SRWv3
         export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
-    #    ./ccpp/framework/scripts/metadata2html.py -c $GITHUB_WORKSPACE/physics/docs/ccpp_prebuild_config_srwv3.py -o $GITHUB_WORKSPACE/physics/docs/html/SRWv3
+        ./ccpp/framework/scripts/metadata2html.py -c $GITHUB_WORKSPACE/ccpp_repo/physics/docs/pdftxt/RE300/ccpp_prebuild_config.py -o $GITHUB_WORKSPACE/physics/docs/html/SRWv3
 
     - name: Build SRWv3 docs
       run: |
