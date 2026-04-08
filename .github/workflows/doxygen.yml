@@ -20,12 +20,6 @@ jobs:
 
     steps:
 
-    - name: Checkout current ccpp-physics code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        submodules: recursive
-
     - name: Install Doxygen + Graphviz + LaTeX
       run: |
         sudo apt-get update
@@ -37,37 +31,45 @@ jobs:
         which bibtex
         doxygen --version
 
+    - name: Checkout CCPP framework
+      uses: actions/checkout@v4
+      with:
+        repository: NCAR/ccpp-framework
+        ref: develop
+        path: fw_repo 
+
+    - name: Checkout current ccpp-physics code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        path: main_repo
+        submodules: recursive
+
     - name: Build HSD docs
       run: |
         cd physics/docs
         doxygen ccpphsd_doxyfile
 
-    - name: Checkout SCM V7
+    - name: Checkout CCPP V7 tag
       uses: actions/checkout@v4
       with:
-        repository: NCAR/ccpp-scm
-        ref: v7.0.1
-        path: scm_repo
+        ref: v7.0.0
+        path: v7_repo
         submodules: recursive
 
-    - name: Generate metadata tables (SCM V7)
+    - name: Generate metadata tables
       run: |
-        pwd
-        cd scm_repo
-        ls
-
-        export PYTHONPATH=$(pwd)/ccpp/framework/scripts:$(pwd)/ccpp/framework/scripts/parse_tools
-
-        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py
-
-        mkdir -p ccpp/physics/physics/docs/html/V7
-        mv ccpp/physics/physics/docs/*.html ccpp/physics/physics/docs/html/V7
+        export PYTHONPATH=$(pwd)/fw_repo/scripts:$(pwd)/fw_repo/scripts/parse_tools
+        ./fw_repo/scripts/metadata2html.py -c main_repo/physics/docs/pdftxt/RE7/ccpp_prebuild_config.py
+        mkdir -p v7_repo/physics/docs/html/V7
+        mv v7_repo/physics/docs/*.html v7_repo/physics/docs/html/V7
 
     - name: Build V7 docs
       run: |
-        cd scm_repo/ccpp/physics/physics/docs
+        cd v7_repo/physics/docs
         doxygen ccpp_doxyfile
-        mv doc/html/* html/V7/
+        mkdir -p ../../../physics/docs/html/V7
+        mv doc/html/* ../../../physics/docs/html/V7/
 
     - name: Checkout ufs-community SRWv3 branch
       uses: actions/checkout@v4
