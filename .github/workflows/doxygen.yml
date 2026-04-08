@@ -47,7 +47,7 @@ jobs:
 
     - name: Build HSD docs
       run: |
-        cd physics/docs
+        cd main_repo/physics/docs
         doxygen ccpphsd_doxyfile
 
     - name: Checkout CCPP V7 tag
