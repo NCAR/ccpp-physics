@@ -31,76 +31,78 @@ jobs:
         which bibtex
         doxygen --version
 
-    - name: Checkout CCPP framework
+    - name: Checkout CCPP SCM v7
       uses: actions/checkout@v4
       with:
-        repository: NCAR/ccpp-framework
-        ref: develop
-        path: fw_repo 
-
-    - name: Checkout current ccpp-physics code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        path: main_repo
-        submodules: recursive
-
-    - name: Build HSD docs
-      run: |
-        cd main_repo/physics/docs
-        doxygen ccpphsd_doxyfile
-
-    - name: Checkout CCPP V7 tag
-      uses: actions/checkout@v4
-      with:
+        repository: NCAR/ccpp-scm
         ref: v7.0.0
-        path: v7_repo
-        submodules: recursive
+        path: scm_repo
+        submodules: recursive 
 
-    - name: Generate metadata tables
+    - name: Generate metadata tables v7 branch
       run: |
-        cd v7_repo
-        export PYTHONPATH=$GITHUB_WORKSPACE/fw_repo/scripts:$GITHUB_WORKSPACE/fw_repo/scripts/parse_tools
-        $GITHUB_WORKSPACE/fw_repo/scripts/metadata2html.py -c $GITHUB_WORKSPACE/main_repo/physics/docs/pdftxt/RE7/ccpp_prebuild_config.py
-        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/V7
-        ls $GITHUB_WORKSPACE
-        ls $GITHUB_WORKSPACE/v7_repo
-        ls $GITHUB_WORKSPACE/v7_repo/physics/docs
-        mv physics/docs/*.html $GITHUB_WORKSPACE/physics/docs/html/V7
+        cd scm_repo
+        mkdir -p ccpp/physics/physics/docs/html/V7
+        export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
+        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py -o ccpp/physics/physics/docs/html/V7
 
     - name: Build V7 docs
       run: |
-        cd $GITHUB_WORKSPACE/v7_repo/physics/docs
+        cd scm_repo/ccpp/physics/physics/docs
         doxygen ccpp_doxyfile
-        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/V7
-        mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/V7/
+        mv doc/html/* html/V7
 
-    - name: Checkout ufs-community SRWv3 branch
-      uses: actions/checkout@v4
-      with:
-        repository: ufs-community/ccpp-physics
-        ref: release/srw-v3
-        path: srw_repo
-        submodules: recursive
+    - name: Switch physics submodule to main branch
+      run: |
+        cd scm_repo/ccpp/physics
+        git fetch origin
+        git checkout main
+        git pull origin main
+
+    - name: Generate metadata tables main branch
+      run: |
+        cd scm_repo
+        mkdir -p ccpp/physics/physics/docs/html/HSD
+        export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
+        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py -o ccpp/physics/physics/docs/html/HSD
+
+    - name: Build HSD docs
+      run: |
+        cd scm_repo/ccpp/physics/physics/docs
+        doxygen ccpphsd_doxyfile
+        mv doc/html/* html/HSD
+
+    - name: Switch physics submodule to SRWv3 (ufs-community)
+      run: |
+        cd scm_repo/ccpp/physics
+        git remote set-url origin https://github.com/ufs-community/ccpp-physics.git
+        git fetch origin release/srw-v3
+        git checkout release/srw-v3
+
+    - name: Generate metadata tables SRWv3 branch
+      run: |
+        cd scm_repo
+        mkdir -p ccpp/physics/physics/docs/html/SRWv3
+        export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
+        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py -o ccpp/physics/physics/docs/html/SRWv3
 
     - name: Build SRWv3 docs
       run: |
-        cd srw_repo/physics/docs
+        cd scm_repo/ccpp/physics/physics/docs
         doxygen ccppsrw_doxyfile
-        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/SRWv3
-        mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/SRWv3/
+        mv doc/html/* html/SRWv3/
 
-    - name: Checkout main branch again for landing page
-      uses: actions/checkout@v4
-      with:
-        ref: scidocs_hsd_aqua
-        path: main_repo
+    - name: Switch to submodule main (ncar)
+      run: |
+        cd scm_repo/ccpp/physics
+        git remote set-url origin https://github.com/hertneky/ccpp-physics.git
+        git fetch origin scidocs_hsd_aqua
+        git checkout scidocs_hsd_aqua
 
     - name: Build landing page
       run: |
-        cd main_repo/physics/docs
+        cd scm_repo/ccpp/physics/physics/docs
         doxygen mainpage_doxyfile
-        cp -r html/* $GITHUB_WORKSPACE/physics/docs/html/
 
     - name: Setup Pages
       uses: actions/configure-pages@v5
@@ -108,7 +110,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: physics/docs/html
+        path: scm_repo/ccpp/physics/physics/docs/html
 
     - name: Deploy to GitHub Pages
       id: deployment
