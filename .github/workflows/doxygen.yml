@@ -53,8 +53,8 @@ jobs:
 
     - name: Stash ccpp_prebuild_config scripts
       run: |
-      mv scm_repo/ccpp/physics/physics/docs/pdftxt/RE7/ccpp_prebuild_config.py $GITHUB_WORKSPACE/physics/docs/ccpp_prebuild_config_v7.py
-      mv scm_repo/ccpp/physics/physics/docs/pdftxt/RE300/ccpp_prebuild_config.py $GITHUB_WORKSPACE/physics/docs/ccpp_prebuild_config_srwv3.py
+        mv scm_repo/ccpp/physics/physics/docs/pdftxt/RE7/ccpp_prebuild_config.py $GITHUB_WORKSPACE/physics/docs/ccpp_prebuild_config_v7.py
+        mv scm_repo/ccpp/physics/physics/docs/pdftxt/RE300/ccpp_prebuild_config.py $GITHUB_WORKSPACE/physics/docs/ccpp_prebuild_config_srwv3.py
 
     - name: Switch physics submodule to v7 branch
       run: |
