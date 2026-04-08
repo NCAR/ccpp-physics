@@ -60,17 +60,20 @@ jobs:
     - name: Generate metadata tables
       run: |
         cd v7_repo
-        export PYTHONPATH=$(pwd)/fw_repo/scripts:$(pwd)/fw_repo/scripts/parse_tools
-        ./scripts/metadata2html.py -c ../main_repo/physics/docs/pdftxt/RE7/ccpp_prebuild_config.py
-        mkdir -p physics/docs/html/V7
-        mv physics/docs/*.html physics/docs/html/V7
+        export PYTHONPATH=$GITHUB_WORKSPACE/fw_repo/scripts:$GITHUB_WORKSPACE/fw_repo/scripts/parse_tools
+        $GITHUB_WORKSPACE/fw_repo/scripts/metadata2html.py -c $GITHUB_WORKSPACE/main_repo/physics/docs/pdftxt/RE7/ccpp_prebuild_config.py
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/V7
+        ls $GITHUB_WORKSPACE
+        ls $GITHUB_WORKSPACE/v7_repo
+        ls $GITHUB_WORKSPACE/v7_repo/physics/docs
+        mv physics/docs/*.html $GITHUB_WORKSPACE/physics/docs/html/V7
 
     - name: Build V7 docs
       run: |
-        cd v7_repo/physics/docs
+        cd $GITHUB_WORKSPACE/v7_repo/physics/docs
         doxygen ccpp_doxyfile
-        mkdir -p ../../../physics/docs/html/V7
-        mv doc/html/* ../../../physics/docs/html/V7/
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/V7
+        mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/V7/
 
     - name: Checkout ufs-community SRWv3 branch
       uses: actions/checkout@v4
@@ -84,8 +87,8 @@ jobs:
       run: |
         cd srw_repo/physics/docs
         doxygen ccppsrw_doxyfile
-        mkdir -p ../../../physics/docs/html/SRWv3
-        mv doc/html/* ../../../physics/docs/html/SRWv3/
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/SRWv3
+        mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/SRWv3/
 
     - name: Checkout main branch again for landing page
       uses: actions/checkout@v4
