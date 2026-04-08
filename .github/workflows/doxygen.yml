@@ -42,15 +42,15 @@ jobs:
     - name: Generate metadata tables v7 branch
       run: |
         cd scm_repo
-        mkdir -p ccpp/physics/physics/docs/html/V7
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/V7
         export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
-        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py -o ccpp/physics/physics/docs/html/V7
+        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py -o $GITHUB_WORKSPACE/physics/docs/html/V7
 
     - name: Build V7 docs
       run: |
         cd scm_repo/ccpp/physics/physics/docs
         doxygen ccpp_doxyfile
-        mv doc/html/* html/V7
+        mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/V7
 
     - name: Switch physics submodule to main branch
       run: |
@@ -62,15 +62,15 @@ jobs:
     - name: Generate metadata tables main branch
       run: |
         cd scm_repo
-        mkdir -p ccpp/physics/physics/docs/html/HSD
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/HSD
         export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
-        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py -o ccpp/physics/physics/docs/html/HSD
+   #     ./ccpp/framework/scripts/metadata2html.py -c ccpp/physics/physics/docs/pdftxt/HSD/ccpp_prebuild_config.py -o $GITHUB_WORKSPACE/physics/docs/html/HSD
 
     - name: Build HSD docs
       run: |
         cd scm_repo/ccpp/physics/physics/docs
         doxygen ccpphsd_doxyfile
-        mv doc/html/* html/HSD
+        mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/HSD
 
     - name: Switch physics submodule to SRWv3 (ufs-community)
       run: |
@@ -82,15 +82,15 @@ jobs:
     - name: Generate metadata tables SRWv3 branch
       run: |
         cd scm_repo
-        mkdir -p ccpp/physics/physics/docs/html/SRWv3
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/SRWv3
         export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
-        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py -o ccpp/physics/physics/docs/html/SRWv3
+    #    ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py -o $GITHUB_WORKSPACE/physics/docs/html/SRWv3
 
     - name: Build SRWv3 docs
       run: |
         cd scm_repo/ccpp/physics/physics/docs
         doxygen ccppsrw_doxyfile
-        mv doc/html/* html/SRWv3/
+        mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/SRWv3
 
     - name: Switch to submodule main (ncar)
       run: |
@@ -103,6 +103,7 @@ jobs:
       run: |
         cd scm_repo/ccpp/physics/physics/docs
         doxygen mainpage_doxyfile
+        mv html/* $GITHUB_WORKSPACE/physics/docs/html
 
     - name: Setup Pages
       uses: actions/configure-pages@v5
@@ -110,7 +111,7 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: scm_repo/ccpp/physics/physics/docs/html
+        path: physics/docs/html
 
     - name: Deploy to GitHub Pages
       id: deployment
