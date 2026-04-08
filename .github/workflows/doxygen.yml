@@ -77,7 +77,7 @@ jobs:
         cd scm_repo/ccpp/physics
         git remote set-url origin https://github.com/ufs-community/ccpp-physics.git
         git fetch origin release/srw-v3
-        git checkout release/srw-v3
+        git checkout -B release/srw-v3 FETCH_HEAD
 
     - name: Generate metadata tables SRWv3 branch
       run: |
