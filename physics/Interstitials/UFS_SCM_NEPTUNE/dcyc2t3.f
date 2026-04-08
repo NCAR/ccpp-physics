@@ -139,10 +139,10 @@
 !!                             list for sea-ice model
 !!-     mar  2008  y. hou     - add cosine of zenith angle as output for
 !!                             sunshine duration time calc.
-!!-     sep  2008  y. hou     - separate net sw and downward lw in slrad,
+!!-     sep  2008  y. hou     - separate net sw and downward lw in slrad
 !!                changed the sign of sfc net sw to consistent with
 !!                 other parts of the mdl (positive value defines from
-!!                 atmos to the ground). rename output fluxes as adjusted
+!!                 atmos to the ground).rename output fluxes as adjusted
 !!                 fluxes. other minor changes such as renaming some of
 !!                 passing argument names to be consistent with calling
 !!                 program.
@@ -157,7 +157,7 @@
 !!                 spectral component fluxes
 !!-     Oct  2014  y. hous s. moorthi - add emissivity contribution to
 !!                             upward longwave flux
-!!-     Mar  2019  s. moorthi - modify xmu calculation in a time centered
+!!-     Mar  2019  s. moorthi -modify xmu calculation in a time centered
 !!                             way and add more accuracy when physics
 !!                             time step is close to radiation time step
 !> \section arg_table_dcyc2t3_run Argument Table
@@ -167,28 +167,30 @@
 !> @{
       subroutine dcyc2t3_run                                            &
 !  ---  inputs:
-     &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        &
+     &     ( lssav, ldiag3d, lsidea, solhr,slag,sdec,cdec,sinlat,coslat,&
      &       con_g, con_cp, con_pi, con_sbc,                            &
      &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,tf,tsflw,tsfc,      &
      &       sfcemis_lnd, sfcemis_ice, sfcemis_wat,                     &
      &       sfcdsw,sfcdswc,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,            &
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
-     &       im, levs, deltim, fhswr,                                   &
+     &       im, levs, ntrac, deltim, delt, tend_opt_rad_scaler, fhswr, &
      &       dry, icy, wet, damp_LW_fluxadj, lfnc_k, lfnc_p0,           &
      &       use_LW_jacobian, sfculw, use_med_flux, sfculw_med,         &
-     &       fluxlwUP_jac, t_lay, p_lay, p_lev, flux2D_lwUP,            &
+     &       fluxlwUP_jac, p_lay, p_lev, flux2D_lwUP,                   &
      &       flux2D_lwDOWN,pert_radtend,do_sppt,ca_global,tsfc_radtime, &
+     &       dtidx,index_of_process_longwave,index_of_process_shortwave,&
+     &       index_of_temperature,                                      &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
-     &       dtdt,dtdtnp,htrlw,                                         &
+     &       dtdtnp,htrlw,dtend,                                        &
 !  ---  outputs:
      &       adjsfcdsw,adjsfcdswc,adjsfcnsw,adjsfcdlw,                  &
      &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
      &       adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   &
      &       adjnirbmd,adjnirdfd,adjvisbmd,adjvisdfd,                   &
-     &       errmsg,errflg                                              &
-     &     )
+     &       gu0, gv0, gt0, gq0, dudt, dvdt, dtdt, dqdt, ten_t, ten_u,  &
+     &       ten_v, ten_q, errmsg,errflg)
 !
       use machine,         only : kind_phys
 
@@ -200,19 +202,20 @@
      &                                   hour12 = 12.0_kind_phys,       &
      &                                   f3600  = one/3600.0_kind_phys, &
      &                                   f7200  = one/7200.0_kind_phys, &
-     &                                   czlimt = 0.0001_kind_phys        ! ~ cos(89.99427)
+     &                                   czlimt = 0.0001_kind_phys        
+                                                  ! ~ cos(89.99427)
 
 !  ---  inputs:
-      integer, intent(in) :: im, levs
+      integer, intent(in) :: im, levs, ntrac, tend_opt_rad_scaler
 
 !     integer, intent(in) :: ipr
 !     logical lprnt
       logical, dimension(:), intent(in) :: dry, icy, wet
       logical, intent(in) :: use_LW_jacobian, damp_LW_fluxadj,          &
-     &     pert_radtend, use_med_flux
-      logical, intent(in) :: do_sppt,ca_global
+     &     pert_radtend, use_med_flux 
+      logical, intent(in) :: do_sppt,ca_global,lssav,ldiag3d,lsidea
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
-     &     deltim, fhswr, lfnc_k, lfnc_p0
+     &     deltim, delt, fhswr, lfnc_k, lfnc_p0
 
       real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
@@ -228,7 +231,7 @@
      &      sfcnirbmd, sfcnirdfd, sfcvisbmd, sfcvisdfd
 
       real(kind=kind_phys), dimension(:,:), intent(in) :: swh, hlw,     &
-     &                                     swhc, hlwc, p_lay, t_lay
+     &                                     swhc, hlwc, p_lay
 
       real(kind=kind_phys), dimension(:,:), intent(in) :: p_lev
       real(kind=kind_phys), dimension(:,:), intent(in), optional ::     &
@@ -238,10 +241,14 @@
      &     con_pi, con_sbc
 
       real(kind_phys)  :: pid12
-
+      real(kind_phys), optional, intent(inout), dimension(:,:,:) ::     &
+     &                                                       dtend
+      integer,              intent(in),    dimension(:,:) :: dtidx
+      integer, intent(in) :: index_of_process_longwave,                 &
+     &                       index_of_process_shortwave,                &
+     &                       index_of_temperature
 
 !  ---  input/output:
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: dtdt
       real(kind=kind_phys), dimension(:,:), intent(inout), optional ::  &
      &      dtdtnp, htrlw
 
@@ -253,12 +260,20 @@
 
       real(kind=kind_phys), dimension(:), intent(out) ::                &
      &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
-
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: gu0, gv0,  &
+     &                                                       gt0
+      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: gq0
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dudt, dvdt,&
+     &                                                       dtdt
+      real(kind=kind_phys), dimension(:,:,:), intent(inout) :: dqdt
+      real(kind=kind_phys), dimension(:,:), intent(out) :: ten_t, ten_u,&
+     &                                                     ten_v
+      real(kind=kind_phys), dimension(:,:,:), intent(out) :: ten_q
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 !  ---  locals:
-      integer :: i, k, nstp, nstl, it, istsun(im),iSFC,iTOA
+      integer :: i, k, n, nstp, nstl, it, istsun(im),iSFC,iTOA,idtend
       real(kind=kind_phys) :: cns,  coszn, tem1, tem2, anginc,          &
      &                        rstl, solang, dT
       real(kind=kind_phys), dimension(im,levs+1) :: flxlwup_adj,        &
@@ -277,7 +292,12 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
+      
+      ten_t = 0.0
+      ten_u = 0.0
+      ten_v = 0.0
+      ten_q = 0.0
+      
 !     Vertical ordering?
       if (p_lev(1,1) .lt.  p_lev(1, levs)) then 
          iSFC = levs + 1
@@ -320,7 +340,8 @@
           enddo
         enddo
         do i = 1, IM
-          if (istsun(i) > 0) xcosz(i) = xcosz(i) / istsun(i)  ! mean cosine of solar zenith angle at current time
+          ! mean cosine of solar zenith angle at current time
+          if (istsun(i) > 0) xcosz(i) = xcosz(i) / istsun(i)
         enddo
       endif
 !
@@ -330,8 +351,9 @@
          tem1 = tf(i) / tsflw(i)
          tem2 = tem1 * tem1
          adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
-!!  - adjust \a sfc downward LW flux to account for t changes in the lowest model layer.
-!! compute 4th power of the ratio of \c tf in the lowest model layer over the mean value \c tsflw.
+!!  - adjust \a sfc downward LW flux to account for t changes in the 
+!!    lowest model layer. compute 4th power of the ratio of \c tf in the
+!!    lowest model layer over the mean value \c tsflw.
          if (dry(i)) then
             tem2 = tsfc_lnd(i) * tsfc_lnd(i)
             adjsfculw_lnd(i) =  sfcemis_lnd(i) * con_sbc * tem2 * tem2
@@ -347,7 +369,8 @@
             adjsfculw_wat(i) =  sfcemis_wat(i) * con_sbc *
      &                        tem2 * tem2
      &                        + (one - sfcemis_wat(i)) * adjsfcdlw(i)
-!>  - replace upward longwave flux provided by the mediator (zero over lakes)
+!>  - replace upward longwave flux provided by the mediator 
+!!    (zero over lakes)
             if (use_med_flux) then
                if (sfculw_med(i) > f_eps) then
                   adjsfculw_wat(i) = sfculw_med(i)
@@ -386,18 +409,21 @@
       enddo
 
       ! Adjust the LW and SW heating-rates.
-      ! For LW, optionally scale using the Jacobian of the upward LW flux. *RRTMGP ONLY*
-      ! For SW, adjust heating rates with zenith angle change.
+      ! For LW, optionally scale using the Jacobian of the upward LW 
+      ! flux. *RRTMGP ONLY* For SW, adjust heating rates with zenith 
+      ! angle change.
       if (use_LW_jacobian) then
-         ! Compute adjusted net LW flux foillowing Hogan and Bozzo 2015 (10.1002/2015MS000455)
-         ! Here we assume that the profile of the downwelling LW Jaconiam has the same shape
-         ! as the upwelling, but scaled and offset.
-         ! The scaling factor is 0.2
+         ! Compute adjusted net LW flux following Hogan and Bozzo 2015
+         ! (10.1002/2015MS000455)
+         ! Here we assume that the profile of the downwelling LW 
+         ! Jacobian has the same shape as the upwelling, but scaled 
+         ! and offset. The scaling factor is 0.2
          ! The profile of the downwelling Jacobian (J) is offset so that
          !     J_dn_sfc / J_up_sfc = scaling_factor
          !     J_dn_toa / J_up_sfc = 0
          !
-         ! Optionally, the flux adjustment can be damped with height using a logistic function
+         ! Optionally, the flux adjustment can be damped with height 
+         ! using a logistic function
          ! fx ~ L / (1 + exp(-k*dp)), where dp = p - p0
          ! L  = 1, fix scale between 0-1.      - Fixed
          ! k  = 1 / pressure decay length (Pa) - Controlled by namelist
@@ -422,21 +448,21 @@
                htrlw(i,k) = fluxlwnet_adj * con_g /                     &
      &              (con_cp * (p_lev(i,k+1) - p_lev(i,k)))
 
-               ! Add radiative heating rates to physics heating rate. Optionally, scaled w/ height
-               ! using a logistic function
+               ! Add radiative heating rates to physics heating rate. 
+               ! Optionally, scaled w/ height using a logistic function
                if (damp_LW_fluxadj) then
                   lfnc = L / (1+exp(-(p_lev(i,k) - lfnc_p0)/lfnc_k))
                else
                   lfnc = 1.
                endif
-               dtdt(i,k) = dtdt(i,k) + swh(i,k)*xmu(i) +                &
+               ten_t(i,k) = swh(i,k)*xmu(i) +                           &
      &              htrlw(i,k)*lfnc + (1.-lfnc)*hlw(i,k)
             enddo
          enddo
       else
          do k = 1, levs
             do i = 1, im
-               dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + hlw(i,k)
+               ten_t(i,k)  = swh(i,k)*xmu(i)  + hlw(i,k)
             enddo
          enddo
       endif
@@ -458,7 +484,91 @@
            enddo
          endif
       endif
-!
+!     
+      case_rad_scaler_ten: select case (tend_opt_rad_scaler)
+        case (1) !immediately apply tendencies
+                  !Current state = current state + dt*current tendency
+                  !Accumulated tendency unchanged
+          do k=1,levs
+            do i=1,im
+              gt0(i,k) = gt0(i,k) + delt*ten_t(i,k)
+              gu0(i,k) = gu0(i,k) + delt*ten_u(i,k)
+              gv0(i,k) = gv0(i,k) + delt*ten_v(i,k)
+              do n = 1, ntrac
+                gq0(i,k,n) = gq0(i,k,n) + delt*ten_q(i,k,n)
+              end do
+            end do
+          end do
+        case (2) !add tendencies to sum
+        !Accumulated tendency = accumulated tendency + current tendency
+        !Current state unchanged
+          do k=1,levs
+            do i=1,im
+              dtdt(i,k) = dtdt(i,k) + ten_t(i,k)
+              dudt(i,k) = dudt(i,k) + ten_u(i,k)
+              dvdt(i,k) = dvdt(i,k) + ten_v(i,k)
+              do n = 1, ntrac
+                dqdt(i,k,n) = dqdt(i,k,n) + ten_q(i,k,n)
+              end do
+            end do
+          end do
+        case (3) !add tendencies to sum and apply
+        !Current state = current state + dt*(
+        !                accumulated tendency + current tendency)
+        !Accumulated tendency = 0
+          do k=1,levs
+            do i=1,im
+              gt0(i,k) = gt0(i,k) + delt*(dtdt(i,k) + ten_t(i,k))
+              dtdt(i,k) = 0.0
+              gu0(i,k) = gu0(i,k) + delt*(dudt(i,k) + ten_u(i,k))
+              dudt(i,k) = 0.0
+              gv0(i,k) = gv0(i,k) + delt*(dvdt(i,k) + ten_v(i,k))
+              dvdt(i,k) = 0.0
+              do n = 1, ntrac
+                gq0(i,k,n) = gq0(i,k,n) + delt*(dqdt(i,k,n) +           &
+     &                       ten_q(i,k,n))
+                dqdt(i,k,n) = 0.0
+              end do
+            end do
+          end do
+        case (4) !Current state unchanged
+        !Accumulated tendency unchanged
+        !Current tendency unchanged (but will be overwritten during 
+        !                            next primary scheme)
+          exit case_rad_scaler_ten
+        case default
+          errflg = 1
+          write(errmsg,'(*(a))') 'A tendency application control was ', &
+     &                 ' outside of the acceptable range (1-4)'
+          return
+      end select case_rad_scaler_ten
+      
+      if (lssav .and. ldiag3d .and. .not. lsidea) then
+        idtend = dtidx(index_of_temperature,index_of_process_longwave)
+        if(idtend>=1) then
+          if (use_LW_jacobian) then
+            do k=1,levs
+               do i=1,im
+                 dtend(i,k,idtend) = dtend(i,k,idtend) + (ten_t(i,k) -  &
+     &                               swh(i,k)*xmu(i))*deltim
+               end do
+            end do
+          else
+            dtend(:,:,idtend) = dtend(:,:,idtend) + hlw(:,:)*deltim
+          endif
+        endif
+
+        idtend = dtidx(index_of_temperature,index_of_process_shortwave)
+        if(idtend>=1) then
+           do k=1,levs
+              do i=1,im
+                 dtend(i,k,idtend) = dtend(i,k,idtend)                  &
+     &                               + swh(i,k)*xmu(i)*deltim
+              enddo
+           enddo
+        endif
+      end if
+      
       return
 !...................................
       end subroutine dcyc2t3_run

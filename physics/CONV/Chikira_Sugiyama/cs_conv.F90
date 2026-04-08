@@ -152,7 +152,7 @@ module cs_conv
 !!  \section general_cs_conv CS Convection Scheme General Algorithm
 !> @{
    subroutine cs_conv_run(         IJSDIM ,  KMAX     , ntracp1 , NN,       &
-                          NTR    , nctp   ,                                 & !DD dimensions
+                          NTR    , nctp   ,  ntqv     ,                     & !DD dimensions
                           otspt  , lat    ,  kdt      ,                     &
                           t      , q      ,  rain1    , clw     ,           &
                           zm     , zi     ,  pap      , paph    ,           &
@@ -163,22 +163,22 @@ module cs_conv
                           lprnt  , ipr, kcnv,                               &
                           QLCN, QICN, w_upi, cf_upi, CNV_MFD,               & ! for coupling to MG microphysics
                           CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,       &
-                          mp_phys,errmsg,errflg)
+                          mp_phys,ten_t,ten_u,ten_v,ten_q,ten_clw,errmsg,errflg)
 
 
    implicit none
 !
 ! input arguments
 !
-   INTEGER, INTENT(IN)     :: IJSDIM, KMAX, ntracp1, nn, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
+   INTEGER, INTENT(IN)     :: IJSDIM, KMAX, ntracp1, nn, NTR, mype, nctp, mp_phys, kdt, lat, ntqv !! DD, for GFS, pass in
    logical, intent(in)     :: otspt(:,:)          ! otspt(:,1) - on/off switch for tracer transport by updraft and
                                                   !              downdraft. should not include subgrid PDF and turbulence
                                                   ! otspt(:,2) - on/off switch for tracer transport by subsidence
                                                   !              should include subgrid PDF and turbulence
 
-   real(kind_phys), intent(inout) :: t(:,:)          ! temperature at mid-layer (K)
-   real(kind_phys), intent(inout) :: q(:,:)          ! water vapor array including moisture (kg/kg)
-   real(kind_phys), intent(inout) :: clw(:,:,:)      ! tracer array including cloud condensate (kg/kg)
+   real(kind_phys), intent(in)    :: t(:,:)          ! temperature at mid-layer (K)
+   real(kind_phys), intent(in)    :: q(:,:)          ! water vapor array including moisture (kg/kg)
+   real(kind_phys), intent(in)    :: clw(:,:,:)      ! tracer array including cloud condensate (kg/kg)
    real(kind_phys), intent(in)    :: pap(:,:)        ! pressure at mid-layer (Pa)
    real(kind_phys), intent(in)    :: paph(:,:)       ! pressure at boundaries (Pa)
    real(kind_phys), intent(in)    :: zm(:,:)         ! geopotential at mid-layer (m)
@@ -186,8 +186,8 @@ module cs_conv
    real(kind_phys), intent(in)    :: fscav(:), fswtr(:), wcbmaxm(:)
    real(kind_phys), intent(in)    :: precz0in, preczhin, clmdin
 ! added for cs_convr
-   real(kind_phys), intent(inout) :: u(:,:)          ! zonal wind at mid-layer (m/s)
-   real(kind_phys), intent(inout) :: v(:,:)          ! meridional wind at mid-layer (m/s)
+   real(kind_phys), intent(in)    :: u(:,:)          ! zonal wind at mid-layer (m/s)
+   real(kind_phys), intent(in)    :: v(:,:)          ! meridional wind at mid-layer (m/s)
 
    real(kind_phys), intent(in)    :: DELTA           ! physics time step
    real(kind_phys), intent(in)    :: DELTI           ! dynamics time step (model time increment in seconds)
@@ -204,16 +204,18 @@ module cs_conv
    real(kind_phys), intent(inout), dimension(:,:) :: dd_mf, dt_mf
    
    real(kind_phys), intent(out)   :: rain1(:)        ! lwe thickness of deep convective precipitation amount (m)
-! GJF* These variables are conditionally allocated depending on whether the
-!     Morrison-Gettelman microphysics is used, so they must be declared 
-!     using assumed shape.
+
    real(kind_phys), intent(out), dimension(:,:), optional :: qlcn, qicn, w_upi,cnv_mfd, &
                                                    cnv_dqldt, clcn, cnv_fice, &
                                                    cnv_ndrop, cnv_nice, cf_upi
-! *GJF
+ 
    logical, intent(in)    :: lprnt
    integer, intent(in)    :: ipr
    integer, intent(inout) :: kcnv(:)          ! zero if no deep convection and 1 otherwise
+   
+   real(kind_phys), intent(out), dimension(:,:) :: ten_t, ten_u, ten_v
+   real(kind_phys), intent(out), dimension(:,:,:) :: ten_q, ten_clw
+   
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
@@ -248,6 +250,7 @@ module cs_conv
 !
    real(kind_phys) GDT(IJSDIM,KMAX)           !< temperature [K]
    real(kind_phys) GDQ(IJSDIM,KMAX,NTR)       !< tracers including moisture [kg/kg]  !DDsigmadiag
+   real(kind_phys) new_clw(IJSDIM,KMAX,nn)    !< temporary new convectively-transported tracer array used for calculating tendencies
    real(kind_phys) GDU(IJSDIM,KMAX)           !< zonal wind [m/s]
    real(kind_phys) GDV(IJSDIM,KMAX)           !< meridional wind [m/s]
    real(kind_phys) GDTM(IJSDIM,KMAX+1)        !< temperature at boundaries of layers [K]
@@ -263,7 +266,7 @@ module cs_conv
 !DD   real(kind_phys) :: zs(IJSDIM)           !< surface height [m]
 
    integer KTMAX(IJSDIM)               !< max of KT
-   real(kind_phys)    :: ftintm, wrk, wrk1, tem
+   real(kind_phys)    :: ftintm, wrk, wrk1, tem, new_qv
    integer i, k, n, ISTS, IENS, kp1
 
 !DD borrowed from RAS to go form total condensate to ice/water separately
@@ -275,6 +278,13 @@ module cs_conv
    ! Initialize CCPP error handling variables
    errmsg = ''
    errflg = 0
+   
+   ten_t = 0.0
+   ten_u = 0.0
+   ten_v = 0.0
+   ten_q = 0.0
+   new_clw = clw
+   ten_clw = 0.0
 
 !  lprnt = kdt == 1 .and. mype == 38
 !  ipr = 43
@@ -329,22 +339,22 @@ module cs_conv
 !!\f]
 !! where T is temperature, and\f$T_1\f$ and \f$T_2\f$ are set as tcf=263.16
 !! and tf= 233.16 
-   if (clw(1,1,2) <= -999.0) then  ! input ice/water are together
+   if (new_clw(1,1,2) <= -999.0) then  ! input ice/water are together
      do k=1,kmax
        do i=1,IJSDIM
-         tem = clw(i,k,1) * MAX(ZERO, MIN(ONE, (TCR-t(i,k))*TCRF))
-         clw(i,k,2) = clw(i,k,1) - tem
-         clw(i,k,1) = tem
+         tem = new_clw(i,k,1) * MAX(ZERO, MIN(ONE, (TCR-t(i,k))*TCRF))
+         new_clw(i,k,2) = new_clw(i,k,1) - tem
+         new_clw(i,k,1) = tem
        enddo
      enddo
    endif
 !DD end ras adaptation
    do k=1,kmax
      do i=1,ijsdim
-       tem = min(clw(i,k,1), 0.0)
-       wrk = min(clw(i,k,2), 0.0)
-       clw(i,k,1) = clw(i,k,1) - tem
-       clw(i,k,2) = clw(i,k,2) - wrk
+       tem = min(new_clw(i,k,1), 0.0)
+       wrk = min(new_clw(i,k,2), 0.0)
+       new_clw(i,k,1) = new_clw(i,k,1) - tem
+       new_clw(i,k,2) = new_clw(i,k,2) - wrk
        gdq(i,k,1) = gdq(i,k,1) + tem + wrk
      enddo
    enddo
@@ -354,7 +364,7 @@ module cs_conv
    do n=2,NTR
      do k=1,KMAX
        do i=1,IJSDIM
-         GDQ(i,k,n) = clw(i,k,n-1)
+         GDQ(i,k,n) = new_clw(i,k,n-1)
        enddo
      enddo
    enddo
@@ -422,7 +432,8 @@ module cs_conv
    do n=2,NTR
      do k=1,KMAX
        do i=1,IJSDIM
-         clw(i,k,n-1) = max(zero, GDQ(i,k,n) + GTQ(i,k,n) * delta)
+         new_clw(i,k,n-1) = max(zero, GDQ(i,k,n) + GTQ(i,k,n) * delta)
+         ten_clw(i,k,n-1) = (new_clw(i,k,n-1) - clw(i,k,n-1))/delta
        enddo
      enddo
    enddo
@@ -433,10 +444,11 @@ module cs_conv
 !
    do k=1,KMAX
      do i=1,IJSDIM
-       q(i,k)        = max(zero, GDQ(i,k,1)  + GTQ(i,k,1) * delta)
-       t(i,k)        = GDT(i,k)    + GTT(i,k)   * delta
-       u(i,k)        = GDU(i,k)    + GTU(i,k)   * delta
-       v(i,k)        = GDV(i,k)    + GTV(i,k)   * delta
+       new_qv = max(zero, GDQ(i,k,1)  + GTQ(i,k,1) * delta)
+       ten_q(i,k,ntqv) = (new_qv - GDQ(i,k,1))/delta
+       ten_t(i,k)    = GTT(i,k)
+       ten_u(i,k)    = GTU(i,k)
+       ten_v(i,k)    = GTV(i,k)
 ! Set the mass fluxes.
         ud_mf  (i,k) = GMFX0(i,k)
         dd_mf  (i,k) = GMFX1(i,k)

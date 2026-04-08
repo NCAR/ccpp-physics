@@ -200,7 +200,7 @@
   kind = kind_phys
   intent = in
 [tgrs_1]
-  standard_name = air_temperature_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_air_temperature_at_surface_adjacent_layer
   long_name = mean temperature at lowest model layer
   units = K
   dimensions = (horizontal_loop_extent)
@@ -208,7 +208,7 @@
   kind = kind_phys
   intent = in
 [qgrs_1]
-  standard_name = specific_humidity_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_specific_humidity_at_surface_adjacent_layer
   long_name = specific humidity at lowest model layer
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
@@ -216,7 +216,7 @@
   kind = kind_phys
   intent = in
 [ugrs_1]
-  standard_name = x_wind_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_x_wind_at_surface_adjacent_layer
   long_name = zonal wind at lowest model layer
   units = m s-1
   dimensions = (horizontal_loop_extent)
@@ -224,7 +224,7 @@
   kind = kind_phys
   intent = in
 [vgrs_1]
-  standard_name = y_wind_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_y_wind_at_surface_adjacent_layer
   long_name = meridional wind at lowest model layer
   units = m s-1
   dimensions = (horizontal_loop_extent)
