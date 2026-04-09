@@ -1232,7 +1232,7 @@ c
 
 ! Apply minimum value on chemical conc  after "canopy_to_resolved"
         q2_mod  (:,:, ntchs-1:ntrac1 ) =
-     &                         max(q2_mod  (:,:, ntchs-1:ntrac1), concmin)  ! after "canopy_to_resolved"
+     &     max(q2_mod  (:,:, ntchs-1:ntrac1), concmin)  ! after "canopy_to_resolved"
 
 ! Apply minimum value on humidity qmin  before doing canopy_transfer & update tendency
         q2_mod(:,:, ntqv) = max(q2_mod(:,:, ntqv),qmin)
@@ -1571,20 +1571,6 @@ c
 
       endif !if(do_canopy)
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!> ## Save PBL height for diagnostic purpose
-!
-!     if (do_canopy) then
-
-!     do i = 1, im
-!      IF (FRT_MASK(i) >  0.) THEN
-!         hpbl(i) = hpbl_can(i)
-!         kpbl(i) = kpbl_can(i)
-!      ENDIF
-!     enddo
-
-!     endif  !do_canopy
-!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       return
