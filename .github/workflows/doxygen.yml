@@ -41,39 +41,51 @@ jobs:
       with:
         repository: NCAR/ccpp-scm
         path: scm_repo
-        submodules: recursive 
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Switch physics submodule to main
+      run: |
+        cd scm_repo/ccpp/physics
+        git remote set-url origin https://github.com/hertneky/ccpp-physics.git
+        git fetch origin
+        git checkout scidocs_hsd_aqua
 
     - name: Generate metadata tables main branch
       run: |
         cd scm_repo
-        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/HSD
+        mkdir -p ccpp/physics/physics/docs/doc/html
         export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
-        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py -o $GITHUB_WORKSPACE/physics/docs/html/HSD
+        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py
+        mv ccpp/physics/physics/docs/*.html ccpp/physics/physics/docs/doc/html
 
     - name: Build HSD docs
       run: |
         cd scm_repo/ccpp/physics/physics/docs
         doxygen ccpphsd_doxyfile
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/HSD
         mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/HSD
 
-    - name: Switch physics submodule to v7 branch
+    - name: Switch to v7 tag
       run: |
-        cd scm_repo/ccpp/physics
-        git fetch origin
+        cd scm_repo
+        git fetch origin tag v7.0.0
         git checkout v7.0.0
-        git pull origin v7.0.0
+        git submodule update --init --recursive
 
     - name: Generate metadata tables v7 branch
       run: |
         cd scm_repo
-        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/V7
+        mkdir -p ccpp/physics/physics/docs/doc/html
         export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
-        ./ccpp/framework/scripts/metadata2html.py -c $GITHUB_WORKSPACE/ccpp_repo/physics/docs/pdftxt/RE7/ccpp_prebuild_config.py -o $GITHUB_WORKSPACE/physics/docs/html/V7
+        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py
+        mv ccpp/physics/physics/docs/*.html ccpp/physics/physics/docs/doc/html
 
     - name: Build v7 docs
       run: |
         cd scm_repo/ccpp/physics/physics/docs
-        doxygen ccpphsd_doxyfile
+        doxygen ccpp_doxyfile
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/V7
         mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/V7
 
     - name: Switch physics submodule to SRWv3 (ufs-community)
@@ -86,14 +98,16 @@ jobs:
     - name: Generate metadata tables SRWv3 branch
       run: |
         cd scm_repo
-        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/SRWv3
+        mkdir -p ccpp/physics/physics/docs/doc/html
         export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
-        ./ccpp/framework/scripts/metadata2html.py -c $GITHUB_WORKSPACE/ccpp_repo/physics/docs/pdftxt/RE300/ccpp_prebuild_config.py -o $GITHUB_WORKSPACE/physics/docs/html/SRWv3
+        ./ccpp/framework/scripts/metadata2html.py -c $GITHUB_WORKSPACE/ccpp_repo/physics/docs/pdftxt/RE300/ccpp_prebuild_config.py
+        mv ccpp/physics/physics/docs/*.html ccpp/physics/physics/docs/doc/html
 
     - name: Build SRWv3 docs
       run: |
         cd scm_repo/ccpp/physics/physics/docs
         doxygen ccppsrw_doxyfile
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/SRWv3
         mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/SRWv3
 
     - name: Switch to submodule main (ncar)
@@ -107,7 +121,7 @@ jobs:
       run: |
         cd scm_repo/ccpp/physics/physics/docs
         doxygen mainpage_doxyfile
-        mv html/* $GITHUB_WORKSPACE/physics/docs/html
+        mv html/main/* $GITHUB_WORKSPACE/physics/docs/html
 
     - name: Setup Pages
       uses: actions/configure-pages@v5
