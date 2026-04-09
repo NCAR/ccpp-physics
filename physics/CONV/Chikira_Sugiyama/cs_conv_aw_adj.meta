@@ -21,6 +21,14 @@
   dimensions = ()
   type = integer
   intent = in
+[dt]
+  standard_name = timestep_for_physics
+  long_name = physics time step
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [do_cscnv]
   standard_name = flag_for_Chikira_Sugiyama_deep_convection
   long_name = flag for Chikira-Sugiyama convection
@@ -42,23 +50,9 @@
   dimensions = ()
   type = logical
   intent = in
-[ntrac]
-  standard_name = number_of_tracers
-  long_name = number of tracers
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
 [ntcw]
   standard_name = index_of_cloud_liquid_water_mixing_ratio_in_tracer_concentration_array
   long_name = tracer index for cloud condensate (or liquid water)
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntclamt]
-  standard_name = index_of_cloud_area_fraction_in_atmosphere_layer_in_tracer_concentration_array
-  long_name = tracer index for cloud amount integer
   units = index
   dimensions = ()
   type = integer
@@ -85,39 +79,23 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
-[gt0]
-  standard_name = air_temperature_of_new_state
-  long_name = temperature updated by physics
-  units = K
+  intent = in
+[ten_t]
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
+  units = K s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = inout
-[gq0]
-  standard_name = tracer_concentration_of_new_state
-  long_name = tracer concentration updated by physics
-  units = kg kg-1
+[ten_q]
+  standard_name = tendency_of_tracer_concentration
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = inout
-[save_t]
-  standard_name = air_temperature_save
-  long_name = air temperature before entering a physics scheme
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[save_q]
-  standard_name = tracer_concentration_save
-  long_name = tracer concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
-  type = real
-  kind = kind_phys
-  intent = in
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -126,15 +104,6 @@
   type = real
   kind = kind_phys
   intent = in
-[cldfrac]
-  standard_name = cloud_fraction_for_MG
-  long_name = cloud fraction used by Morrison-Gettelman MP
-  units = frac
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
 [subcldfrac]
   standard_name = subgrid_scale_cloud_fraction_from_shoc
   long_name = subgrid-scale cloud fraction from the SHOC scheme

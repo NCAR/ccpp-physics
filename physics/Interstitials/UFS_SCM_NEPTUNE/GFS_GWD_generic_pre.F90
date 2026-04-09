@@ -13,11 +13,8 @@ contains
      &           im, levs, nmtvr, mntvar,                               &
      &           oc, oa4, clx, theta,                                   &
      &           varss, ocss, oa4ss, clxss,                             &
-     &           sigma, gamma, elvmax, lssav, ldiag3d,                  &
-     &           dtend, dtidx, index_of_temperature, index_of_x_wind,   &
-     &           index_of_y_wind, index_of_process_orographic_gwd,      &
-     &           dudt, dvdt, dtdt, dtf,                                 &
-     &           flag_for_gwd_generic_tend, errmsg, errflg)
+     &           sigma, gamma, elvmax,                   &
+     &           errmsg, errflg)
 
       use machine, only : kind_phys
       implicit none
@@ -30,18 +27,11 @@ contains
      &  theta(:), sigma(:), gamma(:), elvmax(:)
       real(kind=kind_phys), intent(out), optional ::                    &
      &  varss(:), ocss(:), oa4ss(:,:), clxss(:,:)
-      logical, intent(in) :: lssav, ldiag3d, flag_for_gwd_generic_tend
-      real(kind=kind_phys), intent(in) :: dtdt(:,:), dudt(:,:), dvdt(:,:)
-      ! dtend only allocated only if ldiag3d is .true.
-      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
-      integer, intent(in) :: dtidx(:,:), index_of_temperature,          &
-     &  index_of_x_wind, index_of_y_wind, index_of_process_orographic_gwd
-      real(kind=kind_phys), intent(in) :: dtf
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-      integer :: i, k, idtend
+      integer :: i, k
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -114,23 +104,6 @@ contains
         sigma  = 0
         elvmax = 0
       endif   ! end if_nmtvr
-
-      if (lssav .and. ldiag3d .and. flag_for_gwd_generic_tend) then
-        idtend = dtidx(index_of_temperature, index_of_process_orographic_gwd)
-        if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) - dtdt*dtf
-        endif
-
-        idtend = dtidx(index_of_x_wind, index_of_process_orographic_gwd)
-        if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) - dudt*dtf
-        endif
-
-        idtend = dtidx(index_of_y_wind, index_of_process_orographic_gwd)
-        if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) - dvdt*dtf
-        endif
-      endif
 
       end subroutine GFS_GWD_generic_pre_run
 
