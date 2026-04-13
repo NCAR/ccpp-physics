@@ -2,6 +2,7 @@
 !! This file initializes the RRTMGP radiation scheme
 
 module GFS_rrtmgp_setup
+  use mpi_f08
   use machine,                    only : kind_phys
   use module_radiation_astronomy, only : sol_init, sol_update
   use module_radiation_aerosols,  only : aer_init, aer_update
@@ -37,10 +38,10 @@ contains
   subroutine GFS_rrtmgp_setup_init(do_RRTMGP, imp_physics, imp_physics_fer_hires,        &
        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,  &
        imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer,     &
-       ntcw, ntoz, iovr, isubc_sw, isubc_lw, lalw1bd, idate,               &
-       me, aeros_file, iaermdl, iaerflg, con_pi, con_t0c, con_c, con_boltz, con_plnk,    &
-       solar_file, con_solr_2008, con_solr_2002, co2usr_file, co2cyc_file, ipsd0,        &
-       errmsg, errflg)
+       ntcw, ntoz, iovr, isubc_sw, isubc_lw, lalw1bd, idate,                             &
+       mpicomm, mpirank, mpiroot, aeros_file, iaermdl, iaerflg, con_pi, con_t0c,         &
+       con_c, con_boltz, con_plnk, solar_file, con_solr_2008, con_solr_2002, co2usr_file,&
+       co2cyc_file, ipsd0, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: do_RRTMGP
@@ -57,7 +58,8 @@ contains
          con_pi, con_t0c, con_c, con_boltz, con_plnk, con_solr_2008, con_solr_2002
     real(kind_phys), dimension(:), intent(in) :: &
          si
-    integer, intent(in) :: levr, ictm, isol, ico2, iaer, ntcw, ntoz, iovr, isubc_sw, isubc_lw, me
+    type(MPI_Comm), intent(in) :: mpicomm
+    integer, intent(in) :: levr, ictm, isol, ico2, iaer, ntcw, ntoz, iovr, isubc_sw, isubc_lw, mpirank, mpiroot
     logical, intent(in) :: &
          lalw1bd
     integer, intent(in), dimension(:) :: &
@@ -94,7 +96,7 @@ contains
        ipsd0 = 17*idate(1)+43*idate(2)+37*idate(3)+23*idate(4)
     endif
     
-    if ( me == 0 ) then
+    if ( mpirank == mpiroot ) then
        print *,'  In rad_initialize (GFS_rrtmgp_setup_init), before calling radinit'
        print *,' si       = ',si
        print *,' levr     = ',levr,      &
@@ -109,7 +111,7 @@ contains
                ' isubc_sw = ',isubc_sw,  &
                ' isubc_lw = ',isubc_lw,  &
                ' ipsd0    = ',ipsd0,     &
-               ' me       = ',me
+               ' mpirank  = ',mpirank
     endif
 
     loz1st = (ntoz == 0)           ! first-time clim ozone data read flag
@@ -120,14 +122,14 @@ contains
     if (is_initialized) return
 
     ! Call initialization routines..
-    call sol_init ( me, isol, solar_file, con_solr_2008, con_solr_2002, con_pi )
-    call aer_init ( levr, me, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, con_t0c,    &
-         con_c, con_boltz, con_plnk, errflg, errmsg)
+    call sol_init ( mpicomm, mpirank, mpiroot, isol, solar_file, con_solr_2008, con_solr_2002, con_pi )
+    call aer_init ( levr, mpicomm, mpirank, mpiroot, iaermdl, iaerflg, lalw1bd, aeros_file, con_pi, &
+         con_t0c, con_c, con_boltz, con_plnk, errflg, errmsg)
     if(errflg/=0) return
-    call gas_init ( me, co2usr_file, co2cyc_file, ico2, ictm, con_pi, errflg, errmsg )
+    call gas_init ( mpicomm, mpirank, mpiroot, co2usr_file, co2cyc_file, ico2, ictm, con_pi, errflg, errmsg )
     if(errflg/=0) return
 
-    if ( me == 0 ) then
+    if ( mpirank == mpiroot ) then
        print *,' return from rad_initialize (GFS_rrtmgp_setup_init) - after calling radinit'
     endif
     
@@ -138,9 +140,9 @@ contains
 !> \section arg_table_GFS_rrtmgp_setup_timestep_init Argument Table
 !! \htmlinclude GFS_rrtmgp_setup_timestep_init.html
 !!
-  subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, doSWrad, me,     &
-       iaermdl, aeros_file, isol, slag, sdec, cdec, solcon, con_pi, co2dat_file,            &
-       co2gbl_file, ictm, ico2, ntoz, ozphys, errmsg, errflg)
+  subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, doSWrad,         &
+       mpicomm, mpirank, mpiroot, iaermdl, aeros_file, isol, slag, sdec, cdec, solcon,      &
+       con_pi, co2dat_file, co2gbl_file, ictm, ico2, ntoz, ozphys, errmsg, errflg)
      
     ! Inputs
     integer,         intent(in)  :: idate(:)
@@ -149,7 +151,8 @@ contains
     real(kind_phys), intent(in)  :: deltim
     logical,         intent(in)  :: doSWrad
     real(kind_phys), intent(in)  :: con_pi
-    integer,         intent(in)  :: me
+    type(MPI_Comm),  intent(in)  :: mpicomm
+    integer,         intent(in)  :: mpirank, mpiroot
     integer,         intent(in)  :: iaermdl,isol,ictm,ico2,ntoz
     character(len=26), intent(in) :: aeros_file,co2dat_file,co2gbl_file
     type(ty_ozphys),intent(inout) :: ozphys
@@ -217,13 +220,14 @@ contains
           lsol_chg = ( isol==4 .and. lmon_chg )
        endif
        iyear0 = iyear
-       call sol_update(jdate, kyear, deltsw, deltim, lsol_chg, me, slag, sdec, cdec, solcon, con_pi, errmsg, errflg)
+       call sol_update(jdate, kyear, deltsw, deltim, lsol_chg, mpicomm, mpirank, mpiroot, &
+                       slag, sdec, cdec, solcon, con_pi, errmsg, errflg)
        if(errflg/=0) return
     endif
 
     ! Update aerosols...
     if ( lmon_chg ) then
-       call aer_update ( iyear, imon, me, iaermdl, aeros_file, errflg, errmsg)
+       call aer_update ( iyear, imon, mpicomm, mpirank, mpiroot, iaermdl, aeros_file, errflg, errmsg)
        if(errflg/=0) return
     endif
 
@@ -234,7 +238,7 @@ contains
     else
        lco2_chg = .false.
     endif
-    call gas_update (kyear, kmon, kday, khour, lco2_chg, me, co2dat_file, co2gbl_file, ictm,&
+    call gas_update (kyear, kmon, kday, khour, lco2_chg, mpicomm, mpirank, mpiroot, co2dat_file, co2gbl_file, ictm,&
          ico2, errflg, errmsg )
     if(errflg/=0) return
     if (ntoz == 0) then
