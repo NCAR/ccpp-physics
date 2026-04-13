@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - scidocs_hsd_aqua
   workflow_dispatch:
 
 jobs:
@@ -47,9 +46,9 @@ jobs:
     - name: Switch physics submodule to main
       run: |
         cd scm_repo/ccpp/physics
-        git remote set-url origin https://github.com/hertneky/ccpp-physics.git
+        git remote set-url origin https://github.com/NCAR/ccpp-physics.git
         git fetch origin
-        git checkout scidocs_hsd_aqua
+        git checkout main
 
     - name: Generate metadata tables main branch
       run: |
@@ -113,9 +112,9 @@ jobs:
     - name: Switch to submodule main (ncar)
       run: |
         cd scm_repo/ccpp/physics
-        git remote set-url origin https://github.com/hertneky/ccpp-physics.git
-        git fetch origin scidocs_hsd_aqua
-        git checkout -B scidocs_hsd_aqua FETCH_HEAD
+        git remote set-url origin https://github.com/NCAR/ccpp-physics.git
+        git fetch origin main
+        git checkout -B main FETCH_HEAD
 
     - name: Build landing page
       run: |
