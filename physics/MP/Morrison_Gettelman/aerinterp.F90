@@ -903,7 +903,6 @@ contains
       integer ierr
 
 !! ===================================================================
-      read_and_broadcast: if (mpirank==mpiroot) then
       allocate (buff(lonsaer, latsaer, levsw))
       allocate (pres_tmp(lonsaer, levsw))
       allocate (buffx(lonsaer, latsaer, levsw, 1))
@@ -995,10 +994,7 @@ contains
 
       deallocate (buff, pres_tmp)
       deallocate (buffx)
-      endif read_and_broadcast
       
-      call ccpp_bcast(aer_pres, mpiroot, mpicomm, ierr)
-      call ccpp_bcast(aerin,    mpiroot, mpicomm, ierr)
       END SUBROUTINE read_netfaer_dl
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       subroutine read_netfaer(mpicomm, mpirank, mpiroot, nf, iflip, nt, errmsg, errflg)
@@ -1019,7 +1015,6 @@ contains
       integer :: ierr
       
 !! ===================================================================
-      read_and_broadcast: if (mpirank==mpiroot) then
       allocate (buff(lonsaer, latsaer, levsw))
       allocate (pres_tmp(lonsaer, levsw))
       allocate (buffx(lonsaer, latsaer, levsw, 1))
@@ -1111,10 +1106,7 @@ contains
       endif
       deallocate (buff, pres_tmp)
       deallocate (buffx)
-      endif read_and_broadcast
-      
-      call ccpp_bcast(aer_pres, mpiroot, mpicomm, ierr)
-      call ccpp_bcast(aerin,    mpiroot, mpicomm, ierr)
+
       END SUBROUTINE read_netfaer
 
 end module aerinterp
