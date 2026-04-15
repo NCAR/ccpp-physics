@@ -279,7 +279,7 @@ contains
        tr_fca = 1.0
        if ( xz_fca >= z_w_max ) then
           call dtl_reset_cv(xt,xs,xu,xv,xz)
-          go to 10
+          return
        endif
     endif
     !  apply tla
@@ -296,7 +296,7 @@ contains
           tr_tla = 1.0
           if ( xz_tla >= z_w_max ) then
              call dtl_reset_cv(xt,xs,xu,xv,xz)
-             go to 10
+             return
           endif
        endif
     endif
@@ -306,13 +306,11 @@ contains
     if ( t0 > tw_max ) then
        if ( xz >= z_w_max ) then
           call dtl_reset_cv(xt,xs,xu,xv,xz)
-          go to 10
+          return
        endif
     endif
 
     xz = max(xz_mda,xz_fca,xz_tla,xz_mwa)
-
-10  continue
 
   end subroutine dtm_1p_zwa
 

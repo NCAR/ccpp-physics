@@ -930,18 +930,17 @@ REAL(KIND=KFPT),DIMENSION(1:JTBL,1:ITBL),PRIVATE,SAVE:: &
         ENDIF
       ENDDO
 !
+      LPBL=1
       DO K=LMH-1,1,-1
         if(q2(k)-epsq2(k)+epsq2(lm).le.epsq2(lm)*fh) then
           LPBL=K
-          GO TO 110
+          EXIT
         ENDIF
       ENDDO
 !
-      LPBL=1
-!
 !--------------THE HEIGHT OF THE PBL------------------------------------
 !
- 110  PBLH=Z(LPBL+1)-Z(LMH+1)
+      PBLH=Z(LPBL+1)-Z(LMH+1)
 !
 !-----------------------------------------------------------------------
       DO K=1,LMH
@@ -2122,11 +2121,11 @@ REAL(KIND=KFPT),DIMENSION(1:JTBL):: &
       P(1)= RTDXC*(6.*(DYDXR-DYDXL)-DXL*Y2(1))
       Q(1)=-RTDXC*DXR
 !
-      IF(NOLD.EQ.3) GO TO 700
 !-----------------------------------------------------------------------
-      K=3
+      IF (NOLD .GT. 3) THEN
+      DO K=3, NOLD-1
 !
- 100  DXL=DXR
+      DXL=DXR
       DYDXL=DYDXR
       DXR=XOLD(K+1)-XOLD(K)
       DYDXR=(YOLD(K+1)-YOLD(K))/DXR
@@ -2136,32 +2135,35 @@ REAL(KIND=KFPT),DIMENSION(1:JTBL):: &
       P(K-1)= DEN*(6.*(DYDXR-DYDXL)-DXL*P(K-2))
       Q(K-1)=-DEN*DXR
 !
-      K=K+1
-      IF(K.LT.NOLD) GO TO 100
+      END DO
+      END IF
 !-----------------------------------------------------------------------
- 700  K=NOLDM1
+      DO K=NOLDM1, 2, -1
 !
- 200  Y2(K)=P(K-1)+Q(K-1)*Y2(K+1)
+       Y2(K)=P(K-1)+Q(K-1)*Y2(K+1)
 !
-      K=K-1
-      IF(K.GT.1) GO TO 200
+      END DO
 !-----------------------------------------------------------------------
-      K1=1
+      DO K1=1, NNEW
 !
- 300  XK=XNEW(K1)
+      XK=XNEW(K1)
+      KOLD = 1 ! Flag if found interval
 !
-      DO 400 K2=2,NOLD
-      IF(XOLD(K2).LE.XK) GO TO 400
-      KOLD=K2-1
-      GO TO 450
- 400  CONTINUE
-      YNEW(K1)=YOLD(NOLD)
-      GO TO 600
+      DO K2=2,NOLD
+        IF(XOLD(K2) .GT. XK) THEN
+        KOLD=K2-1
+        EXIT
+        END IF
+      END DO
+
+      IF (KOLD == -1) THEN
+        YNEW(K1)=YOLD(NOLD)
+        CYCLE
+      END IF
 !
- 450  IF(K1.EQ.1)   GO TO 500
-      IF(K.EQ.KOLD) GO TO 550
-!
- 500  K=KOLD
+! Update spline coefficients iff new interval
+      IF (K1.EQ.1 .OR. K.NE.KOLD) THEN
+      K=KOLD
 !
       Y2K=Y2(K)
       Y2KP1=Y2(K+1)
@@ -2171,14 +2173,14 @@ REAL(KIND=KFPT),DIMENSION(1:JTBL):: &
       AK=.1666667*RDX*(Y2KP1-Y2K)
       BK=.5*Y2K
       CK=RDX*(YOLD(K+1)-YOLD(K))-.1666667*DX*(Y2KP1+Y2K+Y2K)
+      END IF
 !
- 550  X=XK-XOLD(K)
+      X=XK-XOLD(K)
       XSQ=X*X
 !
       YNEW(K1)=AK*XSQ*X+BK*XSQ+CK*X+YOLD(K)
 !
- 600  K1=K1+1
-      IF(K1.LE.NNEW) GO TO 300
+      END DO
 !-----------------------------------------------------------------------
                         ENDSUBROUTINE SPLINE
 !-----------------------------------------------------------------------
