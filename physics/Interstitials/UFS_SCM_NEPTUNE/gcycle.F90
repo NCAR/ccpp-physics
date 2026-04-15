@@ -253,7 +253,7 @@ contains
       inquire (file=trim(fn_nml),exist=exists)
       if (.not. exists) then
         errflg = 1
-        errmsg = 'ERROR(gcycle): namelist file: ',trim(fn_nml),' does not exist.'
+        errmsg = 'ERROR(gcycle): namelist file: '//trim(fn_nml)//' does not exist.'
         return
       else
         open (unit=nlunit, file=trim(fn_nml), action='READ', status='OLD', iostat=ios)
