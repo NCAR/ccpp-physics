@@ -1263,22 +1263,23 @@
         endif
       enddo
 
-      if (ip .EQ. 0) go to 170
+      if (ip .GT. 0) then
       do i = 1,ip
         szetam(i) = 1.0e+30
         sgzm(i)   = 0.0e+00
         szeta(i)  = zeta(istb(i))
         ifz(i)    = 1
       enddo
+      endif
 
 !------------------------------------------------------------------------
 !     begin wegstein iteration for "zeta" at stable points using
 !     hicks(1976)
 !------------------------------------------------------------------------
 
-      do icnt = 1,icntx
+      stable_iter: do icnt = 1,icntx
         do i = 1,ip
-          if (ifz(i) .EQ. 0) go to 80
+          if (ifz(i) .EQ. 0) cycle
           zal1g = ALOG(szeta(i))
           if (szeta(i) .LE. 0.5) then
             fmz1(i) = (zal1g + a*szeta(i))*rca
@@ -1372,21 +1373,15 @@
            else
              ifz(i) = 0
            endif
-80      continue
         enddo
-      enddo
 
-      do i = 1,ip
-        if (ifz(i) .GE. 1) go to 110
-      enddo
+      end do stable_iter
 
-      go to 130
-
-110   continue
-
-      write(errmsg,'(*(a))') 'NON-CONVERGENCE FOR STABLE ZETA IN gfdl_sfc_layer.F90/MFLUX2'
-      errflg = 1
-      return
+      if (any(ifz(1:ip) .GE. 1)) then
+        write(errmsg,'(*(a))') 'NON-CONVERGENCE FOR STABLE ZETA IN gfdl_sfc_layer.F90/MFLUX2'
+        errflg = 1
+        return
+      endif
 !     call MPI_CLOSE(1,routine)
 
 !------------------------------------------------------------------------
@@ -1395,7 +1390,6 @@
 !     can become unstable
 !------------------------------------------------------------------------
 
-130   continue
       do i = 1,ip
         szo = zoc(istb(i))
         if (szo .LT. 0.0)  then
@@ -1454,8 +1448,6 @@
 !     unstable points
 !------------------------------------------------------------------------
 
-170   continue
-
       iq = 0
       do i = its,ite
         if (zeta(i) .LT. 0.0) then
@@ -1464,22 +1456,23 @@
         endif
       enddo
 
-      if (iq .EQ. 0) go to 290
+      if (iq .GT. 0) then
       do i = 1,iq
         uzeta (i) = zeta(iutb(i))
         ifz   (i) = 1
         uzetam(i) = 1.0e+30
         ugzm  (i) = 0.0e+00
       enddo
+      endif
 
 !------------------------------------------------------------------------
 !     begin wegstein iteration for "zeta" at unstable points using
 !     hicks functions
 !------------------------------------------------------------------------
 
-      do icnt = 1,icntx
+      unstable_iter: do icnt = 1,icntx
         do i = 1,iq
-          if (ifz(i) .EQ. 0) go to 200
+          if (ifz(i) .EQ. 0) cycle
           ugzzo   = ALOG(zkmax(iutb(i))/ABS(zot(iutb(i))))
           uzetao  = ABS(zot(iutb(i)))/zkmax(iutb(i))*uzeta(i)
           ux11    = 1. - 16.*uzeta(i)
@@ -1561,30 +1554,24 @@
           else
             ifz(i) = 0
           endif
-200       continue
         enddo
-      enddo
+
+        if (all(ifz(1:iq) == 0)) exit unstable_iter
+      end do unstable_iter
 
 
-      do i = 1,iq
-        if (ifz(i) .GE. 1) go to 230
-      enddo
-
-      go to 250
-
-230   continue
+      if (any(ifz(1:iq) .GE. 1)) then
       write(errmsg,'(*(a))') 'NON-CONVERGENCE FOR UNSTABLE ZETA IN ROW'// &
           'uq is 1 ',ux2,ugz,ugzm(i),uzeta(i),uzetam(i)
       errflg = 1
       return
+      endif
 
 !     call MPI_CLOSE(1,routine)
 
 !------------------------------------------------------------------------
 !     gather unstable values
 !------------------------------------------------------------------------
-
-250   continue
 
 !------------------------------------------------------------------------
 !     update "zo" for ocean points.  zo cannot be updated within the
@@ -1643,8 +1630,6 @@
         xxsh(iutb(i)) = ufzo(i)
       enddo
 
-290   continue
-
       do i = its,ite
         ucom(i) = ukmax(i)
         vcom(i) = vkmax(i)
@@ -1661,7 +1646,7 @@
 !     do land sfc temperature prediction if ntsflg=1
 !     ntsflg = 1                                    ! gopal's doing
 
-      if (ntsflg .EQ. 0) go to 370
+      if (ntsflg .NE. 0) then
       alll = 600.
       xks   = 0.01
       hcap  = .5/2.39e-8
@@ -1717,9 +1702,9 @@
 !     do iteration to determine "tstar" at new time level
 !------------------------------------------------------------------------
 
-      do icnt = 1,icntx
+      tstar_iter: do icnt = 1,icntx
         do i = 1,ip
-          if (ifz(i) .EQ. 0) go to 330
+          if (ifz(i) .EQ. 0) cycle
           tab1  (i) = tsp(i) - 153.16
           it    (i) = IFIX(tab1(i))
           tab2  (i) = tab1(i) - FLOAT(it(i))
@@ -1751,9 +1736,10 @@
          else
            ifz(i) = 0
          endif
-330       continue
         enddo
-      enddo
+
+        if (all(ifz(1:ip) == 0)) exit tstar_iter
+      end do tstar_iter
 
 !------------------------------------------------------------------------
 !     check for convergence of "t star" prediction
@@ -1774,11 +1760,12 @@
         tstrc(ii) = tsp (i)
       enddo
 
+      endif ! ntsflg
+
 !------------------------------------------------------------------------
 !     compute fluxes  and momentum drag coef
 !------------------------------------------------------------------------
 
-370   continue
       do i = its,ite
 !!!
         if ( iwavecpl .eq. 1 .and. zoc(i) .le. 0.0 ) then

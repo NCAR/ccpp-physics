@@ -1543,7 +1543,7 @@
 !
 ! *** perform bisection *************************************************
 !
-20     do 30 i=1,maxit_par
+       do i=1,maxit_par
        x3 = 0.5*(x1+x2)
 !
        if (ntot .gt. zero_par) then
@@ -1562,15 +1562,15 @@
        x1 = x3
        endif
 !
-       if (abs(x2-x1) .le. eps_par*x1) goto 40
+       if (abs(x2-x1) .le. eps_par*x1) exit
        niter = i
 
 
-30     continue
+       end do
 !
 ! *** converged ; return ************************************************
 !
-40      x3 = 0.5*(x1+x2)
+       x3 = 0.5*(x1+x2)
 !
        if (ntot .gt. zero_par) then
        call sintegral (x2,ndrpl,sinteg1,sinteg2,wparcel,nmodes,
@@ -1826,25 +1826,29 @@
        m=(n+1)/2d0
        xm=0.5d0*(x2+x1)
        xl=0.5d0*(x2-x1)
-       do 12 i=1,m
+       
+       do i=1,m
        z=cos(pi_par*(i-.25d0)/(n+.5d0))
- 1     continue
+       do
        p1=1.d0
        p2=0.d0
-       do 11 j=1,n
-       p3=p2
-       p2=p1
-       p1=((2.d0*j-1.)*z*p2-(j-1.d0)*p3)/j
- 11    continue
+       do j=1,n
+         p3=p2
+         p2=p1
+         p1=((2.d0*j-1.)*z*p2-(j-1.d0)*p3)/j
+       end do
+
        pp=n*(z*p1-p2)/(z*z-1.d0)
        z1=z
        z=z1-p1/pp
-       if(abs(z-z1).gt.eps_par)go to 1
+       if(abs(z-z1).gt.eps_par) exit
+       end do
+
        x(i)=xm-xl*z
        x(n+1-i)=xm+xl*z
        w(i)=2.d0*xl/((1.d0-z*z)*pp*pp)
        w(n+1-i)=w(i)
- 12    continue
+       end do
        end subroutine gauleg
 
 !C=======================================================================
@@ -2922,28 +2926,22 @@
        real*8 :: A_, B_, a0, a1, a2, a3, d, AUX
 
        if (y .le. y1) then
-       d=a
-       goto 5065
-       end if
+         d=a
+       elseif (y .ge. y2) then
+         d=b
+       else
+         AUX=y2-y1
+         A_=6d0*(a-b)/(AUX*AUX*AUX)
+         B_=a+(A_*(y1*y1*y1)/6d0)-(A_*(y1*y1)*y2*0.5d0)
 
-       if (y .ge. y2) then
-       d=b
-       goto 5065
-       end if
+         a0=B_
+         a1=A_*y1*y2
+         a2=-A_*(y1+y2)*0.5d0
+         a3=A_/3d0
+         d=a0+(a1*y)+(a2*y*y)+(a3*y*y*y)
+       endif
 
-
-       AUX=y2-y1
-       A_=6d0*(a-b)/(AUX*AUX*AUX)
-       B_=a+(A_*(y1*y1*y1)/6d0)-(A_*(y1*y1)*y2*0.5d0)
-
-       a0=B_
-       a1=A_*y1*y2
-       a2=-A_*(y1+y2)*0.5d0
-       a3=A_/3d0
-       d=a0+(a1*y)+(a2*y*y)+(a3*y*y*y)
-
-
- 5065    cubicint_ice=d
+       cubicint_ice=d
 
 
        end function cubicint_ice
@@ -2958,26 +2956,20 @@
        real*8 :: A_, a0, a1, a2, a3, d, AUX
 
        if (y .le. y1) then
-       d=0
-       goto 5065
-       end if
+         d=0
+       elseif (y .ge. y2) then
+         d=0
+       else
+         AUX=y2-y1
+         A_=6d0*(a-b)/(AUX*AUX*AUX)
 
-       if (y .ge. y2) then
-       d=0
-       goto 5065
-       end if
+         a1=A_*y1*y2
+         a2=-A_*(y1+y2)*0.5d0
+         a3=A_/3d0
+         d=(a1)+(2d0*a2*y)+(3d0*a3*y*y)
+       endif
 
-
-       AUX=y2-y1
-       A_=6d0*(a-b)/(AUX*AUX*AUX)
-
-       a1=A_*y1*y2
-       a2=-A_*(y1+y2)*0.5d0
-       a3=A_/3d0
-       d=(a1)+(2d0*a2*y)+(3d0*a3*y*y)
-
-
- 5065   dcubicint_ice=d
+       dcubicint_ice=d
 
 
        end function dcubicint_ice

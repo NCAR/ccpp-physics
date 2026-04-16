@@ -6962,8 +6962,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 !  start of iterations
 ! ----------------------------------------------------------------------
           if (swl < 0.) swl = 0.
-1001      continue
-          if (.not.( (nlog < 10) .and. (kcount == 0)))   goto 1002
+          do while ((nlog < 10) .and. (kcount == 0))
           nlog = nlog +1
           df = log ( ( parameters%psisat(isoil) * grav / hfus ) * ( ( 1. + ck * swl )**2.) * &
                ( parameters%smcmax(isoil) / (smc - swl) )** bx) - log ( - (               &
@@ -6992,8 +6991,7 @@ zolmax = xkrefsqr / sqrt(xkzo)   ! maximum z/L
 ! ----------------------------------------------------------------------
 ! bounds applied within do-block are valid for physical solution.
 ! ----------------------------------------------------------------------
-          goto 1001
-1002      continue
+          end do
           free = smc - swl
        end if
 ! ----------------------------------------------------------------------
