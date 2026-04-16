@@ -42,7 +42,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "CCPP SciDoc for Idealized Regional TC Capability"
+PROJECT_NAME           = "CCPP SciDoc for HSD Capabilities"
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -984,20 +984,27 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = pdftxt/HAFS_TC_suite.txt  \
+INPUT                  = pdftxt/HSD_overview.txt \
+                         pdftxt/Idealized_TC.txt \
+                         pdftxt/Aquaplanet.txt \
+                         pdftxt/HAFS_TC_suite.txt  \
+                         pdftxt/GFS_v17_p8_ugwpv1_aquaplanet_suite.txt \
+                         pdftxt/suite_input.nml.txt \
+                         pdftxt/acronyms.txt   \
                          pdftxt/GFS_RRTMG.txt \
                          pdftxt/GFS_SFCLYR.txt \
+                         pdftxt/GFS_NSST.txt \
                          pdftxt/GFS_OCEAN.txt \
                          pdftxt/NOAH_LSM.txt \
+                         pdftxt/NOAHMP_LSM.txt \
                          pdftxt/GFS_SFCSICE.txt \
                          pdftxt/GFS_SATMEDMFVDIFQ.txt \
                          pdftxt/UGWPv0.txt \
+                         pdftxt/GFS_OZPHYS.txt \
                          pdftxt/GFS_H2OPHYS.txt \
                          pdftxt/GFS_SAMFdeep.txt \
                          pdftxt/GFS_SAMFshal.txt \
                          pdftxt/THOMPSON.txt \
-                         pdftxt/suite_input.nml.txt \
-                         pdftxt/acronyms.txt   \ 
                          ../MP \
                          ../CONV \
                          ../GWD \
@@ -1134,7 +1141,8 @@ EXCLUDE_SYMBOLS        =
 # that contain example code fragments that are included (see the \include
 # command).
 
-EXAMPLE_PATH           = pdftxt/RE300 \
+EXAMPLE_PATH           = pdftxt/HSD \
+                         pdftxt \
                          doc/html
 
 # If the value of the EXAMPLE_PATH tag contains directories, you can use the
@@ -1428,7 +1436,8 @@ HTML_STYLESHEET        =
 HTML_EXTRA_STYLESHEET  = _doxygen/doxygen-awesome.css \
                          _doxygen/doxygen-awesome-sidebar-only.css \
                          _doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css \
-                         _doxygen/doxygen-awesome-ccpp.css
+                         _doxygen/doxygen-awesome-ccpp.css \
+                         _doxygen/custom.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
