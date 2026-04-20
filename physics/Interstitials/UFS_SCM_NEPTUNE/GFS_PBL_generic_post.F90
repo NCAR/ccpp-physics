@@ -11,7 +11,7 @@
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
         trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz,                                            &
-        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
+        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_mg,                                 &
         imp_physics_fer_hires, imp_physics_nssl, nssl_ccn_on, ltaerosol, mraerosol, nssl_hail_on, nssl_3moment,                &
         cplflx, cplaqm, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,                 &
         shinhong, do_ysu, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                   &
@@ -33,7 +33,7 @@
       integer, intent(in) :: ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
+      integer, intent(in) :: imp_physics_mg, imp_physics_fer_hires
       integer, intent(in) :: imp_physics_nssl
       logical, intent(in) :: nssl_ccn_on, nssl_hail_on, nssl_3moment
       logical, intent(in) :: ltaerosol, cplflx, cplaqm, cplchm, lssav, ldiag3d, lsidea, use_med_flux, mraerosol
@@ -109,7 +109,7 @@
           call set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
                                         imp_physics_thompson, ltaerosol,mraerosol,   &
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                        imp_physics_zhao_carr, imp_physics_nssl,&
+                                        imp_physics_nssl,&
                                         nssl_hail_on, nssl_ccn_on, nssl_3moment, kk, &
                                         errmsg, errflg)
           if (errflg /= 0) return
@@ -242,14 +242,6 @@
               dqdt(i,k,ntsw) = dvdftra(i,k,5)
               dqdt(i,k,ntgl) = dvdftra(i,k,6)
               dqdt(i,k,ntoz) = dvdftra(i,k,7)
-            enddo
-          enddo
-        elseif (imp_physics == imp_physics_zhao_carr) then
-          do k=1,levs
-            do i=1,im
-              dqdt(i,k,1)    = dvdftra(i,k,1)
-              dqdt(i,k,ntcw) = dvdftra(i,k,2)
-              dqdt(i,k,ntoz) = dvdftra(i,k,3)
             enddo
           enddo
         elseif (imp_physics == imp_physics_nssl ) then
