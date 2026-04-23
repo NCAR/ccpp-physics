@@ -1,0 +1,135 @@
+name: Doxygen GitHub Pages Deploy Action
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+
+    - name: Install Doxygen + Graphviz + LaTeX
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y doxygen graphviz perl texlive-latex-base texlive-latex-extra texlive-fonts-recommended texlive-bibtex-extra
+
+    - name: Verify installations
+      run: |
+        which perl
+        which bibtex
+        doxygen --version
+
+    - name: Checkout current ccpp-physics code
+      uses: actions/checkout@v4
+      with:
+        path: ccpp_repo
+
+    - name: Checkout CCPP SCM main
+      uses: actions/checkout@v4
+      with:
+        repository: NCAR/ccpp-scm
+        path: scm_repo
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Switch physics submodule to main
+      run: |
+        cd scm_repo/ccpp/physics
+        git remote set-url origin https://github.com/NCAR/ccpp-physics.git
+        git fetch origin
+        git checkout main
+
+    - name: Generate metadata tables main branch
+      run: |
+        cd scm_repo
+        mkdir -p ccpp/physics/physics/docs/doc/html
+        export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
+        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py
+        mv ccpp/physics/physics/docs/*.html ccpp/physics/physics/docs/doc/html
+
+    - name: Build HSD docs
+      run: |
+        cd scm_repo/ccpp/physics/physics/docs
+        doxygen ccpphsd_doxyfile
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/HSD
+        mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/HSD
+
+    - name: Switch to v7 tag
+      run: |
+        cd scm_repo
+        git fetch origin tag v7.0.0
+        git checkout v7.0.0
+        git submodule update --init --recursive
+
+    - name: Generate metadata tables v7 branch
+      run: |
+        cd scm_repo
+        mkdir -p ccpp/physics/physics/docs/doc/html
+        export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
+        ./ccpp/framework/scripts/metadata2html.py -c ccpp/config/ccpp_prebuild_config.py
+        mv ccpp/physics/physics/docs/*.html ccpp/physics/physics/docs/doc/html
+
+    - name: Build v7 docs
+      run: |
+        cd scm_repo/ccpp/physics/physics/docs
+        doxygen ccpp_doxyfile
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/V7
+        mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/V7
+
+    - name: Switch physics submodule to SRWv3 (ufs-community)
+      run: |
+        cd scm_repo/ccpp/physics
+        git remote set-url origin https://github.com/ufs-community/ccpp-physics.git
+        git fetch origin release/srw-v3
+        git checkout -B release/srw-v3 FETCH_HEAD
+
+    - name: Generate metadata tables SRWv3 branch
+      run: |
+        cd scm_repo
+        mkdir -p ccpp/physics/physics/docs/doc/html
+        export PYTHONPATH=$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts:$GITHUB_WORKSPACE/scm_repo/ccpp/framework/scripts/parse_tools
+        ./ccpp/framework/scripts/metadata2html.py -c $GITHUB_WORKSPACE/ccpp_repo/physics/docs/pdftxt/RE300/ccpp_prebuild_config.py
+        mv ccpp/physics/physics/docs/*.html ccpp/physics/physics/docs/doc/html
+
+    - name: Build SRWv3 docs
+      run: |
+        cd scm_repo/ccpp/physics/physics/docs
+        doxygen ccppsrw_doxyfile
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/SRWv3
+        mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/SRWv3
+
+    - name: Switch to submodule main (ncar)
+      run: |
+        cd scm_repo/ccpp/physics
+        git remote set-url origin https://github.com/NCAR/ccpp-physics.git
+        git fetch origin main
+        git checkout -B main FETCH_HEAD
+
+    - name: Build landing page
+      run: |
+        cd scm_repo/ccpp/physics/physics/docs
+        doxygen mainpage_doxyfile
+        mv html/main/* $GITHUB_WORKSPACE/physics/docs/html
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v5
+
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: physics/docs/html
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4.0.5

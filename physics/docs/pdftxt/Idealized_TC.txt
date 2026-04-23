@@ -1,0 +1,11 @@
+/**
+\page HAFS_TC_page Idealized Regional TC
+
+This page documents the CCPP science for the Idealized Regional Tropical Cyclone (TC) capability. 
+It focuses on the physics and parameterizations used in this HSD capability. For complete details 
+about the case setup, workflows, and usage within the Unified Weather Model (UWM), see the 
+[UWM HSD Users Guide](https://ufs-weather-model.readthedocs.io/en/develop/IdealizedTC.html).
+
+The following suite is used by the Idealized TC case: \n
+\subpage HAFSv1_page 
+*/
