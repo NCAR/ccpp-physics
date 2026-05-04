@@ -10,11 +10,12 @@
 !!
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
-        tend_opt_pbl, trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz,                                            &
-        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_mg,          &
+        tend_opt_pbl, trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz,                              &
+        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_mg,                                 &
         imp_physics_fer_hires, imp_physics_nssl, nssl_ccn_on, ltaerosol, mraerosol, nssl_hail_on, nssl_3moment,                &
         cplflx, cplaqm, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,                 &
-        shinhong, do_ysu, dvdftra, ten_t, ten_u, ten_v, ten_q, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dtp, dudt, dvdt, dtdt,                   &
+        shinhong, do_ysu, dvdftra, ten_t_pbl, ten_q_pbl,ten_t, ten_u, ten_v, ten_q,                                            &
+        dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dtp, dudt, dvdt, dtdt,                                                            &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,           &
         index_of_process_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,   &
         dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                        &
@@ -56,6 +57,7 @@
 
       real(kind=kind_phys), dimension(:,:, :), intent(in) :: dvdftra
       real(kind=kind_phys), dimension(:,:), intent(in) :: ten_t, ten_u, ten_v
+      real(kind=kind_phys), dimension(:,:), intent(out) :: ten_t_pbl,ten_q_pbl
       real(kind=kind_phys), dimension(:,:,:), intent(out) :: ten_q
       real(kind=kind_phys), dimension(:), intent(in) :: dusfc1, dvsfc1, dtsfc1, dqsfc1
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dudt, dvdt, dtdt
@@ -95,6 +97,8 @@
       errmsg = ''
       errflg = 0
       ten_q = 0.0
+      ten_t_pbl = 0.0
+      ten_q_pbl = 0.0
 !GJF: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
       if (nvdiff == ntrac .and. (hybedmf .or. do_shoc .or. satmedmf)) then
         ten_q = dvdftra
@@ -513,6 +517,15 @@
 
       endif   ! end if_lssav
 
+      !Output t and q tenedncies for PBL only to be used
+      !as input in other schemes
+      do k=1,levs
+         do i=1,im
+            ten_t_pbl(i,k)=ten_t(i,k)
+            ten_q_pbl(i,k)=ten_q(i,k,1)
+         end do
+      end do
+      
       end subroutine GFS_PBL_generic_post_run
 
       end module GFS_PBL_generic_post
