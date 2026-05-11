@@ -409,7 +409,7 @@
 
 ########################################################################
 [ccpp-table-properties]
-  name = flake_driver_post
+  name = flake_driver_post_run
   type = scheme
   dependencies = machine.F
 ########################################################################
