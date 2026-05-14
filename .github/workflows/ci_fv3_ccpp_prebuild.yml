@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: Checkout current ccpp-physics code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v6
       with:
         ref: ${{ github.event.pull_request.head.sha }}
 
@@ -41,7 +41,7 @@ jobs:
         git checkout remote_local/$GIT_REMOTE_BRANCH
 
     - name: Set up Python 3.10.13
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v6
       with:
         python-version: 3.10.13
 

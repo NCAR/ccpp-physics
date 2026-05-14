@@ -3651,7 +3651,8 @@
 
       ! DH* This will need to be implemented by a host model
       ! that actually uses this data
-      print *, 'NOTE: gocart aerosol initialization is reading input data with all MPI ranks'
+      print *, 'NOTE: gocart aerosol initialization is reading input ', &
+     &         'data with all MPI ranks'
 
       if (KCM /= ntrcaerm ) then
         print *, 'ERROR in # of gocart aer species',KCM

@@ -6,6 +6,7 @@
 !! aerosol, IN&CCN and surface properties updates.
    module GFS_phys_time_vary
 
+      use mpi_f08
 #ifdef _OPENMP
       use omp_lib
 #endif
@@ -79,7 +80,7 @@
 !>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
 !> @{
       subroutine GFS_phys_time_vary_init (                                                         &
-              me, master, ntoz, h2o_phys, iaerclm, iaermdl, iccn, iflip, im, levs,                 &
+              mpicomm, mpirank, mpiroot, ntoz, h2o_phys, iaerclm, iaermdl, iccn, iflip, im, levs,  &
               nx, ny, idate, xlat_d, xlon_d,                                                       &
               jindx1_o3, jindx2_o3, ddy_o3, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,                &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
@@ -100,7 +101,8 @@
          implicit none
 
          ! Interface variables
-         integer,              intent(in)    :: me, master, ntoz, iccn, iflip, im, nx, ny, levs, iaermdl
+         type(MPI_Comm),       intent(in)    :: mpicomm
+         integer,              intent(in)    :: mpirank, mpiroot, ntoz, iccn, iflip, im, nx, ny, levs, iaermdl
          logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
          integer,              intent(in)    :: idate(:), iopt_lake, iopt_lake_clm, iopt_lake_flake
          real(kind_phys),      intent(in)    :: fhour, lakefrac_threshold, lakedepth_threshold
@@ -230,9 +232,9 @@
          if (iaerclm) then
            ntrcaer = ntrcaerm
            if(iaermdl == 1) then
-             call read_aerdata (me,master,iflip,idate,errmsg,errflg)
+             call read_aerdata (mpicomm,mpirank,mpiroot,iflip,idate,errmsg,errflg)
            elseif (iaermdl == 6) then
-             call read_aerdata_dl(me,master,iflip,                       &
+             call read_aerdata_dl(mpicomm, mpirank, mpiroot, iflip, &
                                  idate,fhour, errmsg,errflg)
            end if
            if(errflg/=0) return
@@ -251,19 +253,19 @@
 
 !> - Call read_cidata() to read IN and CCN data
          if (iccn == 1) then
-           call read_cidata (me,master)
+           call read_cidata (mpicomm, mpirank, mpiroot)
            ! No consistency check needed for in/ccn data, all values are
            ! hardcoded in module iccn_def.F and GFS_typedefs.F90
          endif
 
 !> - Call tau_amf dats for  ugwp_v1
          if (do_ugwp_v1) then
-            call read_tau_amf(me, master, errmsg, errflg)
+            call read_tau_amf(mpicomm, mpirank, mpiroot, errmsg, errflg)
             if(errflg/=0) return
          endif
 
 !> - Initialize soil vegetation (needed for sncovr calculation further down)
-         call set_soilveg(me, isot, ivegsrc, nlunit, errmsg, errflg)
+         call set_soilveg(mpirank, isot, ivegsrc, nlunit, errmsg, errflg)
          if(errflg/=0) return
 
 !> - read in NoahMP table (needed for NoahMP init)
@@ -289,8 +291,7 @@
          if (iaerclm) then
            call setindxaer (im, xlat_d, jindx1_aer,          &
                             jindx2_aer, ddy_aer, xlon_d,     &
-                            iindx1_aer, iindx2_aer, ddx_aer, &
-                            me, master)
+                            iindx1_aer, iindx2_aer, ddx_aer)
            iamin = min(minval(iindx1_aer), iamin)
            iamax = max(maxval(iindx2_aer), iamax)
            jamin = min(minval(jindx1_aer), jamin)
@@ -306,7 +307,7 @@
 
 !> - Call  cires_indx_ugwp to read monthly-mean GW-tau diagnosed from FV3GFS-runs that can resolve GWs
          if (do_ugwp_v1) then
-            call cires_indx_ugwp (im, me, master, xlat_d, jindx1_tau, jindx2_tau,  &
+            call cires_indx_ugwp (im, mpirank, mpiroot, xlat_d, jindx1_tau, jindx2_tau,  &
                                   ddy_j1tau, ddy_j2tau)
          endif
 
@@ -322,7 +323,7 @@
 
          !--- if sncovr does not exist in the restart, need to create it
          if (all(sncovr < zero)) then
-           if (me == master ) write(*,'(a)') 'GFS_phys_time_vary_init: compute sncovr from weasd and soil vegetation parameters'
+           if (mpirank == mpiroot ) write(*,'(a)') 'GFS_phys_time_vary_init: compute sncovr from weasd and soil vegetation parameters'
            !--- compute sncovr from existing variables
            !--- code taken directly from read_fix.f
            sncovr(:) = zero
@@ -343,7 +344,7 @@
          !--- For RUC LSM: create sncovr_ice from sncovr
          if (lsm == lsm_ruc) then
            if (all(sncovr_ice < zero)) then
-             if (me == master ) write(*,'(a)') 'GFS_phys_time_vary_init: fill sncovr_ice with sncovr for RUC LSM'
+             if (mpirank == mpiroot ) write(*,'(a)') 'GFS_phys_time_vary_init: fill sncovr_ice with sncovr for RUC LSM'
              sncovr_ice(:) = sncovr(:)
            endif
          endif
@@ -353,9 +354,9 @@
          if (iaerclm) then
            ! This call is outside the OpenMP section, so it should access errmsg & errflg directly.
            if(iaermdl==1) then
-             call read_aerdataf (me, master, iflip, idate, fhour, errmsg, errflg)
+             call read_aerdataf (mpicomm, mpirank, mpiroot, iflip, idate, fhour, errmsg, errflg)
            elseif (iaermdl==6) then
-             call read_aerdataf_dl (me, master, iflip, idate, fhour, errmsg, errflg)
+             call read_aerdataf_dl (mpicomm, mpirank, mpiroot, iflip, idate, fhour, errmsg, errflg)
            end if
            ! If it is moved to an OpenMP section, it must use myerrmsg, myerrflg, and copy_error.
            if (errflg/=0) return
@@ -365,7 +366,7 @@
          !--- land and ice - not for restart runs
          lsm_init: if (lsm_cold_start) then
            if (lsm == lsm_noahmp .or. lsm == lsm_ruc) then
-             if (me == master ) write(*,'(a)') 'GFS_phys_time_vary_init: initialize albedo for land and ice'
+             if (mpirank == mpiroot ) write(*,'(a)') 'GFS_phys_time_vary_init: initialize albedo for land and ice'
              do ix=1,im
                albdvis_lnd(ix)  = 0.2_kind_phys
                albdnir_lnd(ix)  = 0.2_kind_phys
@@ -705,7 +706,7 @@
 !>\section gen_GFS_phys_time_vary_timestep_init GFS_phys_time_vary_timestep_init General Algorithm
 !> @{
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
-            me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, cplflx,                     &
+            mpicomm, mpirank, mpiroot, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, cplflx,      &
             nsswr, fhswr, lsswr, fhour,                                                             &
             imfdeepcnv, cal_pre, random_clds, nscyc, ntoz, h2o_phys, iaerclm, iaermdl, iccn, clstp, &
             jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
@@ -724,7 +725,8 @@
          implicit none
 
          ! Interface variables
-         integer,              intent(in)    :: me, master, cnx, cny, isc, jsc, nrcm, im, levs, kdt, &
+         type(MPI_Comm),       intent(in)    :: mpicomm
+         integer,              intent(in)    :: mpirank, mpiroot, cnx, cny, isc, jsc, nrcm, im, levs, kdt, &
                                                 nsswr, imfdeepcnv, iccn, nscyc, ntoz, iflip, iaermdl
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhswr, fhour
@@ -794,8 +796,8 @@
 !$OMP parallel num_threads(nthrds) default(none)                                         &
 !$OMP          shared(kdt,nsswr,lsswr,clstp,imfdeepcnv,cal_pre,random_clds)              &
 !$OMP          shared(fhswr,fhour,seed0,cnx,cny,nrcm,wrk,rannie,rndval, iaermdl)         &
-!$OMP          shared(rann,im,isc,jsc,imap,jmap,ntoz,me,idate,jindx1_o3,jindx2_o3)       &
-!$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,master) &
+!$OMP          shared(rann,im,isc,jsc,imap,jmap,ntoz,mpirank,idate,jindx1_o3,jindx2_o3)  &
+!$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,mpiroot)&
 !$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
 !$OMP          shared(ddx_ci,in_nm,ccn_nm,do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau)    &
 !$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys,h2ophys,rjday,n1,n2,idat,jdat,rinc) &
@@ -883,7 +885,7 @@
 !$OMP section
 !> - Call ciinterpol() to make IN and CCN data interpolation
          if (iccn == 1) then
-           call ciinterpol (me, im, idate, fhour,     &
+           call ciinterpol (mpirank, im, idate, fhour,&
                             jindx1_ci, jindx2_ci,     &
                             ddy_ci, iindx1_ci,        &
                             iindx2_ci, ddx_ci,        &
@@ -893,7 +895,7 @@
 !$OMP section
 !> - Call  cires_indx_ugwp to read monthly-mean GW-tau diagnosed from FV3GFS-runs that resolve GW-activ
          if (do_ugwp_v1) then
-           call tau_amf_interp(me, master, im, idate, fhour, &
+           call tau_amf_interp(mpirank, mpiroot, im, idate, fhour, &
                                jindx1_tau, jindx2_tau,       &
                                ddy_j1tau, ddy_j2tau, tau_amf)
          endif
@@ -906,13 +908,13 @@
            ! aerinterpol is using threading inside, don't
            ! move into OpenMP parallel section above
            if (iaermdl==1) then
-             call aerinterpol (me, master, nthrds, im, idate, &
+             call aerinterpol (mpicomm, mpirank, mpiroot, nthrds, im, idate, &
                               fhour, iflip, jindx1_aer, jindx2_aer, &
                               ddy_aer, iindx1_aer,           &
                               iindx2_aer, ddx_aer,           &
                               levs, prsl, aer_nm, errmsg, errflg)
            else if (iaermdl==6) then
-             call aerinterpol_dl (me, master, nthrds, im, idate,       &
+             call aerinterpol_dl (mpicomm, mpirank, mpiroot, nthrds, im, idate, &
                                  fhour, iflip, jindx1_aer, jindx2_aer, &
                                  ddy_aer, iindx1_aer,                  &
                                  iindx2_aer, ddx_aer,                  &
@@ -924,7 +926,7 @@
 !> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
          if (nscyc >  0) then
            if (mod(kdt,nscyc) == 1) THEN
-             call gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit, fn_nml,      &
+             call gcycle (mpirank, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit, fn_nml,      &
                  input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,         &
                  use_ufo, nst_anl, fhcyc, phour, landfrac, lakefrac, min_seaice, min_lakeice,&
                  frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc,        &
