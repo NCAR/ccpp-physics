@@ -46,7 +46,6 @@
   type = integer
   intent = in
 [imp_physics_wsm6]
-  intent = in
   standard_name = identifier_for_wsm6_microphysics_scheme
   long_name = choice of WSM6 microphysics scheme
   units = flag
