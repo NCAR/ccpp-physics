@@ -95,7 +95,7 @@
   intent = out
 ########################################################################
 [ccpp-arg-table]
-  name = mp_fer_hires_finalize
+  name = mp_fer_hires_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message

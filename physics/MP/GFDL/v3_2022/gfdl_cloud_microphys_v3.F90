@@ -12,7 +12,7 @@ module gfdl_cloud_microphys_v3
 
    private
 
-   public gfdl_cloud_microphys_v3_run, gfdl_cloud_microphys_v3_init, gfdl_cloud_microphys_v3_finalize
+   public gfdl_cloud_microphys_v3_run, gfdl_cloud_microphys_v3_init, gfdl_cloud_microphys_v3_final
 
    logical :: is_initialized = .false.
 
@@ -74,13 +74,13 @@ contains
 
 
 ! =======================================================================
-!>\brief The subroutine 'gfdl_cloud_microphys_v3_finalize' terminates the GFDL
+!>\brief The subroutine 'gfdl_cloud_microphys_v3_final' terminates the GFDL
 !! cloud microphysics.
 !!
-!! \section arg_table_gfdl_cloud_microphys_v3_finalize  Argument Table
-!! \htmlinclude gfdl_cloud_microphys_v3_finalize.html
+!! \section arg_table_gfdl_cloud_microphys_v3_final  Argument Table
+!! \htmlinclude gfdl_cloud_microphys_v3_final.html
 !!
-   subroutine gfdl_cloud_microphys_v3_finalize(errmsg, errflg)
+   subroutine gfdl_cloud_microphys_v3_final(errmsg, errflg)
 
        implicit none
 
@@ -97,7 +97,7 @@ contains
 
        is_initialized = .false.
 
-   end subroutine gfdl_cloud_microphys_v3_finalize
+   end subroutine gfdl_cloud_microphys_v3_final
 
 !>\defgroup gfdlmp  GFDL Cloud Microphysics Module
 !! This is cloud microphysics package for GFDL global cloud resolving model.

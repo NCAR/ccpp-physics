@@ -71,7 +71,7 @@ module  cires_ugwpv0_module
 !/
 !
 ! allocatable arrays, initilized during "cires_ugwp_init" &
-!                     released   during "cires_ugwp_finalize"
+!                     released   during "cires_ugwp_final"
 !
    real, allocatable :: kvg(:), ktg(:), krad(:), kion(:)
    real, allocatable :: zkm(:), pmb(:)
@@ -227,11 +227,11 @@ module  cires_ugwpv0_module
     end subroutine cires_ugwpv0_mod_init
 !
 ! -----------------------------------------------------------------------
-! finalize  of cires_ugwp   (_finalize)
+! finalize  of cires_ugwp   (_final)
 ! -----------------------------------------------------------------------
 
 !> This subroutine deallocate sources/spectra and some diagnostics.
-  subroutine cires_ugwpv0_mod_finalize
+  subroutine cires_ugwpv0_mod_final
 !
 ! deallocate sources/spectra & some diagnostics need to find where "deaalocate them"
 ! before "end" of the FV3GFS
@@ -245,5 +245,5 @@ module  cires_ugwpv0_module
     deallocate( zkm,   pmb  )
     deallocate( rfdis, rfdist)
 
-   end subroutine cires_ugwpv0_mod_finalize
+   end subroutine cires_ugwpv0_mod_final
 end module cires_ugwpv0_module

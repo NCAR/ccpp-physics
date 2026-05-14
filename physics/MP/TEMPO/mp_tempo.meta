@@ -826,13 +826,6 @@
   dimensions = ()
   type = integer
   intent = in
-[blkno]
-  standard_name = ccpp_block_number
-  long_name = number of block for explicit data blocking in CCPP
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
 [ext_diag]
   standard_name = flag_for_extended_diagnostic_output_from_thompson_microphysics
   long_name = flag for extended diagnostic output from thompson microphysics
@@ -955,7 +948,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = mp_tempo_finalize
+  name = mp_tempo_final
   type = scheme
 [is_initialized]
   standard_name = flag_for_thompson_mp_scheme_initialization

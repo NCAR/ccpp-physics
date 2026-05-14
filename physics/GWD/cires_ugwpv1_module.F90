@@ -92,7 +92,7 @@ module  cires_ugwpv1_module
 
 !
 ! allocatable arrays, initilized during "cires_ugwp_init" &
-!                     released   during "cires_ugwp_finalize"
+!                     released   during "cires_ugwp_final"
 !
    real(kind=kind_phys), allocatable :: kvg(:), ktg(:), krad(:), kion(:)
    real(kind=kind_phys), allocatable :: zkm(:), pmb(:)

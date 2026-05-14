@@ -1821,7 +1821,7 @@ module module_mp_thompson
 !> @}
 
 !>\ingroup aathompson
-   subroutine thompson_finalize()
+   subroutine thompson_final()
 
       implicit none
 
@@ -1866,7 +1866,7 @@ module module_mp_thompson
 
       if (ALLOCATED(tnccn_act)) DEALLOCATE(tnccn_act)
 
-   end subroutine thompson_finalize
+   end subroutine thompson_final
 
 !+---+-----------------------------------------------------------------+
 !ctrlL

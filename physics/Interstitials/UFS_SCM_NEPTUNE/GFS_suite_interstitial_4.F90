@@ -39,7 +39,8 @@
       real(kind=kind_phys), intent(in   )                   :: con_pi, dtf
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qc
       ! save_qi is not allocated for Zhao-Carr MP
-      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qi, save_lnc, save_inc
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qi
+      real(kind=kind_phys), intent(in   ), dimension(:,:), optional :: save_lnc, save_inc
 
       ! dtend and dtidx are only allocated if ldiag3d
       logical, intent(in)                                   :: ldiag3d, qdiag3d

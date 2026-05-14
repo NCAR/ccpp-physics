@@ -9,7 +9,7 @@ module mp_thompson_post
 
    implicit none
 
-   public :: mp_thompson_post_init, mp_thompson_post_run, mp_thompson_post_finalize
+   public :: mp_thompson_post_init, mp_thompson_post_run, mp_thompson_post_final
 
    private
 
@@ -129,10 +129,10 @@ contains
 
    end subroutine mp_thompson_post_run
 
-!> \section arg_table_mp_thompson_post_finalize Argument Table
-!! \htmlinclude mp_thompson_post_finalize.html
+!> \section arg_table_mp_thompson_post_final Argument Table
+!! \htmlinclude mp_thompson_post_final.html
 !!
-   subroutine mp_thompson_post_finalize(errmsg, errflg)
+   subroutine mp_thompson_post_final(errmsg, errflg)
 
       implicit none
 
@@ -149,6 +149,6 @@ contains
 
       is_initialized = .false.
 
-   end subroutine mp_thompson_post_finalize
+   end subroutine mp_thompson_post_final
 
 end module mp_thompson_post

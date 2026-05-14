@@ -257,7 +257,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = ugwpv1_gsldrag_finalize
+  name = ugwpv1_gsldrag_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message

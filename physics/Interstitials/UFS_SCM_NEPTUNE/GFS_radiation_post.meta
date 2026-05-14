@@ -2,9 +2,11 @@
   name = GFS_radiation_post
   type = scheme
   dependencies_path	= ../../
-  dependencies = hooks/machine.F,Radiation/radiation_aerosols.f
+  dependencies = hooks/machine.F,Radiation/RRTMG/iounitdef.f,Radiation/radiation_aerosols.f
   dependencies = Radiation/RRTMG/radlw_param.f,Radiation/radiation_tools.F90,Radiation/RRTMGP/rte-rrtmgp/extensions/mo_heating_rates.F90
-  dependencies = Radiation/RRTMGP/rte-rrtmgp/rte-frontend/mo_rte_kind.F90
+  dependencies = Radiation/RRTMGP/rte-rrtmgp/rte-frontend/mo_rte_kind.F90,Radiation/RRTMGP/rte-rrtmgp/rte-frontend/mo_rte_config.F90
+  dependencies = Radiation/RRTMGP/rte-rrtmgp/rte-frontend/mo_rte_util_array_validation.F90
+  dependencies = Radiation/RRTMGP/rte-rrtmgp/gas-optics/mo_gas_optics_constants.F90
 
 ########################################################################
 [ccpp-arg-table]

@@ -533,7 +533,8 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
+  optional = true
 [save_inc]
   standard_name = ice_cloud_number_concentration_save
   long_name = ice cloud number concentration before entering a physics scheme
@@ -541,7 +542,8 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
+  optional = true
 [ntlnc]
   standard_name = index_of_mass_number_concentration_of_cloud_droplets_in_tracer_concentration_array
   long_name = tracer index for liquid number concentration

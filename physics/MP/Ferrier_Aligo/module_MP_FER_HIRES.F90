@@ -2963,7 +2963,7 @@ ENDIF
 !
       END FUNCTION FPVSX0
 
-      SUBROUTINE ferhires_finalize()
+      SUBROUTINE ferhires_final()
       
       IMPLICIT NONE
 
@@ -2980,7 +2980,7 @@ ENDIF
       if (ALLOCATED(vsnowi)) DEALLOCATE(vsnowi)
       if (ALLOCATED(vel_rf)) DEALLOCATE(vel_rf)
       
-      END SUBROUTINE ferhires_finalize
+      END SUBROUTINE ferhires_final
 
 !
       END MODULE module_mp_fer_hires

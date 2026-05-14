@@ -239,6 +239,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = true
 [save_inc]
   standard_name = ice_cloud_number_concentration_save
   long_name = ice cloud number concentration before entering a physics scheme
@@ -247,6 +248,7 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = true
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter

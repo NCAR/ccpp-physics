@@ -11,7 +11,7 @@ module GFS_rrtmg_setup
    use mpi_f08
    implicit none
 
-   public GFS_rrtmg_setup_init, GFS_rrtmg_setup_timestep_init, GFS_rrtmg_setup_finalize
+   public GFS_rrtmg_setup_init, GFS_rrtmg_setup_timestep_init, GFS_rrtmg_setup_final
 
    private
 
@@ -295,10 +295,10 @@ module GFS_rrtmg_setup
 
    end subroutine GFS_rrtmg_setup_timestep_init
 
-!> \section arg_table_GFS_rrtmg_setup_finalize Argument Table
-!! \htmlinclude GFS_rrtmg_setup_finalize.html
+!> \section arg_table_GFS_rrtmg_setup_final Argument Table
+!! \htmlinclude GFS_rrtmg_setup_final.html
 !!
-   subroutine GFS_rrtmg_setup_finalize (errmsg, errflg)
+   subroutine GFS_rrtmg_setup_final (errmsg, errflg)
 
       implicit none
 
@@ -315,7 +315,7 @@ module GFS_rrtmg_setup
 
       is_initialized = .false.
 
-   end subroutine GFS_rrtmg_setup_finalize
+   end subroutine GFS_rrtmg_setup_final
 
 !> This subroutine checks and updates time sensitive data used by
 !! radiation computations. This subroutine needs to be placed inside
