@@ -120,9 +120,9 @@ jobs:
     - name: Switch to submodule main (ncar)
       run: |
         cd scm_repo/ccpp/physics
-        git remote set-url origin https://github.com/NCAR/ccpp-physics.git
-        git fetch origin main
-        git checkout -B main FETCH_HEAD
+        git remote set-url origin https://github.com/hertneky/ccpp-physics.git
+        git fetch origin scidoc_landda
+        git checkout -B scidoc_landda FETCH_HEAD
 
     - name: Build landing page
       run: |
