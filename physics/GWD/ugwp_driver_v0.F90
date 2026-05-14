@@ -30,7 +30,7 @@ module ugwp_driver_v0
           PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DTP,KDT, &
           sgh30, HPRIME,OC,OA4,CLX4,THETA,vSIGMA,vGAMMA,ELVMAXD, &
           DUSFC, DVSFC,  xlatd, sinlat, coslat, sparea, &
-          cdmbgwd, me, master, rdxzb, &
+          cdmbgwd, cdmbgwd0, me, master, rdxzb, &
           zmtb, zogw, tau_mtb, tau_ogw, tau_tofd, &
           dudt_mtb, dudt_ogw, dudt_tms, errmsg,errflg  )
 !----------------------------------------
@@ -89,6 +89,7 @@ module ugwp_driver_v0
       integer, intent(in)              :: KPBL(IM)    ! Index for the PBL top layer!
       real(kind=kind_phys), intent(in) :: dtp         !  time step
       real(kind=kind_phys), intent(in) :: cdmbgwd(2)
+      real(kind=kind_phys), intent(in) :: cdmbgwd0(2) ! Namelist parameters used to scale MB and GWD
           
       real(kind=kind_phys), intent(in), dimension(im,km) :: &
                                         u1,  v1,   t1, q1, del, prsl, prslk, phil
@@ -485,6 +486,8 @@ module ugwp_driver_v0
             sigres = max(sigmin, sigma(J))
             if (hprime(J)/sigres > dxres) sigres = hprime(J)/dxres
             mtbridge = ZR * sigres*ZLEN / hprime(J)
+            ! Scale the drag coefficient by the inverse square root of dxres
+            cdmb4 = cdmbgwd0(1) / sqrt(sqrt(sparea(j)))
 !           dbtmp = cdmb4*mtbridge*max(cos(ang(i,k)), gamma(j)*sin(ang(i,k)))   ! (4.15)-ifs 	
             dbtmp = cdmb4*mtbridge*(bgam * cosang2 + cgam * sinang2)            ! (4.16)-ifs
             DB(I,K)= DBTMP * UDS(I,K)
@@ -624,6 +627,8 @@ module ugwp_driver_v0
 !
         COEFM    = (1. + CLX(I)) ** (OA(I)+1.)
 !
+        ! Scale the cleff coefficient by the inverse square root of dxres
+        cleff = cdmbgwd0(2) / sqrt(sqrt(sparea(j)))
         XLINV(I) = COEFM * CLEFF           ! effective kxw for Lin-wave
         XLINGFS  = COEFM * CLEFF 
 !

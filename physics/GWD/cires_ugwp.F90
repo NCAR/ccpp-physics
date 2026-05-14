@@ -188,7 +188,7 @@ contains
 ! \section det_cires_ugwp CIRES UGWP V0 Scheme Detailed Algorithm
      subroutine cires_ugwp_run(do_ugwp, me,  master, im,  levs, ntrac, dtp, kdt, lonr, &
          oro, oro_uf, hprime, nmtvr, oc, theta, sigma, gamma, elvmax, clx, oa4,        &
-         do_tofd, ldiag_ugwp, cdmbgwd, xlat, xlat_d, sinlat, coslat,                   &
+         do_tofd, ldiag_ugwp, cdmbgwd, cdmbgwd0, xlat, xlat_d, sinlat, coslat,         &
          area, ugrs, vgrs, tgrs, qgrs, prsi, prsl, prslk, phii, phil,                  &
          del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis,                &
          tau_tofd, tau_mtb, tau_ogw, tau_ngw, zmtb, zlwb, zogw,                        &
@@ -216,6 +216,7 @@ contains
     real(kind=kind_phys),    intent(in), dimension(:, :) :: prsi, phii
     real(kind=kind_phys),    intent(in), dimension(:,:,:):: qgrs
     real(kind=kind_phys),    intent(in) :: dtp, cdmbgwd(:)
+    real(kind=kind_phys),    intent(in) :: cdmbgwd0(:)
     logical,                 intent(in) :: do_ugwp, do_tofd, ldiag_ugwp
 
     real(kind=kind_phys),    intent(out), dimension(:)      :: dusfcg, dvsfcg
@@ -293,7 +294,7 @@ contains
       call GWDPS_V0(im, levs, lonr, do_tofd, Pdvdt, Pdudt, Pdtdt, Pkdis,          &
            ugrs, vgrs, tgrs, qgrs(:,:,1), kpbl, prsi,del,prsl, prslk, phii, phil, &
            dtp, kdt, sgh30, hprime, oc, oa4, clx, theta, sigma, gamma, elvmax,    &
-           dusfcg, dvsfcg, xlat_d, sinlat, coslat, area, cdmbgwd(1:2),            &
+           dusfcg, dvsfcg, xlat_d, sinlat, coslat, area, cdmbgwd(1:2), cdmbgwd0,  &
            me, master, rdxzb, zmtb, zogw, tau_mtb, tau_ogw,                       &
            tau_tofd, dudt_mtb, dudt_ogw, dudt_tms,                                &
            errmsg, errflg)
