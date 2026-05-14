@@ -47,9 +47,9 @@ jobs:
     - name: Switch physics submodule to main
       run: |
         cd scm_repo/ccpp/physics
-        git remote set-url origin https://github.com/NCAR/ccpp-physics.git
+        git remote set-url origin https://github.com/hertneky/ccpp-physics.git
         git fetch origin
-        git checkout main
+        git checkout scidoc_landda
 
     - name: Generate metadata tables main branch
       run: |
