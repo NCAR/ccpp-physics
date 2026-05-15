@@ -358,14 +358,6 @@
   type = real
   kind = kind_phys
   intent = in
-[cdmbgwd0]
-  standard_name = multiplicative_tunable_parameters_for_mountain_blocking_and_orographic_gravity_wave_drag_for_ugwp_version_0
-  long_name = multiplication factors for cdmb and gwd for UGWP v0
-  units = none
-  dimensions = (2)
-  type = real
-  kind = kind_phys
-  intent = in
 [xlat]
   standard_name = latitude
   long_name = grid latitude
