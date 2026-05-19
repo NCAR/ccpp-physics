@@ -17,7 +17,7 @@
 !!
       subroutine GFS_rad_time_vary_timestep_init (lrseeds, rseeds,                     &
               lslwr, lsswr, isubc_lw, isubc_sw, icsdsw, icsdlw, cnx, cny, isc, jsc,    &
-              imap, jmap, sec, kdt, imp_physics, imp_physics_zhao_carr, ipsd0, ipsdlim,&
+              imap, jmap, sec, kdt, imp_physics, ipsd0, ipsdlim,                       &
               ps_2delt, ps_1delt, t_2delt, t_1delt, qv_2delt, qv_1delt, t, qv, ps,     &
               errmsg, errflg)
 
@@ -31,7 +31,7 @@
          logical,                intent(in)    :: lrseeds
          integer,                intent(in), optional :: rseeds(:,:)
          integer,                intent(in)    :: isubc_lw, isubc_sw, cnx, cny, isc, jsc, kdt
-         integer,                intent(in)    :: imp_physics, imp_physics_zhao_carr, ipsd0, ipsdlim
+         integer,                intent(in)    :: imp_physics, ipsd0, ipsdlim
          logical,                intent(in)    :: lslwr, lsswr
          integer,                intent(inout), optional :: icsdsw(:), icsdlw(:)
          integer,                intent(in)    :: imap(:), jmap(:)
@@ -81,17 +81,6 @@
                enddo
              end if !lrseeds
            endif  ! isubc_lw and isubc_sw
-
-           if (imp_physics == imp_physics_zhao_carr) then
-             if (kdt == 1) then
-               t_2delt  = t
-               t_1delt  = t
-               qv_2delt = qv
-               qv_1delt = qv
-               ps_2delt = ps
-               ps_1delt = ps
-             endif
-           endif
 
          endif
 
