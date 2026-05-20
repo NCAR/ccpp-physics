@@ -110,6 +110,7 @@
   units = none
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [utnp]
   standard_name = process_split_cumulative_tendency_of_x_wind
