@@ -109,6 +109,7 @@
   units = none
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [con_t0c]
   standard_name = temperature_at_zero_celsius
@@ -362,7 +363,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = True
 [prsl]
   standard_name = air_pressure
@@ -1363,6 +1364,7 @@
   units = 1
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [icloud_bl]
   standard_name = control_for_sgs_cloud_radiation_coupling_in_mellor_yamamda_nakanishi_niino_pbl_scheme

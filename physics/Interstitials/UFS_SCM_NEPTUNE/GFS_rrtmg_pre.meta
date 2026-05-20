@@ -581,6 +581,7 @@
   units = km
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [idcor]
   standard_name = flag_for_decorrelation_length_method

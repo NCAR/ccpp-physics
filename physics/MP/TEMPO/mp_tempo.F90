@@ -437,7 +437,7 @@ module mp_tempo
          real(kind_phys),           intent(in   ) :: dtp
          logical,                   intent(in   ) :: first_time_step
          integer,                   intent(in   ) :: istep, nsteps
-         real,                      intent(in   ) :: dt_inner
+         real(kind=kind_phys),      intent(in   ) :: dt_inner
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
          real(kind_phys),           intent(inout) :: prcp(:)
          real(kind_phys),           intent(inout), optional :: rain(:)

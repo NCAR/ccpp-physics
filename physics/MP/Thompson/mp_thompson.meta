@@ -780,7 +780,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [max_hail_diam_sfc]
   standard_name = max_hail_diameter_sfc
   long_name = instantaneous maximum hail diameter at lowest model level
@@ -861,6 +861,7 @@
   units = 1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
+  kind = kind_phys
   intent = in
   optional = True
 [spp_mp]
