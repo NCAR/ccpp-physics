@@ -483,7 +483,6 @@ module ugwp_driver_v0
             R    = sqrt(rnom/rdem)
             ZR   =  MAX( 2. - R, 0. )
             sigres = max(sigmin, sigma(J))
-            if (hprime(J)/sigres > dxres) sigres = hprime(J)/dxres
             mtbridge = ZR * sigres*ZLEN / hprime(J)
             ! Scale the blocking coefficient by the inverse square root of dxres
             cdmb4 = cdmbgwd(1) / sqrt(sqrt(sparea(j)))
