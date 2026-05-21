@@ -2017,7 +2017,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [xlon_d]
   standard_name = longitude_in_degree
   long_name = longitude in degree east
@@ -2025,7 +2025,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [landfrac]
   standard_name = land_area_fraction
   long_name = fraction of horizontal grid area occupied by land
