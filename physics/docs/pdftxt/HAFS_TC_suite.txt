@@ -9,17 +9,17 @@ of physics schemes used in HAFS, including a few TC-specific modifications such 
 and PBL scheme which can be configured through the namelist options. 
 
 The HAFS_thompson suite uses the parameterizations in the following order:
- - \ref GFS_RRTMG_page
- - \ref GFS_SFCLYR
- - \ref GFS_OCEAN
- - \ref GFS_NOAH
- - \ref GFS_SFCSICE
- - \ref GFS_SATMEDMFVDIFQ
- - \ref GFS_UGWP_v0
- - \ref GFS_H2OPHYS
- - \ref GFS_SAMFdeep
- - \ref GFS_SAMFshal
- - \ref THOMPSON
+ - \subpage GFS_RRTMG_page
+ - \subpage GFS_SFCLYR
+ - \subpage GFS_OCEAN
+ - \subpage GFS_NOAH
+ - \subpage GFS_SFCSICE
+ - \subpage GFS_SATMEDMFVDIFQ
+ - \subpage GFS_UGWP_v0
+ - \subpage GFS_H2OPHYS
+ - \subpage GFS_SAMFdeep
+ - \subpage GFS_SAMFshal
+ - \subpage THOMPSON
 
 \section sdf_hafs_sas Suite Definition File 
 \include suite_FV3_HAFS_v1_thompson_nonsst.xml

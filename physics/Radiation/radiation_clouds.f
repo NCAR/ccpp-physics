@@ -518,8 +518,8 @@
      &     iovr_exp,                     ! Flag for exponential cloud overlap method
      &     iovr_exprand,                 ! Flag for exponential-random cloud overlap method
      &     idcor,
-     &     idcor_con,                   
-     &     idcor_hogan,                 
+     &     idcor_con,
+     &     idcor_hogan,
      &     idcor_oreopoulos
 
 
@@ -795,7 +795,7 @@
           ptop1(i,id) = ptopc(id,1) + tem1*max( 0.0, 4.0*rxlat(i)-1.0 )
         enddo
       enddo
-        
+
       ! Compute cloud decorrelation length
       if (idcor == idcor_hogan) then
         call cmp_dcorr_lgth(ix, xlat, con_pi, de_lgth)
@@ -1548,7 +1548,7 @@
                  else
                    rei(i,k)=reice_def
                  endif
-            endif       
+            endif
             crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))
             csp(i,k) = max(0.0, (1.-snow2ice)*clw(i,k,ntsw) *
      &             gfac * delp(i,k))
@@ -1898,8 +1898,8 @@
                   rew(i,k) = 9.5
                else                                                      !--- Land
                   rew(i,k) = 5.5
-               endif 
-            endif 
+               endif
+            endif
             if (qi1d(k).gt.clwmin .and. cldfra1d(k).lt.ovcst) then
                cip(i,k) = qi1d(k) * dz1d(k)*1000.
                idx_rei = int(t1d(k)-179.)
@@ -1907,7 +1907,7 @@
                corr = t1d(k) - int(t1d(k))
                rei(i,K) = max(5.0, retab(idx_rei)*(1.-corr) +           &
      &                                 retab(idx_rei+1)*corr)
-            endif 
+            endif
          enddo
       enddo
 

@@ -1,0 +1,11 @@
+/**
+\mainpage Introduction
+
+This documentation provides the science description of the CCPP physics used in Hierarchical 
+System Development (HSD) capabilities. Detailed descriptions of HSD case configurations, 
+workflows, and usage are provided in the 
+<a href="https://ufs-weather-model.readthedocs.io/en/develop/HSD.html">UFS Weather Model Users 
+Guide</a> developed under the <a href="https://epic.noaa.gov/">EPIC program</a>. This SciDoc 
+complements that material by focusing on the scientific basis of the CCPP physics suites and 
+parameterizations.
+*/

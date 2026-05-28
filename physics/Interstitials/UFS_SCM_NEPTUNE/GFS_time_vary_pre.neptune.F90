@@ -1,4 +1,4 @@
-!> \file GFS_time_vary_pre.fv3.F90
+!> \file GFS_time_vary_pre.neptune.F90
 !!  Contains code related to GFS physics suite setup (generic part of time_vary_step)
 
    module GFS_time_vary_pre
@@ -70,8 +70,7 @@
 !!
       subroutine GFS_time_vary_pre_timestep_init (jdat, idat, dtp, nsswr,                        &
                   nslwr, nhfrad, idate, debug, me, master, nscyc, sec, phour, zhour, fhour,      &
-                  kdt, julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, tgrs, ugrs, vgrs,&
-                  qgrs, gt0 , gu0 , gv0 , gq0, errmsg, errflg)
+                  kdt, julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
 
         use machine,               only: kind_phys, kind_dbl_prec, kind_sngl_prec
 
@@ -89,12 +88,7 @@
                                                            lslwr
         real(kind=kind_phys),             intent(out)   :: sec, phour, zhour,    &
                                                            fhour, julian, solhr
-        
-        real(kind=kind_phys), intent(in ), dimension(:,:)   :: tgrs, ugrs, vgrs
-        real(kind=kind_phys), intent(in ), dimension(:,:,:) :: qgrs
-        real(kind=kind_phys), intent(out), dimension(:,:)   :: gt0, gu0, gv0
-        real(kind=kind_phys), intent(out), dimension(:,:,:) :: gq0
-        
+
         character(len=*),                 intent(out)   :: errmsg
         integer,                          intent(out)   :: errflg
 
@@ -110,7 +104,7 @@
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
-        
+
         ! Check initialization status
         if (.not.is_initialized) then
            write(errmsg,'(*(a))') "Logic error: GFS_time_vary_pre_timestep_init called &
@@ -118,14 +112,8 @@
            errflg = 1
            return
         end if
-        
-        !--- set current state variables from timestep initial variables
-        gt0(:,:)   = tgrs(:,:)
-        gu0(:,:)   = ugrs(:,:)
-        gv0(:,:)   = vgrs(:,:)
-        gq0(:,:,:) = qgrs(:,:,:)
-        
-        !--- jdat is being updated directly inside of FV3GFS_cap.F90
+
+        !--- jdat is being updated by the host model
         !--- update calendars and triggers
         call w3kind(w3kindreal, w3kindint)
         !--- CCPP uses w3emc_d, therefore expecting the following values
