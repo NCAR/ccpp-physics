@@ -518,8 +518,8 @@
      &     iovr_exp,                     ! Flag for exponential cloud overlap method
      &     iovr_exprand,                 ! Flag for exponential-random cloud overlap method
      &     idcor,
-     &     idcor_con,                   
-     &     idcor_hogan,                 
+     &     idcor_con,
+     &     idcor_hogan,
      &     idcor_oreopoulos
 
 
@@ -600,7 +600,7 @@
         end do
       end do
 
-      if (imp_physics == imp_physics_mg) then ! 
+      if (imp_physics == imp_physics_mg) then !
                   ! unified cloud and/or with MG microphysics
 
         if (uni_cld .and. ncndl >= 2) then
@@ -795,7 +795,7 @@
           ptop1(i,id) = ptopc(id,1) + tem1*max( 0.0, 4.0*rxlat(i)-1.0 )
         enddo
       enddo
-        
+
       ! Compute cloud decorrelation length
       if (idcor == idcor_hogan) then
         call cmp_dcorr_lgth(ix, xlat, con_pi, de_lgth)
@@ -1271,7 +1271,7 @@
           do k = 1, NLAY-1
           do i = 1, IX
              cldtot(i,k) = cld_frac_XuRandall(plyr(i,k), qstl(i,k),     &    
-     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.) 
+     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.)
           end do
           end do
         else
@@ -1280,7 +1280,7 @@
           do k = 1, NLAY-1
           do i = 1, IX
              cldtot(i,k) = cld_frac_XuRandall(plyr(i,k), qstl(i,k),     &    
-     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.) 
+     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.)
           end do
           end do
         endif
@@ -1548,7 +1548,7 @@
                  else
                    rei(i,k)=reice_def
                  endif
-            endif       
+            endif
             crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))
             csp(i,k) = max(0.0, (1.-snow2ice)*clw(i,k,ntsw) *
      &             gfac * delp(i,k))
@@ -1586,7 +1586,7 @@
           do k = 1, NLAY-1
           do i = 1, IX
              cldtot(i,k) = cld_frac_XuRandall(plyr(i,k), qstl(i,k),     &    
-     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.) 
+     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.)
           end do
           end do
         else
@@ -1597,7 +1597,7 @@
           do i = 1, IX
              cldtot(i,k) = cld_frac_XuRandall(plyr(i,k), qstl(i,k),     &    
      &          rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.,                 &
-     &          cond_cfrac_onRH) 
+     &          cond_cfrac_onRH)
           end do
           end do
         endif
@@ -1898,8 +1898,8 @@
                   rew(i,k) = 9.5
                else                                                      !--- Land
                   rew(i,k) = 5.5
-               endif 
-            endif 
+               endif
+            endif
             if (qi1d(k).gt.clwmin .and. cldfra1d(k).lt.ovcst) then
                cip(i,k) = qi1d(k) * dz1d(k)*1000.
                idx_rei = int(t1d(k)-179.)
@@ -1907,7 +1907,7 @@
                corr = t1d(k) - int(t1d(k))
                rei(i,K) = max(5.0, retab(idx_rei)*(1.-corr) +           &
      &                                 retab(idx_rei+1)*corr)
-            endif 
+            endif
          enddo
       enddo
 
@@ -3131,7 +3131,7 @@
 !> This function computes the cloud-fraction following
 !! Xu-Randall(1996) \cite xu_and_randall_1996
 !!
-      function cld_frac_XuRandall(p_lay, qs_lay, relhum, cld_mr, alpha, &
+      function cld_frac_XuRandall(p_lay, qs_lay, relhum, cld_mr, alpha, & !  ---  inputs 
      &                            lambda, factor, cond_cfrac_onRH)
         implicit none
         ! Inputs
@@ -3155,7 +3155,7 @@
 
 !        ! Parameters
 !        real(kind_phys) :: &
-!           lambda = 0.50  ! , & 
+!           lambda = 0.50  ! , &
 !           P      = 0.25
 
         clwt = 1.0e-6 * (p_lay*0.001)
