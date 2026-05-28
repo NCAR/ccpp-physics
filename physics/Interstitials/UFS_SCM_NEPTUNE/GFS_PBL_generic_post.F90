@@ -522,7 +522,7 @@
       do k=1,levs
          do i=1,im
             ten_t_pbl(i,k)=ten_t(i,k)
-            ten_q_pbl(i,k)=ten_q(i,k,1)
+            ten_q_pbl(i,k)=ten_q(i,k,ntqv)
          end do
       end do
       

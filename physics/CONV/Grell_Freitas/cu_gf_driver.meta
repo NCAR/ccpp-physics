@@ -179,7 +179,7 @@
   intent = in
   optional = True
 [forceqv_spechum]
-  standard_name = tendendy_of_specific_humidity_due_to_nonphysics
+  standard_name = tendency_of_specific_humidity_due_to_nonphysics
   long_name = moisture tendency due to dynamics only
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -474,20 +474,20 @@
   intent = in
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
-  long_name = index of x-wind in first dimension of array cumulative change index
+  long_name = index of y-wind in first dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
   intent = in
 [index_of_process_scnv]
-  standard_name = index_of_shallow_convection_process_process_in_cumulative_change_index
+  standard_name = index_of_shallow_convection_process_in_cumulative_change_index
   long_name = index of shallow convection process in second dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
   intent = in
 [index_of_process_dcnv]
-  standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
+  standard_name = index_of_deep_convection_process_in_cumulative_change_index
   long_name = index of deep convection process in second dimension of array cumulative change index
   units = index
   dimensions = ()
@@ -508,8 +508,8 @@
   type = logical
   intent = in
 [qci_conv]
-  standard_name = convective_cloud_condesate_after_rainout
-  long_name = convective cloud condesate after rainout
+  standard_name = convective_cloud_condensate_after_rainout
+  long_name = convective cloud condensate after rainout
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -556,7 +556,7 @@
 [cap_suppress]
   standard_name = radar_derived_convection_suppression
   long_name = radar-derived convection suppression
-  units = unitless
+  units = none
   dimensions = (horizontal_loop_extent,number_of_radar_derived_temperature_or_convection_suppression_intervals)
   type = real
   kind = kind_phys

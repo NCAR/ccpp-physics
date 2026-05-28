@@ -282,7 +282,7 @@
   type = integer
   intent = in
 [index_of_process_dcnv]
-  standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
+  standard_name = index_of_deep_convection_process_in_cumulative_change_index
   long_name = index of deep convection process in second dimension of array cumulative change index
   units = index
   dimensions = ()
@@ -304,7 +304,7 @@
   intent = in
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
-  long_name = index of x-wind in first dimension of array cumulative change index
+  long_name = index of y-wind in first dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
