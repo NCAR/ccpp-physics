@@ -31,12 +31,12 @@ jobs:
         doxygen --version
 
     - name: Checkout current ccpp-physics code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         path: ccpp_repo
 
     - name: Checkout CCPP SCM main
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: NCAR/ccpp-scm
         path: scm_repo
@@ -123,13 +123,13 @@ jobs:
         mv html/main/* $GITHUB_WORKSPACE/physics/docs/html
 
     - name: Setup Pages
-      uses: actions/configure-pages@v5
+      uses: actions/configure-pages@v6
 
     - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
+      uses: actions/upload-pages-artifact@v5
       with:
         path: physics/docs/html
 
     - name: Deploy to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@v4.0.5
+      uses: actions/deploy-pages@v5
