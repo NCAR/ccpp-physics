@@ -866,10 +866,10 @@
          jday = 0
          call w3doxdat(jdat,jdow,jdoy,jday)
          rjday = jdoy + jdat(5) / 24.
-         if (rjday < ozphys%time(1)) rjday = rjday + 365.
 
 !> - Update ozone concentration.
          if (ntoz > 0) then
+            if (rjday < ozphys%time(1)) rjday = rjday + 365.
             call find_photochem_time_index(ozphys%ntime, ozphys%time, rjday, n1, n2)
 
             call ozphys%update_o3prog(jindx1_o3, jindx2_o3, ddy_o3, rjday, n1, n2, ozpl)
@@ -877,6 +877,7 @@
 
 !> - Update stratospheric h2o concentration.
          if (h2o_phys) then
+            if (rjday < h2ophys%time(1)) rjday = rjday + 365.
             call find_photochem_time_index(h2ophys%ntime, h2ophys%time, rjday, n1, n2)
 
             call h2ophys%update(jindx1_h, jindx2_h, ddy_h, rjday, n1, n2, h2opl)
