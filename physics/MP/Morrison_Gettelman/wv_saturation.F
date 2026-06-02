@@ -211,7 +211,7 @@
 
        return
 !
-9000   format('GESTBL: FATAL ERROR *********************************    &
+9000   format('GESTBL: FATAL ERROR ********************************* &
      &',/, ' TMAX AND TMIN REQUIRE A LARGER DIMENSION ON THE LENGTH',   &
      & ' OF THE SATURATION VAPOR PRESSURE TABLE ESTBL(PLENEST)',/,      &
      & ' TMAX, TMIN, AND PLENEST => ', 2f7.2, i3)
@@ -407,11 +407,38 @@
 ! accurate to within 1 percent for 173.16 < t < 373.16
 !
        trinv = 0.0_kp
-       if ((.not. icephs) .or. (ttrice == 0.0_kp)) go to 10
-       trinv = 1.0_kp/ttrice
+       if ((.not. icephs) .or. (ttrice == 0.0_kp)) then
 !
-       do k=kstart,kend
-         do i=1,ilen
+! No icephs or water to ice transition
+!
+         do k=kstart,kend
+           do i=1,ilen
+!
+! Account for change of hlatv with t above freezing where
+! constant slope is given by -2369 j/(kg c) = cpv - cw
+!
+             hlatvp = hlatv - 2369.0_kp*(t(i,k)-tmelt)
+             if (icephs) then
+               hlatsb = hlatv + hlatf
+             else
+               hlatsb = hlatv
+             end if
+             if (t(i,k) < tmelt) then
+               hltalt = hlatsb
+             else
+               hltalt = hlatvp
+             end if
+             desdt    = hltalt*es(i,k)/(rgasv*t(i,k)*t(i,k))
+             gam(i,k) = hltalt*qs(i,k)*p(i,k)*desdt/(cp*es(i,k)*(p(i,k)   &
+     &                  - omeps*es(i,k)))
+             if (qs(i,k) == 1.0_kp) gam(i,k) = 0.0_kp
+           end do
+         end do
+       else
+         trinv = 1.0_kp/ttrice
+!
+         do k=kstart,kend
+           do i=1,ilen
 !
 ! Weighting of hlat accounts for transition from water to ice
 ! polynomial expression approximates difference between es over
@@ -420,58 +447,32 @@
 ! range from ice to water also accounting for change of hlatv with t
 ! above freezing where constant slope is given by -2369 j/(kg c) =cpv - cw
 !
-           tc     = t(i,k) - tmelt
-           lflg   = (tc >= -ttrice .and. tc < 0.0_kp)
-           weight = min(-tc*trinv,1.0_kp)
-           hlatsb = hlatv + weight*hlatf
-           hlatvp = hlatv - 2369.0_kp*tc
-           if (t(i,k) < tmelt) then
-             hltalt = hlatsb
-           else
-             hltalt = hlatvp
-           end if
-           if (lflg) then
-             tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)      &
-     &                      + tc*pcf(5))))
-           else
-             tterm = 0.0_kp
-           end if
-             desdt = hltalt*es(i,k)/(rgasv*t(i,k)*t(i,k)) + tterm*trinv
-             gam(i,k) = hltalt*qs(i,k)*p(i,k)*desdt/(cp*es(i,k)*(p(i,k) &
-     &                  - omeps*es(i,k)))
-           if (qs(i,k) == 1.0_kp) gam(i,k) = 0.0_kp
+             tc     = t(i,k) - tmelt
+             lflg   = (tc >= -ttrice .and. tc < 0.0_kp)
+             weight = min(-tc*trinv,1.0_kp)
+             hlatsb = hlatv + weight*hlatf
+             hlatvp = hlatv - 2369.0_kp*tc
+             if (t(i,k) < tmelt) then
+               hltalt = hlatsb
+             else
+               hltalt = hlatvp
+             end if
+             if (lflg) then
+               tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)
+     &                  + tc*pcf(5))))
+             else
+               tterm = 0.0_kp
+             end if
+               desdt = hltalt*es(i,k)/(rgasv*t(i,k)*t(i,k))
+     &                 + tterm*trinv
+               gam(i,k) = hltalt*qs(i,k)*p(i,k)*desdt/
+     &                    (cp*es(i,k)*(p(i,k) - omeps*es(i,k)))
+             if (qs(i,k) == 1.0_kp) gam(i,k) = 0.0_kp
+           end do
          end do
-       end do
+       end if
 !
-       go to 20
-!
-! No icephs or water to ice transition
-!
-10     do k=kstart,kend
-         do i=1,ilen
-!
-! Account for change of hlatv with t above freezing where
-! constant slope is given by -2369 j/(kg c) = cpv - cw
-!
-           hlatvp = hlatv - 2369.0_kp*(t(i,k)-tmelt)
-           if (icephs) then
-             hlatsb = hlatv + hlatf
-           else
-             hlatsb = hlatv
-           end if
-           if (t(i,k) < tmelt) then
-             hltalt = hlatsb
-           else
-             hltalt = hlatvp
-           end if
-           desdt    = hltalt*es(i,k)/(rgasv*t(i,k)*t(i,k))
-           gam(i,k) = hltalt*qs(i,k)*p(i,k)*desdt/(cp*es(i,k)*(p(i,k)   &
-     &                  - omeps*es(i,k)))
-           if (qs(i,k) == 1.0_kp) gam(i,k) = 0.0_kp
-         end do
-       end do
-!
-20     return
+       return
       end subroutine aqsatd
 
 !>\ingroup wv_saturation_mod
@@ -539,9 +540,34 @@
 ! accurate to within 1 percent for 173.16 < t < 373.16
 !
        trinv = 0.0_kp
-       if ((.not. icephs) .or. (ttrice.eq.0.0_kp)) go to 10
-       trinv = 1.0_kp/ttrice
-       do i=1,len
+       if ((.not. icephs) .or. (ttrice.eq.0.0_kp)) then
+!
+! No icephs or water to ice transition
+!
+         do i=1,len
+!
+! Account for change of hlatv with t above freezing where
+! constant slope is given by -2369 j/(kg c) = cpv - cw
+!
+           hlatvp = hlatv - 2369.0_kp*(t(i)-tmelt)
+           if (icephs) then
+           hlatsb = hlatv + hlatf
+           else
+           hlatsb = hlatv
+           end if
+           if (t(i) < tmelt) then
+           hltalt = hlatsb
+           else
+           hltalt = hlatvp
+           end if
+           desdt = hltalt*es(i)/(rgasv*t(i)*t(i))
+           gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i)
+     &              - omeps*es(i)))
+           if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
+         end do
+       else
+         trinv = 1.0_kp/ttrice
+         do i=1,len
 !
 ! Weighting of hlat accounts for transition from water to ice
 ! polynomial expression approximates difference between es over
@@ -550,50 +576,28 @@
 ! range from ice to water also accounting for change of hlatv with t
 ! above freezing where const slope is given by -2369 j/(kg c) = cpv - cw
 !
-       tc = t(i) - tmelt
-       lflg = (tc >= -ttrice .and. tc < 0.0_kp)
-       weight = min(-tc*trinv,1.0_kp)
-       hlatsb = hlatv + weight*hlatf
-       hlatvp = hlatv - 2369.0_kp*tc
-       if (t(i) < tmelt) then
-       hltalt = hlatsb
-       else
-       hltalt = hlatvp
-       end if
-       if (lflg) then
-       tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)            &
+           tc = t(i) - tmelt
+           lflg = (tc >= -ttrice .and. tc < 0.0_kp)
+           weight = min(-tc*trinv,1.0_kp)
+           hlatsb = hlatv + weight*hlatf
+           hlatvp = hlatv - 2369.0_kp*tc
+           if (t(i) < tmelt) then
+           hltalt = hlatsb
+           else
+           hltalt = hlatvp
+           end if
+           if (lflg) then
+           tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)
      &                + tc*pcf(5))))
-       else
-       tterm = 0.0_kp
+           else
+           tterm = 0.0_kp
+           end if
+           desdt = hltalt*es(i)/(rgasv*t(i)*t(i)) + tterm*trinv
+           gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) 
+     &              - omeps*es(i)))
+           if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
+         end do
        end if
-       desdt = hltalt*es(i)/(rgasv*t(i)*t(i)) + tterm*trinv
-       gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
-       if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
-       end do
-       return
-!
-! No icephs or water to ice transition
-!
-10      do i=1,len
-!
-! Account for change of hlatv with t above freezing where
-! constant slope is given by -2369 j/(kg c) = cpv - cw
-!
-       hlatvp = hlatv - 2369.0_kp*(t(i)-tmelt)
-       if (icephs) then
-       hlatsb = hlatv + hlatf
-       else
-       hlatsb = hlatv
-       end if
-       if (t(i) < tmelt) then
-       hltalt = hlatsb
-       else
-       hltalt = hlatvp
-       end if
-       desdt = hltalt*es(i)/(rgasv*t(i)*t(i))
-       gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
-       if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
-       end do
 !
        return
 !
@@ -1098,9 +1102,37 @@
 ! accurate to within 1 percent for 173.16 < t < 373.16
 !
        trinv = 0.0_kp
-       if ((.not. icephs) .or. (ttrice == 0.0_kp)) go to 10
-       trinv = 1.0_kp/ttrice
-       do i=1,len
+       if ((.not. icephs) .or. (ttrice == 0.0_kp)) then
+!
+! No icephs or water to ice transition
+!
+         do i=1,len
+!
+! Account for change of hlatv with t above freezing where
+! constant slope is given by -2369 j/(kg c) = cpv - cw
+!
+           hlatvp = hlatv - 2369.0_kp*(t(i)-tmelt)
+           if (icephs) then
+           hlatsb = hlatv + hlatf
+           else
+           hlatsb = hlatv
+           end if
+           if (t(i) < tmelt) then
+           hltalt = hlatsb
+           else
+           hltalt = hlatvp
+           end if
+           desdt = hltalt*es(i)/(rgasv*t(i)*t(i))
+           gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i)             &
+     &              - omeps*es(i)))
+           if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
+
+           dqsdt(i) = (cp/hltalt)*gam(i)
+
+         end do
+       else
+         trinv = 1.0_kp/ttrice
+         do i=1,len
 !
 ! Weighting of hlat accounts for transition from water to ice
 ! polynomial expression approximates difference between es over
@@ -1109,57 +1141,31 @@
 ! range from ice to water also accounting for change of hlatv with t
 ! above freezing where const slope is given by -2369 j/(kg c) = cpv - cw
 !
-       tc = t(i) - tmelt
-       lflg = (tc >= -ttrice .and. tc < 0.0_kp)
-       weight = min(-tc*trinv,1.0_kp)
-       hlatsb = hlatv + weight*hlatf
-       hlatvp = hlatv - 2369.0_kp*tc
-       if (t(i) < tmelt) then
-         hltalt = hlatsb
-       else
-         hltalt = hlatvp
-       end if
-       if (lflg) then
-         tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)          &
+         tc = t(i) - tmelt
+         lflg = (tc >= -ttrice .and. tc < 0.0_kp)
+         weight = min(-tc*trinv,1.0_kp)
+         hlatsb = hlatv + weight*hlatf
+         hlatvp = hlatv - 2369.0_kp*tc
+         if (t(i) < tmelt) then
+           hltalt = hlatsb
+         else
+           hltalt = hlatvp
+         end if
+         if (lflg) then
+           tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)           &
      &                  + tc*pcf(5))))
-       else
-         tterm = 0.0_kp
+         else
+           tterm = 0.0_kp
+         end if
+         desdt  = hltalt*es(i)/(rgasv*t(i)*t(i)) + tterm*trinv
+         gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i)                  &
+     &             - omeps*es(i)))
+         if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
+
+         dqsdt(i) = (cp/hltalt)*gam(i)
+
+         end do
        end if
-       desdt  = hltalt*es(i)/(rgasv*t(i)*t(i)) + tterm*trinv
-       gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
-       if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
-
-       dqsdt(i) = (cp/hltalt)*gam(i)
-
-       end do
-       return
-!
-! No icephs or water to ice transition
-!
-10     do i=1,len
-!
-! Account for change of hlatv with t above freezing where
-! constant slope is given by -2369 j/(kg c) = cpv - cw
-!
-       hlatvp = hlatv - 2369.0_kp*(t(i)-tmelt)
-       if (icephs) then
-       hlatsb = hlatv + hlatf
-       else
-       hlatsb = hlatv
-       end if
-       if (t(i) < tmelt) then
-       hltalt = hlatsb
-       else
-       hltalt = hlatvp
-       end if
-       desdt = hltalt*es(i)/(rgasv*t(i)*t(i))
-       gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
-       if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
-
-       dqsdt(i) = (cp/hltalt)*gam(i)
-
-       end do
-!
        return
 !
       end subroutine vqsatd2
@@ -1247,8 +1253,35 @@
 ! accurate to within 1 percent for 173.16 < t < 373.16
 !
        trinv = 0.0_kp
-       if ((.not. icephs) .or. (ttrice == 0.0_kp)) go to 10
-       trinv = 1.0_kp/ttrice
+       if ((.not. icephs) .or. (ttrice == 0.0_kp)) then
+!
+! No icephs or water to ice transition
+!
+!10 do i=1,len
+!
+! Account for change of hlatv with t above freezing where
+! constant slope is given by -2369 j/(kg c) = cpv - cw
+!
+         hlatvp = hlatv - 2369.0_kp*(t-tmelt)
+         if (icephs) then
+           hlatsb = hlatv + hlatf
+         else
+           hlatsb = hlatv
+         end if
+         if (t < tmelt) then
+           hltalt = hlatsb
+         else
+           hltalt = hlatvp
+         end if
+         desdt = hltalt*es/(rgasv*t*t)
+         gam = hltalt*qs*p*desdt/(cp*es*(p - omeps*es))
+         if (qs == 1.0_kp) gam = 0.0_kp
+
+         dqsdt = (cp/hltalt)*gam
+
+!  end do
+       else
+         trinv = 1.0_kp/ttrice
 
 !  do i=1,len
 !
@@ -1259,61 +1292,31 @@
 ! range from ice to water also accounting for change of hlatv with t
 ! above freezing where const slope is given by -2369 j/(kg c) = cpv - cw
 !
-       tc = t - tmelt
-       lflg = (tc >= -ttrice .and. tc < 0.0_kp)
-       weight = min(-tc*trinv,1.0_kp)
-       hlatsb = hlatv + weight*hlatf
-       hlatvp = hlatv - 2369.0_kp*tc
-       if (t < tmelt) then
-         hltalt = hlatsb
-       else
-         hltalt = hlatvp
-       end if
-       if (lflg) then
-         tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)          &
+         tc = t - tmelt
+         lflg = (tc >= -ttrice .and. tc < 0.0_kp)
+         weight = min(-tc*trinv,1.0_kp)
+         hlatsb = hlatv + weight*hlatf
+         hlatvp = hlatv - 2369.0_kp*tc
+         if (t < tmelt) then
+           hltalt = hlatsb
+         else
+           hltalt = hlatvp
+         end if
+         if (lflg) then
+           tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)          &
      &                  + tc*pcf(5))))
-       else
-         tterm = 0.0_kp
-       end if
-       desdt = hltalt*es/(rgasv*t*t) + tterm*trinv
-       gam = hltalt*qs*p*desdt/(cp*es*(p - omeps*es))
-       if (qs == 1.0_kp) gam = 0.0_kp
+         else
+           tterm = 0.0_kp
+         end if
+         desdt = hltalt*es/(rgasv*t*t) + tterm*trinv
+         gam = hltalt*qs*p*desdt/(cp*es*(p - omeps*es))
+         if (qs == 1.0_kp) gam = 0.0_kp
 
-       dqsdt = (cp/hltalt)*gam
-
-!  end do
-       return
-!
-! No icephs or water to ice transition
-!
-
-10     continue
-
-!10 do i=1,len
-!
-! Account for change of hlatv with t above freezing where
-! constant slope is given by -2369 j/(kg c) = cpv - cw
-!
-       hlatvp = hlatv - 2369.0_kp*(t-tmelt)
-       if (icephs) then
-         hlatsb = hlatv + hlatf
-       else
-         hlatsb = hlatv
-       end if
-       if (t < tmelt) then
-         hltalt = hlatsb
-       else
-         hltalt = hlatvp
-       end if
-       desdt = hltalt*es/(rgasv*t*t)
-       gam = hltalt*qs*p*desdt/(cp*es*(p - omeps*es))
-       if (qs == 1.0_kp) gam = 0.0_kp
-
-       dqsdt = (cp/hltalt)*gam
-
+         dqsdt = (cp/hltalt)*gam
 
 !  end do
-!
+       end if
+       
        return
 !
       end subroutine vqsatd2_single
@@ -1405,42 +1408,43 @@
 
        end if
 !
-       if(t < (tmelt - tr) .and. itype == 1) go to 10
+       if (.not. (t < (tmelt - tr) .and. itype == 1)) then
 !
 ! Water
 !
-       ps = 1013.246_kp
-       ts = 373.16_kp
-       e1 = 11.344_kp*(1.0_kp - t/ts)
-       e2 = -3.49149_kp*(ts/t - 1.0_kp)
-       f1 = -7.90298_kp*(ts/t - 1.0_kp)
-       f2 = 5.02808_kp*log10(ts/t)
-       f3 = -1.3816_kp*(10.0_kp**e1 - 1.0_kp)/10000000.0_kp
-       f4 = 8.1328_kp*(10.0_kp**e2 - 1.0_kp)/1000.0_kp
-       f5 = log10(ps)
-       f = f1 + f2 + f3 + f4 + f5
-       es = (10.0_kp**f)*100.0_kp
-       eswtr = es
+         ps = 1013.246_kp
+         ts = 373.16_kp
+         e1 = 11.344_kp*(1.0_kp - t/ts)
+         e2 = -3.49149_kp*(ts/t - 1.0_kp)
+         f1 = -7.90298_kp*(ts/t - 1.0_kp)
+         f2 = 5.02808_kp*log10(ts/t)
+         f3 = -1.3816_kp*(10.0_kp**e1 - 1.0_kp)/10000000.0_kp
+         f4 = 8.1328_kp*(10.0_kp**e2 - 1.0_kp)/1000.0_kp
+         f5 = log10(ps)
+         f = f1 + f2 + f3 + f4 + f5
+         es = (10.0_kp**f)*100.0_kp
+         eswtr = es
+       end if
 !
-       if(t >= tmelt .or. itype == 0) go to 20
+       if (.not. (t >= tmelt .or. itype == 0)) then
 !
 ! Ice
 !
-10     continue
-       t0 = tmelt
-       term1 = 2.01889049_kp/(t0/t)
-       term2 = 3.56654_kp*log(t0/t)
-       term3 = 20.947031_kp*(t0/t)
-       es = 575.185606e10_kp*exp(-(term1 + term2 + term3))
+         t0 = tmelt
+         term1 = 2.01889049_kp/(t0/t)
+         term2 = 3.56654_kp*log(t0/t)
+         term3 = 20.947031_kp*(t0/t)
+         es = 575.185606e10_kp*exp(-(term1 + term2 + term3))
 !
-       if (t < (tmelt - tr)) go to 20
+         if (.not. (t < (tmelt - tr))) then
 !
 ! Weighted transition between water and ice
 !
-       weight = min((tmelt - t)/tr,1.0_kp)
-       es = weight*es + (1.0_kp - weight)*eswtr
+           weight = min((tmelt - t)/tr,1.0_kp)
+           es = weight*es + (1.0_kp - weight)*eswtr
+         end if
+       end if
 !
-20     continue
        itype = itypo
        return
 !
@@ -1549,7 +1553,7 @@
 !
       end subroutine vqsatd2_ice_single
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       end module wv_saturation
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

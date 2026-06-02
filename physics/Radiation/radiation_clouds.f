@@ -2938,20 +2938,19 @@
       k_cldb = k_tropo
       in_cloud = .false.
       k = k_tropo
-      DO WHILE (.not. in_cloud .AND. k.gt.k_m12C+1)
+      outer_loop: DO WHILE (.not. in_cloud .AND. k.gt.k_m12C+1)
          k_cldt = 0
          if (cfr1d(k).ge.0.01) then
             in_cloud = .true.
             k_cldt = MAX(k_cldt, k)
          endif
          if (in_cloud) then
-            DO k2 = k_cldt-1, k_m12C, -1
+            inner_search: DO k2 = k_cldt-1, k_m12C, -1
                if (cfr1d(k2).lt.0.01 .or. k2.eq.k_m12C) then
                   k_cldb = k2+1
-                  goto 87
+                  exit inner_search
                endif
-            ENDDO
- 87         continue
+            END DO inner_search
             in_cloud = .false.
          endif
          if ((k_cldt - k_cldb + 1) .ge. 2) then
@@ -2964,25 +2963,24 @@
             k = k_cldb
          endif
          k = k - 1
-      ENDDO
+      END DO outer_loop
 
       k_cldb = k_m12C + 3
       in_cloud = .false.
       k = k_m12C + 2
-      DO WHILE (.not. in_cloud .AND. k.gt.kbot)
+      outer_loop2: DO WHILE (.not. in_cloud .AND. k.gt.kbot)
          k_cldt = 0
          if (cfr1d(k).ge.0.01) then
             in_cloud = .true.
             k_cldt = MAX(k_cldt, k)
          endif
          if (in_cloud) then
-            DO k2 = k_cldt-1, kbot, -1
+            inner_loop2: DO k2 = k_cldt-1, kbot, -1
                if (cfr1d(k2).lt.0.01 .or. k2.eq.kbot) then
                   k_cldb = k2+1
-                  goto 88
+                  exit inner_loop2
                endif
-            ENDDO
- 88         continue
+            END DO inner_loop2
             in_cloud = .false.
          endif
          if ((k_cldt - k_cldb + 1) .ge. 2) then
@@ -2995,8 +2993,7 @@
             k = k_cldb
          endif
          k = k - 1
-      ENDDO
-
+      END DO outer_loop2
 
       END SUBROUTINE find_cloudLayers
 
