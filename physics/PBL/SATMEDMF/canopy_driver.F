@@ -63,7 +63,7 @@
      &     swh,hlw,xmu,garea,zvfun,sigmaf,                                ! in
      &     psk,rbsoil,zorl,u10m,v10m,t2m, q2m,fm,fh,
      &     tsea,heat,evap,stress,spd1,
-     &     kpbl,                                                          ! inout: kpbl
+     &     kpbl,                                                          ! in: kpbl
      &     pgr, 
      &     prsi,del,prsl,prslk,phii,phil,delt,tte_edmf,
      &     dspheat,                                                       ! in
@@ -91,7 +91,7 @@
       integer, intent(in)  :: tc_pbl
       integer, intent(in)  :: use_lpt
       integer, intent(in)  :: kinver(:)
-      integer, intent(inout)  :: kpbl(:)
+      integer, intent(in)  :: kpbl(:)
       logical, intent(in)  :: gen_tend,ldiag3d
 !
       real(kind=kind_phys), intent(in) :: grav,pi,rd,cp,rv,hvap,hfus,fv,
@@ -143,7 +143,7 @@
       real(kind=kind_phys), intent(in) ::
      &                     dusfc(:),     dvsfc(:),
      &                     dtsfc(:),     dqsfc(:)
-      real(kind=kind_phys), intent(inout) ::
+      real(kind=kind_phys), intent(in) ::
      &                     hpbl(:) ! use resolved hpbl in non-canopy columns
       real(kind=kind_phys), intent(inout) ::
      &                     dkt(:,:), dku(:,:)
@@ -847,6 +847,10 @@
       enddo
 
 ! NB. Using 10-m interpolated values creates shear and gives very high TKE tendencies
+         u1_can  (:,1:km)     = u1_can3  (:,1:km)
+         v1_can  (:,1:km)     = v1_can3  (:,1:km)
+
+         ws1_can (:,1:km) = sqrt(u1_can(:,1:km)**2+v1_can(:,1:km)**2)
 
          t1_can  (:,1:km)     = t1_can3  (:,1:km)
 
@@ -889,10 +893,10 @@
            q1_can (:,kc, ntke    ) = q1(:,k, ntke    ) ! ntke always on
 
 ! Above-canopy wind components set to hybrid model layers
-           u1_can (:,kc) =  u1 (:,k)
-           v1_can (:,kc) =  v1 (:,k)
+!          u1_can (:,kc) =  u1 (:,k)
+!          v1_can (:,kc) =  v1 (:,k)
 
-           ws1_can(:,kc) = sqrt(u1_can(:,kc)**2+v1_can(:,kc)**2)
+!          ws1_can(:,kc) = sqrt(u1_can(:,kc)**2+v1_can(:,kc)**2)
 
          end do
 
@@ -903,10 +907,10 @@
             q1_can (:,kc, ntke    ) = q1(:,1, ntke    ) ! ntke always on
 
 !Sub-canopy values of wind components  set to 1hy model layer
-            u1_can (:,kc) =  u1 (:,1)
-            v1_can (:,kc) =  v1 (:,1)
+!           u1_can (:,kc) =  u1 (:,1)
+!           v1_can (:,kc) =  v1 (:,1)
 
-            ws1_can(:,kc) = sqrt(u1_can(:,kc)**2+v1_can(:,kc)**2)
+!           ws1_can(:,kc) = sqrt(u1_can(:,kc)**2+v1_can(:,kc)**2)
          end do
 
 !
@@ -943,7 +947,7 @@
          IF (FRT_MASK(i) <=  0.) THEN
 
 ! Non-canopy columns 
-!           kpbl_can(i) = kpbl(i) ! kpbl zero before original sat call 
+            kpbl_can(i) = kpbl(i) ! kpbl zero before original sat call 
             hpbl_can(i) = hpbl(i)
 
 ! Non-canopy columns
@@ -1227,8 +1231,8 @@ c
         end do ! k = 1, km-nkc
 
 ! Apply minimum value on chemical conc  after "canopy_to_resolved"
-        q2_mod  (:,:, ntoz:ntrac1 ) =
-     &                         max(q2_mod  (:,:, ntoz:ntrac1), concmin)  ! after "canopy_to_resolved"
+        q2_mod  (:,:, ntchs-1:ntrac1 ) =
+     &     max(q2_mod  (:,:, ntchs-1:ntrac1), concmin)  ! after "canopy_to_resolved"
 
 ! Apply minimum value on humidity qmin  before doing canopy_transfer & update tendency
         q2_mod(:,:, ntqv) = max(q2_mod(:,:, ntqv),qmin)
@@ -1525,17 +1529,28 @@ c
 ! Update ONLY chemical tracers (n=8, ntrac1)
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-! All chemical tracers (n=9, ntrac1)
-! ntqv=1-8 are cloud/rain and "sgs_tke"
-! n=8   "no2" (ntchs=9) GFDL
-! n=9   "no"            GFDL
-! n=10  "o3"            GFDL
+! All chemical tracers (n= ntchs-1 , ntche-1 (ntrac1)
+! ntqv    = 1-7  cloud/rain and "sgs_tke"
+! sgs_tke = 8    N/A
+!
+! ntchs-1 = 8   "no2"    GFS_v16  GFDL MP
+! ntchs   = 9   "no"     GFS_v16  GFDL MP
+! n       = 10  "o3"     GFS_v16  GFDL MP
 ! ...
-! NTRAC1 = 196
-! ---NO PBL TEND --------
-! n=197 ntche
-! n=198 ntke
-! -----------------------
+! ntche-1= 196 NTRAC1    GFS_v16  GFDL MP
+! ntche  = 197 "cld_amt" GFS_v16  GFDL MP 
+! ntke   = 198 "tke"     GFS_v16  GFDL MP
+! ---------------------------------------
+! ntqv    = 1-9  cloud/rain
+! sgs_tke = 10  "sgs_tke" N/A
+!
+! ntchs-1 = 10  "no2"    GFS_v17p8
+! ntchs   = 11  "no"     GFS_v17p8
+! n       = 12  "o3"     GFS_v17p8
+! ...
+! ntche-1 = 198 NTRAC1    GFS_v17p8 
+! ntke    = 199 "tke"     GFS_v17p8
+! ---------------------------------------
         DO n =  ntchs-1, ntche-1 ! 10, ntche-1 (same as NTRAC1)
 
 ! Update all model layers
@@ -1556,18 +1571,6 @@ c
 
       endif !if(do_canopy)
 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!> ## Save PBL height for diagnostic purpose
-!
-      if (do_canopy) then
-
-      do i = 1, im
-         hpbl(i) = hpbl_can(i)
-         kpbl(i) = kpbl_can(i)
-      enddo
-
-      endif  !do_canopy
-!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
       return
