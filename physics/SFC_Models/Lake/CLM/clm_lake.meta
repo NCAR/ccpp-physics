@@ -131,7 +131,7 @@
   units = flag
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = inout
+  intent = in
 [clm_lake_initialized]
   standard_name = flag_for_clm_lake_initialization
   long_name = set to true in clm_lake_run after likeini is called, as a workaround for ccpp limitation
@@ -328,7 +328,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [flag_iter]
   standard_name = flag_for_iteration
   long_name = flag for iteration
@@ -573,7 +573,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [lake_q2m]
   standard_name =  specific_humidity_at_2m_from_clm_lake
   long_name = specific humidity at 2m from clm lake
@@ -581,7 +581,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [weasd]
   standard_name = lwe_thickness_of_surface_snow_amount
   long_name = water equiv of acc snow depth over land and sea ice
@@ -746,7 +746,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [t1]
   standard_name = air_temperature_at_surface_adjacent_layer
   long_name = mean temperature at lowest model layer
