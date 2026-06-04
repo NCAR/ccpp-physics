@@ -16,6 +16,6 @@ For complete details about running the Global Workflow, please refer to the
 v1.0.0 Users Guide]</a>.
 
 The CCPP parameterizations are organized in suites by the host models. In
-this release, The Global Workflow v1.0.0 supports suites: \n
-\subpage GWv1/GFS_v17_p8_ugwpv1_GW_page
+this release, The Global Workflow v1.0.0 supports suites:
+\subpage GFS_v17_p8_ugwpv1_GW_page
 */ 
