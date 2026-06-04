@@ -30,8 +30,4 @@ development of CCPP-Physics.
 for their support and contribution for this CCPP scientific documentation (SciDoc).
 \n Thanks also to the CCPP SciDoc Team at the Developmental Testbed Center: Man Zhang, Ligia Bernardet, Mike Kavulich, and Tracy Hertneky.
 
-<footer style="margin-top:2em; text-align:center;">
-  <a href="https://www.ucar.edu/web-accessibility" target="_blank">
-    WEB ACCESSIBILITY
-  </a>
-</footer>
+[WEB ACCESSIBILITY](https://www.ucar.edu/web-accessibility)
