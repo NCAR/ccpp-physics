@@ -1,8 +1,21 @@
 /**
-\page Global_workflow_page GW
+\mainpage Introduction
 
-This page documents the CCPP science for the UFS Global Workflow (GW) and focuses on the physics and parameterizations used by the Global Workflow. For complete details about running the Global Workflow, please refer to the [Global Workflow v1.0.0 Users Guide]().
+Welcome to the scientific documentation for the physical parameterizations
+available in the <a href="https://ufs.epic.noaa.gov/about/">Unified Forecast
+System (UFS)</a> Global Workflow Application version 1.0.0 (available
+through https://github.com/NOAA-EMC/global-workflow) and the suite that can
+be configured to use it. Thw Global Workflow supports the Global Forecast
+System (GFS), Global Ensemble Forecasting System (GEFS) and the Seasonal
+Forecast System (SFS) with the
+<a href="https://github.com/ufs-community/ufs-weather-model">UFS Weather
+Model</a>.
 
-The following suite is used by the Land DA System: \n
+For complete details about running the Global Workflow, please refer to the
+<a href="https://global-workflow.readthedocs.io/en/latest/">Global Workflow
+v1.0.0 Users Guide]</a>.
+
+The CCPP parameterizations are organized in suites by the host models. In
+this release, The Global Workflow v1.0.0 supports suites: \n
 \subpage GFS_v17_p8_ugwpv1_GW_page
 */ 
