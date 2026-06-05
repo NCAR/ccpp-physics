@@ -106,6 +106,7 @@
   nt_checker = 0
 /
 
+!>[GFS_PHYSICS_NML]
 &gfs_physics_nml
   fhzero       = 6
   h2o_phys     = .true.
@@ -263,6 +264,7 @@
   iau_drymassfixer = .false.
   iau_filter_increments = .false.
 /
+!! [GFS_PHYSICS_NML]
 
 &land_iau_nml
   do_land_iau = .false.
@@ -277,6 +279,7 @@
   land_iau_min_T_increment = 0.0001
 /
 
+!>[CIRES_UGWP_NML]
 &cires_ugwp_nml
   knob_ugwp_solver   = 2
   knob_ugwp_source   = 1,1,0,0
@@ -299,6 +302,7 @@
   knob_ugwp_lhmet    = 200.0e3
   knob_ugwp_orosolv  = 'pss-1986'
 /
+!![CIRES_UGWP_NML]
 
 &gfdl_cloud_microphysics_nml
   sedi_transport = .true.
