@@ -120,7 +120,7 @@
   ltaerosol    = .false.
   mraerosol    = .false.
   lthailaware  = .false.
-  lradar       = .false.
+  lradar       = .true.
   ttendlim     = -999
   dt_inner     = 720
   sedi_semi    = .true.
@@ -153,8 +153,8 @@
   pdfcld       = .false.
   fhswr        = 3600.
   fhlwr        = 3600.
-  ialb         = 2
-  iems         = 2
+  ialb         = 1
+  iems         = 1
   iaer         = 1011
   icliq_sw     = 2
   ico2         = 2
@@ -179,7 +179,7 @@
   xr_cnvcld    = .false.
   imfshalcnv   = 2
   imfdeepcnv   = 2
-  progsigma    = .false.
+  progsigma    = .true.
   betascu      = 8.0
   betamcu      = 1.0
   betadcu      = 2.0
@@ -224,8 +224,8 @@
   rrtmgp_nGptsLW     = 128
   rrtmgp_nBandsLW    = 16
   rrtmgp_nBandsSW    = 14
-  doGP_cldoptics_LUT = .true.
-  doGP_lwscat        = .true.
+  doGP_cldoptics_LUT = .false.
+  doGP_lwscat        = .false.
   doGP_sgs_cnv       = .true.
   do_sppt      = .false.
   do_shum      = .false.

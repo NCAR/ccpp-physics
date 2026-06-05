@@ -31,9 +31,9 @@ The GFS_v17 suite uses the parameterizations in the following order:
 
 \section gfs17p8_nml Namelist 
 - General physics options
-\snippet input_GFS_v17_p8_ugwpv1.nml GFS_PHYSICS_NML
+\snippet FV3_GFS_v17_p8_ugwpv1_input.nml GFS_PHYSICS_NML
 - \ref GFS_UNIFIED_UGWP related options
-\snippet input_GFS_v17_p8_ugwpv1.nml CIRES_UGWP_NML
+\snippet FV3_GFS_v17_p8_ugwpv1_input.nml CIRES_UGWP_NML
 
 - nstf_name = \f$[2,0,0,0,0]^1 [2,1,0,0,0]^2\f$
  - \f$^1\f$ NSST is on and coupled with spin up off

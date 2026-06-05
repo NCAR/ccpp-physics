@@ -951,6 +951,8 @@ INPUT                  = pdftxt/GWv1/GW_overview.txt \
                          pdftxt/GFS_SAMFdeep.txt \
                          pdftxt/GFS_SAMFshal.txt \
                          pdftxt/THOMPSON.txt \
+                         pdftxt/suite_input.nml.txt \
+                         pdftxt/acronyms.txt   \
                          ../MP \
                          ../CONV \
                          ../GWD \
