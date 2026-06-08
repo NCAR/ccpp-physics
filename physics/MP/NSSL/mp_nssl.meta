@@ -433,7 +433,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = True
 [cccna]
   standard_name = activated_cloud_condensation_nuclei_number_concentration
