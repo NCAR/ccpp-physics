@@ -934,26 +934,34 @@
   kind = kind_phys
   intent = out
 [dudt_gw]
-  standard_name = tendency_of_x_wind_due_to_gravity_wave_drag
-  long_name = zonal wind tendency due to all GWs
+  standard_name = tendency_of_x_wind
+  long_name = tendency of x wind calculated by one physics scheme
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
 [dvdt_gw]
-  standard_name = tendency_of_y_wind_due_to_gravity_wave_drag
-  long_name = meridional wind tendency due to all GWs
+  standard_name = tendency_of_y_wind
+  long_name = tendency of y wind calculated by one physics scheme
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
 [dtdt_gw]
-  standard_name = tendency_of_air_temperature_due_to_gravity_wave_drag
-  long_name = air temperature tendency due to all GWs
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dqdt_gw]
+  standard_name = tendency_of_tracer_concentration
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = out
@@ -1037,30 +1045,6 @@
   type = real
   kind = kind_phys
   intent = out
-[dudt]
-  standard_name = process_split_cumulative_tendency_of_x_wind
-  long_name = zonal wind tendency due to model physics
-  units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[dvdt]
-  standard_name = process_split_cumulative_tendency_of_y_wind
-  long_name = meridional wind tendency due to model physics
-  units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[dtdt]
-  standard_name = process_split_cumulative_tendency_of_air_temperature
-  long_name = air temperature tendency due to model physics
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [rdxzb]
   standard_name = level_of_dividing_streamline
   long_name = level of the dividing streamline

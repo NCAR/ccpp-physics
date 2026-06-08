@@ -122,7 +122,9 @@ contains
       rain0, ice0, snow0, graupel0, prcp0, sr, oro,                                &
       dtp, hydrostatic, lradar, refl_10cm,                                         &
       reset, effr_in, rew, rei, rer, res, reg,                                     &
-      cplchm, pfi_lsan, pfl_lsan, con_one, con_p001, con_secinday, errmsg, errflg)
+      cplchm, pfi_lsan, pfl_lsan, con_one, con_p001, con_secinday, ten_t, ten_u,   &
+      ten_v, ten_qv, ten_ql, ten_qr, ten_qi, ten_qs, ten_qg, ten_cldfrc, ten_q,    &
+      errmsg, errflg)
 
       use machine, only: kind_phys, kind_dyn, kind_dbl_prec
 
@@ -133,10 +135,10 @@ contains
       real(kind=kind_phys), intent(in   ) :: con_g, con_fvirt, con_rd, con_eps, rainmin
       real(kind=kind_phys), intent(in   ) :: con_one, con_p001, con_secinday
       real(kind=kind_phys), intent(in   ), dimension(:)     :: garea, slmsk, snowd, oro 
-      real(kind=kind_phys), intent(inout), dimension(:,:)   :: gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, &
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, &
                                                                gq0_ntsw, gq0_ntgl, gq0_ntclamt
       real(kind_phys),      intent(in   ), dimension(:,:,:) :: aerfld
-      real(kind=kind_phys), intent(inout), dimension(:,:)   :: gt0, gu0, gv0
+      real(kind=kind_phys), intent(in   ), dimension(:,:)   :: gt0, gu0, gv0
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: vvl, prsl, del
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: phii
 
@@ -148,6 +150,9 @@ contains
       real(kind_phys),      intent(out  ), dimension(:), optional :: graupel0
       real(kind_phys),      intent(out  ), dimension(:) :: prcp0
       real(kind_phys),      intent(out  ), dimension(:) :: sr
+      
+      real(kind_phys),      intent(out  ), dimension(:,:)    :: ten_t, ten_u, ten_v, ten_qv, ten_ql, ten_qr, ten_qi, ten_qs, ten_qg, ten_cldfrc
+      real(kind_phys),      intent(out  ), dimension(:,:,:)  :: ten_q
 
       real(kind_phys),      intent(in) :: dtp ! physics time step
       logical, intent (in) :: hydrostatic, fast_mp_consv
@@ -167,8 +172,7 @@ contains
       integer :: iis, iie, jjs, jje, kks, kke, kbot, ktop
       integer :: i, k, kk
       real(kind=kind_phys), dimension(1:im,1:levs) :: delp, dz, uin, vin, pt, qv1, ql1, qi1, qr1, qs1, qg1,    &  
-                                                      qa1, qnl, qni, pt_dt, qa_dt, u_dt, v_dt, w, qv_dt, ql_dt,&
-                                                      qr_dt, qi_dt, qs_dt, qg_dt, p123, refl
+                                                      qa1, qnl, qni, w, p123, refl
       real(kind=kind_phys), dimension(1:im,1:levs) :: q_con, cappa !for inline MP option  
       real(kind=kind_phys), dimension(1:im,1,1:levs) :: pfils, pflls
       real(kind=kind_phys), dimension(1:im,1,1:levs) :: adj_vmr, te
@@ -180,11 +184,24 @@ contains
       real(kind=kind_phys) :: onebg
       real(kind=kind_phys) :: tem
       logical last_step, do_inline_mp
+      real(kind=kind_phys), dimension(:,:), allocatable :: new_qv, new_ql, new_qi, new_qr, new_qs, new_qg, new_qa, new_t
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
+      
+      ten_t = 0.0
+      ten_u = 0.0
+      ten_v = 0.0
+      ten_q = 0.0  !set tendency of entire tracer array to zero to make sure that those tracers not affected by this scheme do not change when tendencies are applied
+      ten_qv = 0.0
+      ten_ql = 0.0
+      ten_qr = 0.0
+      ten_qi = 0.0
+      ten_qs = 0.0
+      ten_qg = 0.0
+      ten_cldfrc = 0.0
+      
       iis = 1
       iie = im
       jjs = 1
@@ -200,19 +217,7 @@ contains
       do k = 1, levs
          kk = levs-k+1
          do i = 1, im
-            qv_dt(i,k) = 0.0
-            ql_dt(i,k) = 0.0
-            qr_dt(i,k) = 0.0
-            qi_dt(i,k) = 0.0
-            qs_dt(i,k) = 0.0
-            qg_dt(i,k) = 0.0
-            qa_dt(i,k) = 0.0
-            pt_dt(i,k) = 0.0
-            u_dt(i,k)  = 0.0
-            v_dt(i,k)  = 0.0
             qnl(i,k)   = aerfld(i,kk,11) ! sulfate 
-            pfils(i,1,k) = 0.0
-            pflls(i,1,k) = 0.0
             prefluxw(i,k) =0.0 
             prefluxi(i,k) =0.0 
             prefluxr(i,k) =0.0 
@@ -307,16 +312,16 @@ contains
       do k=1,levs
         kk = levs-k+1
         do i=1,im
-           gq0(i,k)         = qv1(i,kk)
-           gq0_ntcw(i,k)    = ql1(i,kk)
-           gq0_ntrw(i,k)    = qr1(i,kk)
-           gq0_ntiw(i,k)    = qi1(i,kk)
-           gq0_ntsw(i,k)    = qs1(i,kk)
-           gq0_ntgl(i,k)    = qg1(i,kk)
-           gq0_ntclamt(i,k) = qa1(i,kk)
-           gt0(i,k)         = pt(i,kk)
-           gu0(i,k)         = uin(i,kk)
-           gv0(i,k)         = vin(i,kk)
+           ten_qv(i,k)      = (qv1(i,kk) - gq0(i,k))/dtp
+           ten_ql(i,k)      = (ql1(i,kk) - gq0_ntcw(i,k))/dtp
+           ten_qr(i,k)      = (qr1(i,kk) - gq0_ntrw(i,k))/dtp
+           ten_qi(i,k)      = (qi1(i,kk) - gq0_ntiw(i,k))/dtp
+           ten_qs(i,k)      = (qs1(i,kk) - gq0_ntsw(i,k))/dtp
+           ten_qg(i,k)      = (qg1(i,kk) - gq0_ntgl(i,k))/dtp
+           ten_cldfrc(i,k)  = (qa1(i,kk) - gq0_ntclamt(i,k))/dtp
+           ten_t(i,k)       = (pt(i,kk)  - gt0(i,k))/dtp
+           ten_u(i,k)       = (uin(i,kk) - gu0(i,k))/dtp
+           ten_v(i,k)       = (vin(i,kk) - gv0(i,k))/dtp
            refl_10cm(i,k)   = refl(i,kk)
         enddo
       enddo
@@ -333,19 +338,34 @@ contains
       endif
 
       if(effr_in) then
+         allocate(new_qv(im,levs), new_ql(im,levs), new_qi(im,levs), new_qr(im,levs), new_qs(im,levs), new_qg(im,levs), new_qa(im,levs), new_t(im,levs))
+         do k=1,levs
+           kk = levs-k+1
+           do i=1,im
+              new_qv(i,k)    = qv1(i,kk)
+              new_ql(i,k)    = ql1(i,kk)
+              new_qr(i,k)    = qr1(i,kk)
+              new_qi(i,k)    = qi1(i,kk)
+              new_qs(i,k)    = qs1(i,kk)
+              new_qg(i,k)    = qg1(i,kk)
+              new_qa(i,k)    = qa1(i,kk)
+              new_t(i,k)     = pt(i,kk)
+           enddo
+         enddo
+         
          call cld_eff_rad (1, im, 1, levs, slmsk(1:im),          &
             prsl(1:im,1:levs),  del(1:im,1:levs),                &
-            gt0(1:im,1:levs), gq0(1:im,1:levs),                  &
-            gq0_ntcw(1:im,1:levs), gq0_ntiw(1:im,1:levs),        &
-            gq0_ntrw(1:im,1:levs), gq0_ntsw(1:im,1:levs),        &
-            gq0_ntgl(1:im,1:levs), gq0_ntclamt(1:im,1:levs),     &
+            new_t(1:im,1:levs), new_qv(1:im,1:levs),               &
+            new_ql(1:im,1:levs), new_qi(1:im,1:levs),        &
+            new_qr(1:im,1:levs), new_qs(1:im,1:levs),        &
+            new_qg(1:im,1:levs), new_qa(1:im,1:levs),     &
             rew(1:im,1:levs), rei(1:im,1:levs), rer(1:im,1:levs),&
             res(1:im,1:levs), reg(1:im,1:levs),snowd(1:im))
       endif
 
       if(lradar) then 
          call rad_ref (1, im, 1, 1, qv1(1:im,1:levs), qr1(1:im,1:levs), &
-	    qs1(1:im,1:levs),qg1(1:im,1:levs),pt(1:im,1:levs),          & 
+	          qs1(1:im,1:levs),qg1(1:im,1:levs),pt(1:im,1:levs),          & 
             delp(1:im,1:levs), dz(1:im,1:levs), refl(1:im,1:levs), levs, hydrostatic,  & 
             do_inline_mp, 1)
 
@@ -355,7 +375,11 @@ contains
               refl_10cm(i,k)   = max(-35.,refl(i,kk))
            enddo 
          enddo 
-      endif 
+      endif
+      
+      if(effr_in) then
+         deallocate(new_qv, new_ql, new_qi, new_qr, new_qs, new_qg, new_qa, new_t)
+      end if
 
    end subroutine gfdl_cloud_microphys_v3_run
 

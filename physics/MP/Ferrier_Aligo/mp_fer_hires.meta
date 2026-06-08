@@ -171,21 +171,21 @@
   kind = kind_phys
   intent = in
 [t]
-  standard_name = air_temperature_of_new_state
-  long_name = temperature updated by physics
+  standard_name = air_temperature
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [q]
-  standard_name = specific_humidity_of_new_state
-  long_name = water vapor specific humidity updated by physics
+  standard_name = specific_humidity
+  long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [train]
   standard_name = accumulated_change_of_air_temperature_due_to_FA_scheme
   long_name = accumulated change of air temperature due to FA MP scheme
@@ -204,37 +204,37 @@
   kind = kind_phys
   intent = out
 [qc]
-  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
-  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) updated by physics
+  standard_name = cloud_liquid_water_mixing_ratio
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [qr]
-  standard_name = rain_mixing_ratio_of_new_state
-  long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) updated by physics
+  standard_name = rain_mixing_ratio
+  long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [qi]
-  standard_name = cloud_ice_mixing_ratio_of_new_state
-  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
+  standard_name = cloud_ice_mixing_ratio
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [qg]
-  standard_name = mass_weighted_rime_factor_of_new_state
-  long_name = mass weighted rime factor updated by physics
+  standard_name = mass_weighted_rime_factor
+  long_name = mass weighted rime factor
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [prec]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation ( rain, ice, snow, graupel, ...) on physics timestep
@@ -328,6 +328,62 @@
   type = real
   kind = kind_phys
   intent = in
+[ten_t]
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_qv]
+  standard_name = tendency_of_specific_humidity
+  long_name = water vapor specific humidity tendency
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_ql]
+  standard_name = tendency_of_cloud_liquid_water_mixing_ratio
+  long_name = cloud condensed water mixing ratio tendency
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_qr]
+  standard_name = tendency_of_rain_mixing_ratio
+  long_name = ratio of mass of rain water tendency to mass of dry air plus vapor (without condensates)
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_qi]
+  standard_name = tendency_of_cloud_ice_mixing_ratio
+  long_name = cloud condensed water mixing ratio tendency
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_qg]
+  standard_name = tendency_of_mass_weighted_rime_factor
+  long_name = mass weighted rime factor tendency
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_q]
+  standard_name = tendency_of_tracer_concentration
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

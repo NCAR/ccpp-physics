@@ -217,24 +217,6 @@
   type = real
   kind = kind_phys
   intent = in
-[save_lnc]
-  standard_name = liquid_cloud_number_concentration_save
-  long_name = liquid cloud number concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = true
-[save_inc]
-  standard_name = ice_cloud_number_concentration_save
-  long_name = ice cloud number concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = true
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -244,8 +226,8 @@
   kind = kind_phys
   intent = in
 [gq0]
-  standard_name = tracer_concentration_of_new_state
-  long_name = tracer concentration updated by physics
+  standard_name = tracer_concentration
+  long_name = tracer concentration
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
@@ -258,7 +240,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [prsl]
   standard_name = air_pressure
   long_name = mean layer pressure
@@ -309,7 +291,7 @@
   intent = in
   optional = True
 [spechum]
-  standard_name = specific_humidity
+  standard_name = physics_timestep_initial_specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -363,6 +345,20 @@
 [index_of_process_conv_trans]
   standard_name = index_of_convective_transport_process_in_cumulative_change_index
   long_name = index of convective transport process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_process_dcnv]
+  standard_name = index_of_deep_convection_process_process_in_cumulative_change_index
+  long_name = index of deep convection process in second dimension of array cumulative change index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[index_of_process_scnv]
+  standard_name = index_of_shallow_convection_process_process_in_cumulative_change_index
+  long_name = index of shallow convection process in second dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer

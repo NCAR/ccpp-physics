@@ -10,7 +10,7 @@ contains
 !! \htmlinclude ugwpv1_gsldrag_post_run.html
 !!
      subroutine ugwpv1_gsldrag_post_run ( im, levs, ldiag_ugwp,       &
-         dtf, dudt_gw, dvdt_gw, dtdt_gw,                              &
+         dtf, dudt_gw, dvdt_gw,                                       &
          tau_ogw, tau_ngw, zobl, zlwb, zogw, dudt_obl, dvdt_obl,      &
          dudt_ofd, dvdt_ofd, dudt_ogw, dvdt_ogw,                      &
          dudt_oss, dvdt_oss, tot_zmtb, tot_zlwb, tot_zogw,            &
@@ -23,7 +23,7 @@ contains
          du_ogwcol, dv_ogwcol, du_oblcol, dv_oblcol, du_osscol,       &
          dv_osscol, du_ofdcol, dv_ofdcol, du3_ogwcol, dv3_ogwcol,     &
          du3_oblcol, dv3_oblcol, du3_osscol, dv3_osscol, du3_ofdcol,  &
-         dv3_ofdcol, dtdt, dudt, dvdt, errmsg, errflg)
+         dv3_ofdcol, errmsg, errflg)
 
         use machine,                only: kind_phys
 
@@ -40,7 +40,7 @@ contains
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_zmtb, tot_zlwb, tot_zogw
 	
-        real(kind=kind_phys), intent(in),    dimension(:,:) :: dtdt_gw, dudt_gw, dvdt_gw
+        real(kind=kind_phys), intent(in),    dimension(:,:) :: dudt_gw, dvdt_gw
         real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dudt_obl, dvdt_obl, dudt_ogw
         real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dvdt_ogw, dudt_ofd, dvdt_ofd
         real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dudt_oss, dvdt_oss
@@ -60,8 +60,6 @@ contains
         real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_oblcol, dv3_oblcol
         real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_osscol, dv3_osscol
         real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_ofdcol, dv3_ofdcol
-	
-        real(kind=kind_phys), intent(inout), dimension(:,:) :: dtdt, dudt, dvdt
 
         character(len=*),        intent(out) :: errmsg
         integer,                 intent(out) :: errflg
@@ -119,9 +117,6 @@ contains
 !=====================================================================
 ! Updates inside the ugwpv1_gsldrag.F90
 !
-!        dtdt = dtdt + dtdt_gw
-!        dudt = dudt + dudt_gw
-!        dvdt = dvdt + dvdt_gw
 !
 !       "post" may  also create the "time-averaged" diagnostics"
 !            

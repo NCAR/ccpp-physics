@@ -49,22 +49,22 @@
   dimensions = ()
   type = integer
   intent = in
-[tgrs_save]
-  standard_name = air_temperature_save
-  long_name = air temperature before entering a physics scheme
-  units = K
+[dtgrs]
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
+  units = K s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [tgrs]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = model layer mean temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [prslk]
   standard_name = dimensionless_exner_function
   long_name = dimensionless Exner function at model layer centers
