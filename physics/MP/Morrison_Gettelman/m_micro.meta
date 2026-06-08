@@ -380,8 +380,8 @@
   kind = kind_phys
   intent = in
 [qlls_i]
-  standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
-  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
+  standard_name = cloud_liquid_water_mixing_ratio
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -396,8 +396,8 @@
   kind = kind_phys
   intent = in
 [qils_i]
-  standard_name = ice_water_mixing_ratio_convective_transport_tracer
-  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
+  standard_name = cloud_ice_mixing_ratio
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -484,16 +484,16 @@
   kind = kind_phys
   intent = in
 [u_i]
-  standard_name = x_wind_of_new_state
-  long_name = zonal wind updated by physics
+  standard_name = x_wind
+  long_name = zonal wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
 [v_i]
-  standard_name = y_wind_of_new_state
-  long_name = meridional wind updated by physics
+  standard_name = y_wind
+  long_name = meridional wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -555,38 +555,22 @@
   type = real
   kind = kind_phys
   intent = in
-[q_io]
-  standard_name = specific_humidity_of_new_state
-  long_name = water vapor specific humidity updated by physics
+[q_i]
+  standard_name = specific_humidity
+  long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
-[lwm_o]
-  standard_name = cloud_liquid_water_mixing_ratio_of_new_state
-  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) updated by physics
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[qi_o]
-  standard_name = cloud_ice_mixing_ratio_of_new_state
-  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[t_io]
-  standard_name = air_temperature_of_new_state
-  long_name = temperature updated by physics
+  intent = in
+[t_i]
+  standard_name = air_temperature
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [rn_o]
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation (rain, ice, snow, graupel, ...) on physics timestep
@@ -603,22 +587,22 @@
   type = real
   kind = kind_phys
   intent = out
-[ncpl_io]
-  standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air_of_new_state
-  long_name = number concentration of cloud droplets updated by physics
+[ncpl_i]
+  standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air
+  long_name = number concentration of cloud droplets
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
-[ncpi_io]
-  standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air_of_new_state
-  long_name = number concentration of ice updated by physics
+  intent = in
+[ncpi_i]
+  standard_name = mass_number_concentration_of_cloud_ice_water_crystals_in_air
+  long_name = number concentration of ice
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [fprcp]
   standard_name = number_of_frozen_precipitation_species
   long_name = number of frozen precipitation species
@@ -626,54 +610,54 @@
   dimensions = ()
   type = integer
   intent = in
-[rnw_io]
-  standard_name = local_rain_water_mixing_ratio
-  long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) local to physics
+[rnw_i]
+  standard_name = rain_mixing_ratio
+  long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
-[snw_io]
-  standard_name = local_snow_water_mixing_ratio
-  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) local to physics
+  intent = in
+[snw_i]
+  standard_name = snow_mixing_ratio
+  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
-[qgl_io]
-  standard_name = local_graupel_mixing_ratio
-  long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) local to physics
+  intent = in
+[qgl_i]
+  standard_name = graupel_mixing_ratio
+  long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
-[ncpr_io]
-  standard_name = local_rain_number_concentration
-  long_name = number concentration of rain local to physics
+  intent = in
+[ncpr_i]
+  standard_name = mass_number_concentration_of_rain
+  long_name = number concentration of rain
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
-[ncps_io]
-  standard_name = local_snow_number_concentration
-  long_name = number concentration of snow local to physics
+  intent = in
+[ncps_i]
+  standard_name = mass_number_concentration_of_snow
+  long_name = number concentration of snow
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
-[ncgl_io]
-  standard_name = local_graupel_number_concentration
-  long_name = number concentration of graupel local to physics
+  intent = in  
+[ncgl_i]
+  standard_name = mass_number_concentration_of_graupel
+  long_name = number concentration of graupel
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [clls_io]
   standard_name = cloud_fraction_for_MG
   long_name = cloud fraction used by Morrison-Gettelman MP
@@ -828,6 +812,110 @@
   type = real
   kind = kind_phys
   intent = in
+[ten_t]
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_q]
+  standard_name = tendency_of_tracer_concentration
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_qv]
+  standard_name = tendency_of_specific_humidity
+  long_name = water vapor specific humidity tendency
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_ncpi]
+  standard_name = tendency_of_mass_number_concentration_of_cloud_ice_water_crystals_in_air
+  long_name = number concentration of ice tendency
+  units = kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_ncpl]
+  standard_name = tendency_of_mass_number_concentration_of_cloud_liquid_water_particles_in_air
+  long_name = number concentration of cloud droplets (liquid) tendency
+  units = kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_rnw]
+  standard_name = tendency_of_rain_mixing_ratio
+  long_name = tendency of ratio of mass of rain water tendency to mass of dry air plus vapor (without condensates)
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_snw]
+  standard_name = tendency_of_snow_mixing_ratio
+  long_name = tendency of ratio of mass of snow water tendency to mass of dry air plus vapor (without condensates)
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_qgl]
+  standard_name = tendency_of_graupel_mixing_ratio
+  long_name = tendency of ratio of mass of graupel tendency to mass of dry air plus vapor (without condensates)
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_ncpr]
+  standard_name = tendency_of_mass_number_concentration_of_rain_water_in_air
+  long_name = number concentration of rain tendency
+  units = kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_ncps]
+  standard_name = tendency_of_mass_number_concentration_of_snow
+  long_name = number concentration of snow tendency
+  units = kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_ncgl]
+  standard_name = tendency_of_mass_number_concentration_of_graupel
+  long_name = number concentration of graupel tendency
+  units = kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_ql]
+  standard_name = tendency_of_cloud_liquid_water_mixing_ratio
+  long_name = cloud condensed water mixing ratio tendency
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_qi]
+  standard_name = tendency_of_cloud_ice_mixing_ratio
+  long_name = cloud condensed water mixing ratio tendency
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

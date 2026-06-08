@@ -212,8 +212,10 @@ module mp_nssl
                              imp_physics, convert_dry_rho,                      &
                              imp_physics_nssl, nssl_ccn_on,                     &
                              nssl_hail_on, nssl_invertccn, nssl_3moment,        &
-                             ntccn, ntccna,                                     &
-                             errflg, errmsg)
+                             ntccn, ntccna, ten_t, ten_qv, ten_qc, ten_qr, ten_qi,     &
+                             ten_qs, ten_qh, ten_qhl, ten_cccn, ten_ccw, ten_crw, &
+                             ten_cci, ten_csw, ten_chw, ten_chl, ten_vh, ten_vhl, &
+                             ten_zrw, ten_zhw, ten_zhl, errflg, errmsg)
 
         use module_mp_nssl_2mom, only: calcnfromq, na
 
@@ -224,28 +226,28 @@ module mp_nssl
          integer,                   intent(in)    :: mpirank
          ! Hydrometeors
          logical,                   intent(in   ) :: convert_dry_rho
-         real(kind_phys),           intent(inout) :: spechum(:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout), optional :: cccn(:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout), optional :: cccna(:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qc (:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qr (:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qi (:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qs (:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qh (:,:) !(1:ncol,1:nlev) graupel
-         real(kind_phys),           intent(inout), optional :: qhl(:,:) !(1:ncol,1:nlev) hail
-         real(kind_phys),           intent(inout) :: ccw(:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: crw(:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: cci(:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: csw(:,:) !(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: chw(:,:) !(1:ncol,1:nlev) graupel number 
-         real(kind_phys),           intent(inout), optional :: chl(:,:) !(1:ncol,1:nlev) hail number
-         real(kind_phys),           intent(inout) :: vh (:,:) !(1:ncol,1:nlev) graupel volume 
-         real(kind_phys),           intent(inout), optional :: vhl(:,:) !(1:ncol,1:nlev) hail volume
-         real(kind_phys),           intent(inout), optional :: zrw(:,:) !(1:ncol,1:nlev) rain reflectivity
-         real(kind_phys),           intent(inout), optional :: zhw(:,:) !(1:ncol,1:nlev) graupel reflectivity
-         real(kind_phys),           intent(inout), optional :: zhl(:,:) !(1:ncol,1:nlev) hail reflectivity
+         real(kind_phys),           intent(in   ) :: spechum(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ), optional :: cccn(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ), optional :: cccna(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: qc (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: qr (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: qi (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: qs (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: qh (:,:) !(1:ncol,1:nlev) graupel
+         real(kind_phys),           intent(in   ), optional :: qhl(:,:) !(1:ncol,1:nlev) hail
+         real(kind_phys),           intent(in   ) :: ccw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: crw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: cci(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: csw(:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: chw(:,:) !(1:ncol,1:nlev) graupel number 
+         real(kind_phys),           intent(in   ), optional :: chl(:,:) !(1:ncol,1:nlev) hail number
+         real(kind_phys),           intent(in   ) :: vh (:,:) !(1:ncol,1:nlev) graupel volume 
+         real(kind_phys),           intent(in   ), optional :: vhl(:,:) !(1:ncol,1:nlev) hail volume
+         real(kind_phys),           intent(in   ), optional :: zrw(:,:) !(1:ncol,1:nlev) rain reflectivity
+         real(kind_phys),           intent(in   ), optional :: zhw(:,:) !(1:ncol,1:nlev) graupel reflectivity
+         real(kind_phys),           intent(in   ), optional :: zhl(:,:) !(1:ncol,1:nlev) hail reflectivity
          ! State variables and timestep information
-         real(kind_phys),           intent(inout) :: tgrs (:,:) !(1:ncol,1:nlev)
+         real(kind_phys),           intent(in   ) :: tgrs (:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(in   ) :: prsl (:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(in   ) :: prslk(:,:) !(1:ncol,1:nlev)
          real(kind_phys),           intent(in   ) :: phii (:,:) !(1:ncol,1:nlev+1)
@@ -272,13 +274,35 @@ module mp_nssl
          integer,                   intent(in)    :: imp_physics_nssl
          logical,                   intent(in)    :: nssl_ccn_on, nssl_hail_on, nssl_invertccn, nssl_3moment
          integer,                   intent(in)    :: ntccn, ntccna
-        
+         
+         real(kind_phys),           intent(  out) :: ten_t(:,:)
+         real(kind_phys),           intent(  out) :: ten_qv(:,:)
+         real(kind_phys),           intent(  out) :: ten_qc(:,:)
+         real(kind_phys),           intent(  out) :: ten_qr(:,:)
+         real(kind_phys),           intent(  out) :: ten_qi(:,:)
+         real(kind_phys),           intent(  out) :: ten_qs(:,:)
+         real(kind_phys),           intent(  out) :: ten_qh(:,:)
+         real(kind_phys),           intent(  out), optional :: ten_qhl(:,:)
+         real(kind_phys),           intent(  out) :: ten_cccn(:,:)
+         real(kind_phys),           intent(  out) :: ten_ccw(:,:)
+         real(kind_phys),           intent(  out) :: ten_crw(:,:)
+         real(kind_phys),           intent(  out) :: ten_cci(:,:)
+         real(kind_phys),           intent(  out) :: ten_csw(:,:)
+         real(kind_phys),           intent(  out) :: ten_chw(:,:)
+         real(kind_phys),           intent(  out), optional :: ten_chl(:,:)
+         real(kind_phys),           intent(  out) :: ten_vh(:,:)
+         real(kind_phys),           intent(  out), optional :: ten_vhl(:,:)
+         real(kind_phys),           intent(  out), optional :: ten_zrw(:,:)
+         real(kind_phys),           intent(  out), optional :: ten_zhw(:,:)
+         real(kind_phys),           intent(  out), optional :: ten_zhl(:,:)
+     
         integer,          intent(out)   :: errflg
         character(len=*), intent(out)   :: errmsg
 
 
          ! Local variables
 
+         real(kind_phys) :: new_t(1:ncol,1:nlev)
          ! Air density
          real(kind_phys) :: rho(1:ncol,1:nlev)              !< kg m-3
          ! Hydrometeors
@@ -355,11 +379,38 @@ module mp_nssl
          real(kind_phys) :: cwmas
          
          real(kind_phys), allocatable :: an(:,:,:,:) ! temporary scalar array
-         
-
 
         errflg = 0
         errmsg = ''
+        
+        ten_t = 0.0
+        ten_qv = 0.0
+        ten_qc = 0.0
+        ten_qr = 0.0
+        ten_qi = 0.0
+        ten_qs = 0.0
+        ten_qh = 0.0
+        if (nssl_hail_on) then
+          ten_qhl = 0.0
+          ten_chl = 0.0
+          ten_vhl = 0.0
+        end if
+        if (nssl_ccn_on) ten_cccn = 0.0
+        ten_ccw = 0.0
+        ten_crw = 0.0
+        ten_cci = 0.0
+        ten_csw = 0.0
+        ten_chw = 0.0
+        ten_vh = 0.0
+        if ( nssl_3moment ) then
+          ten_zrw = 0.0
+          ten_zhw = 0.0
+          if (nssl_hail_on) then
+            ten_zhl = 0.0
+          end if
+        end if
+        
+        new_t = tgrs
 
 !            write(0,*) 'nssl_run: nlev,ncol,rank = ',nlev,ncol,mpirank
 
@@ -641,7 +692,7 @@ module mp_nssl
          CALL nssl_2mom_driver(                               &
                      ITIMESTEP=itimestep,                     &
                   !   TH=th,                                  &
-                     tt=tgrs,                                 &
+                     tt=new_t,                                &
                      QV=qv_mp,                                &
                      QC=qc_mp,                                &
                      QR=qr_mp,                                &
@@ -695,7 +746,7 @@ module mp_nssl
          CALL nssl_2mom_driver(                               &
                      ITIMESTEP=itimestep,                     &
                   !   TH=th,                                  &
-                     tt=tgrs,                                 &
+                     tt=new_t,                                &
                      QV=qv_mp,                                &
                      QC=qc_mp,                                &
                      QR=qr_mp,                                &
@@ -792,71 +843,72 @@ module mp_nssl
              IF ( nssl_ccn_on ) THEN
              write(*,*) 'qc, ccn, ccw, tt, qi+qs by height'
              DO k = 1,nlev
-               write(*,*) qc_mp(1,k)*1000., cccn(1,k)*rho(1,k)*1.e-6, ccw(1,k)*rho(1,k)*1.e-6, tgrs(1,k), (qs_mp(1,k)+qi_mp(1,k))*1000. ! cccn(1,k)*1.e-6
+               write(*,*) qc_mp(1,k)*1000., cccn(1,k)*rho(1,k)*1.e-6, ccw(1,k)*rho(1,k)*1.e-6, new_t(1,k), (qs_mp(1,k)+qi_mp(1,k))*1000. ! cccn(1,k)*1.e-6
              ENDDO
              ELSE
              write(*,*) 'qc, ccn, ccw, tt, qi+qs by height'
              DO k = 1,nlev
-               write(*,*) qc_mp(1,k)*1000., cccn(1,k)*rho(1,k)*1.e-6, 0.0, tgrs(1,k), (qs_mp(1,k)+qi_mp(1,k))*1000. ! cccn(1,k)*1.e-6
+               write(*,*) qc_mp(1,k)*1000., cccn(1,k)*rho(1,k)*1.e-6, 0.0, new_t(1,k), (qs_mp(1,k)+qi_mp(1,k))*1000. ! cccn(1,k)*1.e-6
              ENDDO
              ENDIF
            ENDIF
          ENDIF
 
-
+         
+         ten_t = (new_t - tgrs)/dtp
          !> - Convert dry mixing ratios to specific humidity/moist mixing ratios
-         spechum = qv_mp/(1.0_kind_phys+qv_mp)
+         ten_qv = (qv_mp/(1.0_kind_phys+qv_mp) - spechum)/dtp
          IF ( convert_dry_rho ) THEN
-         qc      = qc_mp/(1.0_kind_phys+qv_mp)
-         qr      = qr_mp/(1.0_kind_phys+qv_mp)
-         qi      = qi_mp/(1.0_kind_phys+qv_mp)
-         qs      = qs_mp/(1.0_kind_phys+qv_mp)
-         qh      = qh_mp/(1.0_kind_phys+qv_mp)
-         IF ( nssl_ccn_on ) cccn    = cccn_mp/(1.0_kind_phys+qv_mp)
+         ten_qc = (qc_mp/(1.0_kind_phys+qv_mp) - qc)/dtp
+         ten_qr = (qr_mp/(1.0_kind_phys+qv_mp) - qr)/dtp
+         ten_qi = (qi_mp/(1.0_kind_phys+qv_mp) - qi)/dtp
+         ten_qs = (qs_mp/(1.0_kind_phys+qv_mp) - qs)/dtp
+         ten_qh = (qh_mp/(1.0_kind_phys+qv_mp) - qh)/dtp
+         IF ( nssl_ccn_on ) ten_cccn = (cccn_mp/(1.0_kind_phys+qv_mp) - cccn)/dtp
 !         cccna   = cccna_mp/(1.0_kind_phys+qv_mp)
-         ccw      = nc_mp/(1.0_kind_phys+qv_mp)
-         crw      = nr_mp/(1.0_kind_phys+qv_mp)
-         cci      = ni_mp/(1.0_kind_phys+qv_mp)
-         csw      = ns_mp/(1.0_kind_phys+qv_mp)
-         chw      = nh_mp/(1.0_kind_phys+qv_mp)
-         vh       = vh_mp/(1.0_kind_phys+qv_mp)
+         ten_ccw = (nc_mp/(1.0_kind_phys+qv_mp) - ccw)/dtp
+         ten_crw = (nr_mp/(1.0_kind_phys+qv_mp) - crw)/dtp
+         ten_cci = (ni_mp/(1.0_kind_phys+qv_mp) - cci)/dtp
+         ten_csw = (ns_mp/(1.0_kind_phys+qv_mp) - csw)/dtp
+         ten_chw = (nh_mp/(1.0_kind_phys+qv_mp) - chw)/dtp
+         ten_vh  = (vh_mp/(1.0_kind_phys+qv_mp) - vh)/dtp
           IF ( nssl_3moment ) THEN
-           zrw = zrw_mp/(1.0_kind_phys+qv_mp)
-           zhw = zhw_mp/(1.0_kind_phys+qv_mp)
+           ten_zrw = (zrw_mp/(1.0_kind_phys+qv_mp) - zrw)/dtp
+           ten_zhw = (zhw_mp/(1.0_kind_phys+qv_mp) - zhw)/dtp
           ENDIF
          IF ( nssl_hail_on ) THEN
-          qhl     = qhl_mp/(1.0_kind_phys+qv_mp)
-          chl     = nhl_mp/(1.0_kind_phys+qv_mp)
-          vhl     = vhl_mp/(1.0_kind_phys+qv_mp)
+          ten_qhl = (qhl_mp/(1.0_kind_phys+qv_mp) - qhl)/dtp
+          ten_chl = (nhl_mp/(1.0_kind_phys+qv_mp) - chl)/dtp
+          ten_vhl = (vhl_mp/(1.0_kind_phys+qv_mp) - vhl)/dtp
           IF ( nssl_3moment ) THEN
-           zhl = zhl_mp/(1.0_kind_phys+qv_mp)
+           ten_zhl = (zhl_mp/(1.0_kind_phys+qv_mp) - zhl)/dtp
           ENDIF
          ENDIF
          ELSE
 !         spechum = qv_mp ! /(1.0_kind_phys+qv_mp)
-         qc      = qc_mp ! /(1.0_kind_phys+qv_mp)
-         qr      = qr_mp ! /(1.0_kind_phys+qv_mp)
-         qi      = qi_mp ! /(1.0_kind_phys+qv_mp)
-         qs      = qs_mp ! /(1.0_kind_phys+qv_mp)
-         qh      = qh_mp ! /(1.0_kind_phys+qv_mp)
-         IF ( nssl_ccn_on ) cccn    = cccn_mp
+         ten_qc = (qc_mp - qc)/dtp ! /(1.0_kind_phys+qv_mp)
+         ten_qr = (qr_mp - qr)/dtp! /(1.0_kind_phys+qv_mp)
+         ten_qi = (qi_mp - qi)/dtp! /(1.0_kind_phys+qv_mp)
+         ten_qs = (qs_mp - qs)/dtp ! /(1.0_kind_phys+qv_mp)
+         ten_qh = (qh_mp - qh)/dtp ! /(1.0_kind_phys+qv_mp)
+         IF ( nssl_ccn_on ) ten_cccn = (cccn_mp - cccn)/dtp
 !         cccna   = cccna_mp
-         ccw      = nc_mp
-         crw      = nr_mp
-         cci      = ni_mp
-         csw      = ns_mp
-         chw      = nh_mp
-         vh       = vh_mp
+         ten_ccw  = (nc_mp - ccw)/dtp
+         ten_crw  = (nr_mp - crw)/dtp
+         ten_cci  = (ni_mp - cci)/dtp
+         ten_csw  = (ns_mp - csw)/dtp
+         ten_chw  = (nh_mp - chw)/dtp
+         ten_vh   = (vh_mp - vh)/dtp
           IF ( nssl_3moment ) THEN
-           zrw = zrw_mp
-           zhw = zhw_mp
+           ten_zrw = (zrw_mp - zrw)/dtp
+           ten_zhw = (zhw_mp - zhw)/dtp
           ENDIF
          IF ( nssl_hail_on ) THEN
-          qhl     = qhl_mp ! /(1.0_kind_phys+qv_mp)
-          chl     = nhl_mp
-          vhl     = vhl_mp
+          ten_qhl = (qhl_mp - qhl)/dtp ! /(1.0_kind_phys+qv_mp)
+          ten_chl = (nhl_mp - chl)/dtp
+          ten_vhl = (vhl_mp - vhl)/dtp
           IF ( nssl_3moment ) THEN
-           zhl = zhl_mp
+           ten_zhl = (zhl_mp - zhl)/dtp
           ENDIF
          ENDIF
          
