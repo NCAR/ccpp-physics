@@ -110,6 +110,7 @@
   units = none
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [ntrac]
   standard_name = number_of_tracers

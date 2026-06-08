@@ -596,6 +596,7 @@
   units = none
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [cat_adj_shal]
   standard_name = adjustment_for_convective_advection_time_for_shallow

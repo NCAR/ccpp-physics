@@ -454,7 +454,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = True
 [epi]
   standard_name = instantaneous_surface_potential_evaporation
