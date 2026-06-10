@@ -12,5 +12,6 @@
   branch = ccpp/dev
 [submodule "physics/CONV/C3"]
   path = physics/CONV/C3
-  url = https://github.com/lisa-bengtsson/c3.git
+  url = https://github.com/ufs-community/c3
   branch = main
+
