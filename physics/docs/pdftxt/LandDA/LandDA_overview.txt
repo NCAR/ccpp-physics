@@ -8,7 +8,7 @@ be configured to use it.
 
 For complete instructions on configuring and running the Land DA workflow,
 please refer to the <a href="https://land-da-workflow.readthedocs.io/en/v3.0.0/">
-Land DA v3.0.0 Users Guide.
+Land DA v3.0.0 Users Guide</a>.
 
 CCPP parameterizations are organized in suites defined by the host models. In
 this release, the Land DA System supports the following suite:\n
