@@ -5,6 +5,7 @@ The Common Community Physics Package (CCPP) provides scientific documentation fo
 - [CCPP Physics V7.0.0 Scientific Documentation](./V7/)
 - [CCPP Physics UFS Hierarchical System Development (HSD) Scientific Documentation](./HSD/)
 - [CCPP Physics SRW v3.0.0 Scientific Documentation](./SRWv3/)
+- [CCPP Physics UFS Land Data Assimilation System Scientific Documentation](./LandDA/)
 - [CCPP Physics Global Workflow v1.0.0 Scientific Documentation](./GWv1/)
 
 For more information about the CCPP including Release Information, Technical Documentation, and Code, please visit the 

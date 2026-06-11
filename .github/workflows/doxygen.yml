@@ -3,6 +3,7 @@ name: Doxygen GitHub Pages Deploy Action
 on:
   push:
     branches:
+      - main
       - scidocs_gw
   workflow_dispatch:
 
@@ -71,6 +72,13 @@ jobs:
         doxygen ccppgw_doxyfile
         mkdir -p $GITHUB_WORKSPACE/physics/docs/html/GWv1
         mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/GWv1
+
+    - name: Build Land DA docs
+      run: |
+        cd scm_repo/ccpp/physics/physics/docs
+        doxygen ccpplandda_doxyfile
+        mkdir -p $GITHUB_WORKSPACE/physics/docs/html/LandDA
+        mv doc/html/* $GITHUB_WORKSPACE/physics/docs/html/LandDA
 
     - name: Switch to v7 tag
       run: |
