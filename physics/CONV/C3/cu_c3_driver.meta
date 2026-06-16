@@ -288,6 +288,7 @@
   units = none
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [phil]
   standard_name = geopotential
