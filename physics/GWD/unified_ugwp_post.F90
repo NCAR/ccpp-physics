@@ -12,7 +12,7 @@ contains
 !!
      subroutine unified_ugwp_post_run (ldiag3d, ldiag_ugwp,         &
          dtf, im, levs,                                             &
-         gw_dtdt, gw_dudt, gw_dvdt, tau_tofd, tau_mtb, tau_ogw,     &
+         gw_dudt, gw_dvdt, tau_tofd, tau_mtb, tau_ogw,              &
          tau_ngw, zmtb, zlwb, zogw, dudt_mtb, dudt_ogw, dvdt_ogw,   &
          dudt_tms, tot_zmtb, tot_zlwb, tot_zogw,                    &
          tot_tofd, tot_mtb, tot_ogw, tot_ngw,                       &
@@ -25,7 +25,7 @@ contains
          du_oblcol, dv_oblcol, du_osscol, dv_osscol, du_ofdcol,     &
          dv_ofdcol, du3_ogwcol, dv3_ogwcol, du3_oblcol, dv3_oblcol, &
          du3_osscol, dv3_osscol, du3_ofdcol, dv3_ofdcol,            & 
-         dtdt, dudt, dvdt, errmsg, errflg)
+         errmsg, errflg)
 
         use machine,                only: kind_phys
 
@@ -41,7 +41,7 @@ contains
         real(kind=kind_phys), intent(in),    dimension(:)   :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_zmtb, tot_zlwb, tot_zogw
-        real(kind=kind_phys), intent(in),    dimension(:,:) :: gw_dtdt, gw_dudt, gw_dvdt, dudt_mtb
+        real(kind=kind_phys), intent(in),    dimension(:,:) :: gw_dudt, gw_dvdt, dudt_mtb
         real(kind=kind_phys), intent(in),    dimension(:,:), optional :: dudt_ogw, dvdt_ogw
         real(kind=kind_phys), intent(in),    dimension(:,:) :: dudt_tms
         real(kind=kind_phys), intent(inout), dimension(:,:), optional :: du3dt_mtb, du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw
@@ -60,7 +60,6 @@ contains
         real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_oblcol, dv3_oblcol
         real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_osscol, dv3_osscol
         real(kind=kind_phys), intent(inout), dimension(:), optional   :: du3_ofdcol, dv3_ofdcol
-        real(kind=kind_phys), intent(inout), dimension(:,:) :: dtdt, dudt, dvdt
 
         character(len=*),        intent(out) :: errmsg
         integer,                 intent(out) :: errflg
@@ -106,10 +105,6 @@ contains
           ldv3dt_ngw = ldv3dt_ngw + dtf *dvdt_ngw
           ldt3dt_ngw = ldt3dt_ngw + dtf *dtdt_ngw
         end if
-
-        dtdt = dtdt + gw_dtdt
-        dudt = dudt + gw_dudt
-        dvdt = dvdt + gw_dvdt
 
       end subroutine unified_ugwp_post_run
 

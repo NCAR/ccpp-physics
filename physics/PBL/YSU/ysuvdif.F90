@@ -38,7 +38,6 @@
 !!
 !-------------------------------------------------------------------------------
    subroutine ysuvdif_run(im,km,ux,vx,tx,qx,p2d,p2di,pi2d,karman,              &
-                    utnp,vtnp,ttnp,qtnp,                                       &
                     swh,hlw,xmu,ntrac,ndiff,ntcw,ntiw,                         &
                     phii,phil,psfcpa,                                          &
                     zorl,stress,hpbl,psim,psih,                                &
@@ -48,7 +47,7 @@
                     dt,kpbl1d,u10,v10,lssav,ldiag3d,qdiag3d,                   &
                     flag_for_pbl_generic_tend,ntoz,ntqv,dtend,dtidx,           &
                     index_of_temperature,index_of_x_wind,index_of_y_wind,      &
-                    index_of_process_pbl,errmsg,errflg   )
+                    index_of_process_pbl,ten_t,ten_u,ten_v,ten_q,errmsg,errflg)
 
    use machine , only : kind_phys
 !
@@ -97,10 +96,6 @@
 !----------------------------------------------------------------------------------
 ! input/output variables
 !
-   real(kind=kind_phys),     dimension( :,: )                                   , &
-             intent(inout)   ::                                utnp,vtnp,ttnp
-   real(kind=kind_phys),     dimension( :,:,: )                              , &
-             intent(inout)   ::                                          qtnp
    real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
    integer, intent(in) :: dtidx(:,:), ntqv, index_of_temperature,                  &
         index_of_x_wind, index_of_y_wind, index_of_process_pbl
@@ -112,7 +107,8 @@
              intent(out)   ::                                            hpbl
    real(kind=kind_phys),    dimension( : ),                                    &
               intent(out)  :: dusfc,dvsfc, dtsfc,dqsfc
-
+   real(kind=kind_phys), dimension(:,:), intent(out) :: ten_t, ten_u, ten_v
+   real(kind=kind_phys), dimension(:,:,:), intent(out) :: ten_q
    ! error messages
    character(len=*), intent(out)    ::                                 errmsg
    integer,          intent(out)    ::                                 errflg
@@ -186,7 +182,7 @@
    real(kind=kind_phys)    ::  dt2,rdt,spdk2,fm,fh,hol1,gamfac,vpert,prnum,prnum0
    real(kind=kind_phys)    ::  ss,ri,qmean,tmean,alph,chi,zk,rl2,dk,sri
    real(kind=kind_phys)    ::  brint,dtodsd,dtodsu,rdz,dsdzt,dsdzq,dsdz2,rlamdz
-   real(kind=kind_phys)    ::  utend,vtend,ttend,qtend
+   real(kind=kind_phys)    ::  qtend
    real(kind=kind_phys)    ::  dtstep,govrthv
    real(kind=kind_phys)    ::  cont, conq, conw, conwrc, rovcp
 !
@@ -863,15 +859,14 @@
 !
    do k = km,1,-1
      do i = 1,im
-       ttend = (f1(i,k)-thx(i,k)+300.)*rdt*pi2d(i,k)
-       ttnp(i,k) = ttnp(i,k)+ttend
-       dtsfc(i) = dtsfc(i)+ttend*cont*del(i,k)
+       ten_t(i,k) = (f1(i,k)-thx(i,k)+300.)*rdt*pi2d(i,k)
+       dtsfc(i) = dtsfc(i)+ten_t(i,k)*cont*del(i,k)
      enddo
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
      idtend = dtidx(index_of_temperature,index_of_process_pbl)
      if(idtend>=1) then
-       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f1-thx+300.)*rdt*pi2d
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*ten_t(i,k)
      endif
    endif
 !
@@ -975,17 +970,17 @@
 !
 !     recover tendencies of heat and moisture
 !
+   ten_q(:,:,:) = 0.0
    do k = km,1,-1
      do i = 1,im
-       qtend = (f3(i,k,1)-qx(i,k,1))*rdt
-       qtnp(i,k,1) = qtnp(i,k,1)+qtend
-       dqsfc(i) = dqsfc(i)+qtend*conq*del(i,k)
+       ten_q(i,k,ntqv) = (f3(i,k,ntqv)-qx(i,k,ntqv))*rdt
+       dqsfc(i) = dqsfc(i)+ten_q(i,k,ntqv)*conq*del(i,k)
      enddo
    enddo
    if(lssav .and. ldiag3d .and. qdiag3d .and. .not. flag_for_pbl_generic_tend) then
      idtend = dtidx(ntqv+100,index_of_process_pbl)
      if(idtend>=1) then
-       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f3(:,:,1)-qx(:,:,1))*rdt
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*ten_q(i,k,ntqv)
      endif
    endif
 !
@@ -993,8 +988,7 @@
      do ic = 2,ndiff
        do k = km,1,-1
          do i = 1,im
-           qtend = (f3(i,k,ic)-qx(i,k,ic))*rdt
-           qtnp(i,k,ic) = qtnp(i,k,ic)+qtend
+           ten_q(i,k,ic) = (f3(i,k,ic)-qx(i,k,ic))*rdt
          enddo
        enddo
      enddo
@@ -1002,7 +996,7 @@
   &               .not. flag_for_pbl_generic_tend) then
        idtend = dtidx(100+ntoz,index_of_process_pbl)
        if(idtend>=1) then
-         dtend(:,:,idtend) = dtend(:,:,idtend) + f3(:,:,ntoz)-qx(:,:,ntoz)
+         dtend(:,:,idtend) = dtend(:,:,idtend) + ten_q(i,k,ntoz)*dtstep
        endif
      endif
    endif
@@ -1078,23 +1072,21 @@
 !
    do k = km,1,-1
      do i = 1,im
-       utend = (f1(i,k)-ux(i,k))*rdt
-       vtend = (f2(i,k)-vx(i,k))*rdt
-       utnp(i,k) = utnp(i,k)+utend
-       vtnp(i,k) = vtnp(i,k)+vtend
-       dusfc(i) = dusfc(i) + utend*conwrc*del(i,k)
-       dvsfc(i) = dvsfc(i) + vtend*conwrc*del(i,k)
+       ten_u(i,k) = (f1(i,k)-ux(i,k))*rdt
+       ten_v(i,k) = (f2(i,k)-vx(i,k))*rdt
+       dusfc(i) = dusfc(i) + ten_u(i,k)*conwrc*del(i,k)
+       dvsfc(i) = dvsfc(i) + ten_v(i,k)*conwrc*del(i,k)
      enddo
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
      idtend = dtidx(index_of_x_wind,index_of_process_pbl)
      if(idtend>=1) then
-       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f1-ux)*rdt
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*ten_u(i,k)
      endif
 
      idtend = dtidx(index_of_y_wind,index_of_process_pbl)
      if(idtend>=1) then
-       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f2-vx)*rdt
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*ten_v(i,k)
      endif
    endif
 !
