@@ -105,7 +105,7 @@
  near the surface in GFSv16 (Han et al. 2021 \cite han_2021)
 
 
-\sa NCEP Office Note 505 \cite https://doi.org/10.25923/cybh-w893 and 506 \cite https://doi.org/10.25923/5051-3r70 
+\sa NCEP Office Note 505 \cite han_2021 and 506 \cite https://doi.org/10.25923/5051-3r70 
 \section intra_deep  Intraphysics Communication
 \ref arg_table_samfdeepcnv_run
 

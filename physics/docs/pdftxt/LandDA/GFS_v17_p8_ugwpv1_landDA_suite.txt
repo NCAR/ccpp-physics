@@ -12,7 +12,7 @@ the GFS v17, and is expected to evolve before the operational implementation. Th
 
 The GFS_v17 suite uses the parameterizations in the following order:
 - \subpage GFS_RRTMG_page
-- \subpage GFS_SFCLYR
+- \subpage GFS_v17_SFCLYR
 - \subpage GFS_NSST
 - \subpage NoahMP
 - \subpage GFS_SFCSICE
