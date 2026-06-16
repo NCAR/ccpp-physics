@@ -992,7 +992,7 @@ INPUT                  = pdftxt/HSD/HSD_overview.txt \
                          pdftxt/suite_input.nml.txt \
                          pdftxt/acronyms.txt   \
                          pdftxt/GFS_RRTMG.txt \
-                         pdftxt/GFS_SFCLYR.txt \
+                         pdftxt/GFS_v17_SFCLYR.txt \
                          pdftxt/GFS_NSST.txt \
                          pdftxt/GFS_OCEAN.txt \
                          pdftxt/NOAH_LSM.txt \

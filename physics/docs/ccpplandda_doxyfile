@@ -987,7 +987,7 @@ WARN_LOGFILE           =
 INPUT                  = pdftxt/LandDA/LandDA_overview.txt \
                          pdftxt/LandDA/GFS_v17_p8_ugwpv1_landDA_suite.txt \
                          pdftxt/GFS_RRTMG.txt \
-                         pdftxt/GFS_SFCLYR.txt \
+                         pdftxt/GFS_v17_SFCLYR.txt \
                          pdftxt/GFS_NSST.txt \
                          pdftxt/NOAHMP_LSM.txt \
                          pdftxt/GFS_SFCSICE.txt \
