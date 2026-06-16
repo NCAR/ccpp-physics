@@ -1,32 +1,33 @@
 /**
 \page GFS_OZPHYS Ozone Photochemistry (2015) Scheme
 \section des_ozone  Description
- In recent years, the leading NWP centers have extended the vertical range of their NWP and DA systems
- from the surface up through the stratosphere (~10-50 km altitude) and lower mesosphere (~50-65 km). Some
- have also added stratospheric ozone (\f$O_3\f$) as a prognostic trace constituent to their models. Examples
- include the Integrated Forecast System (IFS) of the European Centre for Medium Range Weather Forecasts (ECMWF)
-(Untch et al.(1999) \cite untch_et_al_1999; Dethof and holm (2004) \cite dethof_and_holm_2004), and the NCEP GFS (NCEP 2003). The addition
- of stratospheric ozone as a prognostic variable is expected to improve overall forecast and analyses skill of other fields,
- such as temperature and wind. The primary reasons for this are:
+ In recent years, the leading NWP centers have extended the vertical range of their NWP and DA systems from the
+ surface up through the stratosphere (~10-50 km altitude) and lower mesosphere (~50-65 km). Some have also added
+ stratospheric ozone (\f$O_3\f$) as a prognostic trace constituent to their models. Examples include the Integrated
+ Forecast System (IFS) of the European Centre for Medium Range Weather Forecasts (ECMWF) (Untch et al.(1999) \cite
+ untch_et_al_1999; Dethof and holm (2004) \cite dethof_and_holm_2004), and the NCEP GFS (NCEP 2003). The addition
+ of stratospheric ozone as a prognostic variable is expected to improve overall forecast and analyses skill of other
+ fields, such as temperature and wind. The primary reasons for this are:
  - more accurate assimilation of satellite radiances from channels that are sensitive to ozone 
   (Derber and Wu (1998) \cite derber_and_wu_1998; John and Buehler (2004) \cite john_and_buehler_2004);
- - utilization of correlations between ozone and wind to improve wind analyses in the upper troposphere and lower stratosphere
-(UTLS) (e.g. Riishojgaard (1996) \cite riishojgaard_1996); 
- - more accurate radiative heating rates, and hence temperatures arising from using analysed ozone rather than climatological
-ozone in the forecast model radiation sheme (often referred to as "ozone/radiation interaction") (Jackson and Saunders (2002) \cite jackson_and_saunders_2002); 
+ - utilization of correlations between ozone and wind to improve wind analyses in the upper troposphere and lower
+   stratosphere (UTLS) (e.g. Riishojgaard (1996) \cite riishojgaard_1996); 
+ - more accurate radiative heating rates, and hence temperatures arising from using analysed ozone rather than
+   climatological ozone in the forecast model radiation sheme (often referred to as "ozone/radiation interaction")
+   (Jackson and Saunders (2002) \cite jackson_and_saunders_2002); 
  - more accurate analyses and forecasts of surface ultraviolet (UV) radiation.
  
- With the extension of NWP/DA systems into the upper stratosphere, assimilation and advection alone cannot yield accurate ozone
- forecasts - photochemical effects must also be included. Due to the complexity of ozone photochemistry, it is not currently
- feasible to implement full ozone photochemistry within a high-resolution operational global NWP system. Instead, 
- the operational GFS currently parameterizes photochemical production and destruction based on 
- monthly mean coefficients provided by Naval Research Laboratory CHEM2D chemistry model through an ozone photochemistry parameterization (OPP),
- known as CHEM2D-OPP (Mccormack et al.(2006) \cite mccormack_et_al_2006). CHEM2D is a global model extending from the surface to ~120 km
- that solves 280 chemical reactions for 100 different species within a transformed Eulerian mean framework with fully interactive 
- raditative heating and dynamics. CHEM2D-OPP consists of four coefficients describing
- the residual ozone photochemical tendency as the difference between the production and loss rates \f$(P-L)\f$
- and its sensitivity to local changes in ozone mixing ratio \f$r\f$, temperature \f$T\f$, and overhead ozone column 
- amount \f$\Sigma\f$ (see Figs. 1, 2, 5, and 6 in Mccormack et al.(2006) \cite mccormack_et_al_2006). 
+ With the extension of NWP/DA systems into the upper stratosphere, assimilation and advection alone cannot yield
+ accurate ozone forecasts - photochemical effects must also be included. Due to the complexity of ozone photochemistry,
+ it is not currently feasible to implement full ozone photochemistry within a high-resolution operational global NWP
+ system. Instead, the operational GFS currently parameterizes photochemical production and destruction based on monthly
+ mean coefficients provided by Naval Research Laboratory CHEM2D chemistry model through an ozone photochemistry
+ parameterization (OPP), known as CHEM2D-OPP (Mccormack et al.(2006) \cite mccormack_et_al_2006). CHEM2D is a global
+ model extending from the surface to ~120 km that solves 280 chemical reactions for 100 different species within a
+ transformed Eulerian mean framework with fully interactive raditative heating and dynamics. CHEM2D-OPP consists of
+ four coefficients describing the residual ozone photochemical tendency as the difference between the production and
+ loss rates \f$(P-L)\f$ and its sensitivity to local changes in ozone mixing ratio \f$r\f$, temperature \f$T\f$, and
+ overhead ozone column amount \f$\Sigma\f$ (see Figs. 1, 2, 5, and 6 in Mccormack et al.(2006) \cite mccormack_et_al_2006). 
  The local time rate of change of ozone mixing ratio due to photochemistry is then:
  \f[
   \frac{\partial r}{\partial t}=(P-L)\left[r,T,\Sigma\right]            
@@ -37,7 +38,8 @@ ozone in the forecast model radiation sheme (often referred to as "ozone/radiati
  defining it about some reference state \f$r_0\f$,\f$T_0\f$,\f$\Sigma_0\f$, then expanding it about this reference state
  using a first-order Taylor series expansion.
  \f[
- \frac{\partial r(\lambda,\phi,p,t)}{\partial t}=(P-L)_0+\frac{\partial (P-L)}{\partial r}\bracevert_0(r-r_0)+\frac{\partial (P-L)}{\partial T}\bracevert_0(T-T_0)+\frac{\partial (P-L)}{\partial \Sigma}\bracevert_0(\Sigma-\Sigma_{0})           
+ \frac{\partial r(\lambda,\phi,p,t)}{\partial t}=(P-L)_0+\frac{\partial (P-L)}{\partial r}\bracevert_0(r-r_0)+\frac{\partial
+  (P-L)}{\partial T}\bracevert_0(T-T_0)+\frac{\partial (P-L)}{\partial \Sigma}\bracevert_0(\Sigma-\Sigma_{0})           
  \f]
  where \f$\lambda\f$ represents longtitude, \f$\phi\f$ represents latitude, and \f$p\f$ represents pressure as the model 
  vertical coordinate. The subscript "0" attached to \f$(P-L)\f$ and its partial derivatives refers to their values
@@ -46,12 +48,28 @@ ozone in the forecast model radiation sheme (often referred to as "ozone/radiati
  three terms on the right) are computed from odd oxygen (\f$O_X\equiv O_3+O\f$) reaction rates in the CHEM2D photochemical 
  transport model. These coefficients are then stored in tabular 
  form as functions of latitude, pressure, and month, with suitable linear interpolation to the desired location. 
-The ozone photochemistry scheme has been upgraded recently through latest coefficients and adding two more terms that 
-depend on the temperature and column ozone climatology
-(\c global_o3prdlos.f77 is replaced by \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77 in ozphys_2015_run).
+ The ozone photochemistry scheme has been upgraded recently through latest coefficients and adding two more terms that 
+ depend on the temperature and column ozone climatology
+ (\c global_o3prdlos.f77 is replaced by \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77 in ozphys_2015_run).
 
+\section intra_ozphys Intraphysics Communication
+- \ref arg_table_ty_ozphys
 
 \section gen_ozone  General Algorithm
+ The 2015 implementation of this parameterization within the module \c run_03prog_2015 relies on six mean monthly coefficients.
+ Specifically, for the NRL parameterization, climatological T and O2 are stored in locations 5 and 6 of the coefficient array.
+ The implementation relies on the scheme being initialized correctly by invoking the \c load(), \c setup(), and \c update()
+ procedures prior to calling the \c run() procedure.
+ - load_o3prog() - Read data and load it into type ty_ozphys (called once by the host model)
+ - setup_o3prog() - Create spatial interpolation indices (called once after the model grid is known)
+ - update_o3prog() - Update ozone concentration in time (called within the physics loop before run()). Because radiation is
+   often run at a lower temporal resolution than the rest of the physics, \c update_o3prog() must be called before the radiation,
+   which is called before the physics. For example, within the physics loop: update_o3prog() -> radiation() -> run_o3prog()
+   -> physics.
+ Additionally, there is functionality to disable interactive ozone, instead reverting to ozone climatology. In this case,
+ analagous to the prognostic ozone, there are \c update() and \c run() procedures that must be called before the radiation. For
+ example, within the physics loop: update_o3clim() -> run_o3clim() -> radiation() -> physics.
+
 - module_ozphys::run_o3prog_2015()
 
 
