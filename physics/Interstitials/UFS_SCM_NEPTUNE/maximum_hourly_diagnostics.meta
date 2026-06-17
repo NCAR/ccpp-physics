@@ -229,7 +229,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [pratemax]
   standard_name = maximum_precipitation_rate_over_maximum_hourly_time_interval
   long_name = maximum precipitation rate over maximum hourly time interval

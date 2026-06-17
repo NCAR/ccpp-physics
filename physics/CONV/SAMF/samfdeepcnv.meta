@@ -564,6 +564,7 @@
   units = none
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [maxMF]
   standard_name = maximum_mass_flux
