@@ -600,7 +600,7 @@
         end do
       end do
 
-      if (imp_physics == imp_physics_mg) then ! 
+      if (imp_physics == imp_physics_mg) then !
                   ! unified cloud and/or with MG microphysics
 
         if (uni_cld .and. ncndl >= 2) then
@@ -1271,7 +1271,7 @@
           do k = 1, NLAY-1
           do i = 1, IX
              cldtot(i,k) = cld_frac_XuRandall(plyr(i,k), qstl(i,k),     &    
-     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.) 
+     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.)
           end do
           end do
         else
@@ -1280,7 +1280,7 @@
           do k = 1, NLAY-1
           do i = 1, IX
              cldtot(i,k) = cld_frac_XuRandall(plyr(i,k), qstl(i,k),     &    
-     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.) 
+     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.)
           end do
           end do
         endif
@@ -1586,7 +1586,7 @@
           do k = 1, NLAY-1
           do i = 1, IX
              cldtot(i,k) = cld_frac_XuRandall(plyr(i,k), qstl(i,k),     &    
-     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.) 
+     &           rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.)
           end do
           end do
         else
@@ -1597,7 +1597,7 @@
           do i = 1, IX
              cldtot(i,k) = cld_frac_XuRandall(plyr(i,k), qstl(i,k),     &    
      &          rhly(i,k), clwf(i,k), xrc3, xr_exp, 0.,                 &
-     &          cond_cfrac_onRH) 
+     &          cond_cfrac_onRH)
           end do
           end do
         endif
@@ -3152,7 +3152,7 @@
 
 !        ! Parameters
 !        real(kind_phys) :: &
-!           lambda = 0.50  ! , & 
+!           lambda = 0.50  ! , &
 !           P      = 0.25
 
         clwt = 1.0e-6 * (p_lay*0.001)
