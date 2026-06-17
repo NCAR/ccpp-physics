@@ -744,20 +744,18 @@ contains
         do k=kts,ktf
           if(zo_cup(i,k).gt.zkbmax+z1(i))then
             kbmax(i)=k
-            go to 25
+            exit
           endif
         enddo
- 25     continue
 !
 !> - Compute the level where detrainment for downdraft starts (\p kdet)
 !
         do k=kts,ktf
           if(zo_cup(i,k).gt.z_detr+z1(i))then
             kdet(i)=k
-            go to 26
+            exit
           endif
         enddo
- 26     continue
 !
         endif
       enddo
@@ -770,7 +768,7 @@ contains
 !
       start_k22=2
 !$acc parallel loop
-       do 36 i=its,itf
+       do i=its,itf
          if(ierr(i).eq.0)then
             k22(i)=maxloc(heo_cup(i,start_k22:kbmax(i)+2),1)+start_k22-1
             if(k22(i).ge.kbmax(i))then
@@ -783,7 +781,7 @@ contains
              kbcon(i)=0
            endif
          endif
- 36   continue
+       end do
 !$acc end parallel
 
 !
@@ -1013,7 +1011,7 @@ contains
 !$acc end parallel
 
 !$acc kernels
-      do 37 i=its,itf
+      do i=its,itf
          kzdown(i)=0
          if(ierr(i).eq.0)then
             zktop=(zo_cup(i,ktop(i))-z1(i))*.6
@@ -1024,11 +1022,11 @@ contains
               if(zo_cup(i,k).gt.zktop)then
                  kzdown(i)=k
                  kzdown(i)=min(kzdown(i),kstabi(i)-1)  !
-                 go to 37
+                 exit
               endif
               enddo
          endif
- 37   continue
+      end do
 !$acc end kernels
 
 !
@@ -2670,8 +2668,8 @@ contains
         edtc(i,1)=0.
        enddo
        do kk = kts,ktf-1
-         do 62 i=its,itf
-          if(ierr(i).ne.0)go to 62
+         do i=its,itf
+          if(ierr(i).ne.0) cycle
           if (kk .le. min0(ktop(i),ktf) .and. kk .ge. kbcon(i)) then
              vws(i) = vws(i)+                                        &
               (abs((us(i,kk+1)-us(i,kk))/(z(i,kk+1)-z(i,kk)))        &
@@ -2680,7 +2678,7 @@ contains
             sdp(i) = sdp(i) + p(i,kk) - p(i,kk+1)
           endif
           if (kk .eq. ktf-1)vshear(i) = 1.e3 * vws(i) / sdp(i)
-   62   continue
+         end do
        end do
       do i=its,itf
          if(ierr(i).eq.0)then
@@ -3632,13 +3630,13 @@ endif
 !$acc end kernels
 
 !$acc parallel loop
-       do 27 i=its,itf
+      do i=its,itf
       kbcon(i)=1
 !
 ! reset iloop for mid level convection
       if(cap_max(i).gt.200 .and. imid.eq.1)iloop(i)=5
 !
-      if(ierr(i).ne.0)go to 27
+      if(ierr(i).ne.0) cycle
       start_level(i)=k22(i)
       kbcon(i)=k22(i)+1
       if(iloop(i).eq.5)kbcon(i)=k22(i)
@@ -3654,70 +3652,73 @@ endif
         enddo
        !==
 
-      go to 32
- 31   continue
-      kbcon(i)=kbcon(i)+1
-      if(kbcon(i).gt.kbmax(i)+2)then
-         if(iloop(i).ne.4)then
-                ierr(i)=3
-#ifndef _OPENACC
-                ierrc(i)="could not find reasonable kbcon in cup_kbcon"
-#endif
-         endif
-        go to 27
-      endif
- 32   continue
-      hetest=hcot(i,kbcon(i)) !hkb(i) ! he_cup(i,k22(i))
-      if(hetest.lt.hes_cup(i,kbcon(i)))then
-        go to 31
-      endif
+       find_kbcon_loop: do
 
-!     cloud base pressure and max moist static energy pressure
-!     i.e., the depth (in mb) of the layer of negative buoyancy
-      if(kbcon(i)-k22(i).eq.1)go to 27
-      if(iloop(i).eq.5 .and. (kbcon(i)-k22(i)).le.2)go to 27
-      pbcdif=-p_cup(i,kbcon(i))+p_cup(i,k22(i))
-      plus=max(25.,cap_max(i)-float(iloop(i)-1)*cap_inc(i))
-      if(iloop(i).eq.4)plus=cap_max(i)
+        hetest=hcot(i,kbcon(i)) !hkb(i) ! he_cup(i,k22(i))
+        if(hetest.lt.hes_cup(i,kbcon(i)))then
+          kbcon(i)=kbcon(i)+1
+          if(kbcon(i).gt.kbmax(i)+2)then
+             if(iloop(i).ne.4)then
+                    ierr(i)=3
+#ifndef _OPENACC
+                    ierrc(i)="could not find reasonable kbcon in cup_kbcon"
+#endif
+             endif
+             exit find_kbcon_loop
+          endif
+          cycle find_kbcon_loop
+        endif
+
+!      cloud base pressure and max moist static energy pressure
+!      i.e., the depth (in mb) of the layer of negative buoyancy
+        if(kbcon(i)-k22(i).eq.1) exit find_kbcon_loop
+        if(iloop(i).eq.5 .and. (kbcon(i)-k22(i)).le.2) exit find_kbcon_loop
+        
+        pbcdif=-p_cup(i,kbcon(i))+p_cup(i,k22(i))
+        plus=max(25.,cap_max(i)-float(iloop(i)-1)*cap_inc(i))
+        if(iloop(i).eq.4)plus=cap_max(i)
 !
 ! for shallow convection, if cap_max is greater than 25, it is the pressure at pbltop
-      if(iloop(i).eq.5)plus=150.
-        if(iloop(i).eq.5.and.cap_max(i).gt.200)pbcdif=-p_cup(i,kbcon(i))+cap_max(i)
-      if(pbcdif.le.plus)then
-        go to 27
-      elseif(pbcdif.gt.plus)then
-        k22(i)=k22(i)+1
-        kbcon(i)=k22(i)+1
-!==     since k22 has be changed, hkb has to be re-calculated
-        x_add = xlv*zqexec(i)+cp*ztexec(i)
-        call get_cloud_bc(kte,he_cup (i,1:kte),hkb (i),k22(i),x_add)
+        if(iloop(i).eq.5)plus=150.
+          if(iloop(i).eq.5.and.cap_max(i).gt.200)pbcdif=-p_cup(i,kbcon(i))+cap_max(i)
+        
+        if(pbcdif.le.plus)then
+          exit find_kbcon_loop
+        elseif(pbcdif.gt.plus)then
+          k22(i)=k22(i)+1
+          kbcon(i)=k22(i)+1
+!==      since k22 has be changed, hkb has to be re-calculated
+          x_add = xlv*zqexec(i)+cp*ztexec(i)
+          call get_cloud_bc(kte,he_cup (i,1:kte),hkb (i),k22(i),x_add)
 
-        start_level(i)=k22(i)
-!        if(iloop_in.eq.5)start_level(i)=kbcon(i)
-        hcot(i,1:start_level(i)) = hkb(i)
+          start_level(i)=k22(i)
+!          if(iloop_in.eq.5)start_level(i)=kbcon(i)
+          hcot(i,1:start_level(i)) = hkb(i)
 !$acc loop seq
-        do k=start_level(i)+1,kbmax(i)+3
-           dz=z_cup(i,k)-z_cup(i,k-1)
+          do k=start_level(i)+1,kbmax(i)+3
+             dz=z_cup(i,k)-z_cup(i,k-1)
 
-           hcot(i,k)= ( (1.-0.5*entr_rate(i)*dz)*hcot(i,k-1)   &
-                         + entr_rate(i)*dz*heo(i,k-1)       )/ &
-                      (1.+0.5*entr_rate(i)*dz)
-        enddo
-       !==
+             hcot(i,k)= ( (1.-0.5*entr_rate(i)*dz)*hcot(i,k-1)   &
+                           + entr_rate(i)*dz*heo(i,k-1)        )/ &
+                        (1.+0.5*entr_rate(i)*dz)
+          enddo
+          !==
 
-        if(iloop(i).eq.5)kbcon(i)=k22(i)
-        if(kbcon(i).gt.kbmax(i)+2)then
-            if(iloop(i).ne.4)then
-                ierr(i)=3
+          if(iloop(i).eq.5)kbcon(i)=k22(i)
+          if(kbcon(i).gt.kbmax(i)+2)then
+              if(iloop(i).ne.4)then
+                  ierr(i)=3
 #ifndef _OPENACC
-                ierrc(i)="could not find reasonable kbcon in cup_kbcon"
+                  ierrc(i)="could not find reasonable kbcon in cup_kbcon"
 #endif
-            endif
-            go to 27
+              endif
+              exit find_kbcon_loop
+          endif
+          cycle find_kbcon_loop
         endif
-        go to 32
-      endif
- 27   continue
+      end do find_kbcon_loop
+
+      end do
  !$acc end parallel
 
    end subroutine cup_kbcon
@@ -3946,7 +3947,7 @@ endif
         ,intent (in  )                   ::                                   &
         dt
      real(kind=kind_phys) :: names,scalef,thresh,qmem,qmemf,qmem2,qtest,qmem1
-     integer :: icheck
+     integer :: icheck, i, k
 !
 ! first do check on vertical heating rate
 !
@@ -4815,17 +4816,18 @@ endif
         enddo
         ktopdby(i)=maxloc(dby(:),1)
         kklev=maxloc(dbm(:),1)
+
+        kfinalzu=ktf-2
+        ktop(i)=kfinalzu
 !$acc loop seq
         do k=maxloc(dby(:),1)+1,ktf-2
           if(dby(k).lt.dbythresh*maxval(dby))then
               kfinalzu=k  - 1
               ktop(i)=kfinalzu
-              go to 412
+              exit
           endif
         enddo
-        kfinalzu=ktf-2
-        ktop(i)=kfinalzu
-412     continue
+
         ktop(i)=ktopdby(i) ! HCB
         kklev=min(kklev+3,ktop(i)-2)
 !
@@ -5774,10 +5776,9 @@ endif
               kfinalzu = k - 1
               ktop(i)  = kfinalzu
               !print*,'hco4=',k,kfinalzu,ktop(i),kbcon(i)+1;call flush(6)
-              go to 412
+              exit
           endif
         enddo
-        412    continue
        else
          do k=start_level(i)+1,ktf-2
           !~ print*,'hco31=',k,dby(k),dbythresh*maxval(dby)
