@@ -135,13 +135,13 @@
           B(I,K)  = DTAUX * dti
           C(I,K)  = max((ENG0-ENG1),0.0) * hfbcpdt
           IF(vidx>=1) THEN
-            dtend(i,k,vidx) = dtend(i,k,vidx) + A*dt
+            dtend(i,k,vidx) = dtend(i,k,vidx) + A(i,k)*dt
           ENDIF
           IF(uidx>=1) THEN
-            dtend(i,k,uidx) = dtend(i,k,uidx) + B*dt
+            dtend(i,k,uidx) = dtend(i,k,uidx) + B(i,k)*dt
           ENDIF
           IF(tidx>=1) THEN
-            dtend(i,k,tidx) = dtend(i,k,tidx) + C*dt
+            dtend(i,k,tidx) = dtend(i,k,tidx) + C(i,k)*dt
           ENDIF
         ENDDO
       ENDDO

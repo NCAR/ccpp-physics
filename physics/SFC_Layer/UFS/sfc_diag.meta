@@ -91,6 +91,7 @@
   units = none
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [zf]
   standard_name = height_above_ground_at_lowest_model_layer
