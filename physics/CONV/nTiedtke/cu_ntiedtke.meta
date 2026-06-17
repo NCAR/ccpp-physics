@@ -70,39 +70,46 @@
   name = cu_ntiedtke_run
   type = scheme
 [pu]
-  standard_name = x_wind_of_new_state
-  long_name = updated x-direction wind
+  standard_name = x_wind
+  long_name = x-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [pv]
-  standard_name = y_wind_of_new_state
-  long_name = updated y-direction wind
+  standard_name = y_wind
+  long_name = y-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [pt]
-  standard_name = air_temperature_of_new_state
-  long_name = updated temperature
+  standard_name = air_temperature
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [pqv]
-  standard_name = specific_humidity_of_new_state
+  standard_name = specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
+[ntqv]
+  standard_name = index_of_specific_humidity_in_tracer_concentration_array
+  long_name = tracer index for water vapor (specific humidity)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [tdi]
-  standard_name = air_temperature
+  standard_name = physics_timestep_initial_air_temperature
   long_name = mid-layer temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -110,7 +117,7 @@
   kind = kind_phys
   intent = in
 [qvdi]
-  standard_name = specific_humidity
+  standard_name = physics_timestep_initial_specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -142,7 +149,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [poz]
   standard_name = geopotential
   long_name = geopotential at model layer centers
@@ -309,6 +316,54 @@
   standard_name = convective_cloud_cover
   long_name = convective cloud cover
   units = frac
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_t]
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_u]
+  standard_name = tendency_of_x_wind
+  long_name = tendency of x wind calculated by one physics scheme
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_v]
+  standard_name = tendency_of_y_wind
+  long_name = tendency of y wind calculated by one physics scheme
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_q]
+  standard_name = tendency_of_tracer_concentration
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
+[dclw_i]
+  standard_name = tendency_of_ice_water_mixing_ratio_convective_transport_tracer
+  long_name = tendency of ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dclw_l]
+  standard_name = tendency_of_cloud_condensed_water_mixing_ratio_convective_transport_tracer
+  long_name = tendency of ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
+  units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys

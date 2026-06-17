@@ -281,6 +281,7 @@ contains
 !
 
       integer l,lice,iwrml,ifrzl
+      logical :: needs_retry
       real(kind=kind_phys)    psfck,tdchk,a,tdkl,tdpre,tlmhk,twrmk,areas8,areap4,       &
               surfw,surfc,dzkl,area1,pintk1,pintk2,pm150,pkl,tkl,qkl
 
@@ -296,7 +297,10 @@ contains
       psfck = pint(lm+1)
 !meb
       tdchk = 2.0
-  760 tcold = t(lm)
+      retry_loop: do while (needs_retry)
+      needs_retry = .false.
+      
+      tcold = t(lm)
       twarm = t(lm)
       licee = lm
 !
@@ -322,8 +326,9 @@ contains
 !
       if (tcold == t(lm) .and. tdchk < 6.0) then
         tdchk = tdchk + 2.0
-        goto 760
+        needs_retry = .true.
       endif
+      end do retry_loop
 !
 !    lowest layer t
 !
@@ -340,7 +345,7 @@ contains
 !             if (izr.lt.1) iwx(i,j)=iwx(i,j)+4
 
             iwx = iwx + 4
-            goto 850
+            karr = 1
         else
 !             turn on the flag for rain = 8
 !             if its not on already
@@ -348,11 +353,9 @@ contains
 !             if (irain.lt.1) iwx(i,j)=iwx(i,j)+8
 
             iwx = iwx + 8
-            goto 850
+            karr = 1
         endif
       endif
-      karr = 1
-  850 continue
 !
 !   compute wet bulb only at points that need it
 !
@@ -639,11 +642,12 @@ contains
       end if
 !
 !     loop downward through sounding from highest precip generating level.
-   30 continue
+      sounding_loop: do
+      process_level: do
 !
       if (icefrac >= 1.0) then  !  starting as all ice
-        if (twq(k1) < twmelt) go to 40       ! cannot commence melting
-        if (twq(k1) == twtop) go to 40        ! both equal twmelt, nothing h
+        if (twq(k1) < twmelt) exit process_level ! cannot commence melting
+        if (twq(k1) == twtop) exit process_level ! both equal twmelt, nothing h
         wgt1  = (twmelt-twq(k1)) / (twtop-twq(k1))
         rhavg = rhq(k1) + wgt1 * (rhtop-rhq(k1)) * 0.5
         dtavg = (twmelt-twq(k1)) * 0.5
@@ -654,7 +658,7 @@ contains
       else if (icefrac <= 0.0) then     !  starting as all liquid
         lll = 1
 !       goto 1020
-        if (twq(k1) > twice) go to 40        ! cannot commence freezing
+        if (twq(k1) > twice) exit process_level ! cannot commence freezing
         if (twq(k1) == twtop) then
             wgt1 = 0.5
         else
@@ -674,7 +678,7 @@ contains
         mye     = emelt * rhavg ** efac
         icefrac = icefrac + dpk * dtavg / mye           
       else                 ! mix where tw curve crosses twmelt in layer
-        if (twq(k1) == twtop) go to 40   ! both equal twmelt, nothing h
+        if (twq(k1) == twtop) exit process_level ! both equal twmelt, nothing h
         wgt1    = (twmelt-twq(k1)) / (twtop-twq(k1))
         wgt2    = 1.0 - wgt1
         rhavg   = rhtop + wgt2 * (rhq(k1)-rhtop) * 0.5
@@ -686,7 +690,7 @@ contains
         icefrac = min(1.0,max(icefrac,0.0))   
         if (icefrac <= 0.0) then
 !           goto 1020
-            if (twq(k1) > twice) go to 40    ! cannot commence freezin
+            if (twq(k1) > twice) exit process_level ! cannot commence freezin
             wgt1 = (twice-twq(k1)) / (twtop-twq(k1))
             dtavg = twmelt - (twq(k1)+twice) * 0.5
         else
@@ -700,18 +704,22 @@ contains
       end if
 !
       icefrac = min(1.0,max(icefrac,0.0))
+      exit process_level
+      end do process_level
 
 !     if (i.eq.1.and.j.eq.1) write (*,*) 'new icefrac:', icefrac, icefrac
 !
 !     get next level down if there is one, loop back.
-   40 continue
+
       if (k1 > 1) then
         twtop = twq(k1)
         ptop  = pq(k1)
         rhtop = rhq(k1)
         k1    = k1 - 1
-        go to 30
+      else
+        exit sounding_loop
       end if
+      end do sounding_loop
 !
 !     determine precip type based on snow fraction and surface wet-bulb.
 !
@@ -1104,6 +1112,7 @@ contains
       real(kind=kind_phys), parameter :: d00=0.0  
       integer karr,licee
       real(kind=kind_phys)    tcold,twarm
+      logical :: needs_retry
 !
       integer l,lmhk,lice,iwrml,ifrzl
       real(kind=kind_phys)    psfck,tdchk,a,tdkl,tdpre,tlmhk,twrmk,areas8,areap4,area1,   &
@@ -1132,7 +1141,11 @@ contains
         psfck = pint(lp1)
 !meb
         tdchk = 2.0
-  760   tcold = t(lmhk)
+        needs_retry = .true.
+
+        retry_loop: do while (needs_retry)
+        needs_retry = .false.
+        tcold = t(lmhk)
         twarm = t(lmhk)
         licee = lmhk
 !
@@ -1159,8 +1172,10 @@ contains
 !
         if (tcold == t(lmhk) .and. tdchk < 6.0) then
           tdchk = tdchk + 2.0
-          goto 760
+          needs_retry = .true.
         endif
+
+        end do retry_loop
 !
 !    lowest layer t
 !
@@ -1176,17 +1191,15 @@ contains
 !           izr=mod(iwx,8)/4
 !           if (izr.lt.1) iwx=iwx+4
             iwx = iwx + 4
-            goto 850
+            karr = 1
         else
 !           turn on the flag for rain = 8 if its not on already
 !           irain=iwx/8
 !           if (irain.lt.1) iwx=iwx+8
             iwx = iwx + 8
-            goto 850
+            karr = 1
         endif
       endif
-      karr = 1
-  850 continue
 !
       if (karr > 0)then
         lmhk = lm

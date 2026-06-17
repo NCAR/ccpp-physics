@@ -41,7 +41,7 @@
 !> \section arg_table_moninshoc_run Argument Table
 !! \htmlinclude moninshoc_run.html
 !!
-      subroutine moninshoc_run (im,km,ntrac,ntcw,ncnd,dv,du,tau,rtg,
+      subroutine moninshoc_run (im,km,ntrac,ntcw,ncnd,rtg,
      &                          u1,v1,t1,q1,tkh,prnum,ntke,
      &                          psk,rbsoil,zorl,u10m,v10m,fm,fh,
      &                          tsea,heat,evap,stress,spd1,kpbl,
@@ -51,7 +51,8 @@
      &                          grav,rd,cp,hvap,fv,ntoz,dtend,dtidx,
      &                          index_of_temperature,index_of_x_wind,
      &                          index_of_y_wind,index_of_process_pbl,
-     &                          gen_tend,ldiag3d,ntqv,errmsg,errflg)
+     &                          gen_tend,ldiag3d,ntqv,ten_t,ten_u,
+     &                          ten_v,errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -74,8 +75,6 @@
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, phii
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: q1
 
-      real(kind=kind_phys), dimension(:,:),   intent(inout) :: du, dv,
-     &  tau
       real(kind=kind_phys), dimension(:,:,:), intent(inout) :: rtg
 
       real(kind=kind_phys), dimension(:,:,:), intent(inout), optional ::&
@@ -91,7 +90,8 @@
      &  dvsfc, dtsfc, dqsfc, hpbl
       real(kind=kind_phys), dimension(:,:),     intent(out) :: prnum
       real(kind=kind_phys), dimension(:,:),     intent(out) :: dkt
-
+      real(kind=kind_phys), dimension(:,:,),    intent(out) :: ten_t, 
+     &  ten_u, ten_v
       character(len=*),                         intent(out) :: errmsg
       integer,                                  intent(out) :: errflg
 !
@@ -115,7 +115,7 @@
 !
       real(kind=kind_phys) dsdz2,  dsdzq,  dsdzt, dsig, dt2, rdt
      &,                    dtodsd, dtodsu, rdz,   tem,  tem1
-     &,                    ttend,  utend, vtend,  qtend
+     &,                    qtend
      &,                    spdk2,  rbint, ri,     zol1, robn, bvf2
 !
       real(kind=kind_phys), parameter ::  one=1.0_kp, zero=0.0_kp
@@ -463,18 +463,17 @@
 !
       do  k = 1,km
         do i = 1,im
-          ttend      = (a1(i,k)-t1(i,k))   * rdt
+          ten_t(i,k)      = (a1(i,k)-t1(i,k))   * rdt
           qtend      = (a2(i,k)-q1(i,k,1)) * rdt
-          tau(i,k)   = tau(i,k)   + ttend
           rtg(i,k,1) = rtg(i,k,1) + qtend
-          dtsfc(i)   = dtsfc(i)   + del(i,k)*ttend
+          dtsfc(i)   = dtsfc(i)   + del(i,k)*ten_t(i,k)
           dqsfc(i)   = dqsfc(i)   + del(i,k)*qtend
         enddo
       enddo
       if(ldiag3d .and. .not. gen_tend) then
         idtend = dtidx(index_of_temperature,index_of_process_pbl)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + (a1-t1)
+          dtend(:,:,idtend) = dtend(:,:,idtend) + ten_t(:,:)*delt
         endif
         idtend = dtidx(ntqv+100,index_of_process_pbl)
         if(idtend>=1) then
@@ -547,23 +546,21 @@
 !
       do k = 1,km
         do i = 1,im
-          utend    = (a1(i,k)-u1(i,k))*rdt
-          vtend    = (a2(i,k)-v1(i,k))*rdt
-          du(i,k)  = du(i,k)  + utend
-          dv(i,k)  = dv(i,k)  + vtend
+          ten_u(i,k)    = (a1(i,k)-u1(i,k))*rdt
+          ten_v(i,k)    = (a2(i,k)-v1(i,k))*rdt
           tem      = del(i,k) * gravi
-          dusfc(i) = dusfc(i) + tem * utend
-          dvsfc(i) = dvsfc(i) + tem * vtend
+          dusfc(i) = dusfc(i) + tem * ten_u(i,k)
+          dvsfc(i) = dvsfc(i) + tem * ten_v(i,k)
         enddo
       enddo
       if (ldiag3d .and. .not. gen_tend) then
         idtend = dtidx(index_of_x_wind,index_of_process_pbl)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + a1-u1
+          dtend(:,:,idtend) = dtend(:,:,idtend) + ten_u(:,:)*delt
         endif
         idtend = dtidx(index_of_y_wind,index_of_process_pbl)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + a1-v1
+          dtend(:,:,idtend) = dtend(:,:,idtend) + ten_v(:,:)*delt
         endif
       endif
 !

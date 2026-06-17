@@ -44,18 +44,26 @@ contains
 !> \section arg_table_GFS_photochemistry_run Argument Table
 !! \htmlinclude GFS_photochemistry_run.html
 !!
-  subroutine GFS_photochemistry_run (dtp, ozphys, oz_phys_2015, oz_phys_2006, con_1ovg,   &
-       prsl, dp, ozpl, h2o_phys, h2ophys, h2opl, h2o0, oz0, gt0, do3_dt_prd, do3_dt_ozmx, &
+! #########################################################################################
+  subroutine GFS_photochemistry_run (dtp, ntqv, ntoz, im, levs, ozphys, oz_phys_2015, oz_phys_2006, con_1ovg,   &
+       prsl, dp, ozpl, h2o_phys, h2ophys, h2opl, gq0, gt0, ten_q, ten_u, ten_v, ten_t, do3_dt_prd, do3_dt_ozmx, &
        do3_dt_temp, do3_dt_ohoz, dqv_dt_prd, dqv_dt_qvmx, errmsg, errflg)
     
     ! Inputs
     real(kind=kind_phys), intent(in) :: &
          dtp,          & ! Model timestep
          con_1ovg        ! Physical constant (1./gravity)
+    integer, intent(in) :: &
+         ntqv,           &! index for specific humidity in the tracer array
+         ntoz,           &! index for ozone in the the tracer array
+         im,             &! horizontal loop extent
+         levs            ! vertical dimension
     real(kind=kind_phys), intent(in), dimension(:,:) :: &
          prsl,         & ! Air pressure (Pa)
          dp,           & ! Pressure thickness (Pa)
          gt0             ! Air temperature (K)
+    real(kind=kind_phys), intent(in), dimension(:,:,:) :: &
+         gq0             ! tracer concentration
     real(kind=kind_phys), intent(in), dimension(:,:,:) :: &
          ozpl,         & ! Ozone data for current model timestep.
          h2opl           ! h2o data for curent model timestep.
@@ -78,28 +86,60 @@ contains
          dqv_dt_qvmx     ! Physics tendency: specific humidity effect
 
     ! Outputs
-    real(kind=kind_phys), intent(inout), dimension(:,:) :: &
-         oz0,          & ! Update ozone concentration.
-         h2o0            ! Updated h2o concentration.
+    real(kind=kind_phys), intent(out), dimension(:,:) :: &
+         ten_u, ten_v, ten_t
+    real(kind=kind_phys), intent(out), dimension(:,:,:) :: &
+         ten_q             ! tendency of tracer concentration
     character(len=*), intent(out) :: &
          errmsg          ! CCPP Error message.
     integer,  intent(out) :: &
          errflg          ! CCPP Error flag.
-
+    
+    ! Locals
+    integer :: i,k
+    real(kind=kind_phys), dimension(im,levs) :: &
+         init_oz0,  oz0,          & ! initial and updated local ozone concentration
+         init_h2o0, h2o0            ! initial and updated local h2o concentration
+    
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-
+    
+    ten_u(:,:) = 0.0_kind_phys
+    ten_v(:,:) = 0.0_kind_phys
+    ten_t(:,:) = 0.0_kind_phys
+    ten_q(:,:,:) = 0.0_kind_phys
     if (oz_phys_2015) then
+       init_oz0  = gq0(:,:,ntoz)
+       oz0 = init_oz0
        call ozphys%run_o3prog_2015(con_1ovg, dtp, prsl, gt0, dp, ozpl, oz0, do3_dt_prd,    &
             do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
+       do i=1, im
+         do k=1, levs
+           ten_q(i,k,ntoz) = (oz0(i,k) - init_oz0(i,k))/dtp
+         end do
+       end do
     endif
     if (oz_phys_2006) then
+       init_oz0  = gq0(:,:,ntoz)
+       oz0 = init_oz0
        call ozphys%run_o3prog_2006(con_1ovg, dtp, prsl, gt0, dp, ozpl, oz0, do3_dt_prd,    &
             do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz)
+       do i=1, im
+         do k=1, levs
+           ten_q(i,k,ntoz) = (oz0(i,k) - init_oz0(i,k))/dtp
+         end do
+       end do
     endif
     if (h2o_phys) then
+       init_h2o0 = gq0(:,:,ntqv)
+       h2o0 = init_h2o0
        call h2ophys%run(dtp, prsl, h2opl, h2o0, dqv_dt_prd, dqv_dt_qvmx)
+       do i=1, im
+         do k=1, levs
+           ten_q(i,k,ntqv) = (h2o0(i,k) - init_h2o0(i,k))/dtp
+         end do
+       end do
     endif
 
   end subroutine GFS_photochemistry_run

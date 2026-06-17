@@ -109,6 +109,7 @@
   units = none
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [con_t0c]
   standard_name = temperature_at_zero_celsius
@@ -279,7 +280,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [qgrs_water_vapor]
   standard_name = specific_humidity
   long_name = water vapor specific humidity
@@ -287,7 +288,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [qgrs_liquid_cloud]
   standard_name = cloud_liquid_water_mixing_ratio
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
@@ -295,7 +296,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [qgrs_ice]
   standard_name = cloud_ice_mixing_ratio
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
@@ -303,7 +304,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [qgrs_snow]
   standard_name = snow_mixing_ratio
   long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates)
@@ -311,7 +312,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [qgrs_cloud_droplet_num_conc]
   standard_name = mass_number_concentration_of_cloud_liquid_water_particles_in_air
   long_name = number concentration of cloud droplets (liquid)
@@ -330,8 +331,8 @@
   kind = kind_phys
   intent = in
 [qgrs_ozone]
-  standard_name = ozone_mixing_ratio
-  long_name = ozone mixing ratio
+  standard_name = ozone_concentration
+  long_name = ozone concentration
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -362,7 +363,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = True
 [prsl]
   standard_name = air_pressure
@@ -752,7 +753,7 @@
 [qke_adv]
   standard_name = turbulent_kinetic_energy
   long_name = turbulent kinetic energy
-  units = J
+  units = J kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
@@ -1027,116 +1028,125 @@
   type = integer
   intent = inout
 [dudt]
-  standard_name = process_split_cumulative_tendency_of_x_wind
-  long_name = updated tendency of the x wind
+  standard_name = tendency_of_x_wind
+  long_name = tendency of x wind calculated by one physics scheme
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [dvdt]
-  standard_name = process_split_cumulative_tendency_of_y_wind
-  long_name = updated tendency of the y wind
+  standard_name = tendency_of_y_wind
+  long_name = tendency of y wind calculated by one physics scheme
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [dtdt]
-  standard_name = process_split_cumulative_tendency_of_air_temperature
-  long_name = updated tendency of the temperature
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
+[dqdt_all]
+  standard_name = tendency_of_tracer_concentration
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
 [dqdt_water_vapor]
-  standard_name = process_split_cumulative_tendency_of_specific_humidity
-  long_name = water vapor specific humidity tendency due to model physics
+  standard_name = tendency_of_specific_humidity
+  long_name = water vapor specific humidity tendency
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [dqdt_liquid_cloud]
-  standard_name = process_split_cumulative_tendency_of_cloud_liquid_water_mixing_ratio
-  long_name = cloud condensed water mixing ratio tendency due to model physics
+  standard_name = tendency_of_cloud_liquid_water_mixing_ratio
+  long_name = cloud condensed water mixing ratio tendency
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [dqdt_ice]
-  standard_name = process_split_cumulative_tendency_of_cloud_ice_mixing_ratio
-  long_name = cloud condensed water mixing ratio tendency due to model physics
+  standard_name = tendency_of_cloud_ice_mixing_ratio
+  long_name = cloud condensed water mixing ratio tendency
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [dqdt_snow]
-  standard_name = process_split_cumulative_tendency_of_snow_mixing_ratio
-  long_name = ratio of mass of snow water tendency to mass of dry air plus vapor (without condensates) due to model physics
+  standard_name = tendency_of_snow_mixing_ratio
+  long_name = tendency of ratio of mass of snow water tendency to mass of dry air plus vapor (without condensates)
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [dqdt_ozone]
-  standard_name = process_split_cumulative_tendency_of_ozone_mixing_ratio
-  long_name = ozone mixing ratio tendency due to model physics
+  standard_name = tendency_of_ozone_concentration
+  long_name = ozone concentration tendency
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
 [dqdt_cloud_droplet_num_conc]
-  standard_name = process_split_cumulative_tendency_of_mass_number_concentration_of_cloud_liquid_water_particles_in_air
-  long_name = number conc. of cloud droplets (liquid) tendency due to model physics
+  standard_name = tendency_of_mass_number_concentration_of_cloud_liquid_water_particles_in_air
+  long_name = number concentration of cloud droplets (liquid) tendency
   units = kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = True
 [dqdt_ice_num_conc]
-  standard_name = process_split_cumulative_tendency_of_mass_number_concentration_of_cloud_ice_water_crystals_in_air
-  long_name = number conc. of ice tendency due to model physics
+  standard_name = tendency_of_mass_number_concentration_of_cloud_ice_water_crystals_in_air
+  long_name = number concentration of ice tendency
   units = kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
+  optional = True
 [dqdt_water_aer_num_conc]
-  standard_name = process_split_cumulative_tendency_of_mass_number_concentration_of_hygroscopic_aerosols
-  long_name = number conc. of water-friendly aerosols tendency due to model physics
+  standard_name = tendency_of_mass_number_concentration_of_hygroscopic_aerosols
+  long_name = number concentration of water-friendly aerosols tendency
   units = kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = True
 [dqdt_ice_aer_num_conc]
-  standard_name = process_split_cumulative_tendency_of_mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols
-  long_name = number conc. of ice-friendly aerosols tendency due to model physics
+  standard_name = tendency_of_mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols
+  long_name = number concentration of ice-friendly aerosols tendency
   units = kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = True
 [dqdt_cccn]
-  standard_name = tendency_of_cloud_condensation_nuclei_number_concentration_due_to_model_physics
-  long_name = number concentration of cloud condensation nuclei tendency due to model physics
+  standard_name = tendency_of_cloud_condensation_nuclei_number_concentration
+  long_name = number concentration of cloud condensation nuclei tendency
   units = kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = True
 [tmf]
   standard_name = tendency_of_vertically_diffused_tracer_concentration
-  long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
+  long_name = tendency of the tracers due to vertical diffusion in PBL scheme
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
   type = real
@@ -1363,6 +1373,7 @@
   units = 1
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [icloud_bl]
   standard_name = control_for_sgs_cloud_radiation_coupling_in_mellor_yamamda_nakanishi_niino_pbl_scheme

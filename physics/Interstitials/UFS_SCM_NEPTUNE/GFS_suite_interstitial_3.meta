@@ -228,23 +228,23 @@
   kind = kind_phys
   intent = in
 [gt0]
-  standard_name = air_temperature_of_new_state
-  long_name = temperature updated by physics
+  standard_name = air_temperature
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
 [gq0]
-  standard_name = tracer_concentration_of_new_state
-  long_name = tracer concentration updated by physics
+  standard_name = tracer_concentration
+  long_name = tracer concentration
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
 [sigmain]
-  standard_name = prognostic_updraft_area_fraction_in_convection
+  standard_name = physics_timestep_initial_updraft_area_fraction
   long_name = convective updraft area fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -253,8 +253,8 @@
   intent = inout
   optional = True
 [sigmaout]
-  standard_name = updraft_area_fraction_updated_by_physics
-  long_name = convective updraft area fraction updated by physics
+  standard_name = updraft_area_fraction
+  long_name = convective updraft area fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -268,20 +268,20 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = True
 [omegain]
-  standard_name = prognostic_updraft_velocity_in_convection
+  standard_name = physics_timestep_initial_updraft_velocity
   long_name = convective updraft velocity
   units = Pa s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = True
 [omegaout]
-  standard_name = updraft_velocity_updated_by_physics
-  long_name = convective updraft velocity updated by physics
+  standard_name = updraft_velocity
+  long_name = convective updraft velocity
   units = Pa s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -298,20 +298,6 @@
 [imp_physics_mg]
   standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[imp_physics_zhao_carr]
-  standard_name = identifier_for_zhao_carr_microphysics_scheme
-  long_name = choice of Zhao-Carr microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[imp_physics_zhao_carr_pdf]
-  standard_name = identifier_for_zhao_carr_pdf_microphysics_scheme
-  long_name = choice of Zhao-Carr microphysics scheme with PDF clouds
   units = flag
   dimensions = ()
   type = integer
@@ -505,64 +491,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[ldiag3d]
-  standard_name = flag_for_diagnostics_3D
-  long_name = flag for 3d diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[qdiag3d]
-  standard_name = flag_for_tracer_diagnostics_3D
-  long_name = flag for 3d tracer diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[index_of_process_conv_trans]
-  standard_name = index_of_convective_transport_process_in_cumulative_change_index
-  long_name = index of convective transport process in second dimension of array cumulative change index
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[save_lnc]
-  standard_name = liquid_cloud_number_concentration_save
-  long_name = liquid cloud number concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[save_inc]
-  standard_name = ice_cloud_number_concentration_save
-  long_name = ice cloud number concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[ntlnc]
-  standard_name = index_of_mass_number_concentration_of_cloud_droplets_in_tracer_concentration_array
-  long_name = tracer index for liquid number concentration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[ntinc]
-  standard_name = index_of_mass_number_concentration_of_cloud_ice_in_tracer_concentration_array
-  long_name = tracer index for ice    number concentration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-[dtidx]
-  standard_name = cumulative_change_of_state_variables_outer_index
-  long_name = index of state-variable and process in last dimension of diagnostic tendencies array AKA cumulative_change_index
-  units = index
-  dimensions = (number_of_tracers_plus_one_hundred,number_of_cumulative_change_processes)
-  type = integer
-  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -90,7 +90,7 @@
      &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
 !The following three variables are for SA-3D-TKE
      &     def_1,def_2,def_3,sa3dtke,dku3d_h,dku3d_e,                   &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,usfco,vsfco,use_oceanuv,           &
+     &     rtg,u1,v1,t1,q1,usfco,vsfco,use_oceanuv,                     &
      &     swh,hlw,xmu,garea,zvfun,sigmaf,                              &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
@@ -101,6 +101,7 @@
      &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           &
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
+     &     ten_t, ten_u, ten_v,                                         &
      &     errmsg,errflg)
 
 !
@@ -129,8 +130,7 @@
       real(kind=kind_phys), optional, intent(in)  :: claie(:), cfch(:), &
      &                     cfrt(:), cclu(:), cpopu(:)
       !----------------------------------------------
-      real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
-     &                     tdt(:,:),    rtg(:,:,:),    tkeh(:,:)
+      real(kind=kind_phys), intent(inout) :: rtg(:,:,:),    tkeh(:,:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(:,:),     v1(:,:),                        &
      &                     usfco(:),    vsfco(:),                       &
@@ -166,9 +166,11 @@
 !
 !  flag for tke dissipative heating
       logical, intent(in)  :: dspheat
+      real(kind=kind_phys), intent(out) :: ten_t(:,:),                  &
+     &                                     ten_u(:,:), ten_v(:,:)
 !  flag for TTE-EDMF scheme
       logical, intent(in)  :: tte_edmf
-!
+!     
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -276,7 +278,7 @@
      &                     rdt,     rdz,    qmin,   qlmin,
      &                     rimin,   rbcr,   rbint,  tdzmin,
      &                     rlmn,    rlmn0,  rlmn1,  rlmn2,
-     &                     ttend,   utend,  vtend,  qtend,
+     &                     qtend,
      &                     zfac,    zfmin,  vk,     spdk2,
      &                     tkmin,   tkbmx,  disste, xkgdx,
      &                     xkinv1,  xkinv2,
@@ -1845,9 +1847,9 @@
               END IF
 
 ! Comment out to turn OFF the integrated canopy effect
-              dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
-              dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
-              dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
+!Apr17        dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
+!Apr17        dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
+!Apr17        dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
 
             END IF ! (COUNTCAN > 0)
 
@@ -2863,10 +2865,9 @@ c
 c
       do  k = 1,km
          do i = 1,im
-            ttend      = (f1(i,k)-t1(i,k))*rdt
-            qtend      = (f2(i,k)-q1(i,k,1))*rdt
-            tdt(i,k)   = tdt(i,k)+ttend
-            rtg(i,k,1) = rtg(i,k,1)+qtend
+            ten_t(i,k)   = (f1(i,k)-t1(i,k))*rdt
+            qtend        = (f2(i,k)-q1(i,k,1))*rdt
+            rtg(i,k,1)   = rtg(i,k,1)+qtend
 !           dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
 !           dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
@@ -2882,8 +2883,7 @@ c
         if(idtend>=1) then
           do  k = 1,km
             do i = 1,im
-              ttend      = (f1(i,k)-t1(i,k))*rdt
-              dtend(i,k,idtend) = dtend(i,k,idtend)+ttend*delt
+              dtend(i,k,idtend) = dtend(i,k,idtend)+ten_t(i,k)*delt
             enddo
           enddo
         endif
@@ -2935,8 +2935,7 @@ c
           do i = 1,im
 !           tem = min(diss(i,k), dspmax)
 !           ttend = tem / cp
-            ttend = diss(i,k) / cp
-            tdt(i,k) = tdt(i,k) + dspfac * ttend
+            ten_t(i,k) = ten_t(i,k) + dspfac * diss(i,k) / cp
           enddo
         enddo
         if(ldiag3d .and. .not. gen_tend) then
@@ -2944,8 +2943,8 @@ c
           if(idtend>=1) then
             do k = 1,km1
               do i = 1,im
-                ttend = diss(i,k) / cp
-                dtend(i,k,idtend) = dtend(i,k,idtend)+dspfac*ttend*delt
+                dtend(i,k,idtend) = dtend(i,k,idtend)+              
+     &                              (dspfac * diss(i,k) / cp)*delt
               enddo
             enddo
           endif
@@ -3018,10 +3017,8 @@ c
 c
       do k = 1,km
          do i = 1,im
-            utend = (f1(i,k)-u1(i,k))*rdt
-            vtend = (f2(i,k)-v1(i,k))*rdt
-            du(i,k)  = du(i,k)+utend
-            dv(i,k)  = dv(i,k)+vtend
+            ten_u(i,k) = (f1(i,k)-u1(i,k))*rdt
+            ten_v(i,k) = (f2(i,k)-v1(i,k))*rdt
 !           dusfc(i) = dusfc(i)+conw*del(i,k)*utend
 !           dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
@@ -3044,8 +3041,7 @@ c
         if(idtend>=1) then
           do k = 1,km
             do i = 1,im
-              utend = (f1(i,k)-u1(i,k))*rdt
-              dtend(i,k,idtend) = dtend(i,k,idtend) + utend*delt
+              dtend(i,k,idtend) = dtend(i,k,idtend) + ten_u(i,k)*delt
             enddo
           enddo
         endif
@@ -3054,8 +3050,7 @@ c
         if(idtend>=1) then
           do k = 1,km
             do i = 1,im
-              vtend = (f2(i,k)-v1(i,k))*rdt
-              dtend(i,k,idtend) = dtend(i,k,idtend) + vtend*delt
+              dtend(i,k,idtend) = dtend(i,k,idtend) + ten_v(i,k)*delt
             enddo
           enddo
         endif
@@ -3078,6 +3073,11 @@ c
       endif  !sa3dtke
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      if (do_canopy) then
+        if(allocated(EDDYVESTX)) deallocate(EDDYVESTX)
+        if(allocated(ZCANX)) deallocate(ZCANX)
+      endif
+      
       return
       end subroutine satmedmfvdifq_run
 !> @}

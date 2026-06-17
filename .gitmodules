@@ -9,4 +9,4 @@
 [submodule "physics/SFC_Layer/MYNN/MYNN"]
   path = physics/SFC_Layer/MYNN/MYNN
   url = https://github.com/NCAR/MYNN-SFC
-  branch = main
+  branch = ccpp/dev

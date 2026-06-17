@@ -150,18 +150,21 @@ end subroutine m_micro_init
      &,                         CNV_DQLDT_i, CLCN_i, u_i, v_i           &
      &,                         TAUGWX,   TAUGWY                        &
      &,                         TAUOROX,  TAUOROY, CNV_FICE_i           &
-     &,                         CNV_NDROP_i,CNV_NICE_i, q_io, lwm_o     &
-     &,                         qi_o,     t_io,    rn_o, sr_o           &
-     &,                         ncpl_io,  ncpi_io, fprcp, rnw_io, snw_io&
-     &,                         qgl_io,   ncpr_io, ncps_io, ncgl_io     &
+     &,                         CNV_NDROP_i,CNV_NICE_i, q_i             &
+     &,                         t_i ,    rn_o, sr_o                     &
+     &,                         ncpl_i,   ncpi_i, fprcp, rnw_i,  snw_i  &
+     &,                         qgl_i,    ncpr_i,  ncps_i,  ncgl_i      &
      &,                         CLLS_io,  KCBL, rainmin                 &
      &,                         CLDREFFL, CLDREFFI, CLDREFFR, CLDREFFS  &
      &,                         CLDREFFG, ntrcaer, aerfld_i             &
      &,                         naai_i, npccn_i, iccn                   &
      &,                         skip_macro                              &
      &,                         alf_fac, qc_min, pdfflag                &
-     &,                         kdt, xlat, xlon, rhc_i,                 &
-     &                          errmsg, errflg)
+     &,                         kdt, xlat, xlon, rhc_i                  &
+     &,                         ten_t, ten_q, ten_qv, ten_ncpi          &
+     &,                         ten_ncpl, ten_rnw, ten_snw, ten_qgl     &
+     &,                         ten_ncpr, ten_ncps, ten_ncgl, ten_ql    &
+     &,                         ten_qi, errmsg, errflg)
 
 !      use funcphys,      only: fpvs                !< saturation vapor pressure for water-ice mixed
 !      use funcphys,      only: fpvsl, fpvsi, fpvs  !< saturation vapor pressure for water,ice & mixed
@@ -203,7 +206,7 @@ end subroutine m_micro_init
      &       CNV_DQLDT_i, CLCN_i,     QLCN_i, QICN_i,                   &
      &       CNV_MFD_i,               cf_upi, CNV_FICE_i, CNV_NDROP_i,  &
      &       CNV_NICE_i,  w_upi
-! *GJF
+
        real (kind=kind_phys), dimension(:,:),intent(in)  ::             &
      &       rhc_i, naai_i, npccn_i
        real (kind=kind_phys), dimension(:,:,:),intent(in) ::            &
@@ -214,7 +217,6 @@ end subroutine m_micro_init
 !    &       CNVPRCP
 
 !   output
-       real (kind=kind_phys),dimension(:,:), intent(out) :: lwm_o, qi_o
        real (kind=kind_phys),dimension(:,:), intent(out) ::  &
             cldreffl, cldreffi, cldreffr, cldreffs, cldreffg
        real (kind=kind_phys),dimension(:), intent(out) :: rn_o,  sr_o
@@ -224,12 +226,13 @@ end subroutine m_micro_init
 !   input and output
 !      Anning Cheng 10/24/2016 twat for total water, diagnostic purpose
        integer, dimension(:), intent(inout):: KCBL
-       real (kind=kind_phys),dimension(:,:),intent(inout):: q_io, t_io,   &
-     &                                             ncpi_io
+       real (kind=kind_phys),dimension(:,:),intent(in):: q_i, t_i,      &
+     &                                             ncpi_i
        real (kind=kind_phys),dimension(:,:),intent(inout) :: &
-            rnw_io, snw_io, ncpr_io, ncps_io, qgl_io,  ncgl_io, ncpl_io, &
             CLLS_io
-! *GJF
+       real (kind=kind_phys),dimension(:,:),intent(in) :: ncpl_i, rnw_i, snw_i, qgl_i, ncpr_i, ncps_i, ncgl_i
+       real (kind=kind_phys),dimension(:,:), intent(out) :: ten_t, ten_qv, ten_ncpi, ten_ncpl, ten_rnw, ten_snw, ten_qgl, ten_ncpr, ten_ncps, ten_ncgl, ten_ql, ten_qi
+       real (kind=kind_phys),dimension(:,:,:), intent(out) :: ten_q
 !Moo   real (kind=kind_phys),dimension(im,lm),intent(inout):: CLLS_io
 
 
@@ -411,6 +414,19 @@ end subroutine m_micro_init
 ! Initialize CCPP error handling variables
        errmsg = ''
        errflg = 0
+       
+       ten_t = 0.0
+       ten_q = 0.0
+       ten_qv = 0.0
+       ten_ncpi = 0.0
+       ten_rnw = 0.0
+       ten_snw = 0.0
+       ten_qgl = 0.0
+       ten_ncpr = 0.0
+       ten_ncps = 0.0
+       ten_ncgl = 0.0
+       ten_ql = 0.0
+       ten_qi = 0.0
 
        lprnt = .false.
        ipr   = 1
@@ -421,18 +437,18 @@ end subroutine m_micro_init
          DO K=1, LM
            ll = lm-k+1
            DO I = 1,IM
-             Q1(i,k)        = q_io(i,ll)
+             Q1(i,k)        = q_i(i,ll)
              U1(i,k)        = u_i(i,ll)
              V1(i,k)        = v_i(i,ll)
              omega(i,k)     = omega_i(i,ll)
-             ncpl(i,k)      = ncpl_io(i,ll)
-             ncpi(i,k)      = ncpi_io(i,ll)
-             rnw(i,k)       = rnw_io(i,ll)
-             snw(i,k)       = snw_io(i,ll)
-             qgl(i,k)       = qgl_io(i,ll)
-             ncpr(i,k)      = ncpr_io(i,ll)
-             ncps(i,k)      = ncps_io(i,ll)
-             ncgl(i,k)      = ncgl_io(i,ll)
+             ncpl(i,k)      = ncpl_i(i,ll)
+             ncpi(i,k)      = ncpi_i(i,ll)
+             rnw(i,k)       = rnw_i(i,ll)
+             snw(i,k)       = snw_i(i,ll)
+             qgl(i,k)       = qgl_i(i,ll)
+             ncpr(i,k)      = ncpr_i(i,ll)
+             ncps(i,k)      = ncps_i(i,ll)
+             ncgl(i,k)      = ncgl_i(i,ll)
 !                                                  QLLS is the total cloud water
              QLLS(i,k)      = QLLS_i(i,ll)-QLCN_i(i,ll)
              QLCN(i,k)      = QLCN_i(i,ll)
@@ -445,7 +461,7 @@ end subroutine m_micro_init
              CLLS(I,k)      = max(CLLS_io(I,ll)-CLCN_i(I,ll),zero)
              PLO(i,k)       = prsl_i(i,ll)*0.01_kp
              zlo(i,k)       = phil(i,ll) * onebg
-             temp(i,k)      = t_io(i,ll)
+             temp(i,k)      = t_i(i,ll)
              radheat(i,k)   = lwheat_i(i,ll) + swheat_i(i,ll)
              rhc(i,k)       = rhc_i(i,ll)
              if (iccn == 1) then
@@ -481,18 +497,18 @@ end subroutine m_micro_init
        else
          DO K=1, LM
            DO I = 1,IM
-             Q1(i,k)        = q_io(i,k)
+             Q1(i,k)        = q_i(i,k)
              U1(i,k)        = u_i(i,k)
              V1(i,k)        = v_i(i,k)
              omega(i,k)     = omega_i(i,k)
-             ncpl(i,k)      = ncpl_io(i,k)
-             ncpi(i,k)      = ncpi_io(i,k)
-             rnw(i,k)       = rnw_io(i,k)
-             snw(i,k)       = snw_io(i,k)
-             qgl(i,k)       = qgl_io(i,k)
-             ncpr(i,k)      = ncpr_io(i,k)
-             ncps(i,k)      = ncps_io(i,k)
-             ncgl(i,k)      = ncgl_io(i,k)
+             ncpl(i,k)      = ncpl_i(i,k)
+             ncpi(i,k)      = ncpi_i(i,k)
+             rnw(i,k)       = rnw_i(i,k)
+             snw(i,k)       = snw_i(i,k)
+             qgl(i,k)       = qgl_i(i,k)
+             ncpr(i,k)      = ncpr_i(i,k)
+             ncps(i,k)      = ncps_i(i,k)
+             ncgl(i,k)      = ncgl_i(i,k)
 !                                                  QLLS is the total cloud water
              QLLS(i,k)      = QLLS_i(i,k)-QLCN_i(i,k)
              QLCN(i,k)      = QLCN_i(i,k)
@@ -505,7 +521,7 @@ end subroutine m_micro_init
              CLLS(I,k)      = max(CLLS_io(I,k)-CLCN_i(I,k),zero)
              PLO(i,k)       = prsl_i(i,k)*0.01_kp
              zlo(i,k)       = phil(i,k) * onebg
-             temp(i,k)      = t_io(i,k)
+             temp(i,k)      = t_i(i,k)
              radheat(i,k)   = lwheat_i(i,k) + swheat_i(i,k)
              rhc(i,k)       = rhc_i(i,k)
              if (iccn == 1) then
@@ -1798,18 +1814,18 @@ end subroutine m_micro_init
          DO K=1, LM
            ll = lm-k+1
            DO I = 1,IM
-             t_io(i,k)    = TEMP(i,ll)
-             q_io(i,k)    = Q1(i,ll)
-             ncpi_io(i,k) = NCPI(i,ll)
-             ncpl_io(i,k) = NCPL(i,ll)
-             rnw_io(i,k)  = rnw(i,ll)
-             snw_io(i,k)  = snw(i,ll)
-             qgl_io(i,k)  = qgl(i,ll)
-             ncpr_io(i,k) = NCPR(i,ll)
-             ncps_io(i,k) = NCPS(i,ll)
-             ncgl_io(i,k) = NCGL(i,ll)
-             lwm_o(i,k)   = QL_TOT(i,ll)
-             qi_o(i,k)    = QI_TOT(i,ll)
+             ten_t(i,k) = (temp(i,ll) - t_i(i,k))/dt_i
+             ten_qv(i,k) = (Q1(i,ll) - q_i(i,k))/dt_i
+             ten_ncpi(i,k) = (ncpi(i,ll) - ncpi_i(i,k))/dt_i
+             ten_ncpl(i,k) = (ncpl(i,ll) - ncpl_i(i,k))/dt_i
+             ten_rnw(i,k) = (rnw(i,ll) - rnw_i(i,k))/dt_i
+             ten_snw(i,k) = (snw(i,ll) - snw_i(i,k))/dt_i
+             ten_qgl(i,k) = (qgl(i,ll) - qgl_i(i,k))/dt_i
+             ten_ncpr(i,k) = (ncpr(i,ll) - ncpr_i(i,k))/dt_i
+             ten_ncps(i,k) = (ncps(i,ll) - ncps_i(i,k))/dt_i
+             ten_ncgl(i,k) = (ncgl(i,ll) - ncgl_i(i,k))/dt_i
+             ten_ql(i,k) = (ql_tot(i,ll) - qlls_i(i,k))/dt_i
+             ten_qi(i,k) = (qi_tot(i,ll) - qils_i(i,k))/dt_i
            END DO
          END DO
          if (skip_macro) then
@@ -1830,18 +1846,18 @@ end subroutine m_micro_init
        else
          DO K=1, LM
            DO I = 1,IM
-             t_io(i,k)    = TEMP(i,k)
-             q_io(i,k)    = Q1(i,k)
-             ncpi_io(i,k) = NCPI(i,k)
-             ncpl_io(i,k) = NCPL(i,k)
-             rnw_io(i,k)  = rnw(i,k)
-             snw_io(i,k)  = snw(i,k)
-             qgl_io(i,k)  = qgl(i,k)
-             ncpr_io(i,k) = NCPR(i,k)
-             ncps_io(i,k) = NCPS(i,k)
-             ncgl_io(i,k) = NCGL(i,k)
-             lwm_o(i,k)   = QL_TOT(i,k)
-             qi_o(i,k)    = QI_TOT(i,k)
+             ten_t(i,k) = (temp(i,k) - t_i(i,k))/dt_i
+             ten_qv(i,k) = (Q1(i,k) - q_i(i,k))/dt_i
+             ten_ncpi(i,k) = (ncpi(i,k) - ncpi_i(i,k))/dt_i
+             ten_ncpl(i,k) = (ncpl(i,k) - ncpl_i(i,k))/dt_i
+             ten_rnw(i,k) = (rnw(i,k) - rnw_i(i,k))/dt_i
+             ten_snw(i,k) = (snw(i,k) - snw_i(i,k))/dt_i
+             ten_qgl(i,k) = (qgl(i,k) - qgl_i(i,k))/dt_i
+             ten_ncpr(i,k) = (ncpr(i,k) - ncpr_i(i,k))/dt_i
+             ten_ncps(i,k) = (ncps(i,k) - ncps_i(i,k))/dt_i
+             ten_ncgl(i,k) = (ncgl(i,k) - ncgl_i(i,k))/dt_i
+             ten_ql(i,k) = (ql_tot(i,k) - qlls_i(i,k))/dt_i
+             ten_qi(i,k) = (qi_tot(i,k) - qils_i(i,k))/dt_i
            END DO
          END DO
          if (skip_macro) then
@@ -1874,7 +1890,7 @@ end subroutine m_micro_init
 
 !     if (lprnt) then
 !       write(0,*)' rn_o=',rn_o(ipr),' ls_prc2=',ls_prc2(ipr),' ls_snr=',ls_snr(ipr),' kdt=',kdt
-!       write(0,*)' end micro_mg_tend t_io= ', t_io(ipr,:)
+!       write(0,*)' end micro_mg_tend t_i= ', t_i(ipr,:)
 !       write(0,*)' end micro_mg_tend clls_io= ', clls_io(ipr,:)
 !     endif
 !      do k=1,lm

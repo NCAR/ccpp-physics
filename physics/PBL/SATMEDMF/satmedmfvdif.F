@@ -61,7 +61,7 @@
 !! \section detail_satmedmfvidf GFS satmedmfvdif Detailed Algorithm 
       subroutine satmedmfvdif_run(im,km,ntrac,ntcw,ntiw,ntke,           &
      &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
+     &     rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                           &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
@@ -69,7 +69,7 @@
      &     kinver,xkzm_m,xkzm_h,xkzm_s,                                 &
      &     index_of_temperature,index_of_x_wind,index_of_y_wind,        &
      &     index_of_process_pbl,ntqv,ntoz,dtend,dtidx,                  &
-     &     gen_tend,ldiag3d,errmsg,errflg)
+     &     gen_tend,ten_t,ten_u,ten_v,ldiag3d,errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -90,8 +90,7 @@
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
-      real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
-     &                     tdt(:,:),    rtg(:,:,:)
+      real(kind=kind_phys), intent(inout) :: rtg(:,:,:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(:,:),     v1(:,:),                        &
      &                     t1(:,:),     q1(:,:,:),                      &
@@ -110,7 +109,8 @@
      &                     dusfc(:),     dvsfc(:),                      &
      &                     dtsfc(:),     dqsfc(:),                      &
      &                     hpbl(:)
-!
+      real(kind=kind_phys), intent(out) :: ten_t(:,:),                  &
+     &                                     ten_u(:,:), ten_v(:,:)
       logical, intent(in)  :: dspheat
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -203,7 +203,7 @@
      &                     ri,      rimin,
      &                     rbcr,    rbint,  tdzmin,
      &                     rlmn,    rlmx,   elmx,
-     &                     ttend,   utend,  vtend,  qtend,
+     &                     qtend,
      &                     zfac,    zfmin,  vk,     spdk2,
      &                     tkmin,   xkzinv, dspfac, xkgdx,
      &                     zlup,    zldn,   bsum,
@@ -1401,24 +1401,13 @@
 !
       do  k = 1,km
          do i = 1,im
-            ttend      = (f1(i,k)-t1(i,k))*rdt
+            ten_t(i,k) = (f1(i,k)-t1(i,k))*rdt
             qtend      = (f2(i,k)-q1(i,k,1))*rdt
-            tdt(i,k)   = tdt(i,k)+ttend
             rtg(i,k,1) = rtg(i,k,1)+qtend
-            dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
+            dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ten_t(i,k)
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
       enddo
-      if (ldiag3d .and. .not. gen_tend) then
-        idtend = dtidx(index_of_temperature,index_of_process_pbl)
-        if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f1-t1)
-        endif
-        idtend = dtidx(100+ntqv,index_of_process_pbl)
-        if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) +delt*rdt*(f2-q1(:,:,1))
-        endif
-      endif
 !
       if(ntrac1 >= 2) then
         do kk = 2, ntrac1
@@ -1439,10 +1428,20 @@
         do i = 1,im
 !         tem = min(diss(i,k), dspmax)
 !         ttend = tem / cp
-          ttend = diss(i,k) / cp
-          tdt(i,k) = tdt(i,k) + dspfac * ttend
+          ten_t(i,k) = ten_t(i,k) + dspfac * diss(i,k) / cp
         enddo
       enddo
+      endif
+      
+      if (ldiag3d .and. .not. gen_tend) then
+        idtend = dtidx(index_of_temperature,index_of_process_pbl)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + delt*ten_t(i,k)
+        endif
+        idtend = dtidx(100+ntqv,index_of_process_pbl)
+        if(idtend>=1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) +delt*rdt*(f2-q1(:,:,1))
+        endif
       endif
 !
 !> -# Compute tridiagonal matrix elements for momentum
@@ -1511,22 +1510,20 @@
 !
       do k = 1,km
          do i = 1,im
-            utend = (f1(i,k)-u1(i,k))*rdt
-            vtend = (f2(i,k)-v1(i,k))*rdt
-            du(i,k)  = du(i,k)+utend
-            dv(i,k)  = dv(i,k)+vtend
-            dusfc(i) = dusfc(i)+conw*del(i,k)*utend
-            dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
+            ten_u(i,k) = (f1(i,k)-u1(i,k))*rdt
+            ten_v(i,k) = (f2(i,k)-v1(i,k))*rdt
+            dusfc(i) = dusfc(i)+conw*del(i,k)*ten_u(i,k)
+            dvsfc(i) = dvsfc(i)+conw*del(i,k)*ten_v(i,k)
          enddo
       enddo
       if (ldiag3d .and. .not. gen_tend) then
         idtend=dtidx(index_of_x_wind,index_of_process_pbl)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f1-u1)
+          dtend(:,:,idtend) = dtend(:,:,idtend) + delt*ten_u(i,k)
         endif
         idtend=dtidx(index_of_y_wind,index_of_process_pbl)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f2-v1)
+          dtend(:,:,idtend) = dtend(:,:,idtend) + delt*ten_v(i,k)
         endif
       endif
 !

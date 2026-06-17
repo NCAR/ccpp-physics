@@ -192,7 +192,7 @@
 !> \section det_gwdps GFS Orographic GWD Scheme Detailed Algorithm
 !> @{
       subroutine gwdps_run(                                             &
-     &           IM,KM,A,B,C,U1,V1,T1,Q1,KPBL,                          &
+     &           IM,KM,A,B,C,ten_q,U1,V1,T1,Q1,KPBL,                    &
      &           PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DELTIM,KDT,             &
      &           HPRIME,OC,OA4,CLX4,THETA,SIGMA,GAMMA,ELVMAX,           &
      &           DUSFC,DVSFC,dtaux2d_ms,dtauy2d_ms,dtaux2d_bl,          &
@@ -301,8 +301,9 @@
       integer, intent(in) :: KPBL(:) ! Index for the PBL top layer!
       real(kind=kind_phys), intent(in) ::                               &
      &                     deltim, G, CP, RD, RV, cdmbgwd(:)
-      real(kind=kind_phys), intent(inout) ::                            &
+      real(kind=kind_phys), intent(out) ::                              &
      &                     A(:,:), B(:,:), C(:,:)
+      real(kind=kind_phys), intent(out) :: ten_q(:,:,:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     U1(:,:),   V1(:,:),     T1(:,:),             &
      &                     Q1(:,:),   PRSI(:,:),   DEL(:,:),            &
@@ -414,6 +415,11 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+      
+      A = 0.0
+      B = 0.0
+      C = 0.0
+      ten_q = 0.0
 !
 !     parameter (cdmb = 1.0)     ! non-dim sub grid mtn drag Amp (*j*)
 ! non-dim sub grid mtn drag Amp (*j*)
@@ -1235,8 +1241,8 @@
           if (K < IDXZB(I)) then                       ! ---  lm mb (*j*)  changes overwrite GWD
                                                        ! ---------------------------------------
             DBIM     =   DB(I,K) / (1.+DB(I,K)*DELTIM)
-            A(J,K)   = - DBIM * V1(J,K) + A(J,K)
-            B(J,K)   = - DBIM * U1(J,K) + B(J,K)
+            A(J,K)   = - DBIM * V1(J,K)
+            B(J,K)   = - DBIM * U1(J,K)
             ENG1     = ENG0*(1.0-DBIM*DELTIM)*(1.0-DBIM*DELTIM)
 
 !          if ( ABS(DBIM * U1(J,K)) > .01 )
@@ -1255,8 +1261,8 @@
             end if
           else                                         ! orographic GWD applied
                                                        ! ----------------------
-            A(J,K)   = DTAUY + A(J,K)
-            B(J,K)   = DTAUX + B(J,K)
+            A(J,K)   = DTAUY
+            B(J,K)   = DTAUX
             tem1     = U1(J,K) + DTAUX*DELTIM
             tem2     = V1(J,K) + DTAUY*DELTIM
             ENG1     = 0.5 * (tem1*tem1+tem2*tem2)
@@ -1270,7 +1276,7 @@
                dvsfc_ms(j) = dvsfc_ms(j) + DTAUY * del(j,k)
             end if
           endif
-          C(J,K) = C(J,K) + max(ENG0-ENG1,0.) * oneocpdt
+          C(J,K) = max(ENG0-ENG1,0.) * oneocpdt
         ENDDO
       ENDDO
 

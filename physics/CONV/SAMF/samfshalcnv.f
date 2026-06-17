@@ -50,13 +50,13 @@
 !!  -# Calculate the tendencies of the state variables (per unit cloud base mass flux) and the cloud base mass flux.
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!  \section det_samfshalcnv GFS samfshalcnv Detailed Algorithm
-      subroutine samfshalcnv_run(im,km,itc,ntc,cliq,cp,cvap,            &
+      subroutine samfshalcnv_run(im,km,nn,itc,ntc,cliq,cp,cvap,            &
      &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
      &     t0c,delt,ntk,ntr,delp,first_time_step,restart,               & 
      &     tmf,qmicro,progsigma,progomega,                              &
-     &     prslp,psp,phil,tkeh,qtr,prevsq,q,q1,t1,u1,v1,fscav,          &
-     &     rn,kbot,ktop,kcnv,islimsk,garea,cscale,                      &
-     &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
+     &     prslp,psp,phil,tkeh,qtr,dqtr,prevsq,q,q1,t1,u1,v1,fscav,     &
+     &     rn,kbot,ktop,kcnv,islimsk,garea,cscale,ten_t, ten_u, ten_v,  &
+     &     ten_q, dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                &
      &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,                & 
      &     sigmain,sigmaout,omegain,omegaout,betadcu,betamcu,betascu,   &
      &     cat_adj_shal,errmsg,errflg)
@@ -66,7 +66,7 @@
 
       implicit none
 !
-      integer, intent(in)  :: im, km, itc, ntc, ntk, ntr, ncloud
+      integer, intent(in)  :: im, km, nn, itc, ntc, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(:)
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap,               &
      &   eps, epsm1, fv, grav, hvap, rd, rv, t0c, betascu, betadcu,     &
@@ -83,8 +83,11 @@
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       integer, intent(inout)  :: kcnv(:)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
-      real(kind=kind_phys), intent(inout) ::   qtr(:,:,:),              &
-     &   q1(:,:), t1(:,:), u1(:,:), v1(:,:), tkeh(:,:)
+      real(kind=kind_phys), intent(inout) :: tkeh(:,:)
+      real(kind=kind_phys), intent(in) ::   qtr(:,:,:),                 &
+     &   q1(:,:)
+
+      real(kind=kind_phys), intent(in) :: t1(:,:), u1(:,:), v1(:,:)
 !
       integer, intent(out) :: kbot(:), ktop(:)
       real(kind=kind_phys), intent(out) :: rn(:),                       &
@@ -171,7 +174,7 @@ cc
      &                     omegac(im),zeta(im,km),dbyo1(im,km),
      &                     sigmab(im),qadv(im,km)
       real(kind=kind_phys) gravinv,dxcrtas,invdelt,sigmind,sigmins,
-     &                     sigminm
+     &                     sigminm,wc_min,wc_eff
       logical flag_shallow,flag_mid
 c  physical parameters
 !     parameter(g=grav,asolfac=0.89)
@@ -205,8 +208,6 @@ c  physical parameters
 !      parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
       parameter(betaw=.03,dxcrtc0=9.e3)
       parameter(h1=0.33333333)
-!  progsigma
-      parameter(dxcrtas=500.e3,sigmind=0.01,sigmins=0.03,sigminm=0.01)
 c  local variables and arrays
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
      &                     uo(im,km),      vo(im,km),     qeso(im,km),
@@ -254,6 +255,23 @@ c  cloud water
       real(kind=kind_phys) tf, tcr, tcrf
       parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
 
+      real(kind=kind_phys), intent(out) :: ten_t(:,:), ten_u(:,:),      &
+     & ten_v(:,:), ten_q(:,:,:), dqtr(:,:,:)
+
+      real(kind=kind_phys) :: new_t1(im,km),new_u1(im,km),new_v1(im,km),&
+     & new_q1(im,km), new_qtr(im,km,nn)
+
+      ten_t = 0._kind_phys
+      ten_u = 0._kind_phys
+      ten_v = 0._kind_phys
+      ten_q = 0._kind_phys
+      dqtr  = 0._kind_phys
+
+      new_t1 = t1 
+      new_u1 = u1 
+      new_v1 = v1
+      new_q1 = q1
+      new_qtr = qtr
 
 c-----------------------------------------------------------------------
 !
@@ -276,8 +294,10 @@ c-----------------------------------------------------------------------
 
       if (progsigma) then
          dxcrt=10.e3
+         dxcrtas=500.e3
       else
          dxcrt=15.e3
+         dxcrtas=500.e3
       endif
 
 c-----------------------------------------------------------------------
@@ -295,7 +315,21 @@ c-----------------------------------------------------------------------
       prsl = prslp * 0.001
       del  = delp  * 0.001
 !************************************************************************
-!
+!   - Initialize parameters related to prognostic closure
+      if (progsigma) then
+ 	 if (progomega) then
+            sigmind  = 0.03
+            sigmins  = 0.03
+            sigminm = 0.03
+            wc_min = 0.2
+         else
+   	    sigmind  = 0.01
+            sigmins  = 0.03
+            sigminm = 0.03
+            wc_min = 0.2
+ 	 endif
+      endif
+!     
       km1 = km - 1
 c
 c  initialize arrays
@@ -1520,11 +1554,11 @@ c
       if (progomega) then
          call progomega_calc(first_time_step,restart,im,km,
      &        kbcon1,ktcon,omegain,delt,del,zi,cnvflg,omegaout,
-     &        grav,buo,drag,wush,xlamue,bb1,bb2)
+     &        grav,buo,drag,wush,bb1,bb2)
          do k = 1, km
             do i = 1, im
                if (cnvflg(i)) then
-                  if(k > kbcon1(i) .and. k < ktcon(i)) then
+                  if(k >= kbcon1(i) .and. k < ktcon(i)) then
                      omega_u(i,k)=omegaout(i,k)
                      omega_u(i,k)=MAX(omega_u(i,k),-80.)
 !     Convert to m/s for use in convective time-scale:
@@ -1611,7 +1645,7 @@ c
          do k = 2, km1
             do i = 1, im
                if (cnvflg(i)) then
-                  if(k > kbcon1(i) .and. k < ktcon(i)) then
+                  if(k >= kbcon1(i) .and. k < ktcon(i)) then
                      dp = 1000. * del(i,k)
                      tem = 0.5 * (omega_u(i,k) + omega_u(i,k-1))
                      omegac(i) = omegac(i) + tem * dp
@@ -1636,7 +1670,7 @@ c
          do k = 2, km1
             do i = 1, im
                if (cnvflg(i)) then
-                  if(k > kbcon1(i) .and. k < ktcon(i)) then
+                  if(k >= kbcon1(i) .and. k < ktcon(i)) then
                      if(omega_u(i,k) .ne. 0.)then
                         zeta(i,k)=eta(i,k)*(omegac(i)/omega_u(i,k))
                      else
@@ -1955,21 +1989,28 @@ c
 !  compute convective turn-over time
 !
 !> - Following Bechtold et al. (2008) \cite bechtold_et_al_2008, calculate the convective turnover time using the mean updraft velocity (wc) and the cloud depth. It is also proportional to the grid size (gdx).
-      do i= 1, im
-        if(cnvflg(i)) then
-          tem = zi(i,ktcon1(i)) - zi(i,kbcon1(i))
-          dtconv(i) = tem / wc(i)
-          if (.not.hwrf_samfshal) then
-            tfac = 1. + gdx(i) / 75000.
-            dtconv(i) = tfac * dtconv(i)
-          endif
-          dtconv(i) = max(dtconv(i),dtmin)
-          dtconv(i) = max(dtconv(i),dt2)
-          dtconv(i) = min(dtconv(i),dtmax)
-        endif
+      do i = 1, im
+         if (cnvflg(i)) then
+            tem = zi(i,ktcon1(i)) - zi(i,kbcon1(i))
+            if (progomega) then
+               wc_eff = max(wc(i), wc_min)
+               dtconv(i) = tem / wc_eff
+            else
+               dtconv(i) = tem / wc(i)
+            endif
+! - grid spacing scaling (disabled for HWRF shallow option)
+            if (.not. hwrf_samfshal) then
+               tfac = 1. + gdx(i) / 75000.
+               dtconv(i) = tfac * dtconv(i)
+            endif
+! - limits
+            dtconv(i) = max(dtconv(i), dtmin)
+            dtconv(i) = max(dtconv(i),dt2)
+            dtconv(i) = min(dtconv(i), dtmax)
+         endif
       enddo
-!
-!> - Calculate advective time scale (tauadv) using a mean cloud layer wind speed.
+!     
+!     > - Calculate advective time scale (tauadv) using a mean cloud layer wind speed.
       do i= 1, im
         if(cnvflg(i)) then
           sumx(i) = 0.
@@ -2129,13 +2170,13 @@ c
           if (cnvflg(i)) then
             if(k > kb(i) .and. k <= ktcon(i)) then
               dellat = (dellah(i,k) - hvap * dellaq(i,k)) / cp
-              t1(i,k) = t1(i,k) + dellat * xmb(i) * dt2
-              q1(i,k) = q1(i,k) + dellaq(i,k) * xmb(i) * dt2
+              new_t1(i,k) = t1(i,k) + dellat * xmb(i) * dt2
+              new_q1(i,k) = q1(i,k) + dellaq(i,k) * xmb(i) * dt2
 !             tem = 1./rcs(i)
 !             u1(i,k) = u1(i,k) + dellau(i,k) * xmb(i) * dt2 * tem
 !             v1(i,k) = v1(i,k) + dellav(i,k) * xmb(i) * dt2 * tem
-              u1(i,k) = u1(i,k) + dellau(i,k) * xmb(i) * dt2
-              v1(i,k) = v1(i,k) + dellav(i,k) * xmb(i) * dt2
+              new_u1(i,k) = u1(i,k) + dellau(i,k) * xmb(i) * dt2
+              new_v1(i,k) = v1(i,k) + dellav(i,k) * xmb(i) * dt2
               dp = 1000. * del(i,k)
               tem = xmb(i) * dp / grav
               delhbar(i) = delhbar(i) + tem * dellah(i,k)
@@ -2160,9 +2201,9 @@ c
         do i = 1,im
           if (cnvflg(i)) then
             if(k > kb(i) .and. k <= ktcon(i)) then
-              tem = q1(i,k) * delp(i,k) / grav
-              if(q1(i,k) < 0.) tsumn(i) = tsumn(i) + tem
-              if(q1(i,k) > 0.) tsump(i) = tsump(i) + tem
+              tem = new_q1(i,k) * delp(i,k) / grav
+              if(new_q1(i,k) < 0.) tsumn(i) = tsumn(i) + tem
+              if(new_q1(i,k) > 0.) tsump(i) = tsump(i) + tem
             endif
           endif
         enddo
@@ -2184,11 +2225,13 @@ c
             if(k > kb(i) .and. k <= ktcon(i)) then
               if(rtnp(i) < 0.) then
                 if(tsump(i) > abs(tsumn(i))) then
-                  if(q1(i,k) < 0.) q1(i,k)= 0.
-                  if(q1(i,k) > 0.) q1(i,k)=(1.+rtnp(i))*q1(i,k)
+                  if(new_q1(i,k) < 0.) new_q1(i,k)= 0.
+                  if(new_q1(i,k) > 0.) new_q1(i,k)=                     &
+     &                                       (1.+rtnp(i))*new_q1(i,k)
                 else
-                  if(q1(i,k) < 0.) q1(i,k)=(1.+rtnp(i))*q1(i,k)
-                  if(q1(i,k) > 0.) q1(i,k)=0.
+                  if(new_q1(i,k) < 0.) new_q1(i,k)=                     &
+     &                                       (1.+rtnp(i))*new_q1(i,k)
+                  if(new_q1(i,k) > 0.) new_q1(i,k)=0.
                 endif
               endif
             endif
@@ -2275,7 +2318,7 @@ c
         do i = 1, im
           if (cnvflg(i)) then
             if(k > kb(i) .and. k <= ktcon(i)) then
-              qtr(i,k,kk) = ctr(i,k,n)
+              new_qtr(i,k,kk) = ctr(i,k,n)
             endif
           endif
         enddo
@@ -2306,15 +2349,16 @@ c
               if (cnvflg(i)) then
                 if(k > kb(i) .and. k < ktcon(i)) then
                   dp = 1000. * del(i,k)
-                  if (qtr(i,k,kk) < 0.) then
+                  if (new_qtr(i,k,kk) < 0.) then
 !   borrow negative mass from wet deposition
-                    tem = -qtr(i,k,kk)*dp
+                    tem = -new_qtr(i,k,kk)*dp
                     if(wet_dep(i,k,n) >= tem) then
                       wet_dep(i,k,n) = wet_dep(i,k,n) - tem
-                      qtr(i,k,kk) = 0.
+                      new_qtr(i,k,kk) = 0.
                     else
                       wet_dep(i,k,n) = 0.
-                      qtr(i,k,kk) = qtr(i,k,kk)+wet_dep(i,k,n)/dp
+                      new_qtr(i,k,kk) = new_qtr(i,k,kk)+                &
+     &                                  wet_dep(i,k,n)/dp
                     endif
                   endif
                 endif
@@ -2333,7 +2377,7 @@ c
         do i = 1, im
           if (cnvflg(i)) then
             if(k > kb(i) .and. k <= ktcon(i)) then
-              qeso(i,k) = 0.01 * fpvs(t1(i,k))      ! fpvs is in pa
+              qeso(i,k) = 0.01 * fpvs(new_t1(i,k))      ! fpvs is in pa
               qeso(i,k) = eps * qeso(i,k)/(pfld(i,k) + epsm1*qeso(i,k))
               val     =             1.e-8
               qeso(i,k) = max(qeso(i,k), val )
@@ -2379,8 +2423,8 @@ c
 !             evef = edt(i) * evfact
 !             if(islimsk(i) == 1) evef=edt(i) * evfactl
 !             if(islimsk(i) == 1) evef=.07
-              qcond(i) = shevf * evef * (q1(i,k) - qeso(i,k))
-     &                 / (1. + el2orc * qeso(i,k) / t1(i,k)**2)
+              qcond(i) = shevf * evef * (new_q1(i,k) - qeso(i,k))
+     &                 / (1. + el2orc * qeso(i,k) / new_t1(i,k)**2)
               dp = 1000. * del(i,k)
               factor = dp / grav
               if(rn(i) > 0. .and. qcond(i) < 0.) then
@@ -2402,8 +2446,8 @@ c
                 else
                   rn(i) = rn(i) - tem1
                 endif
-                q1(i,k) = q1(i,k) + qevap(i)
-                t1(i,k) = t1(i,k) - elocp * qevap(i)
+                new_q1(i,k) = new_q1(i,k) + qevap(i)
+                new_t1(i,k) = new_t1(i,k) - elocp * qevap(i)
                 deltv(i) = - elocp*qevap(i)/dt2
                 delq(i) =  + qevap(i)/dt2
                 delqev(i) = delqev(i) + tem * qevap(i)
@@ -2485,12 +2529,12 @@ c
 !           if (k > kb(i) .and. k <= ktcon(i)) then
             if (k >= kbcon(i) .and. k <= ktcon(i)) then
               tem  = dellal(i,k) * xmb(i) * dt2
-              tem1 = max(0.0, min(1.0, (tcr-t1(i,k))*tcrf))
-              if (qtr(i,k,2) > -999.0) then
-                qtr(i,k,1) = qtr(i,k,1) + tem * tem1            ! ice
-                qtr(i,k,2) = qtr(i,k,2) + tem *(1.0-tem1)       ! water
+              tem1 = max(0.0, min(1.0, (tcr-new_t1(i,k))*tcrf))
+              if (new_qtr(i,k,2) > -999.0) then
+                new_qtr(i,k,1) = new_qtr(i,k,1) + tem * tem1            ! ice
+                new_qtr(i,k,2) = new_qtr(i,k,2) + tem *(1.0-tem1)       ! water
               else
-                qtr(i,k,1) = qtr(i,k,1) + tem
+                new_qtr(i,k,1) = new_qtr(i,k,1) + tem
               endif
             endif
           endif
@@ -2506,7 +2550,7 @@ c
 !         do k = 1, km
 !           do i = 1, im
 !             if(cnvflg(i) .and. rn(i) > 0.) then
-!               if (k <= kmax(i)) qtr(i,k,kk) = qaero(i,k,n)
+!               if (k <= kmax(i)) new_qtr(i,k,kk) = qaero(i,k,n)
 !             endif
 !           enddo
 !         enddo
@@ -2546,14 +2590,14 @@ c
           if(cnvflg(i)) then
             if(k > kb(i) .and. k < ktop(i)) then
               tem = 0.5 * (eta(i,k-1) + eta(i,k)) * xmb(i)
-              tem1 = pfld(i,k) * 100. / (rd * t1(i,k))
+              tem1 = pfld(i,k) * 100. / (rd * new_t1(i,k))
               if(progsigma)then
                 tem2 = sigmab(i)
               else
                 tem2 = max(sigmagfm(i), betaw)
               endif
               ptem = tem / (tem2 * tem1)
-              qtr(i,k,ntk)=qtr(i,k,ntk)+0.5*tem2*ptem*ptem
+              new_qtr(i,k,ntk)=new_qtr(i,k,ntk)+0.5*tem2*ptem*ptem
             endif
           endif
         enddo
@@ -2562,6 +2606,12 @@ c
       endif
       endif
 !!
+      ten_t = (new_t1 - t1)/delt 
+      ten_u = (new_u1 - u1)/delt 
+      ten_v = (new_v1 - v1)/delt
+      ten_q(:,:,1) = (new_q1 - q1)/delt
+      dqtr  = (new_qtr - qtr)/delt
+
       return
       end subroutine samfshalcnv_run
 !> @}

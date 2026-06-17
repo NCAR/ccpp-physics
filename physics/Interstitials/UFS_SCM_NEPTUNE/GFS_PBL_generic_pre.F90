@@ -14,10 +14,10 @@
         ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,          &
         ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz,                                &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
-        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, imp_physics_nssl,  &
+        imp_physics_mg, imp_physics_fer_hires, imp_physics_nssl,                         &
         ltaerosol, mraerosol, nssl_ccn_on, nssl_hail_on, nssl_3moment,                   &
-        hybedmf, do_shoc, satmedmf, qgrs, vdftra, save_u, save_v, save_t, save_q,        &
-        flag_for_pbl_generic_tend, ldiag3d, qdiag3d, lssav, ugrs, vgrs, tgrs, errmsg, errflg)
+        hybedmf, do_shoc, satmedmf, qgrs, vdftra,                                        &
+        ugrs, vgrs, tgrs, errmsg, errflg)
         
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -30,18 +30,16 @@
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
       integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,ntchs, ntchm
       integer, intent(in) :: ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz
-      logical, intent(in) :: trans_aero, ldiag3d, qdiag3d, lssav
+      logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
-      logical, intent(in) :: ltaerosol, hybedmf, do_shoc, satmedmf, flag_for_pbl_generic_tend, mraerosol
+      integer, intent(in) :: imp_physics_mg, imp_physics_fer_hires
+      logical, intent(in) :: ltaerosol, hybedmf, do_shoc, satmedmf, mraerosol
       integer, intent(in) :: imp_physics_nssl
       logical, intent(in) :: nssl_hail_on, nssl_ccn_on, nssl_3moment
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs
       real(kind=kind_phys), dimension(:,:), intent(in) :: ugrs, vgrs, tgrs
       real(kind=kind_phys), dimension(:,:, :), intent(inout) :: vdftra
-      real(kind=kind_phys), dimension(:,:), intent(out) :: save_u, save_v, save_t
-      real(kind=kind_phys), dimension(:,:, :), intent(out) :: save_q
 
       ! CCPP error handling variables
       character(len=*), intent(out) :: errmsg
@@ -191,16 +189,6 @@
             enddo
           enddo
           rtg_ozone_index = 7
-        elseif (imp_physics == imp_physics_zhao_carr) then
-! Zhao/Carr/Sundqvist
-          do k=1,levs
-            do i=1,im
-              vdftra(i,k,1) = qgrs(i,k,ntqv)
-              vdftra(i,k,2) = qgrs(i,k,ntcw)
-              vdftra(i,k,3) = qgrs(i,k,ntoz)
-            enddo
-          enddo
-          rtg_ozone_index = 3
         elseif (imp_physics == imp_physics_nssl ) then
   ! nssl
             IF ( nssl_hail_on ) THEN
@@ -275,7 +263,7 @@
           call set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
                                         imp_physics_thompson, ltaerosol,mraerosol, &
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                        imp_physics_zhao_carr, imp_physics_nssl,&
+                                        imp_physics_nssl,                       &
                                         nssl_hail_on, nssl_ccn_on, nssl_3moment, kk, &
                                         errmsg, errflg)
           if (errflg /= 0) return
@@ -299,31 +287,6 @@
           enddo
         endif
 !
-      endif
-
-      if(ldiag3d .and. lssav .and. flag_for_pbl_generic_tend) then
-        do k=1,levs
-          do i=1,im
-            save_t(i,k) = tgrs(i,k)
-            save_u(i,k) = ugrs(i,k)
-            save_v(i,k) = vgrs(i,k)
-          enddo
-        enddo
-        if(qdiag3d) then
-          do k=1,levs
-            do i=1,im
-              save_q(i,k,ntqv) = qgrs(i,k,ntqv)
-              save_q(i,k,ntoz) = qgrs(i,k,ntoz)
-            enddo
-          enddo
-          if(ntke>0) then
-            do k=1,levs
-              do i=1,im
-                save_q(i,k,ntke) = qgrs(i,k,ntke)
-              enddo
-            enddo
-          endif
-        endif
       endif
 
     end subroutine GFS_PBL_generic_pre_run

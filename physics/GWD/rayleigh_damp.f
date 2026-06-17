@@ -19,8 +19,8 @@
 !>\section gen_ray_damp_run GFS rayleigh_damp_runGeneral Algorithm
 !> @{
       subroutine rayleigh_damp_run (                                    &
-     &  lsidea,IM,KM,A,B,C,U1,V1,DT,CP,LEVR,pgr,PRSL,PRSLRD0,ral_ts,    &
-     &  ldiag3d,dtend,dtidx,index_of_process_rayleigh_damping,          &
+     &  lsidea,IM,KM,A,B,C,ten_q,U1,V1,DT,CP,LEVR,pgr,PRSL,PRSLRD0,     &
+     &  ral_ts,ldiag3d,dtend,dtidx,index_of_process_rayleigh_damping,   &
      &  index_of_temperature,index_of_x_wind,index_of_y_wind,           &
      &  errmsg,errflg)
 !
@@ -68,7 +68,8 @@
       real(kind=kind_phys),intent(in)    :: DT, CP, PRSLRD0, ral_ts
       real(kind=kind_phys),intent(in)    :: pgr(:), PRSL(:,:)
       real(kind=kind_phys),intent(in)    :: U1(:,:), V1(:,:)
-      real(kind=kind_phys),intent(inout) :: A(:,:), B(:,:), C(:,:)
+      real(kind=kind_phys),intent(  out) :: A(:,:), B(:,:), C(:,:)
+      real(kind=kind_phys),intent(  out) :: ten_q(:,:,:)
       real(kind=kind_phys),optional, intent(inout) :: dtend(:,:,:)
       integer, intent(in)                :: dtidx(:,:)
       integer, intent(in)                ::                              &
@@ -81,9 +82,14 @@
       real(kind=kind_phys), parameter :: cons1=1.0, cons2=2.0, half=0.5
       real(kind=kind_phys) DTAUX, DTAUY, wrk1, rtrd1, rfactrd, wrk2
      &,                    ENG0, ENG1, tem1, tem2, dti, hfbcpdt, rtrd
-      real(kind=kind_phys) tx1(im), deltaA, deltaB, deltaC
+      real(kind=kind_phys) tx1(im)
       integer              i, k, uidx,vidx,tidx
-
+      
+      A = 0.0
+      B = 0.0
+      C = 0.0
+      ten_q = 0.0
+      
       if(ldiag3d) then
          uidx=dtidx(index_of_x_wind,index_of_process_rayleigh_damping)
          vidx=dtidx(index_of_y_wind,index_of_process_rayleigh_damping)
@@ -125,20 +131,17 @@
           tem1    = U1(I,K) + DTAUX
           tem2    = V1(I,K) + DTAUY
           ENG1    = tem1*tem1 + tem2*tem2
-          deltaA  = DTAUY * dti
-          deltaB  = DTAUX * dti
-          deltaC  = max((ENG0-ENG1),0.0) * hfbcpdt
-          A(I,K)  = A(I,K) + deltaA
-          B(I,K)  = B(I,K) + deltaB
-          C(I,K)  = C(I,K) + deltaC
+          A(I,K)  = DTAUY * dti
+          B(I,K)  = DTAUX * dti
+          C(I,K)  = max((ENG0-ENG1),0.0) * hfbcpdt
           IF(vidx>=1) THEN
-            dtend(i,k,vidx) = dtend(i,k,vidx) + deltaA
+            dtend(i,k,vidx) = dtend(i,k,vidx) + A(i,k)*dt
           ENDIF
           IF(uidx>=1) THEN
-            dtend(i,k,uidx) = dtend(i,k,uidx) + deltaB
+            dtend(i,k,uidx) = dtend(i,k,uidx) + B(i,k)*dt
           ENDIF
           IF(tidx>=1) THEN
-            dtend(i,k,tidx) = dtend(i,k,tidx) + deltaC
+            dtend(i,k,tidx) = dtend(i,k,tidx) + C(i,k)*dt
           ENDIF
         ENDDO
       ENDDO

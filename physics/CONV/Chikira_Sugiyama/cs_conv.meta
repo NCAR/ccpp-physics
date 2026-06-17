@@ -50,6 +50,13 @@
   dimensions = ()
   type = integer
   intent = in
+[ntqv]
+  standard_name = index_of_specific_humidity_in_tracer_concentration_array
+  long_name = tracer index for water vapor (specific humidity)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
 [otspt]
   standard_name = flag_convective_tracer_transport
   long_name = flag to enable tracer transport by updrafts/downdrafts[(:,1)] or subsidence [(:,2)]
@@ -72,21 +79,21 @@
   type = integer
   intent = in
 [t]
-  standard_name = air_temperature_of_new_state
+  standard_name = air_temperature
   long_name = mid-layer temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [q]
-  standard_name = specific_humidity_of_new_state
+  standard_name = specific_humidity
   long_name = mid-layer specific humidity of water vapor
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [rain1]
   standard_name = lwe_thickness_of_deep_convective_precipitation_amount
   long_name = deep convective rainfall amount on physics timestep
@@ -102,7 +109,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [zm]
   standard_name = geopotential
   long_name = mid-layer geopotential
@@ -176,21 +183,21 @@
   kind = kind_phys
   intent = inout
 [u]
-  standard_name = x_wind_of_new_state
+  standard_name = x_wind
   long_name = mid-layer zonal wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [v]
-  standard_name = y_wind_of_new_state
+  standard_name = y_wind
   long_name = mid-layer meridional wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [fscav]
   standard_name = fraction_of_tracer_scavenged
   long_name = fraction of the tracer (aerosols) that is scavenged by convection
@@ -401,6 +408,46 @@
   dimensions = ()
   type = integer
   intent = in
+[ten_t]
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_u]
+  standard_name = tendency_of_x_wind
+  long_name = tendency of x wind calculated by one physics scheme
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_v]
+  standard_name = tendency_of_y_wind
+  long_name = tendency of y wind calculated by one physics scheme
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_q]
+  standard_name = tendency_of_tracer_concentration
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_clw]
+  standard_name = tendency_of_convective_transportable_tracers
+  long_name = array to contain tendencies of cloud water and other convective trans. tracers
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers_for_convective_transport)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

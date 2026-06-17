@@ -80,7 +80,7 @@ contains
                fhour,fh_dfi_radar,ix_dfi_radar,num_dfi_radar,cap_suppress,      &
                dfi_radar_max_intervals,ldiag3d,qci_conv,do_cap_suppress,        &
                sigmaout,maxupmf,maxMF,do_mynnedmf,ichoice_in,ichoicem_in,       &
-               ichoice_s_in,errmsg,errflg)
+               ichoice_s_in,ten_t,ten_u,ten_v,ten_q,dcliw,dclcw,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -120,11 +120,11 @@ contains
    real(kind=kind_phys),  dimension( : , : ), intent(in    ), optional :: forcet,forceqv_spechum
    real(kind=kind_phys),  dimension( : , : ), intent(in    ) :: w,phil,delp
    real(kind=kind_phys), dimension ( : , : ), intent(in    ), optional :: sigmain,qmicro
-   real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: t,us,vs
+   real(kind=kind_phys),  dimension( : , : ), intent(in    ) :: t,us,vs
    real(kind=kind_phys),  dimension( : , : ), intent(inout ), optional :: qci_conv
    real(kind=kind_phys),  dimension( : , : ), intent(out   ) :: cnvw_moist,cnvc
    real(kind=kind_phys), dimension ( : , : ), intent(out   ), optional :: sigmaout
-   real(kind=kind_phys),  dimension( : , : ), intent(inout ) :: cliw, clcw
+   real(kind=kind_phys),  dimension( : , : ), intent(in    ) :: cliw, clcw
    real(kind=kind_phys), dimension ( : , : , :), intent(in    ) :: tmf
 !$acc declare copyin(forcet,forceqv_spechum,w,phil)
 !$acc declare copy(t,us,vs,qci_conv,cliw, clcw)
@@ -158,7 +158,7 @@ contains
 !$acc declare copyout(ud_mf,dd_mf,dt_mf,raincv,cld1d)
    ! Specific humidity from FV3
    real(kind=kind_phys), dimension (:,:), intent(in) :: qv2di_spechum
-   real(kind=kind_phys), dimension (:,:), intent(inout) :: qv_spechum
+   real(kind=kind_phys), dimension (:,:), intent(in) :: qv_spechum
    real(kind=kind_phys), dimension (:), intent(inout), optional :: aod_gf
 !$acc declare copyin(qv2di_spechum) copy(qv_spechum,aod_gf)
    ! Local water vapor mixing ratios and cloud water mixing ratios
@@ -172,7 +172,9 @@ contains
    integer, intent(in   ) :: imfshalcnv
    integer, dimension(:), intent(inout), optional :: cactiv,cactiv_m
 !$acc declare copy(cactiv,cactiv_m)
-
+   real(kind_phys), dimension(:,:), intent(out) :: ten_t, ten_u, ten_v, dcliw, dclcw
+   real(kind_phys), dimension(:,:,:), intent(out) :: ten_q
+   
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
@@ -225,7 +227,7 @@ contains
 ! omega (omeg), windspeed (us,vs), and a flag (ierr) to turn off
 ! convection for this call only and at that particular gridpoint
 !
-   real(kind=kind_phys), dimension (im,km) :: qcheck,zo,t2d,q2d,po,p2d,rhoi,clw_ten
+   real(kind=kind_phys), dimension (im,km) :: qcheck,zo,t2d,q2d,po,p2d,rhoi,clw_ten,new_qv_spechum,new_cliw,new_clcw
    real(kind=kind_phys), dimension (im,km) :: tn,qo,tshall,qshall,dz8w,omeg
    real(kind=kind_phys), dimension (im)    :: z1,psur,cuten,cutens,cutenm
    real(kind=kind_phys), dimension (im)    :: umean,vmean,pmean,mc_thresh
@@ -268,7 +270,16 @@ contains
   ! initialize ccpp error handling variables
      errmsg = ''
      errflg = 0
-
+     
+     ten_t = 0.0
+     ten_u = 0.0
+     ten_v = 0.0
+     ten_q = 0.0
+     dcliw = 0.0
+     dclcw = 0.0
+     new_clcw = clcw
+     new_cliw = cliw
+     
      ichoice   = ichoice_in
      ichoicem  = ichoicem_in
      ichoice_s = ichoice_s_in
@@ -956,11 +967,12 @@ contains
                cnvw(i,k)=cnvwt(i,k)*xmb(i)*dt+cnvwts(i,k)*xmbs(i)*dt+cnvwtm(i,k)*xmbm(i)*dt
                ud_mf(i,k)=cuten(i)*zu(i,k)*xmb(i)*dt
                dd_mf(i,k)=cuten(i)*zd(i,k)*edt(i)*xmb(i)*dt
-               t(i,k)=t(i,k)+dt*(cutens(i)*outts(i,k)+cutenm(i)*outtm(i,k)+outt(i,k)*cuten(i))
+               
+               ten_t(i,k) = cutens(i)*outts(i,k)+cutenm(i)*outtm(i,k)+outt(i,k)*cuten(i)
                qv(i,k)=max(1.e-16,qv(i,k)+dt*(cutens(i)*outqs(i,k)+cutenm(i)*outqm(i,k)+outq(i,k)*cuten(i)))
                gdc(i,k,7)=sqrt(us(i,k)**2 +vs(i,k)**2)
-               us(i,k)=us(i,k)+outu(i,k)*cuten(i)*dt +outum(i,k)*cutenm(i)*dt +outus(i,k)*cutens(i)*dt
-               vs(i,k)=vs(i,k)+outv(i,k)*cuten(i)*dt +outvm(i,k)*cutenm(i)*dt +outvs(i,k)*cutens(i)*dt
+               ten_u(i,k) = outu(i,k)*cuten(i) +outum(i,k)*cutenm(i) +outus(i,k)*cutens(i)
+               ten_v(i,k) = outv(i,k)*cuten(i) +outvm(i,k)*cutenm(i) +outvs(i,k)*cutens(i)
 
                gdc(i,k,1)= max(0.,tun_rad_shall(i)*cupclws(i,k)*cutens(i))      ! my mod
                !gdc2(i,k,1)=max(0.,tun_rad_deep(i)*(cupclwm(i,k)*cutenm(i)+cupclw(i,k)*cuten(i)))
@@ -1005,10 +1017,13 @@ contains
                          )
                tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
                if (clcw(i,k) .gt. -999.0) then
-                cliw(i,k) = max(0.,cliw(i,k) + tem * tem1)            ! ice
-                clcw(i,k) = max(0.,clcw(i,k) + tem *(1.0-tem1))       ! water
+                new_cliw(i,k) = max(0.,cliw(i,k) + tem * tem1)            ! ice
+                new_clcw(i,k) = max(0.,clcw(i,k) + tem *(1.0-tem1))       ! water
+                dcliw(i,k) = (new_cliw(i,k) - cliw(i,k))/dt
+                dclcw(i,k) = (new_clcw(i,k) - clcw(i,k))/dt
                else
-                cliw(i,k) = max(0.,cliw(i,k) + tem)
+                new_cliw(i,k) = max(0.,cliw(i,k) + tem)
+                dcliw(i,k) = (new_cliw(i,k) - cliw(i,k))/dt
                endif
 
              enddo
@@ -1076,9 +1091,14 @@ contains
 ! Scale dry mixing ratios for water wapor and cloud water to specific humidy / moist mixing ratios
 !
 !$acc kernels
-        qv_spechum = qv/(1.0_kind_phys+qv)
+        new_qv_spechum = qv/(1.0_kind_phys+qv)
         cnvw_moist = cnvw/(1.0_kind_phys+qv)
 !$acc end kernels
+        do i=its,ite
+          do k=kts,kte
+            ten_q(i,k,ntqv) = (new_qv_spechum(i,k) - qv_spechum(i,k))/dt
+          end do
+        end do
 !
 ! Diagnostic tendency updates
 !

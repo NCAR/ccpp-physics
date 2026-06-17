@@ -47,14 +47,14 @@
         pblh, kpbl, kinver, slmsk,                  &
         garea, ustar, cm, ch, wind,                 &
         snowd, zorl, evap, hflx,                    &
-        dudt, dvdt, dtdt, dqdt,                     &
+        dqdt,                                       &
         dusfc,dvsfc,dtsfc,dqsfc,                    &
         dkt,xkzm_m, xkzm_h,xkzm_s, gamt,gamq,       &
         con_cp,con_g,con_rd,                        &
         me, lprnt, gen_tend, ldiag3d, dtend, dtidx, &
         index_of_temperature, index_of_x_wind,      &
         index_of_y_wind, index_of_process_pbl,      &
-        ntqv, errmsg, errflg )
+        ntqv, ten_t, ten_u, ten_v, errmsg, errflg )
 
 !
 
@@ -124,16 +124,14 @@
               phii, prsi
       real(kind=kind_phys),dimension(:,:),intent(in) ::      &
               ugrs, vgrs, tgrs, prsl
-!      real(kind=kind_phys),dimension(:,:),intent(inout)  :: &
-!             dudt, dvdt, dtdt, dkt
-      real(kind=kind_phys),dimension(:,:),intent(inout)   :: &
-             dudt, dvdt, dtdt
       real(kind=kind_phys),dimension(:,:),intent(out)     :: &
              dkt
 
 !MYJ-4D
       real(kind=kind_phys),dimension(:,:,:),intent(inout) :: &
              qgrs,dqdt
+      real(kind=kind_phys), intent(out) :: ten_t(:,:),       &
+                                       ten_u(:,:), ten_v(:,:)
 
 !LOCAL
       integer :: ntsd, k, k1, i, kx1
@@ -589,9 +587,9 @@
       do k=1,levs
          k1=levs+1-k
          do i=1,im
-            dudt(i,k)=dudt(i,k)+rublten(i,k1)
-            dvdt(i,k)=dvdt(i,k)+rvblten(i,k1)
-            dtdt(i,k)=dtdt(i,k)+rthblten(i,k1)*exner(i,k1)
+            ten_t(i,k)=rublten(i,k1)
+            ten_v(i,k)=rvblten(i,k1)
+            ten_t(i,k)=rthblten(i,k1)*exner(i,k1)
             dqdt(i,k,1)=dqdt(i,k,1)+rqvblten(i,k1)
             dqdt(i,k,ntcw)=dqdt(i,k,ntcw)+rqcblten(i,k1)
          end do
@@ -626,7 +624,7 @@
            k1=levs+1-k
            do i=1,im
 !             t_myj1=t_myj(i,k1)+rthblten(i,k1)*exner(i,k1)*dt_phs
-             t_myj1=t_myj(i,k1)+dtdt(i,k)*dt_phs
+             t_myj1=t_myj(i,k1)+ten_t(i,k)*dt_phs
              if(tmax.lt.t_myj1)then
                 tmax=t_myj1
                 i_max=i
@@ -648,7 +646,7 @@
              print*,'bad bad tmin,tmax=',tmin,tmax,i_min,k_min,i_max,k_max
 
              do k=1,levs
-                 print*,'delt,t_myj=',k,dtdt(i,k)*dt_phs,tgrs(i,k)
+                 print*,'delt,t_myj=',k,ten_t(i,k)*dt_phs,tgrs(i,k)
              end do
 
              print*,'ide,levs,ntsd=',ide,lm,ntsd,dt_myj
@@ -689,7 +687,7 @@
            k1=levs+1-k
            do i=1,im
 !             t_myj1=t_myj(i,k1)+rthblten(i,k1)*exner(i,k1)*dt_phs
-             t_myj1=t_myj(i,k1)+dtdt(i,k)*dt_phs
+             t_myj1=t_myj(i,k1)+ten_t(i,k)*dt_phs
              if(tmax.lt.t_myj1)then
                 tmax=t_myj1
                 i_max=i
@@ -705,7 +703,7 @@
          end do
          print*,'2after me i_min,k_min,i_max,k_max=',me,i_min,k_min,i_max,k_max
          print*,'ntsd,tmin,tmax=',ntsd,tmin,tmax
-         print*,'dtdt(i,j)=',dtdt(i_max,k_max)*dt_phs,t_myj(i_max,k_max)
+         print*,'ten_t(i,j)*dt=',ten_t(i_max,k_max)*dt_phs,t_myj(i_max,k_max)
 
          tmax=-1.e-5
          tmin=1.e5
@@ -713,8 +711,8 @@
            k1=levs+1-k
            do i=1,im
 !             t_myj1=t_myj(i,k1)+rthblten(i,k1)*exner(i,k1)*dt_phs
-             t_myj1=ugrs(i,k)+dudt(i,k)*dt_phs
-!             t_myj1=dudt(i,k)*dt_phs
+             t_myj1=ugrs(i,k)+ten_u(i,k)*dt_phs
+!             t_myj1=ten_u(i,k)*dt_phs
              if(tmax.lt.t_myj1)then
                 tmax=t_myj1
                 i_max=i
@@ -729,12 +727,12 @@
          end do
          print*,'3after i_min,k_min,i_max,k_max=',i_min,k_min,i_max,k_max
          print*,'ntsd,me,tmin,tmax=',ntsd,me,tmin,tmax
-         print*,'dudt(i,k)=',dudt(i_max,k_max)*dt_phs,ugrs(i_max,k_max)
+         print*,'ten_u(i,k)*dt=',ten_u(i_max,k_max)*dt_phs,ugrs(i_max,k_max)
 
          if(tmax.gt.200.or.tmin.lt.-200)then
-           print*,'bad,bad,bad=',dudt(i_max,k_max)*dt_phs,ugrs(i_max,k_max)
+           print*,'bad,bad,bad=',ten_u(i_max,k_max)*dt_phs,ugrs(i_max,k_max)
            do k=1,levs
-              print*,'k,dudt*dt_phs,ugrs=',k,dudt(i_max,k)*dt_phs,ugrs(i_max,k)
+              print*,'k,ten_u*dt_phs,ugrs=',k,ten_u(i_max,k)*dt_phs,ugrs(i_max,k)
            end do
          end if
 
@@ -744,8 +742,8 @@
            k1=levs+1-k
            do i=1,im
 !             t_myj1=t_myj(i,k1)+rthblten(i,k1)*exner(i,k1)*dt_phs
-             t_myj1=vgrs(i,k)+dvdt(i,k)*dt_phs
-!             t_myj1=dvdt(i,k)*dt_phs
+             t_myj1=vgrs(i,k)+ten_v(i,k)*dt_phs
+!             t_myj1=ten_v(i,k)*dt_phs
              if(tmax.lt.t_myj1)then
                 tmax=t_myj1
                 i_max=i
@@ -760,7 +758,7 @@
          end do
          print*,'4after i_min,k_min,i_max,k_max=',i_min,k_min,i_max,k_max
          print*,'ntsd,me,tmin,tmax=',ntsd,me,tmin,tmax
-         print*,'dvdt(i,k)=',dvdt(i_max,k_max)*dt_phs,vgrs(i_max,k_max)
+         print*,'ten_v(i,k)*dt=',ten_v(i_max,k_max)*dt_phs,vgrs(i_max,k_max)
 
          tmax=-1.e-5
          tmin=1.e5

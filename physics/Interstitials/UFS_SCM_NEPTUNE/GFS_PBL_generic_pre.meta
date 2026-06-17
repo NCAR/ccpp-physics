@@ -266,13 +266,6 @@
   dimensions = ()
   type = integer
   intent = in
-[imp_physics_zhao_carr]
-  standard_name = identifier_for_zhao_carr_microphysics_scheme
-  long_name = choice of Zhao-Carr microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [imp_physics_mg]
   standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
@@ -366,66 +359,6 @@
   type = real
   kind = kind_phys
   intent = inout
-[save_u]
-  standard_name = x_wind_save
-  long_name = x-wind before entering a physics scheme
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[save_v]
-  standard_name = y_wind_save
-  long_name = y-wind before entering a physics scheme
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[save_t]
-  standard_name = air_temperature_save
-  long_name = air temperature before entering a physics scheme
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[save_q]
-  standard_name = tracer_concentration_save
-  long_name = tracer concentration before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
-  type = real
-  kind = kind_phys
-  intent = out
-[flag_for_pbl_generic_tend]
-  standard_name = flag_for_generic_tendency_due_to_planetary_boundary_layer
-  long_name = true if GFS_PBL_generic should calculate tendencies
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[ldiag3d]
-  standard_name = flag_for_diagnostics_3D
-  long_name = flag for 3d diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[qdiag3d]
-  standard_name = flag_for_tracer_diagnostics_3D
-  long_name = flag for 3d tracer diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-[lssav]
-  standard_name = flag_for_diagnostics
-  long_name = logical flag for storing diagnostics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [ugrs]
   standard_name = x_wind
   long_name = zonal wind

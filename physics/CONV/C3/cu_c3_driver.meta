@@ -233,7 +233,7 @@
   optional = True
 [tmf]
   standard_name = tendency_of_vertically_diffused_tracer_concentration
-  long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
+  long_name = tendency of the tracers due to vertical diffusion in PBL scheme
   units = kg kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_vertical_diffusion_tracers)
   type = real
@@ -249,7 +249,7 @@
   intent = in
   optional = True
 [sigmain]
-  standard_name = prognostic_updraft_area_fraction_in_convection
+  standard_name = physics_timestep_initial_updraft_area_fraction
   long_name = convective updraft area fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -258,8 +258,8 @@
   intent = in
   optional = True
 [sigmaout]
-  standard_name = updraft_area_fraction_updated_by_physics
-  long_name = convective updraft area fraction updated by physics
+  standard_name = updraft_area_fraction
+  long_name = convective updraft area fraction
   units = frac
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -288,6 +288,7 @@
   units = none
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [phil]
   standard_name = geopotential
@@ -314,21 +315,21 @@
   kind = kind_phys
   intent = out
 [qv_spechum]
-  standard_name = specific_humidity_of_new_state
-  long_name = water vapor specific humidity updated by physics
+  standard_name = specific_humidity
+  long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [t]
-  standard_name = air_temperature_of_new_state
-  long_name = updated temperature
+  standard_name = air_temperature
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [cld1d]
   standard_name = cloud_work_function
   long_name = cloud work function
@@ -338,23 +339,23 @@
   kind = kind_phys
   intent = out
 [us]
-  standard_name = x_wind_of_new_state
-  long_name = updated x-direction wind
+  standard_name = x_wind
+  long_name = x-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [vs]
-  standard_name = y_wind_of_new_state
-  long_name = updated y-direction wind
+  standard_name = y_wind
+  long_name = y-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [t2di]
-  standard_name = air_temperature
+  standard_name = physics_timestep_initial_air_temperature
   long_name = mid-layer temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -370,7 +371,7 @@
   kind = kind_phys
   intent = in
 [qv2di_spechum]
-  standard_name = specific_humidity
+  standard_name = physics_timestep_initial_specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -453,7 +454,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [clcw]
   standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
@@ -461,7 +462,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [pbl]
   standard_name = atmosphere_boundary_layer_thickness
   long_name = PBL thickness
@@ -736,6 +737,54 @@
   dimensions = ()
   type = integer
   intent = in
+[ten_t]
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_u]
+  standard_name = tendency_of_x_wind
+  long_name = tendency of x wind calculated by one physics scheme
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_v]
+  standard_name = tendency_of_y_wind
+  long_name = tendency of y wind calculated by one physics scheme
+  units = m s-2
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_q]
+  standard_name = tendency_of_tracer_concentration
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
+[dcliw]
+  standard_name = tendency_of_ice_water_mixing_ratio_convective_transport_tracer
+  long_name = tendency of ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dclcw]
+  standard_name = tendency_of_cloud_condensed_water_mixing_ratio_convective_transport_tracer
+  long_name = tendency of ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

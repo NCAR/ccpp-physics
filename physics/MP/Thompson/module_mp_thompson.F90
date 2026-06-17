@@ -5377,9 +5377,8 @@ module module_mp_thompson
          n_local = ta_Na(1) + 1.0
       endif
       do n = 2, ntb_arc
-         if (n_local.ge.ta_Na(n-1) .and. n_local.lt.ta_Na(n)) goto 8003
+         if (n_local.ge.ta_Na(n-1) .and. n_local.lt.ta_Na(n)) exit
       enddo
- 8003 continue
       i = n
       x1 = LOG(ta_Na(i-1))
       x2 = LOG(ta_Na(i))
@@ -5390,9 +5389,8 @@ module module_mp_thompson
          w_local = ta_Ww(1) + 0.001
       endif
       do n = 2, ntb_arw
-         if (w_local.ge.ta_Ww(n-1) .and. w_local.lt.ta_Ww(n)) goto 8005
+         if (w_local.ge.ta_Ww(n-1) .and. w_local.lt.ta_Ww(n)) exit
       enddo
- 8005 continue
       j = n
       y1 = LOG(ta_Ww(j-1))
       y2 = LOG(ta_Ww(j))
@@ -5463,7 +5461,7 @@ module module_mp_thompson
       C=1./FPMIN
       D=1./B
       H=D
-      DO 11 I=1,ITMAX
+      DO I=1,ITMAX
         AN=-I*(I-A)
         B=B+2.
         D=AN*D+B
@@ -5473,10 +5471,10 @@ module module_mp_thompson
         D=1./D
         DEL=D*C
         H=H*DEL
-        IF(ABS(DEL-1.).LT.gEPS)GOTO 1
- 11   CONTINUE
-      PRINT *, 'A TOO LARGE, ITMAX TOO SMALL IN GCF'
- 1    GAMMCF=EXP(-X+A*LOG(X)-GLN)*H
+        IF(ABS(DEL-1.).LT.gEPS) EXIT
+      END DO
+      IF (I.EQ.ITMAX) PRINT *, 'A TOO LARGE, ITMAX TOO SMALL IN GCF'
+     GAMMCF=EXP(-X+A*LOG(X)-GLN)*H
    END SUBROUTINE GCF
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 
@@ -5504,14 +5502,14 @@ module module_mp_thompson
       AP=A
       SUM=1./A
       DEL=SUM
-      DO 11 N=1,ITMAX
+      DO N=1,ITMAX
         AP=AP+1.
         DEL=DEL*X/AP
         SUM=SUM+DEL
-        IF(ABS(DEL).LT.ABS(SUM)*gEPS)GOTO 1
- 11   CONTINUE
-      PRINT *,'A TOO LARGE, ITMAX TOO SMALL IN GSER'
- 1    GAMSER=SUM*EXP(-X+A*LOG(X)-GLN)
+        IF(ABS(DEL).LT.ABS(SUM)*gEPS) EXIT
+      END DO
+      IF (N.EQ.ITMAX) PRINT *,'A TOO LARGE, ITMAX TOO SMALL IN GSER'
+      GAMSER=SUM*EXP(-X+A*LOG(X)-GLN)
    END SUBROUTINE GSER
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 

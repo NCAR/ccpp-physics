@@ -362,7 +362,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = True
 [tsfg]
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
@@ -517,7 +516,7 @@
   units = count
   dimensions = ()
   type = integer
-  intent = inout
+  intent = out
 [idxday]
   standard_name = daytime_points
   long_name = daytime points

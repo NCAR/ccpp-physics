@@ -78,11 +78,11 @@
            &  imp_physics_gfdl, imp_physics_fa, conv_cf_opt
       logical,             intent(in)  :: flag_init, flag_restart, do_mynnedmf
 
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: qc, qi
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: qr, qs, qg
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: qc, qi, qs
+      real(kind=kind_phys), dimension(:,:), intent(in) :: qr, qg
       ! note: qci_conv only allocated if GF is used
-      real(kind=kind_phys), dimension(:,:), intent(inout), optional :: qci_conv
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: qlc, qli !for SAS
+      real(kind=kind_phys), dimension(:,:), intent(in), optional :: qci_conv
+      real(kind=kind_phys), dimension(:,:), intent(in) :: qlc, qli !for SAS
       real(kind=kind_phys), dimension(:,:), intent(in), optional    :: ud_mf
       real(kind=kind_phys), dimension(:,:), intent(in)    :: T3D,delp
       real(kind=kind_phys), dimension(:,:), intent(in)    :: qv,P3D,exner

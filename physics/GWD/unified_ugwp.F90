@@ -243,10 +243,10 @@ contains
          br1,hpbl,vtype,slmsk, do_tofd, ldiag_ugwp, ugwp_seq_update,                   &
          cdmbgwd, alpha_fd, jdat, xlat, xlat_d, sinlat, coslat, area,                  &
          ugrs, vgrs, tgrs, q1, prsi, prsl, prslk, phii, phil,                          &
-         del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis,                &
+         del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_dqdt, gw_kdis,       &
          tau_tofd, tau_mtb, tau_ogw, tau_ngw,                                          &
          dudt_mtb, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,                          &
-         dudt, dvdt, dtdt, rdxzb, con_g, con_omega, con_pi, con_cp, con_rd, con_rv,    &
+         rdxzb, con_g, con_omega, con_pi, con_cp, con_rd, con_rv,                      &
          con_rerth, con_fvirt, rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                &
          ldiag3d, dtend, dtidx, index_of_temperature, index_of_x_wind,                 &
          index_of_y_wind, index_of_process_orographic_gwd,                             &
@@ -305,6 +305,7 @@ contains
     real(kind=kind_phys),    intent(out), dimension(:)          :: rdxzb
     real(kind=kind_phys),    intent(out), dimension(:)          :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: gw_dudt, gw_dvdt, gw_dtdt, gw_kdis
+    real(kind=kind_phys),    intent(out), dimension(:,:,:)      :: gw_dqdt
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: dudt_mtb, dudt_tms
 
     real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
@@ -316,8 +317,6 @@ contains
 
     ! These arrays only allocated if ldiag_ugwp = .true.
     real(kind=kind_phys),    intent(inout), dimension(:,:), optional :: du3dt_mtb, du3dt_ogw, du3dt_tms
-
-    real(kind=kind_phys),    intent(inout), dimension(:,:) :: dudt, dvdt, dtdt
 
     real(kind=kind_phys),    intent(in) :: con_g, con_omega, con_pi, con_cp, con_rd, &
                                            con_rv, con_rerth, con_fvirt
@@ -383,6 +382,7 @@ contains
     gw_dudt(:,:)  = 0.0
     gw_dvdt(:,:)  = 0.0
     gw_dtdt(:,:)  = 0.0
+    gw_dqdt(:,:,:)= 0.0
     gw_kdis(:,:)  = 0.0
     dudt_mtb(:,:) = 0.0
     dudt_tms(:,:) = 0.0
@@ -443,7 +443,7 @@ contains
            nmtvr_temp = nmtvr
         end if
 
-        call gwdps_run(im, levs, Pdvdt, Pdudt, Pdtdt,                  &
+        call gwdps_run(im, levs, Pdvdt, Pdudt, Pdtdt, gw_dqdt,         &
                    ugrs, vgrs, tgrs, q1,                               &
                    kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt, &
                    hprime, oc, oa4, clx, theta, sigma, gamma,          &
@@ -494,9 +494,9 @@ contains
     if ( do_gsl_drag_ls_bl.or.do_gsl_drag_ss.or.do_gsl_drag_tofd ) then
 
     if (do_gwd_opt_psl) then
-       call drag_suite_psl(im,levs,dvdt,dudt,dtdt,uwnd1,vwnd1,       &
-                 tgrs,q1,kpbl,prsi,del,prsl,prslk,phii,phil,dtp,     &
-                 kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &
+       call drag_suite_psl(im,levs,gw_dvdt,gw_dudt,gw_dtdt,uwnd1,    &
+                 vwnd1,tgrs,q1,kpbl,prsi,del,prsl,prslk,phii,phil,   &
+                 dtp,kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,        &
                  ol4ss,theta,sigma,gamma,elvmax,dtaux2d_ms,          &
                  dtauy2d_ms,dtaux2d_bl,dtauy2d_bl,dtaux2d_ss,        &
                  dtauy2d_ss,dtaux2d_fd,dtauy2d_fd,dusfcg,            &
@@ -507,15 +507,15 @@ contains
                  cdmbgwd,alpha_fd,me,master,                         &
                  lprnt,ipr,rdxzb,dx,gwd_opt,                         &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
-                 psl_gwd_dx_factor,                                  &
+                 psl_gwd_dx_factor, flag_for_gwd_generic_tend,       &
                  dtend, dtidx, index_of_process_orographic_gwd,      &
                  index_of_temperature, index_of_x_wind,              &
                  index_of_y_wind, ldiag3d, ldiag_ugwp,               &
                  ugwp_seq_update, spp_wts_gwd, spp_gwd, errmsg, errflg)
     else
-       call drag_suite_run(im,levs,dvdt,dudt,dtdt,uwnd1,vwnd1,       &
-                 tgrs,q1,kpbl,prsi,del,prsl,prslk,phii,phil,dtp,     &
-                 kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &
+       call drag_suite_run(im,levs,gw_dvdt,gw_dudt,gw_dtdt,gw_dqdt,  &
+                 uwnd1,vwnd1,tgrs,q1,kpbl,prsi,del,prsl,prslk,phii,  &
+                 phil,dtp,kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,   &
                  ol4ss,theta,sigma,gamma,elvmax,dtaux2d_ms,          &
                  dtauy2d_ms,dtaux2d_bl,dtauy2d_bl,dtaux2d_ss,        &
                  dtauy2d_ss,dtaux2d_fd,dtauy2d_fd,dusfcg,            &
@@ -526,6 +526,7 @@ contains
                  cdmbgwd,alpha_fd,me,master,                         &
                  lprnt,ipr,rdxzb,dx,gwd_opt,                         &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
+                 flag_for_gwd_generic_tend,                          &
                  dtend, dtidx, index_of_process_orographic_gwd,      &
                  index_of_temperature, index_of_x_wind,              &
                  index_of_y_wind, ldiag3d, ldiag_ugwp,               &
@@ -603,10 +604,6 @@ contains
             gw_dudt(i,k) = gw_dudt(i,k)+ Pdudt(i,k)
             gw_dvdt(i,k) = gw_dvdt(i,k)+ Pdvdt(i,k)
             gw_kdis(i,k) = gw_kdis(i,k)+ Pkdis(i,k)
-            ! accumulation of tendencies for CCPP to replicate EMC-physics updates (!! removed in latest code commit to VLAB)
-            !dudt(i,k) = dudt(i,k) +gw_dudt(i,k)
-            !dvdt(i,k) = dvdt(i,k) +gw_dvdt(i,k)
-            !dtdt(i,k) = dtdt(i,k) +gw_dtdt(i,k)
           enddo
         enddo
 
@@ -626,17 +623,17 @@ contains
       if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
         idtend = dtidx(index_of_x_wind,index_of_process_nonorographic_gwd)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdudt*dtp
+          dtend(:,:,idtend) = dtend(:,:,idtend) + dudt_ngw(:,:)*dtp
         endif
 
         idtend = dtidx(index_of_y_wind,index_of_process_nonorographic_gwd)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdvdt*dtp
+          dtend(:,:,idtend) = dtend(:,:,idtend) + dvdt_ngw(:,:)*dtp
         endif
 
         idtend = dtidx(index_of_temperature,index_of_process_nonorographic_gwd)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdtdt*dtp
+          dtend(:,:,idtend) = dtend(:,:,idtend) + dtdt_ngw(:,:)*dtp
         endif
       endif
 
