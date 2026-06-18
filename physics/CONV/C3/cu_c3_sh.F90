@@ -411,13 +411,12 @@ contains
         if(ierr(i).eq.0)then
 !
 !$acc loop seq
-      do k=kts,ktf
+      find_kbmax: do k=kts,ktf
         if(zo_cup(i,k).gt.zkbmax+z1(i))then
           kbmax(i)=k
-          go to 25
+          exit find_kbmax
         endif
-      enddo
- 25   continue
+      end do find_kbmax
 !
       kbmax(i)=min(kbmax(i),ktf/2)
       endif
@@ -606,7 +605,7 @@ contains
 !
 
 !$acc parallel loop private(ki,qaver,k,trash,trash2,dz,dp)
-      do 42 i=its,itf
+      do i=its,itf
         dbyt(i,:)=0.
         if(ierr(i) /= 0) cycle
 !$acc loop seq
@@ -648,14 +647,14 @@ contains
 #ifndef _OPENACC
             ierrc(i)='ktop is less than kbcon+1'
 #endif
-             go to 42
+             cycle
          endif
          if(ktop(i).gt.ktf-2)then
              ierr(i)=5
 #ifndef _OPENACC
              ierrc(i)="ktop is larger than ktf-2"
 #endif
-             go to 42
+             cycle
          endif
 !
          call get_cloud_bc(kte,qo_cup (i,1:kte),qaver,k22(i),zero)
@@ -725,7 +724,7 @@ contains
            xzu (i,k)=0.
            zuo (i,k)=0.
          enddo
- 42 continue
+      end do
 !$acc end parallel
 !
 !--- calculate workfunctions for updrafts

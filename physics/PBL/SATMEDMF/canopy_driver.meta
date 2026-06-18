@@ -504,7 +504,7 @@
   units = index
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = inout
+  intent = in
 [pgr]
   standard_name = surface_air_pressure
   long_name = surface pressure
@@ -629,7 +629,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [tkeh]
   standard_name = vertical_turbulent_kinetic_energy_at_interface
   long_name = vertical turbulent kinetic energy at model layer interfaces
