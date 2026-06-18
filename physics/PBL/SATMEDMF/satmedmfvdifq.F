@@ -1847,9 +1847,9 @@
               END IF
 
 ! Comment out to turn OFF the integrated canopy effect
-              dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
-              dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
-              dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
+!Apr17        dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
+!Apr17        dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
+!Apr17        dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
 
             END IF ! (COUNTCAN > 0)
 
