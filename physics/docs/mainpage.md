@@ -5,6 +5,8 @@ The Common Community Physics Package (CCPP) provides scientific documentation fo
 - [CCPP Physics V7.0.0 Scientific Documentation](./V7/)
 - [CCPP Physics UFS Hierarchical System Development (HSD) Scientific Documentation](./HSD/)
 - [CCPP Physics SRW v3.0.0 Scientific Documentation](./SRWv3/)
+- [CCPP Physics UFS Land Data Assimilation System Scientific Documentation](./LandDA/)
+- [CCPP Physics Global Workflow v1.0.0 Scientific Documentation](./GWv1/)
 
 For more information about the CCPP including Release Information, Technical Documentation, and Code, please visit the 
 <a href="https://dtcenter.org/community-code/common-community-physics-package-ccpp" target="_blank">CCPP website</a>, hosted by the Developmental Testbed Center (DTC).
@@ -28,3 +30,7 @@ development of CCPP-Physics.
 
 for their support and contribution for this CCPP scientific documentation (SciDoc).
 \n Thanks also to the CCPP SciDoc Team at the Developmental Testbed Center: Man Zhang, Ligia Bernardet, Mike Kavulich, and Tracy Hertneky.
+
+---
+
+[WEB ACCESSIBILITY](https://www.ucar.edu/web-accessibility)
