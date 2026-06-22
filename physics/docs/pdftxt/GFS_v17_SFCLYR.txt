@@ -1,0 +1,73 @@
+/**
+\page GFS_v17_SFCLYR GFS Surface Layer Scheme
+\section des_rough  Description
+
+ The lowest model layer is assumed to be the surface layer and apply the 
+ Monin-Obukhov similarity profile relationship to obtain the surface stress
+ and sensible and latent heat fluxes. The formulation was based on 
+ Miyakoda and Sirutis (1986) \cite miyakoda_and_sirutis_1986
+ and has been modified by P. Long \cite long_1984 \cite long_1986 
+in the very stable and very unstable situations.
+
+ The \ref NoahMP_LSM is largely responsible for the quality
+ of model forecasts produced for near-surface weather parameters, such
+ as 2-meter air temperature (\f$T_{2m}\f$) and surface skin temperature
+  (\f$LST\f$). \f$LST\f$ is derived from the surface energy budget, and is
+ particularly important to remote sensing and data  assimilation. How
+ precise these two parameters can be simulated by the model strongly
+ depends on how accurate the surface heat fluxes are parameterized,
+ particularly the surface sensible heat flux (\f$SH\f$). The surface
+ thermal roughness length is a key parameter to determine \f$SH\f$.
+ Previous GFS version do not distinguish between the roughness length
+ for heat and momentum. The aerodynamic roughness \f$Z_{0m}\f$ is used
+ for wind, while the thermal roughness \f$Z_{0t}\f$ is used for heat and
+ water vapor. In the surface layer, the GFS applies the MO similarity profile
+ scheme with modified stability functions (Miyakoda and Sirutis 1986 \cite miyakoda_and_sirutis_1986;
+ Long 1984, 1986 \cite long_1984 \cite long_1986).
+ Momentum and thermal roughness lengths are necessary to estimate the 
+ surface fluxes from the atmospheric surface layer similarity theory. In the current
+ operational GFS, the momentum roughtness length \f$Z_{0m}\f$ is specified according to the 
+ fixed vegetation types but has no seasonal variation.
+
+ In May 2011, the new vegetation-dependent formulations of
+ thermal roughness formulation ( 
+ Zheng et al. (2012) \cite zheng_et_al_2012)
+ was implemented to deal with the cold \f$LST\f$ bias
+ over the arid western continental United States
+  (CONUS) during daytime. The thermal roughness length \f$Z_{0H}\f$ is derived by a 
+ seasonlly varying formulation dependent on the seasonal cycle of green vegetation
+ fraction. In this \f$Z_{0H}\f$ formulation, a key parameter known as \f$C_{zil}\f$
+ is specified according to a dependence on canopy height.
+
+The NCEP GFS global prediction model has experienced a longstanding problem of severe 
+cold bias in the \f$T_{2m}\f$ forecasts over land in the late afternoon and nighttime
+during moist seasons. This cold bias is closely associated with the nocturnal stable 
+boundary layer and is accompanied by a corresponding warm air temperature bias in the first
+model level above the ground. In 2017, Zheng et al. (2017) \cite zheng_et_al_2017 identified the 
+bias and introduced a stability parameter constraint \f$(z/L)_{lim}\f$ to prevent the land-atmosphere system from fully decoupling:
+\f[
+(z/L)_{lim}=\frac{ln(\frac{z}{z_{0M}})}{2\alpha(1-\frac{z_{0M}}{z})}
+\f]
+
+Here \f$z\f$ is the height, \f$L\f$ is the Obukhov length, \f$z_{0M}\f$ is the momentum roughness length, and \f$\alpha = 5\f$. 
+
+The pertinent features of the GFS stable surface layer parameterization scheme are described in the appendix of Zheng et al. (2017) 
+\cite zheng_et_al_2017.
+
+Recently, Han et al.(2021) \cite https://doi.org/10.25923/cybh-w893 introduced a few new features:
+- A sea spray effect algorithm was included to enhance sensible and latent heat fluxes, especially for strong wind conditions.
+- To better represent sub-grid scale turbulence variability in the surface layer, a new algorithm for maximum surface layer stability parameter was developed as an inverse function of the background turbulent eddy diffusivity.
+- The thermal roughness length calculation over land has been modified.
+
+\subsection gfsv17updates_sfclyr GFS Surface Layer Scheme Updates in GFSv17
+- Implementation of a new sea spray parameterization
+- Update momentum roughness over sea, thermal roughness over land, and
+maximum stability limit
+
+\section intra_rough Intraphysics Communication
+\ref arg_table_sfc_diff_run
+
+\section gen_rough  General Algorithm
+\ref general_diff
+
+*/
