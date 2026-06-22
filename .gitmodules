@@ -10,3 +10,8 @@
   path = physics/SFC_Layer/MYNN/MYNN
   url = https://github.com/NCAR/MYNN-SFC
   branch = ccpp/dev
+[submodule "physics/CONV/C3"]
+  path = physics/CONV/C3
+  url = https://github.com/ufs-community/c3
+  branch = main
+
