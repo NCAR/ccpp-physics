@@ -15,5 +15,5 @@
 [submodule "physics/CONV/C3"]
   path = physics/CONV/C3
   url = https://github.com/ufs-community/c3
-  branch = main
-
+  #branch = main
+  branch = feature/capgen-ng
