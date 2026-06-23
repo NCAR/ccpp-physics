@@ -22,33 +22,49 @@
  by the large scale dynamics is in balance with the consumption of the
  cloud work function by the convection.
 
- The SAS scheme uses the working concepts put forth 
- in Arakawa and Schubert (1974) \cite arakawa_and_schubert_1974 but includes modifications
- and simplifications from Grell (1993) \cite grell_1993 such as saturated
- downdrafts and only one cloud type (the deepest possible), rather than
- a spectrum based on cloud top heights or assumed entrainment rates.
- The scheme was implemented for the GFS in 1995 by Pan and Wu (1995) \cite pan_and_wu_1995, 
- with further modifications discussed in Han and Pan (2011) \cite han_and_pan_2011, including the calculation
- of cloud top, a greater CFL-criterion-based maximum cloud base mass flux,
- updated cloud model entrainment and detrainment, improved convective
- transport of horizontal momentum, a more general triggering function,
- and the inclusion of convective overshooting.
+ The SAS scheme uses the working concepts put forth in Arakawa and Schubert (1974)
+ \cite arakawa_and_schubert_1974 but includes modifications and simplifications
+ from Grell (1993) \cite grell_1993 such as saturated downdrafts and only one cloud
+ type (the deepest possible), rather than a spectrum based on cloud top heights or
+ assumed entrainment rates. The scheme was implemented for the GFS in 1995 by Pan
+ and Wu (1995) \cite pan_and_wu_1995, with further modifications discussed in Han
+ and Pan (2011) \cite han_and_pan_2011, including the calculation of cloud top, a
+ greater CFL-criterion-based maximum cloud base mass flux, updated cloud model
+ entrainment and detrainment, improved convective transport of horizontal momentum,
+ a more general triggering function, and the inclusion of convective overshooting.
 
  The SAMF scheme updates the SAS scheme with scale- and aerosol-aware
- parameterizations from Han et al. (2017) \cite han_et_al_2017 based on
- the studies by Arakawa and Wu (2013) \cite arakawa_and_wu_2013 and 
- Grell and Freitas (2014) \cite grell_and_freitas_2014 for scale awareness
- and Lim (2011) by \cite lim_2011 for aerosol awareness. The ratio of
- advective time to convective turnover time is also taken into account
+ parameterizations from Han et al. (2017) \cite han_et_al_2017 where the mass-flux
+ is scaled down at increasing resolution based on the studies by Arakawa and Wu
+ (2013) \cite arakawa_and_wu_2013 using convective updraft area fraction and Grell
+ and Freitas (2014) \cite grell_and_freitas_2014 for scale awareness. The updraft
+ area fraction for scale-awareness has been adapted to follow a prognostic equation
+ outlined in Bengtsson et al. (2022) for enhanced convective memory representation.
+ The method outlined in Lim (2011) \cite lim_2011 is used for aerosol awareness.
+ The ratio of advective time to convective turnover time is also taken into account
  for the scale-aware parameterization. Along with the scale- and aerosol-aware
- parameterizations, more changes are made to the SAMF scheme. The cloud
- base mass-flux computation is modified to use convective turnover time
- as the convective adjustment time scale. The rain conversion rate is
- modified to decrease with decreasing air temperature above the freezing
- level. Convective inhibition in the sub-cloud layer is used as an additional
- trigger condition. Convective cloudiness is enhanced by considering suspended
- cloud condensate in the updraft. The lateral entrainment is also enhanced
- to more strongly suppress convection in a drier environment.
+ parameterizations, more changes are made to the SAMF scheme. The cloud base
+ mass-flux computation is modified to use convective turnover time as the
+ convective adjustment time scale. The rain conversion rate is modified to decrease
+ with decreasing air temperature above the freezing level. Convective inhibition in
+ the sub-cloud layer is used as an additional trigger condition. Convective
+ cloudiness is enhanced by considering suspended cloud condensate in the updraft.
+ The lateral entrainment is also enhanced to more strongly suppress convection in
+ a drier environment.
+
+ To represent the effects of convective organization that occur on scales
+ smaller than the model grid, the GFSv17 convection scheme employs a stochastic
+ cellular automata (CA) framework (Bengtsson et al. 2021). The CA evolves a
+ subgrid-scale convective activity field based on local interactions between
+ neighboring cells, allowing convective systems to develop spatial and temporal
+ coherence rather than occurring independently in each grid box. This approach
+ is motivated by observations showing that deep convection often organizes into
+ clusters and mesoscale structures that influence precipitation variability and
+ upscale interactions with the large-scale circulation. The resulting CA-derived
+ convective organization parameter is used to modulate convective initiation,
+ providing a physically motivated representation of unresolved convective memory
+ and organization while introducing realistic stochastic variability into the
+ forecast system.
 
 
 \subsection gfsv16updates GFSv16 Updates
@@ -69,18 +85,26 @@
  and maximum allowable cloudbase mass flux (as of June 2018).
 
 \subsection gfsv17updates_samf GFS saSAS Scheme Updates in GFSv17
- The updates to the SAMF parameterization described above, between GFSv16 and GFSv17
- are carefully outlined in Bengtsson and Han (2004)(submitted to WAF). The main updates include:
+ The updates to the SAMF parameterization described above, between GFSv16 and
+ GFSv17 are carefully outlined in Bengtsson and Han (2024) \cite bengtsson_han_2024.
+ The main updates include:
 
- - Implementation of a positive definition mass-flux scheme and a method for removing the negative tracers (Han et al. 2022 \cite Han_et_al_2022)
- - Introduction of a new closure based on a prognostic evolution of the convective updraft area fraction in both shallow and deep convection (Bengtsson et al. 2022 \cite Bengtsson_2022)
- - Introduction of 3D effects of cold-pool dynamics and stochastic initiation using self-organizing \ref cellular_automata (Bengtsson et al. 2021 \cite bengtsson_et_al_2021)
- - Introduction of environmental wind shear and TKE dependence in convection, to seek improvements in hurricane forecast prediction (Han et al. 2024 \cite Han_2024)
- - Stricter convective initiation criteria to allow for more CAPE to build up to address a low CAPE bias in GFSv16 (Han et al. 2021 \cite han_2021)
- - Reduction of convective rain evaporation rate to address a systematic cold bias near the surface in GFSv16 (Han et al. 2021 \cite han_2021)
+ - Implementation of a positive definition mass-flux scheme and a method for
+ removing the negative tracers (Han et al. 2022 \cite Han_et_al_2022)
+ - Introduction of a new closure based on a prognostic evolution of the convective
+ updraft area fraction in both shallow and deep convection (Bengtsson et al. 2022
+ \cite Bengtsson_2022)
+ - Introduction of 3D effects of cold-pool dynamics and stochastic initiation using
+ self-organizing \ref cellular_automata (Bengtsson et al. 2021 \cite bengtsson_et_al_2021)
+ - Introduction of environmental wind shear and TKE dependence in convection, to
+ seek improvements in hurricane forecast prediction (Han et al. 2024 \cite Han_2024)
+ - Stricter convective initiation criteria to allow for more CAPE to build up to
+ address a low CAPE bias in GFSv16 (Han et al. 2021 \cite han_2021)
+ - Reduction of convective rain evaporation rate to address a systematic cold bias
+ near the surface in GFSv16 (Han et al. 2021 \cite han_2021)
 
 
-\sa NCEP Office Note 505 \cite https://doi.org/10.25923/cybh-w893 and 506 \cite https://doi.org/10.25923/5051-3r70 
+\sa NCEP Office Note 505 \cite han_2021 and 506 \cite https://doi.org/10.25923/5051-3r70 
 \section intra_deep  Intraphysics Communication
 \ref arg_table_samfdeepcnv_run
 

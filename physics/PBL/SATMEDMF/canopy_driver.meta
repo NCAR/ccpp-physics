@@ -504,7 +504,7 @@
   units = index
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = inout
+  intent = in
 [pgr]
   standard_name = surface_air_pressure
   long_name = surface pressure
@@ -629,7 +629,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [tkeh]
   standard_name = vertical_turbulent_kinetic_energy_at_interface
   long_name = vertical turbulent kinetic energy at model layer interfaces
@@ -878,7 +878,7 @@
   intent = in
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
-  long_name = index of x-wind in first dimension of array cumulative change index
+  long_name = index of y-wind in first dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer

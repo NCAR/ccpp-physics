@@ -954,7 +954,7 @@
   type = integer
   intent = in
 [index_of_process_mp]
-  standard_name = index_of_microphysics_process_process_in_cumulative_change_index
+  standard_name = index_of_microphysics_process_in_cumulative_change_index
   long_name = index of microphysics transport process in second dimension of array cumulative change index
   units = index
   dimensions = ()

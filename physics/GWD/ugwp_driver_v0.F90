@@ -426,28 +426,26 @@ module ugwp_driver_v0
 ! Alternative expression: ZMTB = max(Heff*(1. -Fcrit_gfs/Fr), 0)
 ! fcrit_gfs/fr	 
 !
-        goto 788
 
-        BNV     = SQRT( BNV2bar(I) )
-        heff    = 2.*min(HPRIME(J),hpmax)
-        zw2     = UBAR(I)*UBAR(I)+VBAR(I)*VBAR(I)
-        Ulow(i) = sqrt(max(zw2,dw2min))
-        Fr      = heff*bnv/Ulow(i)
-        ZW1     = max(Heff*(1. -fcrit_gfs/fr), 0.0)
-        zw2     = phil(j,2)*rgrav
-        if (Fr > fcrit_gfs .and. zw1 > zw2 ) then 
-          do k=2, kmm1
-            pkp1log =  phil(j,k+1) * rgrav
-            pklog   =  phil(j,k)   * rgrav
-            if (zw1 <= pkp1log .and. zw1 >= pklog)  exit
-          enddo
-            IDXZB(I) = K
-            zmtb (J) = PHIL(J, K)*rgrav
-        else
-           zmtb (J) = 0.
-           IDXZB(I) = 0
-        endif
-788     continue
+!        BNV     = SQRT( BNV2bar(I) )
+!        heff    = 2.*min(HPRIME(J),hpmax)
+!        zw2     = UBAR(I)*UBAR(I)+VBAR(I)*VBAR(I)
+!        Ulow(i) = sqrt(max(zw2,dw2min))
+!        Fr      = heff*bnv/Ulow(i)
+!        ZW1     = max(Heff*(1. -fcrit_gfs/fr), 0.0)
+!        zw2     = phil(j,2)*rgrav
+!        if (Fr > fcrit_gfs .and. zw1 > zw2 ) then 
+!          do k=2, kmm1
+!            pkp1log =  phil(j,k+1) * rgrav
+!            pklog   =  phil(j,k)   * rgrav
+!            if (zw1 <= pkp1log .and. zw1 >= pklog)  exit
+!          enddo
+!            IDXZB(I) = K
+!            zmtb (J) = PHIL(J, K)*rgrav
+!        else
+!           zmtb (J) = 0.
+!           IDXZB(I) = 0
+!        endif
       ENDDO
 
 !
@@ -483,8 +481,9 @@ module ugwp_driver_v0
             R    = sqrt(rnom/rdem)
             ZR   =  MAX( 2. - R, 0. )
             sigres = max(sigmin, sigma(J))
-            if (hprime(J)/sigres > dxres) sigres = hprime(J)/dxres
             mtbridge = ZR * sigres*ZLEN / hprime(J)
+            ! Scale the blocking coefficient by the inverse square root of dxres
+            cdmb4 = cdmbgwd(1) * 100.0 / sqrt(sqrt(sparea(j)))
 !           dbtmp = cdmb4*mtbridge*max(cos(ang(i,k)), gamma(j)*sin(ang(i,k)))   ! (4.15)-ifs 	
             dbtmp = cdmb4*mtbridge*(bgam * cosang2 + cgam * sinang2)            ! (4.16)-ifs
             DB(I,K)= DBTMP * UDS(I,K)
@@ -623,7 +622,9 @@ module ugwp_driver_v0
         EFACT    = MIN( MAX(EFACT,EFMIN), EFMAX )
 !
         COEFM    = (1. + CLX(I)) ** (OA(I)+1.)
-!
+
+        ! Scale the cleff coefficient by the inverse square root of dxres
+        cleff = cdmbgwd(2) * 0.001 / sqrt(sqrt(sparea(j)))
         XLINV(I) = COEFM * CLEFF           ! effective kxw for Lin-wave
         XLINGFS  = COEFM * CLEFF 
 !
