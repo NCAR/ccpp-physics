@@ -244,7 +244,7 @@ contains
     real(kind=kind_phys),    intent(in), dimension(:) :: rain
 
     integer,                 intent(in) :: ntke
-    real(kind=kind_phys),    intent(in), dimension(:,:) :: q_tke, dqdt_tke
+    real(kind=kind_phys),    intent(in), dimension(:,:), optional :: q_tke, dqdt_tke
 
     logical, intent(in) :: lprnt
     integer, intent(in) :: ipr
