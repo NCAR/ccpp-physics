@@ -229,7 +229,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = unified_ugwp_finalize
+  name = unified_ugwp_final
   type = scheme
 [do_ugwp_v0]
   standard_name = flag_for_ugwp_version_0

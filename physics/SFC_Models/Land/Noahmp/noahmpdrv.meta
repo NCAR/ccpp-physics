@@ -285,7 +285,7 @@
 
 #######################################################################
 [ccpp-arg-table]
-  name = noahmpdrv_finalize
+  name = noahmpdrv_final
   type = scheme
 [land_iau_control]
   standard_name = land_data_assimilation_control

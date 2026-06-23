@@ -93,7 +93,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = gfdl_cloud_microphys_finalize
+  name = gfdl_cloud_microphys_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message

@@ -11,11 +11,11 @@ module mp_tempo
 
       use module_mp_tempo_params
       use module_mp_tempo_utils, only : make_IceNumber, make_RainNumber, make_DropletNumber
-      use module_mp_tempo, only : tempo_init, tempo_3d_to_1d_driver, tempo_finalize
+      use module_mp_tempo, only : tempo_init, tempo_3d_to_1d_driver, tempo_final
 
       implicit none
 
-      public :: mp_tempo_init, mp_tempo_run, mp_tempo_finalize
+      public :: mp_tempo_init, mp_tempo_run, mp_tempo_final
 
       private
 
@@ -389,7 +389,7 @@ module mp_tempo
                               refl_10cm, fullradar_diag,           &
                               max_hail_diam_sfc,                   &
                               do_radar_ref, aerfld,                &
-                              mpicomm, mpirank, mpiroot, blkno,    &
+                              mpicomm, mpirank, mpiroot,           &
                               ext_diag, diag3d, reset_diag3d,      &
                               spp_wts_mp, spp_mp, n_var_spp,       &
                               spp_prt_list, spp_var_list,          &
@@ -454,8 +454,7 @@ module mp_tempo
          logical,                   intent(in   ) :: do_radar_ref
          logical,                   intent(in)    :: sedi_semi
          integer,                   intent(in)    :: decfl
-         ! MPI and block information
-         integer,                   intent(in)    :: blkno
+         ! MPI information
          type(MPI_Comm),            intent(in)    :: mpicomm
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
@@ -650,7 +649,7 @@ module mp_tempo
             return
          endif
 
-         if (first_time_step .and. istep==1 .and. blkno==1) then
+         if (first_time_step .and. istep==1) then
             ! Check initialization state
             if (.not.is_initialized) then
                write(errmsg, fmt='((a))') 'mp_tempo_run called before mp_tempo_init'
@@ -1161,10 +1160,10 @@ module mp_tempo
       end subroutine mp_tempo_run
 !>@}
 
-!> \section arg_table_mp_tempo_finalize Argument Table
-!! \htmlinclude mp_tempo_finalize.html
+!> \section arg_table_mp_tempo_final Argument Table
+!! \htmlinclude mp_tempo_final.html
 !!
-      subroutine mp_tempo_finalize(is_initialized, errmsg, errflg)
+      subroutine mp_tempo_final(is_initialized, errmsg, errflg)
 
          implicit none
          logical,                   intent(inout) :: is_initialized
@@ -1177,11 +1176,11 @@ module mp_tempo
 
          if (.not.is_initialized) return
 
-         call tempo_finalize()
+         call tempo_final()
 
          is_initialized = .false.
 
-      end subroutine mp_tempo_finalize
+      end subroutine mp_tempo_final
 
       subroutine get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
          ! To calculate nifa and nwfa from bins of aerosols.

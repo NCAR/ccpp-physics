@@ -94,7 +94,7 @@ module land_iau_mod
   end type land_iau_control_type
 
   public land_iau_control_type, land_iau_external_data_type, land_iau_state_type, land_iau_mod_set_control, &
-         land_iau_mod_init, land_iau_mod_getiauforcing, land_iau_mod_finalize, calculate_landinc_mask
+         land_iau_mod_init, land_iau_mod_getiauforcing, land_iau_mod_final, calculate_landinc_mask
 
 contains
 
@@ -363,7 +363,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
 
 end subroutine land_iau_mod_init
 
-subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, Land_IAU_state, errmsg, errflg)
+subroutine land_iau_mod_final(Land_IAU_Control, Land_IAU_Data, Land_IAU_state, errmsg, errflg)
 
    implicit none
 
@@ -383,7 +383,7 @@ subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, Land_IAU_state
    if (allocated(Land_IAU_state%stc_inc)) deallocate(Land_IAU_state%stc_inc)
    if (allocated(Land_IAU_state%slc_inc)) deallocate(Land_IAU_state%slc_inc)
 
-end subroutine land_iau_mod_finalize
+end subroutine land_iau_mod_final
 
  subroutine land_iau_mod_getiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)
 

@@ -462,7 +462,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
-  intent = in
+  intent = out
 [dusfc1]
   standard_name = instantaneous_surface_x_momentum_flux
   long_name = surface momentum flux in the x-direction valid for current call

@@ -7,11 +7,11 @@ module mp_fer_hires
       use machine, only : kind_phys
 
       use module_mp_fer_hires, only : ferrier_init_hr, FER_HIRES,       &
-                                      ferhires_finalize
+                                      ferhires_final
 
       implicit none
 
-      public :: mp_fer_hires_init, mp_fer_hires_run, mp_fer_hires_finalize
+      public :: mp_fer_hires_init, mp_fer_hires_run, mp_fer_hires_final
 
       private
 
@@ -373,10 +373,10 @@ module mp_fer_hires
        end subroutine mp_fer_hires_run
 
 
-!> \section arg_table_mp_fer_hires_finalize Argument Table
-!! \htmlinclude mp_fer_hires_finalize.html
+!> \section arg_table_mp_fer_hires_final Argument Table
+!! \htmlinclude mp_fer_hires_final.html
 !!
-       subroutine mp_fer_hires_finalize (errmsg,errflg)
+       subroutine mp_fer_hires_final (errmsg,errflg)
          implicit none
 
          character(len=*),          intent(  out) :: errmsg
@@ -388,9 +388,9 @@ module mp_fer_hires
 
          if (.not.is_initialized) return
 
-         call ferhires_finalize()
+         call ferhires_final()
 
          is_initialized = .false.
-       end subroutine mp_fer_hires_finalize
+       end subroutine mp_fer_hires_final
 
 end module mp_fer_hires

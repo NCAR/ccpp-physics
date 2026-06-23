@@ -411,7 +411,7 @@
   type = integer
   intent = in
 [threads]
-  standard_name = number_of_openmp_threads
+  standard_name = number_of_physics_threads
   long_name = number of OpenMP threads available to scheme
   units = count
   dimensions = ()
@@ -832,13 +832,6 @@
   dimensions = ()
   type = integer
   intent = in
-[blkno]
-  standard_name = ccpp_block_number
-  long_name = number of block for explicit data blocking in CCPP
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
 [ext_diag]
   standard_name = flag_for_extended_diagnostic_output_from_thompson_microphysics
   long_name = flag for extended diagnostic output from thompson microphysics
@@ -1103,7 +1096,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = mp_thompson_finalize
+  name = mp_thompson_final
   type = scheme
 [is_initialized]
   standard_name = flag_for_thompson_mp_scheme_initialization

@@ -161,8 +161,8 @@
   kind = kind_phys
   intent = inout
 [nthreads]
-  standard_name = number_of_openmp_threads
-  long_name = number of OpenMP threads available for physics schemes
+  standard_name = number_of_physics_threads
+  long_name = number of OpenMP threads available to scheme
   units = count
   dimensions = ()
   type = integer

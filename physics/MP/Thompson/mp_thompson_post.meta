@@ -135,7 +135,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = mp_thompson_post_finalize
+  name = mp_thompson_post_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message

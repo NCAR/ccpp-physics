@@ -38,7 +38,6 @@
 
       real(kind=kind_phys), intent(in   )                   :: con_pi, dtf
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qc
-
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qi
 
       ! dtend and dtidx are only allocated if ldiag3d

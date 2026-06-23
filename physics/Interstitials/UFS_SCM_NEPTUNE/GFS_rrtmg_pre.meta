@@ -2,11 +2,11 @@
   name = GFS_rrtmg_pre
   type = scheme
   dependencies_path = ../../
-  dependencies = tools/funcphys.f90,hooks/machine.F
+  dependencies = hooks/physcons.F90,tools/funcphys.f90,hooks/machine.F
   dependencies = MP/TEMPO/TEMPO/module_mp_tempo_params.F90,MP/TEMPO/TEMPO/module_mp_tempo_utils.F90
   dependencies = MP/Thompson/module_mp_thompson.F90,MP/Thompson/module_mp_thompson_make_number_concentrations.F90
-  dependencies = Radiation/RRTMG/radcons.f90,Radiation/radiation_aerosols.f
-  dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
+  dependencies = Radiation/RRTMG/radcons.f90,Radiation/RRTMG/iounitdef.f,Radiation/radiation_aerosols.f
+  dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_cloud_overlap.F90,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
   dependencies = Radiation/RRTMG/radlw_param.f,Radiation/RRTMG/radsw_param.f,Radiation/radiation_cloud_overlap.F90
   dependencies = SFC_Models/Land/Noah/surface_perturbation.F90
   dependencies = photochem/module_ozphys.F90

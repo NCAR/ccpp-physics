@@ -18,7 +18,7 @@
 ! These hold and apply Land IAU increments for soil temperature 
 ! (possibly will extend to soil moisture increments)
       use land_iau_mod,  only: land_iau_control_type, land_iau_external_data_type, land_iau_state_type, &
-            land_iau_mod_init, land_iau_mod_getiauforcing, land_iau_mod_finalize, calculate_landinc_mask   
+            land_iau_mod_init, land_iau_mod_getiauforcing, land_iau_mod_final, calculate_landinc_mask   
 
       implicit none
 
@@ -27,7 +27,7 @@
       private
 
       public :: noahmpdrv_init, noahmpdrv_run, &
-                noahmpdrv_timestep_init, noahmpdrv_finalize 
+                noahmpdrv_timestep_init, noahmpdrv_final 
 
       contains
 
@@ -333,11 +333,11 @@ end subroutine noahmpdrv_timestep_init
 
    !> \ingroup NoahMP_LSM
 !! \brief This subroutine mirrors noahmpdrv_init  
-!!  it calls land_iau_finalize which frees up allocated memory by IAU_init (in noahmdrv_init)  
-!! \section arg_table_noahmpdrv_finalize Argument Table
-!! \htmlinclude noahmpdrv_finalize.html
+!!  it calls land_iau_final which frees up allocated memory by IAU_init (in noahmdrv_init)  
+!! \section arg_table_noahmpdrv_final Argument Table
+!! \htmlinclude noahmpdrv_final.html
 !!
-  subroutine noahmpdrv_finalize (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)          
+  subroutine noahmpdrv_final (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)          
    
     use machine,          only: kind_phys 
     implicit none
@@ -352,9 +352,9 @@ end subroutine noahmpdrv_timestep_init
     errflg = 0    
 
     if (.not. Land_IAU_Control%do_land_iau) return
-    call land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)    
+    call land_iau_mod_final(Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)    
 
-  end subroutine noahmpdrv_finalize
+  end subroutine noahmpdrv_final
 
 !> \ingroup NoahMP_LSM
 !! \brief This subroutine is the main CCPP entry point for the NoahMP LSM.

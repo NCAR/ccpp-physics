@@ -54,7 +54,7 @@ module ugwpv1_gsldrag
 
     private
 
-    public ugwpv1_gsldrag_init, ugwpv1_gsldrag_run, ugwpv1_gsldrag_finalize
+    public ugwpv1_gsldrag_init, ugwpv1_gsldrag_run, ugwpv1_gsldrag_final
 
     logical :: is_initialized = .False.
 
@@ -249,15 +249,15 @@ contains
     end subroutine ugwpv1_gsldrag_init
 
 ! -----------------------------------------------------------------------
-! finalize of ugwpv1_gsldrag   (_finalize)
+! finalize of ugwpv1_gsldrag   (_final)
 ! -----------------------------------------------------------------------
 
 !>@brief The subroutine finalizes the CIRES UGWP
 
-!> \section arg_table_ugwpv1_gsldrag_finalize Argument Table
-!! \htmlinclude ugwpv1_gsldrag_finalize.html
+!> \section arg_table_ugwpv1_gsldrag_final Argument Table
+!! \htmlinclude ugwpv1_gsldrag_final.html
 !!
-    subroutine ugwpv1_gsldrag_finalize(errmsg, errflg)
+    subroutine ugwpv1_gsldrag_final(errmsg, errflg)
 
     implicit none
 
@@ -274,7 +274,7 @@ contains
 
     is_initialized = .false.
 
-    end subroutine ugwpv1_gsldrag_finalize
+    end subroutine ugwpv1_gsldrag_final
 
 ! -----------------------------------------------------------------------
 !    originally from ugwp_driver_v0.f

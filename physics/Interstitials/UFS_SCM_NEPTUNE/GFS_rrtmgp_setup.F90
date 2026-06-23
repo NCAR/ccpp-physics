@@ -9,8 +9,8 @@ module GFS_rrtmgp_setup
   use module_radiation_gases,     only : gas_init, gas_update
   use module_ozphys,              only : ty_ozphys
   implicit none
-
-  public GFS_rrtmgp_setup_init, GFS_rrtmgp_setup_timestep_init, GFS_rrtmgp_setup_finalize
+  
+  public GFS_rrtmgp_setup_init, GFS_rrtmgp_setup_timestep_init, GFS_rrtmgp_setup_final
 
   private
 
@@ -247,10 +247,10 @@ contains
 
   end subroutine GFS_rrtmgp_setup_timestep_init
 
-!> \section arg_table_GFS_rrtmgp_setup_finalize Argument Table
-!! \htmlinclude GFS_rrtmgp_setup_finalize.html
+!> \section arg_table_GFS_rrtmgp_setup_final Argument Table
+!! \htmlinclude GFS_rrtmgp_setup_final.html
 !!
-  subroutine GFS_rrtmgp_setup_finalize (errmsg, errflg)
+  subroutine GFS_rrtmgp_setup_final (errmsg, errflg)
     character(len=*),          intent(  out) :: errmsg
     integer,                   intent(  out) :: errflg
 
@@ -262,6 +262,7 @@ contains
 
     ! do finalization stuff if needed
     is_initialized = .false.
+    
+  end subroutine GFS_rrtmgp_setup_final
 
-  end subroutine GFS_rrtmgp_setup_finalize
 end module GFS_rrtmgp_setup

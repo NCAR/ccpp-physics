@@ -10,7 +10,7 @@ module mp_thompson
       use mpi_f08
       use machine, only : kind_phys
 
-      use module_mp_thompson, only : thompson_init, mp_gt_driver, thompson_finalize, calc_effectRad
+      use module_mp_thompson, only : thompson_init, mp_gt_driver, thompson_final, calc_effectRad
       use module_mp_thompson, only : naIN0, naIN1, naCCN0, naCCN1, eps
       use module_mp_thompson, only : re_qc_min, re_qc_max, re_qi_min, re_qi_max, re_qs_min, re_qs_max
 
@@ -18,7 +18,7 @@ module mp_thompson
 
       implicit none
 
-      public :: mp_thompson_init, mp_thompson_run, mp_thompson_finalize
+      public :: mp_thompson_init, mp_thompson_run, mp_thompson_final
 
       private
 
@@ -377,7 +377,7 @@ module mp_thompson
                               refl_10cm, fullradar_diag,           &
                               max_hail_diam_sfc,                   &
                               do_radar_ref, aerfld,                &
-                              mpicomm, mpirank, mpiroot, blkno,    &
+                              mpicomm, mpirank, mpiroot,           &
                               ext_diag, diag3d, reset_diag3d,      &
                               spp_wts_mp, spp_mp, n_var_spp,       &
                               spp_prt_list, spp_var_list,          &
@@ -441,8 +441,7 @@ module mp_thompson
          logical,                   intent(in   ) :: do_radar_ref
          logical,                   intent(in)    :: sedi_semi
          integer,                   intent(in)    :: decfl
-         ! MPI and block information
-         integer,                   intent(in)    :: blkno
+         ! MPI information
          type(MPI_Comm),            intent(in)    :: mpicomm
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
@@ -621,7 +620,7 @@ module mp_thompson
            new_nifa = nifa
          end if
          
-         if (first_time_step .and. istep==1 .and. blkno==1) then
+         if (first_time_step .and. istep==1) then
             ! Check initialization state
             if (.not.is_initialized) then
                write(errmsg, fmt='((a))') 'mp_thompson_run called before mp_thompson_init'
@@ -1001,10 +1000,10 @@ module mp_thompson
       end subroutine mp_thompson_run
 !>@}
 
-!> \section arg_table_mp_thompson_finalize Argument Table
-!! \htmlinclude mp_thompson_finalize.html
+!> \section arg_table_mp_thompson_final Argument Table
+!! \htmlinclude mp_thompson_final.html
 !!
-      subroutine mp_thompson_finalize(is_initialized, errmsg, errflg)
+      subroutine mp_thompson_final(is_initialized, errmsg, errflg)
 
          implicit none
          logical,                   intent(inout) :: is_initialized
@@ -1017,11 +1016,11 @@ module mp_thompson
 
          if (.not.is_initialized) return
 
-         call thompson_finalize()
+         call thompson_final()
 
          is_initialized = .false.
 
-      end subroutine mp_thompson_finalize
+      end subroutine mp_thompson_final
 
       subroutine get_niwfa(aerfld, nifa, nwfa, ncol, nlev)
          ! To calculate nifa and nwfa from bins of aerosols.

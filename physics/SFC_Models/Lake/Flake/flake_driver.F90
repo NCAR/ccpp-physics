@@ -418,14 +418,14 @@ module flake_driver_post
    use machine, only: kind_phys
    implicit none
    private
-   public flake_driver_post_init, flake_driver_post_finalize, flake_driver_post_run 
+   public flake_driver_post_init, flake_driver_post_final, flake_driver_post_run 
 
 contains
    subroutine flake_driver_post_init()
    end subroutine flake_driver_post_init
 
-   subroutine flake_driver_post_finalize()
-   end subroutine flake_driver_post_finalize
+   subroutine flake_driver_post_final()
+   end subroutine flake_driver_post_final
 
 !> \section arg_table_flake_driver_post_run Argument Table
 !! \htmlinclude flake_driver_post_run.html
