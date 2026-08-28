@@ -133,14 +133,14 @@ module ccpp_multi_gases_mod
 ! ----------------------------------------------------------------
 
 ! ----------------------------------------------------------------
-      subroutine multi_gases_finalize()
+      subroutine multi_gases_final()
 
       if(allocated(vir )) deallocate(vir )
       if(allocated(vicv)) deallocate(vicp)
       if(allocated(vicp)) deallocate(vicv)
 
       return
-      end subroutine multi_gases_finalize
+      end subroutine multi_gases_final
 ! ----------------------------------------------------------------
 
 ! --------------------------------------------------------

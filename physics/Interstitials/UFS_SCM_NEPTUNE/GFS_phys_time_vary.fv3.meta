@@ -16,14 +16,21 @@
   name = GFS_phys_time_vary_init
   type = scheme
 
-[me]
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = MPI_Comm
+  intent = in
+[mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
   units = index
   dimensions = ()
   type = integer
   intent = in
-[master]
+[mpiroot]
   standard_name = mpi_root
   long_name = master MPI-rank
   units = index
@@ -955,8 +962,8 @@
   type = logical
   intent = in
 [nthrds]
-  standard_name = number_of_openmp_threads
-  long_name = number of OpenMP threads available for physics schemes
+  standard_name = number_of_physics_threads
+  long_name = number of OpenMP threads available to scheme
   units = count
   dimensions = ()
   type = integer
@@ -1067,7 +1074,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_phys_time_vary_finalize
+  name = GFS_phys_time_vary_final
   type = scheme
 [is_initialized]
   standard_name = flag_for_gfs_phys_time_vary_interstitial_initialization
@@ -1096,14 +1103,21 @@
 [ccpp-arg-table]
   name = GFS_phys_time_vary_timestep_init
   type = scheme
-[me]
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = MPI_Comm
+  intent = in
+[mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
   units = index
   dimensions = ()
   type = integer
   intent = in
-[master]
+[mpiroot]
   standard_name = mpi_root
   long_name = master MPI-rank
   units = index
@@ -1183,7 +1197,7 @@
 [nsswr]
   standard_name = number_of_timesteps_between_shortwave_radiation_calls
   long_name = number of timesteps between shortwave radiation calls
-  units =
+  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -1310,7 +1324,7 @@
   standard_name = ozone_forcing
   long_name = ozone forcing data
   units = mixed
-  dimensions = (horizontal_dimension,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_data)
+  dimensions = (horizontal_dimension,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_forcing_data)
   type = real
   kind = kind_phys
   intent = inout
@@ -1524,8 +1538,8 @@
   kind = kind_phys
   intent = inout
 [nthrds]
-  standard_name = number_of_openmp_threads
-  long_name = number of OpenMP threads available for physics schemes
+  standard_name = number_of_physics_threads
+  long_name = number of OpenMP threads available to scheme
   units = count
   dimensions = ()
   type = integer
@@ -1613,7 +1627,7 @@
   units = none
   dimensions = (number_of_lines_in_internal_namelist)
   type = character
-  kind = len=256
+  kind = len=*
   intent = in
 [use_ufo]
   standard_name = flag_for_gcycle_surface_option
@@ -2003,7 +2017,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [xlon_d]
   standard_name = longitude_in_degree
   long_name = longitude in degree east
@@ -2011,7 +2025,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [landfrac]
   standard_name = land_area_fraction
   long_name = fraction of horizontal grid area occupied by land

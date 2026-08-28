@@ -27,8 +27,7 @@
         ntss3, ntss4, ntss5, ntsu, ntbcb, ntbcl, ntocb, ntocl, ntchm,          &
         imp_physics,imp_physics_nssl, nssl_ccn_on, nssl_invertccn,             &
         imp_physics_thompson, imp_physics_tempo, imp_physics_gfdl,             &
-        imp_physics_zhao_carr,                                                 &
-        imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
+        imp_physics_mg, imp_physics_wsm6,                                      &
         imp_physics_fer_hires, iovr, iovr_rand, iovr_maxrand, iovr_max,        &
         iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con, idcor_hogan,     &
         idcor_oreopoulos, dcorr_con, julian, yearlen, lndp_var_list, lsswr,    &
@@ -47,10 +46,10 @@
         gasvmr_ccl4,  gasvmr_cfc113, aerodp,ext550, clouds6, clouds7, clouds8, &
         clouds9, cldsa, cldfra, cldfra2d, lwp_ex,iwp_ex, lwp_fc,iwp_fc,        &
         faersw1, faersw2, faersw3, faerlw1, faerlw2, faerlw3, alpha, rrfs_sd,  &
-        aero_dir_fdb, fdb_coef, spp_wts_rad, spp_rad, ico2, ozphys, tempo_cfg, &
+        aero_dir_fdb, fdb_coef, spp_wts_rad, spp_rad, ico2, ozphys,            &
         errmsg, errflg)
 
-      use machine,                   only: kind_phys
+      use machine,                   only: kind_phys, kind_dbl_prec
 
       use radcons,                   only: itsfc, qmin, qme5, qme6, epsq, prsmin
       use funcphys,                  only: fpvs
@@ -88,23 +87,9 @@
                                            make_DropletNumber_thompson => make_DropletNumber, &
                                            make_RainNumber_thompson    => make_RainNumber
 
-      use module_mp_tempo_params, only: &
-           ty_tempo_cfg, &
-           Nt_c_l_tempo => Nt_c_l, &
-           Nt_c_o_tempo => Nt_c_o, &
-           re_qc_min_tempo => re_qc_min, &
-           re_qc_max_tempo => re_qc_max, &
-           re_qi_min_tempo => re_qi_min, &
-           re_qi_max_tempo => re_qi_max, &
-           re_qs_min_tempo => re_qs_min, &
-           re_qs_max_tempo => re_qs_max
-
-      use module_mp_tempo_utils, only: &
-           calc_effectRad_tempo => calc_effectRad, &
-           make_IceNumber_tempo => make_IceNumber, &
-           make_DropletNumber_tempo => make_DropletNumber, &
-           make_RainNumber_tempo => make_RainNumber
-
+      use module_mp_tempo_main, only : cloud_check_and_update, ice_check_and_update, snow_check_and_update
+      use module_mp_tempo_utils, only : get_constant_cloud_number
+      use module_mp_tempo_diags, only : effective_radius
       ! For NRL Ozone
       use module_ozphys, only: ty_ozphys
       implicit none
@@ -124,8 +109,6 @@
                                            imp_physics_thompson,               &
                                            imp_physics_tempo,                  &
                                            imp_physics_gfdl,                   &
-                                           imp_physics_zhao_carr,              &
-                                           imp_physics_zhao_carr_pdf,          &
                                            imp_physics_mg, imp_physics_wsm6,   &
                                            imp_physics_nssl,                   &
                                            imp_physics_fer_hires,              &
@@ -257,11 +240,19 @@
       real(kind=kind_phys), dimension(im,lm+LTP) ::           &
                                   qv_mp, qc_mp, qi_mp, qs_mp, &
                                   nc_mp, ni_mp, nwfa
+      ! tempo
+      real(kind=kind_phys), dimension(im,lm+LTP) ::           &
+                                  rc, nc, qcten, ncten, mvd_c, &
+                                  ri, ni, qiten, niten, &
+                                  rs, qsten
+
+      real(kind=kind_dbl_prec), dimension(im,lm+LTP) ::       &
+                                  ilamc, ilami
+
+      logical,              dimension(im,lm+LTP) ::           &
+                                  l_qc, l_qi, l_qs
       real (kind=kind_phys), dimension(lm) :: cldfra1d, qv1d,           &
      &                                 qc1d, qi1d, qs1d, dz1d, p1d, t1d
-
-      ! For TEMPO MP
-      type(ty_tempo_cfg), intent(in) :: tempo_cfg
 
       ! for F-A MP
       real(kind=kind_phys), dimension(im,lm+LTP+1) :: tem2db, hz
@@ -725,7 +716,7 @@
 
 !      if (ntcw > 0) then                            ! prognostic cloud schemes
         ccnd = 0.0_kind_phys
-        if (ncnd == 1) then                          ! Zhao_Carr_Sundqvist
+        if (ncnd == 1) then                          
           do k=1,LMK
             do i=1,IM
               ccnd(i,k,1) = tracer1(i,k,ntcw)        ! liquid water/ice
@@ -765,8 +756,7 @@
             enddo
           enddo
           ! for Thompson MP - prepare variables for calc_effr
-          if_thompson: if ((imp_physics == imp_physics_thompson .or. &
-               imp_physics == imp_physics_tempo) .and. (ltaerosol .or. mraerosol)) then
+          if_thompson: if (imp_physics == imp_physics_thompson .and. (ltaerosol .or. mraerosol)) then
             do k=1,LMK
               do i=1,IM
                 qvs = qlyr(i,k)
@@ -781,7 +771,7 @@
                 nwfa  (i,k) = tracer1(i,k,ntwa)
               enddo
             enddo
-          elseif (imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_tempo) then
+          elseif (imp_physics == imp_physics_thompson) then
             do k=1,LMK
               do i=1,IM
                 qvs = qlyr(i,k)
@@ -792,22 +782,48 @@
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
                 qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
                 if(nint(slmsk(i)) == 1) then
-                   if (imp_physics == imp_physics_thompson) then
-                      nc_mp (i,k) = Nt_c_l_thompson*orho(i,k)
-                   else
-                      nc_mp (i,k) = Nt_c_l_tempo*orho(i,k)
-                   endif
+                   nc_mp (i,k) = Nt_c_l_thompson*orho(i,k)
                 else
-                   if (imp_physics == imp_physics_thompson) then
-                      nc_mp (i,k) = Nt_c_o_thompson*orho(i,k)
-                   else
-                      nc_mp (i,k) = Nt_c_o_tempo*orho(i,k)
-                   endif
+                   nc_mp (i,k) = Nt_c_o_thompson*orho(i,k)
                 endif
                 ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
               enddo
             enddo
           endif if_thompson
+          if (imp_physics == imp_physics_tempo) then
+            do k=1,LMK
+              do i=1,IM
+                qvs = qlyr(i,k)
+                qv_mp (i,k) = qvs/(1.-qvs)
+                rho   (i,k) = con_eps*plyr(i,k)*100./(con_rd*tlyr(i,k)*(qv_mp(i,k)+con_eps))
+                orho  (i,k) = 1.0/rho(i,k)
+                qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
+                qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
+                qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
+                ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
+                if (ltaerosol) nc_mp (i,k) = tracer1(i,k,ntlnc)/(1.-qvs)
+                
+                qcten (i,k) = 0.
+                ncten (i,k) = 0.
+                qiten (i,k) = 0.
+                niten (i,k) = 0.
+                qsten (i,k) = 0.
+              enddo
+            enddo
+            do i=1,IM
+
+               if (.not. ltaerosol) call get_constant_cloud_number(land=nint(slmsk(i)), nc=nc_mp(i,:))
+
+               call cloud_check_and_update(rho=rho(i,:), l_qc=l_qc(i,:), qc1d=qc_mp(i,:), &
+                    nc1d=nc_mp(i,:), rc=rc(i,:), nc=nc(i,:), qcten=qcten(i,:), ncten=ncten(i,:), &
+                    ilamc=ilamc(i,:), mvd_c=mvd_c(i,:), dt=1., odt=1.)
+               call ice_check_and_update(rho=rho(i,:), l_qi=l_qi(i,:), qi1d=qi_mp(i,:), &
+                    ni1d=ni_mp(i,:), ri=ri(i,:), ni=ni(i,:), qiten=qiten(i,:), niten=niten(i,:), &
+                    ilami=ilami(i,:), dt=1., odt=1.)
+               call snow_check_and_update(rho=rho(i,:), l_qs=l_qs(i,:), qs1d=qs_mp(i,:), &
+                    rs=rs(i,:), qsten=qsten(i,:), dt=1., odt=1.)
+            enddo
+          endif
         endif
         do n=1,ncndl
           do k=1,LMK
@@ -915,7 +931,7 @@
            ! not used yet -- effr_in should always be true for now
           endif
 
-        elseif (imp_physics == imp_physics_thompson .or. imp_physics == imp_physics_tempo) then       !  Thompson MP
+        elseif (imp_physics == imp_physics_thompson) then       !  Thompson MP
           !
           ! Compute effective radii for QC, QI, QS with (GF, MYNN) or without (all others) sub-grid clouds
           !
@@ -923,18 +939,10 @@
           do k=1,lm
             do i=1,im
                if ((ltaerosol .or. mraerosol) .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
-                  if (imp_physics == imp_physics_thompson) then
-                     nc_mp(i,k) = make_DropletNumber_thompson(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
-                  else
-                     nc_mp(i,k) = make_DropletNumber_tempo(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
-                  endif
+                  nc_mp(i,k) = make_DropletNumber_thompson(qc_mp(i,k)*rho(i,k), nwfa(i,k)*rho(i,k)) * orho(i,k)
               endif
               if (qi_mp(i,k)>1.e-12 .and. ni_mp(i,k)<100.) then
-                 if (imp_physics == imp_physics_thompson) then
-                    ni_mp(i,k) = make_IceNumber_thompson(qi_mp(i,k)*rho(i,k), tlyr(i,k)) * orho(i,k)
-                 else
-                    ni_mp(i,k) = make_IceNumber_tempo(qi_mp(i,k)*rho(i,k), tlyr(i,k)) * orho(i,k)
-                 endif
+                 ni_mp(i,k) = make_IceNumber_thompson(qi_mp(i,k)*rho(i,k), tlyr(i,k)) * orho(i,k)
               endif
             end do
           end do
@@ -946,7 +954,7 @@
             !     calc_effectRad (4.99-125.0 for WRFv3.8.1; 2.49-125.0 for WRFv4+)
             !     it will raise the low limit from 5 to 10, but the high limit will remain 125.
 
-            if (imp_physics == imp_physics_thompson) then
+ !           if (imp_physics == imp_physics_thompson) then
                call calc_effectRad_thompson(tlyr(i,:), plyr(i,:)*100., qv_mp(i,:), qc_mp(i,:),   &
                     nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
                     effrl(i,:), effri(i,:), effrs(i,:), islmsk, 1, lm )
@@ -959,22 +967,6 @@
                effrl(i,lmk) = re_qc_min_thompson*1.e6
                effri(i,lmk) = re_qi_min_thompson*1.e6
                effrs(i,lmk) = re_qs_min_thompson*1.e6
-            else
-               call calc_effectRad_tempo(t1d=tlyr(i,:), p1d=plyr(i,:)*100., qv1d=qv_mp(i,:), qc1d=qc_mp(i,:),   &
-                    nc1d=nc_mp(i,:), qi1d=qi_mp(i,:), ni1d=ni_mp(i,:), qs1d=qs_mp(i,:), &
-                    re_qc1d=effrl(i,:), re_qi1d=effri(i,:), re_qs1d=effrs(i,:), kts=1, kte=lm, &
-                    lsml=islmsk, configs=tempo_cfg)
-               ! Scale Thompson's effective radii from meter to micron
-               do k=1,lm
-                  effrl(i,k) = MAX(re_qc_min_tempo, MIN(effrl(i,k), re_qc_max_tempo))*1.e6
-                  effri(i,k) = MAX(re_qi_min_tempo, MIN(effri(i,k), re_qi_max_tempo))*1.e6
-                  effrs(i,k) = MAX(re_qs_min_tempo, MIN(effrs(i,k), re_qs_max_tempo))*1.e6
-               end do
-               effrl(i,lmk) = re_qc_min_tempo*1.e6
-               effri(i,lmk) = re_qi_min_tempo*1.e6
-               effrs(i,lmk) = re_qs_min_tempo*1.e6
-            endif
-
           end do
           effrr(:,:) = 1000. ! rrain_def=1000.
           ! Update global arrays
@@ -986,6 +978,35 @@
               effrs_inout(i,k) = effrs(i,k1)
             enddo
           enddo
+
+        elseif (imp_physics == imp_physics_tempo) then       ! Tempo
+          do i=1,im
+            islmsk = nint(slmsk(i))
+               call effective_radius(temp=tlyr(i,:), l_qc=l_qc(i,:), nc=nc_mp(i,:), &
+                    ilamc=ilamc(i,:), l_qi=l_qi(i,:), ilami=ilami(i,:), l_qs=l_qs(i,:), rs=rs(i,:), &
+                    re_qc=effrl(i,:), re_qi=effri(i,:), re_qs=effrs(i,:))
+               ! use min/max values from Thompson for now
+               do k=1,lm
+                  effrl(i,k) = MAX(re_qc_min_thompson, MIN(effrl(i,k), re_qc_max_thompson))*1.e6
+                  effri(i,k) = MAX(re_qi_min_thompson, MIN(effri(i,k), re_qi_max_thompson))*1.e6
+                  effrs(i,k) = MAX(re_qs_min_thompson, MIN(effrs(i,k), re_qs_max_thompson))*1.e6
+               end do
+               effrl(i,lmk) = re_qc_min_thompson*1.e6
+               effri(i,lmk) = re_qi_min_thompson*1.e6
+               effrs(i,lmk) = re_qs_min_thompson*1.e6
+          end do
+          effrr(:,:) = 1000. ! rrain_def=1000.
+          ! Update global arrays
+          do k=1,lm
+            k1 = k + kd
+            do i=1,im
+              effrl_inout(i,k) = effrl(i,k1)
+              effri_inout(i,k) = effri(i,k1)
+              effrs_inout(i,k) = effrs(i,k1)
+            enddo
+         enddo
+          
+         
         else                                                           ! all other cases
           cldcov = 0.0
         endif
@@ -994,15 +1015,13 @@
 !  --- add suspended convective cloud water to grid-scale cloud water
 !      only for cloud fraction & radiation computation
 !      it is to enhance cloudiness due to suspended convec cloud water
-!      for zhao/moorthi's (imp_phys=99) &
-!          ferrier's (imp_phys=5) microphysics schemes
+!      for ferrier's (imp_phys=5) microphysics schemes
 
-        if ((num_p3d == 4) .and. (npdf3d == 3)) then       ! same as imp_physics = imp_physics_zhao_carr_pdf
+        if ((num_p3d == 4) .and. (npdf3d == 3)) then     
           do k=1,lm
             k1 = k + kd
             do i=1,im
               !GJF: this is not consistent with GFS_typedefs,
-              !     but it looks like the Zhao-Carr-PDF scheme is not in the CCPP
               deltaq(i,k1) = 0.0!Tbd%phy_f3d(i,k,5)      !GJF: this variable is not in phy_f3d anymore
               cnvw  (i,k1) = cnvw_in(i,k)
               cnvc  (i,k1) = cnvc_in(i,k)
@@ -1027,10 +1046,6 @@
           enddo
         endif
 
-        if (imp_physics == imp_physics_zhao_carr) then
-          ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
-        endif
-
 !> - Call radiation_clouds_prop() to calculate cloud properties.
         call radiation_clouds_prop                                      &
      &     ( plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,                  &    !  ---  inputs:
@@ -1041,7 +1056,6 @@
      &       imp_physics, imp_physics_nssl, imp_physics_fer_hires,      &
      &       imp_physics_gfdl, imp_physics_thompson,                    &
      &       imp_physics_wsm6, imp_physics_tempo,                       &
-     &       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
      &       imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,   &
      &       iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,      &
      &       idcor_hogan, idcor_oreopoulos, lcrick, lcnorm,             &

@@ -90,7 +90,7 @@
      &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
 !The following three variables are for SA-3D-TKE
      &     def_1,def_2,def_3,sa3dtke,dku3d_h,dku3d_e,                   &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,usfco,vsfco,use_oceanuv,           &
+     &     rtg,u1,v1,t1,q1,usfco,vsfco,use_oceanuv,                     &
      &     swh,hlw,xmu,garea,zvfun,sigmaf,                              &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
@@ -98,14 +98,11 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,dkt,dku,tkeh,           &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     rlmx,elmx,sfc_rlm,tc_pbl,use_lpt,                            &
-!IVAI: canopy inputs from AQM
      &     do_canopy, cplaqm, claie, cfch, cfrt, cclu, cpopu,           &
-!IVAI
      &     ntqv,dtend,dtidx,index_of_temperature,index_of_x_wind,       &
      &     index_of_y_wind,index_of_process_pbl,gen_tend,ldiag3d,       &
+     &     ten_t, ten_u, ten_v,                                         &
      &     errmsg,errflg)
-!IVAI: aux arrays
-!     &     naux2d,naux3d,aux2d,aux3d)
 
 !
       use machine  , only : kind_phys
@@ -130,12 +127,10 @@
       real(kind=kind_phys), intent(in) :: rlmx, elmx
 !PCC CANOPY------------------------------------
       logical, intent(in)  :: do_canopy, cplaqm
-!IVAI: canopy inputs
       real(kind=kind_phys), optional, intent(in)  :: claie(:), cfch(:), &
      &                     cfrt(:), cclu(:), cpopu(:)
       !----------------------------------------------
-      real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
-     &                     tdt(:,:),    rtg(:,:,:),    tkeh(:,:)
+      real(kind=kind_phys), intent(inout) :: rtg(:,:,:),    tkeh(:,:)
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(:,:),     v1(:,:),                        &
      &                     usfco(:),    vsfco(:),                       &
@@ -171,9 +166,11 @@
 !
 !  flag for tke dissipative heating
       logical, intent(in)  :: dspheat
+      real(kind=kind_phys), intent(out) :: ten_t(:,:),                  &
+     &                                     ten_u(:,:), ten_v(:,:)
 !  flag for TTE-EDMF scheme
       logical, intent(in)  :: tte_edmf
-!
+!     
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -281,7 +278,7 @@
      &                     rdt,     rdz,    qmin,   qlmin,
      &                     rimin,   rbcr,   rbint,  tdzmin,
      &                     rlmn,    rlmn0,  rlmn1,  rlmn2,
-     &                     ttend,   utend,  vtend,  qtend,
+     &                     qtend,
      &                     zfac,    zfmin,  vk,     spdk2,
      &                     tkmin,   tkbmx,  disste, xkgdx,
      &                     xkinv1,  xkinv2,
@@ -322,16 +319,18 @@
 
 !PCC_CANOPY------------------------------------
       integer COUNTCAN,KCAN
-      integer kount         !IVAI
+      integer kount 
       real(kind=kind_phys) FCH,       MOL,   HOL, TLCAN,
      &                     SIGMACAN,  RRCAN, BBCAN,
      &                     AACAN,     ZCAN,  ZFL, BOTCAN,
+     &                     ZZ_INT,
      &                     EDDYVEST1, EDDYVEST_INT
 
       ! in canopy eddy diffusivity [ m**2/s ]
       real(kind=kind_phys), allocatable  :: EDDYVESTX ( : )
       ! in canopy layer [m]
       real(kind=kind_phys), allocatable  :: ZCANX     ( : )
+      real(kind=kind_phys), allocatable  :: ZOOOX     ( : )
       ! Declare local maximum canopy layers
       integer, parameter :: MAXCAN = 1000
       integer, parameter :: mvt   = 30 ! use 30 instead of 27
@@ -344,14 +343,6 @@
      &          2.00, 0.50, 0.00, 0.00, 0.00, 0.00,
      &          0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
 !----------------------------------------------
-
-!IVAI
-!      integer, intent(in) :: naux2d,naux3d
-!      real(kind_phys), intent(inout) :: aux2d(:,:)
-!      real(kind_phys), intent(inout) :: aux3d(:,:,:)
-!IVAI
-
-!!
       parameter(bfac=100.)
       parameter(wfac=7.0)
       parameter(gamcrt=3.,gamcrq=0.,sfcfrac=0.1)
@@ -379,13 +370,15 @@
       parameter(cptke1=0.07,cptke2=0.142,cptke3=0.071)
       parameter(dkmaxles=300.0,sclmin=500.,sclmax=2500.)
       parameter(elmhfac=1.5,elmhmx=1000.,ckh=0.4)
-!
+
 !PCC_CANOPY------------------------------------
       if (do_canopy) then
         if(.not.allocated(EDDYVESTX))
      &    allocate( EDDYVESTX    ( MAXCAN ) )
         if(.not.allocated(ZCANX))
      &    allocate( ZCANX    ( MAXCAN ) )
+        if(.not.allocated(ZOOOX)) 
+     &    allocate( ZOOOX    ( MAXCAN ) )
       endif
 !----------------------------------------------
       if (tc_pbl == 0) then
@@ -397,7 +390,7 @@
         ch0 = 0.55
         ce0 = 0.12
       endif
-!
+
       if(tte_edmf) then
         cfac  = 3.0
         prmax = 6.0
@@ -411,14 +404,10 @@
         ck1   = 0.15
         ch1   = 0.15
       endif
-!
+
       gravi = 1.0 / grav
       g = grav
       gocp = g / cp
-!     cont=cp/g
-!     conq=hvap/g
-!     conw=1.0/g  ! for del in pa
-!!    parameter(cont=1000.*cp/g,conq=1000.*hvap/g,conw=1000./g) !kpa
       elocp  = hvap / cp
       el2orc = hvap * hvap / (rv * cp)
 !
@@ -1716,30 +1705,15 @@
       endif !sa3dtke
 
 !PCC_CANOPY------------------------------------
-      kount=0 !IVAI
       if (do_canopy .and. cplaqm) then
 
-!IVAI
-!        print*, 'SATMEDMFVDIFQ_RUN: CLAIE = ', claie(:)
-!        print*, 'SATMEDMFVDIFQ_RUN: CFCH = ' , cfch (:)
-!        print*, 'SATMEDMFVDIFQ_RUN: CFRT = ' , cfrt (:)
-!        print*, 'SATMEDMFVDIFQ_RUN: CCLU = ' , cclu (:)
-!        print*, 'SATMEDMFVDIFQ_RUN: CPOPU= ' , cpopu(:)
-! 2D aux arrays: canopy data in diffusion
-!        aux2d(:,1) = cfch (:)
-!        aux2d(:,2) = claie(:)
-!        aux2d(:,3) = cfrt(:)
-
-! 3D aux arrays: before canopy correction
-!        aux3d(:,:,1) = dkq(:,:)
-!        aux3d(:,:,2) = dkt(:,:)
-!        aux3d(:,:,3) = dku(:,:)
-!IVAI
         do k = 1, km1-1
+
+          kount=0 !IVAI
+          ZOOOX(:) = 1.  ! IVAI
+
           do i = 1, im
 
-!IVAI: AQM canopy Inputs
-!           FCH = fch_table(vegtype(i)) !top of canopy from look-up table
             FCH = cfch(i)               !top of canopy from AQM canopy inputs
             IF (k .EQ. 1) THEN !use model layer interfaces
               KCAN = 1
@@ -1755,35 +1729,15 @@
             IF (KCAN .EQ. 1) THEN !canopy inside model layer
 !           Check for other Contiguous Canopy Grid Cell Conditions
 
-!           Not a contigous canopy cell
+!           Not a contiguous canopy cell
             IF (   claie(i) .LT. 0.1
      &        .OR. cfch (i) .LT. 0.5
-!IVAI: modified contiguous canopy condition
-!    &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.5
      &        .OR. MAX(0.0, 1.0 - cfrt(i)) .GT. 0.75
-!IVAI
      &        .OR. cpopu(i) .GT. 10000.0
      &        .OR. (EXP(-0.5*claie(i)*cclu(i)) .GT. 0.45
      &                          .AND. cfch(i)  .LT. 18.) ) THEN
 
-
-!TODO: Canopy Inputs
-!                        IF ( XCANOPYLAI .LT. 0.1  !from canopy inputs
-!                        IF ( lai(i) .LT. 0.1  !from LSM
-!     &                   .OR. FCH .LT. 0.5 ) THEN
-!     &                   .OR. MAX(0.0, 1.0 - XCANOPYFRT) .GT. 0.5
-!     &                   .OR. POPU .GT. 10000.0
-!     &                   .OR. EXP(-0.5*XCANOPYLAI*XCANOPYCLU).GT. 0.45
-!     &                      .AND. FCH .LT. 18.0 ) THEN
-
-              dkt(i,k)= dkt(i,k)
-              dkq(i,k)= dkq(i,k)
-              dku(i,k)= dku(i,k)
-
             ELSE ! There is a contiguous forest canopy, apply correction over canopy layers
-
-! Output contiguous canopy mask
-!              if (kount .EQ. 0 ) aux2d(i,5) = aux2d(i,5) + 1
 
 !Raupauch M. R. A Practical Lagrangian method for relating scalar
 !concentrations to
@@ -1797,7 +1751,7 @@
               COUNTCAN = 0   ! Initialize canopy layers
 
               IF (k .EQ. 1) THEN  !Find bottom in each model layer
-                  BOTCAN = 0.5
+                  BOTCAN = 0.0    ! 0.5 (Jan10)
               ELSE
                   BOTCAN = zi(i,k)
               END IF
@@ -1855,34 +1809,57 @@
                  IF ( HOL .GE.  0.9 ) THEN  !VERY STABLE
                     SIGMACAN = 0.25*ustar(i)
                  END IF
-                 IF ( ZCAN .EQ. ZFL )  THEN ! Each model layer that includes canopy
-                  EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN
-                 ELSE IF ( ZCAN .LE. FCH )  THEN !in-canopy layers and set arrays
-                  COUNTCAN = COUNTCAN + 1
-                  ZCANX (COUNTCAN)     = ZCAN
-                  EDDYVESTX (COUNTCAN) = (SIGMACAN*SIGMACAN)*TLCAN
+
+                 IF ( ZCAN .EQ. ZFL )  ! THEN ! Each model layer that includes canopy
+     &              EDDYVEST1 = (SIGMACAN*SIGMACAN)*TLCAN ! Model-layer top diffusivity
+
+! Average In-Canopy diffusivity gives larger canopy correction (2022)
+!                IF ( ZCAN .LE. FCH )  THEN          ! Average In-Canopy   diffusivity (2022) 
+! Average model-layer diffusivity gives smaller canopy correction (pre-2022) & Jan9, 2026
+                 IF ( ZCAN .LE. ZFL )  THEN         ! Average model-layer diffusivity (2026)
+
+                   COUNTCAN = COUNTCAN + 1
+                   ZCANX     (COUNTCAN) = ZCAN
+                   EDDYVESTX (COUNTCAN) = (SIGMACAN*SIGMACAN)*TLCAN
+
                  END IF
+
                  ZCAN = ZCAN-0.5  !step down in-canopy resolution of 0.5m
+
               END DO !end loop on canopy layers
-              EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)
-     &                                ),EDDYVESTX(COUNTCAN:1:-1)) / ZFL
-              dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
-              dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
-              dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
 
-!IVAI: Output contiguos canopy correction bottom layer and 3D
-!              if ( kount .EQ.  0)
-!     &           aux2d(i,4) = 1./EDDYVEST1  * EDDYVEST_INT
-!              aux3d(i,k,4) = 1./EDDYVEST1  * EDDYVEST_INT
-!IVAI
+            IF (COUNTCAN > 0 ) THEN
 
-            END IF   ! contigous canopy conditions
+              IF (COUNTCAN .EQ. 1) THEN
+                 ZZ_INT= ZCANX(COUNTCAN)  ! FCH (set to FCH if COUNTCAN is 1)
+              ELSE
+                 ZZ_INT= IntegrateTrapezoid(
+     &                  ZCANX(COUNTCAN:1:-1), ZOOOX(COUNTCAN:1:-1))
+              END IF
+ 
+              IF (COUNTCAN .EQ. 1) THEN
+                 EDDYVEST_INT = EDDYVESTX(COUNTCAN)
+              ELSE
+
+                 EDDYVEST_INT = IntegrateTrapezoid((ZCANX(COUNTCAN:1:-1)
+     &                                ),EDDYVESTX(COUNTCAN:1:-1)) / 
+     &                                  ZZ_INT
+              END IF
+
+! Comment out to turn OFF the integrated canopy effect
+!Apr17        dkt(i,k)= (dkt(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkt to resolved eddy diffusivity
+!Apr17        dkq(i,k)= (dkq(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dkq to resolved eddy diffusivity
+!Apr17        dku(i,k)= (dku(i,k)/EDDYVEST1) * EDDYVEST_INT !Scale dku to resolved eddy diffusivity
+
+            END IF ! (COUNTCAN > 0)
+
+            END IF   ! contiguous canopy conditions
 
             END IF   ! (KCAN .EQ. 1) model layer(s) containing canopy
 
           enddo !i
 
-          kount = kount + 1 !IVAI
+          kount = kount + 1 
 
         enddo !k
 
@@ -1964,7 +1941,7 @@
               ptem = 0.
             endif
             ptem2 = ptem2 + ptem
-!
+
             tem2 = stress(i)*ustar(i)*phims(i)/(vk*zl(i,1))
             shrp = 0.5 * (tem1 + ptem1 + ptem2 + tem2)
           else
@@ -2888,10 +2865,9 @@ c
 c
       do  k = 1,km
          do i = 1,im
-            ttend      = (f1(i,k)-t1(i,k))*rdt
-            qtend      = (f2(i,k)-q1(i,k,1))*rdt
-            tdt(i,k)   = tdt(i,k)+ttend
-            rtg(i,k,1) = rtg(i,k,1)+qtend
+            ten_t(i,k)   = (f1(i,k)-t1(i,k))*rdt
+            qtend        = (f2(i,k)-q1(i,k,1))*rdt
+            rtg(i,k,1)   = rtg(i,k,1)+qtend
 !           dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
 !           dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
@@ -2907,8 +2883,7 @@ c
         if(idtend>=1) then
           do  k = 1,km
             do i = 1,im
-              ttend      = (f1(i,k)-t1(i,k))*rdt
-              dtend(i,k,idtend) = dtend(i,k,idtend)+ttend*delt
+              dtend(i,k,idtend) = dtend(i,k,idtend)+ten_t(i,k)*delt
             enddo
           enddo
         endif
@@ -2960,8 +2935,7 @@ c
           do i = 1,im
 !           tem = min(diss(i,k), dspmax)
 !           ttend = tem / cp
-            ttend = diss(i,k) / cp
-            tdt(i,k) = tdt(i,k) + dspfac * ttend
+            ten_t(i,k) = ten_t(i,k) + dspfac * diss(i,k) / cp
           enddo
         enddo
         if(ldiag3d .and. .not. gen_tend) then
@@ -2969,8 +2943,8 @@ c
           if(idtend>=1) then
             do k = 1,km1
               do i = 1,im
-                ttend = diss(i,k) / cp
-                dtend(i,k,idtend) = dtend(i,k,idtend)+dspfac*ttend*delt
+                dtend(i,k,idtend) = dtend(i,k,idtend)+              
+     &                              (dspfac * diss(i,k) / cp)*delt
               enddo
             enddo
           endif
@@ -3043,10 +3017,8 @@ c
 c
       do k = 1,km
          do i = 1,im
-            utend = (f1(i,k)-u1(i,k))*rdt
-            vtend = (f2(i,k)-v1(i,k))*rdt
-            du(i,k)  = du(i,k)+utend
-            dv(i,k)  = dv(i,k)+vtend
+            ten_u(i,k) = (f1(i,k)-u1(i,k))*rdt
+            ten_v(i,k) = (f2(i,k)-v1(i,k))*rdt
 !           dusfc(i) = dusfc(i)+conw*del(i,k)*utend
 !           dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
@@ -3069,8 +3041,7 @@ c
         if(idtend>=1) then
           do k = 1,km
             do i = 1,im
-              utend = (f1(i,k)-u1(i,k))*rdt
-              dtend(i,k,idtend) = dtend(i,k,idtend) + utend*delt
+              dtend(i,k,idtend) = dtend(i,k,idtend) + ten_u(i,k)*delt
             enddo
           enddo
         endif
@@ -3079,8 +3050,7 @@ c
         if(idtend>=1) then
           do k = 1,km
             do i = 1,im
-              vtend = (f2(i,k)-v1(i,k))*rdt
-              dtend(i,k,idtend) = dtend(i,k,idtend) + vtend*delt
+              dtend(i,k,idtend) = dtend(i,k,idtend) + ten_v(i,k)*delt
             enddo
           enddo
         endif
@@ -3103,6 +3073,11 @@ c
       endif  !sa3dtke
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      if (do_canopy) then
+        if(allocated(EDDYVESTX)) deallocate(EDDYVESTX)
+        if(allocated(ZCANX)) deallocate(ZCANX)
+      endif
+      
       return
       end subroutine satmedmfvdifq_run
 !> @}

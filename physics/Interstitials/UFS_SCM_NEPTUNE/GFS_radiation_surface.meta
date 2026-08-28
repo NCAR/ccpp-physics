@@ -10,9 +10,23 @@
 [ccpp-arg-table]
   name = GFS_radiation_surface_init
   type = scheme
-[me]
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = MPI_Comm
+  intent = in
+[mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
   units = index
   dimensions = ()
   type = integer
@@ -320,7 +334,7 @@
   units = flag
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = inout
+  intent = in
 [alvsf]
   standard_name = vis_albedo_strong_cosz
   long_name = mean vis albedo with strong cosz dependency
@@ -376,7 +390,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [semis_ice]
   standard_name = surface_longwave_emissivity_over_ice
   long_name = surface lw emissivity in fraction over ice
@@ -384,7 +398,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [semis_wat]
   standard_name = surface_longwave_emissivity_over_water
   long_name = surface lw emissivity in fraction over water

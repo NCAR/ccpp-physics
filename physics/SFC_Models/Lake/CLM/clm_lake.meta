@@ -131,7 +131,7 @@
   units = flag
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = inout
+  intent = in
 [clm_lake_initialized]
   standard_name = flag_for_clm_lake_initialization
   long_name = set to true in clm_lake_run after likeini is called, as a workaround for ccpp limitation
@@ -186,8 +186,8 @@
   kind = kind_phys
   intent = in
 [gt0]
-  standard_name = air_temperature_of_new_state
-  long_name = temperature updated by physics
+  standard_name = air_temperature
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -210,24 +210,24 @@
   kind = kind_phys
   intent = in
 [qvcurr]
-  standard_name = specific_humidity_of_new_state_at_surface_adjacent_layer
-  long_name = water vapor specific humidity at lowest model layer updated by physics
+  standard_name = specific_humidity_at_surface_adjacent_layer
+  long_name = water vapor specific humidity at lowest model layer
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
 [gu0]
-  standard_name = x_wind_of_new_state
-  long_name = zonal wind updated by physics
+  standard_name = x_wind
+  long_name = zonal wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
 [gv0]
-  standard_name = y_wind_of_new_state
-  long_name = meridional wind updated by physics
+  standard_name = y_wind
+  long_name = meridional wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -328,7 +328,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [flag_iter]
   standard_name = flag_for_iteration
   long_name = flag for iteration
@@ -573,7 +573,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [lake_q2m]
   standard_name =  specific_humidity_at_2m_from_clm_lake
   long_name = specific humidity at 2m from clm lake
@@ -581,7 +581,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [weasd]
   standard_name = lwe_thickness_of_surface_snow_amount
   long_name = water equiv of acc snow depth over land and sea ice
@@ -746,9 +746,9 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
 [t1]
-  standard_name = air_temperature_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_air_temperature_at_surface_adjacent_layer
   long_name = mean temperature at lowest model layer
   units = K
   dimensions = (horizontal_loop_extent)
@@ -756,7 +756,7 @@
   kind = kind_phys
   intent = in
 [qv1]
-  standard_name = specific_humidity_at_surface_adjacent_layer
+  standard_name = physics_timestep_initial_specific_humidity_at_surface_adjacent_layer
   long_name = water vapor specific humidity at lowest model layer
   units = kg kg-1
   dimensions = (horizontal_loop_extent)

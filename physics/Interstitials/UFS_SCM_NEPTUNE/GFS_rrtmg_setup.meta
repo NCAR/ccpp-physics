@@ -2,10 +2,12 @@
   name = GFS_rrtmg_setup
   type = scheme
   dependencies_path = ../../
+  dependencies = tools/mpiutil.F90
   dependencies = hooks/machine.F
-  dependencies = Radiation/radiation_aerosols.f
-  dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
+  dependencies = Radiation/RRTMG/iounitdef.f,Radiation/radiation_aerosols.f
+  dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_cloud_overlap.F90,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
   dependencies = Radiation/RRTMG/radlw_main.F90,Radiation/RRTMG/radlw_param.f,Radiation/RRTMG/radsw_main.F90,Radiation/RRTMG/radsw_param.f
+  dependencies = Radiation/RRTMG/radlw_param.f,Radiation/RRTMG/radsw_param.f
   dependencies = MP/module_mp_radar.F90,MP/Thompson/module_mp_thompson.F90,photochem/module_ozphys.F90
 
 ########################################################################
@@ -233,9 +235,23 @@
   dimensions =  ()
   type = logical
   intent = in
-[me]
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = MPI_Comm
+  intent = in
+[mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
   units = index
   dimensions = ()
   type = integer
@@ -440,9 +456,23 @@
   dimensions = ()
   type = logical
   intent = in
-[me]
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = MPI_Comm
+  intent = in
+[mpirank]
   standard_name = mpi_rank
   long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
   units = index
   dimensions = ()
   type = integer
@@ -578,7 +608,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_rrtmg_setup_finalize
+  name = GFS_rrtmg_setup_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message

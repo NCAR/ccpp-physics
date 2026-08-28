@@ -4542,7 +4542,7 @@ subroutine lagrangian_fall (ks, ke, zs, ze, zt, dp, q, precip, m1)
 
     k0 = ks
     do k = ks, ke
-        do n = k0, ke
+        n_loop: do n = k0, ke
             if (ze (k) .le. zt (n) .and. ze (k) .ge. zt (n + 1)) then
                 pl = (zt (n) - ze (k)) / dz (n)
                 if (zt (n + 1) .le. ze (k + 1)) then
@@ -4552,7 +4552,7 @@ subroutine lagrangian_fall (ks, ke, zs, ze, zt, dp, q, precip, m1)
                         a4 (4, n) * r3 * (pr * (pr + pl) + pl ** 2)
                     qm (k) = qm (k) * (ze (k) - ze (k + 1))
                     k0 = n
-                    goto 555
+                    exit n_loop
                 else
                     qm (k) = (ze (k) - zt (n + 1)) * (a4 (2, n) + 0.5 * (a4 (4, n) + &
                         a4 (3, n) - a4 (2, n)) * (1. + pl) - a4 (4, n) * (r3 * (1. + pl * (1. + pl))))
@@ -4567,15 +4567,14 @@ subroutine lagrangian_fall (ks, ke, zs, ze, zt, dp, q, precip, m1)
                                 qm (k) = qm (k) + delz * (a4 (2, m) + 0.5 * esl * &
                                      (a4 (3, m) - a4 (2, m) + a4 (4, m) * (1. - r23 * esl)))
                                 k0 = m
-                                goto 555
+                                exit n_loop
                             endif
                         enddo
                     endif
-                    goto 555
+                    exit n_loop
                 endif
             endif
-        enddo
-        555 continue
+        enddo n_loop
     enddo
 
     m1 (ks) = q (ks) - qm (ks)

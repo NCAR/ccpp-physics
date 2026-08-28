@@ -3,7 +3,7 @@
   type = scheme
 # DH* 20200804 - this is a result of the nasty hack to call gwdps from within ugwp-v0!
   dependencies=cires_ugwp_triggers.F90,cires_ugwp_initialize.F90
-  dependencies=cires_orowam2017.f,cires_ugwp_module.F90,gwdps.f,../hooks/machine.F,ugwp_driver_v0.F
+  dependencies=cires_orowam2017.f,cires_ugwp_module.F90,gwdps.f,../hooks/machine.F,ugwp_driver_v0.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -56,13 +56,6 @@
 [lonr]
   standard_name = number_of_equatorial_longitude_points
   long_name = number of global points in x-dir (i) along the equator
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[latr]
-  standard_name = number_of_latitude_points
-  long_name = number of global points in y-dir (j) along the meridian
   units = count
   dimensions = ()
   type = integer
@@ -170,7 +163,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = cires_ugwp_finalize
+  name = cires_ugwp_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message
@@ -509,24 +502,24 @@
   kind = kind_phys
   intent = out
 [gw_dudt]
-  standard_name = tendency_of_x_wind_due_to_gravity_wave_drag
-  long_name = zonal wind tendency due to UGWP
+  standard_name = tendency_of_x_wind
+  long_name = tendency of x wind calculated by one physics scheme
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
 [gw_dvdt]
-  standard_name = tendency_of_y_wind_due_to_gravity_wave_drag
-  long_name = meridional wind tendency due to UGWP
+  standard_name = tendency_of_y_wind
+  long_name = tendency of y wind calculated by one physics scheme
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
 [gw_dtdt]
-  standard_name = tendency_of_air_temperature_due_to_gravity_wave_drag
-  long_name = air temperature tendency due to UGWP
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
@@ -711,30 +704,6 @@
   kind = kind_phys
   intent = inout
   optional = True
-[dudt]
-  standard_name = process_split_cumulative_tendency_of_x_wind
-  long_name = zonal wind tendency due to model physics
-  units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[dvdt]
-  standard_name = process_split_cumulative_tendency_of_y_wind
-  long_name = meridional wind tendency due to model physics
-  units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[dtdt]
-  standard_name = process_split_cumulative_tendency_of_air_temperature
-  long_name = air temperature tendency due to model physics
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [rdxzb]
   standard_name = level_of_dividing_streamline
   long_name = level of the dividing streamline
@@ -817,19 +786,21 @@
 [q_tke]
   standard_name = turbulent_kinetic_energy
   long_name = turbulent kinetic energy
-  units = J
+  units = J kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
-[dqdt_tke] 
+  optional = True
+[dqdt_tke]
   standard_name = process_split_cumulative_tendency_of_turbulent_kinetic_energy
   long_name = turbulent kinetic energy tendency due to model physics
-  units = J s-1
+  units = J kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
+  optional = True
 [lprnt]
   standard_name = flag_print
   long_name = control flag for diagnostic print out
@@ -869,7 +840,7 @@
   intent = in
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
-  long_name = index of x-wind in first dimension of array cumulative change index
+  long_name = index of y-wind in first dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
@@ -916,6 +887,14 @@
   dimensions = ()
   type = logical
   intent = in
+[ten_q]
+  standard_name = tendency_of_tracer_concentration
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

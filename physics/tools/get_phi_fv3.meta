@@ -31,15 +31,15 @@
   kind = kind_phys
   intent = in
 [gt0]
-  standard_name = air_temperature_of_new_state
-  long_name = updated air temperature
+  standard_name = air_temperature
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = in
 [gq01]
-  standard_name = specific_humidity_of_new_state
+  standard_name = specific_humidity
   long_name = mid-layer specific humidity of water vapor
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)

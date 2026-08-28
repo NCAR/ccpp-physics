@@ -83,7 +83,7 @@ contains
 !! the full k-distribution data is read in, reduced by the "active gases" provided, and
 !! loaded into the RRTMGP DDT, ty_gas_optics_rrtmgp.
   subroutine rrtmgp_sw_gas_optics_init(rrtmgp_root_dir, rrtmgp_sw_file_gas,              &
-       active_gases_array, mpicomm, mpirank, mpiroot, errmsg, errflg)
+       active_gases_array, mpicomm, mpirank, mpiroot, is_initialized, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
@@ -98,9 +98,11 @@ contains
          mpiroot             !< Master MPI rank
 
     ! Outputs
-    character(len=*), intent(out) :: &
+    logical,          intent(inout) :: &
+         is_initialized      !< Initialization flag.
+    character(len=*), intent(  out) :: &
          errmsg              !< CCPP error message
-    integer,          intent(out) :: &
+    integer,          intent(  out) :: &
          errflg              !< CCPP error code
 
     ! Local variables
@@ -112,6 +114,8 @@ contains
     ! Initialize
     errmsg = ''
     errflg = 0
+
+    if (is_initialized) return
 
     ! Filenames are set in the gfphysics_nml
     sw_gas_props_file   = trim(rrtmgp_root_dir)//trim(rrtmgp_sw_file_gas)
@@ -508,6 +512,8 @@ contains
          scale_by_complement_upperSW, kminor_start_lowerSW, kminor_start_upperSW,           &
          solar_quietSW, solar_facularSW, solar_sunspotSW, tsi_defaultSW, mg_defaultSW,      &
          sb_defaultSW, rayl_lowerSW, rayl_upperSW))
+
+    is_initialized = .true.
 
   end subroutine rrtmgp_sw_gas_optics_init
 end module rrtmgp_sw_gas_optics

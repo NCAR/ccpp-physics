@@ -2,11 +2,18 @@
   name = GFS_rrtmg_pre
   type = scheme
   dependencies_path = ../../
-  dependencies = tools/funcphys.f90,hooks/machine.F
-  dependencies = MP/TEMPO/TEMPO/module_mp_tempo_params.F90,MP/TEMPO/TEMPO/module_mp_tempo_utils.F90
+  dependencies = tools/funcphys.f90,hooks/machine.F,hooks/physcons.F90
+  dependencies = MP/TEMPO/tempo_v3/src/module_mp_tempo_params.F90
+  dependencies = MP/TEMPO/tempo_v3/src/module_mp_tempo_cfgs.F90
+  dependencies = MP/TEMPO/tempo_v3/src/module_mp_tempo_ml.F90
+  dependencies = MP/TEMPO/tempo_v3/src/module_mp_tempo_utils.F90
+  dependencies = MP/TEMPO/tempo_v3/src/module_mp_tempo_aerosols.F90
+  dependencies = MP/TEMPO/tempo_v3/src/module_mp_tempo_diags.F90
+  dependencies = MP/TEMPO/tempo_v3/src/module_mp_tempo_main.F90
+  dependencies = MP/TEMPO/tempo_v3/src/module_mp_tempo_driver.F90
   dependencies = MP/Thompson/module_mp_thompson.F90,MP/Thompson/module_mp_thompson_make_number_concentrations.F90
-  dependencies = Radiation/RRTMG/radcons.f90,Radiation/radiation_aerosols.f
-  dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
+  dependencies = Radiation/RRTMG/radcons.f90,Radiation/RRTMG/iounitdef.f,Radiation/radiation_aerosols.f
+  dependencies = Radiation/radiation_astronomy.f,Radiation/radiation_cloud_overlap.F90,Radiation/radiation_clouds.f,Radiation/radiation_gases.f
   dependencies = Radiation/RRTMG/radlw_param.f,Radiation/RRTMG/radsw_param.f,Radiation/radiation_cloud_overlap.F90
   dependencies = SFC_Models/Land/Noah/surface_perturbation.F90
   dependencies = photochem/module_ozphys.F90
@@ -267,13 +274,6 @@
   dimensions = ()
   type = ty_ozphys
   intent = in
-[tempo_cfg]
-  standard_name = configuration_for_TEMPO_microphysics
-  long_name = configuration information for TEMPO microphysics
-  units = mixed
-  dimensions = ()
-  type = ty_tempo_cfg
-  intent = in
 [iaermdl]
   standard_name = control_for_aerosol_radiation_scheme
   long_name = control of aerosol scheme in radiation
@@ -491,20 +491,6 @@
   dimensions = ()
   type = integer
   intent = in
-[imp_physics_zhao_carr]
-  standard_name = identifier_for_zhao_carr_microphysics_scheme
-  long_name = choice of Zhao-Carr microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-[imp_physics_zhao_carr_pdf]
-  standard_name = identifier_for_zhao_carr_pdf_microphysics_scheme
-  long_name = choice of Zhao-Carr microphysics scheme with PDF clouds
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [imp_physics_mg]
   standard_name = identifier_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
@@ -581,6 +567,7 @@
   units = km
   dimensions = ()
   type = real
+  kind = kind_phys
   intent = in
 [idcor]
   standard_name = flag_for_decorrelation_length_method
@@ -1118,8 +1105,8 @@
   kind = kind_phys
   intent = inout
 [qci_conv]
-  standard_name = convective_cloud_condesate_after_rainout
-  long_name = convective cloud condesate after rainout
+  standard_name = convective_cloud_condensate_after_rainout
+  long_name = convective cloud condensate after rainout
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real

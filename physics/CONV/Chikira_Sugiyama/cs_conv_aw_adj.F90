@@ -20,9 +20,8 @@ module cs_conv_aw_adj
 !! \htmlinclude cs_conv_aw_adj_run.html
 !!
 !\section gen_cs_conv_aw_adj_run CPT cs_conv_aw_adj_run General Algorithm
-   subroutine cs_conv_aw_adj_run(im, levs, do_cscnv, do_aw, do_shoc, &
-                ntrac, ntcw, ntclamt, nncl, con_g, sigmafrac,        &
-                gt0, gq0, save_t, save_q, prsi, cldfrac, subcldfrac, &
+   subroutine cs_conv_aw_adj_run(im, levs, dt, do_cscnv, do_aw, do_shoc, &
+                ntcw, nncl, con_g, sigmafrac, ten_t, ten_q, prsi, subcldfrac, &
                 prcp, imp_physics, imp_physics_mg, errmsg, errflg)
 
       use machine, only: kind_phys
@@ -32,17 +31,14 @@ module cs_conv_aw_adj
 ! --- interface variables
       integer,                                    intent(in)    :: im, levs
       logical,                                    intent(in)    :: do_cscnv, do_aw, do_shoc
-      integer,                                    intent(in)    :: ntrac, ntcw, ntclamt, nncl
-      real(kind_phys),                            intent(in)    :: con_g
-      real(kind_phys),  dimension(:,:),       intent(inout) :: sigmafrac
-      real(kind_phys),  dimension(:,:),       intent(inout) :: gt0
-      real(kind_phys),  dimension(:,:,:), intent(inout) :: gq0
-      real(kind_phys),  dimension(:,:),       intent(in)    :: save_t
-      real(kind_phys),  dimension(:,:,:), intent(in)    :: save_q
-      real(kind_phys),  dimension(:,:),     intent(in)    :: prsi
-      real(kind_phys),  dimension(:,:),       intent(inout), optional :: cldfrac
-      real(kind_phys),  dimension(:,:),       intent(inout), optional :: subcldfrac
-      real(kind_phys),  dimension(:),            intent(inout) :: prcp
+      integer,                                    intent(in)    :: ntcw, nncl
+      real(kind_phys),                            intent(in)    :: dt, con_g
+      real(kind_phys),  dimension(:,:),           intent(in)    :: sigmafrac
+      real(kind_phys),  dimension(:,:),           intent(inout) :: ten_t
+      real(kind_phys),  dimension(:,:,:),         intent(inout) :: ten_q
+      real(kind_phys),  dimension(:,:),           intent(in)    :: prsi
+      real(kind_phys),  dimension(:,:),           intent(inout), optional :: subcldfrac
+      real(kind_phys),  dimension(:),             intent(inout) :: prcp
       integer,                                    intent(in   ) :: imp_physics, imp_physics_mg
       character(len=*),                           intent(  out) :: errmsg
       integer,                                    intent(  out) :: errflg
@@ -75,9 +71,9 @@ module cs_conv_aw_adj
       do k = 1,levs
         do i = 1,im
           tem1        = sigmafrac(i,k)
-          gt0(i,k)    = gt0(i,k) - tem1 * (gt0(i,k)-save_t(i,k))
-          tem2        = tem1 * (gq0(i,k,1)-save_q(i,k,1))
-          gq0(i,k,1)  = gq0(i,k,1) - tem2
+          ten_t(i,k)  = (1.0 - tem1)*ten_t(i,k)
+          tem2        = tem1 * ten_q(i,k,1)*dt
+          ten_q(i,k,1) = (1.0 - tem1)*ten_q(i,k,1)
           temrain1(i) = temrain1(i) - (prsi(i,k)-prsi(i,k+1)) * tem2 * onebg
         enddo
       enddo
@@ -93,8 +89,8 @@ module cs_conv_aw_adj
       do n=ntcw,ntcw+nncl-1
         do k = 1,levs
           do i = 1,im
-            tem1        = sigmafrac(i,k) * (gq0(i,k,n)-save_q(i,k,n))
-            gq0(i,k,n)  = gq0(i,k,n) - tem1
+            tem1        = sigmafrac(i,k) * ten_q(i,k,n)*dt
+            ten_q(i,k,n) = (1.0 - sigmafrac(i,k))*ten_q(i,k,n)
             temrain1(i) = temrain1(i) - (prsi(i,k)-prsi(i,k+1)) * tem1 * onebg
           enddo
         enddo

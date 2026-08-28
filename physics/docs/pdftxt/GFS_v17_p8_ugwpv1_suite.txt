@@ -14,7 +14,7 @@ with the CCPP SCM.  The primary differences between the GFS_v16 and GFS_v17 suit
 
 The GFS_v17 suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG_page
- - \ref GFS_SFCLYR
+ - \ref GFS_v17_SFCLYR
  - \ref GFS_NSST
  - \ref NoahMP
  - \ref GFS_SFCSICE

@@ -66,7 +66,7 @@
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
 !!  \section detailed_hedmf  GFS Hybrid HEDMF Detailed Algorithm
 !!  @{
-      subroutine hedmf_run (im,km,ntrac,ntcw,dv,du,tau,rtg,             &
+      subroutine hedmf_run (im,km,ntrac,ntcw,rtg,                       &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
      &   tsea,heat,evap,stress,spd1,kpbl,                               &
@@ -77,7 +77,7 @@
      &   coef_ric_l,coef_ric_s,ldiag3d,ntqv,rtg_ozone_index,ntoz,       &
      &   dtend,dtidx,index_of_process_pbl,index_of_x_wind,              &
      &   index_of_y_wind,index_of_temperature,                          &
-     &   flag_for_pbl_generic_tend,errmsg,errflg)
+     &   flag_for_pbl_generic_tend,ten_t,ten_u,ten_v,errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -101,8 +101,7 @@
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: xkzminv, moninq_fac, var_ric, &
      &                     coef_ric_l, coef_ric_s
-      real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
-     &                     tau(:,:),    rtg(:,:,:)
+      real(kind=kind_phys), intent(inout) :: rtg(:,:,:)
       ! dtend is only allocated if ldiag3d or qdiag3d are true
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
@@ -134,6 +133,8 @@
 !
       logical, intent(in) :: dspheat
 !          flag for tke dissipative heating
+      real(kind=kind_phys), intent(out) :: ten_t(:,:),                  &
+     &                                     ten_u(:,:), ten_v(:,:)
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -1299,22 +1300,66 @@ c
 !>  After returning with the solution, the tendencies for temperature and moisture are recovered.
       do  k = 1,km
          do i = 1,im
-            ttend      = (a1(i,k)-t1(i,k)) * rdt
+            ten_t(i,k) = (a1(i,k)-t1(i,k)) * rdt
             qtend      = (a2(i,k)-q1(i,k,1))*rdt
-            tau(i,k)   = tau(i,k)+ttend
             rtg(i,k,1) = rtg(i,k,1)+qtend
-            dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
+            dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ten_t(i,k)
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
       enddo
+!
+!   compute tke dissipation rate
+!
+!>  ## Calculate heating due to TKE dissipation and add to the tendency for temperature
+!!  Following Han et al. (2016) \cite Han_2016 , turbulence dissipation contributes to the tendency of temperature in the following way. First, turbulence dissipation is calculated by equation 17 of Han et al. (2016) \cite Han_2016 for the PBL and equation 16 for the surface layer.
+      if(dspheat) then
+!
+        do k = 1,km1
+          do i = 1,im
+            diss(i,k) = dku(i,k)*shr2(i,k)-grav*ti(i,k)*dkt(i,k)*bf(i,k)
+            !         diss(i,k) = dku(i,k)*shr2(i,k)
+          enddo
+        enddo
+!
+!     add dissipative heating at the first model layer
+!
+!>  Next, the temperature tendency is updated following equation 14.
+        if (hurr_pbl .and. moninq_fac < 0.0) then
+          ttend_fac = 0.7
+        else
+          ttend_fac = 0.5
+        endif
+      
+        do i = 1,im
+          tem   = govrth(i)*sflux(i)
+          tem1  = tem + stress(i)*spd1(i)/zl(i,1)
+          tem2  = 0.5 * (tem1+diss(i,1))
+          tem2  = max(tem2, 0.)
+          ttend = tem2 / cp
+          ten_t(i,1) = ten_t(i,1)+ttend_fac*ttend
+        enddo
+!
+!     add dissipative heating above the first model layer
+!
+        do k = 2,km1
+          do i = 1,im
+            tem = 0.5 * (diss(i,k-1)+diss(i,k))
+            tem  = max(tem, 0.)
+            ttend = tem / cp
+            ten_t(i,k) = ten_t(i,k) + ttend_fac*ttend
+          enddo
+        enddo
+!
+      endif
+
       if(.not.flag_for_pbl_generic_tend) then
         idtend1=dtidx(index_of_temperature,index_of_process_pbl)
         idtend2=dtidx(ntqv+100,index_of_process_pbl)
         if(idtend1>=1) then
            do  k = 1,km
               do i = 1,im
-                 ttend      = (a1(i,k)-t1(i,k)) * rdt
-                 dtend(i,k,idtend1) = dtend(i,k,idtend1) + ttend*delt
+                 dtend(i,k,idtend1) = dtend(i,k,idtend1) +              &
+     &                                ten_t(i,k)*delt
               enddo
            enddo
         endif
@@ -1352,51 +1397,6 @@ c
           endif
         endif
       endif
-!
-!   compute tke dissipation rate
-!
-!>  ## Calculate heating due to TKE dissipation and add to the tendency for temperature
-!!  Following Han et al. (2016) \cite Han_2016 , turbulence dissipation contributes to the tendency of temperature in the following way. First, turbulence dissipation is calculated by equation 17 of Han et al. (2016) \cite Han_2016 for the PBL and equation 16 for the surface layer.
-      if(dspheat) then
-!
-      do k = 1,km1
-        do i = 1,im
-          diss(i,k) = dku(i,k)*shr2(i,k)-grav*ti(i,k)*dkt(i,k)*bf(i,k)
-!         diss(i,k) = dku(i,k)*shr2(i,k)
-        enddo
-      enddo
-!
-!     add dissipative heating at the first model layer
-!
-!>  Next, the temperature tendency is updated following equation 14.
-      if (hurr_pbl .and. moninq_fac < 0.0) then
-        ttend_fac = 0.7
-      else
-        ttend_fac = 0.5
-      endif
-      
-      do i = 1,im
-         tem   = govrth(i)*sflux(i)
-         tem1  = tem + stress(i)*spd1(i)/zl(i,1)
-         tem2  = 0.5 * (tem1+diss(i,1))
-         tem2  = max(tem2, 0.)
-         ttend = tem2 / cp
-         tau(i,1) = tau(i,1)+ttend_fac*ttend
-      enddo
-!
-!     add dissipative heating above the first model layer
-!
-      do k = 2,km1
-        do i = 1,im
-          tem = 0.5 * (diss(i,k-1)+diss(i,k))
-          tem  = max(tem, 0.)
-          ttend = tem / cp
-          tau(i,k) = tau(i,k) + ttend_fac*ttend
-        enddo
-      enddo
-!
-      endif
-!
 !     compute tridiagonal matrix elements for momentum
 !
 !>  ## Solve for the horizontal momentum tendencies and add them to the output tendency terms
@@ -1453,12 +1453,10 @@ c
 !>  Finally, the tendencies are recovered from the tridiagonal solutions.
       do k = 1,km
          do i = 1,im
-            utend = (a1(i,k)-u1(i,k))*rdt
-            vtend = (a2(i,k)-v1(i,k))*rdt
-            du(i,k)  = du(i,k)  + utend
-            dv(i,k)  = dv(i,k)  + vtend
-            dusfc(i) = dusfc(i) + conw*del(i,k)*utend
-            dvsfc(i) = dvsfc(i) + conw*del(i,k)*vtend
+            ten_u(i,k) = (a1(i,k)-u1(i,k))*rdt
+            ten_v(i,k) = (a2(i,k)-v1(i,k))*rdt
+            dusfc(i) = dusfc(i) + conw*del(i,k)*ten_u(i,k)
+            dvsfc(i) = dvsfc(i) + conw*del(i,k)*ten_v(i,k)
 !
 !  for dissipative heating for ecmwf model
 !
@@ -1476,8 +1474,8 @@ c
          if(idtend1>=1) then
             do k = 1,km
                do i = 1,im
-                  utend = (a1(i,k)-u1(i,k))*rdt
-                  dtend(i,k,idtend1) = dtend(i,k,idtend1) + utend*delt
+                  dtend(i,k,idtend1) = dtend(i,k,idtend1) +             &
+     &                                 ten_u(i,k)*delt
                enddo
             enddo
          endif
@@ -1486,8 +1484,8 @@ c
          if(idtend2>=1) then
             do k = 1,km
                do i = 1,im
-                  vtend = (a2(i,k)-v1(i,k))*rdt
-                  dtend(i,k,idtend2) = dtend(i,k,idtend2) + vtend*delt
+                  dtend(i,k,idtend2) = dtend(i,k,idtend2) +             &
+     &                                 ten_v(i,k)*delt
                enddo
             enddo
          endif

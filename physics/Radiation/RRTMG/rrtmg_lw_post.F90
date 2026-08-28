@@ -11,8 +11,8 @@
 !> \section arg_table_rrtmg_lw_post_run Argument Table
 !! \htmlinclude rrtmg_lw_post_run.html
 !!
-      subroutine rrtmg_lw_post_run (im, levs, ltp, lm, kd, lslwr, lwhtr,       &
-                 tsfa, htlwc, htlw0, sfcflw, tsflw, sfcdlw, htrlw, lwhc,       &
+      subroutine rrtmg_lw_post_run (im, levs, ltp, lm, kd, lslwr, lwhtr, &
+                 tsfa, htlwc, htlw0, sfcflw, tsflw, sfcdlw, htrlw, lwhc, &
                  errmsg, errflg)
     
       use machine,                   only: kind_phys

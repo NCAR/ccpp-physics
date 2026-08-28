@@ -9,7 +9,7 @@
 
       private
 
-      public GFS_time_vary_pre_init, GFS_time_vary_pre_timestep_init, GFS_time_vary_pre_finalize
+      public GFS_time_vary_pre_init, GFS_time_vary_pre_timestep_init, GFS_time_vary_pre_final
 
       logical :: is_initialized = .false.
 
@@ -39,10 +39,10 @@
       end subroutine GFS_time_vary_pre_init
 
 
-!> \section arg_table_GFS_time_vary_pre_finalize Argument Table
-!! \htmlinclude GFS_time_vary_pre_finalize.html
+!> \section arg_table_GFS_time_vary_pre_final Argument Table
+!! \htmlinclude GFS_time_vary_pre_final.html
 !!
-      subroutine GFS_time_vary_pre_finalize(errmsg, errflg)
+      subroutine GFS_time_vary_pre_final(errmsg, errflg)
 
          implicit none
 
@@ -59,7 +59,7 @@
 
          is_initialized = .false.
 
-      end subroutine GFS_time_vary_pre_finalize
+      end subroutine GFS_time_vary_pre_final
 
 
 !> \section arg_table_GFS_time_vary_pre_timestep_init Argument Table
@@ -67,24 +67,30 @@
 !!
       subroutine GFS_time_vary_pre_timestep_init (jdat, idat, dtp, nsswr, &
         nslwr, idate, debug, me, master, nscyc, sec, phour, zhour, fhour, kdt,   &
-        julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
+        julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, tgrs, ugrs, vgrs, qgrs, &
+        gt0 , gu0 , gv0 , gq0 , errmsg, errflg)
 
         use machine,               only: kind_phys, kind_dbl_prec, kind_sngl_prec
 
         implicit none
-        
+
         integer,                          intent(in)    :: idate(:)
         integer,                          intent(in)    :: jdat(:), idat(:)
         integer,                          intent(in)    :: nsswr, nslwr, me,     &
                                                            master, nscyc
         logical,                          intent(in)    :: debug
         real(kind=kind_phys),             intent(in)    :: dtp
-        
+
         integer,                          intent(out)   :: kdt, yearlen, ipt
         logical,                          intent(out)   :: lprnt, lssav, lsswr,  &
                                                            lslwr
         real(kind=kind_phys),             intent(out)   :: sec, phour, zhour,    &
                                                            fhour, julian, solhr
+        
+        real(kind=kind_phys), intent(in ), dimension(:,:)   :: tgrs, ugrs, vgrs
+        real(kind=kind_phys), intent(in ), dimension(:,:,:) :: qgrs
+        real(kind=kind_phys), intent(out), dimension(:,:)   :: gt0, gu0, gv0
+        real(kind=kind_phys), intent(out), dimension(:,:,:) :: gq0
         
         character(len=*),                 intent(out)   :: errmsg
         integer,                          intent(out)   :: errflg
@@ -109,7 +115,13 @@
            errflg = 1
            return
         end if
-
+        
+        !--- set current state variables from timestep initial variables
+        gt0(:,:)   = tgrs(:,:)
+        gu0(:,:)   = ugrs(:,:)
+        gv0(:,:)   = vgrs(:,:)
+        gq0(:,:,:) = qgrs(:,:,:)
+        
         !--- jdat is being updated directly inside of the time integration
         !--- loop of scm.F90
         !--- update calendars and triggers
@@ -120,22 +132,23 @@
            call w3difdat(jdat,idat,4,rinc8)
            sec = rinc8(4)
         else
-           write(errmsg,'(*(a))') "FATAL ERROR: Invalid w3kindreal or w3kindint:", w3kindreal, w3kindint
+           write(errmsg,'(a,2i4)') "FATAL ERROR: Invalid w3kindreal or w3kindint:", w3kindreal, w3kindint
            errflg = 1
            return
         end if
         phour = sec/con_hr
+
         !--- set current bucket hour
         zhour = phour
         fhour = (sec + dtp)/con_hr
         kdt   = nint((sec + dtp)/dtp)
-        
-        !GJF* These calculations were originally in GFS_physics_driver.F90 for 
-        !     NoahMP. They were moved to this routine since they only depends 
-        !     on time (not space). Note that this code is included as-is from 
-        !     GFS_physics_driver.F90, but it may be simplified by using more 
-        !     NCEP W3 library calls (e.g., see W3DOXDAT, W3FS13 for Julian day 
-        !     of year and W3DIFDAT to determine the integer number of days in 
+
+        !GJF* These calculations were originally in GFS_physics_driver.F90 for
+        !     NoahMP. They were moved to this routine since they only depend
+        !     on time (not space). Note that this code is included as-is from
+        !     GFS_physics_driver.F90, but it may be simplified by using more
+        !     NCEP W3 library calls (e.g., see W3DOXDAT, W3FS13 for Julian day
+        !     of year and W3DIFDAT to determine the integer number of days in
         !     a given year). *GJF
         ! Julian day calculation (fcst day of the year)
         ! we need yearln and julian to
@@ -148,7 +161,7 @@
         fjd    = float(jdat(5))/24.0 + float(jdat(6))/1440.0
 
         julian = float(jd1-jd0) + fjd
-        
+
         !
         ! Year length
         !

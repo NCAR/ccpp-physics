@@ -14,12 +14,12 @@ contains
 !! \htmlinclude cires_ugwp_post_run.html
 !!
      subroutine cires_ugwp_post_run (ldiag_ugwp, dtf, im, levs,     &
-         gw_dtdt, gw_dudt, gw_dvdt, tau_tofd, tau_mtb, tau_ogw,     &
+         gw_dudt, gw_dvdt, tau_tofd, tau_mtb, tau_ogw,              &
          tau_ngw, zmtb, zlwb, zogw, dudt_mtb, dudt_ogw, dudt_tms,   &
          tot_zmtb, tot_zlwb, tot_zogw,                              &
          tot_tofd, tot_mtb, tot_ogw, tot_ngw,                       &
          du3dt_mtb,du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw,      &
-         dtdt, dudt, dvdt, errmsg, errflg)
+         errmsg, errflg)
 
         use machine,                only: kind_phys
 
@@ -34,10 +34,9 @@ contains
         real(kind=kind_phys), intent(in),    dimension(:)   :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
         real(kind=kind_phys), intent(inout), dimension(:)   :: tot_zmtb, tot_zlwb, tot_zogw
-        real(kind=kind_phys), intent(in),    dimension(:,:) :: gw_dtdt, gw_dudt, gw_dvdt, dudt_mtb, dudt_tms
+        real(kind=kind_phys), intent(in),    dimension(:,:) :: gw_dudt, gw_dvdt, dudt_mtb, dudt_tms
         real(kind=kind_phys), intent(in),    dimension(:,:) :: dudt_ogw
         real(kind=kind_phys), intent(inout), dimension(:,:), optional :: du3dt_mtb, du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw
-        real(kind=kind_phys), intent(inout), dimension(:,:) :: dtdt, dudt, dvdt
 
         character(len=*),        intent(out) :: errmsg
         integer,                 intent(out) :: errflg
@@ -62,10 +61,6 @@ contains
           du3dt_ngw = du3dt_ngw + dtf *gw_dudt
           dv3dt_ngw = dv3dt_ngw + dtf *gw_dvdt
         endif
-
-        dtdt = dtdt + gw_dtdt
-        dudt = dudt + gw_dudt
-        dvdt = dvdt + gw_dvdt
 
       end subroutine cires_ugwp_post_run
 

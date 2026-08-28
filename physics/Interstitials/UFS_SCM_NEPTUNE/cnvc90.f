@@ -1,7 +1,6 @@
 !>\file cnvc90.f
-!! This file contains the calculation of fraction of convective cloud,
-!! pressure at bottom of convective cloud and at top of convective
-!! cloud.
+!! This module computes the convective cloud fraction, as well as
+!! the pressure at the base and top of the convective cloud.
       module cnvc90
 
       contains
@@ -11,9 +10,6 @@
 
 !>\defgroup GFS_cnvc90 GFS Convective Cloud Diagnostics Module
 !> @{
-!! This module contains the calculation of fraction of convective cloud,
-!! pressure at bottom of convective cloud and at top of convective
-!! cloud.
 !> \section arg_table_cnvc90_run Argument Table
 !! \htmlinclude cnvc90_run.html
 !!
@@ -43,23 +39,23 @@
 
       ! Local variables
       integer              :: i,ibot,itop,lc,lz,n,ncc
-      real(kind=kind_phys) :: ah,cc1,cc2,cvb0,p1,p2,rkbot,rktop,val
+      real(kind=kind_phys) :: ah,cc1,cc2,cvb0,p1,p2
       integer              :: NMD(IM)
       real(kind=kind_phys) :: PMD(IM)
-!
+
       real (kind=kind_phys), parameter :: cons_100=100.0
       real(kind=kind_phys) :: R_KBOT_I, R_KTOP_I
-!
+
       PARAMETER(NCC=9)
       real(kind=kind_phys) :: CC(NCC),P(NCC)
       DATA CC/0.,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8/
       DATA P/.14,.31,.70,1.6,3.4,7.7,17.,38.,85./
       DATA CVB0/100./
-!
+
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-!
+
       LZ=0
       LC=0
       IF(CLSTP.GE.1000.) LZ=1
@@ -123,9 +119,6 @@
           ENDIF
         ENDDO
       ENDIF
-      RETURN
       END SUBROUTINE cnvc90_run
 !> @}
-
       end module cnvc90
-

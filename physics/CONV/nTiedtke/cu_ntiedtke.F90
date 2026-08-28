@@ -168,9 +168,9 @@ contains
 !!
 !=================================================================================================================
 !     level 1 subroutine 'cu_ntiedkte_run'
-      subroutine cu_ntiedtke_run(pu,pv,pt,pqv,tdi,qvdi,pqvf,ptf,clw,poz,pzz,prsl,prsi,pomg, &
+      subroutine cu_ntiedtke_run(pu,pv,pt,pqv,ntqv,tdi,qvdi,pqvf,ptf,clw,poz,pzz,prsl,prsi,pomg, &
                                  evap,hfx,zprecc,lmask,lq,km,dt,dx,kbot,ktop,kcnv, &
-                                 ktrac,ud_mf,dd_mf,dt_mf,cnvw,cnvc,errmsg,errflg)
+                                 ktrac,ud_mf,dd_mf,dt_mf,cnvw,cnvc,ten_t,ten_u,ten_v,ten_q,dclw_i,dclw_l,errmsg,errflg)
 !=================================================================================================================
 !  this is the interface between the model and the mass flux convection module
 !     m.tiedtke      e.c.m.w.f.      1989
@@ -200,7 +200,7 @@ contains
 !
       implicit none
 !--- input arguments:
-      integer, intent(in) :: lq, km, ktrac
+      integer, intent(in) :: ntqv, lq, km, ktrac
       integer, intent(in), dimension(:) :: lmask
 
       real(kind=kind_phys), intent(in) :: dt
@@ -210,15 +210,18 @@ contains
       real(kind=kind_phys), dimension(:,:),intent(in) :: pzz, prsi
 
 !--- inout arguments:
-      real(kind=kind_phys), dimension(:,:,:), intent(inout ) :: clw
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: pu, pv, pt, pqv
+      real(kind=kind_phys), dimension(:,:,:), intent(in ) :: clw
+      real(kind=kind_phys), dimension(:,:), intent(in) :: pu, pv, pt, pqv
 
 !--- output arguments:
       real(kind=kind_phys), dimension(:), intent(out) :: zprecc
       integer, dimension(:), intent(out) :: kbot, ktop, kcnv
       real(kind=kind_phys), dimension (:,:), intent(out), optional :: ud_mf
       real(kind=kind_phys), dimension (:,:), intent(out) :: dd_mf, dt_mf, cnvw, cnvc
-
+      
+      real(kind=kind_phys), dimension (:,:), intent(out) :: ten_t, ten_u, ten_v, dclw_i, dclw_l
+      real(kind=kind_phys), dimension (:,:,:), intent(out) :: ten_q
+      
 ! error messages
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -248,6 +251,13 @@ contains
 ! Initialize CCPP error handling variables
    errmsg = ''
    errflg = 0
+   
+   ten_t = 0.0
+   ten_u = 0.0
+   ten_v = 0.0
+   ten_q = 0.0
+   dclw_i = 0.0
+   dclw_l = 0.0
 
       km1 = km + 1
       ztmst=dt
@@ -380,8 +390,8 @@ contains
       if(pcte(j,k1).gt.0.) then
         fliq=foealfa(ztp1(j,k1))
         fice=1.0-fliq
-        clw(j,k,2)=clw(j,k,2)+fliq*pcte(j,k1)*ztmst
-        clw(j,k,1)=clw(j,k,1)+fice*pcte(j,k1)*ztmst
+        dclw_l(j,k) = fliq*pcte(j,k1)
+        dclw_i(j,k) = fice*pcte(j,k1)
       endif
       end do
       end do
@@ -389,8 +399,8 @@ contains
       do k=1,km
         k1 = km-k+1
         do j=1,lq
-          pt(j,k) = ztp1(j,k1)+(ptte(j,k1)-ztt(j,k1))*ztmst
-          pqv(j,k)  = zqp1(j,k1)+(pqte(j,k1)-zqq(j,k1))*ztmst
+          ten_t(j,k) = ptte(j,k1)-ztt(j,k1)
+          ten_q(j,k,ntqv) = pqte(j,k1)-zqq(j,k1)
           ud_mf(j,k)= zmfu(j,k1)*ztmst
           dd_mf(j,k)= -zmfd(j,k1)*ztmst
           dt_mf(j,k)= zmfude_rate(j,k1)*ztmst
@@ -417,8 +427,8 @@ contains
         do k=1,km
           k1=km-k+1
           do j=1,lq
-            pu(j,k)=pu(j,k)+pvom(j,k1)*ztmst
-            pv(j,k)=pv(j,k)+pvol(j,k1)*ztmst
+            ten_u(j,k) = pvom(j,k1)
+            ten_v(j,k) = pvol(j,k1)
           end do
         end do
       endif

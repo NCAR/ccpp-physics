@@ -795,7 +795,7 @@ CONTAINS
          do k=2,nzs
          if(zsmain(k).ge.0.4_kind_phys) then
             NROOT=K
-            goto  111
+            exit
          endif
          enddo
      ELSE
@@ -810,11 +810,10 @@ CONTAINS
          do k=2,nzs
          if(zsmain(k).ge.1.1_kind_phys) then
             NROOT=K
-            goto  111
+            exit
          endif
          enddo
      ENDIF
- 111   continue
 
 !-----
     IF (debug_print ) THEN
@@ -1523,10 +1522,10 @@ CONTAINS
 	if(snhei.gt.0.0081_kind_phys*rhowater/rhosn) then
 !*** Update snow density for current temperature (Koren et al 1999,doi:10.1029/1999JD900232.)
         BSN=delt/3600._kind_phys*c1sn*exp(0.08_kind_phys*min(zero,tsnav)-c2sn*rhosn*1.e-3_kind_phys)
-       if(bsn*snwe*100._kind_phys.lt.1.e-4_kind_phys) goto 777
-        XSN=rhosn*(exp(bsn*snwe*100._kind_phys)-one)/(bsn*snwe*100._kind_phys)
-        rhosn=MIN(MAX(58.8_kind_phys,XSN),500._kind_phys)
- 777   continue
+       if(bsn*snwe*100._kind_phys.ge.1.e-4_kind_phys) then
+         XSN=rhosn*(exp(bsn*snwe*100._kind_phys)-one)/(bsn*snwe*100._kind_phys)
+         rhosn=MIN(MAX(58.8_kind_phys,XSN),500._kind_phys)
+       endif
       endif
 
       !-- snow_mosaic from the previous time step 
@@ -2322,13 +2321,15 @@ CONTAINS
 
        R=(TN-173.15_kind_dbl_prec)/.05_kind_dbl_prec+one
        I=INT(R)
-       IF(I.GE.1) goto 10
-       I=1
-       R=1.
-  10   IF(I.LE.5000) GOTO 20
-       I=5000
-       R=5001._kind_dbl_prec
-  20   R1=T(I)
+
+       if (I .LT. 1) then
+         I = 1
+         R = 1._kind_dbl_prec
+       else if (I .GT. 5000) then
+         I = 5000
+         R = 5001._kind_dbl_prec
+       end if
+       R1=T(I)
        R2=R-I
        QSN=(T(I+1)-R1)*R2 + R1
 !-----------------------------------------------------------------------
@@ -4857,7 +4858,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
 !******************************************************************************
         cotso(1)=zero
         rhtso(1)=TSO(NZS)
-        DO 33 K=1,NZS2
+        DO K=1,NZS2
           KN=NZS-K
           K1=2*KN-3
           X1=DTDZS(K1)*THDIF(KN-1)
@@ -4867,7 +4868,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
           DENOM=1.+X1+X2-X2*cotso(K)
           cotso(K+1)=X1/DENOM
           rhtso(K+1)=(FT+X2*rhtso(K))/DENOM
-   33  CONTINUE
+        END DO
 
 !************************************************************************
 !--- THE HEAT BALANCE EQUATION (Smirnova et al., 1996, EQ. 21,26)

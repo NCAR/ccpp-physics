@@ -56,20 +56,21 @@ contains
   ! ###########################################################################################
   ! GFS_radiation_post_run
   ! ###########################################################################################
-  subroutine GFS_radiation_post_run(doLWrad, doSWrad, lssav, total_albedo, topfsw, fhlwr, fhswr,&
-      coszen, coszdg, raddt, aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, tgrs, kb,  &
-      kd, kt, sfcflw, sfcfsw, topflw, scmpsw, nCol, nLev, lmk, nDay, nfxr, nspc1, fluxr,        &
+  subroutine GFS_radiation_post_run(doLWrad, doSWrad, tend_opt_lwrad, tend_opt_swrad, lssav, total_albedo, topfsw, fhlwr, fhswr, delt, &
+      coszen, coszdg, raddt, aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, kb,  &
+      kd, kt, sfcflw, sfcfsw, topflw, scmpsw, nCol, nLev, ntrac, lmk, nDay, nfxr, nspc1, fluxr,        &
       do_RRTMGP, do_lw_clrsky_hr, fluxlwUP_clrsky, fluxlwDOWN_clrsky, htrlwc, fluxlwUP_allsky,  &
       fluxlwDOWN_allsky, htrlw, do_sw_clrsky_hr, htrswc, fluxswUP_clrsky, idxday,               &
       fluxswDOWN_clrsky, htrsw, fluxswUP_allsky, fluxswDOWN_allsky, iSFC, iTOA, tsflw, tsfa,    &
       sfcdlw, sfculw, htrlwu, nirbmdi, nirdfdi, visbmdi, visdfdi, nirbmui, nirdfui, visbmui,    &
       visdfui, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfcnsw,  &
-      sfcdsw, errmsg, errflg) 
+      sfcdsw, gu0, gv0, gt0, gq0, dudt, dvdt, dtdt, dqdt, ten_t, ten_u, ten_v, ten_q, errmsg, errflg) 
 
     ! Inputs
     integer, intent(in) :: &
          nCol,              & !< Horizontal loop extent 
          nLev,              & !< Number of vertical layers
+         ntrac,             & !< number of tracers
          lmk,               & !< Number of vertical layers for radiation (adjusted)
          nDay,              & !< Number of daylit columns
          nfxr,              & !< Number of variables stored in the fluxr array
@@ -78,7 +79,9 @@ contains
          kd,                & !< Vertical index difference between in/out and local  (H/M/L diag)
          kt,                & !< Vertical index difference between layer and upper bound (H/M/L diag)
          iSFC,              & !< Vertical index for surface level
-         iTOA                 !< Vertical index for TOA level
+         iTOA,              & !< Vertical index for TOA level
+         tend_opt_swrad,    &
+         tend_opt_lwrad
     integer, intent(in), dimension(:) :: &
          idxday               !< Index array for daytime points
     logical, intent(in) :: & 
@@ -87,11 +90,12 @@ contains
          lssav,             & !< Flag for radiation diagnostics
          do_RRTMGP,         & !< Flag for using RRTMGP scheme
          do_lw_clrsky_hr,   & !< Output clear-sky LW heating-rate?
-         do_sw_clrsky_hr      !< Output clear-sky SW heating-rate? 
+         do_sw_clrsky_hr     !< Output clear-sky SW heating-rate?
     real(kind_phys), intent(in) ::  &
          fhlwr,             & !< Frequency for longwave radiation  (sec)
          fhswr,             & !< Frequency for shortwave radiation (sec)
-         raddt                !< Radiation time step               (sec)
+         raddt,             & !< Radiation time step               (sec)
+         delt                 !< physics timestep
     real(kind_phys), dimension(:), intent(in) ::  &
          coszen,            & !< Mean cos of zenith angle over rad call period
          coszdg               !< Daytime mean cosz over rad call period
@@ -103,8 +107,6 @@ contains
          sfc_alb_uvvis_dif    !< Surface albedo (diffuse)
     real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev                !< Pressure @ model layer-interfaces (Pa)
-    real(kind_phys), dimension(:,:), intent(in) :: & 
-         tgrs                 !< Temperature @ model layer-centers (K)
     real(kind_phys), dimension(:,:), intent(in), optional :: &
          fluxlwUP_clrsky,   & !< RRTMGP longwave clear-sky flux    (W/m2)
          fluxlwDOWN_clrsky, & !< RRTMGP longwave clear-sky flux    (W/m2)
@@ -165,6 +167,12 @@ contains
          topflw               !< LW  fluxes at top atmosphere
     real(kind_phys), dimension(:,:), intent(inout) :: &
          fluxr                !< LW/SW diagnostics
+    real(kind_phys), dimension(:,:),   intent(inout) :: gu0, gv0, gt0
+    real(kind_phys), dimension(:,:,:), intent(inout) :: gq0
+    real(kind_phys), dimension(:,:),   intent(inout) :: dudt, dvdt, dtdt
+    real(kind_phys), dimension(:,:,:), intent(inout) :: dqdt
+    real(kind_phys), dimension(:,:),   intent(out) :: ten_t, ten_u, ten_v
+    real(kind_phys), dimension(:,:,:), intent(out) :: ten_q
     character(len=*), intent(out) :: &
          errmsg               !< CCPP error message
     integer, intent(out) :: &
@@ -175,16 +183,19 @@ contains
          htrswc               !< SW clear-sky heating rate (K/s)
 
     ! Local variables
-    integer :: i
+    integer :: i, k, n
     real(rte_wp), dimension(nDay, nLev) :: thetaTendClrSkySW, thetaTendAllSkySW
     real(rte_wp), dimension(nCol, nLev) :: thetaTendClrSkyLW, thetaTendAllSkyLW
+    real(kind_phys), dimension(nCol, nLev) :: save_t
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
 
-    ! Only proceed if radiation is being called.
-    if (.not. (doLWrad .or. doSWrad)) return
+    ten_t = 0.0
+    ten_u = 0.0
+    ten_v = 0.0
+    ten_q = 0.0
 
     ! #######################################################################################
     ! Longwave Radiation
@@ -231,7 +242,68 @@ contains
         htrlwu = htrlw
       endif ! RRTMGP Longwave Radiaiton
     endif    ! ALL Longwave Radiation
-
+    
+    !htrlw is calculated in rrtmg_lw_post if using RRTMG and above if using RRTMGP
+    ten_t = htrlw
+    
+    !save temperature to give to GFS_radiation_diagnostics
+    save_t = gt0
+    
+    !This may belong in a separate GFS_radsw_post routine rather than here, although it would need to be created
+    case_LWRAD_ten: select case (tend_opt_lwrad)
+      case (1) !immediately apply tendencies
+                !Current state = current state + dt*current tendency
+                !Accumulated tendency unchanged
+        do k=1,nlev
+          do i=1,ncol
+            gt0(i,k) = gt0(i,k) + delt*ten_t(i,k)
+            gu0(i,k) = gu0(i,k) + delt*ten_u(i,k)
+            gv0(i,k) = gv0(i,k) + delt*ten_v(i,k)
+            do n = 1, ntrac
+              gq0(i,k,n) = gq0(i,k,n) + delt*ten_q(i,k,n)
+            end do
+          end do
+        end do
+      case (2) !add tendencies to sum
+                !Accumulated tendency = accumulated tendency + current tendency
+                !Current state unchanged
+        do k=1,nlev
+          do i=1,ncol
+            dtdt(i,k) = dtdt(i,k) + ten_t(i,k)
+            dudt(i,k) = dudt(i,k) + ten_u(i,k)
+            dvdt(i,k) = dvdt(i,k) + ten_v(i,k)
+            do n = 1, ntrac
+              dqdt(i,k,n) = dqdt(i,k,n) + ten_q(i,k,n)
+            end do
+          end do
+        end do
+      case (3) !add tendencies to sum and apply
+                !Current state = current state + dt*(accumulated tendency + current tendency)
+                !Accumulated tendency = 0
+        do k=1,nlev
+          do i=1,ncol
+            gt0(i,k) = gt0(i,k) + delt*(dtdt(i,k) + ten_t(i,k))
+            dtdt(i,k) = 0.0
+            gu0(i,k) = gu0(i,k) + delt*(dudt(i,k) + ten_u(i,k))
+            dudt(i,k) = 0.0
+            gv0(i,k) = gv0(i,k) + delt*(dvdt(i,k) + ten_v(i,k))
+            dvdt(i,k) = 0.0
+            do n = 1, ntrac
+              gq0(i,k,n) = gq0(i,k,n) + delt*(dqdt(i,k,n) + ten_q(i,k,n))
+              dqdt(i,k,n) = 0.0
+            end do
+          end do
+        end do
+      case (4) !Current state unchanged
+                !Accumulated tendency unchanged
+                !Current tendency unchanged (but will be overwritten during next primary scheme)
+        exit case_LWRAD_ten
+      case default
+        errflg = 1
+        errmsg = 'A tendency application control was outside of the acceptable range (1-4)'
+        return
+    end select case_LWRAD_ten
+    
     ! #######################################################################################
     ! Shortwave Radiation
     ! #######################################################################################
@@ -313,7 +385,7 @@ contains
         enddo
       endif ! RRTMGP Shortwave Radiaiton
     endif ! ALL Shortwave Radiation  
-
+    
     ! The total sky (with clouds) shortwave albedo
     total_albedo = 0.0
     where(topfsw(:)%dnfxc>0) total_albedo(:) = topfsw(:)%upfxc/topfsw(:)%dnfxc
@@ -323,9 +395,66 @@ contains
     ! #########################################################################################
     if (lssav) then
        call GFS_radiation_diagnostics(doLWrad, doSWrad, fhlwr, fhswr, coszen, coszdg, raddt,  &
-            aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, tgrs, kb, kd, kt, sfcflw, &
+            aerodp, cldsa, mtopa, mbota, cldtausw, cldtaulw, p_lev, save_t, kb, kd, kt, sfcflw, &
             sfcfsw, topfsw, topflw, scmpsw, nCol, nDay, nLev, lmk, nfxr, nspc1, fluxr)
     endif
+    
+    !htrsw is calculated in rrtmg_sw_post if using RRTMG and above if using RRTMGP
+    ten_t = htrsw
+    
+    case_SWRAD_ten: select case (tend_opt_swrad)
+      case (1) !immediately apply tendencies
+                !Current state = current state + dt*current tendency
+                !Accumulated tendency unchanged
+        do k=1,nlev
+          do i=1,ncol
+            gt0(i,k) = gt0(i,k) + delt*ten_t(i,k)
+            gu0(i,k) = gu0(i,k) + delt*ten_u(i,k)
+            gv0(i,k) = gv0(i,k) + delt*ten_v(i,k)
+            do n = 1, ntrac
+              gq0(i,k,n) = gq0(i,k,n) + delt*ten_q(i,k,n)
+            end do
+          end do
+        end do
+      case (2) !add tendencies to sum
+                !Accumulated tendency = accumulated tendency + current tendency
+                !Current state unchanged
+        do k=1,nlev
+          do i=1,ncol
+            dtdt(i,k) = dtdt(i,k) + ten_t(i,k)
+            dudt(i,k) = dudt(i,k) + ten_u(i,k)
+            dvdt(i,k) = dvdt(i,k) + ten_v(i,k)
+            do n = 1, ntrac
+              dqdt(i,k,n) = dqdt(i,k,n) + ten_q(i,k,n)
+            end do
+          end do
+        end do
+      case (3) !add tendencies to sum and apply
+                !Current state = current state + dt*(accumulated tendency + current tendency)
+                !Accumulated tendency = 0
+        do k=1,nlev
+          do i=1,ncol
+            gt0(i,k) = gt0(i,k) + delt*(dtdt(i,k) + ten_t(i,k))
+            dtdt(i,k) = 0.0
+            gu0(i,k) = gu0(i,k) + delt*(dudt(i,k) + ten_u(i,k))
+            dudt(i,k) = 0.0
+            gv0(i,k) = gv0(i,k) + delt*(dvdt(i,k) + ten_v(i,k))
+            dvdt(i,k) = 0.0
+            do n = 1, ntrac
+              gq0(i,k,n) = gq0(i,k,n) + delt*(dqdt(i,k,n) + ten_q(i,k,n))
+              dqdt(i,k,n) = 0.0
+            end do
+          end do
+        end do
+      case (4) !Current state unchanged
+                !Accumulated tendency unchanged
+                !Current tendency unchanged (but will be overwritten during next primary scheme)
+        exit case_SWRAD_ten
+      case default
+        errflg = 1
+        errmsg = 'A tendency application control was outside of the acceptable range (1-4)'
+        return
+    end select case_SWRAD_ten
 
   end subroutine GFS_radiation_post_run
   

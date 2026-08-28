@@ -386,37 +386,37 @@
   kind = kind_phys
   intent = in
 [tk3d]
-  standard_name = air_temperature_of_new_state
-  long_name = updated temperature
+  standard_name = air_temperature
+  long_name = air temperature
   units = K
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [us3d]
-  standard_name = x_wind_of_new_state
-  long_name = updated x-direction wind
+  standard_name = x_wind
+  long_name = x-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [vs3d]
-  standard_name = y_wind_of_new_state
-  long_name = updated y-direction wind
+  standard_name = y_wind
+  long_name = y-direction wind
   units = m s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [spechum]
-  standard_name = specific_humidity_of_new_state
-  long_name = water vapor specific humidity updated by physics
+  standard_name = specific_humidity
+  long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [w]
   standard_name = lagrangian_tendency_of_air_pressure
   long_name = layer mean vertical velocity
@@ -439,7 +439,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_of_soil_internal_to_land_surface_scheme)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = True
 [tslb]
   standard_name = soil_temperature_for_land_surface_model
@@ -634,7 +634,7 @@
   type = integer
   intent = in
 [qgrs]
-  standard_name = tracer_concentration
+  standard_name = physics_timestep_initial_tracer_concentration
   long_name = model layer mean tracer concentration
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
@@ -642,8 +642,8 @@
   kind = kind_phys
   intent = inout
 [gq0]
-  standard_name = tracer_concentration_of_new_state
-  long_name = tracer concentration updated by physics
+  standard_name = tracer_concentration
+  long_name = tracer concentration
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
@@ -708,7 +708,7 @@
   type = integer
   intent = in
 [nwfa]
-  standard_name = mass_number_concentration_of_hygroscopic_aerosols_of_new_state
+  standard_name = mass_number_concentration_of_hygroscopic_aerosols
   long_name = number concentration of water-friendly aerosols
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -717,7 +717,7 @@
   intent = inout
   optional = True
 [nifa]
-  standard_name = mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols_of_new_state
+  standard_name = mass_number_concentration_of_nonhygroscopic_ice_nucleating_aerosols
   long_name = number concentration of ice-friendly aerosols
   units = kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
@@ -896,7 +896,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = True
 [hwp_ave]
   standard_name = hourly_wildfire_potential_average
@@ -939,7 +939,7 @@
  dimensions = (horizontal_loop_extent)
  type = real
  kind = kind_phys
- intent = out
+ intent = inout
  optional = True
 [lu_nofire_out]
  standard_name = sum_of_land_use_fractions_for_no_fire_pixels

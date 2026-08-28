@@ -38,7 +38,7 @@
 !!
 !-------------------------------------------------------------------------------
    subroutine shinhongvdif_run(im,km,ux,vx,tx,qx,p2d,p2di,pi2d,karman,         &
-                  utnp,vtnp,ttnp,qtnp,ntrac,ndiff,ntcw,ntiw,                   &
+                  ntrac,ndiff,ntcw,ntiw,                                       &
                   phii,phil,psfcpa,                                            &
                   zorl,stress,hpbl,psim,psih,                                  &
                   landmask,heat,evap,wspd,br,                                  &
@@ -49,7 +49,7 @@
                   dx,lssav,ldiag3d,                                            &
                   flag_for_pbl_generic_tend,ntoz,ntqv,dtend,dtidx,             &
                   index_of_process_pbl,index_of_temperature,index_of_x_wind,   &
-                  index_of_y_wind,errmsg,errflg )
+                  index_of_y_wind,ten_t,ten_u,ten_v,ten_q,errmsg,errflg )
 
    use machine , only : kind_phys
 !
@@ -136,13 +136,6 @@
    real(kind=kind_phys),     dimension(:,:)                                  , &
              intent(in   )   ::                                          p2di, &
                                                                          phii
-! 3D in&out
-   real(kind=kind_phys),     dimension(:,:)                                  , &
-             intent(inout)   ::                                          utnp, &
-                                                                         vtnp, &
-                                                                         ttnp
-   real(kind=kind_phys),     dimension(:,:,:)                                , &
-             intent(inout)   ::                                          qtnp
 ! 2D in
    integer,  dimension(:)                                                    , &
              intent(in   )   ::                                      landmask
@@ -171,6 +164,8 @@
                                                                         dtsfc, &
                                                                         dqsfc
 
+   real(kind=kind_phys), intent(out) :: ten_t(:,:), ten_u(:,:), ten_v(:,:)
+   real(kind=kind_phys), intent(out) :: ten_q(:,:,:)
    real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
    integer, intent(in) :: dtidx(:,:), index_of_process_pbl, ntqv, &
         index_of_x_wind, index_of_y_wind, index_of_temperature
@@ -191,7 +186,6 @@
    real(kind=kind_phys)    ::  dt2,rdt,spdk2,fm,fh,hol1,gamfac,vpert,prnum,prnum0
    real(kind=kind_phys)    ::  ss,ri,qmean,tmean,alpha,chi,zk,rl2,dk,sri
    real(kind=kind_phys)    ::  brint,dtodsd,dtodsu,rdz,dsdzt,dsdzq,dsdz2,rlamdz
-   real(kind=kind_phys)    ::  utend,vtend,ttend,qtend
    real(kind=kind_phys)    ::  dtstep,govrthv
    real(kind=kind_phys)    ::  cont, conq, conw, conwrc 
    real(kind=kind_phys)    ::  delxy,pu1,pth1,pq1
@@ -969,13 +963,12 @@
 !
    do k = kte,kts,-1
      do i = its,ite
-       ttend = (f1(i,k)-thx(i,k)+300.)*rdt*pi2d(i,k)
-       ttnp(i,k) = ttnp(i,k)+ttend
-       dtsfc(i) = dtsfc(i)+ttend*cont*del(i,k)
+       ten_t(i,k) = (f1(i,k)-thx(i,k)+300.)*rdt*pi2d(i,k)
+       dtsfc(i) = dtsfc(i)+ten_t(i,k)*cont*del(i,k)
        if(k.eq.kte) then
-         tflux_e(i,k) = ttend*dz8w2d(i,k)
+         tflux_e(i,k) = ten_t(i,k)*dz8w2d(i,k)
        else
-         tflux_e(i,k) = tflux_e(i,k+1) + ttend*dz8w2d(i,k)
+         tflux_e(i,k) = tflux_e(i,k+1) + ten_t(i,k)*dz8w2d(i,k)
        endif
      enddo
    enddo
@@ -1096,15 +1089,15 @@
 !
 !     recover tendencies of heat and moisture
 !
+   ten_q(:,:,:) = 0.0
    do k = kte,kts,-1
      do i = its,ite
-       qtend = (f3(i,k,1)-qx(i,k,1))*rdt
-       qtnp(i,k,1) = qtnp(i,k,1)+qtend
-       dqsfc(i) = dqsfc(i)+qtend*conq*del(i,k)
+       ten_q(i,k,ntqv)= (f3(i,k,ntqv)-qx(i,k,ntqv))*rdt
+       dqsfc(i) = dqsfc(i)+ten_q(i,k,ntqv)*conq*del(i,k)
        if(k.eq.kte) then
-         qflux_e(i,k) = qtend*dz8w2d(i,k)
+         qflux_e(i,k) = ten_q(i,k,ntqv)*dz8w2d(i,k)
        else
-         qflux_e(i,k) = qflux_e(i,k+1) + qtend*dz8w2d(i,k)
+         qflux_e(i,k) = qflux_e(i,k+1) + ten_q(i,k,ntqv)*dz8w2d(i,k)
        endif
        tvflux_e(i,k) = tflux_e(i,k) + qflux_e(i,k)*ep1*thx(i,k)
      enddo
@@ -1112,7 +1105,7 @@
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
      idtend = dtidx(ntqv+100,index_of_process_pbl)
      if(idtend>=1) then
-       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*rdt*(f3(:,:,1)-qx(:,:,1))
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*ten_q(:,:,ntqv)
      endif
    endif
 !   print*,"qtnp:",maxval(qtnp(:,:,1)),minval(qtnp(:,:,1))
@@ -1138,8 +1131,7 @@
        if(ifvmix(ic)) then
          do k = kte,kts,-1
            do i = its,ite
-             qtend = (f3(i,k,ic)-qx(i,k,ic))*rdt
-             qtnp(i,k,ic) = qtnp(i,k,ic)+qtend
+             ten_q(i,k,ic) = (f3(i,k,ic)-qx(i,k,ic))*rdt
            enddo
          enddo
        endif
@@ -1148,7 +1140,7 @@
   &               .not. flag_for_pbl_generic_tend) then
        idtend=dtidx(ntoz+100,index_of_process_pbl)
        if(idtend>=1) then
-         dtend(:,:,idtend) = dtend(:,:,idtend) + qtend*(f3(:,:,ntoz)-qx(:,:,ntoz))
+         dtend(:,:,idtend) = dtend(:,:,idtend) + ten_q(i,k,ntoz)*dtstep
        endif
      endif
    endif
@@ -1234,22 +1226,20 @@
 !
    do k = kte,kts,-1
      do i = its,ite
-       utend = (f1(i,k)-ux(i,k))*rdt
-       vtend = (f2(i,k)-vx(i,k))*rdt
-       utnp(i,k) = utnp(i,k)+utend
-       vtnp(i,k) = vtnp(i,k)+vtend
-       dusfc(i) = dusfc(i) + utend*conwrc*del(i,k)
-       dvsfc(i) = dvsfc(i) + vtend*conwrc*del(i,k)
+       ten_u(i,k) = (f1(i,k)-ux(i,k))*rdt
+       ten_v(i,k) = (f2(i,k)-vx(i,k))*rdt
+       dusfc(i) = dusfc(i) + ten_u(i,k)*conwrc*del(i,k)
+       dvsfc(i) = dvsfc(i) + ten_v(i,k)*conwrc*del(i,k)
      enddo
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
      idtend=dtidx(index_of_x_wind,index_of_process_pbl)
      if(idtend>=1) then
-       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*rdt*(f1-ux)
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*ten_u(i,k)
      endif
      idtend=dtidx(index_of_y_wind,index_of_process_pbl)
      if(idtend>=1) then
-       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*rdt*(f2-vx)
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*ten_v(i,k)
      endif
    endif
 !

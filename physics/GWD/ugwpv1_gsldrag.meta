@@ -3,7 +3,7 @@
   type = scheme
   dependencies = ../hooks/machine.F,drag_suite.F90
   dependencies = cires_ugwpv1_module.F90,cires_ugwpv1_triggers.F90,cires_ugwpv1_initialize.F90,cires_ugwpv1_solv2.F90,ecmwf_ngw.F90
-  dependencies = cires_ugwpv1_sporo.F90,cires_ugwpv1_oro.F90 
+  dependencies = cires_ugwpv1_sporo.F90,cires_ugwpv1_oro.F90
 ########################################################################
 [ccpp-arg-table]
   name = ugwpv1_gsldrag_init
@@ -62,13 +62,6 @@
 [lonr]
   standard_name = number_of_equatorial_longitude_points
   long_name = number of global points in x-dir (i) along the equator
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-[latr]
-  standard_name = number_of_latitude_points
-  long_name = number of global points in y-dir (j) along the meridian
   units = count
   dimensions = ()
   type = integer
@@ -264,7 +257,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = ugwpv1_gsldrag_finalize
+  name = ugwpv1_gsldrag_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message
@@ -778,7 +771,7 @@
   units = mixed
   dimensions = (horizontal_loop_extent)
   type = real
-  kind = kind_phys  
+  kind = kind_phys
   intent = in
 [dudt_ogw]
   standard_name = tendency_of_x_wind_due_to_mesoscale_orographic_gravity_wave_drag
@@ -941,26 +934,34 @@
   kind = kind_phys
   intent = out
 [dudt_gw]
-  standard_name = tendency_of_x_wind_due_to_gravity_wave_drag
-  long_name = zonal wind tendency due to all GWs
+  standard_name = tendency_of_x_wind
+  long_name = tendency of x wind calculated by one physics scheme
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
 [dvdt_gw]
-  standard_name = tendency_of_y_wind_due_to_gravity_wave_drag
-  long_name = meridional wind tendency due to all GWs
+  standard_name = tendency_of_y_wind
+  long_name = tendency of y wind calculated by one physics scheme
   units = m s-2
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
   intent = out
 [dtdt_gw]
-  standard_name = tendency_of_air_temperature_due_to_gravity_wave_drag
-  long_name = air temperature tendency due to all GWs
+  standard_name = tendency_of_air_temperature
+  long_name = tendency of air temperature calculated by one physics scheme
   units = K s-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[dqdt_gw]
+  standard_name = tendency_of_tracer_concentration
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = out
@@ -1044,31 +1045,6 @@
   type = real
   kind = kind_phys
   intent = out
-  intent = out
-[dudt]
-  standard_name = process_split_cumulative_tendency_of_x_wind
-  long_name = zonal wind tendency due to model physics
-  units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[dvdt]
-  standard_name = process_split_cumulative_tendency_of_y_wind
-  long_name = meridional wind tendency due to model physics
-  units = m s-2
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-[dtdt]
-  standard_name = process_split_cumulative_tendency_of_air_temperature
-  long_name = air temperature tendency due to model physics
-  units = K s-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
 [rdxzb]
   standard_name = level_of_dividing_streamline
   long_name = level of the dividing streamline
@@ -1102,7 +1078,7 @@
   intent = in
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
-  long_name = index of x-wind in first dimension of array cumulative change index
+  long_name = index of y-wind in first dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
@@ -1173,5 +1149,3 @@
   dimensions = ()
   type = integer
   intent = out
-
-  

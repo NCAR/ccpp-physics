@@ -469,7 +469,7 @@ contains
                 endif
 
                 !  apply fca
-                if ( d_conv(i) > zero ) then
+                if ( d_conv(i) > zero .and. xt(i) > zero ) then
                    !>  - If thickness of free convection layer > 0.0, call dtm_1p_fca()
                    !! to apply free convection adjustment.
                    !>   - If \a dtl thickness >= module_nst_parameters::z_w_max(), call dtl_reset()

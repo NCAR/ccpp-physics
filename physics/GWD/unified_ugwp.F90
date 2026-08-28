@@ -35,8 +35,8 @@ module unified_ugwp
 
     use machine, only: kind_phys
 
-!    use cires_ugwp_module,   only: knob_ugwp_version, cires_ugwp_mod_init,   cires_ugwp_mod_finalize
-    use cires_ugwpv0_module, only: knob_ugwp_version, cires_ugwpv0_mod_init, cires_ugwpv0_mod_finalize
+!    use cires_ugwp_module,   only: knob_ugwp_version, cires_ugwp_mod_init,   cires_ugwp_mod_final
+    use cires_ugwpv0_module, only: knob_ugwp_version, cires_ugwpv0_mod_init, cires_ugwpv0_mod_final
     use gwdps, only: gwdps_run
     use cires_ugwp_triggers
     use ugwp_driver_v0
@@ -46,9 +46,9 @@ module unified_ugwp
 
     private
 
-    public unified_ugwp_init, unified_ugwp_run, unified_ugwp_finalize
+    public unified_ugwp_init, unified_ugwp_run, unified_ugwp_final
 
-    logical :: is_initialized = .False.
+    logical :: is_initialized = .false.
 
 contains
 
@@ -63,7 +63,7 @@ contains
 !! \htmlinclude unified_ugwp_init.html
 !!
     subroutine unified_ugwp_init (me, master, nlunit, input_nml_file, logunit, &
-                fn_nml2, jdat, lonr, latr, levs, ak, bk, dtp, cdmbgwd, cgwf,   &
+                fn_nml2, jdat, lonr, levs, ak, bk, dtp, cdmbgwd, cgwf,   &
                 con_pi, con_rerth, pa_rf_in, tau_rf_in, con_p0, do_ugwp,       &
                 do_ugwp_v0, do_ugwp_v0_orog_only, do_ugwp_v0_nst_only,         &
                 do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd, gwd_opt,  &
@@ -80,7 +80,6 @@ contains
     integer,              intent (in) :: jdat(:)
     integer,              intent (in) :: lonr
     integer,              intent (in) :: levs
-    integer,              intent (in) :: latr
     real(kind=kind_phys), intent (in) :: ak(:), bk(:)
     real(kind=kind_phys), intent (in) :: dtp
     real(kind=kind_phys), intent (in) :: cdmbgwd(:), cgwf(:) ! "scaling" controls for "old" GFS-GW schemes
@@ -95,11 +94,6 @@ contains
     character(len=*), intent (in) :: fn_nml2
     !character(len=*), parameter   :: fn_nml='input.nml'
 
-    integer :: ios
-    logical :: exists
-    real    :: dxsg
-    integer :: k
-    
     integer,          intent(in)  :: gwd_opt
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
@@ -129,16 +123,16 @@ contains
 
     end if
 
-
     if (is_initialized) return
-
 
     if ( do_ugwp_v0 .or. do_ugwp_v0_nst_only ) then
        ! if (do_ugwp .or. cdmbgwd(3) > 0.0) then (deactivate effect of do_ugwp)
        if (cdmbgwd(3) > 0.0) then
         call cires_ugwpv0_mod_init(me, master, nlunit, input_nml_file, logunit, &
-                                fn_nml2, lonr, latr, levs, ak, bk, con_p0, dtp, &
-                                cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in)
+                                fn_nml2, lonr, levs, ak, bk, con_p0, dtp, &
+                                cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in, &
+                                errmsg, errflg)
+        if (errflg/=0) return
        else
          write(errmsg,'(*(a))') "Logic error: cires_ugwp_mod_init called but &
                &do_ugwp_v0 or do_ugwp_v0_nst_only is true and cdmbgwd(3) <= 0"
@@ -147,26 +141,24 @@ contains
        end if
     end if
 
-
     is_initialized = .true.
 
     end subroutine unified_ugwp_init
 
-
 ! -----------------------------------------------------------------------
-! finalize of unified_ugwp   (_finalize)
+! finalize of unified_ugwp   (_final)
 ! -----------------------------------------------------------------------
 
 !>@brief The subroutine finalizes the GFS UGWP
 
-!> \section arg_table_unified_ugwp_finalize Argument Table
-!! \htmlinclude unified_ugwp_finalize.html
+!> \section arg_table_unified_ugwp_final Argument Table
+!! \htmlinclude unified_ugwp_final.html
 !!
-    subroutine unified_ugwp_finalize(do_ugwp_v0,do_ugwp_v0_nst_only,  &
+    subroutine unified_ugwp_final(do_ugwp_v0,do_ugwp_v0_nst_only,  &
                                      errmsg, errflg)
 
     implicit none
-!
+
     logical,          intent (in) :: do_ugwp_v0, do_ugwp_v0_nst_only
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
@@ -177,12 +169,11 @@ contains
 
     if (.not.is_initialized) return
 
-    if ( do_ugwp_v0 .or. do_ugwp_v0_nst_only )  call cires_ugwpv0_mod_finalize()
+    if ( do_ugwp_v0 .or. do_ugwp_v0_nst_only )  call cires_ugwpv0_mod_final()
 
     is_initialized = .false.
 
-    end subroutine unified_ugwp_finalize
-
+    end subroutine unified_ugwp_final
 
 ! -----------------------------------------------------------------------
 !    originally from ugwp_driver_v0.f
@@ -195,49 +186,49 @@ contains
 !> This subroutine executes the CIRES UGWP Version 0.
 !!
 !> \section gen_unified_ugwp GFS Unified GWP Scheme General Algorithm
-!! The physics of NGWs in the UGWP framework (Yudin et al. 2018 
-!! \cite yudin_et_al_2018) is represented by four GW-solvers, which is introduced 
-!! in Lindzen (1981) \cite lindzen_1981, Hines (1997) \cite hines_1997, 
-!! Alexander and Dunkerton (1999) \cite alexander_and_dunkerton_1999, 
-!! and Scinocca (2003) \cite scinocca_2003. The major modification of 
-!! these GW solvers is represented by the addition of the background 
-!! dissipation of temperature and winds to the saturation criteria for 
-!! wave breaking. This feature is important in the mesosphere and 
-!! thermosphere for WAM applications and it considers appropriate 
-!! scale-dependent dissipation of waves near the model top lid providing 
-!! the momentum and energy conservation in the vertical column physics 
-!! (Shaw and Shepherd 2009 \cite shaw_and_shepherd_2009). In the UGWP-v0, 
-!! the modification of Scinocca (2003) \cite scinocca_2003 scheme for 
+!! The physics of NGWs in the UGWP framework (Yudin et al. 2018
+!! \cite yudin_et_al_2018) is represented by four GW-solvers, which is introduced
+!! in Lindzen (1981) \cite lindzen_1981, Hines (1997) \cite hines_1997,
+!! Alexander and Dunkerton (1999) \cite alexander_and_dunkerton_1999,
+!! and Scinocca (2003) \cite scinocca_2003. The major modification of
+!! these GW solvers is represented by the addition of the background
+!! dissipation of temperature and winds to the saturation criteria for
+!! wave breaking. This feature is important in the mesosphere and
+!! thermosphere for WAM applications and it considers appropriate
+!! scale-dependent dissipation of waves near the model top lid providing
+!! the momentum and energy conservation in the vertical column physics
+!! (Shaw and Shepherd 2009 \cite shaw_and_shepherd_2009). In the UGWP-v0,
+!! the modification of Scinocca (2003) \cite scinocca_2003 scheme for
 !! NGWs with non-hydrostatic and rotational effects for GW propagations
-!! and backgroufnd dissipation is represented by the subroutine 
-!! fv3_ugwp_solv2_v0. In the next release of UGWP, additional 
-!! GW-solvers will be implemented along with physics-based triggering 
-!! of waves and stochastic approaches for selection of GW modes 
-!! characterized by horizontal phase velocities, azimuthal directions 
+!! and backgroufnd dissipation is represented by the subroutine
+!! fv3_ugwp_solv2_v0. In the next release of UGWP, additional
+!! GW-solvers will be implemented along with physics-based triggering
+!! of waves and stochastic approaches for selection of GW modes
+!! characterized by horizontal phase velocities, azimuthal directions
 !! and magnitude of the vertical momentum flux (VMF).
 !!
-!! In UGWP-v0, the specification for the VMF function is adopted from 
-!! the GEOS-5 global atmosphere model of GMAO NASA/GSFC, as described 
-!! in Molod et al. (2015) \cite molod_et_al_2015 and employed in the 
-!! MERRRA-2 reanalysis (Gelaro et al., 2017 \cite gelaro_et_al_2017). 
-!! The Fortran subroutine slat_geos5_tamp_v0() describes the latitudinal 
-!! shape of VMF-function as displayed in Figure 3 of Molod et al. (2015) 
-!! \cite molod_et_al_2015. It shows that the enhanced values of VMF in 
-!! the equatorial region gives opportunity to simulate the QBO-like 
-!! oscillations in the equatorial zonal winds and lead to more realistic 
-!! simulations of the equatorial dynamics in GEOS-5 operational and 
-!! MERRA-2 reanalysis products. For the first vertically extended 
-!! version of FV3GFS in the stratosphere and mesosphere, this simplified 
-!! function of VMF allows us to tune the model climate and to evaluate 
-!! multi-year simulations of FV3GFS with the MERRA-2 and ERA-5 reanalysis 
-!! products, along with temperature, ozone, and water vapor observations 
-!! of current satellite missions. After delivery of the UGWP-code, the 
-!! EMC group developed and tested approach to modulate the zonal mean 
-!! NGW forcing by 3D-distributions of the total precipitation as a proxy 
-!! for the excitation of NGWs by convection and the vertically-integrated 
-!! (surface - tropopause) Turbulent Kinetic Energy (TKE). The verification 
-!! scores with updated NGW forcing, as reported elsewhere by EMC researchers, 
-!! display noticeable improvements in the forecast scores produced by FV3GFS 
+!! In UGWP-v0, the specification for the VMF function is adopted from
+!! the GEOS-5 global atmosphere model of GMAO NASA/GSFC, as described
+!! in Molod et al. (2015) \cite molod_et_al_2015 and employed in the
+!! MERRRA-2 reanalysis (Gelaro et al., 2017 \cite gelaro_et_al_2017).
+!! The Fortran subroutine slat_geos5_tamp_v0() describes the latitudinal
+!! shape of VMF-function as displayed in Figure 3 of Molod et al. (2015)
+!! \cite molod_et_al_2015. It shows that the enhanced values of VMF in
+!! the equatorial region gives opportunity to simulate the QBO-like
+!! oscillations in the equatorial zonal winds and lead to more realistic
+!! simulations of the equatorial dynamics in GEOS-5 operational and
+!! MERRA-2 reanalysis products. For the first vertically extended
+!! version of FV3GFS in the stratosphere and mesosphere, this simplified
+!! function of VMF allows us to tune the model climate and to evaluate
+!! multi-year simulations of FV3GFS with the MERRA-2 and ERA-5 reanalysis
+!! products, along with temperature, ozone, and water vapor observations
+!! of current satellite missions. After delivery of the UGWP-code, the
+!! EMC group developed and tested approach to modulate the zonal mean
+!! NGW forcing by 3D-distributions of the total precipitation as a proxy
+!! for the excitation of NGWs by convection and the vertically-integrated
+!! (surface - tropopause) Turbulent Kinetic Energy (TKE). The verification
+!! scores with updated NGW forcing, as reported elsewhere by EMC researchers,
+!! display noticeable improvements in the forecast scores produced by FV3GFS
 !! configuration extended into the mesosphere.
 !!
 !> \section arg_table_unified_ugwp_run Argument Table
@@ -252,10 +243,10 @@ contains
          br1,hpbl,vtype,slmsk, do_tofd, ldiag_ugwp, ugwp_seq_update,                   &
          cdmbgwd, alpha_fd, jdat, xlat, xlat_d, sinlat, coslat, area,                  &
          ugrs, vgrs, tgrs, q1, prsi, prsl, prslk, phii, phil,                          &
-         del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis,                &
+         del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_dqdt, gw_kdis,       &
          tau_tofd, tau_mtb, tau_ogw, tau_ngw,                                          &
          dudt_mtb, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,                          &
-         dudt, dvdt, dtdt, rdxzb, con_g, con_omega, con_pi, con_cp, con_rd, con_rv,    &
+         rdxzb, con_g, con_omega, con_pi, con_cp, con_rd, con_rv,                      &
          con_rerth, con_fvirt, rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                &
          ldiag3d, dtend, dtidx, index_of_temperature, index_of_x_wind,                 &
          index_of_y_wind, index_of_process_orographic_gwd,                             &
@@ -278,12 +269,12 @@ contains
     real(kind=kind_phys),    intent(in), dimension(:)       :: dx
 
 !vay-nov 2020
-    real(kind=kind_phys),    intent(in), dimension(:,:)     ::  oa4ss,ol4ss   
-    
+    real(kind=kind_phys),    intent(in), dimension(:,:)     ::  oa4ss,ol4ss
+
     logical,                 intent(in)                     :: flag_for_gwd_generic_tend
-    
+
     ! elvmax is intent(in) for CIRES UGWPv1, but intent(inout) for GFS GWDPS
-    
+
     real(kind=kind_phys),    intent(inout), dimension(:)    :: elvmax
     real(kind=kind_phys),    intent(in),    dimension(:,:)  :: clx, oa4
     real(kind=kind_phys),    intent(in),    dimension(:)    :: xlat, xlat_d, sinlat, coslat, area
@@ -314,6 +305,7 @@ contains
     real(kind=kind_phys),    intent(out), dimension(:)          :: rdxzb
     real(kind=kind_phys),    intent(out), dimension(:)          :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: gw_dudt, gw_dvdt, gw_dtdt, gw_kdis
+    real(kind=kind_phys),    intent(out), dimension(:,:,:)      :: gw_dqdt
     real(kind=kind_phys),    intent(out), dimension(:,:)        :: dudt_mtb, dudt_tms
 
     real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
@@ -325,8 +317,6 @@ contains
 
     ! These arrays only allocated if ldiag_ugwp = .true.
     real(kind=kind_phys),    intent(inout), dimension(:,:), optional :: du3dt_mtb, du3dt_ogw, du3dt_tms
-
-    real(kind=kind_phys),    intent(inout), dimension(:,:) :: dudt, dvdt, dtdt
 
     real(kind=kind_phys),    intent(in) :: con_g, con_omega, con_pi, con_cp, con_rd, &
                                            con_rv, con_rerth, con_fvirt
@@ -350,7 +340,7 @@ contains
 
     ! option  for psl gwd
     logical, intent(in)              :: do_gwd_opt_psl      ! option for psl gravity wave drag
-    real(kind=kind_phys), intent(in) :: psl_gwd_dx_factor   ! 
+    real(kind=kind_phys), intent(in) :: psl_gwd_dx_factor   !
 
     character(len=*),        intent(out) :: errmsg
     integer,                 intent(out) :: errflg
@@ -367,7 +357,7 @@ contains
     ! ugwp_seq_update == T, otherwise, they retain the values
     ! passed to the scheme.
     real(kind=kind_phys), dimension(im, levs) :: uwnd1, vwnd1
- 
+
     real(kind=kind_phys), parameter :: tamp_mpa=30.e-3
 
     integer :: nmtvr_temp, idtend
@@ -384,7 +374,6 @@ contains
     errmsg = ''
     errflg = 0
 
-
     ! Initialize intent(out) variables in case they are not set below
     dusfcg(:)     = 0.0
     dvsfcg(:)     = 0.0
@@ -393,10 +382,11 @@ contains
     gw_dudt(:,:)  = 0.0
     gw_dvdt(:,:)  = 0.0
     gw_dtdt(:,:)  = 0.0
+    gw_dqdt(:,:,:)= 0.0
     gw_kdis(:,:)  = 0.0
     dudt_mtb(:,:) = 0.0
     dudt_tms(:,:) = 0.0
-    
+
     ! 1) ORO stationary GWs
     !    ------------------
 
@@ -419,7 +409,6 @@ contains
        dtaux2d_fd(:,:)= 0.0
        dtauy2d_fd(:,:)= 0.0
     end if
-
 
     ! Prepare to run UGWP_v0 mesoscale GWD + blocking scheme
     ! These tendency initializations pertain to the non-stationary GWD
@@ -454,7 +443,7 @@ contains
            nmtvr_temp = nmtvr
         end if
 
-        call gwdps_run(im, levs, Pdvdt, Pdudt, Pdtdt,                  &
+        call gwdps_run(im, levs, Pdvdt, Pdudt, Pdtdt, gw_dqdt,         &
                    ugrs, vgrs, tgrs, q1,                               &
                    kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt, &
                    hprime, oc, oa4, clx, theta, sigma, gamma,          &
@@ -480,7 +469,6 @@ contains
         du3dt_mtb = 0.0  ; du3dt_ogw = 0.0 ;  du3dt_tms= 0.0
       end if
 
-
       if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
         idtend = dtidx(index_of_x_wind,index_of_process_orographic_gwd)
         if(idtend>=1) then
@@ -500,17 +488,15 @@ contains
 
     end if
 
-
-
     ! Run the appropriate mesoscale (mesoscale GWD + blocking) scheme
     ! Note:  In case of GSL drag_suite, this includes ss and tofd
 
     if ( do_gsl_drag_ls_bl.or.do_gsl_drag_ss.or.do_gsl_drag_tofd ) then
-!
+
     if (do_gwd_opt_psl) then
-       call drag_suite_psl(im,levs,dvdt,dudt,dtdt,uwnd1,vwnd1,       &
-                 tgrs,q1,kpbl,prsi,del,prsl,prslk,phii,phil,dtp,     &
-                 kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &
+       call drag_suite_psl(im,levs,gw_dvdt,gw_dudt,gw_dtdt,uwnd1,    &
+                 vwnd1,tgrs,q1,kpbl,prsi,del,prsl,prslk,phii,phil,   &
+                 dtp,kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,        &
                  ol4ss,theta,sigma,gamma,elvmax,dtaux2d_ms,          &
                  dtauy2d_ms,dtaux2d_bl,dtauy2d_bl,dtaux2d_ss,        &
                  dtauy2d_ss,dtaux2d_fd,dtauy2d_fd,dusfcg,            &
@@ -521,15 +507,15 @@ contains
                  cdmbgwd,alpha_fd,me,master,                         &
                  lprnt,ipr,rdxzb,dx,gwd_opt,                         &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
-                 psl_gwd_dx_factor,                                  &
+                 psl_gwd_dx_factor, flag_for_gwd_generic_tend,       &
                  dtend, dtidx, index_of_process_orographic_gwd,      &
                  index_of_temperature, index_of_x_wind,              &
                  index_of_y_wind, ldiag3d, ldiag_ugwp,               &
                  ugwp_seq_update, spp_wts_gwd, spp_gwd, errmsg, errflg)
     else
-       call drag_suite_run(im,levs,dvdt,dudt,dtdt,uwnd1,vwnd1,       &
-                 tgrs,q1,kpbl,prsi,del,prsl,prslk,phii,phil,dtp,     &
-                 kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &
+       call drag_suite_run(im,levs,gw_dvdt,gw_dudt,gw_dtdt,gw_dqdt,  &
+                 uwnd1,vwnd1,tgrs,q1,kpbl,prsi,del,prsl,prslk,phii,  &
+                 phil,dtp,kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,   &
                  ol4ss,theta,sigma,gamma,elvmax,dtaux2d_ms,          &
                  dtauy2d_ms,dtaux2d_bl,dtauy2d_bl,dtaux2d_ss,        &
                  dtauy2d_ss,dtaux2d_fd,dtauy2d_fd,dusfcg,            &
@@ -540,6 +526,7 @@ contains
                  cdmbgwd,alpha_fd,me,master,                         &
                  lprnt,ipr,rdxzb,dx,gwd_opt,                         &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
+                 flag_for_gwd_generic_tend,                          &
                  dtend, dtidx, index_of_process_orographic_gwd,      &
                  index_of_temperature, index_of_x_wind,              &
                  index_of_y_wind, ldiag3d, ldiag_ugwp,               &
@@ -550,10 +537,8 @@ contains
 !
         tau_mtb  = 0. ; tau_ogw  = 0. ; tau_tofd = 0.
         dudt_mtb = 0. ; dudt_tms = 0.
-	
+
     end if
-
-
 
    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
    ! Begin non-stationary GW schemes
@@ -619,10 +604,6 @@ contains
             gw_dudt(i,k) = gw_dudt(i,k)+ Pdudt(i,k)
             gw_dvdt(i,k) = gw_dvdt(i,k)+ Pdvdt(i,k)
             gw_kdis(i,k) = gw_kdis(i,k)+ Pkdis(i,k)
-            ! accumulation of tendencies for CCPP to replicate EMC-physics updates (!! removed in latest code commit to VLAB)
-            !dudt(i,k) = dudt(i,k) +gw_dudt(i,k)
-            !dvdt(i,k) = dvdt(i,k) +gw_dvdt(i,k)
-            !dtdt(i,k) = dtdt(i,k) +gw_dtdt(i,k)
           enddo
         enddo
 
@@ -638,26 +619,25 @@ contains
         enddo
 
       endif  ! cdmbgwd(3) > 0.0
- 
+
       if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
         idtend = dtidx(index_of_x_wind,index_of_process_nonorographic_gwd)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdudt*dtp
+          dtend(:,:,idtend) = dtend(:,:,idtend) + dudt_ngw(:,:)*dtp
         endif
-        
+
         idtend = dtidx(index_of_y_wind,index_of_process_nonorographic_gwd)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdvdt*dtp
+          dtend(:,:,idtend) = dtend(:,:,idtend) + dvdt_ngw(:,:)*dtp
         endif
 
         idtend = dtidx(index_of_temperature,index_of_process_nonorographic_gwd)
         if(idtend>=1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + Pdtdt*dtp
+          dtend(:,:,idtend) = dtend(:,:,idtend) + dtdt_ngw(:,:)*dtp
         endif
       endif
 
-    end if  ! do_ugwp_v0.or.do_ugwp_v0_nst_only 
-
+    end if  ! do_ugwp_v0.or.do_ugwp_v0_nst_only
 
     end subroutine unified_ugwp_run
 !>@}

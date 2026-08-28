@@ -94,7 +94,7 @@ module land_iau_mod
   end type land_iau_control_type
 
   public land_iau_control_type, land_iau_external_data_type, land_iau_state_type, land_iau_mod_set_control, &
-         land_iau_mod_init, land_iau_mod_getiauforcing, land_iau_mod_finalize, calculate_landinc_mask
+         land_iau_mod_init, land_iau_mod_getiauforcing, land_iau_mod_final, calculate_landinc_mask
 
 contains
 
@@ -170,6 +170,9 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file, me, 
          write(iosstr, '(I0)') ios         
          errmsg = 'lnd_iau_mod_set_control: I/O error code '//trim(iosstr)//' at land_iau namelist read'  
          errflg = 1
+#ifndef INTERNAL_FILE_NML
+         close(nlunit)
+#endif
          return
     end if 
        
@@ -179,6 +182,9 @@ subroutine land_iau_mod_set_control(Land_IAU_Control,fn_nml,input_nml_file, me, 
           WRITE(6, * ) 'lnd_iau_mod_set_control: Warning! EoF ('//trim(iosstr)//') while reading land_iau namelist,' &
                   // ' likely because land_iau_nml was not found in input.nml. It will be set to default.' 
         endif
+#ifndef INTERNAL_FILE_NML
+        close(nlunit)
+#endif
    endif
 
    if (me == mpi_root) then
@@ -357,7 +363,7 @@ subroutine land_iau_mod_init (Land_IAU_Control, Land_IAU_Data, Land_IAU_State, e
 
 end subroutine land_iau_mod_init
 
-subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, Land_IAU_state, errmsg, errflg)
+subroutine land_iau_mod_final(Land_IAU_Control, Land_IAU_Data, Land_IAU_state, errmsg, errflg)
 
    implicit none
 
@@ -377,7 +383,7 @@ subroutine land_iau_mod_finalize(Land_IAU_Control, Land_IAU_Data, Land_IAU_state
    if (allocated(Land_IAU_state%stc_inc)) deallocate(Land_IAU_state%stc_inc)
    if (allocated(Land_IAU_state%slc_inc)) deallocate(Land_IAU_state%slc_inc)
 
-end subroutine land_iau_mod_finalize
+end subroutine land_iau_mod_final
 
  subroutine land_iau_mod_getiauforcing(Land_IAU_Control, Land_IAU_Data, Land_IAU_State, errmsg, errflg)
 

@@ -131,55 +131,35 @@
           psmean(i) = psmean(i) + pgr(i)*dtf        ! mean surface pressure
         enddo
 
-        if (ldiag3d) then
-          if (lsidea) then
-            idtend = dtidx(index_of_temperature,index_of_process_longwave)
-            if(idtend>=1) then
-               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,1)*dtf
-            endif
+        if (ldiag3d .and. lsidea) then
+          idtend = dtidx(index_of_temperature,index_of_process_longwave)
+          if(idtend>=1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,1)*dtf
+          endif
 
-            idtend = dtidx(index_of_temperature,index_of_process_shortwave)
-            if(idtend>=1) then
-               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,2)*dtf
-            endif
+          idtend = dtidx(index_of_temperature,index_of_process_shortwave)
+          if(idtend>=1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,2)*dtf
+          endif
 
-            idtend = dtidx(index_of_temperature,index_of_process_pbl)
-            if(idtend>=1) then
-               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,3)*dtf
-            endif
+          idtend = dtidx(index_of_temperature,index_of_process_pbl)
+          if(idtend>=1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,3)*dtf
+          endif
 
-            idtend = dtidx(index_of_temperature,index_of_process_dcnv)
-            if(idtend>=1) then
-               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,4)*dtf
-            endif
+          idtend = dtidx(index_of_temperature,index_of_process_dcnv)
+          if(idtend>=1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,4)*dtf
+          endif
 
-            idtend = dtidx(index_of_temperature,index_of_process_scnv)
-            if(idtend>=1) then
-               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,5)*dtf
-            endif
+          idtend = dtidx(index_of_temperature,index_of_process_scnv)
+          if(idtend>=1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,5)*dtf
+          endif
 
-            idtend = dtidx(index_of_temperature,index_of_process_mp)
-            if(idtend>=1) then
-               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,6)*dtf
-            endif
-          else
-            idtend = dtidx(index_of_temperature,index_of_process_longwave)
-            if(idtend>=1) then
-              if (use_LW_jacobian) then
-                dtend(:,:,idtend) = dtend(:,:,idtend) + htrlwu(:,:)*dtf
-              else
-                dtend(:,:,idtend) = dtend(:,:,idtend) + htrlw(:,:)*dtf
-              endif
-            endif
-
-            idtend = dtidx(index_of_temperature,index_of_process_shortwave)
-            if(idtend>=1) then
-               do k=1,levs
-                  do i=1,im
-                     dtend(i,k,idtend) = dtend(i,k,idtend) + htrsw(i,k)*dtf*xmu(i)
-                  enddo
-               enddo
-            endif
+          idtend = dtidx(index_of_temperature,index_of_process_mp)
+          if(idtend>=1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,6)*dtf
           endif
         endif
       endif    ! end if_lssav_block

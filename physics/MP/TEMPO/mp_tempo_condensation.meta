@@ -1,0 +1,252 @@
+[ccpp-table-properties]
+  name = mp_tempo_condensation
+  type = scheme
+  dependencies = ../../hooks/machine.F
+  dependencies = tempo_v3/src/module_mp_tempo_params.F90
+  dependencies = tempo_v3/src/module_mp_tempo_cfgs.F90
+  dependencies = tempo_v3/src/module_mp_tempo_ml.F90
+  dependencies = tempo_v3/src/module_mp_tempo_utils.F90
+  dependencies = tempo_v3/src/module_mp_tempo_aerosols.F90  
+  dependencies = tempo_v3/src/module_mp_tempo_diags.F90
+  dependencies = tempo_v3/src/module_mp_tempo_main.F90      
+  dependencies = tempo_v3/src/module_mp_tempo_driver.F90
+   
+########################################################################
+[ccpp-arg-table]
+  name = mp_tempo_condensation_init
+  type = scheme
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+
+########################################################################
+[ccpp-arg-table]
+  name = mp_tempo_condensation_run
+  type = scheme
+[mdt]
+  standard_name = time_step_for_remapping_for_fast_physics
+  long_name = remapping time step for fast physics
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_dyn
+  intent = in
+[mpicomm]
+  standard_name = mpi_communicator
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = MPI_Comm
+  intent = in
+[mpirank]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[isc1]
+  standard_name = starting_x_direction_index_alloc1
+  long_name = starting X direction index for allocation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iec1]
+  standard_name = ending_x_direction_index_alloc1
+  long_name = ending X direction index for allocation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[jsc1]
+  standard_name = starting_y_direction_index_alloc1
+  long_name = starting X direction index for allocation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[jec1]
+  standard_name = ending_y_direction_index_alloc1
+  long_name = ending X direction index for allocation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[km]
+  standard_name = vertical_dimension_for_fast_physics
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in  
+[tgrs]
+  standard_name = virtual_temperature_at_Lagrangian_surface
+  long_name = virtual temperature at Lagrangian surface
+  units = K
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  type = real
+  kind = kind_dyn
+  intent = inout
+[spechum]
+  standard_name = water_vapor_specific_humidity_at_Lagrangian_surface
+  long_name = water vapor specific humidity updated by fast physics at Lagrangian surface
+  units = kg kg-1
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  type = real
+  kind = kind_dyn
+  intent = inout
+[prsl]
+  standard_name = log_pressure_at_Lagrangian_surface
+  long_name = logarithm of pressure at Lagrangian surface
+  units = Pa
+  dimensions = (starting_x_direction_index_alloc2:ending_x_direction_index_alloc2,ccpp_constant_one:vertical_dimension_for_fast_physics_plus_one,starting_y_direction_index_alloc2:ending_y_direction_index_alloc2)
+  type = real
+  kind = kind_dyn
+  intent = in
+[isc2]
+  standard_name = starting_x_direction_index_alloc2
+  long_name = starting X direction index for allocation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[iec2]
+  standard_name = ending_x_direction_index_alloc2
+  long_name = ending X direction index for allocation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[jsc2]
+  standard_name = starting_y_direction_index_alloc2
+  long_name = starting X direction index for allocation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[jec2]
+  standard_name = ending_y_direction_index_alloc2
+  long_name = ending X direction index for allocation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in  
+[qc]
+  standard_name = cloud_liquid_water_specific_humidity_at_Lagrangian_surface
+  long_name = cloud liquid water specific humidity updated by fast physics at Lagrangian surface
+  units = kg kg-1
+  dimensions = (starting_x_direction_index_alloc1:ending_x_direction_index_alloc1,starting_y_direction_index_alloc1:ending_y_direction_index_alloc1,ccpp_constant_one:vertical_dimension_for_fast_physics)
+  type = real
+  kind = kind_dyn
+  intent = inout
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out
+[isd]
+  standard_name = starting_x_direction_index_domain
+  long_name = starting X direction index for domain
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ied]
+  standard_name = ending_x_direction_index_domain
+  long_name = ending X direction index for domain
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[jsd]
+  standard_name = starting_y_direction_index_domain
+  long_name = starting X direction index for domain
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[jed]
+  standard_name = ending_y_direction_index_domain
+  long_name = ending X direction index for domain
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in  
+[is]
+  standard_name = starting_x_direction_index
+  long_name = starting X direction index
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ie]
+  standard_name = ending_x_direction_index
+  long_name = ending X direction index
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[js]
+  standard_name = starting_y_direction_index
+  long_name = starting Y direction index
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[je]
+  standard_name = ending_y_direction_index
+  long_name = ending Y direction index
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  
+########################################################################
+[ccpp-arg-table]
+  name = mp_tempo_condensation_final
+  type = scheme
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_code
+  long_name = error code for error handling in CCPP
+  units = 1
+  dimensions = ()
+  type = integer
+  intent = out

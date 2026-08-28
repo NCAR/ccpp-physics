@@ -45,7 +45,7 @@ contains
   ! ######################################################################################
 !>
   subroutine rrtmgp_sw_cloud_optics_init( rrtmgp_root_dir, rrtmgp_sw_file_clouds,        &
-       nrghice, mpicomm, mpirank, mpiroot, errmsg, errflg)
+       nrghice, mpicomm, mpirank, mpiroot, is_initialized, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
@@ -60,9 +60,11 @@ contains
          mpiroot               !< Master MPI rank
 
     ! Outputs
-    character(len=*), intent(out) :: &
+    logical,          intent(inout) :: &
+         is_initialized        !< Initialization flag
+    character(len=*), intent(  out) :: &
          errmsg                !< CCPP error message
-    integer,          intent(out) :: &
+    integer,          intent(  out) :: &
          errflg                !< CCPP error code
     
     ! Local variables
@@ -72,6 +74,8 @@ contains
     ! Initialize
     errmsg = ''
     errflg = 0
+
+    if (is_initialized) return
 
     ! Filenames are set in the physics_nml
     sw_cloud_props_file = trim(rrtmgp_root_dir)//trim(rrtmgp_sw_file_clouds)
@@ -250,6 +254,8 @@ contains
             0.944, 0.894,   0.884,   0.883, 0.883, 0.883, 0.883/)
     c0s = (/0.970, 0.970,   0.970,   0.970, 0.970, 0.970, 0.970,    &
             0.970, 0.970,   0.970,   0.700, 0.700, 0.700, 0.700/)
+
+    is_initialized = .true.
 
   end subroutine rrtmgp_sw_cloud_optics_init
 end module rrtmgp_sw_cloud_optics

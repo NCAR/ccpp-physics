@@ -40,6 +40,9 @@
   implicit none
 !
   public
+!! \section arg_table_physcons
+!! \htmlinclude physcons.html
+!!
 
 !> \name Math constants
 ! real(kind=kind_phys),parameter:: con_pi     =3.1415926535897931        !< pi

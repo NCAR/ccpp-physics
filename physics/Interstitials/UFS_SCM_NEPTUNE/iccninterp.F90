@@ -7,6 +7,7 @@
 !! IN and CCN data.
 module iccninterp
 
+    use mpi_f08
     implicit none
 
     private
@@ -16,51 +17,60 @@ module iccninterp
 contains
 
 !>
-      SUBROUTINE read_cidata (me, master)
+      SUBROUTINE read_cidata (mpicomm, mpirank, mpiroot)
       use machine,  only: kind_phys
+      use mpiutil,  only: ccpp_bcast
       use iccn_def
       use netcdf
 !--- in/out
-      integer, intent(in) :: me
-      integer, intent(in) :: master
+      type(MPI_Comm), intent(in) :: mpicomm
+      integer, intent(in) :: mpirank, mpiroot
 !--- locals
       integer :: ncerr
       integer :: i, n, k, ncid, varid,j,it
       real(kind=kind_phys), allocatable, dimension(:) :: hyam,hybm
       real(kind=4), allocatable, dimension(:,:,:) :: ci_ps
+      integer :: ierr
 
-      allocate (hyam(kcipl), hybm(kcipl), ci_ps(lonscip,latscip,timeci))
       allocate (ciplin(lonscip,latscip,kcipl,timeci))
       allocate (ccnin(lonscip,latscip,kcipl,timeci))
       allocate (ci_pres(lonscip,latscip,kcipl,timeci))
-      ncerr = nf90_open("cam5_4_143_NAAI_monclimo2.nc", NF90_NOWRITE, ncid)
-      ncerr = nf90_inq_varid(ncid, "lat", varid)
-      ncerr = nf90_get_var(ncid, varid, ci_lat)
-      ncerr = nf90_inq_varid(ncid, "lon", varid)
-      ncerr = nf90_get_var(ncid, varid, ci_lon)
-      ncerr = nf90_inq_varid(ncid, "PS", varid)
-      ncerr = nf90_get_var(ncid, varid, ci_ps)
-      ncerr = nf90_inq_varid(ncid, "hyam", varid)
-      ncerr = nf90_get_var(ncid, varid, hyam)
-      ncerr = nf90_inq_varid(ncid, "hybm", varid)
-      ncerr = nf90_get_var(ncid, varid, hybm)
-      ncerr = nf90_inq_varid(ncid, "NAAI", varid)
-      ncerr = nf90_get_var(ncid, varid, ciplin)
-      do it = 1,timeci
-        do k=1, kcipl
-          ci_pres(:,:,k,it)=hyam(k)*1.e5+hybm(k)*ci_ps(:,:,it)
+
+      read_and_broadcast: if (mpirank==mpiroot) then
+        allocate (hyam(kcipl), hybm(kcipl), ci_ps(lonscip,latscip,timeci))
+        ncerr = nf90_open("cam5_4_143_NAAI_monclimo2.nc", NF90_NOWRITE, ncid)
+        ncerr = nf90_inq_varid(ncid, "lat", varid)
+        ncerr = nf90_get_var(ncid, varid, ci_lat)
+        ncerr = nf90_inq_varid(ncid, "lon", varid)
+        ncerr = nf90_get_var(ncid, varid, ci_lon)
+        ncerr = nf90_inq_varid(ncid, "PS", varid)
+        ncerr = nf90_get_var(ncid, varid, ci_ps)
+        ncerr = nf90_inq_varid(ncid, "hyam", varid)
+        ncerr = nf90_get_var(ncid, varid, hyam)
+        ncerr = nf90_inq_varid(ncid, "hybm", varid)
+        ncerr = nf90_get_var(ncid, varid, hybm)
+        ncerr = nf90_inq_varid(ncid, "NAAI", varid)
+        ncerr = nf90_get_var(ncid, varid, ciplin)
+        do it = 1,timeci
+          do k=1, kcipl
+            ci_pres(:,:,k,it)=hyam(k)*1.e5+hybm(k)*ci_ps(:,:,it)
+          end do
         end do
-      end do
-      ncerr = nf90_close(ncid)
-      ncerr = nf90_open("cam5_4_143_NPCCN_monclimo2.nc", NF90_NOWRITE, ncid)
-      ncerr = nf90_inq_varid(ncid, "NPCCN", varid)
-      ncerr = nf90_get_var(ncid, varid, ccnin)
-      ncerr = nf90_close(ncid)
+        ncerr = nf90_close(ncid)
+        ncerr = nf90_open("cam5_4_143_NPCCN_monclimo2.nc", NF90_NOWRITE, ncid)
+        ncerr = nf90_inq_varid(ncid, "NPCCN", varid)
+        ncerr = nf90_get_var(ncid, varid, ccnin)
+        ncerr = nf90_close(ncid)
 !---
-      deallocate (hyam, hybm, ci_ps)
-      if (me == master) then
+        deallocate (hyam, hybm, ci_ps)
         write(*,*) 'Reading in ICCN data',ci_time
-      endif
+      endif read_and_broadcast
+
+      call ccpp_bcast(ci_lat,  mpiroot, mpicomm, ierr)
+      call ccpp_bcast(ci_lon,  mpiroot, mpicomm, ierr)
+      call ccpp_bcast(ci_pres, mpiroot, mpicomm, ierr)
+      call ccpp_bcast(ciplin,  mpiroot, mpicomm, ierr)
+      call ccpp_bcast(ccnin,   mpiroot, mpicomm, ierr)
 
       END SUBROUTINE read_cidata
 !

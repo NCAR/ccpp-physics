@@ -2837,7 +2837,7 @@ subroutine lagrangian_fall_ppm (ktop, kbot, zs, ze, zt, dp, q, precip, m1, mono)
 
     k0 = ktop
     do k = ktop, kbot
-        do n = k0, kbot
+        n_loop: do n = k0, kbot
             if (ze (k) <= zt (n) .and. ze (k) >= zt (n + 1)) then
                 pl = (zt (n) - ze (k)) / dz (n)
                 if (zt (n + 1) <= ze (k + 1)) then
@@ -2847,7 +2847,7 @@ subroutine lagrangian_fall_ppm (ktop, kbot, zs, ze, zt, dp, q, precip, m1, mono)
                         a4 (4, n) * r3 * (pr * (pr + pl) + pl ** 2)
                     qm (k) = qm (k) * (ze (k) - ze (k + 1))
                     k0 = n
-                    goto 555
+                    exit n_loop
                 else
                     qm (k) = (ze (k) - zt (n + 1)) * (a4 (2, n) + 0.5 * (a4 (4, n) + &
                         a4 (3, n) - a4 (2, n)) * (1. + pl) - a4 (4, n) * (r3 * (1. + pl * (1. + pl))))
@@ -2862,15 +2862,14 @@ subroutine lagrangian_fall_ppm (ktop, kbot, zs, ze, zt, dp, q, precip, m1, mono)
                                 qm (k) = qm (k) + delz * (a4 (2, m) + 0.5 * esl * &
                                      (a4 (3, m) - a4 (2, m) + a4 (4, m) * (1. - r23 * esl)))
                                 k0 = m
-                                goto 555
+                                exit n_loop
                             endif
                         enddo
                     endif
-                    goto 555
+                    exit n_loop
                 endif
             endif
-        enddo
-        555 continue
+        enddo n_loop
     enddo
 
     m1 (ktop) = q (ktop) - qm (ktop)
