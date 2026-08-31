@@ -28,7 +28,7 @@
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, num_diag_buckets,                         &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d,dqdt_qmicro, lssav, num_dfi_radar,       &
         fh_dfi_radar,index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour, prevsq,      &
-        iopt_lake, iopt_lake_clm, lkm, use_lake_model, errmsg, errflg)
+        iopt_lake, iopt_lake_clm, lkm, use_lake_model, t2m, q2m, dpt2m, v10m, lsmask, con_eps, con_epsm1, errmsg, errflg)
 !
       use machine, only: kind_phys
       use calpreciptype_mod, only: calpreciptype
@@ -98,6 +98,12 @@
       real(kind=kind_phys), dimension(:,:),    intent(inout), optional :: prevsq
       real(kind=kind_phys),                    intent(in)    :: dtp
 
+!FRAM
+      real(kind=kind_phys), dimension(:),      intent(in)    :: t2m, q2m, dpt2m, v10m, lsmask 
+      real(kind_phys), intent(in) :: &
+         con_eps,           & !< Physical constant: Epsilon (Rd/Rv)
+         con_epsm1            !< Physical constant: Epsilon (Rd/Rv) minus on
+
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -127,6 +133,9 @@
       real(kind_phys), dimension(1:im)        :: factor
       real(kind_phys) ze_mp, fctz, delz
       logical :: lfrz
+!FRAM
+      real(kind_phys) frampr, framv10m, twet
+      real(kind_phys) ILRp, ILRt, ILRv, ILR
 
 
       ! Initialize CCPP error handling variables
@@ -134,6 +143,10 @@
       errflg = 0
       
       onebg = one/con_g
+      ILRp = 0.0 
+      ILRt = 0.0 
+      ILRv = 0.0 
+      ILR = 0.0 
       
       save_t = gt0 !save temperature before tendency application in case 
                    !the temperature tendency application is overwritten by radar tendencies below
@@ -246,10 +259,45 @@
       if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson .or. &
            imp_physics == imp_physics_tempo .or. imp_physics == imp_physics_nssl ) then
          do i = 1, im
-            if (gt0(i,1) .le. 273) then
-               frzr(i) = frzr(i) + rain0(i)
-               frzrb(i) = frzrb(i) + rain0(i)
+!FRAM
+            !if (gt0(i,1) .le. 273) then
+            !   frzr(i) = frzr(i) + rain0(i)
+            !   frzrb(i) = frzrb(i) + rain0(i)
+            !endif
+            twet = calculate_tw_vectorized(t2m(i) - 273.15_kind_phys, dpt2m(i) - 273.15_kind_phys, prsl(i,1))
+            if (twet < -7.0) twet = -7.0
+            frampr =  (rain0(i) * 39.37) * 3600. / dtp  
+            framv10m = v10m(i) * 1.944          !convert into knot (1kt ~ 0.51 m/s)
+      
+            if (nint(lsmask(i)) == 1 .and. twet < 0. .and. frampr > 0.01) then !land
+                
+                ILRp = 0.1395 * (frampr ** (-0.541)) 
+                ILRt = -0.0071 * (twet * twet * twet) - 0.1039 * (twet * twet)  &
+                        - 0.3904 * twet + 0.5545 
+                ILRv = 0.0014 * (framv10m * framv10m) + 0.0027 * framv10m + 0.7574
+                
+                if (twet > -0.35) then 
+                   ILR = (0.7 * ILRp) + (0.29 * ILRt) + (0.01  * ILRv)
+                else   
+                   if (framv10m > 12.) then
+                      ILR = (0.73 * ILRp) + (0.01 * ILRt) + (0.26 * ILRv)
+                   else 
+                      ILR = (0.79 * ILRp) + (0.2 * ILRt) + ( 0.01 * ILRv)
+                   endif  
+                endif 
+
+
+                if (ILR > 2.0 .or. ILR < 0.0) then
+                   print *, 'WARNING: Unphysical ILR detected:', ILR, 'at grid index:', i
+                endif
+                 
+                ILR = max(0.0, min(ILR, 2.0))
+
+                frzr(i) = frzr(i) + ILR * rain0(i)
+                frzrb(i) = frzrb(i) + ILR * rain0(i)
+
             endif
+
             tsnowp(i)  = tsnowp(i)  + snow0(i)
             tsnowpb(i)  = tsnowpb(i)  + snow0(i)
             frozr(i) = frozr(i) + graupel0(i)
@@ -616,5 +664,30 @@
       endif
 
       end subroutine GFS_MP_generic_post_run
+
+! this routine is for FRAM alogrithm 
+      elemental function calculate_tw_vectorized(t, td, p_sfc) result(tw)
+      real, intent(in) :: t, td, p_sfc  ! t and td in deg C, p_sfc in Pa or hPa
+      real :: tw, e_actual, es_tw, f, f_prime, p_hpa, delta
+      real, parameter :: gamma_const = 0.00066
+      integer :: i
+
+      p_hpa = merge(p_sfc / 100.0, p_sfc, p_sfc > 2000.0)
+      e_actual = 6.112 * exp((17.67 * td) / (td + 243.5))
+      tw = 0.5 * (t + td)
+
+      do i = 1, 5  ! 5 iterations are sufficient for <0.001 C precision
+	es_tw = 6.112 * exp((17.67 * tw) / (tw + 243.5))
+	f = es_tw - e_actual + (gamma_const * p_hpa * (tw - t))
+	f_prime = (es_tw * (17.67 * 243.5) / (tw + 243.5)**2) + (gamma_const * p_hpa)
+	
+	delta = f / f_prime
+	tw = tw - delta
+	
+	! Strict physical bounds
+	tw = min(max(tw, td), t)
+	if (abs(delta) < 0.001) exit
+       end do
+       end function calculate_tw_vectorized
 
       end module GFS_MP_generic_post
