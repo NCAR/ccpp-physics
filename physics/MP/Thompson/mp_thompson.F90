@@ -337,11 +337,11 @@ module mp_thompson
          end if
 
          if (convert_dry_rho) then
-           !qc = qc/(1.0_kind_phys+qv)
-           !qr = qr/(1.0_kind_phys+qv)
-           !qi = qi/(1.0_kind_phys+qv)
-           !qs = qs/(1.0_kind_phys+qv)
-           !qg = qg/(1.0_kind_phys+qv)
+           qc = qc/(1.0_kind_phys+qv)
+           qr = qr/(1.0_kind_phys+qv)
+           qi = qi/(1.0_kind_phys+qv)
+           qs = qs/(1.0_kind_phys+qv)
+           qg = qg/(1.0_kind_phys+qv)
 
            ni = ni/(1.0_kind_phys+qv)
            nr = nr/(1.0_kind_phys+qv)

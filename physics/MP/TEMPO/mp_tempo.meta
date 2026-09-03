@@ -2,6 +2,7 @@
   name = mp_tempo
   type = scheme
   dependencies = ../../hooks/machine.F
+  dependencies = ../module_get_aerosols_for_mp.F90
   dependencies = tempo_v3/src/module_mp_tempo_params.F90
   dependencies = tempo_v3/src/module_mp_tempo_cfgs.F90
   dependencies = tempo_v3/src/module_mp_tempo_ml.F90
@@ -187,6 +188,13 @@
   dimensions = ()
   type = logical
   intent = in
+[merra2_aerosol_aware]
+  standard_name = do_merra2_aerosol_awareness
+  long_name = flag for merra2 aerosol-aware physics for example the tempo microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [semi_sedi]
   standard_name = flag_for_semi_Lagrangian_sedi_rain
   long_name = flag for semi Lagrangian sedi of rain
@@ -209,6 +217,54 @@
   type = real
   kind = kind_phys
   intent = inout
+[qc]
+  standard_name = physics_timestep_initial_cloud_liquid_water_mixing_ratio
+  long_name = cloud water mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[qr]
+  standard_name = physics_timestep_initial_rain_mixing_ratio
+  long_name = rain water mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[qi]
+  standard_name = physics_timestep_initial_cloud_ice_mixing_ratio
+  long_name = ice water mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[qs]
+  standard_name = physics_timestep_initial_snow_mixing_ratio
+  long_name = snow water mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[qg]
+  standard_name = physics_timestep_initial_graupel_mixing_ratio
+  long_name = graupel mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[aerfld]
+  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
+  long_name = mass mixing ratio of aerosol from gocart or merra2
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
+  type = real
+  kind = kind_phys
+  intent = in
 [nwfa2d]
   standard_name = tendency_of_hygroscopic_aerosols_at_surface_adjacent_layer
   long_name = instantaneous fake water-friendly surface aerosol source
@@ -427,6 +483,14 @@
   kind = kind_phys
   intent = in
   optional = True
+[aerfld]
+  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
+  long_name = mass mixing ratio of aerosol from gocart or merra2
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_aerosol_tracers_MG)
+  type = real
+  kind = kind_phys
+  intent = in
 [ng]
   standard_name = mass_number_concentration_of_graupel
   long_name = graupel number concentration
@@ -495,6 +559,13 @@
 [is_aerosol_aware]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol-aware physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[merra2_aerosol_aware]
+  standard_name = do_merra2_aerosol_awareness
+  long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
   units = flag
   dimensions = ()
   type = logical

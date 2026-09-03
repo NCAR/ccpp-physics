@@ -15,6 +15,8 @@ module mp_tempo
       use module_mp_tempo_params, only : initialize_parameters
       use module_mp_tempo_cfgs, only : ty_tempo_cfgs
       use module_mp_tempo_driver, only : tempo_init, tempo_run, ty_tempo_driver_diags, tempo_aerosol_surface_emissions
+      use module_get_aerosols_for_mp, only : get_niwfa
+      use module_mp_tempo_utils, only : calc_ice_number, calc_cloud_number, calc_rain_number
 
       implicit none
 
@@ -35,8 +37,10 @@ module mp_tempo
            con_rv, con_g, con_rd, con_cp, &
            con_t0c, con_rgas, rhowater, &
            restart, convert_dry_rho, is_aerosol_aware, &
+           merra2_aerosol_aware, &
            is_hail_aware, do_sat_adj, semi_sedi, &
-           spechum, nwfa, nifa, nwfa2d, nifa2d, &
+           spechum, qc, qr, qi, qs, qg, &
+           aerfld, nwfa, nifa, nwfa2d, nifa2d, &
            tempo_cfgs, is_initialized, errmsg, errflg)
          
          ! Interface variables
@@ -49,14 +53,21 @@ module mp_tempo
          logical,                   intent(in   ) :: do_sat_adj
          logical,                   intent(in   ) :: semi_sedi
          logical,                   intent(in   ) :: convert_dry_rho
-         logical,                   intent(in   ) :: is_aerosol_aware
+         logical,                   intent(in   ) :: is_aerosol_aware, merra2_aerosol_aware
          logical,                   intent(in   ) :: is_hail_aware
          real(kind_phys),           intent(in   ) :: con_pi, con_hvap, con_hfus, &
                                                      con_rv, con_g, con_rd, con_cp, &
                                                      con_t0c, con_rgas, rhowater
          ! Hydrometeors
          real(kind_phys),           intent(inout) :: spechum(:,:)
+         real(kind_phys),           intent(inout) :: qc(:,:)
+         real(kind_phys),           intent(inout) :: qr(:,:)
+         real(kind_phys),           intent(inout) :: qi(:,:)
+         real(kind_phys),           intent(inout) :: qs(:,:)
+         real(kind_phys),           intent(inout) :: qg(:,:)
+
          ! Aerosols
+         real(kind_phys),           intent(in)    :: aerfld(:,:,:)
          real(kind_phys),           intent(inout), optional :: nwfa(:,:)
          real(kind_phys),           intent(inout), optional :: nifa(:,:)
          real(kind_phys),           intent(inout), optional :: nwfa2d(:)
@@ -77,7 +88,6 @@ module mp_tempo
          real(kind_phys) :: qv(1:ncol,1:nlev)       ! kg kg-1 (water vapor mixing ratio)
          real(kind_phys) :: hgt(1:ncol,1:nlev)      ! m
          real(kind_phys) :: rho(1:ncol,1:nlev)      ! kg m-3
-         real(kind_phys) :: orho(1:ncol,1:nlev)     ! m3 kg-1
          
          real (kind=kind_phys) :: h_01, z1, niIN3, niCCN3
          integer :: i, k
@@ -86,6 +96,8 @@ module mp_tempo
          errmsg = ''
          errflg = 0
 
+         if (is_initialized) return
+
          if (do_sat_adj) then
             if ((is_aerosol_aware) .or. (is_hail_aware)) then
                write(errmsg, fmt='((a))') 'do_sat_adj should be run with is_aerosol_aware=F and is_hail_aware=F'
@@ -93,12 +105,16 @@ module mp_tempo
                return
             endif
          end if
-
-         if (is_initialized) return
          
          ! Consistency checks
          if (imp_physics/=imp_physics_tempo) then
             write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Tempo MP"
+            errflg = 1
+            return
+         end if
+
+         if (is_aerosol_aware .and. merra2_aerosol_aware) then
+            write(errmsg,'(*(a))') "Logic error: Only one aerosol option can be true, either is_aerosol_aware or merra2_aerosol_aware)"
             errflg = 1
             return
          end if
@@ -110,7 +126,9 @@ module mp_tempo
          ! Main call to tempo_init()
          call tempo_init(aerosolaware_flag=is_aerosol_aware, hailaware_flag=is_hail_aware, &
               semi_sedi_flag=semi_sedi, cloud_condensation_flag=(.not. do_sat_adj), &
-              tempo_cfgs=tempo_cfgs)
+              diagnostic_aerosols_flag=merra2_aerosol_aware, tempo_cfgs=tempo_cfgs)
+
+         if (errflg /= 0) return
 
          ! Set local TEMPO MP module constants from host model and overwrite derived constants calculated in module_mp_tempo_params/initialize_parameters()
          pi = con_pi
@@ -127,7 +145,18 @@ module mp_tempo
          ! Although initialize_parameters() is already called during the call to tempo_init() above, it needs to be called again with the host-set constants to recalculate dependent parameters
          call initialize_parameters()
 
-         if (errflg /= 0) return
+         ! Ensure non-negative mass mixing ratios of all water variables
+         where(spechum<0) spechum = 1.0e-10     ! gthompsn, spechum should *never* be identically zero.
+         where(qc<0)      qc = 0.0
+         where(qr<0)      qr = 0.0
+         where(qi<0)      qi = 0.0
+         where(qs<0)      qs = 0.0
+         where(qg<0)      qg = 0.0
+
+         !> - Convert specific humidity to water vapor mixing ratio.
+         !> - Also, hydrometeor variables are mass or number mixing ratio
+         !> - either kg of species per kg of dry air, or per kg of (dry + vapor).
+         if (merra2_aerosol_aware) call get_niwfa(aerfld, nifa, nwfa, ncol, nlev) 
 
          ! For restart runs, the init is done here
          if (restart) then
@@ -135,33 +164,49 @@ module mp_tempo
            return
          end if
 
-         where(spechum<0) spechum = 1.0e-10
-         qv = spechum/(1.0_kind_phys-spechum)         
+         qv = spechum/(1.0_kind_phys-spechum)
+         
          if (convert_dry_rho) then
-           if (is_aerosol_aware) then
+           qc = qc/(1.0_kind_phys-spechum)
+           qr = qr/(1.0_kind_phys-spechum)
+           qi = qi/(1.0_kind_phys-spechum)
+           qs = qs/(1.0_kind_phys-spechum)
+           qg = qg/(1.0_kind_phys-spechum)
+
+           ni = ni/(1.0_kind_phys-spechum)
+           nr = nr/(1.0_kind_phys-spechum)
+           if (is_aerosol_aware .or. merra2_aerosol_aware) then
+              nc = nc/(1.0_kind_phys-spechum)
               nwfa = nwfa/(1.0_kind_phys-spechum)
               nifa = nifa/(1.0_kind_phys-spechum)
            end if
          end if
 
+         ! Density of moist air in kg m-3 and inverse density of air
+         rho = con_eps*prsl/(con_rd*tgrs*(qv+con_eps))
+
+         ! Ensure we have 1st guess ice number where mass non-zero but no number.
+         where(qi == 0.0) ni = 0.0
+         where(qi > 0.0 .and. ni <= 0.0) ni = calc_ice_number(qi, tgrs)
+
+        ! Ensure we have 1st guess rain number where mass non-zero but no number.
+         where(qr == 0.0) nr = 0.0
+         where(qr > 0.0 .and. nr <= 0.0) nr = calc_rain_number(qr, tgrs)
+
          ! Geopotential height in m2 s-2 to height in m
          hgt = phil/con_g
-         
-         ! Density of moist air in kg m-3 and inverse density of air
-         rho = roverrv*prsl/(rdry*tgrs*(qv+roverrv))
-         orho = 1.0/rho
 
          ! Check for existing aerosol data, both CCN and IN aerosols.  If missing
          ! fill in just a basic vertical profile, somewhat boundary-layer following.
          if (is_aerosol_aware) then
 
-           ! Potential cloud condensation nuclei (CCN)
-           if (MAXVAL(nwfa) .lt. eps) then
+           ! Water-friendly aerosols
+           if (maxval(nwfa) < eps) then
              if (mpirank==mpiroot) write(*,*) ' There are no initial CCN aerosols. A basic vertical profile will be created.'
              do i = 1, ncol
-               if (hgt(i,1).le.1000.0) then
+               if (hgt(i,1) <= 1000.0) then
                  h_01 = 0.8
-               elseif (hgt(i,1).ge.2500.0) then
+               elseif (hgt(i,1) >= 2500.0) then
                  h_01 = 0.01
                else
                  h_01 = 0.8*cos(hgt(i,1)*0.001 - 1.0)
@@ -176,13 +221,14 @@ module mp_tempo
              enddo
            else
              if (mpirank==mpiroot) write(*,*) ' Initial CCN aerosols are present.'
-             if (MAXVAL(nwfa2d) .lt. eps) then
+             if (maxval(nwfa2d) < eps) then
                !+---+-----------------------------------------------------------------+
                !..Scale the lowest level aerosol data into an emissions rate.  This is
                !.. very far from ideal, but need higher emissions where larger amount
                !.. of (climo) existing and lesser emissions where there exists fewer to
                !.. begin as a first-order simplistic approach.  Later, proper connection to
                !.. emission inventory would be better.
+               !.. This has been scaled down by an order of magnitude to match TEMPO in MPAS and WRF
                !+---+-----------------------------------------------------------------+
                if (mpirank==mpiroot) write(*,*) ' There are no initial CCN aerosol surface emission rates. Rates will be created from surface values.'
                do i = 1, ncol
@@ -194,13 +240,13 @@ module mp_tempo
              endif
            endif
 
-           ! Potential ice nuclei (IN)
-           if (MAXVAL(nifa) .lt. eps) then
+           ! IN
+           if (maxval(nifa) < eps) then
              if (mpirank==mpiroot) write(*,*) ' There are no initial IN aerosols. A basic vertical profile will be created.'
              do i = 1, ncol
-               if (hgt(i,1).le.1000.0) then
+               if (hgt(i,1) <= 1000.0) then
                   h_01 = 0.8
-               elseif (hgt(i,1).ge.2500.0) then
+               elseif (hgt(i,1) >= 2500.0) then
                   h_01 = 0.01
                else
                   h_01 = 0.8*cos(hgt(i,1)*0.001 - 1.0)
@@ -224,12 +270,27 @@ module mp_tempo
            endif
 
            ! Ensure non-negative aerosol number concentrations.
-           where(nwfa .LE. 0.0) nwfa = 1.1E6
-           where(nifa .LE. 0.0) nifa = naIN1*0.01
+           where(nwfa <= 0.0) nwfa = 1.1e6
+           where(nifa <= 0.0) nifa = naIN1*0.01
          end if
 
+         if (is_aerosol_aware .or. merra2_aerosol_aware) then
+           ! Ensure we have 1st guess cloud droplet number where mass non-zero but no number.
+           where(qc <= 0.0) nc = 0.0
+           where(qc > 0 .and. nc <= 0.0) nc = calc_cloud_number(qc, nwfa*rho) ! still expects number concentration for aerosols
+         endif  
+
          if (convert_dry_rho) then
-           if (is_aerosol_aware) then
+           qc = qc/(1.0_kind_phys+qv)
+           qr = qr/(1.0_kind_phys+qv)
+           qi = qi/(1.0_kind_phys+qv)
+           qs = qs/(1.0_kind_phys+qv)
+           qg = qg/(1.0_kind_phys+qv)
+
+           ni = ni/(1.0_kind_phys+qv)
+           nr = nr/(1.0_kind_phys+qv)
+           if (is_aerosol_aware .or. merra2_aerosol_aware) then
+              nc = nc/(1.0_kind_phys+qv)
               nwfa = nwfa/(1.0_kind_phys+qv)
               nifa = nifa/(1.0_kind_phys+qv)
            end if
@@ -248,10 +309,10 @@ module mp_tempo
       subroutine mp_tempo_run(ncol, nlev, &
         convert_dry_rho, dtp, dt_inner, &
         spechum, qc, qr, qi, qs, qg, ni, nr, &
-        nc, nwfa, nifa, nwfa2d, nifa2d, ng, volg, &
+        nc, nwfa, nifa, nwfa2d, nifa2d, ng, volg, aerfld, &
         con_g, first_time_step, &
         tgrs, prsl, phii, omega, &
-        is_aerosol_aware, is_hail_aware, &
+        is_aerosol_aware, is_hail_aware, merra2_aerosol_aware, &
         prcp, rain, graupel, ice, snow, sr, refl_10cm, &
         do_radar_ref, &
         is_initialized, tempo_cfgs, ten_q, ten_t, ten_u, ten_v, &
@@ -281,9 +342,10 @@ module mp_tempo
          real(kind_phys), optional, intent(in) :: nifa(:,:)
          real(kind_phys), optional, intent(in   ) :: nwfa2d(:)
          real(kind_phys), optional, intent(in   ) :: nifa2d(:)
+         real(kind_phys),           intent(in)    :: aerfld(:,:,:)
          real(kind_phys), optional, intent(in) :: ng(:,:)
          real(kind_phys), optional, intent(in) :: volg(:,:)
-         logical,                   intent(in)    :: is_aerosol_aware
+         logical,                   intent(in)    :: is_aerosol_aware, merra2_aerosol_aware
          logical,                   intent(in)    :: is_hail_aware
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
          real(kind_phys),           intent(inout) :: prcp(:)
@@ -395,7 +457,7 @@ module mp_tempo
          new_nr = nr
          new_tgrs = tgrs
 
-         if (is_aerosol_aware) then
+         if (is_aerosol_aware .or. merra2_aerosol_aware) then
            dnc      = 0.0
            dnwfa    = 0.0
            dnifa    = 0.0
@@ -431,6 +493,8 @@ module mp_tempo
          dt = dtp/ndt
          if (dt <= dt_inner) dt = dt_inner
 
+        if (merra2_aerosol_aware) call get_niwfa(aerfld, new_nifa, new_nwfa, ncol, nlev)
+
          !> - Convert specific humidity to water vapor mixing ratio.
          !> - Also, hydrometeor variables are mass or number mixing ratio
          !> - either kg of species per kg of dry air, or per kg of (dry + vapor).
@@ -448,7 +512,7 @@ module mp_tempo
               new_ng = new_ng/(1.0_kind_phys-new_spechum)
               new_volg = new_volg/(1.0_kind_phys-new_spechum)
            endif
-           if (is_aerosol_aware) then
+           if (is_aerosol_aware .or. merra2_aerosol_aware) then
               new_nc = new_nc/(1.0_kind_phys-new_spechum)
               new_nwfa = new_nwfa/(1.0_kind_phys-new_spechum)
               new_nifa = new_nifa/(1.0_kind_phys-new_spechum)
@@ -487,14 +551,16 @@ module mp_tempo
             !> - Convert omega in Pa s-1 to vertical velocity w in m s-1
             w = -omega/(rho*con_g)
 
-            if (present(nwfa) .and. present(nwfa2d)) then
-               xnwfa(:,:,1) = nwfa(:,:)
-               xnwfa2d(:,1) = nwfa2d(:)
-               call tempo_aerosol_surface_emissions(dt=dt, nwfa=xnwfa, nwfa2d=xnwfa2d, ims=ims, ime=ime, &
-                    jms=jms, jme=jme, kms=kms, kme=kme, kts=kts)
-               new_nwfa(:,:) = xnwfa(:,:,1)
+            if (is_aerosol_aware) then
+              if (present(nwfa) .and. present(nwfa2d)) then
+                xnwfa(:,:,1) = nwfa(:,:)
+                xnwfa2d(:,1) = nwfa2d(:)
+                call tempo_aerosol_surface_emissions(dt=dt, nwfa=xnwfa, nwfa2d=xnwfa2d, ims=ims, ime=ime, &
+                      jms=jms, jme=jme, kms=kms, kme=kme, kts=kts)
+                new_nwfa(:,:) = xnwfa(:,:,1)
+              endif
             endif
-            
+
             call tempo_run(tempo_cfgs=tempo_cfgs, &
                  dt=dt, itimestep=itimestep , &
                  qv=qv, qc=new_qc, qr=new_qr, qi=new_qi, qs=new_qs, qg=new_qg, ni=new_ni, nr=new_nr, &
@@ -507,8 +573,7 @@ module mp_tempo
                  tempo_diags=tempo_driver_diags)
             
             ice = ice + max(0.0, tempo_driver_diags%ice_liquid_equiv_precip(:,1)/1000.0_kind_phys)
-            snow = snow + (max(0.0, tempo_driver_diags%ice_liquid_equiv_precip(:,1)) + &
-                 max(0.0, tempo_driver_diags%snow_liquid_equiv_precip(:,1)))/1000.0_kind_phys
+            snow = snow + max(0.0, tempo_driver_diags%snow_liquid_equiv_precip(:,1)))/1000.0_kind_phys
             graupel = graupel + max(0.0, tempo_driver_diags%graupel_liquid_equiv_precip(:,1)/1000.0_kind_phys)
             rain = rain + max(0.0, tempo_driver_diags%rain_precip(:,1)/1000.0_kind_phys)
             prcp = prcp + (max(0.0, tempo_driver_diags%ice_liquid_equiv_precip(:,1)) + &
@@ -520,9 +585,7 @@ module mp_tempo
          ! diagnostics that are not precipitation don't need to be in the inner time loop
          sr = tempo_driver_diags%frozen_fraction(:,1)
 
-         if (do_radar_ref) then
-            refl_10cm = tempo_driver_diags%refl10cm(:,:,1)
-         endif
+         if (do_radar_ref) refl_10cm = tempo_driver_diags%refl10cm(:,:,1)
 
          itimestep = itimestep + 1
          
