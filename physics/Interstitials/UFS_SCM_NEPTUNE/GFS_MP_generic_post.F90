@@ -652,6 +652,7 @@
 
 ! this routine is for FRAM alogrithm 
       elemental function calculate_tw_vectorized(t, td, p_sfc) result(tw)
+      use machine, only: kind_phys 
       real(kind=kind_phys), intent(in) :: t, td, p_sfc  ! t and td in deg C, p_sfc in Pa or hPa
       real(kind=kind_phys) :: tw, e_actual, es_tw, f, f_prime, p_hpa, delta
       real(kind=kind_phys), parameter :: gamma_const = 0.00066_kind_phys
