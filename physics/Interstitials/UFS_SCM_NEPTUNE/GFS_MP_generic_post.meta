@@ -1035,18 +1035,18 @@
   type = real
   kind = kind_phys
   intent = in
-[q2m]
-  standard_name = specific_humidity_at_2m
-  long_name = specific humidity at 2 m
-  units = kg kg-1 
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
 [dpt2m]
   standard_name = dewpoint_temperature_at_2m
   long_name = 2 meter dewpoint temperature
   units = K 
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+[u10m]
+  standard_name = x_wind_at_10m
+  long_name = 10 meter u wind speed
+  units = m s-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -1064,22 +1064,6 @@
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-[con_eps]
-  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
-  long_name = rd/rv
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-[con_epsm1]
-  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
-  long_name = (rd/rv) - 1
-  units = none
-  dimensions = ()
   type = real
   kind = kind_phys
   intent = in

@@ -28,7 +28,7 @@
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, num_diag_buckets,                         &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d,dqdt_qmicro, lssav, num_dfi_radar,       &
         fh_dfi_radar,index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour, prevsq,      &
-        iopt_lake, iopt_lake_clm, lkm, use_lake_model, t2m, q2m, dpt2m, v10m, lsmask, con_eps, con_epsm1, errmsg, errflg)
+        iopt_lake, iopt_lake_clm, lkm, use_lake_model, t2m, dpt2m, u10m, v10m, lsmask, errmsg, errflg)
 !
       use machine, only: kind_phys
       use calpreciptype_mod, only: calpreciptype
@@ -98,11 +98,7 @@
       real(kind=kind_phys), dimension(:,:),    intent(inout), optional :: prevsq
       real(kind=kind_phys),                    intent(in)    :: dtp
 
-!FRAM
-      real(kind=kind_phys), dimension(:),      intent(in)    :: t2m, q2m, dpt2m, v10m, lsmask 
-      real(kind_phys), intent(in) :: &
-         con_eps,           & !< Physical constant: Epsilon (Rd/Rv)
-         con_epsm1            !< Physical constant: Epsilon (Rd/Rv) minus on
+      real(kind=kind_phys), dimension(:),      intent(in)    :: t2m, dpt2m, u10m, v10m, lsmask 
 
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
@@ -133,7 +129,6 @@
       real(kind_phys), dimension(1:im)        :: factor
       real(kind_phys) ze_mp, fctz, delz
       logical :: lfrz
-!FRAM
       real(kind_phys) frampr, framv10m, twet
       real(kind_phys) ILRp, ILRt, ILRv, ILR
 
@@ -259,15 +254,10 @@
       if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson .or. &
            imp_physics == imp_physics_tempo .or. imp_physics == imp_physics_nssl ) then
          do i = 1, im
-!FRAM
-            !if (gt0(i,1) .le. 273) then
-            !   frzr(i) = frzr(i) + rain0(i)
-            !   frzrb(i) = frzrb(i) + rain0(i)
-            !endif
             twet = calculate_tw_vectorized(t2m(i) - 273.15_kind_phys, dpt2m(i) - 273.15_kind_phys, prsl(i,1))
             if (twet < -7.0) twet = -7.0
             frampr =  (rain0(i) * 39.37) * 3600. / dtp  
-            framv10m = v10m(i) * 1.944          !convert into knot (1kt ~ 0.51 m/s)
+            framv10m = sqrt( u10m(i) * u10m(i) + v10m(i) * v10m(i)) * 1.944          !convert into knot (1kt ~ 0.51 m/s)
       
             if (nint(lsmask(i)) == 1 .and. twet < 0. .and. frampr > 0.01) then !land
                 
@@ -286,11 +276,6 @@
                    endif  
                 endif 
 
-
-                if (ILR > 2.0 .or. ILR < 0.0) then
-                   print *, 'WARNING: Unphysical ILR detected:', ILR, 'at grid index:', i
-                endif
-                 
                 ILR = max(0.0, min(ILR, 2.0))
 
                 frzr(i) = frzr(i) + ILR * rain0(i)
@@ -667,9 +652,9 @@
 
 ! this routine is for FRAM alogrithm 
       elemental function calculate_tw_vectorized(t, td, p_sfc) result(tw)
-      real, intent(in) :: t, td, p_sfc  ! t and td in deg C, p_sfc in Pa or hPa
-      real :: tw, e_actual, es_tw, f, f_prime, p_hpa, delta
-      real, parameter :: gamma_const = 0.00066
+      real(kind=kind_phys), intent(in) :: t, td, p_sfc  ! t and td in deg C, p_sfc in Pa or hPa
+      real(kind=kind_phys) :: tw, e_actual, es_tw, f, f_prime, p_hpa, delta
+      real(kind=kind_phys), parameter :: gamma_const = 0.00066_kind_phys
       integer :: i
 
       p_hpa = merge(p_sfc / 100.0, p_sfc, p_sfc > 2000.0)
