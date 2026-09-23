@@ -556,7 +556,7 @@ module mp_tempo
                 xnwfa(:,:,1) = nwfa(:,:)
                 xnwfa2d(:,1) = nwfa2d(:)
                 call tempo_aerosol_surface_emissions(dt=dt, nwfa=xnwfa, nwfa2d=xnwfa2d, ims=ims, ime=ime, &
-                      jms=jms, jme=jme, kms=kms, kme=kme, kts=kts)
+                      jms=jms, jme=jme, kms=kms, kme=kme, kts=kts, its=its, ite=ite, jts=jts, jte=jte)
                 new_nwfa(:,:) = xnwfa(:,:,1)
               endif
             endif
