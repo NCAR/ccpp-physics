@@ -1361,7 +1361,7 @@ CONTAINS
           k=kts
           qSHEAR1(k)    =4.*(ust(i)**3*phi_m/(karman*dz(i,k)))-qSHEAR1(k+1) !! staggered
           qBUOY1(k)     =4.*(-ust(i)**3*zet/(karman*dz(i,k)))-qBUOY1(k+1) !! staggered
-          !! unstaggering SHEAR and BUOY and transfering all TKE budget to 3D array
+          !! unstaggering SHEAR and BUOY and transferring all TKE budget to 3D array
           do k = kts,kte-1
              qSHEAR(i,k)=0.5*(qSHEAR1(k)+qSHEAR1(k+1)) !!! unstaggering in z
              qBUOY(i,k) =0.5*(qBUOY1(k)+qBUOY1(k+1)) !!! unstaggering in z
