@@ -565,7 +565,7 @@
   intent = in
 [merra2_aerosol_aware]
   standard_name = do_merra2_aerosol_awareness
-  long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
+  long_name = flag for merra2 aerosol-aware physics for example the tempo microphysics
   units = flag
   dimensions = ()
   type = logical
