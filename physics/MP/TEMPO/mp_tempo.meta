@@ -257,6 +257,31 @@
   type = real
   kind = kind_phys
   intent = inout
+[ni]
+  standard_name = physics_timestep_initial_mass_number_concentration_of_cloud_ice_water_crystals_in_air
+  long_name = ice number concentration
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[nr]
+  standard_name = physics_timestep_initial_mass_number_concentration_of_rain_water_in_air
+  long_name = rain number concentration
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[nc]
+  standard_name = physics_timestep_initial_mass_number_concentration_of_cloud_liquid_water_particles_in_air
+  long_name = cloud droplet number concentration
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
 [aerfld]
   standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
   long_name = mass mixing ratio of aerosol from gocart or merra2

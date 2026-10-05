@@ -39,7 +39,7 @@ module mp_tempo
            restart, convert_dry_rho, is_aerosol_aware, &
            merra2_aerosol_aware, &
            is_hail_aware, do_sat_adj, semi_sedi, &
-           spechum, qc, qr, qi, qs, qg, &
+           spechum, qc, qr, qi, qs, qg, ni, nr, nc, &
            aerfld, nwfa, nifa, nwfa2d, nifa2d, &
            tempo_cfgs, is_initialized, errmsg, errflg)
          
@@ -65,6 +65,9 @@ module mp_tempo
          real(kind_phys),           intent(inout) :: qi(:,:)
          real(kind_phys),           intent(inout) :: qs(:,:)
          real(kind_phys),           intent(inout) :: qg(:,:)
+         real(kind_phys),           intent(inout) :: ni(:,:)
+         real(kind_phys),           intent(inout) :: nr(:,:)
+         real(kind_phys), optional, intent(inout) :: nc(:,:)
 
          ! Aerosols
          real(kind_phys),           intent(in)    :: aerfld(:,:,:)
@@ -183,7 +186,7 @@ module mp_tempo
          end if
 
          ! Density of moist air in kg m-3 and inverse density of air
-         rho = con_eps*prsl/(con_rd*tgrs*(qv+con_eps))
+         rho = eps*prsl/(con_rd*tgrs*(qv+eps))
 
          ! Ensure we have 1st guess ice number where mass non-zero but no number.
          where(qi == 0.0) ni = 0.0
@@ -556,7 +559,7 @@ module mp_tempo
                 xnwfa(:,:,1) = nwfa(:,:)
                 xnwfa2d(:,1) = nwfa2d(:)
                 call tempo_aerosol_surface_emissions(dt=dt, nwfa=xnwfa, nwfa2d=xnwfa2d, ims=ims, ime=ime, &
-                      jms=jms, jme=jme, kms=kms, kme=kme, kts=kts, its=its, ite=ite, jts=jts, jte=jte)
+                      jms=jms, jme=jme, kms=kms, kme=kme, kts=kts)
                 new_nwfa(:,:) = xnwfa(:,:,1)
               endif
             endif
@@ -573,7 +576,7 @@ module mp_tempo
                  tempo_diags=tempo_driver_diags)
             
             ice = ice + max(0.0, tempo_driver_diags%ice_liquid_equiv_precip(:,1)/1000.0_kind_phys)
-            snow = snow + max(0.0, tempo_driver_diags%snow_liquid_equiv_precip(:,1)))/1000.0_kind_phys
+            snow = snow + max(0.0, tempo_driver_diags%snow_liquid_equiv_precip(:,1))/1000.0_kind_phys
             graupel = graupel + max(0.0, tempo_driver_diags%graupel_liquid_equiv_precip(:,1)/1000.0_kind_phys)
             rain = rain + max(0.0, tempo_driver_diags%rain_precip(:,1)/1000.0_kind_phys)
             prcp = prcp + (max(0.0, tempo_driver_diags%ice_liquid_equiv_precip(:,1)) + &
