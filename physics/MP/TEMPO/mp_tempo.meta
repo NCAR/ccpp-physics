@@ -281,7 +281,7 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = T
+  optional = True
 [aerfld]
   standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
   long_name = mass mixing ratio of aerosol from gocart or merra2
