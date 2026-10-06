@@ -18,7 +18,8 @@ contains
   subroutine GFS_physics_post_run(nCol, nLev, ntoz, ntracp100, nprocess, nprocess_summed,   &
        dtidx, is_photochem, ldiag3d, ip_physics, ip_photochem, ip_prod_loss, ip_ozmix,      &
        ip_temp, ip_overhead_ozone, do3_dt_prd, do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz,       &
-       ntqv, dqv_dt_prd, dqv_dt_qvmx, dtend, t, prevst, q, prevsq, errmsg, errflg)
+       ntqv, dqv_dt_prd, dqv_dt_qvmx, dtend, imfdeepcnv, imfdeepcnv_ntiedtke, t, prevst, q, &
+       prevsq, errmsg, errflg)
 
     ! Inputs
     integer, intent(in) :: &
@@ -34,7 +35,9 @@ contains
          ip_prod_loss,   & !< Index for process in diagnostic tendency output
          ip_ozmix,       & !< Index for process in diagnostic tendency output
          ip_temp,        & !< Index for process in diagnostic tendency output
-         ip_overhead_ozone !< Index for process in diagnostic tendency output    
+         ip_overhead_ozone,& !< Index for process in diagnostic tendency output
+         imfdeepcnv,     & !< Flag for mass-flux deep convection scheme
+         imfdeepcnv_ntiedtke !< Flag for new Tiedtke deep convection scheme
     integer, intent(in), dimension(:,:) :: &
          dtidx             !< Bookkeeping indices for GFS diagnostic tendencies
     logical, intent(in) :: &
@@ -56,7 +59,7 @@ contains
     ! Outputs
     real(kind=kind_phys), intent(inout), dimension(:,:,:), optional :: &
          dtend             !< Diagnostic tendencies for state variables
-    real(kind=kind_phys), intent(out), dimension(:,:), optional :: &
+    real(kind=kind_phys), intent(inout), dimension(:,:), optional :: &
          prevst, prevsq    !< Saved temperature and specific humidity after physics
 
     character(len=*), intent(out) :: &
@@ -73,11 +76,14 @@ contains
     errflg = 0
 
     ! Save temperature and specific humidity at end of physics for next time step
-    if (present(prevst)) then
-      prevst(:,:) = t(:,:)
-    end if
-    if (present(prevsq)) then
-      prevsq(:,:) = q(:,:)
+    ! For now, new Tiedtke only - see ADD ISSUE URL HERE
+    if (imfdeepcnv == imfdeepcnv_ntiedtke) then
+      if (present(prevst)) then
+        prevst(:,:) = t(:,:)
+      end if
+      if (present(prevsq)) then
+        prevsq(:,:) = q(:,:)
+      end if
     end if
 
     ! Everything below is related to 3d diagnostics
