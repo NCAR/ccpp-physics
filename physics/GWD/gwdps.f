@@ -360,6 +360,7 @@
 !     parameter (cdmb = 1.0)     !< non-dim sub grid mtn drag Amp (*j*)
       parameter (hncrit=8000.)   !< Max value in meters for ELVMAX (*j*)
 !  hncrit set to 8000m and sigfac added to enhance elvmax mtn hgt
+ 
       parameter (sigfac=4.0)     !< MB3a expt test for ELVMAX factor (*j*)
       parameter (hminmt=50.)     !< min mtn height (*j*)
       parameter (minwnd=0.1)     !< min wind component (*j*)
