@@ -46,7 +46,7 @@
   intent = in
 [nrcm]
   standard_name = number_of_random_numbers
-  long_name = second dimension of random number stream for RAS
+  long_name = second dimension of random number stream
   units = count
   dimensions = ()
   type = integer

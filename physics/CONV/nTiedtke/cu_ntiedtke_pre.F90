@@ -43,8 +43,7 @@ module cu_ntiedtke_pre
       errflg = 0
 
       ! For restart runs, can assume that prevst and prevsq
-      ! are read from the restart files beforehand, same
-      ! for conv_act.
+      ! are read from the restart files beforehand.
       if(flag_init .and. .not.flag_restart) then
         forcet(:,:)=0.0
         forceq(:,:)=0.0
