@@ -20,14 +20,6 @@
      & MAPL_AIRMW, MAPL_RVAP , MAPL_PI , MAPL_R8 , MAPL_R4
        use MAPL_BaseMod, only: MAPL_UNDEF
 #endif
-#ifdef NEMS_GSM
-      use physcons, MAPL_TICE => con_t0c,  MAPL_GRAV => con_g,
-     &              MAPL_CP   => con_cp,   MAPL_ALHL => con_hvap,
-     &              MAPL_ALHF => con_hfus, MAPL_PI   => con_pi,
-     &              MAPL_RGAS => con_rd,   MAPL_RVAP => con_rv
-#endif
-
-
        implicit none
 
 
@@ -39,6 +31,9 @@
        public meltfrz_inst
        public fix_up_clouds_2M
        PUBLIC CLOUD_PTR_STUBS
+#ifdef NEMS_GSM
+       public cldmacro_init
+#endif
 
 !! Some parameters set by PHYSPARAMS
 
@@ -89,15 +84,24 @@
        real    :: turnrhcrit_upper
        real    :: MIN_RI, MAX_RI, MIN_RL, MAX_RL, RI_ANV
 
-
-       real, parameter :: T_ICE_MAX = MAPL_TICE
+#ifdef NEMS_GSM
+       real :: MAPL_TICE = 1.0E30
+       real :: MAPL_GRAV = 1.0E30
+       real :: MAPL_CP   = 1.0E30
+       real :: MAPL_ALHL = 1.0E30
+       real :: MAPL_ALHF = 1.0E30
+       real :: MAPL_PI   = 1.0E30
+       real :: MAPL_RGAS = 1.0E30
+       real :: MAPL_RVAP = 1.0E30
+       real :: T_ICE_MAX = 1.0E30
+       real :: MAPL_ALHS = 1.0E30
+       real :: alhlbcp   = 1.0E30
+       real :: alhfbcp = 1.0E30
+       real :: alhsbcp = 1.0E30
+#endif
        real, parameter :: RHO_W = 1.0e3
        real, parameter :: MIN_CLD_FRAC = 1.0e-8
-       real, parameter :: MAPL_ALHS = MAPL_ALHL+MAPL_ALHF
 
-       real, parameter :: alhlbcp = MAPL_ALHL/MAPL_CP
-     &,                   alhfbcp = MAPL_ALHF/MAPL_CP
-     &,                   alhsbcp = alhlbcp+alhfbcp
 
 
 !      real, parameter :: PI_0 = 4.*atan(1.)
@@ -106,6 +110,28 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
        contains
+
+#ifdef NEMS_GSM
+       subroutine cldmacro_init(con_t0c, con_g, con_cp, con_hvap        &
+     &,         con_hfus, con_pi, con_rd, con_rv)
+         real, intent(in) ::  con_t0c, con_g, con_cp, con_hvap
+         real, intent(in) ::  con_hfus, con_pi, con_rd, con_rv
+         MAPL_TICE = con_t0c
+         MAPL_GRAV = con_g
+         MAPL_CP   = con_cp
+         MAPL_ALHL = con_hvap
+         MAPL_ALHF = con_hfus
+         MAPL_PI   = con_pi
+         MAPL_RGAS = con_rd
+         MAPL_RVAP = con_rv
+
+         T_ICE_MAX = MAPL_TICE
+         MAPL_ALHS = MAPL_ALHL+MAPL_ALHF
+         alhlbcp = MAPL_ALHL/MAPL_CP
+         alhfbcp = MAPL_ALHF/MAPL_CP
+         alhsbcp = alhlbcp+alhfbcp
+       end subroutine cldmacro_init
+#endif
 
 !>\ingroup cldmacro_mod
 !! This subroutine is the cloud macrophysics scheme in MG micriphysics.

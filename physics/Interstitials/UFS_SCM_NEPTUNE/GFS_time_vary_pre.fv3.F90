@@ -21,10 +21,16 @@
 !> \section arg_table_GFS_time_vary_pre_init Argument Table
 !! \htmlinclude GFS_time_vary_pre_init.html
 !!
-      subroutine GFS_time_vary_pre_init (errmsg, errflg)
+      subroutine GFS_time_vary_pre_init (con_rd, con_rv, con_cp, con_cvap, con_cliq, con_csol, &
+                                         con_hvap, con_hfus, con_psat, con_ttp, errmsg, errflg)
+
+         use machine, only: kind_phys
 
          implicit none
 
+         real(kind=kind_phys),             intent(in)    :: con_rd, con_rv, con_cp
+         real(kind=kind_phys),             intent(in)    :: con_cvap, con_cliq, con_csol
+         real(kind=kind_phys),             intent(in)    :: con_hvap, con_hfus, con_psat, con_ttp
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
 
@@ -35,7 +41,8 @@
          if (is_initialized) return
 
          !--- Call gfuncphys (funcphys.f) to compute all physics function tables.
-         call gfuncphys ()
+         call gfuncphys (con_rd, con_rv, con_cp, con_cvap, con_cliq, con_csol, &
+                         con_hvap, con_hfus, con_psat, con_ttp)
 
          is_initialized = .true.
 

@@ -41,6 +41,7 @@ module unified_ugwp
     use cires_ugwp_triggers
     use ugwp_driver_v0
     use drag_suite, only: drag_suite_run, drag_suite_psl
+    use ugwp_common_v0, only: ugwp_common_v0_init
 
     implicit none
 
@@ -64,7 +65,8 @@ contains
 !!
     subroutine unified_ugwp_init (me, master, nlunit, input_nml_file, logunit, &
                 fn_nml2, jdat, lonr, levs, ak, bk, dtp, cdmbgwd, cgwf,   &
-                con_pi, con_rerth, pa_rf_in, tau_rf_in, con_p0, do_ugwp,       &
+                con_pi, con_rerth, con_g, con_cp, con_rd, con_rv, con_fvirt,  &
+                pa_rf_in, tau_rf_in, con_p0, do_ugwp,                          &
                 do_ugwp_v0, do_ugwp_v0_orog_only, do_ugwp_v0_nst_only,         &
                 do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd, gwd_opt,  &
                 errmsg, errflg)
@@ -84,7 +86,8 @@ contains
     real(kind=kind_phys), intent (in) :: dtp
     real(kind=kind_phys), intent (in) :: cdmbgwd(:), cgwf(:) ! "scaling" controls for "old" GFS-GW schemes
     real(kind=kind_phys), intent (in) :: pa_rf_in, tau_rf_in
-    real(kind=kind_phys), intent (in) :: con_p0, con_pi, con_rerth
+    real(kind=kind_phys), intent (in) :: con_p0, con_pi, con_rerth, con_g
+    real(kind=kind_phys), intent (in) :: con_cp, con_rd, con_rv, con_fvirt
     logical,              intent (in) :: do_ugwp
     logical,              intent (in) :: do_ugwp_v0, do_ugwp_v0_orog_only,  &
                                          do_ugwp_v0_nst_only,               &
@@ -124,6 +127,9 @@ contains
     end if
 
     if (is_initialized) return
+
+    call ugwp_common_v0_init(con_pi, con_rerth, con_g, con_cp, con_rd, &
+                             con_rv, con_fvirt)
 
     if ( do_ugwp_v0 .or. do_ugwp_v0_nst_only ) then
        ! if (do_ugwp .or. cdmbgwd(3) > 0.0) then (deactivate effect of do_ugwp)

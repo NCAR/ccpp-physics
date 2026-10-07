@@ -14,25 +14,12 @@ module cs_conv
 !---------------------------------------------------------------------------------
 !
   use machine ,   only : kind_phys
-  use physcons,   only : cp    => con_cp,   grav   => con_g,                   &
-     &                   rair  => con_rd,   rvap   => con_rv,                  &
-     &                   cliq  => con_cliq, cvap   => con_cvap,                &
-     &                   epsv  => con_eps,  epsvm1 => con_epsm1,               &
-     &                   epsvt => con_fvirt,                                   &
-     &                   el    => con_hvap, emelt  => con_hfus, t0c => con_t0c
   use funcphys,   only : fpvs ! this is saturation vapor pressure in funcphys.f
-
-  
   implicit none
 
   private                ! Make default type private to the module
 
    real(kind_phys), parameter :: zero=0.0d0,  one=1.0d0, half=0.5d0
-   real(kind_phys), parameter :: cpoel=cp/el, cpoesub=cp/(el+emelt), esubocp=1.0/cpoesub, &
-                          elocp=el/cp, oneocp=one/cp, gocp=grav/cp, gravi=one/grav,&
-                          emeltocp=emelt/cp, cpoemelt=cp/emelt, epsln=1.e-10_kind_phys
-
-   real(kind_phys), parameter :: fact1=(cvap-cliq)/rvap, fact2=el/rvap-fact1*t0c !< to calculate d(qs)/dT
 
    logical,  parameter :: adjustp=.true.
 !  logical,  parameter :: adjustp=.false.
@@ -163,7 +150,14 @@ module cs_conv
                           lprnt  , ipr, kcnv,                               &
                           QLCN, QICN, w_upi, cf_upi, CNV_MFD,               & ! for coupling to MG microphysics
                           CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,       &
-                          mp_phys,ten_t,ten_u,ten_v,ten_q,ten_clw,errmsg,errflg)
+                          mp_phys,ten_t,ten_u,ten_v,ten_q,ten_clw,          &
+                          cp, grav,                                         &
+                          rair, rvap,                                       &
+                          cliq, cvap,                                       &
+                          epsv, epsvm1,                                     &
+                          epsvt,                                            &
+                          el, emelt, t0c,                                   &
+                          errmsg,errflg)
 
 
    implicit none
@@ -204,7 +198,6 @@ module cs_conv
    real(kind_phys), intent(inout), dimension(:,:) :: dd_mf, dt_mf
    
    real(kind_phys), intent(out)   :: rain1(:)        ! lwe thickness of deep convective precipitation amount (m)
-
    real(kind_phys), intent(out), dimension(:,:), optional :: qlcn, qicn, w_upi,cnv_mfd, &
                                                    cnv_dqldt, clcn, cnv_fice, &
                                                    cnv_ndrop, cnv_nice, cf_upi
@@ -269,6 +262,27 @@ module cs_conv
    real(kind_phys)    :: ftintm, wrk, wrk1, tem, new_qv
    integer i, k, n, ISTS, IENS, kp1
 
+   real(kind_phys), intent(in) :: cp !< specific heat of dry air at constant pressure [J kg-1 K-1]
+   real(kind_phys), intent(in) :: grav !< gravitational acceleration [m s-2]
+   real(kind_phys), intent(in) :: rair !< ideal gas constant for dry air [J kg-1 K-1]
+   real(kind_phys), intent(in) :: rvap !< ideal gas constant for water vapor [J kg-1 K-1]
+   real(kind_phys), intent(in) :: cliq !< specific heat of liquid water at constant pressure [J kg-1 K-1]
+   real(kind_phys), intent(in) :: cvap !< specific heat of water vapor at constant pressure [J kg-1 K-1]
+   real(kind_phys), intent(in) :: epsv !< rd/rv
+   real(kind_phys), intent(in) :: epsvm1 !< (rd/rv) - 1
+   real(kind_phys), intent(in) :: epsvt !< (rv/rd) - 1
+   real(kind_phys), intent(in) :: el !< latent heat of evaporation/sublimation [J kg-1]
+   real(kind_phys), intent(in) :: emelt !< latent heat of fusion [J kg-1]
+   real(kind_phys), intent(in) :: t0c !< temperature at 0 degrees Celsius [K]
+
+   ! real(kind_phys), intent(in) ::
+   real(kind_phys) :: cpoel, cpoesub, esubocp, &
+        elocp, oneocp, gocp, gravi,&
+        emeltocp, cpoemelt, epsln
+   real(kind_phys) :: fact1, fact2
+
+
+
 !DD borrowed from RAS to go form total condensate to ice/water separately
 !  parameter (tf=130.16, tcr=160.16, tcrf=1.0/(tcr-tf),tcl=2.0)
 !  parameter (tf=230.16, tcr=260.16, tcrf=1.0/(tcr-tf))
@@ -285,6 +299,27 @@ module cs_conv
    ten_q = 0.0
    new_clw = clw
    ten_clw = 0.0
+
+   ten_t = 0.0
+   ten_u = 0.0
+   ten_v = 0.0
+   ten_q = 0.0
+   new_clw = clw
+   ten_clw = 0.0
+
+   ! Initialize parameters
+   cpoel=cp/el
+   cpoesub=cp/(el+emelt)
+   esubocp=1.0/cpoesub
+   elocp=el/cp
+   oneocp=one/cp
+   gocp=grav/cp
+   gravi=one/grav
+   emeltocp=emelt/cp
+   cpoemelt=cp/emelt
+   epsln=1.e-10_kind_phys
+   fact1=(cvap-cliq)/rvap
+   fact2=el/rvap-fact1*t0c
 
 !  lprnt = kdt == 1 .and. mype == 38
 !  ipr = 43
@@ -420,7 +455,12 @@ module cs_conv
                    DELTA , DELTI , ISTS  , IENS, mype,& ! input
                    fscav,  fswtr,  wcbmaxm, nctp,     &
                    sigmai, sigma,  vverti,            & ! input/output !DDsigma
-                   do_aw, do_awdd, flx_form)
+                   do_aw, do_awdd, flx_form, rair,    &
+                   oneocp, gravi, grav, gocp, fact2,  &
+                   fact1, esubocp, epsvt, epsvm1,     &
+                   epsv, elocp, el, cpoesub,          &
+                   cpoemelt, cpoel, cp, epsln,        &
+                   emeltocp, emelt)
 !
 !
 !DD detrainment has to be added in for GFS
@@ -611,17 +651,25 @@ module cs_conv
                          DELTA , DELTI , ISTS  , IENS, mype,& ! input
                          fscav,  fswtr,  wcbmaxm, nctp,     & !
                          sigmai, sigma,  vverti,            & ! input/output !DDsigma
-                         do_aw, do_awdd, flx_form)
+                         do_aw, do_awdd, flx_form, rair,    &
+                         oneocp, gravi, grav, gocp, fact2,  &
+                         fact1, esubocp, epsvt, epsvm1,     &
+                         epsv, elocp, el, cpoesub,          &
+                         cpoemelt, cpoel, cp, epsln,        &
+                         emeltocp, emelt)
 !
    IMPLICIT NONE
       
+   real(kind_phys), intent(in) :: oneocp, gravi, grav, gocp, fact2, fact1, &
+        esubocp, epsvt, epsvm1, epsv, elocp, el, cpoesub, cpoemelt, cpoel, &
+        cp, epsln, emeltocp, emelt
    Integer, parameter    :: ntrq=4                    ! starting index for tracers
    INTEGER, INTENT(IN)   :: im, IJSDIM, KMAX, NTR, mype, nctp, ipr !! DD, for GFS, pass in
    logical, intent(in)   :: do_aw, do_awdd, flx_form  ! switch to apply Arakawa-Wu to the tendencies
    logical, intent(in)   :: otspt1(ntr), otspt2(ntr), lprnt
    REAL(kind_phys),intent(in)   :: DELP  (IJSDIM, KMAX)
    REAL(kind_phys),intent(in)   :: DELPINV (IJSDIM, KMAX)
-!
+   real(kind_phys), intent(in) :: rair !< ideal gas constant for dry air [J kg-1 K-1]
 ! [OUTPUT]
    REAL(kind_phys), INTENT(OUT) :: GTT   (IJSDIM, KMAX     ) ! heating rate
    REAL(kind_phys), INTENT(OUT) :: GTQ   (IJSDIM, KMAX, NTR) ! change in q
@@ -995,7 +1043,8 @@ module cs_conv
                GDPM  , FDQS  , GAM   ,                   & ! input
                lprnt,  ipr,                              &
                ISTS  , IENS                  ,           & !)   ! input
-               gctbl, gcqbl,gdq,gcwbl, gcqlbl, gcqibl, gctrbl) ! sub cloud tendencies
+               gctbl, gcqbl,gdq,gcwbl, gcqlbl, gcqibl, gctrbl, &
+               oneocp, grav, el) ! sub cloud tendencies
 !
 !> -# Compute CAPE and CIN
 !
@@ -1092,7 +1141,9 @@ module cs_conv
                 KB    , CTP   , ISTS  , IENS  ,                     & ! input
                 gctm  , gcqm(:,:,CTP), gcwm(:,:,CTP), gchm(:,:,CTP),&
                 gcwt, gclm, gcim, gctrm,                            & ! additional incloud profiles and cloud top total water
-                lprnt , ipr )
+                lprnt , ipr, &
+                oneocp, grav, fact1, fact2, epsvt, &
+                epsvm1, epsv, emelt, el, cp)
 !
 !> -# Call cumbmx() to compute cloud base mass flux
      CALL CUMBMX(IJSDIM, KMAX,                                      & !DD dimensions
@@ -1100,7 +1151,8 @@ module cs_conv
                  ACWF        , GCYT(:,CTP), GDZM     ,              & ! input
                  GDW         , GDQS       , DELP     ,              & ! input
                  KT   (:,CTP), KTMX(CTP)  , KB       ,              & ! input
-                 DELTI       , ISTS       , IENS       )
+                 DELTI       , ISTS       , IENS     ,              & ! input
+                 oneocp, el, epsln )
                  
 !DDsigma -  begin sigma computation
 ! At this point cbmfx is updated and we have everything we need to compute sigma
@@ -1337,7 +1389,7 @@ module cs_conv
                  CBMFX , GCYT  , DELPInv , GCHT  , GCQT  ,      & ! input
                  GCLT  , GCIT  , GCUT  , GCVT  , GDQ(:,:,iti),& ! input
                  gctrt ,                                      &
-                 KT    , ISTS  , IENS, nctp              )      ! input
+                 KT    , ISTS  , IENS, nctp, oneocp, el)      ! input
    endif
 
 !for now area fraction of the downdraft is zero, it will be computed
@@ -1450,8 +1502,11 @@ module cs_conv
                sigmad, do_aw , do_awdd, flx_form,        & ! DDsigma input
                dtmelt, dtevap, dtsubl,                   & ! DDsigma input
                dtdwn , dqvdwn, dqldwn, dqidwn,           & ! DDsigma input
-               dtrdwn,                                   &
-               KB    , KTMXT , ISTS  , IENS    )           ! input
+               dtrdwn,                                   & ! input
+               KB    , KTMXT , ISTS  , IENS,             & ! input
+               oneocp, gocp, esubocp, emeltocp, emelt,   &
+               elocp, el, cp)
+
 
 
 !  sigma = sigma + sigmad
@@ -1466,7 +1521,7 @@ module cs_conv
                  GDH   , GDQ   , GDQ(:,:,iti)  ,           & ! input
                  GDU   , GDV   ,                           & ! input
                  DELPINV , GMFLX , GMFX0 ,                   & ! input
-                 KTMXT , CPRES , kb, ISTS  , IENS )   ! input
+                 KTMXT , CPRES , kb, ISTS  , IENS, oneocp, el )   ! input
    else
      CALL CUMSBW(IM    , IJSDIM, KMAX  ,                   & !DD dimensions
                  GTU   , GTV   ,                           & ! modified
@@ -1707,7 +1762,7 @@ module cs_conv
    CALL CUMFXR(IM    , IJSDIM, KMAX  , NTR   ,           & !DD dimensions
                GTQ   ,                                   & ! modified
                GDQ   , DELP  , DELTA , KTMXT , IMFXR,    & ! input
-               ISTS  , IENS                            )   ! input
+               ISTS  , IENS, gravi                     )   ! input
 
 !
 !  do k=1,kmax
@@ -1865,16 +1920,18 @@ module cs_conv
                  GDPM  , FDQS  , GAM   ,           & ! input
                  lprnt,  ipr,                      &
                  ISTS  , IENS , gctbl, gcqbl ,gdq, &
-                 gcwbl, gcqlbl, gcqibl, gctrbl   )   ! input  !DDsigmadiag add updraft profiles below cloud base
-!
-!
+                 gcwbl, gcqlbl, gcqibl, gctrbl,    &   ! input  !DDsigmadiag add updraft profiles below cloud base
+                 oneocp, grav, el)
+
+
       IMPLICIT NONE
 !     integer, parameter  :: crtrh=0.80
       integer, parameter  :: crtrh=0.70
       INTEGER, INTENT(IN) :: IJSDIM, KMAX , ntr, ntrq  ! DD, for GFS, pass in
       integer  ipr
       logical  lprnt
-!
+      real(kind_phys), intent(in) :: oneocp, grav, el
+
 !   [OUTPUT]
       INTEGER    KB    (IJSDIM)         ! cloud base
       REAL(kind_phys)   GCYM  (IJSDIM, KMAX)   ! norm. mass flux (half lev)
@@ -2083,7 +2140,9 @@ module cs_conv
 !                CPRES , WCB   , ERMR  ,            & ! input
                  KB    , CTP   , ISTS  , IENS,      & ! input
                  gctm  , gcqm  , gcwm  , gchm, gcwt,&
-                 gclm,   gcim  , gctrm , lprnt, ipr )
+                 gclm,   gcim  , gctrm , lprnt, ipr,&
+                 oneocp, grav, fact1, fact2, epsvt, &
+                 epsvm1, epsv, emelt, el, cp)
 !
 !DD AW the above line of arguments were previously local, and often scalars.
 !  Dimensions were added to them to save profiles for each grid point.
@@ -2092,7 +2151,8 @@ module cs_conv
 
       INTEGER, INTENT(IN) :: IJSDIM, KMAX, NTR, ipr , ntrq    ! DD, for GFS, pass in
       logical :: lprnt
-!
+      real(kind_phys), intent(in) ::  oneocp, grav, fact1, fact2, epsvt
+      real(kind_phys), intent(in) ::  epsvm1, epsv, emelt, el, cp
 !   [OUTPUT]
       REAL(kind_phys)   ACWF  (IJSDIM)             !< cloud work function
       REAL(kind_phys)   GCLZ  (IJSDIM, KMAX)       !< cloud liquid water*eta
@@ -2740,12 +2800,14 @@ module cs_conv
                  ACWF  , GCYT  , GDZM  ,   & ! input
                  GDW   , GDQS  , DELP  ,   & ! input
                  KT    , KTMX  , KB    ,   & ! input
-                 DELT  , ISTS  , IENS    )   ! input
+                 DELT  , ISTS  , IENS,     & ! input
+                 oneocp, el, epsln) ! input
 !
 !
       IMPLICIT NONE
       
       INTEGER, INTENT(IN) :: IJSDIM, KMAX  ! DD, for GFS, pass in
+      real(kind_phys), intent(in) :: oneocp, el, epsln
 !
 !   [MODIFY]
       REAL(kind_phys)     CBMFX (IJSDIM)          !< cloud base mass flux
@@ -2888,11 +2950,12 @@ module cs_conv
                  CBMFX , GCYT  , DELPI , GCHT  , GCQT  ,   & ! input
                  GCLT  , GCIT  , GCUT  , GCVT  , GDQI  ,   & ! input
                  gctrt,                                    &
-                 KT    , ISTS  , IENS  , nctp  )             ! input
+                 KT    , ISTS  , IENS  , nctp, oneocp, el)             ! input
 !
       IMPLICIT NONE
 
       INTEGER, INTENT(IN) :: im, IJSDIM, KMAX, NTR, nctp, ntrq !! DD, for GFS, pass in
+      real(kind_phys), intent(in) :: oneocp, el
 !
 !   [MODIFY]
       REAL(kind_phys)     GTT   (IJSDIM, KMAX)   !< temperature tendency
@@ -2962,12 +3025,14 @@ module cs_conv
                  GDH   , GDQ   , GDQI  ,            & ! input
                  GDU   , GDV   ,                    & ! input
                  DELPI , GMFLX , GMFX0 ,            & ! input
-                 KTMX  , CPRES , KB, ISTS  , IENS )   ! input
+                 KTMX  , CPRES , KB, ISTS  , IENS,  &   ! input
+                 oneocp, el)
 !
 !
       IMPLICIT NONE
 
       INTEGER, INTENT(IN) :: IJSDIM, IM, KMAX, NTR, ntrq      !! DD, for GFS, pass in
+      real(kind_phys), intent(in) :: oneocp, el
 !
 !   [MODIFY]
       REAL(kind_phys)     GTT   (IJSDIM, KMAX)      !< Temperature tendency
@@ -3164,8 +3229,10 @@ module cs_conv
                  sigmad, do_aw , do_awdd, flx_form,     & !DDsigma input
                  gtmelt, gtevap, gtsubl,                & !DDsigma input
                  dtdwn , dqvdwn, dqldwn, dqidwn,        & !DDsigma input
-                 dtrdwn,                                &
-                 KB    , KTMX  , ISTS  , IENS    )        ! input
+                 dtrdwn,                                & ! input
+                 KB    , KTMX  , ISTS  , IENS,          & ! input
+                 oneocp, gocp, esubocp, emeltocp, emelt,&
+                 elocp, el, cp)
 !
 ! DD AW : modify to get eddy fluxes and microphysical tendencies for AW
 !
@@ -3173,6 +3240,9 @@ module cs_conv
 
       INTEGER, INTENT(IN) :: IM, IJSDIM, KMAX, NTR , ntrq, nctp   !! DD, for GFS, pass in
       logical, intent(in) :: do_aw, do_awdd, flx_form
+      real(kind_phys), intent(in) :: oneocp, gocp, esubocp, emeltocp, emelt, &
+           elocp, el, cp
+
 !
 !   [MODIFY]
       REAL(kind_phys)     GTT   (IJSDIM, KMAX)       !< Temperature tendency
@@ -3855,10 +3925,11 @@ module cs_conv
                         GDR   , DELP  ,                      & ! input
                         GMFLX , KTMX  , OTSPT ,              & ! input
                         sigmai        , sigma ,              & !DDsigma input
-                        ISTS, IENS )                           ! input
+                        ISTS, IENS, grav )                           ! input
 !
       IMPLICIT NONE
 
+      real(kind_phys), intent(in) :: grav
       INTEGER, INTENT(IN) :: IM, IJSDIM, KMAX, NTR, nctp       !! DD, for GFS, pass in
 !
 !   [MODIFY]
@@ -3910,10 +3981,11 @@ module cs_conv
                       ( IM    , IJSDIM, KMAX  , NTR   ,           & !DD dimensions
                         GTR   ,                                   & ! modified
                         GDR   , DELP  , DELTA , KTMX  , IMFXR ,   & ! input
-                        ISTS  , IENS                            )   ! input
+                        ISTS  , IENS, gravi                     )   ! input
 !
       IMPLICIT NONE
 
+      real(kind_phys), intent(in) :: gravi
       INTEGER, INTENT(IN) :: IM, IJSDIM, KMAX, NTR             !! DD, for GFS, pass in
 !
 !   [MODIFY]
@@ -4002,9 +4074,12 @@ module cs_conv
                ( IM    , IJSDIM, KMAX  ,nctp,              & !DD dimensions
                  GTR   ,                                   & ! modified
                  GDR   , DELP  , DELTA , KTMX  , IMFXR ,   & ! input
-                 ISTS  , IENS                            )   ! input
+                 ISTS  , IENS  ,                           & ! input
+                 gravi &
+                 )
 !
       IMPLICIT NONE
+      real(kind_phys), intent(in) :: gravi
 
       INTEGER, INTENT(IN) :: IM, IJSDIM, KMAX, nctp           !! DD, for GFS, pass in
 !

@@ -2,7 +2,7 @@
   name = GFS_rrtmgp_pre
   type = scheme
   dependencies_path	= ../../
-  dependencies = hooks/physcons.F90,tools/funcphys.f90,hooks/machine.F,Radiation/RRTMG/iounitdef.f,Radiation/radiation_aerosols.f,photochem/module_ozphys.F90
+  dependencies = tools/funcphys.f90,hooks/machine.F,Radiation/RRTMG/iounitdef.f,Radiation/radiation_aerosols.f,photochem/module_ozphys.F90
   dependencies = Radiation/RRTMG/iounitdef.f,Radiation/radiation_astronomy.f,Radiation/radiation_gases.f,Radiation/radiation_tools.F90
 
 ########################################################################
@@ -14,7 +14,7 @@
   long_name = number of gases available used by RRTMGP (Model%nGases)
   units = count
   dimensions =  ()
-  type = integer  
+  type = integer
   intent = in
 [active_gases]
   standard_name = active_gases_used_by_RRTMGP
@@ -109,7 +109,7 @@
   units = s
   dimensions = ()
   type = real
-  kind = kind_phys  
+  kind = kind_phys
   intent = in
 [xlat]
   standard_name = latitude
@@ -125,7 +125,7 @@
   units = radian
   dimensions = (horizontal_loop_extent)
   type = real
-  kind = kind_phys  
+  kind = kind_phys
   intent = in
 [coslat]
   standard_name = cosine_of_latitude
@@ -157,7 +157,7 @@
   units = Pa
   dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
-  kind = kind_phys  
+  kind = kind_phys
   intent = in
 [prslk]
   standard_name = dimensionless_exner_function
@@ -165,7 +165,7 @@
   units = none
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
-  kind = kind_phys    
+  kind = kind_phys
   intent = in
 [prsl]
   standard_name = air_pressure
@@ -189,7 +189,7 @@
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
-  kind = kind_phys  
+  kind = kind_phys
   intent = in
 [tsfc]
   standard_name = surface_skin_temperature
@@ -237,7 +237,7 @@
   units = none
   dimensions = ()
   type = real
-  kind = kind_phys  
+  kind = kind_phys
   intent = in
 [con_epsqs]
   standard_name = minimum_value_of_saturation_mixing_ratio

@@ -18,7 +18,7 @@ module nst_module
   use module_nst_parameters , only : eps_sfs, niter_z_w, niter_conv, niter_sfs, ri_c
   use module_nst_parameters , only : ri_g, omg_m, omg_sh,  kw => tc_w, visw, t0k, cp_w
   use module_nst_parameters , only : z_c_max, z_c_ini, ustar_a_min, delz, exp_const
-  use module_nst_parameters , only : rad2deg, const_rot, tw_max, sst_max
+  use module_nst_parameters , only : const_rot, tw_max, sst_max
   use module_nst_parameters , only : zero,  one
   use module_nst_water_prop , only : sw_rad_skin, sw_ps_9b, sw_ps_9b_aw
 
@@ -34,13 +34,13 @@ contains
   !>\ingroup gfs_nst_main_mod
   !! This subroutine contains the module of diurnal thermocline layer model.
   subroutine dtm_1p(kdt,timestep,rich,tox,toy,i0,q,sss,sep,q_ts,hl_ts,rho, &
-                    alpha,beta,alon,sinlat,soltim,grav,le,d_conv,          &
+                    alpha,beta,alon,sinlat,soltim,grav,le,d_conv,con_pi,   &
                     xt,xs,xu,xv,xz,xzts,xtts)
 
     integer, intent(in) :: kdt
     real(kind=kind_phys), intent(in) :: timestep,rich,tox,toy,i0,q,sss,sep,q_ts,&
                                         hl_ts,rho,alpha,beta,alon,sinlat,soltim,&
-                                        grav,le,d_conv
+                                        grav,le,d_conv,con_pi
     real(kind=kind_phys), intent(inout) :: xt,xs,xu,xv,xz,xzts,xtts
     ! local variables
 
@@ -86,7 +86,7 @@ contains
        ! forward the system one time step
        !
        call eulerm(kdt,timestep,rich,tox,toy,i0,q,sss,sep,q_ts,hl_ts,rho,alpha,   &
-                   beta,alon,sinlat,soltim,grav,le,d_conv,                        &
+                   beta,alon,sinlat,soltim,grav,le,d_conv,con_pi,                 &
                    xt,xs,xu,xv,xz,xzts,xtts)
     endif                         ! if ( xt == 0 ) then
 
@@ -95,7 +95,7 @@ contains
   !>\ingroup gfs_nst_main_mod
   !! This subroutine integrates one time step with modified Euler method.
   subroutine eulerm(kdt,timestep,rich,tox,toy,i0,q,sss,sep,q_ts,hl_ts,rho,alpha,   &
-                    beta,alon,sinlat,soltim,grav,le,d_conv,                        &
+                    beta,alon,sinlat,soltim,grav,le,d_conv,con_pi,                 &
 		    xt,xs,xu,xv,xz,xzts,xtts)
 
     !
@@ -104,7 +104,7 @@ contains
     integer, intent(in) :: kdt
     real(kind=kind_phys), intent(in) :: timestep,rich,tox,toy,i0,q,sss,sep,q_ts,   &
                                         hl_ts,rho,alpha,beta,alon,sinlat,soltim,   &
-					grav,le,d_conv
+					grav,le,d_conv,con_pi
     real(kind=kind_phys), intent(inout) :: xt,xs,xu,xv,xz,xzts,xtts
     !  local variables
     real(kind=kind_phys) :: xt0,xs0,xu0,xv0,xz0,xzts0,xtts0
@@ -113,6 +113,7 @@ contains
     real(kind=kind_phys) :: xt2,xs2,xu2,xv2,xz2,xzts2,xtts2
     real(kind=kind_phys) :: dzw,drho,fc
     real(kind=kind_phys) :: alat,speed
+    real(kind=kind_phys) :: rad2deg
     !  logical lprnt
 
     !
@@ -157,6 +158,7 @@ contains
     xzts0 = xzts
     speed = max(1.0e-8, xu0*xu0+xv0*xv0)
 
+    rad2deg = 180./con_pi
     alat  = asin(sinlat)*rad2deg
 
     fc    = const_rot*sinlat

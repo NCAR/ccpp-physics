@@ -1177,14 +1177,16 @@
       call mfpbltq(im,im,km,kmpbl,ntcw,ntrac1,dt2,
      &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &    gdx,hpbl,kpbl,vpert,buou,wush,tkemean,vez0fun,xmf,
-     &    tcko,qcko,ucko,vcko,xlamue,bl_upfr)
+     &    tcko,qcko,ucko,vcko,xlamue,bl_upfr,
+     &    grav,cp,rv,hvap,fv,eps,epsm1)
 !>  - Call mfscuq(), which is a new mass-flux parameterization for
 !!    stratocumulus-top-induced turbulence mixing. For details of the mfscuq subroutine, step into its documentation ::mfscuq
       call mfscuq(im,im,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,
      &    krad,mrad,radmin,buod,wush,tkemean,vez0fun,xmfd,
-     &    tcdo,qcdo,ucdo,vcdo,xlamde,bl_dnfr)
+     &    tcdo,qcdo,ucdo,vcdo,xlamde,bl_dnfr,
+     &    grav,cp,rv,hvap,fv,eps,epsm1)
 
       if (tc_pbl == 1) then
 !>  - unify mass fluxes with Cu

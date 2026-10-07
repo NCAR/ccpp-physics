@@ -77,15 +77,15 @@
      &   coef_ric_l,coef_ric_s,ldiag3d,ntqv,rtg_ozone_index,ntoz,       &
      &   dtend,dtidx,index_of_process_pbl,index_of_x_wind,              &
      &   index_of_y_wind,index_of_temperature,                          &
-     &   flag_for_pbl_generic_tend,ten_t,ten_u,ten_v,errmsg,errflg)
+     &   flag_for_pbl_generic_tend,ten_t,ten_u,ten_v,                   &
+     &   con_g, con_cp, con_hvap, con_fvirt,                            &
+     &   errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
       !GJF: Note that sending these constants through the argument list
       !results in regression test failures with "PROD" mode compilation
       !flags (specifically, grav and cp)
-      use physcons, grav => con_g, cp => con_cp,
-     &              hvap => con_hvap, fv => con_fvirt
 
       implicit none
 !
@@ -135,6 +135,8 @@
 !          flag for tke dissipative heating
       real(kind=kind_phys), intent(out) :: ten_t(:,:),                  &
      &                                     ten_u(:,:), ten_v(:,:)
+      real(kind=kind_phys), intent(in) :: con_g, con_cp
+      real(kind=kind_phys), intent(in) :: con_hvap, con_fvirt
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -217,12 +219,11 @@
       integer kLOC ! RGF
       real :: xDKU ! RGF
 
+      real(kind=kind_phys) :: grav, cp, hvap, fv
+
       integer, parameter :: useshape=2!0-- no change, original ALPHA adjustment,1-- shape1, 2-- shape2(adjust above sfc)
       real :: smax,ashape,sz2h, sksfc,skmax,ashape1,skminusk0, hmax
 cc
-      parameter(gravi=1.0/grav)
-      parameter(gocp=grav/cp)
-      parameter(cont=cp/grav,conq=hvap/grav,conw=1.0/grav)               ! for del in pa
 !     parameter(cont=1000.*cp/grav,conq=1000.*hvap/grav,conw=1000./grav) ! for del in kpa
       parameter(rlam=30.0,vk=0.4,vk2=vk*vk)
       parameter(prmin=0.25,prmax=4.,zolcr=0.2,zolcru=-0.5)
@@ -270,6 +271,17 @@ c
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      grav = con_g
+      cp = con_cp
+      hvap = con_hvap
+      fv = con_fvirt
+
+      gravi=1.0/grav
+      gocp=grav/cp
+      cont=cp/grav
+      conq=hvap/grav
+      conw=1.0/grav
 
 ! compute preliminary variables
 !
@@ -1109,7 +1121,7 @@ c
 !>  For details of the mfpbl subroutine, step into its documentation ::mfpbl
       call mfpbl(im,im,km,ntrac,dt2,pcnvflg,
      &       zl,zi,thvx,q1,t1,u1,v1,hpbl,kpbl,
-     &       sflux,ustar,wstar,xmf,tcko,qcko,ucko,vcko)
+     &       sflux,ustar,wstar,xmf,tcko,qcko,ucko,vcko,con_g,con_cp)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  compute diffusion coefficients for cloud-top driven diffusion

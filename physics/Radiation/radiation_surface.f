@@ -40,7 +40,6 @@
 !    external modules referenced:                                      !
 !                                                                      !
 !       'module machine'             in 'machine.f'                    !
-!       'module physcons'            in 'physcons.f'                   !
 !       'module module_iounitdef'    in 'iounitdef.f'                  !
 !                                                                      !
 !                                                                      !

@@ -16,7 +16,6 @@
        use MAPL_ConstantsMod, r8 => MAPL_R8
 #endif
 #ifdef NEMS_GSM
-       use physcons, only : MAPL_PI => con_pi
        use machine,  only : r8      => kind_phys
 #endif
 
@@ -94,28 +93,34 @@
      &,                   grav_par=9.81d0,    rgas_par=8.31d0
      &,                   accom_par=1.0d0,    eps_par=1d-6
      &,                   zero_par=1.0e-20,   great_par=1d20
-     &,                   pi_par=mapl_pi,     sq2pi_par=sqrt(pi_par)
 !    &,                   pi_par=3.1415927d0, sq2pi_par=sqrt(pi_par)
      &,                   sq2_par=1.41421356237d0
 !
      &,                   wmw_ice=018d0,      amw_ice=0.029d0
      &,                   rgas_ice=8.314d0,   grav_ice=9.81d0
-     &,                   cpa_ice=1005.1d0,   pi_ice=pi_par
+     &,                   cpa_ice=1005.1d0
      &,                   depcoef_ice=0.1d0,  thaccom_ice=0.7d0
 !
      &,                   To_ice=272.15d0,    Tmin_ice=185.d0
      &,                   Pmin_ice=100.0d0,   Thom=236.0d0
      &,                   rv_ice=rgas_ice/wmw_ice
+       real ::            pi_par=1.0E30_r8,   sq2pi_par=1.0E30_r8
+     &,                   pi_ice=1.0E30_r8
 
 
        CONTAINS
 
 !>\ingroup aer_cloud_mod
 !! This subroutine calculates
-       subroutine aer_cloud_init()
+       subroutine aer_cloud_init(mapl_pi)
 
+       real(kind=r8), intent(in) :: mapl_pi
        real*8  :: daux, sigaux
        integer ::ix
+
+       pi_par=mapl_pi
+       sq2pi_par=sqrt(pi_par)
+       pi_ice=pi_par
 
        call AerConversion_base
 

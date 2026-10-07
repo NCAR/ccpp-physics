@@ -59,7 +59,7 @@
      &     ten_q, dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                &
      &     clam,c0s,c1,evef,pgcon,asolfac,hwrf_samfshal,                & 
      &     sigmain,sigmaout,omegain,omegaout,betadcu,betamcu,betascu,   &
-     &     cat_adj_shal,errmsg,errflg)
+     &     cat_adj_shal,qamin,errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -93,7 +93,7 @@
       real(kind=kind_phys), intent(out) :: rn(:),                       &
      &   cnvw(:,:), cnvc(:,:), dt_mf(:,:)
 !
-      real(kind=kind_phys), intent(out) :: ud_mf(:,:)
+      real(kind=kind_phys), intent(out), optional :: ud_mf(:,:)
       real(kind=kind_phys), intent(inout), optional :: sigmaout(:,:),   &
      &   omegaout(:,:)
 
@@ -102,6 +102,7 @@
       logical,          intent(in)  :: hwrf_samfshal,first_time_step,   &
      &     restart,progsigma,progomega
       real(kind_phys), intent(in) :: cat_adj_shal
+      real(kind=kind_phys), intent(in) :: qamin
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -2127,7 +2128,7 @@ c
 !    &  cnvflg, kb, kmax, ktcon, fscav,
 !!   &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
 !    &  xmb, c0t, eta, zi, xlamue, xlamud, delp,
-!    &  qtr, qaero)
+!    &  qtr, qaero, grav, qamin)
 !     endif
 !
 !> ## For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
@@ -2616,4 +2617,3 @@ c
       end subroutine samfshalcnv_run
 !> @}
       end module samfshalcnv
-

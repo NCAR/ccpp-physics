@@ -582,14 +582,6 @@
   type = real
   kind = kind_phys
   intent = in
-[con_fv]
-  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
-  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
 [dust12m_in]
   standard_name = fengsha_dust12m_input
   long_name = fengsha dust input

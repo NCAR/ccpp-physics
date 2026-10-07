@@ -90,7 +90,6 @@
 !                                                                          !
 !   external modules referenced:                                           !
 !                                                                          !
-!       'module physcons'                                                  !
 !       'mersenne_twister'                                                 !
 !                                                                          !
 !   compilation sequence is:                                               !
@@ -303,8 +302,6 @@
 !! rrtmg-sw radiation code from aer inc.     
       module rrtmg_sw 
 !
-      use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
-     &                             con_amw, con_amo3
       use machine,          only : rb => kind_phys, im => kind_io4,     &
      &                             kind_phys, kind_dbl_prec
 
@@ -344,10 +341,6 @@
 
       real (kind=kind_phys), parameter :: f_zero  = 0.0
       real (kind=kind_phys), parameter :: f_one   = 1.0
-
-! \name atomic weights for conversion from mass to volume mixing ratios
-      real (kind=kind_phys), parameter :: amdw    = con_amd/con_amw
-      real (kind=kind_phys), parameter :: amdo3   = con_amd/con_amo3
 
 ! \name band indices
       integer, dimension(nblow:nbhgh) :: nspa, nspb
@@ -506,7 +499,9 @@
      &       HSW0,HSWB,FLXPRF,FDNCMP,                                   &   ! ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
      &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
-     &       cld_od, cld_ssa, cld_asy, errmsg, errflg                   &
+     &       cld_od, cld_ssa, cld_asy,                                  &
+     &       con_g, con_avgd, con_amd, con_amw, con_amo3,               &
+     &       errmsg, errflg                                             &
      &     )
 
 !  ====================  defination of variables  ====================  !
@@ -719,6 +714,8 @@
      &       cld_lwp, cld_ref_liq,  cld_iwp, cld_ref_ice,               &
      &       cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow,              &
      &       cld_od, cld_ssa, cld_asy
+      real(kind=kind_phys), intent(in) :: con_g, con_avgd, con_amd
+      real(kind=kind_phys), intent(in) :: con_amw, con_amo3
 
       real(kind=kind_phys),dimension(:,:,:),intent(in)::aeraod
       real(kind=kind_phys),dimension(:,:,:),intent(in)::aerssa
@@ -790,6 +787,9 @@
       integer :: i, ib, ipt, j1, k, kk, laytrop, mb, ig
       integer :: inflgsw, iceflgsw, liqflgsw
       integer :: irng, permuteseed
+! \name atomic weights for conversion from mass to volume mixing ratios
+      real (kind=kind_phys) :: amdw
+      real (kind=kind_phys) :: amdo3
 !
 !===> ... begin here
 !
@@ -797,6 +797,9 @@
       errmsg = ''
       errflg = 0
 
+      ! Set atomic weights
+      amdw    = con_amd/con_amw
+      amdo3   = con_amd/con_amo3
 ! Select cloud liquid and ice optics parameterization options
 ! For passing in cloud optical properties directly:
 !     inflgsw  = 0
@@ -1389,7 +1392,8 @@
 !-----------------------------------
       subroutine rswinit( me, rad_hr_units, inc_minor_gas, iswcliq,     &
            isubcsw, iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,&
-           iovr_exp, iovr_exprand, iswmode, errflg, errmsg )
+           iovr_exp, iovr_exprand, iswmode, con_g, con_cp,              &
+           errflg, errmsg )
 
 !  ===================  program usage description  ===================  !
 !                                                                       !
@@ -1447,6 +1451,7 @@
            iswmode, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,      &
            iovr_exp, iovr_exprand
       logical, intent(in) :: inc_minor_gas
+      real(kind=kind_phys), intent(in) :: con_cp, con_g
 !  ---  outputs:
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

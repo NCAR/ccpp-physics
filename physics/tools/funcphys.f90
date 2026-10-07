@@ -261,7 +261,6 @@ module funcphys
 !
 !$$$
   use machine,only:kind_phys,r8=>kind_dbl_prec,r4=>kind_sngl_prec
-  use physcons
   implicit none
   private
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -270,7 +269,29 @@ module funcphys
   integer,public,parameter:: krealfp=kind_phys          !< Integer parameter kind or length of reals
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! Private Variables
-  real(krealfp),parameter:: psatb=con_psat*1.e-5
+  real(krealfp) :: con_rd    = 1.0e30_krealfp
+  real(krealfp) :: con_rv    = 1.0e30_krealfp
+  real(krealfp) :: con_cp    = 1.0e30_krealfp
+  real(krealfp) :: con_cvap  = 1.0e30_krealfp
+  real(krealfp) :: con_cliq  = 1.0e30_krealfp
+  real(krealfp) :: con_csol  = 1.0e30_krealfp
+  real(krealfp) :: con_hvap  = 1.0e30_krealfp
+  real(krealfp) :: con_hfus  = 1.0e30_krealfp
+  real(krealfp) :: con_psat  = 1.0e30_krealfp
+  real(krealfp) :: con_ttp   = 1.0e30_krealfp
+  real(krealfp) :: con_rocp  = 1.0e30_krealfp
+  real(krealfp) :: con_cpor  = 1.0e30_krealfp
+  real(krealfp) :: con_eps   = 1.0e30_krealfp
+  real(krealfp) :: con_dldt  = 1.0e30_krealfp
+  real(krealfp) :: con_xpona = 1.0e30_krealfp
+  real(krealfp) :: con_xponb = 1.0e30_krealfp
+  real(krealfp) :: dldti     = 1.0e30_krealfp
+  real(krealfp) :: heati     = 1.0e30_krealfp
+  real(krealfp) :: xponai    = 1.0e30_krealfp
+  real(krealfp) :: xponbi    = 1.0e30_krealfp
+  real(krealfp) :: tliq      = 1.0e30_krealfp
+  real(krealfp) :: tice      = 1.0e30_krealfp
+  real(krealfp) :: psatb     = 1.0e30_krealfp
   integer,parameter:: nxpvsl=7501
   real(krealfp) c1xpvsl,c2xpvsl,tbpvsl(nxpvsl)
   integer,parameter:: nxpvsi=7501
@@ -563,14 +584,10 @@ contains
     implicit none
     real(krealfp) fpvslx
     real(krealfp),intent(in):: t
-    real(krealfp),parameter:: dldt=con_cvap-con_cliq
-    real(krealfp),parameter:: heat=con_hvap
-    real(krealfp),parameter:: xpona=-dldt/con_rv
-    real(krealfp),parameter:: xponb=-dldt/con_rv+heat/(con_rv*con_ttp)
     real(krealfp) tr
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     tr=con_ttp/t
-    fpvslx=con_psat*(tr**xpona)*exp(xponb*(1.-tr))
+    fpvslx=con_psat*(tr**con_xpona)*exp(con_xponb*(1.-tr))
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
@@ -822,14 +839,10 @@ contains
     implicit none
     real(krealfp) fpvsix
     real(krealfp),intent(in):: t
-    real(krealfp),parameter:: dldt=con_cvap-con_csol
-    real(krealfp),parameter:: heat=con_hvap+con_hfus
-    real(krealfp),parameter:: xpona=-dldt/con_rv
-    real(krealfp),parameter:: xponb=-dldt/con_rv+heat/(con_rv*con_ttp)
     real(krealfp) tr
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     tr=con_ttp/t
-    fpvsix=con_psat*(tr**xpona)*exp(xponb*(1.-tr))
+    fpvsix=con_psat*(tr**xponai)*exp(xponbi*(1.-tr))
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   end function
 !-------------------------------------------------------------------------------
@@ -1047,26 +1060,16 @@ contains
     implicit none
     real(krealfp) fpvsx
     real(krealfp),intent(in):: t
-    real(krealfp),parameter:: tliq=con_ttp
-    real(krealfp),parameter:: tice=con_ttp-20.0
-    real(krealfp),parameter:: dldtl=con_cvap-con_cliq
-    real(krealfp),parameter:: heatl=con_hvap
-    real(krealfp),parameter:: xponal=-dldtl/con_rv
-    real(krealfp),parameter:: xponbl=-dldtl/con_rv+heatl/(con_rv*con_ttp)
-    real(krealfp),parameter:: dldti=con_cvap-con_csol
-    real(krealfp),parameter:: heati=con_hvap+con_hfus
-    real(krealfp),parameter:: xponai=-dldti/con_rv
-    real(krealfp),parameter:: xponbi=-dldti/con_rv+heati/(con_rv*con_ttp)
     real(krealfp) tr,w,pvl,pvi
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     tr=con_ttp/t
     if(t.ge.tliq) then
-      fpvsx=con_psat*(tr**xponal)*exp(xponbl*(1.-tr))
+      fpvsx=con_psat*(tr**con_xpona)*exp(con_xponb*(1.-tr))
     elseif(t.lt.tice) then
       fpvsx=con_psat*(tr**xponai)*exp(xponbi*(1.-tr))
     else
       w=(t-tice)/(tliq-tice)
-      pvl=con_psat*(tr**xponal)*exp(xponbl*(1.-tr))
+      pvl=con_psat*(tr**con_xpona)*exp(con_xponb*(1.-tr))
       pvi=con_psat*(tr**xponai)*exp(xponbi*(1.-tr))
       fpvsx=w*pvl+(1.-w)*pvi
     endif
@@ -1335,18 +1338,14 @@ contains
     real(krealfp) ftdplxg
     real(krealfp),intent(in):: tg,pv
     real(krealfp),parameter:: terrm=1.e-6
-    real(krealfp),parameter:: dldt=con_cvap-con_cliq
-    real(krealfp),parameter:: heat=con_hvap
-    real(krealfp),parameter:: xpona=-dldt/con_rv
-    real(krealfp),parameter:: xponb=-dldt/con_rv+heat/(con_rv*con_ttp)
     real(krealfp) t,tr,pvt,el,dpvt,terr
     integer i
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     t=tg
     do i=1,100
       tr=con_ttp/t
-      pvt=con_psat*(tr**xpona)*exp(xponb*(1.-tr))
-      el=heat+dldt*(t-con_ttp)
+      pvt=con_psat*(tr**con_xpona)*exp(con_xponb*(1.-tr))
+      el=con_hvap+con_dldt*(t-con_ttp)
       dpvt=el*pvt/(con_rv*t**2)
       terr=(pvt-pv)/dpvt
       t=t-terr
@@ -1625,18 +1624,14 @@ contains
     real(krealfp) ftdpixg
     real(krealfp),intent(in):: tg,pv
     real(krealfp),parameter:: terrm=1.e-6
-    real(krealfp),parameter:: dldt=con_cvap-con_csol
-    real(krealfp),parameter:: heat=con_hvap+con_hfus
-    real(krealfp),parameter:: xpona=-dldt/con_rv
-    real(krealfp),parameter:: xponb=-dldt/con_rv+heat/(con_rv*con_ttp)
     real(krealfp) t,tr,pvt,el,dpvt,terr
     integer i
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     t=tg
     do i=1,100
       tr=con_ttp/t
-      pvt=con_psat*(tr**xpona)*exp(xponb*(1.-tr))
-      el=heat+dldt*(t-con_ttp)
+      pvt=con_psat*(tr**xponai)*exp(xponbi*(1.-tr))
+      el=heati+dldti*(t-con_ttp)
       dpvt=el*pvt/(con_rv*t**2)
       terr=(pvt-pv)/dpvt
       t=t-terr
@@ -1925,16 +1920,6 @@ contains
     real(krealfp) ftdpxg
     real(krealfp),intent(in):: tg,pv
     real(krealfp),parameter:: terrm=1.e-6
-    real(krealfp),parameter:: tliq=con_ttp
-    real(krealfp),parameter:: tice=con_ttp-20.0
-    real(krealfp),parameter:: dldtl=con_cvap-con_cliq
-    real(krealfp),parameter:: heatl=con_hvap
-    real(krealfp),parameter:: xponal=-dldtl/con_rv
-    real(krealfp),parameter:: xponbl=-dldtl/con_rv+heatl/(con_rv*con_ttp)
-    real(krealfp),parameter:: dldti=con_cvap-con_csol
-    real(krealfp),parameter:: heati=con_hvap+con_hfus
-    real(krealfp),parameter:: xponai=-dldti/con_rv
-    real(krealfp),parameter:: xponbi=-dldti/con_rv+heati/(con_rv*con_ttp)
     real(krealfp) t,tr,w,pvtl,pvti,pvt,ell,eli,el,dpvt,terr
     integer i
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1942,8 +1927,8 @@ contains
     do i=1,100
       tr=con_ttp/t
       if(t.ge.tliq) then
-        pvt=con_psat*(tr**xponal)*exp(xponbl*(1.-tr))
-        el=heatl+dldtl*(t-con_ttp)
+        pvt=con_psat*(tr**con_xpona)*exp(con_xponb*(1.-tr))
+        el=con_hvap+con_dldt*(t-con_ttp)
         dpvt=el*pvt/(con_rv*t**2)
       elseif(t.lt.tice) then
         pvt=con_psat*(tr**xponai)*exp(xponbi*(1.-tr))
@@ -1951,10 +1936,10 @@ contains
         dpvt=el*pvt/(con_rv*t**2)
       else
         w=(t-tice)/(tliq-tice)
-        pvtl=con_psat*(tr**xponal)*exp(xponbl*(1.-tr))
+        pvtl=con_psat*(tr**con_xpona)*exp(con_xponb*(1.-tr))
         pvti=con_psat*(tr**xponai)*exp(xponbi*(1.-tr))
         pvt=w*pvtl+(1.-w)*pvti
-        ell=heatl+dldtl*(t-con_ttp)
+        ell=con_hvap+con_dldt*(t-con_ttp)
         eli=heati+dldti*(t-con_ttp)
         dpvt=(w*ell*pvtl+(1.-w)*eli*pvti)/(con_rv*t**2)
       endif
@@ -3390,7 +3375,8 @@ contains
 !! set up for computing saturation vapor pressure, dewpoint temperature,
 !! equivalent potential temperature, moist adiabatic temperature and humidity,
 !! pressure to the kappa, and lifting condensation level temperature.
-  subroutine gfuncphys
+  subroutine gfuncphys(con_rd_in, con_rv_in, con_cp_in, con_cvap_in, con_cliq_in, &
+                       con_csol_in, con_hvap_in, con_hfus_in, con_psat_in, con_ttp_in)
 !$$$     Subprogram Documentation Block
 !
 ! Subprogram: gfuncphys    Compute all physics function tables
@@ -3424,7 +3410,37 @@ contains
 !
 !$$$
     implicit none
+    real(krealfp), intent(in) :: con_rd_in, con_rv_in, con_cp_in
+    real(krealfp), intent(in) :: con_cvap_in, con_cliq_in, con_csol_in
+    real(krealfp), intent(in) :: con_hvap_in, con_hfus_in
+    real(krealfp), intent(in) :: con_psat_in, con_ttp_in
 ! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    con_rd = con_rd_in
+    con_rv = con_rv_in
+    con_cp = con_cp_in
+    con_cvap = con_cvap_in
+    con_cliq = con_cliq_in
+    con_csol = con_csol_in
+    con_hvap = con_hvap_in
+    con_hfus = con_hfus_in
+    con_psat = con_psat_in
+    con_ttp = con_ttp_in
+
+    con_rocp = con_rd/con_cp
+    con_cpor = con_cp/con_rd
+    con_eps = con_rd/con_rv
+    con_dldt = con_cvap-con_cliq
+    con_xpona = -con_dldt/con_rv
+    con_xponb = con_xpona+con_hvap/(con_rv*con_ttp)
+
+    dldti = con_cvap-con_csol
+    heati = con_hvap+con_hfus
+    xponai = -dldti/con_rv
+    xponbi = xponai+heati/(con_rv*con_ttp)
+    tliq = con_ttp
+    tice = con_ttp-20.0_krealfp
+    psatb = con_psat*1.0e-5_krealfp
+
     call gpvsl
     call gpvsi
     call gpvs

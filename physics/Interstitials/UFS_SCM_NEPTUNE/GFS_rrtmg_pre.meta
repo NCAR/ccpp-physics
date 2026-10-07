@@ -2,7 +2,7 @@
   name = GFS_rrtmg_pre
   type = scheme
   dependencies_path = ../../
-  dependencies = tools/funcphys.f90,hooks/machine.F,hooks/physcons.F90
+  dependencies = tools/funcphys.f90,hooks/machine.F
   dependencies = MP/TEMPO/tempo_v3/src/module_mp_tempo_params.F90
   dependencies = MP/TEMPO/tempo_v3/src/module_mp_tempo_cfgs.F90
   dependencies = MP/TEMPO/tempo_v3/src/module_mp_tempo_ml.F90
@@ -430,7 +430,7 @@
   intent = in
 [ntbcl]
   standard_name = index_for_bcphilic
-  long_name = index for bcphilic 
+  long_name = index for bcphilic
   units = index
   dimensions = ()
   type = integer
@@ -444,7 +444,7 @@
   intent = in
 [ntocl]
   standard_name = index_for_ocphilic
-  long_name = index for ocphilic 
+  long_name = index for ocphilic
   units = index
   dimensions = ()
   type = integer
@@ -453,9 +453,9 @@
   standard_name = number_of_chemical_tracers
   long_name = number of chemical tracers
   units = count
-  dimensions = () 
+  dimensions = ()
   type = integer
-  intent = in 
+  intent = in
 [imp_physics]
   standard_name = control_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -616,7 +616,7 @@
   standard_name = land_surface_perturbation_variables
   long_name = variables to be perturbed for landperts
   units = none
-  dimensions =  (number_of_perturbed_land_surface_variables) 
+  dimensions =  (number_of_perturbed_land_surface_variables)
   type = character
   kind = len=3
   intent = in

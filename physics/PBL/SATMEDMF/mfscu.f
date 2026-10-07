@@ -14,14 +14,11 @@
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,                             &
      &   thlx,thvx,thlvx,gdx,thetae,radj,                               &
      &   krad,mrad,radmin,buo,xmfd,                                     &
-     &   tcdo,qcdo,ucdo,vcdo,xlamde)
+     &   tcdo,qcdo,ucdo,vcdo,xlamde,                                    &
+     &   con_g,con_cp,con_rv,con_hvap,con_fvirt,con_eps,con_epsm1)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, grav => con_g, cp => con_cp                         &
-     &,             rv => con_rv, hvap => con_hvap                      &
-     &,             fv => con_fvirt                                     &
-     &,             eps => con_eps, epsm1 => con_epsm1
 !
       implicit none
 !
@@ -43,6 +40,8 @@
      &                     tcdo(im,km), qcdo(im,km,ntrac1),             &
      &                     ucdo(im,km), vcdo(im,km),                    &
      &                     xlamde(im,km-1)
+      real(kind=kind_phys), intent(in) :: con_g,con_cp,con_rv,con_hvap
+      real(kind=kind_phys), intent(in) :: con_fvirt,con_eps,con_epsm1
 !
 !  local variables and arrays
 !
@@ -76,9 +75,6 @@
       real(kind=kind_phys) actei, cldtime
 !
 c  physical parameters
-      parameter(g=grav)
-      parameter(gocp=g/cp)
-      parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
       parameter(ce0=0.4,cm=1.0,pgcon=0.55)
       parameter(qmin=1.e-8,qlmin=1.e-12)
       parameter(b1=0.45,f1=0.15)
@@ -88,8 +84,21 @@ c  physical parameters
       parameter(actei = 0.7)
 !     parameter(actei = 0.23)
 !
+      real(kind=kind_phys) :: grav, cp, rv, hvap, fv, eps, epsm1
 !************************************************************************
 !!
+      grav = con_g
+      cp = con_cp
+      rv = con_rv
+      hvap = con_hvap
+      fv = con_fvirt
+      eps = con_eps
+      epsm1 = con_epsm1
+      g=grav
+      gocp=g/cp
+      elocp=hvap/cp
+      el2orc=hvap*hvap/(rv*cp)
+
       totflg = .true.
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))

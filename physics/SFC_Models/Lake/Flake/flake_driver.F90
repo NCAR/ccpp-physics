@@ -42,10 +42,6 @@
 !      use flake_parameters
        use machine , only : kind_phys
 !      use funcphys, only : fpvs
-!      use physcons, only : grav   => con_g,    cp   => con_cp,          &
-!     &                     hvap   => con_hvap, rd   => con_rd,          &
-!     &                     eps    => con_eps, epsm1 => con_epsm1,       &
-!     &                     rvrdm1 => con_fvirt
 
 !==============================================================================
 

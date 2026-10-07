@@ -119,7 +119,7 @@ contains
                    pr3d, ph3d,phl3d, prl3d, tk3d, us3d, vs3d, spechum, w,                  &
                    nsoil, smc, tslb, vegtype_dom, vegtype_frac, soiltyp, nlcat,            &
                    dswsfc, zorl, snow, julian, recmol,                                     &
-                   idat, rain_cpl, rainc_cpl, hf2d, g, pi, con_cp, con_rd, con_fv,         &
+                   idat, rain_cpl, rainc_cpl, hf2d, g, pi, con_cp, con_rd,                 &
                    dust12m_in, emi_ant_in, smoke_RRFS, smoke2d_RRFS,                       &
                    ntrac, qgrs, gq0, chem3d, tile_num,                                     &
                    ntfsmoke, ntsmoke, ntdust, ntcoarsepm,                                  &
@@ -139,7 +139,7 @@ contains
     integer,        intent(in) :: im,kte,kme,ktau,nsoil,tile_num,jdate(8),idat(8)
     integer,        intent(in) :: ntrac, ntfsmoke, ntsmoke, ntdust, ntcoarsepm, ndvel, nlcat
     logical,        intent(in) :: flag_init
-    real(kind_phys),intent(in) :: dt, julian, g, pi, con_cp, con_rd, con_fv
+    real(kind_phys),intent(in) :: dt, julian, g, pi, con_cp, con_rd
 
     integer, parameter :: ids=1,jds=1,jde=1, kds=1
     integer, parameter :: ims=1,jms=1,jme=1, kms=1
@@ -328,7 +328,7 @@ contains
     
 !>- get ready for chemistry run
     call rrfs_smoke_prep(                                               &
-        ktau,current_month, current_hour, gmt, con_rd, con_fv, con_cp,  &
+        ktau,current_month, current_hour, gmt, con_rd, con_cp,          &
         u10m,v10m,ustar,land,garea,rlat,rlon,tskin,                     &
         pr3d,ph3d,phl3d,tk3d,prl3d,us3d,vs3d,spechum,w,                 &
         nsoil,smc,tslb,vegtype_dom,soiltyp,                             &
@@ -658,7 +658,7 @@ contains
  end subroutine rrfs_smoke_wrapper_run
 
  subroutine rrfs_smoke_prep(                                               &
-        ktau,current_month,current_hour,gmt,con_rd,con_fv,con_cp,          &
+        ktau,current_month,current_hour,gmt,con_rd,con_cp,                 &
         u10m,v10m,ustar,land,garea,rlat,rlon,ts2d,                         &
         pr3d,ph3d,phl3d,tk3d,prl3d,us3d,vs3d,spechum,w,                    &
         nsoil,smc,tslb,vegtype_dom,soiltyp,nlcat,vegtype_frac,dswsfc,zorl, &
@@ -687,7 +687,7 @@ contains
     integer, intent(in) :: nsoil, ktau
     integer, dimension(ims:ime), intent(in) :: land, vegtype_dom, soiltyp
     integer, intent(in) :: ntrac
-    real(kind=kind_phys), intent(in) :: g, pi, gmt, con_rd, con_fv, con_cp
+    real(kind=kind_phys), intent(in) :: g, pi, gmt, con_rd, con_cp
     real(kind=kind_phys), dimension(ims:ime), intent(in) ::                & 
          u10m, v10m, ustar, garea, rlat, rlon, ts2d, dswsfc,               &
          zorl, snow_cpl, pb2d, hf2d, oro, t2m, dpt2m, wetness, recmol,     &
@@ -886,7 +886,7 @@ contains
           wind_phy(i,k,j) = sqrt(u_phy(i,k,j)**2 + v_phy(i,k,j)**2)
           ! from mp_thompson.F90 ; rho = con_eps*prsl/(con_rd*tgrs*(qv+con_eps))
           ! from mynnd
-          rho_phy(i,k,j)=p_phy(i,k,j)/(con_rd*t_phy(i,k,j)) !*(1.+con_fv*spechum(i,kkp)))
+          rho_phy(i,k,j)=p_phy(i,k,j)/(con_rd*t_phy(i,k,j))
           rri(i,k,j)=1./rho_phy(i,k,j)
           vvel(i,k,j)=-w(i,kkp)*rri(i,k,j)/g 
           moist(i,k,j,:)=0.

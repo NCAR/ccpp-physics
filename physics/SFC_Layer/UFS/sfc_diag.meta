@@ -2,7 +2,7 @@
   name = sfc_diag
   type = scheme
   dependencies_path = ../../
-  dependencies = tools/funcphys.f90,hooks/machine.F,hooks/physcons.F90
+  dependencies = tools/funcphys.f90,hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -89,6 +89,14 @@
   standard_name = von_karman_constant
   long_name = von karman constant
   units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degrees Celsius
+  units = K
   dimensions = ()
   type = real
   kind = kind_phys

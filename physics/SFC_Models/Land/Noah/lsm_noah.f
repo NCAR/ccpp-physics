@@ -221,7 +221,7 @@
      &       bexppert, xlaipert, vegfpert,pertvegf,                     &  ! sfc perts, mgehne
      &       albdvis_lnd, albdnir_lnd, albivis_lnd, albinir_lnd,        &  
      &       adjvisbmd, adjnirbmd, adjvisdfd, adjnirdfd, rhonewsn1,     &  
-     &       exticeden,                                                 &
+     &       exticeden, con_csol, con_t0c,                              &
 !  ---  in/outs:
      &       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
      &       canopy, trans, tsurf, zorl,                                &
@@ -273,7 +273,7 @@
       logical, dimension(:), intent(in) :: flag_iter, flag_guess, land
 
       logical, intent(in) :: lheatstrg, exticeden
-
+      real (kind=kind_phys),  intent(in) :: con_csol, con_t0c
 !  ---  in/out:
       real (kind=kind_phys), dimension(:), intent(inout) :: weasd,      &
      &       snwdph, tskin, tprcp, srflag, canopy, trans, tsurf, zorl
@@ -286,8 +286,7 @@
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
      &       evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2
       real (kind=kind_phys), dimension(:), intent(inout) :: lai, rca
-      real (kind=kind_phys), dimension(:), intent(inout), optional ::   &
-     &       wet1
+      real (kind=kind_phys), intent(inout), optional :: wet1(:)
       
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -535,6 +534,7 @@
      &       vtype, stype, slope, shdmin1d, alb, snoalb1d,              &
      &       rhonewsn, exticeden,                                       &
      &       bexpp, xlaip,                                              & ! sfc-perts, mgehne
+     &       cp, con_csol, con_t0c,                                     &
      &       lheatstrg,                                                 &
 !  ---  input/outputs:
      &       tbot, cmc, tsea, stsoil, smsoil, slsoil, sneqv, chx, cmx,  &
@@ -583,7 +583,10 @@
             smc(i,k) = smsoil(k)
             slc(i,k) = slsoil(k)
           enddo
-          wet1(i) = smsoil(1) / smcmax !Sarah Lu added 09/09/2010 (for GOCART)
+          if (present(wet1)) then
+! Sarah Lu added 09/09/2010 (for GOCART)
+            wet1(i) = smsoil(1) / smcmax
+          endif
 
 !  --- ...  unit conversion (from m s-1 to mm s-1 and kg m-2 s-1)
           runoff(i)  = runoff1 * 1000.0_kind_phys

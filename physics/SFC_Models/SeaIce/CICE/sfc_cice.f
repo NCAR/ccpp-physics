@@ -16,8 +16,6 @@
 !! \htmlinclude sfc_cice_run.html
 !!
 
-!!      use physcons, only : hvap => con_hvap,  cp => con_cp,           &
-!!    &                     rvrdm1 => con_fvirt, rd => con_rd
 !
 !-----------------------------------
       subroutine sfc_cice_run                                           &

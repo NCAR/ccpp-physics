@@ -820,14 +820,18 @@
       call mfpblt(im,im,km,kmpbl,ntcw,ntrac1,dt2,
      &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &    gdx,hpbl,kpbl,vpert,buou,xmf,
-     &    tcko,qcko,ucko,vcko,xlamue)
+     &    tcko,qcko,ucko,vcko,xlamue,
+     &    grav,cp,rv,hvap,
+     &    fv,eps,epsm1)
 !>  - Call mfscu(), which is a new mass-flux parameterization for 
 !! stratocumulus-top-induced turbulence mixing.
       call mfscu(im,im,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,radj,
      &    krad,mrad,radmin,buod,xmfd,
-     &    tcdo,qcdo,ucdo,vcdo,xlamde)
+     &    tcdo,qcdo,ucdo,vcdo,xlamde,
+     &    grav,cp,rv,hvap,
+     &    fv,eps,epsm1)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !> -# Compute Prandtl number \f$P_r\f$ (prn) and exchange coefficient varying with height

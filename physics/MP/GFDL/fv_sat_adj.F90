@@ -52,15 +52,7 @@ module fv_sat_adj
 !         rad_rain, rad_snow, rad_graupel, dw_ocean, dw_land, tintqs</td>
 !   </tr>
 ! </table>
-    ! DH* TODO - MAKE THIS INPUT ARGUMENTS *DH
-    use physcons, only : rdgas => con_rd_dyn, &
-                         rvgas => con_rv_dyn, &
-                         grav => con_g_dyn,   &
-                         hlv => con_hvap_dyn, &
-                         hlf => con_hfus_dyn, &
-                         cp_air => con_cp_dyn
-    ! *DH
-    use machine,                  only: kind_grid, kind_dyn
+    use machine,             only: kind_grid, kind_dyn, kind_phys
     use module_gfdlmp_param, only: ql_gen, qi_gen, qi0_max, ql_mlt, ql0_max, qi_lim, qs_mlt
     use module_gfdlmp_param, only: icloud_f, sat_adj0, t_sub, cld_min
     use module_gfdlmp_param, only: tau_r2g, tau_smlt, tau_i2s, tau_v2l, tau_l2v, tau_imlt, tau_l2r
@@ -81,11 +73,15 @@ module fv_sat_adj
 
     logical :: is_initialized = .false.
 
-    real(kind=kind_dyn), parameter :: rrg = -rdgas/grav
-    ! real, parameter :: cp_air = cp_air           ! 1004.6, heat capacity of dry air at constant pressure, come from constants_mod
-    real(kind=kind_dyn), parameter :: cp_vap = 4.0 * rvgas        !< 1846.0, heat capacity of water vapor at constant pressure
-    real(kind=kind_dyn), parameter :: cv_air = cp_air - rdgas     !< 717.55, heat capacity of dry air at constant volume
-    real(kind=kind_dyn), parameter :: cv_vap = 3.0 * rvgas        !< 1384.5, heat capacity of water vapor at constant volume
+    real(kind=kind_dyn) :: rrg = 1.0E30_kind_dyn
+    real(kind=kind_dyn) :: cp_vap = 1.0E30_kind_dyn
+    real(kind=kind_dyn) :: cv_air = 1.0E30_kind_dyn
+    real(kind=kind_dyn) :: cv_vap =  1.0E30_kind_dyn
+    real(kind=kind_dyn) :: rvgas = 1.0E30_kind_dyn
+    real(kind=kind_dyn) :: grav = 1.0E30_kind_dyn
+    real(kind=kind_dyn) :: hlv = 1.0E30_kind_dyn
+    real(kind=kind_dyn) :: cp_air = 1.0E30_kind_dyn
+    real(kind=kind_dyn) :: rdgas = 1.0E30_kind_dyn
     ! http: / / www.engineeringtoolbox.com / ice - thermal - properties - d_576.html
     ! c_ice = 2050.0 at 0 deg c
     ! c_ice = 1972.0 at - 15 deg c
@@ -98,19 +94,19 @@ module fv_sat_adj
     ! real, parameter :: c_liq = 4218.0            ! ifs: heat capacity of liquid at 0 deg c
     real(kind=kind_dyn), parameter :: c_ice = 1972.0              !< gfdl: heat capacity of ice at - 15 deg c
     real(kind=kind_dyn), parameter :: c_liq = 4185.5              !< gfdl: heat capacity of liquid at 15 deg c
-    real(kind=kind_dyn), parameter :: dc_vap = cp_vap - c_liq     !< - 2339.5, isobaric heating / cooling
+    real(kind=kind_dyn) :: dc_vap = 1.0E30_kind_dyn
     real(kind=kind_dyn), parameter :: dc_ice = c_liq - c_ice      !< 2213.5, isobaric heating / colling
     real(kind=kind_dyn), parameter :: tice = 273.16               !< freezing temperature
     real(kind=kind_dyn), parameter :: t_wfr = tice - 40.          !< homogeneous freezing temperature
-    real(kind=kind_dyn), parameter :: lv0 = hlv - dc_vap * tice   !< 3.13905782e6, evaporation latent heat coefficient at 0 deg k
-    real(kind=kind_dyn), parameter :: li00 = hlf - dc_ice * tice  !< - 2.7105966e5, fusion latent heat coefficient at 0 deg k
+    real(kind=kind_dyn) :: lv0 =  1.0E30_kind_dyn
+    real(kind=kind_dyn) :: li00 = 1.0E30_kind_dyn
     ! real (kind_grid), parameter :: e00 = 610.71  ! gfdl: saturation vapor pressure at 0 deg c
     real (kind_grid), parameter  :: e00 = 611.21    !< ifs: saturation vapor pressure at 0 deg c
-    real (kind_grid), parameter :: d2ice = dc_vap + dc_ice !< - 126, isobaric heating / cooling
-    real (kind_grid), parameter :: li2 = lv0 + li00        !< 2.86799816e6, sublimation latent heat coefficient at 0 deg k
-    real(kind=kind_dyn), parameter :: lat2 = (hlv + hlf) ** 2     !< used in bigg mechanism
-    real(kind=kind_dyn) :: d0_vap                                 !< the same as dc_vap, except that cp_vap can be cp_vap or cv_vap
-    real(kind=kind_dyn) :: lv00                                   !< the same as lv0, except that cp_vap can be cp_vap or cv_vap
+    real (kind_grid) :: d2ice = 1.0E30_kind_grid
+    real (kind_grid) :: li2 = 1.0E30_kind_grid
+    real(kind=kind_dyn) :: lat2 = 1.0E30_kind_dyn
+    real(kind=kind_dyn) :: d0_vap = 1.0E30_kind_dyn               !< the same as dc_vap, except that cp_vap can be cp_vap or cv_vap
+    real(kind=kind_dyn) :: lv00 = 1.0E30_kind_dyn                 !< the same as lv0, except that cp_vap can be cp_vap or cv_vap
     real(kind=kind_dyn), allocatable :: table (:), table2 (:), tablew (:), des2 (:), desw (:)
 
 contains
@@ -120,7 +116,9 @@ contains
 !! \htmlinclude fv_sat_adj_init.html
 !!
 subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
-                           mpirank, mpiroot, errmsg, errflg)
+                           mpirank, mpiroot, con_rd, con_cp, &
+                           con_g, con_hvap, con_hfus, con_rv, &
+                           errmsg, errflg)
 
     implicit none
 
@@ -133,12 +131,43 @@ subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
     real(kind_dyn),   intent(in   ) :: cpilist(0:ngas)
     integer,          intent(in   ) :: mpirank
     integer,          intent(in   ) :: mpiroot
+    real(kind_phys),  intent(in   ) :: con_rd
+    real(kind_phys),  intent(in   ) :: con_cp
+    real(kind_phys),  intent(in   ) :: con_g
+    real(kind_phys),  intent(in   ) :: con_hvap
+    real(kind_phys),  intent(in   ) :: con_hfus
+    real(kind_phys),  intent(in   ) :: con_rv
     character(len=*), intent(  out) :: errmsg
     integer,          intent(  out) :: errflg
 
     ! Local variables
     integer, parameter :: length = 2621
+    real(kind_dyn) :: con_rd_dyn
+    real(kind_dyn) :: con_cp_dyn
+    real(kind_dyn) :: hlf
     integer :: i
+
+    con_rd_dyn = real(con_rd, kind=kind_dyn)
+    con_cp_dyn = real(con_cp, kind=kind_dyn)
+    rdgas = con_rd_dyn
+    rvgas = real(con_rv, kind=kind_dyn)
+    grav = real(con_g, kind=kind_dyn)
+    hlv = real(con_hvap, kind=kind_dyn)
+    hlf = real(con_hfus, kind=kind_dyn)
+
+    ! initialize module variables
+    rrg = -rdgas/grav
+    cp_vap = 4.0 * rvgas        !< 1846.0, heat capacity of water vapor at constant pressure
+    ! real, parameter :: cp_air = cp_air           ! 1004.6, heat capacity of dry air at constant pressure, come from constants_mod
+    cp_air = real(con_cp, kind=kind_dyn)
+    cv_air = cp_air - rdgas     !< 717.55, heat capacity of dry air at constant volume
+    cv_vap = 3.0 * rvgas        !< 1384.5, heat capacity of water vapor at constant volume
+    dc_vap = cp_vap - c_liq     !< - 2339.5, isobaric heating / cooling
+    lv0 = hlv - dc_vap * tice   !< 3.13905782e6, evaporation latent heat coefficient at 0 deg k
+    li00 = hlf - dc_ice * tice  !< - 2.7105966e5, fusion latent heat coefficient at 0 deg k
+    d2ice = dc_vap + dc_ice !< - 126, isobaric heating / cooling
+    li2 = lv0 + li00        !< 2.86799816e6, sublimation latent heat coefficient at 0 deg k
+    lat2 = (hlv + hlf) ** 2     !< used in bigg mechanism
 
     ! Initialize the CCPP error handling variables
     errmsg = ''
@@ -179,7 +208,8 @@ subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
     desw (length) = desw (length - 1)
 
 #ifdef MULTI_GASES
-    call multi_gases_init(ngas,nwat,rilist,cpilist,mpirank==mpiroot)
+    call multi_gases_init(ngas,nwat,rilist,cpilist,con_rd_dyn,con_cp_dyn,&
+         mpirank==mpiroot)
 #endif
 
     is_initialized = .true.
@@ -236,7 +266,6 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, isc1, iec1, isc2, iec2, k
                  qs, qg, hs, peln, delz, delp, pt, pkz, q_con, akap, cappa, area, dtdt,   &
                  out_dt, last_step, do_qa, qa,                                            &
                  nthreads, errmsg, errflg)
-
     implicit none
 
     ! Interface variables

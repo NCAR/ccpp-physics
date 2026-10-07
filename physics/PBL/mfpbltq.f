@@ -16,14 +16,12 @@
       subroutine mfpbltq(im,ix,km,kmpbl,ntcw,ntrac1,delt,
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &   gdx,hpbl,kpbl,vpert,buo,wush,tkemean,vez0fun,xmf,
-     &   tcko,qcko,ucko,vcko,xlamueq,a1)
+     &   tcko,qcko,ucko,vcko,xlamueq,a1,
+! The following are constants being passed in by argument
+     &   con_g,con_cp,con_rv,con_hvap,con_fvirt,con_eps,con_epsm1)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, grav => con_g, cp => con_cp
-     &,             rv => con_rv, hvap => con_hvap
-     &,             fv => con_fvirt
-     &,             eps => con_eps, epsm1 => con_epsm1
 !
       implicit none
 !
@@ -42,6 +40,8 @@
      &                     tcko(im,km),qcko(im,km,ntrac1),
      &                     ucko(im,km),vcko(im,km),
      &                     xlamueq(im,km-1)
+      real(kind=kind_phys), intent(in) :: con_g,con_cp,con_rv,con_hvap
+      real(kind=kind_phys), intent(in) :: con_fvirt,con_eps,con_epsm1
 !
 c  local variables and arrays
 !
@@ -72,12 +72,10 @@ c  local variables and arrays
       real(kind=kind_phys) xlamavg(im),   sigma(im),
      &                     scaldfunc(im), sumx(im)
 !
+      real(kind=kind_phys) :: grav, cp, rv, hvap, fv, eps, epsm1
       logical totflg, flg(im)
 !
 !  physical parameters
-      parameter(g=grav)
-      parameter(gocp=g/cp)
-      parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
       parameter(ce0=0.4,cm=1.0,cq=1.0,tkcrt=2.,cmxfac=5.)
       parameter(qmin=1.e-8,qlmin=1.e-12)
       parameter(alp=1.5,vpertmax=3.0,pgcon=0.55)
@@ -85,6 +83,18 @@ c  local variables and arrays
 !
 !************************************************************************
 !!
+      grav = con_g
+      cp = con_cp
+      rv = con_rv
+      hvap = con_hvap
+      fv = con_fvirt
+      eps = con_eps
+      epsm1 = con_epsm1
+      g=grav
+      gocp=g/cp
+      elocp=hvap/cp
+      el2orc=hvap*hvap/(rv*cp)
+
       totflg = .true.
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))

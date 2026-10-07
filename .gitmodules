@@ -8,10 +8,13 @@
   branch = main
 [submodule "physics/SFC_Layer/MYNN/MYNN"]
   path = physics/SFC_Layer/MYNN/MYNN
-  url = https://github.com/NCAR/MYNN-SFC
-  branch = ccpp/dev
+  # url = https://github.com/NCAR/MYNN-SFC
+  # branch = ccpp/dev
+  url = https://github.com/scrasmussen/MYNN-SFC
+  branch = mynn-sfc-remove-physcons
 [submodule "physics/CONV/C3"]
   path = physics/CONV/C3
-  url = https://github.com/ufs-community/c3
-  branch = main
-
+  # url = https://github.com/ufs-community/c3
+  # branch = main
+  url = https://github.com/scrasmussen/c3
+  branch = c3-remove-physcons

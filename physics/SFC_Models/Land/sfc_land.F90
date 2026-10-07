@@ -78,7 +78,7 @@
    real(kind=kind_phys), intent(in), optional :: cmm_lnd(:)
    real(kind=kind_phys), intent(in), optional :: chh_lnd(:)
    real(kind=kind_phys), intent(in), optional :: zvfun_lnd(:)
-   real(kind=kind_phys), intent(in), optional :: slc(:,:)
+   real(kind=kind_phys), intent(in) :: slc(:,:)
    ! Inputs/Outputs
    real(kind=kind_phys), intent(inout) :: sncovr1(:)
    real(kind=kind_phys), intent(inout) :: qsurf(:)

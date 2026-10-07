@@ -16,14 +16,11 @@
       subroutine mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,delt,                &
      &   cnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,                   &
      &   gdx,hpbl,kpbl,vpert,buo,xmf,                                   &
-     &   tcko,qcko,ucko,vcko,xlamue)
+     &   tcko,qcko,ucko,vcko,xlamue,                                    &
+     &   con_g,con_cp,con_rv,con_hvap,con_fvirt,con_eps,con_epsm1)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, grav => con_g, cp => con_cp                         &
-     &,             rv => con_rv, hvap => con_hvap                      &
-     &,             fv => con_fvirt                                     &
-     &,             eps => con_eps, epsm1 => con_epsm1
 !
       implicit none
 !
@@ -64,6 +61,9 @@ c  local variables and arrays
       real(kind=kind_phys) rbdn(im), rbup(im), hpblx(im),
      &                     xlamuem(im,km-1)
 !
+      real(kind=kind_phys), intent(in) :: con_g,con_cp,con_rv,con_hvap
+      real(kind=kind_phys), intent(in) :: con_fvirt,con_eps,con_epsm1
+
       real(kind=kind_phys) wu2(im,km), thlu(im,km),
      &                     qtx(im,km), qtu(im,km)
 !
@@ -73,16 +73,26 @@ c  local variables and arrays
       logical totflg, flg(im)
 !
 !  physical parameters
-      parameter(g=grav)
-      parameter(gocp=g/cp)
-      parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
       parameter(ce0=0.4,cm=1.0)
       parameter(qmin=1.e-8,qlmin=1.e-12)
       parameter(alp=1.0,pgcon=0.55)
       parameter(a1=0.13,b1=0.5,f1=0.15)
+      real(kind=kind_phys) :: grav, cp, rv, hvap, fv, eps, epsm1
 !
 !************************************************************************
 !!
+      grav = con_g
+      cp = con_cp
+      rv = con_rv
+      hvap = con_hvap
+      fv = con_fvirt
+      eps = con_eps
+      epsm1 = con_epsm1
+      g=grav
+      gocp=g/cp
+      elocp=hvap/cp
+      el2orc=hvap*hvap/(rv*cp)
+
       totflg = .true.
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))

@@ -36,7 +36,6 @@
 ! #########################################################################################
 module module_ozphys
   use machine,  only : kind_phys
-  use funcphys, only : fpkapx
   implicit none
 
   public ty_ozphys
@@ -511,10 +510,11 @@ contains
   end subroutine run_o3clim
 
 !> Procedure (type-bound) for loading data for climotological ozone.
-  function load_o3clim(this, file, fileID) result (err_message)
+  function load_o3clim(this, file, fileID, con_rocp) result (err_message)
     class(ty_ozphys), intent(inout) :: this
     integer,          intent(in)    :: fileID
     character(len=*), intent(in)    :: file
+    real(kind_phys),  intent(in)    :: con_rocp
     character(len=128)              :: err_message
 
     ! Locals
@@ -589,7 +589,8 @@ contains
      
      do iLev = 1, this%nlevc
         this%pstr(iLev)  = pstr4(iLev)
-        this%pkstr(iLev) = fpkapx(this%pstr(iLev)*100.0)
+        ! following line equivalent to funcphys's fpkapx=(p/1.e5_krealfp)**con_rocp
+        this%pkstr(iLev) = (this%pstr(iLev)*1.0e-3_kind_phys)**con_rocp
      enddo
      
    end function load_o3clim

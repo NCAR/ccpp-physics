@@ -6,10 +6,6 @@
 !
       USE MACHINE , ONLY : kind_phys
       USE FUNCPHYS
-      USE PHYSCONS, CP => con_CP, RD => con_RD, RV => con_RV            &
-     &,             T0C => con_T0C, HVAP => con_HVAP, HFUS => con_HFUS  &
-     &,             EPS => con_EPS, EPSM1 => con_EPSM1                  &
-     &,             EPS1 => con_FVirt, pi => con_pi, grav => con_g 
       implicit none
 !
 !--- Common block of constants used in column microphysics
@@ -116,7 +112,7 @@
       CONTAINS
 !
 !> This subroutine initializes constants & lookup tables for microphysics.
-      SUBROUTINE GSMCONST (DTPG,mype,first)
+      SUBROUTINE GSMCONST (DTPG,mype,first, pi, t0c)
 !
       implicit none
 !-------------------------------------------------------------------------------
@@ -156,6 +152,7 @@
       integer mype
       real    dtpg
       logical first
+      real, intent(in) :: pi, t0c
 !
 !--- Parameters & data statement for local calculations
 !
@@ -231,8 +228,8 @@
 !       read(1) my_growth    ! Applicable only for DTPH=180 s for offline testing
         CLOSE (1)
       else
-        CALL ICE_LOOKUP                   ! Lookup tables for ice
-        CALL RAIN_LOOKUP                  ! Lookup tables for rain
+        CALL ICE_LOOKUP(pi)                 ! Lookup tables for ice
+        CALL RAIN_LOOKUP(pi)                ! Lookup tables for rain
         if (write_lookup) then
           open(unit=1,file='micro_lookup.dat',form='unformatted')
           write(1) ventr1
@@ -425,7 +422,7 @@
       END subroutine MY_GROWTH_RATES
 !
 !> This subroutine creates lookup tables for ice processes.
-      subroutine ice_lookup
+      subroutine ice_lookup(pi)
 !
       implicit none
 !-----------------------------------------------------------------------------------
@@ -455,8 +452,9 @@
 !       - DmaxI - maximum diameter for integration (2 cm)
 !       - DdelI - interval for integration (1 micron)
 !
+      real, intent(in) :: pi
       real, parameter :: DminI=.02e-3, DmaxI=20.e-3, DdelI=1.e-6,       &
-     &  XImin=1.e6*DminI, XImax=1.e6*DmaxI
+     & XImin=1.e6*DminI, XImax=1.e6*DmaxI
       integer, parameter :: IDImin=XImin, IDImax=XImax
 !
 !---- Meaning of the following arrays:
@@ -957,7 +955,7 @@
       end subroutine ice_lookup
 !
 !> This subroutine creates lookup tables for rain processes.
-      subroutine rain_lookup
+      subroutine rain_lookup(pi)
       implicit none
 !
 !--- Parameters & arrays for fall speeds of rain as a function of rain drop
@@ -966,6 +964,7 @@
 !      drop sizes of .05 mm (50 microns, DminR) to maximum drop sizes of 10 mm 
 !      (DmaxR). 
 !
+      real, intent(in) :: pi
       real, parameter :: DminR=.05e-3, DmaxR=10.e-3, DdelR=1.e-6,       &
      & XRmin=1.e6*DminR, XRmax=1.e6*DmaxR
       integer, parameter :: IDRmin=XRmin, IDRmax=XRmax
@@ -1122,7 +1121,9 @@
 !
       SUBROUTINE GSMCOLUMN ( ARAING, ASNOWG, DTPG, I_index, J_index,    &
      & LSFC, P_col, QI_col, QR_col, QV_col, QW_col, RimeF_col, T_col,   &
-     & THICK_col, WC_col, LM, RHC_col, XNCW, FLGmin, PRINT_diag, psfc)
+     & THICK_col, WC_col, LM, RHC_col, XNCW, FLGmin, PRINT_diag, psfc,  &
+     & con_hvap, con_hfus, con_cp, con_rv, con_t0c, con_rd, con_epsm1,  &
+     & con_fvirt, con_eps)
 !
       implicit none
 !
@@ -1202,6 +1203,8 @@
       REAL ARAING, ASNOWG, P_col(LM), QI_col(LM), QR_col(LM), QV_col(LM)&
      &,    QW_col(LM), RimeF_col(LM), T_col(LM), THICK_col(LM),         &
      &     WC_col(LM), RHC_col(LM), XNCW(LM), ARAIN, ASNOW, dtpg, psfc
+      real, intent(in) :: con_hvap, con_hfus, con_cp, con_rv, con_t0c
+      real, intent(in) :: con_rd, con_epsm1, con_fvirt, con_eps
       real flgmin
 !
       INTEGER I_index, J_index, LSFC
@@ -1244,7 +1247,8 @@
 !-- NLImax - maximum number concentration of large ice crystals (20,000 /m**3, 20 per liter)
 !-- NLImin - minimum number concentration of large ice crystals (100 /m**3, 0.1 per liter)
 !
-      REAL, PARAMETER ::   RHOL=1000.,  XLS=HVAP+HFUS                   &
+      REAL :: XLS, CLIMIT, RCP, RCPRV, RRHOLD, XLS1, XLS2, XLS3
+      REAL, PARAMETER ::   RHOL=1000.,                                  &
 
 !    &, T_ICE=-10.          !- Ver1
 !    &, T_ICE_init=-5.      !- Ver1
@@ -1253,10 +1257,6 @@
 !    &, T_ICE_init=-15.,    !- Ver2
 !
 !    & CLIMIT=10.*EPSQ, EPS1=RV/RD-1., RCP=1./CP,
-
-     &,CLIMIT=10.*EPSQ, RCP=1./CP,                                      &
-     & RCPRV=RCP/RV, RRHOL=1./RHOL, XLS1=XLS*RCP, XLS2=XLS*XLS*RCPRV,   &
-     & XLS3=XLS*XLS/RV,                                                 &
      & C1=1./3., C2=1./6., C3=3.31/6.,                                  &
      & DMR1=.1E-3, DMR2=.2E-3, DMR3=.32E-3, N0r0=8.E6, N0rmin=1.e4,     &
      & N0s0=4.E6, RHO0=1.194, XMR1=1.e6*DMR1, XMR2=1.e6*DMR2,           &
@@ -1315,12 +1315,32 @@
      &,    piacw,    piacwi,  piacwr,  qv,    dwvi                      &
      &,    arainnew, thick,   asnownew                                  &
      &,    qinew,    qi_min_0c, QSW_l, QSI_l, QSW0_l, SCHMIT_FAC
+      real :: cp, rv, hvap, hfus, t0c, rrhol, rd, epsm1, eps1, eps
     
 !
 !
 !#######################################################################
 !########################## Begin Execution ############################
 !#######################################################################
+      CP = con_CP
+      RD = con_RD
+      RV = con_RV
+      T0C = con_T0C
+      HVAP = con_HVAP
+      HFUS = con_HFUS
+      EPS = con_EPS
+      EPSM1 = con_EPSM1
+      EPS1 = con_FVirt
+
+
+      XLS=HVAP+HFUS
+      CLIMIT=10.*EPSQ
+      RCP=1./CP
+      RCPRV=RCP/RV
+      RRHOL=1./RHOL
+      XLS1=XLS*RCP
+      XLS2=XLS*XLS*RCPRV
+      XLS3=XLS*XLS/RV
 !
       DTPH   = DTPG / mic_step
       ARAING = 0.    ! Total Accumulated rainfall at surface (kg/m**2)
@@ -1767,7 +1787,8 @@
                   DUM   = RHgrd*EPS*DUM/(pp+epsm1*dum) ! Updated (dummy) saturation specific humidity w/r/t ice
 !                 DUM   = RHgrd*EPS*DUM/(PP-DUM)       ! Updated (dummy) saturation mixing ratio w/r/t ice
 
-                  IF (DUM2 > DUM) PIDEP = DEPOSIT(PP, RHgrd, DUM1, DUM2)
+                  IF (DUM2 > DUM) PIDEP = DEPOSIT(PP, RHgrd,            &
+     &                 DUM1, DUM2, CP, RV, HVAP, HFUS)
 
                   DWVi = 0.                            ! Used only for debugging
 !
@@ -1850,7 +1871,7 @@
 !
               IF (TC >= T_ICE .AND. (QW > EPSQ .OR. WV > QSWgrd)) THEN
                 IF (PIACWI == 0. .AND. PIDEP == 0.) THEN
-                  PCOND = CONDENSE (PP, QW, RHgrd, TK, WV)
+                  PCOND = CONDENSE (PP, QW, RHgrd, TK, WV, CP, RV)
                 ELSE  !-- Modify cloud condensation in response to ice processes
                   DUM     = XLV*QSWgrd*RCPRV*TK2
                   DENOMWI = 1. + XLS*DUM
@@ -2509,7 +2530,7 @@
 !--------- Produces accurate calculation of cloud condensation ---------
 !#######################################################################
 !
-      REAL FUNCTION CONDENSE (PP, QW, RHgrd, TK, WV)
+      REAL FUNCTION CONDENSE (PP, QW, RHgrd, TK, WV, CP, RV)
 !
       implicit none
 !
@@ -2520,11 +2541,12 @@
 !---------------------------------------------------------------------------------
 !
       real pp, qw, rhgrd, tk, wv
+      real, intent(in) :: cp, rv
       INTEGER, PARAMETER :: HIGH_PRES=kind_phys
 !     INTEGER, PARAMETER :: HIGH_PRES=Selected_Real_Kind(15)
       REAL (KIND=HIGH_PRES), PARAMETER ::                               &
      & RHLIMIT=.001, RHLIMIT1=-RHLIMIT
-      REAL, PARAMETER :: RCP=1./CP, RCPRV=RCP/RV
+      REAL :: RCP, RCPRV
       REAL (KIND=HIGH_PRES) :: COND, SSAT, WCdum, tsq
       real wvdum, tdum, xlv, xlv1, xlv2, ws, dwv, esw, rfac
 !
@@ -2536,6 +2558,8 @@
 !     XLV1=XLV*RCP
 !     XLV2=XLV*XLV*RCPRV
 !
+      RCP=1./CP
+      RCPRV=RCP/RV
       Tdum     = TK
       WVdum    = WV
       WCdum    = QW
@@ -2576,7 +2600,7 @@
 !---------------- Calculate ice deposition at T<T_ICE ------------------
 !#######################################################################
 !
-      REAL FUNCTION DEPOSIT (PP, RHgrd, Tdum, WVdum)
+      REAL FUNCTION DEPOSIT (PP, RHgrd, Tdum, WVdum, CP, RV, HVAP, HFUX)
 !
       implicit none
 !
@@ -2584,17 +2608,23 @@
 !      vapor pressure for the adjustment
 !
       REAL PP, RHgrd, Tdum, WVdum
+      real, intent(in) :: CP, RV, HVAP, HFUX
       INTEGER, PARAMETER :: HIGH_PRES=kind_phys
 !     INTEGER, PARAMETER :: HIGH_PRES=Selected_Real_Kind(15)
       REAL (KIND=HIGH_PRES), PARAMETER :: RHLIMIT=.001,                 & 
      & RHLIMIT1=-RHLIMIT
-      REAL, PARAMETER :: RCP=1./CP, RCPRV=RCP/RV, XLS=HVAP+HFUS         &
-     &,                  XLS1=XLS*RCP, XLS2=XLS*XLS*RCPRV
+      REAL :: RCP, RCPRV, XLS, XLS1, XLS2
       REAL (KIND=HIGH_PRES) :: DEP, SSAT
       real esi, ws, dwv
 !
 !-----------------------------------------------------------------------
 !
+      RCP=1./CP
+      RCPRV=RCP/RV
+      XLS=HVAP+HFUX
+      XLS1=XLS*RCP
+      XLS2=XLS*XLS*RCPRV
+
       ESI=min(PP, FPVSI(Tdum))                  ! Saturation vapor press w/r/t ice
 !     WS=RHgrd*EPS*ESI/(PP-ESI)                 ! Saturation mixing ratio
       WS=RHgrd*EPS*ESI/(PP+epsm1*ESI)           ! Saturation mixing ratio
@@ -2625,12 +2655,14 @@
       SUBROUTINE rsipath(im, ix, ix2, levs, prsl, prsi, t, q, clw       &
      &,                  f_ice, f_rain, f_rime, flgmin                  &
      &,                  cwatp, cicep, rainp, snowp                     &
-     &,                  recwat, rerain, resnow, lprnt, ipr)
+     &,                  recwat, rerain, resnow, lprnt, ipr, eps1, grav &
+     &,                  rd, t0c)
 !
       implicit none
 !
 !--------------------CLOUD----------------------------------------------
       integer im, ix, ix2, levs, ipr
+      real, intent(in) :: eps1, grav, rd, t0c
       real    prsl(ix,levs), prsi(ix,levs+1), t(ix,levs), q(ix,levs)    &
      &,       clw(ix2,levs), f_ice(ix2,levs), f_rain(ix2,levs)          &
      &,       f_rime(ix2,levs)                                          &
@@ -2897,8 +2929,8 @@
       subroutine rsipath2                                               &
      &     ( plyr, plvl, tlyr, qlyr, qcwat, qcice, qrain, rrime,        &     ! inputs
      &       IM, LEVS, iflip, flgmin,                                   &
-     &       cwatp, cicep, rainp, snowp, recwat, rerain, resnow, snden  &     ! outputs
-     &     )
+     &       cwatp, cicep, rainp, snowp, recwat, rerain, resnow, snden, &     ! outputs
+     &       eps1, grav, rd, t0c) ! constant inputs
 
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -2955,6 +2987,7 @@
 
 !  ---  constant parameter:
       real, parameter :: CEXP= 1.0/3.0
+      real, intent(in) :: eps1, grav, rd, t0c
 
 !  ---  inputs:
       real, dimension(:,:), intent(in) ::                               &
@@ -3190,4 +3223,3 @@
 !-----------------------------------
 
       end MODULE module_microphysics
-

@@ -20,6 +20,7 @@ module cires_ugwp
     use ugwp_driver_v0
     use gwdps, only: gwdps_run
     use cires_ugwp_triggers
+    use ugwp_common_v0, only: ugwp_common_v0_init
 
     implicit none
 
@@ -40,7 +41,8 @@ contains
 !!
     subroutine cires_ugwp_init (me, master, nlunit, input_nml_file, logunit, &
                 fn_nml2, lonr, levs, ak, bk, dtp, cdmbgwd, cgwf,       &
-                pa_rf_in, tau_rf_in, con_p0, gwd_opt,do_ugwp, errmsg, errflg)
+                pa_rf_in, tau_rf_in, con_p0, con_pi, con_rerth, con_g, con_cp, &
+                con_rd, con_rv, con_fvirt, gwd_opt, do_ugwp, errmsg, errflg)
 
 !----  initialization of cires_ugwp
     implicit none
@@ -56,7 +58,8 @@ contains
     real(kind=kind_phys), intent (in) :: dtp
     real(kind=kind_phys), intent (in) :: cdmbgwd(:), cgwf(:) ! "scaling" controls for "old" GFS-GW schemes
     real(kind=kind_phys), intent (in) :: pa_rf_in, tau_rf_in
-    real(kind=kind_phys), intent (in) :: con_p0
+    real(kind=kind_phys), intent (in) :: con_p0, con_pi, con_rerth, con_g
+    real(kind=kind_phys), intent (in) :: con_cp, con_rd, con_rv, con_fvirt
     integer,              intent(in)  :: gwd_opt
     logical,              intent (in) :: do_ugwp
     
@@ -71,6 +74,9 @@ contains
     errflg = 0
 
     if (is_initialized) return
+
+    call ugwp_common_v0_init(con_pi, con_rerth, con_g, con_cp, con_rd, &
+                             con_rv, con_fvirt)
 
     ! Consistency checks
     if (gwd_opt/=1) then

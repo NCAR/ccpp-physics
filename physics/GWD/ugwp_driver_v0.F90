@@ -1033,9 +1033,7 @@ module ugwp_driver_v0
 
 
 !      real  :: rcpd, grav2cpd
-       real, parameter ::  rcpdl    = cpd/grav, &   ! 1/[g/cp]  == cp/g
-                           grav2cpd = grav/rcpdl, & ! g*(g/cp)= g^2/cp
-                           cpdi     = one/cpd
+       real :: rcpdl, grav2cpd, cpdi
 
        real :: expdis, fdis
 !      real :: fmode, expdis, fdis
@@ -1045,6 +1043,10 @@ module ugwp_driver_v0
 !
 !--------------------------------------------------------------------------
 !
+        rcpdl = cpd/grav       ! 1/[g/cp] == cp/g
+        grav2cpd = grav/rcpdl  ! g*(g/cp) == g^2/cp
+        cpdi = one/cpd
+
         do k=1,klev
           do j=1,klon
             pdvdt(j,k) = zero

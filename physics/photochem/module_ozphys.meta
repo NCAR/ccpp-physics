@@ -11,7 +11,7 @@
 [ccpp-table-properties]
   name = module_ozphys
   type = module
-  dependencies = machine.F,funcphys.f90
+  dependencies = machine.F
 
 [ccpp-arg-table]
   name = module_ozphys

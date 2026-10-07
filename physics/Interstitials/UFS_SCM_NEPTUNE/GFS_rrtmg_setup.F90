@@ -44,7 +44,8 @@ module GFS_rrtmg_setup
         lcnorm, imp_physics, lnoprec, idate, iflip, do_RRTMGP,               &
         mpicomm, mpirank, mpiroot, lalw1bd,                                  &
         iaermdl, iaerflg, aeros_file, con_pi, con_t0c, con_c, con_boltz,     &
-        con_plnk, con_solr_2008, con_solr_2002, con_g, con_rd, co2usr_file,  &
+        con_plnk, con_solr_2008, con_solr_2002, con_g, con_cp, con_rd,       &
+        co2usr_file,                                                        &
         co2cyc_file, rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, isubclw,&
         iswmode, ipsd0, ltp, lextop, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
@@ -167,7 +168,7 @@ module GFS_rrtmg_setup
       character(len=26),intent(in)  :: aeros_file, solar_file, co2usr_file,&
            co2cyc_file
       real(kind_phys),  intent(in)  :: con_pi, con_t0c, con_c, con_boltz,  &
-           con_plnk, con_solr_2008, con_solr_2002, con_g, con_rd
+           con_plnk, con_solr_2008, con_solr_2002, con_g, con_cp, con_rd
       integer,          intent(inout) :: ipsd0
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -229,12 +230,12 @@ module GFS_rrtmg_setup
 
       call rlwinit ( mpirank, rad_hr_units, inc_minor_gas, icliq_lw, isubcsw, &
            iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
-           iovr_exp, iovr_exprand, errflg, errmsg )
+           iovr_exp, iovr_exprand, con_g, con_cp, errflg, errmsg )
       if(errflg/=0) return
 
       call rswinit ( mpirank, rad_hr_units, inc_minor_gas, icliq_sw, isubclw, &
            iovr, iovr_rand, iovr_maxrand, iovr_max, iovr_dcorr,         &
-           iovr_exp, iovr_exprand,iswmode, errflg, errmsg )
+           iovr_exp, iovr_exprand, iswmode, con_g, con_cp, errflg, errmsg )
       if(errflg/=0) return
 
       if ( mpirank == mpiroot ) then

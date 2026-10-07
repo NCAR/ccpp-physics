@@ -3,6 +3,7 @@
 !! \cite chen_and_lin_2013 ).
 module gfdl_cloud_microphys_v3
 
+   use machine, only: kind_phys
    use gfdl_cloud_microphys_v3_mod, only: gfdl_cloud_microphys_v3_mod_init,         &
                                              gfdl_cloud_microphys_v3_mod_driver,       &
                                              gfdl_cloud_microphys_v3_mod_end,          &
@@ -31,7 +32,16 @@ contains
 
    subroutine gfdl_cloud_microphys_v3_init (me, master, nlunit, input_nml_file, logunit, &
                             fn_nml, imp_physics, imp_physics_gfdl, do_shoc,  &
-                            hydrostatic, errmsg, errflg)
+                            hydrostatic, con_g, con_1ovg, &
+                            con_pi, con_boltz, con_avgd, con_rd, &
+                            con_rv, con_fvirt, con_runiver, con_cp, &
+                            con_csol, con_hvap, con_hfus, con_rhoair_IFS, &
+                            con_rhosnow, con_one, con_amd, con_amw, &
+                            con_visd, con_visk, con_vdifu, con_tcond, &
+                            con_cdg, con_cdh, con_rhocw, con_rhoci, &
+                            con_rhocr, con_rhocg, con_rhoch, con_qcmin, &
+                            con_qfmin, errmsg, errflg)
+
 
        implicit none
 
@@ -45,6 +55,37 @@ contains
        integer,          intent( in) :: imp_physics_gfdl
        logical,          intent( in) :: do_shoc
        logical,          intent( in) :: hydrostatic
+       real(kind_phys),  intent(in) :: con_g
+       real(kind_phys),  intent(in) :: con_1ovg
+       real(kind_phys),  intent(in) :: con_pi
+       real(kind_phys),  intent(in) :: con_boltz
+       real(kind_phys),  intent(in) :: con_avgd
+       real(kind_phys),  intent(in) :: con_rd
+       real(kind_phys),  intent(in) :: con_rv
+       real(kind_phys),  intent(in) :: con_fvirt
+       real(kind_phys),  intent(in) :: con_runiver
+       real(kind_phys),  intent(in) :: con_cp
+       real(kind_phys),  intent(in) :: con_csol
+       real(kind_phys),  intent(in) :: con_hvap
+       real(kind_phys),  intent(in) :: con_hfus
+       real(kind_phys),  intent(in) :: con_rhoair_IFS
+       real(kind_phys),  intent(in) :: con_rhosnow
+       real(kind_phys),  intent(in) :: con_one
+       real(kind_phys),  intent(in) :: con_amd
+       real(kind_phys),  intent(in) :: con_amw
+       real(kind_phys),  intent(in) :: con_visd
+       real(kind_phys),  intent(in) :: con_visk
+       real(kind_phys),  intent(in) :: con_vdifu
+       real(kind_phys),  intent(in) :: con_tcond
+       real(kind_phys),  intent(in) :: con_cdg
+       real(kind_phys),  intent(in) :: con_cdh
+       real(kind_phys),  intent(in) :: con_rhocw
+       real(kind_phys),  intent(in) :: con_rhoci
+       real(kind_phys),  intent(in) :: con_rhocr
+       real(kind_phys),  intent(in) :: con_rhocg
+       real(kind_phys),  intent(in) :: con_rhoch
+       real(kind_phys),  intent(in) :: con_qcmin
+       real(kind_phys),  intent(in) :: con_qfmin
        character(len=*), intent(out) :: errmsg
        integer,          intent(out) :: errflg
 
@@ -66,7 +107,16 @@ contains
            return
        endif
 
-       call gfdl_cloud_microphys_v3_mod_init(me, master, nlunit, input_nml_file, logunit, fn_nml, hydrostatic, errmsg, errflg)
+       call gfdl_cloud_microphys_v3_mod_init(me, master, nlunit, input_nml_file, logunit, &
+            fn_nml, hydrostatic, con_g, con_1ovg, &
+            con_pi, con_boltz, con_avgd, con_rd, &
+            con_rv, con_fvirt, con_runiver, con_cp, &
+            con_csol, con_hvap, con_hfus, con_rhoair_IFS, &
+            con_rhosnow, con_one, con_amd, con_amw, &
+            con_visd, con_visk, con_vdifu, con_tcond, &
+            con_cdg, con_cdh, con_rhocw, con_rhoci, &
+            con_rhocr, con_rhocg, con_rhoch, con_qcmin, &
+            con_qfmin, errmsg, errflg)
 
        is_initialized = .true.
 

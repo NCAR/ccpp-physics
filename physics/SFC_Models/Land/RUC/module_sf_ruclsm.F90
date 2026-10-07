@@ -10,24 +10,25 @@ MODULE module_sf_ruclsm
 
    use machine ,   only : kind_phys, kind_dbl_prec
    use namelist_soilveg_ruc
-   use physcons,   only : rhowater, con_t0c, con_hfus, con_hvap, &
-                          con_pi, con_rv, con_g, con_csol, con_tice
 
    implicit none
 
    private
    !private qsn
 
-   public :: lsmruc, ruclsminit, rslf
+   public :: lsmruc, ruclsminit, rslf, ruc_lsm_cons_init
 
+      real (kind_phys) :: con_hfus = 1.0E30_kind_phys
+      real (kind_phys) :: rhowater = 1.0E30_kind_phys
+      real (kind_phys) :: con_tice = 1.0E30_kind_phys
 !> CONSTANT PARAMETERS
 !! @{
-      real (kind_phys), parameter :: tfrz     = con_t0c
-      real (kind_phys), parameter :: xls      = con_hvap + con_hfus 
-      real (kind_phys), parameter :: piconst  = con_pi
-      real (kind_phys), parameter :: r_v      = con_rv
-      real (kind_phys), parameter :: grav     = con_g
-      real (kind_phys), parameter :: sheatice = con_csol
+      real (kind_phys) :: tfrz     = 1.0E30_kind_phys
+      real (kind_phys) :: xls      = 1.0E30_kind_phys
+      real (kind_phys) :: piconst  = 1.0E30_kind_phys
+      real (kind_phys) :: r_v      = 1.0E30_kind_phys
+      real (kind_phys) :: grav     = 1.0E30_kind_phys
+      real (kind_phys) :: sheatice = 1.0E30_kind_phys
 
       real (kind_phys), parameter :: rhoice   = 917._kind_phys ! ice density
       real (kind_phys), parameter :: sheatsn  = 2090._kind_phys ! snow heat capacity
@@ -78,6 +79,31 @@ MODULE module_sf_ruclsm
 
 
 CONTAINS
+
+  subroutine ruc_lsm_cons_init(rhowater_in, con_t0c, con_hfus_in, con_hvap, &
+                          con_pi, con_rv, con_g, con_csol, con_tice_in )
+    real (kind_phys), intent(in) :: rhowater_in
+    real (kind_phys), intent(in) :: con_t0c
+    real (kind_phys), intent(in) :: con_hfus_in
+    real (kind_phys), intent(in) :: con_hvap
+    real (kind_phys), intent(in) :: con_pi
+    real (kind_phys), intent(in) :: con_rv
+    real (kind_phys), intent(in) :: con_g
+    real (kind_phys), intent(in) :: con_csol
+    real (kind_phys), intent(in) :: con_tice_in
+
+    ! set module level variables
+    con_hfus = con_hfus_in
+    rhowater = rhowater_in
+    con_tice = con_tice_in
+    tfrz     = con_t0c
+    xls      = con_hvap + con_hfus
+    piconst  = con_pi
+    r_v      = con_rv
+    grav     = con_g
+    sheatice = con_csol
+  end subroutine ruc_lsm_cons_init
+
 
 !-----------------------------------------------------------------
 !>\ingroup lsm_ruc_group

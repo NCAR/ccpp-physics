@@ -1,31 +1,61 @@
 !>\file cires_ugwp_initialize.F90
 !! This file contains cu-cires ugwp initialization scheme.
-!  initialization of ugwp_common_v0
 !  init gw-solvers (1,2) .. no UFS-funds for (3,4) tests
 !  init gw-source specifications
 !  init gw-background dissipation
 !===============================    
 
-!> This module contains UGWP v0 initialization schemes 
-    module ugwp_common_v0
-!
-     use machine,  only: kind_phys
-     use physcons, only : pi => con_pi, grav => con_g, rd => con_rd,   &
-                          rv => con_rv, cpd => con_cp, fv => con_fvirt,&
-                          arad => con_rerth
-     implicit none
+!> Shared constants used by the UGWP v0 implementation.
+!! Values are supplied by the CCPP host during scheme initialization.
+module ugwp_common_v0
 
-      real(kind=kind_phys), parameter ::  grcp = grav/cpd, rgrav = 1.0d0/grav, &
-                          rdi  = 1.0d0/rd,                                     &
-                          gor  = grav/rd,  gr2   = grav*gor, gocp = grav/cpd,  &
-                          rcpd = 1./cpd,   rcpd2 = 0.5*rcpd,                   &
-                          pi2  = pi + pi,  omega1 = pi2/86400.0,               &
-                          omega2 = omega1+omega1,                              &
-                          rad_to_deg=180.0/pi, deg_to_rad=pi/180.0,            &
-                          dw2min=1.0, bnv2min=1.e-6, velmin=sqrt(dw2min)
+  use machine, only: kind_phys
 
+  implicit none
 
-     end module ugwp_common_v0
+  real(kind=kind_phys) :: pi, grav, rd, rv, cpd, fv, arad
+  real(kind=kind_phys) :: grcp, rgrav, rdi, gor, gr2, gocp
+  real(kind=kind_phys) :: rcpd, rcpd2, pi2, omega1, omega2
+  real(kind=kind_phys) :: rad_to_deg, deg_to_rad
+  real(kind=kind_phys) :: dw2min, bnv2min, velmin
+
+contains
+
+  subroutine ugwp_common_v0_init(con_pi, con_rerth, con_g, con_cp, con_rd, &
+                                 con_rv, con_fvirt)
+
+    real(kind=kind_phys), intent(in) :: con_pi, con_rerth, con_g, con_cp
+    real(kind=kind_phys), intent(in) :: con_rd, con_rv, con_fvirt
+
+    pi = con_pi
+    arad = con_rerth
+    grav = con_g
+    cpd = con_cp
+    rd = con_rd
+    rv = con_rv
+    fv = con_fvirt
+
+    grcp = grav/cpd
+    rgrav = 1.0_kind_phys/grav
+    rdi = 1.0_kind_phys/rd
+    gor = grav/rd
+    gr2 = grav*gor
+    gocp = grav/cpd
+    rcpd = 1.0_kind_phys/cpd
+    rcpd2 = 0.5_kind_phys*rcpd
+    pi2 = pi + pi
+    omega1 = pi2/86400.0_kind_phys
+    omega2 = omega1 + omega1
+    rad_to_deg = 180.0_kind_phys/pi
+    deg_to_rad = pi/180.0_kind_phys
+    dw2min = 1.0_kind_phys
+    bnv2min = 1.0e-6_kind_phys
+    velmin = sqrt(dw2min)
+
+  end subroutine ugwp_common_v0_init
+
+end module ugwp_common_v0
+
 !
 !
 !===================================================
@@ -98,7 +128,7 @@
 !> This module contains orographic wave source schemes for UGWP v0.
      module ugwpv0_oro_init
 
-     use ugwp_common_v0, only : bnv2min, grav, grcp, fv, grav, cpd, grcp, pi
+     use ugwp_common_v0, only : bnv2min, grav, grcp, fv, cpd, pi
 
      implicit none
 !  
@@ -143,7 +173,7 @@
       integer ::  nstoro                    ! flag for stochastic launch above SG-peak
 
       integer, parameter ::  mdir = 8
-      real,    parameter ::  fdir=.5*mdir/pi
+      real :: fdir = 1.0E30
 
       integer nwdir(mdir)
       data nwdir/6,7,5,8,2,3,1,4/
@@ -168,8 +198,8 @@
       real,  parameter :: lzmax   = 18.e3                      ! 18 km
       real,  parameter :: mkzmin  = 6.28/lzmax
       real,  parameter :: mkz2min = mkzmin*mkzmin
-      real,  parameter :: zbr_pi  = (3.0/2.0)*pi
-      real,  parameter :: zbr_ifs = 0.5*pi
+      real :: zbr_pi = 1.0E30
+      real :: zbr_ifs = 1.0E30
 
       contains
 !
@@ -192,6 +222,9 @@
       real, parameter :: lonr_refgw =  192.0
 
 ! copy  to "ugwp_oro_init"  =>  nwaves, nazdir, nstoch
+      fdir=.5*mdir/pi
+      zbr_pi  = (3.0/2.0)*pi
+      zbr_ifs = 0.5*pi
  
       nworo  =  nwaves
       nazoro =  nazdir
@@ -307,7 +340,9 @@
       real ,     parameter  :: zcimin = ucrit2
       real ,     parameter  :: zcimax = 125.0
       real ,     parameter  :: zgam   =   0.25
-      real ,     parameter  :: zms_l  = 2000.0, zms = pi2 / zms_l, zmsi = 1.0 / zms
+      real ,     parameter  :: zms_l  = 2000.0
+      real :: zms = 1.0E30
+      real :: zmsi = 1.0E30
 
       integer               :: ilaunch
       real                  :: gw_eff
@@ -339,6 +374,9 @@
 !
       real :: zang, zang1, znorm
       real :: zx1, zx2, ztx, zdx, zxran, zxmin, zxmax, zx, zpexp
+
+     zms = pi2 / zms_l
+     zmsi = 1.0 / zms
 
      if( nwaves == 0) then
 !

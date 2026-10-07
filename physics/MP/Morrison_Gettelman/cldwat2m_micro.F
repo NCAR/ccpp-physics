@@ -24,11 +24,6 @@
 
 #ifdef NEMS_GSM
        use machine,       only : r8 => kind_phys
-       use physcons, gravit => con_g,    rair    => con_rd,             &
-     &               rh2o   => con_rv,   epsilon => con_eps,            &
-     &               tmelt  => con_tice, cpair   => con_cp,             &
-     &               latvap => con_hvap, latice  => con_hfus,           &
-     &               pi => con_pi
        use wv_saturation, only : estblf, hlatv, tmin, hlatf, rgasv, pcf,&
      &                           epsqs, ttrice, vqsatd2,cp,             &
      &                           vqsatd2_single,polysvp,gestbl
@@ -68,10 +63,21 @@
 
        real(r8), parameter :: zero=0.0_r8,  one=1.0_r8,  two=2.0_r8     &
      &,                       three=3.0_r8, four=4.0_r8, five=5.0_r8    &
-     &,                       half=0.5_r8,  oneb3=one/three             &
-     &,                       onebcp=one/cpair
+     &,                       half=0.5_r8,  oneb3=one/three
+
 #ifdef NEMS_GSM
 !
+       real(r8) :: gravit = 1.0E30_r8
+       real(r8) :: rair = 1.0E30_r8
+       real(r8) :: rh2o = 1.0E30_r8
+       real(r8) :: epsilon = 1.0E30_r8
+       real(r8) :: tmelt = 1.0E30_r8
+       real(r8) :: cpair = 1.0E30_r8
+       real(r8) :: latvap = 1.0E30_r8
+       real(r8) :: latice = 1.0E30_r8
+       real(r8) :: pi = 1.0E30_r8
+       real(r8) :: onebcp = 1.0E30_r8
+
        integer,  parameter :: iulog = 6
 
        real(r8), parameter :: rhmini = 0.80_r8
@@ -170,8 +176,13 @@
      &,                   lammins, lammaxs
 
 !> parameters for snow/rain fraction for convective clouds
+#ifdef NEMS_GSM
+      real(r8), private :: tmax_fsnow = 1.0E30_r8
+      real(r8), private :: tmin_fsnow = 1.0E30_r8
+#else
       real(r8), private, parameter :: tmax_fsnow = tmelt
      &,                               tmin_fsnow = tmelt-5._r8
+#endif
 
 !needed for findsp
       real(r8), private:: tt0
@@ -187,7 +198,12 @@
 !>\ingroup cldwat2m_micro_mod
 !! This subroutine initializes constants for MG microphysics.
 !!\author Andrew Gettelman
-      subroutine ini_micro(Dcs_, QCVAR_, ts_auto_ice_)
+       subroutine ini_micro(Dcs_, QCVAR_, ts_auto_ice_                  &
+#ifdef NEMS_GSM
+     &, gravit_in, rair_in, rh2o_in, epsilon_in, tmelt_in, cpair_in     &
+     &, latvap_in, latice_in, pi_in                                     &
+#endif
+     & )
 
 !-----------------------------------------------------------------------
 !
@@ -210,8 +226,24 @@
 
        character(len=16) :: eddy_scheme = ' '
        logical           :: history_microphysics
+#ifdef NEMS_GSM
+       real(r8), intent(in) :: gravit_in, rair_in, rh2o_in, epsilon_in
+       real(r8), intent(in) :: tmelt_in, cpair_in, latvap_in, latice_in
+       real(r8), intent(in) :: pi_in
 
-
+       gravit = gravit_in
+       rair = rair_in
+       rh2o = rh2o_in
+       epsilon = epsilon_in
+       tmelt = tmelt_in
+       cpair = cpair_in
+       latvap = latvap_in
+       latice = latice_in
+       pi = pi_in
+       onebcp = one/cpair
+       tmax_fsnow = tmelt
+       tmin_fsnow = tmelt-five
+#endif
 
 #ifdef CAM 
 

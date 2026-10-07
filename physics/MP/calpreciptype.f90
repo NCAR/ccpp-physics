@@ -11,6 +11,8 @@ contains
                                xlat,xlon,                           &
                                gt0,gq0,prsl,prsi,prec,              & !input
                                phii,tskin,                          & !input
+                               con_g, con_eps, con_epsm1,           & !input
+                               con_epsq, con_fvirt, con_rog,        & !input
                                domr,domzr,domip,doms)  !output
 
 !$$$  subprogram documentation block
@@ -25,12 +27,12 @@ contains
 !     
 !  --------------------------------------------------------------------
       use funcphys, only : fpvs,ftdp,fpkap,ftlcl,stma,fthe
-      use physcons
       use machine , only : kind_phys
 !- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       implicit none
 !
-      real(kind=kind_phys),   parameter :: pthresh = 0.0, oneog = 1.0/con_g
+      real(kind=kind_phys),   parameter :: pthresh = 0.0
+      real(kind=kind_phys) :: oneog
       integer,parameter :: nalg    = 5
 !     
 !     declare variables.
@@ -42,6 +44,8 @@ contains
       real(kind=kind_phys),dimension(ix,lm), intent(in)  :: gt0,gq0,prsl
       real(kind=kind_phys),dimension(ix,lp1),intent(in)  :: prsi,phii
       real(kind=kind_phys),dimension(im),    intent(out) :: domr,domzr,domip,doms
+      real(kind=kind_phys),intent(in)    :: con_g, con_eps, con_epsm1
+      real(kind=kind_phys),intent(in)    :: con_epsq, con_fvirt, con_rog
       
       integer,             dimension(nalg) :: sleet,rain,freezr,snow
       real(kind=kind_phys),dimension(lm)   :: t,q,pmid
@@ -53,6 +57,7 @@ contains
                            time_vert,time_ncep,time_ramer,time_bourg,time_revised,&
                            time_dominant,btim,timef,ranl(2)
 
+      oneog = 1.0/con_g
 !     
 !     computes wet bulb here since two algorithms use it
 !      lp1=lm+1
