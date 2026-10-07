@@ -663,17 +663,17 @@
       tw = 0.5 * (t + td)
 
       do i = 1, 5  ! 5 iterations are sufficient for <0.001 C precision
-	es_tw = 6.112 * exp((17.67 * tw) / (tw + 243.5))
-	f = es_tw - e_actual + (gamma_const * p_hpa * (tw - t))
-	f_prime = (es_tw * (17.67 * 243.5) / (tw + 243.5)**2) + (gamma_const * p_hpa)
-	
-	delta = f / f_prime
-	tw = tw - delta
-	
-	! Strict physical bounds
-	tw = min(max(tw, td), t)
-	if (abs(delta) < 0.001) exit
-       end do
-       end function calculate_tw_vectorized
+        es_tw = 6.112 * exp((17.67 * tw) / (tw + 243.5))
+        f = es_tw - e_actual + (gamma_const * p_hpa * (tw - t))
+        f_prime = (es_tw * (17.67 * 243.5) / (tw + 243.5)**2) + (gamma_const * p_hpa)
+
+        delta = f / f_prime
+        tw = tw - delta
+
+        ! Strict physical bounds
+        tw = min(max(tw, td), t)
+        if (abs(delta) < 0.001) exit
+      end do
+      end function calculate_tw_vectorized
 
       end module GFS_MP_generic_post
