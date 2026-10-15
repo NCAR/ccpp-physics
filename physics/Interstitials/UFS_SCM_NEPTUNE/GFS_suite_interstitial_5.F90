@@ -1,5 +1,5 @@
 !> \file GFS_suite_interstitial_5.F90
-!!  Contains code to update cloud liquid and ice in the convective transportable tracer array before RAS convection.
+!!  Contains code to update cloud liquid and ice in the convective transportable tracer array before convection.
 
   module GFS_suite_interstitial_5
 

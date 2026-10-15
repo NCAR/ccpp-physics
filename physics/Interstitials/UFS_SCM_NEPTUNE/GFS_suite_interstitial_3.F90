@@ -21,7 +21,7 @@
                imp_physics_wsm6, imp_physics_fer_hires, prsi,           &
                imp_physics_nssl, imp_physics_tempo,                     &
                prsl, prslk, rhcbot,rhcpbl, rhctop, rhcmax, islmsk,      &
-               work1, work2, kpbl, kinver, ras, me,                     &
+               work1, work2, kpbl, kinver, me,                     &
                clw, rhc, save_qc, save_qi, save_tcp, errmsg, errflg)
 
       use machine, only: kind_phys
@@ -35,7 +35,7 @@
         imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires,  &
         imp_physics_nssl, imp_physics_tempo, me
       integer,              intent(in   ), dimension(:)     :: islmsk, kpbl, kinver
-      logical,              intent(in   )                   :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras, progsigma
+      logical,              intent(in   )                   :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, progsigma
       logical,              intent(in   )                   :: first_time_step, restart, progomega
       integer,              intent(in   )                   :: imfshalcnv, imfdeepcnv, imfshalcnv_samf,imfdeepcnv_samf
       integer,              intent(in   )                   :: imfshalcnv_c3,imfdeepcnv_c3
@@ -115,7 +115,7 @@
          enddo
       endif
       
-      if (cscnv .or. satmedmf .or. trans_trac .or. ras) then
+      if (cscnv .or. satmedmf .or. trans_trac) then
         tracers = 2
         do n=2,ntrac
 !          if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
@@ -130,7 +130,7 @@
             enddo
           endif
         enddo
-      endif ! end if_ras or cfscnv or samf
+      endif
 
       if (ntcw > 0) then
         if (imp_physics == imp_physics_mg .and. rhcpbl < 0.5_kind_phys) then ! compute rhc for GMAO macro physics cloud pdf

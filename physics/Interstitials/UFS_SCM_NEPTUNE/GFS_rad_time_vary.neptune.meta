@@ -131,13 +131,6 @@
   dimensions = ()
   type = integer
   intent = in
-[imp_physics_zhao_carr]
-  standard_name = identifier_for_zhao_carr_microphysics_scheme
-  long_name = choice of Zhao-Carr microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
 [ipsd0]
   standard_name = initial_seed_for_mcica
   long_name = initial permutation seed for mcica radiation
@@ -151,84 +144,6 @@
   units = 1
   dimensions =  ()
   type = integer
-  intent = in
-[ps_2delt]
-  standard_name = surface_air_pressure_two_timesteps_back
-  long_name = surface air pressure two timesteps back
-  units = Pa
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[ps_1delt]
-  standard_name = surface_air_pressure_on_previous_timestep
-  long_name = surface air pressure at previous timestep
-  units = Pa
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[t_2delt]
-  standard_name = air_temperature_two_timesteps_back
-  long_name = air temperature two timesteps back
-  units = K
-  dimensions = (horizontal_dimension,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[t_1delt]
-  standard_name = air_temperature_on_previous_timestep_in_xyz_dimensioned_restart_array
-  long_name = air temperature at previous timestep
-  units = K
-  dimensions = (horizontal_dimension,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[qv_2delt]
-  standard_name = specific_humidity_two_timesteps_back
-  long_name = water vapor specific humidity two timesteps back
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[qv_1delt]
-  standard_name = specific_humidity_on_previous_timestep_in_xyz_dimensioned_restart_array
-  long_name = water vapor specific humidity at previous timestep
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
-[t]
-  standard_name = air_temperature
-  long_name = model layer mean temperature
-  units = K
-  dimensions = (horizontal_dimension,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[qv]
-  standard_name = specific_humidity
-  long_name = water vapor specific humidity
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-[ps]
-  standard_name = air_pressure_at_lowest_model_interface
-  long_name = air pressure at lowest model interface
-  units = Pa
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
   intent = in
 [errmsg]
   standard_name = ccpp_error_message
@@ -245,4 +160,3 @@
   dimensions = ()
   type = integer
   intent = out
-

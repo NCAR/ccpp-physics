@@ -399,13 +399,6 @@
   dimensions = ()
   type = logical
   intent = in
-[ras]
-  standard_name = flag_for_relaxed_arakawa_schubert_deep_convection
-  long_name = flag for ras convection scheme
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [ntsigma]
   standard_name = index_of_updraft_area_fraction_in_tracer_concentration_array
   long_name = tracer index of updraft_area_fraction

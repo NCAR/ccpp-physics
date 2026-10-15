@@ -1988,7 +1988,7 @@
 !   initial subroutine "cld_init".                                      !
 !   This program is written by Moorthi                                  !
 !   to represent unified cloud across all physics while                 !
-!   using SHOC+MG2/3+convection (RAS or SAS or CSAW)                    !
+!   using SHOC+MG2/3+convection (SAS or CSAW)                           !
 !                                                                       !
 ! usage:         call progclduni                                        !
 !                                                                       !
