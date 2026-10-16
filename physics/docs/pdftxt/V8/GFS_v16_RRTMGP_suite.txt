@@ -7,13 +7,13 @@ This is an experimental version of the Global Forecast System (GFS) in which the
 operationally is replaced with the RTE-RRTMGP parameterization for research and development. 
 
 \section sdf_gfsv16GP Suite Definition File 
-\include suite_SCM_GFS_v16_RRTMGP.xml
+\include V8/suite_SCM_GFS_v16_RRTMGP.xml
 
 \section gfs16GP_nml_opt_des Namelist 
 - General physics options
-\snippet input_GFS_v16_RRTMGP.nml GFS_PHYSICS_NML
+\snippet V8/input_GFS_v16_RRTMGP.nml GFS_PHYSICS_NML
 - \ref GFS_UGWP_v0_UGWP related options
-\snippet input_GFS_v16_RRTMGP.nml CIRES_UGWP_NML
+\snippet V8/input_GFS_v16_RRTMGP.nml CIRES_UGWP_NML
 
 - nstf_name = \f$[2,0,0,0,0]^1 [2,1,0,0,0]^2\f$
  - \f$^1\f$ NSST is on and coupled with spin up off
