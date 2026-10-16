@@ -21,6 +21,7 @@ UFS_PHYSICS_REF ?= release/srw-v3
 build:
 	"$(PYTHON)" build_doxygen.py \
 	  --ncar-physics-ref "$(NCAR_PHYSICS_REF)" \
+	  --v8-physics-ref "$(V8_PHYSICS_REF)" \
 	  --v7-physics-ref "$(V7_PHYSICS_REF)" \
 	  --ufs-physics-ref "$(UFS_PHYSICS_REF)"
 
