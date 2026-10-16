@@ -183,8 +183,8 @@ def main():
     )
     parser.add_argument(
         "--v8-physics-ref",
-        default="main",
-        help="hertneky/ccpp-physics ref for the V8 docs (default: main)",
+        default="v8_SciDoc",
+        help="hertneky/ccpp-physics ref for the V8 docs (default: v8_SciDoc)",
     )
     parser.add_argument(
         "--v7-physics-ref",

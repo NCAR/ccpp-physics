@@ -57,7 +57,7 @@ jobs:
       run: |
         make -C tools/doxygen build \
           NCAR_PHYSICS_REF=main \
-          V8_PHYSICS_REF=main \
+          V8_PHYSICS_REF=v8_SciDoc \
           V7_PHYSICS_REF=v7.0.1 \
           UFS_PHYSICS_REF=release/srw-v3
 
