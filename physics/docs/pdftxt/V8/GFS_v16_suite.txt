@@ -22,7 +22,7 @@ The GFS_v16 suite uses the parameterizations in the following order:
  - \ref GFDL_cloud
 
 \section sdf_gfsv16b Suite Definition File 
-\include  suite_SCM_GFS_v16.xml
+\include  V8/suite_SCM_GFS_v16.xml
 
 
 \section gfs16_nml_opt_des Namelist 
