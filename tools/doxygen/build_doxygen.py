@@ -144,7 +144,7 @@ def build(workspace, site, ncar_physics_ref, v8_physics_ref, v7_physics_ref, ufs
         physics,
         site,
         f"hertneky/ccpp-physics ref {v8_physics_ref!r}",
-        "ccpp_doxyfile",
+        "ccppv8_doxyfile",
         "V8",
     )
 
