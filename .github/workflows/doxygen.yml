@@ -9,7 +9,7 @@ on:
 
 jobs:
   metadata-check:
-    if: github.repository == 'NCAR/ccpp-physics' || github.repository == 'ufs-community/ccpp-physics'
+    if: github.repository == 'hertneky/ccpp-physics' || github.repository == 'ufs-community/ccpp-physics'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -28,7 +28,7 @@ jobs:
 
   deploy:
     needs: metadata-check
-    if: ${{ github.event_name != 'pull_request' && github.repository == 'NCAR/ccpp-physics' }}
+    if: ${{ github.event_name != 'pull_request' && github.repository == 'hertneky/ccpp-physics' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
