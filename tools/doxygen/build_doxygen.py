@@ -177,9 +177,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--ncar-physics-ref",
-        default="main",
+        default="v8_SciDoc",
         help="hertneky/ccpp-physics ref for HSD, GWv1, LandDA, and the landing "
-        "page (default: main)",
+        "page (default: v8_SciDoc)",
     )
     parser.add_argument(
         "--v8-physics-ref",

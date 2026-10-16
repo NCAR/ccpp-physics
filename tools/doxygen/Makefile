@@ -14,7 +14,8 @@ help:
 	  'Override NCAR_PHYSICS_REF, V7_PHYSICS_REF, or UFS_PHYSICS_REF to select refs.' \
 	  'See README.md for prerequisites and configuration.'
 
-NCAR_PHYSICS_REF ?= main
+NCAR_PHYSICS_REF ?= v8_SciDoc
+V8_PHYSICS_REF ?= v8_SciDoc
 V7_PHYSICS_REF ?= v7.0.1
 UFS_PHYSICS_REF ?= release/srw-v3
 build:
