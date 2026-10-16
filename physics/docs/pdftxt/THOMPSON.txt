@@ -9,15 +9,16 @@ of number concentration, density, and ice mass from recent observational studies
 The original RAP/HRRR microphysics implementation represents the most aggressive attempt to include explicit prediction of
 cloud and precipitation microphysical processes in the NCEP operational forecast model suite. The RAP and HRRR are
 important guidance to NWS aviation forecasts, and any microphysics improvements are aimed at least in part, to improve
-that guidance. The scheme is particularly beneficial for aircraft icing forecasts. Recently, this scheme is now being tested
-with a GFS_v17 prototype: the GFS_v17_HR3 suite at Environmental Modeling Center (EMC) as a candidate for the next operational implementation. 
+that guidance. The scheme is particularly beneficial for aircraft icing forecasts. This scheme with added components, such as
+semi-lagrangian sedimentation, inner loop (see below),  and a few other tunings is also implemented in GFSv17, HAFS, and SFS,
+at the Office of Modeling and Development (OMD) as a candidate for the next operational implementation.
 
 The microphysical processes accounted for are shown in the graphic below:
 \image html gsd_thompson.png "Figure 1: Complex Microphysics Model in the RAP" width=500
 
-Descriptions of these preocesses follow:
+Descriptions of these processes follow:
 - \b Deposition: Diffusional growth of ice particles under conditions of vapor supersaturation with respect to ice. 
-Growth is "aerosol-aware", meaning the number of ice-friendly nulei and ice crystals is estimated by the microphysics scheme. 
+Growth is "aerosol-aware", meaning the number of ice-friendly nuclei and ice crystals is estimated by the microphysics scheme. 
 Deposition of ice is estimated using the properties of these ice-friendly aerosols. Latent heat associated with the phase 
 change from vapor to ice is released to the atmosphere.
 
@@ -44,7 +45,7 @@ latent heat is released into the atmosphere during this process.
 - \b Supercooled \b water \b formation: Liquid cloud particles that remain in their liquid state despite being cooled below the freezing point of water.
 
 The scheme also assumes precipitation particle-size distributions for the three predicted precipitation types: rain, snow, and graupel.
-These size distributions are requied to emulate growth of precipitation by accretion of cloud-size particles, coalescence with other
+These size distributions are required to emulate growth of precipitation by accretion of cloud-size particles, coalescence with other
 precipitation particles, and fall speeds of precipitation hydrometeors. The rainwater fall speed depends on the rainwater mixing ratio,
 with small values associated with fall speeds (and allowing the model to parameterize the behavior) of drizzle. The forecast precipitation 
 type is based on what prognostic precipitation type actually reaches the surface (Benjamin et al.(2016) \cite Benjamin_2016b )
@@ -62,6 +63,8 @@ is parameterized through using low fall velocities when there are low rain mixin
 
 - Allows for more accurate prediction of precipitation in the form of snow, because slow fall velocities give time for snow to 
 advect between grid columns
+
+- Uses explicit bin method in Stochastic Collection Eqn (SCE) in collisions between hydrometeors with similar fallspeed
 
 - Includes cloud ice sedimentation, which positively influences RH and cloud forecasts
 
