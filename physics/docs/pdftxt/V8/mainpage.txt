@@ -1,0 +1,35 @@
+/**
+\mainpage Introduction 
+
+Welcome to the scientific documentation for the parameterizations available in the Common 
+Community Physics Package (CCPP) v8.0.0 and the suites that can be configured using them.
+
+The CCPP-Physics (available through https://github.com/NCAR/ccpp-physics/) is envisioned to
+contain parameterizations used in the <a href="https://ufscommunity.org/about/what-is-ufs/">
+Unified Forecast System (UFS)</a> applications for weather through seasonal prediction
+timescales, encompassing the current operational GFS schemes, as well as developmental schemes
+under consideration for upcoming operational implementations. The UFS can be configured for
+multiple applications, including the UFS Short-Range Weather (SRW) Application (available
+through https://github.com/ufs-community/ufs-srweather-app/), which targets predictions of
+atmospheric behavior on a limited spatial domain and on time scales from less than an hour out
+to several days, the Global Workflow (GW) Application (available through
+https://github.com/NOAA-EMC/global-workflow/)(which targets predictions of global atmospheric
+behavior out to about two weeks), the Subseasonal-to-Seasonal (S2S) Application (which predicts
+the Earth System out to several months), and the Hurricane Application (which predicts tropical
+cyclones).
+
+The CCPP parameterizations are aggregated in suites by the host models. In this release, the
+CCPP Single Column Model (SCM), developed by the Development Testbed Center (DTC), supports
+suites: 
+- \ref GFS_v16_page
+- \ref GFS_v16_RRTMGP_page
+- \ref GFS_v17_p8_ugwpv1_page
+- \ref HRRR_gf_page
+- \ref WoFS_v0_page 
+
+In this website you will find documentation on various aspects of each parameterization,
+including a high-level overview of its function, the input/output argument list, and a
+description of the algorithm. 
+More details about this and other CCPP releases may be found on the
+<a href="https://dtcenter.org/community-code/common-community-physics-package-ccpp"> CCPP
+website </a> hosted by the DTC.

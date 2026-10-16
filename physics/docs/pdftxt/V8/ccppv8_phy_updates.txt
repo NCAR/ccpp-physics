@@ -1,0 +1,104 @@
+/**
+\page ccppv8_phy Physics Update Summary
+
+This page provides an overview of updates in CCPP Physics v8.0.0 since the previous v7.0.1 release.
+
+\b General \b Changes:
+- Updated Tendency application
+
+\b GFS  \b Scale-aware \b SAS  \b Cumulus \b Schemes:
+- Reduced excessive convective cloud condensate using a scale-adaptive updraft condensate, with a corresponding reduction
+  to minimum inversion-layer diffusivity to preserve marine stratocumulus clouds
+- Added a sigmab_coldstart option to reduce excessive convective reflectivity during warm starts by initializing advective
+  tendencies and minimum updraft fraction
+- Added a prognostic updraft velocity equation to support prognostic closure and convective adjustment timescales
+- Improved prognostic updraft velocity and updraft fraction (sigmab) calculations to better represent convective updrafts,
+  moisture convergence, and cloud-layer advection, reducing unrealistic initial reflectivity
+- Expanded prognostic closure support to coarser-resolution SFS forecasts and corrected updraft vertical velocity tendency units
+- Added cat_adj_deep and cat_adj_shal options to control convective adjustment timescales in deep and shallow saSAS
+- Fixed missing vertical TKE transport when aerosol transport is enabled and introduced interface-level TKE for convection schemes
+- Corrected convection scheme logic to prevent unintended vertical transport of cloud water and ice number concentrations.
+- Added a tuning parameter for convective cloud liquid
+
+\b Grell-Freitas \b Scale \b and \b Aerosol \b Aware \b Convection \b Scheme:
+- Updated for humidity DA
+- Restored scale-awareness in the first hour
+- Suppressed weak radar reflectivity over water
+
+\b GFS \b Scale-aware \b TKE-EDMF \b PBL \b Scheme:
+- Added integrated canopy effects to eddy diffusivity, improving representation of turbulent mixing within and above the forest
+  canopies
+- Added scale-aware 3D TKE
+- Added option to use liquid/ice water potential temperature in local mixing/diffusion
+- Added an explicit three-layer subcanopy scheme for chemical tracers, improving representation of canopy-driven vertical
+  mixing and near-surface ozone precursors while conserving mass
+- Introduce total turbulent energy (TTE)-EDMF
+
+\b MYNN-EDMF \b PBL \b Scheme:
+- Added "tendency_of_vertically_diffused_tracer_concentration" as output from the MYNN PBL scheme to fix a bug when running
+  with prognostic area fraction closure in suites using SAS convection
+
+\b Thompson \b Cloud \b Microphysics \b Scheme:
+- Increased cloud number concentration over land from 100/cm³ to 150/cm³, to reduce the high bias in downward shortwave (DSW)
+  radiative flux over land
+- Introduced two Thompson MP related namelist options of tc_rain and tc_snow for adjustments of max terminal fall speeds of
+  rain and snow under TC conditions
+
+\b Radiation
+- Reduced the convective cloud ice radius from 50 µm to 25 µm
+- Added new diagnostic for instantaneous clear-sky downward shortwave flux at the surface
+- Fixed sawtooth artifacts in fhzero-averaged radiation diagnostics by correcting the timing of radiation fluxe accumulation
+- Updated the RTE-RRTMGP to version 1.8 improved compatibility with moving-nest configurations and radiation input files
+- Updated cloud cover calculations in RRTMGP to be consistent with RRTMG and adjusted cloud cover parameters to reduce low
+  cloud bias
+
+\b NoahMP \b Land \b Surface \b Model:
+- Removed vegetation type-dependent for the diagnostic option opt_diag used in HR3
+- Used radiative temperature as skin temperature
+- Used single loop alternative approach to address some flux inconsistence below and above the canopy
+- Corrected thermal roughness calculations and adjust momentum roughness lengths
+- Improved initial snow temperature estimates using interpolation between skin temperature and the first soil-layer
+  temperature based on snow depth
+- Updated snow thermal conductivity treatments to reduce excessive snow insulation and maintain consistency with the
+  non-glacier Noah-MP model
+- Updated radiation parameter for grassland/cropland
+- Adjusted albedo parameter for each soil color category
+- Added Incremental Analysis Update (IAU) to soil temperature and moisture and adjusted soil moisture limits and data
+  assimilation constraints to eliminate unrealistically low surface temperatures in arid regions
+- Incorporated soil organic matter (SOM) effects into soil thermal conductivity using a lookup table derived from PNNL soil
+  carbon and VIIRS surface type data to mitigate persistent nighttime and early morning warm surface temperature bias
+- Updated aquifer hydraulic conductivity to use the arithmetic average rather than the harmonic average, increasing the amount
+  of water uptake by the soil layer and improving evapotranspiration modeling
+- Enabled snow aging to occur at night, ensuring more realistic snow dynamics and remove albedo aging
+- Corrected glacier albedo calculations to occur only when the cosine of solar zenith angle is positive, and set canopy liquid
+  water and ice to zero over glaciers
+- Kept the snow depth and density fixed over glacier following a similar approach used in other NWP systems; this includes cold
+  starting glaciers with 2m of snow
+
+\b GFS \b Surface \b Layer \b Scheme
+- Fixed bug so the wave model only updates surface roughness over open ocean and not over lakes and sea ice and prevents
+  unrealistic surface roughness values from the wave model, such as values greater than 0.1 m
+
+\b RUC \b Land \b Surface \b Model
+- Output of surface runoff is changed from instantaneous to accumulated surface runoff
+- Update the RUC LSM deep soil temperature from climatology to real forecast
+
+\b MYNN \b Surface-layer \b Scheme
+- Added "tendency_of_vertically_diffused_tracer_concentration" as output from the MYNN PBL scheme to fix a bug when running with
+  prognostic area fraction closure in suites using SAS convectioed
+
+\b Unified \b Gravity \b Wave \b Physics \b Scheme
+- Fixed an uninitialized array reference to Bnv2 in the gravity-wave drag physics, preventing invalid Richardson number
+  calculations
+
+\b Orographic \b Drag \b Scheme
+- Updated to reduce the high 10m wind speed bias
+- Updated the OGWD reference height to include planetary boundary layer height, improving 500-hPa height anomaly correlation
+  and reducing an overly strong winter polar vortex
+
+\b Stratosphere \b H2O \b Photochemistry \b Scheme
+- Combined ozone and h20 scheme into new module, GFS_photochemistry
+- Updated ozone photochemistry diagnostics to align with the parameterization’s Taylor expansion and added water vapor
+  photochemical tendency calculations for individual terms
+
+*/
