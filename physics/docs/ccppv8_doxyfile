@@ -1,0 +1,178 @@
+# Project-specific Doxygen configuration for CCPP SciDoc v8.0.0.
+
+# Project
+DOXYFILE_ENCODING       = UTF-8
+PROJECT_NAME            = "CCPP SciDoc v8.0.0"
+PROJECT_NUMBER          = v8.0.0
+PROJECT_BRIEF           = "Common Community Physics Package Developed at DTC"
+PROJECT_LOGO            = img/dtc_logo.png
+OUTPUT_DIRECTORY        = html
+OUTPUT_LANGUAGE         = English
+OPTIMIZE_FOR_FORTRAN    = YES
+EXTENSION_MAPPING       = .f=FortranFree \
+                          .F=FortranFree \
+                          .F90=FortranFree \
+                          .f90=FortranFree
+MARKDOWN_SUPPORT        = YES
+TOC_INCLUDE_HEADINGS    = 5
+DISTRIBUTE_GROUP_DOC    = YES
+NUM_PROC_THREADS        = 1
+TIMESTAMP               = NO
+
+# Build options
+SHOW_FILES              = NO
+LAYOUT_FILE             = ccpp_dox_layout.xml
+CITE_BIB_FILES          = library.bib
+
+# Options for warnings
+WARNINGS                = YES
+WARN_IF_DOC_ERROR       = YES
+WARN_IF_INCOMPLETE_DOC  = YES
+WARN_AS_ERROR           = NO
+
+# Input Options
+INPUT                   = pdftxt/V8/mainpage.txt \
+                          pdftxt/V8/ccppv8_phy_updates.txt \
+                          pdftxt/V8/all_schemes_list.txt \
+                          pdftxt/V8/GFS_v16_suite.txt \
+                          pdftxt/V8/GFS_v16_RRTMGP_suite.txt \
+                          pdftxt/V8/GFS_v17_p8_ugwpv1_suite.txt \
+                          pdftxt/V8/HRRR_gf_suite.txt \
+                          pdftxt/V8/WoFS_v0_suite.txt \
+                          pdftxt/RRFS_SGSCLOUD.txt \
+                          pdftxt/GFS_RRTMG.txt \
+                          pdftxt/GFS_RRTMGP.txt \
+                          pdftxt/GFS_SFCLYR.txt \
+                          pdftxt/MYNN_SFCLAYER.txt \
+                          pdftxt/GFS_NSST.txt \
+                          pdftxt/GFS_OCEAN.txt \
+                          pdftxt/NOAH_LSM.txt \
+                          pdftxt/GFS_SFCSICE.txt \
+                          pdftxt/GFS_SATMEDMFVDIFQ.txt \
+                          pdftxt/NOAHMP_LSM.txt \
+                          pdftxt/UGWPv0.txt \
+                          pdftxt/GFS_ugwpv1.txt \
+                          pdftxt/GFS_UGWPV1_ORO.txt \
+                          pdftxt/GFS_GWDPS.txt \
+                          pdftxt/GFS_OZPHYS.txt \
+                          pdftxt/GFS_H2OPHYS.txt \
+                          pdftxt/GFS_SAMFdeep.txt \
+                          pdftxt/GFS_SAMFshal.txt \
+                          pdftxt/GFDL_cloud.txt \
+                          pdftxt/NSSLMICRO.txt \
+                          pdftxt/MYNN_EDMF.txt \
+                          pdftxt/CU_GF_deep.txt \
+                          pdftxt/RUCLSM.txt \
+                          pdftxt/CLM_LAKE.txt \
+                          pdftxt/THOMPSON.txt \
+                          pdftxt/suite_input.nml.txt \
+                          pdftxt/acronyms.txt \
+                          ../MP \
+                          ../CONV \
+                          ../GWD \
+                          ../SFC_Layer \
+                          ../PBL \
+                          ../SFC_Models \
+                          ../photochem \
+                          ../Radiation
+INPUT_ENCODING          = UTF-8
+FILE_PATTERNS           = *.f *.F *.F90 *.f90 *.nml *.txt
+RECURSIVE               = YES
+EXCLUDE                 = ../Radiation/RRTMGP/rte-rrtmgp \
+                          ../MP/Morrison_Gettelman \
+                          ../MP/Ferrier_Aligo \
+                          ../MP/Zhao_Carr \
+                          ../PBL/MYJ \
+                          ../PBL/HEDMF \
+                          ../PBL/SHOC \
+                          ../PBL/saYSU \
+                          ../PBL/YSU \
+                          ../PBL/SATMEDMF/mfscu.f \
+                          ../PBL/SATMEDMF/satmedmfvdif.F \
+                          ../SFC_Models/Lake/Flake \
+                          ../smoke_dust \
+                          ../SFC_Layer/GFDL \
+                          ../SFC_Layer/MYJ \
+                          ../tools \
+                          ../CONV/C3 \
+                          ../CONV/Chikira_Sugiyama \
+                          ../CONV/nTiedtke \
+                          ../CONV/RAS \
+                          ../CONV/SAS \
+                          ../CONV/SAMF/samfaerosols.F \
+                          ../SFC_Layer/UFS/date_def.f \
+                          ../GWD/cires_ugwpv1_module.F90 \
+                          ../GWD/cires_ugwpv1_initialize.F90 \
+                          ../GWD/cires_ugwpv1_oro.F90 \
+                          ../GWD/cires_ugwpv1_solv2.F90 \
+                          ../GWD/cires_ugwpv1_sporo.F90 \
+                          ../GWD/cires_ugwpv1_triggers.F90 \
+                          ../GWD/cires_tauamf_data.F90 \
+                          ../GWD/unified_ugwp.F90 \
+                          ../GWD/unified_ugwp_post.F90 \
+                          ../GWD/gwdc.f \
+                          ../GWD/gwdc_post.f \
+                          ../GWD/gwdc_pre.f \
+                          ../GWD/rayleigh_damp.f
+EXAMPLE_PATH            = pdftxt/V8
+                          pdftxt
+IMAGE_PATH              = img
+
+# Source browser options
+SOURCE_BROWSER          = YES
+REFERENCED_BY_RELATION  = YES
+REFERENCES_RELATION     = YES
+REFERENCES_LINK_SOURCE  = YES
+VERBATIM_HEADERS        = YES
+
+# HTML output options
+GENERATE_HTML           = YES
+HTML_OUTPUT             = V8
+HTML_HEADER             = _doxygen/header.html
+HTML_FOOTER             = _doxygen/footer.html
+HTML_EXTRA_STYLESHEET   = _doxygen/doxygen-awesome.css \
+                          _doxygen/doxygen-awesome-sidebar-only.css \
+                          _doxygen/doxygen-awesome-sidebar-only-darkmode-toggle.css \
+                          _doxygen/doxygen-awesome-ccpp.css \
+                          _doxygen/custom.css
+HTML_EXTRA_FILES        = _doxygen/doxygen-awesome-darkmode-toggle.js \
+                          _doxygen/doxygen-awesome-ccpp.js
+HTML_COLORSTYLE         = LIGHT
+HTML_DYNAMIC_MENUS      = YES
+HTML_CODE_FOLDING       = YES
+HTML_COPY_CLIPBOARD     = YES
+HTML_FORMULA_FORMAT     = SVG
+USE_MATHJAX             = YES
+MATHJAX_VERSION         = MathJax_2
+MATHJAX_FORMAT          = HTML-CSS
+MATHJAX_RELPATH         = https://cdn.jsdelivr.net/npm/mathjax@2
+DISABLE_INDEX           = YES
+GENERATE_TREEVIEW       = YES
+TREEVIEW_WIDTH          = 335
+SEARCHENGINE            = YES
+
+# Preprocessor options
+ENABLE_PREPROCESSING    = NO
+
+# Diagram generator tool options
+HAVE_DOT                = YES
+DOT_NUM_THREADS         = 0
+DOT_COMMON_ATTR         = "fontname=\"Source Sans Pro\",fontsize=10"
+DOT_EDGE_ATTR           = "labelfontname=\"Source Sans Pro\",labelfontsize=10"
+DOT_NODE_ATTR           = "shape=box,height=0.2,width=0.4"
+CLASS_GRAPH             = YES
+COLLABORATION_GRAPH     = YES
+GROUP_GRAPHS            = YES
+UML_LOOK                = YES
+UML_LIMIT_NUM_FIELDS    = 10
+INCLUDE_GRAPH           = YES
+CALL_GRAPH              = YES
+CALLER_GRAPH            = YES
+GRAPHICAL_HIERARCHY     = YES
+DIRECTORY_GRAPH         = YES
+DIR_GRAPH_MAX_DEPTH     = 1
+DOT_IMAGE_FORMAT        = SVG
+INTERACTIVE_SVG         = YES
+DOT_GRAPH_MAX_NODES     = 1000
+GENERATE_LEGEND         = YES
+DOT_CLEANUP             = YES

@@ -2,6 +2,7 @@
 
 The Common Community Physics Package (CCPP) provides scientific documentation for the physics suites and parameterizations used across a variety of atmospheric modeling applications. The documentation describes the scientific basis, configuration options, and implementation details for the parameterizations included in the CCPP physics suites for different modeling systems and use cases.
 
+- [CCPP Physics V8.0.0 Scientific Documentation](./V8/)
 - [CCPP Physics V7.0.0 Scientific Documentation](./V7/)
 - [CCPP Physics UFS Hierarchical System Development (HSD) Scientific Documentation](./HSD/)
 - [CCPP Physics SRW v3.0.0 Scientific Documentation](./SRWv3/)
