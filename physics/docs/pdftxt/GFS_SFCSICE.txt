@@ -7,8 +7,8 @@
  regionally or globally would influence oceanic and atmospheric conditions, which in turn affect the
  sea ice distribution. The physical and dynamical processes affecting the weather and climate are
  considered as follows:
- + The high albedo of the sea ice reflects more solar radiation back to the space. The feedbacks are
- considered as positive. The broader the sea ice cover, the higher the surface albedo, which result
+ + The high albedo of the sea ice reflects more solar radiation back to space. The feedback is
+ considered positive. The broader the sea ice cover, the higher the surface albedo, which results
  in less amount of solar radiation absorbed at the Earth's surface. A cooler surface would favor more
  sea ice to form. The process would be reversed in less sea ice situation.
  + The sea ice restricts the heat/water exchange between the air and ocean. The presence of extensive
@@ -20,7 +20,7 @@
  The freezing and melting of the ocean surface and the associated fluxes of salt and heat produce major
  changes in the density structure of the polar water. Formation of sea ice injects salt into the ocean
  makes the water heavier and more convectively unstable, conversely when melting occurs, stable and fresh
- layers can prevent deep covective activity.
+ layers can prevent deep convective activity.
 
  A sea ice model, in general, may contain subcomponents treating 1) dynamics (ice motion),
  2) ice transport, 3) multiple ice thickness categories (including leads), 4) surface albedo,

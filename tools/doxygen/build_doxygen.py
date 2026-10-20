@@ -121,7 +121,7 @@ def build_landing_page(physics, site, ref_name):
     move_contents(landing, site)
 
 
-def build(workspace, site, ncar_physics_ref, v7_physics_ref, ufs_physics_ref):
+def build(workspace, site, ncar_physics_ref, v8_physics_ref, v7_physics_ref, ufs_physics_ref):
     """Build every documentation section, one Physics ref at a time."""
     require_tools()
     physics = workspace / "physics_repo"
@@ -138,6 +138,15 @@ def build(workspace, site, ncar_physics_ref, v7_physics_ref, ufs_physics_ref):
     ):
         build_section(physics, site, ncar, doxyfile, section)
     build_landing_page(physics, site, ncar)
+
+    checkout_physics(physics, NCAR_PHYSICS_URL, v8_physics_ref)
+    build_section(
+        physics,
+        site,
+        f"NCAR/ccpp-physics ref {v8_physics_ref!r}",
+        "ccppv8_doxyfile",
+        "V8",
+    )
 
     checkout_physics(physics, NCAR_PHYSICS_URL, v7_physics_ref)
     build_section(
@@ -173,6 +182,11 @@ def main():
         "page (default: main)",
     )
     parser.add_argument(
+        "--v8-physics-ref",
+        default="v8.0.0",
+        help="NCAR/ccpp-physics ref for the V8 docs (default: v8.0.0)",
+    )
+    parser.add_argument(
         "--v7-physics-ref",
         default="v7.0.1",
         help="NCAR/ccpp-physics ref for the V7 docs (default: v7.0.1)",
@@ -192,6 +206,7 @@ def main():
         workspace,
         site,
         arguments.ncar_physics_ref,
+        arguments.v8_physics_ref,
         arguments.v7_physics_ref,
         arguments.ufs_physics_ref,
     )
