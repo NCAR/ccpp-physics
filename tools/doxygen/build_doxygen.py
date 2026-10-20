@@ -9,7 +9,7 @@ import subprocess
 import sys
 
 
-NCAR_PHYSICS_URL = "https://github.com/hertneky/ccpp-physics.git"
+NCAR_PHYSICS_URL = "https://github.com/NCAR/ccpp-physics.git"
 UFS_PHYSICS_URL = "https://github.com/ufs-community/ccpp-physics.git"
 GENERATE_METADATA_HTML = Path(__file__).with_name("generate_metadata_html.py")
 
@@ -129,7 +129,7 @@ def build(workspace, site, ncar_physics_ref, v8_physics_ref, v7_physics_ref, ufs
         shutil.rmtree(site)
     site.mkdir(parents=True)
 
-    ncar = f"hertneky/ccpp-physics ref {ncar_physics_ref!r}"
+    ncar = f"NCAR/ccpp-physics ref {ncar_physics_ref!r}"
     checkout_physics(physics, NCAR_PHYSICS_URL, ncar_physics_ref)
     for doxyfile, section in (
         ("ccpphsd_doxyfile", "HSD"),
@@ -143,7 +143,7 @@ def build(workspace, site, ncar_physics_ref, v8_physics_ref, v7_physics_ref, ufs
     build_section(
         physics,
         site,
-        f"hertneky/ccpp-physics ref {v8_physics_ref!r}",
+        f"NCAR/ccpp-physics ref {v8_physics_ref!r}",
         "ccppv8_doxyfile",
         "V8",
     )
@@ -152,7 +152,7 @@ def build(workspace, site, ncar_physics_ref, v8_physics_ref, v7_physics_ref, ufs
     build_section(
         physics,
         site,
-        f"hertneky/ccpp-physics ref {v7_physics_ref!r}",
+        f"NCAR/ccpp-physics ref {v7_physics_ref!r}",
         "ccpp_doxyfile",
         "V7",
     )
@@ -177,19 +177,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--ncar-physics-ref",
-        default="v8_SciDoc",
-        help="hertneky/ccpp-physics ref for HSD, GWv1, LandDA, and the landing "
-        "page (default: v8_SciDoc)",
+        default="main",
+        help="NCAR/ccpp-physics ref for HSD, GWv1, LandDA, and the landing "
+        "page (default: main)",
     )
     parser.add_argument(
         "--v8-physics-ref",
-        default="v8_SciDoc",
-        help="hertneky/ccpp-physics ref for the V8 docs (default: v8_SciDoc)",
+        default="v8.0.0",
+        help="NCAR/ccpp-physics ref for the V8 docs (default: v8.0.0)",
     )
     parser.add_argument(
         "--v7-physics-ref",
         default="v7.0.1",
-        help="hertneky/ccpp-physics ref for the V7 docs (default: v7.0.1)",
+        help="NCAR/ccpp-physics ref for the V7 docs (default: v7.0.1)",
     )
     parser.add_argument(
         "--ufs-physics-ref",
