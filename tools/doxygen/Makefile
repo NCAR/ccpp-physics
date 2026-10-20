@@ -11,11 +11,11 @@ help:
 	  'make build     Build the complete GitHub Pages site locally.' \
 	  'make host     Serve the built site at http://$(PAGES_BIND):$(PAGES_PORT).' \
 	  'make clean     Remove the generated site and local build workspace.' \
-	  'Override NCAR_PHYSICS_REF, V7_PHYSICS_REF, or UFS_PHYSICS_REF to select refs.' \
+	  'Override NCAR_PHYSICS_REF, V8_PHYSICS_REF, V7_PHYSICS_REF, or UFS_PHYSICS_REF to select refs.' \
 	  'See README.md for prerequisites and configuration.'
 
-NCAR_PHYSICS_REF ?= v8_SciDoc
-V8_PHYSICS_REF ?= v8_SciDoc
+NCAR_PHYSICS_REF ?= main
+V8_PHYSICS_REF ?= v8.0.0
 V7_PHYSICS_REF ?= v7.0.1
 UFS_PHYSICS_REF ?= release/srw-v3
 build:
