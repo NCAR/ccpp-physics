@@ -5,6 +5,20 @@ This page provides an overview of updates in CCPP Physics v8.0.0 since the previ
 
 \b General \b Changes:
 - Updated Tendency application
+  - Converts all primary schemes to return tendencies rather than modify the physics state
+  - Adds code to interstitial schemes to apply tendencies based on control from the host
+  - Other minor changes (including lots of metadata changes) to implement the above
+  - Obsolete schemes removed
+    - GFS_MP_generic_pre.F90
+    - GFS_DCNV_generic_pre.F90
+    - GFS_SCNV_generic_pre.F90
+    - GFS_suite_stateout_reset.F90
+    - GFS_suite_stateout_update.F90
+    - mp_tempo_pre.F90
+    - mp_thompson_pre.F90
+  - New schemes added:
+    - GFS_photochemistry_post.F90 (because there was no generic interstitial scheme for this to apply tendencies)
+    - mynnedmf_wrapper_post.F90 (because it doesn't use GFS_PBL_generic_post.F90)
 
 \b GFS  \b Scale-aware \b SAS  \b Cumulus \b Schemes:
 - Reduced excessive convective cloud condensate using a scale-adaptive updraft condensate, with a corresponding reduction
