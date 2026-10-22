@@ -1,0 +1,11 @@
+name: ccpp-physics-doxygen
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - git
+  - make
+  - doxygen=1.18.0
+  - graphviz=14.1.2
+  - perl
+  - texlive-core
