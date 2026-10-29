@@ -104,13 +104,13 @@
             do k=1,levs
                do i=1,im
                   omegain(i,k)=0.0
-                  omegaout(i,k)=0.0
+                  omegaout(i,k)=omegain(i,k)
                enddo
             enddo
          endif
          do k=1,levs
             do i=1,im
-               omegaout(i,k)=0.0
+               omegaout(i,k)=omegain(i,k)
             enddo
          enddo
       endif
