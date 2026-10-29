@@ -72,7 +72,7 @@ to the parameterization.
 
 \section allsuite_overview Physics Suites
 
-The obly publicly supported host model for CCPP v8.0.0 is the CCPP Single Column Model (CCPP-SCM). 
+The only publicly supported host model for CCPP v8.0.0 is the CCPP Single Column Model (CCPP-SCM). 
 The forcing datasets included in the CCPP-SCM v8.0.0 public release were created by averaging observations and large-eddy simulations over areas that are
 too coarse to resolve convection. Therefore, best results will be obtained with the CCPP-SCM v8.0.0 when using suites that include parameterized
 convection.
