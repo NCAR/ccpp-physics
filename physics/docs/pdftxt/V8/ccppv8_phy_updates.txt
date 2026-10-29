@@ -32,7 +32,7 @@ This page provides an overview of updates in CCPP Physics v8.0.0 since the previ
 - Added cat_adj_deep and cat_adj_shal options to control convective adjustment timescales in deep and shallow saSAS
 - Fixed missing vertical TKE transport when aerosol transport is enabled and introduced interface-level TKE for convection schemes
 - Corrected convection scheme logic to prevent unintended vertical transport of cloud water and ice number concentrations.
-- Added a tuning parameter for convective cloud liquid
+- Added a tuning parameter (cscale, range 0-1, default 1) for convective cloud liquid
 
 \b Grell-Freitas \b Scale \b and \b Aerosol \b Aware \b Convection \b Scheme:
 - Updated for humidity DA
@@ -46,7 +46,7 @@ This page provides an overview of updates in CCPP Physics v8.0.0 since the previ
 - Added option to use liquid/ice water potential temperature in local mixing/diffusion
 - Added an explicit three-layer subcanopy scheme for chemical tracers, improving representation of canopy-driven vertical
   mixing and near-surface ozone precursors while conserving mass
-- Introduce total turbulent energy (TTE)-EDMF
+- Introduced total turbulent energy (TTE)-EDMF
 
 \b MYNN-EDMF \b PBL \b Scheme:
 - Added "tendency_of_vertically_diffused_tracer_concentration" as output from the MYNN PBL scheme to fix a bug when running
@@ -61,13 +61,13 @@ This page provides an overview of updates in CCPP Physics v8.0.0 since the previ
 \b Radiation
 - Reduced the convective cloud ice radius from 50 µm to 25 µm
 - Added new diagnostic for instantaneous clear-sky downward shortwave flux at the surface
-- Fixed sawtooth artifacts in fhzero-averaged radiation diagnostics by correcting the timing of radiation fluxe accumulation
+- Fixed sawtooth artifacts in fhzero-averaged radiation diagnostics by correcting the timing of radiation flux accumulation
 - Updated the RTE-RRTMGP to version 1.8 improved compatibility with moving-nest configurations and radiation input files
 - Updated cloud cover calculations in RRTMGP to be consistent with RRTMG and adjusted cloud cover parameters to reduce low
   cloud bias
 
 \b NoahMP \b Land \b Surface \b Model:
-- Removed vegetation type-dependent for the diagnostic option opt_diag used in HR3
+- Removed vegetation type-dependence for the diagnostic option opt_diag used in HR3
 - Used radiative temperature as skin temperature
 - Used single loop alternative approach to address some flux inconsistence below and above the canopy
 - Corrected thermal roughness calculations and adjust momentum roughness lengths
@@ -97,10 +97,6 @@ This page provides an overview of updates in CCPP Physics v8.0.0 since the previ
 - Output of surface runoff is changed from instantaneous to accumulated surface runoff
 - Update the RUC LSM deep soil temperature from climatology to real forecast
 
-\b MYNN \b Surface-layer \b Scheme
-- Added "tendency_of_vertically_diffused_tracer_concentration" as output from the MYNN PBL scheme to fix a bug when running with
-  prognostic area fraction closure in suites using SAS convectioed
-
 \b Unified \b Gravity \b Wave \b Physics \b Scheme
 - Fixed an uninitialized array reference to Bnv2 in the gravity-wave drag physics, preventing invalid Richardson number
   calculations
@@ -111,7 +107,7 @@ This page provides an overview of updates in CCPP Physics v8.0.0 since the previ
   and reducing an overly strong winter polar vortex
 
 \b Stratosphere \b H2O \b Photochemistry \b Scheme
-- Combined ozone and h20 scheme into new module, GFS_photochemistry
+- Combined ozone and h2o scheme into new module, GFS_photochemistry
 - Updated ozone photochemistry diagnostics to align with the parameterization’s Taylor expansion and added water vapor
   photochemical tendency calculations for individual terms
 
