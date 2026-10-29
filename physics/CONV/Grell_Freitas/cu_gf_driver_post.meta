@@ -37,22 +37,6 @@
   type = real
   kind = kind_phys
   intent = in
-[prevst]
-  standard_name = air_temperature_on_previous_timestep
-  long_name = temperature from previous time step
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-[prevsq]
-  standard_name = specific_humidity_on_previous_timestep
-  long_name = moisture from previous time step
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
 [cactiv]
   standard_name = counter_for_grell_freitas_convection
   long_name = convective activity memory
