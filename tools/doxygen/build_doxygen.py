@@ -145,7 +145,7 @@ def build(workspace, site, ncar_physics_ref, v8_physics_ref, v7_physics_ref, ufs
         site,
         f"NCAR/ccpp-physics ref {v8_physics_ref!r}",
         "ccppv8_doxyfile",
-        "V8",
+        "V8.0.0",
     )
 
     checkout_physics(physics, NCAR_PHYSICS_URL, v7_physics_ref)
