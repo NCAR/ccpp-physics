@@ -16,7 +16,7 @@ module cu_gf_driver_post
 !> \section arg_table_cu_gf_driver_post_run Argument Table
 !! \htmlinclude cu_gf_driver_post_run.html
 !!
-   subroutine cu_gf_driver_post_run (im, km, t, q, prevst, prevsq, cactiv, cactiv_m, conv_act, conv_act_m, ntsmoke, ntdust, ntcoarsepm, chem3d, gq0, errmsg, errflg)
+   subroutine cu_gf_driver_post_run (im, km, cactiv, cactiv_m, conv_act, conv_act_m, ntsmoke, ntdust, ntcoarsepm, chem3d, gq0, errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -24,10 +24,6 @@ module cu_gf_driver_post
 
       ! Interface variables
       integer,          intent(in)  :: im, km
-      real(kind_phys),  intent(in)  :: t(:,:)
-      real(kind_phys),  intent(in)  :: q(:,:)
-      real(kind_phys),  intent(out) :: prevst(:,:)
-      real(kind_phys),  intent(out) :: prevsq(:,:)
       integer,          intent(in)  :: cactiv(:)
       integer,          intent(in)  :: cactiv_m(:)
       real(kind_phys),  intent(out) :: conv_act(:)
@@ -36,7 +32,7 @@ module cu_gf_driver_post
       real(kind_phys),  intent(inout), optional :: chem3d(:,:,:)
       real(kind_phys),  intent(inout) :: gq0(:,:,:)
       character(len=*), intent(out) :: errmsg
-!$acc declare copyin(t,q,cactiv,cactiv_m) copyout(prevst,prevsq,conv_act,conv_act_m,chem3d,gq0)
+!$acc declare copyin(cactiv,cactiv_m) copyout(conv_act,conv_act_m,chem3d,gq0)
       integer, intent(out)          :: errflg
 
       ! Local variables
@@ -47,9 +43,6 @@ module cu_gf_driver_post
       errflg = 0
 
 !$acc kernels
-      prevst(:,:) = t(:,:)
-      prevsq(:,:) = q(:,:)
-
       do i = 1, im
         if (cactiv(i).gt.0) then
           conv_act(i) = conv_act(i)+1.0

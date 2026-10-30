@@ -27,7 +27,7 @@
         drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,                             &
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, num_diag_buckets,                         &
         dtend, dtidx, index_of_temperature, index_of_process_mp,ldiag3d, qdiag3d,dqdt_qmicro, lssav, num_dfi_radar,       &
-        fh_dfi_radar,index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour, prevsq,      &
+        fh_dfi_radar,index_of_process_dfi_radar, ix_dfi_radar, dfi_radar_tten, radar_tten_limits, fhour,              &
         iopt_lake, iopt_lake_clm, lkm, use_lake_model, errmsg, errflg)
 !
       use machine, only: kind_phys
@@ -95,7 +95,6 @@
       real(kind=kind_phys), dimension(:),      intent(inout) :: tsnowpb
       real(kind=kind_phys), dimension(:),      intent(inout) :: rhonewsn1
       real(kind=kind_phys), dimension(:,:),    intent(inout), optional :: dqdt_qmicro
-      real(kind=kind_phys), dimension(:,:),    intent(inout), optional :: prevsq
       real(kind=kind_phys),                    intent(in)    :: dtp
 
       ! CCPP error handling
@@ -606,14 +605,6 @@
       do i=1,im
         pwat(i) = pwat(i) * onebg
       enddo
-
-      if(progsigma)then      
-         do k = 1, levs
-            do i=1, im
-               prevsq(i,k) = gq0(i,k,1)
-            enddo
-         enddo
-      endif
 
       end subroutine GFS_MP_generic_post_run
 

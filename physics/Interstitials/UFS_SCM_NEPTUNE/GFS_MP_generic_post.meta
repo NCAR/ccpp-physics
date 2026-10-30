@@ -983,15 +983,6 @@
   kind = kind_phys
   intent = inout
   optional = True
-[prevsq]
-  standard_name = specific_humidity_on_previous_timestep
-  long_name = specific_humidity_on_previous_timestep
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = True
 [lssav]
   standard_name = flag_for_diagnostics
   long_name = logical flag for storing diagnostics
@@ -1042,4 +1033,3 @@
   dimensions = ()
   type = integer
   intent = out
-
