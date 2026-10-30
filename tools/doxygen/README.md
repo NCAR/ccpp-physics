@@ -40,7 +40,7 @@ The build checks out one ccpp-physics clone at each of these refs in turn:
 | Make variable      | Repository                   | Default ref      | Sections                          |
 |--------------------|------------------------------|------------------|-----------------------------------|
 | `NCAR_PHYSICS_REF` | `NCAR/ccpp-physics`          | `main`           | HSD, GWv1, LandDA, landing page   |
-| `V8_PHYSICS_REF`   | `NCAR/ccpp-physics`          | `v8.0.0`         | V8                                |
+| `V8_PHYSICS_REF`   | `NCAR/ccpp-physics`          | `v8.0.0`         | V8.0.0                            |
 | `V7_PHYSICS_REF`   | `NCAR/ccpp-physics`          | `v7.0.1`         | V7                                |
 | `UFS_PHYSICS_REF`  | `ufs-community/ccpp-physics` | `release/srw-v3` | SRWv3                             |
 
