@@ -222,7 +222,8 @@
 cc
       parameter(gravi=1.0/grav)
       parameter(gocp=grav/cp)
-      parameter(cont=cp/grav,conq=hvap/grav,conw=1.0/grav)               ! for del in pa
+ ! for del in pa
+      parameter(cont=cp/grav,conq=hvap/grav,conw=1.0/grav)
 !     parameter(cont=1000.*cp/grav,conq=1000.*hvap/grav,conw=1000./grav) ! for del in kpa
       parameter(rlam=30.0,vk=0.4,vk2=vk*vk)
       parameter(prmin=0.25,prmax=4.,zolcr=0.2,zolcru=-0.5)

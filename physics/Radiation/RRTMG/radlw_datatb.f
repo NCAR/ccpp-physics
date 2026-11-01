@@ -938,12 +938,15 @@
 
 !> absrain is the rain drop absorption coefficient \f$(m^{2}/g)\f$ .
 !     real (kind=kind_phys), parameter :: absrain = 3.07e-3       ! chou coeff
-      real (kind=kind_phys), parameter :: absrain = 0.33e-3       ! ncar coeff
+ ! ncar coeff
+      real (kind=kind_phys), parameter :: absrain = 0.33e-3
 
 !> abssnow0 is the snow flake absorption coefficient (micron), fu coeff
-      real (kind=kind_phys), parameter :: abssnow0 = 1.5          ! fu   coeff
+ ! fu   coeff
+      real (kind=kind_phys), parameter :: abssnow0 = 1.5
 !> abssnow1 is the snow flake absorption coefficient \f$(m^{2}/g)\f$, ncar coeff
-      real (kind=kind_phys), parameter :: abssnow1 = 2.34e-3      ! ncar coeff
+ ! ncar coeff
+      real (kind=kind_phys), parameter :: abssnow1 = 2.34e-3
 
 ! === absliq# is the liquid water absorption coefficient (m2/g).
 

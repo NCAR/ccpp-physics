@@ -1,0 +1,84 @@
+# to test locally run the following from the command line
+# act push -W .github/workflows/ci_scm_ccpp_capgen.yml -j ccpp-capgen-SCM
+
+name: CI test to run SCM capgen step
+
+on: [push, pull_request]
+
+jobs:
+  ccpp-capgen-SCM:
+    if: github.repository == 'NCAR/ccpp-physics' || github.repository == 'ufs-community/ccpp-physics'
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout current ccpp-physics code
+      uses: actions/checkout@v6
+
+    - name: Checkout latest ccpp-scm code
+      run: git clone --depth 1 https://github.com/NCAR/ccpp-scm.git
+
+    - name: Initialize submodules
+      run: |
+        git config --global --add safe.directory "$GITHUB_WORKSPACE/ccpp-scm"
+        git -C "$GITHUB_WORKSPACE/ccpp-scm" submodule update --init --recursive
+
+    - name: Use current ccpp-physics code in ccpp-scm
+      run: |
+        physics_sha="$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)"
+        echo "Physics SHA: $physics_sha"
+        git -C "$GITHUB_WORKSPACE/ccpp-scm/ccpp/physics" fetch --update-shallow "$GITHUB_WORKSPACE" "$physics_sha"
+        git -C "$GITHUB_WORKSPACE/ccpp-scm/ccpp/physics" checkout --detach "$physics_sha"
+        git -C "$GITHUB_WORKSPACE/ccpp-scm/ccpp/physics" submodule update --init --recursive
+        test "$(git -C "$GITHUB_WORKSPACE/ccpp-scm/ccpp/physics" rev-parse HEAD)" = "$physics_sha"
+
+    - name: Set up Python 3.10.13
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.10.13
+
+    - name: Install capgen dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes libxml2-utils
+
+    - name: Run ccpp_capgen.py
+      run: |
+        cd "$GITHUB_WORKSPACE/ccpp-scm"
+
+        scheme_files="$(
+          sed -n '/^set(SCHEME_METADATA_FILES$/,/^)/p' ccpp/CMakeLists.txt |
+            sed -n 's|.*${SCHEME_FILES_DIR}/\([^" ]*\.meta\)".*|\1|p' |
+            sed "s|^|$GITHUB_WORKSPACE/ccpp-scm/ccpp/physics/physics/|" |
+            paste -sd, -
+        )"
+        host_files="$(
+          sed -n '/^set(HOST_METADATA_FILES$/,/^)/p' ccpp/CMakeLists.txt |
+            sed -n 's|.*${HOST_FILES_DIR}/\([^" ]*\.meta\)".*|\1|p' |
+            sed "s|^|$GITHUB_WORKSPACE/ccpp-scm/scm/src/|" |
+            paste -sd, -
+        )"
+        suite_files="$(
+          find "$GITHUB_WORKSPACE/ccpp-scm/ccpp/suites" -maxdepth 1 -type f -name '*.xml' |
+            sort |
+            paste -sd, -
+        )"
+
+        test -n "$scheme_files"
+        test -n "$host_files"
+        test -n "$suite_files"
+
+        "$GITHUB_WORKSPACE/ccpp-scm/ccpp/framework/capgen/ccpp_capgen.py" \
+          --host-name scm \
+          --host-files "$host_files" \
+          --scheme-files "$scheme_files" \
+          --suites "$suite_files" \
+          --output-root "$GITHUB_WORKSPACE/ccpp-scm/scm/bin/ccpp" \
+          --legacy-mode \
+          --gfs-dim-aliases \
+          --no-host-introspection \
+          --verbose
+
+        test -s "$GITHUB_WORKSPACE/ccpp-scm/scm/bin/ccpp/datatable.xml"

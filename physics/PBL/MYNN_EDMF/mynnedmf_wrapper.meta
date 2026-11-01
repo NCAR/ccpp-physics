@@ -1191,7 +1191,7 @@
   intent = in
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
-  long_name = index of x-wind in first dimension of array cumulative change index
+  long_name = index of y-wind in first dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer
@@ -1410,6 +1410,13 @@
   dimensions = ()
   type = integer
   intent = in
+[imp_physics_tempo]
+  standard_name = identifier_for_tempo_microphysics_scheme
+  long_name = choice of Tempo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in  
 [imp_physics_wsm6]
   standard_name = identifier_for_wsm6_microphysics_scheme
   long_name = choice of WSM6 microphysics scheme
@@ -1446,7 +1453,7 @@
   type = integer
   intent = in
 [imfdeepcnv_samf]
-  standard_name = identifer_for_scale_aware_mass_flux_deep_convection
+  standard_name = identifier_for_scale_aware_mass_flux_deep_convection
   long_name = flag for SAMF deep convection scheme
   units = flag
   dimensions = ()

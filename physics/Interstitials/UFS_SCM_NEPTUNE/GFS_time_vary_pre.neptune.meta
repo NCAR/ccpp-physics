@@ -2,7 +2,7 @@
   name = GFS_time_vary_pre
   type = scheme
   dependencies_path = ../../
-  dependencies = tools/funcphys.f90,hooks/machine.F
+  dependencies = hooks/physcons.F90,tools/funcphys.f90,hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -26,7 +26,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_time_vary_pre_finalize
+  name = GFS_time_vary_pre_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message

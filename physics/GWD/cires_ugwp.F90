@@ -16,7 +16,7 @@ module cires_ugwp
 
     use machine, only: kind_phys
 
-    use cires_ugwpv0_module, only: knob_ugwp_version, cires_ugwpv0_mod_init, cires_ugwpv0_mod_finalize
+    use cires_ugwpv0_module, only: knob_ugwp_version, cires_ugwpv0_mod_init, cires_ugwpv0_mod_final
     use ugwp_driver_v0
     use gwdps, only: gwdps_run
     use cires_ugwp_triggers
@@ -25,7 +25,7 @@ module cires_ugwp
 
     private
 
-    public cires_ugwp_init, cires_ugwp_run, cires_ugwp_finalize
+    public cires_ugwp_init, cires_ugwp_run, cires_ugwp_final
 
     logical :: is_initialized = .False.
 
@@ -103,16 +103,16 @@ contains
     end subroutine cires_ugwp_init
 
 ! -----------------------------------------------------------------------
-! finalize of cires_ugwp   (_finalize)
+! finalize of cires_ugwp   (_final)
 ! -----------------------------------------------------------------------
 
 !> The subroutine finalizes the CIRES UGWP
 #if 0
-!> \section arg_table_cires_ugwp_finalize Argument Table
-!! \htmlinclude cires_ugwp_finalize.html
+!> \section arg_table_cires_ugwp_final Argument Table
+!! \htmlinclude cires_ugwp_final.html
 !!
 #endif
-    subroutine cires_ugwp_finalize(errmsg, errflg)
+    subroutine cires_ugwp_final(errmsg, errflg)
 
     implicit none
 !
@@ -125,11 +125,11 @@ contains
 
     if (.not.is_initialized) return
 
-    call cires_ugwpv0_mod_finalize()
+    call cires_ugwpv0_mod_final()
 
     is_initialized = .false.
 
-    end subroutine cires_ugwp_finalize
+    end subroutine cires_ugwp_final
 
 ! -----------------------------------------------------------------------
 !    originally from ugwp_driver_v0.f
@@ -244,7 +244,7 @@ contains
     real(kind=kind_phys),    intent(in), dimension(:) :: rain
 
     integer,                 intent(in) :: ntke
-    real(kind=kind_phys),    intent(in), dimension(:,:) :: q_tke, dqdt_tke
+    real(kind=kind_phys),    intent(in), dimension(:,:), optional :: q_tke, dqdt_tke
 
     logical, intent(in) :: lprnt
     integer, intent(in) :: ipr

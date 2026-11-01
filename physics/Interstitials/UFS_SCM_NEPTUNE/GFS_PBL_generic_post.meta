@@ -260,6 +260,13 @@
   dimensions = ()
   type = integer
   intent = in
+[imp_physics_tempo]
+  standard_name = identifier_for_tempo_microphysics_scheme
+  long_name = choice of Tempo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
 [imp_physics_wsm6]
   standard_name = identifier_for_wsm6_microphysics_scheme
   long_name = choice of WSM6 microphysics scheme
@@ -291,6 +298,13 @@
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[lthailaware]
+  standard_name = flag_for_hail_physics
+  long_name = flag for hail physics
   units = flag
   dimensions = ()
   type = logical
@@ -354,6 +368,13 @@
 [cplchp]
   standard_name = flag_for_chemistry_package_coupling
   long_name = flag controlling cplchp collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[cplcat]
+  standard_name = flag_for_catchem_coupling
+  long_name = flag controlling cplcat collection (default off)
   units = flag
   dimensions = ()
   type = logical
@@ -429,6 +450,22 @@
   type = real
   kind = kind_phys
   intent = in
+[ten_t_pbl]
+  standard_name = tendency_of_air_temperature_due_to_PBL
+  long_name = tendency of air temperature calculated by the PBL scheme
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_q_pbl]
+  standard_name = tendency_of_specific_humidity_concentration_due_to_PBL
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [ten_t]
   standard_name = tendency_of_air_temperature
   long_name = tendency of air temperature calculated by one physics scheme
@@ -460,7 +497,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension,number_of_tracers)
   type = real
   kind = kind_phys
-  intent = in
+  intent = out
 [dusfc1]
   standard_name = instantaneous_surface_x_momentum_flux
   long_name = surface momentum flux in the x-direction valid for current call
@@ -517,7 +554,7 @@
   intent = in
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
-  long_name = index of x-wind in first dimension of array cumulative change index
+  long_name = index of y-wind in first dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer

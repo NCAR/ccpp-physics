@@ -46,7 +46,7 @@
 
       private
 
-      public GFS_phys_time_vary_init, GFS_phys_time_vary_timestep_init, GFS_phys_time_vary_finalize
+      public GFS_phys_time_vary_init, GFS_phys_time_vary_timestep_init, GFS_phys_time_vary_final
 
       real(kind=kind_phys), parameter :: con_hr        =  3600.0_kind_phys
       real(kind=kind_phys), parameter :: con_99        =    99.0_kind_phys
@@ -278,9 +278,6 @@
            call read_mp_table_parameters(errmsg, errflg)
            if(errflg/=0) return
          endif
-
-
-! Need an OpenMP barrier here (implicit in "end sections")
 
 !> - Setup spatial interpolation indices for ozone physics.
          if (ntoz > 0) then
@@ -830,8 +827,7 @@
 
 !$OMP section
 
-         !--- random number needed for RAS and old SAS and when cal_pre=.true.
-         !    imfdeepcnv < 0 when ras = .true.
+         !--- random number needed for old SAS and when cal_pre=.true.
          if ( (imfdeepcnv <= 0 .or. cal_pre) .and. random_clds ) then
 
            iseed = mod(con_100*sqrt(fhour*con_hr),1.0d9) + seed0
@@ -987,10 +983,10 @@
       end subroutine GFS_phys_time_vary_timestep_init
 !> @}
 
-!> \section arg_table_GFS_phys_time_vary_finalize Argument Table
-!! \htmlinclude GFS_phys_time_vary_finalize.html
+!> \section arg_table_GFS_phys_time_vary_final Argument Table
+!! \htmlinclude GFS_phys_time_vary_final.html
 !!
-      subroutine GFS_phys_time_vary_finalize(is_initialized, errmsg, errflg)
+      subroutine GFS_phys_time_vary_final(is_initialized, errmsg, errflg)
 
          implicit none
 
@@ -1021,6 +1017,6 @@
 
          is_initialized = .false.
 
-      end subroutine GFS_phys_time_vary_finalize
+      end subroutine GFS_phys_time_vary_final
 
    end module GFS_phys_time_vary

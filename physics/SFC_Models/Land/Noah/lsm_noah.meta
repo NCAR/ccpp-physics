@@ -84,7 +84,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = lsm_noah_finalize
+  name = lsm_noah_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message

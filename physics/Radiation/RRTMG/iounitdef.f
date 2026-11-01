@@ -63,7 +63,8 @@
       integer, parameter :: NISIGI2 = 12
       integer, parameter :: NISFCI  = 14
       integer, parameter :: NICO2TR = 15
-      integer, parameter :: NICO2CN = 112 ! CCE (Cray) forbids 100-102 20211112 JM
+ ! CCE (Cray) forbids 100-102 20211112 JM
+      integer, parameter :: NICO2CN = 112
       integer, parameter :: NIMTNVR = 24
       integer, parameter :: NIDTBTH = 27
       integer, parameter :: NIO3PRD = 28
@@ -72,9 +73,12 @@
       integer, parameter :: NICLTUN = 43
       integer, parameter :: NIO3CLM = 48
       integer, parameter :: NIMICPH = 1
-      integer, parameter :: NISFCYC = 111 ! CCE (Cray) forbids 100-102 20210701 JM
-      integer, parameter :: NIAERCM = 112 ! CCE (Cray) forbids 100-102 20210701 JM
-      integer, parameter :: NIRADSF = 112 ! CCE (Cray) forbids 100-102 20210701 JM
+ ! CCE (Cray) forbids 100-102 20210701 JM
+      integer, parameter :: NISFCYC = 111
+ ! CCE (Cray) forbids 100-102 20210701 JM
+      integer, parameter :: NIAERCM = 112
+ ! CCE (Cray) forbids 100-102 20210701 JM
+      integer, parameter :: NIRADSF = 112
 
 !  --- ... output units
 

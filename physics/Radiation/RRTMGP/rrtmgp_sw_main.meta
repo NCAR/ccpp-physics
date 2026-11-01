@@ -3,8 +3,12 @@
   type = scheme
   dependencies = ../../hooks/machine.F,../radiation_tools.F90,../mersenne_twister.f
   dependencies = rte-rrtmgp/rrtmgp-frontend/mo_gas_optics_rrtmgp.F90,rte-rrtmgp/extensions/mo_fluxes_byband.F90
-  dependencies = rte-rrtmgp/rte-frontend/mo_rte_kind.F90,rte-rrtmgp/gas-optics/mo_gas_concentrations.F90,rte-rrtmgp/rte-frontend/mo_optical_props.F90
+  dependencies = rte-rrtmgp/rte-frontend/mo_rte_kind.F90,rte-rrtmgp/gas-optics/mo_gas_concentrations.F90
+  dependencies = rte-rrtmgp/rte-frontend/mo_optical_props.F90,rte-rrtmgp/rte-kernels/mo_optical_props_kernels.F90
   dependencies = rte-rrtmgp/rte-frontend/mo_rte_sw.F90,rte-rrtmgp/rte-frontend/mo_fluxes.F90
+  dependencies = rte-rrtmgp/rte-kernels/mo_rte_util_array.F90,rte-rrtmgp/rrtmgp-kernels/mo_gas_optics_rrtmgp_kernels.F90
+  dependencies = rte-rrtmgp/gas-optics/mo_gas_optics_util_string.F90,rte-rrtmgp/gas-optics/mo_gas_optics.F90
+  dependencies = rte-rrtmgp/rrtmgp-frontend/mo_cloud_optics_rrtmgp.F90
   dependencies = rte-rrtmgp/rte-kernels/mo_fluxes_broadband_kernels.F90, rte-rrtmgp/rte-kernels/mo_rte_solver_kernels.F90
   dependencies = rrtmgp_sw_gas_optics.F90, rrtmgp_sw_cloud_optics.F90,rrtmgp_sampling.F90
   dependencies = ../../Interstitials/UFS_SCM_NEPTUNE/GFS_rrtmgp_pre.F90

@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = satmedmfvdifq
   type = scheme
-  dependencies = ../../tools/funcphys.f90,../../tools/canopy_utils_mod.f,../../hooks/machine.F,../mfpbltq.f,mfscuq.f,../tridi.f
+  dependencies = ../../tools/funcphys.f90,../../tools/canopy_utils_mod.f,../../hooks/machine.F,../mfpbltq.f,mfscuq.f,mfscuq_mlm.f,../tridi.f
 
 ########################################################################
 [ccpp-arg-table]
@@ -177,6 +177,81 @@
   type = real
   kind = kind_phys
   intent = in
+[mlm]
+  standard_name = flag_for_using_mixed_layer_model_in_TKE_EDMF_PBL
+  long_name = flag for mixed-layer model in TKE-EDMF PBL scheme
+  units = none
+  dimensions = ()
+  type = logical
+  intent = in
+[ntsw]
+  standard_name = index_of_snow_mixing_ratio_in_tracer_concentration_array
+  long_name = tracer index for snow water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[ntinc]
+  standard_name = index_of_mass_number_concentration_of_cloud_ice_in_tracer_concentration_array
+  long_name = tracer index for ice number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[pfl_lsan]
+  standard_name = liquid_flux_due_to_large_scale_precipitation
+  long_name = instantaneous 3D flux of liquid water from nonconvective precipitation
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[pfi_lsan]
+  standard_name = ice_flux_due_to_large_scale_precipitation
+  long_name = instantaneous 3D flux of ice from nonconvective precipitation
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = True
+[eflux]
+  standard_name = total_energy_flux
+  long_name = total energy flux from mlm scheme
+  units = K m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[rflux]
+  standard_name = radiative_flux
+  long_name = radiative flux from mlm scheme
+  units = K m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[wflux]
+  standard_name = total_water_flux
+  long_name = total water flux from mlm scheme
+  units = kg kg-1 m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
+[pflux]
+  standard_name = precipitation_flux
+  long_name = precipitation flux from mlm scheme
+  units = kg kg-1 m s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = True
 [rtg]
   standard_name = tendency_of_vertically_diffused_tracer_concentration
   long_name = tendency of the tracers due to vertical diffusion in PBL scheme
@@ -762,7 +837,7 @@
   intent = in
 [index_of_y_wind]
   standard_name = index_of_y_wind_in_cumulative_change_index
-  long_name = index of x-wind in first dimension of array cumulative change index
+  long_name = index of y-wind in first dimension of array cumulative change index
   units = index
   dimensions = ()
   type = integer

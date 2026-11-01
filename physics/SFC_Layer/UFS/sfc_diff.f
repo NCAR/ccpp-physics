@@ -15,7 +15,8 @@
 
       private
 
-      real (kind=kind_phys), parameter :: ca=0.4_kind_phys  ! ca - von karman constant
+ ! ca - von karman constant
+      real (kind=kind_phys), parameter :: ca=0.4_kind_phys
 
       contains
 
@@ -54,7 +55,8 @@
 !!\f]
 !! - Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
 !!
-      subroutine sfc_diff_run (im,rvrdm1,eps,epsm1,grav,                &  !intent(in)
+ !intent(in)
+      subroutine sfc_diff_run (im,rvrdm1,eps,epsm1,grav,                &
      &                    ps,t1,q1,z1,garea,wind,                       &  !intent(in)
      &                    prsl1,prslki,prsik1,prslk1,                   &  !intent(in)
      &                    sigmaf,vegtype,shdmax,ivegsrc,                &  !intent(in)
@@ -86,17 +88,21 @@
 !
       integer, parameter  :: kp = kind_phys
       integer, intent(in) :: im, ivegsrc
-      integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
-      logical, intent(in) :: use_oceanuv ! option for including ocean current in the computation of flux
+ ! option for calculating surface roughness length over ocean
+      integer, intent(in) :: sfc_z0_type
+ ! option for including ocean current in the computation of flux
+      logical, intent(in) :: use_oceanuv
 
       integer, dimension(:), intent(in) :: vegtype
 
-      logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
+ ! reduced drag coeff. flag for high wind over sea (j.han)
+      logical, intent(in) :: redrag
       logical, dimension(:), intent(in) :: flag_iter, dry, icy
       logical, dimension(:), intent(in) :: flag_lakefreeze
       logical, dimension(:), intent(inout) :: wet
 
-      logical, intent(in) :: thsfc_loc ! Flag for reference pressure in theta calculation
+ ! Flag for reference pressure in theta calculation
+      logical, intent(in) :: thsfc_loc
 
       real(kind=kind_phys), dimension(:), intent(in)    :: u10m,v10m
       real(kind=kind_phys), dimension(:), intent(in)    :: u1,v1

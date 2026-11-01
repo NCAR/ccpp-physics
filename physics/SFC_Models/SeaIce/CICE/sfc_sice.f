@@ -136,14 +136,20 @@
       implicit none
 !
 ! - Define constant parameters
-      integer,              parameter :: kmi   = 2                  !< 2-layer of ice
+ !< 2-layer of ice
+      integer,              parameter :: kmi   = 2
       real(kind=kind_phys), parameter :: zero  = 0.0_kind_phys
       real(kind=kind_phys), parameter :: one   = 1.0_kind_phys
-      real(kind=kind_phys), parameter :: himax = 8.0_kind_phys      !< maximum ice thickness allowed
-      real(kind=kind_phys), parameter :: himin = 0.1_kind_phys      !< minimum ice thickness required
-      real(kind=kind_phys), parameter :: hsmax = 2.0_kind_phys      !< maximum snow depth allowed
-      real(kind=kind_phys), parameter :: timin = 173.0_kind_phys    !< minimum temperature allowed for snow/ice
-      real(kind=kind_phys), parameter :: albfw = 0.06_kind_phys     !< albedo for lead
+ !< maximum ice thickness allowed
+      real(kind=kind_phys), parameter :: himax = 8.0_kind_phys
+ !< minimum ice thickness required
+      real(kind=kind_phys), parameter :: himin = 0.1_kind_phys
+ !< maximum snow depth allowed
+      real(kind=kind_phys), parameter :: hsmax = 2.0_kind_phys
+ !< minimum temperature allowed for snow/ice
+      real(kind=kind_phys), parameter :: timin = 173.0_kind_phys
+ !< albedo for lead
+      real(kind=kind_phys), parameter :: albfw = 0.06_kind_phys
       real(kind=kind_phys), parameter :: dsi   = one/0.33_kind_phys
       real(kind=kind_phys), parameter :: qmin  = 1.0e-8_kind_phys
 
@@ -521,22 +527,34 @@
 !
 
 !  ---  constant parameters: (properties of ice, snow, and seawater)
-      real (kind=kind_phys), parameter :: ds   = 330.0_kind_phys    !< snow (ov sea ice) density (kg/m^3)
-      real (kind=kind_phys), parameter :: dw   =1000.0_kind_phys    !< fresh water density  (kg/m^3)
+ !< snow (ov sea ice) density (kg/m^3)
+      real (kind=kind_phys), parameter :: ds   = 330.0_kind_phys
+ !< fresh water density  (kg/m^3)
+      real (kind=kind_phys), parameter :: dw   =1000.0_kind_phys
       real (kind=kind_phys), parameter :: dsdw = ds/dw
       real (kind=kind_phys), parameter :: dwds = dw/ds
-      real (kind=kind_phys), parameter :: ks   = 0.31_kind_phys     !< conductivity of snow   (w/mk)
-      real (kind=kind_phys), parameter :: i0   = 0.3_kind_phys      !< ice surface penetrating solar fraction
-      real (kind=kind_phys), parameter :: ki   = 2.03_kind_phys     !< conductivity of ice  (w/mk)
-      real (kind=kind_phys), parameter :: di   = 917.0_kind_phys    !< density of ice   (kg/m^3)
+ !< conductivity of snow   (w/mk)
+      real (kind=kind_phys), parameter :: ks   = 0.31_kind_phys
+ !< ice surface penetrating solar fraction
+      real (kind=kind_phys), parameter :: i0   = 0.3_kind_phys
+ !< conductivity of ice  (w/mk)
+      real (kind=kind_phys), parameter :: ki   = 2.03_kind_phys
+ !< density of ice   (kg/m^3)
+      real (kind=kind_phys), parameter :: di   = 917.0_kind_phys
       real (kind=kind_phys), parameter :: didw = di/dw
       real (kind=kind_phys), parameter :: dsdi = ds/di
-      real (kind=kind_phys), parameter :: ci   = 2054.0_kind_phys   !< heat capacity of fresh ice (j/kg/k)
-      real (kind=kind_phys), parameter :: li   = 3.34e5_kind_phys   !< latent heat of fusion (j/kg-ice)
-      real (kind=kind_phys), parameter :: si   = 1.0_kind_phys      !< salinity of sea ice
-      real (kind=kind_phys), parameter :: mu   = 0.054_kind_phys    !< relates freezing temp to salinity
-      real (kind=kind_phys), parameter :: tfi  = -mu*si             !< sea ice freezing temp = -mu*salinity
-      real (kind=kind_phys), parameter :: tfw  = -1.8_kind_phys     !< tfw - seawater freezing temp (c)
+ !< heat capacity of fresh ice (j/kg/k)
+      real (kind=kind_phys), parameter :: ci   = 2054.0_kind_phys
+ !< latent heat of fusion (j/kg-ice)
+      real (kind=kind_phys), parameter :: li   = 3.34e5_kind_phys
+ !< salinity of sea ice
+      real (kind=kind_phys), parameter :: si   = 1.0_kind_phys
+ !< relates freezing temp to salinity
+      real (kind=kind_phys), parameter :: mu   = 0.054_kind_phys
+ !< sea ice freezing temp = -mu*salinity
+      real (kind=kind_phys), parameter :: tfi  = -mu*si
+ !< tfw - seawater freezing temp (c)
+      real (kind=kind_phys), parameter :: tfw  = -1.8_kind_phys
       real (kind=kind_phys), parameter :: tfi0 = tfi-0.0001_kind_phys
       real (kind=kind_phys), parameter :: dici = di*ci
       real (kind=kind_phys), parameter :: dili = di*li

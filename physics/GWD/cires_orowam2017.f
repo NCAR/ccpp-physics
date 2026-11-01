@@ -55,7 +55,8 @@
       real(kind=kind_phys), parameter  :: mkz2min = mkzmin* mkzmin
       real(kind=kind_phys), parameter  :: kedmin = 1.e-3
       real(kind=kind_phys), parameter  :: kedmax = 350.,axmax=250.e-5
-      real(kind=kind_phys), parameter  :: rtau   = 0.01   ! nonlin-OGW scale 1/10sec
+ ! nonlin-OGW scale 1/10sec
+      real(kind=kind_phys), parameter  :: rtau   = 0.01
       real(kind=kind_phys), parameter  :: Linsat2 =0.5
       real(kind=kind_phys), parameter  :: kxmin = 6.28e-3/100.
       real(kind=kind_phys), parameter  :: kxmax = 6.28e-3/5.0

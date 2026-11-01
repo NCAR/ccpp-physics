@@ -514,7 +514,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = lsm_ruc_finalize
+  name = lsm_ruc_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message

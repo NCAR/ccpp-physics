@@ -11,6 +11,7 @@
       use mfpbltq_mod
       use tridi_mod
       use mfscuq_mod
+      use mfscuq_mlm_mod, only : mfscuq_mlm
       !PCC_CANOPY_utilities
       use canopy_utils_mod
 
@@ -87,7 +88,9 @@
 !! (mfscuq.f).
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm
       subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntrw,               &
-     &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,              &
+     &     ntiw,ntke,grav,pi,rd,cp,rv,hvap,hfus,fv,eps,epsm1,           &
+     &     mlm,ntsw,ntinc,pfl_lsan,pfi_lsan,                            &
+     &     eflux,rflux,wflux,pflux,                                     &
 !The following three variables are for SA-3D-TKE
      &     def_1,def_2,def_3,sa3dtke,dku3d_h,dku3d_e,                   &
      &     rtg,u1,v1,t1,q1,usfco,vsfco,use_oceanuv,                     &
@@ -113,6 +116,10 @@
 !----------------------------------------------------------------------
       integer, intent(in)  :: im, km, ntrac, ntcw, ntrw, ntiw,          &
      &                        ntke, ntqv
+!+mlm              
+      logical, intent(in)  :: mlm
+      integer, intent(in)  :: ntsw, ntinc
+!-mlm              
       integer, intent(in)  :: sfc_rlm
       integer, intent(in)  :: tc_pbl
       integer, intent(in)  :: use_lpt
@@ -125,6 +132,13 @@
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: dspfac, bl_upfr, bl_dnfr
       real(kind=kind_phys), intent(in) :: rlmx, elmx
+!+mlm    For mixed-layer option 
+      real(kind=kind_phys), optional, intent(in) ::                     &
+     &     pfl_lsan(:,:),    pfi_lsan(:,:)
+      real(kind=kind_phys), optional, intent(inout)::                     &
+     &                     eflux(:,:),   pflux(:,:),                    &
+     &                     wflux(:,:),   rflux(:,:)
+!-mlm              
 !PCC CANOPY------------------------------------
       logical, intent(in)  :: do_canopy, cplaqm
       real(kind=kind_phys), optional, intent(in)  :: claie(:), cfch(:), &
@@ -188,6 +202,12 @@
       integer kps,kbx,kmx
       integer lcld(im),kcld(im),krad(im),mrad(im)
       integer kx1(im), kb1(im), kpblx(im)
+!+mlm      
+      real(kind=kind_phys) shear(im,km),buoy(im,km)
+      real(kind=kind_phys) uflux(im,km),vflux(im,km)
+      real(kind=kind_phys) hx(im,km),rad(im,km),prec(im,km)
+      real(kind=kind_phys) tdt(im,km), du(im,km), dv(im,km)
+!-mlm      
 !
       real(kind=kind_phys) te(im,km),   tei(im,km-1), tke(im,km),
      &                     tteh(im,km), tesq(im,km-1),e2(im,0:km)
@@ -253,6 +273,9 @@
 !
       logical  pblflg(im), sfcflg(im), flg(im)
       logical  scuflg(im), pcnvflg(im)
+!+mlm amy
+      logical  mscuflg(im)
+!-mlm
       logical  mlenflg
 !
 !  pcnvflg: true for unstable pbl
@@ -357,7 +380,7 @@
       parameter(aphi5=5.,aphi16=16.)
       parameter(elmfac=1.0,elefac=1.0,cql=100.)
       parameter(dw2min=1.e-4,dkmax=1000.,xkgdx=1000.)
-      parameter(qlcr=3.5e-5,zstblmax=2500.)
+      parameter(qlcr=3.5e-5)
       parameter(xkinv1=0.15,xkinv2=0.3)
       parameter(h1=0.33333333,hcrinv=250.)
       parameter(vegflo=0.1,vegfup=1.0,z0lo=0.1,z0up=1.0)
@@ -404,6 +427,12 @@
         ck1   = 0.15
         ch1   = 0.15
       endif
+!+mlm   
+      zstblmax = 2500.
+      if (mlm) then
+        zstblmax = 5000.
+      endif              
+!-mlm      
 
       gravi = 1.0 / grav
       g = grav
@@ -427,22 +456,44 @@
       km1 = km - 1
       kmpbl = km / 2
       kmscu = km / 2
+!+mlm      
+      !if MLM check mod set height to model top
+      if (mlm) then
+         kmpbl = km - 1
+         kmscu = km - 1
+      endif
+!-mlm      
 !>  - Compute physical height of the layer centers and interfaces from
 !! the geopotential height (\p zi and \p zl)
       do k=1,km
-        do i=1,im
-          zi(i,k) = phii(i,k) * gravi
-          zl(i,k) = phil(i,k) * gravi
-          xmf(i,k) = 0.
-          xmfd(i,k) = 0.
-          buou(i,k) = 0.
-          buod(i,k) = 0.
-          wush(i,k) = 0.
-          ckz(i,k) = ck1
-          chz(i,k) = ch1
-          rlmnz(i,k) = rlmn0
-        enddo
+         do i=1,im
+            zi(i,k) = phii(i,k) * gravi
+            zl(i,k) = phil(i,k) * gravi
+            xmf(i,k) = 0.
+            xmfd(i,k) = 0.
+            buou(i,k) = 0.
+            buod(i,k) = 0.
+            wush(i,k) = 0.
+            ckz(i,k) = ck1
+            chz(i,k) = ch1
+            rlmnz(i,k) = rlmn0
+!+mlm
+            if (mlm) then
+               if (k.lt.km) xlamde(i,k) = 0.
+               rad(i,k) = 0.
+               tdt(i,k) = 0.
+               du(i,k) = 0.
+               dv(i,k) = 0.              
+               if (present(pfi_lsan) .and. present(pfl_lsan)) then
+                  prec(i,k) = -(pfi_lsan(i,k) + pfl_lsan(i,k))
+               else
+                  prec(i,k) = 0.
+               endif
+            endif
+!-mlm
+         enddo
       enddo
+     
       do i=1,im
         zi(i,km+1) = phii(i,km+1) * gravi
       enddo
@@ -561,6 +612,7 @@
          pftke(i)=1.0
          pblflg(i)= .true.
          sfcflg(i)= .true.
+         mscuflg(i) = .false.
          if(rbsoil(i) > 0.) sfcflg(i) = .false.
          pcnvflg(i)= .false.
          scuflg(i)= .true.
@@ -603,6 +655,11 @@
             else
               tem1=max(q1(i,k,ntiw),qlmin)
               qice(i,k) = tem1
+!+mlm              
+              if(mlm .and. ntsw > 0) then
+                tem1 = max(q1(i,k,ntsw)+q1(i,k,ntiw),qlmin)
+              endif
+!-mlm              
             endif
             qlx(i,k) = tem + tem1
             ptem = hvap*tem + (hvap+hfus)*tem1
@@ -612,6 +669,17 @@
             slx(i,k) = cp * t1(i,k) + phil(i,k) - hvap*qlx(i,k)
             qliq(i,k) = qlx(i,k)
           endif
+!+mlm  !
+          if (mlm) then
+             hx(i,k)    = cp * t1(i,k) + phil(i,k) + hvap*q1(i,k,1)
+             if (ntiw > 0) then
+                hx(i,k) = hx(i,k) - hfus*q1(i,k,ntiw)
+             endif
+             if(ntsw > 0) then
+                hx(i,k) = hx(i,k) - hfus*q1(i,k,ntsw)
+             endif
+          endif
+!-mlm          
           tem2       = 1.+fv*max(q1(i,k,1),qmin)-qlx(i,k)
           thvx(i,k)  = theta(i,k) * tem2
           tvx(i,k)   = t1(i,k) * tem2
@@ -692,6 +760,15 @@
           radx(i,k) = tem*(swh(i,k)*xmu(i)+hlw(i,k))
         enddo
       enddo
+!+mlm
+      if (mlm) then
+         do k=2,km1
+            do i=1,im
+               rad(i,k) = rad(i,k-1) - radx(i,k)
+            enddo
+         enddo
+      endif
+!-mlm      
 !>  - Compute stable/unstable PBL flag (pblflg) based on the total
 !! surface energy flux (\e false if the total surface energy flux
 !! is into the surface)
@@ -985,7 +1062,7 @@
       do i=1,im
         if(pblflg(i)) then
           if(zol(i) < zolcru) then
-            pcnvflg(i) = .true.
+              pcnvflg(i) = .true.
           endif
           wst3(i) = gotvx(i,1)*sflux(i)*hpbl(i)
           wstar(i)= wst3(i)**h1
@@ -1186,6 +1263,12 @@
       do i = 1, im
         if(scuflg(i) .and. krad(i) <= 1) scuflg(i)=.false.
         if(scuflg(i) .and. radmin(i)>=0.) scuflg(i)=.false.
+!+mlm amy
+        if (scuflg(i) .and. mlm) then
+            mscuflg(i) = scuflg(i)
+            scuflg(i) = .false.
+         endif
+!-mlm      
       enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1227,11 +1310,18 @@
      &    tcko,qcko,ucko,vcko,xlamue,bl_upfr)
 !>  - Call mfscuq(), which is a new mass-flux parameterization for
 !!    stratocumulus-top-induced turbulence mixing. For details of the mfscuq subroutine, step into its documentation ::mfscuq
+
+!+mlm      
+      if (.not. mlm) then
+!-mlm      
       call mfscuq(im,im,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,
      &    krad,mrad,radmin,buod,wush,tkemean,vez0fun,xmfd,
      &    tcdo,qcdo,ucdo,vcdo,xlamde,bl_dnfr)
+!+mlm      
+      end if
+!-mlm      
 
       if (tc_pbl == 1) then
 !>  - unify mass fluxes with Cu
@@ -2024,8 +2114,39 @@
           else
             prod(i,k) = buop + shrp
           endif
+!+mlm
+          buoy(i,k)  = buop
+          shear(i,k) = shrp
+!-mlm
+          
         enddo
       enddo
+!+mlm !stratocumulus mixed-layer model for turbulent fluxes
+!tke updated with transport fluxes following Solomon et al. 2026
+      if (mlm) then
+         call mfscuq_mlm(im,im,km,ntcw,ntsw,ntiw,ntinc,
+     &        ntrac1,mscuflg,zl,zm,q1,t1,u1,v1,
+     &        prec,rad,buoy,prsl,slx,hx,thlvx,
+     &        radmin, kcld, krad,         
+     &        uflux,vflux,tdt,du,dv,rtg,
+     &        eflux,rflux,wflux,pflux)
+
+         do k = 1, km1
+            do i = 1, im
+
+               if (k.gt.1) then
+                  tem1 = uflux(i,k)*(u1(i,k)-u1(i,k-1))*rdzt(i,k-1)
+                  tem2 = vflux(i,k)*(v1(i,k)-v1(i,k-1))*rdzt(i,k-1)
+
+                  shear(i,k) = shear(i,k) - tem1 - tem2
+                  prod(i,k)  = buoy(i,k) + shear(i,k)
+               endif
+
+            enddo
+         enddo
+      endif
+
+!-mlm      
 !
 !----------------------------------------------------------------------
 !>  - First predict te due to te production & dissipation(diss)
@@ -2052,7 +2173,6 @@
            tem=def_3(i,k)
 !          tem=min(tem,1.0)
            te(i,k) = te(i,k) + dtn * (prod(i,k)-disste+tem)
-!          te(i,k) = max(te(i,k), tkmin)
            te(i,k) = max(te(i,k), tkmnz(i,k))
         enddo
        enddo
@@ -2063,14 +2183,20 @@
        do k = 1,km1
         do i=1,im
            tem = sqrt(te(i,k))
-           ptem = ce0 / ele(i,k)
+!+mlm           
+           if (mscuflg(i)) then
+              ptem = min(ce0 / ele(i,k), 0.005)
+           else
+              ptem = ce0 / ele(i,k)
+           endif
+!-mlm           
            disste = ptem * te(i,k) * tem
            tem1 = prod(i,k) + te(i,k) / dtn
            disste = max(min(disste, tem1), 0.)
            if(.not. tte_edmf) diss(i,k) = disste
            te(i,k) = te(i,k) + dtn * (prod(i,k)-disste)
            te(i,k) = max(te(i,k), tkmnz(i,k))
-!          te(i,k) = max(te(i,k), tkmin)
+
         enddo
        enddo
        enddo
@@ -2315,7 +2441,6 @@ c
 !>  - Call tridit() to solve tridiagonal problem for TKE
 c
       call tridit(im,km,1,al,ad,au,f1,au,f1)
-!
 ! Negative TKE or TTE are set to zero after borrowing it from positive
 !   values within the mass-flux transport layers
 !
@@ -2420,6 +2545,8 @@ c
           endif
         enddo
       enddo
+
+
 c
 !>  - Recover the tendency of TKE or TTE
 c
@@ -2868,6 +2995,11 @@ c
             ten_t(i,k)   = (f1(i,k)-t1(i,k))*rdt
             qtend        = (f2(i,k)-q1(i,k,1))*rdt
             rtg(i,k,1)   = rtg(i,k,1)+qtend
+!+mlm      
+            if (mlm) then
+               ten_t(i,k)   = ten_t(i,k) + tdt(i,k)
+            endif            
+!-mlm      
 !           dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
 !           dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
@@ -3023,6 +3155,16 @@ c
 !           dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
       enddo
+!+mlm            
+      if (mlm) then
+        do k = 1,km
+           do i = 1,im
+              ten_u(i,k) = ten_u(i,k) + du(i,k)
+              ten_v(i,k) = ten_v(i,k) + dv(i,k)
+           enddo
+        enddo
+      endif
+!-mlm            
       if (use_oceanuv) then
         do i = 1,im
           spd1_m=sqrt( (u1(i,1)-usfco(i))**2+(v1(i,1)-vsfco(i))**2 )

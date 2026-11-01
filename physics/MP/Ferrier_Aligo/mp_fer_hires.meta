@@ -72,7 +72,7 @@
   type = integer
   intent = in
 [threads]
-  standard_name = number_of_openmp_threads
+  standard_name = number_of_physics_threads
   long_name = number of OpenMP threads available to scheme
   units = count
   dimensions = ()
@@ -95,7 +95,7 @@
   intent = out
 ########################################################################
 [ccpp-arg-table]
-  name = mp_fer_hires_finalize
+  name = mp_fer_hires_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message
@@ -158,7 +158,7 @@
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
   units = Pa
-  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  dimensions = (horizontal_loop_extent,vertical_interface_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -258,7 +258,7 @@
   type = integer
   intent = in
 [threads]
-  standard_name = number_of_openmp_threads
+  standard_name = number_of_physics_threads
   long_name = number of OpenMP threads available to scheme
   units = count
   dimensions = ()

@@ -10,14 +10,14 @@
 !!
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
-        tend_opt_pbl, trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz,                              &
-        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_mg,                                 &
+        tend_opt_pbl, trans_aero, ntchs, ntchm, ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz, imp_physics,                 &
+        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_mg, imp_physics_tempo, lthailaware,              &
         imp_physics_fer_hires, imp_physics_nssl, nssl_ccn_on, ltaerosol, mraerosol, gtaerosol, nssl_hail_on, nssl_3moment,     &
-        cplflx, cplaqm, cplchm, cplchp, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,         &
-        shinhong, do_ysu, dvdftra, ten_t, ten_u, ten_v, ten_q, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dtp, dudt, dvdt, dtdt,     &
-        dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_of_temperature, index_of_x_wind, index_of_y_wind,           &
-        index_of_process_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,   &
-        dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                        &
+        cplflx, cplaqm, cplchm, cplchp, cplcat, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, &
+        shinhong, do_ysu, dvdftra, ten_t_pbl, ten_q_pbl, ten_t, ten_u, ten_v, ten_q, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dtp, &
+        dudt, dvdt, dtdt, dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_of_temperature, index_of_x_wind,          &
+        index_of_y_wind, index_of_process_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag,          &
+        dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                &
         rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, kdt, dusfc_cice, dvsfc_cice,                             &
         dtsfc_cice, dqsfc_cice, use_med_flux, dtsfc_med, dqsfc_med, dusfc_med, dvsfc_med, wet, dry, icy, wind, stress_wat,     &
         hflx_wat, evap_wat, ugrs1, vgrs1, hffac, ugrs, vgrs, tgrs, qgrs, huge,                                                 &
@@ -34,11 +34,11 @@
       integer, intent(in) :: ntccn, nthl, nthnc, ntgv, nthv, ntrz, ntgz, nthz
       integer, intent(in) :: tend_opt_pbl
       logical, intent(in) :: trans_aero
-      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
+      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_tempo
       integer, intent(in) :: imp_physics_mg, imp_physics_fer_hires
       integer, intent(in) :: imp_physics_nssl
       logical, intent(in) :: nssl_ccn_on, nssl_hail_on, nssl_3moment
-      logical, intent(in) :: ltaerosol, cplflx, cplaqm, cplchm, cplchp, lssav, ldiag3d, lsidea, use_med_flux, mraerosol, gtaerosol
+      logical, intent(in) :: ltaerosol, cplflx, cplaqm, cplchm, cplchp, cplcat, lssav, ldiag3d, lsidea, use_med_flux, mraerosol, gtaerosol, lthailaware
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
       logical, intent(in) :: flag_for_pbl_generic_tend      
@@ -56,6 +56,7 @@
 
       real(kind=kind_phys), dimension(:,:, :), intent(in) :: dvdftra
       real(kind=kind_phys), dimension(:,:), intent(in) :: ten_t, ten_u, ten_v
+      real(kind=kind_phys), dimension(:,:), intent(out) :: ten_t_pbl,ten_q_pbl
       real(kind=kind_phys), dimension(:,:,:), intent(out) :: ten_q
       real(kind=kind_phys), dimension(:), intent(in) :: dusfc1, dvsfc1, dtsfc1, dqsfc1
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dudt, dvdt, dtdt
@@ -95,6 +96,8 @@
       errmsg = ''
       errflg = 0
       ten_q = 0.0
+      ten_t_pbl = 0.0
+      ten_q_pbl = 0.0
 !GJF: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
       if (nvdiff == ntrac .and. (hybedmf .or. do_shoc .or. satmedmf) .and. (.not. cplchp)) then
         ten_q = dvdftra
@@ -114,6 +117,7 @@
           call set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
                                         imp_physics_thompson, ltaerosol,        &
                                         mraerosol, gtaerosol,                   &
+                                        imp_physics_tempo, lthailaware,         &
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
                                         imp_physics_nssl,&
                                         nssl_hail_on, nssl_ccn_on, nssl_3moment, kk, &
@@ -204,6 +208,43 @@
               enddo
             enddo
           endif
+        elseif (imp_physics == imp_physics_tempo) then
+  ! Tempo
+          do k=1,levs
+             do i=1,im
+                ten_q(i,k,ntqv)  = dvdftra(i,k,1)
+                ten_q(i,k,ntcw)  = dvdftra(i,k,2)
+                ten_q(i,k,ntiw)  = dvdftra(i,k,3)
+                ten_q(i,k,ntrw)  = dvdftra(i,k,4)
+                ten_q(i,k,ntsw)  = dvdftra(i,k,5)
+                ten_q(i,k,ntgl)  = dvdftra(i,k,6)
+                ten_q(i,k,ntinc) = dvdftra(i,k,7)
+                ten_q(i,k,ntrnc) = dvdftra(i,k,8)
+                ten_q(i,k,ntoz)  = dvdftra(i,k,9)
+             enddo
+          enddo
+
+          n = 10
+          if (ltaerosol) then
+             do k=1,levs
+                do i=1,im
+                   ten_q(i,k,ntlnc) = dvdftra(i,k,n)
+                   ten_q(i,k,ntwa)  = dvdftra(i,k,n+1)
+                   ten_q(i,k,ntia)  = dvdftra(i,k,n+2)
+                enddo
+             enddo
+             n = 13
+          endif
+
+          if (lthailaware) then
+             do k=1,levs
+                do i=1,im
+                   ten_q(i,k,ntgnc) = dvdftra(i,k,n)
+                   ten_q(i,k,ntgv) = dvdftra(i,k,n+1)
+                enddo
+             enddo
+          endif
+
         elseif (imp_physics == imp_physics_mg) then          ! MG3/2
           if (ntgl > 0) then                                 ! MG
             do k=1,levs
@@ -452,7 +493,7 @@
         end if
       end if
 
-      if (cplaqm) then
+      if (cplaqm .or. cplcat) then
         do i = 1, im
           if (oceanfrac(i) > zero) then
             if (.not.cplflx) then
@@ -514,6 +555,15 @@
         endif
 
       endif   ! end if_lssav
+
+      !Output t and q tenedncies for PBL only to be used
+      !as input in other schemes
+      do k=1,levs
+         do i=1,im
+            ten_t_pbl(i,k)=ten_t(i,k)
+            ten_q_pbl(i,k)=ten_q(i,k,ntqv)
+         end do
+      end do
 
       end subroutine GFS_PBL_generic_post_run
 

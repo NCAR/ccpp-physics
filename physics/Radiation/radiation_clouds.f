@@ -28,6 +28,7 @@
 !            ntrac, ntcw, ntiw, ntrw, ntsw, ntgl, ntclamt,             !
 !            imp_physics, imp_physics_nssl, imp_physics_fer_hires,     !
 !            imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, !
+!            imp_physics_tempo,                                        !
 !            imp_physics_mg, iovr, iovr_rand, iovr_maxrand, iovr_max,  !
 !            iovr_dcorr, iovr_exp, iovr_exprand, idcor, idcor_con,     !
 !            idcor_hogan, idcor_oreopoulos,                            !
@@ -178,11 +179,14 @@
 !  ---  set constant parameters
       real (kind=kind_phys) :: gfac,gord
 
-      integer, parameter, public :: NF_CLDS = 9          !< number of fields in cloud array
-      integer, parameter, public :: NK_CLDS = 3          !< number of cloud vertical domains
+ !< number of fields in cloud array
+      integer, parameter, public :: NF_CLDS = 9
+ !< number of cloud vertical domains
+      integer, parameter, public :: NK_CLDS = 3
 
 ! pressure limits of cloud domain interfaces (low,mid,high) in mb (0.1kPa)
-      real (kind=kind_phys), save :: ptopc(NK_CLDS+1,2)   !< pressure limits of cloud domain interfaces
+ !< pressure limits of cloud domain interfaces
+      real (kind=kind_phys), save :: ptopc(NK_CLDS+1,2)
                                                           !! (low, mid, high) in mb (0.1kPa)
 
 !org  data ptopc / 1050., 642., 350., 0.0,  1050., 750., 500., 0.0 /
@@ -192,16 +196,24 @@
       real (kind=kind_phys), parameter :: climit = 0.001, climit2=0.05
       real (kind=kind_phys), parameter :: ovcst  = 1.0 - 1.0e-8
 
-      real (kind=kind_phys), parameter :: reliq_def = 10.0        !< default liq radius to 10 micron
-      real (kind=kind_phys), parameter :: reice_def = 50.0        !< default ice radius to 50 micron
-      real (kind=kind_phys), parameter :: rrain_def = 1000.0      !< default rain radius to 1000 micron
-      real (kind=kind_phys), parameter :: rsnow_def = 250.0       !< default snow radius to 250 micron
-      real (kind=kind_phys), parameter :: creice_def = 25.0       !< default convective ice radius to 25 micron overland
+ !< default liq radius to 10 micron
+      real (kind=kind_phys), parameter :: reliq_def = 10.0
+ !< default ice radius to 50 micron
+      real (kind=kind_phys), parameter :: reice_def = 50.0
+ !< default rain radius to 1000 micron
+      real (kind=kind_phys), parameter :: rrain_def = 1000.0
+ !< default snow radius to 250 micron
+      real (kind=kind_phys), parameter :: rsnow_def = 250.0
+ !< default convective ice radius to 25 micron overland
+      real (kind=kind_phys), parameter :: creice_def = 25.0
 
-      real (kind=kind_phys), parameter :: cldssa_def = 0.99       !< default cld single scat albedo
-      real (kind=kind_phys), parameter :: cldasy_def = 0.84       !< default cld asymmetry factor
+ !< default cld single scat albedo
+      real (kind=kind_phys), parameter :: cldssa_def = 0.99
+ !< default cld asymmetry factor
+      real (kind=kind_phys), parameter :: cldasy_def = 0.84
 
-      integer  :: llyr   = 2                              !< upper limit of boundary layer clouds
+ !< upper limit of boundary layer clouds
+      integer  :: llyr   = 2
 
       ! Default ice crystal sizes vs. temperature following Kristjansson and Mitchell
       real (kind=kind_phys), dimension(95), parameter :: retab =(/      &
@@ -422,6 +434,7 @@
 !   imp_physics_fer_hires     : Ferrier-Aligo microphysics scheme       !
 !   imp_physics_gfdl          : GFDL microphysics scheme                !
 !   imp_physics_thompson      : Thompson microphysics scheme            !
+!   imp_physics_tempo         : Tempo microphysics scheme               !
 !   imp_physics_wsm6          : WSMG     microphysics scheme            !
 !   imp_physics_mg  :  Morrison-Gettelman microphysics scheme           !
 !   iovr            : choice of cloud-overlap                           !
@@ -615,7 +628,8 @@
      &                     cld_resnow)
         endif
 
-      elseif (imp_physics == imp_physics_gfdl) then           ! GFDL cloud scheme
+ ! GFDL cloud scheme
+      elseif (imp_physics == imp_physics_gfdl) then
 
         if (.not. lgfdlmprad) then
           call progcld_gfdl_lin (plyr, plvl, tlyr, tvly, qlyr,          &    !  ---  inputs
@@ -1974,7 +1988,7 @@
 !   initial subroutine "cld_init".                                      !
 !   This program is written by Moorthi                                  !
 !   to represent unified cloud across all physics while                 !
-!   using SHOC+MG2/3+convection (RAS or SAS or CSAW)                    !
+!   using SHOC+MG2/3+convection (SAS or CSAW)                           !
 !                                                                       !
 ! usage:         call progclduni                                        !
 !                                                                       !
@@ -2381,7 +2395,8 @@
         kstr = NLAY
         kend = 1
         kinc = -1
-      else                                      ! input data from sfc to toa
+ ! input data from sfc to toa
+      else
         kstr = 1
         kend = NLAY
         kinc = 1
@@ -2406,7 +2421,8 @@
           clds(i,4) = 1.0 - cl1(i)              ! save total cloud
         enddo
 
-      elseif ( iovr == iovr_maxrand ) then                 ! max/ran overlap
+ ! max/ran overlap
+      elseif ( iovr == iovr_maxrand ) then
 
         do k = kstr, kend, kinc
           do i = 1, IX
@@ -2430,7 +2446,8 @@
           clds(i,4) = 1.0 - cl1(i) * cl2(i)     ! save total cloud
         enddo
 
-      elseif ( iovr == iovr_max ) then                 ! maximum overlap all levels
+ ! maximum overlap all levels
+      elseif ( iovr == iovr_max ) then
 
         cl1(:) = 0.0
 
@@ -2451,7 +2468,8 @@
           clds(i,4) = cl1(i)        ! save total cloud
         enddo
 
-      elseif ( iovr == iovr_dcorr ) then                 ! random if clear-layer divided,
+ ! random if clear-layer divided,
+      elseif ( iovr == iovr_dcorr ) then
                                                 ! otherwise de-corrlength method
         do i = 1, ix
           dz1(i) = - dz(i,kstr)
@@ -2483,7 +2501,8 @@
           clds(i,4) = 1.0 - cl1(i) * cl2(i)     ! save total cloud
         enddo
 
-      elseif ( iovr == iovr_exp .or. iovr == iovr_exprand ) then  ! exponential overlap (iovr=4), or
+ ! exponential overlap (iovr=4), or
+      elseif ( iovr == iovr_exp .or. iovr == iovr_exprand ) then
                                                 ! exponential-random  (iovr=5);
                                                 ! distinction defined by alpha
 
@@ -2601,7 +2620,8 @@
           enddo       ! end_do_i_loop
         enddo         ! end_do_k_loop
 
-      else                                      ! input data from sfc to toa
+ ! input data from sfc to toa
+      else
 
         do i = 1, IX
           cl1 (i) = 0.0
@@ -3128,7 +3148,8 @@
 !> This function computes the cloud-fraction following
 !! Xu-Randall(1996) \cite xu_and_randall_1996
 !!
-      function cld_frac_XuRandall(p_lay, qs_lay, relhum, cld_mr, alpha, & !  ---  inputs 
+ !  ---  inputs 
+      function cld_frac_XuRandall(p_lay, qs_lay, relhum, cld_mr, alpha, &
      &                            lambda, factor, cond_cfrac_onRH)
         implicit none
         ! Inputs

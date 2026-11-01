@@ -360,7 +360,8 @@
 !     parameter (cdmb = 1.0)     !< non-dim sub grid mtn drag Amp (*j*)
       parameter (hncrit=8000.)   !< Max value in meters for ELVMAX (*j*)
 !  hncrit set to 8000m and sigfac added to enhance elvmax mtn hgt
-      parameter (sigfac=4.0)     !< MB3a expt test for ELVMAX factor (*j*)
+ !< MB3a expt test for ELVMAX factor (*j*)
+      parameter (sigfac=4.0)
       parameter (hminmt=50.)     !< min mtn height (*j*)
       parameter (minwnd=0.1)     !< min wind component (*j*)
 
@@ -368,7 +369,8 @@
 !!    parameter (dpmin=05.0)     !< Minimum thickness of the reference layer
 !     parameter (dpmin=20.0)     !< Minimum thickness of the reference layer
                                  !< in centibars
-      parameter (dpmin=5000.0)   !< Minimum thickness of the reference layer
+ !< Minimum thickness of the reference layer
+      parameter (dpmin=5000.0)
                                  !< in Pa
 !
       real(kind=kind_phys) FDIR

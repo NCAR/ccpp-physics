@@ -119,6 +119,13 @@
   dimensions = ()
   type = logical
   intent = in
+[cplcat]
+  standard_name = flag_for_catchem_coupling
+  long_name = flag controlling cplcat collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [cplwav]
   standard_name = flag_for_ocean_wave_coupling
   long_name = flag controlling cplwav collection (default off)

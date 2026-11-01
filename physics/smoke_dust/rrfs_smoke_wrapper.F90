@@ -259,11 +259,13 @@ contains
         do i=1,im
           do k=kts,kte
             qgrs(i,k,ntfsmoke) = 0.
+            gq0(i,k,ntfsmoke) = 0.
           end do
         end do
       endif
       do i=1,im
         qgrs(i,kts,ntfsmoke) = qgrs(i,kts,ntfsmoke) + smoke_fire(i)
+        gq0(i,kts,ntfsmoke) = gq0(i,kts,ntfsmoke) + smoke_fire(i)
       end do
     endif
 

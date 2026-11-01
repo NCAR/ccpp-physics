@@ -4,14 +4,15 @@
 
 # Default codeowners for files that don't have specific owners:
 
-*           @grantfirl @rhaesung @Qingfu-Liu @dustinswales @mzhangw
+*           @grantfirl @rhaesung @Qingfu-Liu @dustinswales @mzhangw @climbfuji
 
 
 # The following lines are from the CCPP Primary Schemes Points of Contact
 #   https://docs.google.com/spreadsheets/d/14y0Th_sSpCqlssEMNfSZ_Ni9wrpPqfpPY0kRG7jCZB8/edit#gid=0
 # (Internal NOAA document.)
 
-physics/CONV/C3/cu_c3*                                                       @lisa-bengtsson @haiqinli                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/CONV/C3/CCPP/cu_c3*                                                  @lisa-bengtsson @haiqinli                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/CONV/C3/mod*                                                         @lisa-bengtsson @haiqinli                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/CONV/Chikira_Sugiyama/cs_conv_aw_adj.*                               @AnningCheng-NOAA                         @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/CONV/Chikira_Sugiyama/cs_conv.*                                      @AnningCheng-NOAA                         @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/CONV/Grell_Freitas/cu_gf*                                            @haiqinli                                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
@@ -23,6 +24,7 @@ physics/CONV/SAS/sascnvn.*                                                   @Jo
 physics/CONV/SAS/shalcnv.*                                                   @JongilHan66                              @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/CONV/nTiedtke/cu_ntiedtke*                                           @JongilHan66 @Qingfu-Liu                  @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/CONV/progsigma_calc.f90                                              @lisa-bengtsson                           @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/CONV/progomega_calc.f90                                              @lisa-bengtsson                           @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/cires_orowam2017.f                                               @mdtoyNOAA                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/cires_tauamf_data.F90                                            @mdtoyNOAA                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/cires_ugwp*                                                      @mdtoyNOAA                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
@@ -30,7 +32,7 @@ physics/GWD/drag_suite.*                                                     @md
 physics/GWD/gwdc.*                                                           @Songyou184                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/gwdps.*                                                          @Songyou184                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/rayleigh_damp.*                                                  @yangfanglin                              @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/GWD/ugwp_driver_v0.F90                                               @mdtoyNOAA                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/GWD/ugwp_driver_v0.F90                                               @mdtoyNOAA @matusmartini @areinecke       @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/ugwpv1_gsldrag.*                                                 @mdtoyNOAA @BoYang-NOAA                   @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/ugwpv1_gsldrag_post.*                                            @mdtoyNOAA @BoYang-NOAA                   @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/GWD/unified_ugwp*                                                    @mdtoyNOAA                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
@@ -68,6 +70,7 @@ physics/PBL/SATMEDMF/satmedmfvdif.*                                          @Jo
 physics/PBL/SATMEDMF/satmedmfvdifq.*                                         @JongilHan66                              @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/PBL/SATMEDMF/mfscu.f                                                 @JongilHan66                              @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/PBL/SATMEDMF/mfscuq.f                                                @JongilHan66                              @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/PBL/SATMEDMF/mfscuq_mlm.f                                            @AmySolomon                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/PBL/SHOC/moninshoc.*                                                                                           @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/PBL/SHOC/shoc.*                                                                                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/PBL/YSU/ysuvdif.*                                                    @Qingfu-Liu @WeiguoWang-NOAA              @grantfirl @rhaesung @Qingfu-Liu @dustinswales
@@ -75,6 +78,7 @@ physics/PBL/saYSU/shinhongvdif.*                                             @Qi
 physics/PBL/mfpbl.f                                                          @JongilHan66                              @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/PBL/mfpblt.f                                                         @JongilHan66                              @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/PBL/mfpbltq.f                                                        @JongilHan66                              @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/PBL/
 physics/PBL/tridi.f                                                          @JongilHan66 @WeiguoWang-NOAA             @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Radiation/RRTMG/iounitdef.f                                                                                    @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Radiation/RRTMG/module_bfmicrophysics.f                                                                        @grantfirl @rhaesung @Qingfu-Liu @dustinswales

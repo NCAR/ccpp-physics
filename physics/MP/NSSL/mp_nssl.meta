@@ -36,7 +36,7 @@
   type = integer
   intent = out
 [threads]
-  standard_name = number_of_openmp_threads
+  standard_name = number_of_physics_threads
   long_name = number of OpenMP threads available to scheme
   units = count
   dimensions = ()
@@ -433,7 +433,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = True
 [cccna]
   standard_name = activated_cloud_condensation_nuclei_number_concentration

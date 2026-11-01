@@ -31,8 +31,10 @@
       logical, intent(in) :: use_lake2m
       logical, intent(in) :: use_oceanuv
       logical, intent(in) :: thsfc_loc  ! Flag for reference pot. temp.
-      logical, intent(in) :: diag_flux  ! Flag for flux method in 2-m diagnostics
-      logical, intent(in) :: diag_log   ! Flag for 2-m log diagnostics under stable conditions
+ ! Flag for flux method in 2-m diagnostics
+      logical, intent(in) :: diag_flux
+ ! Flag for 2-m log diagnostics under stable conditions
+      logical, intent(in) :: diag_log
       real(kind=kind_phys), intent(in) :: grav,cp,eps,epsm1,con_rocp
       real(kind=kind_phys), intent(in) :: con_karman
       real(kind=kind_phys), dimension(:), intent( in) ::                &

@@ -418,17 +418,12 @@ module flake_driver_post
    use machine, only: kind_phys
    implicit none
    private
-   public flake_driver_post_init, flake_driver_post_finalize, flake_driver_post_run 
+   public flake_driver_post_run 
 
 contains
-   subroutine flake_driver_post_init()
-   end subroutine flake_driver_post_init
 
-   subroutine flake_driver_post_finalize()
-   end subroutine flake_driver_post_finalize
-
-!> \section arg_table_flake_driver_post Argument Table
-!! \htmlinclude flake_driver_post.html
+!> \section arg_table_flake_driver_post_run Argument Table
+!! \htmlinclude flake_driver_post_run.html
 !!
 subroutine flake_driver_post_run (im, use_lake_model, h_ML, T_wML,  &
                            Tsurf, lakedepth, xz, zm, tref, tsfco,   &

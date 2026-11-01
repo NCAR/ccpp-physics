@@ -12,8 +12,9 @@
       contains
 
       subroutine set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
-                                          imp_physics_thompson,ltaerosol,         &
-                                          mraerosol,gtaerosol,                    &
+                                          imp_physics_thompson, ltaerosol,        &
+                                          mraerosol, gtaerosol,                   &
+                                          imp_physics_tempo, lthailaware,         &
                                           imp_physics_mg, ntgl, imp_physics_gfdl, &
                                           imp_physics_nssl,                       &
                                           nssl_hail_on, nssl_ccn_on, nssl_3moment, kk, &
@@ -21,10 +22,10 @@
       implicit none
       !
       integer, intent(in )          :: imp_physics, imp_physics_wsm6,          &
-                                       imp_physics_thompson,                   &
+                                       imp_physics_thompson, imp_physics_tempo,&
                                        imp_physics_mg, ntgl, imp_physics_gfdl, &
                                        imp_physics_nssl
-      logical, intent(in )          :: ltaerosol, mraerosol, gtaerosol, nssl_hail_on, nssl_ccn_on, nssl_3moment
+      logical, intent(in )          :: ltaerosol, mraerosol, gtaerosol, nssl_hail_on, nssl_ccn_on, nssl_3moment, lthailaware
       integer, intent(out)          :: kk
       character(len=*), intent(out) :: errmsg
       integer, intent(out)          :: errflg
@@ -44,6 +45,18 @@
         else
           kk = 9
         endif
+      elseif (imp_physics == imp_physics_tempo) then
+! Tempo (Note: why are we setting tracer indices manually?)
+! I'll assume that kk = 9 includes qv, qc, qr, qi, qs, qg, ni, nr
+! when ltaerosol = true: nc, nwfa, and nifa are added (+3)
+! when lthail = true: ng and volg are added (+2)
+         kk = 9
+         if(ltaerosol) then
+            kk = kk + 3
+         endif
+         if(lthailaware) then
+            kk = kk + 2
+         endif
 ! MG
       elseif (imp_physics == imp_physics_mg) then
         if (ntgl > 0) then

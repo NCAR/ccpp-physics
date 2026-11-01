@@ -2466,7 +2466,8 @@
 !> asymmetry coefficients
       real (kind=kind_phys), dimension(nblow:nbhgh), public ::  c0r
 
-      data a0r,a1r / 3.07e-3, 0.0 /,    a0s,a1s / 0.0,     1.5 /  ! fu's coeff
+ ! fu's coeff
+      data a0r,a1r / 3.07e-3, 0.0 /,    a0s,a1s / 0.0,     1.5 /
 
       data b0r  / 0.466, 0.437, 0.416, 0.391, 0.374, 0.352, 0.183,      &
      &            0.048, 0.012, 0.000, 0.000, 0.000, 0.000, 0.496 /

@@ -68,7 +68,7 @@ module fv_sat_adj
 
 #ifdef MULTI_GASES
     use ccpp_multi_gases_mod, only: multi_gases_init,     &
-                                    multi_gases_finalize, &
+                                    multi_gases_final, &
                                     virq_qpz, vicpqd_qpz, &
                                     vicvqd_qpz, num_gas
 #endif
@@ -77,7 +77,7 @@ module fv_sat_adj
     
     private
 
-    public fv_sat_adj_init, fv_sat_adj_run, fv_sat_adj_finalize
+    public fv_sat_adj_init, fv_sat_adj_run, fv_sat_adj_final
 
     logical :: is_initialized = .false.
 
@@ -187,11 +187,11 @@ subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
 end subroutine fv_sat_adj_init
 
 !\ingroup fast_sat_adj
-!>\brief The subroutine 'fv_sat_adj_finalize' deallocates lookup tables for the saturation mixing ratio.
-!! \section arg_table_fv_sat_adj_finalize Argument Table
-!! \htmlinclude fv_sat_adj_finalize.html
+!>\brief The subroutine 'fv_sat_adj_final' deallocates lookup tables for the saturation mixing ratio.
+!! \section arg_table_fv_sat_adj_final Argument Table
+!! \htmlinclude fv_sat_adj_final.html
 !!
-subroutine fv_sat_adj_finalize (errmsg, errflg)
+subroutine fv_sat_adj_final (errmsg, errflg)
 
     implicit none
 
@@ -211,12 +211,12 @@ subroutine fv_sat_adj_finalize (errmsg, errflg)
     if (allocated(desw  )) deallocate(desw  )
 
 #ifdef MULTI_GASES
-    call multi_gases_finalize()
+    call multi_gases_final()
 #endif
 
     is_initialized = .false.
 
-end subroutine fv_sat_adj_finalize
+end subroutine fv_sat_adj_final
 
 !>\defgroup fast_sat_adj GFDL In-Core Fast Saturation Adjustment Module
 !> @{

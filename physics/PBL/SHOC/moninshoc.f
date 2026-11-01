@@ -564,7 +564,8 @@
         endif
       endif
 !
-      if (ntke > 0) then    ! solve tridiagonal problem for momentum and tke
+ ! solve tridiagonal problem for momentum and tke
+      if (ntke > 0) then
 !
 !     compute tridiagonal matrix elements for tke
 !

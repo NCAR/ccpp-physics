@@ -1,0 +1,85 @@
+# to test locally run the following from the command line
+# act push -W .github/workflows/ci_ufsatm_ccpp_capgen.yml -j ccpp-capgen-ufsatm
+
+name: CI test to run UFSATM capgen step
+
+on: [push, pull_request]
+
+jobs:
+  ccpp-capgen-ufsatm:
+    if: github.repository == 'NCAR/ccpp-physics' || github.repository == 'ufs-community/ccpp-physics'
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout current ccpp-physics code
+      uses: actions/checkout@v6
+
+    - name: Checkout latest ufsatm
+      run: git clone --depth 1 https://github.com/NOAA-EMC/ufsatm.git
+
+    - name: Initialize submodules
+      run: |
+        git config --global --add safe.directory "$GITHUB_WORKSPACE/ufsatm"
+        git -C "$GITHUB_WORKSPACE/ufsatm" submodule update --init --recursive
+
+    - name: Use current ccpp-physics code in ufsatm
+      run: |
+        physics_sha="$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)"
+        echo "Physics SHA: $physics_sha"
+        git -C "$GITHUB_WORKSPACE/ufsatm/ccpp/physics" fetch --update-shallow "$GITHUB_WORKSPACE" "$physics_sha"
+        git -C "$GITHUB_WORKSPACE/ufsatm/ccpp/physics" checkout --detach "$physics_sha"
+        git -C "$GITHUB_WORKSPACE/ufsatm/ccpp/physics" submodule update --init --recursive
+        test "$(git -C "$GITHUB_WORKSPACE/ufsatm/ccpp/physics" rev-parse HEAD)" = "$physics_sha"
+
+    - name: Set up Python 3.10.13
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.10.13
+
+    - name: Install capgen dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes libxml2-utils
+
+    - name: Run ccpp_capgen.py
+      run: |
+        cd "$GITHUB_WORKSPACE/ufsatm"
+
+        scheme_files="$(
+          sed -n 's|.*${SCHEME_FILES_DIR}/\([^" ]*\.meta\)".*|\1|p' ccpp/CMakeLists.txt |
+            grep -Fv 'GFS_rad_time_vary.mpas.meta' |
+            sed "s|^|$GITHUB_WORKSPACE/ufsatm/ccpp/physics/physics/|" |
+            paste -sd, -
+        )"
+        host_files="$(
+          sed -n '/^set(HOST_METADATA_FILES$/,/^)/p' ccpp/CMakeLists.txt |
+            sed -n 's|.*"\([^" ]*\.meta\)".*|\1|p' |
+            sed "s|\${HOST_FILES_DIR}|$GITHUB_WORKSPACE/ufsatm/ccpp|" |
+            sed "s|^physics/|$GITHUB_WORKSPACE/ufsatm/ccpp/physics/|" |
+            paste -sd, -
+        )"
+        suite_files="$(
+          sed -n '/^  set(SUITE_FILES$/,/^  )/p' ccpp/CMakeLists.txt |
+            sed -n 's|.*${SUITE_FILES_DIR}/\([^" ]*\.xml\)".*|\1|p' |
+            sed "s|^|$GITHUB_WORKSPACE/ufsatm/ccpp/suites/|" |
+            paste -sd, -
+        )"
+
+        test -n "$scheme_files"
+        test -n "$host_files"
+        test -n "$suite_files"
+
+        "$GITHUB_WORKSPACE/ufsatm/ccpp/framework/capgen/ccpp_capgen.py" \
+          --host-name ufs \
+          --host-files "$host_files" \
+          --scheme-files "$scheme_files" \
+          --suites "$suite_files" \
+          --output-root "$GITHUB_WORKSPACE/ufsatm/bin/ccpp" \
+          --legacy-mode \
+          --gfs-dim-aliases \
+          --no-host-introspection \
+          --verbose
+
+        test -s "$GITHUB_WORKSPACE/ufsatm/bin/ccpp/datatable.xml"

@@ -120,14 +120,18 @@
 !    &   VTAGSFC='NCEP-Radiation_surface   v5.0  Aug 2012 '
 
 !  ---  constant parameters
-      integer, parameter, public :: IMXEMS  = 360   ! number of longtitude points in global emis-type map
-      integer, parameter, public :: JMXEMS  = 180   ! number of latitude points in global emis-type map
+ ! number of longtitude points in global emis-type map
+      integer, parameter, public :: IMXEMS  = 360
+ ! number of latitude points in global emis-type map
+      integer, parameter, public :: JMXEMS  = 180
       real (kind=kind_phys), parameter :: f_zero = 0.0
       real (kind=kind_phys), parameter :: f_one  = 1.0
       real (kind=kind_phys), parameter :: epsln  = 1.0e-6
       real (kind=kind_phys) :: rad2dg
-      integer, allocatable  ::  idxems(:,:)         ! global surface emissivity index array
-      integer :: iemslw = 1                         ! global surface emissivity control flag set up in 'sfc_init'
+ ! global surface emissivity index array
+      integer, allocatable  ::  idxems(:,:)
+ ! global surface emissivity control flag set up in 'sfc_init'
+      integer :: iemslw = 1
 !
       public  sfc_init, setalb, setemis
       public  f_zero, f_one, epsln
@@ -952,7 +956,8 @@
 
         enddo  lab_do_IMAX
 
-      elseif ( iemslw == 2 ) then   ! sfc emiss updated in land model: Noah MP or RUC
+ ! sfc emiss updated in land model: Noah MP or RUC
+      elseif ( iemslw == 2 ) then
 
         do i = 1, IMAX
 

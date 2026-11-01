@@ -285,17 +285,27 @@
 !      mass-weighted fall speeds of rain as functions of mean diameter
 !      from the lookup tables.
 !
-      RR_DRmin=N0r0*RRATE(MDRmin)     !< RR for mean drop diameter of .05 mm
-      RR_DR1=N0r0*RRATE(MDR1)         !< RR for mean drop diameter of .10 mm
-      RR_DR2=N0r0*RRATE(MDR2)         !< RR for mean drop diameter of .20 mm
-      RR_DR3=N0r0*RRATE(MDR3)         !< RR for mean drop diameter of .32 mm
-      RR_DRmax=N0r0*RRATE(MDRmax)     !< RR for mean drop diameter of .45 mm
+ !< RR for mean drop diameter of .05 mm
+      RR_DRmin=N0r0*RRATE(MDRmin)
+ !< RR for mean drop diameter of .10 mm
+      RR_DR1=N0r0*RRATE(MDR1)
+ !< RR for mean drop diameter of .20 mm
+      RR_DR2=N0r0*RRATE(MDR2)
+ !< RR for mean drop diameter of .32 mm
+      RR_DR3=N0r0*RRATE(MDR3)
+ !< RR for mean drop diameter of .45 mm
+      RR_DRmax=N0r0*RRATE(MDRmax)
 !
-      RQR_DRmin=N0r0*MASSR(MDRmin)    !< Rain content for mean drop diameter of .05 mm
-      RQR_DR1=N0r0*MASSR(MDR1)        !< Rain content for mean drop diameter of .10 mm
-      RQR_DR2=N0r0*MASSR(MDR2)        !< Rain content for mean drop diameter of .20 mm
-      RQR_DR3=N0r0*MASSR(MDR3)        !< Rain content for mean drop diameter of .32 mm
-      RQR_DRmax=N0r0*MASSR(MDRmax)    !< Rain content for mean drop diameter of .45 mm
+ !< Rain content for mean drop diameter of .05 mm
+      RQR_DRmin=N0r0*MASSR(MDRmin)
+ !< Rain content for mean drop diameter of .10 mm
+      RQR_DR1=N0r0*MASSR(MDR1)
+ !< Rain content for mean drop diameter of .20 mm
+      RQR_DR2=N0r0*MASSR(MDR2)
+ !< Rain content for mean drop diameter of .32 mm
+      RQR_DR3=N0r0*MASSR(MDR3)
+ !< Rain content for mean drop diameter of .45 mm
+      RQR_DRmax=N0r0*MASSR(MDRmax)
       C_N0r0=PI*RHOL*N0r0
       CN0r0=1.E6/C_N0r0**.25
       CN0r_DMRmin=1./(PI*RHOL*DMRmin**4)
@@ -418,7 +428,8 @@
 !
       DT_ICE=(DTPH/600.)**1.5
 !     MY_GROWTH=DT_ICE*MY_600          ! original version
-      MY_GROWTH=DT_ICE*MY_600*1.E-3    !-- 20090714: Convert from g to kg
+ !-- 20090714: Convert from g to kg
+      MY_GROWTH=DT_ICE*MY_600*1.E-3
 !
 !-----------------------------------------------------------------------
 !
@@ -579,8 +590,10 @@
       c2=1./sqrt(3.)
 !     pi=acos(-1.)
       cbulk=6./pi
-      cbulk_ice=900.*pi/6.    ! Maximum bulk ice density allowed of 900 kg/m**3
-      px=.4**cexp             ! Convert fall speeds from 400 mb (Starr & Cox) to 1000 mb
+ ! Maximum bulk ice density allowed of 900 kg/m**3
+      cbulk_ice=900.*pi/6.
+ ! Convert fall speeds from 400 mb (Starr & Cox) to 1000 mb
+      px=.4**cexp
 !
 !--------------------- Dynamic viscosity (1000 mb, 288 K) --------------------------
 !
@@ -2539,13 +2552,17 @@
       Tdum     = TK
       WVdum    = WV
       WCdum    = QW
-      ESW      = min(PP, FPVSL(Tdum))          ! Saturation vapor press w/r/t water
+ ! Saturation vapor press w/r/t water
+      ESW      = min(PP, FPVSL(Tdum))
 !     WS       = RHgrd*EPS*ESW/(PP-ESW)        ! Saturation mixing ratio w/r/t water
-      WS       = RHgrd*EPS*ESW/(PP+epsm1*ESW)  ! Saturation specific hum w/r/t water
-      DWV      = WVdum - WS                    ! Deficit grid-scale specific humidity
+ ! Saturation specific hum w/r/t water
+      WS       = RHgrd*EPS*ESW/(PP+epsm1*ESW)
+ ! Deficit grid-scale specific humidity
+      DWV      = WVdum - WS
       SSAT     = DWV / WS                      ! Supersaturation ratio
       CONDENSE = 0.
-      rfac     = 0.5                           ! converges faster with 0.5
+ ! converges faster with 0.5
+      rfac     = 0.5
       DO WHILE ((SSAT < RHLIMIT1 .AND. WCdum > EPSQ)                    &
      &           .OR. SSAT > RHLIMIT)
 !
@@ -2595,10 +2612,13 @@
 !
 !-----------------------------------------------------------------------
 !
-      ESI=min(PP, FPVSI(Tdum))                  ! Saturation vapor press w/r/t ice
+ ! Saturation vapor press w/r/t ice
+      ESI=min(PP, FPVSI(Tdum))
 !     WS=RHgrd*EPS*ESI/(PP-ESI)                 ! Saturation mixing ratio
-      WS=RHgrd*EPS*ESI/(PP+epsm1*ESI)           ! Saturation mixing ratio
-      DWV=WVdum-WS                              ! Deficit grid-scale water vapor mixing ratio
+ ! Saturation mixing ratio
+      WS=RHgrd*EPS*ESI/(PP+epsm1*ESI)
+ ! Deficit grid-scale water vapor mixing ratio
+      DWV=WVdum-WS
       SSAT=DWV/WS                               ! Supersaturation ratio
       DEPOSIT=0.
       DO WHILE (SSAT > RHLIMIT .OR. SSAT < RHLIMIT1)
@@ -2648,7 +2668,8 @@
       logical lprnt
 !
 
-      RECW1 = 620.3505 / TNW**CEXP         ! cloud droplet effective radius
+ ! cloud droplet effective radius
+      RECW1 = 620.3505 / TNW**CEXP
 
       do l=1,levs
         do i=1,im
@@ -2979,7 +3000,8 @@
 !
 !===>  ...  begin here
 !
-      recw1 = 620.3505 / TNW**CEXP         ! cloud droplet effective radius
+ ! cloud droplet effective radius
+      recw1 = 620.3505 / TNW**CEXP
 
       do k = 1, LEVS
         do i = 1, IM

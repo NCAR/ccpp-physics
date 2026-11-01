@@ -283,7 +283,7 @@ module mp_nssl
          real(kind_phys),           intent(  out) :: ten_qs(:,:)
          real(kind_phys),           intent(  out) :: ten_qh(:,:)
          real(kind_phys),           intent(  out), optional :: ten_qhl(:,:)
-         real(kind_phys),           intent(  out) :: ten_cccn(:,:)
+         real(kind_phys),           intent(  out), optional :: ten_cccn(:,:)
          real(kind_phys),           intent(  out) :: ten_ccw(:,:)
          real(kind_phys),           intent(  out) :: ten_crw(:,:)
          real(kind_phys),           intent(  out) :: ten_cci(:,:)

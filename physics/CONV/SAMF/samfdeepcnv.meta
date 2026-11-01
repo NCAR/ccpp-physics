@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = samfdeepcnv
   type = scheme
-  dependencies = ../../tools/funcphys.f90,../../hooks/machine.F,samfaerosols.F,../progsigma_calc.f90,../progomega_calc.f90
+  dependencies = ../../tools/funcphys.f90,../../hooks/machine.F,samfaerosols.F,../progsigma_calc.f90,../progomega_calc.f90,mo_conv_kind.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -15,7 +15,7 @@
   type = integer
   intent = in
 [imfdeepcnv_samf]
-  standard_name = identifer_for_scale_aware_mass_flux_deep_convection
+  standard_name = identifier_for_scale_aware_mass_flux_deep_convection
   long_name = flag for SAMF deep convection scheme
   units = flag
   dimensions = ()
@@ -562,6 +562,30 @@
   standard_name = tuning_param_for_deep_cu
   long_name = tuning param for deep cu in case prognostic closure is used
   units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[lbb1]
+  standard_name = tuning_parameter_for_updraft_velocity_entrainment_term
+  long_name = tuning parameter for updraft velocity entrainment term
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[lbb2]
+  standard_name = tuning_parameter_for_updraft_velocity_buoyancy_term
+  long_name = tuning parameter for updraft velocity buoyancy term
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[lbb3]
+  standard_name = tuning_parameter_for_updraft_velocity_shear_term
+  long_name = tuning parameter for updraft velocity shear term
+  units = 1
   dimensions = ()
   type = real
   kind = kind_phys

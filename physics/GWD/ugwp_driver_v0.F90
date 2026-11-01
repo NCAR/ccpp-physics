@@ -481,8 +481,9 @@ module ugwp_driver_v0
             R    = sqrt(rnom/rdem)
             ZR   =  MAX( 2. - R, 0. )
             sigres = max(sigmin, sigma(J))
-            if (hprime(J)/sigres > dxres) sigres = hprime(J)/dxres
             mtbridge = ZR * sigres*ZLEN / hprime(J)
+            ! Scale the blocking coefficient by the inverse square root of dxres
+            cdmb4 = cdmbgwd(1) * 100.0 / sqrt(sqrt(sparea(j)))
 !           dbtmp = cdmb4*mtbridge*max(cos(ang(i,k)), gamma(j)*sin(ang(i,k)))   ! (4.15)-ifs 	
             dbtmp = cdmb4*mtbridge*(bgam * cosang2 + cgam * sinang2)            ! (4.16)-ifs
             DB(I,K)= DBTMP * UDS(I,K)
@@ -621,7 +622,9 @@ module ugwp_driver_v0
         EFACT    = MIN( MAX(EFACT,EFMIN), EFMAX )
 !
         COEFM    = (1. + CLX(I)) ** (OA(I)+1.)
-!
+
+        ! Scale the cleff coefficient by the inverse square root of dxres
+        cleff = cdmbgwd(2) * 0.001 / sqrt(sqrt(sparea(j)))
         XLINV(I) = COEFM * CLEFF           ! effective kxw for Lin-wave
         XLINGFS  = COEFM * CLEFF 
 !

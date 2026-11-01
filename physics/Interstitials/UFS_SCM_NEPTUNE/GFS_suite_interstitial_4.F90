@@ -20,10 +20,10 @@
            make_IceNumber_thompson => make_IceNumber, &
            make_DropletNumber_thompson => make_DropletNumber
 
-      use module_mp_tempo_utils, only: &
+      use module_mp_tempo_utils_v2, only: &
            make_IceNumber_tempo => make_IceNumber, &
            make_DropletNumber_tempo => make_DropletNumber
-
+    
       implicit none
 
       ! interface variables
@@ -39,7 +39,6 @@
 
       real(kind=kind_phys), intent(in   )                   :: con_pi, dtf
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qc
-
       real(kind=kind_phys), intent(in   ), dimension(:,:)   :: save_qi
 
       ! dtend and dtidx are only allocated if ldiag3d

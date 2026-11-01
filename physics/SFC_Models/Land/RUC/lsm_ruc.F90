@@ -17,7 +17,7 @@ module lsm_ruc
 
         private
 
-        public :: lsm_ruc_init, lsm_ruc_run, lsm_ruc_finalize
+        public :: lsm_ruc_init, lsm_ruc_run, lsm_ruc_final
 
         real(kind_phys), parameter :: zero = 0.0_kind_dbl_prec, one = 1.0_kind_dbl_prec, epsln = 1.0e-8_kind_dbl_prec
         real(kind_phys), dimension (2), parameter, private :: d = (/0.1,0.25/)
@@ -237,10 +237,10 @@ module lsm_ruc
 
       end subroutine lsm_ruc_init
 
-!> \section arg_table_lsm_ruc_finalize Argument Table
-!! \htmlinclude lsm_ruc_finalize.html
+!> \section arg_table_lsm_ruc_final Argument Table
+!! \htmlinclude lsm_ruc_final.html
 !!
-      subroutine lsm_ruc_finalize (errmsg, errflg)
+      subroutine lsm_ruc_final (errmsg, errflg)
 
       implicit none
 
@@ -251,7 +251,7 @@ module lsm_ruc
       errmsg = ''
       errflg = 0
 
-  end subroutine lsm_ruc_finalize
+  end subroutine lsm_ruc_final
 
 ! ===================================================================== !
 !  lsm_ruc_run:                                                         !

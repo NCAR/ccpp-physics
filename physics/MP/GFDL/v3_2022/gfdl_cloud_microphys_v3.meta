@@ -99,7 +99,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = gfdl_cloud_microphys_v3_finalize
+  name = gfdl_cloud_microphys_v3_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message

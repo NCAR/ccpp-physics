@@ -284,28 +284,45 @@
 !          at the present time, those diverse values are kept temperately to
 !          provide the same result as the original codes.  -- y.t.h.  may09
 
-      integer,               parameter :: nsold   = 4           !< max soil layers
+ !< max soil layers
+      integer,               parameter :: nsold   = 4
 
 !     real (kind=kind_phys), parameter :: gs      = con_g       !< con_g   =9.80665
-      real (kind=kind_phys), parameter :: gs1     = 9.8         !< con_g in sfcdif
-      real (kind=kind_phys), parameter :: gs2     = 9.81        !< con_g in snowpack, frh2o
-      real (kind=kind_phys), parameter :: tfreez  = con_t0c     !< con_t0c =273.16
-      real (kind=kind_phys), parameter :: lsubc   = 2.501e+6    !< con_hvap=2.5000e+6
-      real (kind=kind_phys), parameter :: lsubf   = 3.335e5     !< con_hfus=3.3358e+5
-      real (kind=kind_phys), parameter :: lsubs   = 2.83e+6     ! ? in sflx, snopac
-      real (kind=kind_phys), parameter :: elcp    = 2.4888e+3   ! ? in penman
+ !< con_g in sfcdif
+      real (kind=kind_phys), parameter :: gs1     = 9.8
+ !< con_g in snowpack, frh2o
+      real (kind=kind_phys), parameter :: gs2     = 9.81
+ !< con_t0c =273.16
+      real (kind=kind_phys), parameter :: tfreez  = con_t0c
+ !< con_hvap=2.5000e+6
+      real (kind=kind_phys), parameter :: lsubc   = 2.501e+6
+ !< con_hfus=3.3358e+5
+      real (kind=kind_phys), parameter :: lsubf   = 3.335e5
+ ! ? in sflx, snopac
+      real (kind=kind_phys), parameter :: lsubs   = 2.83e+6
+ ! ? in penman
+      real (kind=kind_phys), parameter :: elcp    = 2.4888e+3
 !     real (kind=kind_phys), parameter :: rd      = con_rd      ! con_rd  =287.05
-      real (kind=kind_phys), parameter :: rd1     = 287.04      ! con_rd in sflx, penman, canres
-      real (kind=kind_phys), parameter :: cp      = con_cp      ! con_cp  =1004.6
-      real (kind=kind_phys), parameter :: cp1     = 1004.5      ! con_cp in sflx, canres
-      real (kind=kind_phys), parameter :: cp2     = 1004.0      ! con_cp in htr
+ ! con_rd in sflx, penman, canres
+      real (kind=kind_phys), parameter :: rd1     = 287.04
+ ! con_cp  =1004.6
+      real (kind=kind_phys), parameter :: cp      = con_cp
+ ! con_cp in sflx, canres
+      real (kind=kind_phys), parameter :: cp1     = 1004.5
+ ! con_cp in htr
+      real (kind=kind_phys), parameter :: cp2     = 1004.0
 !     real (kind=kind_phys), parameter :: cph2o   = con_cliq    ! con_cliq=4.1855e+3
-      real (kind=kind_phys), parameter :: cph2o1  = 4.218e+3    ! con_cliq in penman, snopac
-      real (kind=kind_phys), parameter :: cph2o2  = 4.2e6       ! con_cliq in hrt *unit diff!
-      real (kind=kind_phys), parameter :: cpice   = con_csol    ! con_csol=2.106e+3
-      real (kind=kind_phys), parameter :: cpice1  = 2.106e6     ! con_csol in hrt *unit diff!
+ ! con_cliq in penman, snopac
+      real (kind=kind_phys), parameter :: cph2o1  = 4.218e+3
+ ! con_cliq in hrt *unit diff!
+      real (kind=kind_phys), parameter :: cph2o2  = 4.2e6
+ ! con_csol=2.106e+3
+      real (kind=kind_phys), parameter :: cpice   = con_csol
+ ! con_csol in hrt *unit diff!
+      real (kind=kind_phys), parameter :: cpice1  = 2.106e6
 !     real (kind=kind_phys), parameter :: sigma   = con_sbc     ! con_sbc=5.6704e-8
-      real (kind=kind_phys), parameter :: sigma1  = 5.67e-8     ! con_sbc in penman, nopac, snopac
+ ! con_sbc in penman, nopac, snopac
+      real (kind=kind_phys), parameter :: sigma1  = 5.67e-8
 
 !  ---  inputs:
       integer, intent(in) :: nsoil, couple, icein, vegtyp, soiltyp,     &
@@ -2026,7 +2043,8 @@
       real (kind=kind_phys), parameter :: elfc   = vkrm*btg
       real (kind=kind_phys), parameter :: wold   = 0.15
       real (kind=kind_phys), parameter :: wnew   = 1.0-wold
-      real (kind=kind_phys), parameter :: pihf   = 3.14159265/2.0  ! con_pi/2.0
+ ! con_pi/2.0
+      real (kind=kind_phys), parameter :: pihf   = 3.14159265/2.0
 
       real (kind=kind_phys), parameter :: epsu2  = 1.e-4
       real (kind=kind_phys), parameter :: epsust = 0.07

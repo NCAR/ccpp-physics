@@ -121,11 +121,16 @@
 
       integer, parameter :: NBLOW  = 16     !< band range lower index
       integer, parameter :: NBHGH  = 29     !< band range upper index
-      integer, parameter :: NBANDS = NBHGH-NBLOW+1   !< total number of SW bands (14)
-      integer, parameter :: NGPTSW = 112    !< total number of g-point in all bands 
-      integer, parameter :: NGMAX  = 16     !< maximum number of g-point in one band
-      integer, parameter :: MAXGAS = 7      !< maximum number of absorbing gases
-      integer, parameter :: NTBMX  = 10000  !< index upper limit of optical depth and transmittance tables
+ !< total number of SW bands (14)
+      integer, parameter :: NBANDS = NBHGH-NBLOW+1
+ !< total number of g-point in all bands 
+      integer, parameter :: NGPTSW = 112
+ !< maximum number of g-point in one band
+      integer, parameter :: NGMAX  = 16
+ !< maximum number of absorbing gases
+      integer, parameter :: MAXGAS = 7
+ !< index upper limit of optical depth and transmittance tables
+      integer, parameter :: NTBMX  = 10000
 ! SW bands counter starting index (for compatibility with previous
 !! SW radiation schemes)
       integer, parameter :: NSWSTR = 1

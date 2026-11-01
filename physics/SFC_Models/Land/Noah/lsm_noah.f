@@ -13,7 +13,7 @@
 
       private
 
-      public :: lsm_noah_init, lsm_noah_run, lsm_noah_finalize
+      public :: lsm_noah_init, lsm_noah_run, lsm_noah_final
 
       contains
 
@@ -69,10 +69,10 @@
       end subroutine lsm_noah_init
 
 
-!> \section arg_table_lsm_noah_finalize Argument Table
-!! \htmlinclude lsm_noah_finalize.html
+!> \section arg_table_lsm_noah_final Argument Table
+!! \htmlinclude lsm_noah_final.html
 !!
-      subroutine lsm_noah_finalize(errmsg, errflg)
+      subroutine lsm_noah_final(errmsg, errflg)
 
       implicit none
 
@@ -83,7 +83,7 @@
       errmsg = ''
       errflg = 0
 
-      end subroutine lsm_noah_finalize
+      end subroutine lsm_noah_final
 
 
 ! ===================================================================== !

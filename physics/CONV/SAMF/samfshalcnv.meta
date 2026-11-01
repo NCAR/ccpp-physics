@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = samfshalcnv
   type = scheme
-  dependencies = ../../tools/funcphys.f90,../../hooks/machine.F,samfaerosols.F,../progsigma_calc.f90,../progomega_calc.f90
+  dependencies = ../../tools/funcphys.f90,../../hooks/machine.F,samfaerosols.F,../progsigma_calc.f90,../progomega_calc.f90,mo_conv_kind.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -444,7 +444,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [dt_mf]
   standard_name = instantaneous_atmosphere_detrainment_convective_mass_flux
   long_name = (detrainment mass flux) * delt
@@ -452,7 +452,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [cnvw]
   standard_name = convective_cloud_water_mixing_ratio
   long_name = moist convective cloud water mixing ratio
@@ -460,7 +460,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [cnvc]
   standard_name = convective_cloud_cover
   long_name = convective cloud cover
@@ -468,7 +468,7 @@
   dimensions = (horizontal_loop_extent,vertical_layer_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
 [clam]
   standard_name = entrainment_rate_coefficient_for_shallow_convection
   long_name = entrainment rate coefficient for shal conv.
@@ -594,6 +594,38 @@
   standard_name = tuning_param_for_deep_cu
   long_name = tuning param for deep cu in case prognostic closure is used
   units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[lbb1]
+  standard_name = tuning_parameter_for_updraft_velocity_entrainment_term
+  long_name = tuning parameter for updraft velocity entrainment term
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[lbb2]
+  standard_name = tuning_parameter_for_updraft_velocity_buoyancy_term
+  long_name = tuning parameter for updraft velocity buoyancy term
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[lbb3]
+  standard_name = tuning_parameter_for_updraft_velocity_shear_term
+  long_name = tuning parameter for updraft velocity shear term
+  units = 1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+[dt_decay]
+  standard_name = tuning_parameter_for_updraft_decay_time
+  long_name = tuning parameter for updraft decay time
+  units = 1
   dimensions = ()
   type = real
   kind = kind_phys

@@ -259,6 +259,13 @@
   dimensions = ()
   type = integer
   intent = in
+[imp_physics_tempo]
+  standard_name = identifier_for_tempo_microphysics_scheme
+  long_name = choice of Tempo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in  
 [imp_physics_wsm6]
   standard_name = identifier_for_wsm6_microphysics_scheme
   long_name = choice of WSM6 microphysics scheme
@@ -301,6 +308,13 @@
   dimensions = ()
   type = logical
   intent = in
+[lthailaware]
+  standard_name = flag_for_hail_physics
+  long_name = flag for hail physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in  
 [mraerosol]
   standard_name = do_merra2_aerosol_awareness
   long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics

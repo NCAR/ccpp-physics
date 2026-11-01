@@ -962,8 +962,8 @@
   type = logical
   intent = in
 [nthrds]
-  standard_name = number_of_openmp_threads
-  long_name = number of OpenMP threads available for physics schemes
+  standard_name = number_of_physics_threads
+  long_name = number of OpenMP threads available to scheme
   units = count
   dimensions = ()
   type = integer
@@ -1074,7 +1074,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_phys_time_vary_finalize
+  name = GFS_phys_time_vary_final
   type = scheme
 [is_initialized]
   standard_name = flag_for_gfs_phys_time_vary_interstitial_initialization
@@ -1154,7 +1154,7 @@
   intent = in
 [nrcm]
   standard_name = number_of_random_numbers
-  long_name = second dimension of random number stream for RAS
+  long_name = second dimension of random number stream
   units = count
   dimensions = ()
   type = integer
@@ -1239,8 +1239,8 @@
   type = logical
   intent = in
 [random_clds]
-  standard_name = flag_for_random_clouds_for_RAS
-  long_name = flag for using random clouds with the RAS scheme
+  standard_name = flag_for_random_clouds
+  long_name = flag for using random clouds
   units = flag
   dimensions = ()
   type = logical
@@ -1523,8 +1523,8 @@
   kind = kind_phys
   intent = in
 [seed0]
-  standard_name = seed_random_numbers_RAS
-  long_name = random number seed for the RAS scheme
+  standard_name = seed_random_numbers
+  long_name = random number seed
   units = none
   dimensions = ()
   type = integer
@@ -1538,8 +1538,8 @@
   kind = kind_phys
   intent = inout
 [nthrds]
-  standard_name = number_of_openmp_threads
-  long_name = number of OpenMP threads available for physics schemes
+  standard_name = number_of_physics_threads
+  long_name = number of OpenMP threads available to scheme
   units = count
   dimensions = ()
   type = integer
@@ -2017,7 +2017,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [xlon_d]
   standard_name = longitude_in_degree
   long_name = longitude in degree east
@@ -2025,7 +2025,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
 [landfrac]
   standard_name = land_area_fraction
   long_name = fraction of horizontal grid area occupied by land

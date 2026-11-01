@@ -76,6 +76,22 @@
   type = real
   kind = kind_phys
   intent = in
+[ten_t_pbl]
+  standard_name = tendency_of_air_temperature_due_to_PBL
+  long_name = tendency of air temperature calculated by the PBL scheme
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+[ten_q_pbl]
+  standard_name = tendency_of_specific_humidity_concentration_due_to_PBL
+  long_name = tendency of tracer concentration calculated by one physics scheme
+  units = kg kg-1 s-1
+  dimensions = (horizontal_loop_extent,vertical_layer_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
 [gt0]
   standard_name = air_temperature
   long_name = air temperature

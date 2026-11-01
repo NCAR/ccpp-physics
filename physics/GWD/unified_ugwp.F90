@@ -35,8 +35,8 @@ module unified_ugwp
 
     use machine, only: kind_phys
 
-!    use cires_ugwp_module,   only: knob_ugwp_version, cires_ugwp_mod_init,   cires_ugwp_mod_finalize
-    use cires_ugwpv0_module, only: knob_ugwp_version, cires_ugwpv0_mod_init, cires_ugwpv0_mod_finalize
+!    use cires_ugwp_module,   only: knob_ugwp_version, cires_ugwp_mod_init,   cires_ugwp_mod_final
+    use cires_ugwpv0_module, only: knob_ugwp_version, cires_ugwpv0_mod_init, cires_ugwpv0_mod_final
     use gwdps, only: gwdps_run
     use cires_ugwp_triggers
     use ugwp_driver_v0
@@ -46,7 +46,7 @@ module unified_ugwp
 
     private
 
-    public unified_ugwp_init, unified_ugwp_run, unified_ugwp_finalize
+    public unified_ugwp_init, unified_ugwp_run, unified_ugwp_final
 
     logical :: is_initialized = .false.
 
@@ -146,15 +146,15 @@ contains
     end subroutine unified_ugwp_init
 
 ! -----------------------------------------------------------------------
-! finalize of unified_ugwp   (_finalize)
+! finalize of unified_ugwp   (_final)
 ! -----------------------------------------------------------------------
 
 !>@brief The subroutine finalizes the GFS UGWP
 
-!> \section arg_table_unified_ugwp_finalize Argument Table
-!! \htmlinclude unified_ugwp_finalize.html
+!> \section arg_table_unified_ugwp_final Argument Table
+!! \htmlinclude unified_ugwp_final.html
 !!
-    subroutine unified_ugwp_finalize(do_ugwp_v0,do_ugwp_v0_nst_only,  &
+    subroutine unified_ugwp_final(do_ugwp_v0,do_ugwp_v0_nst_only,  &
                                      errmsg, errflg)
 
     implicit none
@@ -169,11 +169,11 @@ contains
 
     if (.not.is_initialized) return
 
-    if ( do_ugwp_v0 .or. do_ugwp_v0_nst_only )  call cires_ugwpv0_mod_finalize()
+    if ( do_ugwp_v0 .or. do_ugwp_v0_nst_only )  call cires_ugwpv0_mod_final()
 
     is_initialized = .false.
 
-    end subroutine unified_ugwp_finalize
+    end subroutine unified_ugwp_final
 
 ! -----------------------------------------------------------------------
 !    originally from ugwp_driver_v0.f

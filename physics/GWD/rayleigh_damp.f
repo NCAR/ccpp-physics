@@ -107,7 +107,8 @@
 !
       if (lsidea .or. ral_ts <= 0.0 .or. prslrd0 == 0.0) return
 !
-      RTRD1 = 1.0/(ral_ts*86400) ! RECIPROCAL OF TIME SCALE PER SCALE HEIGHT
+ ! RECIPROCAL OF TIME SCALE PER SCALE HEIGHT
+      RTRD1 = 1.0/(ral_ts*86400)
                                  ! ABOVE BEGINNING SIGMA LEVEL FOR RAYLEIGH DAMPING
       dti = cons1 / dt
       hfbcpdt = half / (cp*dt)
@@ -135,13 +136,13 @@
           B(I,K)  = DTAUX * dti
           C(I,K)  = max((ENG0-ENG1),0.0) * hfbcpdt
           IF(vidx>=1) THEN
-            dtend(i,k,vidx) = dtend(i,k,vidx) + A*dt
+            dtend(i,k,vidx) = dtend(i,k,vidx) + A(i,k)*dt
           ENDIF
           IF(uidx>=1) THEN
-            dtend(i,k,uidx) = dtend(i,k,uidx) + B*dt
+            dtend(i,k,uidx) = dtend(i,k,uidx) + B(i,k)*dt
           ENDIF
           IF(tidx>=1) THEN
-            dtend(i,k,tidx) = dtend(i,k,tidx) + C*dt
+            dtend(i,k,tidx) = dtend(i,k,tidx) + C(i,k)*dt
           ENDIF
         ENDDO
       ENDDO

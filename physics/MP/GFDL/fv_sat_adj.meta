@@ -85,7 +85,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = fv_sat_adj_finalize
+  name = fv_sat_adj_final
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message
