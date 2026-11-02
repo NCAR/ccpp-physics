@@ -6,7 +6,7 @@ jobs:
   build:
     if: github.repository == 'NCAR/ccpp-physics' || github.repository == 'ufs-community/ccpp-physics'
 
-    runs-on: macos-latest
+    runs-on: ubuntu-lates
 
     steps:
     - name: Checkout
