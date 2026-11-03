@@ -24,13 +24,13 @@
  radiative flux divergence can produce substantial cooling,
  particularly at the tops of clouds, which can have strong dynamical
  effects on cloud evolution.
- 
+
  Since 2007, the longwave (LW) and the shortwave (SW) radiation
  parameterizations in NCEP's operational GFS are both modified and
  optimized versions of the Rapid Radiative Transfer Model for GCMs
  (RRTMG_LW and RRTMG_SW, respectively) developed at AER \a inc.
  (Atmospheric and Environmental Research)
- (Iacono et al.(2008) \cite iacono_et_al_2008; Mlawer et al.(1997) \cite mlawer_et_al_1997; 
+ (Iacono et al.(2008) \cite iacono_et_al_2008; Mlawer et al.(1997) \cite mlawer_et_al_1997;
   Iacono et al.(2000) \cite iacono_et_al_2000; Clough et al. 2005 \cite clough_et_al_2005). The LW algorithm
  contains 140 unevenly distributed g-points (quadrature points) in 16
  broad spectral bands, while the SW algorithm includes 112 g-points
@@ -43,7 +43,7 @@
  Approximation (\b McICA) method is used in the RRTMG radiative transfer.
  Several cloud overlap methods, including maximum-random, exponential,
  and exponential-random are available in both LW and SW
- radiation calculations. 
+ radiation calculations.
 
  Radiative fields from model outputs (\f$W m^{-2}\f$) include:
 - At surface total sky

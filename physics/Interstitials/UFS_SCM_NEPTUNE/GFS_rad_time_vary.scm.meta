@@ -2,7 +2,7 @@
   name = GFS_rad_time_vary
   type = scheme
   dependencies_path = ../../
-  dependencies = hooks/machine.F,Radiation/mersenne_twister.f,Radiation/RRTMG/radcons.f90
+  dependencies = hooks/machine.F,Radiation/mersenne_twister.F90,Radiation/RRTMG/radcons.f90
 
 ########################################################################
 [ccpp-arg-table]

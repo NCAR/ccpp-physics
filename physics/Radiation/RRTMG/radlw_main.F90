@@ -212,7 +212,7 @@
 !       dec 2001,  yu-tai hou        -- rewritten code into fortran 90 std !
 !                    set ncep radiation structure standard that contains   !
 !                    three plug-in compatable fortran program files:       !
-!                    'radlw_param.f', 'radlw_datatb.f', 'radlw_main.f'     !
+!                    'radlw_param.F90', 'radlw_datatb.F90', 'radlw_main.f'     !
 !                    fixed bugs in subprograms taugb14, taugb2, etc. added !
 !                    out-of-bounds protections. (a detailed note of        !
 !                    up_to_date modifications/corrections by ncep was sent !
@@ -394,9 +394,9 @@
 !! code from AER.
 !> @{
 !! The RRTMG-LW package includes three files:
-!! - radlw_param.f, which contains:
+!! - radlw_param.F90, which contains:
 !!  - module_radlw_parameters: band parameters set up
-!! - radlw_datatb.f, which contains modules:
+!! - radlw_datatb.F90, which contains modules:
 !!  - module_radlw_avplank: plank flux data
 !!  - module_radlw_ref: reference temperature and pressure
 !!  - module_radlw_cldprlw: cloud property coefficients
@@ -443,7 +443,7 @@
 !     qlyr (npts,nlay) : layer specific humidity (gm/gm)   *see inside  !
 !     olyr (npts,nlay) : layer ozone concentration (gm/gm) *see inside  !
 !     gasvmr(npts,nlay,:): atmospheric gases amount:                    !
-!                       (check module_radiation_gases for definition)   !
+!                       (check module_radiation_gases.F90 definition)   !
 !       gasvmr(:,:,1)  -   co2 volume mixing ratio                      !
 !       gasvmr(:,:,2)  -   n2o volume mixing ratio                      !
 !       gasvmr(:,:,3)  -   ch4 volume mixing ratio                      !
@@ -454,7 +454,7 @@
 !       gasvmr(:,:,8)  -   cfc22 volume mixing ratio                    !
 !       gasvmr(:,:,9)  -   ccl4  volume mixing ratio                    !
 !     clouds(npts,nlay,:): layer cloud profiles:                        !
-!                       (check module_radiation_clouds for definition)  !
+!                       (check module_radiation_clouds.F90 definition)  !
 !       clouds(:,:,1)  -   layer total cloud fraction                   !
 !       clouds(:,:,2)  -   layer in-cloud liq water path   (g/m**2)     !
 !       clouds(:,:,3)  -   mean eff radius for liq cloud   (micron)     !
@@ -470,7 +470,7 @@
 !                      are used for generating random numbers.          !
 !                      when isubclw /=2, it will not be used.           !
 !     aerosols(npts,nlay,nbands,:) : aerosol optical properties         !
-!                       (check module_radiation_aerosols for definition)!
+!                       (check module_radiation_aerosols.F90 definition)!
 !        (:,:,:,1)     - optical depth                                  !
 !        (:,:,:,2)     - single scattering albedo                       !
 !        (:,:,:,3)     - asymmetry parameter                            !
