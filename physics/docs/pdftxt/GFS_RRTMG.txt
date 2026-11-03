@@ -74,8 +74,8 @@
 
 In 2022, requests have been made by many physics developers and users to rewrite
 the cloud routines (routines progcld) for radiation computation in the program
-radiation_clouds.f. Those cloud subroutines are very similar, and
-have many lines of common code. We modified the radiation_clouds.f module,
+radiation_clouds.F90. Those cloud subroutines are very similar, and
+have many lines of common code. We modified the radiation_clouds.F90 module,
 and includes all the calculations of the cloud properties to a new subroutine
 radiation_clouds_prop. We also moved the common code from subroutines
 progcld to this new subroutine. Subroutine radiation_clouds_prop can be
@@ -84,7 +84,7 @@ radiation_clouds_prop can connect to the calculations of the cloud
 radiation properties for all the microphysics schemes.
 
 Summary of the major changes:
--  radiation_clouds.f : A new subroutine module_radiation_clouds::radiation_clouds_prop was added to radiation_clouds.f. This new subroutine calculates all cloud radiation properties for all the microphysics schemes. 
+-  radiation_clouds.F90 : A new subroutine module_radiation_clouds::radiation_clouds_prop was added to radiation_clouds.F90. This new subroutine calculates all cloud radiation properties for all the microphysics schemes. 
 
  -    module_radiation_clouds::progcld_zhao_carr()
  -    module_radiation_clouds::progcld_zhao_carr_pdf()

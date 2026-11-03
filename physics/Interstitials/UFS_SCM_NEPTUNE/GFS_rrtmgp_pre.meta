@@ -2,8 +2,8 @@
   name = GFS_rrtmgp_pre
   type = scheme
   dependencies_path	= ../../
-  dependencies = hooks/physcons.F90,tools/funcphys.f90,hooks/machine.F,Radiation/RRTMG/iounitdef.f,Radiation/radiation_aerosols.f,photochem/module_ozphys.F90
-  dependencies = Radiation/RRTMG/iounitdef.f,Radiation/radiation_astronomy.f,Radiation/radiation_gases.f,Radiation/radiation_tools.F90
+  dependencies = hooks/physcons.F90,tools/funcphys.f90,hooks/machine.F,Radiation/RRTMG/iounitdef.F90,Radiation/radiation_aerosols.F90,photochem/module_ozphys.F90
+  dependencies = Radiation/RRTMG/iounitdef.F90,Radiation/radiation_astronomy.F90,Radiation/radiation_gases.F90,Radiation/radiation_tools.F90
 
 ########################################################################
 [ccpp-arg-table]

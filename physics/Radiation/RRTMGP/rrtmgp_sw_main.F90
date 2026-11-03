@@ -236,21 +236,28 @@ contains
     ! ty_optical_props
     call check_error_msg('rrtmgp_sw_main_accumulated_optics_init',&
          sw_optical_props_accum%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props))
+    call sw_optical_props_accum%set_top_at_1(top_at_1)
     call check_error_msg('rrtmgp_sw_main_cloud_optics_init',&
          sw_optical_props_cloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+    call sw_optical_props_cloudsByBand%set_top_at_1(top_at_1)
     call check_error_msg('rrtmgp_sw_main_precip_optics_init',&
          sw_optical_props_precipByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+    call sw_optical_props_precipByBand%set_top_at_1(top_at_1)
     call check_error_msg('rrtmgp_sw_mian_cloud_sampling_init', &
          sw_optical_props_clouds%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props))
+    call sw_optical_props_clouds%set_top_at_1(top_at_1)
     call check_error_msg('rrtmgp_sw_main_aerosol_optics_init',&
          sw_optical_props_aerosol_local%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+    call sw_optical_props_aerosol_local%set_top_at_1(top_at_1)
     if (doGP_sgs_cnv) then
        call check_error_msg('rrtmgp_sw_main_cnv_cloud_optics_init',&
             sw_optical_props_cnvcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+       call sw_optical_props_cnvcloudsByBand%set_top_at_1(top_at_1)
     endif
     if (doGP_sgs_pbl) then
        call check_error_msg('rrtmgp_sw_main_pbl_cloud_optics_init',&
             sw_optical_props_pblcloudsByBand%alloc_2str(rrtmgp_phys_blksz, nLay, sw_gas_props%get_band_lims_wavenumber()))
+       call sw_optical_props_pblcloudsByBand%set_top_at_1(top_at_1)
     endif
 
     if (nDay .gt. 0) then
@@ -553,7 +560,6 @@ contains
           if (clear_column .or. doSWclrsky) then
              call check_error_msg('rrtmgp_sw_main_rte_sw_clrsky',rte_sw(     &
                   sw_optical_props_accum,           & ! IN  - optical-properties
-                  top_at_1,                         & ! IN  - veritcal ordering flag
                   real(coszen(iCols), kind=rte_wp), & ! IN  - Cosine of solar zenith angle
                   toa_src_sw,                       & ! IN  - incident solar flux at TOA
                   sfc_alb_dir,                      & ! IN  - Shortwave surface albedo (direct)
@@ -612,7 +618,6 @@ contains
              ! Compute fluxes
              call check_error_msg('rrtmgp_sw_main_rte_sw_allsky',rte_sw(     &
                   sw_optical_props_accum,           & ! IN  - optical-properties
-                  top_at_1,                         & ! IN  - veritcal ordering flag
                   real(coszen(iCols), kind=rte_wp), & ! IN  - Cosine of solar zenith angle
                   toa_src_sw,                       & ! IN  - incident solar flux at TOA
                   sfc_alb_dir,                      & ! IN  - Shortwave surface albedo (direct)

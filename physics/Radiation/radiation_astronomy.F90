@@ -1,4 +1,4 @@
-!>  \file radiation_astronomy.f
+!>  \file radiation_astronomy.F90
 !!  This file sets up astronomical quantities for solar radiation
 !!  calculations.
 
@@ -75,9 +75,9 @@
 !> \brief This module sets up astronomical quantities for solar radiation
 !!  calculations.
 !!
-!! Operational GFS selection for Solar constant value 
-!! (namelist control parameter - \b ISOL = 2) 
-!! \n ISOL=0: presribed value = 1366 \f$W m^{-2}\f$ (old) 
+!! Operational GFS selection for Solar constant value
+!! (namelist control parameter - \b ISOL = 2)
+!! \n ISOL=0: presribed value = 1366 \f$W m^{-2}\f$ (old)
 !! \n ISOL=10: prescibed value = 1361 \f$W m^{-2}\f$ (new)
 !! \n ISOL=1: NOAA old yearly solar constant table with 11-year cycle (range: 1944-2006)
 !! \n ISOL=2: NOAA new yearly solar constant table with 11-year cycle (range: 1850-2019)
@@ -86,70 +86,70 @@
 !! \version NCEP-Radiation_astronomy v5.2  Jan 2013
 
 !> This module sets up astronomy quantities for solar radiation calculations.
-      module module_radiation_astronomy  
+module module_radiation_astronomy
 !
-      use mpi_f08
-      use mpiutil,           only : ccpp_bcast
-      use machine,           only : kind_phys 
-      use module_iounitdef,  only : NIRADSF
+use mpi_f08
+use mpiutil,           only : ccpp_bcast
+use machine,           only : kind_phys
+use module_iounitdef,  only : NIRADSF
 !
-      implicit   none
+implicit   none
 !
-      private
+private
 
 !  ---  version tag and last revision date
-      character(40), parameter ::                                       &
-     &   VTAGAST='NCEP-Radiation_astronomy v5.2  Jan 2013 '
+character(40), parameter :: &
+   VTAGAST='NCEP-Radiation_astronomy v5.2  Jan 2013 '
 !    &   VTAGAST='NCEP-Radiation_astronomy v5.1  Nov 2012 '
 
 ! Parameter constants
-      real (kind=kind_phys) :: degrad
-      real (kind=kind_phys) :: tpi
-      real (kind=kind_phys) :: hpi
-      real (kind=kind_phys) :: pid12
-      real (kind=kind_phys), parameter :: f12    = 12.0
-      real (kind=kind_phys), parameter :: f3600  = 3600.0
- ! ~ cos(89.99427)
-      real (kind=kind_phys), parameter :: czlimt = 0.0001
+real (kind=kind_phys) :: degrad
+real (kind=kind_phys) :: tpi
+real (kind=kind_phys) :: hpi
+real (kind=kind_phys) :: pid12
+real (kind=kind_phys), parameter :: f12    = 12.0
+real (kind=kind_phys), parameter :: f3600  = 3600.0
+! ~ cos(89.99427)
+real (kind=kind_phys), parameter :: czlimt = 0.0001
 !     real (kind=kind_phys), parameter :: pid12  = (2.0*asin(1.0))/f12
 
 ! Module variable (to be set in module_radiation_astronomy::sol_init):
-      real (kind=kind_phys), public    :: solc0
-      integer   :: isolflg = 10
-      character(26) :: solar_fname = ' '
+real (kind=kind_phys), public    :: solc0
+integer   :: isolflg = 10
+character(26) :: solar_fname = ' '
 
 ! Module variables (to be set in module_radiation_astronomy::sol_update)
 
 ! equation of time
-      real (kind=kind_phys) :: sollag=0.0
+real (kind=kind_phys) :: sollag=0.0
 ! sine of the solar declination angle
-      real (kind=kind_phys) :: sindec=0.0
+real (kind=kind_phys) :: sindec=0.0
 ! cosine of the solar declination angle
-      real (kind=kind_phys) :: cosdec=0.0
+real (kind=kind_phys) :: cosdec=0.0
 ! solar angle increment per interation of cosz calc
-      real (kind=kind_phys) :: anginc=0.0
+real (kind=kind_phys) :: anginc=0.0
 ! saved monthly solar constants (isolflg=4 only)
-      real (kind=kind_phys) :: smon_sav(12)
+real (kind=kind_phys) :: smon_sav(12)
 
 ! saved year  of data used
-      integer               :: iyr_sav =0
+integer               :: iyr_sav =0
 ! total number of zenith angle iterations
-      integer               :: nstp    =6
+integer               :: nstp    =6
 
-      public  sol_init, sol_update, coszmn
+public  sol_init, sol_update, coszmn
 
 
 ! =================
-      contains
+contains
 ! =================
 
 !> This subroutine initializes astronomy process, and set up module
 !! constants.
 !!\param me         print message control flag
 !>\section sol_init_gen sol_init General Algorithm
-      subroutine sol_init                                               &
-     &     ( mpicomm, mpirank, mpiroot,                                 &
-     &       isolar, solar_file, con_solr, con_solr_old, con_pi ) !  ---  inputs
+subroutine sol_init &
+     ( mpicomm, mpirank, mpiroot, &
+       isolar, solar_file, con_solr, con_solr_old, con_pi )   !  ---  inputs
 !  ---  outputs: ( none )
 
 !  ===================================================================  !
@@ -181,154 +181,154 @@
 !                                                                       !
 !  ===================================================================  !
 !
-      implicit none
+implicit none
 
 !  ---  input:
-      type(MPI_Comm), intent(in) :: mpicomm
-      integer,  intent(in) :: mpirank, mpiroot
-      integer,  intent(in) :: isolar
-      character(len=26), intent(in) :: solar_file
-      real(kind=kind_phys), intent(in) :: con_solr, con_solr_old, con_pi
+type(MPI_Comm), intent(in) :: mpicomm
+integer,  intent(in) :: mpirank, mpiroot
+integer,  intent(in) :: isolar
+character(len=26), intent(in) :: solar_file
+real(kind=kind_phys), intent(in) :: con_solr, con_solr_old, con_pi
 !  ---  output: ( none )
 
 !  ---  local:
-      logical :: file_exist
-      integer :: ierr
-      integer :: imonth
+logical :: file_exist
+integer :: ierr
+integer :: imonth
 !
 !===>  ...  begin here
 !
-      if (mpirank==mpiroot) print *, VTAGAST    !print out version tag
+if (mpirank==mpiroot) print *, VTAGAST   !print out version tag
 
-      degrad = 180.0/con_pi
-      tpi    = 2.0 * con_pi
-      hpi    = 0.5 * con_pi
-      pid12  = con_pi/f12  
+degrad = 180.0/con_pi
+tpi    = 2.0 * con_pi
+hpi    = 0.5 * con_pi
+pid12  = con_pi/f12
 
 !  ---  initialization
-      isolflg = isolar
-      solc0   = con_solr
-      solar_fname = solar_file
-      iyr_sav = 0
-      nstp    = 6
-      do imonth = 1,12
-         smon_sav(imonth) = con_solr
-      enddo
+isolflg = isolar
+solc0   = con_solr
+solar_fname = solar_file
+iyr_sav = 0
+nstp    = 6
+do imonth = 1,12
+   smon_sav(imonth) = con_solr
+end do
 
-      if ( isolar == 0 ) then
-        solc0   = con_solr_old
-        if (mpirank==mpiroot) then
-          print *,' - Using old fixed solar constant =', solc0
-        endif
-      elseif ( isolar == 10 ) then
-        if (mpirank==mpiroot) then
-          print *,' - Using new fixed solar constant =', solc0
-        endif
- ! noaa ann-mean tsi in absolute scale
-      elseif ( isolar == 1 ) then
-        solar_fname(15:26) = 'noaa_a0.txt'
+if ( isolar == 0 ) then
+  solc0   = con_solr_old
+  if (mpirank==mpiroot) then
+    print *,' - Using old fixed solar constant =', solc0
+  end if
+else if ( isolar == 10 ) then
+  if (mpirank==mpiroot) then
+    print *,' - Using new fixed solar constant =', solc0
+  end if
+! noaa ann-mean tsi in absolute scale
+else if ( isolar == 1 ) then
+  solar_fname(15:26) = 'noaa_a0.txt'
 
-        if (mpirank==mpiroot) then
-          print *,' - Using NOAA annual mean TSI table in ABS scale',   &
-     &            ' with cycle approximation (old values)!'
-        endif
+  if (mpirank==mpiroot) then
+    print *,' - Using NOAA annual mean TSI table in ABS scale', &
+            ' with cycle approximation (old values)!'
+  end if
 
-        if ( mpirank == mpiroot ) then
-          inquire (file=solar_fname, exist=file_exist)
-        endif
-        call ccpp_bcast(file_exist, mpiroot, mpicomm, ierr)
-        if ( .not. file_exist ) then
-          isolflg = 10
+  if ( mpirank == mpiroot ) then
+    inquire (file=solar_fname, exist=file_exist)
+  end if
+  call ccpp_bcast(file_exist, mpiroot, mpicomm, ierr)
+  if ( .not. file_exist ) then
+    isolflg = 10
 
-          if (mpirank==mpiroot) then
-            print *,'   Requested solar data file "',solar_fname,       &
-     &              '" not found!'
-            print *,'   Using the default solar constant value =',solc0,&
-     &              ' reset control flag isolflg=',isolflg
-          endif
-        endif
- ! noaa ann-mean tsi in tim scale
-      elseif ( isolar == 2 ) then
-        solar_fname(15:26) = 'noaa_an.txt'
+    if (mpirank==mpiroot) then
+      print *,'   Requested solar data file "',solar_fname, &
+              '" not found!'
+      print *,'   Using the default solar constant value =',solc0, &
+              ' reset control flag isolflg=',isolflg
+    end if
+  end if
+! noaa ann-mean tsi in tim scale
+else if ( isolar == 2 ) then
+  solar_fname(15:26) = 'noaa_an.txt'
 
-        if (mpirank==mpiroot) then
-          print *,' - Using NOAA annual mean TSI table in TIM scale',   &
-     &            ' with cycle approximation (new values)!'
-        endif
+  if (mpirank==mpiroot) then
+    print *,' - Using NOAA annual mean TSI table in TIM scale', &
+            ' with cycle approximation (new values)!'
+  end if
 
-        if ( mpirank == mpiroot ) then
-          inquire (file=solar_fname, exist=file_exist)
-        endif
-        call ccpp_bcast(file_exist, mpiroot, mpicomm, ierr)
-        if ( .not. file_exist ) then
-          isolflg = 10
+  if ( mpirank == mpiroot ) then
+    inquire (file=solar_fname, exist=file_exist)
+  end if
+  call ccpp_bcast(file_exist, mpiroot, mpicomm, ierr)
+  if ( .not. file_exist ) then
+    isolflg = 10
 
-          if (mpirank==mpiroot) then
-            print *,'   Requested solar data file "',solar_fname,       &
-     &              '" not found!'
-            print *,'   Using the default solar constant value =',solc0,&
-     &              ' reset control flag isolflg=',isolflg
-          endif
-        endif
- ! cmip5 ann-mean tsi in tim scale
-      elseif ( isolar == 3 ) then
-        solar_fname(15:26) = 'cmip_an.txt'
+    if (mpirank==mpiroot) then
+      print *,'   Requested solar data file "',solar_fname, &
+              '" not found!'
+      print *,'   Using the default solar constant value =',solc0, &
+              ' reset control flag isolflg=',isolflg
+    end if
+  end if
+! cmip5 ann-mean tsi in tim scale
+else if ( isolar == 3 ) then
+  solar_fname(15:26) = 'cmip_an.txt'
 
-        if (mpirank==mpiroot) then
-          print *,' - Using CMIP5 annual mean TSI table in TIM scale',  &
-     &            ' with cycle approximation'
-        endif
+  if (mpirank==mpiroot) then
+    print *,' - Using CMIP5 annual mean TSI table in TIM scale', &
+            ' with cycle approximation'
+  end if
 
-        if ( mpirank == mpiroot ) then
-          inquire (file=solar_fname, exist=file_exist)
-        endif
-        call ccpp_bcast(file_exist, mpiroot, mpicomm, ierr)
-        if ( .not. file_exist ) then
-          isolflg = 10
+  if ( mpirank == mpiroot ) then
+    inquire (file=solar_fname, exist=file_exist)
+  end if
+  call ccpp_bcast(file_exist, mpiroot, mpicomm, ierr)
+  if ( .not. file_exist ) then
+    isolflg = 10
 
-          if (mpirank==mpiroot) then
-            print *,'   Requested solar data file "',solar_fname,       &
-     &              '" not found!'
-            print *,'   Using the default solar constant value =',solc0,&
-     &              ' reset control flag isolflg=',isolflg
-          endif
-        endif
- ! cmip5 mon-mean tsi in tim scale
-      elseif ( isolar == 4 ) then
-        solar_fname(15:26) = 'cmip_mn.txt'
+    if (mpirank==mpiroot) then
+      print *,'   Requested solar data file "',solar_fname, &
+              '" not found!'
+      print *,'   Using the default solar constant value =',solc0, &
+              ' reset control flag isolflg=',isolflg
+    end if
+  end if
+! cmip5 mon-mean tsi in tim scale
+else if ( isolar == 4 ) then
+  solar_fname(15:26) = 'cmip_mn.txt'
 
-        if (mpirank==mpiroot) then
-          print *,' - Using CMIP5 monthly mean TSI table in TIM scale', &
-     &            ' with cycle approximation'
-        endif
+  if (mpirank==mpiroot) then
+    print *,' - Using CMIP5 monthly mean TSI table in TIM scale', &
+            ' with cycle approximation'
+  end if
 
-        if ( mpirank == mpiroot ) then
-          inquire (file=solar_fname, exist=file_exist)
-        endif
-        call ccpp_bcast(file_exist, mpiroot, mpicomm, ierr)
-        if ( .not. file_exist ) then
-          isolflg = 10
+  if ( mpirank == mpiroot ) then
+    inquire (file=solar_fname, exist=file_exist)
+  end if
+  call ccpp_bcast(file_exist, mpiroot, mpicomm, ierr)
+  if ( .not. file_exist ) then
+    isolflg = 10
 
-          if (mpirank==mpiroot) then
-            print *,'   Requested solar data file "',solar_fname,       &
-     &              '" not found!'
-            print *,'   Using the default solar constant value =',solc0,&
-     &              ' reset control flag isolflg=',isolflg
-          endif
-        endif
-      else                               ! selection error
-        isolflg = 10
+    if (mpirank==mpiroot) then
+      print *,'   Requested solar data file "',solar_fname, &
+              '" not found!'
+      print *,'   Using the default solar constant value =',solc0, &
+              ' reset control flag isolflg=',isolflg
+    end if
+  end if
+else   ! selection error
+  isolflg = 10
 
-        if (mpirank==mpiroot) then
-          print *,' - !!! ERROR in selection of solar constant data',   &
-     &            ' source, ISOL =',isolar
-          print *,'   Using the default solar constant value =',solc0,  &
-     &              ' reset control flag isolflg=',isolflg
-        endif
-      endif       ! end if_isolar_block
+  if (mpirank==mpiroot) then
+    print *,' - !!! ERROR in selection of solar constant data', &
+            ' source, ISOL =',isolar
+    print *,'   Using the default solar constant value =',solc0, &
+              ' reset control flag isolflg=',isolflg
+  end if
+end if   ! end if_isolar_block
 !
 !...................................
-      end subroutine sol_init
+end subroutine sol_init
 !-----------------------------------
 
 !> This subroutine computes solar parameters at forecast time.
@@ -347,11 +347,11 @@
 !!                           \f$(w/m^2)\f$
 !>\section gen_sol_update sol_update General Algorithm
 !-----------------------------------
-      subroutine sol_update                                             &
-     &     ( jdate,kyear,deltsw,deltim,lsol_chg,                        &     !  ---  inputs
-     &       mpicomm,mpirank,mpiroot,                                   &     !  ---  inputs
-     &       slag, sdec, cdec, solcon, con_pi, errmsg, errflg           &     !  ---  outputs
-     &      )
+subroutine sol_update &
+     ( jdate,kyear,deltsw,deltim,lsol_chg, &   !  ---  inputs
+       mpicomm,mpirank,mpiroot, &   !  ---  inputs
+       slag, sdec, cdec, solcon, con_pi, errmsg, errflg &   !  ---  outputs
+      )
 
 !  ===================================================================  !
 !                                                                       !
@@ -401,105 +401,105 @@
 !                                                                       !
 !  ===================================================================  !
 !
-      implicit none
+implicit none
 
 !  ---  input:
-      integer, intent(in) :: jdate(:), kyear
-      type(MPI_Comm), intent(in) :: mpicomm
-      integer, intent(in) :: mpirank, mpiroot
-      logical, intent(in) :: lsol_chg
+integer, intent(in) :: jdate(:), kyear
+type(MPI_Comm), intent(in) :: mpicomm
+integer, intent(in) :: mpirank, mpiroot
+logical, intent(in) :: lsol_chg
 
-      real (kind=kind_phys), intent(in) :: deltsw, deltim, con_pi
+real (kind=kind_phys), intent(in) :: deltsw, deltim, con_pi
 
 !  ---  output:
-      real (kind=kind_phys), intent(out) :: slag, sdec, cdec, solcon
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
+real (kind=kind_phys), intent(out) :: slag, sdec, cdec, solcon
+character(len=*), intent(out) :: errmsg
+integer,          intent(out) :: errflg
 
 !  ---  locals:
- ! frc day/hour
-      real (kind=kind_phys), parameter :: hrday = 1.0/24.0
- ! frc day/minute
-      real (kind=kind_phys), parameter :: minday= 1.0/1440.0
- ! frc day/second
-      real (kind=kind_phys), parameter :: secday= 1.0/86400.0
+! frc day/hour
+real (kind=kind_phys), parameter :: hrday = 1.0/24.0
+! frc day/minute
+real (kind=kind_phys), parameter :: minday= 1.0/1440.0
+! frc day/second
+real (kind=kind_phys), parameter :: secday= 1.0/86400.0
 
-      real (kind=kind_phys) :: smean, solc1, dtswh, smon(12)
-      real (kind=kind_phys) :: fjd, fjd1, dlt, r1, alp
+real (kind=kind_phys) :: smean, solc1, dtswh, smon(12)
+real (kind=kind_phys) :: fjd, fjd1, dlt, r1, alp
 
-      integer :: jd, jd1, iyear, imon, iday, ihr, imin, isec
-      integer :: iw3jdn
-      integer :: i, iyr, iyr1, iyr2, jyr, nn, nswr, icy1, icy2, icy
+integer :: jd, jd1, iyear, imon, iday, ihr, imin, isec
+integer :: iw3jdn
+integer :: i, iyr, iyr1, iyr2, jyr, nn, nswr, icy1, icy2, icy
 
-      logical :: file_exist
-      character :: cline*60
-      integer :: ierr
+logical :: file_exist
+character(len=60) :: cline
+integer :: ierr
 !
 !===>  ...  begin here
 !
 ! Initialize the CCPP error handling variables
-      errmsg = ''
-      errflg = 0
+errmsg = ''
+errflg = 0
 
 !  --- ...  forecast time
-      iyear = jdate(1)
-      imon  = jdate(2)
-      iday  = jdate(3)
-      ihr   = jdate(5)
-      imin  = jdate(6)
-      isec  = jdate(7)
+iyear = jdate(1)
+imon  = jdate(2)
+iday  = jdate(3)
+ihr   = jdate(5)
+imin  = jdate(6)
+isec  = jdate(7)
 
-      if ( lsol_chg ) then   ! get solar constant from data table
+if ( lsol_chg ) then   ! get solar constant from data table
 
-        if ( iyr_sav == iyear ) then   ! same year, no new reading necessary
-          if ( isolflg==4 ) then
-            solc0 = smon_sav(imon)
-          endif
-        else                           ! need to read in new data
-          iyr_sav = iyear
-          iyr = iyear 
-          if (mpirank == mpiroot) then
+  if ( iyr_sav == iyear ) then   ! same year, no new reading necessary
+    if ( isolflg==4 ) then
+      solc0 = smon_sav(imon)
+    end if
+  else   ! need to read in new data
+    iyr_sav = iyear
+    iyr = iyear
+    if (mpirank == mpiroot) then
 !  --- ...  check to see if the solar constant data file existed
-            inquire (file=solar_fname, exist=file_exist)
-            if ( .not. file_exist ) then
-              print *,' !!! ERROR! Can not find solar constant file!!!'
-              errflg = 1
-              errmsg = "ERROR(radiation_astronomy): solar constant file"&
-     &              // " not found"
-              return
+      inquire (file=solar_fname, exist=file_exist)
+      if ( .not. file_exist ) then
+        print *,' !!! ERROR! Can not find solar constant file!!!'
+        errflg = 1
+        errmsg = "ERROR(radiation_astronomy): solar constant file" &
+              // " not found"
+        return
 
-            endif
+      end if
 
-            close(NIRADSF)
-            open (NIRADSF,file=solar_fname,form='formatted',            &
-     &                    status='old')
-            rewind NIRADSF
+      close(NIRADSF)
+      open (NIRADSF,file=solar_fname,form='formatted', &
+                    status='old')
+      rewind NIRADSF
 
-            read (NIRADSF, * ) iyr1,iyr2,icy1,icy2,smean,cline(1:60)
+      read (NIRADSF, * ) iyr1,iyr2,icy1,icy2,smean,cline(1:60)
 !           read (NIRADSF, 24) iyr1,iyr2,icy1,icy2,smean,cline
 ! 24        format(4i5,f8.2,a60)
-            
-            print *,'  Updating solar constant with cycle approx'
-            print *,'   Opened solar constant data file: ',solar_fname
+
+      print *,'  Updating solar constant with cycle approx'
+      print *,'   Opened solar constant data file: ',solar_fname
 !check      print *, iyr1, iyr2, icy1, icy2, smean, cline
-          endif
+    end if
 
-          ! Prevent warnings for potentially uninitialized data
-          file_exist = .true.
-          cline = ''
+    ! Prevent warnings for potentially uninitialized data
+    file_exist = .true.
+    cline = ''
 
-          call ccpp_bcast(iyr1,  mpiroot, mpicomm, ierr)
-          call ccpp_bcast(iyr2,  mpiroot, mpicomm, ierr)
-          call ccpp_bcast(icy1,  mpiroot, mpicomm, ierr)
-          call ccpp_bcast(icy2,  mpiroot, mpicomm, ierr)
-          call ccpp_bcast(smean, mpiroot, mpicomm, ierr)
+    call ccpp_bcast(iyr1,  mpiroot, mpicomm, ierr)
+    call ccpp_bcast(iyr2,  mpiroot, mpicomm, ierr)
+    call ccpp_bcast(icy1,  mpiroot, mpicomm, ierr)
+    call ccpp_bcast(icy2,  mpiroot, mpicomm, ierr)
+    call ccpp_bcast(smean, mpiroot, mpicomm, ierr)
 
 !  --- ...  check if there is a upper year limit put on the data table
 
 !           if ( iyear /= kyear ) then
 !             icy = icy1 - iyr1 + 1    ! range of the earlest cycle in data table
 !             if ( kyear-iyr1 < icy ) then ! need data range at least icy years
-                                           ! to perform cycle approximation
+                                     ! to perform cycle approximation
 !               if ( me == 0 ) then
 !                 print *,'  *** the requested year',iyear,' and upper',&
 !    &                  'limit',kyear,' do not fit the range of data ', &
@@ -529,143 +529,143 @@
 
 !  --- ...  checking the cycle range
 
-            if ( iyr < iyr1 ) then
-              icy = icy1 - iyr1 + 1    ! range of the earlest cycle in data table
-              Lab_dowhile1 : do while ( iyr < iyr1 )
-                iyr = iyr + icy
-              enddo Lab_dowhile1
+      if ( iyr < iyr1 ) then
+        icy = icy1 - iyr1 + 1   ! range of the earlest cycle in data table
+        Lab_dowhile1 : do while ( iyr < iyr1 )
+          iyr = iyr + icy
+        end do Lab_dowhile1
 
-              if ( mpirank == mpiroot ) then
-                print *,'   *** Year',iyear,' out of table range!',     &
-     &                  iyr1, iyr2
-                print *,'       Using the closest-cycle year (',iyr,')'
-              endif
-            elseif ( iyr > iyr2 ) then
-              icy = iyr2 - icy2 + 1    ! range of the latest cycle in data table
-              Lab_dowhile2 : do while ( iyr > iyr2 )
-                iyr = iyr - icy
-              enddo Lab_dowhile2
+        if ( mpirank == mpiroot ) then
+          print *,'   *** Year',iyear,' out of table range!', &
+                  iyr1, iyr2
+          print *,'       Using the closest-cycle year (',iyr,')'
+        end if
+      else if ( iyr > iyr2 ) then
+        icy = iyr2 - icy2 + 1   ! range of the latest cycle in data table
+        Lab_dowhile2 : do while ( iyr > iyr2 )
+          iyr = iyr - icy
+        end do Lab_dowhile2
 
-              if ( mpirank == mpiroot ) then
-                print *,'   *** Year',iyear,' out of table range!',     &
-     &                  iyr1, iyr2
-                print *,'       Using the closest-cycle year (',iyr,')'
-              endif
-            endif
+        if ( mpirank == mpiroot ) then
+          print *,'   *** Year',iyear,' out of table range!', &
+                  iyr1, iyr2
+          print *,'       Using the closest-cycle year (',iyr,')'
+        end if
+      end if
 
 !  --- ...  locate the right record for the year of data
 
-            if ( isolflg < 4 ) then        ! use annual mean data tables
-              i = iyr2
-              Lab_dowhile3 : do while ( i >= iyr1 )
+      if ( isolflg < 4 ) then   ! use annual mean data tables
+        i = iyr2
+        Lab_dowhile3 : do while ( i >= iyr1 )
 !               read (NIRADSF,26) jyr, solc1
 ! 26            format(i4,f10.4)
-                if (mpirank == mpiroot) then
-                  read (NIRADSF,*) jyr, solc1
-                end if
-                call ccpp_bcast(jyr,   mpiroot, mpicomm, ierr)
-                call ccpp_bcast(solc1, mpiroot, mpicomm, ierr)
+          if (mpirank == mpiroot) then
+            read (NIRADSF,*) jyr, solc1
+          end if
+          call ccpp_bcast(jyr,   mpiroot, mpicomm, ierr)
+          call ccpp_bcast(solc1, mpiroot, mpicomm, ierr)
 
-                if ( i == iyr .and. iyr == jyr ) then
-                  solc0  = smean + solc1
+          if ( i == iyr .and. iyr == jyr ) then
+            solc0  = smean + solc1
 
-                  if (mpirank == mpiroot) then
-                    print *,' CHECK: Solar constant data used for year',&
-     &                       iyr, solc1, solc0
-                  endif
-                  exit Lab_dowhile3
-                else
+            if (mpirank == mpiroot) then
+              print *,' CHECK: Solar constant data used for year', &
+                       iyr, solc1, solc0
+            end if
+            exit Lab_dowhile3
+          else
 !check            if(me == 0) print *,'  Skip solar const data for yr',i
-                  i = i - 1
-                endif
-              enddo   Lab_dowhile3
-            elseif ( isolflg == 4 ) then   ! use monthly mean data tables
-              i = iyr2
-              Lab_dowhile4 : do while ( i >= iyr1 )
+            i = i - 1
+          end if
+        end do   Lab_dowhile3
+      else if ( isolflg == 4 ) then   ! use monthly mean data tables
+        i = iyr2
+        Lab_dowhile4 : do while ( i >= iyr1 )
 !               read (NIRADSF,26) jyr, smon(:)
 ! 26            format(i4,12f10.4)
-                if (mpirank == mpiroot) then
-                  read (NIRADSF,*) jyr, smon(1:12)
-                end if
-                call ccpp_bcast(jyr,  mpiroot, mpicomm, ierr)
-                call ccpp_bcast(smon, mpiroot, mpicomm, ierr)
+          if (mpirank == mpiroot) then
+            read (NIRADSF,*) jyr, smon(1:12)
+          end if
+          call ccpp_bcast(jyr,  mpiroot, mpicomm, ierr)
+          call ccpp_bcast(smon, mpiroot, mpicomm, ierr)
 
-                if ( i == iyr .and. iyr == jyr ) then
-                  do nn = 1, 12
-                    smon_sav(nn) = smean + smon(nn)
-                  enddo
-                  solc0  = smean + smon(imon)
+          if ( i == iyr .and. iyr == jyr ) then
+            do nn = 1, 12
+              smon_sav(nn) = smean + smon(nn)
+            end do
+            solc0  = smean + smon(imon)
 
-                  if (mpirank == mpiroot) then
-                    print *,' CHECK: Solar constant data used for year',&
-     &                      iyr,' and month',imon
-                  endif
-                  exit Lab_dowhile4
-                else
+            if (mpirank == mpiroot) then
+              print *,' CHECK: Solar constant data used for year', &
+                      iyr,' and month',imon
+            end if
+            exit Lab_dowhile4
+          else
 !check            if(me == 0) print *,'  Skip solar const data for yr',i
-                  i = i - 1
-                endif
-              enddo   Lab_dowhile4
-            endif    ! end if_isolflg_block
+            i = i - 1
+          end if
+        end do   Lab_dowhile4
+      end if   ! end if_isolflg_block
 
-            if (mpirank==mpiroot) close ( NIRADSF )
+      if (mpirank==mpiroot) close ( NIRADSF )
 
-        endif    ! end if_iyr_sav_block
-      endif   ! end if_lsol_chg_block
+  end if   ! end if_iyr_sav_block
+end if   ! end if_lsol_chg_block
 
 !  --- ...  calculate forecast julian day and fraction of julian day
 
-      jd1 = iw3jdn(iyear,imon,iday)
+jd1 = iw3jdn(iyear,imon,iday)
 
 !  --- ...  unlike in normal applications, where day starts from 0 hr,
 !           in astronomy applications, day stats from noon.
 
-      if (ihr < 12) then
-        jd1 = jd1 - 1
-        fjd1= 0.5 + float(ihr)*hrday + float(imin)*minday               &
-     &            + float(isec)*secday
-      else
-        fjd1= float(ihr - 12)*hrday + float(imin)*minday                &
-     &            + float(isec)*secday
-      endif
+if (ihr < 12) then
+  jd1 = jd1 - 1
+  fjd1= 0.5 + real(ihr)*hrday + real(imin)*minday &
+            + real(isec)*secday
+else
+  fjd1= real(ihr - 12)*hrday + real(imin)*minday &
+            + real(isec)*secday
+end if
 
-      fjd1  = fjd1 + jd1
+fjd1  = fjd1 + jd1
 
-      jd  = int(fjd1)
-      fjd = fjd1 - jd
+jd  = int(fjd1)
+fjd = fjd1 - jd
 
 !> -# Call solar()
-      call solar                                                        &
+call solar &
 !  ---  inputs:
-     &     ( jd, fjd, con_pi,                                           &
+     ( jd, fjd, con_pi, &
 !  ---  outputs:
-     &       r1, dlt, alp                                               &
-     &     )
+       r1, dlt, alp &
+     )
 
 !  --- ...  calculate sun-earth distance adjustment factor appropriate to date
-      solcon = solc0 / (r1*r1)
+solcon = solc0 / (r1*r1)
 
-      slag   = sollag
-      sdec   = sindec
-      cdec   = cosdec
+slag   = sollag
+sdec   = sindec
+cdec   = cosdec
 
 !  --- ...  diagnostic print out
 
-      if (mpirank == mpiroot) then
+if (mpirank == mpiroot) then
 
 !> -# Call prtime()
-        call prtime                                                     &
+  call prtime &
 !  ---  inputs:
-     &     ( jd, fjd, dlt, alp, r1, solcon )
+     ( jd, fjd, dlt, alp, r1, solcon )
 !  ---  outputs: ( none )
 
-      endif
+end if
 
 !  --- ...  setting up calculation parameters used by subr coszmn
 
- ! number of mdl t-step per sw call
-      nswr  = max(1, nint(deltsw/deltim))
-      dtswh = deltsw / f3600                ! time length in hours
+! number of mdl t-step per sw call
+nswr  = max(1, nint(deltsw/deltim))
+dtswh = deltsw / f3600   ! time length in hours
 
 !     if ( deltsw >= f3600 ) then           ! for longer sw call interval
 !       nn   = max(6, min(12, nint(f3600/deltim) ))   ! num of calc per hour
@@ -677,18 +677,18 @@
 
 !     anginc = pid12 * dtswh / float(nstp-1)          ! solar angle inc during each calc step
 
-      nstp = max(6, nswr)
-      anginc = pid12 * dtswh / float(nstp)
+nstp = max(6, nswr)
+anginc = pid12 * dtswh / real(nstp)
 
-      if ( mpirank == mpiroot ) then
-        print *,'   for cosz calculations: nswr,deltim,deltsw,dtswh =', &
-     &          nswr,deltim,deltsw,dtswh,'  anginc,nstp =',anginc,nstp
-      endif
+if ( mpirank == mpiroot ) then
+  print *,'   for cosz calculations: nswr,deltim,deltsw,dtswh =', &
+          nswr,deltim,deltsw,dtswh,'  anginc,nstp =',anginc,nstp
+end if
 
 !     if (me == 0) print*,'in sol_update completed sr solar'
 !
 !...................................
-      end subroutine sol_update
+end subroutine sol_update
 !-----------------------------------
 
 !> This subroutine computes radius vector, declination and right
@@ -700,10 +700,10 @@
 !!\param[out] alp right ascension of sun in radians
 !>\section solar_gen solar General Algorithm
 !-----------------------------------
-      subroutine solar                                                  &
-     &     ( jd, fjd, con_pi,                                           &       !  ---  inputs
-     &       r1, dlt, alp                                               &       !  ---  outputs
-     &     )
+subroutine solar &
+     ( jd, fjd, con_pi, &   !  ---  inputs
+       r1, dlt, alp &   !  ---  outputs
+     )
 
 !  ===================================================================  !
 !                                                                       !
@@ -730,133 +730,133 @@
 !                                                                       !
 !  ===================================================================  !
 !
-      implicit none
+implicit none
 
 !  ---  inputs:
-      real (kind=kind_phys), intent(in) :: fjd, con_pi
-      integer,               intent(in) :: jd
+real (kind=kind_phys), intent(in) :: fjd, con_pi
+integer,               intent(in) :: jd
 
 !  ---  outputs:
-      real (kind=kind_phys), intent(out) :: r1, dlt, alp
+real (kind=kind_phys), intent(out) :: r1, dlt, alp
 
 !  ---  locals:
- ! days of year
-      real (kind=kind_phys), parameter :: cyear = 365.25
- ! iteration limit
-      real (kind=kind_phys), parameter :: ccr   = 1.3e-6
- ! days between epoch and
-      real (kind=kind_phys), parameter :: tpp   = 1.55
-                                                           ! perihelion passage of 1900
- ! days between perihelion passage
-      real (kind=kind_phys), parameter :: svt6  = 78.035
-                                                           ! and march equinox of 1900
- ! jd of epoch which is january
-      integer,               parameter :: jdor  = 2415020
-                                                           ! 0, 1900 at 12 hours ut
+! days of year
+real (kind=kind_phys), parameter :: cyear = 365.25
+! iteration limit
+real (kind=kind_phys), parameter :: ccr   = 1.3e-6
+! days between epoch and
+real (kind=kind_phys), parameter :: tpp   = 1.55
+                                                     ! perihelion passage of 1900
+! days between perihelion passage
+real (kind=kind_phys), parameter :: svt6  = 78.035
+                                                     ! and march equinox of 1900
+! jd of epoch which is january
+integer,               parameter :: jdor  = 2415020
+                                                     ! 0, 1900 at 12 hours ut
 
-      real (kind=kind_phys) :: dat, t1, year, tyear, ec, angin, ador,   &
-     &       deleqn, sni, tini, er, qq, e1, ep, cd, eq, date, em,       &
-     &       cr, w1, tst, sun
+real (kind=kind_phys) :: dat, t1, year, tyear, ec, angin, ador, &
+       deleqn, sni, tini, er, qq, e1, ep, cd, eq, date, em, &
+       cr, w1, tst, sun
 
-      integer               :: jdoe, iter
+integer               :: jdoe, iter
 
 !===>  ...  begin here
 
 ! --- ...  computes time in julian centuries after epoch
 
-      t1 = float(jd - jdor) / 36525.0
+t1 = real(jd - jdor) / 36525.0
 
 ! --- ...  computes length of anomalistic and tropical years (minus 365 days)
 
-      year = 0.25964134e0 + 0.304e-5 * t1
-      tyear= 0.24219879E0 - 0.614e-5 * t1
+year = 0.25964134e0 + 0.304e-5 * t1
+tyear= 0.24219879E0 - 0.614e-5 * t1
 
 ! --- ...  computes orbit eccentricity and angle of earth's inclination from t
 
-      ec   = 0.01675104e0 - (0.418e-4 + 0.126e-6 * t1) * t1
-      angin= 23.452294e0 - (0.0130125e0 + 0.164e-5 * t1) * t1
+ec   = 0.01675104e0 - (0.418e-4 + 0.126e-6 * t1) * t1
+angin= 23.452294e0 - (0.0130125e0 + 0.164e-5 * t1) * t1
 
-      ador = jdor
-      jdoe = ador + (svt6 * cyear) / (year - tyear)
+ador = jdor
+jdoe = ador + (svt6 * cyear) / (year - tyear)
 
 ! --- ...  deleqn is updated svt6 for current date
 
-      deleqn= float(jdoe - jd) * (year - tyear) / cyear
-      year  = year + 365.0
-      sni   = sin( angin / degrad )
-      tini  = 1.0 / tan( angin / degrad )
-      er    = sqrt( (1.0 + ec) / (1.0 - ec) )
-      qq    = deleqn * tpi / year
+deleqn= real(jdoe - jd) * (year - tyear) / cyear
+year  = year + 365.0
+sni   = sin( angin / degrad )
+tini  = 1.0 / tan( angin / degrad )
+er    = sqrt( (1.0 + ec) / (1.0 - ec) )
+qq    = deleqn * tpi / year
 
 ! --- ...  determine true anomaly at equinox
 
-      e1    = 1.0
-      cd    = 1.0
-      iter  = 0
+e1    = 1.0
+cd    = 1.0
+iter  = 0
 
-      lab_do_1 : do while ( cd > ccr )
+lab_do_1 : do while ( cd > ccr )
 
-        ep    = e1 - (e1 - ec*sin(e1) - qq) / (1.0 - ec*cos(e1))
-        cd    = abs(e1 - ep)
-        e1    = ep
-        iter  = iter + 1
+  ep    = e1 - (e1 - ec*sin(e1) - qq) / (1.0 - ec*cos(e1))
+  cd    = abs(e1 - ep)
+  e1    = ep
+  iter  = iter + 1
 
-        if (iter > 10) then
-          write(6,*) ' ITERATION COUNT FOR LOOP 32 =', iter
-          write(6,*) ' E, EP, CD =', e1, ep, cd
-          exit lab_do_1
-        endif
+  if (iter > 10) then
+    write(6,*) ' ITERATION COUNT FOR LOOP 32 =', iter
+    write(6,*) ' E, EP, CD =', e1, ep, cd
+    exit lab_do_1
+  end if
 
-      enddo  lab_do_1
+end do  lab_do_1
 
-      eq   = 2.0 * atan( er * tan( 0.5*e1 ) )
+eq   = 2.0 * atan( er * tan( 0.5*e1 ) )
 
 ! --- ...  date is days since last perihelion passage
 
-      dat  = float(jd - jdor) - tpp + fjd
-      date = mod(dat, year)
+dat  = real(jd - jdor) - tpp + fjd
+date = mod(dat, year)
 
 ! --- ...  solve orbit equations by newton's method
 
-      em   = tpi * date / year
-      e1   = 1.0
-      cr   = 1.0
-      iter = 0
+em   = tpi * date / year
+e1   = 1.0
+cr   = 1.0
+iter = 0
 
-      lab_do_2 : do while ( cr > ccr )
+lab_do_2 : do while ( cr > ccr )
 
-        ep   = e1 - (e1 - ec*sin(e1) - em) / (1.0 - ec*cos(e1))
-        cr   = abs(e1 - ep)
-        e1   = ep
-        iter = iter + 1
+  ep   = e1 - (e1 - ec*sin(e1) - em) / (1.0 - ec*cos(e1))
+  cr   = abs(e1 - ep)
+  e1   = ep
+  iter = iter + 1
 
-        if (iter > 10) then
-          write(6,*) ' ITERATION COUNT FOR LOOP 31 =', iter
-          exit lab_do_2
-        endif
+  if (iter > 10) then
+    write(6,*) ' ITERATION COUNT FOR LOOP 31 =', iter
+    exit lab_do_2
+  end if
 
-      enddo  lab_do_2
+end do  lab_do_2
 
-      w1   = 2.0 * atan( er * tan( 0.5*e1 ) )
+w1   = 2.0 * atan( er * tan( 0.5*e1 ) )
 
-      r1   = 1.0 - ec*cos(e1)
+r1   = 1.0 - ec*cos(e1)
 
-      sindec = sni * sin(w1 - eq)
-      cosdec = sqrt( 1.0 - sindec*sindec )
+sindec = sni * sin(w1 - eq)
+cosdec = sqrt( 1.0 - sindec*sindec )
 
-      dlt  = asin( sindec )
-      alp  = asin( tan(dlt)*tini )
+dlt  = asin( sindec )
+alp  = asin( tan(dlt)*tini )
 
-      tst  = cos( w1 - eq )
-      if (tst < 0.0) alp = con_pi - alp
-      if (alp < 0.0) alp = alp + tpi
+tst  = cos( w1 - eq )
+if (tst < 0.0) alp = con_pi - alp
+if (alp < 0.0) alp = alp + tpi
 
-      sun  = tpi * (date - deleqn) / year
-      if (sun < 0.0) sun = sun + tpi
-      sollag = sun - alp - 0.03255e0
+sun  = tpi * (date - deleqn) / year
+if (sun < 0.0) sun = sun + tpi
+sollag = sun - alp - 0.03255e0
 !
 !...................................
-      end subroutine solar
+end subroutine solar
 !-----------------------------------
 
 !> This subroutine computes mean cos solar zenith angle over SW calling
@@ -873,10 +873,10 @@
 !!\param coszdg     average of cosz over entire sw call interval
 !>\section coszmn_gen coszmn General Algorithm
 !-----------------------------------
-      subroutine coszmn                                                 &
-     &     ( xlon,sinlat,coslat,solhr, IM, me,                          &     !  ---  inputs
-     &       coszen, coszdg                                             &     !  ---  outputs
-     &     )
+subroutine coszmn &
+     ( xlon,sinlat,coslat,solhr, IM, me, &   !  ---  inputs
+       coszen, coszdg &   !  ---  outputs
+     )
 
 !  ===================================================================  !
 !                                                                       !
@@ -908,54 +908,54 @@
 !                                                                       !
 !  ===================================================================  !
 !
-      implicit none
+implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: IM, me
+integer, intent(in) :: IM, me
 
-      real (kind=kind_phys), intent(in) :: sinlat(:), coslat(:),        &
-     &       xlon(:), solhr
+real (kind=kind_phys), intent(in) :: sinlat(:), coslat(:), &
+       xlon(:), solhr
 
 !  ---  outputs:
-      real (kind=kind_phys), intent(out) :: coszen(:), coszdg(:)
+real (kind=kind_phys), intent(out) :: coszen(:), coszdg(:)
 
 !  ---  locals:
-      real (kind=kind_phys) :: coszn, cns, solang, rstp
+real (kind=kind_phys) :: coszn, cns, solang, rstp
 
-      integer :: istsun(IM), i, it, j, lat
+integer :: istsun(IM), i, it, j, lat
 
 !===>  ...  begin here
 
- ! solar angle at present time
-      solang = pid12 * (solhr - f12)
-      rstp = 1.0 / float(nstp)
+! solar angle at present time
+solang = pid12 * (solhr - f12)
+rstp = 1.0 / real(nstp)
 
-      do i = 1, IM
-        coszen(i) = 0.0
-        istsun(i) = 0
-      enddo
+do i = 1, IM
+  coszen(i) = 0.0
+  istsun(i) = 0
+end do
 
-      do it = 1, nstp
-        cns = solang + (float(it)-0.5)*anginc + sollag
-        do i = 1, IM
-          coszn     = sindec * sinlat(i) + cosdec * coslat(i)           &
-     &                                   * cos(cns+xlon(i))
-          coszen(i) = coszen(i) + max(0.0, coszn)
-          if (coszn > czlimt) istsun(i) = istsun(i) + 1
-        enddo
-      enddo
+do it = 1, nstp
+  cns = solang + (real(it)-0.5)*anginc + sollag
+  do i = 1, IM
+    coszn     = sindec * sinlat(i) + cosdec * coslat(i) &
+                                   * cos(cns+xlon(i))
+    coszen(i) = coszen(i) + max(0.0, coszn)
+    if (coszn > czlimt) istsun(i) = istsun(i) + 1
+  end do
+end do
 
 !  --- ...  compute time averages
 
-      do i = 1, IM
-        coszdg(i) = coszen(i) * rstp
-        if (istsun(i) > 0 .and. coszen(i) /= 0.0_kind_phys) then
-          coszen(i) = coszen(i) / istsun(i)
-        endif 
-      enddo
+do i = 1, IM
+  coszdg(i) = coszen(i) * rstp
+  if (istsun(i) > 0 .and. coszen(i) /= 0.0_kind_phys) then
+    coszen(i) = coszen(i) / istsun(i)
+  end if
+end do
 !
 !...................................
-      end subroutine coszmn
+end subroutine coszmn
 !-----------------------------------
 
 !> This subroutine prints out forecast date, time, and astronomy
@@ -968,9 +968,9 @@
 !!\param[in] solc  solar constant in \f$w/m^2\f$
 !>\section prtime_gen prtime General Algorithm
 !-----------------------------------
-      subroutine prtime                                                 &
-     &     ( jd, fjd, dlt, alp, r1, solc                                &    !  ---  inputs
-     &     )                                                            !  ---  outputs: ( none )
+subroutine prtime &
+     ( jd, fjd, dlt, alp, r1, solc &   !  ---  inputs
+     )   !  ---  outputs: ( none )
 
 !  ===================================================================  !
 !                                                                       !
@@ -995,96 +995,95 @@
 !                                                                       !
 !  ===================================================================  !
 !
-      implicit none
+implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: jd
+integer, intent(in) :: jd
 
-      real (kind=kind_phys), intent(in) :: fjd, dlt, alp, r1, solc
+real (kind=kind_phys), intent(in) :: fjd, dlt, alp, r1, solc
 
 !  ---  outputs: ( none )
 
 !  ---  locals:
-      real (kind=kind_phys), parameter :: sixty  = 60.0
+real (kind=kind_phys), parameter :: sixty  = 60.0
 
-      character(LEN=1),     parameter :: sign   = '-'
-      character(LEN=1),     parameter :: sigb   = ' '
+character(LEN=1),     parameter :: sign   = '-'
+character(LEN=1),     parameter :: sigb   = ' '
 
-      character(LEN=1)     :: dsig
-      character(LEN=4)     :: month(12)
+character(LEN=1)     :: dsig
+character(LEN=4), parameter :: month(12) = &
+           [ 'JAN.','FEB.','MAR.','APR.','MAY ','JUNE', &
+             'JULY','AUG.','SEP.','OCT.','NOV ','DEC.' ]
 
-      data month / 'JAN.','FEB.','MAR.','APR.','MAY ','JUNE',           &
-     &             'JULY','AUG.','SEP.','OCT.','NOV ','DEC.' /
-
-      integer               :: iday, imon, iyear, ihr, ltd, ltm,        &
-     &                         ihalp, iyy, jda, mfjd, idaywk, idayyr
-      real (kind=kind_phys) :: xmin, dltd, dltm, dlts, halp, ymin,      &
-     &                         asec, eqt, eqsec
+integer               :: iday, imon, iyear, ihr, ltd, ltm, &
+                         ihalp, iyy, jda, mfjd, idaywk, idayyr
+real (kind=kind_phys) :: xmin, dltd, dltm, dlts, halp, ymin, &
+                         asec, eqt, eqsec
 
 !===>  ...  begin here
 
 !  --- ...  get forecast hour and minute from fraction of julian day
 
-      if (fjd >= 0.5) then
-        jda = jd + 1
-        mfjd= nint( fjd*1440.0 )
-        ihr = mfjd / 60 - 12
-        xmin= float(mfjd) - (ihr + 12)*sixty
-      else
-        jda = jd
-        mfjd= nint( fjd*1440.0 )
-        ihr = mfjd / 60 + 12
-        xmin= float(mfjd) - (ihr - 12)*sixty
-      endif
+if (fjd >= 0.5) then
+  jda = jd + 1
+  mfjd= nint( fjd*1440.0 )
+  ihr = mfjd / 60 - 12
+  xmin= real(mfjd) - (ihr + 12)*sixty
+else
+  jda = jd
+  mfjd= nint( fjd*1440.0 )
+  ihr = mfjd / 60 + 12
+  xmin= real(mfjd) - (ihr - 12)*sixty
+end if
 
 !  --- ...  get forecast year, month, and day from julian day
 
-      call w3fs26(jda, iyear,imon,iday, idaywk,idayyr)
+call w3fs26(jda, iyear,imon,iday, idaywk,idayyr)
 
 !  -- ...  compute solar parameters
 
-      dltd = degrad * dlt
-      ltd  = dltd
-      dltm = sixty * (abs(dltd) - abs(float(ltd)))
-      ltm  = dltm
-      dlts = sixty * (dltm - float(ltm))
+dltd = degrad * dlt
+ltd  = dltd
+dltm = sixty * (abs(dltd) - abs(real(ltd)))
+ltm  = dltm
+dlts = sixty * (dltm - real(ltm))
 
-      if ((dltd < 0.0) .and. (ltd == 0.0)) then
-        dsig = sign
-      else
-        dsig = sigb
-      endif
+if ((dltd < 0.0) .and. (ltd == 0.0)) then
+  dsig = sign
+else
+  dsig = sigb
+end if
 
-      halp = 6.0 * alp / hpi
-      ihalp= halp
-      ymin = abs(halp - float(ihalp)) * sixty
-      iyy  = ymin
-      asec = (ymin - float(iyy)) * sixty
+halp = 6.0 * alp / hpi
+ihalp= halp
+ymin = abs(halp - real(ihalp)) * sixty
+iyy  = ymin
+asec = (ymin - real(iyy)) * sixty
 
-      eqt  = 228.55735 * sollag
-      eqsec= sixty * eqt
+eqt  = 228.55735 * sollag
+eqsec= sixty * eqt
 
-      print 101, iday, month(imon), iyear, ihr, xmin, jd, fjd
- 101  format('0 FORECAST DATE',9x,i3,a5,i6,' AT',i3,' HRS',f6.2,' MINS'/&
-     &       '  JULIAN DAY',12x,i8,2x,'PLUS',f11.6)
+print 101, iday, month(imon), iyear, ihr, xmin, jd, fjd
+101 format('0 FORECAST DATE',9x,i3,a5,i6,' AT',i3,' HRS',f6.2,' MINS'/ &
+       '  JULIAN DAY',12x,i8,2x,'PLUS',f11.6)
 
-      print 102, r1, halp, ihalp, iyy, asec
- 102  format('  RADIUS VECTOR',9x,f10.7/'  RIGHT ASCENSION OF SUN',     &
-     &       f12.7,' HRS, OR',i4,' HRS',i4,' MINS',f6.1,' SECS')
+print 102, r1, halp, ihalp, iyy, asec
+102 format('  RADIUS VECTOR',9x,f10.7/'  RIGHT ASCENSION OF SUN', &
+       f12.7,' HRS, OR',i4,' HRS',i4,' MINS',f6.1,' SECS')
 
-      print 103, dltd, dsig, ltd, ltm, dlts, eqt, eqsec, sollag, solc
- 103  format('  DECLINATION OF THE SUN',f12.7,' DEGS, OR ',a1,i3,       &
-     &       ' DEGS',i4,' MINS',f6.1,' SECS'/'  EQUATION OF TIME',6x,   &
-     &       f12.7,' MINS, OR',f10.2,' SECS, OR',f9.6,' RADIANS'/       &
-     &       '  SOLAR CONSTANT',8X,F12.7,' (DISTANCE AJUSTED)'//)
+print 103, dltd, dsig, ltd, ltm, dlts, eqt, eqsec, sollag, solc
+103 format('  DECLINATION OF THE SUN',f12.7,' DEGS, OR ',a1,i3, &
+       ' DEGS',i4,' MINS',f6.1,' SECS'/'  EQUATION OF TIME',6x, &
+       f12.7,' MINS, OR',f10.2,' SECS, OR',f9.6,' RADIANS'/ &
+       '  SOLAR CONSTANT',8X,F12.7,' (DISTANCE AJUSTED)'//)
 
 !
 !...................................
-      end subroutine prtime
+end subroutine prtime
 !-----------------------------------
 
 !
 !...........................................!
-      end module module_radiation_astronomy !
+end module module_radiation_astronomy   !
 !> @}
 !===========================================!

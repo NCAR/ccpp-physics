@@ -95,12 +95,12 @@ physics/Radiation/RRTMGP/rrtmgp_aerosol_optics.*                             @du
 physics/Radiation/RRTMGP/rrtmgp_lw_*                                         @dustinswales @Qingfu-Liu                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Radiation/RRTMGP/rrtmgp_sw_*                                         @dustinswales @Qingfu-Liu                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Radiation/mersenne_twister.f                                                                                   @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/Radiation/radiation_aerosols.f                                       @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/Radiation/radiation_astronomy.f                                      @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/Radiation/radiation_aerosols.F90                                       @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/Radiation/radiation_astronomy.F90                                      @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Radiation/radiation_cloud_overlap.F90                                @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/Radiation/radiation_clouds.f                                         @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/Radiation/radiation_gases.f                                          @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/Radiation/radiation_surface.f                                        @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/Radiation/radiation_clouds.F90                                         @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/Radiation/radiation_gases.F90                                          @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/Radiation/radiation_surface.F90                                        @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Radiation/radiation_tools.F90                                        @Qingfu-Liu @dustinswales                 @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/SFC_Layer/GFDL/gfdl_sfc_layer.*                                      @ZhanZhang-NOAA                           @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/SFC_Layer/GFDL/module_sf_exchcoef.f90                                @ZhanZhang-NOAA                           @grantfirl @rhaesung @Qingfu-Liu @dustinswales
@@ -189,7 +189,7 @@ physics/Interstitials/UFS_SCM_NEPTUNE/iccn_def.F                                
 physics/Interstitials/UFS_SCM_NEPTUNE/iccninterp.F90                                                                   @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/maximum_hourly_diagnostics.*                                                     @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/scm_sfc_flux_spec.*                    @grantfirl                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
-physics/Interstitials/UFS_SCM_NEPTUNE/sfcsub.F                                                                         @grantfirl @rhaesung @Qingfu-Liu @dustinswales
+physics/Interstitials/UFS_SCM_NEPTUNE/sfcsub.F90                                                                       @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/sgscloud_radpost.*                                                               @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 physics/Interstitials/UFS_SCM_NEPTUNE/sgscloud_radpre.*                                                                @grantfirl @rhaesung @Qingfu-Liu @dustinswales
 

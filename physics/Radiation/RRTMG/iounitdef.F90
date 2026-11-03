@@ -1,4 +1,4 @@
-!>\file iounitdef.f
+!>\file iounitdef.F90
 !! This file defines fortran unit numbers for input/output data
 !! files for the NCEP GFS model.
 
@@ -48,57 +48,57 @@
 !!!!!  ==========================================================  !!!!!
 
 !========================================!
-!> this module defines fortran unit numbers for input/output data 
+!> this module defines fortran unit numbers for input/output data
 !! files for the ncep gfs model.
-      module module_iounitdef            !
+module module_iounitdef            !
 !........................................!
 !
-      implicit   none
+implicit   none
 !
-      public
+public
 
 !  --- ...  input units
 
-      integer, parameter :: NISIGI  = 11
-      integer, parameter :: NISIGI2 = 12
-      integer, parameter :: NISFCI  = 14
-      integer, parameter :: NICO2TR = 15
- ! CCE (Cray) forbids 100-102 20211112 JM
-      integer, parameter :: NICO2CN = 112
-      integer, parameter :: NIMTNVR = 24
-      integer, parameter :: NIDTBTH = 27
-      integer, parameter :: NIO3PRD = 28
-      integer, parameter :: NIO3LOS = 29
-      integer, parameter :: NINAMSF = 35
-      integer, parameter :: NICLTUN = 43
-      integer, parameter :: NIO3CLM = 48
-      integer, parameter :: NIMICPH = 1
- ! CCE (Cray) forbids 100-102 20210701 JM
-      integer, parameter :: NISFCYC = 111
- ! CCE (Cray) forbids 100-102 20210701 JM
-      integer, parameter :: NIAERCM = 112
- ! CCE (Cray) forbids 100-102 20210701 JM
-      integer, parameter :: NIRADSF = 112
+integer, parameter :: NISIGI  = 11
+integer, parameter :: NISIGI2 = 12
+integer, parameter :: NISFCI  = 14
+integer, parameter :: NICO2TR = 15
+! CCE (Cray) forbids 100-102 20211112 JM
+integer, parameter :: NICO2CN = 112
+integer, parameter :: NIMTNVR = 24
+integer, parameter :: NIDTBTH = 27
+integer, parameter :: NIO3PRD = 28
+integer, parameter :: NIO3LOS = 29
+integer, parameter :: NINAMSF = 35
+integer, parameter :: NICLTUN = 43
+integer, parameter :: NIO3CLM = 48
+integer, parameter :: NIMICPH = 1
+! CCE (Cray) forbids 100-102 20210701 JM
+integer, parameter :: NISFCYC = 111
+! CCE (Cray) forbids 100-102 20210701 JM
+integer, parameter :: NIAERCM = 112
+! CCE (Cray) forbids 100-102 20210701 JM
+integer, parameter :: NIRADSF = 112
 
 !  --- ... output units
 
-      integer, parameter :: NOSIGR1 = 51
-      integer, parameter :: NOSIGR2 = 52
-      integer, parameter :: NOSFCR  = 53
-      integer, parameter :: NOSIGF  = 61
-      integer, parameter :: NOSFCF  = 62
-      integer, parameter :: NOFLXF  = 63
-      integer, parameter :: NOD3DF  = 64
-      integer, parameter :: NOAERF  = 65    ! for g2d_fld
+integer, parameter :: NOSIGR1 = 51
+integer, parameter :: NOSIGR2 = 52
+integer, parameter :: NOSFCR  = 53
+integer, parameter :: NOSIGF  = 61
+integer, parameter :: NOSFCF  = 62
+integer, parameter :: NOFLXF  = 63
+integer, parameter :: NOD3DF  = 64
+integer, parameter :: NOAERF  = 65    ! for g2d_fld
 !hchuang code change [+1L]
-      integer, parameter :: NOG3DF  = 69
-      integer, parameter :: NOLOGF  = 99
+integer, parameter :: NOG3DF  = 69
+integer, parameter :: NOLOGF  = 99
 
 !  --- ...  in/out units
 
-      integer, parameter :: NIOFRAD = 16
+integer, parameter :: NIOFRAD = 16
 
 !
 !........................................!
-      end module module_iounitdef        !
+end module module_iounitdef        !
 !========================================!
