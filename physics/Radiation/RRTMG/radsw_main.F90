@@ -454,11 +454,11 @@
 !!\tableofcontents
 !!
 !! The RRTMG-SW package includes three files:
-!! - radsw_param.f, which contains:
+!! - radsw_param.F90, which contains:
 !!  - module_radsw_parameters: specifies major parameters of the spectral
 !!    bands and defines the construct structures of derived-type variables
 !!    for holding the output results.
-!! - radsw_datatb.f, which contains:
+!! - radsw_datatb.F90, which contains:
 !!  - module_radsw_ref: reference temperature and pressure
 !!  - module_radsw_cldprtb: cloud property coefficients table
 !!  - module_radsw_sflux: indexes and coefficients for spectral
@@ -519,7 +519,7 @@
 !   qlyr (npts,nlay) : layer specific humidity in gm/gm   *see inside   !
 !   olyr (npts,nlay) : layer ozone concentration in gm/gm               !
 !   gasvmr(npts,nlay,:): atmospheric constent gases:                    !
-!                      (check module_radiation_gases for definition)    !
+!                      (check module_radiation_gases.F90 definition)    !
 !      gasvmr(:,:,1)  - co2 volume mixing ratio                         !
 !      gasvmr(:,:,2)  - n2o volume mixing ratio                         !
 !      gasvmr(:,:,3)  - ch4 volume mixing ratio                         !
@@ -530,7 +530,7 @@
 !      gasvmr(:,:,8)  - cfc22 volume mixing ratio      (not used)       !
 !      gasvmr(:,:,9)  - ccl4  volume mixing ratio      (not used)       !
 !   clouds(npts,nlay,:): cloud profile                                  !
-!                      (check module_radiation_clouds for definition)   !
+!                      (check module_radiation_clouds.F90 definition)   !
 !       clouds(:,:,1)  -   layer total cloud fraction                   !
 !       clouds(:,:,2)  -   layer in-cloud liq water path   (g/m**2)     !
 !       clouds(:,:,3)  -   mean eff radius for liq cloud   (micron)     !
@@ -546,12 +546,12 @@
 !                      are used for generating random numbers.          !
 !                      when isubcsw /=2, it will not be used.           !
 !   aerosols(npts,nlay,nbdsw,:) : aerosol optical properties            !
-!                      (check module_radiation_aerosols for definition) !
+!                      (check module_radiation_aerosols.F90 definition) !
 !         (:,:,:,1)   - optical depth                                   !
 !         (:,:,:,2)   - single scattering albedo                        !
 !         (:,:,:,3)   - asymmetry parameter                             !
 !   sfcalb(npts, : ) : surface albedo in fraction                       !
-!                      (check module_radiation_surface for definition)  !
+!                      (check module_radiation_surface.F90 definition)  !
 !         ( :, 1 )    - near ir direct beam albedo                      !
 !         ( :, 2 )    - near ir diffused albedo                         !
 !         ( :, 3 )    - uv+vis direct beam albedo                       !

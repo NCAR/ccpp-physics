@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = rad_sw_pre
   type = scheme
-  dependencies = iounitdef.f,../../hooks/machine.F
+  dependencies = iounitdef.F90,../../hooks/machine.F
 
 ########################################################################
 [ccpp-arg-table]

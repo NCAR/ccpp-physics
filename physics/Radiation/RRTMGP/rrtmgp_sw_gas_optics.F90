@@ -486,13 +486,13 @@ contains
     
     ! Logicals
     call mpi_bcast(minor_scales_with_density_lowerSW,  &
-         size(minor_scales_with_density_lowerSW), MPI_LOGICAL,          mpiroot, mpicomm, mpierr)
+         size(minor_scales_with_density_lowerSW), MPI_C_BOOL,           mpiroot, mpicomm, mpierr)
     call mpi_bcast(minor_scales_with_density_upperSW,  &
-         size(minor_scales_with_density_upperSW), MPI_LOGICAL,          mpiroot, mpicomm, mpierr)
+         size(minor_scales_with_density_upperSW), MPI_C_BOOL,           mpiroot, mpicomm, mpierr)
     call mpi_bcast(scale_by_complement_lowerSW,        &
-         size(scale_by_complement_lowerSW),       MPI_LOGICAL,          mpiroot, mpicomm, mpierr)
+         size(scale_by_complement_lowerSW),       MPI_C_BOOL,           mpiroot, mpicomm, mpierr)
     call mpi_bcast(scale_by_complement_upperSW,        &
-         size(scale_by_complement_upperSW),       MPI_LOGICAL,          mpiroot, mpicomm, mpierr)
+         size(scale_by_complement_upperSW),       MPI_C_BOOL,           mpiroot, mpicomm, mpierr)
 
     call mpi_barrier(mpicomm, mpierr)
 

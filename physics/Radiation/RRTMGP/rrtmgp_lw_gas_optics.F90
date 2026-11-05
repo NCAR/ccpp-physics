@@ -438,13 +438,13 @@ contains
 
     ! Logicals
     call mpi_bcast(minor_scales_with_density_lowerLW,  &
-         size(minor_scales_with_density_lowerLW),  MPI_LOGICAL,    mpiroot, mpicomm, mpierr)
+         size(minor_scales_with_density_lowerLW),  MPI_C_BOOL,     mpiroot, mpicomm, mpierr)
     call mpi_bcast(minor_scales_with_density_upperLW,  &
-         size(minor_scales_with_density_upperLW),  MPI_LOGICAL,    mpiroot, mpicomm, mpierr)
+         size(minor_scales_with_density_upperLW),  MPI_C_BOOL,     mpiroot, mpicomm, mpierr)
     call mpi_bcast(scale_by_complement_lowerLW,        &
-         size(scale_by_complement_lowerLW),        MPI_LOGICAL,    mpiroot, mpicomm, mpierr)
+         size(scale_by_complement_lowerLW),        MPI_C_BOOL,     mpiroot, mpicomm, mpierr)
     call mpi_bcast(scale_by_complement_upperLW,        &
-         size(scale_by_complement_upperLW),        MPI_LOGICAL,    mpiroot, mpicomm, mpierr)
+         size(scale_by_complement_upperLW),        MPI_C_BOOL,     mpiroot, mpicomm, mpierr)
 
     call mpi_barrier(mpicomm, mpierr)
 

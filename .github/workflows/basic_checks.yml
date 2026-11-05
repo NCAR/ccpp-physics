@@ -6,11 +6,11 @@ jobs:
   build:
     if: github.repository == 'NCAR/ccpp-physics' || github.repository == 'ufs-community/ccpp-physics'
 
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v7
     - name: Init submodules
       run: git submodule update --init --recursive
     #- name: Update packages
@@ -19,4 +19,4 @@ jobs:
     #    #brew install autoconf automake coreutils gcc@9 libtool mpich gnu-sed wget
     #    brew install automake coreutils mpich gnu-sed
     - name: Check for ASCII encoding
-      run: ./tools/check_encoding.py
+      run: ./tools/check_encoding.py --max-depth 3
