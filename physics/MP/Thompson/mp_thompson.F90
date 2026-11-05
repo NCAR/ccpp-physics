@@ -179,34 +179,26 @@ module mp_thompson
             end if
          end if
 
-         if (is_aerosol_aware .and. merra2_aerosol_aware .and. gocart_aerosol_aware)  then
-            write(errmsg,'(*(a))') "Logic error: Only one Thompson aerosol option can be true, either is_aerosol_aware or &
-            merra2_aerosol_aware or gocart_aerosol_aware)"
-            errflg = 1
-            return
-         end if
+        if (is_aerosol_aware .and. merra2_aerosol_aware) then
+           write(errmsg,'(a)') &
+             'Logic error: is_aerosol_aware and merra2_aerosol_aware cannot both be true'
+           errflg = 1
+           return
+        endif
 
-         if (is_aerosol_aware .and. merra2_aerosol_aware )  then
-            write(errmsg,'(*(a))') "Logic error: Only one Thompson aerosol option can be true, either is_aerosol_aware or &
-            merra2_aerosol_aware or gocart_aerosol_aware)"
-            errflg = 1
-            return
-         end if
+        if (is_aerosol_aware .and. gocart_aerosol_aware) then
+           write(errmsg,'(a)') &
+             'Logic error: is_aerosol_aware and gocart_aerosol_aware cannot both be true'
+           errflg = 1
+           return
+        endif
 
-         if (is_aerosol_aware .and. gocart_aerosol_aware)  then
-            write(errmsg,'(*(a))') "Logic error: Only one Thompson aerosol option can be true, either is_aerosol_aware or &
-            merra2_aerosol_aware or gocart_aerosol_aware)"
-            errflg = 1
-            return
-         end if
-
-         if (merra2_aerosol_aware .and. gocart_aerosol_aware)  then
-            write(errmsg,'(*(a))') "Logic error: Only one Thompson aerosol option can be true, either is_aerosol_aware or &
-            merra2_aerosol_aware or gocart_aerosol_aware)"
-            errflg = 1
-            return
-         end if
-
+        if (merra2_aerosol_aware .and. gocart_aerosol_aware) then
+           write(errmsg,'(a)') &
+             'Logic error: merra2_aerosol_aware and gocart_aerosol_aware cannot both be true'
+           errflg = 1
+           return
+        endif
 
          if (gocart_aerosol_aware .and. wetdep_ls_cpl /= 0) then
             write(errmsg,'(*(a))') "Logic error: gocart_aerosol_aware requires ", &
@@ -689,6 +681,14 @@ module mp_thompson
          new_ni = ni
          new_nr = nr
          new_tgrs = tgrs
+
+         if (is_aerosol_aware .or. merra2_aerosol_aware) then
+           dnc = 0.0 ; dnwfa = 0.0 ; dnifa = 0.0
+           allocate(new_nc(ncol,nlev), new_nwfa(ncol,nlev), new_nifa(ncol,nlev))
+           new_nc   = nc
+           new_nwfa = nwfa
+           new_nifa = nifa
+         end if
          
          if (first_time_step .and. istep==1) then
             ! Check initialization state
@@ -765,11 +765,7 @@ module mp_thompson
           endif    
          end if
 
-         new_spechum = spechum
-         new_qc = qc ; new_qr = qr ; new_qi = qi ; new_qs = qs ; new_qg = qg
-         new_ni = ni ; new_nr = nr
-         new_tgrs = tgrs
-         if (is_aerosol_aware .or. merra2_aerosol_aware .or. gocart_aerosol_aware) then
+         if (gocart_aerosol_aware) then
            dnc = 0.0 ; dnwfa = 0.0 ; dnifa = 0.0
            allocate(new_nc(ncol,nlev), new_nwfa(ncol,nlev), new_nifa(ncol,nlev))
            new_nc   = nc
@@ -907,7 +903,7 @@ module mp_thompson
             qcten3     => diag3d(:,:,37:37)
          end if set_extended_diagnostic_pointers
          !> - Call mp_gt_driver() with or without aerosols, with or without effective radii, ...
-         if (((is_aerosol_aware .or. merra2_aerosol_aware)).and. (.not. (cplchp .or.cplchm))) then
+         if (is_aerosol_aware) then
             call mp_gt_driver(qv=qv, qc=new_qc, qr=new_qr, qi=new_qi, qs=new_qs, qg=new_qg, ni=new_ni, nr=new_nr,        &
                               nc=new_nc, nwfa=new_nwfa, nifa=new_nifa, nwfa2d=nwfa2d, nifa2d=nifa2d,     &
                               tt=new_tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
@@ -950,8 +946,50 @@ module mp_thompson
                               qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
                               qcten3=qcten3, pfils=pfils, pflls=pflls,                       &
                               fs_fac_rain=fs_fac_rain, fs_fac_snow=fs_fac_snow)
-         else if (((cplchp .or.cplchm).and. (is_aerosol_aware .or. merra2_aerosol_aware .or. &
-                   gocart_aerosol_aware))) then
+         else if (merra2_aerosol_aware) then
+             call mp_gt_driver(qv=qv, qc=new_qc, qr=new_qr, qi=new_qi, qs=new_qs, qg=new_qg, ni=new_ni, nr=new_nr,        &
+                               nc=new_nc, nwfa=new_nwfa, nifa=new_nifa,                                   &
+                               tt=new_tgrs, p=prsl, w=w, dz=dz, dt_in=dtstep, dt_inner=dt_inner,  &
+                               sedi_semi=sedi_semi, decfl=decfl, lsm=islmsk,                  &
+                               rainnc=rain_mp, rainncv=delta_rain_mp,                         &
+                               snownc=snow_mp, snowncv=delta_snow_mp,                         &
+                               icenc=ice_mp, icencv=delta_ice_mp,                             &
+                               graupelnc=graupel_mp, graupelncv=delta_graupel_mp, sr=sr,      &
+                               refl_10cm=refl_10cm,                                           &
+                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
+                               max_hail_diam_sfc=max_hail_diam_sfc,                           &
+                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                               aero_ind_fdb=aero_ind_fdb, rand_perturb_on=spp_mp_opt,         &
+                               kme_stoch=kme_stoch,                                           &
+                               rand_pert=spp_wts_mp, spp_var_list=spp_var_list,               &
+                               spp_prt_list=spp_prt_list, n_var_spp=n_var_spp,                &
+                               spp_stddev_cutoff=spp_stddev_cutoff,                           &
+                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
+                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
+                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
+                               fullradar_diag=fullradar_diag, istep=istep, nsteps=nsteps,     &
+                               first_time_step=first_time_step, errmsg=errmsg, errflg=errflg, &
+                               ! Extended diagnostics
+                               ext_diag=ext_diag,                                             &
+                               ! vts1=vts1, txri=txri, txrc=txrc,                             &
+                               prw_vcdc=prw_vcdc,                                             &
+                               prw_vcde=prw_vcde, tpri_inu=tpri_inu, tpri_ide_d=tpri_ide_d,   &
+                               tpri_ide_s=tpri_ide_s, tprs_ide=tprs_ide,                      &
+                               tprs_sde_d=tprs_sde_d,                                         &
+                               tprs_sde_s=tprs_sde_s, tprg_gde_d=tprg_gde_d,                  &
+                               tprg_gde_s=tprg_gde_s, tpri_iha=tpri_iha,                      &
+                               tpri_wfz=tpri_wfz, tpri_rfz=tpri_rfz, tprg_rfz=tprg_rfz,       &
+                               tprs_scw=tprs_scw, tprg_scw=tprg_scw, tprg_rcs=tprg_rcs,       &
+                               tprs_rcs=tprs_rcs,                                             &
+                               tprr_rci=tprr_rci, tprg_rcg=tprg_rcg, tprw_vcd_c=tprw_vcd_c,   &
+                               tprw_vcd_e=tprw_vcd_e, tprr_sml=tprr_sml, tprr_gml=tprr_gml,   &
+                               tprr_rcg=tprr_rcg, tprr_rcs=tprr_rcs,                          &
+                               tprv_rev=tprv_rev, tten3=tten3,                                &
+                               qvten3=qvten3, qrten3=qrten3, qsten3=qsten3, qgten3=qgten3,    &
+                               qiten3=qiten3, niten3=niten3, nrten3=nrten3, ncten3=ncten3,    &
+                               qcten3=qcten3, pfils=pfils, pflls=pflls,                       &
+                               fs_fac_rain=fs_fac_rain, fs_fac_snow=fs_fac_snow)
+         else if ((cplchp .or.cplchm).and. gocart_aerosol_aware) then
              call mp_gt_driver(qv=qv, qc=new_qc, qr=new_qr, qi=new_qi, qs=new_qs, qg=new_qg, ni=new_ni, nr=new_nr,        &
                                aero3d=aero3d, aeroFF=aeroFF,                                  &
                                nc=new_nc, nwfa=new_nwfa, nifa=new_nifa,                       &

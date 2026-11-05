@@ -80,10 +80,10 @@
 !>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
 !> @{
       subroutine GFS_phys_time_vary_init (                                                         &
-              mpicomm, mpirank, mpiroot, ntoz, h2o_phys, iaerclm, mraerosol, iaermdl, iccn, iflip, &
-              im, levs, nx, ny, idate, xlat_d, xlon_d,                                             &
+              mpicomm, mpirank, mpiroot, ntoz, h2o_phys, iaerclm, iaermdl, iccn, iflip, im, levs,  &
+              nx, ny, idate, xlat_d, xlon_d,                                                       &
               jindx1_o3, jindx2_o3, ddy_o3, jindx1_h, jindx2_h, ddy_h, h2opl,fhour,                &
-              jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm, aer_mr,    &
+              jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
               do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
               isot, ivegsrc, nlunit, sncovr, sncovr_ice, lsm, lsm_noahmp, lsm_ruc, min_seaice,     &
@@ -103,7 +103,7 @@
          ! Interface variables
          type(MPI_Comm),       intent(in)    :: mpicomm
          integer,              intent(in)    :: mpirank, mpiroot, ntoz, iccn, iflip, im, nx, ny, levs, iaermdl
-         logical,              intent(in)    :: h2o_phys, iaerclm, mraerosol, lsm_cold_start
+         logical,              intent(in)    :: h2o_phys, iaerclm, lsm_cold_start
          integer,              intent(in)    :: idate(:), iopt_lake, iopt_lake_clm, iopt_lake_flake
          real(kind_phys),      intent(in)    :: fhour, lakefrac_threshold, lakedepth_threshold
          real(kind_phys),      intent(in)    :: xlat_d(:), xlon_d(:)
@@ -119,7 +119,6 @@
          integer,              intent(inout), optional :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
          real(kind_phys),      intent(inout), optional :: ddy_aer(:), ddx_aer(:)
          real(kind_phys),      intent(out)   :: aer_nm(:,:,:)
-         real(kind_phys),      intent(out)   :: aer_mr(:,:,:)
          integer,              intent(inout), optional :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
          real(kind_phys),      intent(inout), optional :: ddy_ci(:), ddx_ci(:)
          integer,              intent(inout) :: imap(:), jmap(:)
@@ -203,8 +202,6 @@
          ! Local variables
          integer :: i, j, ix, vegtyp
          real(kind_phys) :: rsnow
-         logical :: rad_clim      ! radiation is using MERRA2 climatology
-         logical :: need_merra2   ! climatology files must be read (radiation or Thompson)
 
          !--- Noah MP
          integer              :: soiltyp, isnow, is, imn
@@ -230,31 +227,29 @@
          jamin=999
          jamax=-999
 
-
 !> - Call read_aerdata() to read aerosol climatology, Anning added coupled
 !>  added coupled gocart and radiation option to initializing aer_nm
-
-         ! MERRA2 climatology files are needed if radiation wants them (iaermdl==1)
-         ! or if Thompson wants them (mraerosol), independently of iaermdl.
-         rad_clim    = iaerclm .and. (iaermdl == 1 .or. iaermdl == 6)
-         need_merra2 = rad_clim .or. mraerosol
-
-         if (need_merra2) then
+         if (iaerclm) then
            ntrcaer = ntrcaerm
-           if (iaermdl == 6) then
+           if(iaermdl == 1) then
+             call read_aerdata (mpicomm,mpirank,mpiroot,iflip,idate,errmsg,errflg)
+           elseif (iaermdl == 6) then
              call read_aerdata_dl(mpicomm, mpirank, mpiroot, iflip, &
-                                  idate, fhour, errmsg, errflg)
-           else
-             call read_aerdata   (mpicomm, mpirank, mpiroot, iflip, &
-                                  idate, errmsg, errflg)
-           endif
-           if (errflg /= 0) return
+                                 idate,fhour, errmsg,errflg)
+           end if
+           if(errflg/=0) return
+         else if(iaermdl ==2 ) then
+           do ix=1,ntrcaerm
+             do j=1,levs
+               do i=1,im
+                 aer_nm(i,j,ix) = 1.e-20_kind_phys
+               end do
+             end do
+           end do
+           ntrcaer = ntrcaerm
          else
            ntrcaer = 1
          endif
-
-         if (iaermdl == 2) aer_nm(:,:,:) = 1.e-20_kind_phys
-         if (mraerosol)    aer_mr(:,:,:) = 1.e-20_kind_phys
 
 !> - Call read_cidata() to read IN and CCN data
          if (iccn == 1) then
@@ -290,7 +285,7 @@
          endif
 
 !> - Call setindxaer() to initialize aerosols data
-         if (iaerclm .or.  mraerosol) then
+         if (iaerclm) then
            call setindxaer (im, xlat_d, jindx1_aer,          &
                             jindx2_aer, ddy_aer, xlon_d,     &
                             iindx1_aer, iindx2_aer, ddx_aer)
@@ -353,14 +348,14 @@
 
          if (errflg/=0) return
 
-         if (need_merra2) then
-           if (iaermdl == 6) then
-             call read_aerdataf_dl (mpicomm, mpirank, mpiroot, iflip, idate, fhour, errmsg, errflg)
-           else
+         if (iaerclm) then
+           if(iaermdl==1) then
              call read_aerdataf (mpicomm, mpirank, mpiroot, iflip, idate, fhour, errmsg, errflg)
-           endif
-           if (errflg /= 0) return
-         endif
+           elseif (iaermdl==6) then
+             call read_aerdataf_dl (mpicomm, mpirank, mpiroot, iflip, idate, fhour, errmsg, errflg)
+           end if
+           if (errflg/=0) return
+         end if
 
          !--- For Noah MP or RUC LSMs: initialize four components of albedo for
          !--- land and ice - not for restart runs
@@ -707,10 +702,10 @@
 !> @{
       subroutine GFS_phys_time_vary_timestep_init (                                                 &
             mpicomm, mpirank, mpiroot, cnx, cny, isc, jsc, nrcm, im, levs, kdt, idate, cplflx,      &
-            nsswr, fhswr, lsswr, fhour,imfdeepcnv, cal_pre,                                         &
-            random_clds, nscyc, ntoz, h2o_phys, iaerclm, mraerosol, iaermdl, iccn, clstp,           &
+            nsswr, fhswr, lsswr, fhour,                                                             &
+            imfdeepcnv, cal_pre, random_clds, nscyc, ntoz, h2o_phys, iaerclm, iaermdl, iccn, clstp, &
             jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl, iflip,            &
-            jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm, aer_mr,       &
+            jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm, fn_nml,      &
             imap, jmap, prsl, seed0, rann, nthrds, nx, ny, nsst, tile_num, nlunit, lsoil, lsoil_lsm,&
             kice, ialb, isot, ivegsrc, input_nml_file, use_ufo, nst_anl, frac_grid, fhcyc, phour,   &
@@ -730,7 +725,7 @@
                                                 nsswr, imfdeepcnv, iccn, nscyc, ntoz, iflip, iaermdl
          integer,              intent(in)    :: idate(:)
          real(kind_phys),      intent(in)    :: fhswr, fhour
-         logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm, mraerosol, cplflx
+         logical,              intent(in)    :: lsswr, cal_pre, random_clds, h2o_phys, iaerclm, cplflx
          real(kind_phys),      intent(out)   :: clstp
          integer,              intent(in), optional    :: jindx1_o3(:), jindx2_o3(:), jindx1_h(:), jindx2_h(:)
          real(kind_phys),      intent(in), optional    :: ddy_o3(:),  ddy_h(:)
@@ -738,7 +733,6 @@
          integer,              intent(in), optional    :: jindx1_aer(:), jindx2_aer(:), iindx1_aer(:), iindx2_aer(:)
          real(kind_phys),      intent(in), optional    :: ddy_aer(:), ddx_aer(:)
          real(kind_phys),      intent(inout) :: aer_nm(:,:,:)
-         real(kind_phys),      intent(inout) :: aer_mr(:,:,:)
          integer,              intent(in), optional    :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
          real(kind_phys),      intent(in), optional    :: ddy_ci(:), ddx_ci(:)
          real(kind_phys),      intent(inout) :: in_nm(:,:), ccn_nm(:,:)
@@ -782,7 +776,7 @@
          real(kind_phys) :: rannie(cny)
          real(kind_phys) :: rndval(cnx*cny*nrcm)
          real(kind_dbl_prec)  :: rinc(5)
-         logical :: rad_clim, need_merra2
+
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
@@ -798,7 +792,7 @@
 !$OMP          shared(kdt,nsswr,lsswr,clstp,imfdeepcnv,cal_pre,random_clds)              &
 !$OMP          shared(fhswr,fhour,seed0,cnx,cny,nrcm,wrk,rannie,rndval, iaermdl)         &
 !$OMP          shared(rann,im,isc,jsc,imap,jmap,ntoz,mpirank,idate,jindx1_o3,jindx2_o3)  &
-!$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,mraerosol,mpiroot)&
+!$OMP          shared(ozpl,ddy_o3,h2o_phys,jindx1_h,jindx2_h,h2opl,ddy_h,iaerclm,mpiroot)&
 !$OMP          shared(levs,prsl,iccn,jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci)     &
 !$OMP          shared(ddx_ci,in_nm,ccn_nm,do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau)    &
 !$OMP          shared(ddy_j2tau,tau_amf,iflip,ozphys,h2ophys,rjday,n1,n2,idat,jdat,rinc) &
@@ -904,43 +898,25 @@
 !$OMP end sections
 !$OMP end parallel
 
-
 !> - Call aerinterpol() to make aerosol interpolation
-         rad_clim    = iaerclm .and. (iaermdl == 1 .or. iaermdl == 6)
-         need_merra2 = rad_clim .or. mraerosol
-         if (need_merra2) then
+         if (iaerclm) then
            ! aerinterpol is using threading inside, don't
            ! move into OpenMP parallel section above
-           if (iaermdl == 6) then
+           if (iaermdl==1) then
+             call aerinterpol (mpicomm, mpirank, mpiroot, nthrds, im, idate, &
+                              fhour, iflip, jindx1_aer, jindx2_aer, &
+                              ddy_aer, iindx1_aer,           &
+                              iindx2_aer, ddx_aer,           &
+                              levs, prsl, aer_nm, errmsg, errflg)
+           else if (iaermdl==6) then
              call aerinterpol_dl (mpicomm, mpirank, mpiroot, nthrds, im, idate, &
-                                  fhour, iflip, jindx1_aer, jindx2_aer, &
-                                  ddy_aer, iindx1_aer,                  &
-                                  iindx2_aer, ddx_aer,                  &
-                                  levs, prsl, aer_nm, errmsg, errflg)
-             if (errflg /= 0) return
-             if (mraerosol) aer_mr(:,:,:) = aer_nm(:,:,:)
-           else if (iaermdl == 2) then
-             ! Radiation is on coupled GOCART in aer_nm; interpolate the
-             ! climatology straight into aer_mr for Thompson. Writing
-             ! aer_nm here would clobber the coupled fields.
-             call aerinterpol (mpicomm, mpirank, mpiroot, nthrds, im, idate, &
-                               fhour, iflip, jindx1_aer, jindx2_aer, &
-                               ddy_aer, iindx1_aer,                  &
-                               iindx2_aer, ddx_aer,                  &
-                               levs, prsl, aer_mr, errmsg, errflg)
-             if (errflg /= 0) return
-           else
-             ! iaermdl==1: aer_nm holds climatology, Thompson shares it
-             call aerinterpol (mpicomm, mpirank, mpiroot, nthrds, im, idate, &
-                               fhour, iflip, jindx1_aer, jindx2_aer, &
-                               ddy_aer, iindx1_aer,                  &
-                               iindx2_aer, ddx_aer,                  &
-                               levs, prsl, aer_nm, errmsg, errflg)
-             if (errflg /= 0) return
-             if (mraerosol) aer_mr(:,:,:) = aer_nm(:,:,:)
+                                 fhour, iflip, jindx1_aer, jindx2_aer, &
+                                 ddy_aer, iindx1_aer,                  &
+                                 iindx2_aer, ddx_aer,                  &
+                                 levs, prsl, aer_nm, errmsg, errflg)
            endif
+           if(errflg /= 0) return
          endif
-
 
 !> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
          if (nscyc >  0) then

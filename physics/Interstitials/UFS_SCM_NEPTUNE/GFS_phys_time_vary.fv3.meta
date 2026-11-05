@@ -58,13 +58,6 @@
   dimensions = ()
   type = logical
   intent = in
-[mraerosol]
-  standard_name = do_merra2_aerosol_awareness
-  long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [iaermdl]
   standard_name = control_for_aerosol_radiation_scheme
   long_name = control of aerosol scheme in radiation
@@ -256,14 +249,6 @@
 [aer_nm]
   standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
   long_name = mass mixing ratio of aerosol from gocart or merra2
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
-  type = real
-  kind = kind_phys
-  intent = out
-[aer_mr]
-  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2_mp
-  long_name = mass mixing ratio of aerosol from gocart or merra2 for mp
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
   type = real
@@ -1288,13 +1273,6 @@
   dimensions = ()
   type = logical
   intent = in
-[mraerosol]
-  standard_name = do_merra2_aerosol_awareness
-  long_name = flag for merra2 aerosol-aware physics for example the thompson microphysics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
 [iaermdl]
   standard_name = control_for_aerosol_radiation_scheme
   long_name = control of aerosol scheme in radiation
@@ -1443,14 +1421,6 @@
 [aer_nm]
   standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2
   long_name = mass mixing ratio of aerosol from gocart or merra2
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
-  type = real
-  kind = kind_phys
-  intent = inout
-[aer_mr]
-  standard_name = mass_mixing_ratio_of_aerosol_from_gocart_or_merra2_mp
-  long_name = mass mixing ratio of aerosol from gocart or merra2 for mp
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_layer_dimension,number_of_aerosol_tracers_MG)
   type = real

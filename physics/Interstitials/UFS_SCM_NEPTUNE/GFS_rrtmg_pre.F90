@@ -768,7 +768,7 @@
                 qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
                 nc_mp (i,k) = tracer1(i,k,ntlnc)/(1.-qvs)
                 ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
-               if (gtaerosol.or.mraerosol) then
+               if (gtaerosol) then
                 nwfa (i,k) = max(1.e-15,((tracer1(i,k,ntss1)/0.0045435214+tracer1(i,k,ntss2)/0.2907854+tracer1(i,k,ntss3)/12.91224+ &
               tracer1(i,k,ntss4)/206.2216+tracer1(i,k,ntss5)/4326.23)*9.+tracer1(i,k,ntsu)/0.3053104*5+ &
               tracer1(i,k,ntocl)/0.3232698*8)*1.e6)
