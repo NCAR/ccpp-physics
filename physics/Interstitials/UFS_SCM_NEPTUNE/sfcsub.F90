@@ -8,6 +8,7 @@
 !! and setrmsk().
 module sfccyc_module
   use machine, only : kind_io8, kind_io4
+  use sp_mod
   implicit none
   save
 
