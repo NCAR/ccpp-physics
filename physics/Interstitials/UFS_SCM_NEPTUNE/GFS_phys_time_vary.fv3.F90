@@ -274,9 +274,6 @@
            if(errflg/=0) return
          endif
 
-
-! Need an OpenMP barrier here (implicit in "end sections")
-
 !> - Setup spatial interpolation indices for ozone physics.
          if (ntoz > 0) then
            call ozphys%setup_o3prog(xlat_d, jindx1_o3, jindx2_o3, ddy_o3)
@@ -352,13 +349,11 @@
          if (errflg/=0) return
 
          if (iaerclm) then
-           ! This call is outside the OpenMP section, so it should access errmsg & errflg directly.
            if(iaermdl==1) then
              call read_aerdataf (mpicomm, mpirank, mpiroot, iflip, idate, fhour, errmsg, errflg)
            elseif (iaermdl==6) then
              call read_aerdataf_dl (mpicomm, mpirank, mpiroot, iflip, idate, fhour, errmsg, errflg)
            end if
-           ! If it is moved to an OpenMP section, it must use myerrmsg, myerrflg, and copy_error.
            if (errflg/=0) return
          end if
 
@@ -826,8 +821,7 @@
 
 !$OMP section
 
-         !--- random number needed for RAS and old SAS and when cal_pre=.true.
-         !    imfdeepcnv < 0 when ras = .true.
+         !--- random number needed for old SAS and when cal_pre=.true.
          if ( (imfdeepcnv <= 0 .or. cal_pre) .and. random_clds ) then
 
            iseed = mod(con_100*sqrt(fhour*con_hr),1.0d9) + seed0

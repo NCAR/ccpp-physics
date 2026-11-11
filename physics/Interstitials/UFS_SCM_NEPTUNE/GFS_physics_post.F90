@@ -1,7 +1,7 @@
 !> \file GFS_physics_post.F90
 !!
 !! This module contains GFS specific calculations (e.g. diagnostics) and suite specific
-!! code (e.g Saving fields for subsequent physics timesteps).  For interoperability across a 
+!! code (e.g saving fields for subsequent physics timesteps). For interoperability across a 
 !! wide range of hosts, CCPP compliant schemes should avoid including such calculations. This 
 !! module/scheme is intended for such "host-specific" computations.
 !!
@@ -18,8 +18,8 @@ contains
   subroutine GFS_physics_post_run(nCol, nLev, ntoz, ntracp100, nprocess, nprocess_summed,   &
        dtidx, is_photochem, ldiag3d, ip_physics, ip_photochem, ip_prod_loss, ip_ozmix,      &
        ip_temp, ip_overhead_ozone, do3_dt_prd, do3_dt_ozmx, do3_dt_temp, do3_dt_ohoz,       &
-       ntqv, dqv_dt_prd, dqv_dt_qvmx, &
-       dtend, errmsg, errflg)
+       ntqv, dqv_dt_prd, dqv_dt_qvmx, dtend, imfdeepcnv, imfdeepcnv_ntiedtke, t, prevst, q, &
+       prevsq, errmsg, errflg)
 
     ! Inputs
     integer, intent(in) :: &
@@ -35,13 +35,17 @@ contains
          ip_prod_loss,   & !< Index for process in diagnostic tendency output
          ip_ozmix,       & !< Index for process in diagnostic tendency output
          ip_temp,        & !< Index for process in diagnostic tendency output
-         ip_overhead_ozone !< Index for process in diagnostic tendency output    
+         ip_overhead_ozone,& !< Index for process in diagnostic tendency output
+         imfdeepcnv,     & !< Flag for mass-flux deep convection scheme
+         imfdeepcnv_ntiedtke !< Flag for new Tiedtke deep convection scheme
     integer, intent(in), dimension(:,:) :: &
          dtidx             !< Bookkeeping indices for GFS diagnostic tendencies
     logical, intent(in) :: &
          ldiag3d           !< Flag for 3d diagnostic fields
     logical, intent(in), dimension(:) :: &
          is_photochem      !< Flags for photochemistry processes to sum
+    real(kind=kind_phys), intent(in), dimension(:,:) :: &
+         t, q              !< Current temperature and specific humidity
 
     ! Inputs (optional)
     real(kind=kind_phys), intent(in), dimension(:,:), pointer, optional :: &
@@ -55,6 +59,9 @@ contains
     ! Outputs
     real(kind=kind_phys), intent(inout), dimension(:,:,:), optional :: &
          dtend             !< Diagnostic tendencies for state variables
+    real(kind=kind_phys), intent(inout), dimension(:,:), optional :: &
+         prevst, prevsq    !< Saved temperature and specific humidity after physics
+
     character(len=*), intent(out) :: &
          errmsg            !< CCPP error message
     integer, intent(out) :: &
@@ -68,6 +75,18 @@ contains
     errmsg = ''
     errflg = 0
 
+    ! Save temperature and specific humidity at end of physics for next time step
+    ! For now, new Tiedtke only - see ADD ISSUE URL HERE
+    if (imfdeepcnv == imfdeepcnv_ntiedtke) then
+      if (present(prevst)) then
+        prevst(:,:) = t(:,:)
+      end if
+      if (present(prevsq)) then
+        prevsq(:,:) = q(:,:)
+      end if
+    end if
+
+    ! Everything below is related to 3d diagnostics
     if(.not.ldiag3d) then
        return
     endif
@@ -182,4 +201,5 @@ contains
       endif
     end subroutine sum_it
   end subroutine GFS_physics_post_run
+
 end module GFS_physics_post

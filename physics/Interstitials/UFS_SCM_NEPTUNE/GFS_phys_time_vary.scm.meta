@@ -1153,7 +1153,7 @@
   intent = in
 [nrcm]
   standard_name = number_of_random_numbers
-  long_name = second dimension of random number stream for RAS
+  long_name = second dimension of random number stream
   units = count
   dimensions = ()
   type = integer
@@ -1231,8 +1231,8 @@
   type = logical
   intent = in
 [random_clds]
-  standard_name = flag_for_random_clouds_for_RAS
-  long_name = flag for using random clouds with the RAS scheme
+  standard_name = flag_for_random_clouds
+  long_name = flag for using random clouds
   units = flag
   dimensions = ()
   type = logical
@@ -1500,8 +1500,8 @@
   kind = kind_phys
   intent = in
 [seed0]
-  standard_name = seed_random_numbers_RAS
-  long_name = random number seed for the RAS scheme
+  standard_name = seed_random_numbers
+  long_name = random number seed
   units = none
   dimensions = ()
   type = integer
