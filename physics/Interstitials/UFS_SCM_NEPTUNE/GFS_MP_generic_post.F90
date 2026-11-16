@@ -254,7 +254,7 @@
       if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson .or. &
            imp_physics == imp_physics_tempo .or. imp_physics == imp_physics_nssl ) then
          do i = 1, im
-            twet = calculate_tw_vectorized(t2m(i) - 273.15_kind_phys, dpt2m(i) - 273.15_kind_phys, prsl(i,1))
+            twet = calculate_tw_vectorized(t2m(i) - 273.15_kind_phys, dpt2m(i) - 273.15_kind_phys, prsl(i,1)*0.01_kind_phys)
             if (twet < -7.0) twet = -7.0
             frampr =  (rain0(i) * 39.37) * 3600. / dtp  
             framv10m = sqrt( u10m(i) * u10m(i) + v10m(i) * v10m(i)) * 1.944          !convert into knot (1kt ~ 0.51 m/s)
@@ -651,14 +651,13 @@
       end subroutine GFS_MP_generic_post_run
 
 ! this routine is for FRAM alogrithm 
-      elemental function calculate_tw_vectorized(t, td, p_sfc) result(tw)
+      elemental function calculate_tw_vectorized(t, td, p_hpa) result(tw)
       use machine, only: kind_phys 
-      real(kind=kind_phys), intent(in) :: t, td, p_sfc  ! t and td in deg C, p_sfc in Pa or hPa
-      real(kind=kind_phys) :: tw, e_actual, es_tw, f, f_prime, p_hpa, delta
+      real(kind=kind_phys), intent(in) :: t, td, p_hpa  ! t and td in deg C, p_hpa in hPa
+      real(kind=kind_phys) :: tw, e_actual, es_tw, f, f_prime, delta
       real(kind=kind_phys), parameter :: gamma_const = 0.00066_kind_phys
       integer :: i
 
-      p_hpa = merge(p_sfc / 100.0, p_sfc, p_sfc > 2000.0)
       e_actual = 6.112 * exp((17.67 * td) / (td + 243.5))
       tw = 0.5 * (t + td)
 
