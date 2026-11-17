@@ -6,6 +6,8 @@
 !! as described in Bengtsson et al. 2022 \cite Bengtsson_2022.
       module progsigma
 
+        use mo_conv_kind, only : conv_wp
+
         implicit none
 
         public progsigma_calc
@@ -30,39 +32,39 @@
 
 !     intent in
       integer, intent(in)  :: im,km,kb(im),kbcon1(im),ktcon(im)
-      real(kind=kind_phys), intent(in)  :: hvap,delt,betascu,betamcu,betadcu, &
+      real(kind=conv_wp), intent(in)  :: hvap,delt,betascu,betamcu,betadcu, &
                                            sigmind,sigminm,sigmins
-      real(kind=kind_phys), intent(in)  :: qadv(im,km),del(im,km),    &
+      real(kind=conv_wp), intent(in)  :: qadv(im,km),del(im,km),    &
            qmicro(im,km),tmf(im,km),dbyo1(im,km),zdqca(im,km),           &
            omega_u(im,km),zeta(im,km)
       logical, intent(in)  :: flag_init,flag_restart,cnvflg(im),flag_shallow,flag_mid
-      real(kind=kind_phys), intent(in) :: sigmain(im,km)
+      real(kind=conv_wp), intent(in) :: sigmain(im,km)
 
 !     intent out
-      real(kind=kind_phys), intent(inout) :: sigmaout(im,km)
-      real(kind=kind_phys), intent(out) :: sigmab(im)
+      real(kind=conv_wp), intent(inout) :: sigmaout(im,km)
+      real(kind=conv_wp), intent(out) :: sigmab(im)
 
 
 !     Local variables
       integer              :: i,k,km1
-      real(kind=kind_phys) :: termA(im),termB(im),termC(im),termD(im)
-      real(kind=kind_phys) :: fdqa(im),form(im,km),              &
+      real(kind=conv_wp) :: termA(im),termB(im),termC(im),termD(im)
+      real(kind=conv_wp) :: fdqa(im),form(im,km),              &
            dp(im,km),inbu(im,km)                         
-      real(kind=kind_phys) :: sumx(im)
+      real(kind=conv_wp) :: sumx(im)
 
-      real(kind=kind_phys) :: gcvalmx,epsilon,ZZ,cvg,mcon,buy2,   &
+      real(kind=conv_wp) :: gcvalmx,epsilon,ZZ,cvg,mcon,buy2,   &
                           fdqb,dtdyn,dxlim,rmulacvg,tem,     &
                           DEN,dp1,invdelt,sigmind_new
 
      !Parameters
-      gcvalmx = 0.1
-      rmulacvg=10.
-      epsilon=1.E-11
+      gcvalmx = 0.1_conv_wp 
+      rmulacvg=10.0_conv_wp 
+      epsilon=1.E-11_conv_wp 
       km1=km-1
-      invdelt = 1./delt
+      invdelt = 1.0_conv_wp /delt
 
       if(flag_init .and. .not. flag_restart) then
-           sigmind_new=0.0
+           sigmind_new=0.0_conv_wp 
       else
            sigmind_new=sigmind
       end if
@@ -70,27 +72,27 @@
      !Initialization 2D
       do k = 1,km
          do i = 1,im
-            inbu(i,k)=0.
-            form(i,k)=0.
-            dp(i,k)=0.
+            inbu(i,k)=0.0_conv_wp 
+            form(i,k)=0.0_conv_wp 
+            dp(i,k)=0.0_conv_wp 
          enddo
       enddo
      
      !Initialization 1D
       do i=1,im
-         sigmab(i)=0.
-         termA(i)=0.
-         termB(i)=0.
-         termC(i)=0.
-         termD(i)=0.
-         fdqa(i)=0.
-         sumx(i)=0.
+         sigmab(i)=0.0_conv_wp 
+         termA(i)=0.0_conv_wp 
+         termB(i)=0.0_conv_wp 
+         termC(i)=0.0_conv_wp 
+         termD(i)=0.0_conv_wp 
+         fdqa(i)=0.0_conv_wp 
+         sumx(i)=0.0_conv_wp 
       enddo
 
       do k = 2,km1
           do i = 1,im
              if(cnvflg(i))then
-                dp(i,k) = 1000. * del(i,k)
+                dp(i,k) = 1000.0_conv_wp  * del(i,k)
              endif
           enddo
       enddo
@@ -108,13 +110,13 @@
       enddo
       do i = 1, im
         if(cnvflg(i)) then
-          if(sumx(i) == 0.) then
+          if(sumx(i) == 0.0_conv_wp ) then
             k = kbcon1(i)
             sigmab(i) = sigmain(i,k)
           else
             sigmab(i) = sigmab(i) / sumx(i)
-            sigmab(i) = min(sigmab(i), 1._kind_phys)
-            if(sigmab(i) < 1.E-5) sigmab(i)=0.
+            sigmab(i) = min(sigmab(i), 1.0_conv_wp)
+            if(sigmab(i) < 1.E-5_conv_wp ) sigmab(i)=0.0_conv_wp 
           endif
         endif
       enddo
@@ -131,8 +133,8 @@
 !               Do the integral over buoyant layers with positive mcon acc from
 !               updraft starting level
 !
-                 if(buy2 > 0.)then
-                   inbu(i,k)=1.
+                 if(buy2 > 0.0_conv_wp )then
+                   inbu(i,k)=1.0_conv_wp 
                    termD(i) = termD(i) + mcon
                  endif
                endif
@@ -169,8 +171,8 @@
           do i = 1,im
              if(cnvflg(i))then
                if(k >= kbcon1(i) .and. k < ktcon(i)) then
-                form(i,k)=-1.0*inbu(i,k)*(omega_u(i,k)*delt)
-                fdqb=0.5*((form(i,k)*zdqca(i,k)))
+                form(i,k)=-1.0_conv_wp *inbu(i,k)*(omega_u(i,k)*delt)
+                fdqb=0.5_conv_wp *((form(i,k)*zdqca(i,k)))
                 termC(i)=termC(i)+inbu(i,k)*   &
                      (fdqb+fdqa(i))*hvap*zeta(i,k)
                 fdqa(i)=fdqb
@@ -182,15 +184,15 @@
       !sigmab
       do i = 1,im
          if(cnvflg(i))then
-            DEN=MIN(termC(i)+termB(i),1.e8_kind_phys)
+            DEN=MIN(termC(i)+termB(i),1.e8_conv_wp)
             cvg=termD(i)*delt
-            ZZ=MAX(0.0,SIGN(1.0,termA(i)))            &
-                 *MAX(0.0,SIGN(1.0,termB(i)))         &
-                 *MAX(0.0,SIGN(1.0,termC(i)-epsilon))
-            cvg=MAX(0.0,cvg)
-            sigmab(i)=(ZZ*(termA(i)+cvg))/(DEN+(1.0-ZZ))
-            if(sigmab(i)>0.)then
-               sigmab(i)=MIN(sigmab(i),0.95)  
+            ZZ=MAX(0.0_conv_wp ,SIGN(1.0_conv_wp ,termA(i)))            &
+                 *MAX(0.0_conv_wp ,SIGN(1.0_conv_wp ,termB(i)))         &
+                 *MAX(0.0_conv_wp ,SIGN(1.0_conv_wp ,termC(i)-epsilon))
+            cvg=MAX(0.0_conv_wp ,cvg)
+            sigmab(i)=(ZZ*(termA(i)+cvg))/(DEN+(1.0_conv_wp -ZZ))
+            if(sigmab(i)>0.0_conv_wp)then
+               sigmab(i)=MIN(sigmab(i),0.95_conv_wp)  
                sigmab(i)=MAX(sigmab(i),sigmind_new)
             endif
          endif!cnvflg
@@ -228,7 +230,7 @@
          enddo
       endif
       do i= 1, im
-        sigmab(i) = MIN(0.95,sigmab(i))
+        sigmab(i) = MIN(0.95_conv_wp ,sigmab(i))
       enddo
 
      end subroutine progsigma_calc

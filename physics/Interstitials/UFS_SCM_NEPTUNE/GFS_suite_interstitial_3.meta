@@ -51,7 +51,7 @@
   type = integer
   intent = in
 [imfdeepcnv_samf]
-  standard_name = identifer_for_scale_aware_mass_flux_deep_convection
+  standard_name = identifier_for_scale_aware_mass_flux_deep_convection
   long_name = flag for SAMF deep convection scheme
   units = flag
   dimensions = ()
