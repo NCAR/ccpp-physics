@@ -8,7 +8,8 @@
 !> \section arg_table_GFS_SCNV_generic_post_run Argument Table
 !! \htmlinclude GFS_SCNV_generic_post_run.html
 !!
-      subroutine GFS_SCNV_generic_post_run (im, levs, tracers_total, otsptflag, imp_physics, imp_physics_gfdl, tend_opt_scnv, lssav, ldiag3d, qdiag3d, &
+      subroutine GFS_SCNV_generic_post_run (im, levs, tracers_total, otsptflag, imp_physics, &
+        imp_physics_gfdl, tend_opt_scnv, lssav, ldiag3d, qdiag3d, &
         frain, gu0, gv0, gt0, gq0, dudt, dvdt, dtdt, dqdt, ten_t, ten_u, ten_v, ten_q, delt,              &
         clw, dclw, shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw, nsamftrac,    &
         rainc, cnvprcp, cnvw_phy_f3d, cnvc_phy_f3d,                      &
@@ -16,7 +17,7 @@
         index_of_process_scnv, ntqv, flag_for_scnv_generic_tend,                   &
         ntcw,ntiw,ntclamt,ntrw,ntsw,ntrnc,ntsnc,ntgl,ntgnc,ntsigma,                &
         imfshalcnv, imfshalcnv_sas, imfshalcnv_samf, ntrac,                        &
-        cscnv, satmedmf, trans_trac, ras, errmsg, errflg)
+        cscnv, satmedmf, trans_trac, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -43,13 +44,9 @@
       real(kind=kind_phys), dimension(:), intent(in) :: rain1
       real(kind=kind_phys), dimension(:, :), intent(in) :: cnvw, cnvc
       real(kind=kind_phys), dimension(:), intent(inout) :: rainc, cnvprcp
-      ! The following arrays may not be allocated, depending on certain flags and microphysics schemes.
-      ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
-      ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
-      ! as long as these do not get used when not allocated.
       real(kind=kind_phys), dimension(:,:), intent(inout), optional :: cnvw_phy_f3d, cnvc_phy_f3d
       integer, intent(in) :: imfshalcnv, imfshalcnv_sas, imfshalcnv_samf
-      logical, intent(in) :: cscnv, satmedmf, trans_trac, ras
+      logical, intent(in) :: cscnv, satmedmf, trans_trac
 
       character(len=*),              intent(out) :: errmsg
       integer,                       intent(out) :: errflg
@@ -180,7 +177,7 @@
              dtend(:,:,idtend) = dtend(:,:,idtend) + (ten_v * delt) * frain
           endif
 
-          if (cscnv .or. satmedmf .or. trans_trac .or. ras) then
+          if (cscnv .or. satmedmf .or. trans_trac) then
              tracers = 2
              do n=2,ntrac
                 if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &

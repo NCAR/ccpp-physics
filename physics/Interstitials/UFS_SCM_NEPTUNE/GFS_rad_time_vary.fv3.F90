@@ -18,7 +18,6 @@
       subroutine GFS_rad_time_vary_timestep_init (lrseeds, rseeds,                     &
               lslwr, lsswr, isubc_lw, isubc_sw, icsdsw, icsdlw, cnx, cny, isc, jsc,    &
               imap, jmap, sec, kdt, imp_physics, ipsd0, ipsdlim,                       &
-              ps_2delt, ps_1delt, t_2delt, t_1delt, qv_2delt, qv_1delt, t, qv, ps,     &
               errmsg, errflg)
 
          use mersenne_twister,          only: random_setseed, random_index, random_stat
@@ -36,13 +35,6 @@
          integer,                intent(inout), optional :: icsdsw(:), icsdlw(:)
          integer,                intent(in)    :: imap(:), jmap(:)
          real(kind_phys),        intent(in)    :: sec
-         real(kind_phys),        intent(inout), optional :: ps_2delt(:)
-         real(kind_phys),        intent(inout), optional :: ps_1delt(:)
-         real(kind_phys),        intent(inout), optional :: t_2delt(:,:)
-         real(kind_phys),        intent(inout), optional :: t_1delt(:,:)
-         real(kind_phys),        intent(inout), optional :: qv_2delt(:,:)
-         real(kind_phys),        intent(inout), optional:: qv_1delt(:,:)
-         real(kind_phys),        intent(in)    :: t(:,:), qv(:,:), ps(:)
          character(len=*),       intent(out)   :: errmsg
          integer,                intent(out)   :: errflg
 

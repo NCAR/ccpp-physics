@@ -732,8 +732,7 @@
            clstp = 0100
          endif
 
-         !--- random number needed for RAS and old SAS and when cal_pre=.true.
-         !    imfdeepcnv < 0 when ras = .true.
+         !--- random number needed for old SAS and when cal_pre=.true.
          if ( (imfdeepcnv <= 0 .or. cal_pre) .and. random_clds ) then
 
            iseed = mod(con_100*sqrt(fhour*con_hr),1.0d9) + seed0
