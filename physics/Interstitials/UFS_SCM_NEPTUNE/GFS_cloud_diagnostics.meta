@@ -2,7 +2,7 @@
   name = GFS_cloud_diagnostics
   type = scheme
   dependencies_path = ../../
-  dependencies = hooks/machine.F,Radiation/radiation_clouds.f
+  dependencies = hooks/machine.F,Radiation/radiation_clouds.F90
 
 ########################################################################
 [ccpp-arg-table]

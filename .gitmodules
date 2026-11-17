@@ -1,7 +1,7 @@
 [submodule "physics/Radiation/RRTMGP/rte-rrtmgp"]
   path = physics/Radiation/RRTMGP/rte-rrtmgp
-  url = https://github.com/NCAR/rte-rrtmgp
-  branch = main
+  url = https://github.com/ufs-community/rte-rrtmgp
+  branch = v1.9.3
 [submodule "physics/MP/TEMPO/tempo_v3"]
   path = physics/MP/TEMPO/tempo_v3
   url = https://github.com/NCAR/TEMPO
