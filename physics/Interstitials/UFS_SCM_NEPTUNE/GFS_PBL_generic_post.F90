@@ -210,15 +210,15 @@
   ! Tempo
           do k=1,levs
              do i=1,im
-                dqdt(i,k,ntqv)  = dvdftra(i,k,1)
-                dqdt(i,k,ntcw)  = dvdftra(i,k,2)
-                dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
-                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
-                dqdt(i,k,ntgl)  = dvdftra(i,k,6)
-                dqdt(i,k,ntinc) = dvdftra(i,k,7)
-                dqdt(i,k,ntrnc) = dvdftra(i,k,8)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,9)
+                ten_q(i,k,ntqv)  = dvdftra(i,k,1)
+                ten_q(i,k,ntcw)  = dvdftra(i,k,2)
+                ten_q(i,k,ntiw)  = dvdftra(i,k,3)
+                ten_q(i,k,ntrw)  = dvdftra(i,k,4)
+                ten_q(i,k,ntsw)  = dvdftra(i,k,5)
+                ten_q(i,k,ntgl)  = dvdftra(i,k,6)
+                ten_q(i,k,ntinc) = dvdftra(i,k,7)
+                ten_q(i,k,ntrnc) = dvdftra(i,k,8)
+                ten_q(i,k,ntoz)  = dvdftra(i,k,9)
              enddo
           enddo
 
@@ -226,9 +226,9 @@
           if (ltaerosol) then
              do k=1,levs
                 do i=1,im
-                   dqdt(i,k,ntlnc) = dvdftra(i,k,n)
-                   dqdt(i,k,ntwa)  = dvdftra(i,k,n+1)
-                   dqdt(i,k,ntia)  = dvdftra(i,k,n+2)
+                   ten_q(i,k,ntlnc) = dvdftra(i,k,n)
+                   ten_q(i,k,ntwa)  = dvdftra(i,k,n+1)
+                   ten_q(i,k,ntia)  = dvdftra(i,k,n+2)
                 enddo
              enddo
              n = 13
@@ -237,8 +237,8 @@
           if (lthailaware) then
              do k=1,levs
                 do i=1,im
-                   dqdt(i,k,ntgnc) = dvdftra(i,k,n)
-                   dqdt(i,k,ntgv) = dvdftra(i,k,n+1)
+                   ten_q(i,k,ntgnc) = dvdftra(i,k,n)
+                   ten_q(i,k,ntgv) = dvdftra(i,k,n+1)
                 enddo
              enddo
           endif
